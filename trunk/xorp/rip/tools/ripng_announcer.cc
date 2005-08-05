@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.6 2005/08/01 15:23:39 bms Exp $"
 
 #include "rip/rip_module.h"
 
@@ -254,7 +254,7 @@ main(int argc, char* const argv[])
 		int fd = init_rip_socket(if_num);
 		if (fd > 0) {
 		    rip_announce(fd, my_routes);
-		    close(fd);
+		    comm_close(fd);
 		}
 	    }
 	}

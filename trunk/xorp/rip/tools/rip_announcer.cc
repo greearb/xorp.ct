@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.6 2005/08/01 15:23:39 bms Exp $"
 
 #include <vector>
 #include <fstream>
@@ -139,11 +139,11 @@ init_rip_socket(IPv4 if_addr)
 	fd = -1;
     } else if (comm_set_iface4(fd, &join_if_addr) < 0) {
 	cerr << "comm_set_iface4 failed" << endl;
-	close(fd);
+	comm_close(fd);
 	fd = -1;
     } else if (comm_set_ttl(fd, 1) < 0) {
 	cerr << "comm_set_ttl failed" << endl;
-	close(fd);
+	comm_close(fd);
 	fd = -1;
     }
     return fd;
@@ -242,7 +242,7 @@ main(int argc, char* const argv[])
 		int fd = init_rip_socket(if_addr);
 		if (fd > 0) {
 		    fake_peer(fd, period, my_routes);
-		    close(fd);
+		    comm_close(fd);
 		}
 	    }
 	}
