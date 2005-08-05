@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.5 2004/06/10 22:41:26 hodson Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.6 2005/03/25 02:53:54 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -27,8 +27,9 @@
  * IGMPv1 and IGMPv2 (RFC 2236)
  */
 
-
+#ifdef HAVE_NETINET_IGMP_H
 #include <netinet/igmp.h>
+#endif
 
 
 /*

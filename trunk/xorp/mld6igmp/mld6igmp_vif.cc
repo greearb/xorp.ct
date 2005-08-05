@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.39 2005/06/01 09:34:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.40 2005/06/03 19:02:33 pavlin Exp $"
 
 
 //
@@ -250,6 +250,7 @@ Mld6igmpVif::start(string& error_msg)
     //
     // Query all members on startup
     //
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	TimeVal scaled_max_resp_time =
 	    (query_response_interval().get() * IGMP_TIMER_SCALE);
@@ -265,6 +266,8 @@ Mld6igmpVif::start(string& error_msg)
 		startup_query_interval,
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
+
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	TimeVal scaled_max_resp_time =
@@ -707,8 +710,14 @@ Mld6igmpVif::is_igmpv1_mode() const
 const char *
 Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 {
+
+    (void)message_type;
+
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
 	return (IGMPTYPE2ASCII(message_type));
+#endif
+
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLDTYPE2ASCII(message_type));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.13 2005/03/25 02:53:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.14 2005/06/01 09:34:00 pavlin Exp $"
 
 
 //
@@ -66,6 +66,8 @@ void
 Mld6igmpVif::other_querier_timer_timeout()
 {
     IPvX ipaddr_zero(family());		// XXX: ANY
+
+    (void)ipaddr_zero;
     
     if (primary_addr() == IPvX::ZERO(family())) {
 	// XXX: the vif address is unknown; this cannot happen if the
@@ -77,6 +79,7 @@ Mld6igmpVif::other_querier_timer_timeout()
     set_querier_addr(primary_addr());
     _proto_flags |= MLD6IGMP_VIF_QUERIER;
     
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	// Now I am the querier. Send a general membership query.
 	TimeVal scaled_max_resp_time =
@@ -92,6 +95,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 		query_interval().get(),
 		callback(this, &Mld6igmpVif::query_timer_timeout));
     }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
@@ -123,9 +127,12 @@ Mld6igmpVif::query_timer_timeout()
     IPvX ipaddr_zero(family());			// XXX: ANY
     TimeVal interval;
 
+    (void)ipaddr_zero;
+
     if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
 	return;		// I am not the querier anymore. Ignore.
 
+#if HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	// Send a general membership query
 	TimeVal scaled_max_resp_time =
@@ -148,6 +155,7 @@ Mld6igmpVif::query_timer_timeout()
 		callback(this, &Mld6igmpVif::query_timer_timeout)
 		);
     }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 
 #if HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {

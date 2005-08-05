@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.32 2005/06/01 09:34:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/igmp_proto.cc,v 1.33 2005/06/03 19:00:05 pavlin Exp $"
 
 
 //
@@ -79,6 +79,7 @@ Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst,
 			  bool is_router_alert,
 			  buffer_t *buffer)
 {
+#ifndef HOST_OS_WINDOWS
     uint8_t message_type;
     int max_resp_time, igmp_code;
     IPvX group_address(family());
@@ -358,6 +359,16 @@ Mld6igmpVif::igmp_process(const IPvX& src, const IPvX& dst,
 		 cstring(src), cstring(dst),
 		 name().c_str());
     return (XORP_ERROR);
+#else // HOST_OS_WINDOWS
+    XLOG_WARNING("IGMP not supported under Windows at this time");
+    return (XORP_ERROR);
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(is_router_alert);
+    UNUSED(buffer);
+#endif // HOST_OS_WINDOWS
 }
 
 /**
@@ -494,6 +505,7 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
 					 const IPvX& group_address,
 					 buffer_t *buffer)
 {
+#ifndef HOST_OS_WINDOWS
     int igmp_message_version;
     MemberQuery *member_query = NULL;
     IPvX source_address(family());		// XXX: ANY
@@ -561,6 +573,16 @@ Mld6igmpVif::igmp_membership_report_recv(const IPvX& src,
     }
     
     return (XORP_OK);
+
+#else // HOST_OS_WINDOWS
+    XLOG_WARNING("Not supported under Windows at this time");
+    return (XORP_ERROR);
+
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(message_type);
+    UNUSED(group_address);
+#endif // HOST_OS_WINDOWS
     
     UNUSED(max_resp_time);
     UNUSED(buffer);
@@ -587,6 +609,7 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
 				   const IPvX& group_address,
 				   buffer_t *buffer)
 {
+#ifndef HOST_OS_WINDOWS
     if (is_igmpv1_mode()) {
 	//
 	// Ignore this 'Leave Group' message because this
@@ -648,6 +671,12 @@ Mld6igmpVif::igmp_leave_group_recv(const IPvX& src,
     }
     
     // Nothing found. Ignore.
+#else // HOST_OS_WINDOWS
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(message_type);
+    UNUSED(group_address);
+#endif // HOST_OS_WINDOWS
     
     UNUSED(max_resp_time);
     UNUSED(buffer);

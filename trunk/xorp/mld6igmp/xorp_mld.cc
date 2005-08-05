@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xorp_mld.cc,v 1.9 2005/02/17 01:03:36 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xorp_mld.cc,v 1.10 2005/03/25 02:53:55 pavlin Exp $"
 
 
 //
@@ -30,6 +30,10 @@
 #include "libxorp/exceptions.hh"
 
 #include "xrl_mld6igmp_node.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 //
