@@ -2203,7 +2203,7 @@ Neighbour<A>::tear_down_state()
     // If this assertion ever occurs then the nack list on the LSAs on
     // the queue must be cleared. The top of push_lsas shows how this
     // can be done. If the current state is less than exchange just
-    // call push_lsas will do the trick.
+    // calling push_lsas will do the trick.
     XLOG_ASSERT(_lsa_queue.empty());
 
     list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
