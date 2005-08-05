@@ -216,6 +216,7 @@ pp_area_type(OspfTypes::AreaType area_type)
 #include "packet.hh"
 #include "transmit.hh"
 #include "peer_manager.hh"
+#include "routing_table.hh"
 #include "trace.hh"
 
 template <typename A>
@@ -327,6 +328,11 @@ class Ospf {
     PeerManager<A>& get_peer_manager() { return _peer_manager; }
 
     /**
+     * @return a reference to the RoutingTable.
+     */
+    RoutingTable<A>& get_routing_table() { return _routing_table; }
+
+    /**
      * @return a reference to the LSA decoder.
      */
     LsaDecoder& get_lsa_decoder() { return _lsa_decoder; }
@@ -356,6 +362,7 @@ class Ospf {
     PacketDecoder _packet_decoder;	// Packet decoders.
     LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
+    RoutingTable<A> _routing_table;
 
     OspfTypes::RouterID _router_id;	// Router ID.
 

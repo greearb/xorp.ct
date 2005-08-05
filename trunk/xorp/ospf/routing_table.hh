@@ -21,9 +21,44 @@
 template <typename A>
 class RoutingTable {
  public:
-    PeerManager(Ospf<A> &ospf)
+    RoutingTable(Ospf<A> &ospf)
 	: _ospf(ospf)
     {}
+
+    void begin();
+
+    /**
+     * Add route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     */
+    bool add_route(IPNet<A> net,
+		   A nexthop,
+		   uint32_t metric,
+		   bool equal);
+
+    /**
+     * Replace route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     */
+    bool replace_route(IPNet<A> net,
+		       A nexthop,
+		       uint32_t metric,
+		       bool equal);
+
+    /**
+     * Delete route
+     */
+    bool delete_route(IPNet<A> net);
+
+    void end();
     
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
