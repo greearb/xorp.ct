@@ -895,6 +895,7 @@ template <typename A>
 void
 AreaRouter<A>::routing_begin()
 {
+    _TransitCapability = false;
 #ifdef  PARANOIA
     list<RouteCmd<Vertex> > r;
     _spt.compute(r);
@@ -904,7 +905,7 @@ AreaRouter<A>::routing_begin()
 
 template <typename A>
 void
-AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
+AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 {
     //  RFC 2328 Section  13.2. Installing LSAs in the database
 
@@ -912,19 +913,41 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
 
     RouterLsa *rlsa;
     if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+	if (rlsa->get_v_bit())
+	    _TransitCapability = true;
+	    
 	Vertex v;
 
 	v.set_version(_ospf.get_version());
 	v.set_type(Vertex::Router);
-	v.set_nodeid(_ospf.get_router_id());
+	v.set_nodeid(rlsa->get_header().get_link_state_id());
+
+	// XXX We really want to remove all the links but removing a
+	// node and putting it back has the same effect.
+	if (known)
+	    _spt.remove_node(v);
+	_spt.add_node(v);
 
 	list<RouterLink> &rl = rlsa->get_router_links();
 	list<RouterLink>::const_iterator i = rl.begin();
 	for(; i != rl.end(); i++) {
+	    Vertex dst;
+	    dst.set_version(_ospf.get_version());
+	    dst.set_type(Vertex::Router);
 	    switch (_ospf.get_version()) {
 	    case OspfTypes::V2:
+ 		switch(i->get_type()) {
+		case RouterLink::p2p:
+		case RouterLink::transit:
+		case RouterLink::stub:
+		case RouterLink::vlink:
+		    dst.set_nodeid(i->get_link_id());
+		    _spt.add_edge(v, i->get_metric(), dst);
+		    break;
+		}
 		break;
 	    case OspfTypes::V3:
+		XLOG_UNFINISHED();
 		break;
 	    }
 	}
@@ -960,6 +983,10 @@ AreaRouter<A>::routing_end()
 
     list<RouteCmd<Vertex> > r;
     _spt.compute(r);
+
+    list<RouteCmd<Vertex> >::const_iterator i;
+    for(i = r.begin(); i != r.end(); i++)
+	XLOG_WARNING("TBD: Add route: %s", i->str().c_str());
 }
 
 template class AreaRouter<IPv4>;

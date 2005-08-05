@@ -201,6 +201,8 @@ class AreaRouter {
     
     DelayQueue<Lsa::LsaRef> _queue;	// Router LSA queue.
 
+    bool _TransitCapability;		// Used by the spt computation.
+
     /**
      * Internal state that is required about this peer.
      */
