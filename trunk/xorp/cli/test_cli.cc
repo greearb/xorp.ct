@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.36 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.37 2005/07/28 23:26:24 pavlin Exp $"
 
 
 //
@@ -21,10 +21,8 @@
 
 
 #include "cli_module.h"
+
 #include "libxorp/xorp.h"
-
-#include <netdb.h>
-
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
@@ -35,6 +33,13 @@
 #include "cli_client.hh"
 #include "xrl_cli_node.hh"
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 //
 // Local variables

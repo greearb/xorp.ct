@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.6 2005/03/25 02:52:58 pavlin Exp $"
+#ident "$XORP: xorp/cli/tools/send_cli_processor_xrl.cc,v 1.7 2005/07/18 21:26:54 pavlin Exp $"
 
 #include "pim/pim_module.h"
 #include "libxorp/xorp.h"
@@ -25,6 +25,10 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/cli_processor_xif.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 //
 // A program for sending a CLI request to a module that has built-in CLI

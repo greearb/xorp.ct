@@ -12,25 +12,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.20 2005/07/26 06:49:52 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.21 2005/07/27 23:32:52 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
 #define __CLI_CLI_CLIENT_HH__
 
-
 //
 // CLI client definition.
 //
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 
 #include <list>
 
 #include "libxorp/buffer.hh"
 #include "libxorp/ipvx.hh"
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "cli_node.hh"
 

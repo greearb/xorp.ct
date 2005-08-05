@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.39 2005/07/26 06:39:30 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.40 2005/07/26 06:49:52 pavlin Exp $"
 
 
 //
@@ -24,10 +24,16 @@
 #include "libxorp/xorp.h"
 
 #include <errno.h>
-#include <termios.h>
 
-#include <arpa/telnet.h>
+#ifdef HAVE_TERMIOS_H
+#include <termios.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -40,6 +46,21 @@
 #include "cli_client.hh"
 #include "cli_private.hh"
 
+#ifdef HAVE_ARPA_TELNET_H
+#include <arpa/telnet.h>
+#else
+#include "telnet.h"
+#endif
+
+#ifdef HOST_OS_WINDOWS
+#define DEFAULT_TERM_TYPE "ansi-nt"
+#define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
+#define FDOPEN(x,y) _fdopen(_open_osfhandle((x),_O_RDWR|_O_TEXT),(y))
+#else
+#define DEFAULT_TERM_TYPE "vt100"
+#define FILENO(x) fileno(x)
+#define FDOPEN(x,y) fdopen((x), (y))
+#endif
 
 //
 // Exported variables

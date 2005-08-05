@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.19 2005/07/15 06:33:21 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.20 2005/07/15 07:05:29 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -27,6 +27,7 @@
 #include <list>
 
 #include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 #include "libproto/proto_node.hh"
 #include "cli_command.hh"
 
