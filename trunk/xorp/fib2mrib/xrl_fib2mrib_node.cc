@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.31 2005/03/23 21:39:58 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.32 2005/03/25 02:53:21 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -1630,8 +1630,8 @@ XrlFib2mribNode::fea_fib_client_0_1_add_route4(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str(),
 	      (xorp_route)? "true" : "false");
 
@@ -1667,8 +1667,8 @@ XrlFib2mribNode::fea_fib_client_0_1_add_route6(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str(),
 	      (xorp_route)? "true" : "false");
 
@@ -1728,8 +1728,8 @@ XrlFib2mribNode::fea_fib_client_0_1_replace_route4(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str(),
 	      (xorp_route)? "true" : "false");
 
@@ -1765,8 +1765,8 @@ XrlFib2mribNode::fea_fib_client_0_1_replace_route6(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str(),
 	      (xorp_route)? "true" : "false");
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xorp_fib2mrib.cc,v 1.8 2005/03/05 01:59:31 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xorp_fib2mrib.cc,v 1.9 2005/03/25 02:53:21 pavlin Exp $"
 
 //
 // XORP Fib2mrib module implementation.
@@ -28,6 +28,10 @@
 #include "libxorp/exceptions.hh"
 
 #include "xrl_fib2mrib_node.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 //
