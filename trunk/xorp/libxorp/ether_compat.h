@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.8 2004/06/22 23:41:42 pavlin Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.9 2005/03/25 02:53:40 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -28,21 +28,34 @@
 #endif /* __XORP_CONFIG_H__ */
 
 #ifdef HAVE_NET_ETHERNET_H
-#include <net/ethernet.h>
+# include <net/ethernet.h>
 #elif defined(HAVE_NET_IF_ETHER_H)
-#include <net/if.h>
-#include <net/if_ether.h>
+# ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+# endif
+# include <net/if_ether.h>
 #elif defined(HAVE_SYS_ETHERNET_H)
-#include <sys/types.h>
-#include <sys/ethernet.h>
+# ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+# endif
+# include <sys/ethernet.h>
 #elif defined(HAVE_NETINET_IF_ETHER_H)
-#include <net/if.h>
-#include <netinet/if_ether.h>
+# ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+# endif
+# include <netinet/if_ether.h>
 #endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#ifndef ETHER_ADDR_LEN
+#define ETHER_ADDR_LEN 6
+struct ether_addr {
+	char	octet[ETHER_ADDR_LEN];
+};
+#endif
 
 #ifdef NEED_ETHER_ATON
 struct ether_addr* ether_aton(const char *a);

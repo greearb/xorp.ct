@@ -14,98 +14,128 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.3 2004/07/16 11:24:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.4 2005/03/25 02:53:40 pavlin Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
- *   - OpenBSD's "src/lib/libc/net/ethers.c"
- *
+ *   tcpdump/addrtoname.c (from FreeBSD)
  * The copyright message(s) with the original file(s) is/are included below.
  */
 
-/*	$OpenBSD: ethers.c,v 1.17 2004/02/16 19:41:12 otto Exp $	*/
-
 /*
- * Copyright (c) 1998 Todd C. Miller <Todd.Miller@courtesan.com>
+ * Copyright (c) 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997
+ *	The Regents of the University of California.  All rights reserved.
  *
- * Permission to use, copy, modify, and distribute this software for any
- * purpose with or without fee is hereby granted, provided that the above
- * copyright notice and this permission notice appear in all copies.
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted provided that: (1) source code distributions
+ * retain the above copyright notice and this paragraph in its entirety, (2)
+ * distributions including binary code include the above copyright notice and
+ * this paragraph in its entirety in the documentation or other materials
+ * provided with the distribution, and (3) all advertising materials mentioning
+ * features or use of this software display the following acknowledgement:
+ * ``This product includes software developed by the University of California,
+ * Lawrence Berkeley Laboratory and its contributors.'' Neither the name of
+ * the University nor the names of its contributors may be used to endorse
+ * or promote products derived from this software without specific prior
+ * written permission.
+ * THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR IMPLIED
+ * WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
- * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
+ *  Internet, ethernet, port, and protocol string to address
+ *  and address to string conversion routines
+ *
+ * $FreeBSD: src/contrib/tcpdump/addrtoname.c,v 1.12 2004/03/31 14:57:24 bms Exp $
  */
+#if 0
+static const char rcsid[] _U_ =
+    "@(#) $Header$ (LBL)";
+#endif
 
-/* 
- * ethers(3) a la Sun.
- * Originally Written by Roland McGrath <roland@frob.com> 10/14/93.
- * Substantially modified by Todd C. Miller <Todd.Miller@courtesan.com>
- */
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#include "libxorp/xorp.h"
+#include "libxorp/utility.h"
+#include "libxorp/ether_compat.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <limits.h>
-
-#include "libxorp_module.h"
-#include "xorp.h"
-#include "ether_compat.h"
-#include "utility.h"
-
-
-#ifdef NEED_ETHER_ATON
-/*
- * Convert an ASCII representation of an ethernet address to
- * binary form.
- */
-struct ether_addr *
-ether_aton(const char *a)
-{
-	int i;
-	long l;
-	static struct ether_addr e;
-	const char *s = a;
-	char *pp;
-
-	while (xorp_isspace(*s))
-		s++;
-
-	/* expect 6 hex octets separated by ':' or space/NUL if last octet */
-	for (i = 0; i < 6; i++) {
-		l = strtol(s, &pp, 16);
-		if (pp == s || l > 0xFF || l < 0)
-			return (NULL);
-		if (!(*pp == ':' ||
-			(i == 5 && (xorp_isspace(*pp) || *pp == '\0'))))
-			return (NULL);
-		e.ether_addr_octet[i] = (u_char)l;
-		s = pp + 1;
-	}
-
-	return (&e);
-}
-#endif /* NEED_ETHER_ATON */
+#ifdef HAVE_STDINT_H
+#include <stdint.h>
+#endif
+#include <inttypes.h>
+#include <ctype.h>
 
 #ifdef NEED_ETHER_NTOA
-/*
- * Convert a binary representation of an ethernet address to
- * an ASCII string.
- */
+/* XXX: returns a pointer to static storage. */
 char *
 ether_ntoa(const struct ether_addr *e)
 {
-	static char a[] = "xx:xx:xx:xx:xx:xx";
+	static const char hex[] = "0123456789abcdef";
+	static char buf[sizeof("00:00:00:00:00:00")];
+	char *cp;
+	const uint8_t *ep;
+	unsigned int i, j;
 
-	(void)snprintf(a, sizeof a, "%02x:%02x:%02x:%02x:%02x:%02x",
-	    e->ether_addr_octet[0], e->ether_addr_octet[1],
-	    e->ether_addr_octet[2], e->ether_addr_octet[3],
-	    e->ether_addr_octet[4], e->ether_addr_octet[5]);
+	cp = buf;
+	ep = (const uint8_t *)e->octet;
+	if ((j = *ep >> 4) != 0)
+		*cp++ = hex[j];
+	*cp++ = hex[*ep++ & 0xf];
+	for (i = 5; (int)--i >= 0;) {
+		*cp++ = ':';
+		if ((j = *ep >> 4) != 0)
+		*cp++ = hex[j];
+	*cp++ = hex[*ep++ & 0xf];
+	}
+	*cp = '\0';
 
-	return (a);
+	return (buf);
 }
 #endif /* NEED_ETHER_NTOA */
+
+#ifdef NEED_ETHER_ATON
+
+/* Hex digit to integer. */
+#ifdef __STDC__
+inline
+#endif
+static int
+xdtoi(int c)
+{
+	if (isdigit(c))
+		return (c - '0');
+	else if (islower(c))
+		return (c - 'a' + 10);
+	else
+		return (c - 'A' + 10);
+}
+
+/*
+ * Convert 's' which has the form "xx:xx:xx:xx:xx:xx" into a new
+ * ethernet address.  Assumes 's' is well formed.
+ * XXX: returns a pointer to static storage.
+ */
+struct ether_addr *
+ether_aton(const char *s)
+{
+	static struct ether_addr o;
+	uint8_t *ep, *e;
+	unsigned int d;
+
+	e = ep = (uint8_t *)&o;
+
+	while (*s) {
+		if (*s == ':')
+			s += 1;
+		d = xdtoi(*s++);
+		if (isxdigit((uint8_t)*s)) {
+			d <<= 4;
+			d |= xdtoi(*s++);
+		}
+		*ep++ = d;
+	}
+
+	return (&o);
+}
+#endif /* NEED_ETHER_ATON */
