@@ -59,6 +59,7 @@ libospf_la_SOURCES  += ospf.hh
 libospf_la_SOURCES  += packet.hh
 libospf_la_SOURCES  += peer_manager.hh
 libospf_la_SOURCES  += peer.hh
+libospf_la_SOURCES  += routing_table.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 libospf_la_SOURCES  += vertex.hh
@@ -70,6 +71,7 @@ libospf_la_SOURCES  += ospf.cc
 libospf_la_SOURCES  += packet.cc
 libospf_la_SOURCES  += peer_manager.cc
 libospf_la_SOURCES  += peer.cc
+libospf_la_SOURCES  += routing_table.cc
 libospf_la_SOURCES  += xrl_io.cc
 libospf_la_SOURCES  += xrl_target.cc
 
