@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timespent.hh,v 1.7 2004/06/23 01:12:52 pavlin Exp $
+// $XORP: xorp/libxorp/timespent.hh,v 1.8 2005/03/25 02:53:48 pavlin Exp $
 
 #ifndef __LIBXORP_TIMESPENT_HH__
 #define __LIBXORP_TIMESPENT_HH__
 
 #include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
 
 static const int TIMESPENT_LIMIT = 10;	// Time allowed in seconds.
 
@@ -34,9 +35,7 @@ public:
 	: _function(function), _file(file), _line(line),
 	  _limit(TimeVal(limit,0))
     {
-	timeval now;
-	gettimeofday(&now, 0);
-	_start = TimeVal(now);
+	TimerList::system_gettimeofday(&_start);
     }
 
     /**
@@ -45,9 +44,10 @@ public:
      */
     bool overlimit(TimeVal& delta)
     {
-	timeval now;
-	gettimeofday(&now, 0);
-	delta = TimeVal(now) - _start;
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
+
+	delta = now - _start;
 
 	return delta > _limit;
     }
