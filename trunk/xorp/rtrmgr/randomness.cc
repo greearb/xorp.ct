@@ -12,13 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.14 2005/02/01 02:53:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.15 2005/03/25 02:54:37 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
-#include <fcntl.h>
-
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
 
+// XXX: Needs HAVE_OPENSSL_MD5_H
 #include <openssl/md5.h>
 
 #include "rtrmgr_module.h"

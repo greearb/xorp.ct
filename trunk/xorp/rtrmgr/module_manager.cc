@@ -12,23 +12,41 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.43 2005/04/28 02:24:57 pavlin Exp $"
-
-#include <signal.h>
-#include <glob.h>
-
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/param.h>
-#include <sys/wait.h>
-
-#include <map>
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.44 2005/06/17 20:43:31 pavlin Exp $"
 
 #include "rtrmgr_module.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
+#include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
+
+#include <signal.h>
+
+#ifdef HAVE_GLOB_H
+#include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+
+#include <map>
 
 #include "module_manager.hh"
 #include "conf_tree_node.hh"
@@ -36,7 +54,11 @@
 #include "template_commands.hh"
 //#include "xrl_rtrmgr_interface.hh"
 #include "main_rtrmgr.hh"
+#include "util.hh"
 
+#ifdef HOST_OS_WINDOWS
+#define stat _stat
+#endif
 
 static map<pid_t, string> module_pids;
 static multimap<string, Module*> module_paths;

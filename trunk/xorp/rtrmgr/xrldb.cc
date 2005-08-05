@@ -12,10 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.11 2004/12/11 21:30:00 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.12 2005/03/25 02:54:41 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
@@ -27,6 +35,10 @@
 
 #include "xrldb.hh"
 
+#ifdef HOST_OS_WINDOWS
+#define	stat	_stat
+#define	S_IFDIR	_S_IFDIR
+#endif
 
 XrlSpec::XrlSpec(const Xrl& xrl, const XrlArgs& rspec, bool verbose)
     : _xrl(xrl),
@@ -162,6 +174,7 @@ XRLdb::XRLdb(const string& xrldir, bool verbose) throw (InitError)
     }
 
     // TODO: file suffix is hardcoded here!
+    // XXX string globname = xrldir + PATH_DELIMITER_STRING + "*.xrls";
     string globname = xrldir + "/*.xrls";
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {

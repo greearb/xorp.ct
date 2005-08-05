@@ -12,17 +12,31 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.51 2005/07/19 07:08:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.52 2005/07/27 23:52:20 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_GLOB_H
 #include <glob.h>
-
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_SIGNAL_H
 #include <sys/signal.h>
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
 
 #include "rtrmgr_module.h"
 
@@ -39,7 +53,11 @@
 #include "util.hh"
 #include "y.opcmd_tab.h"
 
-
+#ifdef HOST_OS_WINDOWS
+#define	stat	_stat
+#define	S_IFDIR	_S_IFDIR
+#define	S_ISREG	_S_ISREG
+#endif
 
 extern int init_opcmd_parser(const char *filename, OpCommandList *o);
 extern void parse_opcmd() throw (ParseError);

@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.61 2005/07/11 21:49:29 pavlin Exp $"
-
-#include <signal.h>
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.62 2005/07/11 23:14:52 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -23,10 +21,23 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#include <arpa/inet.h>
-#include <netdb.h>
+#include <signal.h>
+
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
+#ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
 
 #include "libxipc/sockutil.hh"
 #include "libxipc/finder_server.hh"
@@ -46,6 +57,14 @@
 #include "userdb.hh"
 #include "util.hh"
 #include "xrl_rtrmgr_interface.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+#ifdef HOST_OS_WINDOWS
+#define	stat	_stat
+#endif
 
 
 //

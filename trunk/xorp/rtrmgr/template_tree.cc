@@ -12,10 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.34 2005/07/25 07:23:03 zec Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.35 2005/08/02 20:52:15 zec Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
 
 #include "rtrmgr_module.h"
 
@@ -30,6 +37,10 @@
 #include "template_tree_node.hh"
 #include "util.hh"
 
+#ifdef HOST_OS_WINDOWS
+#define	stat	_stat
+#define	S_IFDIR	_S_IFDIR
+#endif
 
 extern int init_template_parser(const char* filename, TemplateTree* c);
 extern void complete_template_parser();
@@ -64,7 +75,6 @@ TemplateTree::load_template_tree(const string& config_template_dir,
 			  config_template_dir.c_str(), strerror(errno));
 	return false;
     }
-
     if ((dirdata.st_mode & S_IFDIR) == 0) {
 	errmsg = c_format("Error reading config directory %s: not a directory",
 			  config_template_dir.c_str());

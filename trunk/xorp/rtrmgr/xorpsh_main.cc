@@ -12,11 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.44 2005/07/15 06:39:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.45 2005/07/19 23:38:25 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+
 #include <signal.h>
 
 #include "rtrmgr_module.h"
@@ -24,6 +33,8 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "libcomm/comm_api.h"
 
 #include "cli.hh"
 #include "op_commands.hh"
@@ -34,6 +45,15 @@
 #include "util.hh"
 #include "xorpsh_main.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+#ifdef HOST_OS_WINDOWS
+#define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
+#else
+#define FILENO(x) fileno(x)
+#endif
 
 //
 // Default values

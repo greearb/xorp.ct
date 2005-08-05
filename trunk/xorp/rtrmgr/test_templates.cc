@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.13 2004/12/23 16:38:27 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.14 2005/03/25 02:54:40 pavlin Exp $"
 
 
 #include <signal.h>
@@ -34,6 +34,14 @@
 //#include "userdb.hh"
 //#include "xrl_rtrmgr_interface.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif // HAVE_GETOPT_H
+
+// XXX: hack.
+#ifdef HOST_OS_WINDOWS
+#include "glob_win32.h"
+#endif // HOST_OS_WINDOWS
 
 //
 // Defaults

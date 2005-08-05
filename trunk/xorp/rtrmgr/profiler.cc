@@ -13,18 +13,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/profiler.cc,v 1.2 2005/02/01 07:55:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/profiler.cc,v 1.3 2005/03/25 02:54:37 pavlin Exp $"
 
 // Access the profiling support in XORP processes.
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include <stdio.h>
-#include <sysexits.h>
-
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
+
 #include "rtrmgr_module.h"
+
+#include <stdio.h>
+
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -35,6 +41,10 @@
 
 #include "xrl/interfaces/profile_xif.hh"
 #include "xrl/targets/profiler_base.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 class XrlProfilerTarget :  XrlProfilerTargetBase {
  public:
@@ -185,7 +195,7 @@ usage(const char *myname)
     fprintf(stderr,
 	    "usage: %s -t target {-l | -v profile variable [-e|-d|-c|-g]}\n",
 	    myname);
-    return EX_USAGE;
+    return 1;
 }
 
 int

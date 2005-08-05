@@ -1,6 +1,20 @@
-#ifndef lint
-#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
 #endif
+#include "libxorp/xorp.h"
+#include "rtrmgr_module.h"
+#include "libxorp/xlog.h"
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#else
+#ifndef __unused
+#define __unused
+#endif
+#ifndef __P
+#define __P(x) x
+#endif
+#endif
+#ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1

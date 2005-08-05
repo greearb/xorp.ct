@@ -12,9 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.87 2005/07/28 07:26:54 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.88 2005/07/28 23:26:24 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
 
 #include "rtrmgr_module.h"
 

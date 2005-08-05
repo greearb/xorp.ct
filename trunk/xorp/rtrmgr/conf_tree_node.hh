@@ -12,18 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.42 2005/07/26 05:20:51 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.43 2005/07/28 23:18:32 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
 
+#include "libxorp/xorp.h"
 
 #include <map>
 #include <list>
 #include <set>
 #include <vector>
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+
 #include "libxorp/timeval.hh"
 #include "config_operators.hh"
 

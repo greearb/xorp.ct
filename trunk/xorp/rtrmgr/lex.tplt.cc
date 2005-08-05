@@ -23,6 +23,18 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include "libxorp/xorp.h"
+
+#ifdef HAVE_SYS_CDEFS_H
+#include <sys/cdefs.h>
+#else
+#define __unused
+#endif
+
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
@@ -9868,6 +9880,11 @@ YY_BUFFER_STATE b;
 	}
 
 
+#ifdef HOST_OS_WINDOWS
+#define isatty(x) _isatty(x)
+#define fileno(x) _fileno(x)
+#endif
+
 #ifndef YY_ALWAYS_INTERACTIVE
 #ifndef YY_NEVER_INTERACTIVE
 extern int isatty YY_PROTO(( int ));
@@ -9881,7 +9898,6 @@ void yy_init_buffer( b, file )
 YY_BUFFER_STATE b;
 FILE *file;
 #endif
-
 
 	{
 	yy_flush_buffer( b );

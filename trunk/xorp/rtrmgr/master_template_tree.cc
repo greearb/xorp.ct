@@ -12,10 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.3 2005/07/11 21:49:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.4 2005/07/11 23:14:52 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
+#ifdef HAVE_GLOB_H
 #include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
 
 #include "rtrmgr_module.h"
 

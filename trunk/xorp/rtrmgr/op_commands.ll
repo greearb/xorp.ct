@@ -1,4 +1,5 @@
 %{
+#include "libxorp/xorp.h"
 #include <string.h>
 #include "y.opcmd_tab.h"
 %}

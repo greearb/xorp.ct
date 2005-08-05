@@ -12,11 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.11 2005/02/01 03:01:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.12 2005/03/25 02:54:40 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_GRP_H
 #include <grp.h>
+#endif
+#ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
 
 #include "rtrmgr_module.h"
 

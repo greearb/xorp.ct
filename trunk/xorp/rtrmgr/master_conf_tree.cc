@@ -12,11 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.53 2005/07/08 16:42:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.54 2005/07/22 00:31:30 pavlin Exp $"
 
-//#define DEBUG_LOGGING
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+#ifdef HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+#ifdef HAVE_GRP_H
 #include <grp.h>
+#endif
 
 #include "rtrmgr_module.h"
 
@@ -32,6 +38,28 @@
 #include "master_template_tree.hh"
 #include "master_template_tree_node.hh"
 #include "util.hh"
+
+#ifdef HOST_OS_WINDOWS
+
+// XXX: Use unlink emulation from MS VC runtime.
+#ifdef unlink
+#undef unlink
+#endif
+#define unlink(x) _unlink(x)
+
+// Stub out umask.
+#ifdef umask
+#undef umask
+#endif
+#define umask(x)
+
+// Stub out fchown.
+#ifdef fchown
+#undef fchown
+#endif
+#define fchown(x,y,z) (0)
+
+#endif
 
 //
 // The strings that are used to add and delete a load or save file, to
