@@ -25,6 +25,7 @@
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 
 #include "xrl_io.hh"
 
@@ -77,8 +78,13 @@ XrlIO<A>::disable_interface_vif(const string& interface, const string& vif)
 
 template <typename A>
 bool
-XrlIO<A>::add_route()
+XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		    bool discard)
 {
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
+	      discard ? "true" : "false");
+
     XLOG_UNFINISHED();
 
     return true;
@@ -86,8 +92,24 @@ XrlIO<A>::add_route()
 
 template <typename A>
 bool
-XrlIO<A>::delete_route()
+XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+			bool discard)
 {
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
+	      discard ? "true" : "false");
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+template <typename A>
+bool
+XrlIO<A>::delete_route(IPNet<A> net)
+{
+    debug_msg("Net %s\n", cstring(net));
+
     XLOG_UNFINISHED();
 
     return true;

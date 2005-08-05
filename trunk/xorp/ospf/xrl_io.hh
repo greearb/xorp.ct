@@ -57,13 +57,38 @@ class XrlIO : public IO<A> {
 
     /**
      * Add route to RIB.
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
      */
-    bool add_route();
+    bool add_route(IPNet<A> net,
+		   A nexthop,
+		   uint32_t metric,
+		   bool equal,
+		   bool discard);
 
     /**
-     * Delete route from RIB
+     * Replace route in RIB.
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
      */
-    bool delete_route();
+    bool replace_route(IPNet<A> net,
+		       A nexthop,
+		       uint32_t metric,
+		       bool equal,
+		       bool discard);
+
+    /**
+     * Delete route from RIB.
+     */
+    bool delete_route(IPNet<A> net);
 
  private:
     EventLoop& _eventloop;

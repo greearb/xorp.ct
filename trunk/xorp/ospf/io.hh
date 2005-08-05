@@ -58,12 +58,37 @@ class IO {
     
     /**
      * Add route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
      */
-    virtual bool add_route() = 0;
+    virtual bool add_route(IPNet<A> net,
+			   A nexthop,
+			   uint32_t metric,
+			   bool equal,
+			   bool discard) = 0;
+
+    /**
+     * Replace route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
+     */
+    virtual bool replace_route(IPNet<A> net,
+			       A nexthop,
+			       uint32_t metric,
+			       bool equal,
+			       bool discard) = 0;
 
     /**
      * Delete route
      */
-    virtual bool delete_route() = 0;
+    virtual bool delete_route(IPNet<A> net) = 0;
 };
 #endif // __OSPF_IO_HH__

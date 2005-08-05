@@ -31,6 +31,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 
 #include "libxorp/eventloop.hh"
 
@@ -144,16 +145,38 @@ class DebugIO : public IO<A> {
     /**
      * Add route to RIB.
      */
-    bool add_route()
+    bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		   bool discard)
     {
+	DOUT(_info) << "Net" << net.str() <<
+	    " nexthop" << nexthop.str() <<
+	    " metric" << metric <<
+	    " equal" << equal <<
+	    " discard" << discard << endl;
+	return true;
+    }
+
+    /**
+     * Replace route in RIB.
+     */
+    bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		   bool discard)
+    {
+	DOUT(_info) << "Net" << net.str() <<
+	    " nexthop" << nexthop.str() <<
+	    " metric" << metric <<
+	    " equal" << equal <<
+	    " discard" << discard << endl;
 	return true;
     }
 
     /**
      * Delete route from RIB
      */
-    bool delete_route()
+    bool delete_route(IPNet<A> net)
     {
+	DOUT(_info) << "Net" << net.str() << endl;
+	
 	return true;
     }
 
