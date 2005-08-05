@@ -86,7 +86,7 @@ class Vertex {
 	string output;
 	switch(_version) {
 	case OspfTypes::V2:
-	    output = "Version: V2";
+	    output = "OSPFv2";
 	    switch(_t) {
 	    case Router:
 		output += " Router";
@@ -95,10 +95,10 @@ class Vertex {
 		output += " Network";
 		break;
 	    }
-	    output += c_format("%#x", _nodeid);
+	    output += c_format(" %s(%#x)", pr_id(_nodeid).c_str(), _nodeid);
 	    break;
 	case OspfTypes::V3:
-	    output = "Version: V3";
+	    output = "OSPFv3";
 	    switch(_t) {
 	    case Router:
 		output += c_format(" Router %#x", _nodeid);
