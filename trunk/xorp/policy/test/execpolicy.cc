@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.3 2005/07/08 02:06:23 abittau Exp $"
+#ident "$XORP: xorp/policy/test/execpolicy.cc,v 1.4 2005/08/04 15:26:59 bms Exp $"
 
 /*
  * EXIT CODES:
@@ -35,6 +35,7 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/timeval.hh"
+#include "libxorp/clock.hh"
 #include "libxorp/timer.hh"
 
 #include "policy/backend/policy_filter.hh"
@@ -54,6 +55,9 @@ int main(int argc, char *argv[]) {
     string conf = "";
 
     bool accepted = true;
+
+    SystemClock sc;
+    TimerList timerlist(&sc);
 
     TimeVal start;
     TimerList::system_gettimeofday(&start);

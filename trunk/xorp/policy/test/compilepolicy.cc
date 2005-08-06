@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.4 2005/07/01 22:54:37 abittau Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.5 2005/08/04 15:26:59 bms Exp $"
 
 /*
  * EXIT CODES:
@@ -357,6 +357,8 @@ int main(int argc, char *argv[]) {
     }
    
     TimeVal start;
+    SystemClock sc;
+    TimerList timerlist(&sc);
     TimerList::system_gettimeofday(&start); 
 
     try {
