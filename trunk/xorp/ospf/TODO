@@ -67,6 +67,11 @@ packet or on the router ID, depending on the linktype that the packet
 arrived on. If a packet is being demultipled on the source address and
 the router ID changes is this likely to be a problem?
 
+2) In the OSPFv2 case when generating router links the state backup is
+treated the same as DR_other, which generates links. Previously the
+backup state generated no links. In the OSPFv3 case in state backup we
+generate no links. Its not clear what the correct behaviour should be.
+
 Done
 ~~~~
 
