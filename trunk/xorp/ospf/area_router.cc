@@ -765,11 +765,12 @@ AreaRouter<A>::neighbours_exchange_or_loading() const
 
 template <typename A>
 bool
-AreaRouter<A>::on_link_state_request_list(const PeerID /*peerid*/,
-					  const OspfTypes::NeighbourID /*nid*/,
-					  Lsa::LsaRef /*lsar*/) const
+AreaRouter<A>::on_link_state_request_list(const PeerID peerid,
+					  const OspfTypes::NeighbourID nid,
+					  Lsa::LsaRef lsar) const
 {
-    XLOG_UNFINISHED();
+    return _ospf.get_peer_manager().
+	on_link_state_request_list(peerid, _area, nid, lsar);
 }
 
 template <typename A>

@@ -194,6 +194,19 @@ PeerOut<A>::push_lsas()
     return true;
 }
 
+template <typename A>
+bool 
+PeerOut<A>::on_link_state_request_list(OspfTypes::AreaID area,
+				       const OspfTypes::NeighbourID nid,
+				       Lsa::LsaRef lsar)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->on_link_state_request_list(nid, lsar);
+}
 
 template <typename A>
 void
@@ -367,6 +380,21 @@ Peer<A>::push_lsas()
 	    return false;
 
     return true;
+}
+
+template <typename A>
+bool 
+Peer<A>::on_link_state_request_list(const OspfTypes::NeighbourID nid,
+				    Lsa::LsaRef lsar) const
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_neighbour_id() == nid)
+	    return (*n)->on_link_state_request_list(lsar);
+
+    XLOG_UNREACHABLE();
+
+    return false;
 }
 
 template <typename A>
@@ -1213,14 +1241,40 @@ Peer<A>::update_router_links()
 
     OspfTypes::Version version = _ospf.get_version();
 
+    // Save the old router links so that its possible to tell if the
+    // router links have changed.
+    list<RouterLink> router_links;
+    router_links.insert(router_links.begin(),
+			_router_links.begin(), _router_links.end());
+    _router_links.clear();
+
     switch(version) {
     case OspfTypes::V2:
-	update_router_linksV2();	
+	update_router_linksV2(_router_links);
 	break;
     case OspfTypes::V3:
-	update_router_linksV3();
+	update_router_linksV3(_router_links);
 	break;
     }
+
+     list<RouterLink>::iterator i, j;
+     bool equal = false;
+     if (router_links.size() == _router_links.size()) {
+	 for (i = router_links.begin(); i != router_links.end(); i++) {
+	     equal = false;
+	     for (j = _router_links.begin(); j != _router_links.end(); j++) {
+		 if(*i == *j) {
+		     equal = true;
+		     break;
+		 }
+	     }
+	     if (equal == false)
+		 break;
+	 }
+     }
+     if (equal == false) {
+	 get_area_router()->new_router_links(get_peerid(), _router_links);
+     }
 }
 
 template <>
@@ -1284,15 +1338,14 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 
 template <>
 void
-Peer<IPv4>::update_router_linksV2()
+Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 {
     OspfTypes::Version version = _ospf.get_version();
     RouterLink router_link(version);
 
     switch(_interface_state) {
     case Down:
-	// Notify the area database this router link in no longer available
-	get_area_router()->remove_router_link(get_peerid());
+	// No links
 	return;
 	break;
     case Loopback:
@@ -1330,6 +1383,7 @@ Peer<IPv4>::update_router_linksV2()
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(0);
 	break;
+	// RFC 2328 Section 12.4.1.2.Describing broadcast and NBMA interfaces
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA: {
 	bool adjacent = false;
@@ -1350,6 +1404,7 @@ Peer<IPv4>::update_router_linksV2()
 	case Point2Point:
 	    XLOG_UNFINISHED();
 	    break;
+	case Backup:	// XXX - Is this correct for the backup state?
 	case DR_other: {
 	    // Do we have an adjacency with the DR?
 	    list<Neighbour<IPv4> *>::iterator n;
@@ -1388,11 +1443,6 @@ Peer<IPv4>::update_router_linksV2()
 	    router_link.set_metric(_peerout.get_interface_cost());
 	}
 	    break;
-	case Backup:
-	    // Not clear what should be done here.
-	    XLOG_WARNING("TBD BACKUP");
-	    return;
-	    break;
 	}
     }
     
@@ -1406,35 +1456,33 @@ Peer<IPv4>::update_router_linksV2()
     }
 
  done:
-    // Notify the area database this router link in now available
-    get_area_router()->add_router_link(get_peerid(), router_link);
+    router_links.push_back(router_link);
 }
 
 template <>
 void
-Peer<IPv6>::update_router_linksV2()
+Peer<IPv6>::update_router_linksV2(list<RouterLink>&)
 {
     XLOG_FATAL("OSPFv2 can't carry IPv6 addresses");
 }
 
 template <>
 void
-Peer<IPv4>::update_router_linksV3()
+Peer<IPv4>::update_router_linksV3(list<RouterLink>&)
 {
     XLOG_FATAL("OSPFv3 can't carry IPv4 addresses yet!");
 }
 
 template <>
 void
-Peer<IPv6>::update_router_linksV3()
+Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 {
     RouterLink router_link(OspfTypes::V3);
 
     switch(_interface_state) {
     case Down:
     case Loopback:
-	// Notify the area database this router link in no longer available
-	get_area_router()->remove_router_link(get_peerid());
+	// No links
 	return;
 	break;
     case Waiting:
@@ -1463,8 +1511,7 @@ Peer<IPv6>::update_router_linksV3()
 	    router_link.set_neighbour_interface_id((*n)->get_hello_packet()->
 						   get_interface_id());
 	    router_link.set_neighbour_router_id((*n)->get_router_id());
-
-	    get_area_router()->add_router_link(get_peerid(), router_link);
+	    router_links.push_back(router_link);
 	}
 	
     }
@@ -1510,7 +1557,8 @@ Peer<IPv6>::update_router_linksV3()
 		// DR router ID.
 		router_link.set_neighbour_router_id(get_designated_router());
 
-		get_area_router()->add_router_link(get_peerid(), router_link);
+// 		get_area_router()->add_router_link(get_peerid(), router_link);
+		router_links.push_back(router_link);
 	    }
 	}
 	    break;
@@ -2727,6 +2775,32 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 //     send_ack(direct_ack, /*direct*/true, multicast_on_peer);
     _peer.send_direct_acks(get_neighbour_id(), direct_ack);
     _peer.send_delayed_acks(get_neighbour_id(), delayed_ack);
+
+    // Have any of the update packets satisfied outstanding requests?
+    if (_ls_request_list.empty())
+	return;
+    
+    list<Lsa::LsaRef>& lsas = lsup->get_lsas();
+    list<Lsa::LsaRef>::const_iterator i;
+    list<Lsa_header>::iterator j;
+
+    for (i = lsas.begin(); i != lsas.end(); i++) {
+	Lsa_header& lsah = (*i)->get_header();
+	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
+	    if (j->get_ls_type() != (*i)->get_ls_type())
+		continue;
+
+	    if (j->get_link_state_id() != lsah.get_link_state_id())
+		continue;
+
+	    if (j->get_advertising_router() != lsah.get_advertising_router())
+		continue;
+	    _ls_request_list.erase(j);
+	    break;
+	}
+    }
+    if (_ls_request_list.empty())
+	event_loading_done();
 }
 
 template <typename A>
@@ -2768,10 +2842,14 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 		break;
 	    case AreaRouter<A>::EQUIVALENT:
 		_ls_request_list.erase(i);
+		if (_ls_request_list.empty())
+		    event_loading_done();
 		return true;
 		break;
 	    case AreaRouter<A>::NEWER:
 		_ls_request_list.erase(i);
+		if (_ls_request_list.empty())
+		    event_loading_done();
 		break;
 	    case AreaRouter<A>::OLDER:
 		return true;
@@ -2883,6 +2961,27 @@ Neighbour<A>::push_lsas()
     restart_retransmitter();
 
     return true;
+}
+
+template <typename A>
+bool
+Neighbour<A>::on_link_state_request_list(Lsa::LsaRef lsar) const
+{
+    list<Lsa_header>::const_iterator i;
+    Lsa_header& lsah = lsar->get_header();
+    for(i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
+	if (i->get_ls_type() != lsar->get_ls_type())
+	    continue;
+	
+	if (i->get_link_state_id() != lsah.get_link_state_id())
+	    continue;
+
+	if (i->get_advertising_router() != lsah.get_advertising_router())
+	    continue;
+	return true;
+    }
+    
+    return false;
 }
 
 template <typename A>
@@ -3006,8 +3105,6 @@ Neighbour<A>::event_exchange_done()
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str());
 
-    XLOG_WARNING("TBD");
-
     switch(get_state()) {
     case Down:
 	break;
@@ -3031,11 +3128,7 @@ Neighbour<A>::event_exchange_done()
 	// requests. Currently we only have a single retransmit timer
 	// although this isn't really an issue.
 	if (_ls_request_list.empty()) {
-	    // XXX - This should probably be done through an
-	    // event. Its important that the area router knows when
-	    // the databases are in sync.
-	    change_state(Full);
-	    XLOG_UNFINISHED();
+	    event_loading_done();
 	    return;
 	}
 	restart_retransmitter();
@@ -3055,6 +3148,46 @@ Neighbour<A>::event_bad_link_state_request()
 {
     const char *event_name = "BadLSReq";
     event_SequenceNumberMismatch_or_BadLSReq(event_name);
+}
+
+template <typename A>
+void
+Neighbour<A>::event_loading_done()
+{
+    const char *event_name = "LoadingDone";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      pr_id(get_candidate_id()).c_str(),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    switch(get_state()) {
+    case Down:
+	break;
+    case Attempt:
+	break;
+    case Init:
+	break;
+    case TwoWay:
+	break;
+    case ExStart:
+	break;
+    case Exchange:
+	break;
+    case Loading:
+	change_state(Full);
+	_peer.update_router_links();
+	XLOG_WARNING("TBD - If this is the DR generate a Network-LSA");
+	break;
+    case Full:
+	break;
+    }
 }
 
 template <typename A>

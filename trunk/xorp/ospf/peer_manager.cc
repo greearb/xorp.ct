@@ -321,6 +321,21 @@ PeerManager<A>::known_interface_address(const A address) const
 }
 
 template <typename A>
+bool
+PeerManager<A>::on_link_state_request_list(const PeerID peerid,
+					   OspfTypes::AreaID area,
+					   const OspfTypes::NeighbourID nid,
+					   Lsa::LsaRef lsar)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->on_link_state_request_list(area, nid, lsar);
+}
+
+template <typename A>
 bool 
 PeerManager<A>::set_network_mask(const PeerID peerid, OspfTypes::AreaID area, 
 				 uint32_t network_mask)

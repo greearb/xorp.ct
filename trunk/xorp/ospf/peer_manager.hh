@@ -145,6 +145,18 @@ class PeerManager {
      */
     bool known_interface_address(const A address) const;
 
+    /**
+     * Is this LSA on this neighbours link state request list.
+     * @param peerid
+     * @param nid
+     *
+     * @return true if it is.
+     */
+    bool on_link_state_request_list(const PeerID peerid,
+				    OspfTypes::AreaID area,
+				    const OspfTypes::NeighbourID nid,
+				    Lsa::LsaRef lsar);
+    
     // Configure the peering.
 
     /**

@@ -142,6 +142,16 @@ class PeerOut {
     bool push_lsas();
 
     /**
+     * Is this LSA on this neighbours link state request list.
+     * @param nid
+     *
+     * @return true if it is.
+     */
+    bool on_link_state_request_list(OspfTypes::AreaID area,
+				    const OspfTypes::NeighbourID nid,
+				    Lsa::LsaRef lsar);
+    
+    /**
      * @return the link type.
      */
     OspfTypes::LinkType get_linktype() const { return _linktype; }
@@ -323,6 +333,15 @@ class Peer {
      * Send (push) any queued LSAs.
      */
     bool push_lsas();
+
+    /**
+     * Is this LSA on this neighbours link state request list.
+     * @param nid
+     *
+     * @return true if it is.
+     */
+    bool on_link_state_request_list(const OspfTypes::NeighbourID nid,
+				    Lsa::LsaRef lsar) const;
 
     /**
      * Send direct ACKs
@@ -570,6 +589,13 @@ class Peer {
      */
     uint32_t get_designated_router_interface_id(A = A::ZERO()) const;
 
+    /**
+     * Compute the current router link.
+     *
+     * Typically called after a state transition.
+     */
+    void update_router_links();
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -589,6 +615,8 @@ class Peer {
     list<Neighbour<A> *> _neighbours;	// List of discovered neighbours.
 
     HelloPacket _hello_packet;		// Packet that is sent by this peer.
+
+    list<RouterLink> _router_links;	// Router links for this peer
 
     /**
      * Possible DR or BDR candidates.
@@ -622,7 +650,6 @@ class Peer {
 
     void start_wait_timer();
 
-
     bool send_hello_packet();
     
     OspfTypes::RouterID
@@ -633,25 +660,18 @@ class Peer {
     void compute_designated_router_and_backup_designated_router();
 
     /**
-     * Compute the current router link.
-     *
-     * Typically called after a state transition.
-     */
-    void update_router_links();
-
-    /**
      * Compute the current router link for OSPFv2
      *
      * Typically called after a state transition.
      */
-    void update_router_linksV2();
+    void update_router_linksV2(list<RouterLink>& router_links);
 
     /**
      * Compute the current router link for OSPFv3
      *
      * Typically called after a state transition.
      */
-    void update_router_linksV3();
+    void update_router_linksV3(list<RouterLink>& router_links);
 
     /**
      * Stop all timers.
@@ -788,6 +808,13 @@ class Neighbour {
      * Send (push) any queued LSAs.
      */
     bool push_lsas();
+
+    /**
+     * Is this LSA on this neighbours link state request list.
+     *
+     * @return true if it is.
+     */
+    bool on_link_state_request_list(Lsa::LsaRef lsar) const;
 
     /**
      * Send acknowledgement.
@@ -937,6 +964,7 @@ class Neighbour {
     void event_sequence_number_mismatch();
     void event_exchange_done();
     void event_bad_link_state_request();
+    void event_loading_done();
 
     /**
      * Common code for:
