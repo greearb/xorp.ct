@@ -162,55 +162,27 @@ AreaRouter<A>::peer_down(PeerID peerid)
 }
 
 template <typename A>
-bool
-AreaRouter<A>::add_router_link(PeerID peerid, RouterLink& router_link)
+bool 
+AreaRouter<A>::new_router_links(PeerID peerid,
+				const list<RouterLink>& router_links)
 {
-    debug_msg("PeerID %u %s\n", peerid, cstring(router_link));
-
     if (0 == _peers.count(peerid)) {
 	XLOG_WARNING("Peer not found %u", peerid);
 	return false;
     }
 
-    // Update the router link.
     typename PeerMap::iterator i = _peers.find(peerid);
     PeerStateRef psr = i->second;
-    list<RouterLink>::const_iterator r;
-    for (r = psr->_router_links.begin(); r != psr->_router_links.end(); r++) {
-	if (router_link == (*r))
-	    return true;
-    }
-    psr->_router_links.push_back(router_link);
 
-    if (update_router_links(psr)) {
-	// publish the router LSA.
-	_queue.add(_router_lsa);
-    }
-		   
-    return true;
-}
-
-template <typename A>
-bool
-AreaRouter<A>::remove_router_link(PeerID peerid)
-{
-    debug_msg("PeerID %u\n", peerid);
-
-    if (0 == _peers.count(peerid)) {
-	XLOG_WARNING("Peer not found %u", peerid);
-	return false;
-    }
-
-    // Mark the the router link as invalid.
-    typename PeerMap::iterator i = _peers.find(peerid);
-    PeerStateRef psr = i->second;
     psr->_router_links.clear();
+    psr->_router_links.insert(psr->_router_links.begin(),
+			      router_links.begin(), router_links.end());
 
     if (update_router_links(psr)) {
 	// publish the router LSA.
 	_queue.add(_router_lsa);
     }
-		   
+
     return true;
 }
 
@@ -237,7 +209,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 			    list<Lsa_header>& delayed_ack,
 			    bool backup, bool dr)
 {
-    debug_msg("PeerID %u NeighbourID %u %s backup %s dr %s\n", peerid, nid,
+    debug_msg("PeerID %u NeighbourID %u %s\nbackup %s dr %s\n", peerid, nid,
 	      pp_lsas(lsas).c_str(),
 	      backup ? "true" : "false",
 	      dr ? "true" : "false");

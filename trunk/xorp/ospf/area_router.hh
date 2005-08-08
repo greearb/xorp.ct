@@ -51,18 +51,9 @@ class AreaRouter {
     bool peer_down(PeerID peer);
 
     /**
-     * Add router link
-     *
-     * Advertise this router link.
+     * A new set of router links.
      */
-    bool add_router_link(PeerID peer, RouterLink& router_link);
-
-    /**
-     * Remove router link
-     *
-     * Stop advertising this router link.
-     */
-    bool remove_router_link(PeerID peer);
+    bool new_router_links(PeerID peer, const list<RouterLink>& router_link);
 
     /**
      * Add a network to be announced.
