@@ -709,10 +709,10 @@ class RouterLsa : public Lsa {
     size_t min_length() const {
 	switch(get_version()) {
 	case OspfTypes::V2:
-	    return 20;
+	    return 4;
 	    break;
 	case OspfTypes::V3:
-	    return 20;
+	    return 4;
 	    break;
 	}
 	XLOG_UNREACHABLE();
