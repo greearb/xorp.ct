@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.14 2005/06/01 09:34:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.15 2005/08/05 12:41:48 bms Exp $"
 
 
 //
@@ -128,6 +128,7 @@ Mld6igmpVif::query_timer_timeout()
     TimeVal interval;
 
     (void)ipaddr_zero;
+    (void)interval;
 
     if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
 	return;		// I am not the querier anymore. Ignore.
