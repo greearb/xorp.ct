@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.92 2005/04/10 06:23:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.93 2005/08/04 14:14:02 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1463,10 +1463,10 @@ BGPPeer::established()
 	_handler->peering_came_up();
     }
 
-    _in_updates = 0;
-    _out_updates = 0;
-    _in_total_messages = 0;
-    _out_total_messages = 0;
+//     _in_updates = 0;
+//     _out_updates = 0;
+//     _in_total_messages = 0;
+//     _out_total_messages = 0;
     _established_transitions++;
     _mainprocess->eventloop().current_time(_established_time);
     _mainprocess->eventloop().current_time(_in_update_time);
