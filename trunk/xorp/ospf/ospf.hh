@@ -69,6 +69,11 @@ struct OspfTypes {
     };
 
     /**
+     * The AreaID for the backbone area.
+     */
+    static const AreaID BACKBONE = 0;
+
+    /**
      * An opaque handle that identifies a neighbour.
      */
     typedef uint32_t NeighbourID;
