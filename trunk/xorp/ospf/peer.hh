@@ -282,7 +282,6 @@ class Peer {
     A get_interface_address() const { 
 	return _peerout.get_interface_address();
     }
-
     
     /**
      * Adress of the p2p neighbour.
