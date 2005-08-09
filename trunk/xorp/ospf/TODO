@@ -59,6 +59,15 @@ should get this information from the FEA.
 19) The delayed ACKs are not delayed. The peer should probably hold a
 delayed ack list that is transmitted ocassionally.
 
+20) Virtual links are currently handled incorrectly. Peers/interfaces
+are typed (BROADCAST, NBMA, PointToMultiPoint, PointToPoint, and
+VirtualLink). A Virtual Link should be an attribute of the Neighbour
+structure any type of interface can also have neighbours of virtual
+links (except PointToPoint). A simple way of handling the problem
+would be have the neighbour hold its own copy of the linktype which
+could include VirtualLink. Never allow peer to be created with a
+linktype of Virtual link.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
