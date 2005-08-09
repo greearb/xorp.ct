@@ -63,7 +63,7 @@ struct OspfTypes {
      * Area Type
      */
     enum AreaType {
-	BORDER,		// Area Border Router
+	BORDER,		// Border Area
 	STUB,		// Stub Area
 	NSSA,		// Not-So-Stubby Area
     };
