@@ -181,7 +181,8 @@ template <typename A>
 PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
 			    const A source,
-			    uint16_t  interface_mtu,
+			    uint16_t interface_prefix_length,
+			    uint16_t interface_mtu,
 			    OspfTypes::LinkType linktype, 
 			    OspfTypes::AreaID area)
     throw(BadPeer)
@@ -204,7 +205,8 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     // this interface/vif is unique.
 
     _peers[peerid] = new PeerOut<A>(_ospf, interface, vif, peerid,
-				    source, interface_mtu, linktype,
+				    source, interface_prefix_length,
+				    interface_mtu, linktype,
 				    area, area_router->get_area_type());
 
     // Pass in the option to be sent by the hello packet.
@@ -333,19 +335,6 @@ PeerManager<A>::on_link_state_request_list(const PeerID peerid,
     }
 
     return _peers[peerid]->on_link_state_request_list(area, nid, lsar);
-}
-
-template <typename A>
-bool 
-PeerManager<A>::set_network_mask(const PeerID peerid, OspfTypes::AreaID area, 
-				 uint32_t network_mask)
-{
-    if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
-	return false;
-    }
-
-    return _peers[peerid]->set_network_mask(area, network_mask);
 }
 
 template <typename A> 

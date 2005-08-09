@@ -131,22 +131,6 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 
 template <typename A>
 bool
-Ospf<A>::set_network_mask(const string& interface, const string& vif,
-			  OspfTypes::AreaID area, 
-			  uint32_t network_mask)
-{
-    try {
-	_peer_manager.set_network_mask(_peer_manager.get_peerid(interface,vif),
-				       area, network_mask);
-    } catch(BadPeer& e) {
-	XLOG_ERROR("%s", cstring(e));
-	return false;
-    }
-    return true;
-}
-
-template <typename A>
-bool
 Ospf<A>::set_interface_id(const string& interface, const string& vif,
 		      OspfTypes::AreaID area,
 		      uint32_t interface_id)

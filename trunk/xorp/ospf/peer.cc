@@ -23,6 +23,7 @@
 #include <list>
 #include <set>
 #include <queue>
+#include <typeinfo>
 
 #include "ospf_module.h"
 
@@ -47,14 +48,19 @@
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 		     const PeerID peerid,
-		     const A interface_address, const uint16_t interface_mtu,
+		     const A interface_address,
+		     const uint16_t interface_prefix_length,
+		     const uint16_t interface_mtu,
 		     OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 		     OspfTypes::AreaType area_type)
     : _ospf(ospf), _interface(interface), _vif(vif), _peerid(peerid),
-      _interface_address(interface_address), _interface_mtu(interface_mtu),
+      _interface_address(interface_address),
+      _interface_prefix_length(interface_prefix_length),
+      _interface_mtu(interface_mtu),
       _linktype(linktype), _running(false)
 {
-    _areas[area] = new Peer<A>(ospf, *this, area, area_type);
+    Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);
+    set_mask(peer);
 }
 
 template <typename A>
@@ -68,6 +74,17 @@ PeerOut<A>::~PeerOut()
 }
 
 template <typename A>
+void
+PeerOut<A>::set_mask(Peer<A> *peer)
+{
+    if (typeid(A) != typeid(IPv4))
+	return;
+    peer->
+	set_network_mask(ntohl(IPv4::make_prefix(get_interface_prefix_length())
+			       .addr()));
+}
+
+template <typename A>
 bool
 PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
 {
@@ -77,6 +94,7 @@ PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
     XLOG_ASSERT(OspfTypes::V3 == _ospf.get_version());
 
     Peer<A> *peer = _areas[area] = new Peer<A>(_ospf, *this, area, area_type);
+    set_mask(peer);
     if (_running)
 	peer->start();
 
@@ -241,18 +259,6 @@ PeerOut<A>::take_down_peering()
 	XLOG_ASSERT(area_router);
 	area_router->peer_down(_peerid);
     }
-}
-
-template <typename A>
-bool 
-PeerOut<A>::set_network_mask(OspfTypes::AreaID area, uint32_t network_mask)
-{
-    if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
-	return false;
-    }
-
-    return _areas[area]->set_network_mask(network_mask);
 }
 
 template <typename A> 

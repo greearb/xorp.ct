@@ -263,13 +263,6 @@ class Ospf {
     bool disable_interface_vif(const string& interface, const string& vif);
 
     /**
-     * Set the network mask OSPFv2 only.
-     */
-    bool set_network_mask(const string& interface, const string& vif,
-			  OspfTypes::AreaID area, 
-			  uint32_t network_mask);
-
-    /**
      * Set the interface ID OSPFv3 only.
      */
     bool set_interface_id(const string& interface, const string& vif,

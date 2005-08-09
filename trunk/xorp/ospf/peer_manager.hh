@@ -87,7 +87,8 @@ class PeerManager {
      * @return PeerID on success otherwise throw an exception.
      */
     PeerID create_peer(const string& interface, const string& vif,
-		       const A source, uint16_t interface_mtu,
+		       const A source, uint16_t interface_prefix_length,
+		       uint16_t interface_mtu,
 		       OspfTypes::LinkType linktype, OspfTypes::AreaID area)
 	throw(BadPeer);
 	
@@ -158,12 +159,6 @@ class PeerManager {
 				    Lsa::LsaRef lsar);
     
     // Configure the peering.
-
-    /**
-     * Set the network mask OSPFv2 only.
-     */
-    bool set_network_mask(const PeerID, OspfTypes::AreaID area, 
-			  uint32_t network_mask);
 
     /**
      * Set the interface ID OSPFv3 only.

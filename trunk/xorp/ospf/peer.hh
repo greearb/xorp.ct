@@ -40,7 +40,8 @@ class PeerOut {
 
     PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
 	    PeerID peerid,
-	    const A source, const uint16_t interface_mtu,
+	    const A source, const uint16_t prefix_length,
+	    const uint16_t interface_mtu,
 	    OspfTypes::LinkType linktype, OspfTypes::AreaID area,
 	    OspfTypes::AreaType area_type);
 
@@ -68,8 +69,7 @@ class PeerOut {
      * @return prefix length of this interface.
      */
     uint16_t get_interface_prefix_length() const {
-	XLOG_WARNING("TBD");
-	return 16;
+	return _interface_prefix_length;
     }
 
     /**
@@ -159,11 +159,6 @@ class PeerOut {
     // Configure the peering.
 
     /**
-     * Set the network mask OSPFv2 only.
-     */
-    bool set_network_mask(OspfTypes::AreaID area, uint32_t network_mask);
-
-    /**
      * Set the interface ID OSPFv3 only.
      */
     bool set_interface_id(OspfTypes::AreaID area, uint32_t interface_id);
@@ -196,6 +191,7 @@ class PeerOut {
     const string _vif;			// responsible for.
     const PeerID _peerid;		// The peers ID.
     const A _interface_address;		// Interface address.
+    const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
 
     OspfTypes::LinkType _linktype;	// Type of this link.
@@ -204,6 +200,11 @@ class PeerOut {
     map<OspfTypes::AreaID, Peer<A> *>  _areas; 
 
     bool _running;			// True if the peer is up and running
+
+    /**
+     * If this IPv4 then set the mask in the hello packet.
+     */
+    void PeerOut<A>::set_mask(Peer<A> *peer);
 
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are

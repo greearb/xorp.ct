@@ -289,6 +289,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     ospf.set_router_id(set_id("0.0.0.1"));
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
+    const uint16_t interface_prefix_length = 16;
     const uint16_t interface_mtu = 1500;
 
     // Create an area
@@ -311,22 +312,11 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    PeerID peerid = ospf.get_peer_manager().create_peer(interface, vif,
-							src,
-							interface_mtu,
-							OspfTypes::BROADCAST,
-							area);
-
-    switch(src.ip_version()) {
-    case 4:
-	ospf.get_peer_manager().set_network_mask(peerid, area, 0xffff0000);
-	break;
-    case 6:
-	break;
-    default:
-	XLOG_FATAL("Unknown IP version %d", src.ip_version());
-	break;
-    }
+    PeerID peerid = ospf.get_peer_manager().
+	create_peer(interface, vif, src, interface_prefix_length,
+		    interface_mtu,
+		    OspfTypes::BROADCAST,
+		    area);
 
     ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
     ospf.get_peer_manager().set_router_dead_interval(peerid, area,
@@ -372,6 +362,7 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_1.set_router_id(set_id("192.150.187.1"));
     ospf_2.set_router_id(set_id("192.150.187.2"));
 
+    const uint16_t interface_prefix_length = 16;
     const uint16_t interface_mtu = 1500;
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
@@ -400,26 +391,13 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     }
     
     PeerID peerid_1 = ospf_1.get_peer_manager().
-	create_peer(interface_1, vif_1, src_1, interface_mtu, 
+	create_peer(interface_1, vif_1, src_1, interface_prefix_length,
+		    interface_mtu, 
 		    OspfTypes::BROADCAST, area);
     PeerID peerid_2 = ospf_2.get_peer_manager().
-	create_peer(interface_2, vif_2, src_2, interface_mtu,
+	create_peer(interface_2, vif_2, src_2, interface_prefix_length,
+		    interface_mtu,
 		    OspfTypes::BROADCAST, area);
-
-    switch(src_1.ip_version()) {
-    case 4:
-	{
-	    uint32_t mask = 0xffff0000;
-	    ospf_1.get_peer_manager().set_network_mask(peerid_1, area, mask);
-	    ospf_2.get_peer_manager().set_network_mask(peerid_2, area, mask);
-	}
-	break;
-    case 6:
-	break;
-    default:
-	XLOG_FATAL("Unknown IP version %d", src_1.ip_version());
-	break;
-    }
 
     ospf_1.get_peer_manager().set_hello_interval(peerid_1, area,
 						 hello_interval);
