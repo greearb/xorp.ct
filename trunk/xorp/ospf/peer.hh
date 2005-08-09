@@ -284,6 +284,13 @@ class Peer {
     }
     
     /**
+     * @return prefix length of this interface.
+     */
+    uint16_t get_interface_prefix_length() const {
+	return _peerout.get_interface_prefix_length();
+    }
+
+    /**
      * Adress of the p2p neighbour.
      *
      * @return p2p neighbour address.
