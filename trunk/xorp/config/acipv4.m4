@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/acipv4.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
 dnl
 
 dnl
@@ -115,6 +115,19 @@ dummy += IGMPMSG_WHOLEPKT;
            [Define to 1 if you have IPv4 multicast routing])
  ipv4_multicast_routing=yes],
  AC_MSG_RESULT(no))
+
+dnl
+dnl XXX: For Linux, we hardcode the define, as a compile of the XORP
+dnl multicast routing protocols on Linux platforms will use multicast
+dnl header files from the XORP tree itself for consistency across
+dnl various Linux platforms.
+dnl
+case "${host_os}" in
+ linux* )
+   AC_DEFINE(HAVE_IPV4_MULTICAST_ROUTING, 1,
+             [Define to 1 if you have IPv4 multicast routing])
+ ;;
+esac
 
 dnl ---------------------------------------------------------------------------
 dnl IPv4 raw socket
