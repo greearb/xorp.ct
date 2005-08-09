@@ -224,6 +224,12 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
     
     list<Lsa::LsaRef>::const_iterator i;
     for (i = lsas.begin(); i != lsas.end(); i++) {
+	// These LSAs came over the wire they must not be self originating.
+	XLOG_ASSERT(!(*i)->get_self_originating());
+
+	// Record the creation time and initial age.
+	(*i)->record_creation_time(now);
+
 	// (1) Validate the LSA's LS checksum. 
 	// (2) Check that the LSA's LS type is known.
 	// Both checks already performed in the packet/LSA decoding process.
@@ -301,7 +307,6 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 		add_lsa((*i));
 	    else
 		update_lsa((*i), index);
-
 	    routing_add(*i, NOMATCH != search);
 	    
 	    // (e) Possibly acknowledge this LSA.
@@ -466,10 +471,23 @@ typename AreaRouter<A>::LsaSearch
 AreaRouter<A>::compare_lsa(const Lsa_header& candidate,
 			   const Lsa_header& current) const
 {
-    if (current.get_ls_sequence_number() > candidate.get_ls_sequence_number())
-	return OLDER;
-    if (current.get_ls_sequence_number() < candidate.get_ls_sequence_number())
-	return NEWER;
+    debug_msg("router id: %s\n", pr_id(_ospf.get_router_id()).c_str());
+    debug_msg("\ncandidate: %s\ncurrent: %s\n", cstring(candidate),
+	      cstring(current));
+
+    const uint32_t candidate_seqno = candidate.get_ls_sequence_number();
+    const uint32_t current_seqno = current.get_ls_sequence_number();
+
+    if (current_seqno != candidate_seqno) {
+	if (OspfTypes::InitialSequenceNumber == candidate_seqno)
+	    return OLDER;
+	if (OspfTypes::InitialSequenceNumber == current_seqno)
+	    return NEWER;
+	if (current_seqno > candidate_seqno)
+	    return OLDER;
+	if (current_seqno < candidate_seqno)
+	    return NEWER;
+    }
 
     if (current.get_ls_checksum() > candidate.get_ls_checksum())
 	return OLDER;
@@ -815,6 +833,11 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 {
     // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
+    debug_msg("lsar: %s\noriginated: %s index: %d\n", cstring((*lsar)),
+	   lsa_exists ? "true" : "false", index);
+    if (lsa_exists)
+	debug_msg("database copy: %s\n", cstring((*_db[index])));
+
     bool originated = lsa_exists;
     if (!originated) {
 	if (lsar->get_header().get_advertising_router() ==
@@ -834,6 +857,9 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 
     if (!originated)
 	return false;
+
+    debug_msg("router id: %s\n", pr_id(_ospf.get_router_id()).c_str());
+    debug_msg("self originated: %s\n", cstring((*lsar)));
 
     // If we got this far this is a self-originated LSA that needs to
     // be removed from the wild.
