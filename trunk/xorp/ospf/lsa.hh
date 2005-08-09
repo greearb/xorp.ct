@@ -207,7 +207,8 @@ class Lsa {
      * decoded. The buffer is just being stored.
      */
     Lsa(OspfTypes::Version version, uint8_t *buf, size_t len)
-	:  _header(version), _version(version)
+	:  _header(version), _version(version), _valid(true),
+	   _self_originating(false),  _initial_age(0), _transmitted(false)
     {
 	_pkt.resize(len);
 	memcpy(&_pkt[0], buf, len);
