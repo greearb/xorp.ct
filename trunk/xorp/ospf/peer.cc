@@ -325,7 +325,42 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
 	      cstring(*packet));
 
-    XLOG_WARNING("TBD - Check this packet");
+    // RFC 2328 Section 8.2. Receiving protocol packets
+
+    // As the packet has reached this far a bunch of the tests have
+    // already been performed.
+
+    if (dst != get_interface_address() &&
+	dst != A::OSPFIGP_ROUTERS() &&
+	dst != A::OSPFIGP_DESIGNATED_ROUTERS()) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "Destination address not acceptable %s\n%s",
+		   cstring(dst), cstring(*packet));
+	return false;
+    }
+
+    if (src == get_interface_address() &&
+	(dst == A::OSPFIGP_ROUTERS() ||
+	 dst == A::OSPFIGP_DESIGNATED_ROUTERS())) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Dropping self originated packet %s\n%s",
+		       cstring(src), cstring(*packet));
+	return false;
+    }
+
+    switch(_peerout.get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+	
+	break;
+    case OspfTypes::VirtualLink:
+	// A peer can never be configured as a virtual link.
+	XLOG_UNREACHABLE();
+	break;
+    case OspfTypes::PointToPoint:
+	break;
+    }
 
     HelloPacket *hello;
     DataDescriptionPacket *dd;
