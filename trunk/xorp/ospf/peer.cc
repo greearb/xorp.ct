@@ -724,7 +724,18 @@ Peer<A>::process_link_state_acknowledgement_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsap));
 
-    XLOG_WARNING("TBD");
+    Neighbour<A> *n = find_neighbour(src, lsap);
+
+    if (0 == n) {
+	XLOG_TRACE(_ospf.trace()._input_errors,
+		   "No matching neighbour found source %s %s",
+		   cstring(src),
+		   cstring(*lsap));
+	
+	return false;
+    }
+
+    n->link_state_acknowledgement_received(lsap);
     
     return false;	// Never keep a copy of the packet.
 }
@@ -2860,22 +2871,73 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     list<Lsa_header>::iterator j;
 
     for (i = lsas.begin(); i != lsas.end(); i++) {
-	Lsa_header& lsah = (*i)->get_header();
 	for (j = _ls_request_list.begin(); j != _ls_request_list.end(); j++) {
-	    if (j->get_ls_type() != (*i)->get_ls_type())
-		continue;
-
-	    if (j->get_link_state_id() != lsah.get_link_state_id())
-		continue;
-
-	    if (j->get_advertising_router() != lsah.get_advertising_router())
-		continue;
-	    _ls_request_list.erase(j);
-	    break;
+	    if ((*j) == (*i)->get_header()) {
+		_ls_request_list.erase(j);
+		break;
+	    }
 	}
     }
     if (_ls_request_list.empty())
 	event_loading_done();
+}
+
+template <typename A>
+void
+Neighbour<A>::
+link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
+{
+    const char *event_name = "LinkStateAcknowledgementReceived-pseudo-event";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s> %s\n",
+	      pr_id(get_candidate_id()).c_str(),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str(),
+	      cstring(*lsap));
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+	// Ignore
+	return;
+    case Exchange:
+    case Loading:
+    case Full:
+	break;
+    }
+
+    // Find the LSA on the retransmission list.
+    // 1) Remove the NACK state.
+    // 2) Remove from the retransmisson list.
+
+    list<Lsa_header>& headers = lsap->get_lsa_headers();
+    list<Lsa_header>::iterator i;
+    list<Lsa::LsaRef>::iterator j;
+    for (i = headers.begin(); i != headers.end(); i++) {
+	bool found = false;
+	for (j = _lsa_rxmt.begin(); j != _lsa_rxmt.end(); j++) {
+	    if ((*i) == (*j)->get_header()) {
+		found = true;
+		(*j)->remove_nack(get_neighbour_id());
+		_lsa_rxmt.erase(j);
+		break;
+	    }
+	}
+	if (!found) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Ack for LSA not in retransmission list.%s\n%s",
+		       cstring(*i), cstring(*lsap));
+	}
+    }
 }
 
 template <typename A>
@@ -2897,19 +2959,10 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     case Exchange:
     case Loading: {
 	// (b) See if this LSA is on the link state request list.
-	list<Lsa_header>::iterator i;
 	Lsa_header& lsah = lsar->get_header();
-	for(i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
-	    if (i->get_ls_type() != lsar->get_ls_type())
-		continue;
-
-	    if (i->get_link_state_id() != lsah.get_link_state_id())
-		continue;
-
-	    if (i->get_advertising_router() != lsah.get_advertising_router())
-		continue;
-	    break;
-	}
+	list<Lsa_header>::iterator i = find(_ls_request_list.begin(),
+					    _ls_request_list.end(),
+					    lsah);
 	if (i != _ls_request_list.end()) {
 	    switch(get_area_router()->compare_lsa(lsah, *i)) {
 	    case AreaRouter<A>::NOMATCH:
@@ -3042,20 +3095,11 @@ template <typename A>
 bool
 Neighbour<A>::on_link_state_request_list(Lsa::LsaRef lsar) const
 {
-    list<Lsa_header>::const_iterator i;
-    Lsa_header& lsah = lsar->get_header();
-    for(i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
-	if (i->get_ls_type() != lsar->get_ls_type())
-	    continue;
-	
-	if (i->get_link_state_id() != lsah.get_link_state_id())
-	    continue;
-
-	if (i->get_advertising_router() != lsah.get_advertising_router())
-	    continue;
+    if (_ls_request_list.end() != find(_ls_request_list.begin(),
+				       _ls_request_list.end(),
+				       lsar->get_header()))
 	return true;
-    }
-    
+				       
     return false;
 }
 

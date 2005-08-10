@@ -807,6 +807,9 @@ class Neighbour {
 
     void link_state_update_received(LinkStateUpdatePacket *lsup);
 
+    void link_state_acknowledgement_received(LinkStateAcknowledgementPacket
+					     *lsap);
+
     /**
      * Queue an LSA for transmission.
      *

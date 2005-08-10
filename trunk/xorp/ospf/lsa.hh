@@ -185,6 +185,33 @@ class Lsa_header {
 };
 
 /**
+ * Compare the three fields that make an LSA equivalent.
+ *
+ *   RFC 2328 Section 12.1.  The LSA Header:
+ *
+ *	"The LSA header contains the LS type, Link State ID and
+ *	Advertising Router fields.  The combination of these three
+ *	fields uniquely identifies the LSA."
+ */
+inline
+bool
+operator==(const Lsa_header& lhs, const Lsa_header& rhs)
+{
+    // We could check for lhs == rhs this will be such a rare
+    // occurence why bother.
+    if (lhs.get_ls_type() != rhs.get_ls_type())
+	return false;
+
+    if (lhs.get_link_state_id() != rhs.get_link_state_id())
+	return false;
+
+    if (lhs.get_advertising_router() != rhs.get_advertising_router())
+	return false;
+
+    return true;
+}
+
+/**
  * Link State Advertisement (LSA)
  *
  * A generic LSA. All actual LSAs should be derived from this LSA.
@@ -383,6 +410,14 @@ class Lsa {
      */
     bool exists_nack(OspfTypes::NeighbourID nid) {
 	return _nack_list.end() != _nack_list.find(nid);
+    }
+
+    /**
+     * If the NACK list is empty return true. All of the neighbours
+     * have now nacked this LSA.
+     */
+    bool empty_nack() const {
+	return _nack_list.empty();
     }
 
     /**
