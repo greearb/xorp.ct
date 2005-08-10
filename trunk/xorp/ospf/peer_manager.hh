@@ -199,6 +199,12 @@ class PeerManager {
     bool set_router_dead_interval(const PeerID, OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
 
+    /**
+     * Set interface cost
+     */
+    bool set_interface_cost(const PeerID, OspfTypes::AreaID area,
+			    uint16_t interface_cost);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     

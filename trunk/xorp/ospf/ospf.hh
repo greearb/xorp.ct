@@ -298,6 +298,13 @@ class Ospf {
     bool set_router_dead_interval(const string& interface, const string& vif,
 				  OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
+
+    /**
+     * Set the interface cost.
+     */
+    bool set_interface_cost(const string& interface, const string& vif,
+			    OspfTypes::AreaID area,
+			    uint16_t interaface_cost);
     
     /**
      * XXX

@@ -31,9 +31,6 @@ are told them just create the neighbour structures and we should be
 done. Need to be careful that we don't destroy the neighbour
 structures when the timers expire.
 
-14) Provide a mechanism to set the interface cost. Checkout
-get_interface_cost().
-
 15) I think the age needs to have the link cost added to it as well as
 updating the time.
 
@@ -99,5 +96,10 @@ types are valid. This method should be used by data_description_received.
 
 13) Provide a mechanism to set the interface prefix length. Checkout
 get_interface_prefix_length().
+
+[DONE]
+
+14) Provide a mechanism to set the interface cost. Checkout
+get_interface_cost().
 
 [DONE]

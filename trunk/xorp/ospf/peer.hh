@@ -83,8 +83,7 @@ class PeerOut {
      * @return cost of this interface.
      */
     uint16_t get_interface_cost() const {
-	XLOG_WARNING("TBD");
-	return 1;
+	return _interface_cost;
     }
 
     /**
@@ -184,6 +183,15 @@ class PeerOut {
     bool set_router_dead_interval(OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
 
+    
+    /**
+     * Set the interface cost.
+     */
+    bool set_interface_cost(uint16_t interface_cost) {
+	_interface_cost = interface_cost;
+	return true;
+    }
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
@@ -193,6 +201,7 @@ class PeerOut {
     const A _interface_address;		// Interface address.
     const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
+    uint16_t _interface_cost;		// Cost of this interface.
 
     OspfTypes::LinkType _linktype;	// Type of this link.
 

@@ -57,6 +57,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _interface_address(interface_address),
       _interface_prefix_length(interface_prefix_length),
       _interface_mtu(interface_mtu),
+      _interface_cost(1), // Must be greater than 0.
       _linktype(linktype), _running(false)
 {
     Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);

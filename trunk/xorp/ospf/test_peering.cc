@@ -291,6 +291,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     OspfTypes::AreaID area = set_id("128.16.64.16");
     const uint16_t interface_prefix_length = 16;
     const uint16_t interface_mtu = 1500;
+    const uint16_t interface_cost = 10;
 
     // Create an area
     ospf.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
@@ -321,6 +322,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
     ospf.get_peer_manager().set_router_dead_interval(peerid, area,
 						     4 * hello_interval);
+    ospf.get_peer_manager().set_interface_cost(peerid, area, interface_cost);
 
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
@@ -364,6 +366,7 @@ two_peers(TestInfo& info, OspfTypes::Version version)
 
     const uint16_t interface_prefix_length = 16;
     const uint16_t interface_mtu = 1500;
+    const uint16_t interface_cost = 10;
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
 
@@ -403,10 +406,14 @@ two_peers(TestInfo& info, OspfTypes::Version version)
 						 hello_interval);
     ospf_1.get_peer_manager().set_router_dead_interval(peerid_1, area,
 						       4 * hello_interval);
+    ospf_1.get_peer_manager().set_interface_cost(peerid_1, area,
+						 interface_cost);
     ospf_2.get_peer_manager().set_hello_interval(peerid_2, area,
 						 hello_interval);
     ospf_2.get_peer_manager().set_router_dead_interval(peerid_2, area,
 						       4 * hello_interval);
+    ospf_2.get_peer_manager().set_interface_cost(peerid_2, area,
+						 interface_cost);
 
     EmulateSubnet<A> emu(info);
 

@@ -132,8 +132,8 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 template <typename A>
 bool
 Ospf<A>::set_interface_id(const string& interface, const string& vif,
-		      OspfTypes::AreaID area,
-		      uint32_t interface_id)
+			  OspfTypes::AreaID area,
+			  uint32_t interface_id)
 {
     try {
 	_peer_manager.set_interface_id(_peer_manager.get_peerid(interface,vif),
@@ -148,8 +148,8 @@ Ospf<A>::set_interface_id(const string& interface, const string& vif,
 template <typename A>
 bool
 Ospf<A>::set_hello_interval(const string& interface, const string& vif,
-		   OspfTypes::AreaID area,
-		   uint16_t hello_interval)
+			    OspfTypes::AreaID area,
+			    uint16_t hello_interval)
 {
     try {
 	_peer_manager.set_hello_interval(_peer_manager.
@@ -166,8 +166,8 @@ Ospf<A>::set_hello_interval(const string& interface, const string& vif,
 template <typename A>
 bool 
 Ospf<A>::set_options(const string& interface, const string& vif,
-	    OspfTypes::AreaID area,
-	    uint32_t options)
+		     OspfTypes::AreaID area,
+		     uint32_t options)
 {
     try {
 	_peer_manager.set_options(_peer_manager.get_peerid(interface, vif),
@@ -183,8 +183,8 @@ Ospf<A>::set_options(const string& interface, const string& vif,
 template <typename A>
 bool
 Ospf<A>::set_router_priority(const string& interface, const string& vif,
-		    OspfTypes::AreaID area,
-		    uint8_t priority)
+			     OspfTypes::AreaID area,
+			     uint8_t priority)
 {
     try {
 	_peer_manager.set_router_priority(_peer_manager.
@@ -207,6 +207,23 @@ Ospf<A>::set_router_dead_interval(const string& interface, const string& vif,
 	_peer_manager.set_router_dead_interval(_peer_manager.
 					       get_peerid(interface,vif),
 					       area, router_dead_interval);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::set_interface_cost(const string& interface, const string& vif,
+			    OspfTypes::AreaID area,
+			    uint16_t interface_cost)
+{
+    try {
+	_peer_manager.set_interface_cost(_peer_manager.
+					 get_peerid(interface,vif),
+					 area, interface_cost);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
