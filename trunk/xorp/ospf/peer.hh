@@ -203,7 +203,7 @@ class PeerOut {
     const uint16_t _interface_mtu;	// MTU of this interface.
     uint16_t _interface_cost;		// Cost of this interface.
 
-    OspfTypes::LinkType _linktype;	// Type of this link.
+    const OspfTypes::LinkType _linktype;	// Type of this link.
 
 					//  Areas being served.
     map<OspfTypes::AreaID, Peer<A> *>  _areas; 
@@ -509,7 +509,9 @@ class Peer {
     /**
      * @return the link type.
      */
-    OspfTypes::LinkType get_linktype() const { return _peerout.get_linktype();}
+    OspfTypes::LinkType get_linktype() const {
+	return _peerout.get_linktype();
+    }
 
 #if	0
     /**
@@ -725,10 +727,12 @@ class Neighbour {
      */
     Neighbour(Ospf<A>& ospf, Peer<A>& peer, OspfTypes::RouterID router_id,
 	      A neighbour_address, OspfTypes::NeighbourID neighbourid,
+	      OspfTypes::LinkType linktype, 
 	      State state = Init)
 	: _ospf(ospf), _peer(peer), _router_id(router_id),
 	  _neighbour_address(neighbour_address),
 	  _neighbourid(neighbourid),
+	  _linktype(linktype),
 	  _state(state), _hello_packet(0),
 	  _last_dd(ospf.get_version()),
 	  _data_description_packet(ospf.get_version()),
@@ -836,6 +840,11 @@ class Neighbour {
     bool on_link_state_request_list(Lsa::LsaRef lsar) const;
 
     /**
+     * @return the link type.
+     */
+    OspfTypes::LinkType get_linktype() const { return _linktype; }
+
+    /**
      * Send acknowledgement.
      *
      * @param ack list of acknowledgements.
@@ -860,6 +869,8 @@ class Neighbour {
     const OspfTypes::RouterID _router_id;// Neighbour's RouterID.
     const A _neighbour_address;		// Neighbour's address.
     const OspfTypes::NeighbourID _neighbourid;	// The neighbours ID.
+    const OspfTypes::LinkType _linktype;	// Type of this link.
+
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
 					// from this neighbour.

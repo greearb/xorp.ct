@@ -60,6 +60,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _interface_cost(1), // Must be greater than 0.
       _linktype(linktype), _running(false)
 {
+    XLOG_ASSERT(OspfTypes::VirtualLink != linktype);
     Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);
     set_mask(peer);
 }
@@ -360,7 +361,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     }
 
     const uint16_t plen = get_interface_prefix_length();
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
@@ -536,7 +537,7 @@ Neighbour<A> *
 Peer<A>::find_neighbour(A src, Packet *packet)
 {
     typename list<Neighbour<A> *>::iterator n;
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
@@ -580,8 +581,8 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     // Check the network masks - OSPFv2 only.
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
-	if (OspfTypes::PointToPoint == _peerout.get_linktype() ||
-	    OspfTypes::VirtualLink == _peerout.get_linktype())
+	if (OspfTypes::PointToPoint == get_linktype() ||
+	    OspfTypes::VirtualLink == get_linktype())
 	    break;
 	if (_hello_packet.get_network_mask() !=
 	    hello->get_network_mask()) {
@@ -629,7 +630,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
-			     Neighbour<A>::_ticket++);
+			     Neighbour<A>::_ticket++, get_linktype());
 	_neighbours.push_back(n);
     }
 
@@ -768,7 +769,7 @@ Peer<A>::event_interface_up()
 
     XLOG_ASSERT(Down == _interface_state);
 
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	_interface_state = Point2Point;
 	break;
@@ -1068,7 +1069,7 @@ Peer<A>::send_hello_packet()
 
     SimpleTransmit<A> *transmit;
 
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	XLOG_UNFINISHED();
 	break;
@@ -1280,7 +1281,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	_interface_state = DR_other;
 
     // Step(6)
-    if(OspfTypes::NBMA ==_peerout.get_linktype())
+    if(OspfTypes::NBMA == get_linktype())
 	XLOG_UNFINISHED();
 	
 
@@ -1323,7 +1324,7 @@ Peer<A>::update_router_links()
     debug_msg("Interface(%s) State(%s) Linktype(%s)\n",
 	      get_if_name().c_str(),
 	      pp_interface_state(get_state()).c_str(),
-	      pp_link_type(_peerout.get_linktype()).c_str());
+	      pp_link_type(get_linktype()).c_str());
 
     OspfTypes::Version version = _ospf.get_version();
 
@@ -1462,7 +1463,7 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 	break;
     }
     
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	router_link.set_type(RouterLink::p2p);
 	router_link.set_link_id(ntohl(get_interface_address().addr()));
@@ -1586,7 +1587,7 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
     router_link.set_interface_id(get_interface_id());
     router_link.set_metric(_peerout.get_interface_cost());
 
-    switch(_peerout.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint: {
 	// Find the neighbour. If the neighbour is fully adjacent then
 	// configure a router link.
@@ -1856,7 +1857,7 @@ Neighbour<A>::establish_adjacency_p() const
 {
     bool become_adjacent = false;
 
-    switch(_peer.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
 	// The router itself is the Designated Router
@@ -2137,7 +2138,7 @@ Neighbour<A>::send_data_description_packet()
 
     SimpleTransmit<A> *transmit;
 
-    switch(_peer.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
@@ -2197,7 +2198,7 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
 
     SimpleTransmit<A> *transmit;
 
-    switch(_peer.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
@@ -2237,7 +2238,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
 
     SimpleTransmit<A> *transmit;
 
-    switch(_peer.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	transmit = new SimpleTransmit<A>(pkt,
 					 A::OSPFIGP_ROUTERS(), 
@@ -2291,7 +2292,7 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
 					 _peer.get_interface_address());
     } else {
 
-	switch(_peer.get_linktype()) {
+	switch(get_linktype()) {
 	case OspfTypes::PointToPoint:
 	    transmit = new SimpleTransmit<A>(pkt,
 					     A::OSPFIGP_ROUTERS(), 
@@ -2429,7 +2430,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     } else  if(is_bdr != was_bdr)
 	_peer.schedule_event("NeighbourChange");
 
-    if (OspfTypes::NBMA ==_peer.get_linktype())
+    if (OspfTypes::NBMA == get_linktype())
 	XLOG_WARNING("TBD");
 }
 
@@ -2482,7 +2483,7 @@ Neighbour<A>::event_2_way_received()
 	XLOG_WARNING("Unhandled state %s", pp_state(get_state()).c_str());
 	break;
     case Attempt:
-	XLOG_ASSERT(_peer.get_linktype() == OspfTypes::NBMA);
+	XLOG_ASSERT(get_linktype() == OspfTypes::NBMA);
 	break;
     case Init:
 	if (establish_adjacency_p()) {
@@ -3022,7 +3023,7 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     // (5) This LSA should be flooded now. If it hasn't already been
     // multicast out of this peer/inteface.
 
-    switch(_peer.get_linktype()) {
+    switch(get_linktype()) {
     case OspfTypes::BROADCAST:
 	if (multicast_on_peer)
 	    return true;
