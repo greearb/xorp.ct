@@ -68,6 +68,8 @@ backbone checks.
 
 22) Perform authentication.
 
+23) In peer.cc "_peer.schedule_event("BackupSeen")" is an event that
+is not understood by process_scheduled_events().
 
 Possible issues
 ~~~~~~~~~~~~~~~
