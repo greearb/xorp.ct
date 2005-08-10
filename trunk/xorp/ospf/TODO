@@ -62,6 +62,13 @@ would be have the neighbour hold its own copy of the linktype which
 could include VirtualLink. Never allow peer to be created with a
 linktype of Virtual link.
 
+21) When the support for Virtual links is added make sure the RFC 2328
+secction 8.2, receiving protocol packets covers the virtual link
+backbone checks.
+
+22) Perform authentication.
+
+
 Possible issues
 ~~~~~~~~~~~~~~~
 

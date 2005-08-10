@@ -329,6 +329,10 @@ template <typename A>
 bool
 Peer<A>::receive(A dst, A src, Packet *packet)
 {
+    // Please note that the return status from this method determines
+    // if the packet is freed. A return status of false means free the
+    // packet it hasn't been stored.
+
     debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
 	      cstring(*packet));
 
@@ -355,19 +359,48 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	return false;
     }
 
+    const uint16_t plen = get_interface_prefix_length();
     switch(_peerout.get_linktype()) {
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
-	
+	if (IPNet<A>(get_interface_address(), plen) != IPNet<A>(src, plen)) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Dropping packet from foreign network %s\n",
+		       cstring(IPNet<A>(src, plen)));
+	    
+	    return false;
+	}
 	break;
     case OspfTypes::VirtualLink:
 	// A peer can never be configured as a virtual link.
+	// The virtual link checks will be performed later in the
+	// neighbour code..
 	XLOG_UNREACHABLE();
 	break;
     case OspfTypes::PointToPoint:
 	break;
     }
+
+    if (dst == A::OSPFIGP_DESIGNATED_ROUTERS()) {
+	switch(get_state()) {
+	case Peer<A>::Down:
+	case Peer<A>::Loopback:
+	case Peer<A>::Waiting:
+	case Peer<A>::Point2Point:
+	case Peer<A>::DR_other:
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+	       "Must be in state DR or backup to receive ALLDRouters\n");
+	    return false;
+	    break;
+	case Peer<A>::Backup:
+	    break;
+	case Peer<A>::DR:
+	    break;
+	}
+    }
+
+    // XXX - Authenticate packet here.
 
     HelloPacket *hello;
     DataDescriptionPacket *dd;
