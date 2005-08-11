@@ -1299,7 +1299,9 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 
     // Step(7)
     // Need to send AdjOK to all neighbours that are least 2-Way.
-    XLOG_WARNING("TBD - Send AdjOK");
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if (Neighbour<A>::TwoWay <= (*n)->get_state())
+	    (*n)->event_adj_ok();
 }
 
 #if	0
@@ -3350,6 +3352,46 @@ Neighbour<A>::event_kill_neighbour()
     case Loading:
     case Full:
 	change_state(Down);
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_adj_ok()
+{
+    const char *event_name = "AdjOK?";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      pr_id(get_candidate_id()).c_str(),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    switch(get_state()) {
+    case Down:
+    case Attempt:
+    case Init:
+	// Nothing
+	break;
+    case TwoWay:
+	if (establish_adjacency_p()) {
+	    change_state(ExStart);
+
+	    start_sending_data_description_packets(event_name);
+	}
+	break;
+    case ExStart:
+    case Exchange:
+    case Loading:
+    case Full:
+	if (!establish_adjacency_p())
+	    change_state(TwoWay);
 	break;
     }
 }
