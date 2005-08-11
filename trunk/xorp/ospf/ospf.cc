@@ -230,6 +230,28 @@ Ospf<A>::set_interface_cost(const string& interface, const string& vif,
     }
     return true;
 }
+
+template <typename A>
+bool
+Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
+			   OspfTypes::AreaID area,
+			   uint16_t inftransdelay)
+{
+    if (0 == inftransdelay) {
+	XLOG_ERROR("Zero is not a legal value for inftransdelay");
+	return false;
+    }
+
+    try {
+	_peer_manager.set_inftransdelay(_peer_manager.
+					get_peerid(interface,vif),
+					area, inftransdelay);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
     
 template <typename A>
 bool

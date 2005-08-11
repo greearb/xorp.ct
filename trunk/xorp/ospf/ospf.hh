@@ -305,7 +305,14 @@ class Ospf {
     bool set_interface_cost(const string& interface, const string& vif,
 			    OspfTypes::AreaID area,
 			    uint16_t interaface_cost);
-    
+
+    /**
+     * Set InfTransDelay
+     */
+    bool set_inftransdelay(const string& interface, const string& vif,
+			   OspfTypes::AreaID area,
+			   uint16_t inftransdelay);
+
     /**
      * XXX
      * Be sure to capture the multipath capability of OSPF.

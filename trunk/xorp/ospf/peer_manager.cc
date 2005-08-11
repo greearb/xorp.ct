@@ -441,5 +441,19 @@ PeerManager<A>::set_interface_cost(const PeerID peerid,
     return _peers[peerid]->set_interface_cost(interface_cost);
 }
 
+template <typename A>
+bool
+PeerManager<A>::set_inftransdelay(const PeerID peerid, 
+				   OspfTypes::AreaID /*area*/,
+				   uint16_t inftransdelay)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_inftransdelay(inftransdelay);
+}
+
 template class PeerManager<IPv4>;
 template class PeerManager<IPv6>;

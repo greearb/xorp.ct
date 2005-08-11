@@ -87,6 +87,13 @@ class PeerOut {
     }
 
     /**
+     * @return InfTransDelay
+     */
+    uint16_t get_inftransdelay() const {
+	return _inftransdelay;
+    }
+
+    /**
      * Add another Area for this peer to be in, should only be allowed
      * for OSPFv3.
      */
@@ -183,12 +190,19 @@ class PeerOut {
     bool set_router_dead_interval(OspfTypes::AreaID area,
 				  uint32_t router_dead_interval);
 
-    
     /**
      * Set the interface cost.
      */
     bool set_interface_cost(uint16_t interface_cost) {
 	_interface_cost = interface_cost;
+	return true;
+    }
+
+    /**
+     * Set InfTransDelay
+     */
+    bool set_inftransdelay(uint16_t inftransdelay) {
+	_inftransdelay = inftransdelay;
 	return true;
     }
 
@@ -202,6 +216,7 @@ class PeerOut {
     const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
     uint16_t _interface_cost;		// Cost of this interface.
+    uint16_t _inftransdelay;		// InfTransDelay.
 
     const OspfTypes::LinkType _linktype;	// Type of this link.
 
@@ -318,6 +333,13 @@ class Peer {
      */
     uint16_t get_interface_mtu() const {
 	return _peerout.get_interface_mtu();
+    }
+
+    /**
+     * @return InfTransDelay
+     */
+    uint16_t get_inftransdelay() const {
+	return _peerout.get_inftransdelay();
     }
 
     /**

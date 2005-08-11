@@ -205,6 +205,12 @@ class PeerManager {
     bool set_interface_cost(const PeerID, OspfTypes::AreaID area,
 			    uint16_t interface_cost);
 
+    /**
+     * Set InfTransDelay
+     */
+    bool set_inftransdelay(const PeerID, OspfTypes::AreaID area,
+			   uint16_t inftransdelay);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     

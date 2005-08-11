@@ -58,6 +58,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _interface_prefix_length(interface_prefix_length),
       _interface_mtu(interface_mtu),
       _interface_cost(1), // Must be greater than 0.
+      _inftransdelay(1),  // Must be greater than 0.
       _linktype(linktype), _running(false)
 {
     XLOG_ASSERT(OspfTypes::VirtualLink != linktype);
