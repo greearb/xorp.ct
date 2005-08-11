@@ -2490,7 +2490,6 @@ Neighbour<A>::event_2_way_received()
 	       _peer.get_if_name().c_str(),
 	       pr_id(get_candidate_id()).c_str(),
 	       pp_state(get_state()).c_str());
-    XLOG_WARNING("TBD");
 
     switch(get_state()) {
     case Down:
