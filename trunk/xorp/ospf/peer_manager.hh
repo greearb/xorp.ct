@@ -211,6 +211,31 @@ class PeerManager {
     bool set_inftransdelay(const PeerID, OspfTypes::AreaID area,
 			   uint16_t inftransdelay);
 
+    /**
+     * Number of areas this router serves.
+     */
+    size_t number_of_areas() const { return _areas.size(); }
+
+    /**
+     * Is this an internal router?
+     */
+    bool internal_router_p() const;
+
+    /**
+     * Is this an area border router?
+     */
+    bool area_border_router_p() const;
+
+    /**
+     * Is this a backbone router?
+     */
+    bool backbone_router_p() const;
+
+    /**
+     * Is this an AS boundary router?
+     */
+    bool as_boundary_router_p() const;
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     

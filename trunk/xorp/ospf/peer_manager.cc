@@ -455,5 +455,43 @@ PeerManager<A>::set_inftransdelay(const PeerID peerid,
     return _peers[peerid]->set_inftransdelay(inftransdelay);
 }
 
+template <typename A>
+bool
+PeerManager<A>::internal_router_p() const
+{
+    // True if are connected to only one area.
+    return 1 == _areas.size() ? true : false;
+}
+
+template <typename A>
+bool
+PeerManager<A>::area_border_router_p() const
+{
+    // True if this router is connected to multiple areas..
+    return 1 < _areas.size() ? true : false;
+}
+
+const OspfTypes::AreaID BACKBONE = OspfTypes::BACKBONE;
+
+template <typename A>
+bool
+PeerManager<A>::backbone_router_p() const
+{
+    // True if one of the areas the router is connected to is the
+    // backbone area.
+    // XXX - The line below should be OspfTypes::BACKBONE the gcc34
+    // compiler rejected this hence the local declaration.
+    return 1 == _areas.count(BACKBONE) ? true : false;
+}
+
+template <typename A>
+bool
+PeerManager<A>::as_boundary_router_p() const
+{
+    // XXX - By definition, we don't yet have a way of redisting
+    // routes from another protocol.
+    return false;
+}
+
 template class PeerManager<IPv4>;
 template class PeerManager<IPv6>;

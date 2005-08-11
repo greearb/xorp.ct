@@ -14,16 +14,7 @@ in the standard header decode code.
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
 
-8) Constructor for the AreaRouter should take all the information to
-fill in the Router LSA.
-
 9) Figure out under what conditions the E-bit should be set.
-
-10) Section 3.3 Classification of routers. Add an OSPF enumeration for the
-four classifications. Note that the classifications are
-overlapping. Add four predicate methods to the peer manager that will
-return the status of the router. For example if the router is only
-configured with one area internal_router_p will return true.
 
 12) Point 2 Point and Point 2 Multipoint.
 When coding this we will need to be told neigbour addresses. When we
@@ -119,4 +110,15 @@ updating the time.
 
 [Done. When marshaling a link state update packet InfTransDelay is
 added to the age field of each LSA that is being carried].
+
+8) Constructor for the AreaRouter should take all the information to
+fill in the Router LSA.
+
+[Wrong]
+
+10) Section 3.3 Classification of routers. Add an OSPF enumeration for the
+four classifications. Note that the classifications are
+overlapping. Add four predicate methods to the peer manager that will
+return the status of the router. For example if the router is only
+configured with one area internal_router_p will return true.
 
