@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.3 2005/03/25 02:52:47 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.4 2005/07/22 01:20:11 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
@@ -52,6 +52,20 @@ public:
      */
     void push_routes(list<const PeerTableInfo<A>*>& peer_list);
 
+    /*
+     * Need to keep track what is going on with dump iterators which peers go
+     * down and up
+     */
+    void peering_went_down(const PeerHandler *peer, uint32_t genid,
+                           BGPRouteTable<A> *caller);
+
+    void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+                               BGPRouteTable<A> *caller);
+
+    void peering_came_up(const PeerHandler *peer, uint32_t genid,
+                         BGPRouteTable<A> *caller);
+
+private:
     /**
      * Dump the next route.
      */
@@ -66,6 +80,13 @@ public:
      * Do a background route dump
      */
     void do_background_dump();
+
+    /**
+     * Check whether a policy push is occuring 
+     *
+     * @return true if routes are being pushed
+     */
+    bool pushing_routes();
 
 private:
     EventLoop&		eventloop();

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.3 2005/03/25 02:52:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.4 2005/07/22 01:20:11 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,6 +118,46 @@ PolicyTableSourceMatch<A>::do_background_dump()
 		    new_oneoff_after_ms(0,
 		     callback(this,
 			      &PolicyTableSourceMatch<A>::do_background_dump));
+}
+
+template<class A>
+void
+PolicyTableSourceMatch<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
+                                BGPRouteTable<A> *caller)
+{
+    if (pushing_routes())
+        _dump_iter->peering_went_down(peer, genid);
+    
+    BGPRouteTable<A>::peering_went_down(peer, genid, caller);
+}
+
+template<class A>
+void
+PolicyTableSourceMatch<A>::peering_down_complete(const PeerHandler *peer, uint32_t genid,
+                                    BGPRouteTable<A> *caller)
+{
+    if (pushing_routes())
+	_dump_iter->peering_down_complete(peer, genid);
+    
+    BGPRouteTable<A>::peering_down_complete(peer, genid, caller);
+}
+
+template<class A>
+void
+PolicyTableSourceMatch<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
+                              BGPRouteTable<A> *caller)
+{       
+    if (pushing_routes())
+	_dump_iter->peering_came_up(peer, genid);
+
+    BGPRouteTable<A>::peering_came_up(peer, genid, caller);
+}
+
+template<class A>
+bool
+PolicyTableSourceMatch<A>::pushing_routes()
+{
+    return _pushing_routes;
 }
 
 template class PolicyTableSourceMatch<IPv4>;
