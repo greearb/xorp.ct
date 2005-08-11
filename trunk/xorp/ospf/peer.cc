@@ -940,7 +940,19 @@ Peer<A>::event_interface_down()
     tear_down_state();
     update_router_links();
 
-    XLOG_WARNING("TBD - KillNbr");
+    typename list<Neighbour<A> *>::iterator n = _neighbours.begin();
+    while (n != _neighbours.end()) {
+	(*n)->event_kill_neighbour();
+	// The assumption here is that only a linktype of BROADCAST
+	// can have been dynamically created. So its acceptable to
+	// delete it.
+	if (OspfTypes::BROADCAST == (*n)->get_linktype()) {
+	    delete (*n);
+	    _neighbours.erase(n++);
+	} else {
+	    n++;
+	}
+    }
 }
 
 template <typename A>
@@ -3306,6 +3318,38 @@ Neighbour<A>::event_loading_done()
 	XLOG_WARNING("TBD - If this is the DR generate a Network-LSA");
 	break;
     case Full:
+	break;
+    }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_kill_neighbour()
+{
+    const char *event_name = "KillNbr";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      pr_id(get_candidate_id()).c_str(),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    switch(get_state()) {
+    case Down:
+	break;
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+    case Exchange:
+    case Loading:
+    case Full:
+	change_state(Down);
 	break;
     }
 }

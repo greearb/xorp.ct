@@ -857,6 +857,8 @@ class Neighbour {
      */
     bool send_ack(list<Lsa_header>& ack, bool direct, bool& multicast_on_peer);
 
+    void event_kill_neighbour();
+
     /**
      * Pretty print the neighbour state.
      */
