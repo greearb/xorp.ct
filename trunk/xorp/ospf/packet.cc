@@ -813,6 +813,12 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
 bool
 LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 {
+    return encode(pkt, 0 /* inftransdelay */);
+}
+
+bool
+LinkStateUpdatePacket::encode(vector<uint8_t>& pkt, uint16_t inftransdelay)
+{
     size_t header_offset = get_standard_header_length();
     size_t offset = header_offset;
     // Make a pass over all the LSAs to compute the total length of
@@ -851,6 +857,7 @@ LinkStateUpdatePacket::encode(vector<uint8_t>& pkt)
 	uint8_t *lsa_ptr;
 	lsa_ptr = (*i)->lsa(lsa_len);
 	memcpy(&ptr[offset], lsa_ptr, lsa_len);
+	Lsa::update_age_inftransdelay(&ptr[offset], inftransdelay);
 	offset += lsa_len;
     }
     

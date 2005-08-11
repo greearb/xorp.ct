@@ -2249,7 +2249,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
     _peer.populate_common_header(lsup);
     
     vector<uint8_t> pkt;
-    lsup.encode(pkt);
+    lsup.encode(pkt, _peer.get_inftransdelay());
 
     SimpleTransmit<A> *transmit;
 

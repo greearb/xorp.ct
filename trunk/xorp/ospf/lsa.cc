@@ -174,17 +174,40 @@ Lsa_header::str() const
     return output;
 }
 
+inline
+uint16_t
+add_age(uint16_t current, uint16_t delta)
+{
+    uint16_t age = current + delta;
+
+    // The largest acceptable age for an LSA is MaxAge.
+    return age < OspfTypes::MaxAge ? age : OspfTypes::MaxAge;
+}
+
 void
 Lsa::update_age(TimeVal now)
 {
     // Compute the new age value based on the current time.
     TimeVal tdiff = now - _creation;
-    uint16_t age = _initial_age + tdiff.sec();
-
-    // The largest acceptable age for an LSA is MaxAge.
-    age = age < OspfTypes::MaxAge ? age : OspfTypes::MaxAge;
+    uint16_t age = add_age(_initial_age, tdiff.sec());
 
     set_ls_age(age);
+}
+
+void
+Lsa::update_age_inftransdelay(uint8_t *ptr, uint16_t inftransdelay)
+{
+    uint16_t age;
+    
+    age = extract_16(ptr);
+
+    debug_msg("Current age %u\n", age);
+
+    age = add_age(age, inftransdelay);
+
+    debug_msg("Age with InfTransDelay added %u\n", age);
+
+    embed_16(&ptr[0], age);
 }
 
 void

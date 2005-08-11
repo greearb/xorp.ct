@@ -363,6 +363,8 @@ class Lsa {
      */
     void update_age(TimeVal now);
 
+    static void update_age_inftransdelay(uint8_t *ptr, uint16_t inftransdelay);
+
     /**
      * Set the age to MaxAge.
      */

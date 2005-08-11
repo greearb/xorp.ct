@@ -552,6 +552,15 @@ class LinkStateUpdatePacket : public Packet {
      */
     bool encode(vector<uint8_t>& pkt);
 
+    /**
+     * Encode the packet.
+     *
+     * @param pkt vector into which the packet should be placed.
+     * @param inftransdelay add this delay to the age field of each LSA.
+     * @return true if the encoding succeeded.
+     */
+    bool encode(vector<uint8_t>& pkt, uint16_t inftransdelay);
+
     list<Lsa::LsaRef>& get_lsas() {
 	return _lsas;
     }
