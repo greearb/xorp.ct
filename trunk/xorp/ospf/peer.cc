@@ -3051,7 +3051,8 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 	break;
     }
 
-    XLOG_WARNING("TBD increment LSA's LS age by InfTransDelay");
+    // Increment LSA's LS age by InfTransDelay performed in
+    // send_link_state_update_packet.
 
     _lsa_queue.push_back(lsar);
 
