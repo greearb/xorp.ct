@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.52 2005/08/03 13:12:03 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.53 2005/08/03 13:52:34 zec Exp $ */
 
 protocols {
     bgp {
@@ -67,11 +67,6 @@ policy {
 		localpref: u32range;
             }
 	    to {
-		protocol: txt;
-
-		network4: ipv4net;
-		network6: ipv6net;
-	    
 		nexthop4: ipv4range;
 		nexthop6: ipv6range;
 
@@ -408,20 +403,6 @@ policy {
             } /* from */
 
 	    to {
-		protocol {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
-		network4 {
-			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
-		network6 {
-			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
-			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
-		}
 		nexthop4 {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";

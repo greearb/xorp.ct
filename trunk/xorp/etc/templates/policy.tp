@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.12 2005/07/27 07:00:33 zec Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.13 2005/08/03 13:52:34 zec Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -71,10 +71,12 @@ policy {
                 }
 
                 network4 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
                     %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
                 network6 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
                 }
@@ -102,10 +104,12 @@ policy {
 
 	    to {
                 network4 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
                     %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
                 }
                 network6 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
                     %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
                 }
