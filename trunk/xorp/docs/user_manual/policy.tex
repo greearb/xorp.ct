@@ -1,5 +1,5 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.1 2005/08/12 12:19:39 abittau Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -24,9 +24,10 @@ routing protocol.  Only routes which have won the decision process (i.e. the
 ones used in the forwarding plane) will be considered by export filters.
 \end{description}
 
-Normally policies will operate within a single routing protocol, such as setting
-the MED on all BGP routes.  If a policy involves two different protocols, then
-{\em route redistribution} will occur ``implicitly''.
+Normally policies will operate within a single routing protocol, for example  a
+policy which sets the MED on all BGP routes (only BGP is involved).  If a policy
+involves two different protocols, then {\em route redistribution} will occur
+``implicitly''.
 
 \section{Policy Statement}
 A {\em policy statement} is the user definition for a policy.  Internally, it
@@ -72,8 +73,8 @@ the type of policy, within a protocol block.  For example:
 xx\=xx\=xx\=xx\=xx\=\kill
 protocol \{\\
 \>bgp \{\\
-\>\>export "policy1,policy2,\ldots"\\
-\>\>import "drop\_bad"\\
+\>\>export: "policy1,policy2,\ldots"\\
+\>\>import: "drop\_bad"\\
 \>\} \\
 \}
 \end{tabbing} 
@@ -88,8 +89,8 @@ one will cause an accept or reject.
 
 \subsection{Term}
 A term is the heart of the policy execution.  It specifies how to match routes
-as they enter the system, as they are about to leave destination and ultimately
-which actions to perform on them.  The structure of a term is as follows:
+as they enter the system, as they are about to leave and ultimately what
+actions to perform on them.  The structure of a term is as follows:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -124,12 +125,12 @@ the route in case of a match.
 
 \subsubsection{Match Conditions}
 The overall structure of a match condition is: {\em variable}, {\em operator},
-{\em argument}.  A variable is a route attribute such as metric, prefix, nexthop
-and so on.  The operator will specify {\em how} this variable is matched.  For
-example $<$ will perform a less-than match whereas $>$ will perform a
-greater-than operation.  The argument will be the value against which the
-variable is matched.  The overall result is a {\em logical and} with the result
-of each statement. An example would be as follows:
+{\em argument}.  A variable is a route attribute such as metric, prefix,
+next-hop and so on.  The operator will specify {\em how} this variable is
+matched.  For example {\tt $<$} may perform a less-than match whereas {\tt $>$}
+may perform a greater-than operation.  The argument will be the value against
+which the variable is matched.  The overall result is a {\em logical and} with
+the result of each statement. An example would be as follows:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -158,15 +159,15 @@ for {\tt $==$} when matching (in {\tt from} and {\tt to} blocks) which simply
 means equality.
 
 \subsubsection{Actions}
-Actions have a similar syntax to match conditions.  All actions are performed
-sequentially. The main exception is that operators will normally be assignment
-and that special {\em commands} exist.  These commands are namely {\tt accept}
-and {\tt reject}.  If a route is accepted, no further terms will be executed and
-the route will be propagated downstream.  If a route is rejected, again no
-further terms will run, and the route will {\em not} be propagated
-downstream---it will be suppressed and dropped.  Depending on whether it is an
-export or import filter, reject will have different semantics.  On export it
-will not be advertised and on import it will never be used at all.  
+All actions are performed sequentially and have a similar syntax to match
+conditions. The main difference with respect to match conditions is that the
+operator will normally be assignment and that special {\em commands} exist.
+These commands are {\tt accept} and {\tt reject}.  If a route is accepted, no
+further terms will be executed and the route will be propagated downstream.  If
+a route is rejected, once again no further terms will run, and the route will {\em
+not} be propagated downstream---it will be suppressed and dropped.  Depending on
+whether it is an export or import filter, reject will have different semantics.
+On export it will not be advertised and on import it will never be used at all.  
 
 Here is an example of the syntax used when specifying actions:
 
@@ -206,9 +207,9 @@ hit.
 
 \section{Sets}
 Many times it is useful to match against a set of values.  For example it is
-more practical to reference a set of prefixes to match against which may be used
-in different policies rather than enumerating the prefixes one by one in each
-policy.  This is achieved via sets which contain un-ordered items and no
+more practical to reference a set of prefixes to match against, which may also
+be used in different policies rather than enumerating the prefixes one by one in
+each policy.  This is achieved via sets which contain un-ordered items and no
 duplicates.  Sets are declared as follows:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -262,9 +263,10 @@ policy \{\\
 
 This policy will match when the route is 10.0.0.0/8 or 192.168.0.0/16.  In this
 case the match needs to satisfy only one element of the set.  This is not always
-the case.  If a set (such as BGP communities) were matched against a set the
-user specifies, depending on the operator, different semantics would apply.  For
-example the sets must be equal, or one has to be the subset of the other and so
+the case.  If a route attribute which actually {\em is} a set (such as BGP
+communities) was matched against a set the user specifies, depending on the
+operator, different semantics would apply.  For example an operator may check
+that the sets are equal, or that one has to be the subset of the other and so
 on.  Obviously in this case each route has a single prefix so the only
 reasonable match would be to check whether that prefix is in the set or not.
 
@@ -275,7 +277,7 @@ is not a requirement.
 \section{Tracing}
 It is often useful to trace routes going through filters in order to debug
 policies.  Another utility of this would be to log specific routes or simply to
-monitor routes flowing through XORP.  This functionality if given via policy
+monitor routes flowing throughout XORP.  This functionality is achieved via policy
 tracing.
 
 In order to trace a particular term simply assign an integer to the {\tt trace}
@@ -300,7 +302,7 @@ then \{\\
 
 Assuming this is a BGP import policy, this term would cause all routes learnt
 from the BGP peer 10.0.0.1 to be logged verbosely.  Currently there is no useful
-meaning associated with the integral verbosity level, although 1 normally
+meaning associated with the integral verbosity level although 1 normally
 indicates a single line of log whereas 3 is the most noisy.
 
 Note that only terms which match may be traced---else the {\tt then} block which
@@ -310,14 +312,14 @@ tracing.  This may be necessary if {\em all} routes need to be monitored.
 
 \section{Route Redistribution}
 Route redistribution is a mechanism for advertising routes learnt via a
-different protocol.  An example would be to advertise some static routes with
-BGP.  Or possibly some BGP routes with OSPF and so on.  The key is that the {\tt
-from} block of a term will be matched in the protocol which {\em received} the
-route whereas the {\tt to} block will be matched in the protocol which is {\em
-advertising} the route (doing the redistribution).  Thus, route redistribution
-will always be an export policy---the protocol exporting (advertising) is the
-one redistributing.  All actions (such as changing the metric) will occur in the
-protocol doing the redistribution.  
+different protocol.  An example would be to advertise some static routes using
+BGP.  Another possibility is advertising BGP routes using OSPF and so on.  The
+key is that the {\tt from} block of a term will be matched in the protocol which
+{\em received} the route whereas the {\tt to} block will be matched in the
+protocol which is {\em advertising} the route (doing the redistribution).
+Route redistribution will always be an export policy---the protocol exporting
+(advertising) is the one redistributing.  All actions (such as changing the
+metric) will occur in the protocol doing the redistribution.  
 
 Here is an example:
 
@@ -362,7 +364,7 @@ are advertised to the BGP peer 10.0.0.1, the MED will be set to 13.
 
 Note that this policy will cause all static routes with metric of 2 to be
 advertised to {\em all} BGP peers---not only 10.0.0.1.  This policy does two
-things: it sets up the route redistribution, and further more changes the med
+things: it sets up the route redistribution, and further more changes the MED 
 for a specific peer on those routes.  Other peers will receive the static routes
 with the default MED value.  
 
@@ -397,8 +399,10 @@ the route.\\
 {\tt network6-list} & {\tt :} & network6-list & Matches if the IPv6 set contains
 the route.\\
 \hline
-{\tt prefix4-length} & {\tt :} & u32range & XXX \\
-{\tt prefix6-length} & {\tt :} & u32range & XXX \\
+{\tt prefix4-length} & {\tt :} & u32range & Matches if the IPv4 route has a
+prefix length within the specified range. \\
+{\tt prefix6-length} & {\tt :} & u32range & Matches if the IPv6 route has a
+prefix length within the specified range. \\
 \end{tabular}
 \caption{\label{policy_common_match_from}Common match conditions in the {\tt from}
 block for all protocols}
@@ -409,8 +413,8 @@ semantics as the {\tt from} block except for one case.  It is illegal to specify
 the protocol in the {\tt to} block.  The reason for this is that when a policy
 is bound to a protocol via the {\tt export} or {\tt import} statement, that
 protocol automatically becomes the one referenced in the {\tt to} block.  When a
-BGP export policy is created, the {\tt to} must be BGP by definition as it is
-doing the advertisement.
+BGP export policy is created, the {\tt to} must be BGP by definition as {\em it}
+is doing the advertisement.
 
 \subsection{Actions}
 Common actions to all protocols are summarized in
@@ -436,14 +440,15 @@ Currently 1 means a single line of logging and 3 is the most verbose level. \\
 BGP supports policy and route redistribution.  It can be used both as a source
 for redistribution (BGP-to-something) and as a target (something-to-BGP).  The
 following sections summarize which aspects of BGP routes may be matched and what
-actions may be taken.
+actions may be taken. These are also specified in the {\tt bgp.tp} template file.
 
 The BGP policy engine currently has an interesting feature / bug.  An export
-filter is placed on the RIB too.  Thus, if an export policy rejects all routes,
-the RIB will never receive these routes and no routes will go in the kernel.  To
-avoid this, match {\tt neighbor 0.0.0.0} in the {\tt to} block and {\tt accept}.
-The next term could match all and reject.  This ``feature'' is actually useful
-if you want a BGP peering but do not wish to change the routing table.
+filter is placed on the RIB branch too.  Thus, if an export policy rejects all
+routes, the RIB will never receive these routes and no routes will go into the
+forwarding plane.  To avoid this, match {\tt neighbor: 0.0.0.0} in the {\tt to}
+block and {\tt accept}.  The next term could match all and reject.  This
+``feature'' is actually useful if you want a BGP peering but do not wish to
+change the routing table.
 
 \subsection{Match Conditions}
 Table~\ref{policy_bgp_match} summarizes the match conditions specific to BGP.
@@ -452,25 +457,30 @@ Table~\ref{policy_bgp_match} summarizes the match conditions specific to BGP.
 \begin{tabular}{l|c|c|p{7cm}}
 Variable & Operator & Argument type & Semantics \\
 \hline
-{\tt nexthop4} & {\tt :} & ipv4range & XXX \\
-{\tt nexhtop6} & {\tt :} & ipv6range & XXX \\
+{\tt nexthop4} & {\tt :} & ipv4range & Matches if the IPv4 next-hop of the route
+lies within the specified range.\\
+{\tt nexhtop6} & {\tt :} & ipv6range & Matches if the IPv6 next-hop of the route
+lies within the specified range. \\
 \hline
 {\tt as-path} & {\tt :} & txt & Matches an AS-Path with a regular expression. \\
 {\tt as-path-list} & {\tt :} & as-path-list & If the set contains a regular
 expression which matches an AS-Path, then the term matches. \\
 \hline
-{\tt community} & {\tt :} & txt & XXX \\
-{\tt community-list} & {\tt :} & community-list & XXX \\
+{\tt community} & {\tt :} & txt & Matches against the specified community. \\
+{\tt community-list} & {\tt :} & community-list & If the set contains a
+community which matches, then the term matches. \\
 \hline
-{\tt neighbor} & {\tt :} & ipv4range & XXX (matches who the route was learnt
-from / its going to) \\
+{\tt neighbor} & {\tt :} & ipv4range & In a {\tt from} block it matches whether
+the route was learnt from a BGP peer in the specified range.  In a {\tt to}
+block it matches whether the route is about to be advertised to a BGP peer in
+the specified range. \\
 \hline
-{\tt origin} & {\tt :} & u32 & Matches the origin attribute of the route (0,1,2)
-XXX \\
+{\tt origin} & {\tt :} & u32 & Matches the origin attribute of the route. 0
+stands for IGP, 1 for EGP and 2 for INCOMPLETE.  \\
 \hline
 {\tt med} & {\tt :} & u32 & Matches the MED of the route. \\
 \hline
-{\tt localpref} & {\tt :} & u32 & Matches the localpref of the route. \\
+{\tt localpref} & {\tt :} & u32 & Matches the local preference of the route. \\
 \end{tabular}
 \caption{\label{policy_bgp_match}BGP specific match conditions.}
 \end{table}
@@ -497,7 +507,7 @@ specified number of times. \\
 \hline
 {\tt origin} & {\tt :} & u32 & Sets the origin. \\
 \hline
-{\tt med} & {\tt :} & u32 & Sets the med. \\
+{\tt med} & {\tt :} & u32 & Sets the MED. \\
 \hline
 {\tt localpref} & {\tt :} & u32 & Sets the localpref. \\
 \end{tabular}
@@ -508,12 +518,13 @@ specified number of times. \\
 Static routes support policy and may be used as a source for route
 redistribution.  The only extra attribute which may be matched on a static route
 is {\tt metric} which takes an integer as an argument.  It matches the metric of
-the route.
+the route.  The {\tt static\_routes.tp} template file specifies the route
+attributes specific to static routes.
 
 \section{RIP}
 RIP supports policy and may be used as a source and target for route
-redistribution in principle.  Currently it is not enabled, although it should
-work (only changed in .tp files should be required).
+redistribution in principle.  Currently it is not enabled although it should
+work (only changes in rip$[$ng$]$.tp files should be required).
 
 \section{Examples}
 Some common policies are presented in this section for a better understanding of
@@ -532,11 +543,11 @@ policy \{\\
 \>\>\>\}\\
 \>\>\} \\
 \>\} \\
-\}
+\}\\
 \\
 protocols \{\\
 \>bgp \{\\
-\>\>export: "medout"
+\>\>export: "medout"\\
 \>\}\\
 \}\\
 \end{tabbing} 
@@ -544,12 +555,12 @@ protocols \{\\
 \end{minipage}
 }
 
-This will cause all routes leaving BGP to have a med of 42.  The whole decision
-process is unaffected as routes come in with their original med.  
+This will cause all routes leaving BGP to have a MED of 42.  The whole decision
+process is unaffected as routes come in with their original MED.  
 
 If this were used as an import policy, then routes flowing into the decision
-process would have a modified med.  It is also possible that advertised routes
-as a consequence will have a med of 42, even though it is used as an import
+process would have a modified MED.  As a consequence, it is also possible that
+the advertised routes will have a MED of 42, even though it is used as an import
 policy.
 
 Here is a more complicated example:
@@ -611,10 +622,10 @@ protocols \{\\
 In this example, all static routes are redistributed to BGP.  The BGP peer
 10.0.0.1 will receive all of them with a MED of 1.  
 
-For some reason, static routes with metric 7 are important and they are
-advertised to 10.0.0.2 with MED of 7 and are also logged.  Note that 10.0.0.1
-will receive these static routes with a MED of 1, even if they had a metric of
-7.
+For some reason, static routes with a metric of 7 are important and they are
+advertised to the BGP peer 10.0.0.2 with a MED of 7 and are also logged.  Note
+that 10.0.0.1 will receive these static routes with a MED of 1, even if they had
+a metric of 7.
 
 Finally, all static routes which are now in BGP are dropped on the export path.
 All other BGP peers will not receive any of the static routes.
