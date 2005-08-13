@@ -158,7 +158,8 @@ Lsa_header::str() const
 
     switch(get_version()) {
     case OspfTypes::V2:
-	output += c_format(" Options %#x", get_options());
+	output += c_format(" Options %#x %s", get_options(),
+			   cstring(Options(get_version(), get_options())));
 	break;
     case OspfTypes::V3:
 	break;
@@ -670,7 +671,8 @@ RouterLsa::str() const
 	// # links, don't bother to store this info.
 	break;
     case OspfTypes::V3:
-	output += c_format("\n\tOptions %#x", get_options());
+	output += c_format("\n\tOptions %#x %s", get_options(),
+			   cstring(Options(get_version(), get_options())));
 	break;
     }
 
@@ -832,7 +834,8 @@ NetworkLsa::str() const
 	break;
     case OspfTypes::V3:
 	XLOG_ASSERT(nms.begin() == nms.end());
-	output += c_format("\n\tOptions %#x", get_options());
+	output += c_format("\n\tOptions %#x %s", get_options(),
+			   cstring(Options(get_version(), get_options())));
 	break;
     }
 
