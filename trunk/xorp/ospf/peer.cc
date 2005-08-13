@@ -1324,7 +1324,6 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     if(OspfTypes::NBMA == get_linktype())
 	XLOG_UNFINISHED();
 	
-
     // Step(7)
     // Need to send AdjOK to all neighbours that are least 2-Way.
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
@@ -1708,6 +1707,15 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 
 template <typename A>
 void
+Peer<A>::generate_network_lsa()
+{
+    XLOG_ASSERT(OspfTypes::BROADCAST == get_linktype() ||
+		OspfTypes::NBMA == get_linktype());
+    XLOG_WARNING("TBD - This is the DR generate a Network-LSA");
+}
+
+template <typename A>
+void
 Peer<A>::tear_down_state()
 {
     _hello_timer.clear();
@@ -1921,12 +1929,32 @@ Neighbour<A>::establish_adjacency_p() const
 
 template <typename A>
 bool
-Neighbour<A>::is_DR_or_BDR() const
+Neighbour<A>::is_DR() const
 {
     if (_peer.get_candidate_id() == _peer.get_designated_router())
 	return true;
 
+    return false;
+}
+
+template <typename A>
+bool
+Neighbour<A>::is_BDR() const
+{
     if (_peer.get_candidate_id() == _peer.get_backup_designated_router())
+	return true;
+
+    return false;
+}
+
+template <typename A>
+bool
+Neighbour<A>::is_DR_or_BDR() const
+{
+    if (is_DR())
+	return true;
+
+    if (is_BDR())
 	return true;
 
     return false;
@@ -3345,7 +3373,17 @@ Neighbour<A>::event_loading_done()
     case Loading:
 	change_state(Full);
 	_peer.update_router_links();
-	XLOG_WARNING("TBD - If this is the DR generate a Network-LSA");
+	switch(get_linktype()) {
+	case OspfTypes::BROADCAST:
+	case OspfTypes::NBMA:
+	    if (is_DR())
+		_peer.generate_network_lsa();
+	    break;
+	case OspfTypes::PointToMultiPoint:
+	case OspfTypes::VirtualLink:
+	case OspfTypes::PointToPoint:
+	    break;
+    }
 	break;
     case Full:
 	break;

@@ -650,6 +650,13 @@ class Peer {
      */
     void update_router_links();
 
+    /**
+     * This router is the designated router for this peer.
+     * The linktype is BROADCAST or NBMA.
+     * Generate a netork-LSA.
+     */
+    void generate_network_lsa();
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -947,6 +954,16 @@ class Neighbour {
      * @return true if an adjacency should be established with this neighbour
      */
     bool establish_adjacency_p() const;
+
+    /**
+     * @return true if this router is the DR.
+     */
+    bool is_DR() const;
+
+    /**
+     * @return true if this router is the BDR.
+     */
+    bool is_BDR() const;
 
     /**
      * @return true if this router is the DR or BDR.
