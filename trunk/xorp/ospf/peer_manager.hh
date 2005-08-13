@@ -158,6 +158,33 @@ class PeerManager {
 				    const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar);
     
+    /**
+     * Are any of neighbours of this area a virtual link endpoint.
+     *
+     * @return true if any are.
+     */
+    bool virtual_link_endpoint(OspfTypes::AreaID area) const;
+
+    /**
+     * Is this an internal router?
+     */
+    bool internal_router_p() const;
+
+    /**
+     * Is this an area border router?
+     */
+    bool area_border_router_p() const;
+
+    /**
+     * Is this a backbone router?
+     */
+    bool backbone_router_p() const;
+
+    /**
+     * Is this an AS boundary router?
+     */
+    bool as_boundary_router_p() const;
+
     // Configure the peering.
 
     /**
@@ -171,7 +198,6 @@ class PeerManager {
      */
     bool set_hello_interval(const PeerID, OspfTypes::AreaID area,
 			    uint16_t hello_interval);
-
 #if	0
     /**
      * Set options.
@@ -215,26 +241,6 @@ class PeerManager {
      * Number of areas this router serves.
      */
     size_t number_of_areas() const { return _areas.size(); }
-
-    /**
-     * Is this an internal router?
-     */
-    bool internal_router_p() const;
-
-    /**
-     * Is this an area border router?
-     */
-    bool area_border_router_p() const;
-
-    /**
-     * Is this a backbone router?
-     */
-    bool backbone_router_p() const;
-
-    /**
-     * Is this an AS boundary router?
-     */
-    bool as_boundary_router_p() const;
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.

@@ -79,8 +79,7 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 	return false;
     }
 
-    _areas[area] = new AreaRouter<A>(_ospf, area, area_type,
-				     compute_options(area_type));
+    _areas[area] = new AreaRouter<A>(_ospf, area, area_type);
     
     return true;
 }
@@ -315,7 +314,7 @@ PeerManager<A>::known_interface_address(const A address) const
     // with the FEA.
 
     typename map<PeerID, PeerOut<A> *>::const_iterator i;
-    for(i = _peers.begin(); i != _peers.end();)
+    for(i = _peers.begin(); i != _peers.end(); i++)
 	if ((*i).second->get_interface_address() == address) 
 	    return true;
 
@@ -335,6 +334,18 @@ PeerManager<A>::on_link_state_request_list(const PeerID peerid,
     }
 
     return _peers[peerid]->on_link_state_request_list(area, nid, lsar);
+}
+
+template <typename A>
+bool
+PeerManager<A>::virtual_link_endpoint(OspfTypes::AreaID area) const
+{
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++)
+	if ((*i).second->virtual_link_endpoint(area)) 
+	    return true;
+
+    return false;
 }
 
 template <typename A> 
