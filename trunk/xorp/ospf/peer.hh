@@ -158,6 +158,13 @@ class PeerOut {
 				    Lsa::LsaRef lsar);
     
     /**
+     * Are any of neighbours of this peer a virtual link endpoint.
+     *
+     * @return true if any are.
+     */
+    bool virtual_link_endpoint(OspfTypes::AreaID area);
+
+    /**
      * @return the link type.
      */
     OspfTypes::LinkType get_linktype() const { return _linktype; }
@@ -380,6 +387,13 @@ class Peer {
      */
     bool on_link_state_request_list(const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar) const;
+
+    /**
+     * Are any of neighbours of this peer a virtual link endpoint.
+     *
+     * @return true if any are.
+     */
+    bool virtual_link_endpoint() const;
 
     /**
      * Send direct ACKs

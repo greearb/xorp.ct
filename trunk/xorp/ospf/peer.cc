@@ -230,6 +230,21 @@ PeerOut<A>::on_link_state_request_list(OspfTypes::AreaID area,
 }
 
 template <typename A>
+bool 
+PeerOut<A>::virtual_link_endpoint(OspfTypes::AreaID area)
+{
+    // The caller is asking all peers, it has no knowledge of the peer
+    // to area bindings. Hence it is not an error to be asked about an
+    // area this peer is not in.
+    if (0 == _areas.count(area)) {
+//  	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->virtual_link_endpoint();
+}
+
+template <typename A>
 void
 PeerOut<A>::bring_up_peering()
 {
@@ -470,6 +485,18 @@ Peer<A>::on_link_state_request_list(const OspfTypes::NeighbourID nid,
 	    return (*n)->on_link_state_request_list(lsar);
 
     XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
+bool 
+Peer<A>::virtual_link_endpoint() const
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if (OspfTypes::VirtualLink == (*n)->get_linktype())
+	    return true;
 
     return false;
 }
