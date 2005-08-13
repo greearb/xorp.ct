@@ -28,7 +28,7 @@ template <typename A>
 class AreaRouter {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
-	       OspfTypes::AreaType area_type, uint32_t options);
+	       OspfTypes::AreaType area_type);
 
     /**
      * Add peer
@@ -69,6 +69,15 @@ class AreaRouter {
      * @return the type of this area.
      */
     OspfTypes::AreaType get_area_type() const { return _area_type; }
+
+    /**
+     * Get the options that are sent in hello packets, data
+     * description packets, LSA headers (OSPFv2),  Router-LSAs
+     * (OSPFv3) and Network-LSAs (OSPFv3).
+     */
+    uint32_t get_options() {
+	return _ospf.get_peer_manager().compute_options(get_area_type());
+    }
 
     /**
      * Receive LSAs
@@ -176,7 +185,6 @@ class AreaRouter {
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
-    const uint32_t _options;		// Options that we are sending.
 
     Spt<Vertex> _spt;			// SPT computation unit.
 

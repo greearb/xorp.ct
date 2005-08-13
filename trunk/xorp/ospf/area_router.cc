@@ -49,8 +49,8 @@
 
 template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
-			  OspfTypes::AreaType area_type, uint32_t options) 
-    : _ospf(ospf), _area(area), _area_type(area_type), _options(options),
+			  OspfTypes::AreaType area_type) 
+    : _ospf(ospf), _area(area), _area_type(area_type),
       _last_entry(0), _allocated_entries(0), _readers(0),
       _queue(ospf.get_eventloop(),
 			  OspfTypes::MinLSInterval,
@@ -64,15 +64,6 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     rlsa->record_creation_time(now);
 
     Lsa_header& header = rlsa->get_header();
-
-    switch (ospf.get_version()) {
-    case OspfTypes::V2:
-	header.set_options(_options);
-	break;
-    case OspfTypes::V3:
-	rlsa->set_options(_options);
-	break;
-    }
     
     // This is a router LSA so the link state ID is the Router ID.
     header.set_link_state_id(_ospf.get_router_id());
@@ -678,7 +669,19 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
     if (empty && router_lsa->get_router_links().empty())
 	return false;
 
-    XLOG_WARNING("TBD: Set/Unset V,E and B bits");
+    PeerManager<A>& pm = _ospf.get_peer_manager();
+    router_lsa->set_v_bit(pm.virtual_link_endpoint(_area));
+    router_lsa->set_e_bit(pm.as_boundary_router_p());
+    router_lsa->set_b_bit(pm.area_border_router_p());
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	router_lsa->get_header().set_options(get_options());
+	break;
+    case OspfTypes::V3:
+	router_lsa->set_options(get_options());
+	break;
+    }
 
     // A new router LSA should have been generated before MaxAge was hit.
     XLOG_ASSERT(router_lsa->get_header().get_ls_age() != OspfTypes::MaxAge);

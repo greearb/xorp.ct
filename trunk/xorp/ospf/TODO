@@ -14,8 +14,6 @@ in the standard header decode code.
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
 
-9) Figure out under what conditions the E-bit should be set.
-
 12) Point 2 Point and Point 2 Multipoint.
 When coding this we will need to be told neigbour addresses. When we
 are told them just create the neighbour structures and we should be
@@ -40,15 +38,6 @@ should get this information from the FEA.
 
 19) The delayed ACKs are not delayed. The peer should probably hold a
 delayed ack list that is transmitted ocassionally.
-
-20) Virtual links are currently handled incorrectly. Peers/interfaces
-are typed (BROADCAST, NBMA, PointToMultiPoint, PointToPoint, and
-VirtualLink). A Virtual Link should be an attribute of the Neighbour
-structure any type of interface can also have neighbours of virtual
-links (except PointToPoint). A simple way of handling the problem
-would be have the neighbour hold its own copy of the linktype which
-could include VirtualLink. Never allow peer to be created with a
-linktype of Virtual link.
 
 21) When the support for Virtual links is added make sure the RFC 2328
 secction 8.2, receiving protocol packets covers the virtual link
@@ -116,9 +105,25 @@ fill in the Router LSA.
 
 [Wrong]
 
+20) Virtual links are currently handled incorrectly. Peers/interfaces
+are typed (BROADCAST, NBMA, PointToMultiPoint, PointToPoint, and
+VirtualLink). A Virtual Link should be an attribute of the Neighbour
+structure any type of interface can also have neighbours of virtual
+links (except PointToPoint). A simple way of handling the problem
+would be have the neighbour hold its own copy of the linktype which
+could include VirtualLink. Never allow peer to be created with a
+linktype of Virtual link.
+
+[DONE]
+
 10) Section 3.3 Classification of routers. Add an OSPF enumeration for the
 four classifications. Note that the classifications are
 overlapping. Add four predicate methods to the peer manager that will
 return the status of the router. For example if the router is only
 configured with one area internal_router_p will return true.
 
+[DONE]
+
+9) Figure out under what conditions the E-bit should be set.
+
+[When the router is an AS boundary router]
