@@ -272,6 +272,9 @@ class EmulateSubnet {
 // Reduce the hello interval from 10 to 1 second to speed up the test.
 uint16_t hello_interval = 1;
 
+// Do not stop a tests allow it to run forever to observe timers.
+bool forever = false;
+
 /**
  * Configure a single peering. Nothing is really expected to go wrong
  * but the test is useful to verify the normal path through the code.
@@ -328,6 +331,10 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 
     // Bring the peering up
     ospf.get_peer_manager().set_state_peer(peerid, true);
+
+    if (forever)
+	while (ospf.running())
+	    eventloop.run();
 
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(10 * hello_interval ,0),
@@ -430,6 +437,10 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
     ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
 
+    if (forever)
+	while (ospf_1.running() && ospf_2.running())
+	    eventloop.run();
+
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(15 * hello_interval, 0),
 					   &timeout);
@@ -463,6 +474,7 @@ main(int argc, char **argv)
 	t.get_optional_args("-t", "--test", "run only the specified test");
     string hello_interval_arg = 
 	t.get_optional_args("-h", "--hello", "hello interval");
+    forever = t.get_optional_flag("-f", "--forever", "Don't terminate test");
     t.complete_args_parsing();
 
     if (!hello_interval_arg.empty())
