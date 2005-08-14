@@ -363,6 +363,12 @@ class Lsa {
      */
     void update_age(TimeVal now);
 
+    /**
+     * Increment the age field of an LSA by inftransdelay.
+     *
+     * @param ptr to the age field, first field in a LSA.
+     * @param inftransdelay delay to add in seconds.
+     */
     static void update_age_inftransdelay(uint8_t *ptr, uint16_t inftransdelay);
 
     /**
