@@ -235,7 +235,7 @@ class PeerOut {
     /**
      * If this IPv4 then set the mask in the hello packet.
      */
-    void PeerOut<A>::set_mask(Peer<A> *peer);
+    void set_mask(Peer<A> *peer);
 
     // In order to maintain the requirement for an interpacket gap,
     // all outgoing packets are appended to this queue. Then they are

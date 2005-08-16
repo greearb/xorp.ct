@@ -397,7 +397,7 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
 
     if (i != index)
-	XLOG_FATAL("Indexes don't match %d != %d %s", i, index,
+	XLOG_FATAL("Indexes don't match %u != %u %s", XORP_UINT_CAST(i), XORP_UINT_CAST(index),
 		   cstring(*_db[index]));
 
 #ifdef PARANOIA
@@ -659,9 +659,10 @@ AreaRouter<A>::open_database(bool& empty)
 
     return dbh;
 }
+
 template <typename A>
 bool
-AreaRouter<A>::valid_entry_database(uint32_t index) const
+AreaRouter<A>::valid_entry_database(size_t index) const
 {
     // This LSA is not valid.
     if (!_db[index]->valid())
@@ -935,8 +936,8 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 {
     // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
-    debug_msg("lsar: %s\noriginated: %s index: %d\n", cstring((*lsar)),
-	   lsa_exists ? "true" : "false", index);
+    debug_msg("lsar: %s\noriginated: %s index: %u\n", cstring((*lsar)),
+	      lsa_exists ? "true" : "false", XORP_UINT_CAST(index));
     if (lsa_exists)
 	debug_msg("database copy: %s\n", cstring((*_db[index])));
 
