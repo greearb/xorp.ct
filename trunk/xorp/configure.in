@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.137 2005/07/31 11:13:14 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.138 2005/08/16 20:49:58 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [Report configure problems to feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.137 2005/07/31 11:13:14 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.138 2005/08/16 20:49:58 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -268,7 +268,7 @@ AC_ARG_WITH([openssl],
 dnl ----------------------------
 dnl --with-snmp
 dnl ----------------------------
-AC_ARG_WITH(snmp,
+AC_ARG_WITH([snmp],
 	    AC_HELP_STRING([--with-snmp],
 			   [build XORP MIBs for Net-SNMP]),
 	 [ snmp="yes";
@@ -282,15 +282,25 @@ AC_ARG_WITH(snmp,
 AC_SUBST(MIBS)
 
 dnl ----------------------------
+dnl --with-path-to-snmpd
+dnl ----------------------------
+AC_ARG_WITH([path-to-snmpd],
+	    AC_HELP_STRING([--with-path-to-snmpd=DIR],
+			   [specify path to the snmpd executable]),
+	    [snmpd=${withval}/snmpd;],
+	    [snmpd="not_found";]
+)
+
+dnl ----------------------------
 dnl --with-path-to-net-snmp-config
 dnl ----------------------------
 AC_ARG_WITH([path-to-net-snmp-config],
-	AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
-		       [specify path to the net-snmp-config executable]),
-	[net_snmp_config_dir=${withval};
-	 net_snmp_config=${net_snmp_config_dir}/net-snmp-config;],
-	[net_snmp_config_dir="";
-	 net_snmp_config="net-snmp-config";]
+	    AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
+			   [specify path to the net-snmp-config executable]),
+	    [net_snmp_config_dir=${withval};
+	     net_snmp_config=${net_snmp_config_dir}/net-snmp-config;],
+	    [net_snmp_config_dir="";
+	     net_snmp_config="net-snmp-config";]
 )
 
 
