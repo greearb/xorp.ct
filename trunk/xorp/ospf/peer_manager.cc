@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.40 2005/08/13 08:10:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,7 +39,6 @@
 #include "libproto/spt.hh"
 
 #include "ospf.hh"
-#include "ls_database.hh"
 #include "packet.hh"
 #include "delay_queue.hh"
 #include "vertex.hh"
