@@ -235,7 +235,8 @@ class Lsa {
      */
     Lsa(OspfTypes::Version version, uint8_t *buf, size_t len)
 	:  _header(version), _version(version), _valid(true),
-	   _self_originating(false),  _initial_age(0), _transmitted(false)
+	   _self_originating(false),  _initial_age(0), _transmitted(false),
+	   _trace(false)
     {
 	_pkt.resize(len);
 	memcpy(&_pkt[0], buf, len);
@@ -324,9 +325,9 @@ class Lsa {
     bool valid() const { return _valid; }
 
     /**
-     * Mark this LSA as invalid.
+     * Mark this LSA as invalid and clear the timer.
      */
-    void invalidate() { _valid = false; }
+    void invalidate() { _valid = false; _timer.clear();}
 
     /**
      * @return true of this is a self originating LSA.
@@ -439,6 +440,15 @@ class Lsa {
     void set_transmitted(bool t) { _transmitted = t; }
 
     /**
+     * Get a reference to the internal timer.
+     */
+    XorpTimer& get_timer() { return _timer; }
+
+    void set_tracing(bool trace) { _trace = trace; }
+
+    bool tracing() const { return _trace; }
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -465,6 +475,8 @@ class Lsa {
 				// when MaxAge is reached.
 
     bool _transmitted;		// Set to true when this LSA is transmitted.
+
+    bool _trace;		// True if this LSA should be traced.
 
     // List of neighbours that have not yet acknowledged this LSA.
 
