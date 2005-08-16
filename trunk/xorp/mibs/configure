@@ -867,7 +867,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-openssl=DIR               specify root of OpenSSL installation
   --with-path-to-snmpd=DIR         specify path to the snmpd executable
-  --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree
+  --with-path-to-net-snmp-config=DIR
+                          specify path to the net-snmp-config executable
   --with-snmp                   build XORP MIBs for Net-SNMP
   --with-dmalloc=DIR      build using the dmalloc allocator in DIR
 
@@ -3875,7 +3876,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 3878 "configure"' > conftest.$ac_ext
+  echo '#line 3879 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4129,12 +4130,14 @@ else
 fi;
 
 
-# Check whether --with-path-to-net-snmp-src or --without-path-to-net-snmp-src was given.
-if test "${with_path_to_net_snmp_src+set}" = set; then
-  withval="$with_path_to_net_snmp_src"
-  path_to_net_snmp_src=${withval};
+# Check whether --with-path-to-net-snmp-config or --without-path-to-net-snmp-config was given.
+if test "${with_path_to_net_snmp_config+set}" = set; then
+  withval="$with_path_to_net_snmp_config"
+  net_snmp_config_dir=${withval};
+	 net_snmp_config=${net_snmp_config_dir}/net-snmp-config;
 else
-  path_to_net_snmp_src="no";
+  net_snmp_config_dir="";
+	 net_snmp_config="net-snmp-config";
 
 fi;
 
@@ -4650,7 +4653,8 @@ fi
 
 
 if test "${with_snmp}" = "yes"; then
-    # Extract the first word of "net-snmp-config", so it can be a program name with args.
+                if test "${net_snmp_config_dir}" = ""; then
+	# Extract the first word of "net-snmp-config", so it can be a program name with args.
 set dummy net-snmp-config; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
 echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
@@ -4686,13 +4690,51 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
+    else
+	# Extract the first word of "net-snmp-config", so it can be a program name with args.
+set dummy net-snmp-config; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_prog_net_snmp_found+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if test -n "$net_snmp_found"; then
+  ac_cv_prog_net_snmp_found="$net_snmp_found" # Let the user override the test.
+else
+as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in ${net_snmp_config_dir}
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_prog_net_snmp_found=""true""
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  test -z "$ac_cv_prog_net_snmp_found" && ac_cv_prog_net_snmp_found=""false""
+fi
+fi
+net_snmp_found=$ac_cv_prog_net_snmp_found
+if test -n "$net_snmp_found"; then
+  echo "$as_me:$LINENO: result: $net_snmp_found" >&5
+echo "${ECHO_T}$net_snmp_found" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+    fi
 else
     net_snmp_found="skip_check"
     snmpd="skip_check"
 fi
 
 if test "${net_snmp_found}" = "true";  then
-    net_snmp_v=`net-snmp-config --version`
+    net_snmp_v=`${net_snmp_config} --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
     net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
@@ -4923,7 +4965,7 @@ fi
 
 oldCPPFLAGS=${CPPFLAGS}
 while test "${net_snmp_found}" = "true"; do
-    NETSNMPCFLAGS=`net-snmp-config --cflags`
+    NETSNMPCFLAGS=`${net_snmp_config} --cflags`
 
     # Some versions of net-snmp are broken with respect to the use of
     # the 'inline' keyword and various C++ compilers, so can't be
@@ -5166,7 +5208,7 @@ echo "${ECHO_T}no" >&6
 
     if test "${snmpd_flags_valid}" = "no" ; then
 	echo "-------------------------------------------------------------   "
-	echo "'net-snmp-config --cflags' gave invalid cflags!                 "
+	echo "'${net_snmp_config} --cflags' gave invalid cflags!              "
 	echo "-------------------------------------------------------------   "
 	snmpd_valid=no
 	break

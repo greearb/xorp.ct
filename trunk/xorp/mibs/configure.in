@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.7 2005/04/15 00:16:31 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.8 2005/05/26 11:51:33 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.53)
-AC_REVISION([$XORP$])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.8 2005/05/26 11:51:33 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -155,11 +155,15 @@ AC_ARG_WITH(path-to-snmpd,
 )
 
 dnl ----------------------------
-dnl --with-path-to-net-snmp-src
+dnl --with-path-to-net-snmp-config
 dnl ----------------------------
-AC_ARG_WITH(path-to-net-snmp-src,
-	[  --with-path-to-net-snmpd-src=DIR specify path to the net-snmpd source tree],
-	[path_to_net_snmp_src=${withval};], [path_to_net_snmp_src="no";]
+AC_ARG_WITH([path-to-net-snmp-config],
+	AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
+		       [specify path to the net-snmp-config executable]),
+	[net_snmp_config_dir=${withval};
+	 net_snmp_config=${net_snmp_config_dir}/net-snmp-config;],
+	[net_snmp_config_dir="";
+	 net_snmp_config="net-snmp-config";]
 )
 
 dnl ----------------------------
@@ -267,14 +271,22 @@ dnl SNMP
 dnl ---------------------------------------------------------------------------
 
 if test "${with_snmp}" = "yes"; then
-    AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
+    dnl
+    dnl Test for the "net-snmp-config" program
+    dnl
+    if test "${net_snmp_config_dir}" = ""; then
+	AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false")
+    else
+	AC_CHECK_PROG(net_snmp_found, net-snmp-config, "true", "false",
+		${net_snmp_config_dir})
+    fi
 else
     net_snmp_found="skip_check"
     snmpd="skip_check"
 fi
 
 if test "${net_snmp_found}" = "true";  then
-    net_snmp_v=`net-snmp-config --version`
+    net_snmp_v=`${net_snmp_config} --version`
     net_snmp_maj=`echo $net_snmp_v | cut -f 1 -d.`
     net_snmp_min=`echo $net_snmp_v | cut -f 2 -d.`
     net_snmp_rev=`echo $net_snmp_v | cut -f 3 -d.`
@@ -410,7 +422,7 @@ fi
 
 oldCPPFLAGS=${CPPFLAGS}
 while test "${net_snmp_found}" = "true"; do
-    NETSNMPCFLAGS=`net-snmp-config --cflags`
+    NETSNMPCFLAGS=`${net_snmp_config} --cflags`
 
     # Some versions of net-snmp are broken with respect to the use of
     # the 'inline' keyword and various C++ compilers, so can't be
@@ -428,7 +440,7 @@ while test "${net_snmp_found}" = "true"; do
     XR_CHECK_CFLAG(${NETSNMPCFLAGS}, snmpd_flags_valid=yes, snmpd_flags_valid=no)
     if test "${snmpd_flags_valid}" = "no" ; then
 	echo "-------------------------------------------------------------   "
-	echo "'net-snmp-config --cflags' gave invalid cflags!                 "
+	echo "'${net_snmp_config} --cflags' gave invalid cflags!              "
 	echo "-------------------------------------------------------------   "
 	snmpd_valid=no
 	break

@@ -880,6 +880,8 @@ Optional Packages:
   --with-gnu-ld           assume the C compiler uses GNU ld default=no
   --with-openssl          specify path to OpenSSL installation root
   --with-snmp             build XORP MIBs for Net-SNMP
+  --with-path-to-net-snmp-config=DIR
+                          specify path to the net-snmp-config executable
   --with-dmalloc=DIR      build using the dmalloc allocator in DIR
 
 Some influential environment variables:
@@ -4168,7 +4170,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4171 "configure"' > conftest.$ac_ext
+  echo '#line 4173 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4596,6 +4598,18 @@ else
 
 fi;
 
+
+
+# Check whether --with-path-to-net-snmp-config or --without-path-to-net-snmp-config was given.
+if test "${with_path_to_net_snmp_config+set}" = set; then
+  withval="$with_path_to_net_snmp_config"
+  net_snmp_config_dir=${withval};
+	 net_snmp_config=${net_snmp_config_dir}/net-snmp-config;
+else
+  net_snmp_config_dir="";
+	 net_snmp_config="net-snmp-config";
+
+fi;
 
 
 

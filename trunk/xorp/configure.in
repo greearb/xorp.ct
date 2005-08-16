@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.136 2005/06/03 22:30:42 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.137 2005/07/31 11:13:14 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [Report configure problems to feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.136 2005/06/03 22:30:42 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.137 2005/07/31 11:13:14 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -280,6 +280,18 @@ AC_ARG_WITH(snmp,
 	 ]
 )
 AC_SUBST(MIBS)
+
+dnl ----------------------------
+dnl --with-path-to-net-snmp-config
+dnl ----------------------------
+AC_ARG_WITH([path-to-net-snmp-config],
+	AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
+		       [specify path to the net-snmp-config executable]),
+	[net_snmp_config_dir=${withval};
+	 net_snmp_config=${net_snmp_config_dir}/net-snmp-config;],
+	[net_snmp_config_dir="";
+	 net_snmp_config="net-snmp-config";]
+)
 
 
 dnl ---------------------------------------------------------------------------
