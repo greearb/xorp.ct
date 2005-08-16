@@ -128,7 +128,7 @@ template <typename A>
 void
 PeerOut<A>::set_state(bool state)
 {
-    debug_msg("state %d\n", state);
+    debug_msg("state %s\n", state ? "up" : "down");
 
     switch (_running) {
     case true:
@@ -453,6 +453,7 @@ Peer<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 {
     debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
 
+    multicast_on_peer = false;
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	if (!(*n)->queue_lsa(peerid, nid, lsar, multicast_on_peer))
@@ -3004,7 +3005,7 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	}
 	if (!found) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "Ack for LSA not in retransmission list.%s\n%s",
+		       "Ack for LSA not in retransmission list.\n%s\n%s",
 		       cstring(*i), cstring(*lsap));
 	}
     }
@@ -3017,6 +3018,8 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 {
     // RFC 2328 Section 13.3.  Next step in the flooding procedure
 
+    XLOG_TRACE(lsar->tracing(), "Attempting to queue %s", cstring(*lsar));
+
     // (1) 
     switch(get_state()) {
     case Down:
@@ -3025,6 +3028,8 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     case TwoWay:
     case ExStart:
 	// (a) Neighbour is in too low a state so return.
+	XLOG_TRACE(lsar->tracing(), "Not queued state too low %s",
+		   cstring(*lsar));
 	return true;
     case Exchange:
     case Loading: {
@@ -3063,8 +3068,11 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     
     // (c) If the neighbour IDs match then this is the neighbour that this
     // LSA was originally received on.
-    if (_neighbourid == nid)
+    if (_neighbourid == nid) {
+	XLOG_TRACE(lsar->tracing(), "LSA came from this neighbour %s",
+		   cstring(*lsar));
 	return true;
+    }
 
     // (d) If this LSA isn't already on the retransmit queue add it.
     if (find(_lsa_rxmt.begin(), _lsa_rxmt.end(), lsar) == _lsa_rxmt.end())
@@ -3080,13 +3088,19 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 	// (3) If this LSA arrived from the designated router or the
 	// backup designated router. Chances are high that our
 	// neighbours have received this LSA already.
-	if (_peer.is_neighbour_DR_or_BDR(nid))
+	if (_peer.is_neighbour_DR_or_BDR(nid)) {
+	    XLOG_TRACE(lsar->tracing(), "Peers neighbour is DR or BDR %s",
+		       cstring(*lsar));
 	    return true;
+	}
 
 	// (4) If this peer (interface) is in state Backup then out of
 	// here.
-	if (_peer.get_state() == Peer<A>::Backup)
+	if (_peer.get_state() == Peer<A>::Backup) {
+	    XLOG_TRACE(lsar->tracing(), "Peer state is backup%s",
+		       cstring(*lsar));
 	    return true;
+	}
     }
 
     // (5) This LSA should be flooded now. If it hasn't already been
@@ -3094,9 +3108,11 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 
     switch(get_linktype()) {
     case OspfTypes::BROADCAST:
-	if (multicast_on_peer)
+	if (multicast_on_peer) {
+	    XLOG_TRACE(lsar->tracing(), "LSA has already been multicast %s",
+		       cstring(*lsar));
 	    return true;
-	else
+	} else
 	    multicast_on_peer = true;
 	break;
     case OspfTypes::NBMA:
@@ -3110,6 +3126,8 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
     // send_link_state_update_packet.
 
     _lsa_queue.push_back(lsar);
+
+    XLOG_TRACE(lsar->tracing(), "Queued successful %s", cstring(*lsar));
 
     return true;
 }
