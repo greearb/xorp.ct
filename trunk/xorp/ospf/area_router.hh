@@ -150,10 +150,21 @@ class AreaRouter {
     /**
      * Open database
      *
+     * Used only by the peer to generate the database description packets.
+     *
      * @param empty true if the database is empty.
      * @return Database Handle
      */
     DataBaseHandle open_database(bool& empty);
+
+    /**
+     * Is this a valid entry to be returned by the database.
+     *
+     * This method is for internal use and its use is not recommended.
+     *
+     * @return true if this entry is valid.
+     */
+    bool valid_entry_database(size_t index) const;
 
     /**
      * Is there another database entry following this one.
@@ -188,6 +199,8 @@ class AreaRouter {
 
     Spt<Vertex> _spt;			// SPT computation unit.
 
+    Lsa::LsaRef _invalid_lsa;		// An invalid LSA to overwrite slots
+
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
     deque<size_t> _empty_slots;		// Available slots in the Database.
@@ -218,7 +231,23 @@ class AreaRouter {
     PeerMap _peers;		// Peers of this area.
 
     /**
+     * Start aging LSA.
+     *
+     * All non self originated LSAs must be aged and when they reach
+     * MAXAGE flooded and flushed.
+     */
+    bool age_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * This LSA has reached MAXAGE so flood it to all the peers of
+     * this area. If its an external LSA flood it to all areas.
+     */
+    void maxage_reached(Lsa::LsaRef lsar, size_t index);
+
+    /**
      * Add this LSA to the database.
+     *
+     * The LSA must have an updated age field. 
      *
      * @param lsar LSA to add.
      * @return true on success
@@ -230,9 +259,11 @@ class AreaRouter {
      *
      * @param lsar LSA to delete.
      * @param index into database.
+     * @param invalidate if true as well as removing from the database
+     * mark the LSA as invalid.
      * @return true on success
      */
-    bool delete_lsa(Lsa::LsaRef lsar, size_t index);
+    bool delete_lsa(Lsa::LsaRef lsar, size_t index, bool invalidate);
 
     /**
      * Update this LSA in the database.
@@ -254,6 +285,16 @@ class AreaRouter {
     bool find_lsa(const Ls_request& lsr, size_t& index) const;
 
     /**
+     * Find LSA matching this request.
+     *
+     * @param lsar that is being sought.
+     * @param index into LSA database if search succeeded.
+     *
+     * @return true if an LSA was found. 
+     */
+    bool find_lsa(Lsa::LsaRef lsar, size_t& index) const;
+
+    /**
      * Compare this LSA to 
      *
      * @param Lsa_header that is being sought.
@@ -266,12 +307,19 @@ class AreaRouter {
     /**
      * Update router links.
      *
-     * A peer has just changed state so update the router lsa and publish.
+     * A peer has just changed state, or the refresh timer has fired,
+     * so update the router lsa and publish.
      *
-     * @param peerid peer that changed state.
      * @return true if something changed.
      */
-    bool update_router_links(PeerStateRef psr);
+    bool update_router_links();
+
+    /**
+     * Refresh Router-LSA.
+     *
+     * Called from the refresh timer.
+     */
+    void refresh_router_lsa();
 
     /*
      * Send this LSA to all our peers.
@@ -298,8 +346,14 @@ class AreaRouter {
 
     /**
      * Send this LSA to all area's.
+     *
+     * This is an External-LSA being sent to other areas.
+     *
+     * @param lsar The LSA to publish
+     * @param add if true add to the database as well as flooding, if
+     * false it is already in the database remove and flood.
      */
-    void flood_all_areas(Lsa::LsaRef lsar);
+    void flood_all_areas(Lsa::LsaRef lsar, bool add);
 
     /**
      * Notify all areas this is the last of the all areas LSAs.

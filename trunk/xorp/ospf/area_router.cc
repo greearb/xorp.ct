@@ -57,6 +57,14 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  callback(this, &AreaRouter<A>::publish_all))
 {
     // Never need to delete this as the ref_ptr will tidy up.
+    // An entry to be placed in invalid slots.
+    // When a LSA that was not self originated reaches MAXAGE it must
+    // be flooded but we can't mark it as invalid. In all other cases
+    // just marking an entry as invalid is good enough.
+    _invalid_lsa = Lsa::LsaRef(new RouterLsa(_ospf.get_version()));
+    _invalid_lsa->invalidate();
+
+    // Never need to delete this as the ref_ptr will tidy up.
     RouterLsa *rlsa = new RouterLsa(_ospf.get_version());
     rlsa->set_self_originating(true);
     TimeVal now;
@@ -120,7 +128,7 @@ AreaRouter<A>::peer_up(PeerID peerid)
     PeerStateRef psr = i->second;
     psr->_up = true;
 
-    if (update_router_links(psr)) {
+    if (update_router_links()) {
 	// publish the router LSA.
 	_queue.add(_router_lsa);
     }
@@ -144,7 +152,7 @@ AreaRouter<A>::peer_down(PeerID peerid)
     PeerStateRef psr = i->second;
     psr->_up = false;
 
-    if (update_router_links(psr)) {
+    if (update_router_links()) {
 	// publish the router LSA.
 	_queue.add(_router_lsa);
     }
@@ -169,7 +177,7 @@ AreaRouter<A>::new_router_links(PeerID peerid,
     psr->_router_links.insert(psr->_router_links.begin(),
 			      router_links.begin(), router_links.end());
 
-    if (update_router_links(psr)) {
+    if (update_router_links()) {
 	// publish the router LSA.
 	_queue.add(_router_lsa);
     }
@@ -278,7 +286,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
 	    // If this is an AS-external-LSA send it to all area's
 	    if ((*i)->external())
-		flood_all_areas((*i));
+		flood_all_areas((*i), true /* ADD */);
 
 	    // Set to true if the LSA was multicast out of this
 	    // interface. If it was, there is no requirement to send an
@@ -298,6 +306,8 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 		add_lsa((*i));
 	    else
 		update_lsa((*i), index);
+	    // Start aging this LSA.
+	    age_lsa((*i));
 	    routing_add(*i, NOMATCH != search);
 	    
 	    // (e) Possibly acknowledge this LSA.
@@ -358,6 +368,59 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
 template <typename A>
 bool
+AreaRouter<A>::age_lsa(Lsa::LsaRef lsar)
+{
+    size_t index;
+
+    XLOG_ASSERT(!lsar->get_self_originating());
+
+    if (!find_lsa(lsar, index)) {
+	XLOG_WARNING("LSA not in database: %s", cstring(*lsar));
+	return false;
+    }
+
+    lsar->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::MaxAge -
+				 lsar->get_header().get_ls_age(), 0),
+			 callback(this,
+				  &AreaRouter<A>::maxage_reached, lsar,index));
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
+{
+    size_t index;
+
+    if (!find_lsa(lsar, index))
+	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
+
+    if (i != index)
+	XLOG_FATAL("Indexes don't match %d != %d %s", i, index,
+		   cstring(*_db[index]));
+
+#ifdef PARANOIA
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    lsar->update_age(now);
+    if (OspfTypes::MaxAge != lsar->get_header().get_ls_age())
+	XLOG_FATAL("LSA has not reached maxage %s", cstring(*lsar));
+#endif
+    
+    delete_lsa(lsar, index, false /* Don't invalidate */);
+    publish_all(lsar);
+
+    if (lsar->external())
+	flood_all_areas(lsar, false /* DELETE */);
+
+    // Clear the timer otherwise there is a circular dependency.
+    // The LSA contains a XorpTimer that points back to the LSA.
+    lsar->get_timer().clear();
+}
+
+template <typename A>
+bool
 AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
 {
     // If there are no readers we can put this LSA into an empty slot.
@@ -380,7 +443,7 @@ AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
 
 template <typename A>
 bool
-AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index)
+AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index, bool invalidate)
 {
     Lsa_header& dblsah = _db[index]->get_header();
     XLOG_ASSERT(dblsah.get_ls_type() == lsar->get_header().get_ls_type());
@@ -390,7 +453,9 @@ AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index)
 		lsar->get_header().get_advertising_router());
 
     XLOG_ASSERT(_db[index]->valid());
-    _db[index]->invalidate();
+    if (invalidate)
+	_db[index]->invalidate();
+    _db[index] = _invalid_lsa;
     _empty_slots.push_back(index);
 
     // _last_entry points one past the last entry, if the deleted LSA
@@ -424,7 +489,7 @@ AreaRouter<A>::update_lsa(Lsa::LsaRef lsar, size_t index)
 	_db[index]->invalidate();
 	_db[index] = lsar;
     } else {
-	delete_lsa(lsar, index);
+	delete_lsa(lsar, index, true /* Mark the LSA as invalid */);
 	add_lsa(lsar);
     }
 
@@ -452,6 +517,17 @@ AreaRouter<A>::find_lsa(const Ls_request& lsr, size_t& index) const
     }
 
     return false;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::find_lsa(Lsa::LsaRef lsar, size_t& index) const
+{
+    const Lsa_header lsah = lsar->get_header();
+    Ls_request lsr(_ospf.get_version(), lsah.get_ls_type(),
+		   lsah.get_link_state_id(), lsah.get_advertising_router());
+
+    return find_lsa(lsr, index);
 }
 
 /**
@@ -583,6 +659,20 @@ AreaRouter<A>::open_database(bool& empty)
 
     return dbh;
 }
+template <typename A>
+bool
+AreaRouter<A>::valid_entry_database(uint32_t index) const
+{
+    // This LSA is not valid.
+    if (!_db[index]->valid())
+	return false;
+
+    // There is no wire format for this LSA.
+    if (!_db[index]->available())
+	return false;
+
+    return true;
+}
 
 template <typename A>
 bool
@@ -590,7 +680,7 @@ AreaRouter<A>::subsequent(DataBaseHandle& dbh) const
 {
     bool another = false;
     for (size_t index = dbh.position(); index < dbh.last(); index++) {
-	if (!_db[index]->valid() || !_db[index]->available())
+	if (!valid_entry_database(index))
 	    continue;
 	another = true;
 	break;
@@ -615,7 +705,7 @@ AreaRouter<A>::get_entry_database(DataBaseHandle& dbh, bool& last)
 		       XORP_INT_CAST(_db.size()));
 
 	dbh.advance(last);
-    } while(!_db[position]->valid() || !_db[position]->available());
+    } while(!valid_entry_database(position));
 
     // If this is not the last entry make sure there is a subsequent
     // valid entry.
@@ -641,15 +731,8 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
 
 template <typename A>
 bool
-AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
+AreaRouter<A>::update_router_links()
 {
-    // We know exactly which peer transitioned state an optimisation
-    // would be use this information to add or delete the specific
-    // router link. For the moment rebuild the whole list every time
-    // there is a maximum of two router links per interface so we are
-    // looking at a handful of entries. If this ever changes use psr
-    // to do something more efficient.
-
     RouterLsa *router_lsa = dynamic_cast<RouterLsa *>(_router_lsa.get());
     XLOG_ASSERT(router_lsa);
     bool empty = router_lsa->get_router_links().empty();
@@ -699,7 +782,22 @@ AreaRouter<A>::update_router_links(PeerStateRef /*psr*/)
 
     router_lsa->encode();
 
+    // Prime this Router-LSA to be refreshed.
+    router_lsa->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
+			 callback(this, &AreaRouter<A>::refresh_router_lsa));
+
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::refresh_router_lsa()
+{
+    if (update_router_links()) {
+	// publish the router LSA.
+	_queue.add(_router_lsa);
+    }
 }
 
 template <typename A>
@@ -763,11 +861,12 @@ AreaRouter<A>::push_lsas()
 
 template <typename A>
 void
-AreaRouter<A>::flood_all_areas(Lsa::LsaRef lsar)
+AreaRouter<A>::flood_all_areas(Lsa::LsaRef lsar, bool add)
 {
-    debug_msg("Flood all areas: %s\n", cstring(*lsar));
+    debug_msg("Flood all areas %s : %s\n", add ? "add" : "delete",
+	      cstring(*lsar));
 
-    XLOG_UNFINISHED();
+    XLOG_WARNING("TBD sent external-LSAs to other areas");
 }
 
 template <typename A>
@@ -949,7 +1048,7 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 		}
 		break;
 	    case OspfTypes::V3:
-		XLOG_UNFINISHED();
+		XLOG_WARNING("TBD - Compute OSPFv3 node and edge");
 		break;
 	    }
 	}
