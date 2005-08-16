@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.35 2005/07/22 02:27:18 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.36 2005/07/22 19:25:53 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -365,6 +365,11 @@ The following types are currently supported for template tree nodes:
 \begin{description}
 \item{\tt u32}\\
 Unsigned 32 bit integer
+\item{\tt u32range}\\
+A range of unsigned 32 bit integers defined by an upper and lower
+inclusive boundary.  Boundaries are separated by two dots,
+e.g. {\tt 1234..5678}.  If upper and lower boundaries are equal it is
+sufficient to specify only a single value, e.g. {\tt 1234}.
 \item{\tt i32}\\
 Signed 32 bit integer
 \item{\tt bool}\\
@@ -376,14 +381,29 @@ config tree node is suppressed if the value is the default.
 An IPv4 address in dotted decimal format.
 \item{\tt ipv4net}\\ An IPv4 address and prefix length in the
 conventional format.  E.g.: {\tt 1.2.3.4/24}.
+\item{\tt ipv4range}\\
+A range of IPv4 addresses defined by an upper and lower inclusive boundary.
+IPv4 addresses are specified in dotted decimal format delimited by two dots,
+e.g. {\tt 1.2.3.4..5.6.7.8}. If upper and lower boundaries are equal it is
+sufficient to specify only a single value, e.g. {\tt 1.2.3.4}.
 \item{\tt ipv6}\\
 An IPv6 address in the canonical colon-separated human-readable format.
 \item{\tt ipv6net}\\
 An IPv6 address and prefix in the conventional format. E.g.: {\tt
 fe80::1/64}
+\item{\tt ipv6range}\\
+A range of IPv6 addresses defined by an upper and lower inclusive boundary.
+IPv6 addresses are specified in colon-separated format and are delimited
+by two dots, e.g. {\tt fe80::1234..fe80::5678}.
+If upper and lower boundaries are equal it is
+sufficient to specify only a single value, e.g. {\tt fe80::1234}.
 \item{\tt macaddr}\\
 An MAC address in the conventional colon-separated hex format.  E.g.:
 {\tt 00:c0:4f:68:8c:58}
+\item{\tt com32}\\
+Unsigned 32 bit integer representing a BGP community tag.  It can be
+specified either in a colon-separated format using two 16 bit integers,
+e.g. {\tt 65001:1}, or as a single 32 bit unsigned integer.
 \end{description}
 
 It is likely that additional types will be added in the future, as
