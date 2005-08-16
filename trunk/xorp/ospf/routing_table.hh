@@ -18,6 +18,24 @@
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
 
+#include <libxorp/trie.hh>
+
+template <typename A>
+class RouteEntry {
+ public:
+    list<A> _nexthops;		// Possible nexthops for this route
+
+    bool _discard;		// True if this is a discard route.
+    uint32_t _users;		// Only valid if this is a discard
+				// route. The number of routes below
+				// the discard route.
+    
+    OspfTypes::AreaID _area;	// Area the LSA came from.
+    list<Lsa::LsaRef> lsars;	// LSAs the routes came from.
+    bool _modified;		// True if this route has been
+				// modified in the last sweep.
+};
+
 template <typename A>
 class RoutingTable {
  public:
@@ -62,5 +80,7 @@ class RoutingTable {
     
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
+
+    Trie<A, RouteEntry<A> > _trie;
 };
 #endif // __OSPF_ROUTING_TABLE_HH__
