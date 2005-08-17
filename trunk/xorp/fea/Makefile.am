@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.59 2005/07/29 17:52:37 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.60 2005/08/01 16:43:07 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -21,8 +21,7 @@ check_PROGRAMS 		+= test_mfea
 check_PROGRAMS		+= test_rawsock4
 check_PROGRAMS		+= test_xrl_sockets4_udp
 
-check_SCRIPTS		 = test_xrl_sockets4_udp.sh
-check_SCRIPTS		+= test_add_route.sh
+check_SCRIPTS		 = test_add_route.sh
 check_SCRIPTS		+= test_config_interface.sh
 check_SCRIPTS		+= test_xrl_sockets4_udp.sh
 
