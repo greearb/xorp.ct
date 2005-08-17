@@ -20,23 +20,8 @@
 
 /* Scanner skeleton version:
  * $Header$
- * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.8 2004/01/06 19:03:44 nectar Exp $
+ * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HOST_OS_WINDOWS		/* XXX: lame */
-#define strdup _strdup
-#endif
-
-
-#if defined(__FreeBSD__)
-#include <sys/cdefs.h>
-#else
-#define __unused
-#endif
 
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
@@ -274,7 +259,7 @@ YY_BUFFER_STATE yy_scan_string YY_PROTO(( yyconst char *yy_str ));
 YY_BUFFER_STATE yy_scan_bytes YY_PROTO(( yyconst char *bytes, int len ));
 
 static void *yy_flex_alloc YY_PROTO(( yy_size_t ));
-static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t )) __unused;
+static void *yy_flex_realloc YY_PROTO(( void *, yy_size_t ));
 static void yy_flex_free YY_PROTO(( void * ));
 
 #define yy_new_buffer yy_create_buffer
@@ -1535,10 +1520,14 @@ char *yytext;
 #line 1 "compilepolicy.l"
 #define INITIAL 0
 #line 2 "compilepolicy.l"
-#ifdef HAVE_CONFIG_H
+// XXX: this whole parsing is becoming a mess... Once we finalize how to test
+// policy and what it should look like, it needs a re-write.
 #include "config.h"
-#endif
 #include "policy/test/compilepolicy.hh"
+#ifdef HOST_OS_WINDOWS		/* XXX: lame */
+#define strdup _strdup
+#endif
+
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
 #include <sstream>
@@ -1559,7 +1548,7 @@ namespace {
 #define STR 1
 #define BLOCK 2
 
-#line 1554 "lex.yy_compile_policy.cc"
+#line 1552 "lex.yy_compile_policy.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1710,10 +1699,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 51 "compilepolicy.l"
+#line 55 "compilepolicy.l"
 
 
-#line 1708 "lex.yy_compile_policy.cc"
+#line 1706 "lex.yy_compile_policy.cc"
 
 	if ( yy_init )
 		{
@@ -1798,42 +1787,42 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 53 "compilepolicy.l"
+#line 57 "compilepolicy.l"
 BEGIN(STR);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 55 "compilepolicy.l"
+#line 59 "compilepolicy.l"
 return YY_LBRACE;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 57 "compilepolicy.l"
+#line 61 "compilepolicy.l"
 return YY_RBRACE;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 59 "compilepolicy.l"
+#line 63 "compilepolicy.l"
 BEGIN(BLOCK); return YY_SOURCE;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 60 "compilepolicy.l"
+#line 64 "compilepolicy.l"
 BEGIN(BLOCK); return YY_DEST;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 61 "compilepolicy.l"
+#line 65 "compilepolicy.l"
 BEGIN(BLOCK); return YY_ACTION;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 63 "compilepolicy.l"
+#line 67 "compilepolicy.l"
 { return YY_SEMICOLON; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 64 "compilepolicy.l"
+#line 68 "compilepolicy.l"
 {  
 	 	  _yy_lineno += policy_utils::count_nl(yytext);
 	   	  return YY_LBRACE; 
@@ -1841,7 +1830,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 68 "compilepolicy.l"
+#line 72 "compilepolicy.l"
 {
 		  BEGIN(INITIAL);
 		  _yy_lineno += policy_utils::count_nl(yytext);
@@ -1850,7 +1839,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 74 "compilepolicy.l"
+#line 78 "compilepolicy.l"
 { yylval.c_str = strdup(yytext);
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STATEMENT;
@@ -1858,12 +1847,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 79 "compilepolicy.l"
+#line 83 "compilepolicy.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 80 "compilepolicy.l"
+#line 84 "compilepolicy.l"
 { yylval.c_str = strdup(yytext); 
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STR;
@@ -1871,7 +1860,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 85 "compilepolicy.l"
+#line 89 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4;
@@ -1879,7 +1868,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 90 "compilepolicy.l"
+#line 94 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4NET;
@@ -1887,7 +1876,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 95 "compilepolicy.l"
+#line 99 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6;
@@ -1895,7 +1884,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 100 "compilepolicy.l"
+#line 104 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6NET;
@@ -1903,62 +1892,62 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 105 "compilepolicy.l"
+#line 109 "compilepolicy.l"
 return YY_TERM;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 107 "compilepolicy.l"
+#line 111 "compilepolicy.l"
 return YY_POLICY_STATEMENT;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 109 "compilepolicy.l"
+#line 113 "compilepolicy.l"
 return YY_SET;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 111 "compilepolicy.l"
+#line 115 "compilepolicy.l"
 return YY_IMPORT;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 112 "compilepolicy.l"
+#line 116 "compilepolicy.l"
 return YY_EXPORT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 114 "compilepolicy.l"
+#line 118 "compilepolicy.l"
 { yylval.c_str = strdup(yytext);
 				  return YY_ID;
 				}  
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 118 "compilepolicy.l"
+#line 122 "compilepolicy.l"
 return YY_SEMICOLON;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 120 "compilepolicy.l"
+#line 124 "compilepolicy.l"
 _yy_lineno++;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 122 "compilepolicy.l"
+#line 126 "compilepolicy.l"
 /* eat blanks */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 124 "compilepolicy.l"
+#line 128 "compilepolicy.l"
 { yyerror("Unknown character"); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 126 "compilepolicy.l"
+#line 130 "compilepolicy.l"
 ECHO;
 	YY_BREAK
-#line 1953 "lex.yy_compile_policy.cc"
+#line 1951 "lex.yy_compile_policy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 case YY_STATE_EOF(BLOCK):
@@ -2551,13 +2540,7 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
-
-#ifdef HOST_OS_WINDOWS
-	b->yy_is_interactive = file ? (_isatty(_fileno(file) ) > 0) : 0;
-#else
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
-#endif
-
 #endif
 #endif
 	}
@@ -2852,7 +2835,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 126 "compilepolicy.l"
+#line 130 "compilepolicy.l"
 
 
 void yyerror(const char *m) {
