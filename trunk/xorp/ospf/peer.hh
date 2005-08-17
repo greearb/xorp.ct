@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/peer.hh,v 1.81 2005/08/16 22:49:15 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -378,6 +378,12 @@ class Peer {
      * Send (push) any queued LSAs.
      */
     bool push_lsas();
+
+    /*
+     * Should we be computing the DR and BDR on this peer?
+     * Another way of phrasing this is, is the linktype BROADCAST or NBMA?
+     */
+    bool do_dr_or_bdr() const;
 
     /**
      * Is this LSA on this neighbours link state request list.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.118 2005/08/16 22:21:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.119 2005/08/17 01:55:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -476,6 +476,26 @@ Peer<A>::push_lsas()
 }
 
 template <typename A>
+bool
+Peer<A>::do_dr_or_bdr() const
+{
+    switch(get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+	return true;
+	break;
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+    case OspfTypes::PointToPoint:
+	return false;
+	break;
+    }
+    XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
 bool 
 Peer<A>::on_link_state_request_list(const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar) const
@@ -589,6 +609,8 @@ template <typename A>
 bool
 Peer<A>::is_neighbour_DR_or_BDR(OspfTypes::NeighbourID nid) const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	if ((*n)->get_neighbour_id() == nid)
@@ -1164,6 +1186,8 @@ template <typename A>
 OspfTypes::RouterID
 Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     // Step (2)
     // Calculate the the new backup designated router.
     // Look for routers that do not consider themselves to be the DR
@@ -1203,6 +1227,8 @@ template <typename A>
 OspfTypes::RouterID
 Peer<A>::designated_router(list<Candidate>& candidates) const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     // Step (3)
     // Calculate the designated router.
     Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"), 0);
@@ -1237,6 +1263,8 @@ template <typename A>
 void
 Peer<A>::compute_designated_router_and_backup_designated_router()
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     list<Candidate> candidates;
 
     // Is this router a candidate?
@@ -1410,6 +1438,8 @@ template <>
 uint32_t
 Peer<IPv4>::get_designated_router_interface_id(IPv4) const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	XLOG_FATAL("OSPFv3 Only");
@@ -1427,6 +1457,8 @@ template <>
 uint32_t
 Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
 	XLOG_FATAL("OSPFv3 Only");
@@ -1845,6 +1877,8 @@ template <typename A>
 OspfTypes::RouterID
 Peer<A>::get_designated_router() const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     return _hello_packet.get_designated_router();
 }
 
@@ -1861,6 +1895,8 @@ template <typename A>
 OspfTypes::RouterID
 Peer<A>::get_backup_designated_router() const
 {
+    XLOG_ASSERT(do_dr_or_bdr());
+
     return _hello_packet.get_backup_designated_router();
 }
 
@@ -1932,6 +1968,8 @@ template <typename A>
 bool
 Neighbour<A>::is_DR() const
 {
+    XLOG_ASSERT(_peer.do_dr_or_bdr());
+
     if (_peer.get_candidate_id() == _peer.get_designated_router())
 	return true;
 
@@ -1942,6 +1980,8 @@ template <typename A>
 bool
 Neighbour<A>::is_BDR() const
 {
+    XLOG_ASSERT(_peer.do_dr_or_bdr());
+
     if (_peer.get_candidate_id() == _peer.get_backup_designated_router())
 	return true;
 
@@ -1952,6 +1992,8 @@ template <typename A>
 bool
 Neighbour<A>::is_DR_or_BDR() const
 {
+    XLOG_ASSERT(_peer.do_dr_or_bdr());
+
     if (is_DR())
 	return true;
 
@@ -1966,6 +2008,8 @@ bool
 Neighbour<A>::is_neighbour_DR_or_BDR()
     const
 {
+    XLOG_ASSERT(_peer.do_dr_or_bdr());
+
     if (get_candidate_id() == _peer.get_designated_router())
 	return true;
 
@@ -2445,9 +2489,11 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     OspfTypes::RouterID previous_bdr;
     if (first) {
     } else {
-	previous_router_priority = _hello_packet->get_router_priority();
-	previous_dr = _hello_packet->get_designated_router();
-	previous_bdr = _hello_packet->get_backup_designated_router();
+	if (_peer.do_dr_or_bdr()) {
+	    previous_router_priority = _hello_packet->get_router_priority();
+	    previous_dr = _hello_packet->get_designated_router();
+	    previous_bdr = _hello_packet->get_backup_designated_router();
+	}
 	delete _hello_packet;
     }
     _hello_packet = hello;
@@ -2467,9 +2513,12 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     }
     event_2_way_received();
 
+    // Don't attempt to compute the DR or BDR if this is not BROADCAST or NBMA.
+    if (!_peer.do_dr_or_bdr())
+	return;
+
     if (first || previous_router_priority != hello->get_router_priority())
 	_peer.schedule_event("NeighbourChange");
-
 
     bool is_dr = get_candidate_id() == hello->get_designated_router();
 
@@ -2504,7 +2553,6 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     if (OspfTypes::NBMA == get_linktype())
 	XLOG_WARNING("TBD");
 }
-
 
 template <typename A>
 void
@@ -3389,17 +3437,8 @@ Neighbour<A>::event_loading_done()
     case Loading:
 	change_state(Full);
 	_peer.update_router_links();
-	switch(get_linktype()) {
-	case OspfTypes::BROADCAST:
-	case OspfTypes::NBMA:
-	    if (is_DR())
-		_peer.generate_network_lsa();
-	    break;
-	case OspfTypes::PointToMultiPoint:
-	case OspfTypes::VirtualLink:
-	case OspfTypes::PointToPoint:
-	    break;
-    }
+	if (_peer.do_dr_or_bdr() && is_DR())
+	    _peer.generate_network_lsa();
 	break;
     case Full:
 	break;
