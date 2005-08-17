@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.25 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.26 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -328,7 +328,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	    && ii->second.enabled()) {
 	    //
 	    // XXX: we don't allow the set the MAC address if the interface
-	    // is not DOWN.
+	    // is not DOWN (limitation imposed by Linux).
 	    //
 	    error_msg = c_format("Cannot set Ethernet MAC address: "
 				 "the interface is not DOWN");
