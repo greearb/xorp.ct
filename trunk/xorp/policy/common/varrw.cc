@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/varrw.cc,v 1.1 2005/07/08 02:06:22 abittau Exp $"
+#ident "$XORP: xorp/policy/common/varrw.cc,v 1.2 2005/07/20 01:29:24 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
@@ -21,7 +21,7 @@
 #include "libxorp/xlog.h"
 #include "element.hh"
 
-VarRW::VarRW() : _trace(0)
+VarRW::VarRW() : _allow_trace(false), _trace(0)
 {
 }
 
@@ -33,7 +33,8 @@ const Element&
 VarRW::read_trace(const string& id)
 {
     const Element& e = read(id);
-    _tracelog << "Read " << id << ": " << e.str() << endl;
+    if (_allow_trace)
+	_tracelog << "Read " << id << ": " << e.str() << endl;
     return e;
 }
 
@@ -46,11 +47,13 @@ VarRW::write_trace(const string& id, const Element& e)
 	
 	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
 	_trace = u32.val();
-	_tracelog << "Write " << id << ": " << _trace << endl;
+	if (_allow_trace)
+	    _tracelog << "Write " << id << ": " << _trace << endl;
 	return;
     }
 
-    _tracelog << "Write " << id << ": " << e.str() << endl;
+    if (_allow_trace)
+	_tracelog << "Write " << id << ": " << e.str() << endl;
     write(id, e);
 }
 

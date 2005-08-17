@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.4 2005/07/15 02:27:08 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.5 2005/08/04 15:26:57 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,6 +29,8 @@ IvExec::IvExec(vector<PolicyInstr*>& policies, SetManager& sman, VarRW& varrw,
 	       _policies(policies), _sman(sman), _varrw(varrw),
 	       _finished(false), _fa(DEFAULT), _os(os) 
 {
+    if (!varrw.trace_allowed())
+	_os = NULL;
 }
 
 IvExec::~IvExec()
