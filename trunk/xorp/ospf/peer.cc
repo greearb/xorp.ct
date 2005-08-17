@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.118 2005/08/16 22:21:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2761,17 +2761,15 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    case OspfTypes::BORDER:
 		break;
 	    case OspfTypes::STUB:
+	    case OspfTypes::NSSA:
 		if (_ospf.get_lsa_decoder().external(ls_type)) {
 		    XLOG_TRACE(_ospf.trace()._input_errors,
-			       "AS-external-LSA not allowed in STUB area %s",
+			       "AS-external-LSA not allowed in %s area %s",
+			       pp_area_type(_peer.get_area_type()).c_str(),
 			       cstring(*dd));
 		    event_sequence_number_mismatch();
 		    return;
 		}
-		break;
-	    case OspfTypes::NSSA:
-		// XXX - Are external-LSAs allowed in NSSA.
-		XLOG_UNFINISHED();
 		break;
 	    }
 	    
