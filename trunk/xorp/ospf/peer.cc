@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.119 2005/08/17 01:55:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.120 2005/08/17 03:30:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1742,8 +1742,7 @@ template <typename A>
 void
 Peer<A>::generate_network_lsa()
 {
-    XLOG_ASSERT(OspfTypes::BROADCAST == get_linktype() ||
-		OspfTypes::NBMA == get_linktype());
+    XLOG_ASSERT(do_dr_or_bdr());
     XLOG_WARNING("TBD - This is the DR generate a Network-LSA");
 }
 
