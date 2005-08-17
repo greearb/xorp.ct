@@ -74,6 +74,7 @@ LIBTOOL = @LIBTOOL@
 LN_S = @LN_S@
 MAINT = @MAINT@
 MIBS = @MIBS@
+NETSNMPCFLAGS = @NETSNMPCFLAGS@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
@@ -118,7 +119,7 @@ TESTS = test_xorpevents$(EXEEXT)
 
 
 # -- Compiler and pre compiler flags
-AM_CPPFLAGS = `net-snmp-config --cflags` -UPACKAGE		\
+AM_CPPFLAGS = @NETSNMPCFLAGS@ -UPACKAGE		\
 				   -UPACKAGE_BUGREPORT	\
 				   -UPACKAGE_NAME	\
 				   -UPACKAGE_STRING	\

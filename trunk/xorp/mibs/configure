@@ -5298,6 +5298,8 @@ echo "${ECHO_T}no" >&6
 	break
     fi
 
+
+
     CPPFLAGS=${NETSNMPCFLAGS}
 
 for ac_header in net-snmp/agent/net-snmp-agent-includes.h
@@ -8224,6 +8226,7 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@net_snmp_found@,$net_snmp_found,;t t
 s,@snmpd@,$snmpd,;t t
 s,@snmpd2@,$snmpd2,;t t
+s,@NETSNMPCFLAGS@,$NETSNMPCFLAGS,;t t
 s,@MIBS@,$MIBS,;t t
 CEOF
 

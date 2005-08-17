@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.33 2005/05/24 22:11:09 jcardona Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.34 2005/07/29 17:52:39 bms Exp $
 ##
 
 # All of the following shared objects will be installed in
@@ -43,7 +43,7 @@ TESTS				 = test_xorpevents$(EXEEXT)
 
 # -- Compiler and pre compiler flags
 
-AM_CPPFLAGS			 = `net-snmp-config --cflags`
+AM_CPPFLAGS			 = @NETSNMPCFLAGS@
 AM_CPPFLAGS			+= -UPACKAGE		\
 				   -UPACKAGE_BUGREPORT	\
 				   -UPACKAGE_NAME	\

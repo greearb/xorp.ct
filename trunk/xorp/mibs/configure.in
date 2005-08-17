@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.9 2005/08/16 20:49:58 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.10 2005/08/16 23:42:30 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.9 2005/08/16 20:49:58 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.10 2005/08/16 23:42:30 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -465,6 +465,8 @@ while test "${net_snmp_found}" = "true"; do
 	snmpd_valid=no
 	break
     fi
+
+    AC_SUBST(NETSNMPCFLAGS)
 
     CPPFLAGS=${NETSNMPCFLAGS}
     AC_CHECK_HEADERS([net-snmp/agent/net-snmp-agent-includes.h],
