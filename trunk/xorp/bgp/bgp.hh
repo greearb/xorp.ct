@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.41 2005/07/08 23:16:38 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.42 2005/07/20 01:29:21 abittau Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -223,7 +223,7 @@ public:
     void terminate() { _exit_loop = true; }
     bool run() {return !_exit_loop;}
 
-    int create_listener(const Iptuple& iptuple);
+    XorpFd create_listener(const Iptuple& iptuple);
     LocalData *get_local_data();
     void start_server(const Iptuple& iptuple);
     void stop_server(const Iptuple& iptuple);
@@ -448,7 +448,7 @@ private:
      * Store the socket descriptor and iptuple together.
      */
     struct Server {
-	Server(int fd, Iptuple iptuple) : _serverfd(fd) {
+	Server(XorpFd fd, Iptuple iptuple) : _serverfd(fd) {
 	    _tuples.push_back(iptuple);
 	}
 	Server(const Server& rhs) {
@@ -465,10 +465,10 @@ private:
 	    return *this;
 	}
 	string str() {
-	    return c_format("fd(%d)", _serverfd);
+	    return c_format("fd(%p)", _serverfd.str().c_str());
 
 	}
-	int _serverfd;
+	XorpFd _serverfd;
 	list <Iptuple> _tuples;
     };
 
@@ -477,7 +477,7 @@ private:
     /**
      * Callback method called when a connection attempt is made.
      */
-    void connect_attempt(int fd, SelectorMask m, string laddr, uint16_t lport);
+    void connect_attempt(XorpFd fd, IoEventType type, string laddr, uint16_t lport);
 
     template <typename A>
     void extract_attributes(// Input values, 

@@ -30,7 +30,7 @@
 #include "bgp_module.h"
 
 #include "libxorp/xorp.h"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
@@ -277,40 +277,44 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
 ** Callback registered with the asyncio code.
 */
 void
-BGPMain::connect_attempt(int fd, SelectorMask m,
+BGPMain::connect_attempt(XorpFd fd, IoEventType type,
 			 string laddr, uint16_t lport)
 {
-    if (SEL_RD != m) {
-	XLOG_WARNING("Unexpected SelectorMask %#x", m);
-	return;
-    }
-
-    char buf[Socket::SOCKET_BUFFER_SIZE];
-    struct sockaddr *cliaddr = reinterpret_cast<struct sockaddr *>(buf);
-    socklen_t clilen = sizeof(buf);
-
-    int connfd = accept(fd, cliaddr, &clilen);
-
-    debug_msg("Incoming connection attempt %d\n", connfd);
-
-    if (-1 == connfd) {
-	XLOG_WARNING("Accept failed %s", strerror(errno));
-	return;
-    }
-
-    // Extract the peers IP address.
-    char peername[1024];
     int error;
-    if ((error = getnameinfo(cliaddr, clilen , peername, sizeof(peername),
-			     0, 0, NI_NUMERICHOST)))
-	XLOG_FATAL("getnameinfo() failed: %s", gai_strerror(error));
+    struct sockaddr_storage ss;
+    socklen_t sslen = sizeof(ss);
 
-    /*
-    ** Loop through our peer list and see if we are configured for
-    ** this guy.
-    */
+    char peer_hostname[MAXHOSTNAMELEN];
+    if (type != IOT_ACCEPT) {
+	XLOG_WARNING("Unexpected I/O event type %d", type);
+	return;
+    }
+
+    // Accept the incoming connection.
+    XorpFd connfd = comm_sock_accept(fd);
+    if (!connfd.is_valid()) {
+	XLOG_WARNING("accept failed: %s", comm_get_last_error_str());
+	return;
+    }
+    debug_msg("Incoming connection attempt %s\n", connfd.str().c_str());
+
+    // Query the socket for the peer's address.
+    error = getpeername(connfd, (struct sockaddr *)&ss, &sslen);
+    if (error != 0) {
+	XLOG_FATAL("getpeername() failed: %s",
+		   comm_get_last_error_str());
+    }
+
+    // Format the peer's address as an ASCII string.
+    if ((error = getnameinfo((struct sockaddr *)&ss, sslen,
+			     peer_hostname, sizeof(peer_hostname),
+			     0, 0, NI_NUMERICHOST))) {
+	XLOG_FATAL("getnameinfo() failed: %s", gai_strerror(error));
+    }
+
     _peerlist->dump_list();
 
+    // Look for the peer in the list of known peers.
     list<BGPPeer *>& peers = _peerlist->get_list();
     list<BGPPeer *>::iterator i;
 
@@ -319,8 +323,8 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 	debug_msg("Trying: %s ", iptuple.str().c_str());
 
 	if (iptuple.get_local_port() == lport &&
-	   iptuple.get_local_addr() == laddr &&
-	   iptuple.get_peer_addr() == peername) {
+	    iptuple.get_local_addr() == laddr &&
+	    iptuple.get_peer_addr() == peer_hostname) {
 	    debug_msg(" Succeeded\n");
 	    (*i)->connected(connfd);
 	    return;
@@ -328,9 +332,12 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 	debug_msg(" Failed\n");
     }
 
-    XLOG_WARNING("Connection by %s denied", peername);
-    if (-1 == close(connfd))
-	XLOG_WARNING("Close failed %s", strerror(errno));
+    XLOG_WARNING("Connection by %s denied", peer_hostname);
+
+    if (comm_close(connfd) != XORP_OK) {
+	XLOG_WARNING("Close failed: %s",
+		     comm_get_last_error_str());
+    }
 
     /*
     ** If at some later point in time we want to allow some form of
@@ -358,14 +365,14 @@ BGPMain::connect_attempt(int fd, SelectorMask m,
 void
 BGPMain::attach_peer(BGPPeer* peer)
 {
-    debug_msg("Peer added (fd %d)\n", peer->get_sock());
+    debug_msg("Peer added (fd %s)\n", peer->get_sock().str().c_str());
     _peerlist->add_peer(peer);
 }
 
 void
 BGPMain::detach_peer(BGPPeer* peer)
 {
-    debug_msg("Peer removed (fd %d)\n", peer->get_sock());
+    debug_msg("Peer removed (fd %s)\n", peer->get_sock().str().c_str());
     _peerlist->remove_peer(peer);
 }
 
@@ -763,7 +770,7 @@ BGPMain::register_ribname(const string& name)
     return true;
 }
 
-int
+XorpFd
 BGPMain::create_listener(const Iptuple& iptuple)
 {
     SocketServer s = SocketServer(iptuple, eventloop());
@@ -809,14 +816,14 @@ BGPMain::start_server(const Iptuple& iptuple)
 	}
     }
 
-    int sfd = create_listener(iptuple);
+    XorpFd sfd = create_listener(iptuple);
     if (!eventloop().
-	add_selector(sfd,
-		     SEL_RD,
+	add_ioevent_cb(sfd,
+		     IOT_ACCEPT,
 		     callback(this, &BGPMain::connect_attempt,
 			      iptuple.get_local_addr(),
 			      iptuple.get_local_port()))) {
-	XLOG_ERROR("Failed to add socket %d to eventloop", sfd);
+	XLOG_ERROR("Failed to add socket %s to eventloop", sfd.str().c_str());
     }
     _serverfds.push_back(Server(sfd, iptuple));
 }
@@ -833,8 +840,8 @@ BGPMain::stop_server(const Iptuple& iptuple)
 	    if (*j == iptuple) {
 		i->_tuples.erase(j);
 		if (i->_tuples.empty()) {
-		    eventloop().remove_selector(i->_serverfd);
-		    ::close(i->_serverfd);
+		    eventloop().remove_ioevent_cb(i->_serverfd);
+		    comm_close(i->_serverfd);
 		    _serverfds.erase(i);
 		}
 		return;
@@ -853,8 +860,8 @@ BGPMain::stop_all_servers()
     list<Server>::iterator i;
     for (i = _serverfds.begin(); i != _serverfds.end();) {
 	debug_msg("%s\n", i->str().c_str());
-	eventloop().remove_selector(i->_serverfd);
-	::close(i->_serverfd);
+	eventloop().remove_ioevent_cb(i->_serverfd);
+	comm_close(i->_serverfd);
 	_serverfds.erase(i++);
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.93 2005/08/04 14:14:02 bms Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.94 2005/08/09 22:17:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1076,7 +1076,7 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
  * must be used or closed by this method.
  */
 void
-BGPPeer::event_open(const int sock)
+BGPPeer::event_open(const XorpFd sock)
 {
     debug_msg("Connection attempt: State %d ", _state);
     if (_state == STATECONNECT || _state == STATEACTIVE) {
@@ -1090,12 +1090,16 @@ BGPPeer::event_open(const int sock)
 	XLOG_INFO("%s rejecting connection: current state %s",
 		  this->str().c_str(),
 		  pretty_print_state(_state));
-		     
+
+#ifdef HOST_OS_WINDOWS
+	closesocket((SOCKET)sock);
+#else
 	if (-1 == ::close(sock)) {
 	    XLOG_WARNING("%s Close of incoming connection failed: %s",
 			 this->str().c_str(),
 			 strerror(errno));
 	}
+#endif
     }
 }
 
@@ -1474,7 +1478,7 @@ BGPPeer::established()
 }
 
 void
-BGPPeer::connected(int sock)
+BGPPeer::connected(XorpFd sock)
 {
     if (!_SocketClient)
 	XLOG_FATAL("%s No socket structure", this->str().c_str());
@@ -1506,13 +1510,15 @@ BGPPeer::connected(int sock)
     event_open(sock);
 }
 
-int
+XorpFd
 BGPPeer::get_sock()
 {
     if (_SocketClient != NULL)
 	return _SocketClient->get_sock();
-    else
-	return -1;
+    else {
+	XorpFd invalidfd;
+	return invalidfd;
+    }
 }
 
 void

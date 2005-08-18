@@ -21,7 +21,7 @@
 #include "bgp_module.h"
 
 #include "libxorp/xorp.h"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"

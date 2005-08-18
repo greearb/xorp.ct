@@ -49,7 +49,7 @@
 
 #include "libxorp/debug.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/asyncio.hh"
 #include "libxorp/callback.hh"
@@ -84,7 +84,7 @@ public:
     //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
     EventLoop& eventloop() {return _eventloop;}
 
-    int get_sock() { return _s;}
+    XorpFd get_sock() { return _s; }
 
     void create_listener();
 
@@ -93,9 +93,7 @@ public:
     const char  *get_remote_host() {return _remote_host.c_str();}
 
 protected:
-    static const xsock_t UNCONNECTED = -1;
-
-    void set_sock(int s) {_s = s;}
+    void set_sock(XorpFd s) { _s = s; }
 
     void close_socket();
     void create_socket(const struct sockaddr *sin, int is_blocking);
@@ -116,7 +114,7 @@ protected:
     string get_remote_addr() {return _iptuple.get_peer_addr();}
     uint16_t get_remote_port() {return _iptuple.get_peer_port();}
 private:
-    xsock_t _s;
+    XorpFd _s;
 
     /*
     ** All in network byte order.
@@ -166,7 +164,7 @@ public:
      *
      * @param s incoming socket file descriptor
      */
-    void connected(int s);
+    void connected(XorpFd s);
 
     /**
      * Throw away all the data that is queued to be sent on this socket.
@@ -205,7 +203,7 @@ public:
     enum Event {
 	DATA = AsyncFileWriter::DATA,
 	FLUSHING = AsyncFileWriter::FLUSHING,
-	ERROR = AsyncFileWriter::ERROR_CHECK_ERRNO
+	ERROR = AsyncFileWriter::OS_ERROR
     };
 
     /**
@@ -259,17 +257,18 @@ public:
     bool still_reading();
 protected:
 private:
-    void connect_socket(int sock, string raddr, uint16_t port,
+    void connect_socket(XorpFd sock, string raddr, uint16_t port,
 			string laddr, ConnectCallback cb);
-    void connect_socket_complete(int fd, SelectorMask m, ConnectCallback cb);
+    void connect_socket_complete(XorpFd fd, IoEventType type,
+				 ConnectCallback cb);
     void connect_socket_break();
 
-    void async_add(int sock);
+    void async_add(XorpFd sock);
     void async_remove();
     void async_remove_reader();
     
-    void read_from_server(int sock);
-    void write_to_server(int sock);
+    void read_from_server(XorpFd sock);
+    void write_to_server(XorpFd sock);
 
     void send_message_complete(AsyncFileWriter::Event e,
 			      const uint8_t* buf,

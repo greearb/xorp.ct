@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.11 2004/06/10 22:40:40 hodson Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.12 2005/03/25 02:52:54 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -39,14 +39,14 @@ public:
     bool send(const vector<uint8_t>& data, string& error_string);
     void send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 		       const size_t buf_bytes, const size_t offset);
-    bool zap(int &fd, const char *msg);
+    bool zap(XorpFd &fd, const char *msg);
     bool disconnect(string& error_string);
     void reset();
     bool terminate(string& error_string);
 
 protected:
-    void connect_attempt(int fd, SelectorMask m);
-    void receive(int fd, SelectorMask m);
+    void connect_attempt(XorpFd fd, IoEventType type);
+    void receive(XorpFd fd, IoEventType type);
     enum status {
 	GOOD,
 	CLOSED,
@@ -67,11 +67,10 @@ private:
     const char *_server;
     const bool _verbose;
 
-    static const int UNCONNECTED = -1;
     bool _done;
-    int _s;
-    int _listen;
-    int _bind;
+    XorpFd _s;
+    XorpFd _listen;
+    XorpFd _bind;
     AsyncFileWriter *_async_writer;
     string _coordinator;
     uint32_t _genid;

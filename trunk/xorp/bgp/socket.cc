@@ -45,8 +45,6 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 
     //    _eventloop = 0;
 
-    _s = UNCONNECTED;
-
 #ifdef	DEBUG_PEERNAME
     _remote_host = "unconnected socket";
 #endif
@@ -60,12 +58,11 @@ Socket::create_listener()
     size_t len;
     const struct sockaddr *sin = get_local_socket(len);
 
-    XLOG_ASSERT(UNCONNECTED == _s);
+    XLOG_ASSERT(!_s.is_valid());
 
-    _s = comm_bind_tcp(sin, 0);
-    if (XORP_BAD_SOCKET == _s) {
+    _s = comm_bind_tcp(sin, COMM_SOCK_NONBLOCKING);
+    if (!_s.is_valid()) {
 	XLOG_ERROR("comm_bind_tcp failed");
-	_s = UNCONNECTED;
     }
 }
 
@@ -74,10 +71,10 @@ Socket::create_listener()
 void
 Socket::close_socket()
 {
-    debug_msg("Close socket %s %d\n", get_remote_host(), _s);
+    debug_msg("Close socket %s %s\n", get_remote_host(), _s.str().c_str());
 
     comm_sock_close(_s);
-    _s = UNCONNECTED;
+    _s.clear();
 }
 
 void
@@ -85,15 +82,15 @@ Socket::create_socket(const struct sockaddr *sin, int is_blocking)
 {
     debug_msg("create_socket called\n");
 
-    XLOG_ASSERT(UNCONNECTED == _s);
+    XLOG_ASSERT(!_s.is_valid());
 
-    if (UNCONNECTED == (_s = comm_sock_open(sin->sa_family, SOCK_STREAM, 0,
-					    is_blocking))) {
+    _s = comm_sock_open(sin->sa_family, SOCK_STREAM, 0, is_blocking);
+    if (!_s.is_valid()) {
 	XLOG_ERROR("comm_sock_open failed");
 	return;
     }
 
-    debug_msg("BGPSocket socket created (sock - %d)\n", _s);
+    debug_msg("BGPSocket socket created (sock - %s)\n", _s.str().c_str());
 }
 
 void
@@ -113,11 +110,7 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
     hints.ai_socktype = SOCK_STREAM;
     // addr must be numeric so this can't fail.
     if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {
-#ifdef	HOST_OS_WINDOWS
-	const char *error_string = "unknown reason";
-#else
 	const char *error_string = gai_strerror(error);
-#endif
 	XLOG_FATAL("getaddrinfo(%s,%s,...) failed: %s", addr.c_str(),
 		   port.c_str(),
 		   error_string);
@@ -156,7 +149,7 @@ void
 SocketClient::disconnect()
 {
     debug_msg("Disconnect\n");
-    XLOG_ASSERT(UNCONNECTED != get_sock());
+    XLOG_ASSERT(get_sock().is_valid());
 
     /*
     ** If you see this assert then the disconnect code has been
@@ -189,10 +182,11 @@ SocketClient::connect(ConnectCallback cb)
     debug_msg("SocketClient connecting to remote Peer %s\n",
 	      get_remote_host());
 
-    XLOG_ASSERT(UNCONNECTED == get_sock());
+    // Assert that socket doesn't already exist, as we are about to create it.
+    XLOG_ASSERT(!get_sock().is_valid());
 
     size_t len;
-    create_socket(get_local_socket(len), 1 /* blocking */);
+    create_socket(get_local_socket(len), COMM_SOCK_BLOCKING);
 
     if (_md5sig)
  	comm_set_tcpmd5(get_sock(), _md5sig);
@@ -208,7 +202,7 @@ SocketClient::connect_break()
 }
 
 void
-SocketClient::connected(int s)
+SocketClient::connected(XorpFd s)
 {
 #ifdef	DEBUG_PEERNAME
     char socket_buffer[SOCKET_BUFFER_SIZE];
@@ -217,14 +211,15 @@ SocketClient::connected(int s)
     if (-1 == getpeername(s, sin, &len))
 	XLOG_FATAL("getpeername failed: %s", strerror(errno));
     char hostname[1024];
-    if (getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0, 0))
-	XLOG_FATAL("getnameinfo failed: %s", strerror(errno));
+    int error;
+    if (error = getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0, 0))
+	XLOG_FATAL("getnameinfo failed: %s", gai_strerror(error));
     set_remote_host(hostname);
 #endif
 
     debug_msg("Connected to remote Peer %s\n", get_remote_host());
 
-    XLOG_ASSERT(UNCONNECTED == get_sock());
+    XLOG_ASSERT(!get_sock().is_valid());
     XLOG_ASSERT(!_connecting);
     set_sock(s);
     async_add(s);
@@ -313,16 +308,15 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 		    (_async_reader && _async_reader->buffers_remaining() > 0));
 	break;
 
+    case AsyncFileReader::WOULDBLOCK:
     case AsyncFileReader::FLUSHING:
 	/*
 	 * We are not using a dynamic buffer so don't worry.
 	 */
 	break;
 
-    case AsyncFileReader::ERROR_CHECK_ERRNO:
-#ifndef HOST_OS_WINDOWS
-	debug_msg("Read failed: %s\n", strerror(errno));
-#endif
+    case AsyncFileReader::OS_ERROR:
+	debug_msg("Read failed: %d\n", _async_reader->error());
 	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
 	break;
 
@@ -354,11 +348,12 @@ SocketClient::send_message_complete(AsyncFileWriter::Event ev,
     case AsyncFileWriter::FLUSHING:
 	cb->dispatch(SocketClient::FLUSHING, buf);
 	break;
-    case AsyncFileWriter::ERROR_CHECK_ERRNO:
+    case AsyncFileWriter::OS_ERROR:
 	//XXXX do something
 	//probably need to do some more error handling here
 	cb->dispatch(SocketClient::ERROR, buf);
 	break;
+    case AsyncFileWriter::WOULDBLOCK:
     case AsyncFileWriter::END_OF_FILE:
 	// Can't possibly happen.
 	break;
@@ -421,7 +416,7 @@ SocketClient::output_queue_size() const
 /* **************** BGPSocketClient - PRIVATE METHODS *********************** */
 
 void
-SocketClient::connect_socket(int sock, string raddr, uint16_t port,
+SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
 			     string laddr, ConnectCallback cb)
 {
     debug_msg("raddt %s port %d laddr %s\n", raddr.c_str(), port,
@@ -431,7 +426,7 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
     const struct sockaddr *local = get_bind_socket(len);
 
     /* Bind the local endpoint to the supplied address */
-    if (XORP_ERROR == comm_sock_bind(sock, local)) {
+    if (XORP_BAD_SOCKET == comm_sock_bind(sock, local)) {
 
 	/*
 	** This endpoint is now screwed so shut it.
@@ -446,12 +441,12 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
     const struct sockaddr *servername = get_remote_socket(len);
 
     if (!eventloop().
-	add_selector(sock,
-		    SEL_ALL,
+	add_ioevent_cb(sock,
+		    IOT_CONNECT,
 		     callback(this,
 			      &SocketClient::connect_socket_complete,
 			      cb))) {
-	XLOG_ERROR("Failed to add socket %d to eventloop", sock);
+	XLOG_ERROR("Failed to add socket %s to eventloop", sock.str().c_str());
     }
 
     const int blocking = 0;
@@ -477,77 +472,42 @@ SocketClient::connect_socket(int sock, string raddr, uint16_t port,
     // 2) A connection may have been made already, this happens in the
     // loopback case, again the completion method should deal with this.
 
-    connect_socket_complete(sock, SEL_ALL, cb);
+    connect_socket_complete(sock, IOT_CONNECT, cb);
 }
 
 void
-SocketClient::connect_socket_complete(int sock, SelectorMask m,
+SocketClient::connect_socket_complete(XorpFd sock, IoEventType type,
 				      ConnectCallback cb)
 {
-    debug_msg("connect socket complete %d %d\n", sock, m);
+    int soerror;
+    socklen_t len = sizeof(soerror);
 
-    UNUSED(m);
+    debug_msg("connect socket complete %s %d\n", sock.str().c_str(), type);
+
+    UNUSED(type);
 
     XLOG_ASSERT(_connecting);
     _connecting = false;
 
     XLOG_ASSERT(get_sock() == sock);
 
-    eventloop().remove_selector(sock);
-
-    char socket_buffer[SOCKET_BUFFER_SIZE];
-    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(socket_buffer);
-    socklen_t len = sizeof(socket_buffer);
-    int error;
-
-    /*
-    ** Try a number of different methods to discover if the connection
-    ** has succeeded.
-    */
+    eventloop().remove_ioevent_cb(sock);
 
     // Did the connection succeed?
-    if (read(sock, 0, 0) != 0) {
-	debug_msg("connect failed (read) %d\n", sock);
+    if (comm_sock_is_connected(sock) != XORP_OK) {
+	debug_msg("connect failed (comm_sock_is_connected: %s) %s\n",
+		  comm_get_last_error_str(), sock.str().c_str());
 	goto failed;
     }
 
-    // Did the connection succeed?
-    memset(sin, 0, len);
-    len = sizeof(sin);
-    if (-1 == getpeername(sock, sin, &len)) {
-	debug_msg("connect failed (geetpeername) %d\n", sock);
+    // Check for a pending socket error if one exists.
+    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, XORP_SOCKOPT_CAST(&soerror),
+		   &len) != 0) {
+	debug_msg("connect failed (getsockopt) %s\n", sock.str().c_str());
 	goto failed;
     }
 
-#if	0
-    // If we need to check the result of getpeername.
-    char hostname[1024];
-    if (getnameinfo(sin, len, hostname, sizeof(hostname), 0, 0,
-		    NI_NUMERICHOST)) {
-	debug_msg("getnameinfo failed: %s\n", strerror(errno)); 
-	goto failed;
-    }
-#endif    
-#if	0
-    if (0 == sin.sin_port) {
-	debug_msg("connect failed (sin_port) %d\n", sock);
-	goto failed;
-    }
-
-    if (0 == sin.sin_addr.s_addr) {
-	debug_msg("connect failed (sin_addr) %d\n", sock);
-	goto failed;
-    }
-#endif
-
-    // Did the connection succeed?
-    len = sizeof(error);
-    if (getsockopt(sock, SOL_SOCKET, SO_ERROR, &error, &len) < 0) {
-	debug_msg("connect failed (getsockopt) %d\n", sock);
-	goto failed;
-    }
-
-    debug_msg("connect suceeded %d\n", sock);
+    debug_msg("connect suceeded %s\n", sock.str().c_str());
 
     async_add(sock);
     cb->dispatch(true);
@@ -567,14 +527,14 @@ SocketClient::connect_socket_break()
     XLOG_ASSERT(_connecting);
     _connecting = false;
 
-    eventloop().remove_selector(get_sock());
+    eventloop().remove_ioevent_cb(get_sock());
     close_socket();
 }
 
 void 
-SocketClient::async_add(int sock)
+SocketClient::async_add(XorpFd sock)
 {
-    if (XORP_ERROR == comm_sock_set_blocking(sock, 0))
+    if (XORP_ERROR == comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING))
 	XLOG_FATAL("Failed to go non-blocking");
 
     XLOG_ASSERT(0 == _async_writer);
@@ -613,9 +573,9 @@ bool
 SocketClient::is_connected()
 {
     if (_connecting)
-	return UNCONNECTED;
+	return false;
 
-    return get_sock() != UNCONNECTED;
+    return get_sock().is_valid();
 }	
 
 bool

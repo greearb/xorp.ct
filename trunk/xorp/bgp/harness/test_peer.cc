@@ -26,7 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
 
@@ -252,7 +252,6 @@ TestPeer::TestPeer(EventLoop& eventloop, XrlRouter& xrlrouter,
     : _eventloop(eventloop), _xrlrouter(xrlrouter), _server(server),
       _verbose(verbose),
      _done(false),
-      _s(UNCONNECTED),  _listen(UNCONNECTED), _bind(UNCONNECTED),
       _async_writer(0),
       _bgp(false),
       _flying(0),
@@ -310,17 +309,17 @@ TestPeer::connect(const string& host, const uint32_t& port,
 {
     debug_msg("\n");
 
-    if(UNCONNECTED != _listen) {
+    if (_listen.is_valid()) {
 	error_string = "Peer is currently listening";
 	return false;
     }
 
-    if(UNCONNECTED != _bind) {
+    if (_bind.is_valid()) {
 	error_string = "Peer is currently bound";
 	return false;
     }
 
-    if(UNCONNECTED != _s) {
+    if (_s.is_valid()) {
 	error_string = "Peer is already connected";
 	return false;
     }
@@ -335,36 +334,37 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(peer->sa_family, SOCK_STREAM, 0);
-    if(-1 == s) {
-	error_string = c_format("socket call failed: %s", strerror(errno));
+    XorpFd s = comm_sock_open(peer->sa_family, SOCK_STREAM, 0,
+			      COMM_SOCK_NONBLOCKING);
+    if (!s.is_valid()) {
+	error_string = c_format("comm_sock_open failed: %s\n",
+				comm_get_last_error_str());
 	return false;
     }
 
-    if(-1 == ::connect(s, peer, len)) {
-	::close(s);
-	return false;
-    }
+    // XXX
+    int in_progress = 0;
+    (void)comm_sock_connect(s, peer, COMM_SOCK_NONBLOCKING, &in_progress);
 
    /*
-   ** If there is a coordinator then add a selector.
+   ** If there is a coordinator then add an I/O event callback.
    */
-   if(0 != _coordinator.length() &&
-       !_eventloop.add_selector(s, SEL_RD,
+   if (0 != _coordinator.length() &&
+       !_eventloop.add_ioevent_cb(s, IOT_READ,
 				callback(this, &TestPeer::receive))) {
-	::close(s);
-	XLOG_WARNING("Failed to add socket %d to eventloop", s);
+	comm_sock_close(s);
+	XLOG_WARNING("Failed to add socket %s to eventloop", s.str().c_str());
 	return false;
     }
 
    /*
    ** Set up the async writer.
    */
-    if(fcntl(s, F_SETFL, O_NONBLOCK) < 0) {
-        XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
+    if (XORP_ERROR == comm_sock_set_blocking(s, COMM_SOCK_NONBLOCKING)) {
+        XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
-   _async_writer = new AsyncFileWriter(_eventloop, s);
+    _async_writer = new AsyncFileWriter(_eventloop, s);
 
     _s = s;
 
@@ -377,17 +377,17 @@ TestPeer::listen(const string& host, const uint32_t& port,
 {
     debug_msg("\n");
 
-    if(UNCONNECTED != _listen) {
+    if (_listen.is_valid()) {
 	error_string = "Peer is already listening";
 	return false;
     }
 
-    if(UNCONNECTED != _bind) {
+    if (_bind.is_valid()) {
 	error_string = "Peer is currently bound";
 	return false;
     }
 
-    if(UNCONNECTED != _s) {
+    if (_s.is_valid()) {
 	error_string = "Peer is currently connected";
 	return false;
     }
@@ -403,35 +403,19 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(local->sa_family, SOCK_STREAM, 0);
-    if(-1 == s) {
-	error_string = c_format("socket call failed: %s", strerror(errno));
+    XorpFd s = comm_bind_tcp(local, COMM_SOCK_NONBLOCKING);
+    if (!s.is_valid()) {
+	error_string = c_format("comm_bind_tcp() failed: %s\n",
+				comm_get_last_error_str());
 	return false;
     }
 
-    int opt = 1;
-    if(-1 == ::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-	error_string = c_format("setsockopt failed: %s\n", strerror(errno));
-	return false;
-    }
-
-    if(-1 == ::bind(s, local, len)) {
-	::close(s);
-	error_string = c_format("Bind failed: %s", strerror(errno));
-	return false;
-    }
-
-    if(-1 == ::listen(s, 1)) {
-	::close(s);
-	error_string = c_format("Listen failed: %s", strerror(errno));
-	return false;
-    }
-
-    if(!_eventloop.add_selector(s, SEL_RD,
+    if(!_eventloop.add_ioevent_cb(s, IOT_ACCEPT,
 				callback(this,
 					 &TestPeer::connect_attempt))) {
-	::close(s);
-	error_string = c_format("Failed to add socket %d to eventloop", s);
+	comm_sock_close(s);
+	error_string = c_format("Failed to add socket %s to eventloop",
+				s.str().c_str());
 	return false;
     }
     _listen = s;
@@ -445,17 +429,17 @@ TestPeer::bind(const string& host, const uint32_t& port,
 {
     debug_msg("\n");
 
-    if(UNCONNECTED != _listen) {
+    if (_listen.is_valid()) {
 	error_string = "Peer is currently listening";
 	return false;
     }
 
-    if(UNCONNECTED != _bind) {
+    if (_bind.is_valid()) {
 	error_string = "Peer is already bound";
 	return false;
     }
 
-    if(UNCONNECTED != _s) {
+    if (_s.is_valid()) {
 	error_string = "Peer is currently connected";
 	return false;
     }
@@ -470,21 +454,24 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    int s = ::socket(local->sa_family, SOCK_STREAM, 0);
-    if(-1 == s) {
-	error_string = c_format("socket call failed: %s", strerror(errno));
+    XorpFd s = comm_sock_open(local->sa_family, SOCK_STREAM, 0,
+			      COMM_SOCK_NONBLOCKING);
+    if (!s.is_valid()) {
+	error_string = c_format("comm_sock_open failed: %s",
+				comm_get_last_error_str());
 	return false;
     }
 
-    int opt = 1;
-    if(-1 == ::setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt))) {
-	error_string = c_format("setsockopt failed: %s\n", strerror(errno));
+    if (XORP_OK != comm_set_reuseaddr(s, 1)) {
+	error_string = c_format("comm_set_reuseaddr failed: %s\n",
+				comm_get_last_error_str());
 	return false;
     }
 
-    if(-1 == ::bind(s, local, len)) {
-	::close(s);
-	error_string = c_format("Bind failed: %s", strerror(errno));
+    if (comm_sock_bind(s, local) != XORP_OK) {
+	comm_sock_close(s);
+	error_string = c_format("comm_sock_bind failed: %s",
+				comm_get_last_error_str());
 	return false;
     }
 
@@ -497,7 +484,7 @@ bool
 TestPeer::send(const vector<uint8_t>& data, string& error_string)
 {
     debug_msg("len: %u\n", XORP_UINT_CAST(data.size()));
-    if(UNCONNECTED == _s) {
+    if (!_s.is_valid()) {
 	XLOG_WARNING("Not connected");
 	error_string = "Not connected";
 	return false;
@@ -522,7 +509,7 @@ void
 TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 			const size_t buf_bytes, const size_t offset)
 {
-    switch(ev) {
+    switch (ev) {
     case AsyncFileOperator::DATA:
 	debug_msg("event: data\n");
 	if (offset == buf_bytes)
@@ -533,29 +520,33 @@ TestPeer::send_complete(AsyncFileWriter::Event ev, const uint8_t *buf,
 	debug_msg("Freeing Buffer for sent packet: %p\n", buf);
 	delete[] buf;
 	break;
-    case AsyncFileOperator::ERROR_CHECK_ERRNO:
+    case AsyncFileOperator::OS_ERROR:
 	debug_msg("event: error\n");
 	/* Don't free the message here we'll get it in the flush */
 	XLOG_ERROR("Writing buffer failed: %s",  strerror(errno));
     case AsyncFileOperator::END_OF_FILE:
 	XLOG_ERROR("End of File: %s",  strerror(errno));
+    case AsyncFileOperator::WOULDBLOCK:
+	// do nothing
+	;
     }
 }
 
 bool
-TestPeer::zap(int& fd, const char *msg)
+TestPeer::zap(XorpFd& fd, const char *msg)
 {
-    debug_msg("%s = %d\n", msg, fd);
-    if(UNCONNECTED == fd)
+    debug_msg("%s = %s\n", msg, fd.str().c_str());
+
+    if (!fd.is_valid())
 	return true;
 
-    int tempfd = fd;
-    fd = UNCONNECTED;
+    XorpFd tempfd = fd;
+    fd.clear();
 
-   _eventloop.remove_selector(tempfd);
-   debug_msg("Removing selector for fd = %d\n", tempfd);
-   if(-1 == ::close(tempfd)) {
-	XLOG_WARNING("Close of %s failed %s", msg, strerror(errno));
+   _eventloop.remove_ioevent_cb(tempfd);
+   debug_msg("Removing io event cb for fd = %s\n", tempfd.str().c_str());
+   if (comm_sock_close(tempfd) == -1) {
+	XLOG_WARNING("Close of %s failed: %s", msg, comm_get_last_error_str());
 	return false;
    }
 
@@ -567,7 +558,7 @@ TestPeer::disconnect(string& error_string)
 {
     debug_msg("\n");
 
-    if(UNCONNECTED == _s) {
+    if (!_s.is_valid()) {
 	XLOG_WARNING("Not connected");
 	error_string = "Not connected";
 	return false;
@@ -607,55 +598,52 @@ TestPeer::terminate(string& /*error_string*/)
 ** Process incoming connection attempts.
 */
 void
-TestPeer::connect_attempt(int fd, SelectorMask m)
+TestPeer::connect_attempt(XorpFd fd, IoEventType type)
 {
     debug_msg("\n");
 
-    if(SEL_RD != m) {
-	XLOG_WARNING("Unexpected SelectorMask %#x", m);
+    if (type != IOT_ACCEPT) {
+	XLOG_WARNING("Unexpected IoEventType %d", type);
 	return;
     }
 
-    if(UNCONNECTED != _s) {
+    if (_s.is_valid()) {
 	XLOG_WARNING("Connection attempt while already connected");
 	return;
     }
 
     XLOG_ASSERT(_listen == fd);
-    _listen = UNCONNECTED;
+    _listen.clear();
 
-    struct sockaddr_in cliaddr;
-    socklen_t clilen = sizeof(cliaddr);
-    int connfd = accept(fd, reinterpret_cast<struct sockaddr *>(&cliaddr),
-			&clilen);
-
-    debug_msg("Incoming connection attempt %d\n", connfd);
+    XorpFd connfd = comm_sock_accept(fd);
+    debug_msg("Incoming connection attempt %s\n", connfd.str().c_str());
 
     /*
     ** We don't want any more connection attempts so remove ourselves
     ** from the eventloop and close the file descriptor.
     */
-   _eventloop.remove_selector(fd);
-   debug_msg("Removing selector for fd = %d\n", fd);
-   if(-1 == ::close(fd))
+   _eventloop.remove_ioevent_cb(fd);
+   debug_msg("Removing io event cb for fd = %s\n", fd.str().c_str());
+   if (XORP_ERROR == comm_sock_close(fd))
 	XLOG_WARNING("Close failed");
 
    /*
-   ** If there is a coordinator then add a selector.
+   ** If there is a coordinator then add an io event callback.
    */
    if(0 != _coordinator.length() &&
-       !_eventloop.add_selector(connfd, SEL_RD,
+       !_eventloop.add_ioevent_cb(connfd, IOT_READ,
 				callback(this, &TestPeer::receive))) {
-	::close(connfd);
-	XLOG_WARNING("Failed to add socket %d to eventloop", connfd);
+	comm_sock_close(connfd);
+	XLOG_WARNING("Failed to add socket %s to eventloop",
+			connfd.str().c_str());
 	return;
     }
 
    /*
    ** Set up the async writer.
    */
-    if(fcntl(connfd, F_SETFL, O_NONBLOCK) < 0) {
-        XLOG_FATAL("Failed to go non-blocking: %s", strerror(errno));
+    if (XORP_ERROR == comm_sock_set_blocking(connfd, COMM_SOCK_NONBLOCKING)) {
+        XLOG_FATAL("Failed to go non-blocking: %s", comm_get_last_error_str());
     }
     delete _async_writer;
    _async_writer = new AsyncFileWriter(_eventloop, connfd);
@@ -667,16 +655,16 @@ TestPeer::connect_attempt(int fd, SelectorMask m)
 ** Process incoming bytes
 */
 void
-TestPeer::receive(int fd, SelectorMask m)
+TestPeer::receive(XorpFd fd, IoEventType type)
 {
     debug_msg("\n");
 
-    if(SEL_RD != m) {
-	XLOG_WARNING("Unexpected SelectorMask %#x", m);
+    if (type != IOT_READ) {
+	XLOG_WARNING("Unexpected IoEventType %d", type);
 	return;
     }
 
-    if(0 == _coordinator.length()) {
+    if (0 == _coordinator.length()) {
 	XLOG_WARNING("No coordinator configured");
 	return;
     }
@@ -687,7 +675,7 @@ TestPeer::receive(int fd, SelectorMask m)
     int len;
     if(!_bgp) {
 	uint8_t buf[64000];
-	if(-1 == (len = read(fd, buf, sizeof(buf)))) {
+	if(-1 == (len = recv(fd, (char *)buf, sizeof(buf), 0))) {
 	    string error = c_format("read error: %s", strerror(errno));
 	    XLOG_WARNING(error.c_str());
 	    datain(ERROR, _bgp_buf, _bgp_bytes, error);
@@ -710,31 +698,31 @@ TestPeer::receive(int fd, SelectorMask m)
 	get = length - _bgp_bytes;
     }
 
-    if(-1 == (len = read(fd, &_bgp_buf[_bgp_bytes], get))) {
+    if (-1 == (len = recv(fd, (char *)&_bgp_buf[_bgp_bytes], get, 0))) {
 	string error = c_format("read error: %s", strerror(errno));
 	XLOG_WARNING(error.c_str());
 	datain(ERROR, _bgp_buf, _bgp_bytes, error);
 	_bgp_bytes = 0;
-	::close(fd);
-	_s = UNCONNECTED;
-	_eventloop.remove_selector(fd);
+	comm_sock_close(fd);
+	_s.clear();
+	_eventloop.remove_ioevent_cb(fd);
 	return;
     }
 
-    if(0 == len) {
+    if (0 == len) {
 	if(0 < _bgp_bytes)
 	    datain(GOOD, _bgp_buf, _bgp_bytes);
 	datain(CLOSED, 0, 0);
 	_bgp_bytes = 0;
-	::close(fd);
-	_s = UNCONNECTED;
-	_eventloop.remove_selector(fd);
+	comm_sock_close(fd);
+	_s.clear();
+	_eventloop.remove_ioevent_cb(fd);
 	return;
     }
 
     _bgp_bytes += len;
 
-    if(_bgp_bytes >= BGP_COMMON_HEADER_LEN) {
+    if (_bgp_bytes >= BGP_COMMON_HEADER_LEN) {
 	const fixed_header *header =
 	    reinterpret_cast<const struct fixed_header *>(_bgp_buf);
 	u_short length = ntohs(header->length);
@@ -761,7 +749,7 @@ TestPeer::datain(status st, uint8_t *ptr, size_t len, string error)
     debug_msg("status = %d len = %u error = %s\n", st, XORP_UINT_CAST(len),
 	      error.c_str());
 
-    if(_verbose) {
+    if (_verbose) {
 	switch(st) {
 	case GOOD:
 	    if(_bgp)

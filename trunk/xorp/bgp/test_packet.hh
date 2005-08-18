@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/test_packet.hh,v 1.4 2004/06/10 22:40:37 hodson Exp $
+// $XORP: xorp/bgp/test_packet.hh,v 1.5 2005/03/25 02:52:50 pavlin Exp $
 
 #ifndef __BGP_TEST_PACKET_HH__
 #define __BGP_TEST_PACKET_HH__
@@ -21,7 +21,7 @@
 #include "socket.hh"
 #include "libxorp/debug.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/selector.hh"
+#include "libxorp/eventloop.hh"
 
 class BGPTestPacket
 {

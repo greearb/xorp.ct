@@ -74,15 +74,15 @@ test_subnet_route1(TestInfo& info, IPNet<A> net)
 	++net;
     }
 
-    timeval now;
+    TimeVal now;
     TimeVal start;
     TimeVal used;
 
-    gettimeofday(&now, 0);
-    start = TimeVal(now);
+    TimerList::system_gettimeofday(&now);
+    start = now;
     route_table.delete_all_nodes();
-    gettimeofday(&now, 0);
-    used = TimeVal(now) - start;
+    TimerList::system_gettimeofday(&now);
+    used = now - start;
 
     DOUT(info) << " To delete " << routes << 
 	" routes with the same path attribute list took " <<
@@ -115,15 +115,15 @@ test_subnet_route2(TestInfo& info, IPNet<A> net)
 	++net;
     }
 
-    timeval now;
+    TimeVal now;
     TimeVal start;
     TimeVal used;
 
-    gettimeofday(&now, 0);
-    start = TimeVal(now);
+    TimerList::system_gettimeofday(&now);
+    start = now;
     route_table.delete_all_nodes();
-    gettimeofday(&now, 0);
-    used = TimeVal(now) - start;
+    TimerList::system_gettimeofday(&now);
+    used = now - start;
 
     DOUT(info) << " To delete " << routes << 
 	" routes with the a different path attribute list per route took " <<

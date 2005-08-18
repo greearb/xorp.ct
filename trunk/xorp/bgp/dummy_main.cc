@@ -25,7 +25,7 @@
 #endif
 
 #include "libxorp/xorp.h"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
@@ -65,8 +65,7 @@ BGPMain::local_config(const uint32_t&, const IPv4&)
 ** Callback registered with the asyncio code.
 */
 void 
-BGPMain::connect_attempt(int, SelectorMask,
-			 string, uint16_t)
+BGPMain::connect_attempt(XorpFd, IoEventType, string, uint16_t)
 {
 }
 
@@ -119,10 +118,12 @@ BGPMain::register_ribname(const string&)
     return false;
 }
 
-int
+XorpFd
 BGPMain::create_listener(const Iptuple&)
 {
-    return 0;
+    XorpFd tmpfd;
+
+    return (tmpfd);
 }
 
 LocalData*
