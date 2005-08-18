@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/xorpevents.cc,v 1.13 2004/06/10 22:41:25 hodson Exp $"
+#ident "$XORP: xorp/mibs/xorpevents.cc,v 1.14 2005/03/25 02:53:53 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -23,6 +23,7 @@
 #include "xorp_netsnmp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/xorpfd.hh"
 
 #include "xorpevents.hh"
 
@@ -38,7 +39,7 @@ SnmpEventLoop SnmpEventLoop::_sel;
 // from test programs
 //
 void
-run_fd_callbacks (int, void *)
+run_fd_callbacks(int, void *)
 {
     SnmpEventLoop& e = SnmpEventLoop::the_instance();
     /*
@@ -46,7 +47,7 @@ run_fd_callbacks (int, void *)
      * descriptors showed some activity, thus the 0 ms timeout
      */
     DEBUGMSGTL((e._log_name, "run all xorp file descriptor callbacks\n"));
-    if (!e.selector_list().select(0))
+    if (!e.selector_list().wait_and_dispatch(0))
 	snmp_log(LOG_WARNING, "call to run_fd_callbacks did nothing\n");
 }
 
@@ -90,68 +91,77 @@ SnmpEventLoop::~SnmpEventLoop()
 }
 
 void 
-SnmpEventLoop::notify_added(int fd, const SelectorMask& mask) 
+SnmpEventLoop::notify_added(XorpFd fd, const SelectorMask& mask) 
 {
   
     switch (mask) {
     case SEL_RD:
 	if (_exported_readfds.end() != _exported_readfds.find(fd)) break; 
-	if (FD_REGISTERED_OK != register_readfd(fd, run_fd_callbacks, NULL))
-	    snmp_log(LOG_WARNING, "unable to import xorp fd %d\n", fd);
+	if (FD_REGISTERED_OK != register_readfd(fd, run_fd_callbacks,
+						NULL))
+	    snmp_log(LOG_WARNING, "unable to import xorp fd %s\n",
+		     fd.str().c_str());
 	else {
-	    DEBUGMSGTL((_log_name, "imported xorp rdfd:%d\n", fd));
+	    DEBUGMSGTL((_log_name, "imported xorp rdfd:%s\n",
+			fd.str().c_str()));
 	    _exported_readfds.insert(fd);
 	}
 	break;
     case SEL_WR:
 	if (_exported_writefds.end() != _exported_writefds.find(fd)) break; 
 	if (FD_REGISTERED_OK != register_writefd(fd, run_fd_callbacks, NULL))
-	    snmp_log(LOG_WARNING, "unable to import xorp fd %d\n", fd);
+	    snmp_log(LOG_WARNING, "unable to import xorp fd %s\n",
+		     fd.str().c_str());
 	else {
-	    DEBUGMSGTL((_log_name, "imported xorp wrfd:%d \n", fd));
+	    DEBUGMSGTL((_log_name, "imported xorp wrfd:%s\n",
+			fd.str().c_str()));
 	    _exported_writefds.insert(fd);
 	}
 	break;
     case SEL_EX:
 	if (_exported_exceptfds.end() != _exported_exceptfds.find(fd)) break; 
 	if (FD_REGISTERED_OK != register_exceptfd(fd, run_fd_callbacks, NULL))
-	    snmp_log(LOG_WARNING, "unable to import xorp fd %d\n", fd);
+	    snmp_log(LOG_WARNING, "unable to import xorp fd %s\n",
+		     fd.str().c_str());
 	else {
-	    DEBUGMSGTL((_log_name, "imported xorp exfd:%d \n", fd));
+	    DEBUGMSGTL((_log_name, "imported xorp exfd:%s\n",
+			fd.str().c_str()));
 	    _exported_exceptfds.insert(fd);
 	}
 	break;
    default:
-	snmp_log(LOG_WARNING, "invalid mask %d for fd %d\n", mask, fd);
+	snmp_log(LOG_WARNING, "invalid mask %d for fd %s\n", mask,
+		 fd.str().c_str());
     }
     
 }
 
 void 
-SnmpEventLoop::notify_removed(int fd, const SelectorMask& mask) 
+SnmpEventLoop::notify_removed(XorpFd fd, const SelectorMask& mask) 
 {
     SnmpEventLoop::FdSet::iterator p;
     switch (mask) {
     case SEL_RD:
 	p = _exported_readfds.find(fd);
 	if (p == _exported_readfds.end()) break; 
-	unregister_readfd(*p);
+	unregister_readfd(fd);
 	_exported_readfds.erase(p);
 	break;	
     case SEL_WR:
 	p =_exported_writefds.find(fd);
 	if (p == _exported_writefds.end()) break;
-	unregister_writefd(*p);
+	unregister_writefd(fd);
 	_exported_writefds.erase(p);
 	break;	
     case SEL_EX: 
 	p = _exported_exceptfds.find(fd);
 	if (p == _exported_exceptfds.end()) break;
-	unregister_exceptfd(*p);
+	unregister_exceptfd(fd);
 	_exported_exceptfds.erase(p);
 	break;	
     default:
-	snmp_log(LOG_WARNING, "invalid mask %d for fd %d\n", mask, fd);
+	snmp_log(LOG_WARNING, "invalid mask %d for fd %s\n", mask,
+		 fd.str().c_str());
     }
 }
 
@@ -192,20 +202,20 @@ void
 SnmpEventLoop::clear_pending_alarms ()
 {
     SnmpEventLoop::AlarmMap::iterator p;
-    for (p = _pending_alarms.begin(); p != _pending_alarms.end(); p++)
+    for (p = _pending_alarms.begin(); p != _pending_alarms.end(); ++p)
 	snmp_alarm_unregister((*p).second);
     _pending_alarms.erase(_pending_alarms.begin(), _pending_alarms.end());
 }
 
 void
-SnmpEventLoop::clear_monitored_fds ()
+SnmpEventLoop::clear_monitored_fds()
 {
     SnmpEventLoop::FdSet::iterator p;
-    for (p = _exported_readfds.begin(); p != _exported_readfds.end(); p++)
+    for (p = _exported_readfds.begin(); p != _exported_readfds.end(); ++p)
 	unregister_readfd(*p);
-    for (p = _exported_writefds.begin(); p != _exported_writefds.end(); p++)
+    for (p = _exported_writefds.begin(); p != _exported_writefds.end(); ++p)
 	unregister_writefd(*p);
-    for (p = _exported_exceptfds.begin(); p != _exported_exceptfds.end(); p++)
+    for (p = _exported_exceptfds.begin(); p != _exported_exceptfds.end(); ++p)
 	unregister_exceptfd(*p);
     _exported_readfds.erase(_exported_readfds.begin(),_exported_readfds.end());
     _exported_writefds.erase(
