@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.45 2005/07/19 23:38:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.46 2005/08/05 12:53:31 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -600,6 +600,16 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     
     string alert = "The configuration had been changed by user " +
 	username + "\n";
+    if (! deltas.empty()) {
+	alert += "DELTAS:\n";
+	SlaveConfigTree sct(deltas, _tt, _xclient, _clientid, false);
+	alert += sct.show_tree(false);
+    }
+    if (! deletions.empty()) {
+	alert += "DELETIONS:\n";
+	SlaveConfigTree sct(deletions, _tt, _xclient, _clientid, false);
+	alert += sct.show_tree(false);
+    }
     _router_cli->notify_user(alert, true);
 }
 
