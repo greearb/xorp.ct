@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.15 2005/03/11 19:51:49 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_mirror.cc,v 1.16 2005/03/25 02:53:23 pavlin Exp $"
 
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
@@ -392,7 +392,7 @@ IfMgrXrlMirrorTarget::fea_ifmgr_mirror_0_1_interface_set_pif_index(
 	)
 {
     _dispatcher.push(new IfMgrIfSetPifIndex(ifname,
-					    static_cast<uint16_t>(pif)));
+					    static_cast<uint32_t>(pif)));
     if (_dispatcher.execute() == true) {
 	return XrlCmdError::OKAY();
     }

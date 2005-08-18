@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.15 2004/11/05 03:54:10 bms Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.16 2005/03/25 02:53:22 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -177,8 +177,8 @@ public:
     inline const Mac&	mac() const			{ return _mac; }
     inline void		set_mac(const Mac& mac)		{ _mac = mac; }
 
-    inline uint16_t	pif_index() const		{ return _pif; }
-    inline void		set_pif_index(uint16_t pif)	{ _pif = pif; }
+    inline uint32_t	pif_index() const		{ return _pif; }
+    inline void		set_pif_index(uint32_t pif)	{ _pif = pif; }
 
     inline const VifMap& vifs() const			{ return _vifs; }
     inline VifMap& vifs()				{ return _vifs; }
@@ -197,7 +197,7 @@ protected:
     bool	_discard;	// is a discard interface
     uint32_t	_mtu;		// mtu in bytes
     Mac		_mac;		// MAC address
-    uint16_t	_pif;		// Physical interface index
+    uint32_t	_pif;		// Physical interface index
 
     VifMap	_vifs;		// map of vifname-vif
 };
@@ -233,8 +233,8 @@ public:
     inline bool		loopback() const		{ return _loopback; }
     inline void		set_loopback(bool l)		{ _loopback = l; }
 
-    inline uint16_t	pif_index() const		{ return _pif; }
-    inline uint16_t	set_pif_index(uint16_t i) 	{ return _pif = i; }
+    inline uint32_t	pif_index() const		{ return _pif; }
+    inline uint32_t	set_pif_index(uint32_t i) 	{ return _pif = i; }
 
     inline const V4Map&	ipv4addrs() const		{ return _v4addrs; }
     inline V4Map&	ipv4addrs() 			{ return _v4addrs; }
@@ -259,7 +259,7 @@ protected:
     bool	_bcap;		// broadcast capable
     bool	_p2pcap;	// point-to-point capable
     bool	_loopback;	// true if loopback Vif
-    uint16_t	_pif;		// physical interface index
+    uint32_t	_pif;		// physical interface index
 
     V4Map	_v4addrs;
     V6Map	_v6addrs;

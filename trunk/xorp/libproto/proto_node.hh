@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.29 2005/03/20 00:21:10 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.30 2005/03/25 02:53:24 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -77,7 +77,7 @@ public:
      * @param vif_name the vif name to map to a vif index.
      * @return the virtual interface index for vif name @ref vif_name.
      */
-    inline uint16_t vif_name2vif_index(const string& vif_name) const;
+    inline uint32_t vif_name2vif_index(const string& vif_name) const;
     
     /**
      * Find an unused vif index.
@@ -85,7 +85,7 @@ public:
      * @return the smallest unused vif index if there is one available,
      * otherwise return @ref Vif::VIF_INDEX_INVALID.
      */
-    inline uint16_t find_unused_vif_index() const;
+    inline uint32_t find_unused_vif_index() const;
     
     /**
      * Find a virtual interface for a given name.
@@ -116,7 +116,7 @@ public:
      * @return the virtual interface with physical interface index @ref
      * pif_index if found, otherwise NULL.
      */
-    inline V *vif_find_by_pif_index(uint16_t pif_index) const;
+    inline V *vif_find_by_pif_index(uint32_t pif_index) const;
     
     /**
      * Find a virtual interface for a given virtual interface index.
@@ -125,7 +125,7 @@ public:
      * @return the vvirtual interface with virtual interface index @ref
      * vif_index if found, otherwise NULL.
      */
-    inline V *vif_find_by_vif_index(uint16_t vif_index) const;
+    inline V *vif_find_by_vif_index(uint32_t vif_index) const;
 
     /**
      * Find a virtual interface that belongs to the same subnet
@@ -198,7 +198,7 @@ public:
      * 
      * @return the maximum number of vifs we can have.
      */
-    uint16_t	maxvifs() const { return (_proto_vifs.size()); }
+    uint32_t	maxvifs() const { return (_proto_vifs.size()); }
 
     /**
      * Get the event loop this node is added to.
@@ -259,7 +259,7 @@ public:
      */
     virtual int	proto_recv(const string& src_module_instance_name,
 			   xorp_module_id src_module_id,
-			   uint16_t vif_index,
+			   uint32_t vif_index,
 			   const IPvX& src,
 			   const IPvX& dst,
 			   int ip_ttl,
@@ -303,7 +303,7 @@ public:
      */
     virtual int	proto_send(const string& dst_module_instance_name,
 			   xorp_module_id dst_module_id,
-			   uint16_t vif_index,
+			   uint32_t vif_index,
 			   const IPvX& src,
 			   const IPvX& dst,
 			   int ip_ttl,
@@ -345,7 +345,7 @@ public:
     virtual int	signal_message_recv(const string& src_module_instance_name,
 				    xorp_module_id src_module_id,
 				    int message_type,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst,
 				    const uint8_t *rcvbuf,
@@ -384,7 +384,7 @@ public:
     virtual int	signal_message_send(const string& dst_module_instance_name,
 				    xorp_module_id dst_module_id,
 				    int message_type,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst,
 				    const uint8_t *sndbuf,
@@ -437,7 +437,7 @@ public:
      * @return the smallest unused vif index from the set of configured vifs
      * if there is one available, otherwise return @ref Vif::VIF_INDEX_INVALID.
      */
-    inline uint16_t find_unused_config_vif_index() const;
+    inline uint32_t find_unused_config_vif_index() const;
 
     /**
      * Add a configured vif.
@@ -456,7 +456,7 @@ public:
      * @error_msg: The error message (if error).
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_config_vif(const string& vif_name, uint16_t vif_index,
+    int		add_config_vif(const string& vif_name, uint32_t vif_index,
 			       string& error_msg);
 
     /**
@@ -507,7 +507,7 @@ public:
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
-				     uint16_t pif_index,
+				     uint32_t pif_index,
 				     string& error_msg);
     
     /**
@@ -577,7 +577,7 @@ private:
     vector<V *> _proto_vifs;	// The array with all protocol vifs
     EventLoop&	_eventloop;	// The event loop to use
     
-    map<string, uint16_t> _vif_name2vif_index_map;
+    map<string, uint32_t> _vif_name2vif_index_map;
     
     bool	_is_vif_setup_completed;	// True if the vifs are setup
     
@@ -719,10 +719,10 @@ ProtoNode<V>::update_status()
 }
 
 template<class V>
-inline uint16_t
+inline uint32_t
 ProtoNode<V>::vif_name2vif_index(const string& vif_name) const
 {
-    map<string, uint16_t>::const_iterator iter;
+    map<string, uint32_t>::const_iterator iter;
     
     iter = find(_vif_name2vif_index_map.find(vif_name));
     if (iter != _vif_name2vif_index_map.end())
@@ -731,10 +731,10 @@ ProtoNode<V>::vif_name2vif_index(const string& vif_name) const
 }
 
 template<class V>
-inline uint16_t
+inline uint32_t
 ProtoNode<V>::find_unused_vif_index() const
 {
-    for (uint16_t i = 0; i < _proto_vifs.size(); i++) {
+    for (uint32_t i = 0; i < _proto_vifs.size(); i++) {
 	if (_proto_vifs[i] == NULL)
 	    return (i);
     }
@@ -786,7 +786,7 @@ ProtoNode<V>::vif_find_by_addr(const IPvX& ipaddr_test) const
 
 template<class V>
 inline V *
-ProtoNode<V>::vif_find_by_pif_index(uint16_t pif_index) const
+ProtoNode<V>::vif_find_by_pif_index(uint32_t pif_index) const
 {
     typename vector<V *>::const_iterator iter;
     
@@ -803,7 +803,7 @@ ProtoNode<V>::vif_find_by_pif_index(uint16_t pif_index) const
 
 template<class V>
 inline V *
-ProtoNode<V>::vif_find_by_vif_index(uint16_t vif_index) const
+ProtoNode<V>::vif_find_by_vif_index(uint32_t vif_index) const
 {
     if (vif_index < _proto_vifs.size()) {
 	// XXX: if vif_index becomes signed, we must check (vif_index >= 0)
@@ -875,7 +875,7 @@ ProtoNode<V>::add_vif(V *vif)
     
     // Add the entry to the vif_name2vif_index map
     _vif_name2vif_index_map.insert(
-	pair<string, uint16_t>(vif->name(), vif->vif_index()));
+	pair<string, uint32_t>(vif->name(), vif->vif_index()));
     
     return (XORP_OK);
 }
@@ -920,7 +920,7 @@ ProtoNode<V>::delete_vif(const V *vif)
     }
     
     // Remove the entry from the vif_name2vif_index map
-    map<string, uint16_t>::iterator iter;
+    map<string, uint32_t>::iterator iter;
     iter = _vif_name2vif_index_map.find(vif->name());
     XLOG_ASSERT(iter != _vif_name2vif_index_map.end());
     _vif_name2vif_index_map.erase(iter);
@@ -993,12 +993,12 @@ ProtoNode<V>::end_config(string& error_msg)
 }
 
 template<class V>
-inline uint16_t
+inline uint32_t
 ProtoNode<V>::find_unused_config_vif_index() const
 {
     map<string, Vif>::const_iterator iter;
     
-    for (uint16_t i = 0; i < Vif::VIF_INDEX_INVALID; i++) {
+    for (uint32_t i = 0; i < Vif::VIF_INDEX_INVALID; i++) {
 	bool is_avail = true;
 	// Check if this vif index is in use
 	for (iter = _configured_vifs.begin();
@@ -1070,7 +1070,7 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
 
 template<class V>
 inline int
-ProtoNode<V>::add_config_vif(const string& vif_name, uint16_t vif_index,
+ProtoNode<V>::add_config_vif(const string& vif_name, uint32_t vif_index,
 			     string& error_msg)
 {
     map<string, Vif>::iterator iter;
@@ -1209,7 +1209,7 @@ ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
 template<class V>
 inline int
 ProtoNode<V>::set_config_pif_index(const string& vif_name,
-				   uint16_t pif_index,
+				   uint32_t pif_index,
 				   string& error_msg)
 {
     map<string, Vif>::iterator iter;

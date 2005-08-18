@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.9 2004/11/05 03:54:10 bms Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.10 2005/03/25 02:53:22 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -168,7 +168,7 @@ protected:
  */
 class IfMgrIfSetPifIndex : public IfMgrIfCommandBase {
 public:
-    inline IfMgrIfSetPifIndex(const string& ifname, uint16_t pif)
+    inline IfMgrIfSetPifIndex(const string& ifname, uint32_t pif)
 	: IfMgrIfCommandBase(ifname), _pif(pif) {}
 
     inline uint32_t pif_index() const			{ return _pif; }
@@ -182,7 +182,7 @@ public:
     string str() const;
 
 protected:
-    uint16_t _pif;
+    uint32_t _pif;
 };
 
 
