@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.17 2005/05/10 23:58:57 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.18 2005/05/27 20:37:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry data handling
@@ -55,7 +55,7 @@
 
 // Note: applies only for (S,G)
 void
-PimMre::update_sptbit_sg(uint16_t iif_vif_index)
+PimMre::update_sptbit_sg(uint32_t iif_vif_index)
 {
     PimMre *pim_mre_wc = wc_entry();
     PimNbr *pim_nbr_rpfp_nbr_wc = NULL;

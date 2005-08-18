@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.42 2005/05/16 19:17:28 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.43 2005/06/21 00:03:58 pavlin Exp $"
 
 
 //
@@ -174,7 +174,7 @@ PimBsr::stop()
     // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
     // messages. Note that the PIM Register vif is excluded.
     //
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	pim_vif_up = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif_up == NULL)
 	    continue;
@@ -262,7 +262,7 @@ PimBsr::stop()
 	    
 	    active_bsr_zone->new_fragment_tag();
 	    active_bsr_zone->set_is_cancel(true);
-	    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 		PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 		if (pim_vif == NULL)
 		    continue;
@@ -809,7 +809,7 @@ PimBsr::clean_expire_bsr_zones_timer_timeout()
 }
 
 void
-PimBsr::add_vif_addr(uint16_t vif_index, const IPvX& vif_addr)
+PimBsr::add_vif_addr(uint32_t vif_index, const IPvX& vif_addr)
 {
     bool old_is_up = is_up();
     bool found = false;
@@ -875,7 +875,7 @@ PimBsr::add_vif_addr(uint16_t vif_index, const IPvX& vif_addr)
 }
 
 void
-PimBsr::delete_vif_addr(uint16_t vif_index, const IPvX& vif_addr)
+PimBsr::delete_vif_addr(uint32_t vif_index, const IPvX& vif_addr)
 {
     bool old_is_up = is_up();
     bool found = false;
@@ -1263,7 +1263,7 @@ PimBsr::send_test_cand_rp_adv()
     // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
     // messages. Note that the PIM Register vif is excluded.
     //
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -2281,7 +2281,7 @@ BsrZone::bsr_timer_timeout()
     }
     // Originate BSM
     new_fragment_tag();
-    for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -2302,7 +2302,7 @@ BsrZone::bsr_timer_timeout()
     set_bsr_zone_state(BsrZone::STATE_ELECTED_BSR);
     // Originate BSM
     new_fragment_tag();
-    for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -2345,7 +2345,7 @@ BsrZone::scope_zone_expiry_timer_timeout()
 
 void
 BsrZone::set_i_am_candidate_bsr(bool i_am_candidate_bsr,
-				uint16_t my_vif_index,
+				uint32_t my_vif_index,
 				const IPvX& my_bsr_addr,
 				uint8_t my_bsr_priority)
 {
@@ -2518,7 +2518,7 @@ BsrZone::candidate_rp_advertise_timer_timeout()
 	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
 	// messages. Note that the PIM Register vif is excluded.
 	//
-	for (uint16_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
 	    pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_task.hh,v 1.8 2005/03/25 02:54:00 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_task.hh,v 1.9 2005/04/20 09:34:47 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TASK_HH__
@@ -153,13 +153,13 @@ public:
 	_pim_nbr_addr = v;
 	_is_set_pim_nbr_addr_sg_sg_rpt = true;
     }
-    void	set_vif_index(uint16_t v) { _vif_index = v; }
+    void	set_vif_index(uint32_t v) { _vif_index = v; }
     void	set_addr_arg(const IPvX& v) { _addr_arg = v; }
     
     //
     // Misc. information
     //
-    uint16_t	vif_index() const { return (_vif_index); }
+    uint32_t	vif_index() const { return (_vif_index); }
     const IPvX&	addr_arg() const { return (_addr_arg); }
     PimMreTrackState::input_state_t input_state() const { return (_input_state); }
     
@@ -278,7 +278,7 @@ private:
     bool	_is_processing_pim_nbr_addr_sg_rpt;
     
     // The 'occasionally-used' argument(s).
-    uint16_t	_vif_index;
+    uint32_t	_vif_index;
     IPvX	_addr_arg;
 
     //

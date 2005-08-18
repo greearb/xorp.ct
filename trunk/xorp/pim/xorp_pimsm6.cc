@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.9 2005/02/19 02:55:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/xorp_pimsm6.cc,v 1.10 2005/03/25 02:54:04 pavlin Exp $"
 
 
 //
@@ -31,6 +31,9 @@
 
 #include "xrl_pim_node.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 //
 // Local functions prototypes

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrt.hh,v 1.15 2005/04/30 21:36:45 pavlin Exp $
+// $XORP: xorp/pim/pim_mrt.hh,v 1.16 2005/05/27 20:37:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRT_HH__
@@ -131,22 +131,22 @@ public:
     //
     int signal_message_nocache_recv(const string& src_module_instance_name,
 				    xorp_module_id src_module_id,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst);
     int signal_message_wrongvif_recv(const string& src_module_instance_name,
 				     xorp_module_id src_module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst);
     int signal_message_wholepkt_recv(const string& src_module_instance_name,
 				     xorp_module_id src_module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst,
 				     const uint8_t *rcvbuf,
 				     size_t rcvlen);
-    void receive_data(uint16_t iif_vif_index, const IPvX& src,
+    void receive_data(uint32_t iif_vif_index, const IPvX& src,
 		      const IPvX& dst);
     
     int signal_dataflow_recv(const IPvX& source_addr,
@@ -168,9 +168,9 @@ public:
     int		family() const;
     PimMribTable& pim_mrib_table();
     Mifset&	i_am_dr();
-    PimVif	*vif_find_by_vif_index(uint16_t vif_index);
+    PimVif	*vif_find_by_vif_index(uint32_t vif_index);
     PimVif	*vif_find_pim_register();
-    uint16_t	pim_register_vif_index() const;
+    uint32_t	pim_register_vif_index() const;
     
     //
     // Track-state related methods
@@ -199,68 +199,68 @@ public:
     void add_task_delete_mrib_entries(const list<Mrib *>& mrib_list);
     void add_task_nbr_mrib_next_hop_changed(const IPvXNet& modified_prefix_addr);
     void add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr);
-    void add_task_pim_nbr_changed(uint16_t vif_index,
+    void add_task_pim_nbr_changed(uint32_t vif_index,
 				  const IPvX& pim_nbr_addr);
-    void add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
+    void add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
 					 const IPvX& pim_nbr_addr);
     void add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
 					  const IPvX& group_addr);
     void add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
 					  const IPvX& source_addr,
 					  const IPvX& group_addr);
-    void add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr);
-    void add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr);
-    void add_task_receive_join_sg(uint16_t vif_index, const IPvX& source_addr,
+    void add_task_receive_join_rp(uint32_t vif_index, const IPvX& rp_addr);
+    void add_task_receive_join_wc(uint32_t vif_index, const IPvX& group_addr);
+    void add_task_receive_join_sg(uint32_t vif_index, const IPvX& source_addr,
 				  const IPvX& group_addr);
-    void add_task_receive_join_sg_rpt(uint16_t vif_index,
+    void add_task_receive_join_sg_rpt(uint32_t vif_index,
 				      const IPvX& source_addr,
 				      const IPvX& group_addr);
-    void add_task_receive_prune_rp(uint16_t vif_index, const IPvX& rp_addr);
-    void add_task_receive_prune_wc(uint16_t vif_index, const IPvX& group_addr);
-    void add_task_see_prune_wc(uint16_t vif_index, const IPvX& group_addr,
+    void add_task_receive_prune_rp(uint32_t vif_index, const IPvX& rp_addr);
+    void add_task_receive_prune_wc(uint32_t vif_index, const IPvX& group_addr);
+    void add_task_see_prune_wc(uint32_t vif_index, const IPvX& group_addr,
 			       const IPvX& target_nbr_addr);
-    void add_task_receive_prune_sg(uint16_t vif_index, const IPvX& source_addr,
+    void add_task_receive_prune_sg(uint32_t vif_index, const IPvX& source_addr,
 				   const IPvX& group_addr);
-    void add_task_receive_prune_sg_rpt(uint16_t vif_index,
+    void add_task_receive_prune_sg_rpt(uint32_t vif_index,
 				       const IPvX& source_addr,
 				       const IPvX& group_addr);
-    void add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
+    void add_task_receive_end_of_message_sg_rpt(uint32_t vif_index,
 						const IPvX& group_addr);
-    void add_task_downstream_jp_state_rp(uint16_t vif_index,
+    void add_task_downstream_jp_state_rp(uint32_t vif_index,
 					 const IPvX& rp_addr);
-    void add_task_downstream_jp_state_wc(uint16_t vif_index,
+    void add_task_downstream_jp_state_wc(uint32_t vif_index,
 					 const IPvX& group_addr);
-    void add_task_downstream_jp_state_sg(uint16_t vif_index,
+    void add_task_downstream_jp_state_sg(uint32_t vif_index,
 					 const IPvX& source_addr,
 					 const IPvX& group_addr);
-    void add_task_downstream_jp_state_sg_rpt(uint16_t vif_index,
+    void add_task_downstream_jp_state_sg_rpt(uint32_t vif_index,
 					     const IPvX& source_addr,
 					     const IPvX& group_addr);
     void add_task_upstream_jp_state_sg(const IPvX& source_addr,
 				       const IPvX& group_addr);
-    void add_task_local_receiver_include_wc(uint16_t vif_index,
+    void add_task_local_receiver_include_wc(uint32_t vif_index,
 					    const IPvX& group_addr);
-    void add_task_local_receiver_include_sg(uint16_t vif_index,
+    void add_task_local_receiver_include_sg(uint32_t vif_index,
 					    const IPvX& source_addr,
 					    const IPvX& group_addr);
-    void add_task_local_receiver_exclude_sg(uint16_t vif_index,
+    void add_task_local_receiver_exclude_sg(uint32_t vif_index,
 					    const IPvX& source_addr,
 					    const IPvX& group_addr);
-    void add_task_assert_state_wc(uint16_t vif_index, const IPvX& group_addr);
-    void add_task_assert_state_sg(uint16_t vif_index,
+    void add_task_assert_state_wc(uint32_t vif_index, const IPvX& group_addr);
+    void add_task_assert_state_sg(uint32_t vif_index,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr);
-    void add_task_i_am_dr(uint16_t vif_index);
-    void add_task_my_ip_address(uint16_t vif_index);
-    void add_task_my_ip_subnet_address(uint16_t vif_index);
+    void add_task_i_am_dr(uint32_t vif_index);
+    void add_task_my_ip_address(uint32_t vif_index);
+    void add_task_my_ip_subnet_address(uint32_t vif_index);
     void add_task_spt_switch_threshold_changed();
     void add_task_was_switch_to_spt_desired_sg(const IPvX& source_addr,
 					       const IPvX& group_addr);
     void add_task_keepalive_timer_sg(const IPvX& source_addr,
 				     const IPvX& group_addr);
     void add_task_sptbit_sg(const IPvX& source_addr, const IPvX& group_addr);
-    void add_task_start_vif(uint16_t vif_index);
-    void add_task_stop_vif(uint16_t vif_index);
+    void add_task_start_vif(uint32_t vif_index);
+    void add_task_stop_vif(uint32_t vif_index);
     void add_task_add_pim_mre(PimMre *pim_mre);
     void add_task_delete_pim_mre(PimMre *pim_mre);
     

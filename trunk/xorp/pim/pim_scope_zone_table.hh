@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.8 2004/06/10 22:41:34 hodson Exp $
+// $XORP: xorp/pim/pim_scope_zone_table.hh,v 1.9 2005/03/25 02:54:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_SCOPE_ZONE_TABLE_HH__
@@ -67,12 +67,12 @@ public:
     virtual ~PimScopeZoneTable();
     
     list<PimScopeZone>& pim_scope_zone_list() { return (_pim_scope_zone_list); }
-    void add_scope_zone(const IPvXNet& scope_zone_prefix, uint16_t vif_index);
+    void add_scope_zone(const IPvXNet& scope_zone_prefix, uint32_t vif_index);
     void delete_scope_zone(const IPvXNet& scope_zone_prefix,
-			   uint16_t vif_index);
+			   uint32_t vif_index);
     
-    bool is_scoped(const IPvX& addr, uint16_t vif_index) const;
-    bool is_scoped(const PimScopeZoneId& zone_id, uint16_t vif_index) const;
+    bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
+    bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
     bool is_zone_border_router(const IPvXNet& group_prefix) const;
     
     PimNode&	pim_node() const	{ return (_pim_node);		}
@@ -91,12 +91,12 @@ public:
     virtual ~PimScopeZone();
     
     const IPvXNet& scope_zone_prefix() const { return (_scope_zone_prefix); }
-    void set_scoped_vif(uint16_t vif_index, bool v);
+    void set_scoped_vif(uint32_t vif_index, bool v);
     
     bool is_empty() const { return (! _scoped_vifs.any()); }
-    bool is_set(uint16_t vif_index) const;
-    bool is_scoped(const IPvX& addr, uint16_t vif_index) const;
-    bool is_scoped(const PimScopeZoneId& zone_id, uint16_t vif_index) const;
+    bool is_set(uint32_t vif_index) const;
+    bool is_scoped(const IPvX& addr, uint32_t vif_index) const;
+    bool is_scoped(const PimScopeZoneId& zone_id, uint32_t vif_index) const;
     bool is_same_scope_zone(const IPvXNet& scope_zone_prefix) const;
     
 private:

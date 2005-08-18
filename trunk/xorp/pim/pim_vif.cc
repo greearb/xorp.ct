@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.55 2005/06/02 18:37:20 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.56 2005/06/03 19:06:12 pavlin Exp $"
 
 
 //
@@ -611,6 +611,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	// but for simplicity we do it for Null Registers as well.
 	//
 	switch (family()) {
+#ifndef HOST_OS_WINDOWS
 	case AF_INET:
 	{
 	    struct ip ip4_header;
@@ -620,6 +621,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	    ip_tos = ip4_header.ip_tos;
 	    break;
 	}
+#endif
 	
 #ifdef HAVE_IPV6
 	case AF_INET6:
@@ -763,12 +765,14 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	       name().c_str());
     return (XORP_ERROR);
 
+#ifndef HOST_OS_WINDOWS
  rcvlen_error:
     // XXX: this should not happen. The only way to jump here
     // is if we are trying to send a PIM Register message that did not
     // contain an IP header, but this is not a valid PIM Register message.
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
+#endif
 }
 
 /**

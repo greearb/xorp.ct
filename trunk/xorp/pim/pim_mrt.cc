@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.9 2005/03/25 02:54:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt.cc,v 1.10 2005/04/30 21:36:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table implementation.
@@ -135,7 +135,7 @@ PimMrt::i_am_dr()
 }
 
 PimVif *
-PimMrt::vif_find_by_vif_index(uint16_t vif_index)
+PimMrt::vif_find_by_vif_index(uint32_t vif_index)
 {
     return (pim_node().vif_find_by_vif_index(vif_index));
 }
@@ -146,7 +146,7 @@ PimMrt::vif_find_pim_register()
     return (pim_node().vif_find_pim_register());
 }
 
-uint16_t
+uint32_t
 PimMrt::pim_register_vif_index() const
 {
     return (pim_node().pim_register_vif_index());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.34 2005/03/24 00:40:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.35 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -653,7 +653,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
     cli_print(c_format("%-12s %-8s %-6s %1s %-8s %8s %-15s %9s\n",
 		       "Interface", "State", "Mode", "V", "PIMstate",
 		       "Priority", "DRaddr", "Neighbors"));
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -675,7 +675,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 			   // TODO: should we print "only P2P" if P2P link?
 			   // pim_vif->is_p2p()? "P2P" : pim_vif->i_am_dr()? "DR" : "NotDR",
 			   pim_vif->i_am_dr()? "DR" : "NotDR",
-			   pim_vif->dr_priority().get(),
+			   XORP_INT_CAST(pim_vif->dr_priority().get()),
 			   cstring(pim_vif->dr_addr()),
 			   pim_vif->pim_nbrs_number()));
     }
@@ -706,7 +706,7 @@ PimNodeCli::cli_show_pim_interface_address(const vector<string>& argv)
     
     cli_print(c_format("%-12s %-15s %-15s %-15s\n",
 		       "Interface", "PrimaryAddr", "DomainWideAddr", "SecondaryAddr"));
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -1039,7 +1039,7 @@ PimNodeCli::cli_print_pim_mre(const PimMre *pim_mre)
     }
     
     // Compute the RPF interface
-    uint16_t vif_index_s, vif_index_rp;
+    uint32_t vif_index_s, vif_index_rp;
     PimVif *iif_pim_vif_s = NULL;
     PimVif *iif_pim_vif_rp = NULL;
     
@@ -1279,7 +1279,7 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
     cli_print(c_format("%-12s %10s %-15s %1s %-6s %8s %7s\n",
 		       "Interface", "DRpriority", "NeighborAddr", "V", "Mode",
 		       "Holdtime", "Timeout"));
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -1301,7 +1301,8 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	    
 	    string dr_priority_string;
 	    if (pim_nbr->is_dr_priority_present())
-		dr_priority_string = c_format("%d", pim_nbr->dr_priority());
+		dr_priority_string = c_format("%d",
+XORP_INT_CAST(pim_nbr->dr_priority()));
 	    else
 		dr_priority_string = "none";
 	    
@@ -1309,7 +1310,8 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
 		TimeVal tv_left;
 		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
-		nbr_timeout_sec_string = c_format("%d", tv_left.sec());
+		nbr_timeout_sec_string = c_format("%d",
+XORP_INT_CAST(tv_left.sec()));
 	    } else {
 		nbr_timeout_sec_string = "None";
 	    }
@@ -1383,8 +1385,8 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
 			   mrib->next_hop_vif_index(),
-			   mrib->metric_preference(),
-			   mrib->metric()));
+			   XORP_INT_CAST(mrib->metric_preference()),
+			   XORP_INT_CAST(mrib->metric())));
 	return (XORP_OK);
     }
     
@@ -1408,8 +1410,8 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
 			   mrib->next_hop_vif_index(),
-			   mrib->metric_preference(),
-			   mrib->metric()));
+			   XORP_INT_CAST(mrib->metric_preference()),
+			   XORP_INT_CAST(mrib->metric())));
     }
     
     return (XORP_OK);
@@ -1553,7 +1555,7 @@ PimNodeCli::cli_show_pim_scope(const vector<string>& argv)
 	 iter != pim_node().pim_scope_zone_table().pim_scope_zone_list().end();
 	 ++iter) {
 	const PimScopeZone& pim_scope_zone = *iter;
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (pim_scope_zone.is_set(i)) {
 		PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 		if (pim_vif == NULL)

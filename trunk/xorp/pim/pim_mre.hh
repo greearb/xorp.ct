@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre.hh,v 1.47 2005/05/03 01:39:40 pavlin Exp $
+// $XORP: xorp/pim/pim_mre.hh,v 1.48 2005/05/10 23:58:57 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_HH__
@@ -106,7 +106,7 @@ public:
     PimMrt&	pim_mrt()	const	{ return (_pim_mrt);		}
     PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
     int		family()	const;
-    uint16_t	pim_register_vif_index() const;
+    uint32_t	pim_register_vif_index() const;
     
     //
     // Type of PimMre entry and related info
@@ -152,8 +152,8 @@ public:
     // Note: mrib_rp(), rpf_interface_rp(), set_mrib_rp() apply for all entries
     Mrib	*mrib_rp()	const	{ return (_mrib_rp);		}
     Mrib	*mrib_s()	const	{ return (_mrib_s);		}
-    uint16_t	rpf_interface_rp() const;
-    uint16_t	rpf_interface_s() const;
+    uint32_t	rpf_interface_rp() const;
+    uint32_t	rpf_interface_s() const;
     void	set_mrib_rp(Mrib *v)	{ _mrib_rp = v;			}
     void	set_mrib_s(Mrib *v)	{ _mrib_s = v;			}
     Mrib	*compute_mrib_rp() const;
@@ -296,8 +296,8 @@ public:
     const Mifset& local_receiver_exclude() const {
 	return (_local_receiver_exclude);
     }
-    void	set_local_receiver_include(uint16_t vif_index, bool v);
-    void	set_local_receiver_exclude(uint16_t vif_index, bool t);
+    void	set_local_receiver_include(uint32_t vif_index, bool v);
+    void	set_local_receiver_exclude(uint32_t vif_index, bool t);
     Mifset	_local_receiver_include; // The interfaces with IGMP/MLD6 Join
     Mifset	_local_receiver_exclude; // The interfaces with IGMP/MLD6 Leave
 
@@ -322,58 +322,58 @@ public:
 					 // (*,*,RP) (*,G) (S,G);
 					 // Also Override Timer for (S,G,rpt)
     // Note: applies only for (*,*,RP)
-    void	receive_join_rp(uint16_t vif_index, uint16_t holdtime);
+    void	receive_join_rp(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (*,*,RP)
-    void	receive_prune_rp(uint16_t vif_index, uint16_t holdtime);
+    void	receive_prune_rp(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (*,G)
-    void	receive_join_wc(uint16_t vif_index, uint16_t holdtime);
+    void	receive_join_wc(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (*,G)
-    void	receive_prune_wc(uint16_t vif_index, uint16_t holdtime);
+    void	receive_prune_wc(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G)
-    void	receive_join_sg(uint16_t vif_index, uint16_t holdtime);
+    void	receive_join_sg(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G)
-    void	receive_prune_sg(uint16_t vif_index, uint16_t holdtime);
+    void	receive_prune_sg(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G,rpt)
-    void	receive_join_wc_by_sg_rpt(uint16_t vif_index);
+    void	receive_join_wc_by_sg_rpt(uint32_t vif_index);
     // Note: applies only for (S,G,rpt)
-    void	receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime);
+    void	receive_join_sg_rpt(uint32_t vif_index, uint16_t holdtime);
     // Note: applies only for (S,G,rpt)
-    void	receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+    void	receive_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 				     bool is_join_wc_received);
     // Note: applies only for (S,G,rpt)
-    void	receive_end_of_message_sg_rpt(uint16_t vif_index);
+    void	receive_end_of_message_sg_rpt(uint32_t vif_index);
     // Note: applies only for (*,*,RP)
-    void	rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
+    void	rp_see_join_rp(uint32_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (*,*,RP)
-    void	rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
+    void	rp_see_prune_rp(uint32_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (*,G)
-    void	wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
+    void	wc_see_join_wc(uint32_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (*,G)
-    void	wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
+    void	wc_see_prune_wc(uint32_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
+    void	sg_see_join_sg(uint32_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+    void	sg_see_prune_sg(uint32_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_prune_wc(uint16_t vif_index,
+    void	sg_see_prune_wc(uint32_t vif_index,
 				const IPvX& target_nbr_addr);
     // Note: applies only for (S,G)
-    void	sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+    void	sg_see_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 				    const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+    void	sg_rpt_see_join_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 				       const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+    void	sg_rpt_see_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 					const IPvX& target_nbr_addr);
     // Note: applies only for (S,G,rpt)
-    void	sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+    void	sg_rpt_see_prune_sg(uint32_t vif_index, uint16_t holdtime,
 				    const IPvX& target_nbr_addr);
     // Note: applies only for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	is_join_desired_rp() const;
@@ -413,21 +413,21 @@ public:
     // Note: each method below applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     // (except for the *_tmp_* and *_processed_wc_by_sg_rpt*
     // methods which apply only for (S,G,rpt))
-    void	set_downstream_noinfo_state(uint16_t vif_index);
-    void	set_downstream_join_state(uint16_t vif_index);
-    void	set_downstream_prune_state(uint16_t vif_index);
-    void	set_downstream_prune_pending_state(uint16_t vif_index);
-    void	set_downstream_prune_tmp_state(uint16_t vif_index);
-    void	set_downstream_prune_pending_tmp_state(uint16_t vif_index);
-    void	set_downstream_processed_wc_by_sg_rpt(uint16_t vif_index,
+    void	set_downstream_noinfo_state(uint32_t vif_index);
+    void	set_downstream_join_state(uint32_t vif_index);
+    void	set_downstream_prune_state(uint32_t vif_index);
+    void	set_downstream_prune_pending_state(uint32_t vif_index);
+    void	set_downstream_prune_tmp_state(uint32_t vif_index);
+    void	set_downstream_prune_pending_tmp_state(uint32_t vif_index);
+    void	set_downstream_processed_wc_by_sg_rpt(uint32_t vif_index,
 						      bool v);
-    bool	is_downstream_noinfo_state(uint16_t vif_index) const;
-    bool	is_downstream_join_state(uint16_t vif_index) const;
-    bool	is_downstream_prune_state(uint16_t vif_index) const;
-    bool	is_downstream_prune_pending_state(uint16_t vif_index) const;
-    bool	is_downstream_prune_tmp_state(uint16_t vif_index) const;
-    bool	is_downstream_prune_pending_tmp_state(uint16_t vif_index) const;
-    bool	is_downstream_processed_wc_by_sg_rpt(uint16_t vif_index) const;
+    bool	is_downstream_noinfo_state(uint32_t vif_index) const;
+    bool	is_downstream_join_state(uint32_t vif_index) const;
+    bool	is_downstream_prune_state(uint32_t vif_index) const;
+    bool	is_downstream_prune_pending_state(uint32_t vif_index) const;
+    bool	is_downstream_prune_tmp_state(uint32_t vif_index) const;
+    bool	is_downstream_prune_pending_tmp_state(uint32_t vif_index) const;
+    bool	is_downstream_processed_wc_by_sg_rpt(uint32_t vif_index) const;
     const Mifset& downstream_join_state() const;
     const Mifset& downstream_prune_state() const;
     const Mifset& downstream_prune_pending_state() const;
@@ -440,21 +440,21 @@ public:
     Mifset	_downstream_processed_wc_by_sg_rpt; // (S,G,rpt)J/P processed
     
     // Note: applies only for (*,*,RP)
-    void	downstream_expiry_timer_timeout_rp(uint16_t vif_index);
+    void	downstream_expiry_timer_timeout_rp(uint32_t vif_index);
     // Note: applies only for (*,G)
-    void	downstream_expiry_timer_timeout_wc(uint16_t vif_index);
+    void	downstream_expiry_timer_timeout_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
-    void	downstream_expiry_timer_timeout_sg(uint16_t vif_index);
+    void	downstream_expiry_timer_timeout_sg(uint32_t vif_index);
     // Note: applies only for (S,G,rpt)
-    void	downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index);
+    void	downstream_expiry_timer_timeout_sg_rpt(uint32_t vif_index);
     // Note: applies only for (*,*,RP)
-    void	downstream_prune_pending_timer_timeout_rp(uint16_t vif_index);
+    void	downstream_prune_pending_timer_timeout_rp(uint32_t vif_index);
     // Note: applies only for (*,G)
-    void	downstream_prune_pending_timer_timeout_wc(uint16_t vif_index);
+    void	downstream_prune_pending_timer_timeout_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
-    void	downstream_prune_pending_timer_timeout_sg(uint16_t vif_index);
+    void	downstream_prune_pending_timer_timeout_sg(uint32_t vif_index);
     // Note: applies only for (S,G,rpt)
-    void	downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index);
+    void	downstream_prune_pending_timer_timeout_sg_rpt(uint32_t vif_index);
     XorpTimer	_downstream_expiry_timers[MAX_VIFS];	// Expiry timers
     XorpTimer	_downstream_prune_pending_timers[MAX_VIFS]; // Prune-Pending timers
     
@@ -560,17 +560,17 @@ public:
     // ASSERT info
     //
     //  Note: applies only for (*,G) and (S,G)
-    bool	is_assert_noinfo_state(uint16_t vif_index) const;
+    bool	is_assert_noinfo_state(uint32_t vif_index) const;
     //  Note: applies only for (*,G) and (S,G)
-    bool	is_i_am_assert_winner_state(uint16_t vif_index) const;
+    bool	is_i_am_assert_winner_state(uint32_t vif_index) const;
     //  Note: applies only for (*,G) and (S,G)
-    bool	is_i_am_assert_loser_state(uint16_t vif_index) const;
+    bool	is_i_am_assert_loser_state(uint32_t vif_index) const;
     //  Note: applies only for (*,G) and (S,G)
-    void	set_assert_noinfo_state(uint16_t vif_index);
+    void	set_assert_noinfo_state(uint32_t vif_index);
     //  Note: applies only for (*,G) and (S,G)
-    void	set_i_am_assert_winner_state(uint16_t vif_index);
+    void	set_i_am_assert_winner_state(uint32_t vif_index);
     //  Note: applies only for (*,G) and (S,G)
-    void	set_i_am_assert_loser_state(uint16_t vif_index);
+    void	set_i_am_assert_loser_state(uint32_t vif_index);
     // Note: applies only for (*,G) and (S,G)
     const Mifset& i_am_assert_winner_state() const {
 	return (_i_am_assert_winner_state);
@@ -599,35 +599,35 @@ public:
     
     XorpTimer	_assert_timers[MAX_VIFS];  // The Assert (winner/loser) timers
     // Note: applies only for (*,G)
-    void	assert_timer_timeout_wc(uint16_t vif_index);
+    void	assert_timer_timeout_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
-    void	assert_timer_timeout_sg(uint16_t vif_index);
+    void	assert_timer_timeout_sg(uint32_t vif_index);
     // Note: works for (*,G), (S,G)
-    AssertMetric *assert_winner_metric_wc(uint16_t vif_index) const;
+    AssertMetric *assert_winner_metric_wc(uint32_t vif_index) const;
     // Note: works for (S,G)
-    AssertMetric *assert_winner_metric_sg(uint16_t vif_index) const;
+    AssertMetric *assert_winner_metric_sg(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)
-    AssertMetric *assert_winner_metric(uint16_t vif_index) const {
+    AssertMetric *assert_winner_metric(uint32_t vif_index) const {
 	return (_assert_winner_metrics[vif_index]);
     }
     // Note: works for (*,G), (S,G)
-    void	set_assert_winner_metric_wc(uint16_t vif_index, AssertMetric *v);
+    void	set_assert_winner_metric_wc(uint32_t vif_index, AssertMetric *v);
     // Note: works for (S,G)
-    void	set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v);
+    void	set_assert_winner_metric_sg(uint32_t vif_index, AssertMetric *v);
     // Note: applies only for (*,G) and (S,G)
-    void	set_assert_winner_metric(uint16_t vif_index, AssertMetric *v);
+    void	set_assert_winner_metric(uint32_t vif_index, AssertMetric *v);
     // Note: works for (*,G), (S,G)
-    void	delete_assert_winner_metric_wc(uint16_t vif_index);
+    void	delete_assert_winner_metric_wc(uint32_t vif_index);
     // Note: works for (S,G)
-    void	delete_assert_winner_metric_sg(uint16_t vif_index);
+    void	delete_assert_winner_metric_sg(uint32_t vif_index);
     // Note: applies only for (*,G) and (S,G)
-    void	delete_assert_winner_metric(uint16_t vif_index);
+    void	delete_assert_winner_metric(uint32_t vif_index);
     // Note: applies only for (S,G)
     const Mifset& assert_winner_metric_is_better_than_spt_assert_metric_sg() const {
 	return (_assert_winner_metric_is_better_than_spt_assert_metric_sg);
     }
     // Note: applies only for (S,G)
-    void	set_assert_winner_metric_is_better_than_spt_assert_metric_sg(uint16_t vif_index, bool v);
+    void	set_assert_winner_metric_is_better_than_spt_assert_metric_sg(uint32_t vif_index, bool v);
     Mifset	_assert_winner_metric_is_better_than_spt_assert_metric_sg;
     
     // Note: applies for (*,G)
@@ -639,28 +639,28 @@ public:
 	return (_assert_tracking_desired_state);
     }
     // Note: applies only for (*,G) and (S,G)
-    void	set_assert_tracking_desired_state(uint16_t vif_index, bool v);
+    void	set_assert_tracking_desired_state(uint32_t vif_index, bool v);
     // Note: applies only for (*,G) and (S,G)
-    bool	is_assert_tracking_desired_state(uint16_t vif_index) const;
+    bool	is_assert_tracking_desired_state(uint32_t vif_index) const;
     Mifset	_assert_tracking_desired_state;	// To store the
 						// AssertTrackingDesired state
     
     // Note: applies only for (*,G) and (S,G)
     const Mifset& could_assert_state() const { return (_could_assert_state); }
     // Note: applies only for (*,G) and (S,G)
-    bool	is_could_assert_state(uint16_t vif_index) const;
+    bool	is_could_assert_state(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)
-    void	set_could_assert_state(uint16_t vif_index, bool v);
+    void	set_could_assert_state(uint32_t vif_index, bool v);
     Mifset	_could_assert_state;	// To store the CouldAssert state
     
     // Note: applies only for (S,G)
-    AssertMetric *my_assert_metric_sg(uint16_t vif_index) const;
+    AssertMetric *my_assert_metric_sg(uint32_t vif_index) const;
     // Note: applies only for (S,G)
-    AssertMetric *my_assert_metric_wc(uint16_t vif_index) const;
+    AssertMetric *my_assert_metric_wc(uint32_t vif_index) const;
     // Note: applies only for (S,G)
-    AssertMetric *spt_assert_metric(uint16_t vif_index) const;
+    AssertMetric *spt_assert_metric(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G)
-    AssertMetric *rpt_assert_metric(uint16_t vif_index) const;
+    AssertMetric *rpt_assert_metric(uint32_t vif_index) const;
     // Note: applies only for (*,G) and (S,G) (but is used only for (S,G))
     AssertMetric *infinite_assert_metric() const;
     AssertMetric *_assert_winner_metrics[MAX_VIFS]; // The Assert winner
@@ -701,52 +701,52 @@ public:
     // Note: applies only for (S,G)
     bool	recompute_assert_tracking_desired_sg();
     // Note: applies only for (S,G)
-    bool	process_assert_tracking_desired_sg(uint16_t vif_index,
+    bool	process_assert_tracking_desired_sg(uint32_t vif_index,
 						   bool new_value);
     // Note: applies only for (*,G)
     bool	recompute_assert_tracking_desired_wc();
     // Note: applies only for (*,G)
-    bool	process_assert_tracking_desired_wc(uint16_t vif_index,
+    bool	process_assert_tracking_desired_wc(uint32_t vif_index,
 						   bool new_value);
     // Note: applies only for (S,G) and (S,G,rpt)
     const Mifset& could_assert_sg() const;
     // Note: applies only for (S,G)
     bool	recompute_could_assert_sg();
     // Note: applies only for (S,G)
-    bool	process_could_assert_sg(uint16_t vif_index, bool new_value);
+    bool	process_could_assert_sg(uint32_t vif_index, bool new_value);
     // Note: applies for all entries
     const Mifset& could_assert_wc() const;
     // Note: applies only for (*,G)
     bool	recompute_could_assert_wc();
     // Note: applies only for (*,G)
-    bool	process_could_assert_wc(uint16_t vif_index, bool new_value);
+    bool	process_could_assert_wc(uint32_t vif_index, bool new_value);
     // Note: applies only for (S,G)
-    bool	recompute_my_assert_metric_sg(uint16_t vif_index);
+    bool	recompute_my_assert_metric_sg(uint32_t vif_index);
     // Note: applies only for (*,G)
-    bool	recompute_my_assert_metric_wc(uint16_t vif_index);
+    bool	recompute_my_assert_metric_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
-    bool	recompute_assert_rpf_interface_sg(uint16_t vif_index);
+    bool	recompute_assert_rpf_interface_sg(uint32_t vif_index);
     // Note: applies only for (*,G)
-    bool	recompute_assert_rpf_interface_wc(uint16_t vif_index);
+    bool	recompute_assert_rpf_interface_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
-    bool	recompute_assert_receive_join_sg(uint16_t vif_index);
+    bool	recompute_assert_receive_join_sg(uint32_t vif_index);
     // Note: applies only for (*,G)
-    bool	recompute_assert_receive_join_wc(uint16_t vif_index);
+    bool	recompute_assert_receive_join_wc(uint32_t vif_index);
     // Note: applies only for (S,G)
     bool	recompute_assert_winner_nbr_sg_gen_id_changed(
-	uint16_t vif_index,
+	uint32_t vif_index,
 	const IPvX& nbr_addr);
     // Note: applies only for (*,G)
     bool	recompute_assert_winner_nbr_wc_gen_id_changed(
-	uint16_t vif_index,
+	uint32_t vif_index,
 	const IPvX& nbr_addr);
     // Note: applies only for (S,G)
     bool	recompute_assert_winner_nbr_sg_nlt_expired(
-	uint16_t vif_index,
+	uint32_t vif_index,
 	const IPvX& nbr_addr);
     // Note: applies only for (*,G)
     bool	recompute_assert_winner_nbr_wc_nlt_expired(
-	uint16_t vif_index,
+	uint32_t vif_index,
 	const IPvX& nbr_addr);
     
     // Assert rate-limiting stuff
@@ -778,7 +778,7 @@ public:
     // Data
     //
     // Note: applies only for (S,G)
-    void	update_sptbit_sg(uint16_t iif_vif_index);
+    void	update_sptbit_sg(uint32_t iif_vif_index);
     // Note: applies for (*,G), (S,G), (S,G,rpt)
     bool	is_monitoring_switch_to_spt_desired_sg(const PimMre *pim_mre_sg) const;
     // Note: applies for all entries
@@ -816,21 +816,21 @@ public:
     //
     
     // Note: applies for (*,*,RP)
-    void	recompute_start_vif_rp(uint16_t vif_index);
+    void	recompute_start_vif_rp(uint32_t vif_index);
     // Note: applies for (*,G)
-    void	recompute_start_vif_wc(uint16_t vif_index);
+    void	recompute_start_vif_wc(uint32_t vif_index);
     // Note: applies for (S,G)
-    void	recompute_start_vif_sg(uint16_t vif_index);
+    void	recompute_start_vif_sg(uint32_t vif_index);
     // Note: applies for (S,G,rpt)
-    void	recompute_start_vif_sg_rpt(uint16_t vif_index);
+    void	recompute_start_vif_sg_rpt(uint32_t vif_index);
     // Note: applies for (*,*,RP)
-    void	recompute_stop_vif_rp(uint16_t vif_index);
+    void	recompute_stop_vif_rp(uint32_t vif_index);
     // Note: applies for (*,G)
-    void	recompute_stop_vif_wc(uint16_t vif_index);
+    void	recompute_stop_vif_wc(uint32_t vif_index);
     // Note: applies for (S,G)
-    void	recompute_stop_vif_sg(uint16_t vif_index);
+    void	recompute_stop_vif_sg(uint32_t vif_index);
     // Note: applies for (S,G,rpt)
-    void	recompute_stop_vif_sg_rpt(uint16_t vif_index);
+    void	recompute_stop_vif_sg_rpt(uint32_t vif_index);
     
     // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
     bool	entry_try_remove();    // Try to remove the entry if not needed

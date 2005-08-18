@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.71 2005/05/27 20:32:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.72 2005/06/03 19:07:29 pavlin Exp $"
 
 
 //
@@ -451,7 +451,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::add_vif(const string& vif_name, uint16_t vif_index, string& error_msg)
+PimNode::add_vif(const string& vif_name, uint32_t vif_index, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_vif_index(vif_index);
     
@@ -1089,7 +1089,7 @@ PimNode::vif_shutdown_completed(const string& vif_name)
 int
 PimNode::proto_recv(const string&	, // src_module_instance_name,
 		    xorp_module_id src_module_id,
-		    uint16_t vif_index,
+		    uint32_t vif_index,
 		    const IPvX& src, const IPvX& dst,
 		    int ip_ttl, int ip_tos, bool is_router_alert,
 		    const uint8_t *rcvbuf, size_t rcvlen)
@@ -1151,7 +1151,7 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::pim_send(uint16_t vif_index,
+PimNode::pim_send(uint32_t vif_index,
 		  const IPvX& src, const IPvX& dst,
 		  int ip_ttl, int ip_tos, bool is_router_alert,
 		  buffer_t *buffer)
@@ -1198,7 +1198,7 @@ int
 PimNode::signal_message_recv(const string& src_module_instance_name,
 			     xorp_module_id src_module_id,
 			     int message_type,
-			     uint16_t vif_index,
+			     uint32_t vif_index,
 			     const IPvX& src,
 			     const IPvX& dst,
 			     const uint8_t *rcvbuf,
@@ -1262,7 +1262,7 @@ PimNode::signal_message_recv(const string& src_module_instance_name,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::add_membership(uint16_t vif_index, const IPvX& source,
+PimNode::add_membership(uint32_t vif_index, const IPvX& source,
 			const IPvX& group)
 {
     uint32_t lookup_flags = 0;
@@ -1330,7 +1330,7 @@ PimNode::add_membership(uint16_t vif_index, const IPvX& source,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-PimNode::delete_membership(uint16_t vif_index, const IPvX& source,
+PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
 			   const IPvX& group)
 {
     uint32_t lookup_flags = 0;
@@ -1449,7 +1449,7 @@ PimNode::vif_find_pim_register() const
  * Set/reset the DR flag for vif index @vif_index.
  **/
 void
-PimNode::set_pim_vifs_dr(uint16_t vif_index, bool v)
+PimNode::set_pim_vifs_dr(uint32_t vif_index, bool v)
 {
     if (vif_index >= pim_vifs_dr().size())
 	return;			// TODO: return an error instead?
@@ -1583,7 +1583,7 @@ PimNode::pim_nbr_rpf_find(const IPvX& dst_addr, const Mrib *mrib)
 PimNbr *
 PimNode::pim_nbr_find_global(const IPvX& nbr_addr)
 {
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	PimVif *pim_vif = vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -1622,7 +1622,7 @@ PimNode::add_pim_mre_no_pim_nbr(PimMre *pim_mre)
     if (pim_nbr == NULL) {
 	// Find the first vif. Note that the PIM Register vif is excluded.
 	PimVif *pim_vif = NULL;
-	for (uint16_t i = 0; i < maxvifs(); i++) {
+	for (uint32_t i = 0; i < maxvifs(); i++) {
 	    pim_vif = vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
@@ -1669,7 +1669,7 @@ PimNode::delete_pim_mre_no_pim_nbr(PimMre *pim_mre)
 // process their (*,*,RP) PimMre entries.
 //
 void
-PimNode::init_processing_pim_mre_rp(uint16_t vif_index,
+PimNode::init_processing_pim_mre_rp(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     do {
@@ -1700,7 +1700,7 @@ PimNode::init_processing_pim_mre_rp(uint16_t vif_index,
 // process their (*,G) PimMre entries.
 //
 void
-PimNode::init_processing_pim_mre_wc(uint16_t vif_index,
+PimNode::init_processing_pim_mre_wc(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     do {
@@ -1731,7 +1731,7 @@ PimNode::init_processing_pim_mre_wc(uint16_t vif_index,
 // process their (S,G) PimMre entries.
 //
 void
-PimNode::init_processing_pim_mre_sg(uint16_t vif_index,
+PimNode::init_processing_pim_mre_sg(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     do {
@@ -1762,7 +1762,7 @@ PimNode::init_processing_pim_mre_sg(uint16_t vif_index,
 // process their (S,G,rpt) PimMre entries.
 //
 void
-PimNode::init_processing_pim_mre_sg_rpt(uint16_t vif_index,
+PimNode::init_processing_pim_mre_sg_rpt(uint32_t vif_index,
 					const IPvX& pim_nbr_addr)
 {
     do {
@@ -1789,7 +1789,7 @@ PimNode::init_processing_pim_mre_sg_rpt(uint16_t vif_index,
 }
 
 PimNbr *
-PimNode::find_processing_pim_mre_rp(uint16_t vif_index,
+PimNode::find_processing_pim_mre_rp(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     if (vif_index != Vif::VIF_INDEX_INVALID) {
@@ -1820,7 +1820,7 @@ PimNode::find_processing_pim_mre_rp(uint16_t vif_index,
 }
 
 PimNbr *
-PimNode::find_processing_pim_mre_wc(uint16_t vif_index,
+PimNode::find_processing_pim_mre_wc(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     if (vif_index != Vif::VIF_INDEX_INVALID) {
@@ -1851,7 +1851,7 @@ PimNode::find_processing_pim_mre_wc(uint16_t vif_index,
 }
 
 PimNbr *
-PimNode::find_processing_pim_mre_sg(uint16_t vif_index,
+PimNode::find_processing_pim_mre_sg(uint32_t vif_index,
 				    const IPvX& pim_nbr_addr)
 {
     if (vif_index != Vif::VIF_INDEX_INVALID) {
@@ -1882,7 +1882,7 @@ PimNode::find_processing_pim_mre_sg(uint16_t vif_index,
 }
 
 PimNbr *
-PimNode::find_processing_pim_mre_sg_rpt(uint16_t vif_index,
+PimNode::find_processing_pim_mre_sg_rpt(uint32_t vif_index,
 					const IPvX& pim_nbr_addr)
 {
     if (vif_index != Vif::VIF_INDEX_INVALID) {
@@ -1918,7 +1918,7 @@ PimNode::find_processing_pim_mre_sg_rpt(uint16_t vif_index,
 void
 PimNode::clear_pim_statistics()
 {
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	PimVif *pim_vif = vif_find_by_vif_index(i);
 	if (pim_vif == NULL)
 	    continue;
@@ -1948,7 +1948,7 @@ PimNode::pimstat_##stat_name() const				\
 {								\
     uint32_t sum = 0;						\
 								\
-    for (uint16_t i = 0; i < maxvifs(); i++) {			\
+    for (uint32_t i = 0; i < maxvifs(); i++) {			\
 	PimVif *pim_vif = vif_find_by_vif_index(i);		\
 	if (pim_vif == NULL)					\
 	    continue;						\

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.22 2005/04/26 20:28:52 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.23 2005/04/30 21:36:46 pavlin Exp $"
 
 
 //
@@ -323,7 +323,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 {
     bool	i_am_target_router = true;
     uint32_t	lookup_flags = 0, create_flags = 0;
-    uint16_t	vif_index;
+    uint32_t	vif_index;
     uint16_t	holdtime;
     uint8_t	source_mask_len, group_mask_len;
     IPvX	source_addr(family()), group_addr(family());
@@ -698,7 +698,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL PimMrt ERROR: "
 	       "cannot create entry for (%s,%s) create_flags = %#x",
-	       cstring(source_addr), cstring(group_addr), create_flags);
+	       cstring(source_addr), cstring(group_addr),
+	       XORP_UINT_CAST(create_flags));
     return (XORP_ERROR);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.40 2005/06/01 00:36:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.41 2005/06/03 19:07:29 pavlin Exp $"
 
 
 //
@@ -117,7 +117,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
     //
     // Remove vifs that don't exist anymore
     //
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	Vif* node_vif = vif_find_by_vif_index(i);
 	if (node_vif == NULL)
 	    continue;

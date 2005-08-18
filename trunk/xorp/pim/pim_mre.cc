@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre.cc,v 1.37 2005/04/27 02:09:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre.cc,v 1.38 2005/05/27 20:25:54 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry handling
@@ -277,7 +277,7 @@ PimMre::family() const
     return (_pim_mrt.family());
 }
 
-uint16_t
+uint32_t
 PimMre::pim_register_vif_index() const
 {
     return (_pim_mrt.pim_register_vif_index());
@@ -707,7 +707,7 @@ PimMre::local_receiver_exclude_sg() const
 }
 
 void
-PimMre::set_local_receiver_include(uint16_t vif_index, bool v)
+PimMre::set_local_receiver_include(uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -741,7 +741,7 @@ PimMre::set_local_receiver_include(uint16_t vif_index, bool v)
 }
 
 void
-PimMre::set_local_receiver_exclude(uint16_t vif_index, bool v)
+PimMre::set_local_receiver_exclude(uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1100,7 +1100,7 @@ PimMre::i_am_dr() const
 //
 // Note: applies for (*,*,RP)
 void
-PimMre::recompute_start_vif_rp(uint16_t vif_index)
+PimMre::recompute_start_vif_rp(uint32_t vif_index)
 {
     // XXX: nothing to do
     
@@ -1109,7 +1109,7 @@ PimMre::recompute_start_vif_rp(uint16_t vif_index)
 
 // Note: applies for (*,G)
 void
-PimMre::recompute_start_vif_wc(uint16_t vif_index)
+PimMre::recompute_start_vif_wc(uint32_t vif_index)
 {
     // XXX: nothing to do
     
@@ -1118,7 +1118,7 @@ PimMre::recompute_start_vif_wc(uint16_t vif_index)
 
 // Note: applies for (S,G)
 void
-PimMre::recompute_start_vif_sg(uint16_t vif_index)
+PimMre::recompute_start_vif_sg(uint32_t vif_index)
 {
     // XXX: nothing to do
     
@@ -1127,7 +1127,7 @@ PimMre::recompute_start_vif_sg(uint16_t vif_index)
 
 // Note: applies for (G,G,rpt)
 void
-PimMre::recompute_start_vif_sg_rpt(uint16_t vif_index)
+PimMre::recompute_start_vif_sg_rpt(uint32_t vif_index)
 {
     // XXX: nothing to do
     
@@ -1136,7 +1136,7 @@ PimMre::recompute_start_vif_sg_rpt(uint16_t vif_index)
 
 // Note: applies for (*,*,RP)
 void
-PimMre::recompute_stop_vif_rp(uint16_t vif_index)
+PimMre::recompute_stop_vif_rp(uint32_t vif_index)
 {
     //
     // Reset all associated state with 'vif_index'
@@ -1156,7 +1156,7 @@ PimMre::recompute_stop_vif_rp(uint16_t vif_index)
 
 // Note: applies for (*,G)
 void
-PimMre::recompute_stop_vif_wc(uint16_t vif_index)
+PimMre::recompute_stop_vif_wc(uint32_t vif_index)
 {
     //
     // Reset all associated state with 'vif_index'
@@ -1188,7 +1188,7 @@ PimMre::recompute_stop_vif_wc(uint16_t vif_index)
 
 // Note: applies for (S,G)
 void
-PimMre::recompute_stop_vif_sg(uint16_t vif_index)
+PimMre::recompute_stop_vif_sg(uint32_t vif_index)
 {
     //
     // Reset all associated state with 'vif_index'
@@ -1222,7 +1222,7 @@ PimMre::recompute_stop_vif_sg(uint16_t vif_index)
 
 // Note: applies for (S,G,rpt)
 void
-PimMre::recompute_stop_vif_sg_rpt(uint16_t vif_index)
+PimMre::recompute_stop_vif_sg_rpt(uint32_t vif_index)
 {
     //
     // Reset all associated state with 'vif_index'

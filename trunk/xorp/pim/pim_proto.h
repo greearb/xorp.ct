@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.14 2005/04/27 02:47:05 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.15 2005/07/15 19:38:05 pavlin Exp $
  */
 
 
@@ -33,11 +33,16 @@
 /* XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h> */
 #define _PIM_VT 1
 
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
+#ifdef HAVENETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
+
 #ifdef HAVE_NETINET_PIM_H
 #include <netinet/pim.h>
 #else
@@ -210,11 +215,17 @@
 
 /* PIM message max. payload (IP header and Router Alert IP option excluded) */
 #ifndef HAVE_IPV6
+#ifndef HOST_OS_WINDOWS
 #define PIM_MAXPACKET(ip_family) (((ip_family) == AF_INET) ?		\
 					(IP_MAXPACKET			\
 						- sizeof(struct ip)	\
 						- 4*sizeof(uint8_t))	\
 					: (0))
+#else /* HOST_OS_WINDOWS */
+
+#define PIM_MAXPACKET(ip_family)	65496
+
+#endif /* !HOST_OS_WINDOWS */
 #else
 #ifndef IPV6_MAXPACKET
 #define IPV6_MAXPACKET 65535	/* ip6 max packet size without Jumbo payload */

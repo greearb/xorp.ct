@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mrib_table.hh,v 1.8 2004/07/28 05:12:17 pavlin Exp $
+// $XORP: xorp/pim/pim_mrib_table.hh,v 1.9 2005/03/25 02:54:01 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRIB_TABLE_HH__
@@ -165,7 +165,7 @@ public:
      * @param next_hop_vif_index the index of the resolved vif.
      */
     void	resolve_prefixes_by_vif_name(const string& next_hop_vif_name,
-					     uint16_t next_hop_vif_index);
+					     uint32_t next_hop_vif_index);
 
 private:
     PimNode&	_pim_node;		// The PIM node this table belongs to.

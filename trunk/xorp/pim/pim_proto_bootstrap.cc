@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.18 2005/03/25 02:54:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.19 2005/05/12 09:07:23 pavlin Exp $"
 
 
 //
@@ -271,7 +271,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     if ((active_bsr_zone != NULL)
 	&& (active_bsr_zone->is_bsm_originate())) {
 	active_bsr_zone->new_fragment_tag();
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;
@@ -286,7 +286,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     // If needed, forward the Bootstrap message
     //
     if ((active_bsr_zone != NULL) && (active_bsr_zone->is_bsm_forward())) {
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	    PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
 	    if (pim_vif == NULL)
 		continue;

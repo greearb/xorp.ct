@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.28 2005/05/27 20:07:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.29 2005/06/24 23:37:47 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -54,7 +54,7 @@
 int
 PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
 				    xorp_module_id , // src_module_id,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst)
 {
@@ -72,7 +72,7 @@ PimMrt::signal_message_nocache_recv(const string& src_module_instance_name,
 int
 PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
 				     xorp_module_id , // src_module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst)
 {
@@ -90,7 +90,7 @@ PimMrt::signal_message_wrongvif_recv(const string& src_module_instance_name,
 int
 PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 				     xorp_module_id , // src_module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& src,
 				     const IPvX& dst,
 				     const uint8_t *rcvbuf,
@@ -170,7 +170,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 // "On receipt of data from S to G on interface iif:"
 //
 void
-PimMrt::receive_data(uint16_t iif_vif_index, const IPvX& src, const IPvX& dst)
+PimMrt::receive_data(uint32_t iif_vif_index, const IPvX& src, const IPvX& dst)
 {
     PimVif *pim_vif;
     PimMre *pim_mre;
@@ -466,12 +466,18 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
 	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
 	       "is_geq_upcall = %d is_leq_upcall = %d",
 	       cstring(source_addr), cstring(group_addr),
-	       threshold_interval_sec, threshold_interval_usec,
-	       measured_interval_sec, measured_interval_usec,
-	       threshold_packets, threshold_bytes,
-	       measured_packets, measured_bytes,
-	       is_threshold_in_packets, is_threshold_in_bytes,
-	       is_geq_upcall, is_leq_upcall);
+	       XORP_INT_CAST(threshold_interval_sec),
+	       XORP_INT_CAST(threshold_interval_usec),
+	       XORP_INT_CAST(measured_interval_sec),
+	       XORP_INT_CAST(measured_interval_usec),
+	       XORP_INT_CAST(threshold_packets),
+	       XORP_INT_CAST(threshold_bytes),
+	       XORP_INT_CAST(measured_packets),
+	       XORP_INT_CAST(measured_bytes),
+	       XORP_INT_CAST(is_threshold_in_packets),
+	       XORP_INT_CAST(is_threshold_in_bytes),
+	       XORP_INT_CAST(is_geq_upcall),
+	       XORP_INT_CAST(is_leq_upcall));
     
     pim_mfc = pim_mfc_find(source_addr, group_addr, false);
     

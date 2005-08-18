@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.36 2005/05/04 03:33:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.37 2005/05/04 03:36:00 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -57,7 +57,7 @@
 //
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
-PimMre::set_downstream_noinfo_state(uint16_t vif_index)
+PimMre::set_downstream_noinfo_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -100,7 +100,7 @@ PimMre::set_downstream_noinfo_state(uint16_t vif_index)
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
-PimMre::set_downstream_join_state(uint16_t vif_index)
+PimMre::set_downstream_join_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -140,7 +140,7 @@ PimMre::set_downstream_join_state(uint16_t vif_index)
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
-PimMre::set_downstream_prune_state(uint16_t vif_index)
+PimMre::set_downstream_prune_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -180,7 +180,7 @@ PimMre::set_downstream_prune_state(uint16_t vif_index)
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 void
-PimMre::set_downstream_prune_pending_state(uint16_t vif_index)
+PimMre::set_downstream_prune_pending_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -220,7 +220,7 @@ PimMre::set_downstream_prune_pending_state(uint16_t vif_index)
 
 // Note: applies for (S,G,rpt)
 void
-PimMre::set_downstream_prune_tmp_state(uint16_t vif_index)
+PimMre::set_downstream_prune_tmp_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -242,7 +242,7 @@ PimMre::set_downstream_prune_tmp_state(uint16_t vif_index)
 
 // Note: applies for (S,G,rpt)
 void
-PimMre::set_downstream_prune_pending_tmp_state(uint16_t vif_index)
+PimMre::set_downstream_prune_pending_tmp_state(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -264,7 +264,7 @@ PimMre::set_downstream_prune_pending_tmp_state(uint16_t vif_index)
 
 // Note: applies for (S,G,rpt)
 void
-PimMre::set_downstream_processed_wc_by_sg_rpt(uint16_t vif_index, bool v)
+PimMre::set_downstream_processed_wc_by_sg_rpt(uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -280,7 +280,7 @@ PimMre::set_downstream_processed_wc_by_sg_rpt(uint16_t vif_index, bool v)
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::is_downstream_noinfo_state(uint16_t vif_index) const
+PimMre::is_downstream_noinfo_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (true);		// XXX
@@ -295,7 +295,7 @@ PimMre::is_downstream_noinfo_state(uint16_t vif_index) const
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::is_downstream_join_state(uint16_t vif_index) const
+PimMre::is_downstream_join_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -305,7 +305,7 @@ PimMre::is_downstream_join_state(uint16_t vif_index) const
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::is_downstream_prune_state(uint16_t vif_index) const
+PimMre::is_downstream_prune_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -316,7 +316,7 @@ PimMre::is_downstream_prune_state(uint16_t vif_index) const
 
 // Note: applies for (*,*,RP), (*,G), (S,G), (S,G,rpt)
 bool
-PimMre::is_downstream_prune_pending_state(uint16_t vif_index) const
+PimMre::is_downstream_prune_pending_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -327,7 +327,7 @@ PimMre::is_downstream_prune_pending_state(uint16_t vif_index) const
 
 // Note: applies for (S,G,rpt)
 bool
-PimMre::is_downstream_prune_tmp_state(uint16_t vif_index) const
+PimMre::is_downstream_prune_tmp_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -338,7 +338,7 @@ PimMre::is_downstream_prune_tmp_state(uint16_t vif_index) const
 
 // Note: applies for (S,G,rpt)
 bool
-PimMre::is_downstream_prune_pending_tmp_state(uint16_t vif_index) const
+PimMre::is_downstream_prune_pending_tmp_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -349,7 +349,7 @@ PimMre::is_downstream_prune_pending_tmp_state(uint16_t vif_index) const
 
 // Note: applies for (S,G,rpt)
 bool
-PimMre::is_downstream_processed_wc_by_sg_rpt(uint16_t vif_index) const
+PimMre::is_downstream_processed_wc_by_sg_rpt(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -484,7 +484,7 @@ PimMre::set_not_pruned_state()
 // Join/Prune downstream machinery
 //
 void
-PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_join_rp(uint32_t vif_index, uint16_t holdtime)
 {
     TimeVal tv_left;
     
@@ -542,7 +542,7 @@ PimMre::receive_join_rp(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_prune_rp(uint32_t vif_index, uint16_t holdtime)
 {
     PimVif *pim_vif;
     
@@ -593,7 +593,7 @@ PimMre::receive_prune_rp(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_join_wc(uint32_t vif_index, uint16_t holdtime)
 {
     TimeVal tv_left;
     
@@ -651,7 +651,7 @@ PimMre::receive_join_wc(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_prune_wc(uint32_t vif_index, uint16_t holdtime)
 {
     PimVif *pim_vif;
 
@@ -702,7 +702,7 @@ PimMre::receive_prune_wc(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_join_sg(uint32_t vif_index, uint16_t holdtime)
 {
     TimeVal tv_left;
     
@@ -760,7 +760,7 @@ PimMre::receive_join_sg(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_prune_sg(uint32_t vif_index, uint16_t holdtime)
 {
     PimVif *pim_vif;
     
@@ -811,7 +811,7 @@ PimMre::receive_prune_sg(uint16_t vif_index, uint16_t holdtime)
 }
 
 void
-PimMre::receive_join_wc_by_sg_rpt(uint16_t vif_index)
+PimMre::receive_join_wc_by_sg_rpt(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -843,7 +843,7 @@ PimMre::receive_join_wc_by_sg_rpt(uint16_t vif_index)
 }
 
 void
-PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
+PimMre::receive_join_sg_rpt(uint32_t vif_index, uint16_t holdtime)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -889,7 +889,7 @@ PimMre::receive_join_sg_rpt(uint16_t vif_index, uint16_t holdtime)
 // @is_join_wc_received is true if there was a (*,G)Join together
 // with this (S,G,rpt)Prune message.
 void
-PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+PimMre::receive_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 			     bool is_join_wc_received)
 {
     PimVif *pim_vif;
@@ -984,7 +984,7 @@ PimMre::receive_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 // Note: applies for (S,G,rpt)
 //
 void
-PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
+PimMre::receive_end_of_message_sg_rpt(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1028,7 +1028,7 @@ PimMre::receive_end_of_message_sg_rpt(uint16_t vif_index)
 // Downstream J/P timers
 //
 void
-PimMre::downstream_expiry_timer_timeout_rp(uint16_t vif_index)
+PimMre::downstream_expiry_timer_timeout_rp(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1050,7 +1050,7 @@ PimMre::downstream_expiry_timer_timeout_rp(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_prune_pending_timer_timeout_rp(uint16_t vif_index)
+PimMre::downstream_prune_pending_timer_timeout_rp(uint32_t vif_index)
 {
     PimVif *pim_vif;
     PimNbr *pim_nbr_me;
@@ -1085,7 +1085,7 @@ PimMre::downstream_prune_pending_timer_timeout_rp(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_expiry_timer_timeout_wc(uint16_t vif_index)
+PimMre::downstream_expiry_timer_timeout_wc(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1107,7 +1107,7 @@ PimMre::downstream_expiry_timer_timeout_wc(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_prune_pending_timer_timeout_wc(uint16_t vif_index)
+PimMre::downstream_prune_pending_timer_timeout_wc(uint32_t vif_index)
 {
     PimVif *pim_vif;
     PimNbr *pim_nbr_me;
@@ -1151,7 +1151,7 @@ PimMre::downstream_prune_pending_timer_timeout_wc(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_expiry_timer_timeout_sg(uint16_t vif_index)
+PimMre::downstream_expiry_timer_timeout_sg(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1173,7 +1173,7 @@ PimMre::downstream_expiry_timer_timeout_sg(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_prune_pending_timer_timeout_sg(uint16_t vif_index)
+PimMre::downstream_prune_pending_timer_timeout_sg(uint32_t vif_index)
 {
     PimVif *pim_vif;
     PimNbr *pim_nbr_me;
@@ -1208,7 +1208,7 @@ PimMre::downstream_prune_pending_timer_timeout_sg(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index)
+PimMre::downstream_expiry_timer_timeout_sg_rpt(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1227,7 +1227,7 @@ PimMre::downstream_expiry_timer_timeout_sg_rpt(uint16_t vif_index)
 }
 
 void
-PimMre::downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index)
+PimMre::downstream_prune_pending_timer_timeout_sg_rpt(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1249,7 +1249,7 @@ PimMre::downstream_prune_pending_timer_timeout_sg_rpt(uint16_t vif_index)
 // Upstream J/P (*,*,RP) state machine
 //
 void
-PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
+PimMre::rp_see_join_rp(uint32_t vif_index, uint16_t holdtime,
 		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_nbr_mrib_next_hop_rp;
@@ -1297,7 +1297,7 @@ PimMre::rp_see_join_rp(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
+PimMre::rp_see_prune_rp(uint32_t vif_index, uint16_t holdtime,
 			const IPvX& target_nbr_addr)
 {
     PimNbr *my_nbr_mrib_next_hop_rp;
@@ -1344,7 +1344,7 @@ PimMre::rp_see_prune_rp(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
+PimMre::wc_see_join_wc(uint32_t vif_index, uint16_t holdtime,
 		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_wc;
@@ -1390,7 +1390,7 @@ PimMre::wc_see_join_wc(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
+PimMre::wc_see_prune_wc(uint32_t vif_index, uint16_t holdtime,
 			const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_wc;
@@ -1435,7 +1435,7 @@ PimMre::wc_see_prune_wc(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_see_join_sg(uint32_t vif_index, uint16_t holdtime,
 		       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
@@ -1481,7 +1481,7 @@ PimMre::sg_see_join_sg(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_see_prune_sg(uint32_t vif_index, uint16_t holdtime,
 			const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
@@ -1526,7 +1526,7 @@ PimMre::sg_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
+PimMre::sg_see_prune_wc(uint32_t vif_index, const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
     PimVif *pim_vif;
@@ -1568,7 +1568,7 @@ PimMre::sg_see_prune_wc(uint16_t vif_index, const IPvX& target_nbr_addr)
 }
 
 void
-PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_see_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 			    const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg;
@@ -1613,7 +1613,7 @@ PimMre::sg_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_rpt_see_join_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 			       const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
@@ -1648,7 +1648,7 @@ PimMre::sg_rpt_see_join_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_rpt_see_prune_sg_rpt(uint32_t vif_index, uint16_t holdtime,
 				const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
@@ -1696,7 +1696,7 @@ PimMre::sg_rpt_see_prune_sg_rpt(uint16_t vif_index, uint16_t holdtime,
 }
 
 void
-PimMre::sg_rpt_see_prune_sg(uint16_t vif_index, uint16_t holdtime,
+PimMre::sg_rpt_see_prune_sg(uint32_t vif_index, uint16_t holdtime,
 			    const IPvX& target_nbr_addr)
 {
     PimNbr *my_rpfp_nbr_sg_rpt;
@@ -1849,7 +1849,7 @@ bool
 PimMre::is_join_desired_wc() const
 {
     Mifset m;
-    uint16_t vif_index;
+    uint32_t vif_index;
     const PimMre *pim_mre_wc = NULL;
     
     m = immediate_olist_wc();

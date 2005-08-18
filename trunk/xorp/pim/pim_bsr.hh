@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.14 2005/05/14 03:18:39 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.15 2005/05/16 19:17:28 pavlin Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -122,8 +122,8 @@ public:
     void	clean_expire_bsr_zones();
     void	schedule_clean_expire_bsr_zones();
 
-    void	add_vif_addr(uint16_t vif_index, const IPvX& vif_addr);
-    void	delete_vif_addr(uint16_t vif_index, const IPvX& vif_addr);
+    void	add_vif_addr(uint32_t vif_index, const IPvX& vif_addr);
+    void	delete_vif_addr(uint32_t vif_index, const IPvX& vif_addr);
 
     //
     // Test-related methods
@@ -268,11 +268,11 @@ public:
     void	set_bsm_originate(bool v) { _is_bsm_originate = v; }
     bool	i_am_candidate_bsr() const { return (_i_am_candidate_bsr); }
     void	set_i_am_candidate_bsr(bool i_am_candidate_bsr,
-				       uint16_t my_vif_index,
+				       uint32_t my_vif_index,
 				       const IPvX& my_bsr_addr,
 				       uint8_t my_bsr_priority);
     
-    uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
+    uint32_t	my_vif_index() const	{ return (_my_vif_index);	}
     const IPvX&	my_bsr_addr() const	{ return (_my_bsr_addr);	}
     uint8_t	my_bsr_priority() const	{ return (_my_bsr_priority);	}
     bool	is_my_bsr_addr_explicit() const { return (_is_my_bsr_addr_explicit); }
@@ -336,7 +336,7 @@ private:
     
     // State at a Candidate BSR
     bool	_i_am_candidate_bsr;	// True if I am Cand-BSR for this zone
-    uint16_t	_my_vif_index;		// The vif index with my address
+    uint32_t	_my_vif_index;		// The vif index with my address
 					// if a Cand-BSR
     IPvX	_my_bsr_addr;		// My address if a Cand-BSR
     uint8_t	_my_bsr_priority;	// My BSR priority if a Cand-BSR
@@ -415,8 +415,8 @@ public:
     }
     void	start_candidate_rp_expiry_timer();
 
-    uint16_t	my_vif_index() const	{ return (_my_vif_index);	}
-    void	set_my_vif_index(uint16_t v) { _my_vif_index = v; }
+    uint32_t	my_vif_index() const	{ return (_my_vif_index);	}
+    void	set_my_vif_index(uint32_t v) { _my_vif_index = v; }
     bool	is_my_rp_addr_explicit() const { return (_is_my_rp_addr_explicit); }
     void	set_is_my_rp_addr_explicit(bool v) { _is_my_rp_addr_explicit = v; }
     
@@ -430,7 +430,7 @@ private:
     uint8_t	_rp_priority;		// RP priority (smaller is better)
     uint16_t	_rp_holdtime;		// RP holdtime (in seconds)
     XorpTimer	_candidate_rp_expiry_timer; // The C-RP Expiry Timer
-    uint16_t	_my_vif_index;		// The vif index with my address
+    uint32_t	_my_vif_index;		// The vif index with my address
 					// if a Cand-RP
     bool	_is_my_rp_addr_explicit; // True if my Cand-RP address was
 					// set explicitly

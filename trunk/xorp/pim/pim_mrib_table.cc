@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.10 2005/03/25 02:54:01 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrib_table.cc,v 1.11 2005/04/20 09:34:48 pavlin Exp $"
 
 //
 // PIM Multicast Routing Information Base Table implementation.
@@ -102,7 +102,7 @@ PimMribTable::add_pending_insert(uint32_t tid, const Mrib& mrib,
     // and if the MRIB entry is for one of my own addresses, then we
     // overwrite it with the network interface this address belongs to.
     //
-    uint16_t vif_index = mrib.next_hop_vif_index();
+    uint32_t vif_index = mrib.next_hop_vif_index();
     PimVif *pim_vif = pim_node().vif_find_by_vif_index(vif_index);
     if ((vif_index == Vif::VIF_INDEX_INVALID)
 	|| ((pim_vif != NULL) && pim_vif->is_loopback())) {
@@ -236,7 +236,7 @@ PimMribTable::delete_unresolved_prefix(const IPvXNet& dest_prefix)
 
 void
 PimMribTable::resolve_prefixes_by_vif_name(const string& next_hop_vif_name,
-					   uint16_t next_hop_vif_index)
+					   uint32_t next_hop_vif_index)
 {
     map<IPvXNet, string>::iterator iter, iter2;
 

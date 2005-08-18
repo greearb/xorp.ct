@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.20 2005/04/20 07:24:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.21 2005/04/20 19:45:17 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -57,7 +57,7 @@
 bool
 PimMre::compute_is_could_register_sg() const
 {
-    uint16_t vif_index;
+    uint32_t vif_index;
     Mifset mifs;
     
     if (! is_sg())
@@ -404,7 +404,7 @@ PimMre::rp_register_sg_changed()
 void
 PimMre::add_register_tunnel()
 {
-    uint16_t register_vif_index;
+    uint32_t register_vif_index;
     
     if (! is_sg())
 	return;
@@ -422,7 +422,7 @@ PimMre::add_register_tunnel()
 void
 PimMre::remove_register_tunnel()
 {
-    uint16_t register_vif_index;
+    uint32_t register_vif_index;
     
     if (! is_sg())
 	return;

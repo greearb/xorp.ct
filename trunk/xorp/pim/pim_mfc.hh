@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mfc.hh,v 1.9 2005/05/10 23:42:21 pavlin Exp $
+// $XORP: xorp/pim/pim_mfc.hh,v 1.10 2005/05/11 23:44:00 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MFC_HH__
@@ -57,20 +57,20 @@ public:
     const IPvX& rp_addr() const { return (_rp_addr); }
     void	set_rp_addr(const IPvX& v);
     void	uncond_set_rp_addr(const IPvX& v);
-    uint16_t	iif_vif_index() const	{ return (_iif_vif_index);	}
-    void	set_iif_vif_index(uint16_t v) { _iif_vif_index = v;	}
+    uint32_t	iif_vif_index() const	{ return (_iif_vif_index);	}
+    void	set_iif_vif_index(uint32_t v) { _iif_vif_index = v;	}
     const Mifset& olist() const	{ return (_olist);	}
     const Mifset& olist_disable_wrongvif() const {
 	return (_olist_disable_wrongvif);
     }
-    bool	is_set_oif(uint16_t vif_index) const {
+    bool	is_set_oif(uint32_t vif_index) const {
 	return (_olist.test(vif_index));
     }
     void	set_olist(const Mifset& v) { _olist = v;	}
     void	set_olist_disable_wrongvif(const Mifset& v) {
 	_olist_disable_wrongvif = v;
     }
-    void	set_oif(uint16_t vif_index, bool v) {
+    void	set_oif(uint32_t vif_index, bool v) {
 	if (v)
 	    _olist.set(vif_index);
 	else
@@ -84,7 +84,7 @@ public:
     void	recompute_monitoring_switch_to_spt_desired_mfc();
     void	install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre);
     
-    void	update_mfc(uint16_t new_iif_vif_index,
+    void	update_mfc(uint32_t new_iif_vif_index,
 			   const Mifset& new_olist,
 			   const PimMre* pim_mre_sg);
     int		add_mfc_to_kernel();
@@ -154,7 +154,7 @@ public:
 private:
     PimMrt&	_pim_mrt;		// The PIM MRT (yuck!)
     IPvX	_rp_addr;		// The RP address
-    uint16_t	_iif_vif_index;		// The incoming interface
+    uint32_t	_iif_vif_index;		// The incoming interface
     Mifset	_olist;			// The outgoing interfaces
     Mifset	_olist_disable_wrongvif;// The outgoing interfaces for which
 					// the WRONGVIF kernel signal is

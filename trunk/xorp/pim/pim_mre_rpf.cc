@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.39 2005/04/28 03:00:45 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.40 2005/04/30 21:36:46 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -86,10 +86,10 @@ PimMre::rpfp_nbr_wc() const
     return (nbr_mrib_next_hop_rp());
 }
 
-uint16_t
+uint32_t
 PimMre::rpf_interface_rp() const
 {
-    uint16_t vif_index = Vif::VIF_INDEX_INVALID;
+    uint32_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif;
     
     do {
@@ -112,10 +112,10 @@ PimMre::rpf_interface_rp() const
     return (vif_index);
 }
 
-uint16_t
+uint32_t
 PimMre::rpf_interface_s() const
 {
-    uint16_t vif_index;
+    uint32_t vif_index;
     PimVif *pim_vif;
     
     if (mrib_s() == NULL)
@@ -700,7 +700,7 @@ PimMre::compute_nbr_mrib_next_hop_s() const
 PimNbr *
 PimMre::compute_rpfp_nbr_wc() const
 {
-    uint16_t next_hop_vif_index;
+    uint32_t next_hop_vif_index;
     PimVif *pim_vif;
     
     if (! is_wc())
@@ -737,7 +737,7 @@ PimMre::compute_rpfp_nbr_wc() const
 PimNbr *
 PimMre::compute_rpfp_nbr_sg() const
 {
-    uint16_t next_hop_vif_index;
+    uint32_t next_hop_vif_index;
     PimVif *pim_vif;
     
     if (! is_sg())
@@ -779,7 +779,7 @@ PimMre::compute_rpfp_nbr_sg() const
 PimNbr *
 PimMre::compute_rpfp_nbr_sg_rpt() const
 {
-    uint16_t next_hop_vif_index;
+    uint32_t next_hop_vif_index;
     PimVif *pim_vif;
     PimMre *pim_mre_sg, *pim_mre_wc;
     

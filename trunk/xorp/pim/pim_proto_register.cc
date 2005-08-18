@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.22 2005/05/10 23:51:31 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.23 2005/05/11 23:44:00 pavlin Exp $"
 
 
 //
@@ -21,12 +21,14 @@
 
 
 #include "pim_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
 #include "mrt/inet_cksum.h"
+
 #include "pim_mfc.hh"
 #include "pim_node.hh"
 #include "pim_vif.hh"
@@ -70,6 +72,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 			  const IPvX& dst,
 			  buffer_t *buffer)
 {
+#ifndef HOST_OS_WINDOWS
     uint32_t pim_register_flags;
     bool is_null_register, is_border_register;
     IPvX inner_src(family()), inner_dst(family());
@@ -80,7 +83,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     bool sent_register_stop = false;
     bool is_keepalive_timer_restarted = false;
     uint32_t keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
-    uint16_t register_vif_index = pim_node().pim_register_vif_index();
+    uint32_t register_vif_index = pim_node().pim_register_vif_index();
     
     //
     // Parse the message
@@ -429,6 +432,17 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		 cstring(src), cstring(dst));
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
+
+#else /* HOST_OS_WINDOWS */
+
+    XLOG_FATAL("WinSock2 lacks struct ip definition");
+    return (XORP_ERROR);
+
+    UNUSED(pim_nbr);
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(buffer);
+#endif /* !HOST_OS_WINDOWS */
 }
 
 int
@@ -438,6 +452,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 			  const uint8_t *rcvbuf,
 			  size_t rcvlen)
 {
+#ifndef HOST_OS_WINDOWS
     const struct ip *ip4 = (const struct ip *)rcvbuf;
     buffer_t *buffer;
     uint32_t flags = 0;
@@ -446,7 +461,8 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     if (ip4->ip_v != source_addr.ip_version()) {
 	XLOG_WARNING("Cannot encapsulate IP packet: "
 		     "inner IP version (%d) != expected IP version (%d)",
-		     ip4->ip_v, source_addr.ip_version());
+		     XORP_INT_CAST(ip4->ip_v),
+		     XORP_INT_CAST(source_addr.ip_version()));
 	return (XORP_ERROR);
     }
     
@@ -682,6 +698,18 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	       PIMTYPE2ASCII(PIM_REGISTER),
 	       cstring(domain_wide_addr()), cstring(rp_addr));
     return (XORP_ERROR);
+
+#else /* HOST_OS_WINDOWS */
+
+    XLOG_FATAL("WinSock2 lacks struct ip definition");
+    return (XORP_ERROR);
+
+    UNUSED(rp_addr);
+    UNUSED(source_addr);
+    UNUSED(group_addr);
+    UNUSED(rcvbuf);
+    UNUSED(rcvlen);
+#endif /* !HOST_OS_WINDOWS */
 }
 
 int
@@ -689,9 +717,10 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 			       const IPvX& source_addr,
 			       const IPvX& group_addr)
 {
+#ifndef HOST_OS_WINDOWS
     buffer_t *buffer = buffer_send_prepare();
     uint32_t flags = 0;
-    
+
     // Write all data to the buffer
     flags |= PIM_NULL_REGISTER;
     BUFFER_PUT_HOST_32(flags, buffer);
@@ -800,4 +829,14 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	       "(Null)",
 	       cstring(domain_wide_addr()), cstring(rp_addr));
     return (XORP_ERROR);
+
+#else /* HOST_OS_WINDOWS */
+
+    XLOG_FATAL("WinSock2 lacks struct ip definition");
+    return (XORP_ERROR);
+
+    UNUSED(rp_addr);
+    UNUSED(source_addr);
+    UNUSED(group_addr);
+#endif /* !HOST_OS_WINDOWS */
 }

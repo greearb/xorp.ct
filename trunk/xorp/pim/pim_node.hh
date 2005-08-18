@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.56 2005/06/01 00:36:59 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.57 2005/06/03 19:07:29 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -22,7 +22,7 @@
 //
 // PIM node definition.
 //
-
+#include "libxorp/xorp.h"
 
 #include <vector>
 
@@ -159,7 +159,7 @@ public:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_vif(const string& vif_name, uint16_t vif_index,
+    int		add_vif(const string& vif_name, uint32_t vif_index,
 			string& error_msg);
     
     /**
@@ -335,7 +335,7 @@ public:
      */
     int		proto_recv(const string& src_module_instance_name,
 			   xorp_module_id src_module_id,
-			   uint16_t vif_index,
+			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
 			   const uint8_t *rcvbuf, size_t rcvlen);
@@ -358,7 +358,7 @@ public:
      * @param buffer the data buffer with the message to send.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		pim_send(uint16_t vif_index,
+    int		pim_send(uint32_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool is_router_alert,
 			 buffer_t *buffer);
@@ -398,7 +398,7 @@ public:
     int		signal_message_recv(const string& src_module_instance_name,
 				    xorp_module_id src_module_id,
 				    int message_type,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst,
 				    const uint8_t *rcvbuf,
@@ -409,7 +409,7 @@ public:
     int		signal_message_send(const string&, // dst_module_instance_name,
 				    xorp_module_id, // dst_module_id,
 				    int		, // message_type,
-				    uint16_t	, // vif_index,
+				    uint32_t	, // vif_index,
 				    const IPvX&	, // src,
 				    const IPvX&	, // dst,
 				    const uint8_t * , // sndbuf,
@@ -425,7 +425,7 @@ public:
      * @param vif_index the vif index of the interface to start.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start_protocol_kernel_vif(uint16_t vif_index) = 0;
+    virtual int start_protocol_kernel_vif(uint32_t vif_index) = 0;
     
     /**
      * Stop a protocol vif with the kernel.
@@ -436,7 +436,7 @@ public:
      * @param vif_index the vif index of the interface to stop.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop_protocol_kernel_vif(uint16_t vif_index) = 0;
+    virtual int stop_protocol_kernel_vif(uint32_t vif_index) = 0;
     
     /**
      * Join a multicast group on an interface.
@@ -450,7 +450,7 @@ public:
      * @param multicast_group the multicast group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int join_multicast_group(uint16_t vif_index,
+    virtual int join_multicast_group(uint32_t vif_index,
 				     const IPvX& multicast_group) = 0;
     
     /**
@@ -465,7 +465,7 @@ public:
      * @param multicast_group the multicast group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int leave_multicast_group(uint16_t vif_index,
+    virtual int leave_multicast_group(uint32_t vif_index,
 				      const IPvX& multicast_group) = 0;
     
     /**
@@ -614,7 +614,7 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int add_protocol_mld6igmp(uint16_t vif_index) = 0;
+    virtual int add_protocol_mld6igmp(uint32_t vif_index) = 0;
     
     /**
      * Deregister this protocol with the MLD/IGMP module.
@@ -627,7 +627,7 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int delete_protocol_mld6igmp(uint16_t vif_index) = 0;
+    virtual int delete_protocol_mld6igmp(uint32_t vif_index) = 0;
     
     /**
      * Receive "add membership" from the MLD/IGMP module.
@@ -638,7 +638,7 @@ public:
      * @param group the group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_membership(uint16_t vif_index, const IPvX& source,
+    int		add_membership(uint32_t vif_index, const IPvX& source,
 			       const IPvX& group);
     
     /**
@@ -650,7 +650,7 @@ public:
      * @param group the group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_membership(uint16_t vif_index, const IPvX& source,
+    int		delete_membership(uint32_t vif_index, const IPvX& source,
 				  const IPvX& group);
     
     /**
@@ -681,7 +681,7 @@ public:
      * @return the vif index of the PIM-Register virtual interface if exists,
      * otherwise @ref Vif::VIF_INDEX_INVALID.
      */
-    uint16_t	pim_register_vif_index() const { return (_pim_register_vif_index); }
+    uint32_t	pim_register_vif_index() const { return (_pim_register_vif_index); }
     
     /**
      * Get the PIM Multicast Routing Table.
@@ -735,7 +735,7 @@ public:
      * @param v if true, set the virtual interface as a Designated Router,
      * otherwise reset it.
      */
-    void	set_pim_vifs_dr(uint16_t vif_index, bool v);
+    void	set_pim_vifs_dr(uint32_t vif_index, bool v);
     
     /**
      * Find the RPF PIM neighbor for a given destination address.
@@ -1098,21 +1098,21 @@ public:
     list<PimNbr *>& processing_pim_nbr_list() {
 	return (_processing_pim_nbr_list);
     }
-    void	init_processing_pim_mre_rp(uint16_t vif_index,
+    void	init_processing_pim_mre_rp(uint32_t vif_index,
 					   const IPvX& pim_nbr_addr);
-    void	init_processing_pim_mre_wc(uint16_t vif_index,
+    void	init_processing_pim_mre_wc(uint32_t vif_index,
 					   const IPvX& pim_nbr_addr);
-    void	init_processing_pim_mre_sg(uint16_t vif_index,
+    void	init_processing_pim_mre_sg(uint32_t vif_index,
 					   const IPvX& pim_nbr_addr);
-    void	init_processing_pim_mre_sg_rpt(uint16_t vif_index,
+    void	init_processing_pim_mre_sg_rpt(uint32_t vif_index,
 					       const IPvX& pim_nbr_addr);
-    PimNbr	*find_processing_pim_mre_rp(uint16_t vif_index,
+    PimNbr	*find_processing_pim_mre_rp(uint32_t vif_index,
 					    const IPvX& pim_nbr_addr);
-    PimNbr	*find_processing_pim_mre_wc(uint16_t vif_index,
+    PimNbr	*find_processing_pim_mre_wc(uint32_t vif_index,
 					    const IPvX& pim_nbr_addr);
-    PimNbr	*find_processing_pim_mre_sg(uint16_t vif_index,
+    PimNbr	*find_processing_pim_mre_sg(uint32_t vif_index,
 					    const IPvX& pim_nbr_addr);
-    PimNbr	*find_processing_pim_mre_sg_rpt(uint16_t vif_index,
+    PimNbr	*find_processing_pim_mre_sg_rpt(uint32_t vif_index,
 						const IPvX& pim_nbr_addr);
     
     //
@@ -1313,7 +1313,7 @@ private:
     PimScopeZoneTable _pim_scope_zone_table; // The scope zone table
     PimBsr	_pim_bsr;		// The BSR state
     
-    uint16_t	_pim_register_vif_index;// The PIM Register vif index
+    uint32_t	_pim_register_vif_index;// The PIM Register vif index
     Mifset	_pim_vifs_dr;		// The vifs I am the DR
     
     buffer_t	*_buffer_recv;		// Buffer for receiving messages

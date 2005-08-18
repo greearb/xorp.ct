@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.21 2005/04/20 09:34:47 pavlin Exp $
+// $XORP: xorp/pim/pim_mre_track_state.hh,v 1.22 2005/05/27 20:37:03 pavlin Exp $
 
 
 #ifndef __PIM_PIM_MRE_TRACK_STATE_HH__
@@ -634,7 +634,7 @@ public:
 		&& (entry_type() == action.entry_type()));
     }
     
-    void perform_action(PimMre& pim_mre, uint16_t vif_index,
+    void perform_action(PimMre& pim_mre, uint32_t vif_index,
 			const IPvX& addr_arg);
     void perform_action(PimMfc& pim_mfc);
     

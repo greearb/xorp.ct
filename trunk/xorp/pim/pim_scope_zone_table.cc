@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.10 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_scope_zone_table.cc,v 1.11 2005/03/25 02:54:03 pavlin Exp $"
 
 
 //
@@ -175,7 +175,7 @@ PimScopeZoneTable::~PimScopeZoneTable()
  **/
 void
 PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix,
-				  uint16_t vif_index)
+				  uint32_t vif_index)
 {
     // Test first if we have that scope zone already
     list<PimScopeZone>::iterator iter;
@@ -206,7 +206,7 @@ PimScopeZoneTable::add_scope_zone(const IPvXNet& scope_zone_prefix,
  **/
 void
 PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix,
-				     uint16_t vif_index)
+				     uint32_t vif_index)
 {
     // Find the scope zone and delete it
     list<PimScopeZone>::iterator iter;
@@ -236,7 +236,7 @@ PimScopeZoneTable::delete_scope_zone(const IPvXNet& scope_zone_prefix,
  * Return value: True if @addr is scoped on @vif_index, otherwise false.
  **/
 bool
-PimScopeZoneTable::is_scoped(const IPvX& addr, uint16_t vif_index) const
+PimScopeZoneTable::is_scoped(const IPvX& addr, uint32_t vif_index) const
 {
     list<PimScopeZone>::const_iterator iter;
     for (iter = _pim_scope_zone_list.begin();
@@ -263,7 +263,7 @@ PimScopeZoneTable::is_scoped(const IPvX& addr, uint16_t vif_index) const
  **/
 bool
 PimScopeZoneTable::is_scoped(const PimScopeZoneId& zone_id,
-			     uint16_t vif_index) const
+			     uint32_t vif_index) const
 {
     if (! zone_id.is_scope_zone())
 	return (false);
@@ -339,7 +339,7 @@ PimScopeZone::~PimScopeZone()
  * Set or reset an interface as a boundary for this scope zone.
  **/
 void
-PimScopeZone::set_scoped_vif(uint16_t vif_index, bool v)
+PimScopeZone::set_scoped_vif(uint32_t vif_index, bool v)
 {
     if (vif_index < _scoped_vifs.size()) {
 	if (v)
@@ -359,7 +359,7 @@ PimScopeZone::set_scoped_vif(uint16_t vif_index, bool v)
  * Return value: True if @addr is scoped on @vif_index, otherwise false.
  **/
 bool
-PimScopeZone::is_scoped(const IPvX& addr, uint16_t vif_index) const
+PimScopeZone::is_scoped(const IPvX& addr, uint32_t vif_index) const
 {
     if (! _scope_zone_prefix.contains(addr))
 	return (false);
@@ -379,7 +379,7 @@ PimScopeZone::is_scoped(const IPvX& addr, uint16_t vif_index) const
  **/
 bool
 PimScopeZone::is_scoped(const PimScopeZoneId& zone_id,
-			uint16_t vif_index) const
+			uint32_t vif_index) const
 {
     if (! zone_id.is_scope_zone())
 	return (false);
@@ -402,7 +402,7 @@ PimScopeZone::is_scoped(const PimScopeZoneId& zone_id,
  * zone, otherwise false.
  **/
 bool
-PimScopeZone::is_set(uint16_t vif_index) const
+PimScopeZone::is_set(uint32_t vif_index) const
 {
     if (vif_index < _scoped_vifs.size())
 	return (_scoped_vifs.test(vif_index));

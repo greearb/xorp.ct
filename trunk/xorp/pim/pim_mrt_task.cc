@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.19 2005/04/20 09:34:48 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.20 2005/05/27 20:37:03 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -256,7 +256,7 @@ PimMrt::add_task_nbr_mrib_next_hop_rp_gen_id_changed(const IPvX& rp_addr)
 }
 
 void
-PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
+PimMrt::add_task_pim_nbr_changed(uint32_t vif_index, const IPvX& pim_nbr_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -328,7 +328,7 @@ PimMrt::add_task_pim_nbr_changed(uint16_t vif_index, const IPvX& pim_nbr_addr)
 }
 
 void
-PimMrt::add_task_pim_nbr_gen_id_changed(uint16_t vif_index,
+PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
 					const IPvX& pim_nbr_addr)
 {
     PimMreTask *pim_mre_task;
@@ -431,7 +431,7 @@ PimMrt::add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
 
 // TODO: not used (not needed?)
 void
-PimMrt::add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr)
+PimMrt::add_task_receive_join_rp(uint32_t vif_index, const IPvX& rp_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -448,7 +448,7 @@ PimMrt::add_task_receive_join_rp(uint16_t vif_index, const IPvX& rp_addr)
 }
 
 void
-PimMrt::add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr)
+PimMrt::add_task_receive_join_wc(uint32_t vif_index, const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -465,7 +465,7 @@ PimMrt::add_task_receive_join_wc(uint16_t vif_index, const IPvX& group_addr)
 }
 
 void
-PimMrt::add_task_receive_join_sg(uint16_t vif_index,
+PimMrt::add_task_receive_join_sg(uint32_t vif_index,
 				 const IPvX& source_addr,
 				 const IPvX& group_addr)
 {
@@ -485,7 +485,7 @@ PimMrt::add_task_receive_join_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_receive_join_sg_rpt(uint16_t vif_index,
+PimMrt::add_task_receive_join_sg_rpt(uint32_t vif_index,
 				     const IPvX& source_addr,
 				     const IPvX& group_addr)
 {
@@ -505,7 +505,7 @@ PimMrt::add_task_receive_join_sg_rpt(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_receive_prune_rp(uint16_t vif_index, const IPvX& rp_addr)
+PimMrt::add_task_receive_prune_rp(uint32_t vif_index, const IPvX& rp_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -522,7 +522,7 @@ PimMrt::add_task_receive_prune_rp(uint16_t vif_index, const IPvX& rp_addr)
 }
 
 void
-PimMrt::add_task_receive_prune_wc(uint16_t vif_index, const IPvX& group_addr)
+PimMrt::add_task_receive_prune_wc(uint32_t vif_index, const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -539,7 +539,7 @@ PimMrt::add_task_receive_prune_wc(uint16_t vif_index, const IPvX& group_addr)
 }
 
 void
-PimMrt::add_task_see_prune_wc(uint16_t vif_index, const IPvX& group_addr,
+PimMrt::add_task_see_prune_wc(uint32_t vif_index, const IPvX& group_addr,
 			      const IPvX& target_nbr_addr)
 {
     PimMreTask *pim_mre_task;
@@ -558,7 +558,7 @@ PimMrt::add_task_see_prune_wc(uint16_t vif_index, const IPvX& group_addr,
 }
 
 void
-PimMrt::add_task_receive_prune_sg(uint16_t vif_index,
+PimMrt::add_task_receive_prune_sg(uint32_t vif_index,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr)
 {
@@ -578,7 +578,7 @@ PimMrt::add_task_receive_prune_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_receive_prune_sg_rpt(uint16_t vif_index,
+PimMrt::add_task_receive_prune_sg_rpt(uint32_t vif_index,
 				      const IPvX& source_addr,
 				      const IPvX& group_addr)
 {
@@ -598,7 +598,7 @@ PimMrt::add_task_receive_prune_sg_rpt(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
+PimMrt::add_task_receive_end_of_message_sg_rpt(uint32_t vif_index,
 					       const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
@@ -616,7 +616,7 @@ PimMrt::add_task_receive_end_of_message_sg_rpt(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_downstream_jp_state_rp(uint16_t vif_index,
+PimMrt::add_task_downstream_jp_state_rp(uint32_t vif_index,
 					const IPvX& rp_addr)
 {
     PimMreTask *pim_mre_task;
@@ -634,7 +634,7 @@ PimMrt::add_task_downstream_jp_state_rp(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_downstream_jp_state_wc(uint16_t vif_index,
+PimMrt::add_task_downstream_jp_state_wc(uint32_t vif_index,
 					const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
@@ -652,7 +652,7 @@ PimMrt::add_task_downstream_jp_state_wc(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_downstream_jp_state_sg(uint16_t vif_index,
+PimMrt::add_task_downstream_jp_state_sg(uint32_t vif_index,
 					const IPvX& source_addr,
 					const IPvX& group_addr)
 {
@@ -672,7 +672,7 @@ PimMrt::add_task_downstream_jp_state_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_downstream_jp_state_sg_rpt(uint16_t vif_index,
+PimMrt::add_task_downstream_jp_state_sg_rpt(uint32_t vif_index,
 					    const IPvX& source_addr,
 					    const IPvX& group_addr)
 {
@@ -710,7 +710,7 @@ PimMrt::add_task_upstream_jp_state_sg(const IPvX& source_addr,
 }
 
 void
-PimMrt::add_task_local_receiver_include_wc(uint16_t vif_index,
+PimMrt::add_task_local_receiver_include_wc(uint32_t vif_index,
 					   const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
@@ -728,7 +728,7 @@ PimMrt::add_task_local_receiver_include_wc(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_local_receiver_include_sg(uint16_t vif_index,
+PimMrt::add_task_local_receiver_include_sg(uint32_t vif_index,
 					   const IPvX& source_addr,
 					   const IPvX& group_addr)
 {
@@ -748,7 +748,7 @@ PimMrt::add_task_local_receiver_include_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_local_receiver_exclude_sg(uint16_t vif_index,
+PimMrt::add_task_local_receiver_exclude_sg(uint32_t vif_index,
 					   const IPvX& source_addr,
 					   const IPvX& group_addr)
 {
@@ -768,7 +768,7 @@ PimMrt::add_task_local_receiver_exclude_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_assert_state_wc(uint16_t vif_index, const IPvX& group_addr)
+PimMrt::add_task_assert_state_wc(uint32_t vif_index, const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
     
@@ -785,7 +785,7 @@ PimMrt::add_task_assert_state_wc(uint16_t vif_index, const IPvX& group_addr)
 }
 
 void
-PimMrt::add_task_assert_state_sg(uint16_t vif_index,
+PimMrt::add_task_assert_state_sg(uint32_t vif_index,
 				 const IPvX& source_addr,
 				 const IPvX& group_addr)
 {
@@ -805,7 +805,7 @@ PimMrt::add_task_assert_state_sg(uint16_t vif_index,
 }
 
 void
-PimMrt::add_task_i_am_dr(uint16_t vif_index)
+PimMrt::add_task_i_am_dr(uint32_t vif_index)
 {
     PimMreTask *pim_mre_task;
 
@@ -846,7 +846,7 @@ PimMrt::add_task_i_am_dr(uint16_t vif_index)
 }
 
 void
-PimMrt::add_task_my_ip_address(uint16_t vif_index)
+PimMrt::add_task_my_ip_address(uint32_t vif_index)
 {
     PimMreTask *pim_mre_task;
     
@@ -887,7 +887,7 @@ PimMrt::add_task_my_ip_address(uint16_t vif_index)
 }
 
 void
-PimMrt::add_task_my_ip_subnet_address(uint16_t vif_index)
+PimMrt::add_task_my_ip_subnet_address(uint32_t vif_index)
 {
     PimMreTask *pim_mre_task;
     
@@ -997,7 +997,7 @@ PimMrt::add_task_sptbit_sg(const IPvX& source_addr, const IPvX& group_addr)
 }
 
 void
-PimMrt::add_task_start_vif(uint16_t vif_index)
+PimMrt::add_task_start_vif(uint32_t vif_index)
 {
     PimMreTask *pim_mre_task;
     
@@ -1066,7 +1066,7 @@ PimMrt::add_task_start_vif(uint16_t vif_index)
 }
 
 void
-PimMrt::add_task_stop_vif(uint16_t vif_index)
+PimMrt::add_task_stop_vif(uint32_t vif_index)
 {
     PimMreTask *pim_mre_task;
     

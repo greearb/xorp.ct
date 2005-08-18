@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.28 2005/05/11 23:44:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.29 2005/05/27 20:29:31 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -142,7 +142,7 @@ PimMfc::recompute_rp_mfc()
 void
 PimMfc::recompute_iif_olist_mfc()
 {
-    uint16_t new_iif_vif_index = Vif::VIF_INDEX_INVALID;
+    uint32_t new_iif_vif_index = Vif::VIF_INDEX_INVALID;
     Mifset new_olist;
     uint32_t lookup_flags;
     PimMre *pim_mre, *pim_mre_sg, *pim_mre_sg_rpt;
@@ -202,7 +202,7 @@ PimMfc::recompute_iif_olist_mfc()
 	// "no cache" or "wrong iif" upcalls.
 	//
 	if (new_olist.none()) {
-	    uint16_t iif_vif_index_s = Vif::VIF_INDEX_INVALID;
+	    uint32_t iif_vif_index_s = Vif::VIF_INDEX_INVALID;
 	    if (pim_mre_sg != NULL) {
 		iif_vif_index_s = pim_mre_sg->rpf_interface_s();
 	    } else if (pim_mre_sg_rpt != NULL) {
@@ -426,7 +426,7 @@ PimMfc::install_spt_switch_dataflow_monitor_mfc(PimMre *pim_mre)
 }
 
 void
-PimMfc::update_mfc(uint16_t new_iif_vif_index, const Mifset& new_olist,
+PimMfc::update_mfc(uint32_t new_iif_vif_index, const Mifset& new_olist,
 		   const PimMre* pim_mre_sg)
 {
     bool is_changed = false;
@@ -483,7 +483,7 @@ PimMfc::add_mfc_to_kernel()
 {
     if (pim_node().is_log_trace()) {
 	string res, res2;
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else
@@ -514,7 +514,7 @@ PimMfc::delete_mfc_from_kernel()
 {
     if (pim_node().is_log_trace()) {
 	string res;
-	for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	    if (olist().test(i))
 		res += "O";
 	    else

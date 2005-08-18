@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.15 2005/04/20 09:44:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_nbr.cc,v 1.16 2005/04/30 21:36:46 pavlin Exp $"
 
 //
 // PIM neigbor routers handling
@@ -114,7 +114,7 @@ PimNbr::reset_received_options()
  * 
  * Return value: The Vif index toward this neighbor.
  **/
-uint16_t
+uint32_t
 PimNbr::vif_index() const
 {
     return (pim_vif().vif_index());

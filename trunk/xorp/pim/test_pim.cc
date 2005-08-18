@@ -12,13 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.53 2005/04/20 09:52:06 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.54 2005/05/12 02:22:07 pavlin Exp $"
 
 
 //
 // PIM test program.
 //
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "pim_module.h"
 
@@ -53,6 +56,9 @@
 
 #include "xrl_pim_node.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #ifndef FEA_DUMMY
 static bool is_dummy = false;

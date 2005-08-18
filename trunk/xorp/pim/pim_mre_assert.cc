@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.34 2005/05/03 01:39:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_assert.cc,v 1.35 2005/05/04 01:53:01 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Assert handling
@@ -57,7 +57,7 @@
 //
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_assert_noinfo_state(uint16_t vif_index)
+PimMre::set_assert_noinfo_state(uint32_t vif_index)
 {
     if (! (is_wc() || is_sg()))
 	return;
@@ -91,7 +91,7 @@ PimMre::set_assert_noinfo_state(uint16_t vif_index)
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_i_am_assert_winner_state(uint16_t vif_index)
+PimMre::set_i_am_assert_winner_state(uint32_t vif_index)
 {
     if (! (is_wc() || is_sg()))
 	return;
@@ -122,7 +122,7 @@ PimMre::set_i_am_assert_winner_state(uint16_t vif_index)
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_i_am_assert_loser_state(uint16_t vif_index)
+PimMre::set_i_am_assert_loser_state(uint32_t vif_index)
 {
     if (! (is_wc() || is_sg()))
 	return;
@@ -155,7 +155,7 @@ PimMre::set_i_am_assert_loser_state(uint16_t vif_index)
 
 // Note: applies only for (*,G) and (S,G)
 bool
-PimMre::is_assert_noinfo_state(uint16_t vif_index) const
+PimMre::is_assert_noinfo_state(uint32_t vif_index) const
 {
     if (! (is_wc() || is_sg()))
 	return (true);		// XXX
@@ -170,7 +170,7 @@ PimMre::is_assert_noinfo_state(uint16_t vif_index) const
 
 // Note: applies only for (*,G) and (S,G)
 bool
-PimMre::is_i_am_assert_winner_state(uint16_t vif_index) const
+PimMre::is_i_am_assert_winner_state(uint32_t vif_index) const
 {
     if (! (is_wc() || is_sg()))
 	return (false);		// XXX
@@ -183,7 +183,7 @@ PimMre::is_i_am_assert_winner_state(uint16_t vif_index) const
 
 // Note: applies only for (*,G) and (S,G)
 bool
-PimMre::is_i_am_assert_loser_state(uint16_t vif_index) const
+PimMre::is_i_am_assert_loser_state(uint32_t vif_index) const
 {
     if (! (is_wc() || is_sg()))
 	return (false);		// XXX
@@ -275,7 +275,7 @@ const Mifset&
 PimMre::lost_assert_wc() const
 {
     static Mifset mifs;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! (is_wc() || is_sg() || is_sg_rpt())) {
 	mifs.reset();
@@ -296,7 +296,7 @@ const Mifset&
 PimMre::lost_assert_sg() const
 {
     static Mifset mifs;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! is_sg()) {
 	mifs.reset();
@@ -319,7 +319,7 @@ PimMre::lost_assert_sg_rpt() const
 {
     static Mifset mifs;
     const PimMre *pim_mre_sg = NULL;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! (is_sg() || is_sg_rpt())) {
 	mifs.reset();
@@ -361,7 +361,7 @@ PimMre::lost_assert_sg_rpt() const
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_could_assert_state(uint16_t vif_index, bool v)
+PimMre::set_could_assert_state(uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -379,7 +379,7 @@ PimMre::set_could_assert_state(uint16_t vif_index, bool v)
 
 // Note: applies only for (*,G) and (S,G)
 bool
-PimMre::is_could_assert_state(uint16_t vif_index) const
+PimMre::is_could_assert_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -389,7 +389,7 @@ PimMre::is_could_assert_state(uint16_t vif_index) const
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
+PimMre::set_assert_tracking_desired_state(uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -407,7 +407,7 @@ PimMre::set_assert_tracking_desired_state(uint16_t vif_index, bool v)
 
 // Note: applies only for (*,G) and (S,G)
 bool
-PimMre::is_assert_tracking_desired_state(uint16_t vif_index) const
+PimMre::is_assert_tracking_desired_state(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -419,7 +419,7 @@ PimMre::is_assert_tracking_desired_state(uint16_t vif_index) const
 int
 PimMre::assert_process(PimVif *pim_vif, AssertMetric *assert_metric)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     int ret_value;
     assert_state_t assert_state;
     bool i_am_assert_winner;
@@ -489,7 +489,7 @@ PimMre::assert_process_wc(PimVif *pim_vif,
 			  assert_state_t assert_state,
 			  bool i_am_assert_winner)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
     
     if (! is_wc())
@@ -603,7 +603,7 @@ PimMre::assert_process_sg(PimVif *pim_vif,
 			  assert_state_t assert_state,
 			  bool i_am_assert_winner)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
     
     if (! is_sg())
@@ -745,7 +745,7 @@ PimMre::wrong_iif_data_arrived_wc(PimVif *pim_vif,
 				  const IPvX& assert_source_addr,
 				  bool& is_assert_sent)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     
     if (! is_wc())
 	return (XORP_ERROR);
@@ -778,7 +778,7 @@ PimMre::wrong_iif_data_arrived_sg(PimVif *pim_vif,
 				  const IPvX& assert_source_addr,
 				  bool& is_assert_sent)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     
     if (! is_sg())
 	return (XORP_ERROR);
@@ -834,7 +834,7 @@ PimMre::data_arrived_could_assert(PimVif *pim_vif,
 				  const IPvX& dst,
 				  bool& is_assert_sent)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     int ret_value;
     
     //
@@ -918,7 +918,7 @@ PimMre::data_arrived_could_assert_wc(PimVif *pim_vif,
 				     const IPvX& assert_source_addr,
 				     bool& is_assert_sent)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
     Mifset mifs;
     
@@ -963,7 +963,7 @@ PimMre::data_arrived_could_assert_sg(PimVif *pim_vif,
 				     const IPvX& assert_source_addr,
 				     bool& is_assert_sent)
 {
-    uint16_t vif_index = pim_vif->vif_index();
+    uint32_t vif_index = pim_vif->vif_index();
     AssertMetric *new_assert_metric;
     Mifset mifs;
     
@@ -1008,7 +1008,7 @@ const Mifset&
 PimMre::could_assert_wc() const
 {
     static Mifset mifs;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     mifs = joins_rp();
     if (is_wc() || is_sg() || is_sg_rpt()) {
@@ -1039,7 +1039,7 @@ PimMre::recompute_could_assert_wc()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_could_assert_wc(i, new_value.test(i));
     }
@@ -1050,7 +1050,7 @@ PimMre::recompute_could_assert_wc()
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::process_could_assert_wc(uint16_t vif_index, bool new_value)
+PimMre::process_could_assert_wc(uint32_t vif_index, bool new_value)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
@@ -1093,7 +1093,7 @@ PimMre::could_assert_sg() const
     static Mifset mifs;
     Mifset mifs2;
     PimMre *pim_mre_sg_rpt;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! (is_sg() || is_sg_rpt())) {
 	mifs.reset();
@@ -1152,7 +1152,7 @@ PimMre::recompute_could_assert_sg()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_could_assert_sg(i, new_value.test(i));
     }
@@ -1163,7 +1163,7 @@ PimMre::recompute_could_assert_sg()
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::process_could_assert_sg(uint16_t vif_index, bool new_value)
+PimMre::process_could_assert_sg(uint32_t vif_index, bool new_value)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
@@ -1201,7 +1201,7 @@ PimMre::process_could_assert_sg(uint16_t vif_index, bool new_value)
 
 // Note: applies only for (*,G)
 void
-PimMre::assert_timer_timeout_wc(uint16_t vif_index)
+PimMre::assert_timer_timeout_wc(uint32_t vif_index)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
@@ -1241,7 +1241,7 @@ PimMre::assert_timer_timeout_wc(uint16_t vif_index)
 // Note: applies only for (*,G)
 // TODO: unite actions a3 and a5 below with the original actions earlier
 void
-PimMre::assert_timer_timeout_sg(uint16_t vif_index)
+PimMre::assert_timer_timeout_sg(uint32_t vif_index)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
     
@@ -1280,7 +1280,7 @@ PimMre::assert_timer_timeout_sg(uint16_t vif_index)
 
 // Note: works for (*,G), (S,G)
 AssertMetric *
-PimMre::assert_winner_metric_wc(uint16_t vif_index) const
+PimMre::assert_winner_metric_wc(uint32_t vif_index) const
 {
     const PimMre *pim_mre_wc;
     
@@ -1303,7 +1303,7 @@ PimMre::assert_winner_metric_wc(uint16_t vif_index) const
 
 // Note: works for (S,G)
 AssertMetric *
-PimMre::assert_winner_metric_sg(uint16_t vif_index) const
+PimMre::assert_winner_metric_sg(uint32_t vif_index) const
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (NULL);
@@ -1318,7 +1318,7 @@ PimMre::assert_winner_metric_sg(uint16_t vif_index) const
 
 // Note: works for (*,G), (S,G)
 void
-PimMre::set_assert_winner_metric_wc(uint16_t vif_index, AssertMetric *v)
+PimMre::set_assert_winner_metric_wc(uint32_t vif_index, AssertMetric *v)
 {
     PimMre *pim_mre_wc;
     
@@ -1341,7 +1341,7 @@ PimMre::set_assert_winner_metric_wc(uint16_t vif_index, AssertMetric *v)
 
 // Note: works for (S,G)
 void
-PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
+PimMre::set_assert_winner_metric_sg(uint32_t vif_index, AssertMetric *v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1372,7 +1372,7 @@ PimMre::set_assert_winner_metric_sg(uint16_t vif_index, AssertMetric *v)
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::set_assert_winner_metric(uint16_t vif_index, AssertMetric *v)
+PimMre::set_assert_winner_metric(uint32_t vif_index, AssertMetric *v)
 {
     AssertMetric *old_assert_metric;
     
@@ -1390,7 +1390,7 @@ PimMre::set_assert_winner_metric(uint16_t vif_index, AssertMetric *v)
 
 // Note: works for (*,G), (S,G)
 void
-PimMre::delete_assert_winner_metric_wc(uint16_t vif_index)
+PimMre::delete_assert_winner_metric_wc(uint32_t vif_index)
 {
     PimMre *pim_mre_wc;
     
@@ -1413,7 +1413,7 @@ PimMre::delete_assert_winner_metric_wc(uint16_t vif_index)
 
 // Note: works for (S,G)
 void
-PimMre::delete_assert_winner_metric_sg(uint16_t vif_index)
+PimMre::delete_assert_winner_metric_sg(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1435,7 +1435,7 @@ PimMre::delete_assert_winner_metric_sg(uint16_t vif_index)
 
 // Note: applies only for (*,G) and (S,G)
 void
-PimMre::delete_assert_winner_metric(uint16_t vif_index)
+PimMre::delete_assert_winner_metric(uint32_t vif_index)
 {
     set_assert_winner_metric(vif_index, NULL);
 }
@@ -1443,7 +1443,7 @@ PimMre::delete_assert_winner_metric(uint16_t vif_index)
 // Note: applies only for (S,G)
 void
 PimMre::set_assert_winner_metric_is_better_than_spt_assert_metric_sg(
-    uint16_t vif_index, bool v)
+    uint32_t vif_index, bool v)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return;
@@ -1457,7 +1457,7 @@ PimMre::set_assert_winner_metric_is_better_than_spt_assert_metric_sg(
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint16_t vif_index,
+PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint32_t vif_index,
 						      const IPvX& nbr_addr)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1488,7 +1488,7 @@ PimMre::recompute_assert_winner_nbr_sg_gen_id_changed(uint16_t vif_index,
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
+PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint32_t vif_index,
 						      const IPvX& nbr_addr)
 {
     PimVif *pim_vif = pim_mrt().vif_find_by_vif_index(vif_index);
@@ -1519,7 +1519,7 @@ PimMre::recompute_assert_winner_nbr_wc_gen_id_changed(uint16_t vif_index,
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_winner_nbr_sg_nlt_expired(uint16_t vif_index,
+PimMre::recompute_assert_winner_nbr_sg_nlt_expired(uint32_t vif_index,
 						   const IPvX& nbr_addr)
 {
     // XXX: the action is the same if the neighbor GenID has changed
@@ -1530,7 +1530,7 @@ PimMre::recompute_assert_winner_nbr_sg_nlt_expired(uint16_t vif_index,
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_winner_nbr_wc_nlt_expired(uint16_t vif_index,
+PimMre::recompute_assert_winner_nbr_wc_nlt_expired(uint32_t vif_index,
 						   const IPvX& nbr_addr)
 {
     // XXX: the action is the same if the neighbor GenID has changed
@@ -1545,7 +1545,7 @@ PimMre::assert_tracking_desired_sg() const
     static Mifset mifs;
     Mifset mifs2;
     PimMre *pim_mre_sg_rpt;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! is_sg()) {
 	mifs.reset();
@@ -1601,7 +1601,7 @@ PimMre::recompute_assert_tracking_desired_sg()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_assert_tracking_desired_sg(i, new_value.test(i));
     }
@@ -1612,7 +1612,7 @@ PimMre::recompute_assert_tracking_desired_sg()
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::process_assert_tracking_desired_sg(uint16_t vif_index, bool new_value)
+PimMre::process_assert_tracking_desired_sg(uint32_t vif_index, bool new_value)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -1649,7 +1649,7 @@ PimMre::assert_tracking_desired_wc() const
 {
     static Mifset mifs;
     Mifset mifs2;
-    uint16_t vif_index;
+    uint32_t vif_index;
     
     if (! is_wc()) {
 	mifs.reset();
@@ -1688,7 +1688,7 @@ PimMre::recompute_assert_tracking_desired_wc()
 	return (false);			// Nothing changed
     
     diff_value = new_value ^ old_value;
-    for (uint16_t i = 0; i < pim_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
 	if (diff_value.test(i))
 	    process_assert_tracking_desired_wc(i, new_value.test(i));
     }
@@ -1699,7 +1699,7 @@ PimMre::recompute_assert_tracking_desired_wc()
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::process_assert_tracking_desired_wc(uint16_t vif_index, bool new_value)
+PimMre::process_assert_tracking_desired_wc(uint32_t vif_index, bool new_value)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -1732,7 +1732,7 @@ PimMre::process_assert_tracking_desired_wc(uint16_t vif_index, bool new_value)
 
 // Note: applies only for (S,G)
 AssertMetric *
-PimMre::spt_assert_metric(uint16_t vif_index) const
+PimMre::spt_assert_metric(uint32_t vif_index) const
 {
     static AssertMetric assert_metric(IPvX::ZERO(family()));
     PimVif *pim_vif;
@@ -1757,7 +1757,7 @@ PimMre::spt_assert_metric(uint16_t vif_index) const
 
 // Note: applies only for (*,G) and (S,G)
 AssertMetric *
-PimMre::rpt_assert_metric(uint16_t vif_index) const
+PimMre::rpt_assert_metric(uint32_t vif_index) const
 {
     static AssertMetric assert_metric(IPvX::ZERO(family()));
     PimVif *pim_vif;
@@ -1845,7 +1845,7 @@ PimMre::metric_rp() const
 
 // Note: applies only for (S,G)
 AssertMetric *
-PimMre::my_assert_metric_sg(uint16_t vif_index) const
+PimMre::my_assert_metric_sg(uint32_t vif_index) const
 {
     Mifset mifs;
     
@@ -1868,7 +1868,7 @@ PimMre::my_assert_metric_sg(uint16_t vif_index) const
 
 // Note: applies only for (*,G)
 AssertMetric *
-PimMre::my_assert_metric_wc(uint16_t vif_index) const
+PimMre::my_assert_metric_wc(uint32_t vif_index) const
 {
     Mifset mifs;
     
@@ -1888,7 +1888,7 @@ PimMre::my_assert_metric_wc(uint16_t vif_index) const
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
+PimMre::recompute_my_assert_metric_sg(uint32_t vif_index)
 {
     AssertMetric *my_assert_metric, *winner_metric;
     
@@ -1926,7 +1926,7 @@ PimMre::recompute_my_assert_metric_sg(uint16_t vif_index)
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
+PimMre::recompute_my_assert_metric_wc(uint32_t vif_index)
 {
     AssertMetric *my_assert_metric, *winner_metric;
     
@@ -1967,7 +1967,7 @@ PimMre::recompute_my_assert_metric_wc(uint16_t vif_index)
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
+PimMre::recompute_assert_rpf_interface_sg(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -1998,7 +1998,7 @@ PimMre::recompute_assert_rpf_interface_sg(uint16_t vif_index)
 // "RPF_interface(RP(G)) stops being I"
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
+PimMre::recompute_assert_rpf_interface_wc(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -2028,7 +2028,7 @@ PimMre::recompute_assert_rpf_interface_wc(uint16_t vif_index)
 // Note: applies only for (S,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
+PimMre::recompute_assert_receive_join_sg(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);
@@ -2056,7 +2056,7 @@ PimMre::recompute_assert_receive_join_sg(uint16_t vif_index)
 // Note: applies only for (*,G)
 // Return true if state has changed, otherwise return false.
 bool
-PimMre::recompute_assert_receive_join_wc(uint16_t vif_index)
+PimMre::recompute_assert_receive_join_wc(uint32_t vif_index)
 {
     if (vif_index == Vif::VIF_INDEX_INVALID)
 	return (false);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node_cli.hh,v 1.8 2005/03/24 00:40:01 pavlin Exp $
+// $XORP: xorp/pim/pim_node_cli.hh,v 1.9 2005/03/25 02:54:02 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_CLI_HH__
@@ -87,7 +87,7 @@ private:
     //
     string	mifset_str(const Mifset& mifset) const {
 	string res;
-	for (uint16_t i = 0; i < _pim_node.maxvifs(); i++) {
+	for (uint32_t i = 0; i < _pim_node.maxvifs(); i++) {
 	    if (mifset.test(i))
 		res += "O";
 	    else
