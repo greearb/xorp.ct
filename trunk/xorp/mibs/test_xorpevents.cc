@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.13 2004/12/09 07:54:38 pavlin Exp $"
+#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.14 2005/03/25 02:53:53 pavlin Exp $"
 
 
 #include <set>
@@ -65,7 +65,7 @@ int
 register_readfd(int fd, void (*) (int, void *), void *)
 {
     fprintf(stderr,"Read file descriptor %d exported\n", fd);
-    if (exported_readfds.end() != exported_readfds.find(fd)) 
+    if (exported_readfds.end() != exported_readfds.find(fd))
 	{
 	XLOG_ERROR("fd %d was already exported!!", fd);
 	exit(TEST_FAIL);
@@ -138,7 +138,7 @@ snmp_alarm_register_hr(struct timeval t, unsigned int flags,
 }
 
 void
-snmp_alarm_unregister (unsigned int) {};
+snmp_alarm_unregister(unsigned int) {};
 
 void  snmp_set_do_debugging(int) {};
 int   snmp_get_do_debugging(void) {return 1;};
@@ -273,17 +273,20 @@ fake_snmpd()
     t.copy_out(tv);
     FD_ZERO(&readfds); FD_ZERO(&writefds); FD_ZERO(&exceptfds);
     FakeSnmpdFdSet::iterator p;
-    for (p = exported_readfds.begin(); p != exported_readfds.end(); p++) {
-	FD_SET (*p, &readfds);
-	fprintf(stderr,"fake snmp added fd %d to read fd mask\n", *p);
+    for (p = exported_readfds.begin(); p != exported_readfds.end(); ++p) {
+	int fd = *p;
+	FD_SET(fd, &readfds);
+	fprintf(stderr,"fake snmp added fd %d to read fd mask\n", fd);
     }
-    for (p = exported_writefds.begin(); p != exported_writefds.end(); p++) {
-	FD_SET (*p, &writefds);
-	fprintf(stderr,"fake snmp added fd %d to write fd mask\n", *p);
+    for (p = exported_writefds.begin(); p != exported_writefds.end(); ++p) {
+	int fd = *p;
+	FD_SET(fd, &writefds);
+	fprintf(stderr,"fake snmp added fd %d to write fd mask\n", fd);
     }
-    for (p = exported_exceptfds.begin(); p != exported_exceptfds.end(); p++) {
-	FD_SET (*p, &exceptfds);
-	fprintf(stderr,"fake snmp added fd %d to exception fd mask\n", *p);
+    for (p = exported_exceptfds.begin(); p != exported_exceptfds.end(); ++p) {
+	int fd = *p;
+	FD_SET(fd, &exceptfds);
+	fprintf(stderr,"fake snmp added fd %d to exception fd mask\n", fd);
     }
     if (select (100, &readfds, &writefds, &exceptfds, &tv)) {
 	fprintf(stderr,"fake_select detected activity on "
