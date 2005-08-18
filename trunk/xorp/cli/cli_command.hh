@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.14 2005/07/27 23:32:52 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.15 2005/07/28 23:26:24 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -374,11 +374,20 @@ public:
 	_dynamic_interrupt_callback = v;
     }
 
-protected:
+    /**
+     * Set the callback for command processing.
+     * 
+     * @param v the callback for command processing.
+     */
     void set_cli_process_callback(const CLI_PROCESS_CALLBACK& v) {
 	_cli_process_callback = v;
     }
 
+    /**
+     * Set the callback for command interrupt.
+     * 
+     * @param v the callback for command processing.
+     */
     void set_cli_interrupt_callback(const CLI_INTERRUPT_CALLBACK& v) {
 	_cli_interrupt_callback = v;
     }
