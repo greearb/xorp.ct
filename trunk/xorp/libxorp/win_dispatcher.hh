@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.2 2005/08/18 15:28:42 bms Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -81,7 +81,7 @@ public:
  * each member.
  */
 typedef map<IoEventTuple, IoEventCb>	IoEventMap;
-#endif
+#endif // HOST_OS_WINDOWS
 
 #ifdef HOST_OS_WINDOWS
 /**
@@ -227,7 +227,7 @@ private:
 
     // Pipe handles requiring PeekNamedPipe() polling for readability.
     vector<HANDLE>	_polled_pipes;
-#endif
+#endif // HOST_OS_WINDOWS
 };
 
 #endif // __LIBXORP_WIN_DISPATCHER_HH__
