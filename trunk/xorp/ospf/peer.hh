@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.82 2005/08/17 03:30:34 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.83 2005/08/18 06:22:07 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -270,7 +270,8 @@ class Peer {
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area_id,
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
-	  _area_type(area_type), _hello_packet(ospf.get_version())
+	  _area_type(area_type), _interface_state(Down),
+	  _hello_packet(ospf.get_version())
     {
 	_hello_packet.set_area_id(area_id);
 
@@ -284,8 +285,6 @@ class Peer {
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 	_rxmt_interval = 5;
-
-	change_state(Down);
     }
 
     ~Peer() {
