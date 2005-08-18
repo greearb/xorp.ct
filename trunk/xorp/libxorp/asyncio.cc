@@ -35,21 +35,48 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+#include "xorpfd.hh"
 #include "asyncio.hh"
+
+#ifdef HOST_OS_WINDOWS
+#include "win_dispatcher.hh"
+#include "win_io.h"
+#endif
 
 // ----------------------------------------------------------------------------
 // Utility
 
 bool
-is_pseudo_error(const char* name, int fd, int error_num)
+is_pseudo_error(const char* name, XorpFd fd, int error_num)
 {
     switch (error_num) {
+#ifdef HOST_OS_WINDOWS
+    case ERROR_IO_PENDING:
+	XLOG_WARNING("%s (fd = %p) got ERROR_IO_PENDING, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEINTR:
+	XLOG_WARNING("%s (fd = %p) got WSAEINTR, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEWOULDBLOCK:
+	XLOG_WARNING("%s (fd = %p) got WSAEWOULDBLOCK, continuing.", name,
+		     (void *)fd);
+	return true;
+    case WSAEINPROGRESS:
+	XLOG_WARNING("%s (fd = %p) got WSAEINPROGRESS, continuing.", name,
+		     (void *)fd);
+	return true;
+#else
     case EINTR:
-	debug_msg("%s (fd = %d) got EINTR, continuing.", name, fd);
+	XLOG_WARNING("%s (fd = %d) got EINTR, continuing.", name,
+		     XORP_INT_CAST(fd));
 	return true;
-    case EAGAIN:
-	debug_msg("%s (fd = %d) got EAGAIN, continuing.", name, fd);
+    case EWOULDBLOCK:
+	XLOG_WARNING("%s (fd = %d) got EWOULDBLOCK, continuing.", name,
+		     XORP_INT_CAST(fd));
 	return true;
+#endif /* HOST_OS_WINDOWS */
     }
     return false;
 }
@@ -57,7 +84,6 @@ is_pseudo_error(const char* name, int fd, int error_num)
 // ----------------------------------------------------------------------------
 AsyncFileOperator::~AsyncFileOperator()
 {
-    _fd = -9999;
 }
 
 // ----------------------------------------------------------------------------
@@ -81,24 +107,77 @@ AsyncFileReader::add_buffer_with_offset(uint8_t*	b,
 }
 
 void
-AsyncFileReader::read(int fd, SelectorMask m) {
-    assert(m == SEL_RD);
+AsyncFileReader::read(XorpFd fd, IoEventType type) {
+    //assert(type == IOT_READ);
     assert(fd == _fd);
     assert(_buffers.empty() == false);
 
     debug_msg("Buffer count %u\n", XORP_UINT_CAST(_buffers.size()));
+    (void)type;
 
     BufferInfo& head = _buffers.front();
+    ssize_t done = 0;
+#ifdef HOST_OS_WINDOWS
+    BOOL result = FALSE;
 
+    if (type == IOT_DISCONNECT) {
+    	if (!fd.is_socket()) {
+	    XLOG_FATAL("IOT_DISCONNECT is not valid for non-sockets.\n");
+	} else {
+	    head.dispatch_callback(END_OF_FILE);
+	    return;
+	}
+    }
+
+    switch (fd.type()) {
+    case XorpFd::FDTYPE_SOCKET:
+	done = recv((SOCKET)_fd, (char *)(head._buffer + head._offset),
+		    head._buffer_bytes - head._offset, 0);
+	if (done == SOCKET_ERROR) {
+	    _last_error = WSAGetLastError();
+	    WSASetLastError(ERROR_SUCCESS);
+	    done = -1;
+	}
+	break;
+
+    case XorpFd::FDTYPE_PIPE:
+	done = win_pipe_read(_fd, head._buffer + head._offset,
+			     head._buffer_bytes - head._offset);
+	_last_error = GetLastError();
+	break;
+
+    case XorpFd::FDTYPE_CONSOLE:
+	done = win_con_read(_fd, head._buffer + head._offset,
+			     head._buffer_bytes - head._offset);
+	_last_error = GetLastError();
+	break;
+
+    case XorpFd::FDTYPE_FILE:
+        // XXX: Regular file I/O on Windows will always block, unless
+	// we spawn a helper thread.
+	result = ReadFile(_fd, (LPVOID)(head._buffer + head._offset),
+			       (DWORD)(head._buffer_bytes - head._offset),
+			       (LPDWORD)&done, NULL);
+	if (result == FALSE) {
+	    _last_error = GetLastError();
+	    SetLastError(ERROR_SUCCESS);
+	}
+	break;
+
+    default:
+	XLOG_FATAL("Invalid descriptor type.");
+	break;
+    }
+#else /* !HOST_OS_WINDOWS */
+    done = ::read(_fd, head._buffer + head._offset,
+		  head._buffer_bytes - head._offset);
+    _last_error = errno;
     errno = 0;
-    ssize_t done = ::read(_fd, head._buffer + head._offset,
-			      head._buffer_bytes - head._offset);
-
-    if (done < 0 && is_pseudo_error("AsyncFileReader", _fd, errno)) {
-	errno = 0;
+#endif
+    if (done < 0 && is_pseudo_error("AsyncFileReader", _fd, _last_error)) {
 	return;
     }
-    complete_transfer(errno, done);
+    complete_transfer(_last_error, done);
 }
 
 // transfer_complete() invokes callbacks if necessary and updates buffer
@@ -127,7 +206,7 @@ AsyncFileReader::complete_transfer(int err, ssize_t done) {
     BufferInfo& head = _buffers.front();
     if (err != 0 || done < 0) {
 	stop();
-	head.dispatch_callback(ERROR_CHECK_ERRNO);
+	head.dispatch_callback(OS_ERROR);
     } else {
 	head.dispatch_callback(END_OF_FILE);
     }
@@ -144,11 +223,23 @@ AsyncFileReader::start() {
     }
 
     EventLoop& e = _eventloop;
-    if (e.add_selector(_fd, SEL_RD, 
+    if (e.add_ioevent_cb(_fd, IOT_READ,
 		       callback(this, &AsyncFileReader::read)) == false) {
-	XLOG_ERROR("Async reader failed to add_selector.");
+	XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
 	return false;
     }
+#ifdef HOST_OS_WINDOWS
+    if (_fd.is_socket()) {
+	if (e.add_ioevent_cb(_fd, IOT_DISCONNECT,
+		       callback(this, &AsyncFileReader::read)) == false) {
+	    XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
+	    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+	    return false;
+	}
+    }
+#endif
+
+    debug_msg("%p start\n", this);
 
     _running = true;
     return _running;
@@ -156,7 +247,13 @@ AsyncFileReader::start() {
 
 void
 AsyncFileReader::stop() {
-    _eventloop.remove_selector(_fd, SEL_RD);
+    debug_msg("%p stop\n", this);
+
+    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
+#ifdef HOST_OS_WINDOWS
+    if (_fd.is_socket())
+    	_eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
+#endif
     _running = false;
 }
 
@@ -179,7 +276,7 @@ AsyncFileReader::flush_buffers() {
 #define MAX_IOVEC 16
 #endif
 
-AsyncFileWriter::AsyncFileWriter(EventLoop& e, int fd, uint32_t coalesce)
+AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce)
     : AsyncFileOperator(e, fd)
 {
     static const uint32_t max_coalesce = 16;
@@ -218,9 +315,9 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 }
 
 //
-// Different platforms have different iov.iov_base types which
+// Different UNIX platforms have different iov.iov_base types which
 // we can fix at compile time.  The general idea of writev doesn't
-// change much across platforms
+// change much across UNIX platforms.
 //
 template <typename T, typename U>
 static void
@@ -232,18 +329,19 @@ iov_place(T*& iov_base, U& iov_len, uint8_t* data, size_t data_len)
 }
 
 void
-AsyncFileWriter::write(int fd, SelectorMask m)
+AsyncFileWriter::write(XorpFd fd, IoEventType type)
 {
     assert(_buffers.empty() == false);
-    assert(m == SEL_WR);
+    assert(type == IOT_WRITE);
     assert(fd == _fd);
-
-    sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
 
     // Coalesce buffers into a group
     uint32_t iov_cnt = 0;
     size_t   total_bytes = 0;
+    ssize_t  done = 0;
+
     list<BufferInfo>::iterator i = _buffers.begin();
+
     while (i != _buffers.end()) {
 	BufferInfo bi = *i;
 
@@ -259,15 +357,48 @@ AsyncFileWriter::write(int fd, SelectorMask m)
 	++i;
     }
 
-    ssize_t done = ::writev(_fd, _iov, (int)iov_cnt);
+#ifdef HOST_OS_WINDOWS
+    if (fd.is_socket()) {
+	int result = WSASend((SOCKET)_fd, (LPWSABUF)_iov, iov_cnt,
+			     (LPDWORD)&done, 0, NULL, NULL);
+	if (result == SOCKET_ERROR) {
+	    _last_error = WSAGetLastError();
+	    WSASetLastError(ERROR_SUCCESS);
+	    done = -1;
+	}
+    } else {
+	BOOL result;
+	DWORD done2;
+
+        // XXX: File I/O may be blocking unless we use completion ports.
+	for (uint32_t j = 0; j < iov_cnt; j++) {
+	    result = WriteFile(_fd, (LPVOID)_iov[j].iov_base,
+			       (DWORD)_iov[j].iov_len, (LPDWORD)&done2, NULL);
+	    done += done2;
+	    if (result == FALSE)
+		 break;
+	}
+	if (result == FALSE) {
+	    _last_error = GetLastError();
+	    SetLastError(ERROR_SUCCESS);
+	}
+    }	
+#else
+    sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
+
+    done = ::writev(_fd, _iov, (int)iov_cnt);
+
+    _last_error = errno;
+    errno = 0;
+
     signal(SIGPIPE, saved_sigpipe);
+#endif /* !HOST_OS_WINDOWS */
 
     debug_msg("Wrote %d of %u bytes\n",
 	      XORP_INT_CAST(done), XORP_UINT_CAST(total_bytes));
 
-    if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, errno)) {
-	debug_msg("Write error %d - %s\n", errno, strerror(errno));
-	errno = 0;
+    if (done < 0 && is_pseudo_error("AsyncFileWriter", _fd, _last_error)) {
+	debug_msg("Write error %d\n", _last_error);
 	return;
     }
     complete_transfer(done);
@@ -279,10 +410,10 @@ void
 AsyncFileWriter::complete_transfer(ssize_t sdone)
 {
     if (sdone < 0) {
-	XLOG_ERROR("Write error %d - %s", errno, strerror(errno));
+	XLOG_ERROR("Write error %d\n", _last_error);
 	stop();
 	BufferInfo& head = _buffers.front();
-	head.dispatch_callback(ERROR_CHECK_ERRNO);
+	head.dispatch_callback(OS_ERROR);
 	return;
     }
 
@@ -360,9 +491,9 @@ AsyncFileWriter::start()
     }
 
     EventLoop& e = _eventloop;
-    if (e.add_selector(_fd, SEL_WR,
+    if (e.add_ioevent_cb(_fd, IOT_WRITE,
 		       callback(this, &AsyncFileWriter::write)) == false) {
-	XLOG_ERROR("Async reader failed to add_selector.");
+	XLOG_ERROR("AsyncFileWriter: Failed to add io event callback.");
     }
     _running = true;
     debug_msg("%p start\n", this);
@@ -372,7 +503,7 @@ AsyncFileWriter::start()
 void
 AsyncFileWriter::stop() {
     debug_msg("%p stop\n", this);
-    _eventloop.remove_selector(_fd, SEL_WR);
+    _eventloop.remove_ioevent_cb(_fd, IOT_WRITE);
     _running = false;
 }
 

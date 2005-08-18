@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.6 2005/07/08 16:33:15 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.7 2005/08/01 14:08:47 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,9 +26,11 @@
 #include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/asyncio.hh"
 #include "libxorp/popen.hh"
 #include "run_command.hh"
@@ -104,9 +106,34 @@ RunCommand::execute()
 	return (XORP_ERROR);
     }
 
+#ifdef HOST_OS_WINDOWS
+    // We need to obtain the handle directly from the popen code because
+    // the handle returned by CreateProcess() has the privileges we need.
+    _ph = pgethandle(_pid);
+
+    // If the handle is invalid, the process failed to start.
+    if (_ph == INVALID_HANDLE_VALUE) {
+	XLOG_ERROR("Failed to execute command %s", final_command.c_str());
+	terminate();
+	_exec_id.restore_saved_exec_id(error_msg);
+	return (XORP_ERROR);
+    }
+
+    // We can't rely on end-of-file indicators alone on Win32 to determine
+    // when a child process died; we must wait for it in the event loop.
+    if (!_eventloop.add_ioevent_cb(_ph, IOT_READ,
+			      callback(this, &RunCommand::win_proc_done_cb)))
+	XLOG_FATAL("Cannot add child process handle to event loop.\n");
+#endif
+
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
-					      fileno(_stdout_stream));
+#ifdef HOST_OS_WINDOWS
+      XorpFd(_get_osfhandle(_fileno(_stdout_stream)))
+#else
+      XorpFd(fileno(_stdout_stream))
+#endif
+     );
     _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
 				    callback(this, &RunCommand::append_data));
     if (! _stdout_file_reader->start()) {
@@ -118,7 +145,12 @@ RunCommand::execute()
     }
 
     _stderr_file_reader = new AsyncFileReader(_eventloop,
-					      fileno(_stderr_stream));
+#ifdef HOST_OS_WINDOWS
+      XorpFd(_get_osfhandle(_fileno(_stderr_stream)))
+#else
+      XorpFd(fileno(_stderr_stream))
+#endif
+     );
     _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
 				    callback(this, &RunCommand::append_data));
     if (! _stderr_file_reader->start()) {
@@ -144,7 +176,16 @@ RunCommand::terminate()
 {
     // Kill the process group
     if (0 != _pid) {
+#ifdef HOST_OS_WINDOWS
+	// _ph will be invalid if the process didn't start.
+	if (_ph != INVALID_HANDLE_VALUE) {
+	    DWORD result = TerminateProcess(_ph, 32768);
+	    if (result == 0)
+		XLOG_WARNING("TerminateProcess(): %lu", GetLastError());
+	}
+#else
 	killpg(_pid, SIGTERM);
+#endif
 	_pid = 0;
     }
 
@@ -165,9 +206,18 @@ RunCommand::close_output()
     }
 
     if (_stdout_stream != NULL) {
+#ifdef HOST_OS_WINDOWS
+	// pclose2() will close the process handle from under us.
+	_eventloop.remove_ioevent_cb(_ph, IOT_READ);
+	_ph = INVALID_HANDLE_VALUE;
+#endif
 	int status = pclose2(_stdout_stream);
 	_stdout_stream = NULL;
 
+#ifdef HOST_OS_WINDOWS
+	_command_is_exited = true;
+	_command_exit_status = status;
+#else /* !HOST_OS_WINDOWS */
 	// Get the command status
 	if (status >= 0) {
 	    _command_is_exited = WIFEXITED(status);
@@ -183,6 +233,7 @@ RunCommand::close_output()
 		_command_stop_signal = WSTOPSIG(status);
 	    }
 	}
+#endif /* HOST_OS_WINDOWS */
     }
 
     //
@@ -332,14 +383,19 @@ RunCommand::ExecId::ExecId(uid_t uid, gid_t gid)
 void
 RunCommand::ExecId::save_current_exec_id()
 {
+#ifndef HOST_OS_WINDOWS
     _saved_uid = getuid();
     _saved_gid = getgid();
+#endif
     _is_exec_id_saved = true;
 }
 
 int
 RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
 {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(error_msg);
+#else
     if (! _is_exec_id_saved)
 	return (XORP_OK);	// Nothing to do, because nothing was saved
 
@@ -354,6 +410,7 @@ RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
 			     XORP_UINT_CAST(saved_gid()), strerror(errno));
 	return (XORP_ERROR);
     }
+#endif
 
     return (XORP_OK);
 }
@@ -361,6 +418,9 @@ RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
 int
 RunCommand::ExecId::set_effective_exec_id(string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(error_msg);
+#else
     if (! is_set())
 	return (XORP_OK);
 
@@ -385,6 +445,7 @@ RunCommand::ExecId::set_effective_exec_id(string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
+#endif
 
     return (XORP_OK);
 }
@@ -406,3 +467,14 @@ RunCommand::ExecId::reset()
     _saved_gid = 0;
     _is_exec_id_saved = false;
 }
+
+#ifdef HOST_OS_WINDOWS
+// Hack to get asynchronous notification of Win32 process death.
+void
+RunCommand::win_proc_done_cb(XorpFd fd, IoEventType type)
+{
+    XLOG_ASSERT(type == IOT_READ);
+    UNUSED(fd);
+    done(AsyncFileOperator::END_OF_FILE);
+}
+#endif

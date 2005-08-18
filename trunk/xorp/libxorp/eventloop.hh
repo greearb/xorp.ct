@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.13 2005/03/25 02:53:40 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.14 2005/08/01 14:08:47 bms Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -21,9 +21,14 @@
 #include <sys/time.h>
 #endif
 
+#include "xorpfd.hh"
 #include "clock.hh"
 #include "timer.hh"
+#include "callback.hh"
+#include "ioevents.hh"
 #include "selector.hh"
+
+#include "win_dispatcher.hh"
 
 /**
  * @short Event Loop.
@@ -101,11 +106,14 @@ public:
      */
     TimerList&    timer_list()		{ return _timer_list; }
 
+#ifndef HOST_OS_WINDOWS
     /**
      * @return reference to the @ref SelectorList used by the @ref
      * EventLoop instance.
+     * XXX: Deprecated.
      */
     SelectorList& selector_list()	{ return _selector_list; }
+#endif
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -222,7 +230,7 @@ public:
 
     /**
      * Add a file descriptor and callback to be invoked when
-     * descriptor is ready for input or output.  A SelectorMask
+     * descriptor is ready for input or output.  An IoEventType
      * determines what type of I/O event will cause the callback to be
      * invoked.
      *
@@ -235,29 +243,22 @@ public:
      * argument passed to the callback shows multiple event types.
      *
      * @param fd the file descriptor.
-     * @param mask the @ref SelectorMask of the event types to that
-     * will invoke hook.
+     * @param type the @ref IoEventType of the event.
      * @param cb object to be invoked when file descriptor has I/O
      * pending.
-     * @return true on success.
+     * @return true on success, false if any error occurred.
      */
-    inline bool EventLoop::add_selector(int fd,
-					SelectorMask mask,
-					const SelectorCallback& cb);
+    bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb);
 
     /**
-     * Remove hooks associated with file descriptor.
+     * Remove callbacks associated with file descriptor.
      *
      * @param fd the file descriptor.
-     * @param event_mask mask of event types to clear.
+     * @param type the event type to clear.
+     * The special value IOT_ANY means clear any kind of callback.
+     * @return true on success, false if any error occurred.
      */
-    void remove_selector(int fd, SelectorMask event_mask = SEL_ALL);
-
-    /**
-     * @return the number of file descriptors that have registered
-     * callbacks with the EventLoop @ref SelectorList.
-     */
-    size_t descriptor_count() const;
+    bool remove_ioevent_cb(XorpFd fd, IoEventType type = IOT_ANY);
 
     /**
      * @return true if any XorpTimers are present on EventLoop's TimerList.
@@ -281,7 +282,11 @@ private:
 private:
     ClockBase*		_clock;
     TimerList		_timer_list;
+#ifdef HOST_OS_WINDOWS
+    WinDispatcher	_win_dispatcher;
+#else
     SelectorList	_selector_list;
+#endif
 };
 
 // ----------------------------------------------------------------------------
@@ -334,25 +339,6 @@ inline XorpTimer
 EventLoop::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value)
 {
     return _timer_list.set_flag_after_ms(ms, flag_ptr, to_value);
-}
-
-inline bool
-EventLoop::add_selector(int			fd,
-			SelectorMask		mask,
-			const SelectorCallback&	cb)
-{
-    return _selector_list.add_selector(fd, mask, cb);
-}
-
-inline void
-EventLoop::remove_selector(int fd, SelectorMask event_mask)
-{
-    _selector_list.remove_selector(fd, event_mask);
-}
-
-inline size_t
-EventLoop::descriptor_count() const {
-    return _selector_list.descriptor_count();
 }
 
 inline bool

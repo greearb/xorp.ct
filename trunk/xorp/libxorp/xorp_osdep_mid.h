@@ -77,6 +77,7 @@ extern "C" {
 #define MAXHOSTNAMELEN MAX_HOSTNAME_LEN
 #endif
 
+/* XXX: These will go away if we re-tool the IfTree for Windows. */
 extern char *if_indextoname(unsigned int ifindex, char *name);
 extern unsigned int if_nametoindex(const char *ifname);
 
@@ -174,12 +175,7 @@ extern "C" {
 #endif
 
 /*
- * XXX: Here we need a Windows-friendly definition of struct ip.
- */
-
-/*
  * IP address presentation routines.
- * XXX: Merge ether_compat.h with this file.
  */
 #ifndef HAVE_INET_PTON
 int inet_pton(int af, const char *src, void *dst);

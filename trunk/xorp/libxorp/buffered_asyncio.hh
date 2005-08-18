@@ -32,7 +32,7 @@ class BufferedAsyncReader {
 public:
     enum Event {
 	DATA 		  = 1,
-	ERROR_CHECK_ERRNO = 2,
+	OS_ERROR 	  = 2,
 	END_OF_FILE 	  = 3
     };
 
@@ -59,7 +59,7 @@ public:
      * @param cb the callback to invoke.
      */
     BufferedAsyncReader(EventLoop& 	e,
-			int 		fd,
+			XorpFd 		fd,
 			size_t 		reserve_bytes,
 			const Callback& cb);
 
@@ -118,6 +118,8 @@ public:
      */
     size_t available_bytes() const;
 
+    inline int error() const { return _last_error; }
+
     /**
      * Start.
      *
@@ -138,7 +140,7 @@ private:
     BufferedAsyncReader& operator=(const BufferedAsyncReader&); // Not implemented
 
 private:
-    void selector_event(int fd, SelectorMask m);
+    void io_event(XorpFd fd, IoEventType type);
     void announce_event(Event e);
     inline void provision_trigger_bytes();
 
@@ -152,11 +154,12 @@ private:
     Config		_config;
 
     EventLoop&		_eventloop;
-    int			_fd;
+    XorpFd		_fd;
     Callback		_cb;
 
     vector<uint8_t>	_buffer;
     XorpTimer		_ready_timer;
+    int			_last_error;
 };
 
 #endif // __LIBXORP_BUFFERED_ASYNCIO_HH__

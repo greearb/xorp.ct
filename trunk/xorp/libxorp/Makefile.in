@@ -135,8 +135,7 @@ test_utils_SOURCES = test_utils.cc
 test_vif_SOURCES = test_vif.cc
 
 # -- Library Sources
-# libxorp_la_SOURCES += ether_compat.c
-libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h xlog.h xorp.h utility.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh profile.hh range.hh ref_ptr.hh run_command.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh debug.c utility.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc run_command.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc utils.cc vif.cc
+libxorp_la_SOURCES = libxorp_module.h debug.h ether_compat.h random.h xlog.h xorp.h utility.h win_io.h asnum.hh asyncio.hh buffer.hh buffered_asyncio.hh c_format.hh callback.hh callback_nodebug.hh callback_debug.hh clock.hh config_param.hh eventloop.hh exceptions.hh heap.hh ioevents.hh ipnet.hh ipv4.hh ipv4net.hh ipv6.hh ipv6net.hh ipvx.hh ipvxnet.hh mac.hh nexthop.hh old_trie.hh popen.hh profile.hh range.hh ref_ptr.hh run_command.hh safe_callback_obj.hh selector.hh service.hh time_slice.hh timespent.hh timer.hh timeval.hh token.hh tokenize.hh transaction.hh trie.hh utils.hh vif.hh win_dispatcher.hh debug.c ether_compat.c gai_strerror.c getopt.c inet_ntop.c inet_pton.c random.c utility.c win_io.c xlog.c asyncio.cc buffered_asyncio.cc c_format.cc callback.cc clock.cc eventloop.cc exceptions.cc heap.cc ipv4.cc ipv6.cc ipvx.cc mac.cc nexthop.cc popen.cc profile.cc ref_ptr.cc run_command.cc safe_callback_obj.cc selector.cc service.cc time_slice.cc timer.cc token.cc transaction.cc utils.cc vif.cc win_dispatcher.cc
 
 BUILT_SOURCES = callback_nodebug.hh callback_debug.hh
 
@@ -154,12 +153,14 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libxorp_la_LDFLAGS =
 libxorp_la_LIBADD =
-am_libxorp_la_OBJECTS = debug.lo utility.lo xlog.lo asyncio.lo \
-	buffered_asyncio.lo c_format.lo callback.lo clock.lo \
-	eventloop.lo exceptions.lo heap.lo ipv4.lo ipv6.lo ipvx.lo \
-	mac.lo nexthop.lo popen.lo profile.lo ref_ptr.lo run_command.lo \
-	safe_callback_obj.lo selector.lo service.lo time_slice.lo \
-	timer.lo token.lo transaction.lo utils.lo vif.lo
+am_libxorp_la_OBJECTS = debug.lo ether_compat.lo gai_strerror.lo \
+	getopt.lo inet_ntop.lo inet_pton.lo random.lo utility.lo \
+	win_io.lo xlog.lo asyncio.lo buffered_asyncio.lo c_format.lo \
+	callback.lo clock.lo eventloop.lo exceptions.lo heap.lo ipv4.lo \
+	ipv6.lo ipvx.lo mac.lo nexthop.lo popen.lo profile.lo \
+	ref_ptr.lo run_command.lo safe_callback_obj.lo selector.lo \
+	service.lo time_slice.lo timer.lo token.lo transaction.lo \
+	utils.lo vif.lo win_dispatcher.lo
 libxorp_la_OBJECTS = $(am_libxorp_la_OBJECTS)
 bin_PROGRAMS =
 check_PROGRAMS = test_asyncio$(EXEEXT) test_callback$(EXEEXT) \
@@ -315,11 +316,14 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/buffered_asyncio.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/c_format.Plo $(DEPDIR)/callback.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/clock.Plo $(DEPDIR)/debug.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/eventloop.Plo $(DEPDIR)/exceptions.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/heap.Plo $(DEPDIR)/ipv4.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/ipv6.Plo $(DEPDIR)/ipvx.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/mac.Plo $(DEPDIR)/nexthop.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/popen.Plo $(DEPDIR)/profile.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ether_compat.Plo $(DEPDIR)/eventloop.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/exceptions.Plo $(DEPDIR)/gai_strerror.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/getopt.Plo $(DEPDIR)/heap.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/inet_ntop.Plo $(DEPDIR)/inet_pton.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ipv4.Plo $(DEPDIR)/ipv6.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ipvx.Plo $(DEPDIR)/mac.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/nexthop.Plo $(DEPDIR)/popen.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/profile.Plo $(DEPDIR)/random.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/ref_ptr.Plo $(DEPDIR)/run_command.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/safe_callback_obj.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/selector.Plo $(DEPDIR)/service.Plo \
@@ -343,7 +347,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/time_slice.Plo $(DEPDIR)/timer.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/token.Plo $(DEPDIR)/transaction.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/utility.Plo $(DEPDIR)/utils.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/vif.Plo $(DEPDIR)/xlog.Plo
+@AMDEP_TRUE@	$(DEPDIR)/vif.Plo $(DEPDIR)/win_dispatcher.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/win_io.Plo $(DEPDIR)/xlog.Plo
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -521,9 +526,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/callback.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/clock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/debug.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ether_compat.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/eventloop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/exceptions.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/gai_strerror.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/getopt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/heap.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/inet_ntop.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/inet_pton.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv4.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipv6.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ipvx.Plo@am__quote@
@@ -531,6 +541,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/nexthop.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/popen.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/profile.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/random.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ref_ptr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/run_command.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/safe_callback_obj.Plo@am__quote@
@@ -569,6 +580,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utility.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vif.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/win_dispatcher.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/win_io.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xlog.Plo@am__quote@
 
 distclean-depend:

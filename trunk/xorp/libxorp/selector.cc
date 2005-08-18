@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
@@ -12,16 +13,65 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.23 2005/01/28 23:33:25 bms Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.24 2005/03/25 02:53:45 pavlin Exp $"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp_module.h"
+
 #include "xorp.h"
 #include "debug.h"
+#include "xorpfd.hh"
 #include "selector.hh"
 #include "timeval.hh"
 #include "clock.hh"
+#include "eventloop.hh"
 #include "utility.h"
 #include "xlog.h"
+
+#ifdef	HOST_OS_WINDOWS
+#define	XORP_FD_CAST(x)		((u_int)(x))
+#else
+#define	XORP_FD_CAST(x)		(x)
+#endif
+
+// ----------------------------------------------------------------------------
+// Helper function to deal with translating between old and new
+// I/O event notification mechanisms.
+
+static SelectorMask
+map_ioevent_to_selectormask(const IoEventType type)
+{
+    SelectorMask mask;
+
+    // Convert new event type to legacy UNIX event mask used by SelectorList.
+    switch (type) {
+    case IOT_READ:
+	mask = SEL_RD;
+	break;
+    case IOT_WRITE:
+	mask = SEL_WR;
+	break;
+    case IOT_EXCEPTION:
+	mask = SEL_EX;
+	break;
+    case IOT_ACCEPT:
+	mask = SEL_RD;
+	break;
+    case IOT_CONNECT:
+	mask = SEL_RD;
+	break;
+    case IOT_DISCONNECT:
+	mask = SEL_EX;	// XXX: Disconnection isn't a distinct event in UNIX
+	break;
+    case IOT_ANY:
+	mask = SEL_ALL;
+	break;
+    }
+    return (mask);
+}
 
 // ----------------------------------------------------------------------------
 // SelectorList::Node methods
@@ -33,7 +83,8 @@ SelectorList::Node::Node()
 }
 
 inline bool
-SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb)
+SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
+			     const IoEventCb& cb)
 {
     int i;
 
@@ -54,10 +105,13 @@ SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb)
     }
 
     // 2. If not already registered, find empty slot and add entry.
+    // XXX: TODO: Determine if the node we're about to add is for
+    // an accept event, so we know how to map it back.
     for (i = 0; i < SEL_MAX_IDX; i++) {
 	if (!_mask[i]) {
 	    _mask[i]	= m;
-	    _cb[i]	= SelectorCallback(scb);
+	    _cb[i]	= IoEventCb(cb);
+	    _iot[i]	= type;
 	    return true;
 	}
     }
@@ -67,7 +121,7 @@ SelectorList::Node::add_okay(SelectorMask m, const SelectorCallback& scb)
 }
 
 inline int
-SelectorList::Node::run_hooks(SelectorMask m, int fd)
+SelectorList::Node::run_hooks(SelectorMask m, XorpFd fd)
 {
     int n = 0;
 
@@ -82,7 +136,7 @@ SelectorList::Node::run_hooks(SelectorMask m, int fd)
      * we have already done a callback on.  We therefore keep track of
      * the bits already matched with the variable already_matched.
      *
-     * An alternate fix is to change the semantics of add_selector so
+     * An alternate fix is to change the semantics of add_ioevent_cb so
      * there is one callback for each i/o event.
      *
      * Yet another alternative is to have an object, let's call it a
@@ -96,7 +150,7 @@ SelectorList::Node::run_hooks(SelectorMask m, int fd)
 	SelectorMask match = SelectorMask(_mask[i] & m & ~already_matched);
 	if (match) {
 	    assert(_cb[i].is_empty() == false);
-	    _cb[i]->dispatch(fd, match);
+	    _cb[i]->dispatch(fd, _iot[i]);
 	    n++;
 	}
 	already_matched = SelectorMask(already_matched | match);
@@ -124,7 +178,10 @@ SelectorList::Node::is_empty()
 // SelectorList implementation
 
 SelectorList::SelectorList(ClockBase *clock)
-    : _maxfd(0), _descriptor_count(0), _observer(NULL), _clock(clock)
+    : _clock(clock), _observer(NULL)
+#ifndef HOST_OS_WINDOWS
+    , _maxfd(0), _descriptor_count(0)
+#endif
 {
     static_assert(SEL_RD == (1 << SEL_RD_IDX) && SEL_WR == (1 << SEL_WR_IDX)
 		  && SEL_EX == (1 << SEL_EX_IDX) && SEL_MAX_IDX == 3);
@@ -132,18 +189,38 @@ SelectorList::SelectorList(ClockBase *clock)
 	FD_ZERO(&_fds[i]);
 }
 
-bool
-SelectorList::add_selector(int			   fd,
-			   SelectorMask		   mask,
-			   const SelectorCallback& scb)
+SelectorList::~SelectorList()
 {
-    if (fd < 0) {
-	// Probably want to make this XLOG_FATAL should this ever occur
-	XLOG_ERROR("SelectorList::add_selector: attempt to add invalid file "
-		   "descriptor (fd = %d)\n", fd);
-	return -1;
+}
+
+bool
+SelectorList::add_ioevent_cb(XorpFd		   fd,
+			   IoEventType		   type,
+			   const IoEventCb& cb)
+{
+    SelectorMask mask = map_ioevent_to_selectormask(type);
+
+    if (mask == 0) {
+	XLOG_FATAL("SelectorList::add_ioevent_cb: attempt to add invalid event "
+		   "type (type = %d)\n", type);
     }
 
+    if (!fd.is_valid()) {
+	XLOG_FATAL("SelectorList::add_ioevent_cb: attempt to add invalid file "
+		   "descriptor (fd = %s)\n", fd.str().c_str());
+    }
+
+#ifdef HOST_OS_WINDOWS
+    // Winsock's select() function will only allow you to select
+    // on Winsock socket handles.
+    if (!fd.is_socket()) {
+	XLOG_ERROR("SelectorList::add_ioevent_cb: attempt to add object which "
+		   "is not a socket (fd = %s)\n", fd.str().c_str());
+    }
+    if (_selector_entries[fd].add_okay(mask, type, cb) == false) {
+	return false;
+    }
+#else // ! HOST_OS_WINDOWS
     bool resize = false;
     if (fd >= _maxfd) {
 	_maxfd = fd;
@@ -152,16 +229,16 @@ SelectorList::add_selector(int			   fd,
 	    resize = true;
 	}
     }
-
     bool no_selectors_with_fd = _selector_entries[fd].is_empty();
-    if (_selector_entries[fd].add_okay(mask, scb) == false) {
+    if (_selector_entries[fd].add_okay(mask, type, cb) == false) {
 	return false;
     }
     if (no_selectors_with_fd) _descriptor_count++;
+#endif // HOST_OS_WINDOWS
 
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i)) {
-	    FD_SET(fd, &_fds[i]);
+	    FD_SET(XORP_FD_CAST(fd), &_fds[i]);
 	    if (_observer) _observer->notify_added(fd, mask);
 	}
     }
@@ -170,16 +247,22 @@ SelectorList::add_selector(int			   fd,
 }
 
 void
-SelectorList::remove_selector(int fd, SelectorMask mask)
+SelectorList::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
+#ifndef HOST_OS_WINDOWS
     if (fd < 0 || fd >= (int)_selector_entries.size()) {
-	XLOG_ERROR("Attempting to remove fd = %d that is outside range of file descriptors 0..%u", fd,  XORP_UINT_CAST(_selector_entries.size()));
+	XLOG_ERROR("Attempting to remove fd = %d that is outside range of "
+		   "file descriptors 0..%u", (int)fd,
+		   XORP_UINT_CAST(_selector_entries.size()));
 	return;
     }
+#endif
+
+    SelectorMask mask = map_ioevent_to_selectormask(type);
 
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i) && FD_ISSET(fd, &_fds[i])) {
-	    FD_CLR(fd, &_fds[i]);
+	    FD_CLR(XORP_FD_CAST(fd), &_fds[i]);
 	    if (_observer)
 		_observer->notify_removed(fd, ((SelectorMask) (1 << i)));
 	}
@@ -189,17 +272,81 @@ SelectorList::remove_selector(int fd, SelectorMask mask)
 	assert(FD_ISSET(fd, &_fds[SEL_RD_IDX]) == 0);
 	assert(FD_ISSET(fd, &_fds[SEL_WR_IDX]) == 0);
 	assert(FD_ISSET(fd, &_fds[SEL_EX_IDX]) == 0);
+#ifndef HOST_OS_WINDOWS
 	_descriptor_count --;
+#endif
     }
 }
 
 int
-SelectorList::select(TimeVal* timeout)
+SelectorList::wait_and_dispatch(TimeVal* timeout)
 {
     fd_set testfds[SEL_MAX_IDX];
     int n = 0;
 
     memcpy(testfds, _fds, sizeof(_fds));
+
+#ifdef HOST_OS_WINDOWS
+    if (timeout != NULL && _selector_entries.empty()) {
+	// Winsock's select() will not block if the FD lists are empty.
+	SleepEx(timeout->to_ms(), TRUE);
+    } else if (timeout == NULL || *timeout == TimeVal::MAXIMUM()) {
+	n = ::select(-1,
+		     &testfds[SEL_RD_IDX],
+		     &testfds[SEL_WR_IDX],
+		     &testfds[SEL_EX_IDX],
+		     NULL);
+    } else {
+	struct timeval tv_to;
+	timeout->copy_out(tv_to);
+	n = ::select(-1,
+		     &testfds[SEL_RD_IDX],
+		     &testfds[SEL_WR_IDX],
+		     &testfds[SEL_EX_IDX],
+		     &tv_to);
+    }
+
+    _clock->advance_time();
+
+    if (n < 0) {
+	switch (errno) {
+	case WSAENOTSOCK:
+	    callback_bad_descriptors();
+	    break;
+	case WSAEINVAL:
+	    XLOG_FATAL("Bad select argument (probably timeval)");
+	    break;
+	case WSAEINTR:
+	    // The system call was interrupted by a signal, hence return
+	    // immediately to the event loop without printing an error.
+	    debug_msg("SelectorList::wait_and_dispatch() interrupted by a signal\n");
+	    break;
+	default:
+	    XLOG_ERROR("SelectorList::wait_and_dispatch() failed: %d", WSAGetLastError());
+	    break;
+	}
+	return 0;
+    }
+
+    for (map<XorpFd,Node>::iterator ii = _selector_entries.begin();
+	 ii != _selector_entries.end();
+	 ++ii) {
+	int mask = 0;
+	if (FD_ISSET(XORP_FD_CAST(ii->first), &testfds[SEL_RD_IDX])) {
+	    mask |= SEL_RD;
+	}
+	if (FD_ISSET(XORP_FD_CAST(ii->first), &testfds[SEL_WR_IDX])) {
+	    mask |= SEL_WR;
+	}
+	if (FD_ISSET(XORP_FD_CAST(ii->first), &testfds[SEL_EX_IDX])) {
+	    mask |= SEL_EX;
+	}
+	if (mask) {
+	    ii->second.run_hooks(SelectorMask(mask), ii->first);
+	}
+    }
+
+#else // ! HOST_OS_WINDOWS
 
     if (timeout == 0 || *timeout == TimeVal::MAXIMUM()) {
 	n = ::select(_maxfd + 1,
@@ -217,8 +364,6 @@ SelectorList::select(TimeVal* timeout)
 		     &tv_to);
     }
 
-    // We need to re-read the system wallclock time immediately
-    // after returning from a possibly blocking select() syscall.
     _clock->advance_time();
 
     if (n < 0) {
@@ -232,10 +377,10 @@ SelectorList::select(TimeVal* timeout)
 	case EINTR:
 	    // The system call was interrupted by a signal, hence return
 	    // immediately to the event loop without printing an error.
-	    debug_msg("SelectorList::select() interrupted by a signal\n");
+	    debug_msg("SelectorList::wait_and_dispatch() interrupted by a signal\n");
 	    break;
 	default:
-	    XLOG_ERROR("SelectorList::select() failed: %s", strerror(errno));
+	    XLOG_ERROR("SelectorList::wait_and_dispatch() failed: %s", strerror(errno));
 	    break;
 	}
 	return 0;
@@ -265,14 +410,17 @@ SelectorList::select(TimeVal* timeout)
 	assert(!FD_ISSET(i, &testfds[SEL_WR_IDX]));	// paranoia
 	assert(!FD_ISSET(i, &testfds[SEL_EX_IDX]));	// paranoia
     }
+
+#endif // HOST_OS_WINDOWS
+
     return n;
 }
 
 int
-SelectorList::select(int millisecs)
+SelectorList::wait_and_dispatch(int millisecs)
 {
     TimeVal t(millisecs / 1000, (millisecs % 1000) * 1000);
-    return select(&t);
+    return wait_and_dispatch(&t);
 }
 
 void
@@ -286,17 +434,21 @@ SelectorList::get_fd_set(SelectorMask selected_mask, fd_set& fds) const
     return;
 }
 
+#ifndef HOST_OS_WINDOWS
 int
 SelectorList::get_max_fd() const
 {
     return _maxfd;
 }
+#endif
 
 void
 SelectorList::callback_bad_descriptors()
 {
+#ifndef HOST_OS_WINDOWS
     int bc = 0;	/* bad descriptor count */
-    for(int fd = 0; fd <= _maxfd; fd++) {
+
+    for (int fd = 0; fd <= _maxfd; fd++) {
 	if (_selector_entries[fd].is_empty() == true)
 	    continue;
 	/* Check fd is valid.  NB we call fstat without a stat struct to
@@ -307,15 +459,15 @@ SelectorList::callback_bad_descriptors()
 	    /* Force callbacks, should force read/writes that fail and
 	     * client should remove descriptor from list. */
 	    XLOG_ERROR("SelectorList found file descriptor %d no longer "
-		       "valid.", fd);
+	       "valid.", fd);
 	    _selector_entries[fd].run_hooks(SEL_ALL, fd);
 	    bc++;
 	}
     }
     /* Assert should only fail if OS checks stat struct before fd (??) */
     assert(bc != 0);
+#endif
 }
-
 
 void
 SelectorList::set_observer(SelectorListObserverBase& obs)

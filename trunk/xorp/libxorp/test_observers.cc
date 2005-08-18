@@ -23,7 +23,7 @@
 #endif
 
 #include "libxorp_module.h"
-
+#include "libxorp/xorpfd.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
@@ -33,6 +33,8 @@
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
+
+#ifndef HOST_OS_WINDOWS
 
 static int fired(0);
 
@@ -71,20 +73,20 @@ static bool print_dot() {
 }
 
 // callback for selector.  
-static void do_the_twist(int fd, SelectorMask mask) {
-    printf("fd: %d mask: %0x are here\n", fd, mask);
+static void do_the_twist(XorpFd fd, IoEventType event) {
+    printf("fd: %s event: %0x is here\n", fd.str().c_str(), event);
 }
 
 // Implement the SelectorList observer and notification functions
 class mySelectorListObserver : public SelectorListObserverBase {
-    void notify_added(int, const SelectorMask&); 
-    void notify_removed(int, const SelectorMask&); 
+    void notify_added(XorpFd, const SelectorMask&); 
+    void notify_removed(XorpFd, const SelectorMask&); 
 };
 
 void 
-mySelectorListObserver::notify_added(int fd, const SelectorMask& mask)
+mySelectorListObserver::notify_added(XorpFd fd, const SelectorMask& mask)
 {
-    fprintf(stderr, "notif added fd:%d mask:%#0x\n", fd, mask);
+    fprintf(stderr, "notif added fd: %s mask:%#0x\n", fd.str().c_str(), mask);
     add_rem_fd_counter+=fd;
     add_rem_mask_counter+=mask;
     switch (mask) {
@@ -96,9 +98,9 @@ mySelectorListObserver::notify_added(int fd, const SelectorMask& mask)
 } 
 
 void 
-mySelectorListObserver::notify_removed(int fd, const SelectorMask& mask)
+mySelectorListObserver::notify_removed(XorpFd fd, const SelectorMask& mask)
 {
-    fprintf(stderr, "notif removed fd:%d mask:%#0x\n", fd, mask);
+    fprintf(stderr, "notif removed fd: %s mask:%#0x\n", fd.str().c_str(), mask);
     add_rem_fd_counter-=fd;
     add_rem_mask_counter-=mask;
     if (no_notifications_beyond_this_point) {
@@ -142,29 +144,50 @@ void run_test()
     XorpTimer zzz = e.new_periodic(30, callback(print_dot));
     assert(zzz.scheduled());
 
-    int fd[2];
-    if (pipe(fd)) {
+    XorpFd fd[2];
+    int pipefds[2];
+
+#ifndef HOST_OS_WINDOWS
+    if (pipe(pipefds)) {
 	fprintf(stderr, "unable to generate file descriptors for test\n");
 	exit(2);
     }
-    XorpCallback2<void,int,SelectorMask>::RefPtr cb = callback(do_the_twist);
-    e.selector_list().add_selector(fd[0], SEL_RD, cb);
-    e.selector_list().add_selector(fd[1], SEL_WR, cb);
-    e.selector_list().add_selector(fd[0], SEL_EX, cb);
+    fd[0] = XorpFd(pipefds[0]);
+    fd[1] = XorpFd(pipefds[1]);
+#else
+    if (_pipe(pipefds, 65536, _O_BINARY)) {
+	fprintf(stderr, "unable to generate file descriptors for test\n");
+	exit(2);
+    }
+    fd[0] = XorpFd(_get_osfhandle(pipefds[0]));
+    fd[1] = XorpFd(_get_osfhandle(pipefds[1]));
+#endif
+
+    XorpCallback2<void,XorpFd,IoEventType>::RefPtr cb = callback(do_the_twist);
+    e.selector_list().add_ioevent_cb(fd[0], IOT_READ, cb);
+    e.selector_list().add_ioevent_cb(fd[1], IOT_WRITE, cb);
+    e.selector_list().add_ioevent_cb(fd[0], IOT_EXCEPTION, cb);
 
     while(show_stopper.scheduled()) {
 	assert(zzz.scheduled());    
 	e.run(); // run will return after one or more pending events
 		 // have fired.
-	e.selector_list().remove_selector(fd[0]);
-	e.selector_list().remove_selector(fd[1]);
+	e.selector_list().remove_ioevent_cb(fd[0],IOT_READ);
+	e.selector_list().remove_ioevent_cb(fd[1],IOT_WRITE);
+	e.selector_list().remove_ioevent_cb(fd[0],IOT_EXCEPTION);
     }
     zzz.unschedule();
     // these should not raise notifications since they have already been removed
     no_notifications_beyond_this_point = true;
-    e.selector_list().remove_selector(fd[0]);
-    e.selector_list().remove_selector(fd[1]);
-    close(fd[0]); close(fd[1]);
+    e.selector_list().remove_ioevent_cb(fd[0],IOT_READ);
+    e.selector_list().remove_ioevent_cb(fd[1],IOT_WRITE);
+#ifndef HOST_OS_WINDOWS
+    close(fd[0]);
+    close(fd[1]);
+#else
+    _close(fd[0]);
+    _close(fd[1]);
+#endif
     
     one_fd_rem_per_each_fd_add_notif =  (add_rem_fd_counter == 0) &&
 					(add_rem_mask_counter == 0);
@@ -183,8 +206,11 @@ void run_test()
     fprintf(stderr, "Test passed\n");
 }
 
+#endif // !HOST_OS_WINDOWS
+
 int main(int /* argc */, const char* argv[]) 
 {
+#ifndef HOST_OS_WINDOWS
 
     //
     // Initialize and start xlog
@@ -207,5 +233,8 @@ int main(int /* argc */, const char* argv[])
     xlog_stop();
     xlog_exit();
 
+#else
+    UNUSED(argv);
+#endif
     return 0;
 }

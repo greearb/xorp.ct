@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.10 2005/07/01 16:57:25 pavlin Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.11 2005/08/01 14:08:47 bms Exp $
  */
 
 
@@ -23,6 +23,8 @@
 #define __LIBXORP_XORP_H__
 
 #include "config.h"
+
+#include "xorp_osdep_begin.h"
 
 #ifdef __cplusplus
 #include <new>
@@ -75,6 +77,8 @@
 #include <time.h>
 
 #include "utility.h"
+
+#include "xorp_osdep_mid.h"
 
 #if defined (__cplusplus) && !defined(__STL_NO_NAMESPACES)
 using namespace std::rel_ops;
@@ -136,14 +140,6 @@ typedef bool bool_t;
 #define XORP_OK		 (0)
 #define XORP_ERROR	(-1)
 
-/* XXX: Remove these lines when the xorp_osdep headers are merged! */
-typedef int xsock_t;
-#ifndef XORP_BAD_SOCKET
-#define XORP_BAD_SOCKET		(-1)
-#endif
-#ifndef XORP_SOCKOPT_CAST
-#define XORP_SOCKOPT_CAST(x)	(x)
-#endif
-/* XXX */
+#include "xorp_osdep_end.h"
 
 #endif /* __LIBXORP_XORP_H__ */

@@ -1,5 +1,4 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
@@ -22,12 +21,10 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/random.h"
 #include "libcomm/comm_api.h"
-
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
 
 #include "asyncio.hh"
 
@@ -93,17 +90,17 @@ run_test()
 {
     EventLoop e;
 
-    int s[2]; // pair of sockets - one for read, one for write
-    if (socketpair(AF_UNIX, SOCK_STREAM, 0, s) < 0) {
-	perror("Failed to open socket pair");
+    xsock_t s[2]; // pair of sockets - one for read, one for write
+    if (comm_sock_pair(AF_UNIX, SOCK_STREAM, 0, s) != XORP_OK) {
+	puts(comm_get_last_error_str());
 	exit(-1);
     }
-    if (fcntl(s[0], F_SETFL, O_NONBLOCK) < 0) {
-	perror("Failed to set socket non-blocking");
+    if (comm_sock_set_blocking(s[0], 0) != XORP_OK) {
+	puts(comm_get_last_error_str());
 	exit(-1);
     }
-    if (fcntl(s[1], F_SETFL, O_NONBLOCK) < 0) {
-	perror("Failed to set socket non-blocking");
+    if (comm_sock_set_blocking(s[1], 0) != XORP_OK) {
+	puts(comm_get_last_error_str());
 	exit(-1);
     }
 
@@ -120,13 +117,15 @@ run_test()
 	// set value of each bytes in buffer to be test iteration number
 	// then we can check for corruption
 	memset(msg, i, msg_bytes); 
-	assert(afr.start() == false); // can't start no buffer
+	bool was_started = afr.start();
+	(void)was_started;
+	assert(was_started == false); // can't start no buffer
 	// Choose number of buffers to use
 	int n = 1 + (random() % MAX_BUFFERS);
 	printf("%d ", n); fflush(stdout);
 	while (n >= 0) {
 	    // Size of buffer add must be at least 1
-	    size_t b_bytes = 1 + (random() % (MAX_BUFFER_BYTES - 1)); 
+	    size_t b_bytes = 1 + (rand() % (MAX_BUFFER_BYTES - 1)); 
 	    afw.add_buffer(msg, b_bytes, 
 			   callback(&writer_check, msg, &t));
 	    afr.add_buffer(msg, b_bytes,
@@ -134,6 +133,11 @@ run_test()
 	    n--;
 	    bytes_transferred += b_bytes;
 	}
+
+	// XXX: Because of the new ioevent semantics, start and stop
+	// calls must be exactly matched in Win32.
+	afr.stop();
+
 	afw.start(); afw.stop(); afw.start(); // Just walk thru starting and
 	afr.start(); afr.stop(); afr.start(); // stopping...
 
@@ -149,7 +153,7 @@ run_test()
     }
 
     // test END_OF_FILE
-    close(s[0]); // close writer's file descriptor
+    comm_close(s[0]); // close writer's file descriptor
 
     bool eof_test_done = false;
     afr.add_buffer(msg, msg_bytes,
@@ -165,11 +169,14 @@ run_test()
 int
 main(int /* argc */, char *argv[]) 
 {
+
+    comm_init();
+
     //
     // Initialize and start xlog
     //
     xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
+    xlog_set_verbose(XLOG_VERBOSE_MAX);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     
@@ -186,6 +193,8 @@ main(int /* argc */, char *argv[])
     //
     xlog_stop();
     xlog_exit();
+
+    comm_exit();
     
     return 0;
 }

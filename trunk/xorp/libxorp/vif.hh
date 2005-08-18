@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.10 2005/01/22 07:05:42 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.11 2005/03/25 02:53:49 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -244,21 +244,21 @@ public:
      * 
      * @return the physical interface index (if applicable).
      */
-    uint16_t pif_index() const { return (_pif_index); }
+    uint32_t pif_index() const { return (_pif_index); }
     
     /**
      * Set the physical interface index.
      * 
      * @param v the value of the physical interface index to set to.
      */
-    void set_pif_index(uint16_t v) { _pif_index = v; }
+    void set_pif_index(uint32_t v) { _pif_index = v; }
     
     /**
      * Various vif_index related values.
      */
     enum {
-	VIF_INDEX_INVALID	= ((uint16_t)~0),
-	VIF_INDEX_MAX		= ((uint16_t)~0)
+	VIF_INDEX_INVALID	= ((uint32_t)~0),
+	VIF_INDEX_MAX		= ((uint32_t)~0)
     };
     
     /**
@@ -266,14 +266,14 @@ public:
      * 
      * @return the virtual interface index.
      */
-    const uint16_t vif_index() const { return (_vif_index); }
+    const uint32_t vif_index() const { return (_vif_index); }
     
     /**
      * Set the virtual interface index.
      * 
      * @param v the value of the virtual interface index to set to.
      */
-    void set_vif_index(uint16_t v) { _vif_index = v; }
+    void set_vif_index(uint32_t v) { _vif_index = v; }
 
     /**
      * Test if this vif is a PIM Register interface.
@@ -501,9 +501,9 @@ public:
 private:
     string	_name;		// The vif name
     string	_ifname;	// The physical interface name (if applicable)
-    uint16_t	_pif_index;	// Physical interface index (if applicable),
+    uint32_t	_pif_index;	// Physical interface index (if applicable),
 				// or 0 if invalid.
-    uint16_t	_vif_index;	// Virtual interface index
+    uint32_t	_vif_index;	// Virtual interface index
     bool	_is_pim_register;	// PIM Register vif
     bool	_is_p2p;		// Point-to-point interface
     bool	_is_loopback;		// Loopback interface

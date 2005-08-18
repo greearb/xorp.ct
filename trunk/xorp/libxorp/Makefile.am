@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.36 2005/07/25 17:47:59 abittau Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.37 2005/07/29 17:52:38 bms Exp $
 ##
 
 # -- Real Programs
@@ -102,9 +102,11 @@ test_vif_SOURCES	= test_vif.cc
 libxorp_la_SOURCES  = libxorp_module.h
 libxorp_la_SOURCES += debug.h
 libxorp_la_SOURCES += ether_compat.h
+libxorp_la_SOURCES += random.h
 libxorp_la_SOURCES += xlog.h
 libxorp_la_SOURCES += xorp.h
 libxorp_la_SOURCES += utility.h
+libxorp_la_SOURCES += win_io.h
 
 libxorp_la_SOURCES += asnum.hh
 libxorp_la_SOURCES += asyncio.hh
@@ -119,6 +121,7 @@ libxorp_la_SOURCES += config_param.hh
 libxorp_la_SOURCES += eventloop.hh
 libxorp_la_SOURCES += exceptions.hh
 libxorp_la_SOURCES += heap.hh
+libxorp_la_SOURCES += ioevents.hh
 libxorp_la_SOURCES += ipnet.hh
 libxorp_la_SOURCES += ipv4.hh
 libxorp_la_SOURCES += ipv4net.hh
@@ -147,10 +150,17 @@ libxorp_la_SOURCES += transaction.hh
 libxorp_la_SOURCES += trie.hh
 libxorp_la_SOURCES += utils.hh
 libxorp_la_SOURCES += vif.hh
+libxorp_la_SOURCES += win_dispatcher.hh
 
 libxorp_la_SOURCES += debug.c
-# libxorp_la_SOURCES += ether_compat.c
+libxorp_la_SOURCES += ether_compat.c
+libxorp_la_SOURCES += gai_strerror.c
+libxorp_la_SOURCES += getopt.c
+libxorp_la_SOURCES += inet_ntop.c
+libxorp_la_SOURCES += inet_pton.c
+libxorp_la_SOURCES += random.c
 libxorp_la_SOURCES += utility.c
+libxorp_la_SOURCES += win_io.c
 libxorp_la_SOURCES += xlog.c
 
 libxorp_la_SOURCES += asyncio.cc
@@ -179,6 +189,7 @@ libxorp_la_SOURCES += token.cc
 libxorp_la_SOURCES += transaction.cc
 libxorp_la_SOURCES += utils.cc
 libxorp_la_SOURCES += vif.cc
+libxorp_la_SOURCES += win_dispatcher.cc
 
 BUILT_SOURCES	   = callback_nodebug.hh callback_debug.hh
 

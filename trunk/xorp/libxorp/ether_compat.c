@@ -66,7 +66,7 @@ static const char rcsid[] _U_ =
 #include <inttypes.h>
 #include <ctype.h>
 
-#ifdef NEED_ETHER_NTOA
+#ifndef HAVE_ETHER_NTOA
 /* XXX: returns a pointer to static storage. */
 char *
 ether_ntoa(const struct ether_addr *e)
@@ -92,9 +92,9 @@ ether_ntoa(const struct ether_addr *e)
 
 	return (buf);
 }
-#endif /* NEED_ETHER_NTOA */
+#endif /* !HAVE_ETHER_NTOA */
 
-#ifdef NEED_ETHER_ATON
+#ifndef HAVE_ETHER_ATON
 
 /* Hex digit to integer. */
 #ifdef __STDC__
@@ -138,4 +138,4 @@ ether_aton(const char *s)
 
 	return (&o);
 }
-#endif /* NEED_ETHER_ATON */
+#endif /* !HAVE_ETHER_ATON */

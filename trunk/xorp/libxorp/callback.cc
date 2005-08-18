@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/callback.cc,v 1.4 2005/03/25 02:53:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/callback.cc,v 1.5 2005/07/29 20:06:30 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,6 +39,7 @@
 #include "callback.hh"
 #include "c_format.hh"
 #include "timeval.hh"
+#include "timer.hh"
 
 /**
  * Maximum callback dispatch duration.
@@ -55,7 +56,7 @@ struct CBStackElement {
     const char* file;
     int 	line;
 
-    CBStackElement(const timeval& now, const char* f, int l)
+    CBStackElement(const TimeVal& now, const char* f, int l)
 	: start(now), file(f), line(l)
     {}
 };
@@ -64,8 +65,8 @@ static stack<CBStackElement> cb_stack;
 void
 trace_dispatch_enter(const char* file, int line)
 {
-    timeval now;
-    gettimeofday(&now, 0);
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
     cb_stack.push(CBStackElement(now, file, line));
 }
 
@@ -74,11 +75,11 @@ trace_dispatch_leave()
 {
     XLOG_ASSERT(cb_stack.empty() == false);
 
-    timeval now;
-    gettimeofday(&now, 0);
+    TimeVal now;
+    TimerList::system_gettimeofday(&now);
 
     const CBStackElement& e     = cb_stack.top();
-    TimeVal 		  delta = TimeVal(now) - e.start;
+    TimeVal 		  delta = now - e.start;
 
     if (delta >= MAX_CALLBACK_DURATION) {
 	string s = c_format("Callback originating at %s:%d took "

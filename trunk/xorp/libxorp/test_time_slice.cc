@@ -47,8 +47,6 @@ static int s_failures = 0;
 bool failures()			{ return s_failures; }
 void incr_failures()		{ s_failures++; }
 
-
-
 //
 // printf(3)-like facility to conditionally print a message if verbosity
 // is enabled.

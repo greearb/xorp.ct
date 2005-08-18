@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.4 2005/06/27 08:38:07 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.5 2005/07/08 16:33:15 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -238,6 +238,10 @@ private:
      */
     void done(AsyncFileOperator::Event);
 
+#ifdef HOST_OS_WINDOWS
+    void win_proc_done_cb(XorpFd fd, IoEventType type);
+#endif
+
     static const size_t	BUF_SIZE = 8192;
     EventLoop&		_eventloop;
     string		_command;
@@ -255,6 +259,9 @@ private:
     size_t		_last_stdout_offset;
     size_t		_last_stderr_offset;
     pid_t		_pid;
+#ifdef HOST_OS_WINDOWS
+    HANDLE		_ph;
+#endif
     bool		_is_error;
     string		_error_msg;
     bool		_is_running;

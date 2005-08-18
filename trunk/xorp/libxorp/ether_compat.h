@@ -39,6 +39,13 @@
 #  include <sys/types.h>
 # endif
 # include <sys/ethernet.h>
+#endif
+
+#if defined(HAVE_NETINET_ETHER_H)
+# ifdef HAVE_NET_IF_H
+#  include <net/if.h>
+# endif
+# include <netinet/ether.h>
 #elif defined(HAVE_NETINET_IF_ETHER_H)
 # ifdef HAVE_NET_IF_H
 #  include <net/if.h>
@@ -57,13 +64,13 @@ struct ether_addr {
 };
 #endif
 
-#ifdef NEED_ETHER_ATON
+#ifndef HAVE_ETHER_ATON
 struct ether_addr* ether_aton(const char *a);
-#endif /* NEED_ETHER_ATON */
+#endif
 
-#ifdef NEED_ETHER_NTOA
+#ifndef HAVE_ETHER_NTOA
 char* ether_ntoa(const struct ether_addr* ea);
-#endif /* NEED_ETHER_NTOA */
+#endif
 
 #ifdef __cplusplus
 }

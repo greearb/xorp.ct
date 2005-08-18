@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.3 2005/03/03 07:45:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.4 2005/03/25 02:53:37 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -21,11 +21,14 @@
 
 #include "buffered_asyncio.hh"
 
+extern bool is_pseudo_error(const char* name, XorpFd fd, int error_num);
+
 BufferedAsyncReader::BufferedAsyncReader(EventLoop& 		e,
-					 int 			fd,
+					 XorpFd 			fd,
 					 size_t 		reserve_bytes,
 					 const Callback& 	cb)
-    : _eventloop(e), _fd(fd), _cb(cb), _buffer(reserve_bytes)
+    : _eventloop(e), _fd(fd), _cb(cb), _buffer(reserve_bytes),
+      _last_error(0)
 {
     _config.head 	  = &_buffer[0];
     _config.head_bytes 	  = 0;
@@ -108,29 +111,36 @@ BufferedAsyncReader::available_bytes() const
 void
 BufferedAsyncReader::start()
 {
-    _eventloop.add_selector(_fd, SEL_RD,
-			    callback(this,
-				     &BufferedAsyncReader::selector_event));
+    if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
+				  callback(this,
+					   &BufferedAsyncReader::io_event)) ==
+	false) {
+	XLOG_ERROR("BufferedAsyncReader: failed to add io event callback.");
+    }
+
     if (_config.head_bytes >= _config.trigger_bytes) {
 	_ready_timer =
-	    _eventloop.new_oneoff_after_ms(0,
+	     _eventloop.new_oneoff_after_ms(0,
 		callback(this, &BufferedAsyncReader::announce_event, DATA));
-
     }
+
+    debug_msg("%p start\n", this);
 }
 
 void
 BufferedAsyncReader::stop()
 {
-    _eventloop.remove_selector(_fd);
+    debug_msg("%p stop\n", this);
+
+    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
     _ready_timer.unschedule();
 }
 
 void
-BufferedAsyncReader::selector_event(int fd, SelectorMask m)
+BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
 {
-    assert((m & SEL_RD) == SEL_RD);
     assert(fd == _fd);
+    assert(type == IOT_READ);
 
     uint8_t* 	tail 	   = _config.head + _config.head_bytes;
     size_t 	tail_bytes = _buffer.size() - (tail - &_buffer[0]);
@@ -138,7 +148,25 @@ BufferedAsyncReader::selector_event(int fd, SelectorMask m)
     assert(tail_bytes >= 1);
     assert(tail + tail_bytes == &_buffer[0] + _buffer.size());
 
-    ssize_t 	read_bytes = ::read(fd, tail, tail_bytes);
+    ssize_t read_bytes;
+
+#ifdef HOST_OS_WINDOWS
+    if (fd.is_socket()) {
+	read_bytes = ::recvfrom(fd, (char *)tail, tail_bytes, 0,
+		       NULL, 0);
+	_last_error = WSAGetLastError();
+	WSASetLastError(ERROR_SUCCESS);
+    } else {
+	(void)ReadFile(fd, (LPVOID)tail, (DWORD)tail_bytes,
+		       (LPDWORD)&read_bytes, NULL);
+	_last_error = GetLastError();
+	SetLastError(ERROR_SUCCESS);
+    }
+#else
+    read_bytes = ::read(fd, tail, tail_bytes);
+    _last_error = errno;
+    errno = 0;
+#endif
 
     if (read_bytes > 0) {
 	_config.head_bytes += read_bytes;
@@ -156,11 +184,11 @@ BufferedAsyncReader::selector_event(int fd, SelectorMask m)
     } else if (read_bytes == 0) {
 	announce_event(END_OF_FILE);
     } else {
-	if (errno == EINTR || errno == EAGAIN)
+	if (is_pseudo_error("BufferedAsyncReader", fd, _last_error))
 	    return;
-	XLOG_ERROR("read error %d %s", errno, strerror(errno));
+	XLOG_ERROR("read error %d", _last_error);
 	stop();
-	announce_event(ERROR_CHECK_ERRNO);
+	announce_event(OS_ERROR);
     }
 }
 
@@ -172,7 +200,7 @@ BufferedAsyncReader::announce_event(Event ev)
 	// We might get here because a read returns more data than a user
 	// wants to process.  They exit the callback with more data in their
 	// buffer than the threshold event so we schedule a timer to
-	// prod them again, but in the meantime selector event occurs
+	// prod them again, but in the meantime an io event occurs
 	// and pre-empts the timer callback.
 	// Another example could be when a previous callback modifies
 	// the threshold value.

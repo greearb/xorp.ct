@@ -27,9 +27,14 @@
 #include <unistd.h>
 #endif
 
+#ifdef HOST_OS_WINDOWS
+#include <map>
+#else
 #include <vector>
+#endif
 
 #include "callback.hh"
+#include "ioevents.hh"
 
 class ClockBase;
 class SelectorList;
@@ -44,8 +49,6 @@ enum SelectorMask {
     SEL_EX	= 0x04,				// Exception events
     SEL_ALL	= SEL_RD | SEL_WR | SEL_EX	// All events
 };
-
-typedef XorpCallback2<void,int,SelectorMask>::RefPtr SelectorCallback;
 
 class SelectorTag;
 
@@ -68,13 +71,13 @@ private:
      * This function will get called when a new file descriptor is
      * added to the SelectorList.
      */
-    virtual void notify_added(int fd, const SelectorMask& mask) = 0;
+    virtual void notify_added(XorpFd fd, const SelectorMask& mask) = 0;
 
     /**
      * This function will get called when a new file descriptor is
      * removed from the SelectorList.
      */
-    virtual void notify_removed(int fd, const SelectorMask& mask) = 0;
+    virtual void notify_removed(XorpFd fd, const SelectorMask& mask) = 0;
 
     SelectorList * _observed;
 
@@ -86,8 +89,8 @@ private:
  *
  * A SelectorList provides an entity where callbacks for pending I/O
  * operations on file descriptors may be registered.  The callbacks
- * are invoked when one of the @ref select methods is called and I/O
- * is pending on the particular descriptors.
+ * are invoked when one of the @ref wait_and_dispatch methods is called
+ * and I/O is pending on the particular descriptors.
  *
  */
 class SelectorList {
@@ -97,6 +100,11 @@ public:
      * Default constructor.
      */
     SelectorList(ClockBase* clock);
+
+    /**
+     * Destructor.
+     */
+    virtual ~SelectorList();
 
     /**
      * Add a hook for pending I/O operations on a callback.
@@ -120,8 +128,7 @@ public:
      *
      * @return true if function succeeds, false otherwise.
      */
-     bool add_selector(int fd, SelectorMask mask,
-		       const SelectorCallback& scb);
+     bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -131,7 +138,7 @@ public:
      * @param mask of event types to be removed, e.g. an OR'ed
      * combination of the available @ref SelectorMask values.
      */
-    void remove_selector(int fd, SelectorMask event_mask = SEL_ALL);
+    void remove_ioevent_cb(XorpFd fd, IoEventType type = IOT_ANY);
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they
@@ -141,7 +148,7 @@ public:
      *
      * @return the number of callbacks that were made.
      */
-    int	select(TimeVal *timeout);
+    int	wait_and_dispatch(TimeVal *timeout);
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they
@@ -151,15 +158,13 @@ public:
      *
      * @return the number of callbacks that were made.
      */
-    int	select(int millisecs);
+    int	wait_and_dispatch(int millisecs);
 
-    /**
-     * Get the number of file descriptors with requested callbacks.
-     *
-     * @return the number of file descriptors that currently have
-     * callbacks registered.
-     */
+#ifdef HOST_OS_WINDOWS
+    inline size_t descriptor_count() const { return _selector_entries.size(); }
+#else
     inline size_t descriptor_count() const { return _descriptor_count; }
+#endif
 
     /**
      * Get a copy of the current list of monitored file descriptors in
@@ -172,11 +177,11 @@ public:
      void get_fd_set(SelectorMask selected_mask, fd_set& fds) const;
 
      /**
-     * Get a the value of the largest monitored file descriptor
-     *
-     * @return the maximum fd.
-     */
-    int get_max_fd() const;
+      * Get a the value of the largest monitored file descriptor
+      *
+      * @return the maximum fd.
+      */
+     int get_max_fd() const;
 
      /**
      * Set the SelectorObserver object that will receive notifications
@@ -210,23 +215,30 @@ private:
 	SEL_MAX_IDX	= 3
     };
     struct Node {
-	int			_mask[SEL_MAX_IDX];
-	SelectorCallback	_cb[SEL_MAX_IDX];
+	int		_mask[SEL_MAX_IDX];
+	IoEventCb	_cb[SEL_MAX_IDX];
+	// Reverse mapping of legacy UNIX event to IoEvent
+	IoEventType	_iot[SEL_MAX_IDX];
 
 	Node();
-	inline bool	add_okay(SelectorMask m, const SelectorCallback& scb);
-	inline int	run_hooks(SelectorMask m, int fd);
+	inline bool	add_okay(SelectorMask m,  IoEventType type,
+				 const IoEventCb& cb);
+	inline int	run_hooks(SelectorMask m, XorpFd fd);
 	inline void	clear(SelectorMask m);
 	inline bool	is_empty();
     };
 
-    vector<Node>	_selector_entries;
+    ClockBase*		_clock;
+    SelectorListObserverBase * _observer;
     fd_set		_fds[SEL_MAX_IDX];
+
+#ifdef HOST_OS_WINDOWS
+    map<XorpFd, Node>	_selector_entries;
+#else
+    vector<Node>	_selector_entries;
     int			_maxfd;
     size_t		_descriptor_count;
-
-    SelectorListObserverBase * _observer;
-    ClockBase*		_clock;
+#endif
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.12 2005/08/01 13:42:25 bms Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.13 2005/08/01 13:44:14 bms Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -25,13 +25,14 @@
 #include <fcntl.h>
 #endif
 
+#include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 
 struct iovec;
 
 // Asynchronous file transfer classes.  These utilize XORP EventLoop
-// and it's SelectorList to read / write files asynchronously.  The
+// and the IoEvent framework to read / write files asynchronously.  The
 // user creates and AsyncFile{Reader,Writer} and adds a buffer for
 // reading / writing with add_buffer().  A callback is provided with
 // each buffer is called every time I/O happens on the buffer.
@@ -54,8 +55,9 @@ public:
     enum Event {
 	DATA = 1,		// I/O occured
 	FLUSHING = 2,		// Buffer is being flushed
-	ERROR_CHECK_ERRNO = 4,	// I/O Error has occurred, check errno
-	END_OF_FILE = 8		// End of file reached (applies to read only)
+	OS_ERROR = 4,		// I/O Error has occurred, check error()
+	END_OF_FILE = 8,	// End of file reached (applies to read only)
+	WOULDBLOCK = 16		// I/O would block the current thread
     };
 
     /**
@@ -111,19 +113,29 @@ public:
     /**
      * @return file descriptor undergoing asynchronous operation.
      */
-    inline int		fd() const		{ return _fd; }
+    inline XorpFd	fd() const		{ return _fd; }
+
+    /**
+     * @return the last error code returned by the underlying OS.
+     */
+    inline int		error() const		{ return _last_error; }
 
 protected:
-    AsyncFileOperator(EventLoop& e, int fd)
-	: _eventloop(e), _fd(fd), _running(false) {
+    AsyncFileOperator(EventLoop& e, XorpFd fd)
+	: _eventloop(e), _fd(fd), _running(false),
+	  _last_error(0)
+    {
+#ifndef HOST_OS_WINDOWS
 	int fl = fcntl(fd, F_GETFL);
 	assert(fl & O_NONBLOCK);
+#endif
     }
     virtual ~AsyncFileOperator();
 
     EventLoop&		_eventloop;
-    int			_fd;
+    XorpFd		_fd;
     bool		_running;
+    int			_last_error;
 };
 
 /**
@@ -135,7 +147,7 @@ public:
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor to read from.
      */
-    AsyncFileReader(EventLoop& e, int fd) : AsyncFileOperator(e, fd) {}
+    AsyncFileReader(EventLoop& e, XorpFd fd) : AsyncFileOperator(e, fd) {}
     ~AsyncFileReader() { stop(); }
 
     /**
@@ -195,7 +207,7 @@ protected:
 	Callback	_cb;
     };
 
-    void read(int fd, SelectorMask m);
+    void read(XorpFd fd, IoEventType type);
     void complete_transfer(int err, ssize_t done);
 
     list<BufferInfo> _buffers;
@@ -213,7 +225,7 @@ public:
      * @param coalese the number of buffers to coalese for each write()
      *        system call.
      */
-    AsyncFileWriter(EventLoop& e, int fd, uint32_t coalesce = 1);
+    AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1);
 
     ~AsyncFileWriter();
 
@@ -287,7 +299,7 @@ protected:
 	Callback	_cb;
     };
 
-    void write(int, SelectorMask);
+    void write(XorpFd, IoEventType);
     void complete_transfer(ssize_t done);
 
     uint32_t		_coalesce;
