@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.21 2005/03/17 02:29:11 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.22 2005/03/25 02:53:27 pavlin Exp $"
 
 #include <functional>
 
@@ -33,8 +33,11 @@
 ///////////////////////////////////////////////////////////////////////////////
 // FinderTcpBase
 
-FinderTcpBase::FinderTcpBase(EventLoop& e, int fd)
-    : _fd(fd), _reader(e, fd), _writer(e, fd), _isize(0), _osize(0)
+FinderTcpBase::FinderTcpBase(EventLoop& e, XorpFd sock)
+    : _sock(sock),
+      _reader(e, sock),
+      _writer(e, sock),
+      _isize(0), _osize(0)
 {
     debug_msg("Constructor for FinderTcpBase object 0x%p\n", this);
     _reader.add_buffer(reinterpret_cast<uint8_t*>(&_isize), sizeof(_isize),
@@ -126,14 +129,17 @@ FinderTcpBase::read_callback(AsyncFileOperator::Event	ev,
     case AsyncFileOperator::FLUSHING:
 	return;
     case AsyncFileOperator::END_OF_FILE:
-	debug_msg("End of file (%s)\n", strerror(errno));
+	debug_msg("End of file (%d)\n", _reader.error());
 	error_event();
 	return;
-    case AsyncFileOperator::ERROR_CHECK_ERRNO:
-	if (EAGAIN == errno) {
+    case AsyncFileOperator::WOULDBLOCK:
+	_reader.resume();
+	return;
+    case AsyncFileOperator::OS_ERROR:
+	if (EWOULDBLOCK == _reader.error()) {
 	    _reader.resume();
 	} else {
-	    debug_msg("read_callback errno = %d\n", errno);
+	    debug_msg("read_callback error = %d\n", _reader.error());
 	    error_event();
 	}
 	return;
@@ -186,12 +192,16 @@ FinderTcpBase::write_callback(AsyncFileOperator::Event	ev,
 	return;
     case AsyncFileOperator::END_OF_FILE:
 	return;
-    case AsyncFileOperator::ERROR_CHECK_ERRNO:
-	if (EAGAIN == errno) {
+    case AsyncFileOperator::WOULDBLOCK:
+	_writer.resume();
+	return;
+    case AsyncFileOperator::OS_ERROR:
+	if (EWOULDBLOCK == _writer.error()) {
 	    _writer.resume();
 	} else {
-	    debug_msg("Error encountered (errno = %d), shutting down", errno);
-	    write_event(errno, buffer, 0);
+	    debug_msg("Error encountered (error = %d), shutting down",
+		      _writer.error());
+	    write_event(_writer.error(), buffer, 0);
 	    error_event();
 	}
 	return;
@@ -249,16 +259,16 @@ FinderTcpBase::close()
     _writer.stop();
     _reader.flush_buffers();
     _reader.stop();
-    comm_close(_fd);
-    debug_msg("Closing fd = %d\n", _fd);
-    _fd = -1;
+    comm_close(_sock);
+    debug_msg("Closing fd = %p\n", _sock.str().c_str());
+    _sock.clear();
     close_event();
 }
 
 bool
 FinderTcpBase::closed() const
 {
-    return _fd <= 0;
+    return (!_sock.is_valid());
 }
 
 ///////////////////////////////////////////////////////////////////////////////
@@ -276,27 +286,27 @@ FinderTcpListenerBase::FinderTcpListenerBase(EventLoop& e,
     in_addr if_ia;
     if_ia.s_addr = interface.addr();
 
-    if (if_valid(if_ia) == false && interface != IPv4::ANY()) {
-	xorp_throw(InvalidAddress, "Not a valid interface address");
+    if (is_ip_configured(if_ia) == false && interface != IPv4::ANY()) {
+	xorp_throw(InvalidAddress, "Not a configured IPv4 address");
     }
 
-    _lfd = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING);
-    if (XORP_ERROR == _lfd) {
-	xorp_throw(InvalidPort, strerror(errno));
+    _lsock = comm_bind_tcp4(&if_ia, htons(port), COMM_SOCK_NONBLOCKING);
+    if (!_lsock.is_valid()) {
+	xorp_throw(InvalidPort, comm_get_last_error_str());
     }
 
     if (en)
 	set_enabled(en);
-
-    debug_msg("Created new listener with fd %d\n", _lfd);
+    debug_msg("Created new listener with fd %s\n", _lsock.str().c_str());
 }
 
 FinderTcpListenerBase::~FinderTcpListenerBase()
 {
     set_enabled(false);
-    _e.remove_selector(_lfd);
-    debug_msg("Destructing Listener with fd = %d\n", _lfd);
-    comm_close(_lfd);
+    // XXX: duplicate call; set_enabled() will remove callback
+    //_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
+    debug_msg("Destructing Listener with fd = %p\n", _lsock.str().c_str());
+    comm_close(_lsock);
 }
 
 void
@@ -306,13 +316,12 @@ FinderTcpListenerBase::set_enabled(bool en)
 	return;
 
     if (en) {
-	SelectorCallback cb = callback(this,
-				       &FinderTcpListenerBase::connect_hook);
-	if (false == _e.add_selector(_lfd, SEL_RD, cb)) {
-	    XLOG_FATAL("Failed to add selector\n");
+	IoEventCb cb = callback(this, &FinderTcpListenerBase::connect_hook);
+	if (false == _e.add_ioevent_cb(_lsock, IOT_ACCEPT, cb)) {
+	    XLOG_FATAL("Failed to add io event callback\n");
 	}
     } else {
-	_e.remove_selector(_lfd);
+	_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
     }
     _en = en;
 }
@@ -324,38 +333,41 @@ FinderTcpListenerBase::enabled() const
 }
 
 void
-FinderTcpListenerBase::connect_hook(int fd, SelectorMask m)
+FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
 {
-    assert(fd == _lfd);
-    assert(m == SEL_RD);
+    assert(fd == _lsock);
+    assert(type == IOT_ACCEPT);
 
-    fd = comm_sock_accept(_lfd);
-    if (XORP_ERROR == fd) {
-	XLOG_ERROR("accept(): %s", strerror(errno));
+    (void)fd;
+    XorpFd sock;
+
+    sock = comm_sock_accept(_lsock);
+    if (!sock.is_valid()) {
+	XLOG_ERROR("accept(): %s", comm_get_last_error_str());
 	return;
     }
 
     sockaddr_in name;
     socklen_t namelen = sizeof(name);
-    if (getpeername(fd, reinterpret_cast<sockaddr*>(&name), &namelen) < 0) {
-	XLOG_ERROR("getpeername(): %s", strerror(errno));
+    if (getpeername(sock, reinterpret_cast<sockaddr*>(&name), &namelen) < 0) {
+	XLOG_ERROR("getpeername(): %s",
+		   comm_get_last_error_str());
 	return;
     }
 
     IPv4 peer(name);
     if (host_is_permitted(peer)) {
-	debug_msg("Created fd %d\n", fd);
-	int fl = fcntl(fd, F_GETFL);
-	if (fcntl(fd, F_SETFL, fl | O_NONBLOCK) < 0) {
+	debug_msg("Created socket %p\n", sock.str().c_str());
+	if (comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING) != XORP_OK) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");
 	    return;
 	}
-	if (connection_event(fd) == true)
+	if (connection_event(sock) == true)
 	    return;
     } else {
 	XLOG_WARNING("Rejected connection attempt from %s",
 		     peer.str().c_str());
     }
-    comm_close(fd);
+    comm_close(sock);
 }
 

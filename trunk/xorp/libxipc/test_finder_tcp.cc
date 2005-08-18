@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.17 2005/07/29 20:00:14 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_tcp.cc,v 1.18 2005/07/31 10:09:17 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,6 +22,7 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/xorpfd.hh"
 
 #include "libcomm/comm_api.h"
 
@@ -66,7 +67,7 @@ do {									\
 
 class DummyFinderTcp : public FinderTcpBase {
 public:
-    DummyFinderTcp(EventLoop& e, int fd, const char* name)
+    DummyFinderTcp(EventLoop& e, XorpFd fd, const char* name)
 	: FinderTcpBase(e, fd), _name(name), _reads(0), _writes(0)
     {}
     
@@ -126,7 +127,7 @@ public:
 	delete _connection;
     }
     
-    bool connection_event(int fd)
+    bool connection_event(XorpFd fd)
     {
 	assert(0 == _connection);
 	_connection = new DummyFinderTcp(_e, fd, "server");
@@ -149,10 +150,10 @@ connect_client(EventLoop* e, bool* client_connect_failed)
     ia.s_addr = FinderConstants::FINDER_DEFAULT_HOST().addr();
 
     int in_progress = 0;
-    int fd = comm_connect_tcp4(&ia,
+    XorpFd fd = comm_connect_tcp4(&ia,
 			       htons(FinderConstants::FINDER_DEFAULT_PORT()),
 			       COMM_SOCK_NONBLOCKING, &in_progress);
-    if (fd < 0) {
+    if (!fd.is_valid()) {
 	fprintf(stderr, "Client failed to connect\n");
 	*client_connect_failed = true;
 	return;

@@ -57,9 +57,9 @@ public:
     HeaderReader& get(const string& name, int32_t& val) throw (NotFound);
     HeaderReader& get(const string& name, uint32_t& val) throw (NotFound);
     HeaderReader& get(const string& name, double& val) throw (NotFound);
-    uint32_t bytes_consumed() const { return _bytes_consumed; }
+    const size_t bytes_consumed() const { return _bytes_consumed; }
 private:
-    uint32_t _bytes_consumed;
+    size_t _bytes_consumed;
     map<string, string> _map;
     typedef map<string, string>::iterator CMI;
 };

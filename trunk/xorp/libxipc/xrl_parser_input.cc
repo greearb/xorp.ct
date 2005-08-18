@@ -156,19 +156,17 @@ XrlParserFileInput::path_open_input(const char* filename)
     if (filename == 0)
 	return 0;
 
-    if (filename[0] == '/') {
-	//
-	// Filename begins with a slash so assume it is absolute.
-	//
+    if (is_absolute_path(filename)) {
 	ifstream* pif = new ifstream(filename);
 	if (pif->good()) {
 	    return pif;
 	}
 	delete pif;
     } else {
-	//
-	// Filename does not begin with a slash so assume it is relative.
-	//
+	// A relative path has been specified, therefore try to locate
+	// the file under one of our search paths.
+	string filename_s = unix_path_to_native(filename);
+
 	for (list<string>::const_iterator pi = _path.begin();
 	     pi != _path.end(); pi++) {
 	    const string& path = *pi;
@@ -177,10 +175,12 @@ XrlParserFileInput::path_open_input(const char* filename)
 		continue;
 
 	    string path_file;
-	    if (path[path.size() - 1] == '/') {
-		path_file = path + filename;
+
+	    // Eliminate trailing slash from appended path, if any.
+	    if (path[path.size() - 1] == PATH_DELIMITER_CHAR) {
+		path_file = path + filename_s;
 	    } else {
-		path_file = path + "/" + filename;
+		path_file = path + PATH_DELIMITER_STRING + filename_s;
 	    }
 
 	    ifstream* pif = new ifstream(path_file.c_str());

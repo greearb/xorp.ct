@@ -78,11 +78,11 @@ static const uint32_t   MAX_WRITES		    = 16;
 
 class STCPRequestHandler {
 public:
-    STCPRequestHandler(XrlPFSTCPListener& parent, int fd) :
-	_parent(parent), _fd(fd),
-	_reader(parent.eventloop(), fd, 4 * 65536,
+    STCPRequestHandler(XrlPFSTCPListener& parent, XorpFd sock) :
+	_parent(parent), _sock(sock),
+	_reader(parent.eventloop(), sock, 4 * 65536,
 		callback(this, &STCPRequestHandler::read_event)),
-	_writer(parent.eventloop(), fd, MAX_WRITES),
+	_writer(parent.eventloop(), sock, MAX_WRITES),
 	_responses_size(0)
     {
 	EventLoop& e = _parent.eventloop();
@@ -92,7 +92,7 @@ public:
 						     "life timer expired",
 						     true));
 	_reader.start();
-	debug_msg("STCPRequestHandler (%p) fd = %d\n", this, fd);
+	debug_msg("STCPRequestHandler (%p) fd = %p\n", this, sock.str().c_str());
     }
 
     ~STCPRequestHandler()
@@ -100,9 +100,9 @@ public:
 	_parent.remove_request_handler(this);
 	_reader.stop();
 	_writer.stop();
-	debug_msg("~STCPRequestHandler (%p) fd = %d\n", this, _fd);
-	close(_fd);
-	_fd = -1;
+	debug_msg("STCPRequestHandler (%p) fd = %p\n", this, _sock.str().c_str());
+	comm_close(_sock);
+	_sock.clear();
     }
 
     void dispatch_request(uint32_t seqno, const uint8_t* buffer, size_t bytes);
@@ -126,7 +126,7 @@ public:
 
 private:
     XrlPFSTCPListener& _parent;
-    int _fd;
+    XorpFd _sock;
 
     // Reader associated with buffer
     BufferedAsyncReader _reader;
@@ -153,8 +153,8 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 			       uint8_t*				buffer,
 			       size_t   			buffer_bytes)
 {
-    if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
-	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
+    if (ev == BufferedAsyncReader::OS_ERROR) {
+	XLOG_ERROR("Read failed (error = %d)\n", _reader.error());
 	die("read error");
 	return;
     }
@@ -164,7 +164,7 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	return;
     }
 
-    for (uint iters = 0; iters < MAX_XRLS_DISPATCHED; iters++) {
+    for (u_int iters = 0; iters < MAX_XRLS_DISPATCHED; iters++) {
 	if (buffer_bytes < sizeof(STCPPacketHeader)) {
 	    // Not enough data to even inspect the header
 	    size_t new_trigger_bytes = sizeof(STCPPacketHeader) - buffer_bytes;
@@ -298,8 +298,8 @@ STCPRequestHandler::update_writer(AsyncFileWriter::Event ev,
 
     debug_msg("Writer offset %u\n", XORP_UINT_CAST(bytes_done));
 
-    if (ev == AsyncFileWriter::ERROR_CHECK_ERRNO && errno != EAGAIN) {
-	die("read failed");
+    if (ev == AsyncFileWriter::OS_ERROR && _writer.error() != EWOULDBLOCK) {
+	die("write failed");
 	return;
     }
 
@@ -353,29 +353,25 @@ XrlPFSTCPListener::XrlPFSTCPListener(EventLoop&	    e,
 				     XrlDispatcher* x,
 				     uint16_t	    port)
     throw (XrlPFConstructorError)
-    : XrlPFListener(e, x), _fd(-1), _address_slash_port()
+    : XrlPFListener(e, x), _address_slash_port()
 {
 
-    if ((_fd = create_listening_ip_socket(TCP, port)) < 1) {
-	xorp_throw(XrlPFConstructorError, strerror(errno));
+    _sock = comm_bind_tcp4(NULL, port, COMM_SOCK_NONBLOCKING);
+    if (!_sock.is_valid()) {
+	xorp_throw(XrlPFConstructorError,
+		   comm_get_last_error_str());
     }
 
     string addr;
-    if (get_local_socket_details(_fd, addr, port) == false) {
-        close(_fd);
-	_fd = -1;
-        xorp_throw(XrlPFConstructorError, strerror(errno));
-    }
-
-    if (fcntl(_fd, F_SETFL, O_NONBLOCK) < 0) {
-	debug_msg("failed to go non-blocking\n");
-        close(_fd);
-	_fd = -1;
-        xorp_throw(XrlPFConstructorError, strerror(errno));
+    if (get_local_socket_details(_sock, addr, port) == false) {
+	int err = comm_get_last_error();
+        comm_close(_sock);
+	_sock.clear();
+        xorp_throw(XrlPFConstructorError, comm_get_error_str(err));
     }
 
     _address_slash_port = address_slash_port(addr, port);
-    _eventloop.add_selector(_fd, SEL_RD,
+    _eventloop.add_ioevent_cb(_sock, IOT_ACCEPT,
 			     callback(this, &XrlPFSTCPListener::connect_hook));
 }
 
@@ -386,23 +382,21 @@ XrlPFSTCPListener::~XrlPFSTCPListener()
 	// nb destructor for STCPRequestHandler triggers removal of node
 	// from list
     }
-    _eventloop.remove_selector(_fd);
-    close(_fd);
-    _fd = -1;
+    _eventloop.remove_ioevent_cb(_sock, IOT_ACCEPT);
+    comm_close(_sock);
+    _sock.clear();
 }
 
 void
-XrlPFSTCPListener::connect_hook(int fd, SelectorMask /* m */)
+XrlPFSTCPListener::connect_hook(XorpFd fd, IoEventType /* type */)
 {
-    struct sockaddr_in a;
-    socklen_t alen = sizeof(a);
-
-    int cfd = accept(fd, (sockaddr*)&a, &alen);
-    if (cfd < 0) {
-	debug_msg("accept() failed: %s\n", strerror(errno));
+    XorpFd cfd = comm_sock_accept(fd);
+    if (!cfd.is_valid()) {
+	debug_msg("accept failed: %s\n",
+		  comm_get_last_error_str());
 	return;
     }
-    fcntl(cfd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
+    comm_sock_set_blocking(cfd, COMM_SOCK_NONBLOCKING);
     add_request_handler(new STCPRequestHandler(*this, cfd));
 }
 
@@ -575,34 +569,31 @@ uint32_t XrlPFSTCPSender::_next_uid = 0;
 XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     throw (XrlPFConstructorError)
     : XrlPFSender(e, addr_slash_port),
-      _uid(_next_uid++), _fd(-1),
+      _uid(_next_uid++),
       _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
-    _fd = create_connected_ip_socket(TCP, addr_slash_port);
-    debug_msg("stcp sender (%p) fd = %d\n", this, _fd);
-    if (_fd <= 0) {
+    _sock = create_connected_tcp4_socket(addr_slash_port);
+    debug_msg("stcp sender (%p) fd = %p\n", this, _sock.str().c_str());
+    if (!_sock.is_valid()) {
 	debug_msg("failed to connect to %s\n", addr_slash_port);
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Could not connect to %s\n", addr_slash_port));
     }
 
-    if (fcntl(_fd, F_SETFL, fcntl(_fd, F_GETFL) | O_NONBLOCK) < 0) {
+    if (comm_sock_set_blocking(_sock, 0) != XORP_OK) {
+	int err = comm_get_last_error();
 	debug_msg("failed to go non-blocking.\n");
-        close(_fd);
-	_fd = -1;
-	xorp_throw(XrlPFConstructorError,
-		   c_format("Failed to set fd non-blocking: %s\n",
-			    strerror(errno)));
+	XLOG_WARNING("Failed to set fd non-blocking: %s\n",
+		     comm_get_error_str(err));
     }
 
-    _reader =
-	new BufferedAsyncReader(e, _fd, 4 * 65536,
-				callback(this, &XrlPFSTCPSender::read_event));
+    _reader = new BufferedAsyncReader(e, _sock, 4 * 65536,
+callback(this, &XrlPFSTCPSender::read_event));
 
     _reader->set_trigger_bytes(sizeof(STCPPacketHeader));
     _reader->start();
 
-    _writer = new AsyncFileWriter(e, _fd, MAX_WRITES);
+    _writer = new AsyncFileWriter(e, _sock, MAX_WRITES);
 
     _current_seqno   = 0;
     _active_bytes    = 0;
@@ -621,9 +612,10 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
     _reader = 0;
     delete _writer;
     _writer = 0;
-    if (_fd >= 0)
-	close(_fd);
-    _fd = -1;
+    if (_sock.is_valid()) {
+	comm_close(_sock);
+	_sock.clear();
+    }
     debug_msg("~XrlPFSTCPSender (%p)\n", this);
     sender_list.remove_instance(_uid);
 }
@@ -631,7 +623,7 @@ XrlPFSTCPSender::~XrlPFSTCPSender()
 void
 XrlPFSTCPSender::die(const char* reason, bool verbose)
 {
-    XLOG_ASSERT(_fd > 0);
+    XLOG_ASSERT(_sock.is_valid());
 
     if (verbose)
 	XLOG_ERROR("XrlPFSTCPSender died: %s", reason);
@@ -644,8 +636,8 @@ XrlPFSTCPSender::die(const char* reason, bool verbose)
     delete _writer;
     _writer = 0;
 
-    close(_fd);
-    _fd = -1;
+    comm_close(_sock);
+    _sock.clear();
 
     // Detach all callbacks before attempting to invoke them.
     // Otherwise destructor may get called when we're still going through
@@ -681,7 +673,7 @@ XrlPFSTCPSender::send(const Xrl&	x,
 	indirect_calls ++;
     }
 
-    if (_fd <= 0) {
+    if (!_sock.is_valid()) {
 	debug_msg("Attempted send when socket is dead!\n");
 	if (direct_call) {
 	    return false;
@@ -779,8 +771,9 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     debug_msg("read event %u (need at least %u)\n",
 		XORP_UINT_CAST(buffer_bytes),
 		XORP_UINT_CAST(sizeof(STCPPacketHeader)));
-    if (ev == BufferedAsyncReader::ERROR_CHECK_ERRNO) {
-	XLOG_ERROR("Read failed (errno = %d): %s\n", errno, strerror(errno));
+
+    if (ev == BufferedAsyncReader::OS_ERROR) {
+	XLOG_ERROR("Read failed (error = %d)\n", _reader->error());
 	die("read error");
 	return;
     }
@@ -813,7 +806,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     }
 
     if (sph->type() == STCP_PT_HELO_ACK) {
-	debug_msg("Got keep alive ack");
+	debug_msg("Got keep alive ack\n");
 	_keepalive_sent = false;
 	dispose_request();
 	_reader->dispose(sph->frame_bytes());

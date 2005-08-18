@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf.hh,v 1.24 2004/10/13 06:03:28 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf.hh,v 1.25 2005/03/25 02:53:33 pavlin Exp $
 
 // XRL Protocol Family Header
 
@@ -23,7 +23,6 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
-#include "libxorp/selector.hh"
 #include "libxorp/exceptions.hh"
 
 class Xrl;

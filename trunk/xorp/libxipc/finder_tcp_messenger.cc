@@ -30,9 +30,9 @@
 
 FinderTcpMessenger::FinderTcpMessenger(EventLoop&		e,
 				       FinderMessengerManager*	mm,
-				       int			fd,
+				       XorpFd			sock,
 				       XrlCmdMap&		cmds)
-    : FinderMessengerBase(e, mm, cmds), FinderTcpBase(e, fd)
+    : FinderMessengerBase(e, mm, cmds), FinderTcpBase(e, sock)
 {
     if (manager())
 	manager()->messenger_birth_event(this);
@@ -234,10 +234,10 @@ FinderTcpListener::~FinderTcpListener()
 }
 
 bool
-FinderTcpListener::connection_event(int fd)
+FinderTcpListener::connection_event(XorpFd sock)
 {
     FinderTcpMessenger* m =
-	new FinderTcpMessenger(eventloop(), &_mm, fd, _cmds);
+	new FinderTcpMessenger(eventloop(), &_mm, sock, _cmds);
     // Check if manager has taken responsibility for messenger and clean up if
     // not.
     if (_mm.manages(m) == false)
@@ -265,16 +265,16 @@ FinderTcpConnector::connect(FinderTcpMessenger*& created_messenger)
     host_ia.s_addr = _host.addr();
 
     int in_progress = 0;
-    int fd = comm_connect_tcp4(&host_ia, htons(_port),
+    XorpFd sock = comm_connect_tcp4(&host_ia, htons(_port),
 			       COMM_SOCK_NONBLOCKING, &in_progress);
-    if (fd < 0) {
+    if (!sock.is_valid()) {
 	created_messenger = 0;
 	int last_error = comm_get_last_error();
 	XLOG_ASSERT(0 != last_error);
 	return last_error;
     }
 
-    created_messenger = new FinderTcpMessenger(_e, &_mm, fd, _cmds);
+    created_messenger = new FinderTcpMessenger(_e, &_mm, sock, _cmds);
     debug_msg("Created messenger %p\n", created_messenger);
     return 0;
 }

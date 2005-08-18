@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.11 2005/03/25 02:53:27 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_server.cc,v 1.12 2005/06/04 17:58:34 pavlin Exp $"
 
 #include "finder_module.h"
 #include "finder_server.hh"
@@ -65,14 +65,11 @@ FinderServer::FinderServer(EventLoop& e,
     //	  add_binding(default_interface, default_port);
 
     // Permit connections from local addresses
-    uint32_t n = if_count();
-    for (uint32_t i = 1; i <= n; i++) {
-	string name;
-	in_addr ia;
-	uint16_t flags;
-	if (if_probe(i, name, ia, flags)) {
-	    add_permitted_host(IPv4(ia));
-	}
+    vector<IPv4> addrs;
+    get_active_ipv4_addrs(addrs);
+    vector<IPv4>::const_iterator i;
+    for (i = addrs.begin(); i != addrs.end(); i++) {
+	add_permitted_host(*i);
     }
 }
 

@@ -40,7 +40,7 @@
 
 class FinderTcpBase {
 public:
-    FinderTcpBase(EventLoop& e, int fd);
+    FinderTcpBase(EventLoop& e, XorpFd fd);
 
     virtual ~FinderTcpBase();
 
@@ -114,7 +114,7 @@ protected:
 			const uint8_t*, size_t, size_t);
 
 protected:
-    int _fd;
+    XorpFd _sock;
     vector<uint8_t> _input_buffer;
 
     AsyncFileReader _reader;
@@ -147,7 +147,7 @@ public:
      * @return true if instance agrees to take responsibility for file
      * descriptor, false otherwise.
      */
-    virtual bool connection_event(int fd) = 0;
+    virtual bool connection_event(XorpFd fd) = 0;
 
     /**
      * Determine whether listener is enabled.
@@ -174,7 +174,7 @@ protected:
      * Accepts connection, checks source address, and then calls
      * connection_event() if source is valid.
      */
-    void connect_hook(int fd, SelectorMask m);
+    void connect_hook(XorpFd fd, IoEventType type);
 
     FinderTcpListenerBase(const FinderTcpListenerBase&);	    // Not impl
     FinderTcpListenerBase& operator=(const FinderTcpListenerBase&); // Not impl
@@ -183,7 +183,7 @@ protected:
 
 protected:
     EventLoop&	_e;
-    int		_lfd;
+    XorpFd	_lsock;
     bool	_en;
 
     IPv4	_addr;

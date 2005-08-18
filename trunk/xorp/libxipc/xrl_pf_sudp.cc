@@ -105,7 +105,7 @@ render_dispatch_header(const XUID& id, uint32_t content_bytes)
 }
 
 static bool
-parse_dispatch_header(string hdr, XUID& id, uint32_t& content_bytes)
+parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
 {
     try {
 	HeaderReader h(hdr);
@@ -207,7 +207,7 @@ parse_response(const char* buf,
 // ----------------------------------------------------------------------------
 // XrlPFUDPSender
 
-int XrlPFSUDPSender::sender_fd;
+XorpFd XrlPFSUDPSender::sender_sock;
 int XrlPFSUDPSender::instance_count;
 
 typedef map<const XUID, Request> XuidRequestMap;
@@ -226,35 +226,35 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 		   c_format("Bad destination: %s\n", address_slash_port));
     }
 #ifdef HAVE_SIN_LEN
-    _destination.sin_len = sizeof(_destination);
+    _destination.sin_len = sizeof(struct sockaddr_in);
 #endif /* HAVE_SIN_LEN */
     _destination.sin_family = AF_INET;
     _destination.sin_port = htons(port);
 
-    if (sender_fd <= 0) {
+    if (!sender_sock.is_valid()) {
 	debug_msg("Creating master socket\n");
-	sender_fd = socket(AF_INET, SOCK_DGRAM, 0);
-	if (sender_fd > 0) {
-	    if (set_socket_sndbuf_bytes(sender_fd, SUDP_SEND_BUFFER_BYTES)
-		< SUDP_SEND_BUFFER_BYTES) {
-		close(sender_fd);
-		sender_fd = 0;
+	sender_sock = comm_open_udp(AF_INET, COMM_SOCK_NONBLOCKING);
+	if (sender_sock.is_valid()) {
+	    if (comm_sock_set_sndbuf(sender_sock, SUDP_SEND_BUFFER_BYTES,
+		SUDP_SEND_BUFFER_BYTES) < SUDP_SEND_BUFFER_BYTES)
+	    {
+		comm_close(sender_sock);
+		sender_sock.clear();
 		xorp_throw(XrlPFConstructorError,
 			   c_format("Could not create master socket: "
 				    "cannot set socket sending buffer to %d\n",
 				    XORP_INT_CAST(SUDP_SEND_BUFFER_BYTES)));
 	    }
-	    _eventloop.add_selector(sender_fd, SEL_RD,
-				    callback(&XrlPFSUDPSender::recv));
+	    _eventloop.add_ioevent_cb(sender_sock, IOT_READ,
+				      callback(&XrlPFSUDPSender::recv));
 	} else {
 	    xorp_throw(XrlPFConstructorError,
-		       c_format("Could not create master socket: %s\n",
-				strerror(errno)));
+		       c_format("Could not create master socket.\n"));
 	}
     }
     instance_count++;
-    debug_msg("Created XrlPFSUDPSender %s instance count %d sender_fd %d\n",
-	      address_slash_port, instance_count, sender_fd);
+    debug_msg("Created XrlPFSUDPSender %s instance count %d sender_sock %p\n",
+	      address_slash_port, instance_count, sender_sock.str().c_str());
 }
 
 XrlPFSUDPSender::~XrlPFSUDPSender()
@@ -264,9 +264,9 @@ XrlPFSUDPSender::~XrlPFSUDPSender()
 	      this, instance_count);
 
     if (instance_count == 0) {
-	_eventloop.remove_selector(sender_fd, SEL_RD);
-	close(sender_fd);
-	sender_fd = 0;
+	_eventloop.remove_ioevent_cb(sender_sock, IOT_READ);
+	comm_close(sender_sock);
+	sender_sock.clear();
     }
 
     // Delete requests associated with us, they cannot possibly be valid
@@ -310,10 +310,16 @@ XrlPFSUDPSender::send(const Xrl& 			x,
     ssize_t msg_bytes = msg.size();
     if (msg_bytes > SUDP_SEND_BUFFER_BYTES) {
 	debug_msg("Message sent larger than transport method designed");
-    } else if (sendto(sender_fd, msg.data(), msg.size(), 0,
-		      (sockaddr*)&_destination, sizeof(_destination))
-	       != msg_bytes) {
-	debug_msg("Write failed: %s\n", strerror(errno));
+    } else if (::sendto(sender_sock, msg.data(), msg.size(), 0,
+		      (sockaddr*)&_destination,
+#ifdef HAVE_SIN_LEN
+		      _destination.sin_len
+#else
+		      sizeof(_destination)
+#endif
+		) != msg_bytes) {
+	debug_msg("Write failed: %s\n",
+		  comm_get_last_error_str());
 	requests_pending.erase(p.first);
 
 	if (direct_call) {
@@ -376,20 +382,22 @@ XrlPFSUDPSender::timeout_hook(XUID xuid)
 }
 
 // ----------------------------------------------------------------------------
-// XrlPFSUDPSender timer and selector hooks
+// XrlPFSUDPSender timer and io event hooks
 
 void
-XrlPFSUDPSender::recv(int fd, SelectorMask m)
+XrlPFSUDPSender::recv(XorpFd fd, IoEventType type)
 {
-    assert(fd == sender_fd);
-    assert(m == SEL_RD);
+    assert(fd == sender_sock);
+    assert(type == IOT_READ);
 
     char buf[SUDP_RECV_BUFFER_BYTES + 1];
 
-    ssize_t read_bytes = read(sender_fd, buf, SUDP_RECV_BUFFER_BYTES);
+    ssize_t read_bytes = ::recvfrom(sender_sock, buf, SUDP_RECV_BUFFER_BYTES,
+				    0, NULL, NULL);
+
     if (read_bytes < 0) {
-	// Read fail request will timeout
-	debug_msg("read failed: %s\n", strerror(errno));
+	debug_msg("recvfrom failed: %s\n",
+		  comm_get_last_error_str());
 	return;
     }
     buf[read_bytes] = '\0';
@@ -411,7 +419,8 @@ XrlPFSUDPSender::recv(int fd, SelectorMask m)
     debug_msg("Received %s\n", xuid.str().c_str());
     map<const XUID, Request>::iterator i = requests_pending.find(xuid);
     if (i == requests_pending.end()) {
-	XLOG_WARNING("XRL Protocol Family SUDP: response arrived for XRL that appears to have timed out.");
+	XLOG_WARNING("XRL Protocol Family SUDP: response arrived for XRL "
+		     "that appears to have timed out.");
 	return;
     }
 
@@ -448,53 +457,59 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlDispatcher* xr)
     : XrlPFListener(e, xr)
 {
     debug_msg("XrlPFSUDPListener\n");
-    if ((_fd = create_listening_ip_socket(UDP)) < 0) {
+
+    _sock = comm_bind_udp4(NULL, 0, COMM_SOCK_NONBLOCKING);
+    if (!_sock.is_valid()) {
 	xorp_throw(XrlPFConstructorError,
-		   c_format("Could not allocate listening IP socket: %s",
-			    strerror(errno)));
+		   c_format("Could not allocate listening IP socket."));
     }
+
+    // XXX: We don't check return values here.
+    (void)comm_sock_set_sndbuf(_sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN);
+    (void)comm_sock_set_rcvbuf(_sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN);
 
     string addr;
     uint16_t port;
-    if (get_local_socket_details(_fd, addr, port) == false) {
-        close(_fd);
+    if (get_local_socket_details(_sock, addr, port) == false) {
+	comm_close(_sock);
 	xorp_throw(XrlPFConstructorError,
-		   c_format("Could not get local socket details: %s",
-			    strerror(errno)));
+		   c_format("Could not get local socket details."));
     }
     _addr = address_slash_port(addr, port);
 
-    _eventloop.add_selector(_fd, SEL_RD,
-			     callback(this, &XrlPFSUDPListener::recv));
+    _eventloop.add_ioevent_cb(_sock, IOT_READ,
+			      callback(this, &XrlPFSUDPListener::recv));
 }
 
 XrlPFSUDPListener::~XrlPFSUDPListener()
 {
-    _eventloop.remove_selector(_fd);
-    close(_fd);
+    _eventloop.remove_ioevent_cb(_sock, IOT_READ);
+    comm_close(_sock);
 }
 
 void
-XrlPFSUDPListener::recv(int fd, SelectorMask m)
+XrlPFSUDPListener::recv(XorpFd fd, IoEventType type)
 {
     static char rbuf[SUDP_RECV_BUFFER_BYTES + 1];
 
-    assert(fd == _fd);
-    assert(m == SEL_RD);
+    assert(fd == _sock);
+    assert(type == IOT_READ);
 
     debug_msg("recv()\n");
 
-    struct sockaddr sockfrom;
+    struct sockaddr_storage sockfrom;
     socklen_t sockfrom_bytes = sizeof(sockfrom);
 
-    errno = 0;
-    ssize_t rbuf_bytes = recvfrom(_fd, rbuf, sizeof(rbuf) / sizeof(rbuf[0]),
-				  0, &sockfrom, &sockfrom_bytes);
-    if (errno == EAGAIN) {
-	return;
-    } else if (errno != 0) {
-	debug_msg("recvfrom failed: %s\n", strerror(errno));
-	return;
+    ssize_t rbuf_bytes = ::recvfrom(_sock, rbuf, sizeof(rbuf) / sizeof(rbuf[0]),
+				    0, (sockaddr*)&sockfrom, &sockfrom_bytes);
+    if (rbuf_bytes < 0) {
+	int err = comm_get_last_error();
+	if (err == EWOULDBLOCK) {
+	    return;
+	} else {
+	    debug_msg("recvfrom failed: %s\n", comm_get_error_str(err));
+	    return;
+	}
     }
 
     if (rbuf_bytes > SUDP_RECV_BUFFER_BYTES) {
@@ -538,11 +553,11 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
 }
 
 void
-XrlPFSUDPListener::send_reply(sockaddr*			sa,
+XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
 			      const XrlError&		e,
 			      const XUID&		xuid,
-			      const XrlArgs* 	reply_args) {
-
+			      const XrlArgs* 	reply_args)
+{
 #ifdef XRLPFSUDPPARANOIA
     static XUID last("00000000-00000000-00000000-00000000");
     assert(last != xuid);
@@ -563,17 +578,31 @@ XrlPFSUDPListener::send_reply(sockaddr*			sa,
     v[1].iov_base = const_cast<char*>(reply.c_str());
     v[1].iov_len = reply.size();
 
+    ssize_t v_bytes = v[0].iov_len + v[1].iov_len;
+
+#ifndef HOST_OS_WINDOWS
     msghdr m;
     memset(&m, 0, sizeof(m));
-    m.msg_name = (caddr_t)sa;
-    m.msg_namelen = sizeof(*sa);
+    m.msg_name = (caddr_t)ss;
+#ifdef HAVE_SS_LEN
+    m.msg_namelen = ss->ss_len;
+#else
+    m.msg_namelen = sizeof(struct sockaddr_storage);
+#endif
     m.msg_iov = v;
     m.msg_iovlen = sizeof(v) / sizeof(v[0]);
 
-    ssize_t v_bytes = v[0].iov_len + v[1].iov_len;
     if (v_bytes > SUDP_SEND_BUFFER_BYTES ||
-	sendmsg(_fd, &m, 0) != v_bytes) {
-	debug_msg("Failed to send reply (%d): %s\n", errno, strerror(errno));
+	v_bytes != sendmsg(_sock, &m, 0))
+#else
+    if (v_bytes > SUDP_SEND_BUFFER_BYTES ||
+    	SOCKET_ERROR == WSASendTo(_sock, (LPWSABUF)v, 2, (LPDWORD)&v_bytes,
+				  0, (sockaddr*)ss, sizeof(*ss), NULL, NULL))
+#endif
+    {
+	int err = comm_get_last_error();
+	debug_msg("Failed to send reply (%d): %s\n", err,
+		  comm_get_error_str(err));
     }
 }
 

@@ -102,7 +102,7 @@ static string
 mk_instance_name(EventLoop& e, const char* classname)
 {
     static uint32_t sp = (uint32_t)getpid();
-    static uint32_t sa = if_get_preferred().s_addr;
+    static uint32_t sa = get_preferred_ipv4_addr().s_addr;
     static uint32_t sc;
 
     TimeVal now;
@@ -155,7 +155,7 @@ XrlRouter::initialize(const char* class_name,
 	    struct in_addr addr;
 	    IPv4 ipv4(value);
 	    ipv4.copy_out(addr);
-	    if (if_set_preferred(addr) != true) {
+	    if (set_preferred_ipv4_addr(addr) != true) {
 		XLOG_ERROR("Failed to change the Finder client address to %s",
 			   ipv4.str().c_str());
 	    }

@@ -24,9 +24,11 @@
 #include "finder_module.h"
 
 #include "libxorp/xorp.h"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/xlog.h"
+#include "libxorp/random.h"
 
 #include "finder_server.hh"
 #include "finder_tcp_messenger.hh"
@@ -73,11 +75,11 @@ do {									\
     if (verbose()) {							\
 	const char *wh = strrchr(file, '/');				\
 	wh = (wh) ? wh + 1 : file;					\
-	struct timeval t;						\
-	gettimeofday(&t, 0);						\
+	TimeVal t;							\
+	TimerList::system_gettimeofday(&t);				\
  	printf("From %s:%d at %ld.%06ld: ", wh, line,			\
-	       static_cast<long>(t.tv_sec),				\
-	       static_cast<long>(t.tv_usec));				\
+	       static_cast<long>(t.sec()),				\
+	       static_cast<long>(t.usec()));				\
 	printf(x);							\
     }									\
 } while(0)

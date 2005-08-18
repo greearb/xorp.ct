@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.21 2005/01/26 02:45:33 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.22 2005/03/25 02:53:34 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -49,9 +49,9 @@ public:
     bool response_pending() const;
 
 private:
-    void connect_hook(int fd, SelectorMask m);
+    void connect_hook(XorpFd fd, IoEventType type);
 
-    int	_fd;
+    XorpFd	_sock;
     string _address_slash_port;
     list<STCPRequestHandler*> _request_handlers;
 
@@ -74,7 +74,7 @@ public:
 
     bool sends_pending() const;
 
-    inline bool alive() const 				{ return _fd > 0; }
+    inline bool alive() const { return _sock.is_valid(); }
 
     const char* protocol() const;
 
@@ -109,7 +109,7 @@ private:
 
 private:
     uint32_t 			 _uid;
-    int				 _fd;
+    XorpFd			 _sock;
 
     // Transmission related
     AsyncFileWriter*		  _writer;

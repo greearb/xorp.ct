@@ -24,6 +24,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
+#include "libxorp/random.h"
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"

@@ -24,6 +24,7 @@
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/random.h"
 
 #include "xrl_atom.hh"
 #include "xrl_atom_encoding.hh"

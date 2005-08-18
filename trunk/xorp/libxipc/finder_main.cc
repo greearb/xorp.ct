@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.16 2005/07/29 20:00:14 bms Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.17 2005/08/04 11:07:14 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -76,33 +76,6 @@ usage()
 	    "[-i <interface>]\n");
 }
 
-static bool
-valid_interface(const IPv4& addr)
-{
-    uint32_t naddr = if_count();
-    uint16_t any_up = 0;
-
-    for (uint32_t n = 1; n <= naddr; n++) {
-	string name;
-	in_addr if_addr;
-	uint16_t flags;
-
-	if (if_probe(n, name, if_addr, flags) == false)
-	    continue;
-
-	any_up |= (flags & IFF_UP);
-
-	if (IPv4(if_addr) == addr && flags & IFF_UP) {
-	    return true;
-	}
-    }
-
-    if (IPv4::ANY() == addr && any_up)
-	return true;
-
-    return false;
-}
-
 void
 finder_sig_handler(int s)
 {
@@ -158,7 +131,9 @@ finder_main(int argc, char* const argv[])
 	    //
 	    try {
 		IPv4 bind_addr = IPv4(optarg);
-		if (valid_interface(bind_addr) == false) {
+		in_addr ina;
+		bind_addr.copy_out(ina);
+		if (is_ip_configured(ina) == false) {
 		    fprintf(stderr,
 			    "%s is not the address of an active interface.\n",
 			    optarg);

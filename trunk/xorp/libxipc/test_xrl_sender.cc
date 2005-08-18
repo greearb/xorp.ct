@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.13 2005/07/29 20:00:15 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.14 2005/07/31 10:11:12 bms Exp $"
 
 //
 // Test XRLs sender.
@@ -27,6 +27,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/callback.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"

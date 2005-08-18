@@ -69,124 +69,17 @@
 
 #include "sockutil.hh"
 
-//
-// XXX: BEGIN DUPLICATED CODE FROM 'libcomm'
-// TODO: remove it when libxipc starts using libcomm
-//
-#define SO_RCV_BUF_SIZE_MIN	(48*1024)  /* min. rcv socket buf size	     */
-#define SO_RCV_BUF_SIZE_MAX	(256*1024) /* desired rcv socket buf size    */
-#define SO_SND_BUF_SIZE_MIN	(48*1024)  /* min. snd socket buf size	     */
-#define SO_SND_BUF_SIZE_MAX	(256*1024) /* desired snd socket buf size    */
+#include <vector>
 
-/**
- * comm_sock_set_sndbuf:
- * @sock: The socket whose sending buffer size to set.
- * @desired_bufsize: The preferred buffer size.
- * @min_bufsize: The smallest acceptable buffer size.
- *
- * Set the sending buffer size of a socket.
- *
- * Return value: the successfully set buffer size on success,
- * otherwise 0.
- **/
-int
-x_comm_sock_set_sndbuf(int sock, int desired_bufsize, int min_bufsize)
-{
-    int delta = desired_bufsize / 2;
 
-    /*
-     * Set the socket buffer size.  If we can't set it as large as we
-     * want, search around to try to find the highest acceptable
-     * value.  The highest acceptable value being smaller than
-     * minsize is a fatal error.
-     */
-    if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
-		   (void *)&desired_bufsize, sizeof(desired_bufsize)) < 0) {
-	desired_bufsize -= delta;
-	while (true) {
-	    if (delta > 1)
-		delta /= 2;
-
-	    if (setsockopt(sock, SOL_SOCKET, SO_SNDBUF,
-			   (void *)&desired_bufsize, sizeof(desired_bufsize))
-		< 0) {
-		desired_bufsize -= delta;
-		if (desired_bufsize <= 0)
-		    break;
-	    } else {
-		if (delta < 1024)
-		    break;
-		desired_bufsize += delta;
-	    }
-	}
-	if (desired_bufsize < min_bufsize) {
-	    XLOG_ERROR("Cannot set sending buffer size of socket %d: "
-		       "desired buffer size %u < minimum allowed %u",
-		       sock, desired_bufsize, min_bufsize);
-	    return 0;
-	}
-    }
-
-    return (desired_bufsize);
-}
-
-/**
- * comm_sock_set_rcvbuf:
- * @sock: The socket whose receiving buffer size to set.
- * @desired_bufsize: The preferred buffer size.
- * @min_bufsize: The smallest acceptable buffer size.
- *
- * Set the receiving buffer size of a socket.
- *
- * Return value: the successfully set buffer size on success,
- * otherwise 0.
- **/
-int
-x_comm_sock_set_rcvbuf(int sock, int desired_bufsize, int min_bufsize)
-{
-    int delta = desired_bufsize / 2;
-
-    /*
-     * Set the socket buffer size.  If we can't set it as large as we
-     * want, search around to try to find the highest acceptable
-     * value.  The highest acceptable value being smaller than
-     * minsize is a fatal error.
-     */
-    if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
-		   (void *)&desired_bufsize, sizeof(desired_bufsize)) < 0) {
-	desired_bufsize -= delta;
-	while (true) {
-	    if (delta > 1)
-		delta /= 2;
-
-	    if (setsockopt(sock, SOL_SOCKET, SO_RCVBUF,
-			   (void *)&desired_bufsize, sizeof(desired_bufsize))
-		< 0) {
-		desired_bufsize -= delta;
-		if (desired_bufsize <= 0)
-		    break;
-	    } else {
-		if (delta < 1024)
-		    break;
-		desired_bufsize += delta;
-	    }
-	}
-	if (desired_bufsize < min_bufsize) {
-	    XLOG_ERROR("Cannot set receiving buffer size of socket %d: "
-		       "desired buffer size %u < minimum allowed %u",
-		       sock, desired_bufsize, min_bufsize);
-	    return 0;
-	}
-    }
-
-    return (desired_bufsize);
-}
-//
-// XXX: END DUPLICATED CODE FROM 'libcomm'
-//
+#ifndef HOST_OS_WINDOWS
+static uint32_t if_count();
+static bool if_probe(uint32_t index, string& name, in_addr& addr,
+		     uint16_t& flags);
+#endif
 
 bool
-get_local_socket_details(int fd, string& addr, uint16_t& port)
+get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 {
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
@@ -209,7 +102,8 @@ get_local_socket_details(int fd, string& addr, uint16_t& port)
 	    char hname[MAXHOSTNAMELEN + 1];
 	    hname[MAXHOSTNAMELEN] = '\0';
 	    if (gethostname(hname, MAXHOSTNAMELEN) < 0) {
-		XLOG_ERROR("gethostname failed: %s", strerror(errno));
+		XLOG_ERROR("gethostname failed: %s",
+			   comm_get_last_error_str());
 		return false;
 	    }
 
@@ -229,7 +123,7 @@ get_local_socket_details(int fd, string& addr, uint16_t& port)
 }
 
 bool
-get_remote_socket_details(int fd, string& addr, string& port)
+get_remote_socket_details(XorpFd fd, string& addr, string& port)
 {
     struct sockaddr_in sin;
     socklen_t slen = sizeof(sin);
@@ -249,175 +143,49 @@ get_remote_socket_details(int fd, string& addr, string& port)
     return true;
 }
 
-int
-create_connected_ip_socket(IPSocketType ist, const string& addr_slash_port)
+// XXX: This will go away eventually.
+XorpFd
+create_connected_tcp4_socket(const string& addr_slash_port)
 {
+    XorpFd sock;
     string addr;
+    struct in_addr ia;
     uint16_t port;
+    int in_progress;
+
     if (split_address_slash_port(addr_slash_port, addr, port) == false) {
 	XLOG_ERROR("bad address slash port: %s", addr_slash_port.c_str());
-	return -1;
-    }
-    return create_connected_ip_socket(ist, addr, port);
-}
-
-int
-create_connected_ip_socket(IPSocketType ist, const string& addr, uint16_t port)
-{
-    int stype = (ist == UDP) ? SOCK_DGRAM : SOCK_STREAM;
-
-    int fd = socket(PF_INET, stype, 0);
-    if (fd < 0) {
-	XLOG_ERROR("failed to open socket: %s", strerror(errno));
-	return -1;
+	return sock;
     }
 
-    // Set the receiving socket buffer size in the kernel
-    if (x_comm_sock_set_rcvbuf(fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
-	< SO_RCV_BUF_SIZE_MIN) {
-	close_socket(fd);
-	return -1;
-    }
-
-    // Set the sending socket buffer size in the kernel
-    if (x_comm_sock_set_sndbuf(fd, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
-	< SO_SND_BUF_SIZE_MIN) {
-	close_socket(fd);
-	return -1;
-    }
-
-    // Resolve address
-    struct in_addr ia;
     if (address_lookup(addr, ia) == false) {
 	XLOG_ERROR("Can't resolve IP address for %s", addr.c_str());
-	return -1;
+	return sock;
     }
 
-    // Connect
-    struct sockaddr_in sin;
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
-    sin.sin_addr.s_addr = ia.s_addr;
-    if (connect(fd, (struct sockaddr*)&sin, sizeof(sin)) < 0) {
-        XLOG_ERROR("failed to connect to %s port %d: %s",
-                  addr.c_str(), port, strerror(errno));
-	close_socket(fd);
-	return -1;
-    }
-
-    return fd;
-}
-
-int
-create_listening_ip_socket(IPSocketType ist, uint16_t port)
-{
-    int stype = (ist == UDP) ? SOCK_DGRAM : SOCK_STREAM;
-    int fd = socket(PF_INET, stype, ist);
-    if (fd < 0) {
-	XLOG_ERROR("failed to open socket: %s", strerror(errno));
-	return -1;
+    sock = comm_connect_tcp4(&ia, htons(port), COMM_SOCK_NONBLOCKING,
+			     &in_progress);
+    if (!sock.is_valid()) {
+	return sock;
     }
 
     // Set the receiving socket buffer size in the kernel
-    if (x_comm_sock_set_rcvbuf(fd, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
+    if (comm_sock_set_rcvbuf(sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
-	close_socket(fd);
-	return -1;
+	comm_close(sock);
+	sock.clear();
+	return sock;
     }
 
     // Set the sending socket buffer size in the kernel
-    if (x_comm_sock_set_sndbuf(fd, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
+    if (comm_sock_set_sndbuf(sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN)
 	< SO_SND_BUF_SIZE_MIN) {
-	close_socket(fd);
-	return -1;
+	comm_close(sock);
+	sock.clear();
+	return sock;
     }
 
-    // reuse addr
-    int opt = 1;
-    if (stype == SOCK_STREAM && setsockopt(fd, SOL_SOCKET, SO_REUSEADDR,
-					   &opt, sizeof(opt)) < 0) {
-        XLOG_ERROR("failed to setsockopt SO_REUSEADDR: %s", strerror(errno));
-        close_socket(fd);
-	return -1;
-    }
-
-    // bind
-    struct sockaddr_in sin;
-    memset((void *)&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_port = htons(port);
-    sin.sin_addr = if_get_preferred();
-    if (bind(fd, (sockaddr*)&sin, sizeof(sin)) < 0) {
-        XLOG_ERROR("failed to bind socket: %s (%s)",
-		   strerror(errno), inet_ntoa(sin.sin_addr));
-        close_socket(fd);
-	return -1;
-    }
-
-    // listen
-    if (stype == SOCK_STREAM && listen(fd, 5) < 0) {
-        XLOG_ERROR("failed to listen: %s", strerror(errno));
-        close_socket(fd);
-	return -1;
-    }
-
-    return fd;
-}
-
-void
-close_socket(int fd)
-{
-    // set_socket_sndbuf_bytes(fd, 2048);
-    // set_socket_rcvbuf_bytes(fd, 2048);
-    close(fd);
-}
-
-int
-get_socket_sndbuf_bytes(int fd)
-{
-    int sz;
-    if (getsockopt(fd, SOL_SOCKET, SO_SNDBUF, &sz, 0) < 0) {
-	XLOG_ERROR("getsockopt(%d, SO_SNDBUF) failed (errno %d, %s)\n",
-		   fd, errno, strerror(errno));
-	return -1;
-    }
-    return sz;
-}
-
-int
-get_socket_rcvbuf_bytes(int fd)
-{
-    int sz;
-    if (getsockopt(fd, SOL_SOCKET, SO_RCVBUF, &sz, 0) < 0) {
-	XLOG_ERROR("getsockopt(%d, SO_RCVBUF) failed (errno %d, %s)\n",
-		   fd, errno, strerror(errno));
-	return -1;
-    }
-    return sz;
-}
-
-int
-set_socket_sndbuf_bytes(int fd, uint32_t sz)
-{
-    int isz = int(sz);
-    if (setsockopt(fd, SOL_SOCKET, SO_SNDBUF, &isz, sizeof(isz)) < 0) {
-	XLOG_ERROR("setsockopt(%d, SO_SNDBUF, %d) failed (errno %d, %s)\n",
-		   fd, isz, errno, strerror(errno));
-	return -1;
-    }
-    return isz;
-}
-
-int
-set_socket_rcvbuf_bytes(int fd, uint32_t sz)
-{
-    int isz = int(sz);
-    if (setsockopt(fd, SOL_SOCKET, SO_RCVBUF, &isz, sizeof(isz)) < 0) {
-	XLOG_ERROR("setsockopt(%d, SO_RCVBUF, %d) failed (errno %d, %s)\n",
-		   fd, isz, errno, strerror(errno));
-	return -1;
-    }
-    return isz;
+    return sock;
 }
 
 bool
@@ -455,8 +223,15 @@ address_lookup(const string& addr, in_addr& ia)
     do {
 	struct hostent *h = gethostbyname(addr.c_str());
 	if (h == NULL) {
-	    XLOG_ERROR("Can't resolve IP address for %s: %s %d", addr.c_str(),
-		       hstrerror(h_errno), h_errno);
+#ifdef HAVE_HSTRERROR
+	    int err = h_errno;
+	    const char *strerr = hstrerror(err);
+#else
+	    int err = comm_get_last_error();
+	    const char *strerr = comm_get_error_str(err);
+#endif
+	    XLOG_ERROR("Can't resolve IP address for %s: %s %d",
+		       addr.c_str(), strerr, err);
 	    return false;
 	} else {
 	    memcpy(&ia, h->h_addr_list[0], sizeof(ia));
@@ -469,10 +244,168 @@ address_lookup(const string& addr, in_addr& ia)
     return false;
 }
 
-uint32_t
+//
+// Return a vector containing the IPv4 addresses which are currently
+// configured and administratively up on the local host.
+//
+void
+get_active_ipv4_addrs(vector<IPv4>& addrs)
+{
+#ifdef HOST_OS_WINDOWS
+    PMIB_IPADDRTABLE	pAddrTable;
+    DWORD		result, tries;
+    ULONG		dwSize;
+
+    tries = 0;
+    result = ERROR_INSUFFICIENT_BUFFER;
+    dwSize = sizeof(MIB_IPADDRTABLE);
+    do {
+	pAddrTable = (PMIB_IPADDRTABLE) ((tries == 0) ? malloc(dwSize) :
+				     realloc(pAddrTable, dwSize));
+	if (pAddrTable == NULL)
+	    break;
+	result = GetIpAddrTable(pAddrTable, &dwSize, TRUE);
+    } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
+
+    if (result != NO_ERROR) {
+	DWORD dwMsgLen;
+	LPSTR pMsg;
+
+	dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
+				  FORMAT_MESSAGE_ALLOCATE_BUFFER|
+				  FORMAT_MESSAGE_IGNORE_INSERTS|
+				  FORMAT_MESSAGE_MAX_WIDTH_MASK,
+				  NULL, result,
+				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				  (LPSTR)&pMsg, 0, 0);
+	XLOG_FATAL("GetIpAddrTable(): %s\n", pMsg);
+	LocalFree(pMsg);
+	return;
+    }
+    XLOG_ASSERT(pAddrTable->dwNumEntries != 0);
+
+    // Loopback is always listed last in the table, according to MSDN.
+    // They lie. We want it at the front so don't do anything different.
+
+    for (uint32_t i = 0; i < pAddrTable->dwNumEntries; i++) {
+	uint32_t iaddr = pAddrTable->table[i].dwAddr;
+	if (iaddr != INADDR_ANY)
+	    addrs.push_back(IPv4(iaddr));
+    }
+
+    free(pAddrTable);
+
+#else
+    uint32_t n = if_count();
+
+    string if_name;
+    in_addr if_addr;
+    uint16_t if_flags;
+
+    // Always push loopback first.
+    addrs.push_back(IPv4::LOOPBACK());
+
+    for (uint32_t i = 1; i <= n; i++) {
+	if (if_probe(i, if_name, if_addr, if_flags) &&
+	    (if_addr.s_addr != INADDR_LOOPBACK) && (if_flags & IFF_UP)) {
+	    addrs.push_back(IPv4(if_addr));
+	}
+    }
+#endif
+}
+
+// Return true if a given IPv4 address is currently configured in the system.
+bool
+is_ip_configured(const in_addr& a)
+{
+    vector<IPv4> addrs;
+    get_active_ipv4_addrs(addrs);
+
+    if (addrs.empty())
+	return false;
+
+    vector<IPv4>::const_iterator i;
+    for (i = addrs.begin(); i != addrs.end(); i++) {
+	if (*i == IPv4(a))
+	    return true;
+    }
+
+    return false;
+}
+
+static in_addr s_if_preferred;
+
+//
+// Set the preferred endpoint address for IPv4 based XRL communication.
+//
+// The specified address must be configured on an interface which is
+// administratively up.
+//
+bool
+set_preferred_ipv4_addr(in_addr new_addr)
+{
+    vector<IPv4> addrs;
+    get_active_ipv4_addrs(addrs);
+
+    if (addrs.empty())
+	return false;
+
+    vector<IPv4>::const_iterator i;
+    for (i = addrs.begin(); i != addrs.end(); i++) {
+	if (*i == IPv4(new_addr)) {
+	    XLOG_INFO(
+		"Changing to address %s for IPv4 based XRL communication.",
+		i->str().c_str());
+	    i->copy_out(s_if_preferred);
+	    return true;
+	}
+    }
+
+    return false;
+}
+
+//
+// Return the preferred endpoint address for IPv4 based XRL communication.
+//
+in_addr
+get_preferred_ipv4_addr()
+{
+    if (s_if_preferred.s_addr != INADDR_ANY)
+	return (s_if_preferred);
+
+    // No address has been set or specified; attempt to use the first
+    // available IPv4 address in the system.
+    vector<IPv4> addrs;
+    get_active_ipv4_addrs(addrs);
+
+    if (!addrs.empty())
+	addrs[0].copy_out(s_if_preferred);
+
+    XLOG_INFO("Using address %s for IPv4 based XRL communication.\n",
+	      inet_ntoa(s_if_preferred));
+
+    return (s_if_preferred);
+}
+
+#ifndef HOST_OS_WINDOWS
+//
+// Return the number of network interfaces currently configured in the system.
+// NOTE: Only used under UNIX.
+//
+static uint32_t
 if_count()
 {
-    static uint32_t cnt = 0;
+#if defined(__FreeBSD__)
+    int cnt, error;
+    size_t cntlen = sizeof(cnt);
+    error = sysctlbyname("net.link.generic.system.ifcount",
+			 (void *)&cnt, &cntlen, NULL, 0);
+    if (error == 0)
+	return ((uint32_t)cnt);
+
+    return (0);
+#elif defined(HAVE_IF_INDEXTONAME)
+    static uint32_t cnt = 0;	// XXX: This is a bug
     if (cnt == 0) {
 	char buf[IF_NAMESIZE];
 	char* ifname = 0;
@@ -480,11 +413,28 @@ if_count()
 	    cnt++;
     }
     return cnt;
+#else
+    return (0);
+#endif
 }
+#endif // !HOST_OS_WINDOWS
 
-bool
+#ifndef HOST_OS_WINDOWS
+//
+// Probe for an interface given its index.
+// Return its name, IPv4 address, and interface flags.
+// NOTE: Only used under UNIX.
+//
+static bool
 if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
 {
+#if !defined(HAVE_IF_INDEXTONAME)
+    return false;
+    UNUSED(index);
+    UNUSED(name);
+    UNUSED(addr);
+    UNUSED(flags);
+#else
     ifreq ifr;
 
     if (if_indextoname(index, ifr.ifr_name) == 0) {
@@ -492,15 +442,15 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
     }
     name = ifr.ifr_name;
 
-    int s = socket(PF_INET, SOCK_DGRAM, 0);
-    if (s < 0) {
+    XorpFd s = comm_open_udp(AF_INET, COMM_SOCK_BLOCKING);
+    if (!s.is_valid()) {
 	debug_msg("Failed to open socket\n");
 	return false;
     }
 
     if (ioctl(s, SIOCGIFADDR, &ifr) < 0) {
 	debug_msg("Failed to get interface address\n");
-	close(s);
+	comm_close(s);
 	return false;
     }
     sockaddr_in& sin = reinterpret_cast<sockaddr_in&>(ifr.ifr_addr);
@@ -508,89 +458,13 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
 
     if (ioctl(s, SIOCGIFFLAGS, &ifr) < 0) {
 	debug_msg("Failed to get interface flags\n");
-	close(s);
+	comm_close(s);
 	return false;
     }
     flags = ifr.ifr_flags;
 
-    close(s);
+    comm_close(s);
     return true;
+#endif
 }
-
-bool
-if_valid(const in_addr& a)
-{
-    uint32_t n = if_count();
-
-    string if_name;
-    in_addr if_addr;
-    uint16_t if_flags;
-
-    for (uint32_t i = 1; i <= n; i++) {
-	if (if_probe(i, if_name, if_addr, if_flags) &&
-	    if_addr.s_addr == a.s_addr) {
-	    return true;
-	}
-    }
-    return false;
-}
-
-static in_addr s_if_preferred;
-
-bool
-if_set_preferred(in_addr new_addr)
-{
-    uint32_t n = if_count();
-    for (uint32_t i = 1; i <= n; i++) {
-	string name;
-	in_addr addr;
-	uint16_t flags;
-	if (if_probe(i, name, addr, flags) &&
-	    addr.s_addr == new_addr.s_addr &&
-	    (flags & IFF_UP)) {
-// 	    XLOG_INFO("Changing to interface %s addr %s for IP based XRL "
-// 		      "communication.", name.c_str(), inet_ntoa(addr));
-	    s_if_preferred = addr;
-	    return true;
-	}
-    }
-    return false;
-}
-
-in_addr if_get_preferred()
-{
-    if (s_if_preferred.s_addr)
-	return s_if_preferred;
-
-    uint32_t n = if_count();
-
-    string	name;
-    in_addr	addr;
-    uint16_t	flags;
-
-    for (uint32_t i = 1; i <= n; i++) {
-	if (if_probe(i, name, addr, flags) &&
-	    (flags & IFF_LOOPBACK) &&
-	    (flags & IFF_UP)) {
-	    goto done;
-	}
-    }
-
-    for (uint32_t i = 1; i <= n; i++) {
-    	if (if_probe(i, name, addr, flags) &&
-	    (flags & IFF_UP)) {
-	    goto done;
-	}
-    }
-
-    // Random badness
-    name = "any";
-    addr.s_addr = INADDR_ANY;
-
- done:
-    //    XLOG_INFO("Using interface %s addr %s for IP based XRL "
-    //	      "communication.", name.c_str(), inet_ntoa(addr));
-
-    s_if_preferred = addr;
-    return s_if_preferred;
-}
+#endif // !HOST_OS_WINDOWS

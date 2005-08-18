@@ -211,7 +211,7 @@ test_main(void)
 {
     EventLoop e;
 
-    IPv4 ipc_addr = if_get_preferred();
+    IPv4 ipc_addr = get_preferred_ipv4_addr();
 
     DummyFinder finder;
     FinderTcpListener listener(e,
