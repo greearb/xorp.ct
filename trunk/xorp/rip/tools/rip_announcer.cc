@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.6 2005/08/01 15:23:39 bms Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
 
 #include <vector>
 #include <fstream>
@@ -52,7 +52,7 @@ struct RipRoute {
 };
 
 bool
-announce_routes(int fd, vector<RipRoute<IPv4> >* my_routes)
+announce_routes(XorpFd fd, vector<RipRoute<IPv4> >* my_routes)
 {
     NullAuthHandler			nah;
     PacketAssemblerSpecState<IPv4>	sp(nah);
@@ -76,7 +76,7 @@ announce_routes(int fd, vector<RipRoute<IPv4> >* my_routes)
 	sockaddr_in sai;
 	pkt.address().copy_out(sai);
 	sai.sin_port = htons(pkt.port());
-	if (sendto(fd,  pkt.data_ptr(), pkt.data_bytes(), 0,
+	if (sendto(fd, XORP_BUF_CAST(pkt.data_ptr()), pkt.data_bytes(), 0,
 		   reinterpret_cast<const sockaddr*>(&sai), sizeof(sai)) < 0) {
 	    cerr << "Write failed: " << strerror(errno) << endl;
 	    return false;
@@ -88,7 +88,7 @@ announce_routes(int fd, vector<RipRoute<IPv4> >* my_routes)
 }
 
 static void
-fake_peer(int fd, uint32_t period, vector<RipRoute<IPv4> >& my_routes)
+fake_peer(XorpFd fd, uint32_t period, vector<RipRoute<IPv4> >& my_routes)
 {
     EventLoop e;
     XorpTimer t = e.new_periodic(period * 1000,
@@ -124,27 +124,26 @@ originate_routes_from_file(const char* 			file,
     fin.close();
 }
 
-static int
+static XorpFd
 init_rip_socket(IPv4 if_addr)
 {
     in_addr mcast_addr, join_if_addr;
 
     IPv4::RIP2_ROUTERS().copy_out(mcast_addr);
     if_addr.copy_out(join_if_addr);
-    int fd = comm_bind_join_udp4(&mcast_addr, &join_if_addr, htons(520),
+    XorpFd fd = comm_bind_join_udp4(&mcast_addr, &join_if_addr, htons(520),
 				 COMM_SOCK_ADDR_PORT_DONTREUSE,
 				 COMM_SOCK_NONBLOCKING);
-    if (fd < 0) {
+    if (!fd.is_valid()) {
 	cerr << "Could not instantiate socket" << endl;
-	fd = -1;
     } else if (comm_set_iface4(fd, &join_if_addr) < 0) {
 	cerr << "comm_set_iface4 failed" << endl;
 	comm_close(fd);
-	fd = -1;
+	fd.clear();
     } else if (comm_set_ttl(fd, 1) < 0) {
 	cerr << "comm_set_ttl failed" << endl;
 	comm_close(fd);
-	fd = -1;
+	fd.clear();
     }
     return fd;
 }
@@ -239,10 +238,11 @@ main(int argc, char* const argv[])
 		cerr << "No routes to originate." << endl;
 		short_usage();
 	    } else {
-		int fd = init_rip_socket(if_addr);
-		if (fd > 0) {
+		XorpFd fd = init_rip_socket(if_addr);
+		if (!fd.is_valid()) {
 		    fake_peer(fd, period, my_routes);
 		    comm_close(fd);
+		    fd.clear();
 		}
 	    }
 	}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.6 2005/08/01 15:23:39 bms Exp $"
+#ident "$XORP: xorp/rip/tools/ripng_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
 
 #include "rip/rip_module.h"
 
@@ -56,7 +56,7 @@ struct RipRoute {
 };
 
 static bool
-announce_routes(int fd, vector<RipRoute<IPv6> >* my_routes)
+announce_routes(XorpFd fd, vector<RipRoute<IPv6> >* my_routes)
 {
     PacketAssemblerSpecState<IPv6>	sp;
     ResponsePacketAssembler<IPv6> 	rpa(sp);
@@ -79,7 +79,7 @@ announce_routes(int fd, vector<RipRoute<IPv6> >* my_routes)
 	sockaddr_in6 sai;
 	pkt.address().copy_out(sai);
 	sai.sin6_port = htons(pkt.port());
-	if (sendto(fd,  pkt.data_ptr(), pkt.data_bytes(), 0,
+	if (sendto(fd, XORP_BUF_CAST(pkt.data_ptr()), pkt.data_bytes(), 0,
 		   reinterpret_cast<const sockaddr*>(&sai), sizeof(sai)) < 0) {
 	    cerr << "Write failed: " << strerror(errno) << endl;
 	    return false;
@@ -91,7 +91,7 @@ announce_routes(int fd, vector<RipRoute<IPv6> >* my_routes)
 }
 
 static void
-rip_announce(int fd, vector<RipRoute<IPv6> >& my_routes)
+rip_announce(XorpFd fd, vector<RipRoute<IPv6> >& my_routes)
 {
     EventLoop e;
     XorpTimer t = e.new_periodic(30 * 1000,
@@ -127,37 +127,42 @@ originate_routes_from_file(const char* 			file,
     fin.close();
 }
 
-static int
+static XorpFd
 init_rip_socket(int if_num)
 {
 #ifdef HAVE_IPV6
     in6_addr grp_addr;
     IPv6::RIP2_ROUTERS().copy_out(grp_addr);
-    int fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521),
+    XorpFd fd = comm_bind_join_udp6(&grp_addr, if_num, htons(521),
 				 COMM_SOCK_ADDR_PORT_REUSE,
 				 COMM_SOCK_NONBLOCKING);
-    if (fd < 0) {
+    if (!fd.is_valid()) {
 	cerr << "comm_bind_join_udp6 failed" << endl;
     }
     if (comm_set_iface6(fd, if_num) != XORP_OK) {
 	cerr << "comm_set_iface6 failed" << endl;
 	comm_close(fd);
-	return -1;
+	fd.clear();
+	return fd;
     }
      if (comm_set_ttl(fd, 255) != XORP_OK) {
 	 cerr << "comm_set_ttl failed" << endl;
 	 comm_close(fd);
-	 return -1;
+	 fd.clear();
+	 return fd;
     }
     if (comm_set_loopback(fd, 0) != XORP_OK) {
 	cerr << "comm_set_loopback failed" << endl;
-	return -1;
+	comm_close(fd);
+	fd.clear();
+	return fd;
     }
     return fd;
 #else
-    UNUSED(if_num);
     cerr << "IPv6 support not found during build." << endl;
-    return -1;
+    XorpFd fd;
+    return fd;
+    UNUSED(if_num);
 #endif
 }
 
@@ -251,8 +256,8 @@ main(int argc, char* const argv[])
 		cerr << "No routes to originate." << endl;
 		short_usage();
 	    } else {
-		int fd = init_rip_socket(if_num);
-		if (fd > 0) {
+		XorpFd fd = init_rip_socket(if_num);
+		if (!fd.is_valid()) {
 		    rip_announce(fd, my_routes);
 		    comm_close(fd);
 		}
