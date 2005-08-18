@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.81 2005/08/16 22:49:15 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.82 2005/08/17 03:30:34 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -285,7 +285,7 @@ class Peer {
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 	_rxmt_interval = 5;
 
-	_interface_state = Down;
+	change_state(Down);
     }
 
     ~Peer() {
@@ -702,6 +702,16 @@ class Peer {
     };
 
     list<string> _scheduled_events;	// List of deferred events.
+
+    /**
+     * Change state, use this not set_state when changing states.
+     */
+    void change_state(InterfaceState state);
+
+    /**
+     * Set the state of this peer.
+     */
+    void set_state(InterfaceState state) {_interface_state = state; }
 
     /**
      * Set the designated router.

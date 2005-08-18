@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.120 2005/08/17 03:30:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.121 2005/08/17 04:22:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -818,21 +818,21 @@ Peer<A>::event_interface_up()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    XLOG_ASSERT(Down == _interface_state);
+    XLOG_ASSERT(Down == get_state());
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
-	_interface_state = Point2Point;
+	change_state(Point2Point);
 	break;
     case OspfTypes::BROADCAST:
 	// Not eligible to be the designated router.
 	if (0 == _hello_packet.get_router_priority()) {
-	    _interface_state = DR_other;
+	    change_state(DR_other);
 
 	    // Start sending hello packets.
 	    start_hello_timer();
 	} else {
-	    _interface_state = Waiting;
+	    change_state(Waiting);
 	    start_wait_timer();
 	}
 	break;
@@ -841,14 +841,14 @@ Peer<A>::event_interface_up()
 	break;
     case OspfTypes::PointToMultiPoint:
     case OspfTypes::VirtualLink:
-	_interface_state = Point2Point;
+	change_state(Point2Point);
 	XLOG_UNFINISHED();
 	break;
     }
 
     update_router_links();
 
-    XLOG_ASSERT(Down != _interface_state);
+    XLOG_ASSERT(Down != get_state());
 }
 
 template <typename A>
@@ -874,18 +874,17 @@ Peer<A>::event_backup_seen()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
     case Loopback:
 	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(_interface_state).c_str());
+		     pp_interface_state(get_state()).c_str());
 	break;
     case Waiting:
 	compute_designated_router_and_backup_designated_router();
 
-	XLOG_ASSERT(_interface_state == DR_other ||
-		    _interface_state == Backup ||
-		    _interface_state == DR);
+	XLOG_ASSERT(get_state() == DR_other || get_state() == Backup ||
+		    get_state() == DR);
 
 	break;
     case Point2Point:
@@ -893,7 +892,7 @@ Peer<A>::event_backup_seen()
     case Backup:
     case DR:
 	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(_interface_state).c_str());
+		     pp_interface_state(get_state()).c_str());
 	break;
     }
 
@@ -909,21 +908,21 @@ Peer<A>::event_neighbour_change()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
     case Loopback:
     case Waiting:
     case Point2Point:
 	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(_interface_state).c_str());
+		     pp_interface_state(get_state()).c_str());
     case DR_other:
     case Backup:
     case DR:
 	compute_designated_router_and_backup_designated_router();
 
-	XLOG_ASSERT(_interface_state == DR_other ||
-		    _interface_state == Backup ||
-		    _interface_state == DR);
+	XLOG_ASSERT(get_state() == DR_other ||
+		    get_state() == Backup ||
+		    get_state() == DR);
 
 	break;
     }
@@ -940,7 +939,7 @@ Peer<A>::event_loop_ind()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    _interface_state = Loopback;
+    change_state(Loopback);
 
     tear_down_state();
     update_router_links();
@@ -955,13 +954,13 @@ Peer<A>::event_unloop_ind()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
 	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(_interface_state).c_str());
+		     pp_interface_state(get_state()).c_str());
 	break;
     case Loopback:
-	_interface_state = Down;
+	change_state(Down);
 	break;
     case Waiting:
     case Point2Point:
@@ -969,7 +968,7 @@ Peer<A>::event_unloop_ind()
     case Backup:
     case DR:
 	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(_interface_state).c_str());
+		     pp_interface_state(get_state()).c_str());
 
 	break;
     }
@@ -986,7 +985,7 @@ Peer<A>::event_interface_down()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    _interface_state = Down;
+    change_state(Down);
 
     tear_down_state();
     update_router_links();
@@ -1343,11 +1342,11 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     set_backup_designated_router(bdr);
 
     if (get_candidate_id() == dr)
-	_interface_state = DR;
+	change_state(DR);
     else if (get_candidate_id() == bdr)
-	_interface_state = Backup;
+	change_state(Backup);
     else
-	_interface_state = DR_other;
+	change_state(DR_other);
 
     // Step(6)
     if(OspfTypes::NBMA == get_linktype())
@@ -1467,7 +1466,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 	break;
     }
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
     case Loopback:
     case Waiting:
@@ -1492,7 +1491,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
     }
     XLOG_FATAL("Designated router interface ID "
 	       "available in states DR and DR Other not %s",
-	       pp_interface_state(_interface_state).c_str());
+	       pp_interface_state(get_state()).c_str());
 
     return 0;
 }
@@ -1504,7 +1503,7 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     OspfTypes::Version version = _ospf.get_version();
     RouterLink router_link(version);
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
 	// No links
 	return;
@@ -1548,7 +1547,7 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA: {
 	bool adjacent = false;
-	switch(_interface_state) {
+	switch(get_state()) {
 	case Down:
 	    break;
 	case Loopback:
@@ -1640,7 +1639,7 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 {
     RouterLink router_link(OspfTypes::V3);
 
-    switch(_interface_state) {
+    switch(get_state()) {
     case Down:
     case Loopback:
 	// No links
@@ -1680,7 +1679,7 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA: {
 	bool adjacent = false;
-	switch(_interface_state) {
+	switch(get_state()) {
 	case Down:
 	    break;
 	case Loopback:
@@ -1861,6 +1860,13 @@ uint32_t
 Peer<A>::get_rxmt_interval()
 {
     return _rxmt_interval;
+}
+
+template <typename A>
+void
+Peer<A>::change_state(InterfaceState state)
+{
+    set_state(state);
 }
 
 template <typename A>
