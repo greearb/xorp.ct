@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.10 2005/07/31 02:03:55 bms Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.11 2005/08/04 10:05:09 bms Exp $"
 
 /*
  * Message logging utility.
@@ -22,14 +22,11 @@
 #include "config.h"
 #endif
 
-#include "xorp.h"
-
-#include <time.h>
-
 #include "libxorp_module.h"
-#include "config.h"
+#include "xorp.h"
 #include "xlog.h"
 
+#include <time.h>
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
