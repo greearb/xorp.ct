@@ -98,10 +98,9 @@ SUBDIRS =
 bin_PROGRAMS = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
-TESTS = test_packet test_checksum test_peering
+check_PROGRAMS = test_packet test_checksum test_peering
 
-# -- No-install Programs
-noinst_PROGRAMS = test_packet test_checksum test_peering
+TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = libospf.la
@@ -142,9 +141,9 @@ am_libospf_la_OBJECTS = area_router.lo fletcher_checksum.lo lsa.lo \
 	xrl_io.lo xrl_target.lo
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
-noinst_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
+check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
 	test_peering$(EXEEXT)
-PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
+PROGRAMS = $(bin_PROGRAMS)
 
 am_test_checksum_OBJECTS = test_checksum.$(OBJEXT)
 test_checksum_OBJECTS = $(am_test_checksum_OBJECTS)
@@ -316,8 +315,8 @@ uninstall-binPROGRAMS:
 clean-binPROGRAMS:
 	-test -z "$(bin_PROGRAMS)" || rm -f $(bin_PROGRAMS)
 
-clean-noinstPROGRAMS:
-	-test -z "$(noinst_PROGRAMS)" || rm -f $(noinst_PROGRAMS)
+clean-checkPROGRAMS:
+	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
 test_checksum$(EXEEXT): $(test_checksum_OBJECTS) $(test_checksum_DEPENDENCIES) 
 	@rm -f test_checksum$(EXEEXT)
 	$(CXXLINK) $(test_checksum_LDFLAGS) $(test_checksum_OBJECTS) $(test_checksum_LDADD) $(LIBS)
@@ -561,6 +560,7 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-recursive
 all-am: Makefile $(LTLIBRARIES) $(PROGRAMS)
@@ -593,8 +593,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-recursive
 
-clean-am: clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS mostlyclean-am
+clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES mostlyclean-am
 
 distclean: distclean-recursive
 
@@ -633,9 +633,9 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 uninstall-info: uninstall-info-recursive
 
 .PHONY: $(RECURSIVE_TARGETS) GTAGS all all-am check check-TESTS check-am \
-	clean clean-binPROGRAMS clean-generic clean-libtool \
-	clean-noinstLTLIBRARIES clean-noinstPROGRAMS clean-recursive \
-	distclean distclean-compile distclean-depend distclean-generic \
+	clean clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
+	clean-libtool clean-noinstLTLIBRARIES clean-recursive distclean \
+	distclean-compile distclean-depend distclean-generic \
 	distclean-libtool distclean-recursive distclean-tags distdir \
 	dvi dvi-am dvi-recursive info info-am info-recursive install \
 	install-am install-binPROGRAMS install-data install-data-am \

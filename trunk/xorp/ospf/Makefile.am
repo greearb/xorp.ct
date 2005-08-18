@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/ospf/Makefile.am,v 1.11 2005/08/05 04:02:41 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -13,14 +13,13 @@ bindir = $(prefix)/$(subdir)
 bin_PROGRAMS	 = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
-TESTS		 = test_packet
-TESTS		+= test_checksum
-TESTS		+= test_peering
+check_PROGRAMS	 = test_packet
+check_PROGRAMS	+= test_checksum
+check_PROGRAMS	+= test_peering
 
-# -- No-install Programs
-noinst_PROGRAMS	 = test_packet
-noinst_PROGRAMS += test_checksum
-noinst_PROGRAMS += test_peering
+TESTS		 = test_packet$(EXEEXT)
+TESTS		+= test_checksum$(EXEEXT)
+TESTS		+= test_peering$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libospf.la
