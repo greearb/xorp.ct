@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.52 2005/07/27 23:52:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.53 2005/08/05 12:53:30 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -411,14 +411,6 @@ void
 OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 		       map<string, CliCommandMatch>& return_matches) const
 {
-    bool is_executable = false;
-    bool can_pipe = false;
-
-    if (! _command_action.empty()) {
-	is_executable = true;
-	can_pipe = true;
-    }
-
     list<string>::const_iterator ci = _command_parts.begin();
     for (size_t i = 0; i < wordnum; i++) {
 	++ci;
@@ -448,8 +440,8 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    list<string>::const_iterator vi;
 	    for (vi = var_matches.begin(); vi != var_matches.end(); ++vi) {
 		const string& command_name = *vi;
-		CliCommandMatch ccm(command_name, _help_string, is_executable,
-				    can_pipe);
+		CliCommandMatch ccm(command_name, _help_string,
+				    is_executable(), can_pipe());
 		return_matches.insert(make_pair(command_name, ccm));
 	    }
 	    break;
@@ -458,15 +450,15 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    // A mandatory argument that is supplied by the user
 	    XLOG_ASSERT(match[match.size() - 1] == '>');
 	    const string& command_name = match;
-	    CliCommandMatch ccm(command_name, _help_string, is_executable,
-				can_pipe);
+	    CliCommandMatch ccm(command_name, _help_string, is_executable(),
+				can_pipe());
 	    ccm.set_wildcard(true);	// XXX: the argument can be any value
 	    return_matches.insert(make_pair(command_name, ccm));
 	    break;
 	}
 	const string& command_name = match;
-	CliCommandMatch ccm(command_name, _help_string, is_executable,
-			    can_pipe);
+	CliCommandMatch ccm(command_name, _help_string, is_executable(),
+			    can_pipe());
 	return_matches.insert(make_pair(command_name, ccm));
 	break;
     } while (false);
@@ -653,10 +645,10 @@ OpCommandList::add_op_command(const OpCommand& op_command)
     return new_command;
 }
 
-map<string, string>
+map<string, CliCommandMatch>
 OpCommandList::top_level_commands() const
 {
-    map<string, string> commands;
+    map<string, CliCommandMatch> commands;
 
     //
     // Add the first word of every command, and the help if this
@@ -669,18 +661,35 @@ OpCommandList::top_level_commands() const
 	const string& top_command = path_parts.front();
 	bool is_top_command = false;
 
+	//
+	// XXX: If the module has not been started, then don't add its
+	// commands. However, add all commands that are not associated
+	// with any module.
+	//
+	if ((_mmgr.module_is_active(op_command->module()) == false)
+	    && (! op_command->module().empty())) {
+	    continue;
+	}
+
 	if (path_parts.size() == 1)
 	    is_top_command = true;
 
 	if (is_top_command) {
 	    commands.erase(top_command);
-	    commands.insert(make_pair(top_command, op_command->help_string()));
+	    CliCommandMatch ccm(op_command->command_name(),
+				op_command->help_string(),
+				op_command->is_executable(),
+				op_command->can_pipe());
+	    commands.insert(make_pair(top_command, ccm));
 	    continue;
 	}
 
 	if (commands.find(top_command) == commands.end()) {
-	    commands.insert(make_pair(top_command,
-				      string("-- no help available --")));
+	    CliCommandMatch ccm(top_command,
+				string("-- no help available --"),
+				false,
+				false);
+	    commands.insert(make_pair(top_command, ccm));
 	}
     }
     return commands;

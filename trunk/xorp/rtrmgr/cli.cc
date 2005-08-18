@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.88 2005/07/28 23:26:24 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.89 2005/08/05 12:53:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -544,11 +544,14 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	quit_com->set_can_pipe(false);
     }
 
-    map<string, string> cmds = op_cmd_list()->top_level_commands();
-    map<string, string>::const_iterator iter;
+    map<string, CliCommandMatch> cmds = op_cmd_list()->top_level_commands();
+    map<string, CliCommandMatch>::const_iterator iter;
     for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
-	com1 = com0->add_command(iter->first, iter->second, false);
-	com1->set_global_name(iter->first);
+	const CliCommandMatch& ccm = iter->second;
+	com1 = com0->add_command(ccm.command_name(), ccm.help_string(), false);
+	com1->set_global_name(ccm.command_name());
+	com1->set_can_pipe(ccm.can_pipe());
+	com1->set_wildcard(ccm.is_wildcard());
 	// Set the callback to generate the node's children
 	com1->set_dynamic_children_callback(callback(op_cmd_list(),
 						     &OpCommandList::childlist));
@@ -560,7 +563,13 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	    callback(this, &RouterCLI::op_mode_func));
 	com1->set_dynamic_interrupt_callback(
 	    callback(this, &RouterCLI::op_mode_cmd_interrupt));
-	com1->set_can_pipe(false);
+	if (ccm.is_executable()) {
+	    // XXX: set the processing and interrupt callbacks
+	    com1->set_cli_process_callback(
+		callback(this, &RouterCLI::op_mode_func));
+	    com1->set_cli_interrupt_callback(
+		callback(this, &RouterCLI::op_mode_cmd_interrupt));
+	}
     }
 }
 
@@ -595,10 +604,12 @@ RouterCLI::op_mode_help(const string& path) const
 				can_pipe);
 	    children.insert(make_pair(command_name, ccm));
 	}
-	map<string, string> cmds = op_cmd_list()->top_level_commands();
-	map<string, string>::const_iterator iter;
+	map<string, CliCommandMatch> cmds;
+	cmds = op_cmd_list()->top_level_commands();
+	map<string, CliCommandMatch>::const_iterator iter;
 	for (iter = cmds.begin(); iter != cmds.end(); ++iter) {
-	    command_name = iter->first;
+	    const CliCommandMatch& ccm_top = iter->second;
+	    const string& command_name = ccm_top.command_name();
 	    help_string = c_format("Give help on the \"%s\" command",
 				   command_name.c_str());
 	    CliCommandMatch ccm(command_name, help_string, is_executable,
