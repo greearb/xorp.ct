@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.12 2004/06/10 22:41:25 hodson Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.13 2005/03/25 02:53:53 pavlin Exp $
 
 #ifndef __MIBS_XORPEVENTS_HH__
 #define __MIBS_XORPEVENTS_HH__
@@ -21,6 +21,7 @@
 #include <map>
 #include "libxorp/timeval.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/xorpfd.hh"
 
 class SnmpEventLoop;
 
@@ -38,7 +39,7 @@ class SnmpEventLoop : public EventLoop, public SelectorListObserverBase,
     public TimerListObserverBase 
 {
 public:
-    typedef std::set<int> FdSet;
+    typedef std::set<XorpFd> FdSet;
     typedef std::map<TimeVal, unsigned int> AlarmMap;
 
 public:
@@ -91,13 +92,13 @@ private:
     void clear_pending_alarms ();
     void clear_monitored_fds ();
 
-    void notify_added(int, const SelectorMask&);
-    void notify_removed(int, const SelectorMask&);
+    void notify_added(XorpFd, const SelectorMask&);
+    void notify_removed(XorpFd, const SelectorMask&);
 
     void notify_scheduled(const TimeVal&);
     void notify_unscheduled(const TimeVal&);
 
-    friend void run_fd_callbacks (int, void *);
+    friend void run_fd_callbacks(int, void *);
     friend void run_timer_callbacks(u_int, void *);
 
     static const char * _log_name;
