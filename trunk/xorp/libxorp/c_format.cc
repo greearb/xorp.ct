@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.7 2005/06/20 21:31:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.8 2005/07/29 20:05:41 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -107,8 +107,7 @@ do_c_format(const char* fmt, ...)
 	    return r;
 	}
 	buf_size += FORMAT_BUFSIZE;
-	b.resize(buf_size);
-#else
+#else	// HAVE_C99_SNPRINTF
 	// We have a C99 compliant implementation
 	if ((size_t)ret < buf_size) {
 	    string r = string(&b[0]);	// Buffer size is OK
@@ -116,8 +115,8 @@ do_c_format(const char* fmt, ...)
 	    return r;
 	}
 	buf_size = ret + 1;		// Add space for the extra '\0'
+#endif	// HAVE_C99_SNPRINTF
 	b.resize(buf_size);
-#endif
     } while (true);
 
     XLOG_UNREACHABLE();
