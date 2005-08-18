@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/acsocket.m4,v 1.1 2005/05/05 19:38:32 bms Exp $
 dnl
 
 dnl
@@ -67,6 +67,20 @@ AC_CHECK_MEMBER([struct sockaddr.sa_len],
  [AC_DEFINE(HAVE_SA_LEN, 1,
 	    [Define to 1 if your struct sockaddr has field sa_len])], ,
  [${test_sa_len_headers}])
+
+dnl ----------------------------
+dnl Check for ss_len in sockaddr_storage (Windows: No)
+dnl ----------------------------
+
+test_ss_len_headers=["
+	#include <sys/types.h>
+	#include <sys/socket.h>
+"]
+
+AC_CHECK_MEMBER([struct sockaddr_storage.ss_len],
+ [AC_DEFINE(HAVE_SS_LEN, 1,
+	    [Define to 1 if your struct sockaddr_storage has field ss_len])], ,
+ [${test_ss_len_headers}])
 
 dnl ----------------------------
 dnl Check for sin_len in sockaddr_in (Windows: No)
