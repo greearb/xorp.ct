@@ -66,6 +66,12 @@
 /* Define to 1 if system getopt() is in unistd.h */
 #undef HAVE_DECL_GETOPT
 
+/* Define to 1 if the C library has ether_aton(3) */
+#undef HAVE_ETHER_ATON
+
+/* Define to 1 if the C library has ether_ntoa(3) */
+#undef HAVE_ETHER_NTOA
+
 /* Define to 1 if you have the <fcntl.h> header file. */
 #undef HAVE_FCNTL_H
 
@@ -194,6 +200,9 @@
 
 /* Define to 1 if you have the <netinet6/nd6.h> header file. */
 #undef HAVE_NETINET6_ND6_H
+
+/* Define to 1 if you have the <netinet/ether.h> header file. */
+#undef HAVE_NETINET_ETHER_H
 
 /* Define to 1 if you have the <netinet/icmp6.h> header file. */
 #undef HAVE_NETINET_ICMP6_H
@@ -328,6 +337,9 @@
 
 /* Define to 1 if you have socklen_t */
 #undef HAVE_SOCKLEN_T
+
+/* Define to 1 if your struct sockaddr_storage has field ss_len */
+#undef HAVE_SS_LEN
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -507,15 +519,6 @@
 
 /* Define to 1 if you have KAME IPv6 stack */
 #undef IPV6_STACK_KAME
-
-/* Define to 1 if the C library is missing ether_aton(3) */
-#undef NEED_ETHER_ATON
-
-/* Define to 1 if the C library is missing ether_ntoa(3) */
-#undef NEED_ETHER_NTOA
-
-/* Define to 1 if your system does not have modern random() */
-#undef NEED_RANDOM
 
 /* Define to 1 if your system does not define ssize_t */
 #undef NEED_SSIZE_T

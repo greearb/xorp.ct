@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.139 2005/08/16 23:39:59 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.140 2005/08/16 23:49:01 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -35,9 +35,9 @@ dnl ---------------------------------------------------------------------------
 dnl Boilerplate
 dnl ---------------------------------------------------------------------------
 
-AC_INIT(xorp, [1.1], [Report configure problems to feedback@xorp.org])
+AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.139 2005/08/16 23:39:59 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.140 2005/08/16 23:49:01 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -524,7 +524,7 @@ AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h iphlpapi.h process.h])
 dnl
 dnl Check for headers where 'struct ether_addr' is typically defined.
 dnl
-AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if_ether.h netinet/if_ether.h])
+AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if_ether.h netinet/if_ether.h netinet/ether.h])
 if test "${ac_cv_header_sys_ethernet_h}" = "yes"
 then
 	xr_cv_ether_header="sys/ethernet.h"
@@ -541,6 +541,10 @@ if test "${ac_cv_header_netinet_if_ether_h}" = "yes"
 then
 	xr_cv_ether_header="netinet/if_ether.h"
 fi
+if test "${ac_cv_header_netinet_ether_h}" = "yes"
+then
+	xr_cv_ether_header="netinet/ether.h"
+fi
 
 dnl
 dnl Check for the ether_ntoa() function.
@@ -552,9 +556,9 @@ AC_CACHE_CHECK(for ether_ntoa in $xr_cv_ether_header,
 			       xr_cv_have_ether_ntoa=yes,
 			       xr_cv_have_ether_ntoa=no)
 )
-if test "${xr_cv_have_ether_ntoa}" = "no" ; then
-   AC_DEFINE(NEED_ETHER_NTOA, 1,
-		[Define to 1 if the C library is missing ether_ntoa(3)])
+if test "${xr_cv_have_ether_ntoa}" = "yes" ; then
+   AC_DEFINE(HAVE_ETHER_NTOA, 1,
+		[Define to 1 if the C library has ether_ntoa(3)])
 fi
 
 dnl
@@ -567,9 +571,9 @@ AC_CACHE_CHECK(for ether_aton in $xr_cv_ether_header,
 			       xr_cv_have_ether_aton=yes,
 			       xr_cv_have_ether_aton=no)
 )
-if test "${xr_cv_have_ether_aton}" = "no" ; then
-   AC_DEFINE(NEED_ETHER_ATON, 1,
-		[Define to 1 if the C library is missing ether_aton(3)])
+if test "${xr_cv_have_ether_aton}" = "yes" ; then
+   AC_DEFINE(HAVE_ETHER_ATON, 1,
+		[Define to 1 if the C library has ether_aton(3)])
 fi
 
 
@@ -669,10 +673,16 @@ AC_CHECK_FUNCS([mkstemp])
 dnl XXX We have a library check but we need to know if the function exists.
 AC_CHECK_FUNCS([hstrerror])
 
-dnl XXX needed in many places it shouldn't be
-AC_CHECK_FUNCS([random], ,
-  [AC_DEFINE(NEED_RANDOM, 1,
-	     [Define to 1 if your system does not have modern random()])])
+dnl XXX The autoconf 2.59 generated test for random() fails indiscriminately.
+dnl We need to manually break out detection of the function.
+case "${host_os}" in
+ *mingw* )
+  ;;
+ * )
+   AC_DEFINE(HAVE_RANDOM, 1,
+             [Define to 1 if you have the `random' function.])
+ ;;
+esac
 
 dnl
 dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.
