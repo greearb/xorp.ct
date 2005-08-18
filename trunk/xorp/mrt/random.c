@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/mrt/random.c,v 1.3 2005/06/06 15:25:25 bms Exp $"
+#ident "$XORP: xorp/mrt/random.c,v 1.4 2005/06/06 18:15:43 pavlin Exp $"
 
 
 /*
@@ -27,10 +27,16 @@
  */
 
 
-#include <stdio.h>
-#include <stdlib.h>
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#include <stdio.h>
+#ifdef HAVE_STDLIB_H
+#include <stdlib.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
 
 #include "mrt_module.h"
 #include "libxorp/xorp.h"
@@ -87,6 +93,7 @@ static char *	setstate_from_netbsd(char *arg_state);
 void
 my_srandom(unsigned long seed)
 {
+#ifndef HOST_OS_WINDOWS
     struct timeval curtime;
     
     if (seed == 0) {
@@ -96,6 +103,17 @@ my_srandom(unsigned long seed)
     
     LOCAL_SRANDOM(seed);
     srandom_called = true;
+#else /* HOST_OS_WINDOWS */
+    FILETIME ft;
+
+    if (seed == 0) {
+	GetSystemTimeAsFileTime(&ft);
+	seed = (unsigned long)(ft.dwHighDateTime + ft.dwLowDateTime);
+    }
+
+    LOCAL_SRANDOM(seed);
+    srandom_called = true;
+#endif /* !HOST_OS_WINDOWS */
 }
 
 /**

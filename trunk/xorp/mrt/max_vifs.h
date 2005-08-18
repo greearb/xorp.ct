@@ -15,23 +15,23 @@
  */
 
 /*
- * $XORP: xorp/mrt/max_vifs.h,v 1.6 2005/01/28 02:41:11 pavlin Exp $
+ * $XORP: xorp/mrt/max_vifs.h,v 1.7 2005/03/25 02:53:56 pavlin Exp $
  */
 
 #ifndef __MRT_MAX_VIFS_H__
 #define __MRT_MAX_VIFS_H__
 
-
 /*
  * Header file to define the maximum number of multicast-capable vifs
  * in the constant MAX_VIFS .
  */
-
-
 #include "config.h"
 #include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+
 #include "mrt/include/ip_mroute.h"
 
 

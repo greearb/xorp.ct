@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/multicast_defs.h,v 1.4 2004/06/10 22:41:29 hodson Exp $
+ * $XORP: xorp/mrt/multicast_defs.h,v 1.5 2005/03/25 02:53:57 pavlin Exp $
  */
 
 #ifndef __MRT_MULTICAST_DEFS_H__
@@ -29,8 +29,13 @@
 
 
 #include "libxorp/xorp.h"
+
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 
 
 /*

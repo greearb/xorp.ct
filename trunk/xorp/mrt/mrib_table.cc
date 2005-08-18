@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.12 2005/04/20 09:20:32 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.13 2005/06/20 21:46:56 pavlin Exp $"
 
 
 //
@@ -449,7 +449,7 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
  */
 void
 MribTable::update_entry_vif_index(const IPvXNet& dest_prefix,
-				  uint16_t vif_index)
+				  uint32_t vif_index)
 {
     Mrib* mrib;
 
@@ -628,9 +628,12 @@ Mrib::str() const
     
     s += "dest_prefix: " + _dest_prefix.str();
     s += " next_hop_router: " + _next_hop_router_addr.str();
-    s += " next_hop_vif_index: " + c_format("%d", _next_hop_vif_index);
-    s += " metric_preference: " + c_format("%d", _metric_preference);
-    s += " metric: " + c_format("%d", _metric);
+    s += " next_hop_vif_index: " + c_format("%u",
+XORP_UINT_CAST(_next_hop_vif_index));
+    s += " metric_preference: " + c_format("%u",
+XORP_UINT_CAST(_metric_preference));
+    s += " metric: " + c_format("%d",
+XORP_INT_CAST(_metric));
     
     return s;
 }

@@ -12,22 +12,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mrt.cc,v 1.5 2004/06/10 22:41:29 hodson Exp $"
+#ident "$XORP: xorp/mrt/test_mrt.cc,v 1.6 2005/03/25 02:53:57 pavlin Exp $"
 
 
 //
 // Multicast Routing Table test program.
 //
 
-
-#include "mrt_module.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <list>
 
+#include "mrt_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "mrt/mrt.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 
 //

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.8 2005/01/28 02:41:12 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.9 2005/03/25 02:53:58 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -23,50 +23,82 @@
 
 #include "config.h"
 
-#include <net/route.h>
-
-#if defined(HOST_OS_FREEBSD)
-#include <netinet/ip_mroute.h>
+#ifdef HAVE_NET_ROUTE_H
+# include <net/route.h>
 #endif
 
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 /*
- * XXX: in NetBSD and OpenBSD, struct igmpmsg definition can be seen
- * only by kernel...
+ * FreeBSD (all versions)
  */
-#define	_KERNEL
+#if defined(HOST_OS_FREEBSD)
+# include <netinet/ip_mroute.h>
 #endif
-#ifndef HOST_OS_LINUX
-#include <netinet/ip_mroute.h>
-#endif
+
+/*
+ * NetBSD (all versions)
+ * OpenBSD (all versions)
+ *
+ * Prologue.
+ *
+ * The definition of 'struct igmpmsg' is wrapped under
+ * an #ifdef _KERNEL conditional on these platforms.
+ */
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-#undef _KERNEL
+# define	_KERNEL
 #endif
 
+/*
+ * Non-Linux platforms with the <netinet/ip_mroute.h>
+ * header available.
+ */
+#if defined(HAVE_NETINET_IP_MROUTE_H) && !defined(HOST_OS_LINUX)
+# include <netinet/ip_mroute.h>
+#endif
+
+/*
+ * NetBSD (all versions)
+ * OpenBSD (all versions)
+ *
+ * Epilogue.
+ */
+#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+# undef _KERNEL
+#endif
+
+/*
+ * Linux (Older versions)
+ *
+ * We ship our own Linux <netinet/mroute.h> header to
+ * workaround broken headers on certain Linux variants.
+ */
 #if defined(HOST_OS_LINUX)
-/* XXX: linux/mroute.h is broken for older Linux versions */
-#include "mrt/include/linux/netinet/mroute.h"
+# include "mrt/include/linux/netinet/mroute.h"
 #endif
 
-
+/*
+ * FreeBSD 4.3
+ *
+ * On this platform, attempting to include both the ip_mroute.h
+ * and ip6_mroute.h headers results in undefined behavior.
+ * Therefore we implement a preprocessor workaround here.
+ */
 #ifdef HAVE_IPV6
 
-/* XXX: on FreeBSD-4.3 including both ip_mroute.h and ip6_mroute.h is broken */
-/* Save GET_TIME */
-#ifdef GET_TIME
-# define _SAVE_GET_TIME GET_TIME
-# undef GET_TIME
-#endif
+/* Save GET_TIME. */
+# ifdef GET_TIME
+#  define _SAVE_GET_TIME GET_TIME
+#  undef GET_TIME
+# endif
 
-#ifdef HAVE_NETINET6_IP6_MROUTE_H
-#include <netinet6/ip6_mroute.h>
-#endif
+# ifdef HAVE_NETINET6_IP6_MROUTE_H
+#  include <netinet6/ip6_mroute.h>
+# endif
 
-/* Restore GET_TIME */
-#if defined(_SAVE_GET_TIME) && (! defined(GET_TIME))
-# define GET_TIME _SAVE_GET_TIME
-# undef _SAVE_GET_TIME
-#endif
+/* Restore GET_TIME. */
+# if defined(_SAVE_GET_TIME) && !defined(GET_TIME)
+#  define GET_TIME _SAVE_GET_TIME
+#  undef _SAVE_GET_TIME
+# endif
 
 #endif /* HAVE_IPV6 */
 

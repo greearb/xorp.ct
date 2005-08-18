@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mrt/mrib_table.hh,v 1.9 2005/03/25 02:53:57 pavlin Exp $
+// $XORP: xorp/mrt/mrib_table.hh,v 1.10 2005/04/20 09:20:32 pavlin Exp $
 
 #ifndef __MRT_MRIB_TABLE_HH__
 #define __MRT_MRIB_TABLE_HH__
@@ -116,14 +116,14 @@ public:
      * 
      * @return the vif index of the interface toward the next-hop router.
      */
-    uint16_t	next_hop_vif_index() const { return (_next_hop_vif_index); }
+    uint32_t	next_hop_vif_index() const { return (_next_hop_vif_index); }
     
     /**
      * Set the vif index of the interface toward the next-hop router.
      * 
      * @param v the value of the vif index to set.
      */
-    void	set_next_hop_vif_index(uint16_t v) { _next_hop_vif_index = v; }
+    void	set_next_hop_vif_index(uint32_t v) { _next_hop_vif_index = v; }
     
     /**
      * Get the metric preference value.
@@ -164,7 +164,7 @@ public:
 private:
     IPvXNet	_dest_prefix;		// The destination prefix address
     IPvX	_next_hop_router_addr;	// The address of the next-hop router
-    uint16_t	_next_hop_vif_index;	// The vif index to the next-hop router
+    uint32_t	_next_hop_vif_index;	// The vif index to the next-hop router
     uint32_t	_metric_preference;	// The metric preference to the
 					// destination
     uint32_t	_metric;		// The metric to the destination
@@ -362,7 +362,7 @@ public:
      * @param vif_index the new vif index of the @ref Mrib entry.
      */
     void update_entry_vif_index(const IPvXNet& dest_prefix,
-				uint16_t vif_index);
+				uint32_t vif_index);
 
     //
     // Pending transactions related methods
@@ -504,7 +504,7 @@ private:
 	const Mrib&	mrib() const { return (_mrib); }
 	bool		is_insert() const { return (_is_insert); }
 	bool		is_remove_all() const { return (_is_remove_all); }
-	void		update_entry_vif_index(uint16_t vif_index) {
+	void		update_entry_vif_index(uint32_t vif_index) {
 	    _mrib.set_next_hop_vif_index(vif_index);
 	}
 	
