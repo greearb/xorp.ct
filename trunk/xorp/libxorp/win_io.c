@@ -15,9 +15,11 @@
  *
  */
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/win_io.c,v 1.2 2005/08/18 15:28:42 bms Exp $"
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "xorp.h"
 
