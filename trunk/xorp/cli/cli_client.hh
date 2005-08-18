@@ -33,7 +33,7 @@
 
 #include "libxorp/buffer.hh"
 #include "libxorp/ipvx.hh"
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/timer.hh"
 #include "cli_node.hh"
@@ -67,7 +67,7 @@ public:
      * @param output_fd the file descriptor for the CLI client to write
      * data to.
      */
-    CliClient(CliNode& init_cli_node, int input_fd, int output_fd);
+    CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd);
 
     /**
      * Destructor
@@ -137,14 +137,14 @@ public:
      * 
      * @return the file descriptor for reading the input from the user.
      */
-    int		input_fd() { return (_input_fd); }
+    XorpFd	input_fd() { return (_input_fd); }
 
     /**
      * Get the file descriptor for writing the output to the user.
      * 
      * @return the file descriptor for writing the output to the user.
      */
-    int		output_fd() { return (_output_fd); }
+    XorpFd	output_fd() { return (_output_fd); }
     
     /**
      * Test if this client is associated with a terminal type input device.
@@ -214,7 +214,7 @@ public:
 	return (_cli_session_term_name);
     }
 
-    /**
+    /*
      * Get the user network address.
      * 
      * @return the user network address.
@@ -420,7 +420,7 @@ private:
     void	set_pipe_mode(bool v) { _is_pipe_mode = v; }
     
     int		block_connection(bool is_blocked);
-    void	client_read(int fd, SelectorMask mask);
+    void	client_read(XorpFd fd, IoEventType type);
     void	process_input_data();
     
     static	CPL_MATCH_FN(command_completion_func);
@@ -465,10 +465,16 @@ private:
     void	set_hold_mode(bool v) { _is_hold_mode = v; }
     bool	is_prompt_flushed() const { return _is_prompt_flushed; }
     void	set_prompt_flushed(bool v) { _is_prompt_flushed = v; }
+
+#ifdef HOST_OS_WINDOWS
+    int		process_key(KEY_EVENT_RECORD &ke);
+    size_t	peek_keydown_events(HANDLE h, char *buffer, int buffer_size);
+    bool	poll_conin();
+#endif
     
     CliNode&	_cli_node;		// The CLI node I belong to
-    int		_input_fd;		// File descriptor to read the input
-    int		_output_fd;		// File descriptor to write the output
+    XorpFd	_input_fd;		// File descriptor to read the input
+    XorpFd	_output_fd;		// File descriptor to write the output
     FILE	*_input_fd_file;	// The FILE version of _input_fd
     FILE	*_output_fd_file;	// The FILE version of _output_fd
     
@@ -580,6 +586,11 @@ private:
     // Misc state
     //
     vector<uint8_t>	_pending_input_data;
+
+#ifdef HOST_OS_WINDOWS
+    XorpTimer	_poll_conin_timer;	// periodic console input callback
+    size_t	_keycnt;		// # of keypresses polled for
+#endif
 };
 
 

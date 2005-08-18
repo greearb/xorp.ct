@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.27 2005/07/15 07:05:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.28 2005/07/28 23:26:24 pavlin Exp $"
 
 
 //
@@ -78,7 +78,7 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
 		   module_id, XORP_MODULE_CLI);
     }
     
-    _cli_socket = -1;
+    _cli_socket.clear();
     _cli_port = 0;		// XXX: not defined yet.
     _next_session_id = 0;
     
@@ -117,8 +117,8 @@ CliNode::start()
     //
     // Start accepting connections
     //
-    if (sock_serv_open() >= 0) {
-	eventloop().add_selector(_cli_socket, SEL_RD,
+    if (sock_serv_open().is_valid()) {
+	eventloop().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
 				 callback(this, &CliNode::accept_connection));
     }
     
@@ -154,7 +154,7 @@ CliNode::stop()
 
     delete_pointers_list(_client_list);
 
-    eventloop().remove_selector(_cli_socket, SEL_RD);
+    eventloop().remove_ioevent_cb(_cli_socket, IOT_ACCEPT);
     sock_serv_close();
 
     if (ProtoNode<Vif>::stop() < 0)
@@ -607,7 +607,7 @@ CliNode::recv_process_command_output(const string * , // processor_name,
 }
 
 CliClient *
-CliNode::add_client(int input_fd, int output_fd, bool is_network,
+CliNode::add_client(XorpFd input_fd, XorpFd output_fd, bool is_network,
 		    string& error_msg)
 {
     return (add_connection(input_fd, output_fd, is_network, error_msg));

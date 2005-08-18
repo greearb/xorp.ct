@@ -62,7 +62,7 @@
 
 
 // TODO: use a parameter to define the buffer size
-CliClient::CliClient(CliNode& init_cli_node, int input_fd, int output_fd)
+CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd)
     : _cli_node(init_cli_node),
       _input_fd(input_fd),
       _output_fd(output_fd),
@@ -154,28 +154,28 @@ CliClient::~CliClient()
     set_log_output(false);
 
     // Remove the input file descriptor from the eventloop
-    if (_input_fd >= 0) {
-	cli_node().eventloop().remove_selector(_input_fd);
+    if (_input_fd.is_valid()) {
+	cli_node().eventloop().remove_ioevent_cb(_input_fd, IOT_READ);
     }
 
     // Close files and file descriptors
     if (_input_fd_file != NULL) {
 	fclose(_input_fd_file);
 	_input_fd_file = NULL;
-	_input_fd = -1;
+	_input_fd.clear();
     }
     if (_output_fd_file != NULL) {
 	fclose(_output_fd_file);
 	_output_fd_file = NULL;
-	_output_fd = -1;
+	_output_fd.clear();
     }
-    if (_input_fd >= 0) {
+    if (_input_fd.is_valid()) {
 	comm_close(_input_fd);
-	_input_fd = -1;
+	_input_fd.clear();
     }
-    if (_output_fd >= 0) {
+    if (_output_fd.is_valid()) {
 	comm_close(_output_fd);
-	_output_fd = -1;
+	_output_fd.clear();
     }
 
     if (_gl != NULL)
@@ -1276,11 +1276,11 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing,
 	// This client is sending too much data. Kick it out!
 	// TODO: print more informative message about the
 	// client: E.g. where it came from, etc.
-	XLOG_WARNING("Removing client (input fd = %d output fd = %d "
+	XLOG_WARNING("Removing client (input fd = %s output fd = %s "
 		     "family = %d): "
 		     "data buffer full",
-		     input_fd(),
-		     output_fd(),
+		     input_fd().str().c_str(),
+		     output_fd().str().c_str(),
 		     cli_node().family());
 	return (XORP_ERROR);
     }

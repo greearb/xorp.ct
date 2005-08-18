@@ -26,7 +26,7 @@
 
 #include <list>
 
-#include "libxorp/selector.hh"
+#include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
 #include "libproto/proto_node.hh"
 #include "cli_command.hh"
@@ -263,7 +263,7 @@ public:
      */
     int	proto_recv(const string&	, // src_module_instance_name,
 		   xorp_module_id	, // src_module_id,
-		   uint16_t		, // vif_index,
+		   uint32_t		, // vif_index,
 		   const IPvX&		, // src,
 		   const IPvX&		, // dst,
 		   int			, // ip_ttl,
@@ -277,7 +277,7 @@ public:
      */
     int	proto_send(const string&	, // dst_module_instance_name,
 		   xorp_module_id	, // dst_module_id,
-		   uint16_t		, // vif_index,
+		   uint32_t		, // vif_index,
 		   const IPvX&		, // src,
 		   const IPvX&		, // dst,
 		   int			, // ip_ttl,
@@ -292,7 +292,7 @@ public:
     int	signal_message_recv(const string&	, // src_module_instance_name,
 			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
-			    uint16_t		, // vif_index,
+			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // rcvbuf,
@@ -304,7 +304,7 @@ public:
     int	signal_message_send(const string&	, // dst_module_instance_name,
 			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
-			    uint16_t		, // vif_index,
+			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // sndbuf,
@@ -343,7 +343,7 @@ public:
      * @return a pointer to the CLI client (@ref CliClient) with enabled
      * CLI access on success, otherwise NULL.
      */
-    CliClient *add_client(int input_fd, int output_fd, bool is_network,
+    CliClient *add_client(XorpFd input_fd, XorpFd output_fd, bool is_network,
 			  string& error_msg);
 
     /**
@@ -434,16 +434,16 @@ private:
 			     const string& command_global_name,
 			     const vector<string>& argv);
     
-    int		sock_serv_open();
+    XorpFd	sock_serv_open();
     int		sock_serv_close();
-    CliClient	*add_connection(int input_fd, int output_fd, bool is_network,
-				string& error_msg);
+    CliClient	*add_connection(XorpFd input_fd, XorpFd output_fd,
+				bool is_network, string& error_msg);
     int		delete_connection(CliClient *cli_client, string& error_msg);
-    void	accept_connection(int fd, SelectorMask mask);
+    void	accept_connection(XorpFd fd, IoEventType type);
     
     bool	is_allow_cli_access(const IPvX& ipvx) const;
     
-    int			_cli_socket;	// The CLI listening socket
+    XorpFd		_cli_socket;	// The CLI listening socket
     unsigned short	_cli_port;	// The CLI port (network-order) to
 					//   listen on for new connections.
     list<CliClient *>	_client_list;	// The list with the CLI clients

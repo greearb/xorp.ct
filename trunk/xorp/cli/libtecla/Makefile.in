@@ -131,12 +131,12 @@ TARGET_LIBS = @TARGET_LIBS@
 # should be assigned the single word: demos. If it isn't assigned
 # anything, the demo programs won't be built.
 #
-DEMOS = demos
+DEMOS = #demos
 
 #
 # List the programs that are to be made by default.
 #
-PROGRAMS = enhance
+PROGRAMS = #enhance
 
 #
 # List programs for which reentrant versions are to be built by default.

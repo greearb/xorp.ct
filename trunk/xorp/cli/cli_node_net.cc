@@ -91,7 +91,7 @@
  * 
  * Return value: The new socket to listen on success, othewise %XORP_ERROR.
  **/
-int
+XorpFd
 CliNode::sock_serv_open()
 {
     // Open the socket
@@ -106,11 +106,9 @@ CliNode::sock_serv_open()
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
+	_cli_socket.clear();
+	break;
     }
-    
-    if (_cli_socket < 0)
-	return (XORP_ERROR);
     
     return (_cli_socket);
 }
@@ -128,29 +126,30 @@ CliNode::sock_serv_close()
 {
     int ret_value = XORP_OK;
 
-    if (_cli_socket < 0)
+    if (!_cli_socket.is_valid())
 	return (XORP_OK);	// Nothing to do
 
     if (comm_close(_cli_socket) < 0)
 	ret_value = XORP_ERROR;
-    _cli_socket = -1;
+
+    _cli_socket.clear();
 
     return (ret_value);
 }
 
 void
-CliNode::accept_connection(int fd, SelectorMask mask)
+CliNode::accept_connection(XorpFd fd, IoEventType type)
 {
     string error_msg;
 
-    debug_msg("Received connection on socket = %d, family = %d\n",
-	      fd, family());
+    debug_msg("Received connection on socket = %p, family = %d\n",
+	      fd.str().c_str(), family());
     
-    XLOG_ASSERT(mask == SEL_RD);
+    XLOG_ASSERT(type == IOT_ACCEPT);
     
-    int client_socket = comm_sock_accept(fd);
+    XorpFd client_socket = comm_sock_accept(fd);
     
-    if (client_socket >= 0) {
+    if (client_socket.is_valid()) {
 	if (add_connection(client_socket, client_socket, true, error_msg)
 	    == NULL) {
 	    XLOG_ERROR("Cannot accept CLI connection: %s", error_msg.c_str());
@@ -159,50 +158,54 @@ CliNode::accept_connection(int fd, SelectorMask mask)
 }
 
 CliClient *
-CliNode::add_connection(int input_fd, int output_fd, bool is_network,
+CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
 			string& error_msg)
 {
     string dummy_error_msg;
     CliClient *cli_client = NULL;
     
-    debug_msg("Added connection with input_fd = %d, output_fd = %d, "
+    debug_msg("Added connection with input_fd = %s, output_fd = %s, "
 	      "family = %d\n",
-	      input_fd, output_fd, family());
+	      input_fd.str().c_str(), output_fd.str().c_str(), family());
     
     cli_client = new CliClient(*this, input_fd, output_fd);
     cli_client->set_network_client(is_network);
     _client_list.push_back(cli_client);
+
+#ifdef HOST_OS_WINDOWS
+    if (cli_client->is_interactive())
+	SetConsoleMode(input_fd, ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+#endif
     
     //
     // Set peer address (for network connection only)
     //
     if (cli_client->is_network()) {
-	union {
-	    struct sockaddr sa;
-#ifdef HAVE_IPV6
-	    char data[sizeof(struct sockaddr_in6)];
-#endif
-	} un;
-	struct sockaddr *sa = (struct sockaddr *)&un.sa;
-	socklen_t len = sizeof(un);
-	if (getpeername(cli_client->input_fd(), sa, &len) < 0) {
-	    error_msg = c_format("Cannot get peer name: %s", strerror(errno));
+	struct sockaddr_storage ss;
+	socklen_t len = sizeof(ss);
+	// XXX
+	if (getpeername(cli_client->input_fd(), (struct sockaddr *)&ss,
+			&len) < 0) {
+	    error_msg = c_format("Cannot get peer name");
 	    // Error getting peer address
 	    delete_connection(cli_client, dummy_error_msg);
 	    return (NULL);
 	}
 	IPvX peer_addr = IPvX::ZERO(family());
-	switch (sa->sa_family) {
+
+	// XXX: The fandango below can go away once the IPvX
+	// constructors are fixed to do the right thing.
+	switch (ss.ss_family) {
 	case AF_INET:
 	{
-	    struct sockaddr_in *s_in = (struct sockaddr_in *)sa;
+	    struct sockaddr_in *s_in = (struct sockaddr_in *)&ss;
 	    peer_addr.copy_in(*s_in);
 	}
 	break;
 #ifdef HAVE_IPV6
 	case AF_INET6:
 	{
-	    struct sockaddr_in6 *s_in6 = (struct sockaddr_in6 *)sa;
+	    struct sockaddr_in6 *s_in6 = (struct sockaddr_in6 *)&ss;
 	    peer_addr.copy_in(*s_in6);
 	}
 	break;
@@ -211,7 +214,7 @@ CliNode::add_connection(int input_fd, int output_fd, bool is_network,
 	    // Invalid address family
 	    error_msg = c_format("Cannot set peer address: "
 				 "invalid address family (%d)",
-				 sa->sa_family);
+				 ss.ss_family);
 	    delete_connection(cli_client, dummy_error_msg);
 	    return (NULL);
 	}
@@ -311,9 +314,11 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
 	return (XORP_ERROR);
     }
 
-    debug_msg("Delete connection on input fd = %d, output fd = %d, "
+    debug_msg("Delete connection on input fd = %s, output fd = %s, "
 	      "family = %d\n",
-	      cli_client->input_fd(), cli_client->output_fd(), family());
+	      cli_client->input_fd().str().c_str(),
+	      cli_client->output_fd().str().c_str(),
+	      family());
     cli_client->cli_flush();
     
     // The callback when deleting this client
@@ -329,18 +334,119 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
     return (XORP_OK);
 }
 
+// XXX: Making this work with Windows in non-blocking mode is a bit crufty.
+
+#ifdef HOST_OS_WINDOWS
+
+// Helper function to process a raw keystroke into ASCII.
+int
+CliClient::process_key(KEY_EVENT_RECORD &ke)
+{
+    int ch = ke.uChar.AsciiChar;
+
+    switch (ke.wVirtualKeyCode) {
+    case VK_SPACE:
+	return (' ');
+	break;
+    case VK_RETURN:
+	return ('\n');
+	break;
+    case VK_BACK:
+	return (0x08);
+	break;
+    default:
+	if (ch >= 1 && ch <= 255)
+	return (ch);
+	break;
+    }
+    return (0);
+}
+
+// Helper function to return the number of ASCII key-downs in the
+// console input buffer on Win32, and optionally put them in
+// a user-provided buffer which we hand-off to libtecla.
+size_t
+CliClient::peek_keydown_events(HANDLE h, char *buffer, int buffer_size)
+{
+    INPUT_RECORD inr[64];
+    DWORD nevents = 0;
+    size_t nkeystrokes = 0;
+    size_t remaining = buffer_size;
+    char *cp = buffer;
+    int ch;
+
+    BOOL result = PeekConsoleInputA(h, inr, sizeof(inr)/sizeof(inr[0]),
+				    &nevents);
+    if (result == FALSE) {
+	XLOG_ERROR("PeekConsoleInput() failed: %lu\n", GetLastError());
+	return (0);
+    }
+    if (nevents == 0)
+	return (0);
+
+    for (size_t i = 0; i < nevents; i++) {
+	if (inr[i].EventType == KEY_EVENT &&
+	    inr[i].Event.KeyEvent.bKeyDown == TRUE) {
+	    ch = process_key(inr[i].Event.KeyEvent);
+	    if (ch != 0) {
+		++nkeystrokes;
+		// If buffer specified, copy to buffer,
+		// otherwise we're just counting what's in the queue.
+		if (buffer != NULL) {
+		    if (remaining == 0)
+			break;
+		    else {
+			*cp++ = ch;
+			--remaining;
+		    } /* if */
+		} /* if */
+	    } /* if */
+	} /* if */
+    } /* for */
+
+    // Return the number of keystrokes placed into the input buffer.
+    return (nkeystrokes);
+}
+
+bool
+CliClient::poll_conin()
+{
+    // Peek but don't flush the buffer; only invoke callback if needed.
+    // XXX: This gross hack will go away when we have WinDispatcher.
+    _keycnt = peek_keydown_events((HANDLE)input_fd(), NULL, 0);
+    if (_keycnt > 0)
+	client_read(input_fd(), IOT_READ);
+    return true;
+}
+#endif
+
+#ifdef HOST_OS_WINDOWS
+#define CONIN_POLL_INTERVAL	250	// milliseconds
+#endif
+
 int
 CliClient::start_connection(string& error_msg)
 {
-    if (cli_node().eventloop().add_selector(
-	    input_fd(),
-	    SEL_RD,
-	    callback(this, &CliClient::client_read))
-	== false) {
-	error_msg = c_format("Cannot start CLI connection: cannot add the "
-			     "file descriptor to the eventloop");
+#ifdef HOST_OS_WINDOWS
+    UNUSED(error_msg);
+    if (!is_interactive()) {
+#endif
+    if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
+					    callback(this, &CliClient::client_read))
+	== false)
 	return (XORP_ERROR);
-    }
+#ifdef HOST_OS_WINDOWS
+    } else {
+	// stdio, so schedule a periodic timer every 400ms
+	// to poll for input.
+	// XXX: This will go away when we bring in the new WinDispatcher;
+	// we can then merely ask to be signalled by the console handle
+	// as for any other system event.
+	_poll_conin_timer = cli_node().eventloop().new_periodic(
+				CONIN_POLL_INTERVAL,
+				callback(this, &CliClient::poll_conin));
+    } // !is_interactive
+#endif
     
     //
     // Setup the telnet options
@@ -352,15 +458,16 @@ CliClient::start_connection(string& error_msg)
 	char do_window_size_cmd[] = { IAC, DO, TELOPT_NAWS, '\0' };
 	char do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
 	char will_transmit_binary_cmd[] = { IAC, WILL, TELOPT_BINARY, '\0' };
-	
-	write(output_fd(), will_echo_cmd, sizeof(will_echo_cmd));
-	write(output_fd(), will_sga_cmd, sizeof(will_sga_cmd));
-	write(output_fd(), dont_linemode_cmd, sizeof(dont_linemode_cmd));
-	write(output_fd(), do_window_size_cmd, sizeof(do_window_size_cmd));
-	write(output_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd));
-	write(output_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd));
+
+	send(input_fd(), will_echo_cmd, sizeof(will_echo_cmd), 0);
+	send(input_fd(), will_sga_cmd, sizeof(will_sga_cmd), 0);
+	send(input_fd(), dont_linemode_cmd, sizeof(dont_linemode_cmd), 0);
+	send(input_fd(), do_window_size_cmd, sizeof(do_window_size_cmd), 0);
+	send(input_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd), 0);
+	send(input_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd), 0);
     }
     
+#ifdef HAVE_TERMIOS_H
     //
     // Put the terminal in non-canonical and non-echo mode.
     // In addition, disable signals INTR, QUIT, [D]SUSP
@@ -397,14 +504,15 @@ CliClient::start_connection(string& error_msg)
 	    }
 	}
     }
+#endif /* HAVE_TERMIOS_H */
     
     //
     // Setup the read/write file descriptors
     //
-    if (input_fd() == fileno(stdin)) {
+    if (input_fd() == XorpFd(FILENO(stdin))) {
 	_input_fd_file = stdin;
     } else {
-	_input_fd_file = fdopen(input_fd(), "r");
+	_input_fd_file = FDOPEN(input_fd(), "r");
 	if (_input_fd_file == NULL) {
 	    error_msg = c_format("Cannot associate a stream with the "
 				 "input file descriptor: %s",
@@ -412,10 +520,10 @@ CliClient::start_connection(string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
-    if (output_fd() == fileno(stdout)) {
+    if (output_fd() == XorpFd(FILENO(stdout))) {
 	_output_fd_file = stdout;
     } else {
-	_output_fd_file = fdopen(output_fd(), "w");
+	_output_fd_file = FDOPEN(output_fd(), "w");
 	if (_output_fd_file == NULL) {
 	    error_msg = c_format("Cannot associate a stream with the "
 				 "output file descriptor: %s",
@@ -434,13 +542,15 @@ CliClient::start_connection(string& error_msg)
     gl_set_is_net(_gl, 1);
     
     // Set the terminal
-    string term_name = "vt100";		// Default value
+    string term_name = DEFAULT_TERM_TYPE;
     if (is_output_tty()) {
 	term_name = getenv("TERM");
 	if (term_name.empty())
-	    term_name = "vt100";	// Set to default
+	    term_name = DEFAULT_TERM_TYPE;	// Set to default
     }
 
+    // XXX: struct winsize is a tty-ism
+#if 0
     // Get the terminal size
     if (is_output_tty()) {
 	struct winsize window_size;
@@ -479,6 +589,7 @@ CliClient::start_connection(string& error_msg)
 		      XORP_UINT_CAST(window_height()));
 	}
     }
+#endif
 
     // Change the input and output streams for libtecla
     if (gl_change_terminal(_gl, _input_fd_file, _output_fd_file,
@@ -526,6 +637,7 @@ CliClient::start_connection(string& error_msg)
 int
 CliClient::stop_connection(string& error_msg)
 {
+#ifdef HAVE_TERMIOS_H
     //
     // Restore the terminal settings
     //
@@ -561,7 +673,9 @@ CliClient::stop_connection(string& error_msg)
 	    }
 	}
     }
-    
+#endif /* HAVE_TERMIOS_H */
+
+    error_msg = "";
     return (XORP_OK);
 }
 
@@ -576,25 +690,22 @@ CliClient::set_is_waiting_for_data(bool v)
 }
 
 //
-// If @is_blocked is true, block the connection (by not select()-ing
-// on its socket), otherwise add its socket back to the pool of select()-ed
-// sockets.
+// If @is_blocked is true, block the connection (by removing its I/O
+// event hook), otherwise add its socket back to the event loop.
 //
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 int
 CliClient::block_connection(bool is_blocked)
 {
-    if (input_fd() < 0)
+    if (!input_fd().is_valid())
 	return (XORP_ERROR);
     
     if (is_blocked) {
-	// Un-select()
-	cli_node().eventloop().remove_selector(input_fd(), SEL_ALL);
+	cli_node().eventloop().remove_ioevent_cb(input_fd(), IOT_READ);
 	return (XORP_OK);
     }
 
-    // Do-select()
-    if (cli_node().eventloop().add_selector(input_fd(), SEL_RD,
+    if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
 					    callback(this, &CliClient::client_read))
 	== false)
 	return (XORP_ERROR);
@@ -603,16 +714,27 @@ CliClient::block_connection(bool is_blocked)
 }
 
 void
-CliClient::client_read(int fd, SelectorMask mask)
+CliClient::client_read(XorpFd fd, IoEventType type)
 {
     string dummy_error_msg;
 
     char buf[1024];		// TODO: 1024 size must be #define
     int n;
     
-    XLOG_ASSERT(mask == SEL_RD);
-    
+    XLOG_ASSERT(type == IOT_READ);
+
+#ifdef HOST_OS_WINDOWS
+    if (!is_interactive()) {
+	n = recv(fd, buf, sizeof(buf), 0);
+    } else {
+	// Read keystrokes into buffer and flush them.
+	n = peek_keydown_events((HANDLE)fd, buf, sizeof(buf));
+	if (n > 0)
+	    FlushConsoleInputBuffer((HANDLE)fd);
+    }
+#else /* !HOST_OS_WINDOWS */
     n = read(fd, buf, sizeof(buf) - 1);
+#endif /* HOST_OS_WINDOWS */
     
     debug_msg("client_read %d octet(s)\n", n);
     if (n <= 0) {
@@ -657,11 +779,9 @@ CliClient::process_input_data()
 		// Kick-out the client
 		// TODO: print more informative message about the client:
 		// E.g. where it came from, etc.
-		XLOG_WARNING("Removing client (input fd = %d output fd = %d "
-			     "family = %d): "
+		XLOG_WARNING("Removing client (socket = %s family = %d): "
 			     "error processing telnet option",
-			     input_fd(),
-			     output_fd(),
+			     input_fd().str().c_str(),
 			     cli_node().family());
 		cli_node().delete_connection(this, dummy_error_msg);
 		return;
