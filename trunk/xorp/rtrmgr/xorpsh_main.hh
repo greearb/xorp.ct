@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.25 2005/07/15 06:39:08 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.26 2005/07/22 10:47:35 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -152,7 +152,9 @@ private:
 
     XorpTimer           _repeat_request_timer;
 
-    int			_fddesc[2];
+#ifndef HOST_OS_WINDOWS
+    XorpFd		_fddesc[2];
+#endif
 
     // XXX: must be last
     XrlXorpshInterface	_xorpsh_interface;

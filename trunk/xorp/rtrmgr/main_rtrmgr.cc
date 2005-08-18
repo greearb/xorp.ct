@@ -77,7 +77,7 @@ static bool default_verbose = false;
 //
 // Local state
 //
-static bool	running = false;
+static volatile bool	running = false;
 static string	template_dir;
 static string	xrl_targets_dir;
 static string	boot_file;
@@ -132,33 +132,6 @@ display_defaults()
 	    default_do_restart ? "true" : "false");
     fprintf(stderr, "  Print verbose information  := %s\n",
 	    default_verbose ? "true" : "false");
-}
-
-static bool
-valid_interface(const IPv4& addr)
-{
-    uint32_t naddr = if_count();
-    uint16_t any_up = 0;
-
-    for (uint32_t n = 1; n <= naddr; n++) {
-        string name;
-        in_addr if_addr;
-        uint16_t flags;
-
-        if (if_probe(n, name, if_addr, flags) == false)
-            continue;
-
-        any_up |= (flags & IFF_UP);
-
-        if (IPv4(if_addr) == addr && flags & IFF_UP) {
-            return true;
-        }
-    }
-
-    if (IPv4::ANY() == addr && any_up)
-        return true;
-
-    return false;
 }
 
 // the following two functions are an ugly hack to cause the C code in
@@ -447,9 +420,11 @@ Rtrmgr::validate_save_hook() {
 	case EACCES:
 	    err += "Permission denied.";
 	    break;
+#ifdef ELOOP
 	case ELOOP:
 	    err += "Too many symbolic links.";
 	    break;
+#endif
 	default:
 	    err += "Unknown error accessing file.";
 	}
@@ -571,7 +546,9 @@ main(int argc, char* const argv[])
 	    //
 	    try {
 		IPv4 bind_addr = IPv4(optarg);
-		if (valid_interface(bind_addr) == false) {
+		in_addr ina;
+		bind_addr.copy_out(ina);
+		if (is_ip_configured(ina) == false) {
 		    fprintf(stderr,
 			    "%s is not the address of an active interface.\n",
 			    optarg);

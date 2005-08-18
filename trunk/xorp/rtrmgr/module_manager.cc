@@ -86,6 +86,12 @@ restart_module(Module* module)
     return (XORP_OK);
 }
 
+//
+// XXX: We need to figure out how to get an asynchronous notification
+// of a 'child' process exiting in Win32.
+//
+
+#ifndef HOST_OS_WINDOWS
 static void
 child_handler(int x)
 {
@@ -201,6 +207,7 @@ child_handler(int x)
 	XLOG_UNREACHABLE();
     }
 }
+#endif
 
 Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
     : GenericModule(name), _mmgr(mmgr),
@@ -291,9 +298,13 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     //
     // We need to kill the process
     //
-    XLOG_INFO("Killing module: %s (pid = %d)", _name.c_str(), _pid);
+    XLOG_INFO("Killing module: %s (pid = %p)", _name.c_str(), (void *)_pid);
     new_status(MODULE_SHUTTING_DOWN);
+#ifdef HOST_OS_WINDOWS
+    GenerateConsoleCtrlEvent(CTRL_C_EVENT, _pid);
+#else
     kill(_pid, SIGTERM);
+#endif
 
     _shutdown_timer = _mmgr.eventloop().new_oneoff_after_ms(2000,
 			callback(this, &Module::terminate_with_prejudice, cb));
@@ -347,11 +358,17 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     XLOG_ASSERT(pid_iter != module_pids.end());
     module_pids.erase(pid_iter);
 
-    debug_msg("sending kill -9\n");
     // If it still hasn't exited, kill it properly.
-    kill(_pid, SIGKILL);
-    new_status(MODULE_NOT_STARTED);
+#ifdef HOST_OS_WINDOWS
+    TerminateProcess(_phand, 1);
+    CloseHandle(_phand);
     _pid = 0;
+    _phand = INVALID_HANDLE_VALUE;
+#else
+    kill(_pid, SIGKILL);
+    _pid = 0;
+#endif
+    new_status(MODULE_NOT_STARTED);
 
     // We'll give it a couple more seconds to really go away
     _shutdown_timer = _mmgr.eventloop().new_oneoff_after_ms(2000, cb);
@@ -369,17 +386,26 @@ Module::set_execution_path(const string& path)
 	return XORP_OK;
     }
 
-    if (path[0] == '~' || path[0] == '/') {
+    if (is_absolute_path(_path, true)) {
 	// The path to the module starts from the user home directory,
-	// or it's an absolute path
+	// or it's an absolute path (in UNIX, DOS or NT UNC form).
 	_path = path;
     } else {
 	// Add the XORP root path to the front
-	_path = _mmgr.xorp_root_dir() + "/" + path;
+	_path = _mmgr.xorp_root_dir() + PATH_DELIMITER_STRING + path;
     }
+
+#ifdef HOST_OS_WINDOWS
+    // Assume the path is still in UNIX format at this point and needs to
+    // be converted to the native format.
+    _path = unix_path_to_native(_path);
+#endif
+
     XLOG_TRACE(_verbose, "New module: %s (%s)", _name.c_str(), _path.c_str());
 
-    if (_path[0] != '/') {
+    if (!is_absolute_path(_path, false)) {
+	fprintf(stderr, "calling glob\n");	// XXX
+
 	// we're going to call glob, but don't want to allow wildcard expansion
 	for (size_t i = 0; i < _path.length(); i++) {
 	    char c = _path[i];
@@ -402,6 +428,11 @@ Module::set_execution_path(const string& path)
 	_expath = _path;
     }
 
+#ifdef HOST_OS_WINDOWS
+    _path += EXECUTABLE_SUFFIX;
+    _expath += EXECUTABLE_SUFFIX;
+#endif
+
     struct stat sb;
     if (stat(_expath.c_str(), &sb) < 0) {
 	string err = _expath + ": ";
@@ -415,9 +446,11 @@ Module::set_execution_path(const string& path)
 	case EACCES:
 	    err += "Permission denied.";
 	    break;
+#ifdef ELOOP
 	case ELOOP:
 	    err += "Too many symbolic links.";
 	    break;
+#endif
 	default:
 	    err += "Unknown error accessing file.";
 	}
@@ -434,10 +467,14 @@ Module::set_argv(const vector<string>& argv) {
 
 void
 Module::set_userid(uid_t userid) {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(userid);
+#else
     //don't call thiss if you don't want to setuid.
     XLOG_ASSERT(userid != NO_SETUID_ON_EXEC);
 
     _userid = userid;
+#endif
 }
 
 int
@@ -489,6 +526,34 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
     }
 
     if (! is_process_running) {
+#ifdef HOST_OS_WINDOWS
+	STARTUPINFOA si;
+	PROCESS_INFORMATION pi;
+
+	GetStartupInfoA(&si);
+	si.lpReserved = NULL;
+	si.dwFlags |= STARTF_USESTDHANDLES;
+
+	string targv;
+	for (size_t i = 0; i < _argv.size(); i++) {
+	    targv += _argv[i];
+	    targv += ' ';
+	}
+
+	if (CreateProcessA(const_cast<char *>(_expath.c_str()),
+			   const_cast<char *>(targv.c_str()),
+			   NULL, NULL, TRUE,
+			   CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP,
+			   NULL, NULL, &si, &pi) == 0) {
+	    XLOG_ERROR("Execution of %s failed", _expath.c_str());
+	    _pid = 0;
+	    _phand = INVALID_HANDLE_VALUE;
+	} else {
+	    _pid = pi.dwProcessId;
+	    _phand = pi.hProcess;
+	}
+
+#else /* !HOST_OS_WINDOWS */
 	// We need to start a new process
 	signal(SIGCHLD, child_handler);
 	_pid = fork();
@@ -526,7 +591,8 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		}
 	    }
 	}
-	debug_msg("New module has PID %d\n", _pid);
+#endif /* HOST_OS_WINDOWS */
+	debug_msg("New module has PID %p\n", (void *)_pid);
 
 	// Insert the new process in the map of processes
 	XLOG_ASSERT(module_pids.find(_pid) == module_pids.end());
@@ -623,7 +689,7 @@ Module::str() const
     string s = "Module " + _name + ", path " + _path + "\n";
 
     if (_status != MODULE_NOT_STARTED && _status != MODULE_FAILED)
-	s += c_format("Module is running, pid=%d\n", _pid);
+	s += c_format("Module is running, pid=%p\n", (void *)_pid);
     else
 	s += "Module is not running\n";
     return s;

@@ -30,6 +30,7 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 xorp_rtrmgr_SOURCES	 = rtrmgr_module.h
 xorp_rtrmgr_SOURCES	+= y.boot_tab.h
 xorp_rtrmgr_SOURCES	+= y.tplt_tab.h
+xorp_rtrmgr_SOURCES	+= glob_win32.h
 
 xorp_rtrmgr_SOURCES	+= command_tree.hh
 xorp_rtrmgr_SOURCES	+= conf_tree.hh
@@ -58,6 +59,7 @@ xorp_rtrmgr_SOURCES	+= xorp_client.hh
 xorp_rtrmgr_SOURCES	+= xrl_rtrmgr_interface.hh
 xorp_rtrmgr_SOURCES	+= xrldb.hh
 
+xorp_rtrmgr_SOURCES	+= glob_win32.c
 xorp_rtrmgr_SOURCES	+= conf_tree.cc
 xorp_rtrmgr_SOURCES	+= conf_tree_node.cc
 xorp_rtrmgr_SOURCES	+= config_operators.cc
@@ -99,6 +101,7 @@ xorpsh_SOURCES	 = rtrmgr_module.h
 xorpsh_SOURCES	+= y.boot_tab.h
 xorpsh_SOURCES	+= y.opcmd_tab.h
 xorpsh_SOURCES	+= y.tplt_tab.h
+xorpsh_SOURCES	+= glob_win32.h
 
 xorpsh_SOURCES	+= cli.hh
 xorpsh_SOURCES	+= command_tree.hh
@@ -121,6 +124,7 @@ xorpsh_SOURCES	+= xorpsh_base.hh
 xorpsh_SOURCES	+= xorpsh_main.hh
 xorpsh_SOURCES	+= xrl_xorpsh_interface.hh
 
+xorpsh_SOURCES	+= glob_win32.c
 xorpsh_SOURCES	+= cli.cc
 xorpsh_SOURCES	+= command_tree.cc
 xorpsh_SOURCES	+= conf_tree.cc
@@ -167,6 +171,7 @@ xorp_profiler_LDADD	+= $(LDADD)
 # #
 test_templates_SOURCES	 = rtrmgr_module.h
 test_templates_SOURCES	+= y.tplt_tab.h
+test_templates_SOURCES	+= glob_win32.h
 
 test_templates_SOURCES	+= conf_tree_node.hh
 test_templates_SOURCES	+= config_operators.hh
@@ -175,6 +180,7 @@ test_templates_SOURCES	+= template_tree.hh
 test_templates_SOURCES	+= template_tree_node.hh
 test_templates_SOURCES	+= util.hh
 
+test_templates_SOURCES	+= glob_win32.c
 test_templates_SOURCES	+= conf_tree_node.cc
 test_templates_SOURCES	+= config_operators.cc
 test_templates_SOURCES	+= lex.tplt.cc
@@ -193,6 +199,7 @@ test_templates_LDADD	 = $(LDADD)
 test_sample_config_SOURCES	 = rtrmgr_module.h
 test_sample_config_SOURCES	+= y.boot_tab.h
 test_sample_config_SOURCES	+= y.tplt_tab.h
+test_sample_config_SOURCES	+= glob_win32.h
 
 test_sample_config_SOURCES	+= command_tree.hh
 test_sample_config_SOURCES	+= conf_tree.hh
@@ -219,6 +226,7 @@ test_sample_config_SOURCES	+= xorp_client.hh
 #test_sample_config_SOURCES	+= xrl_rtrmgr_interface.hh
 test_sample_config_SOURCES	+= xrldb.hh
 
+test_sample_config_SOURCES	+= glob_win32.c
 test_sample_config_SOURCES	+= command_tree.cc
 test_sample_config_SOURCES	+= conf_tree.cc
 test_sample_config_SOURCES	+= conf_tree_node.cc
@@ -255,6 +263,8 @@ test_sample_config_LDADD 	 = $(LDADD)
 test_module_manager_SOURCES	 = rtrmgr_module.h
 test_module_manager_SOURCES	+= y.boot_tab.h
 test_module_manager_SOURCES	+= y.tplt_tab.h
+test_module_manager_SOURCES	+= glob_win32.h
+
 # test_module_manager_SOURCES	+= command_tree.hh
 test_module_manager_SOURCES	+= conf_tree.hh
 test_module_manager_SOURCES	+= conf_tree_node.hh
@@ -278,6 +288,7 @@ test_module_manager_SOURCES	+= util.hh
 test_module_manager_SOURCES	+= xorp_client.hh
 test_module_manager_SOURCES	+= xrldb.hh
 
+test_module_manager_SOURCES	+= glob_win32.c
 test_module_manager_SOURCES	+= conf_tree.cc
 test_module_manager_SOURCES	+= conf_tree_node.cc
 test_module_manager_SOURCES	+= config_operators.cc

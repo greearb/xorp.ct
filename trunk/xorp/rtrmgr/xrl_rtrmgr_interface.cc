@@ -117,7 +117,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 	uint32_t& pid,
 	uint32_t& clientid)
 {
+#ifdef HOST_OS_WINDOWS
+    pid = GetCurrentProcessId();
+#else
     pid = getpid();
+#endif
     const User* user;
     UserInstance* newuser;
 
@@ -135,9 +139,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     // Note that clientname is user supplied data, so this would be
     // dangerous if the user could pass "..".
     //
+#ifdef HOST_OS_WINDOWS
+    char tmppath[128];
+    GetTempPathA(sizeof(tmppath), tmppath);
+    filename = tmppath + clientname;
+#else
     filename = "/tmp/rtrmgr-" + clientname;
     mode_t oldmode = umask(S_IRWXG|S_IRWXO);
     debug_msg("newmode: %o oldmode: %o\n", S_IRWXG|S_IRWXO, oldmode);
+#endif
 
     FILE* file = fopen(filename.c_str(), "w+");
     if (file == NULL) {
@@ -145,11 +155,17 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 			      filename.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#ifndef HOST_OS_WINDOWS
     umask(oldmode);
+#endif
 
     user = _userdb.find_user_by_user_id(user_id);
     if (user == NULL) {
+#ifdef HOST_OS_WINDOWS
+	DeleteFileA(filename.c_str());
+#else
 	unlink(filename.c_str());
+#endif
 	string err = c_format("User ID %u not found",
 			      XORP_UINT_CAST(user_id));
 	return XrlCmdError::COMMAND_FAILED(err);
@@ -170,23 +186,43 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     //
     if (fprintf(file, "%s", newuser->authtoken().c_str()) 
 	< (int)(newuser->authtoken().size())) {
+#ifdef HOST_OS_WINDOWS
+	DeleteFileA(filename.c_str());
+#else
 	unlink(filename.c_str());
+#endif
 	string err = c_format("Failed to write to temporary file: %s",
 			      filename.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+
+#ifndef HOST_OS_WINDOWS
     if (fchown(fileno(file), user_id, (gid_t)-1) != 0) {
 	unlink(filename.c_str());
 	string err = c_format("Failed to chown temporary file %s to user_id %u",
 			      filename.c_str(), XORP_UINT_CAST(user_id));
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+#endif
+
     if (fclose(file) != 0) {
+#ifdef HOST_OS_WINDOWS
+	DeleteFileA(filename.c_str());
+#else
 	unlink(filename.c_str());
+#endif
 	string err = c_format("Failed to close temporary file: %s",
 			      filename.c_str());
 	return XrlCmdError::COMMAND_FAILED(err);
     }
+
+#if 1
+    //
+    // XXX: a hack to return back the key itself in case we run
+    // xorpsh on a remote machine.
+    //
+    filename = newuser->authtoken();
+#endif
 
     return XrlCmdError::OKAY();
 }

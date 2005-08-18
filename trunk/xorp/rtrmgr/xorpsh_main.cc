@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.46 2005/08/05 12:53:31 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.47 2005/08/18 00:45:02 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -135,11 +135,6 @@ XorpShell::XorpShell(const string& IPCname,
       _mode(MODE_INITIALIZING),
       _xorpsh_interface(&_xrlrouter, *this)
 {
-    size_t i;
-
-    for (i = 0; i < sizeof(_fddesc) / sizeof(_fddesc[0]); i++)
-	_fddesc[i] = -1;
-
     //
     // Print various information
     //
@@ -180,46 +175,56 @@ XorpShell::~XorpShell()
     if (_router_cli != NULL)
 	delete _router_cli;
 
+#ifndef HOST_OS_WINDOWS
     // Close the opened file descriptors
     size_t i;
     for (i = 0; i < sizeof(_fddesc) / sizeof(_fddesc[0]); i++) {
-	if (_fddesc[i] >= 0) {
+	if (_fddesc[i].is_valid()) {
 	    close(_fddesc[i]);
-	    _fddesc[i] = -1;
+	    _fddesc[i].clear();
 	}
     }
+#endif
 }
 
 void
 XorpShell::run(const string& commands)
 {
     string errmsg;
-    int& xorpsh_write_commands_fd = _fddesc[1];
-    int xorpsh_input_fd = -1;
-    int xorpsh_output_fd = -1;
+    XorpFd xorpsh_input_fd;
+    XorpFd xorpsh_output_fd;
+    XorpFd xorpsh_write_commands_fd;
 
     if (commands.empty()) {
 	// Accept commands from the stdin
-	xorpsh_input_fd = fileno(stdin);
-	xorpsh_output_fd = fileno(stdout);
-    } else {
+	xorpsh_input_fd = FILENO(stdin);
+	xorpsh_output_fd = FILENO(stdout);
+    }
+#ifndef HOST_OS_WINDOWS
+    else {
 	//
 	// Create an internal pipe to pass the commands to the CLI
 	//
-	if (pipe(_fddesc) != 0) {
+	int pipedesc[2];
+
+	if (pipe(pipedesc) != 0) {
 	    errmsg = c_format("Cannot create an internal pipe: %s",
 			      strerror(errno));
 	    xorp_throw(InitError, errmsg);
 	}
-	// xorpsh_write_commands_fd = _fddesc[1];
-	xorpsh_input_fd = _fddesc[0];
+	// xorpsh_write_commands_fd = pipedesc[1];
+	_fddesc[0] = xorpsh_input_fd = pipedesc[0];
+	_fddesc[1] = xorpsh_write_commands_fd = pipedesc[1];
 	xorpsh_output_fd = fileno(stdout);
     }
+#endif
 
     // Signal handlers so we can clean up when we're killed
     signal(SIGTERM, signal_handler);
     signal(SIGINT, signal_handler);
+#ifdef SIGPIPE
     signal(SIGPIPE, signal_handler);
+#endif
 
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
@@ -230,7 +235,11 @@ XorpShell::run(const string& commands)
 	xorp_throw(InitError, errmsg);
     }
 
+#ifdef HOST_OS_WINDOWS
+    const uint32_t uid = 0;
+#else
     const uint32_t uid = getuid();
+#endif
     _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
 					callback(this,
 						 &XorpShell::register_done));
@@ -242,6 +251,10 @@ XorpShell::run(const string& commands)
     XLOG_TRACE(_verbose, "Registry with rtrmgr successful: token is %s\n",
 	       _authfile.c_str());
 
+
+#if 1  // XXX: a hack to access the rtrmgr on a remote machine
+    _authtoken = _authfile;
+#else
     FILE* file = fopen(_authfile.c_str(), "r");
     if (file == NULL) {
 	XLOG_FATAL("Failed to open authfile %s", _authfile.c_str());
@@ -253,11 +266,16 @@ XorpShell::run(const string& commands)
 	XLOG_FATAL("Failed to read authfile %s", _authfile.c_str());
     }
     fclose(file);
+#ifdef HOST_OS_WINDOWS
+    (void)DeleteFileA(_authfile.c_str());	// XXX
+#else
     if (unlink(_authfile.c_str()) != 0) {
 	XLOG_WARNING("xorpsh is unable to unlink temporary file %s",
 		     _authfile.c_str());
     }
+#endif
     _authtoken = buf;
+#endif
 
     XLOG_TRACE(_verbose, "authtoken = >%s<\n", _authtoken.c_str());
 
@@ -321,15 +339,22 @@ XorpShell::run(const string& commands)
     //
     // Write the commands to one end of the pipe
     //
-    if (xorpsh_write_commands_fd >= 0) {
+    if (xorpsh_write_commands_fd.is_valid()) {
 	string modified_commands = commands;
 	if (! modified_commands.empty()) {
 	    if (modified_commands[modified_commands.size() - 1] != '\n')
 		modified_commands += "\n";
+#ifdef HOST_OS_WINDOWS
+	    DWORD written;
+	    WriteFile(xorpsh_write_commands_fd, modified_commands.c_str(),
+		  modified_commands.size(), &written, NULL);
+	    CloseHandle(xorpsh_write_commands_fd);
+#else
 	    write(xorpsh_write_commands_fd, modified_commands.c_str(),
 		  modified_commands.size());
 	    close(xorpsh_write_commands_fd);
-	    xorpsh_write_commands_fd = -1;
+#endif
+	    xorpsh_write_commands_fd.clear();
 	}
     }
 
@@ -589,6 +614,9 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	return;
     }
 
+#ifdef HOST_OS_WINDOWS
+    string username("root");
+#else
     // Notify the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
@@ -596,7 +624,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
-
+#endif
     
     string alert = "The configuration had been changed by user " +
 	username + "\n";
@@ -646,10 +674,12 @@ signal_handler(int signal_value)
     case SIGINT:
 	// Ignore Ctrl-C: it is used by the CLI to interrupt a command.
 	break;
+#ifdef SIGPIPE
     case SIGPIPE:
 	// Ignore SIGPIPE: it may be generated when executing commands
 	// specified on the command line.
 	break;
+#endif
     default:
 	// XXX: anything else we have intercepted will terminate us.
 	is_interrupted = true;
@@ -705,6 +735,8 @@ main(int argc, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
+    comm_init();
+
     //
     // Install the handler for unexpected exceptions
     //
@@ -748,7 +780,11 @@ main(int argc, char *argv[])
     //
     char hostname[MAXHOSTNAMELEN];
     if (gethostname(hostname, sizeof(hostname)) < 0) {
+#ifdef HOST_OS_WINDOWS
+	XLOG_FATAL("gethostname() failed: %d", WSAGetLastError());
+#else
 	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
+#endif
     }
     hostname[sizeof(hostname) - 1] = '\0';
 
@@ -764,6 +800,8 @@ main(int argc, char *argv[])
     }
 
  cleanup:
+
+    comm_exit();
 
     //
     // Gracefully stop and exit xlog

@@ -88,9 +88,12 @@ find_executable_program_dir(const string& program_name)
     //
     // Go through the PATH environment variable and find the program location
     //
+    string slash_progname(PATH_DELIMITER_STRING);
+    slash_progname += program_name;
+    slash_progname += EXECUTABLE_SUFFIX;
     const char* s = getenv("PATH");
     while (s != NULL && *s != '\0') {
-	const char* e = strchr(s, ':');
+	const char* e = strchr(s, PATH_ENV_DELIMITER_CHAR);
 	string path;
 	if (e != NULL) {
 	    path = string(s, e);
@@ -99,7 +102,7 @@ find_executable_program_dir(const string& program_name)
 	    path = string(s);
 	    s = NULL;
 	}
-	string complete_path = path + "/" + program_name;
+	string complete_path = path + slash_progname;
 	if (access(complete_path.c_str(), X_OK) == 0) {
 	    return path;
 	}
@@ -111,6 +114,9 @@ find_executable_program_dir(const string& program_name)
 static string
 xorp_real_path(const string& path)
 {
+#ifdef HOST_OS_WINDOWS
+    return path;
+#else
     debug_msg("path: %s\n", path.c_str());
 
     char rp[MAXPATHLEN];
@@ -122,6 +128,7 @@ xorp_real_path(const string& path)
     // XLOG_WARNING("realpath(%s) failed.", path.c_str());
     debug_msg("return %s\n", path.c_str());
     return path;
+#endif
 }
 
 void
@@ -135,9 +142,9 @@ xorp_path_init(const char* argv0)
 	return;
     }
 
-    string current_root = find_executable_program_dir(string(argv0));
-    XLOG_ASSERT(! current_root.empty());
-    current_root += "/..";
+    string current_root = find_executable_program_dir(argv0) +
+			  PATH_DELIMITER_STRING +
+			  PATH_PARENT;
     current_root = xorp_real_path(current_root);
 
     debug_msg("current_root: %s\n", current_root.c_str());
@@ -196,6 +203,7 @@ xorp_boot_file()
     return s_boot_file;
 }
 
+// XXX: Tied to POSIX paths
 const char*
 xorp_basename(const char* argv0)
 {
@@ -271,6 +279,9 @@ find_executable_filename(const string& program_filename)
 	return string("");			// Error
     }
 
+    // Assume the path passed to us is a UNIX-style path.
+    executable_filename = unix_path_to_native(program_filename);
+
     //
     // TODO: take care of the commented-out access() calls below (by BMS).
     //
@@ -280,12 +291,11 @@ find_executable_filename(const string& program_filename)
     // Consider checking for it in configure.in and shipping
     // our own if we can't find it on the system.
     //
-    if (program_filename[0] == '/') {
+    if (is_absolute_path(executable_filename)) {
 	// Absolute path name
-	if (stat(program_filename.c_str(), &statbuf) == 0 &&
+	if (stat(executable_filename.c_str(), &statbuf) == 0 &&
 	    // access(program_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {
-	    executable_filename = program_filename;
 	    return executable_filename;
 	}
 	return string("");			// Error
@@ -300,13 +310,20 @@ find_executable_filename(const string& program_filename)
     // Expand path
     const char* p = getenv("PATH");
     if (p != NULL) {
-	list<string> l2 = split(p, ':');
+	list<string> l2 = split(p, PATH_ENV_DELIMITER_CHAR);
 	path.splice(path.end(), l2);
     }
 
     // Search each path component
     while (!path.empty()) {
-	string full_path_executable = path.front() + "/" + program_filename;
+	// Don't forget to append the executable suffix if needed.
+	string full_path_executable = path.front() + PATH_DELIMITER_STRING +
+				      executable_filename + EXECUTABLE_SUFFIX;
+#ifdef HOST_OS_WINDOWS
+	// Deal with any silly tricks which MSYS may have pulled on
+	// us, like using UNIX-style slashes in a DOS-style path. Grr. -bms
+	full_path_executable = unix_path_to_native(full_path_executable);
+#endif
 	if (stat(full_path_executable.c_str(), &statbuf) == 0 &&
 	    // access(program_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {

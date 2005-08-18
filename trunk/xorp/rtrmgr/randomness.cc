@@ -21,6 +21,7 @@
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
+
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
@@ -34,6 +35,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
+
 #include "randomness.hh"
 
 
@@ -43,6 +47,8 @@ RandomGen::RandomGen()
       _random_data(NULL),
       _counter(0)
 {
+    bool not_enough_randomness = false;
+#ifndef HOST_OS_WINDOWS
     FILE* file;
 
     file = fopen("/dev/urandom", "r");
@@ -62,11 +68,12 @@ RandomGen::RandomGen()
 	fclose(file);
     }
 
-    bool not_enough_randomness = false;
     if (_random_exists) {
 	file = fopen("/dev/random", "r");
+#ifdef O_NONBLOCK
 	// We need non-blocking reads
 	fcntl(fileno(file), F_SETFD, O_NONBLOCK);
+#endif
 
 	// Use /dev/random to initialized the random pool
 	_random_data = new uint8_t[RAND_POOL_SIZE];
@@ -77,6 +84,7 @@ RandomGen::RandomGen()
 	}
 	fclose(file);
     }
+#endif /* !HOST_OS_WINDOWS */
 
     if ((!_urandom_exists && !_random_exists) || not_enough_randomness) {
 	//
@@ -90,18 +98,21 @@ RandomGen::RandomGen()
 	//   4. Use MD5 to extract data from the buffer.
 	//   5. Add timing-based randomness every opportunity we can.
 	//
-	int count = 0;
-	int scount = 0;
 	if (_random_data == NULL)
 	    _random_data = new uint8_t[RAND_POOL_SIZE];
 
 	// Current time - this is mostly predictable, but a few less
 	// significant bits are hard to predict.
-	struct timeval tv;
-        gettimeofday(&tv, NULL);
-	for (size_t i = 0; i < sizeof(tv); i++) {
-	    _random_data[i] ^= *(((char*)(&tv))+i);
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
+	double d = now.get_double();
+	for (size_t i = 0; i < sizeof(d); i++) {
+	    _random_data[i] ^= *(((char *)(&d))+i);
 	}
+
+#ifndef HOST_OS_WINDOWS
+	int count = 0;
+	int scount = 0;
 
 	//
 	// Read host-based secrets - good source of unpredictable data,
@@ -217,9 +228,10 @@ RandomGen::RandomGen()
 	    MD5_Update(&md5_context, _random_data, RAND_POOL_SIZE);
 	    MD5_Final(outbuf, &md5_context);
 	    fwrite(outbuf, 1, 16, file);
-	    fwrite(&tv, 1, sizeof(tv), file);
+	    fwrite(&d, 1, sizeof(d), file);
 	    fclose(file);
 	}
+#endif /* !HOST_OS_WINDOWS */
     }
 }
 
@@ -303,15 +315,16 @@ RandomGen::read_fd(FILE* file)
 	    memset(tbuf, 0, bytes);
 
 	    // Add more time bits - don't get a lot from this but it's cheap
-	    struct timeval tv;
-	    gettimeofday(&tv, NULL);
+	    TimeVal now;
+	    TimerList::system_gettimeofday(&now);
+	    double d = now.get_double();
 	    memcpy(&ix, ixb, 4);
-	    ix ^= tv.tv_usec;
-	    ix = ix % (RAND_POOL_SIZE - sizeof(tv));
+	    ix ^= now.usec();
+	    ix = ix % (RAND_POOL_SIZE - sizeof(d));
 	    // Add them at a "random" location - not truely random
 	    // because we may not have enough entropy in the pool yet.
-	    for (i = 0; i < sizeof(tv); i++) {
-		_random_data[i] ^= *(((char*)(&tv)) + i + ix);
+	    for (i = 0; i < sizeof(d); i++) {
+		_random_data[i] ^= *(((char *)(&d)) + i + ix);
 	    }
 	}
     }
@@ -358,7 +371,9 @@ RandomGen::get_random_bytes(size_t len, uint8_t* buf)
 	if (file == NULL) {
 	    XLOG_FATAL("Failed to open /dev/random");
 	} else {
+#ifdef O_NONBLOCK
 	    fcntl(fileno(file), F_SETFD, O_NONBLOCK);
+#endif
 	    size_t bytes_read = fread(buf, 1, len, file);
 	    if (len > 0)
 		add_buf_to_randomness(buf, len);
@@ -378,13 +393,13 @@ RandomGen::get_random_bytes(size_t len, uint8_t* buf)
     size_t bytes_written = 0;
 
     while (bytes_written < len) {
-	struct timeval tv;
-	gettimeofday(&tv, NULL);
-
+	TimeVal now;
+	TimerList::system_gettimeofday(&now);
+	double d = now.get_double();
 	MD5_Init(&md5_context);
 	_counter++;
 	add_buf_to_randomness((uint8_t*)(&_counter), sizeof(_counter));
-	add_buf_to_randomness((uint8_t*)(&tv), sizeof(tv));
+	add_buf_to_randomness((uint8_t*)(&d), sizeof(d));
 	MD5_Update(&md5_context, _random_data, RAND_POOL_SIZE);
 	MD5_Final(outbuf, &md5_context);
 	memcpy(buf + bytes_written, outbuf,

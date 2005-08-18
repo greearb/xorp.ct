@@ -94,15 +94,22 @@ UserDB::~UserDB()
 void 
 UserDB::load_password_file()
 {
+#ifdef HOST_OS_WINDOWS
+    string username("Administrator");
+    uint32_t userid = 0;
+    add_user(userid, username, userid);
+#else
     struct passwd* pwent;
 
     pwent = getpwent();
     while (pwent != NULL) {
-	debug_msg("User: %s UID: %u\n", pwent->pw_name, pwent->pw_uid);
+	debug_msg("User: %s UID: %u\n", pwent->pw_name,
+		  XORP_UINT_CAST(pwent->pw_uid));
 	add_user(pwent->pw_uid, pwent->pw_name, pwent->pw_gid);
 	pwent = getpwent();
     }
     endpwent();
+#endif
 }
 
 User* 
@@ -111,6 +118,7 @@ UserDB::add_user(uint32_t user_id, const string& username,
 {
     if (_users.find(user_id) == _users.end()) {
 	User* newuser = new User(user_id, username);
+#ifndef HOST_OS_WINDOWS
 	struct group* grp = getgrnam("xorp");
 	if (grp != NULL) {
 	    debug_msg("group xorp exists, id=%u\n",
@@ -135,6 +143,10 @@ UserDB::add_user(uint32_t user_id, const string& username,
 	} else {
 	    XLOG_ERROR("Group \"xorp\" does not exist on this system.");
 	}
+#else
+	UNUSED(pw_gid);
+	newuser->add_acl_capability("config");
+#endif
 	_users[user_id] = newuser;
 	return newuser;
     } else {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.89 2005/08/05 12:53:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.90 2005/08/18 00:11:19 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,9 +37,12 @@
 #include "template_tree_node.hh"
 #include "util.hh"
 
+#ifdef HOST_OS_WINDOWS
+inline uid_t getuid() { return 0; }
+#endif
 
 RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
-		     int cli_client_input_fd, int cli_client_output_fd,
+		     XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
 		     bool verbose) throw (InitError)
     : _xorpsh(xorpsh),
       _cli_node(cli_node),
@@ -678,7 +681,9 @@ RouterCLI::display_config_mode_users() const
     else
 	cli_client().cli_print("Users ");
     list<uint32_t>::const_iterator iter, iter2;
+#ifndef HOST_OS_WINDOWS
     struct passwd* pwent;
+#endif
     for (iter = _config_mode_users.begin();
 	 iter != _config_mode_users.end();
 	 ++iter) {
@@ -690,13 +695,21 @@ RouterCLI::display_config_mode_users() const
 	    else
 		cli_client().cli_print(", ");
 	}
-	pwent = getpwuid(*iter);
-	if (pwent == NULL)
-	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
+#ifdef HOST_OS_WINDOWS
 	else
-	    cli_client().cli_print(pwent->pw_name);
+	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
+#else
+	else {
+	    pwent = getpwuid(*iter);
+	    if (pwent != NULL)
+		cli_client().cli_print(pwent->pw_name);
+	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
+	}
+#endif
     }
+#ifndef HOST_OS_WINDOWS
     endpwent();
+#endif
     if (_config_mode_users.size() == 1)
 	cli_client().cli_print(" is also in configuration mode.\n");
     else
@@ -1402,12 +1415,15 @@ RouterCLI::new_config_user(uid_t user_id)
 	return;
 
     _config_mode_users.push_back(user_id);
-    struct passwd* pwent = getpwuid(user_id);
     string username;
-    if (pwent == NULL)
-	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
-    else
+#ifndef HOST_OS_WINDOWS
+    struct passwd* pwent = getpwuid(user_id);
+    if (pwent != NULL)
 	username = pwent->pw_name;
+    else
+#endif
+	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
+
     string alert = c_format("User %s entered configuration mode\n",
 			    username.c_str());
     notify_user(alert, false /* not urgent */);
@@ -1884,7 +1900,7 @@ RouterCLI::text_entry_func(const string& ,
 		XLOG_TRACE(_verbose, "creating node %s\n", value.c_str());
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
-					      data_ttn, ctn, 
+					      data_ttn, ctn,
 					      /* nodenum */ 0,
 					      getuid(),
 					      clientid(),
@@ -2313,6 +2329,8 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	return result;
     }
 
+    int myuid = getuid();
+
     if (create_needed) {
 	string newpath;
 	path_parts.push_back(nodename);
@@ -2329,14 +2347,14 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 					  newpath, ttn,
 					  ctn,
 					  /* nodenum */ 0,
-					  getuid(),
+					  myuid,
 					  clientid(),
 					  _verbose);
 	ctn = newnode;
-	ctn->set_value(argv[0], getuid());
-	ctn->set_operator(OP_ASSIGN, getuid());
+	ctn->set_value(argv[0], myuid);
+	ctn->set_operator(OP_ASSIGN, myuid);
     } else {
-	ctn->set_value(argv[0], getuid());
+	ctn->set_value(argv[0], myuid);
 	if (ctn->get_operator() == OP_NONE)
 	    ctn->set_operator(OP_ASSIGN, getuid());
     }

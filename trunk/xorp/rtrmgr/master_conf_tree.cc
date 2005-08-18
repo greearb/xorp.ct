@@ -105,12 +105,17 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     _task_manager = new TaskManager(*this, mmgr, xclient, 
 				    global_do_exec, verbose);
 
+#ifdef HAVE_GRP_H
     // Get the group ID for group "xorp"
     struct group* grp = getgrnam("xorp");
     if (grp != NULL) {
 	_xorp_gid = grp->gr_gid;
 	_is_xorp_gid_set = true;
     }
+#else
+    _xorp_gid = 0;
+    _is_xorp_gid_set = true;
+#endif
 
     if (read_file(configuration, config_file, errmsg) != true) {
 	xorp_throw(InitError, errmsg);
@@ -765,11 +770,15 @@ MasterConfigTree::save_to_file(const string& filename,
 	return false;
     }
 
+    FILE* file;
+
+#ifdef HOST_OS_WINDOWS
+    {
+#else
     // Set a umask of 664, to allow sharing of config files between
     // users in group "xorp".
     mode_t orig_mask = umask(S_IWOTH);
 
-    FILE* file;
     struct stat sb;
     if (stat(filename.c_str(), &sb) == 0) {
 	if (sb.st_mode & S_IFREG == 0) {
@@ -788,6 +797,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	    umask(orig_mask);
 	    return false;
 	}
+#endif
 
 	file = fopen(filename.c_str(), "r");
 	if (file != NULL) {
@@ -950,6 +960,12 @@ bool
 MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 					      string& errmsg)
 {
+#ifdef HOST_OS_WINDOWS
+    return true;
+    UNUSED(fp);
+    UNUSED(user_id);
+    UNUSED(errmsg);
+#else
     //
     // Set the user and group owner of the file, and change its permissions
     // so it is group-writable.
@@ -975,6 +991,7 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
     }
 
     return true;
+#endif // HOST_OS_WINDOWS
 }
 
 bool
@@ -1089,8 +1106,8 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	// Save the current configuration
 	//
 	string config = show_unannotated_tree(/*numbered*/ false);
-	if (write(fileno(fp), config.c_str(), config.size())
-	    != static_cast<ssize_t>(config.size())) {
+	if (fwrite(config.c_str(), config.size(), sizeof(char), fp)
+	    != static_cast<size_t>(config.size())) {
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "error writing to a temporary file: %s",
 			      strerror(errno));
