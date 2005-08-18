@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.8 2005/03/05 01:41:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get.cc,v 1.9 2005/03/25 02:53:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,7 +20,11 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -45,11 +49,11 @@ IfConfigGet::IfConfigGet(IfConfig& ifc)
 IfConfigGet::~IfConfigGet()
 {
     if (_s4 >= 0) {
-	close(_s4);
+	comm_close(_s4);
 	_s4 = -1;
     }
     if (_s6 >= 0) {
-	close(_s6);
+	comm_close(_s6);
 	_s6 = -1;
     }
 }

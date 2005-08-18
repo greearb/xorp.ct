@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.33 2005/03/25 02:53:01 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.34 2005/03/25 05:41:55 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -587,6 +587,7 @@ private:
     FtiConfigEntryGetDummy	_ftic_entry_get_dummy;
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
+    FtiConfigEntryGetIPHelper	_ftic_entry_get_iphelper;
 
     //
     // The secondary mechanisms to get single-entry information
@@ -606,6 +607,7 @@ private:
     FtiConfigEntrySetDummy	_ftic_entry_set_dummy;
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
+    FtiConfigEntrySetIPHelper	_ftic_entry_set_iphelper;
 
     //
     // The secondary mechanisms to set single-entry information
@@ -628,6 +630,7 @@ private:
     FtiConfigEntryObserverDummy	 _ftic_entry_observer_dummy;
     FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
     FtiConfigEntryObserverNetlink _ftic_entry_observer_netlink;
+    FtiConfigEntryObserverIPHelper _ftic_entry_observer_iphelper;
 
     //
     // The primary mechanisms to get the whole table information
@@ -639,6 +642,7 @@ private:
     FtiConfigTableGetDummy	_ftic_table_get_dummy;
     FtiConfigTableGetSysctl	_ftic_table_get_sysctl;
     FtiConfigTableGetNetlink	_ftic_table_get_netlink;
+    FtiConfigTableGetIPHelper	_ftic_table_get_iphelper;
     
     //
     // The secondary mechanisms to get the whole table information
@@ -658,6 +662,7 @@ private:
     FtiConfigTableSetDummy	_ftic_table_set_dummy;
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     FtiConfigTableSetNetlink	_ftic_table_set_netlink;
+    FtiConfigTableSetIPHelper	_ftic_table_set_iphelper;
 
     //
     // The secondary mechanisms to set the whole table information
@@ -680,6 +685,7 @@ private:
     FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
     FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
     FtiConfigTableObserverNetlink _ftic_table_observer_netlink;
+    FtiConfigTableObserverIPHelper _ftic_table_observer_iphelper;
     
     //
     // Original state from the underlying system before the FEA was started
@@ -695,6 +701,15 @@ private:
     bool	_have_ipv6;
     bool	_is_dummy;
     bool	_is_running;
+
+#ifdef HOST_OS_WINDOWS
+    //
+    // State for Windows EnableRouter() API function.
+    //
+    HANDLE	_event;
+    OVERLAPPED  _overlapped;
+    int		_enablecnt;
+#endif
 };
 
 //

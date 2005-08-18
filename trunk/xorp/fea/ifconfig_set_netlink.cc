@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.21 2005/03/25 02:53:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.22 2005/05/08 19:27:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,12 +24,13 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_ARP_H
 #include <net/if_arp.h>
-
-// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
-#ifdef HOST_OS_LINUX
+#endif
+#ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H
@@ -161,7 +162,7 @@ IfConfigSetNetlink::config_end(string& error_msg)
 
 int
 IfConfigSetNetlink::add_interface(const string& ifname,
-				  uint16_t if_index,
+				  uint32_t if_index,
 				  string& error_msg)
 {
     debug_msg("add_interface "
@@ -179,7 +180,7 @@ IfConfigSetNetlink::add_interface(const string& ifname,
 int
 IfConfigSetNetlink::add_vif(const string& ifname,
 			    const string& vifname,
-			    uint16_t if_index,
+			    uint32_t if_index,
 			    string& error_msg)
 {
     debug_msg("add_vif "
@@ -197,7 +198,7 @@ IfConfigSetNetlink::add_vif(const string& ifname,
 
 int
 IfConfigSetNetlink::config_interface(const string& ifname,
-				     uint16_t if_index,
+				     uint32_t if_index,
 				     uint32_t flags,
 				     bool is_up,
 				     bool is_deleted,
@@ -206,7 +207,9 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
+	      ifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
     UNUSED(ifname);
@@ -223,7 +226,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
 int
 IfConfigSetNetlink::config_vif(const string& ifname,
 			       const string& vifname,
-			       uint16_t if_index,
+			       uint32_t if_index,
 			       uint32_t flags,
 			       bool is_up,
 			       bool is_deleted,
@@ -237,7 +240,8 @@ IfConfigSetNetlink::config_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
 	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
 	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, flags,
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
 	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false",
 	      (broadcast)? "true" : "false",
@@ -263,7 +267,7 @@ IfConfigSetNetlink::config_vif(const string& ifname,
 
 int
 IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
-					      uint16_t if_index,
+					      uint32_t if_index,
 					      const struct ether_addr& ether_addr,
 					      string& error_msg)
 {
@@ -282,13 +286,13 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetNetlink::set_interface_mtu(const string& ifname,
-				      uint16_t if_index,
+				      uint32_t if_index,
 				      uint32_t mtu,
 				      string& error_msg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, mtu);
+	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -302,7 +306,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 int
 IfConfigSetNetlink::add_vif_address(const string& ifname,
 				    const string& vifname,
-				    uint16_t if_index,
+				    uint32_t if_index,
 				    bool is_broadcast,
 				    bool is_p2p,
 				    const IPvX& addr,
@@ -315,7 +319,8 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -334,7 +339,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 int
 IfConfigSetNetlink::delete_vif_address(const string& ifname,
 				       const string& vifname,
-				       uint16_t if_index,
+				       uint32_t if_index,
 				       const IPvX& addr,
 				       uint32_t prefix_len,
 				       string& error_msg)
@@ -343,7 +348,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      prefix_len);
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -384,7 +389,7 @@ IfConfigSetNetlink::config_end(string& error_msg)
 
 int
 IfConfigSetNetlink::add_interface(const string& ifname,
-				  uint16_t if_index,
+				  uint32_t if_index,
 				  string& error_msg)
 {
     debug_msg("add_interface "
@@ -403,7 +408,7 @@ IfConfigSetNetlink::add_interface(const string& ifname,
 int
 IfConfigSetNetlink::add_vif(const string& ifname,
 			    const string& vifname,
-			    uint16_t if_index,
+			    uint32_t if_index,
 			    string& error_msg)
 {
     debug_msg("add_vif "
@@ -422,7 +427,7 @@ IfConfigSetNetlink::add_vif(const string& ifname,
 
 int
 IfConfigSetNetlink::config_interface(const string& ifname,
-				     uint16_t if_index,
+				     uint32_t if_index,
 				     uint32_t flags,
 				     bool is_up,
 				     bool is_deleted,
@@ -524,7 +529,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
 int
 IfConfigSetNetlink::config_vif(const string& ifname,
 			       const string& vifname,
-			       uint16_t if_index,
+			       uint32_t if_index,
 			       uint32_t flags,
 			       bool is_up,
 			       bool is_deleted,
@@ -565,7 +570,7 @@ IfConfigSetNetlink::config_vif(const string& ifname,
 
 int
 IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
-					      uint16_t if_index,
+					      uint32_t if_index,
 					      const struct ether_addr& ether_addr,
 					      string& error_msg)
 {
@@ -674,7 +679,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetNetlink::set_interface_mtu(const string& ifname,
-				      uint16_t if_index,
+				      uint32_t if_index,
 				      uint32_t mtu,
 				      string& error_msg)
 {
@@ -778,7 +783,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 int
 IfConfigSetNetlink::add_vif_address(const string& ifname,
 				    const string& vifname,
-				    uint16_t if_index,
+				    uint32_t if_index,
 				    bool is_broadcast,
 				    bool is_p2p,
 				    const IPvX& addr,
@@ -928,7 +933,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 int
 IfConfigSetNetlink::delete_vif_address(const string& ifname,
 				       const string& vifname,
-				       uint16_t if_index,
+				       uint32_t if_index,
 				       const IPvX& addr,
 				       uint32_t prefix_len,
 				       string& error_msg)

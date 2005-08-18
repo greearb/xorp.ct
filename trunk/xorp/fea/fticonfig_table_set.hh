@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.14 2004/12/01 03:28:09 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.15 2005/03/25 02:53:04 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -415,6 +415,64 @@ public:
     
 private:
     ClickSocketReader	_cs_reader;
+};
+
+class FtiConfigTableSetIPHelper : public FtiConfigTableSet {
+public:
+    FtiConfigTableSetIPHelper(FtiConfig& ftic);
+    virtual ~FtiConfigTableSetIPHelper();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+    
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table4(const list<Fte4>& fte_list);
+
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries4();
+
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table6(const list<Fte6>& fte_list);
+    
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries6();
 };
 
 #endif // __FEA_FTICONFIG_TABLE_SET_HH__

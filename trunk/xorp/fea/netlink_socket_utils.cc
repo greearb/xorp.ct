@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.24 2005/05/08 19:27:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.25 2005/06/20 22:45:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,10 +21,10 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
-
-// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
-#ifdef HOST_OS_LINUX
+#endif
+#ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H

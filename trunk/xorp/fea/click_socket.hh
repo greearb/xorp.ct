@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.17 2005/03/25 02:53:00 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.18 2005/04/13 02:59:18 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -280,7 +280,7 @@ public:
      * 
      * @return the number of bytes which were written, or -1 if error.
      */
-    ssize_t write(int fd, const void* data, size_t nbytes);
+    ssize_t write(XorpFd fd, const void* data, size_t nbytes);
 
     /**
      * Check the status of a previous command.
@@ -359,14 +359,14 @@ private:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_read(int fd, string& error_msg);
+    int force_read(XorpFd fd, string& error_msg);
 
     /**
      * Read data available for ClickSocket and invoke
      * ClickSocketObserver::clsock_data() on all observers of Click
      * socket.
      */
-    void select_hook(int fd, SelectorMask sm);
+    void io_event(XorpFd fd, IoEventType type);
 
     /**
      * Force socket to read data and return the result.
@@ -379,7 +379,7 @@ private:
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int  force_read_message(int fd, vector<uint8_t>& message,
+    int  force_read_message(XorpFd fd, vector<uint8_t>& message,
 			    string& error_msg);
 
     /**
@@ -513,8 +513,8 @@ private:
 
 private:
     EventLoop&	 _eventloop;
-    int		 _kernel_fd;
-    int		 _user_fd;
+    XorpFd	 _kernel_fd;
+    XorpFd	 _user_fd;
     ObserverList _ol;
 
     uint16_t 	 _seqno;	// Seqno of next write()

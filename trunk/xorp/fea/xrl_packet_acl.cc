@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.2 2005/03/05 01:41:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_packet_acl.cc,v 1.3 2005/03/25 02:53:16 pavlin Exp $"
 
 #include <map>
 
@@ -21,6 +21,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/random.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/transaction.hh"
@@ -593,7 +594,7 @@ XrlPacketAclTarget::timeout_browse(uint32_t token)
     PaBrowseDB::iterator i = _bdb.find(token);
     if (i == _bdb.end())
 	return;
-    debug_msg("Timing out token id %d\n", token);
+    debug_msg("Timing out token id %u\n", XORP_UINT_CAST(token));
     _bdb.erase(i);
 }
 

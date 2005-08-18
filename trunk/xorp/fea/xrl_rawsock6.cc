@@ -12,14 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.4 2005/03/24 02:50:42 pavlin Exp $"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.5 2005/03/25 02:53:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,6 +20,22 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
 
 #include "xrl/interfaces/fea_rawpkt6_client_xif.hh"
 

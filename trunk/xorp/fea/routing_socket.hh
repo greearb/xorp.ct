@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.11 2004/12/08 01:41:20 pavlin Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.12 2005/03/25 02:53:14 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -118,7 +118,7 @@ private:
      * RoutingSocketObserver::rtsock_data() on all observers of routing
      * socket.
      */
-    void select_hook(int fd, SelectorMask sm);
+    void io_event(XorpFd fd, IoEventType type);
 
     RoutingSocket& operator=(const RoutingSocket&);	// Not implemented
     RoutingSocket(const RoutingSocket&);		// Not implemented

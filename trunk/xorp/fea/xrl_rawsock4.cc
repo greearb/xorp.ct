@@ -12,14 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.13 2005/03/24 02:50:42 pavlin Exp $"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.14 2005/03/25 02:53:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -27,6 +20,27 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+
+/* Windows has no 'struct ip', so ship one. */
+#ifdef HOST_OS_WINDOWS
+#include "ip.h"
+#endif
 
 #include "xrl/interfaces/fea_rawpkt4_client_xif.hh"
 
@@ -74,13 +88,13 @@ public:
 
 	XLOG_ASSERT(data.size() >= MIN_IP_PKT_BYTES);
 
-	const ip* hdr = reinterpret_cast<const ip*>(&data[0]);
+	const struct ip* hdr = reinterpret_cast<const ip*>(&data[0]);
 	if (hdr->ip_p != protocol()) {
-	    debug_msg("Ignore packet with proto %d (watching for %d)\n",
-		      hdr->ip_p, protocol());
+	    debug_msg("Ignore packet with proto %u (watching for %u)\n",
+		      XORP_UINT_CAST(hdr->ip_p),
+		      XORP_UINT_CAST(protocol()));
 	    return;
 	}
-
 	const IfTree& it = _rsm.ifmgr().iftree();
 
 	//

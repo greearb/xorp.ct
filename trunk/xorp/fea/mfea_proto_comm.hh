@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.10 2005/03/25 02:53:11 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.11 2005/04/30 21:59:57 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -25,7 +25,9 @@
 
 #include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 
 #include "libxorp/eventloop.hh"
 #include "libproto/proto_unit.hh"
@@ -94,7 +96,7 @@ public:
      * 
      * @return the socket value if valid, otherwise XORP_ERROR.
      */
-    int		proto_socket() const { return (_proto_socket); }
+    XorpFd	proto_socket() const { return (_proto_socket); }
     
     /**
      * Open an protocol socket.
@@ -102,7 +104,7 @@ public:
      * The protocol socket is specific to the particular protocol of
      * this entry.
      * 
-     * @return the socket value on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		open_proto_socket();
     
@@ -111,7 +113,7 @@ public:
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_proto_socket_selector();
+    int		add_proto_socket_callback();
 
     /**
      * Close the protocol socket.
@@ -183,7 +185,7 @@ public:
      * multicast interface.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		set_default_multicast_vif(uint16_t vif_index);
+    int		set_default_multicast_vif(uint32_t vif_index);
     
     /**
      * Join a multicast group on an interface.
@@ -193,7 +195,7 @@ public:
      * @param group the multicast group to join.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		join_multicast_group(uint16_t vif_index, const IPvX& group);
+    int		join_multicast_group(uint32_t vif_index, const IPvX& group);
     
     /**
      * Leave a multicast group on an interface.
@@ -203,18 +205,18 @@ public:
      * @param group the multicast group to leave.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		leave_multicast_group(uint16_t vif_index, const IPvX& group);
+    int		leave_multicast_group(uint32_t vif_index, const IPvX& group);
     
     /**
      * Read data from a protocol socket, and then call the appropriate protocol
      * module to process it.
      *
-     * This is called as a SelectorList callback.
+     * This is called as a IoEventCb callback.
      * @param fd file descriptor that with event caused this method to be
      * called.
      * @param m mask representing event type.
      */
-    void	proto_socket_read(int fd, SelectorMask m);
+    void	proto_socket_read(XorpFd fd, IoEventType type);
     
     /**
      * Send a packet on a protocol socket.
@@ -235,7 +237,7 @@ public:
      * @param datalen the length of the data in @ref databuf.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_socket_write(uint16_t vif_index,
+    int		proto_socket_write(uint32_t vif_index,
 				   const IPvX& src, const IPvX& dst,
 				   int ip_ttl, int ip_tos,
 				   bool is_router_alert,
@@ -268,15 +270,17 @@ private:
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
     int		  _ipproto;	// The protocol number (IPPROTO_*)
     xorp_module_id _module_id;	// The corresponding module id (XORP_MODULE_*)
-    int		  _proto_socket;   // The socket for protocol message
+    XorpFd	  _proto_socket;   // The socket for protocol message
     uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving
     uint8_t*	  _sndbuf0;	// Data buffer0 for sending
     uint8_t*	  _rcvbuf1;	// Data buffer1 for receiving
     uint8_t*	  _sndbuf1;	// Data buffer1 for sending
     uint8_t*	  _rcvcmsgbuf;	// Control recv info (IPv6 only)
     uint8_t*	  _sndcmsgbuf;	// Control send info (IPv6 only)
+#ifdef HAVE_STRUCT_MSGHDR
     struct msghdr _rcvmh;	// The msghdr structure used by recvmsg()
     struct msghdr _sndmh;	// The msghdr structure used by sendmsg()
+#endif
     struct iovec  _rcviov[2];	// The rcvmh scatter/gatter array
     struct iovec  _sndiov[2];	// The sndmh scatter/gatter array
     struct sockaddr_in  _from4;	// The source addr of recvmsg() msg (IPv4)

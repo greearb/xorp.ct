@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.36 2005/03/25 02:53:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.37 2005/07/26 19:24:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,22 +21,27 @@
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
 
+#include "libcomm/comm_api.h"
+
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_ARP_H
 #include <net/if_arp.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
-
 #ifdef HAVE_NETINET_IN_VAR_H
 #include <netinet/in_var.h>
 #endif
 #ifdef HAVE_NETINET6_IN6_VAR_H
 #include <netinet6/in6_var.h>
 #endif
+
 #ifdef HAVE_NETINET6_ND6_H
 #ifdef HAVE_BROKEN_CXX_NETINET6_ND6_H
 // XXX: a hack needed if <netinet6/nd6.h> is not C++ friendly
@@ -141,7 +146,7 @@ IfConfigSetIoctl::stop(string& error_msg)
 	return (XORP_OK);
 
     if (_s4 >= 0) {
-	ret_value4 = close(_s4);
+	ret_value4 = comm_close(_s4);
 	_s4 = -1;
 	if (ret_value4 < 0) {
 	    error_msg = c_format("Could not close IPv4 ioctl() "
@@ -149,7 +154,7 @@ IfConfigSetIoctl::stop(string& error_msg)
 	}
     }
     if (_s6 >= 0) {
-	ret_value6 = close(_s6);
+	ret_value6 = comm_close(_s6);
 	_s6 = -1;
 	if ((ret_value6 < 0) && (ret_value4 >= 0)) {
 	    error_msg = c_format("Could not close IPv6 ioctl() "
@@ -199,7 +204,7 @@ IfConfigSetIoctl::config_end(string& error_msg)
 
 int
 IfConfigSetIoctl::add_interface(const string& ifname,
-				uint16_t if_index,
+				uint32_t if_index,
 				string& error_msg)
 {
     debug_msg("add_interface "
@@ -217,7 +222,7 @@ IfConfigSetIoctl::add_interface(const string& ifname,
 int
 IfConfigSetIoctl::add_vif(const string& ifname,
 			  const string& vifname,
-			  uint16_t if_index,
+			  uint32_t if_index,
 			  string& error_msg)
 {
     debug_msg("add_vif "
@@ -235,7 +240,7 @@ IfConfigSetIoctl::add_vif(const string& ifname,
 
 int
 IfConfigSetIoctl::config_interface(const string& ifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   uint32_t flags,
 				   bool is_up,
 				   bool is_deleted,
@@ -244,7 +249,9 @@ IfConfigSetIoctl::config_interface(const string& ifname,
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
+	      ifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
     UNUSED(ifname);
@@ -261,7 +268,7 @@ IfConfigSetIoctl::config_interface(const string& ifname,
 int
 IfConfigSetIoctl::config_vif(const string& ifname,
 			     const string& vifname,
-			     uint16_t if_index,
+			     uint32_t if_index,
 			     uint32_t flags,
 			     bool is_up,
 			     bool is_deleted,
@@ -275,7 +282,8 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
 	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
 	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, flags,
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
 	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false",
 	      (broadcast)? "true" : "false",
@@ -301,7 +309,7 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 
 int
 IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
-					    uint16_t if_index,
+					    uint32_t if_index,
 					    const struct ether_addr& ether_addr,
 					    string& error_msg)
 {
@@ -320,13 +328,13 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetIoctl::set_interface_mtu(const string& ifname,
-				    uint16_t if_index,
+				    uint32_t if_index,
 				    uint32_t mtu,
 				    string& error_msg)
 {
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, mtu);
+	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -340,7 +348,7 @@ IfConfigSetIoctl::set_interface_mtu(const string& ifname,
 int
 IfConfigSetIoctl::add_vif_address(const string& ifname,
 				  const string& vifname,
-				  uint16_t if_index,
+				  uint32_t if_index,
 				  bool is_broadcast,
 				  bool is_p2p,
 				  const IPvX& addr,
@@ -353,7 +361,8 @@ IfConfigSetIoctl::add_vif_address(const string& ifname,
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -372,7 +381,7 @@ IfConfigSetIoctl::add_vif_address(const string& ifname,
 int
 IfConfigSetIoctl::add_vif_address4(const string& ifname,
 				   const string& vifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   bool is_broadcast,
 				   bool is_p2p,
 				   const IPvX& addr,
@@ -385,7 +394,8 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -399,12 +409,12 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     error_msg = "method not supported";
 
     return (XORP_ERROR);
-}
+};
 
 int
 IfConfigSetIoctl::add_vif_address6(const string& ifname,
 				   const string& vifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   bool is_p2p,
 				   const IPvX& addr,
 				   const IPvX& dst,
@@ -416,7 +426,8 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	      "addr = %s dst = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_p2p)? "true" : "false", addr.str().c_str(),
-	      dst.str().c_str(), prefix_len);
+	      dst.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -434,7 +445,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 int
 IfConfigSetIoctl::delete_vif_address(const string& ifname,
 				     const string& vifname,
-				     uint16_t if_index,
+				     uint32_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
 				     string& error_msg)
@@ -443,7 +454,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      prefix_len);
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -484,7 +495,7 @@ IfConfigSetIoctl::config_end(string& error_msg)
 
 int
 IfConfigSetIoctl::add_interface(const string& ifname,
-				uint16_t if_index,
+				uint32_t if_index,
 				string& error_msg)
 {
     debug_msg("add_interface "
@@ -503,7 +514,7 @@ IfConfigSetIoctl::add_interface(const string& ifname,
 int
 IfConfigSetIoctl::add_vif(const string& ifname,
 			  const string& vifname,
-			  uint16_t if_index,
+			  uint32_t if_index,
 			  string& error_msg)
 {
     debug_msg("add_vif "
@@ -522,18 +533,30 @@ IfConfigSetIoctl::add_vif(const string& ifname,
 
 int
 IfConfigSetIoctl::config_interface(const string& ifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   uint32_t flags,
 				   bool is_up,
 				   bool is_deleted,
 				   string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    return (XORP_ERROR);
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(flags);
+    UNUSED(is_up);
+    UNUSED(is_deleted);
+    UNUSED(error_msg);
+#else
     struct ifreq ifreq;
 
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
+	      ifname.c_str(),
+	      XORP_UINT_CAST(if_index),
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
     UNUSED(if_index);
@@ -550,12 +573,13 @@ IfConfigSetIoctl::config_interface(const string& ifname,
     }
 
     return (XORP_OK);
+#endif // HOST_OS_WINDOWS
 }
 
 int
 IfConfigSetIoctl::config_vif(const string& ifname,
 			     const string& vifname,
-			     uint16_t if_index,
+			     uint32_t if_index,
 			     uint32_t flags,
 			     bool is_up,
 			     bool is_deleted,
@@ -569,7 +593,9 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
 	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
 	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, flags,
+	      ifname.c_str(), vifname.c_str(),
+	      XORP_UINT_CAST(if_index),
+	      XORP_UINT_CAST(flags),
 	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false",
 	      (broadcast)? "true" : "false",
@@ -596,7 +622,7 @@ IfConfigSetIoctl::config_vif(const string& ifname,
 
 int
 IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
-					    uint16_t if_index,
+					    uint32_t if_index,
 					    const struct ether_addr& ether_addr,
 					    string& error_msg)
 {
@@ -657,15 +683,24 @@ IfConfigSetIoctl::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetIoctl::set_interface_mtu(const string& ifname,
-				    uint16_t if_index,
+				    uint32_t if_index,
 				    uint32_t mtu,
 				    string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    return (XORP_ERROR);
+    UNUSED(ifname);
+    UNUSED(if_index);
+    UNUSED(mtu);
+    UNUSED(error_msg);
+#else
     struct ifreq ifreq;
 
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, mtu);
+	      ifname.c_str(),
+	      XORP_UINT_CAST(if_index),
+	      XORP_UINT_CAST(mtu));
 
     UNUSED(if_index);
 
@@ -678,12 +713,13 @@ IfConfigSetIoctl::set_interface_mtu(const string& ifname,
 	return (XORP_ERROR);
     }
     return (XORP_OK);
+#endif /* HOST_OS_WINDOWS */
 }
 
 int
 IfConfigSetIoctl::add_vif_address(const string& ifname,
 				  const string& vifname,
-				  uint16_t if_index,
+				  uint32_t if_index,
 				  bool is_broadcast,
 				  bool is_p2p,
 				  const IPvX& addr,
@@ -696,7 +732,8 @@ IfConfigSetIoctl::add_vif_address(const string& ifname,
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     switch (addr.af()) {
     case AF_INET:
@@ -729,7 +766,7 @@ IfConfigSetIoctl::add_vif_address(const string& ifname,
 int
 IfConfigSetIoctl::add_vif_address4(const string& ifname,
 				   const string& vifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   bool is_broadcast,
 				   bool is_p2p,
 				   const IPvX& addr,
@@ -742,7 +779,8 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-	      addr.str().c_str(), dst_or_bcast.str().c_str(), prefix_len);
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(vifname);
     UNUSED(if_index);
@@ -753,7 +791,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	return (XORP_ERROR);
     }
 
-#ifdef SIOCAIFADDR
+#if defined(SIOCAIFADDR)
     //
     // Add an alias address
     //
@@ -773,7 +811,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     }
     return (XORP_OK);
 
-#else // ! SIOCAIFADDR
+#elif defined(SIOCSIFADDR)
 
     //
     // Set a new address
@@ -812,7 +850,15 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 	}
     }
     return (XORP_OK);
-#endif // ! SIOCAIFADDR
+#else
+    return (XORP_ERROR);
+    UNUSED(ifname);
+    UNUSED(is_p2p);
+    UNUSED(addr);
+    UNUSED(dst_or_bcast);
+    UNUSED(prefix_len);
+    UNUSED(error_msg);
+#endif
 }
 
 /**
@@ -821,7 +867,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
 int
 IfConfigSetIoctl::add_vif_address6(const string& ifname,
 				   const string& vifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   bool is_p2p,
 				   const IPvX& addr,
 				   const IPvX& dst,
@@ -833,7 +879,8 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	      "addr = %s dst = %s prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_p2p)? "true" : "false", addr.str().c_str(),
-	      dst.str().c_str(), prefix_len);
+	      dst.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
 #ifndef HAVE_IPV6
     UNUSED(ifname);
@@ -855,7 +902,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	return (XORP_ERROR);
     }
 
-#ifdef SIOCAIFADDR_IN6
+# if defined(SIOCAIFADDR_IN6)
     //
     // Add an alias address
     //
@@ -880,7 +927,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     }
     return (XORP_OK);
 
-#else // ! SIOCAIFADDR_IN6
+# elif defined(SIOCSIFADDR)
 
     //
     // Set a new address
@@ -916,7 +963,16 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	}
     }
     return (XORP_OK);
-#endif // ! SIOCAIFADDR_IN6
+# else
+    return (XORP_ERROR);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(if_index);
+    UNUSED(is_p2p);
+    UNUSED(addr);
+    UNUSED(dst);
+    UNUSED(prefix_len);
+# endif
 
 #endif // HAVE_IPV6
 }
@@ -924,7 +980,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 int
 IfConfigSetIoctl::delete_vif_address(const string& ifname,
 				     const string& vifname,
-				     uint16_t if_index,
+				     uint32_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
 				     string& error_msg)
@@ -933,7 +989,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      prefix_len);
+	      XORP_UINT_CAST(prefix_len));
 
     // Check that the family is supported
     switch (addr.af()) {
@@ -970,13 +1026,13 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	memset(&ifreq, 0, sizeof(ifreq));
 	strncpy(ifreq.ifr_name, ifname.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-#ifndef HOST_OS_LINUX
+#if !defined(HOST_OS_LINUX) && defined(SIOCDIFADDR)
 	addr.copy_out(ifreq.ifr_addr);
 	if (ioctl(_s4, SIOCDIFADDR, &ifreq) < 0) {
 	    error_msg = c_format("%s", strerror(errno));
 	    return (XORP_ERROR);
 	}
-#else // HOST_OS_LINUX
+#elif defined(HOST_OS_LINUX)
 	// XXX: In case of Linux, SIOCDIFADDR doesn't delete IPv4 addresses.
 	// Hence, we use SIOCSIFADDR to add 0.0.0.0 as an address. The
 	// effect of this hack is that the IPv4 address on that interface
@@ -987,7 +1043,12 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	    error_msg = c_format("%s", strerror(errno));
 	    return (XORP_ERROR);
 	}
-#endif // HOST_OS_LINUX
+#else
+	return (XORP_ERROR);	
+	UNUSED(ifname);
+	UNUSED(addr);
+	UNUSED(error_msg);
+#endif
 	return (XORP_OK);
 	break;
     }
@@ -995,7 +1056,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-#ifdef SIOCDIFADDR_IN6
+#if !defined(HOST_OS_LINUX) && defined(SIOCDIFADDR_IN6)
 	struct in6_ifreq in6_ifreq;
 
 	UNUSED(if_index);
@@ -1013,7 +1074,7 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	}
 	return (XORP_OK);
 
-#else // ! SIOCDIFADDR_IN6
+#elif defined(HOST_OS_LINUX)
 	//
 	// XXX: Linux uses a weird struct in6_ifreq to do this, and this
 	// name clashes with the KAME in6_ifreq.
@@ -1033,7 +1094,12 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	    return (XORP_ERROR);
 	}
 	return (XORP_OK);
-#endif // ! SIOCDIFADDR_IN6
+#else
+	return (XORP_ERROR);
+	UNUSED(ifname);
+	UNUSED(prefix_len);
+	UNUSED(if_index);
+#endif
 
 	break;
     }

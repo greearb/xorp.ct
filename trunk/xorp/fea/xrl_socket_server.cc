@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.23 2005/05/11 00:32:34 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.24 2005/07/16 01:56:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -36,6 +36,15 @@ static const char* NOT_FOUND_MSG   = "Socket not found.";
 static const char* NO_PIF_MSG 	   = "Could not find interface index "
 				     "associated with address.";
 static const char* NO_IPV6_MSG = "IPv6 is not available on host";
+
+// XXX: This is a horrible hack. This file needs considerable
+// cleanup before it can be merged with a cross-platform build
+#ifdef HOST_OS_WINDOWS
+#define _FEA_BUF_CONST_CAST(x)	\
+	(const_cast<char *>(reinterpret_cast<const char *>((x))))
+#else
+#define _FEA_BUF_CONST_CAST(x)	(x)
+#endif
 
 /**
  * XrlRouter that informs XrlSocketServer of events.
@@ -295,10 +304,10 @@ XrlSocketServer::remove_sockets_owned_by(const string& target)
 // RemoteSocket<A>
 
 template <typename A>
-XrlSocketServer::RemoteSocket<A>::RemoteSocket(XrlSocketServer&	ss,
-			      RemoteSocketOwner&		owner,
-			      int				fd,
-			      const A&				addr)
+XrlSocketServer::RemoteSocket<A>::RemoteSocket<A>(XrlSocketServer& ss,
+			      RemoteSocketOwner&		   owner,
+			      XorpFd				   fd,
+			      const A&				   addr)
     : _ss(ss), _owner(owner), _fd(fd), _addr(addr), _sockid(XUID().str())
 {
     _owner.incr_socket_count();
@@ -308,7 +317,7 @@ template <typename A>
 XrlSocketServer::RemoteSocket<A>::~RemoteSocket()
 {
     EventLoop& eventloop = _ss.eventloop();
-    eventloop.remove_selector(_fd);
+    eventloop.remove_ioevent_cb(_fd);
     comm_close(_fd);
     _owner.decr_socket_count();
 }
@@ -319,23 +328,23 @@ XrlSocketServer::RemoteSocket<A>::set_data_recv_enable(bool en)
 {
     EventLoop& eventloop = _ss.eventloop();
     if (en) {
-	debug_msg("Adding selector for %d\n", _fd);
-	if (eventloop.add_selector(_fd, SEL_RD,
-			callback(this, &RemoteSocket::data_sel_cb)) == false) {
-	    XLOG_ERROR("FAILED TO ADD SELECTOR %d\n", _fd);
+	debug_msg("Adding io event hook for %s\n", _fd.str().c_str());
+	if (eventloop.add_ioevent_cb(_fd, IOT_READ,
+			callback(this, &RemoteSocket::data_io_cb)) == false) {
+	    XLOG_ERROR("FAILED TO ADD IO CALLBACK %s\n", _fd.str().c_str());
 	}
     } else {
-	debug_msg("Removing selector for %d\n", _fd);
-	eventloop.remove_selector(_fd);
+	debug_msg("Removing io event hook for %s\n", _fd.str().c_str());
+	eventloop.remove_ioevent_cb(_fd);
     }
 }
 
 template <typename A>
 void
-XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
+XrlSocketServer::RemoteSocket<A>::data_io_cb(XorpFd fd, IoEventType)
 {
     XLOG_ASSERT(fd == _fd);
-    debug_msg("data_sel_cb %d\n", fd);
+    debug_msg("data_io_cb %s\n", fd.str().c_str());
     //
     // Create command.  We use buffer associated with this command type
     // to read data into (to avoid a copy).
@@ -350,8 +359,8 @@ XrlSocketServer::RemoteSocket<A>::data_sel_cb(int fd, SelectorMask)
     // XXX buffer is overprovisioned for normal case and size hard-coded...
     // It get's resized a little later on to amount of data read.
     cmd->data().resize(64000);
-    ssize_t rsz = recvfrom(fd, &cmd->data()[0], cmd->data().size(), 0,
-			   sa, &sin_len);
+    ssize_t rsz = recvfrom(fd, XORP_BUF_CAST(&cmd->data()[0]),
+			   cmd->data().size(), 0, sa, &sin_len);
 
     if (rsz < 0) {
 	delete cmd;
@@ -376,31 +385,42 @@ XrlSocketServer::RemoteSocket<A>::set_connect_recv_enable(bool en)
 {
     EventLoop& eventloop = _ss.eventloop();
     if (en) {
-	eventloop.remove_selector(_fd, SEL_RD,
-			  callback(this, &RemoteSocket::connect_sel_cb));
+	eventloop.remove_ioevent_cb(_fd, IOT_ACCEPT,
+			  callback(this, &RemoteSocket::accept_io_cb));
     } else {
-	eventloop.remove_selector(_fd);
+	eventloop.remove_ioevent_cb(_fd);
     }
 }
 
 template <typename A>
 void
-XrlSocketServer::RemoteSocket<A>::connect_sel_cb(int fd, SelectorMask)
+XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
 {
     XLOG_ASSERT(fd == _fd);
 
-    sockaddr sa;
+    struct sockaddr_storage sa;
     socklen_t sa_len = sizeof(sa);
-    int afd = accept(_fd, &sa, &sa_len);
-    if (afd < 0) {
+
+    XorpFd afd = comm_sock_accept(_fd);
+    if (!afd.is_valid()) {
 	ref_ptr<XrlSocketCommandBase*> ecmd = new
-	    SocketUserSendErrorEvent<A>(owner()->tgt_name(),
-					sockid(), strerror(errno), false);
+	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
+comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
 
-    XLOG_ASSERT(sa.sa_family == A::af());
+    // XXX
+    int error = getpeername(afd, (struct sockaddr *)&sa, &sa_len);
+    if (error != 0) {
+	ref_ptr<XrlSocketCommandBase*> ecmd = new
+	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
+comm_get_last_error_str(), false);
+	owner().enqueue(ecmd);
+	return;
+    }
+
+    XLOG_ASSERT(sa.ss_family == A::af());
 
     _ss.push_socket(new RemoteSocket<A>(_ss, owner(), afd, sa));
 
@@ -654,8 +674,8 @@ XrlSocketServer::socket4_0_1_tcp_open_and_bind(const string&	creator,
 
     in_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_tcp4(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_tcp4(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -688,8 +708,8 @@ XrlSocketServer::socket4_0_1_udp_open_and_bind(const string&	creator,
 
     in_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_udp4(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_udp4(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -716,8 +736,11 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
 						string&		sockid)
 {
     debug_msg("udp_open_bind_join(%s, %s, %u, %s, ttl=%u, reuse %d)\n",
-	      creator.c_str(), local_addr.str().c_str(), local_port,
-	      mcast_addr.str().c_str(), ttl, reuse);
+	      creator.c_str(), local_addr.str().c_str(),
+	      XORP_UINT_CAST(local_port),
+	      mcast_addr.str().c_str(),
+	      XORP_UINT_CAST(ttl),
+	      reuse);
 
     if (status() != SERVICE_RUNNING)
 	return XrlCmdError::COMMAND_FAILED(NOT_RUNNING_MSG);
@@ -734,12 +757,12 @@ XrlSocketServer::socket4_0_1_udp_open_bind_join(const string&	creator,
     in_addr grp;
     mcast_addr.copy_out(grp);
 
-    int fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse,
+    XorpFd fd = comm_bind_join_udp4(&grp, &ia, htons(local_port), reuse,
 				 is_blocking);
     if (fd <= 0) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
-    debug_msg("fd = %d\n", fd);
+    debug_msg("fd = %s\n", fd.str().c_str());
     if (local_addr != IPv4::ANY() && comm_set_iface4(fd, &ia) != XORP_OK) {
 	comm_close(fd);
 	return XrlCmdError::COMMAND_FAILED("Setting interface.");
@@ -794,8 +817,8 @@ XrlSocketServer::socket4_0_1_tcp_open_bind_connect(
     in_addr ia;
     local_addr.copy_out(ia);
 
-    int fd = comm_bind_tcp4(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_tcp4(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -849,10 +872,10 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
     remote_addr.copy_out(ra);
 
     int in_progress = 0;
-    int fd = comm_bind_connect_udp4(&ia, htons(local_port),
+    XorpFd fd = comm_bind_connect_udp4(&ia, htons(local_port),
 				    &ra, htons(remote_port),
 				    is_blocking, &in_progress);
-    if (fd <= 0) {
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -990,7 +1013,9 @@ XrlSocketServer::socket4_0_1_send(
     for (ci = _v4sockets.begin(); ci != _v4sockets.end(); ++ci) {
 	RemoteSocket<IPv4>* rs = ci->get();
 	if (rs->sockid() == sockid) {
-	    int out = send(rs->fd(), &data[0], data.size(), 0);
+	    int out = send(rs->fd(),
+reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+			   data.size(), 0);
 	    if (out == (int)data.size()) {
 		return XrlCmdError::OKAY();
 	    }
@@ -1035,6 +1060,7 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
+	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1046,7 +1072,9 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 			 "but platform has no MSG_EOF\n");
 #endif
 
-	int out = send(rs->fd(), &data[0], data.size(), flags);
+	int out = send(rs->fd(),
+reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+			data.size(), flags);
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
 	}
@@ -1074,7 +1102,9 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 		return XrlCmdError::COMMAND_FAILED("Port out of range.");
 	    }
 	    sai.sin_port = htons(remote_port);
-	    int out = sendto(rs->fd(), &data[0], data.size(), 0,
+	    int out = sendto(rs->fd(),
+reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+			     data.size(), 0,
 			     reinterpret_cast<const sockaddr*>(&sai),
 			     sizeof(sai));
 
@@ -1129,6 +1159,7 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
+	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1139,9 +1170,9 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	    XLOG_WARNING("sendto with end_of_file, "
 			 "but platform has no MSG_EOF\n");
 #endif
-	int out = sendto(rs->fd(), &data[0], data.size(), flags,
-			 reinterpret_cast<const sockaddr*>(&sai),
-			 sizeof(sai));
+	int out = sendto(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
+			 data.size(), flags,
+			 reinterpret_cast<const sockaddr*>(&sai), sizeof(sai));
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
 	}
@@ -1180,12 +1211,14 @@ XrlSocketServer::socket4_0_1_send_from_multicast_if(
     // Save old multicast interface so it can be restored after send.
     uint32_t	oa;
     socklen_t	oa_len = sizeof(oa);
-    if (0 != getsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &oa, &oa_len)) {
+    if (0 != getsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+			XORP_SOCKOPT_CAST(&oa), &oa_len)) {
 	XLOG_WARNING("Failed to get multicast interface.");
     }
 
     uint32_t a  = if_addr.addr();
-    if (0 != setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &a, sizeof(a))) {
+    if (0 != setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF,
+			XORP_SOCKOPT_CAST(&a), sizeof(a))) {
 	return XrlCmdError::COMMAND_FAILED(
 		"Could not set default multicast interface to " +
 		if_addr.str() );
@@ -1194,7 +1227,8 @@ XrlSocketServer::socket4_0_1_send_from_multicast_if(
     XrlCmdError r = socket4_0_1_send_to(sockid, group_addr, group_port, data);
 
     // Restore old multicast interface
-    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, &oa, sizeof(oa));
+    setsockopt(fd, IPPROTO_IP, IP_MULTICAST_IF, XORP_SOCKOPT_CAST(&oa),
+	       sizeof(oa));
     return r;
 }
 
@@ -1220,12 +1254,14 @@ XrlSocketServer::socket4_0_1_set_socket_option(const string&	sockid,
 
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       &optval, sizeof(optval)) != 0) {
+const_cast<char*>(reinterpret_cast<const char*>(&optval)),
+		       sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_ttl") == 0) {
 	if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
-		       &optval, sizeof(optval)) != 0) {
+			_FEA_BUF_CONST_CAST(&optval),
+			sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {
@@ -1257,12 +1293,12 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	sockid,
     socklen_t			optlen = sizeof(optval);
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (getsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       &optval, &optlen) != 0) {
+			_FEA_BUF_CONST_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_ttl") == 0) {
 	if (getsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
-		       &optval, &optlen) != 0) {
+			XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {
@@ -1297,8 +1333,8 @@ XrlSocketServer::socket6_0_1_tcp_open_and_bind(const string&	creator,
 
     in6_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_tcp6(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_tcp6(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -1334,8 +1370,8 @@ XrlSocketServer::socket6_0_1_udp_open_and_bind(const string&	creator,
 
     in6_addr ia;
     local_addr.copy_out(ia);
-    int fd = comm_bind_udp6(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_udp6(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -1385,12 +1421,12 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     in6_addr grp;
     mcast_addr.copy_out(grp);
 
-    int fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse,
+    XorpFd fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse,
 				 is_blocking);
-    if (fd <= 0) {
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
-    debug_msg("fd = %d\n", fd);
+    debug_msg("fd = %s\n", fd.str().c_str());
     if (local_addr != IPv6::ANY() &&
 	comm_set_iface6(fd, pif_index) != XORP_OK) {
 	comm_close(fd);
@@ -1449,8 +1485,8 @@ XrlSocketServer::socket6_0_1_tcp_open_bind_connect(
     in6_addr ia;
     local_addr.copy_out(ia);
 
-    int fd = comm_bind_tcp6(&ia, htons(local_port), is_blocking);
-    if (fd <= 0) {
+    XorpFd fd = comm_bind_tcp6(&ia, htons(local_port), is_blocking);
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -1507,10 +1543,10 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
     remote_addr.copy_out(ra);
 
     int in_progress = 0;
-    int fd = comm_bind_connect_udp6(&ia, htons(local_port),
+    XorpFd fd = comm_bind_connect_udp6(&ia, htons(local_port),
 				    &ra, htons(remote_port),
 				    is_blocking, &in_progress);
-    if (fd <= 0) {
+    if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
 
@@ -1666,7 +1702,8 @@ XrlSocketServer::socket6_0_1_send(
     for (ci = _v6sockets.begin(); ci != _v6sockets.end(); ++ci) {
 	RemoteSocket<IPv6>* rs = ci->get();
 	if (rs->sockid() == sockid) {
-	    int out = send(rs->fd(), &data[0], data.size(), 0);
+	    int out = send(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
+			   data.size(), 0);
 	    if (out == (int)data.size()) {
 		return XrlCmdError::OKAY();
 	    }
@@ -1714,6 +1751,7 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
+	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1725,7 +1763,8 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 			 "but platform has no MSG_EOF\n");
 #endif
 
-	int out = send(rs->fd(), &data[0], data.size(), flags);
+	int out = send(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
+			data.size(), flags);
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
 	}
@@ -1756,7 +1795,8 @@ XrlSocketServer::socket6_0_1_send_to(const string&		sockid,
 		return XrlCmdError::COMMAND_FAILED("Port out of range.");
 	    }
 	    sai.sin6_port = htons(remote_port);
-	    int out = sendto(rs->fd(), &data[0], data.size(), 0,
+	    int out = sendto(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
+			     data.size(), 0,
 			     reinterpret_cast<const sockaddr*>(&sai),
 			     sizeof(sai));
 
@@ -1814,6 +1854,7 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	if (end_of_file)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
+	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1824,9 +1865,9 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	    XLOG_WARNING("sendto with end_of_file, "
 			 "but platform has no MSG_EOF\n");
 #endif
-	int out = sendto(rs->fd(), &data[0], data.size(), flags,
-			 reinterpret_cast<const sockaddr*>(&sai),
-			 sizeof(sai));
+	int out = sendto(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
+			 data.size(), flags,
+			 reinterpret_cast<const sockaddr*>(&sai), sizeof(sai));
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
 	}
@@ -1876,7 +1917,7 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
     }
 
     if (0 != setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-			&pi, sizeof(pi))) {
+			XORP_SOCKOPT_CAST(&pi), sizeof(pi))) {
 	return XrlCmdError::COMMAND_FAILED(
 		"Could not set default multicast interface to " +
 			 if_addr.str() );
@@ -1885,7 +1926,8 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
     XrlCmdError r = socket6_0_1_send_to(sockid, group_addr, group_port, data);
 
     // Restore old multicast interface
-    setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF, &old_pi, sizeof(old_pi));
+    setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
+		XORP_SOCKOPT_CAST(&old_pi), sizeof(old_pi));
     return r;
 #else
     UNUSED(sockid);
@@ -1920,12 +1962,12 @@ XrlSocketServer::socket6_0_1_set_socket_option(const string&	sockid,
 
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       &optval, sizeof(optval)) != 0) {
+			XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
 	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-		       &optval, sizeof(optval)) != 0) {
+			XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {
@@ -1964,12 +2006,12 @@ XrlSocketServer::socket6_0_1_get_socket_option(const string&	sockid,
     socklen_t			optlen = sizeof(optval);
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       &optval, &optlen) != 0) {
+			XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
 	if (getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-		       &optval, &optlen) != 0) {
+		       XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {

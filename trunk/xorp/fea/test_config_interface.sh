@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_config_interface.sh,v 1.15 2004/07/07 20:01:30 pavlin Exp $
+# $XORP: xorp/fea/test_config_interface.sh,v 1.16 2005/03/10 01:45:52 pavlin Exp $
 #
 
 #
@@ -130,6 +130,18 @@ case ${HOSTNAME} in
 	exit 1
 	;;
     esac
+    ;;
+
+    floptop)
+    HAVE_IPV6="false"
+    IFNAME="eth65539"
+    PIF_INDEX="65539"
+    MAC="00:A0:C9:1C:E7:D4"
+    TEST_MAC="0:a0:c9:1c:e7:d5"
+    VIF_FLAG_BROADCAST="true"
+    VIF_FLAG_LOOPBACK="false"
+    VIF_FLAG_POINT_TO_POINT="false"
+    VIF_FLAG_MULTICAST="true"
     ;;
 
     *)

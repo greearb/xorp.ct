@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.44 2005/03/05 01:41:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.45 2005/03/25 02:53:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,7 +20,11 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 
@@ -66,14 +70,17 @@ IfConfig::IfConfig(EventLoop& eventloop,
       _ifc_get_getifaddrs(*this),
       _ifc_get_proc_linux(*this),
       _ifc_get_netlink(*this),
+      _ifc_get_iphelper(*this),
       _ifc_get_click(*this),
       _ifc_set_dummy(*this),
       _ifc_set_ioctl(*this),
       _ifc_set_netlink(*this),
+      _ifc_set_iphelper(*this),
       _ifc_set_click(*this),
       _ifc_observer_dummy(*this),
       _ifc_observer_rtsock(*this),
       _ifc_observer_netlink(*this),
+      _ifc_observer_iphelper(*this),
       _have_ipv4(false),
       _have_ipv6(false),
       _is_dummy(false),
@@ -355,11 +362,12 @@ IfConfig::test_have_ipv4() const
     if (is_dummy())
 	return true;
 
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s < 0)
+    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
+    if (!s.is_valid())
 	return (false);
     
-    close(s);
+    comm_close(s);
+
     return (true);
 }
 
@@ -378,11 +386,11 @@ IfConfig::test_have_ipv6() const
 #ifndef HAVE_IPV6
     return (false);
 #else
-    int s = socket(AF_INET6, SOCK_DGRAM, 0);
-    if (s < 0)
+    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
+    if (!s.is_valid())
 	return (false);
     
-    close(s);
+    comm_close(s);
     return (true);
 #endif // HAVE_IPV6
 }

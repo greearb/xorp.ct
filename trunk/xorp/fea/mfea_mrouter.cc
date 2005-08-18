@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.30 2005/05/07 03:03:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.31 2005/06/20 22:44:54 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -29,12 +29,18 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -95,8 +101,6 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node)
 {
-    _mrouter_socket = -1;
-    
     // Allocate the buffers
     _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
     _sndbuf0 = new uint8_t[IO_BUF_SIZE];
@@ -104,27 +108,32 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndbuf1 = new uint8_t[IO_BUF_SIZE];
     _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
-    
-    // recvmsg() and sendmsg() related initialization
+  
     switch (family()) {
     case AF_INET:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	_rcvmh.msg_name		= (caddr_t)&_from4;
 	_sndmh.msg_name		= (caddr_t)&_to4;
 	_rcvmh.msg_namelen	= sizeof(_from4);
 	_sndmh.msg_namelen	= sizeof(_to4);
+#endif
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	_rcvmh.msg_name		= (caddr_t)&_from6;
 	_sndmh.msg_name		= (caddr_t)&_to6;
 	_rcvmh.msg_namelen	= sizeof(_from6);
 	_sndmh.msg_namelen	= sizeof(_to6);
+#endif
 	break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
 	break;
     }
+
+#ifdef HAVE_STRUCT_MSGHDR_MSG_IOV
     _rcvmh.msg_iov		= _rcviov;
     _sndmh.msg_iov		= _sndiov;
     _rcvmh.msg_iovlen		= 1;
@@ -137,11 +146,14 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
     _sndiov[1].iov_len		= 0;
-    
+#endif
+
+#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
+#endif
     
     _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
     _mrt_api_mrt_mfc_flags_border_vif = false;
@@ -182,15 +194,17 @@ MfeaMrouter::start()
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
+#ifndef HOST_OS_WINDOWS
     // Check if we have the necessary permission
     if (geteuid() != 0) {
 	XLOG_ERROR("Must be root");
 	exit (1);
 	// return (XORP_ERROR);
     }
+#endif
     
     // Open kernel multicast routing access socket
-    if (open_mrouter_socket() < 0)
+    if (!open_mrouter_socket().is_valid())
 	return (XORP_ERROR);
     
     // Start the multicast routing in the kernel
@@ -235,6 +249,9 @@ MfeaMrouter::stop()
 bool
 MfeaMrouter::have_multicast_routing4() const
 {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+    return (false);
+#else
     int s;
     int mrouter_version = 1;	// XXX: hardcoded version
     
@@ -265,6 +282,7 @@ MfeaMrouter::have_multicast_routing4() const
     // Success
     close(s);
     return (true);
+#endif
 }
 
 /**
@@ -346,14 +364,16 @@ MfeaMrouter::kernel_mrouter_ipproto() const
  * 
  * Return value: The socket value on success, otherwise %XORP_ERROR.
  **/
-int
+XorpFd
 MfeaMrouter::open_mrouter_socket()
 {
-    if (_mrouter_socket >= 0)
+    XorpFd badfd;
+
+    if (_mrouter_socket.is_valid())
 	return (_mrouter_socket);
-    
+
     if (kernel_mrouter_ipproto() < 0)
-	return (XORP_ERROR);
+	return (badfd);
     
     //
     // XXX: if we have already IGMP or ICMPV6 socket, then reuse it
@@ -364,20 +384,19 @@ MfeaMrouter::open_mrouter_socket()
 	if (proto_comm == NULL)
 	    break;
 	_mrouter_socket = proto_comm->proto_socket();
-	if (_mrouter_socket >= 0)
+	if (_mrouter_socket.is_valid())
 	    return (_mrouter_socket);
 	break;
     } while (false);
     
-    if ( (_mrouter_socket = socket(family(), SOCK_RAW,
-				   kernel_mrouter_ipproto()))
-	 < 0) {
-	XLOG_ERROR("Cannot open mrouter socket: %s", strerror(errno));
-	return (XORP_ERROR);
+    _mrouter_socket = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    if (!_mrouter_socket.is_valid()) {
+	XLOG_ERROR("Cannot open mrouter socket");
+	return (badfd);
     }
     
-    if (adopt_mrouter_socket() < 0)
-	return (XORP_ERROR);
+    if (!adopt_mrouter_socket().is_valid())
+	return (badfd);
     
     return (_mrouter_socket);
 }
@@ -392,11 +411,13 @@ MfeaMrouter::open_mrouter_socket()
  * 
  * Return value: The adopted socket value on success, otherwise %XORP_ERROR.
  **/
-int
+XorpFd
 MfeaMrouter::adopt_mrouter_socket()
 {
-    if (_mrouter_socket < 0)
-	return (XORP_ERROR);
+    XorpFd badfd;
+
+    if (!_mrouter_socket.is_valid())
+	return (badfd);
     
     XLOG_ASSERT(is_up());
     
@@ -404,14 +425,19 @@ MfeaMrouter::adopt_mrouter_socket()
     if (comm_sock_set_rcvbuf(_mrouter_socket, SO_RCV_BUF_SIZE_MAX,
 			     SO_RCV_BUF_SIZE_MIN)
 	< SO_RCV_BUF_SIZE_MIN) {
-	close(_mrouter_socket);
-	_mrouter_socket = -1;
-	return (XORP_ERROR);
+	comm_close(_mrouter_socket);
+	_mrouter_socket.clear();
+	return (badfd);
     }
     
     // Protocol-specific setup
     switch (family()) {
     case AF_INET:
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("adopt_mrouter_socket() failed: "
+		   "IPv4 multicast routing not supported");
+	return (badfd);
+#endif
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
@@ -419,7 +445,7 @@ MfeaMrouter::adopt_mrouter_socket()
 #ifndef HAVE_IPV6_MULTICAST_ROUTING
 	XLOG_ERROR("adopt_mrouter_socket() failed: "
 		   "IPv6 multicast routing not supported");
-	return (XORP_ERROR);
+	return (badfd);
 #else
 	struct icmp6_filter filter;
 	// Filter all ICMPv6 messages
@@ -427,9 +453,9 @@ MfeaMrouter::adopt_mrouter_socket()
 	if (setsockopt(_mrouter_socket, IPPROTO_ICMPV6, ICMP6_FILTER,
 		       (void *)&filter, sizeof(filter)) < 0) {
 	    XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s", strerror(errno));
-	    close(_mrouter_socket);
-	    _mrouter_socket = -1;
-	    return (XORP_ERROR);
+	    comm_close(_mrouter_socket);
+	    _mrouter_socket.clear();
+	    return (badfd);
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
@@ -437,19 +463,19 @@ MfeaMrouter::adopt_mrouter_socket()
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
-	return (XORP_ERROR);
+	return (badfd);
     }
     
     // Assign a method to read from this socket
-    if (mfea_node().eventloop().add_selector(_mrouter_socket, SEL_RD,
+    if (mfea_node().eventloop().add_ioevent_cb(_mrouter_socket, IOT_READ,
 				callback(this,
 					 &MfeaMrouter::mrouter_socket_read))
 	== false) {
 	XLOG_ERROR("Cannot add mrouter socket to the set of sockets "
 		   "to read from in the event loop");
-	close(_mrouter_socket);
-	_mrouter_socket = -1;
-	return (XORP_ERROR);
+	comm_close(_mrouter_socket);
+	_mrouter_socket.clear();
+	return (badfd);
     }
     
     return (_mrouter_socket);
@@ -466,7 +492,7 @@ MfeaMrouter::adopt_mrouter_socket()
 int
 MfeaMrouter::close_mrouter_socket()
 {
-    if (_mrouter_socket < 0)
+    if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
     
     if (kernel_mrouter_ipproto() < 0)
@@ -483,26 +509,27 @@ MfeaMrouter::close_mrouter_socket()
 	    break;
 	// If there is already IGMP or ICMPV6 socket, then don't close it.
 	if (_mrouter_socket == proto_comm->proto_socket()) {
-	    // Transfer the selector to the protocol socket
-	    mfea_node().eventloop().remove_selector(_mrouter_socket);
-	    proto_comm->add_proto_socket_selector();
-	    _mrouter_socket = -1;
+	    // Transfer the i/o event callback to the protocol socket
+	    mfea_node().eventloop().remove_ioevent_cb(_mrouter_socket);
+	    proto_comm->add_proto_socket_callback();
+	    _mrouter_socket.clear();
 	    return (XORP_OK);
 	}
 	break;
     } while (false);
     
     // Remove the function for reading from this socket    
-    mfea_node().eventloop().remove_selector(_mrouter_socket);
+    mfea_node().eventloop().remove_ioevent_cb(_mrouter_socket);
     
-    // Close the socket and reset it to -1
-    if (close(_mrouter_socket) < 0) {
-	XLOG_ERROR("Cannot close mrouter socket: %s", strerror(errno));
-	_mrouter_socket = -1;
+    // Close the socket and set its handle to an invalid value.
+    if (comm_close(_mrouter_socket) == XORP_ERROR) {
+	XLOG_ERROR("Cannot close mrouter socket: %s",
+		    comm_get_last_error_str());
+	_mrouter_socket.clear();
 	return (XORP_ERROR);
     }
     
-    _mrouter_socket = -1;
+    _mrouter_socket.clear();
     
     return (XORP_OK);
 }
@@ -519,9 +546,17 @@ int
 MfeaMrouter::start_mrt()
 {
     int mrouter_version = 1;	// XXX: hardcoded version
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(mrouter_version)
+#endif
     
     switch (family()) {
     case AF_INET:
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("start_mrt() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_INIT,
 		       (void *)&mrouter_version, sizeof(mrouter_version))
 	    < 0) {
@@ -529,7 +564,9 @@ MfeaMrouter::start_mrt()
 		       mrouter_version, strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 	break;
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -549,6 +586,7 @@ MfeaMrouter::start_mrt()
     }
     break;
 #endif // HAVE_IPV6
+
     default:
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
@@ -559,6 +597,11 @@ MfeaMrouter::start_mrt()
     //
 #if defined(MRT_API_CONFIG) && defined(ENABLE_ADVANCED_MULTICAST_API)
     if (family() == AF_INET) {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("start_mrt() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	uint32_t mrt_api = 0;
 	
 	//
@@ -614,6 +657,8 @@ MfeaMrouter::start_mrt()
 	if (mrt_api & MRT_MFC_BW_UPCALL)
 	    _mrt_api_mrt_mfc_bw_upcall = true;
 #endif
+
+#endif // HAVE_IPV4_MULTICAST_ROUTING	
 	
     }
 #endif // MRT_API_CONFIG && ENABLE_ADVANCED_MULTICAST_API
@@ -708,16 +753,22 @@ MfeaMrouter::stop_mrt()
     _mrt_api_mrt_mfc_rp = false;
     _mrt_api_mrt_mfc_bw_upcall = false;
     
-    if (_mrouter_socket < 0)
+    if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
     
     switch (family()) {
     case AF_INET:
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("stop_mrt() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_DONE, NULL, 0)
 	    < 0) {
 	    XLOG_ERROR("setsockopt(MRT_DONE) failed: %s", strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
@@ -757,16 +808,23 @@ int
 MfeaMrouter::start_pim()
 {
     int v = 1;
-    
+
     switch (family()) {
     case AF_INET:
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("start_pim() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM,
 		       (void *)&v, sizeof(v)) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_PIM, %u) failed: %s",
 		       v, strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 	break;
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -785,11 +843,13 @@ MfeaMrouter::start_pim()
     }
     break;
 #endif // HAVE_IPV6
+
     default:
+	(void)v;
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -806,19 +866,27 @@ int
 MfeaMrouter::stop_pim()
 {
     int v = 0;
-    
-    if (_mrouter_socket < 0)
+
+    if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
     
     switch (family()) {
     case AF_INET:
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("stop_pim() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
+	v = 0;
 	if (setsockopt(_mrouter_socket, IPPROTO_IP, MRT_PIM,
 		       (void *)&v, sizeof(v)) < 0) {
 	    XLOG_ERROR("setsockopt(MRT_PIM, %u) failed: %s",
 		       v, strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif
 	break;
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -827,6 +895,7 @@ MfeaMrouter::stop_pim()
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
+	v = 0;
 	if (setsockopt(_mrouter_socket, IPPROTO_IPV6, MRT6_PIM,
 		       (void *)&v, sizeof(v)) < 0) {
 	    XLOG_ERROR("setsockopt(MRT6_PIM, %u) failed: %s",
@@ -837,11 +906,13 @@ MfeaMrouter::stop_pim()
     }
     break;
 #endif // HAVE_IPV6
+
     default:
+	(void)v;
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
-    
+
     return (XORP_OK);
 }
 
@@ -854,7 +925,7 @@ MfeaMrouter::stop_pim()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::add_multicast_vif(uint16_t vif_index)
+MfeaMrouter::add_multicast_vif(uint32_t vif_index)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
@@ -864,6 +935,11 @@ MfeaMrouter::add_multicast_vif(uint16_t vif_index)
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("add_multicast_vif() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	struct vifctl vc;
 	
 	memset(&vc, 0, sizeof(vc));
@@ -891,6 +967,7 @@ MfeaMrouter::add_multicast_vif(uint16_t vif_index)
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -943,7 +1020,7 @@ MfeaMrouter::add_multicast_vif(uint16_t vif_index)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
+MfeaMrouter::delete_multicast_vif(uint32_t vif_index)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
@@ -953,6 +1030,11 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("delete_multicast_vif() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	int ret_value = -1;
 
 	//
@@ -977,6 +1059,7 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1049,7 +1132,7 @@ MfeaMrouter::delete_multicast_vif(uint16_t vif_index)
  **/
 int
 MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
-		     uint16_t iif_vif_index, uint8_t *oifs_ttl,
+		     uint32_t iif_vif_index, uint8_t *oifs_ttl,
 		     uint8_t *oifs_flags,
 		     const IPvX& rp_addr)
 {
@@ -1058,6 +1141,10 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     
     oifs_ttl[iif_vif_index] = 0;		// Pre-caution
 
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(source);
+    UNUSED(group);
+#endif
     if (mfea_node().is_log_trace()) {
 	string res;
 	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
@@ -1077,6 +1164,12 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("add_mfc() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
+
 #if defined(HAVE_MFCCTL2) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct mfcctl2 mc;
 #else
@@ -1087,7 +1180,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	source.copy_out(mc.mfcc_origin);
 	group.copy_out(mc.mfcc_mcastgrp);
 	mc.mfcc_parent = iif_vif_index;
-	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    mc.mfcc_ttls[i] = oifs_ttl[i];
 #if defined(HAVE_MFCC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	    mc.mfcc_flags[i] = oifs_flags[i];
@@ -1104,6 +1197,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 		       cstring(source), cstring(group), strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1127,7 +1221,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 	source.copy_out(mc.mf6cc_origin);
 	group.copy_out(mc.mf6cc_mcastgrp);
 	mc.mf6cc_parent = iif_vif_index;
-	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    if (oifs_ttl[i] > 0)
 		IF_SET(i, &mc.mf6cc_ifset);
 #if defined(HAVE_MF6CC_FLAGS) && defined(ENABLE_ADVANCED_MULTICAST_API)
@@ -1174,14 +1268,19 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 int
 MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 {
-    XLOG_TRACE(mfea_node().is_log_trace(),
-	       "Delete MFC entry: (%s,%s)",
-	       cstring(source),
-	       cstring(group));
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(source);
+    UNUSED(group);
+#endif
 
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("delete_mfc() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	struct mfcctl mc;
 	
 	source.copy_out(mc.mfcc_origin);
@@ -1193,6 +1292,7 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
 		       cstring(source), cstring(group), strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1659,6 +1759,13 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	error_msg = c_format("delete_all_bw_upcall() failed: "
+			     "IPv4 multicast routing not supported");
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+#else
+
 #if defined(MRT_ADD_BW_UPCALL) && defined(ENABLE_ADVANCED_MULTICAST_API)
 	struct bw_upcall bw_upcall;
 	
@@ -1679,6 +1786,8 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
 	    return (XORP_ERROR);
 	}
 #endif // MRT_ADD_BW_UPCALL && ENABLE_ADVANCED_MULTICAST_API
+
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1742,9 +1851,20 @@ int
 MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 			  SgCount& sg_count)
 {
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(source);
+    UNUSED(group);
+    UNUSED(sg_count);
+#endif
+
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("get_sg_count() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	struct sioc_sg_req sgreq;
 	
 	memset(&sgreq, 0, sizeof(sgreq));
@@ -1770,6 +1890,7 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
 	sg_count.set_pktcnt(sgreq.pktcnt);
 	sg_count.set_bytecnt(sgreq.bytecnt);
 	sg_count.set_wrong_if(sgreq.wrong_if);
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1824,16 +1945,25 @@ MfeaMrouter::get_sg_count(const IPvX& source, const IPvX& group,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
+MfeaMrouter::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
     if (mfea_vif == NULL)
 	return (XORP_ERROR);
+
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(vif_count);
+#endif
     
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("get_vif_count() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	struct sioc_vif_req vreq;
 
 	memset(&vreq, 0, sizeof(vreq));
@@ -1851,6 +1981,7 @@ MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 	vif_count.set_ocount(vreq.ocount);
 	vif_count.set_ibytes(vreq.ibytes);
 	vif_count.set_obytes(vreq.obytes);
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1895,28 +2026,36 @@ MfeaMrouter::get_vif_count(uint16_t vif_index, VifCount& vif_count)
 /**
  * MfeaMrouter::mrouter_socket_read:
  * @fd: file descriptor of arriving data.
- * @mask: The selector event type mask that describes the status of @fd.
+ * @type: The event type that describes the status of @fd.
  * 
  * Read data from the mrouter socket, and then call the appropriate method
  * to process it.
  **/
 void
-MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
+MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 {
     ssize_t nbytes;
     
     UNUSED(fd);
-    UNUSED(mask);
-    
+    UNUSED(type);
+ 
+#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
     // Zero and reset various fields
     _rcvmh.msg_controllen = CMSG_BUF_SIZE;
+#endif
+
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {
     case AF_INET:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAMELEN
 	memset(&_from4, 0, sizeof(_from4));
 	_rcvmh.msg_namelen = sizeof(_from4);
+#else
+	XLOG_FATAL("Needs rewritten to use WSABUFs under Winsock");
+#endif
 	break;
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1925,31 +2064,44 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 		   "IPv6 multicast routing not supported");
 	return;
 #else
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAMELEN
 	memset(&_from6, 0, sizeof(_from6));
 	_rcvmh.msg_namelen = sizeof(_from6);
+#endif
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
 #endif // HAVE_IPV6
+
     default:
 	XLOG_UNREACHABLE();
 	return;			// Error
     }
-    
+
+#ifdef HAVE_RECVMSG
     // Read from the socket
     nbytes = recvmsg(_mrouter_socket, &_rcvmh, 0);
     if (nbytes < 0) {
 	if (errno == EINTR)
 	    return;		// OK: restart receiving
-	XLOG_ERROR("recvmsg() on socket %d failed: %s",
-		   _mrouter_socket, strerror(errno));
+	XLOG_ERROR("recvmsg() on socket %p failed: %s",
+		   _mrouter_socket.str().c_str(), strerror(errno));
 	return;			// Error
     }
+#else
+    XLOG_FATAL("Needs rewritten to use WSARecv() under Winsock");
+    UNUSED(nbytes);
+#endif
     
     // Check if it is a signal from the kernel to the user-level
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_FATAL("mrouter_socket_read() failed: "
+		   "IPv4 multicast routing not supported");
+	return;
+#else
 	struct igmpmsg *igmpmsg;
 	
 	igmpmsg = (struct igmpmsg *)_rcvbuf0;
@@ -1968,6 +2120,7 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 	    kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -2040,13 +2193,25 @@ MfeaMrouter::mrouter_socket_read(int fd, SelectorMask mask)
 int
 MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 {
-    uint16_t	iif_vif_index;
+    uint32_t	iif_vif_index;
     int		message_type;
     IPvX	src(family()), dst(family());
+
+#if !defined(HAVE_IPV4_MULTICAST_ROUTING) && !defined(HAVE_IPV6_MULTICAST_ROUTING)
+    UNUSED(iif_vif_index);
+    UNUSED(message_type);
+    UNUSED(databuf);
+    UNUSED(datalen);
+#endif
     
     switch (family()) {
     case AF_INET:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_ERROR("kernel_call_process() failed: "
+		   "IPv4 multicast routing not supported");
+	return (XORP_ERROR);
+#else
 	struct igmpmsg *igmpmsg = (struct igmpmsg *)databuf;
 	
 	//
@@ -2124,6 +2289,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 					iif_vif_index, src, dst,
 					databuf + sizeof(*igmpmsg),
 					datalen - sizeof(*igmpmsg));
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     

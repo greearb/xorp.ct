@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.21 2005/03/05 01:41:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.22 2005/03/25 02:53:15 pavlin Exp $"
 
 //
 // MFEA test program.
@@ -44,6 +44,9 @@
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #ifndef FEA_DUMMY
 static bool is_dummy = false;

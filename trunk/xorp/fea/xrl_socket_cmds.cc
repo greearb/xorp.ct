@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.4 2005/03/05 01:41:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_cmds.cc,v 1.5 2005/03/25 02:53:17 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -68,7 +68,8 @@ string
 SocketUserSendRecvEvent<A>::str() const
 {
     return c_format("SendRecvEvent(%s, %s, %u, %d bytes)",
-		    _sockid.c_str(), _src_host.str().c_str(), _src_port,
+		    _sockid.c_str(), _src_host.str().c_str(),
+		    XORP_UINT_CAST(_src_port),
 		    static_cast<int>(_data.size()));
 }
 

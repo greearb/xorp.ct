@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.25 2005/07/06 00:11:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.26 2005/07/06 19:34:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -26,6 +26,9 @@
 #include "ifconfig_set.hh"
 #include "nexthop_port_mapper.hh"
 
+#ifdef HOST_OS_WINDOWS
+#define	unlink(x)	_unlink(x)
+#endif
 
 //
 // Set information about network interfaces configuration with the
@@ -132,7 +135,7 @@ IfConfigSetClick::is_discard_emulated(const IfTreeInterface& i) const
 
 int
 IfConfigSetClick::add_interface(const string& ifname,
-				uint16_t if_index,
+				uint32_t if_index,
 				string& error_msg)
 {
     IfTree::IfMap::iterator ii;
@@ -164,7 +167,7 @@ IfConfigSetClick::add_interface(const string& ifname,
 int
 IfConfigSetClick::add_vif(const string& ifname,
 			  const string& vifname,
-			  uint16_t if_index,
+			  uint32_t if_index,
 			  string& error_msg)
 {
     IfTree::IfMap::iterator ii;
@@ -204,7 +207,7 @@ IfConfigSetClick::add_vif(const string& ifname,
 
 int
 IfConfigSetClick::config_interface(const string& ifname,
-				   uint16_t if_index,
+				   uint32_t if_index,
 				   uint32_t flags,
 				   bool is_up,
 				   bool is_deleted,
@@ -215,7 +218,8 @@ IfConfigSetClick::config_interface(const string& ifname,
     debug_msg("config_interface "
 	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
 	      "is_deleted = %s)\n",
-	      ifname.c_str(), if_index, flags, (is_up)? "true" : "false",
+	      ifname.c_str(), XORP_UINT_CAST(if_index),
+	      XORP_UINT_CAST(flags), (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
     ii = _iftree.get_if(ifname);
@@ -248,7 +252,7 @@ IfConfigSetClick::config_interface(const string& ifname,
 int
 IfConfigSetClick::config_vif(const string& ifname,
 			     const string& vifname,
-			     uint16_t if_index,
+			     uint32_t if_index,
 			     uint32_t flags,
 			     bool is_up,
 			     bool is_deleted,
@@ -265,7 +269,8 @@ IfConfigSetClick::config_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
 	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
 	      "point_to_point = %s multicast = %s)\n",
-	      ifname.c_str(), vifname.c_str(), if_index, flags,
+	      ifname.c_str(), vifname.c_str(),
+	      if_index, XORP_UINT_CAST(flags),
 	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false",
 	      (broadcast)? "true" : "false",
@@ -322,7 +327,7 @@ IfConfigSetClick::config_vif(const string& ifname,
 
 int
 IfConfigSetClick::set_interface_mac_address(const string& ifname,
-					    uint16_t if_index,
+					    uint32_t if_index,
 					    const struct ether_addr& ether_addr,
 					    string& error_msg)
 {
@@ -366,7 +371,7 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetClick::set_interface_mtu(const string& ifname,
-				    uint16_t if_index,
+				    uint32_t if_index,
 				    uint32_t mtu,
 				    string& error_msg)
 {
@@ -374,7 +379,7 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
-	      ifname.c_str(), if_index, mtu);
+	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -399,7 +404,7 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 int
 IfConfigSetClick::add_vif_address(const string& ifname,
 				  const string& vifname,
-				  uint16_t if_index,
+				  uint32_t if_index,
 				  bool is_broadcast,
 				  bool is_p2p,
 				  const IPvX& addr,
@@ -416,7 +421,8 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	      ifname.c_str(), vifname.c_str(), if_index,
 	      (is_broadcast)? "true" : "false",
 	      (is_p2p)? "true" : "false", addr.str().c_str(),
-	      dst_or_bcast.str().c_str(), prefix_len);
+	      dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -532,7 +538,7 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 int
 IfConfigSetClick::delete_vif_address(const string& ifname,
 				     const string& vifname,
-				     uint16_t if_index,
+				     uint32_t if_index,
 				     const IPvX& addr,
 				     uint32_t prefix_len,
 				     string& error_msg)
@@ -544,7 +550,7 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-	      prefix_len);
+	      XORP_UINT_CAST(prefix_len));
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -827,7 +833,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 	config += preamble + c_format("discard: %s\n",
 				      fi.discard() ? "true" : "false");
 	config += preamble + c_format("mac: %s\n", fi.mac().str().c_str());
-	config += preamble + c_format("mtu: %u\n", fi.mtu());
+	config += preamble + c_format("mtu: %u\n", XORP_UINT_CAST(fi.mtu()));
 	for (vi = fi.vifs().begin(); vi != fi.vifs().end(); ++vi) {
 	    const IfTreeVif& fv = vi->second;
 	    preamble = "\t";
@@ -842,7 +848,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 					      fa4.addr().str().c_str());
 		preamble = "\t\t";
 		config += preamble + c_format("prefix-length: %u\n",
-					      fa4.prefix_len());
+XORP_UINT_CAST(fa4.prefix_len()));
 		if (fa4.broadcast()) {
 		    config += preamble + c_format("broadcast: %s\n",
 						  fa4.bcast().str().c_str());
@@ -869,7 +875,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 					      fa6.addr().str().c_str());
 		preamble = "\t\t";
 		config += preamble + c_format("prefix-length: %u\n",
-					      fa6.prefix_len());
+XORP_UINT_CAST(fa6.prefix_len()));
 		if (fa6.point_to_point()) {
 		    config += preamble + c_format("destination: %s\n",
 						  fa6.endpoint().str().c_str());
@@ -1025,10 +1031,12 @@ IfConfigSetClick::ClickConfigGenerator::ClickConfigGenerator(
 
 IfConfigSetClick::ClickConfigGenerator::~ClickConfigGenerator()
 {
+#ifndef HOST_OS_WINDOWS
     if (_run_command != NULL)
 	delete _run_command;
     if (! _tmp_filename.empty())
 	unlink(_tmp_filename.c_str());
+#endif
 }
 
 int
@@ -1048,8 +1056,8 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
 	return (XORP_ERROR);
     }
 
-    if (::write(fileno(fp), xorp_config.c_str(), xorp_config.size())
-	!= static_cast<ssize_t>(xorp_config.size())) {
+    if (fwrite(xorp_config.c_str(), xorp_config.size(), 1, fp) !=
+	static_cast<size_t>(xorp_config.size())) {
 	error_msg = c_format("Error writing to temporary file: %s",
 			     strerror(errno));
 	fclose(fp);

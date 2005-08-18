@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.13 2005/03/05 01:41:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.14 2005/03/25 02:53:09 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -629,7 +629,8 @@ public:
 	if (ita.prefix_len() != ima.prefix_len()) {
 	    _errlog += c_format("+   Addr4 %s prefix len mismatch %u != %u\n",
 				ita.addr().str().c_str(),
-				ita.prefix_len(), ima.prefix_len());
+				XORP_UINT_CAST(ita.prefix_len()),
+				XORP_UINT_CAST(ima.prefix_len()));
 	}
 	if (ita.enabled() != ima.enabled()) {
 	    _errlog += c_format("+   Addr4 %s enabled mismatch %s != %s\n",
@@ -710,8 +711,9 @@ public:
 	}
 	if (ita.prefix_len() != ima.prefix_len()) {
 	    _errlog += c_format("+   Addr6 %s prefix len mismatch %u != %u\n",
-				ita.addr().str().c_str(),
-				ita.prefix_len(), ima.prefix_len());
+		 		ita.addr().str().c_str(),
+				XORP_UINT_CAST(ita.prefix_len()),
+				XORP_UINT_CAST(ima.prefix_len()));
 	}
 	if (ita.enabled() != ima.enabled()) {
 	    _errlog += c_format("+   Addr6 %s enabled mismatch %s != %s\n",
@@ -884,7 +886,8 @@ public:
 	if (ifi.mtu() != imi.mtu_bytes()) {
 	    _errlog += c_format("+ Interface %s mtu %u != %u\n",
 				ifi.name().c_str(),
-				ifi.mtu(), imi.mtu_bytes());
+				XORP_UINT_CAST(ifi.mtu()),
+				XORP_UINT_CAST(imi.mtu_bytes()));
 	}
 	if (ifi.mac() != imi.mac()) {
 	    _errlog += c_format("+ Interface %s mac %s != %s\n",

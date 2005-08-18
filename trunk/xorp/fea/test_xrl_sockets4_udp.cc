@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.9 2005/03/05 01:41:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.10 2005/03/25 02:53:15 pavlin Exp $"
 
-#include <sysexits.h>
-
-#include <set>
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "fea_module.h"
 
@@ -24,6 +24,9 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
+#include "libxorp/xorpfd.hh"
+
+#include <set>
 
 #include "libxipc/sockutil.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -34,6 +37,9 @@
 #include "xrl_socket_server.hh"
 #include "addr_table.hh"
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 static const uint8_t FILLER_VALUE = 0xe7;
 
@@ -729,7 +735,7 @@ usage(const char* progname)
             "Specify arguments for external Finder instance\n");
     fprintf(stderr, "  -v                  Verbose output\n");
     fprintf(stderr, "Runs remote UDP socket test using Xrls.\n");
-    exit(EX_USAGE);
+    exit(1);
 }
 
 

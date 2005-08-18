@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.54 2005/06/27 07:08:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.55 2005/06/27 17:48:14 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -441,7 +441,7 @@ MfeaNode::updates_made()
 	    // Add a new vif
 	    //
 	    if (node_vif == NULL) {
-		uint16_t vif_index = find_unused_config_vif_index();
+		uint32_t vif_index = find_unused_config_vif_index();
 		XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 		if (add_config_vif(ifmgr_vif_name, vif_index, error_msg) < 0) {
 		    XLOG_ERROR("Cannot add vif %s to the set of configured "
@@ -697,7 +697,7 @@ MfeaNode::add_pim_register_vif()
     //
     // Test first whether we have already PIM Register vif
     //
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	MfeaVif *mfea_vif = vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;
@@ -716,7 +716,7 @@ MfeaNode::add_pim_register_vif()
     //
     bool mfea_vif_found = false;
     MfeaVif *mfea_vif = NULL;
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	mfea_vif = vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;
@@ -738,7 +738,7 @@ MfeaNode::add_pim_register_vif()
     }
     if (mfea_vif_found) {
 	// Add the Register vif
-	uint16_t vif_index = find_unused_config_vif_index();
+	uint32_t vif_index = find_unused_config_vif_index();
 	XLOG_ASSERT(vif_index != Vif::VIF_INDEX_INVALID);
 	// TODO: XXX: the Register vif name is hardcoded here!
 	MfeaVif register_vif(*this, Vif("register_vif"));
@@ -1297,7 +1297,7 @@ MfeaNode::stop_protocol(xorp_module_id module_id)
 int
 MfeaNode::start_protocol_vif(const string& module_instance_name,
 			     xorp_module_id module_id,
-			     uint16_t vif_index)
+			     uint32_t vif_index)
 {
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
     
@@ -1329,7 +1329,7 @@ MfeaNode::start_protocol_vif(const string& module_instance_name,
 int
 MfeaNode::stop_protocol_vif(const string& module_instance_name,
 			    xorp_module_id module_id,
-			    uint16_t vif_index)
+			    uint32_t vif_index)
 {
     MfeaVif *mfea_vif = vif_find_by_vif_index(vif_index);
     
@@ -1427,7 +1427,7 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
 int
 MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 		     xorp_module_id src_module_id,
-		     uint16_t vif_index,
+		     uint32_t vif_index,
 		     const IPvX& src, const IPvX& dst,
 		     int ip_ttl, int ip_tos, bool is_router_alert,
 		     const uint8_t *rcvbuf, size_t rcvlen)
@@ -1459,7 +1459,7 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 // The function to process incoming messages from the kernel
 int
 MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
-			  uint16_t vif_index,
+			  uint32_t vif_index,
 			  const IPvX& src, const IPvX& dst,
 			  int ip_ttl, int ip_tos, bool is_router_alert,
 			  const uint8_t *rcvbuf, size_t rcvlen)
@@ -1530,7 +1530,7 @@ int
 MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 			      xorp_module_id src_module_id,
 			      int message_type,
-			      uint16_t vif_index,
+			      uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      const uint8_t *rcvbuf, size_t rcvlen)
 {
@@ -1776,7 +1776,7 @@ MfeaNode::signal_dataflow_message_recv(const IPvX& source, const IPvX& group,
 int
 MfeaNode::join_multicast_group(const string& module_instance_name,
 			       xorp_module_id module_id,
-			       uint16_t vif_index,
+			       uint32_t vif_index,
 			       const IPvX& group)
 {
     ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
@@ -1822,7 +1822,7 @@ MfeaNode::join_multicast_group(const string& module_instance_name,
 int
 MfeaNode::leave_multicast_group(const string& module_instance_name,
 				xorp_module_id module_id,
-				uint16_t vif_index,
+				uint32_t vif_index,
 				const IPvX& group)
 {
     ProtoComm *proto_comm = proto_comm_find_by_module_id(module_id);
@@ -1868,7 +1868,7 @@ MfeaNode::leave_multicast_group(const string& module_instance_name,
 int
 MfeaNode::add_mfc(const string& , // module_instance_name,
 		  const IPvX& source, const IPvX& group,
-		  uint16_t iif_vif_index, const Mifset& oiflist,
+		  uint32_t iif_vif_index, const Mifset& oiflist,
 		  const Mifset& oiflist_disable_wrongvif,
 		  uint32_t max_vifs_oiflist,
 		  const IPvX& rp_addr)
@@ -2221,7 +2221,7 @@ MfeaNode::delete_all_dataflow_monitor(const string& , // module_instance_name,
  * Return value: %XORP_OK on success, othewise %XORP_ERROR.
  **/
 int
-MfeaNode::add_multicast_vif(uint16_t vif_index)
+MfeaNode::add_multicast_vif(uint32_t vif_index)
 {
     if (_mfea_mrouter.add_multicast_vif(vif_index) < 0) {
 	return (XORP_ERROR);
@@ -2239,7 +2239,7 @@ MfeaNode::add_multicast_vif(uint16_t vif_index)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::delete_multicast_vif(uint16_t vif_index)
+MfeaNode::delete_multicast_vif(uint32_t vif_index)
 {
     if (_mfea_mrouter.delete_multicast_vif(vif_index) < 0) {
 	return (XORP_ERROR);
@@ -2285,7 +2285,7 @@ MfeaNode::get_sg_count(const IPvX& source, const IPvX& group,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaNode::get_vif_count(uint16_t vif_index, VifCount& vif_count)
+MfeaNode::get_vif_count(uint32_t vif_index, VifCount& vif_count)
 {
     if (_mfea_mrouter.get_vif_count(vif_index, vif_count) < 0) {
 	return (XORP_ERROR);

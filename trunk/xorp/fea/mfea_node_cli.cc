@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.15 2005/03/24 00:36:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.16 2005/03/25 02:53:10 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -280,11 +280,13 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    
 	    // The threshold values
 	    if (mfea_dfe->is_threshold_in_packets())
-		s1 = c_format("%u", mfea_dfe->threshold_packets());
+		s1 = c_format("%u",
+XORP_UINT_CAST(mfea_dfe->threshold_packets()));
 	    else
 		s1 = "?";
 	    if (mfea_dfe->is_threshold_in_bytes())
-		s2 = c_format("%u", mfea_dfe->threshold_bytes());
+		s2 = c_format("%u",
+XORP_UINT_CAST(mfea_dfe->threshold_bytes()));
 	    else
 		s2 = "?";
 	    thresh_s = c_format("%u.%u|%s|%s",
@@ -339,7 +341,7 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
     
     cli_print(c_format("%-12s %-8s %12s %-15s %-1s\n",
 		       "Interface", "State", "Vif/PifIndex", "Addr", "Flags"));
-    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;
@@ -430,7 +432,7 @@ MfeaNodeCli::cli_show_mfea_interface_address(const vector<string>& argv)
     
     cli_print(c_format("%-12s %-15s %-18s %-15s %-15s\n",
 		       "Interface", "Addr", "Subnet", "Broadcast", "P2Paddr"));
-    for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(i);
 	if (mfea_vif == NULL)
 	    continue;

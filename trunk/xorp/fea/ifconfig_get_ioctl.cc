@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.12 2005/03/05 01:41:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.13 2005/03/25 02:53:06 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,11 +20,14 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libcomm/comm_api.h"
+
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -101,7 +104,7 @@ IfConfigGetIoctl::stop(string& error_msg)
 	return (XORP_OK);
 
     if (_s4 >= 0) {
-	ret_value4 = close(_s4);
+	ret_value4 = comm_close(_s4);
 	_s4 = -1;
 	if (ret_value4 < 0) {
 	    error_msg = c_format("Could not close IPv4 ioctl() "
@@ -109,7 +112,7 @@ IfConfigGetIoctl::stop(string& error_msg)
 	}
     }
     if (_s6 >= 0) {
-	ret_value6 = close(_s6);
+	ret_value6 = comm_close(_s6);
 	_s6 = -1;
 	if ((ret_value6 < 0) && (ret_value4 >= 0)) {
 	    error_msg = c_format("Could not close IPv6 ioctl() "
@@ -198,7 +201,7 @@ ioctl_read_ifconf(int family, ifconf *ifconf)
 	    if ((errno != EINVAL) || (lastlen != 0)) {
 		XLOG_ERROR("ioctl(SIOCGIFCONF) failed: %s", strerror(errno));
 		delete[] ifconf->ifc_buf;
-		close(s);
+		comm_close(s);
 		return false;
 	    }
 	} else {
@@ -209,7 +212,7 @@ ioctl_read_ifconf(int family, ifconf *ifconf)
 	ifnum += 10;
     }
     
-    close(s);
+    comm_close(s);
     
     return true;
 }

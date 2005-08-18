@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.21 2004/12/01 03:28:07 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.22 2005/03/25 02:53:01 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -443,6 +443,89 @@ public:
 
 private:
     ClickSocketReader	_cs_reader;
+};
+
+class FtiConfigEntryGetIPHelper : public FtiConfigEntryGet {
+public:
+    FtiConfigEntryGetIPHelper(FtiConfig& ftic);
+    virtual ~FtiConfigEntryGetIPHelper();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest4(const IPv4& dst, Fte4& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network4(const IPv4Net& dst, Fte4& fte);
+
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest6(const IPv6& dst, Fte6& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network6(const IPv6Net& dst, Fte6& fte);
+
+private:
+    /**
+     * Lookup a route by destination address.
+     *
+     * @param dst host address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_dest(const IPvX& dst, FteX& fte);
+
+    /**
+     * Lookup route by network address.
+     *
+     * @param dst network address to resolve.
+     * @param fte return-by-reference forwarding table entry.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool lookup_route_by_network(const IPvXNet& dst, FteX& fte);
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_GET_HH__

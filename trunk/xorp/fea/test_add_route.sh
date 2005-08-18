@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/fea/test_add_route.sh,v 1.20 2004/08/03 07:45:48 pavlin Exp $
+# $XORP: xorp/fea/test_add_route.sh,v 1.21 2004/11/18 20:50:22 pavlin Exp $
 #
 
 #
@@ -62,6 +62,11 @@ case ${HOSTNAME} in
     IFNAME="eth6"
     NEXTHOP4="10.8.0.1"
     NEXTHOP6="fe80:aaaa::1111"
+    ;;
+
+    floptop)
+    HAVE_IPV6="false"
+    IFNAME="eth65539"
     ;;
 
     carp | carp.icir.org)

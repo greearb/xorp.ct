@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.27 2005/03/05 01:41:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.28 2005/03/25 02:53:02 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,7 +21,10 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvxnet.hh"
 
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
+
 #ifdef HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif

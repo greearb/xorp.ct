@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.22 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.23 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,19 +24,26 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
 #ifdef HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
 #ifdef HAVE_NET_IF_TYPES_H
 #include <net/if_types.h>
 #endif
 #ifdef HAVE_NETINET6_IN6_VAR_H
 #include <netinet6/in6_var.h>
+#endif
+#ifdef HAVE_IFADDRS_H
+#include <ifaddrs.h>
 #endif
 
 #include "ifconfig.hh"

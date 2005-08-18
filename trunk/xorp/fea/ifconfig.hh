@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.42 2005/03/25 02:53:05 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.43 2005/03/25 05:41:55 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -404,6 +404,7 @@ private:
     IfConfigGetGetifaddrs	_ifc_get_getifaddrs;
     IfConfigGetProcLinux	_ifc_get_proc_linux;
     IfConfigGetNetlink		_ifc_get_netlink;
+    IfConfigGetIPHelper		_ifc_get_iphelper;
 
     //
     // The secondary mechanisms to get interface-related information
@@ -423,6 +424,7 @@ private:
     IfConfigSetDummy		_ifc_set_dummy;
     IfConfigSetIoctl		_ifc_set_ioctl;
     IfConfigSetNetlink		_ifc_set_netlink;
+    IfConfigSetIPHelper		_ifc_set_iphelper;
 
     //
     // The secondary mechanisms to get interface-related information
@@ -442,6 +444,7 @@ private:
     IfConfigObserverDummy	_ifc_observer_dummy;
     IfConfigObserverRtsock	_ifc_observer_rtsock;
     IfConfigObserverNetlink	_ifc_observer_netlink;
+    IfConfigObserverIPHelper	_ifc_observer_iphelper;
 
     //
     // Misc other state

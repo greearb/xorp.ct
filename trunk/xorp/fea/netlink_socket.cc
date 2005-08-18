@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.30 2005/03/25 02:53:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.31 2005/05/08 19:27:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,15 +22,25 @@
 
 #include <algorithm>
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
+
 #include <errno.h>
 
-// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
-#ifdef HOST_OS_LINUX
+#ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H
@@ -216,8 +226,8 @@ NetlinkSocket::start(int af, string& error_msg)
     //
     // Add the socket to the event loop
     //
-    if (_eventloop.add_selector(_fd, SEL_RD,
-				callback(this, &NetlinkSocket::select_hook))
+    if (_eventloop.add_ioevent_cb(_fd, IOT_READ,
+				callback(this, &NetlinkSocket::io_event))
 	== false) {
 	error_msg = c_format("Failed to add netlink socket to EventLoop");
 	close(_fd);
@@ -232,7 +242,7 @@ int
 NetlinkSocket::stop(string& error_msg)
 {
     if (_fd >= 0) {
-	_eventloop.remove_selector(_fd, SEL_ALL);
+	_eventloop.remove_ioevent_cb(_fd);
 	close(_fd);
 	_fd = -1;
     }
@@ -516,12 +526,12 @@ NetlinkSocket::force_recvmsg(int flags, string& error_msg)
 }
 
 void
-NetlinkSocket::select_hook(int fd, SelectorMask m)
+NetlinkSocket::io_event(XorpFd fd, IoEventType type)
 {
     string error_msg;
 
     XLOG_ASSERT(fd == _fd);
-    XLOG_ASSERT(m == SEL_RD);
+    XLOG_ASSERT(type == IOT_READ);
     if (force_read(error_msg) != XORP_OK) {
 	XLOG_ERROR("Error force_read() from netlink socket: %s",
 		   error_msg.c_str());

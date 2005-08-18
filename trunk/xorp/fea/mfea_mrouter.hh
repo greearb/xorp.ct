@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.9 2004/06/10 22:40:55 hodson Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.10 2005/03/25 02:53:10 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -23,7 +23,9 @@
 // Multicast routing kernel-access specific definitions.
 //
 
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
+#endif
 
 #include "libxorp/eventloop.hh"
 #include "libproto/proto_register.hh"
@@ -110,7 +112,7 @@ public:
      * 
      * @return the socket value if valid, otherwise XORP_ERROR.
      */
-    int		mrouter_socket() const { return (_mrouter_socket); }
+    XorpFd	mrouter_socket() const { return (_mrouter_socket); }
     
     /**
      * Open an mrouter socket.
@@ -121,7 +123,7 @@ public:
      * 
      * @return the socket value on success, otherwise XORP_ERROR.
      */
-    int		open_mrouter_socket();
+    XorpFd	open_mrouter_socket();
     
     /**
      * Adopt control over the mrouter socket.
@@ -131,7 +133,7 @@ public:
      * 
      * @return the socket value on success, otherwise XORP_ERROR.
      */
-    int		adopt_mrouter_socket();
+    XorpFd	adopt_mrouter_socket();
     
     /**
      * Close the mrouter socket.
@@ -174,7 +176,7 @@ public:
      * @param vif_index the vif index of the virtual interface to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_multicast_vif(uint16_t vif_index);
+    int		add_multicast_vif(uint32_t vif_index);
     
     /**
      * Delete a virtual multicast interface from the kernel.
@@ -182,7 +184,7 @@ public:
      * @param vif_index the vif index of the interface to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_multicast_vif(uint16_t vif_index);
+    int		delete_multicast_vif(uint32_t vif_index);
     
     /**
      * Install/modify a Multicast Forwarding Cache (MFC) entry in the kernel.
@@ -202,7 +204,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_mfc(const IPvX& source, const IPvX& group,
-			uint16_t iif_vif_index, uint8_t *oifs_ttl,
+			uint32_t iif_vif_index, uint8_t *oifs_ttl,
 			uint8_t *oifs_flags,
 			const IPvX& rp_addr);
     
@@ -318,7 +320,7 @@ public:
      * the result.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		get_vif_count(uint16_t vif_index, VifCount& vif_count);
+    int		get_vif_count(uint32_t vif_index, VifCount& vif_count);
     
     /**
      * Get the flag that indicates whether the kernel supports disabling of
@@ -387,24 +389,26 @@ private:
     /**
      * Read data from the multicast router socket.
      *
-     * This is called as a SelectorList callback.
+     * This is called as an IoEventCb callback.
      * @param fd file descriptor that with event caused this method to be
      * called.
      * @param m mask representing event type.
      */
-    void	mrouter_socket_read(int fd, SelectorMask m);
+    void	mrouter_socket_read(XorpFd fd, IoEventType m);
     
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
-    int		  _mrouter_socket; // The socket for multicast routing access
+    XorpFd	  _mrouter_socket; // The socket for multicast routing access
     uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving
     uint8_t*	  _sndbuf0;	// Data buffer0 for sending
     uint8_t*	  _rcvbuf1;	// Data buffer1 for receiving
     uint8_t*	  _sndbuf1;	// Data buffer1 for sending
     uint8_t*	  _rcvcmsgbuf;	// Control recv info (IPv6 only)
     uint8_t*	  _sndcmsgbuf;	// Control send info (IPv6 only)
+#ifdef HAVE_STRUCT_MSGHDR
     struct msghdr _rcvmh;	// The msghdr structure used by recvmsg()
     struct msghdr _sndmh;	// The msghdr structure used by sendmsg()
+#endif
     struct iovec  _rcviov[2];	// The rcvmh scatter/gatter array
     struct iovec  _sndiov[2];	// The sndmh scatter/gatter array
     struct sockaddr_in  _from4;	// The source addr of recvmsg() msg (IPv4)

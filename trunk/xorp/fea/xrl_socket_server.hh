@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_socket_server.hh,v 1.8 2004/11/23 00:53:20 pavlin Exp $
+// $XORP: xorp/fea/xrl_socket_server.hh,v 1.9 2005/03/25 02:53:17 pavlin Exp $
 
 #ifndef __FEA_XRL_SOCKET_SERVER_HH__
 #define __FEA_XRL_SOCKET_SERVER_HH__
@@ -332,26 +332,26 @@ public:
     public:
 	RemoteSocket(XrlSocketServer&	ss,
 		     RemoteSocketOwner& rso,
-		     int		fd,
+		     XorpFd		fd,
 		     const A&		addr);
 	~RemoteSocket();
 
-	inline int  fd() const				{ return _fd;	      }
+	inline XorpFd  fd() const			{ return _fd;	      }
 	inline const string& sockid() const		{ return _sockid;     }
 	inline bool addr_is(const A& a) const		{ return a == _addr;  }
 	inline const RemoteSocketOwner& owner() const	{ return _owner; }
 	inline RemoteSocketOwner& owner()		{ return _owner; }
 
 	void set_data_recv_enable(bool en);
-	void data_sel_cb(int fd, SelectorMask);
+	void data_io_cb(XorpFd fd, IoEventType);
 
 	void set_connect_recv_enable(bool en);
-	void connect_sel_cb(int fd, SelectorMask);
+	void accept_io_cb(XorpFd fd, IoEventType);
 
     protected:
 	XrlSocketServer&   _ss;
 	RemoteSocketOwner& _owner;
-	int		   _fd;
+	XorpFd		   _fd;
 	A		   _addr;
 	string		   _sockid;
 

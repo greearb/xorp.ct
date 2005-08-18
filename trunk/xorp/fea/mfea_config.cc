@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.11 2005/03/25 02:53:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.12 2005/05/16 19:05:07 pavlin Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -87,7 +87,7 @@ MfeaNode::add_config_vif(const Vif& vif, string& error_msg)
  */
 int
 MfeaNode::add_config_vif(const string& vif_name,
-			 uint16_t vif_index,
+			 uint32_t vif_index,
 			 string& error_msg)
 {
     if (ProtoNode<MfeaVif>::add_config_vif(vif_name, vif_index, error_msg) < 0)
@@ -222,7 +222,7 @@ MfeaNode::delete_config_vif_addr(const string& vif_name,
  */
 int
 MfeaNode::set_config_pif_index(const string& vif_name,
-			       uint16_t pif_index,
+			       uint32_t pif_index,
 			       string& error_msg)
 {
     if (ProtoNode<MfeaVif>::set_config_pif_index(vif_name, pif_index,

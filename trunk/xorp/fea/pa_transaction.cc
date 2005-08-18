@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.6 2005/04/29 15:16:30 bms Exp $"
+#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.7 2005/04/29 20:13:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -53,8 +53,8 @@ PaTransactionManager::post_commit(uint32_t tid)
 {
     PaTransactionDB::iterator i = _pa_transactions.find(tid);
     if (i == _pa_transactions.end()) {
-	XLOG_ERROR("PaTransaction ID %d is missing snapshots: %s", tid,
-		   "not found in PaTransactionDB");
+	XLOG_ERROR("PaTransaction ID %u is missing snapshots: %s",
+		   XORP_UINT_CAST(tid), "not found in PaTransactionDB");
 	return;
     }
     PaTransaction& pat = i->second;

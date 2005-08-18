@@ -12,17 +12,34 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock6.cc,v 1.11 2005/03/21 23:21:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock6.cc,v 1.12 2005/03/25 02:53:14 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
-
-#include <netinet/in.h>
-#include <netinet/ip6.h>
-
+#endif
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
+#endif
+
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
 
 #include "fea_module.h"
 
@@ -30,7 +47,64 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#include "libcomm/comm_api.h"
+
 #include "rawsock6.hh"
+
+
+#ifdef HOST_OS_WINDOWS
+
+#include <mswsock.h>
+
+#define cmsghdr wsacmsghdr
+
+typedef char *caddr_t;
+
+#ifdef __MINGW32__
+
+#ifndef _ALIGNBYTES
+#define _ALIGNBYTES     (sizeof(int) - 1)
+#endif
+
+#ifndef _ALIGN
+#define _ALIGN(p)       (((unsigned)(p) + _ALIGNBYTES) & ~_ALIGNBYTES)
+#endif
+
+#define CMSG_DATA(cmsg)		\
+	((unsigned char *)(cmsg) + _ALIGN(sizeof(struct cmsghdr)))
+#define	CMSG_NXTHDR(mhdr, cmsg)	\
+	(((char *)(cmsg) + _ALIGN((cmsg)->cmsg_len) + \
+		_ALIGN(sizeof(struct cmsghdr)) > \
+		(char *)(mhdr)->Control.buf + (mhdr)->Control.len) ? \
+		(struct cmsghdr *)0 : \
+		(struct cmsghdr *)((char *)(cmsg) + _ALIGN((cmsg)->cmsg_len)))
+#define	CMSG_FIRSTHDR(mhdr) \
+	((mhdr)->Control.len >= sizeof(struct cmsghdr) ? \
+	 (struct cmsghdr *)(mhdr)->Control.buf : \
+	 (struct cmsghdr *)NULL)
+#define	CMSG_SPACE(l)	(_ALIGN(sizeof(struct cmsghdr)) + _ALIGN(l))
+#define	CMSG_LEN(l)	(_ALIGN(sizeof(struct cmsghdr)) + (l))
+
+typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
+LPWSAOVERLAPPED, LPWSAOVERLAPPED_COMPLETION_ROUTINE); 
+
+#define WSAID_WSARECVMSG \
+    {0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22}}
+
+#else	/* !__MINGW32__ */
+
+#define CMSG_FIRSTHDR(msg)	WSA_CMSG_FIRSTHDR(msg)
+#define CMSG_NXTHDR(msg, cmsg)	WSA_CMSG_NEXTHDR(msg, cmsg)
+#define CMSG_DATA(cmsg) 	WSA_CMSG_DATA(cmsg)
+#define CMSG_SPACE(len)		WSA_CMSG_SPACE(len)
+#define CMSG_LEN(len)		WSA_CMSG_LEN(len)
+
+#endif /* __MINGW32__ */
+
+static const GUID guidWSARecvMsg = WSAID_WSARECVMSG;
+static LPFN_WSARECVMSG lpWSARecvMsg = NULL;
+
+#endif /* HOST_OS_WINDOWS */
 
 /* ------------------------------------------------------------------------- */
 /* RawSocket6 methods */
@@ -38,39 +112,57 @@
 RawSocket6::RawSocket6(uint32_t protocol) throw (RawSocket6Exception)
 {
     _fd = socket(AF_INET6, SOCK_RAW, protocol);
-    if (_fd < 0)
+    if (!_fd.is_valid())
 	xorp_throw(RawSocket6Exception, "socket", errno);
+
+#ifdef HOST_OS_WINDOWS
+    // Obtain the pointer to the extension function WSARecvMsg() if required. 
+    if (lpWSARecvMsg == NULL) {
+	int result;
+	DWORD nbytes;
+
+	result = WSAIoctl(_fd, SIO_GET_EXTENSION_FUNCTION_POINTER,
+			  const_cast<GUID *>(&guidWSARecvMsg),
+			  sizeof(guidWSARecvMsg),
+			  &lpWSARecvMsg, sizeof(lpWSARecvMsg), &nbytes,
+			  NULL, NULL);
+	if (result == SOCKET_ERROR) {
+	    XLOG_ERROR("Cannot obtain WSARecvMsg function pointer; "
+		       "unable to receive raw IPv6 traffic.");
+	    lpWSARecvMsg = NULL;
+	}
+   }
+#endif
 
     int bool_flag = 1;
 #ifdef IPV6_RECVPKTINFO
     // The new option (applies to receiving only)
     if (setsockopt(_fd, IPPROTO_IPV6, IPV6_RECVPKTINFO,
-	(void *)&bool_flag, sizeof(bool_flag)) < 0) {
+	XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	xorp_throw(RawSocket6Exception,
 	"setsockopt(IPV6_RECVPKTINFO) failed", errno);
     }
 #else
     // The old option (see RFC-2292)
     if (setsockopt(_fd, IPPROTO_IPV6, IPV6_PKTINFO,
-	(void *)&bool_flag, sizeof(bool_flag)) < 0) {
+	XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	xorp_throw(RawSocket6Exception,
 	"setsockopt(IPV6_PKTINFO) failed", errno);
     }
 #endif // ! IPV6_RECVPKTINFO
-
-    // XXX: Add more things we're interested in receiving here.
 }
 
 RawSocket6::~RawSocket6()
 {
-    if (_fd > 0)
-	close(_fd);
+    if (_fd.is_valid())
+	comm_close(_fd);
 }
 
 ssize_t
 RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
 		  size_t nbytes) const
 {
+#ifndef HOST_OS_WINDOWS
     uint8_t cmsgbuf[CMSG_SPACE(sizeof(struct in6_pktinfo))];
     struct cmsghdr* cmsgp = reinterpret_cast<struct cmsghdr*>(cmsgbuf);
     struct in6_pktinfo* pktinfo = reinterpret_cast<struct in6_pktinfo*>(
@@ -84,6 +176,7 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
     cmsgp->cmsg_level = IPPROTO_IPV6;
     cmsgp->cmsg_type = IPV6_PKTINFO;
     cmsgp->cmsg_len = CMSG_LEN(sizeof(struct in6_pktinfo));
+#endif
 
     // Destination.
     struct sockaddr_in6 sdst;
@@ -92,7 +185,7 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
     dst.copy_out(sdst.sin6_addr);
 #ifdef HAVE_SIN_LEN
     sdst.sin6_len = sizeof(sockaddr_in6);
-#endif /* HAVE_SIN_LEN */
+#endif
 
     // Payload.
     struct iovec iov;
@@ -100,6 +193,15 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
     iov.iov_len = nbytes;
 
     // Message header.
+#ifdef HOST_OS_WINDOWS
+    // XXX: Currently there is no way of specifying the source address.
+    DWORD sent, error;
+    error = WSASendTo(_fd, reinterpret_cast<WSABUF *>(&iov), 1, &sent, 0,
+		      reinterpret_cast<struct sockaddr *>(&sdst), sizeof(sdst),
+		      NULL, NULL);
+    return sent;
+    UNUSED(src);
+#else
     struct msghdr mh;
     mh.msg_name = (caddr_t)&sdst;
     mh.msg_namelen = sizeof(sdst);
@@ -109,6 +211,7 @@ RawSocket6::write(const IPv6& src, const IPv6& dst, const uint8_t* payload,
     mh.msg_controllen = sizeof(cmsgbuf);
     mh.msg_flags = 0;
     return ::sendmsg(_fd, &mh, 0);
+#endif
 }
 
 /* ------------------------------------------------------------------------- */
@@ -120,9 +223,10 @@ IoRawSocket6::IoRawSocket6(EventLoop&	eventloop,
     throw (RawSocket6Exception)
     : RawSocket6(protocol), _eventloop(eventloop), _autohook(autohook)
 {
-    int fl = fcntl(_fd, F_GETFL);
-    if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
-	xorp_throw(RawSocket6Exception, "fcntl (O_NON_BLOCK)", errno);
+    if (comm_sock_set_blocking(_fd, 0) != XORP_OK) {
+	xorp_throw(RawSocket6Exception, "comm_sock_set_blocking()",
+		   comm_get_last_error());
+    }
 
     _cmsgbuf.reserve(CMSGBUF_BYTES);
     if (_cmsgbuf.capacity() != CMSGBUF_BYTES)
@@ -136,9 +240,8 @@ IoRawSocket6::IoRawSocket6(EventLoop&	eventloop,
     if (_recvbuf.capacity() != RECVBUF_BYTES)
 	xorp_throw(RawSocket6Exception, "receive buffer reserve() failed", 0);
 
-    ssize_t sz = RECVBUF_BYTES;
-    if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz)) < 0)
-	xorp_throw(RawSocket6Exception, "setsockopt (SO_RCVBUF)", errno);
+    if (comm_sock_set_rcvbuf(_fd, RECVBUF_BYTES, RECVBUF_BYTES) != XORP_OK)
+	xorp_throw(RawSocket6Exception, "comm_sock_set_rcvbuf() failed", 0);
 
     if (_autohook)
 	eventloop_hook();
@@ -151,10 +254,10 @@ IoRawSocket6::~IoRawSocket6()
 }
 
 void
-IoRawSocket6::recv(int fd, SelectorMask m)
+IoRawSocket6::recv(XorpFd fd, IoEventType type)
 {
     UNUSED(fd);
-    UNUSED(m);
+    UNUSED(type);
 
     // Source.
     struct sockaddr_in6 ssrc;
@@ -165,6 +268,27 @@ IoRawSocket6::recv(int fd, SelectorMask m)
     iov.iov_base = (caddr_t)&_recvbuf[0];
     iov.iov_len = RECVBUF_BYTES;
 
+    ssize_t n;
+#ifdef HOST_OS_WINDOWS
+    WSAMSG mh;
+    DWORD error;
+    DWORD nrecvd;
+
+    mh.name = (LPSOCKADDR)&ssrc;
+    mh.namelen = sizeof(ssrc);
+    mh.lpBuffers = (LPWSABUF)&iov;
+    mh.dwBufferCount = 1;
+    mh.Control.len = CMSGBUF_BYTES;
+    mh.Control.buf = (caddr_t)&_cmsgbuf[0];
+    mh.dwFlags = 0;
+
+    if (lpWSARecvMsg == NULL) {
+	XLOG_ERROR("lpWSARecvMsg is NULL");
+	return;
+    }
+    error = lpWSARecvMsg(_fd, &mh, &nrecvd, NULL, NULL);
+    n = (ssize_t)nrecvd;
+#else
     // Message header.
     struct msghdr mh;
     mh.msg_name = (caddr_t)&ssrc;
@@ -175,23 +299,24 @@ IoRawSocket6::recv(int fd, SelectorMask m)
     mh.msg_controllen = CMSGBUF_BYTES;
     mh.msg_flags = 0;
 
-    ssize_t n = recvmsg(_fd, &mh, 0);
-    debug_msg("Read fd %d, %d bytes\n", _fd, XORP_INT_CAST(n));
+    n = ::recvmsg(_fd, &mh, 0);
+#endif
+
+    debug_msg("Read fd %s, %d bytes\n", _fd.str().c_str(), XORP_INT_CAST(n));
     if (n <= 0) {
 	return;
     }
     _recvbuf.resize(n);
-
     _hdrinfo.src.copy_in(ssrc.sin6_addr);
 
     // Process the received control message headers.
     struct cmsghdr *chp;
     for (chp = CMSG_FIRSTHDR(&mh); chp != NULL; chp = CMSG_NXTHDR(&mh, chp)) {
 #ifdef IPV6_PKTINFO
-	uint32_t*		intp;
+	struct in6_pktinfo*	pip;
 #endif
 #if defined(IPV6_HOPLIMIT) || defined(IPV6_TCLASS)
-	struct in6_pktinfo*	pip;
+	uint32_t*		intp;
 #endif
 
 	if (chp->cmsg_level == IPPROTO_IPV6) {
@@ -235,7 +360,7 @@ bool
 IoRawSocket6::eventloop_hook()
 {
     debug_msg("hooking\n");
-    return _eventloop.add_selector(_fd, SEL_RD,
+    return _eventloop.add_ioevent_cb(_fd, IOT_READ,
 				   callback(this, &IoRawSocket6::recv));
 }
 
@@ -243,7 +368,7 @@ void
 IoRawSocket6::eventloop_unhook()
 {
     debug_msg("unhooking\n");
-    _eventloop.remove_selector(_fd);
+    _eventloop.remove_ioevent_cb(_fd);
 }
 
 /* ------------------------------------------------------------------------- */

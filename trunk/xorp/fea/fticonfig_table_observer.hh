@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.13 2004/12/01 03:28:08 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.14 2005/03/25 02:53:04 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FTICONFIG_TABLE_OBSERVER_HH__
@@ -202,6 +202,36 @@ public:
     
 private:
     
+};
+
+class FtiConfigTableObserverIPHelper : public FtiConfigTableObserver {
+public:
+    FtiConfigTableObserverIPHelper(FtiConfig& ftic);
+    virtual ~FtiConfigTableObserverIPHelper();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+    
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes);
 };
 
 /**

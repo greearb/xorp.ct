@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.27 2005/02/28 08:13:45 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.28 2005/03/25 02:53:08 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -233,8 +233,8 @@ public:
 
     inline const string& ifname() const	{ return _ifname; }
 
-    inline uint16_t pif_index() const	{ return _pif_index; }
-    inline void set_pif_index(uint16_t v) { _pif_index = v; mark(CHANGED); }
+    inline uint32_t pif_index() const	{ return _pif_index; }
+    inline void set_pif_index(uint32_t v) { _pif_index = v; mark(CHANGED); }
 
     inline bool enabled() const		{ return _enabled; }
 
@@ -327,7 +327,7 @@ public:
 
 protected:
     const string _ifname;
-    uint16_t	 _pif_index;
+    uint32_t	 _pif_index;
     bool 	 _enabled;
     bool	 _discard;
     bool	 _is_discard_emulated;
@@ -352,8 +352,8 @@ public:
 
     const string& vifname() const	{ return _vifname; }
 
-    inline uint16_t pif_index() const	{ return _pif_index; }
-    inline void set_pif_index(uint16_t v) { _pif_index = v; mark(CHANGED); }
+    inline uint32_t pif_index() const	{ return _pif_index; }
+    inline void set_pif_index(uint32_t v) { _pif_index = v; mark(CHANGED); }
 
     inline bool enabled() const		{ return _enabled; }
     inline bool broadcast() const	{ return _broadcast; }
@@ -454,7 +454,7 @@ protected:
     const string _ifname;
     const string _vifname;
 
-    uint16_t	 _pif_index;
+    uint32_t	 _pif_index;
     bool 	 _enabled;
     bool	 _broadcast;
     bool	 _loopback;

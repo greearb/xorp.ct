@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.26 2005/03/05 01:41:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.27 2005/03/25 02:53:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -497,8 +497,10 @@ IfTreeInterface::str() const
 {
     return c_format("Interface %s { enabled := %s } "
 		    "{ mtu := %u } { mac := %s } { flags := %u }",
-		    _ifname.c_str(), true_false(_enabled), _mtu,
-		    _mac.str().c_str(), _if_flags)
+		    _ifname.c_str(), true_false(_enabled),
+		    XORP_UINT_CAST(_mtu),
+		    _mac.str().c_str(),
+		    XORP_UINT_CAST(_if_flags))
 	+ string(" ")
 	+ IfTreeItem::str();
 }
@@ -664,7 +666,7 @@ IfTreeAddr4::str() const
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_broadcast), true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_prefix_len);
+			XORP_UINT_CAST(_prefix_len));
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     if (_broadcast)
@@ -718,7 +720,7 @@ IfTreeAddr6::str() const
 			_addr.str().c_str(), true_false(_enabled),
 			true_false(_loopback),
 			true_false(_point_to_point), true_false(_multicast),
-			_prefix_len);
+			XORP_UINT_CAST(_prefix_len));
     if (_point_to_point)
 	r += c_format(" { endpoint := %s }", _oaddr.str().c_str());
     r += string(" ") + IfTreeItem::str();

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.19 2004/12/03 04:10:47 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.20 2005/03/25 02:53:05 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -385,6 +385,39 @@ private:
     bool read_config(IfTree& it);
 
     ClickSocketReader	_cs_reader;
+};
+
+class IfConfigGetIPHelper : public IfConfigGet {
+public:
+    IfConfigGetIPHelper(IfConfig& ifc);
+    virtual ~IfConfigGetIPHelper();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Pull the network interface information from the underlying system.
+     * 
+     * @param config the IfTree storage to store the pulled information.
+     * @return true on success, otherwise false.
+     */
+    virtual bool pull_config(IfTree& config);
+    
+private:
+    bool read_config(IfTree& it);
 };
 
 #endif // __FEA_IFCONFIG_GET_HH__

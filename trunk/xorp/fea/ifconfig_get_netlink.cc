@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.14 2005/03/05 01:41:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.15 2005/03/25 02:53:06 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,15 +20,15 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
-#ifdef HOST_OS_LINUX
+#ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
 #endif
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -213,8 +213,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
     //
     // Create a list with the interface indexes
     //
-    list<uint16_t> if_index_list;
-    uint16_t if_index;
+    list<uint32_t> if_index_list;
+    uint32_t if_index;
     
     IfTree::IfMap::const_iterator if_iter;
     for (if_iter = it.ifs().begin(); if_iter != it.ifs().end(); ++if_iter) {
@@ -232,7 +232,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     //
     // Send requests for the addresses of each interface we just found
     //
-    list<uint16_t>::const_iterator if_index_iter;
+    list<uint32_t>::const_iterator if_index_iter;
     for (if_index_iter = if_index_list.begin();
 	 if_index_iter != if_index_list.end();
 	 ++if_index_iter) {

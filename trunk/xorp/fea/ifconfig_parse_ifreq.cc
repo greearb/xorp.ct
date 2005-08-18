@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.22 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.23 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -25,7 +25,9 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
@@ -66,6 +68,7 @@ bool
 IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 				const uint8_t* buf, size_t buf_bytes)
 {
+#ifndef HOST_OS_WINDOWS
     u_short if_index = 0;
     string if_name, alias_if_name;
     const uint8_t* ptr;
@@ -229,7 +232,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	}
 	if (is_newlink || (mtu != fi.mtu()))
 	    fi.set_mtu(mtu);
-	debug_msg("MTU: %d\n", fi.mtu());
+	debug_msg("MTU: %d\n", XORP_INT_CAST(fi.mtu()));
 	
 	//
 	// Get the flags
@@ -266,7 +269,9 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    fv.set_enabled(fi.enabled() && (flags & IFF_UP));
 	    fv.set_broadcast(flags & IFF_BROADCAST);
 	    fv.set_loopback(flags & IFF_LOOPBACK);
+#ifdef IFF_POINTOPOINT
 	    fv.set_point_to_point(flags & IFF_POINTOPOINT);
+#endif
 	    fv.set_multicast(flags & IFF_MULTICAST);
 	}
 	debug_msg("vif enabled: %s\n", fv.enabled() ? "true" : "false");
@@ -500,9 +505,13 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 			     && (flags & IFF_BROADCAST)
 			     && has_broadcast_addr);
 	    fa.set_loopback(fv.loopback() && (flags & IFF_LOOPBACK));
+#ifdef IFF_POINTOPOINT
 	    fa.set_point_to_point(fv.point_to_point()
 				  && (flags & IFF_POINTOPOINT)
 				  && has_peer_addr);
+#else
+	    UNUSED(has_peer_addr);
+#endif
 	    fa.set_multicast(fv.multicast() && (flags & IFF_MULTICAST));
 	    
 	    fa.set_prefix_len(subnet_mask.mask_len());
@@ -535,6 +544,15 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
     }
     
     return true;
+#else /* HOST_OS_WINDOWS */
+    XLOG_FATAL("WinSock2 does not support struct ifreq.");
+    return false;
+
+    UNUSED(it);
+    UNUSED(family);
+    UNUSED(buf);
+    UNUSED(buf_bytes);
+#endif /* HOST_OS_WINDOWS */
 }
 
 #endif // HAVE_IOCTL_SIOCGIFCONF

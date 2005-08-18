@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.5 2005/03/24 02:50:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_ifmanager_transaction.cc,v 1.6 2005/03/25 02:53:15 pavlin Exp $"
 
 #include <assert.h>
 #include <deque>
@@ -26,6 +26,10 @@
 #include "libxorp/transaction.hh"
 
 #include "ifmanager_transaction.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 // ----------------------------------------------------------------------------
 // Verbose output

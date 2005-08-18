@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.30 2005/03/24 00:36:55 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.31 2005/03/25 02:53:10 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -193,7 +193,7 @@ public:
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const string& vif_name,
-			       uint16_t vif_index,
+			       uint32_t vif_index,
 			       string& error_msg);
     
     /**
@@ -245,7 +245,7 @@ public:
      * @return  XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
-				     uint16_t pif_index,
+				     uint32_t pif_index,
 				     string& error_msg);
     
     /**
@@ -292,7 +292,7 @@ public:
     virtual int	send_add_config_vif(const string& dst_module_instance_name,
 				    xorp_module_id dst_module_id,
 				    const string& vif_name,
-				    uint16_t vif_index) = 0;
+				    uint32_t vif_index) = 0;
     
     /**
      * Send a message to a client to delete a configured vif.
@@ -518,7 +518,7 @@ public:
      */
     int		start_protocol_vif(const string& module_instance_name,
 				   xorp_module_id module_id,
-				   uint16_t vif_index);
+				   uint32_t vif_index);
 
     /**
      * Stop a protocol on an interface.
@@ -533,7 +533,7 @@ public:
      */
     int		stop_protocol_vif(const string& module_instance_name,
 				  xorp_module_id module_id,
-				  uint16_t vif_index);
+				  uint32_t vif_index);
     
     /**
      * Add a protocol to receive kernel signal messages.
@@ -598,7 +598,7 @@ public:
      */
     int		proto_recv(const string& src_module_instance_name,
 			   xorp_module_id src_module_id,
-			   uint16_t vif_index,
+			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
 			   const uint8_t *rcvbuf, size_t rcvlen);
@@ -635,7 +635,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_comm_recv(xorp_module_id dst_module_id,
-				uint16_t vif_index,
+				uint32_t vif_index,
 				const IPvX& src, const IPvX& dst,
 				int ip_ttl, int ip_tos, bool is_router_alert,
 				const uint8_t *rcvbuf, size_t rcvlen);
@@ -677,7 +677,7 @@ public:
     int		signal_message_recv(const string& src_module_instance_name,
 				    xorp_module_id src_module_id,
 				    int message_type,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& src,
 				    const IPvX& dst,
 				    const uint8_t *rcvbuf,
@@ -828,7 +828,7 @@ public:
      */
     int		join_multicast_group(const string& module_instance_name,
 				     xorp_module_id module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& group);
     
     /**
@@ -848,7 +848,7 @@ public:
      */
     int		leave_multicast_group(const string& module_instance_name,
 				      xorp_module_id module_id,
-				      uint16_t vif_index,
+				      uint32_t vif_index,
 				      const IPvX& group);
     
     /**
@@ -877,7 +877,7 @@ public:
      */
     int		add_mfc(const string& module_instance_name,
 			const IPvX& source, const IPvX& group,
-			uint16_t iif_vif_index, const Mifset& oiflist,
+			uint32_t iif_vif_index, const Mifset& oiflist,
 			const Mifset& oiflist_disable_wrongvif,
 			uint32_t max_vifs_oiflist,
 			const IPvX& rp_addr);
@@ -1017,7 +1017,7 @@ public:
      * @param vif_index the vif index of the interface to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_multicast_vif(uint16_t vif_index);
+    int		add_multicast_vif(uint32_t vif_index);
     
     /**
      * Delete a multicast vif from the kernel.
@@ -1025,7 +1025,7 @@ public:
      * @param vif_index the vif index of the interface to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		delete_multicast_vif(uint16_t vif_index);
+    int		delete_multicast_vif(uint32_t vif_index);
     
     /**
      * Get MFC multicast forwarding statistics from the kernel.
@@ -1056,7 +1056,7 @@ public:
      * the result.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		get_vif_count(uint16_t vif_index, VifCount& vif_count);
+    int		get_vif_count(uint32_t vif_index, VifCount& vif_count);
     
     /**
      * Get a reference to the mrouter (@ref MfeaMrouter).

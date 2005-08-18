@@ -1,8 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/sh
 
 set -e
-
-# srcdir is set by make for check target
 
 # srcdir is set by make for check target
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi

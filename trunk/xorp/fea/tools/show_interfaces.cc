@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.11 2005/03/11 20:18:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.12 2005/03/25 02:53:20 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -23,6 +23,10 @@
 #include "libxorp/eventloop.hh"
 
 #include "show_interfaces.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 InterfaceMonitor::InterfaceMonitor(EventLoop&		eventloop,
 				   const string&	class_name,
@@ -284,6 +288,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
     IfMgrVifAtom::V4Map::const_iterator a4_iter;
     IfMgrVifAtom::V6Map::const_iterator a6_iter;
 
+    debug_msg("Begin iftree loop\n");
+
     //
     // Iterate for all interface, vifs, and addresses, and print them
     //
@@ -400,6 +406,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 			ifmgr_iface.mac().str().c_str());
 	}
     }
+
+    debug_msg("End iftree loop\n");
 
     if (print_iface_name.size() > 0) {
 	if (! iface_found) {

@@ -12,9 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.21 2005/03/25 02:53:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.22 2005/05/11 00:32:34 pavlin Exp $"
 
 #include "fea_module.h"
+
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -25,14 +29,25 @@
 
 #include <algorithm>
 
+#ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
 #ifdef HAVE_SYS_LINKER_H
 #include <sys/linker.h>
 #endif
+#ifdef HAVE_SYS_MOUNT_H
 #include <sys/mount.h>
+#endif
+
 #include <errno.h>
 
 #include "click_socket.hh"
@@ -54,8 +69,6 @@ const TimeVal ClickSocket::USER_CLICK_STARTUP_MAX_WAIT_TIME = TimeVal(1, 0);
 
 ClickSocket::ClickSocket(EventLoop& eventloop)
     : _eventloop(eventloop),
-      _kernel_fd(-1),
-      _user_fd(-1),
       _seqno(0),
       _instance_no(_instance_cnt++),
       _is_enabled(false),
@@ -85,7 +98,7 @@ ClickSocket::~ClickSocket()
 int
 ClickSocket::start(string& error_msg)
 {
-    if (is_kernel_click() && (_kernel_fd < 0)) {
+    if (is_kernel_click() && !_kernel_fd.is_valid()) {
 	//
 	// Install kernel Click (if necessary)
 	//
@@ -105,21 +118,23 @@ ClickSocket::start(string& error_msg)
 	    }
 	}
 
+#ifdef O_NONBLOCK
 	//
 	// Open the Click error file (for reading error messages)
 	//
 	string click_error_filename;
 	click_error_filename = _kernel_click_mount_directory + "/errors";
 	_kernel_fd = open(click_error_filename.c_str(), O_RDONLY | O_NONBLOCK);
-	if (_kernel_fd < 0) {
+	if (!_kernel_fd.is_valid()) {
 	    error_msg = c_format("Cannot open kernel Click error file %s: %s",
 				 click_error_filename.c_str(),
 				 strerror(errno));
 	    return (XORP_ERROR);
 	}
+#endif
     }
 
-    if (is_user_click() && (_user_fd < 0)) {
+    if (is_user_click() && !_user_fd.is_valid()) {
 	//
 	// Execute the Click command (if necessary)
 	//
@@ -163,7 +178,7 @@ ClickSocket::start(string& error_msg)
 	    _user_fd = comm_connect_tcp4(&in_addr,
 					 htons(_user_click_control_socket_port),
 					 COMM_SOCK_BLOCKING, &in_progress);
-	    if (_user_fd >= 0)
+	    if (!_user_fd.is_valid())
 		break;
 	    if (total_wait_time < max_wait_time) {
 		// XXX: exponentially increase the wait time
@@ -191,7 +206,7 @@ ClickSocket::start(string& error_msg)
 				 "Click socket: %s", error_msg2.c_str());
 	    terminate_user_click_command();
 	    comm_close(_user_fd);
-	    _user_fd = -1;
+	    _user_fd.clear();
 	    return (XORP_ERROR);
 	}
 
@@ -246,21 +261,21 @@ ClickSocket::start(string& error_msg)
 	error_label:
 	    terminate_user_click_command();
 	    comm_close(_user_fd);
-	    _user_fd = -1;
+	    _user_fd.clear();
 	    return (XORP_ERROR);
 	} while (false);
 
 	//
 	// Add the socket to the event loop
 	//
-	if (_eventloop.add_selector(_user_fd, SEL_RD,
-				    callback(this, &ClickSocket::select_hook))
+	if (_eventloop.add_ioevent_cb(_user_fd, IOT_READ,
+				    callback(this, &ClickSocket::io_event))
 	    == false) {
 	    error_msg = c_format("Failed to add user-level Click socket "
 				 "to EventLoop");
 	    terminate_user_click_command();
 	    comm_close(_user_fd);
-	    _user_fd = -1;
+	    _user_fd.clear();
 	    return (XORP_ERROR);
 	}
     }
@@ -271,6 +286,10 @@ ClickSocket::start(string& error_msg)
 int
 ClickSocket::stop(string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    UNUSED(error_msg)
+    return (XORP_ERROR);
+#else /* !HOST_OS_WINDOWS */
     //
     // XXX: First we should stop user-level Click, and then kernel-level Click.
     // Otherwise, the user-level Click process may block the unmounting
@@ -283,19 +302,20 @@ ClickSocket::stop(string& error_msg)
 	    //
 	    // Remove the socket from the event loop and close it
 	    //
-	    _eventloop.remove_selector(_user_fd, SEL_ALL);
+	    _eventloop.remove_ioevent_cb(_user_fd);
 	    comm_close(_user_fd);
-	    _user_fd = -1;
+	    _user_fd.clear();
 	}
     }
+
 
     if (is_kernel_click()) {
 	//
 	// Close the Click error file (for reading error messages)
 	//
-	if (_kernel_fd >= 0) {
+	if (_kernel_fd.is_valid()) {
 	    close(_kernel_fd);
-	    _kernel_fd = -1;
+	    _kernel_fd.clear();
 	}
 	if (unmount_click_file_system(error_msg) != XORP_OK) {
 	    string error_msg2;
@@ -308,6 +328,7 @@ ClickSocket::stop(string& error_msg)
     }
 
     return (XORP_OK);
+#endif /* HOST_OS_WINDOWS */
 }
 
 int
@@ -657,6 +678,12 @@ ClickSocket::kernel_module_filename2modulename(const string& module_filename)
 int
 ClickSocket::mount_click_file_system(string& error_msg)
 {
+#if defined(HOST_OS_WINDOWS)
+    // Whilst Cygwin has a mount(), it is very different.
+    // Windows itself has no mount().
+    return (XORP_ERROR);
+    UNUSED(error_msg);
+#else
     if (_kernel_click_mount_directory.empty()) {
 	error_msg = c_format("Kernel Click mount directory is empty");
 	return (XORP_ERROR);
@@ -730,11 +757,16 @@ ClickSocket::mount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory = _kernel_click_mount_directory;
 
     return (XORP_OK);
+#endif // HOST_OS_WINDOWS
 }
 
 int
 ClickSocket::unmount_click_file_system(string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    return (XORP_OK);
+    UNUSED(error_msg);
+#else
     if (_mounted_kernel_click_mount_directory.empty())
 	return (XORP_OK);	// Directory not mounted
 
@@ -760,6 +792,7 @@ ClickSocket::unmount_click_file_system(string& error_msg)
     _mounted_kernel_click_mount_directory.erase();
 
     return (XORP_OK);
+#endif // HOST_OS_WINDOWS
 }
 
 int
@@ -826,6 +859,16 @@ ClickSocket::write_config(const string& element, const string& handler,
 			  bool has_user_config, const string& user_config,
 			  string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    return (0);
+    UNUSED(element);
+    UNUSED(handler);
+    UNUSED(has_kernel_config);
+    UNUSED(kernel_config);
+    UNUSED(has_user_config);
+    UNUSED(user_config);
+    UNUSED(error_msg);
+#else /* !HOST_OS_WINDOWS */
     if (is_kernel_click() && has_kernel_config) {
 	//
 	// Prepare the output handler name
@@ -837,11 +880,16 @@ ClickSocket::write_config(const string& element, const string& handler,
 	    output_handler = handler;
 	output_handler = _kernel_click_mount_directory + "/" + output_handler;
 
+
 	//
 	// Prepare the socket to write the configuration
 	//
-	int fd = ::open(output_handler.c_str(), O_WRONLY | O_TRUNC | O_FSYNC);
-	if (fd < 0) {
+	int openflags = O_WRONLY | O_TRUNC;
+#ifdef O_FSYNC
+	openflags |= O_FSYNC;
+#endif
+	XorpFd fd = ::open(output_handler.c_str(), openflags);
+	if (!fd.is_valid()) {
 	    error_msg = c_format("Cannot open kernel Click handler '%s' "
 				 "for writing: %s",
 				 output_handler.c_str(), strerror(errno));
@@ -950,13 +998,21 @@ ClickSocket::write_config(const string& element, const string& handler,
     }
 
     return (XORP_OK);
+#endif /* HOST_OS_WINDOWS */
 }
 
 ssize_t
-ClickSocket::write(int fd, const void* data, size_t nbytes)
+ClickSocket::write(XorpFd fd, const void* data, size_t nbytes)
 {
+#ifdef HOST_OS_WINDOWS
+    return (0);
+    UNUSED(fd);
+    UNUSED(data);
+    UNUSED(nbytes);
+#else
     _seqno++;
     return ::write(fd, data, nbytes);
+#endif
 }
 
 int
@@ -1056,7 +1112,7 @@ ClickSocket::check_user_command_status(bool& is_warning,
 }
 
 int
-ClickSocket::force_read(int fd, string& error_msg)
+ClickSocket::force_read(XorpFd fd, string& error_msg)
 {
     vector<uint8_t> message;
 
@@ -1074,17 +1130,27 @@ ClickSocket::force_read(int fd, string& error_msg)
 }
 
 int
-ClickSocket::force_read_message(int fd, vector<uint8_t>& message,
+ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
 				string& error_msg)
 {
+#ifdef HOST_OS_WINDOWS
+    return (XORP_ERROR);
+    UNUSED(fd);
+    UNUSED(message);
+    UNUSED(error_msg);
+#else /* !HOST_OS_WINDOWS */
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
     for ( ; ; ) {
 	ssize_t got;
 	// Find how much data is queued in the first message
 	do {
-	    got = recv(fd, &buffer[0], buffer.size(),
-		       MSG_DONTWAIT | MSG_PEEK);
+	    got = recv(fd, XORP_SOCKOPT_CAST(&buffer[0]),
+		       buffer.size(),
+#ifdef MSG_DONTWAIT
+		       MSG_DONTWAIT |
+#endif
+		       MSG_PEEK);
 	    if ((got < 0) && (errno == EINTR))
 		continue;	// XXX: the receive was interrupted by a signal
 	    if ((got < 0) || (got < (ssize_t)buffer.size()))
@@ -1106,15 +1172,16 @@ ClickSocket::force_read_message(int fd, vector<uint8_t>& message,
     }
 
     return (XORP_OK);
+#endif /* HOST_OS_WINDOWS */
 }
 
 void
-ClickSocket::select_hook(int fd, SelectorMask m)
+ClickSocket::io_event(XorpFd fd, IoEventType type)
 {
     string error_msg;
 
     XLOG_ASSERT((fd == _kernel_fd) || (fd == _user_fd));
-    XLOG_ASSERT(m == SEL_RD);
+    XLOG_ASSERT(type == IOT_READ);
     if (force_read(fd, error_msg) != XORP_OK) {
 	XLOG_ERROR("Error force_read() from Click socket: %s",
 		   error_msg.c_str());

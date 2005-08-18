@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.40 2005/03/05 01:41:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.41 2005/03/25 02:53:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,8 +21,14 @@
 #include "libxorp/debug.h"
 #include "libxorp/profile.hh"
 
+#include "libcomm/comm_api.h"
+
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
+#endif
+
+#ifdef HAVE_IPHLPAPI_H
+#include <iphlpapi.h>
 #endif
 
 #include "profile_vars.hh"
@@ -30,6 +36,11 @@
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
 #define PROC_LINUX_FILE_FORWARDING_V6 "/proc/sys/net/ipv6/conf/all/forwarding"
+
+#ifdef __MINGW32__
+#define MIB_IP_FORWARDING	1
+#define MIB_IP_NOT_FORWARDING	2
+#endif
 
 //
 // Unicast forwarding table related configuration.
@@ -51,25 +62,31 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
       _ftic_entry_get_dummy(*this),
       _ftic_entry_get_rtsock(*this),
       _ftic_entry_get_netlink(*this),
+      _ftic_entry_get_iphelper(*this),
       _ftic_entry_get_click(*this),
       _ftic_entry_set_dummy(*this),
       _ftic_entry_set_rtsock(*this),
       _ftic_entry_set_netlink(*this),
+      _ftic_entry_set_iphelper(*this),
       _ftic_entry_set_click(*this),
       _ftic_entry_observer_dummy(*this),
       _ftic_entry_observer_rtsock(*this),
       _ftic_entry_observer_netlink(*this),
+      _ftic_entry_observer_iphelper(*this),
       _ftic_table_get_dummy(*this),
       _ftic_table_get_sysctl(*this),
       _ftic_table_get_netlink(*this),
+      _ftic_table_get_iphelper(*this),
       _ftic_table_get_click(*this),
       _ftic_table_set_dummy(*this),
       _ftic_table_set_rtsock(*this),
       _ftic_table_set_netlink(*this),
+      _ftic_table_set_iphelper(*this),
       _ftic_table_set_click(*this),
       _ftic_table_observer_dummy(*this),
       _ftic_table_observer_rtsock(*this),
       _ftic_table_observer_netlink(*this),
+      _ftic_table_observer_iphelper(*this),
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
@@ -135,6 +152,15 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
 	}
     }
 #endif // HAVE_IPV6
+
+#ifdef HOST_OS_WINDOWS
+    _event = CreateEvent(NULL, FALSE, FALSE, NULL);
+    if (_event == NULL)
+	XLOG_FATAL("Could not create Win32 event object.");
+    memset(&_overlapped, 0, sizeof(_overlapped));
+    _overlapped.hEvent = _event;
+    _enablecnt = 0;
+#endif
 }
 
 FtiConfig::~FtiConfig()
@@ -146,6 +172,14 @@ FtiConfig::~FtiConfig()
 		   "the forwarding table information: %s",
 		   error_msg.c_str());
     }
+
+#ifdef HOST_OS_WINDOWS
+    if (_enablecnt > 0) {
+	XLOG_WARNING("EnableRouter() without %d matching "
+		     "UnenableRouter() calls.", _enablecnt);
+    }
+    CloseHandle(_event);
+#endif
 }
 
 int
@@ -1280,11 +1314,12 @@ FtiConfig::test_have_ipv4() const
     if (is_dummy())
 	return (true);
 
-    int s = socket(AF_INET, SOCK_DGRAM, 0);
-    if (s < 0)
+    XorpFd s = comm_sock_open(AF_INET, SOCK_DGRAM, 0, 0);
+    if (!s.is_valid())
 	return (false);
-    
-    close(s);
+   
+    comm_close(s);
+
     return (true);
 }
 
@@ -1303,11 +1338,11 @@ FtiConfig::test_have_ipv6() const
 #ifndef HAVE_IPV6
     return (false);
 #else
-    int s = socket(AF_INET6, SOCK_DGRAM, 0);
-    if (s < 0)
+    XorpFd s = comm_sock_open(AF_INET6, SOCK_DGRAM, 0, 0);
+    if (!s.is_valid())
 	return (false);
     
-    close(s);
+    comm_close(s);
     return (true);
 #endif // HAVE_IPV6
 }
@@ -1378,6 +1413,16 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	    return (XORP_ERROR);
 	}
 	fclose(fh);
+    }
+#elif defined(HOST_OS_WINDOWS)
+    {
+	MIB_IPSTATS ipstats;
+	DWORD error = GetIpStatistics(&ipstats);
+	if (error != NO_ERROR) {
+	    XLOG_ERROR("GetIpStatistics() failed: %d", (int)GetLastError());
+	    return (XORP_ERROR);
+	}
+	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
     }
 #else
 #error "OS not supported: don't know how to test whether"
@@ -1467,6 +1512,17 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	    return (XORP_ERROR);
 	}
 	fclose(fh);
+    }
+#elif defined(HOST_OS_WINDOWS) && 0
+    // XXX: Not in MinGW w32api yet.
+    {
+	MIB_IPSTATS ipstats;
+	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
+	if (error != NO_ERROR) {
+	    XLOG_ERROR("GetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    return (XORP_ERROR);
+	}
+	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
     }
 #else
 #error "OS not supported: don't know how to test whether"
@@ -1636,6 +1692,33 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	}
 	fclose(fh);
     }
+#elif defined(HOST_OS_WINDOWS)
+    if (enable) {
+	HANDLE hFwd;
+	DWORD result = EnableRouter(&hFwd, &_overlapped);
+	if (result != ERROR_IO_PENDING) {
+	    error_msg = c_format("Error %lu from EnableRouter", GetLastError());
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	++_enablecnt;
+    } else {
+	if (_enablecnt == 0) {
+	    error_msg = c_format("UnableRouter() called without any previous "
+				 "call to EnableRouter()");
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+
+	DWORD result = UnenableRouter(&_overlapped, NULL);
+	if (result != NO_ERROR) {
+	    error_msg = c_format("Error %lu from UnenableRouter",
+				 GetLastError());
+	    XLOG_ERROR(error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	--_enablecnt;
+    }
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv4 unicast forwarding"
@@ -1757,6 +1840,23 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	}
 	fclose(fh);
     }
+#elif defined(HOST_OS_WINDOWS) && 0
+    // XXX: Not yet in MinGW w32api
+    {
+	MIB_IPSTATS ipstats;
+	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
+	if (error != NO_ERROR) {
+	    XLOG_ERROR("GetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    return (XORP_ERROR);
+	}
+	ipstats.dwForwarding = (enable != 0) ? 1 : 0;
+	ipstats.dwDefaultTTL = MIB_USE_CURRENT_TTL;
+	error = SetIpStatisticsEx(&ipstats, AF_INET6);
+	if (error != NO_ERROR) {
+	    XLOG_ERROR("SetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    return (XORP_ERROR);
+	}
+    }
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "IPv6 unicast forwarding"
@@ -1851,6 +1951,10 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	error_msg = "";
 	UNUSED(enable);
     }
+#elif defined(HOST_OS_WINDOWS)
+
+    ; // do nothing
+
 #else
 #error "OS not supported: don't know how to enable/disable"
 #error "the acceptance of IPv6 Router Advertisement messages"

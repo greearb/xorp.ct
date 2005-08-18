@@ -12,23 +12,44 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.12 2005/03/24 02:50:42 pavlin Exp $"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
-
-#include <unistd.h>
-#include <fcntl.h>
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.13 2005/03/25 02:53:14 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+
+/* Windows has no 'struct ip', so ship one. */
+#ifdef HOST_OS_WINDOWS
+#include "ip.h"
+/* XXX */
+typedef char *caddr_t;
+#endif
 
 #include "rawsock4.hh"
 
@@ -38,22 +59,27 @@
 RawSocket4::RawSocket4(uint32_t protocol) throw (RawSocket4Exception)
 {
     _fd = socket(AF_INET, SOCK_RAW, protocol);
-    if (_fd < 0)
+    if (!_fd.is_valid())
 	xorp_throw(RawSocket4Exception, "socket", errno);
 
-    const int on = 1;
-    if (setsockopt(_fd, IPPROTO_IP, IP_HDRINCL, &on, sizeof(on)) < 0)
+#ifdef IP_HDRINCL
+    int on = 1;
+
+    if (setsockopt(_fd, IPPROTO_IP, IP_HDRINCL, XORP_SOCKOPT_CAST(&on),
+	sizeof(on)) < 0)
 	xorp_throw(RawSocket4Exception, "setsockopt (IP_HDRINCL)", errno);
-    /*
-      if (setsockopt(_fd, SOL_SOCKET, SO_DONTROUTE, &on, sizeof(on)) < 0)
-      xorp_throw(RawSocket4Exception, "setsockopt (SO_DONTROUTE)", errno);
-    */
+# if 0
+    if (setsockopt(_fd, SOL_SOCKET, SO_DONTROUTE, XORP_SOCKOPT_CAST(&on),
+	sizeof(on)) < 0)
+	xorp_throw(RawSocket4Exception, "setsockopt (SO_DONTROUTE)", errno);
+# endif
+#endif
 }
 
 RawSocket4::~RawSocket4()
 {
-    	if (_fd > 0)
-	    close(_fd);
+    	if (_fd.is_valid())
+	    comm_close(_fd);
 }
 
 ssize_t
@@ -110,6 +136,13 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
     who.sin_len = sizeof(sockaddr_in);
 #endif /* HAVE_SIN_LEN */
 
+#ifdef HOST_OS_WINDOWS
+    DWORD sent, error;
+    error = WSASendTo(_fd, reinterpret_cast<WSABUF *>(iov), iovcnt, &sent, 0,
+		      reinterpret_cast<struct sockaddr *>(&who), sizeof(who),
+		      NULL, NULL);
+    return sent;
+#else
     struct msghdr mh;
     mh.msg_name = (caddr_t)&who;
     mh.msg_namelen = sizeof(who);
@@ -119,6 +152,7 @@ RawSocket4::write(const uint8_t* buf, size_t nbytes) const
     mh.msg_controllen = 0;
     mh.msg_flags = 0;
     return ::sendmsg(_fd, &mh, 0);
+#endif
 }
 
 /* ------------------------------------------------------------------------- */
@@ -130,8 +164,7 @@ IoRawSocket4::IoRawSocket4(EventLoop&	eventloop,
     throw (RawSocket4Exception)
     : RawSocket4(protocol), _eventloop(eventloop), _autohook(autohook)
 {
-    int fl = fcntl(_fd, F_GETFL);
-    if (fcntl(_fd, F_SETFL, fl | O_NONBLOCK) < 0)
+    if (comm_sock_set_blocking(_fd, 0) != XORP_OK)
 	xorp_throw(RawSocket4Exception, "fcntl (O_NON_BLOCK)", errno);
 
     _recvbuf.reserve(RECVBUF_BYTES);
@@ -139,7 +172,8 @@ IoRawSocket4::IoRawSocket4(EventLoop&	eventloop,
 	xorp_throw(RawSocket4Exception, "receive buffer reserve() failed", 0);
 
     ssize_t sz = RECVBUF_BYTES;
-    if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, &sz, sizeof(sz)) < 0)
+    if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, XORP_SOCKOPT_CAST(&sz),
+	sizeof(sz)) < 0)
 	xorp_throw(RawSocket4Exception, "setsockopt (SO_RCVBUF)", errno);
 
     if (_autohook)
@@ -153,14 +187,16 @@ IoRawSocket4::~IoRawSocket4()
 }
 
 void
-IoRawSocket4::recv(int /* fd */, SelectorMask /* m */)
+IoRawSocket4::recv(XorpFd /* fd */, IoEventType /* m */)
 {
-    struct sockaddr from;
+    struct sockaddr_storage from;
     socklen_t from_len = sizeof(from);
-    ssize_t n = recvfrom(_fd, &_recvbuf[0], RECVBUF_BYTES, 0,
-			 &from, &from_len);
-    debug_msg("Read fd %d, %d bytes, from_len %d\n", _fd,
-	      XORP_INT_CAST(n), from_len);
+
+    ssize_t n = recvfrom(_fd, XORP_SOCKOPT_CAST(&_recvbuf[0]),
+			 RECVBUF_BYTES, 0,
+			 (struct sockaddr *)&from, &from_len);
+    debug_msg("Read fd %s, %d bytes, from_len %d\n",
+	      _fd.str().c_str(), XORP_INT_CAST(n), XORP_INT_CAST(from_len));
     if (n <= 0) {
 	return;
     }
@@ -178,7 +214,7 @@ bool
 IoRawSocket4::eventloop_hook()
 {
     debug_msg("hooking\n");
-    return _eventloop.add_selector(_fd, SEL_RD,
+    return _eventloop.add_ioevent_cb(_fd, IOT_READ,
 				   callback(this, &IoRawSocket4::recv));
 }
 
@@ -186,7 +222,7 @@ void
 IoRawSocket4::eventloop_unhook()
 {
     debug_msg("unhooking\n");
-    _eventloop.remove_selector(_fd);
+    _eventloop.remove_ioevent_cb(_fd);
 }
 
 /* ------------------------------------------------------------------------- */
@@ -252,6 +288,7 @@ void
 FilterRawSocket4::process_recv_data(const vector<uint8_t>& buf)
 {
     XLOG_ASSERT(buf.size() >= sizeof(struct ip));
+
     for (list<InputFilter*>::iterator i = _filters.begin();
 	 i != _filters.end(); ++i) {
 	(*i)->recv(buf);

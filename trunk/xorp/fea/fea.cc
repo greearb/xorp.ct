@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.48 2005/03/05 01:41:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.49 2005/03/25 02:53:00 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,6 +21,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/profile.hh"
+
+#include "libcomm/comm_api.h"
 
 #include "libxipc/xrl_std_router.hh"
 
@@ -38,6 +40,10 @@
 #include "xrl_target.hh"
 #include "xrl_packet_acl.hh"
 #include "profile_vars.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 static const char* xrl_entity = "fea";
 #ifndef FEA_DUMMY
@@ -96,6 +102,8 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
 {
     string error_msg;
     EventLoop eventloop;
+
+    comm_init();
 
     XrlStdRouter xrl_std_router_fea(eventloop,
 				    xrl_entity,
@@ -385,6 +393,8 @@ main(int argc, char *argv[])
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
+
+    comm_exit();
 
     //
     // Gracefully stop and exit xlog

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.22 2005/03/25 02:53:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.23 2005/05/08 19:27:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,10 +20,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
-
-// TODO: XXX: PAVPAVPAV: move this include somewhere else!!
-#ifdef HOST_OS_LINUX
+#endif
+#ifdef HAVE_LINUX_TYPES_H
 #include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_RTNETLINK_H
@@ -181,7 +181,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     uint8_t*		data;
     NetlinkSocket*	ns_ptr = NULL;
     int			family = fte.net().af();
-    uint16_t		if_index = 0;
+    uint32_t		if_index = 0;
 
     debug_msg("add_entry "
 	      "(network = %s nexthop = %s)",

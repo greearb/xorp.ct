@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.22 2005/03/19 23:24:53 pavlin Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.23 2005/03/25 02:53:16 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__
@@ -662,7 +662,7 @@ private:
     //
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
+		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool is_router_alert,
 		   const uint8_t* sndbuf, size_t sndlen);
@@ -679,7 +679,7 @@ private:
     int signal_message_send(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
 			    int message_type,
-			    uint16_t vif_index,
+			    uint32_t vif_index,
 			    const IPvX& src, const IPvX& dst,
 			    const uint8_t *rcvbuf, size_t rcvlen);
     //
@@ -726,7 +726,7 @@ private:
     int	send_add_config_vif(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
 			    const string& vif_name,
-			    uint16_t vif_index);
+			    uint32_t vif_index);
     
     /**
      * Send a message to a client to delete a configured vif.

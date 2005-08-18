@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.31 2005/05/08 23:58:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.32 2005/06/23 19:19:42 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -29,15 +29,21 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 #ifdef HAVE_NET_IF_VAR_H
 #include <net/if_var.h>
 #endif
 #ifdef HAVE_NET_IF_DL_H
 #include <net/if_dl.h>
 #endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -144,8 +150,6 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
 #endif // ! HAVE_RFC3542
 #endif // HAVE_IPV6
     
-    _proto_socket = -1;
-    
     // Allocate the buffers
     _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
     _sndbuf0 = new uint8_t[IO_BUF_SIZE];
@@ -157,23 +161,28 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     // recvmsg() and sendmsg() related initialization
     switch (family()) {
     case AF_INET:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	_rcvmh.msg_name		= (caddr_t)&_from4;
 	_sndmh.msg_name		= (caddr_t)&_to4;
 	_rcvmh.msg_namelen	= sizeof(_from4);
 	_sndmh.msg_namelen	= sizeof(_to4);
+#endif
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	_rcvmh.msg_name		= (caddr_t)&_from6;
 	_sndmh.msg_name		= (caddr_t)&_to6;
 	_rcvmh.msg_namelen	= sizeof(_from6);
 	_sndmh.msg_namelen	= sizeof(_to6);
+#endif
 	break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
 	break;
     }
+#ifdef HAVE_STRUCT_MSGHDR_MSG_IOV
     _rcvmh.msg_iov		= _rcviov;
     _sndmh.msg_iov		= _sndiov;
     _rcvmh.msg_iovlen		= 1;
@@ -186,11 +195,16 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
     _sndiov[1].iov_len		= 0;
-    
+#else
+    XLOG_FATAL("Needs rewritten to use WinSock2 WSABUFS");
+#endif
+   
+#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
+#endif
     
     _ignore_my_packets		= false;
 }
@@ -229,7 +243,7 @@ ProtoComm::start()
 	return (XORP_ERROR);
     
     if (_ipproto >= 0) {
-	if (open_proto_socket() < 0) {
+	if (open_proto_socket() != XORP_OK) {
 	    stop();
 	    return (XORP_ERROR);
 	}
@@ -300,7 +314,8 @@ ProtoComm::ip_hdr_include(bool is_enabled)
 	int bool_flag = is_enabled; 
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_HDRINCL,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+			XORP_SOCKOPT_CAST(&bool_flag),
+			sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_HDRINCL, %u) failed: %s", bool_flag,
 		       strerror(errno));
 	    return (XORP_ERROR);
@@ -358,7 +373,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 #ifdef IPV6_RECVPKTINFO
 	// The new option (applies to receiving only)
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVPKTINFO,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -366,7 +381,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 #else
 	// The old option (see RFC-2292)
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_PKTINFO,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_PKTINFO, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -378,14 +393,14 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVHOPLIMIT
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVHOPLIMIT, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_HOPLIMIT,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_HOPLIMIT, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -397,7 +412,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVTCLASS
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVTCLASS,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVTCLASS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -409,14 +424,14 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVHOPOPTS
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVHOPOPTS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_HOPOPTS,
-		       (void *)&bool_flag, sizeof(bool_flag)) < 0) {
+		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_HOPOPTS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -455,7 +470,7 @@ ProtoComm::set_multicast_ttl(int ttl)
 	u_char ip_ttl = ttl; // XXX: In IPv4 the value argument is 'u_char'
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_TTL,
-		       (void *)&ip_ttl, sizeof(ip_ttl)) < 0) {
+		XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_TTL, %u) failed: %s",
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
@@ -474,7 +489,7 @@ ProtoComm::set_multicast_ttl(int ttl)
 	int ip_ttl = ttl;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-		       (void *)&ip_ttl, sizeof(ip_ttl)) < 0) {
+		XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_HOPS, %u) failed: %s",
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
@@ -513,7 +528,7 @@ ProtoComm::set_multicast_loop(bool is_enabled)
 	u_char loop = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_LOOP,
-		       (void *)&loop, sizeof(loop)) < 0) {
+		XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_LOOP, %u) failed: %s",
 		       loop, strerror(errno));
 	    return (XORP_ERROR);
@@ -532,7 +547,7 @@ ProtoComm::set_multicast_loop(bool is_enabled)
 	uint loop6 = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		       (void *)&loop6, sizeof(loop6)) < 0) {
+		XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_LOOP, %u) failed: %s",
 		       loop6, strerror(errno));
 	    return (XORP_ERROR);
@@ -560,7 +575,7 @@ ProtoComm::set_multicast_loop(bool is_enabled)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::set_default_multicast_vif(uint16_t vif_index)
+ProtoComm::set_default_multicast_vif(uint32_t vif_index)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
 
@@ -580,7 +595,7 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
 	}
 	mfea_vif->addr_ptr()->copy_out(in_addr);
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_IF,
-		       (void *)&in_addr, sizeof(in_addr)) < 0) {
+		XORP_SOCKOPT_CAST(&in_addr), sizeof(in_addr)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_IF, %s) failed: %s",
 		       cstring(*mfea_vif->addr_ptr()), strerror(errno));
 	    return (XORP_ERROR);
@@ -599,7 +614,7 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
 	u_int pif_index = mfea_vif->pif_index();
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		       (void *)&pif_index, sizeof(pif_index)) < 0) {
+		XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_IF, %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
@@ -628,7 +643,7 @@ ProtoComm::set_default_multicast_vif(uint16_t vif_index)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
+ProtoComm::join_multicast_group(uint32_t vif_index, const IPvX& group)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
@@ -659,7 +674,7 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		       (void *)&mreq, sizeof(mreq)) < 0) {
+		XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    XLOG_ERROR("Cannot join group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -681,7 +696,7 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = mfea_vif->pif_index();
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-		       (void *)&mreq6, sizeof(mreq6)) < 0) {
+		XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    XLOG_ERROR("Cannot join group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -710,7 +725,7 @@ ProtoComm::join_multicast_group(uint16_t vif_index, const IPvX& group)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
+ProtoComm::leave_multicast_group(uint32_t vif_index, const IPvX& group)
 {
     MfeaVif *mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
@@ -741,7 +756,7 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-		       (void *)&mreq, sizeof(mreq)) < 0) {
+		XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    XLOG_ERROR("Cannot leave group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -763,7 +778,7 @@ ProtoComm::leave_multicast_group(uint16_t vif_index, const IPvX& group)
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = mfea_vif->pif_index();
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
-		       (void *)&mreq6, sizeof(mreq6)) < 0) {
+		XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    XLOG_ERROR("Cannot leave group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -801,21 +816,29 @@ ProtoComm::open_proto_socket()
     
     // If necessary, open the protocol socket
     do {
-	if (_proto_socket >= 0)
+	if (_proto_socket.is_valid())
 	    break;
 	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
 	    // XXX: reuse the mrouter socket
 	    _proto_socket = mfea_node().mfea_mrouter().mrouter_socket();
-	    if (_proto_socket >= 0) {
+	    if (_proto_socket.is_valid()) {
 		// XXX: we are taking control over the mrouter socket,
 		// hence remove it from the select()-ed sockets.
-		mfea_node().eventloop().remove_selector(_proto_socket);
+		mfea_node().eventloop().remove_ioevent_cb(_proto_socket);
 		break;
 	    }
 	}
-	if ( (_proto_socket = socket(family(), SOCK_RAW, _ipproto)) < 0) {
+	_proto_socket = socket(family(), SOCK_RAW, _ipproto);
+	if (!_proto_socket.is_valid()) {
+	    char *errstr;
+
+#ifdef HAVE_STRERROR
+	    errstr = strerror(errno);
+#else
+	    errstr = "unknown error";
+#endif
 	    XLOG_ERROR("Cannot open ipproto %d raw socket stream: %s",
-		       _ipproto, strerror(errno));
+		       _ipproto, errstr);
 	    return (XORP_ERROR);
 	}
     } while (false);
@@ -876,7 +899,7 @@ ProtoComm::open_proto_socket()
 	    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
-			   (void *)&filter, sizeof(filter)) < 0) {
+		XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
 		close_proto_socket();
 		XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s",
 			   strerror(errno));
@@ -891,7 +914,7 @@ ProtoComm::open_proto_socket()
 	return (XORP_ERROR);
     }
 
-    if (add_proto_socket_selector() < 0) {
+    if (add_proto_socket_callback() < 0) {
 	close_proto_socket();
 	return (XORP_ERROR);
     }
@@ -905,13 +928,13 @@ ProtoComm::open_proto_socket()
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
-ProtoComm::add_proto_socket_selector()
+ProtoComm::add_proto_socket_callback()
 {
-    if (_proto_socket < 0)
+    if (!_proto_socket.is_valid())
 	return (XORP_ERROR);
 
     // Assign a method to read from this socket
-    if (mfea_node().eventloop().add_selector(_proto_socket, SEL_RD,
+    if (mfea_node().eventloop().add_ioevent_cb(_proto_socket, IOT_READ,
 				callback(this, &ProtoComm::proto_socket_read))
 	== false) {
 	XLOG_ERROR("Cannot add a protocol socket to the set of sockets "
@@ -933,30 +956,32 @@ ProtoComm::add_proto_socket_selector()
 int
 ProtoComm::close_proto_socket()
 {
-    if (_proto_socket < 0)
+    if (!_proto_socket.is_valid())
 	return (XORP_ERROR);
     
     // Remove it just in case, even though it may not be select()-ed
-    mfea_node().eventloop().remove_selector(_proto_socket);
+    mfea_node().eventloop().remove_ioevent_cb(_proto_socket);
     
     // If this is the mrouter socket, then don't close it
     do {
 	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
 	    if (_proto_socket == mfea_node().mfea_mrouter().mrouter_socket()) {
-		if (mfea_node().mfea_mrouter().adopt_mrouter_socket() >= 0)
+		if (
+!mfea_node().mfea_mrouter().adopt_mrouter_socket().is_valid()) {
 		    //
 		    // XXX: the control over the socket passed
 		    // to the MfeaMrouter
 		    //
-		    _proto_socket = -1;
-		    return (XORP_OK);
+		    _proto_socket.clear();
+		}
+		return (XORP_OK);
 	    }
 	}
 	break;
     } while (false);
     
-    close(_proto_socket);
-    _proto_socket = -1;
+    comm_close(_proto_socket);
+    _proto_socket.clear();
     
     return (XORP_OK);
 }
@@ -964,13 +989,13 @@ ProtoComm::close_proto_socket()
 /**
  * ProtoComm::proto_socket_read:
  * @fd: file descriptor of arriving data.
- * @mask: The selector event type mask that describes the status of @fd.
+ * @type: The type of I/O event that has arrived.
  * 
  * Read data from a protocol socket, and then call the appropriate protocol
  * module to process it.
  **/
 void
-ProtoComm::proto_socket_read(int fd, SelectorMask mask)
+ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 {
     ssize_t	nbytes;
     int		ip_hdr_len = 0;
@@ -984,28 +1009,36 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     MfeaVif	*mfea_vif = NULL;
 
     UNUSED(fd);
-    UNUSED(mask);
-    
+    UNUSED(type);
+
+#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
     // Zero and reset various fields
     _rcvmh.msg_controllen = CMSG_BUF_SIZE;
+#endif
+
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {
     case AF_INET:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	memset(&_from4, 0, sizeof(_from4));
 	_rcvmh.msg_namelen = sizeof(_from4);
+#endif
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
+#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	memset(&_from6, 0, sizeof(_from6));
 	_rcvmh.msg_namelen = sizeof(_from6);
+#endif
 	break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
 	return;			// Error
     }
-    
+   
+#ifdef HAVE_RECVMSG
     // Read from the socket
     nbytes = recvmsg(_proto_socket, &_rcvmh, 0);
     if (nbytes < 0) {
@@ -1014,11 +1047,20 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	XLOG_ERROR("recvmsg() failed: %s", strerror(errno));
 	return;			// Error
     }
+#else
+    XLOG_FATAL("Needs rewritten to use WSARecv() with WinSock2");
+    UNUSED(nbytes);
+#endif
     
     // Check if it is a signal from the kernel to the user-level
     switch (_ipproto) {
     case IPPROTO_IGMP:
     {
+#ifndef HAVE_IPV4_MULTICAST_ROUTING
+	XLOG_WARNING("proto_socket_read(): "
+		     "IGMP is unsupported on this platform");
+	return;		// Error
+#else
 	struct igmpmsg *igmpmsg;
 	
 	igmpmsg = (struct igmpmsg *)_rcvbuf0;
@@ -1037,6 +1079,7 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
 	}
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
     
@@ -1093,7 +1136,9 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
     //
     // Not a kernel signal. Pass to the registered processing function
     //
-    
+
+#ifdef HAVE_STRUCT_CMSGHDR
+    // XXX: Above should actually be 'if we can see struct ip' and cmsghdr
     // Input check.
     // Get source and destination address, IP TTL (a.k.a. hop-limit),
     // and (eventually) interface address (IPv6 only).
@@ -1421,6 +1466,20 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
 	!= XORP_OK) {
 	return;			// Error
     }
+
+#else // HAVE_STRUCT_CMSGHDR
+    //
+    // XXX: We don't have cmsgs, so we will need to deal with
+    // IP options in a very different way.
+    //
+    UNUSED(ip_hdr_len);
+    UNUSED(ip_data_len);
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(is_router_alert);
+    UNUSED(pif_index);
+    UNUSED(mfea_vif);
+#endif // HAVE_STRUCT_CMSGHDR
     
     return;			// OK
 }
@@ -1446,12 +1505,14 @@ ProtoComm::proto_socket_read(int fd, SelectorMask mask)
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-ProtoComm::proto_socket_write(uint16_t vif_index,
+ProtoComm::proto_socket_write(uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos, bool is_router_alert,
 			      const uint8_t *databuf, size_t datalen)
 {
+#ifndef HOST_OS_WINDOWS
     struct ip	*ip;
+#endif
     uint32_t	ip_option;
     uint32_t	*ip_option_p;
     int		ip_hdr_len = 0;
@@ -1523,6 +1584,7 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     //
     switch (family()) {
     case AF_INET:
+#ifndef HOST_OS_WINDOWS
 	ip = (struct ip *)_sndbuf0;
 	if (is_router_alert) {
 	    // Include the Router Alert option
@@ -1575,10 +1637,25 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
 	// _sndiov[1].iov_base	= (caddr_t)databuf;
 	_sndiov[1].iov_len	= datalen;
+#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
 	_sndmh.msg_control	= NULL;
 	_sndmh.msg_controllen	= 0;
+#endif
 	
+#else /* HOST_OS_WINDOWS */
+	XLOG_FATAL("WinSock2 lacks a 'struct ip' definition");
+	UNUSED(ip_option);
+	UNUSED(ip_option_p);
+	UNUSED(ip_hdr_len);
+	UNUSED(setloop);
+	UNUSED(ret);
+	UNUSED(src);
+	UNUSED(dst);
+	UNUSED(databuf);
+	UNUSED(datalen);
+#endif /* !HOST_OS_WINDOWS */
 	break;
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1769,7 +1846,8 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 	set_multicast_loop(true);
 	setloop = true;
     }
-    
+
+#ifndef HOST_OS_WINDOWS    
     ret = XORP_OK;
     if (sendmsg(_proto_socket, &_sndmh, 0) < 0) {
 	ret = XORP_ERROR;
@@ -1783,6 +1861,9 @@ ProtoComm::proto_socket_write(uint16_t vif_index,
 		       mfea_vif->name().c_str(), strerror(errno));
 	}
     }
+#else
+    XLOG_FATAL("Needs to be rewritten to use WSASend() with WinSock2");
+#endif
     if (setloop) {
 	set_multicast_loop(false);
     }

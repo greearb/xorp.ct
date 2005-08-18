@@ -1,7 +1,7 @@
-#!/bin/sh # -*- sh-indentation: 4; tab-width: 8; indent-tabs-mode: t -*-
+#!/bin/sh
 
 #
-# $XORP: xorp/fea/test_xrls.sh,v 1.1.1.1 2002/12/11 23:56:03 hodson Exp $
+# $XORP: xorp/fea/test_xrls.sh,v 1.2 2003/02/24 04:28:44 hodson Exp $
 #
 
 # This script is used to test all the xrl interfaces of the fea that

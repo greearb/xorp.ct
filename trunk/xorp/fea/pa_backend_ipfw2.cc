@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.4 2005/03/05 01:41:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.5 2005/03/25 02:53:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -20,24 +20,41 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
+#endif
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
-#include <sys/sysctl.h>
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
+#endif
+
 #ifdef HAVE_PACKETFILTER_IPFW2
  #if __FreeBSD_version < 500000
   #define IPFW2 1
  #endif
 #include <netinet/ip_fw.h>
 #endif
+
+#ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
+#endif
+#ifdef HAVE_NETINET_TCP_H
 #include <netinet/tcp.h>
+#endif
 
 #include "pa_entry.hh"
 #include "pa_table.hh"

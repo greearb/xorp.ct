@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.8 2005/07/08 02:06:19 abittau Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.9 2005/07/08 07:17:06 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -66,7 +66,7 @@ private:
     RawSocket6& operator=(const RawSocket6&);	// Not implemented.
 
 protected:
-    int32_t  _fd;
+    XorpFd  _fd;
     uint32_t _pf;
 };
 
@@ -108,7 +108,7 @@ protected:
 				   const vector<uint8_t>& payload) = 0;
 
 protected:
-    void recv(int fd, SelectorMask m);
+    void recv(XorpFd fd, IoEventType type);
     bool eventloop_hook();
     void eventloop_unhook();
 

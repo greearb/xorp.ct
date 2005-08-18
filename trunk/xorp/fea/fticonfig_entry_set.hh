@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.18 2004/12/14 02:23:49 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.19 2005/03/25 02:53:03 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -476,6 +476,71 @@ private:
     bool _is_reinstalling_fte_table6;
     IPv4Net _reinstalling_ipv4net;
     IPv6Net _reinstalling_ipv6net;
+};
+
+class FtiConfigEntrySetIPHelper : public FtiConfigEntrySet {
+public:
+    FtiConfigEntrySetIPHelper(FtiConfig& ftic);
+    virtual ~FtiConfigEntrySetIPHelper();
+
+    /**
+     * Start operation.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+
+    /**
+     * Stop operation.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Add a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry4(const Fte4& fte);
+
+    /**
+     * Delete a single routing entry. Must be with a configuration interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry4(const Fte4& fte);
+
+    /**
+     * Add a single routing entry. Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry6(const Fte6& fte);
+
+    /**
+     * Delete a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry6(const Fte6& fte);
+
+private:
+    bool add_entry(const FteX& fte);
+    bool delete_entry(const FteX& fte);
 };
 
 #endif // __FEA_FTICONFIG_ENTRY_SET_HH__

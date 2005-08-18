@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.26 2005/03/25 02:53:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.27 2005/08/17 16:24:25 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -21,7 +21,9 @@
 #include "libxorp/debug.h"
 #include "libxorp/ether_compat.h"
 
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_set.hh"
@@ -205,7 +207,7 @@ void
 IfConfigSet::push_interface_begin(const IfTreeInterface& i)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -227,7 +229,7 @@ void
 IfConfigSet::push_interface_end(const IfTreeInterface& i)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -293,7 +295,8 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 
 	if (set_interface_mtu(i.ifname(), if_index, new_mtu, error_msg) < 0) {
 	    error_msg = c_format("Failed to set MTU to %u bytes: %s",
-				 new_mtu, error_msg.c_str());
+				 XORP_UINT_CAST(new_mtu),
+				 error_msg.c_str());
 	    ifc().er().interface_error(i.name(), error_msg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
 	    return;
@@ -375,7 +378,7 @@ IfConfigSet::push_vif_begin(const IfTreeInterface&	i,
 			  const IfTreeVif&		v)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -397,7 +400,7 @@ IfConfigSet::push_vif_end(const IfTreeInterface&	i,
 			  const IfTreeVif&		v)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     //
@@ -479,7 +482,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 			      const IfTreeAddr4&	a)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     bool enabled = (i.enabled() & v.enabled() & a.enabled());
@@ -591,7 +594,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 			      const IfTreeAddr6&	a)
 {
     string error_msg;
-    uint16_t if_index = ifc().get_insert_ifindex(i.ifname());
+    uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
 
     bool enabled = (i.enabled() & v.enabled() & a.enabled());

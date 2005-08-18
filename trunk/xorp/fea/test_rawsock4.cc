@@ -12,26 +12,50 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.11 2005/03/25 02:53:15 pavlin Exp $"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.12 2005/04/01 01:30:46 pavlin Exp $"
 
 #define DEBUG_LOGGING
-
-#include <iostream>
-#include <netdb.h>
-#include <sysexits.h>
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "libxorp/debug.h"
+#include "libxorp/xorp.h"
+
+#include "libcomm/comm_api.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+
+#include <iostream>
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+/* Windows has no 'struct ip', so ship one. */
+#ifdef HOST_OS_WINDOWS
+#include "ip.h"
+#endif
 
 #include "rawsock4.hh"
 
@@ -307,7 +331,18 @@ lookup4(const char* addr)
 {
     const struct hostent* he = gethostbyname(addr);
     if (he == 0 || he->h_length < 4) {
-	fprintf(stderr, "gethostbyname failed: %s\n", hstrerror(h_errno));
+	fprintf(stderr, "gethostbyname failed: %s %d\n",
+#ifdef HAVE_HSTRERROR
+		hstrerror(h_errno),
+#else
+		"",
+#endif
+#ifdef HOST_OS_WINDOWS
+		WSAGetLastError()
+#else
+		h_errno
+#endif
+	);
 	exit(EXIT_FAILURE);
     }
     const in_addr* ia = reinterpret_cast<const in_addr*>(he->h_addr_list[0]);
@@ -315,6 +350,14 @@ lookup4(const char* addr)
 }
 
 /* ------------------------------------------------------------------------- */
+
+#ifndef EX_USAGE
+#define EX_USAGE 1
+#endif
+
+#ifndef EXIT_SUCCESS
+#define EXIT_SUCCESS 0
+#endif
 
 static void
 usage()
@@ -331,6 +374,7 @@ usage()
 int
 main(int argc, char* const* argv)
 {
+#ifndef HOST_OS_WINDOWS
     //
     // Root test, can't run if not root.
     //
@@ -343,6 +387,9 @@ main(int argc, char* const* argv)
 	// to count as a failure.
 	return EXIT_SUCCESS;
     }
+#endif
+
+    comm_init();
 
     //
     // Initialize and start xlog
@@ -427,6 +474,8 @@ main(int argc, char* const* argv)
     //
     xlog_stop();
     xlog_exit();
+
+    comm_exit();
 
     return EXIT_SUCCESS;
 }

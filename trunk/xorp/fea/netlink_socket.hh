@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.14 2004/12/08 01:41:20 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.15 2005/03/25 02:53:11 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -173,7 +173,7 @@ private:
      * NetlinkSocketObserver::nlsock_data() on all observers of netlink
      * socket.
      */
-    void select_hook(int fd, SelectorMask sm);
+    void io_event(XorpFd fd, IoEventType sm);
 
     NetlinkSocket& operator=(const NetlinkSocket&);	// Not implemented
     NetlinkSocket(const NetlinkSocket&);		// Not implemented

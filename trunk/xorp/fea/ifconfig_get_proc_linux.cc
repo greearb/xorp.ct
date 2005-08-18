@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.20 2005/03/05 01:41:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.21 2005/03/25 02:53:06 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -25,8 +25,9 @@
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
 #endif
-
+#ifdef HAVE_NET_IF_H
 #include <net/if.h>
+#endif
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
@@ -326,7 +327,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
     char addr6p[8][5], addr6[40];
     int plen, scope, dad_status, if_idx;
     struct ifreq ifreq;
-    int sock;
+    XorpFd sock;
     
     fh = fopen(proc_linux_net_device_file.c_str(), "r");
     if (fh == NULL) {

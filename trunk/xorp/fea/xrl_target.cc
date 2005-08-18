@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.71 2005/03/25 02:53:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.72 2005/04/28 02:32:04 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2016,8 +2016,8 @@ XrlFeaTarget::redist_transaction4_0_1_add_route(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str());
 
     UNUSED(cookie);
@@ -2146,8 +2146,8 @@ XrlFeaTarget::redist_transaction6_0_1_add_route(
 	      nexthop.str().c_str(),
 	      ifname.c_str(),
 	      vifname.c_str(),
-	      metric,
-	      admin_distance,
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str());
 
     UNUSED(cookie);

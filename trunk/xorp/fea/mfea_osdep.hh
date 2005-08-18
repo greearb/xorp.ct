@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.5 2004/06/10 22:40:55 hodson Exp $
+// $XORP: xorp/fea/mfea_osdep.hh,v 1.6 2005/03/25 02:53:10 pavlin Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -25,8 +25,9 @@
 
 #include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-
+#endif
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
 #endif
@@ -156,6 +157,8 @@
 
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+
 #if IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE
 #  error "MFEA message handling needs fix, because IGMPMSG_NOCACHE != MFEA_KERNEL_MESSAGE_NOCACHE"
 #endif
@@ -179,6 +182,8 @@
 #  error "MFEA message handling needs fix, because MRT6MSG_BW_UPCALL != MFEA_KERNEL_MESSAGE_BW_UPCALL"
 #endif
 #endif
+
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 
 //
 // Global variables

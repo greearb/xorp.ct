@@ -12,26 +12,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.7 2005/03/25 02:53:15 pavlin Exp $"
-
-#include <sys/types.h>
-#include <sys/uio.h>
-
-#include <netinet/in_systm.h>
-#include <netinet/in.h>
-#include <netinet/ip.h>
+#ident "$XORP: xorp/fea/test_ifconfig_rtsock.cc,v 1.8 2005/04/01 01:30:46 pavlin Exp $"
 
 #define DEBUG_LOGGING
-
-#include <iostream>
-#include <netdb.h>
-#include <sysexits.h>
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+
+#include <iostream>
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
 
 #include "ifconfig.hh"
 
