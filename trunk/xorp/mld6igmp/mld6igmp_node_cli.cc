@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.19 2005/03/24 00:38:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.20 2005/03/25 02:53:55 pavlin Exp $"
 
 
 //
@@ -196,7 +196,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
     cli_print(c_format("%-12s %-8s %-15s %7s %7s %6s\n",
 		       "Interface", "State", "Querier",
 		       "Timeout", "Version", "Groups"));
-    for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
@@ -214,7 +214,8 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
 	if (mld6igmp_vif->const_other_querier_timer().scheduled()) {
 	    TimeVal tv;
 	    mld6igmp_vif->const_other_querier_timer().time_remaining(tv);
-	    querier_timeout_sec_string = c_format("%d", tv.sec());
+	    querier_timeout_sec_string = c_format("%d",
+						  XORP_INT_CAST(tv.sec()));
 	} else {
 	    querier_timeout_sec_string = "None";
 	}
@@ -254,7 +255,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface_address(const vector<string>& argv)
     
     cli_print(c_format("%-12s %-15s %-15s\n",
 		       "Interface", "PrimaryAddr", "SecondaryAddr"));
-    for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
@@ -345,7 +346,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
     cli_print(c_format("%-12s %-15s %-15s %-12s %7s\n",
 		       "Interface", "Group", "Source",
 		       "LastReported", "Timeout"));
-    for (uint16_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
+    for (uint32_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
@@ -373,7 +374,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 			       cstring(member_query->group()),
 			       cstring(member_query->source()),
 			       cstring(member_query->last_reported_host()),
-			       member_query->timeout_sec()));
+			       XORP_INT_CAST(member_query->timeout_sec())));
 	}
     }
     

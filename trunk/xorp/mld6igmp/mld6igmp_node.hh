@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.24 2005/06/01 09:34:00 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.25 2005/06/03 19:04:43 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -315,7 +315,7 @@ public:
      */
     int		proto_recv(const string& src_module_instance_name,
 			   xorp_module_id src_module_id,
-			   uint16_t vif_index,
+			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
 			   const uint8_t *rcvbuf, size_t rcvlen);
@@ -338,7 +338,7 @@ public:
      * @param buffer the data buffer with the message to send.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		mld6igmp_send(uint16_t vif_index,
+    int		mld6igmp_send(uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos,
 			      bool is_router_alert,
@@ -350,7 +350,7 @@ public:
     int	signal_message_recv(const string&	, // src_module_instance_name,
 			    xorp_module_id	, // src_module_id,
 			    int			, // message_type,
-			    uint16_t		, // vif_index,
+			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // rcvbuf,
@@ -363,7 +363,7 @@ public:
     int	signal_message_send(const string&	, // dst_module_instance_name,
 			    xorp_module_id	, // dst_module_id,
 			    int			, // message_type,
-			    uint16_t		, // vif_index,
+			    uint32_t		, // vif_index,
 			    const IPvX&		, // src,
 			    const IPvX&		, // dst,
 			    const uint8_t *	, // sndbuf,
@@ -379,7 +379,7 @@ public:
      * @param vif_index the vif index of the interface to start.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int start_protocol_kernel_vif(uint16_t vif_index) = 0;
+    virtual int start_protocol_kernel_vif(uint32_t vif_index) = 0;
     
     /**
      * Stop a protocol vif with the kernel.
@@ -390,7 +390,7 @@ public:
      * @param vif_index the vif index of the interface to stop.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int stop_protocol_kernel_vif(uint16_t vif_index) = 0;
+    virtual int stop_protocol_kernel_vif(uint32_t vif_index) = 0;
     
     /**
      * Join a multicast group on an interface.
@@ -404,7 +404,7 @@ public:
      * @param multicast_group the multicast group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int join_multicast_group(uint16_t vif_index,
+    virtual int join_multicast_group(uint32_t vif_index,
 				     const IPvX& multicast_group) = 0;
     
     /**
@@ -419,7 +419,7 @@ public:
      * @param multicast_group the multicast group address.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    virtual int leave_multicast_group(uint16_t vif_index,
+    virtual int leave_multicast_group(uint32_t vif_index,
 				      const IPvX& multicast_group) = 0;
     
     /**
@@ -438,7 +438,7 @@ public:
      */
     int add_protocol(const string& module_instance_name,
 		     xorp_module_id module_id,
-		     uint16_t vif_index);
+		     uint32_t vif_index);
     
     /**
      * Delete a protocol that needs to be notified about multicast membership
@@ -457,7 +457,7 @@ public:
      */
     int delete_protocol(const string& module_instance_name,
 			xorp_module_id module_id,
-			uint16_t vif_index);
+			uint32_t vif_index);
     
     /**
      * Send "add membership" to a protocol that needs to be notified
@@ -478,7 +478,7 @@ public:
      */
     virtual int send_add_membership(const string& dst_module_instance_name,
 				    xorp_module_id dst_module_id,
-				    uint16_t vif_index,
+				    uint32_t vif_index,
 				    const IPvX& source,
 				    const IPvX& group) = 0;
     /**
@@ -501,7 +501,7 @@ public:
      */
     virtual int send_delete_membership(const string& dst_module_instance_name,
 				       xorp_module_id dst_module_id,
-				       uint16_t vif_index,
+				       uint32_t vif_index,
 				       const IPvX& source,
 				       const IPvX& group) = 0;
     
@@ -523,7 +523,7 @@ public:
      */
     int join_prune_notify_routing(const string& module_instance_name,
 				  xorp_module_id module_id,
-				  uint16_t vif_index,
+				  uint32_t vif_index,
 				  const IPvX& source,
 				  const IPvX& group,
 				  action_jp_t action_jp);

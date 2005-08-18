@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.47 2005/06/01 09:34:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.48 2005/06/03 19:04:44 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -634,7 +634,7 @@ XrlMld6igmpNode::mfea_client_send_add_delete_protocol_cb(const XrlError& xrl_err
 }
 
 int
-XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
+XrlMld6igmpNode::start_protocol_kernel_vif(uint32_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     
@@ -651,7 +651,7 @@ XrlMld6igmpNode::start_protocol_kernel_vif(uint16_t vif_index)
 }
 
 int
-XrlMld6igmpNode::stop_protocol_kernel_vif(uint16_t vif_index)
+XrlMld6igmpNode::stop_protocol_kernel_vif(uint32_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     
@@ -684,7 +684,7 @@ XrlMld6igmpNode::send_start_stop_protocol_kernel_vif()
     XLOG_ASSERT(entry != NULL);
 
     bool is_start = entry->is_start();
-    uint16_t vif_index = entry->vif_index();
+    uint32_t vif_index = entry->vif_index();
 
     //
     // Check whether we have already registered with the MFEA
@@ -854,7 +854,7 @@ XrlMld6igmpNode::mfea_client_send_start_stop_protocol_kernel_vif_cb(
 }
 
 int
-XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
+XrlMld6igmpNode::join_multicast_group(uint32_t vif_index,
 				 const IPvX& multicast_group)
 {
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
@@ -873,7 +873,7 @@ XrlMld6igmpNode::join_multicast_group(uint16_t vif_index,
 }
 
 int
-XrlMld6igmpNode::leave_multicast_group(uint16_t vif_index,
+XrlMld6igmpNode::leave_multicast_group(uint32_t vif_index,
 				       const IPvX& multicast_group)
 {
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
@@ -908,7 +908,7 @@ XrlMld6igmpNode::send_join_leave_multicast_group()
     XLOG_ASSERT(entry != NULL);
 
     bool is_join = entry->is_join();
-    uint16_t vif_index = entry->vif_index();
+    uint32_t vif_index = entry->vif_index();
     const IPvX& multicast_group = entry->multicast_group();
 
     //
@@ -1017,7 +1017,7 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
     XLOG_ASSERT(entry != NULL);
 
     bool is_join = entry->is_join();
-    uint16_t vif_index = entry->vif_index();
+    uint32_t vif_index = entry->vif_index();
     const IPvX& multicast_group = entry->multicast_group();
 
     switch (xrl_error.error_code()) {
@@ -1092,7 +1092,7 @@ XrlMld6igmpNode::mfea_client_send_join_leave_multicast_group_cb(
 int
 XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
 				     xorp_module_id dst_module_id,
-				     uint16_t vif_index,
+				     uint32_t vif_index,
 				     const IPvX& source,
 				     const IPvX& group)
 {
@@ -1127,7 +1127,7 @@ XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
 int
 XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
 					xorp_module_id dst_module_id,
-					uint16_t vif_index,
+					uint32_t vif_index,
 					const IPvX& source,
 					const IPvX& group)
 {
@@ -1357,7 +1357,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
 int
 XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
-			    uint16_t vif_index,
+			    uint32_t vif_index,
 			    const IPvX& src,
 			    const IPvX& dst,
 			    int ip_ttl,
@@ -1400,7 +1400,7 @@ XrlMld6igmpNode::send_protocol_message()
     entry = dynamic_cast<SendProtocolMessage*>(xrl_task_base);
     XLOG_ASSERT(entry != NULL);
 
-    uint16_t vif_index = entry->vif_index();
+    uint32_t vif_index = entry->vif_index();
 
     //
     // Check whether we have already registered with the MFEA
@@ -2102,7 +2102,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2159,7 +2160,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2730,7 +2732,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2741,7 +2744,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 			     "on vif %s with vif_index %d",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2756,7 +2759,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 			     "no such vif",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2803,7 +2806,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2814,7 +2818,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 			     "on vif %s with vif_index %d",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2829,7 +2833,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 			     "no such vif",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2876,7 +2880,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2887,7 +2892,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol4(
 			     "on vif %s with vif_index %d",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2922,7 +2927,8 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	error_msg = c_format("Invalid module ID = %d", protocol_id);
+	error_msg = c_format("Invalid module ID = %d",
+			     XORP_INT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2933,7 +2939,7 @@ XrlMld6igmpNode::mld6igmp_0_1_delete_protocol6(
 			     "on vif %s with vif_index %d",
 			     xrl_sender_name.c_str(),
 			     vif_name.c_str(),
-			     vif_index);
+			     XORP_INT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

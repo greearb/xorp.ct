@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.43 2005/03/24 00:38:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.44 2005/03/25 02:53:54 pavlin Exp $"
 
 
 //
@@ -958,7 +958,7 @@ Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
 int
 Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 			 xorp_module_id src_module_id,
-			 uint16_t vif_index,
+			 uint32_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool is_router_alert,
 			 const uint8_t *rcvbuf, size_t rcvlen)
@@ -1020,7 +1020,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
+Mld6igmpNode::mld6igmp_send(uint32_t vif_index,
 			    const IPvX& src, const IPvX& dst,
 			    int ip_ttl, int ip_tos, bool is_router_alert,
 			    buffer_t *buffer)
@@ -1055,7 +1055,7 @@ Mld6igmpNode::mld6igmp_send(uint16_t vif_index,
 int
 Mld6igmpNode::add_protocol(const string& module_instance_name,
 			   xorp_module_id module_id,
-			   uint16_t vif_index)
+			   uint32_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
@@ -1086,7 +1086,7 @@ Mld6igmpNode::add_protocol(const string& module_instance_name,
 int
 Mld6igmpNode::delete_protocol(const string& module_instance_name,
 			      xorp_module_id module_id,
-			      uint16_t vif_index)
+			      uint32_t vif_index)
 {
     Mld6igmpVif *mld6igmp_vif = vif_find_by_vif_index(vif_index);
     
@@ -1122,7 +1122,7 @@ Mld6igmpNode::delete_protocol(const string& module_instance_name,
 int
 Mld6igmpNode::join_prune_notify_routing(const string& module_instance_name,
 					xorp_module_id module_id,
-					uint16_t vif_index,
+					uint32_t vif_index,
 					const IPvX& source,
 					const IPvX& group,
 					action_jp_t action_jp)

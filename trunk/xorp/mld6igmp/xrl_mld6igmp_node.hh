@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.32 2005/06/01 00:36:58 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.33 2005/06/01 09:34:01 pavlin Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -838,17 +838,17 @@ private:
     //
     // Protocol node methods
     //
-    int start_protocol_kernel_vif(uint16_t vif_index);
-    int stop_protocol_kernel_vif(uint16_t vif_index);
+    int start_protocol_kernel_vif(uint32_t vif_index);
+    int stop_protocol_kernel_vif(uint32_t vif_index);
     void mfea_client_send_start_stop_protocol_kernel_vif_cb(const XrlError& xrl_error);
 
-    int join_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
-    int leave_multicast_group(uint16_t vif_index, const IPvX& multicast_group);
+    int join_multicast_group(uint32_t vif_index, const IPvX& multicast_group);
+    int leave_multicast_group(uint32_t vif_index, const IPvX& multicast_group);
     void mfea_client_send_join_leave_multicast_group_cb(const XrlError& xrl_error);
 
     int	proto_send(const string& dst_module_instance_name,
 		   xorp_module_id dst_module_id,
-		   uint16_t vif_index,
+		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool is_router_alert,
 		   const uint8_t* sndbuf, size_t sndlen);
@@ -856,12 +856,12 @@ private:
     
     int send_add_membership(const string& dst_module_instance_name,
 			    xorp_module_id dst_module_id,
-			    uint16_t vif_index,
+			    uint32_t vif_index,
 			    const IPvX& source,
 			    const IPvX& group);
     int send_delete_membership(const string& dst_module_instance_name,
 			       xorp_module_id dst_module_id,
-			       uint16_t vif_index,
+			       uint32_t vif_index,
 			       const IPvX& source,
 			       const IPvX& group);
     void send_add_delete_membership();
@@ -908,7 +908,7 @@ private:
     class StartStopProtocolKernelVif : public XrlTaskBase {
     public:
 	StartStopProtocolKernelVif(XrlMld6igmpNode&	xrl_mld6igmp_node,
-				   uint16_t		vif_index,
+				   uint32_t		vif_index,
 				   bool			is_start)
 	    : XrlTaskBase(xrl_mld6igmp_node),
 	      _vif_index(vif_index),
@@ -917,11 +917,11 @@ private:
 	void		dispatch() {
 	    _xrl_mld6igmp_node.send_start_stop_protocol_kernel_vif();
 	}
-	uint16_t	vif_index() const { return _vif_index; }
+	uint32_t	vif_index() const { return _vif_index; }
 	bool		is_start() const { return _is_start; }
 
     private:
-	uint16_t	_vif_index;
+	uint32_t	_vif_index;
 	bool		_is_start;
     };
 
@@ -950,7 +950,7 @@ private:
     class JoinLeaveMulticastGroup : public XrlTaskBase {
     public:
 	JoinLeaveMulticastGroup(XrlMld6igmpNode&	xrl_mld6igmp_node,
-				uint16_t		vif_index,
+				uint32_t		vif_index,
 				const IPvX&		multicast_group,
 				bool			is_join)
 	    : XrlTaskBase(xrl_mld6igmp_node),
@@ -961,12 +961,12 @@ private:
 	void		dispatch() {
 	    _xrl_mld6igmp_node.send_join_leave_multicast_group();
 	}
-	uint16_t	vif_index() const { return _vif_index; }
+	uint32_t	vif_index() const { return _vif_index; }
 	const IPvX&	multicast_group() const { return _multicast_group; }
 	bool		is_join() const { return _is_join; }
 
     private:
-	uint16_t	_vif_index;
+	uint32_t	_vif_index;
 	IPvX		_multicast_group;
 	bool		_is_join;
     };
@@ -979,7 +979,7 @@ private:
 	SendProtocolMessage(XrlMld6igmpNode&	xrl_mld6igmp_node,
 			    const string&	dst_module_instance_name,
 			    xorp_module_id	dst_module_id,
-			    uint16_t		vif_index,
+			    uint32_t		vif_index,
 			    const IPvX&		src,
 			    const IPvX&		dst,
 			    int			ip_ttl,
@@ -1006,7 +1006,7 @@ private:
 	}
 	const string&	dst_module_instance_name() const { return _dst_module_instance_name; }
 	xorp_module_id	dst_module_id() const { return _dst_module_id; }
-	uint16_t	vif_index() const { return _vif_index; }
+	uint32_t	vif_index() const { return _vif_index; }
 	const IPvX&	src() const { return _src; }
 	const IPvX&	dst() const { return _dst; }
 	int		ip_ttl() const { return _ip_ttl; }
@@ -1017,7 +1017,7 @@ private:
     private:
 	string		_dst_module_instance_name;
 	xorp_module_id	_dst_module_id;
-	uint16_t	_vif_index;
+	uint32_t	_vif_index;
 	IPvX		_src;
 	IPvX		_dst;
 	int		_ip_ttl;
@@ -1033,7 +1033,7 @@ private:
     public:
 	SendAddDeleteMembership(const string& dst_module_instance_name,
 				xorp_module_id dst_module_id,
-				uint16_t vif_index,
+				uint32_t vif_index,
 				const IPvX& source,
 				const IPvX& group,
 				bool is_add)
@@ -1045,7 +1045,7 @@ private:
 	      _is_add(is_add) {}
 	const string& dst_module_instance_name() const { return _dst_module_instance_name; }
 	xorp_module_id dst_module_id() const { return _dst_module_id; }
-	uint16_t vif_index() const { return _vif_index; }
+	uint32_t vif_index() const { return _vif_index; }
 	const IPvX& source() const { return _source; }
 	const IPvX& group() const { return _group; }
 	bool is_add() const { return _is_add; }
@@ -1053,7 +1053,7 @@ private:
     private:
 	string		_dst_module_instance_name;
 	xorp_module_id	_dst_module_id;
-	uint16_t	_vif_index;
+	uint32_t	_vif_index;
 	IPvX		_source;
 	IPvX		_group;
 	bool		_is_add;
