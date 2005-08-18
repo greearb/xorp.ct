@@ -126,6 +126,11 @@ AM_CPPFLAGS = @NETSNMPCFLAGS@ -UPACKAGE		\
 				   -UPACKAGE_TARNAME	\
 				   -UPACKAGE_VERSION
 
+#
+# XXX: disable Net-SNMP inline functions, because of some compilation errors
+# (e.g., with g++-3.4.2).
+#
+AM_CFLAGS = -DNETSNMP_NO_INLINE
 
 
 # -- Linker flags for all targets in this directory

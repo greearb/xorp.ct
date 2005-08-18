@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mibs/Makefile.am,v 1.34 2005/07/29 17:52:39 bms Exp $
+## $XORP: xorp/mibs/Makefile.am,v 1.35 2005/08/17 01:15:45 pavlin Exp $
 ##
 
 # All of the following shared objects will be installed in
@@ -50,6 +50,11 @@ AM_CPPFLAGS			+= -UPACKAGE		\
 				   -UPACKAGE_STRING	\
 				   -UPACKAGE_TARNAME	\
 				   -UPACKAGE_VERSION
+#
+# XXX: disable Net-SNMP inline functions, because of some compilation errors
+# (e.g., with g++-3.4.2).
+#
+AM_CFLAGS			 = -DNETSNMP_NO_INLINE
 
 # -- Linker flags for all targets in this directory
 
