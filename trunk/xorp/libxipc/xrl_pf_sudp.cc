@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.38 2005/03/25 02:53:34 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.40 2005/08/18 15:32:41 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -105,7 +105,7 @@ render_dispatch_header(const XUID& id, uint32_t content_bytes)
 }
 
 static bool
-parse_dispatch_header(string hdr, XUID& id, size_t& content_bytes)
+parse_dispatch_header(string hdr, XUID& id, uint32_t& content_bytes)
 {
     try {
 	HeaderReader h(hdr);
