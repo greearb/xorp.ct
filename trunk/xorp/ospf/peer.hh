@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.83 2005/08/18 06:22:07 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.84 2005/08/18 06:30:37 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -656,11 +656,13 @@ class Peer {
     void update_router_links();
 
     /**
-     * This router is the designated router for this peer.
-     * The linktype is BROADCAST or NBMA.
-     * Generate a netork-LSA.
+     * Used to notify the peer that a neighbour has become fully
+     * adjacent or a neighbour is no longer fully adjacent. Used to
+     * trigger the generation or withdrawal of a network-LSA.
+     *
+     * @param up true if the adjacency became full, false otherwise.
      */
-    void generate_network_lsa();
+    void adjacency_change(bool up);
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
@@ -1056,8 +1058,10 @@ class Neighbour {
     /**
      * The state has just dropped so pull out any state associated
      * with a higher state. 
+     *
+     * @param previous_state
      */
-    void tear_down_state();
+    void tear_down_state(State previous_state);
 
     void event_1_way_received();
     void event_2_way_received();

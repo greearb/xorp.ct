@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.121 2005/08/17 04:22:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.122 2005/08/18 06:22:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1739,10 +1739,10 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 
 template <typename A>
 void
-Peer<A>::generate_network_lsa()
+Peer<A>::adjacency_change(bool /*up*/)
 {
     XLOG_ASSERT(do_dr_or_bdr());
-    XLOG_WARNING("TBD - This is the DR generate a Network-LSA");
+    XLOG_WARNING("TBD - This is the DR modify the Network-LSA");
 }
 
 template <typename A>
@@ -2450,7 +2450,7 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
 
 template <typename A>
 void
-Neighbour<A>::tear_down_state()
+Neighbour<A>::tear_down_state(State previous_state)
 {
     stop_rxmt_timer("Tear Down State");
     _all_headers_sent = false;
@@ -2465,6 +2465,9 @@ Neighbour<A>::tear_down_state()
     for (i = _lsa_rxmt.begin(); i != _lsa_rxmt.end(); i++)
 	(*i)->remove_nack(_neighbourid);
     _lsa_rxmt.clear();
+
+    if (_peer.do_dr_or_bdr() && is_DR() && Full == previous_state)
+	_peer.adjacency_change(false);
 }
 
 /**
@@ -3274,14 +3277,12 @@ template <typename A>
 void
 Neighbour<A>::change_state(State state)
 {
-    // If we are dropping down states tear down any higher level state.
-    if (get_state() > state) {
-	set_state(state);
+    State previous_state = get_state();
+    set_state(state);
 
-	tear_down_state();
-    } else {
-	set_state(state);
-    }
+    // If we are dropping down states tear down any higher level state.
+    if (previous_state > state)
+	tear_down_state(previous_state);
 }
 
 template <typename A>
@@ -3443,7 +3444,7 @@ Neighbour<A>::event_loading_done()
 	change_state(Full);
 	_peer.update_router_links();
 	if (_peer.do_dr_or_bdr() && is_DR())
-	    _peer.generate_network_lsa();
+	    _peer.adjacency_change(true);
 	break;
     case Full:
 	break;
