@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.40 2005/07/28 03:38:44 atanu Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.42 2005/08/18 15:54:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -893,6 +893,16 @@ XrlRtrmgrInterface::load_config_done(bool success,
 			     deltas, deletions);
 
     UNUSED(filename);
+}
+
+XrlCmdError
+XrlRtrmgrInterface::rtrmgr_0_1_set_config_directory(
+    // Input values,
+    const string&	config_directory)
+{
+    _master_config_tree->set_config_directory(config_directory);
+
+    return XrlCmdError::OKAY();
 }
 
 UserInstance *

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.54 2005/07/22 00:31:30 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.56 2005/08/18 15:54:27 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -747,6 +747,7 @@ MasterConfigTree::save_to_file(const string& filename,
 			       string& errmsg)
 {
     string dummy_errmsg;
+    string full_filename = config_full_filename(filename);
 
     errmsg = "";
 
@@ -780,18 +781,18 @@ MasterConfigTree::save_to_file(const string& filename,
     mode_t orig_mask = umask(S_IWOTH);
 
     struct stat sb;
-    if (stat(filename.c_str(), &sb) == 0) {
+    if (stat(full_filename.c_str(), &sb) == 0) {
 	if (sb.st_mode & S_IFREG == 0) {
 	    if (((sb.st_mode & S_IFMT) == S_IFCHR) ||
 		((sb.st_mode & S_IFMT) == S_IFBLK)) {
 		errmsg = c_format("File %s is a special device.\n",
-				  filename.c_str());
+				  full_filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFIFO) {
 		errmsg = c_format("File %s is a named pipe.\n",
-				  filename.c_str());
+				  full_filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
 		errmsg = c_format("File %s is a directory.\n",
-				  filename.c_str());
+				  full_filename.c_str());
 	    }
 	    _exec_id.restore_saved_exec_id(dummy_errmsg);
 	    umask(orig_mask);
@@ -799,12 +800,12 @@ MasterConfigTree::save_to_file(const string& filename,
 	}
 #endif
 
-	file = fopen(filename.c_str(), "r");
+	file = fopen(full_filename.c_str(), "r");
 	if (file != NULL) {
 	    // We've been asked to overwrite a file
 	    char line[80];
 	    if (fgets(line, sizeof(line) - 1, file) == NULL) {
-		errmsg = "File " + filename + " exists, but an error occured when trying to check that it was OK to overwrite it\n";
+		errmsg = "File " + full_filename + " exists, but an error occured when trying to check that it was OK to overwrite it\n";
 		errmsg += "File was NOT overwritten\n";
 		fclose(file);
 		_exec_id.restore_saved_exec_id(dummy_errmsg);
@@ -812,7 +813,7 @@ MasterConfigTree::save_to_file(const string& filename,
 		return false;
 	    }
 	    if (strncmp(line, "/*XORP", 6) != 0) {
-		errmsg = "File " + filename + " exists, but it is not an existing XORP config file.\n";
+		errmsg = "File " + full_filename + " exists, but it is not an existing XORP config file.\n";
 		errmsg += "File was NOT overwritten\n";
 		fclose(file);
 		_exec_id.restore_saved_exec_id(dummy_errmsg);
@@ -822,8 +823,8 @@ MasterConfigTree::save_to_file(const string& filename,
 	    fclose(file);
 	}
 	// It seems OK to overwrite this file
-	if (unlink(filename.c_str()) < 0) {
-	    errmsg = "File " + filename + " exists, and can not be overwritten.\n";
+	if (unlink(full_filename.c_str()) < 0) {
+	    errmsg = "File " + full_filename + " exists, and can not be overwritten.\n";
 	    errmsg += strerror(errno);
 	    fclose(file);
 	    _exec_id.restore_saved_exec_id(dummy_errmsg);
@@ -832,9 +833,9 @@ MasterConfigTree::save_to_file(const string& filename,
 	}
     }
 
-    file = fopen(filename.c_str(), "w");
+    file = fopen(full_filename.c_str(), "w");
     if (file == NULL) {
-	errmsg = "Could not create file \"" + filename + "\"";
+	errmsg = "Could not create file \"" + full_filename + "\"";
 	errmsg += strerror(errno);
 	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	umask(orig_mask);
@@ -847,9 +848,9 @@ MasterConfigTree::save_to_file(const string& filename,
     bytes = fwrite(header.c_str(), 1, header.size(), file);
     if (bytes < header.size()) {
 	fclose(file);
-	errmsg = "Error writing to file \"" + filename + "\"\n";
+	errmsg = "Error writing to file \"" + full_filename + "\"\n";
 	// We couldn't even write the header - clean up if we can
-	if (unlink(filename.c_str()) == 0) {
+	if (unlink(full_filename.c_str()) == 0) {
 	    errmsg += "Save aborted; truncated file has been removed\n";
 	} else {
 	    errmsg += "Save aborted; truncated file may exist\n";
@@ -864,11 +865,11 @@ MasterConfigTree::save_to_file(const string& filename,
     bytes = fwrite(config.c_str(), 1, config.size(), file);
     if (bytes < config.size()) {
 	fclose(file);
-	errmsg = "Error writing to file \"" + filename + "\"\n";
+	errmsg = "Error writing to file \"" + full_filename + "\"\n";
 	errmsg += strerror(errno);
 	errmsg += "\n";
 	//we couldn't write the config - clean up if we can
-	if (unlink(filename.c_str()) == 0) {
+	if (unlink(full_filename.c_str()) == 0) {
 	    errmsg += "Save aborted; truncated file has been removed\n";
 	} else {
 	    errmsg += "Save aborted; truncated file may exist\n";
@@ -887,14 +888,14 @@ MasterConfigTree::save_to_file(const string& filename,
 
     // Close properly and clean up
     if (fclose(file) != 0) {
-	errmsg = "Error closing file \"" + filename + "\"\n";
+	errmsg = "Error closing file \"" + full_filename + "\"\n";
 	errmsg += strerror(errno);
 	errmsg += "\nFile may not have been written correctly\n";
 	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
 
-    run_save_hook(user_id, save_hook, filename);
+    run_save_hook(user_id, save_hook, full_filename);
 
     errmsg += "Save complete\n";
     _exec_id.restore_saved_exec_id(dummy_errmsg);
@@ -924,6 +925,37 @@ MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
 	debug_msg("save hook completed successfully\n");
     else
 	XLOG_ERROR("save hook completed with error %s", errmsg.c_str());
+}
+
+string
+MasterConfigTree::config_full_filename(const string& filename) const
+{
+    string result;
+
+    //
+    // If the name of the config directory wasn't set return the filename
+    // itself.
+    //
+    if (_config_directory.empty())
+	return (filename);
+
+    XLOG_ASSERT(! filename.empty());
+
+    //
+    // If this is an absolute filename then return the filename itself
+    //
+    if (filename[0] == PATH_DELIMITER_CHAR)
+	return (filename);
+
+    //
+    // Concatenate the name of the config directory with the filename
+    //
+    result = _config_directory;
+    if (result[result.size() - 1] != PATH_DELIMITER_CHAR)
+	result += PATH_DELIMITER_STRING;
+    result += filename;
+
+    return (result);
 }
 
 void
@@ -1710,6 +1742,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 				 string& deletions)
 {
     string dummy_errmsg;
+    string full_filename = config_full_filename(filename);
 
     //
     // We run load_from_file as the UID of the user making the request
@@ -1737,7 +1770,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     }
 
     string configuration;
-    if (! read_file(configuration, filename, errmsg)) {
+    if (! read_file(configuration, full_filename, errmsg)) {
 	_exec_id.restore_saved_exec_id(dummy_errmsg);
 	return false;
     }
@@ -1750,7 +1783,7 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // parse errors before we reconfigure ourselves with the new config.
     //
     MasterConfigTree new_tree(_template_tree, _verbose);
-    if (new_tree.parse(configuration, filename, errmsg) != true) {
+    if (new_tree.parse(configuration, full_filename, errmsg) != true) {
 	return false;
     }
 
@@ -1759,7 +1792,6 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // specified in the template tree that aren't already configured.
     //
     new_tree.add_default_children();
-    
 
     //
     // Ok, so the new config parses.  Now we need to figure out how it
@@ -1797,12 +1829,18 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 }
 
 void
+MasterConfigTree::set_config_directory(const string& config_directory)
+{
+    _config_directory = config_directory;
+}
+
+void
 MasterConfigTree::diff_configs(const MasterConfigTree& new_tree,
 			       MasterConfigTree& delta_tree,
 			       MasterConfigTree& deletion_tree)
 {
     //
-    // Clone the existing config tree into the delta tree.
+    // Clone the existing config tree into the deletion tree.
     // Clone the new config tree into the delta tree.
     //
     deletion_tree = *((MasterConfigTree*)(this));

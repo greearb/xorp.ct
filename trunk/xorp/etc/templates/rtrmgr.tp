@@ -1,7 +1,9 @@
-/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.1 2005/07/02 04:20:19 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.2 2005/07/22 02:13:27 pavlin Exp $ */
 
 rtrmgr {
-    targetname:		txt = "rtrmgr";
+    targetname:			txt = "rtrmgr";
+
+    config-directory:		txt = "";
 
     load-file-command:		txt = "fetch";
     load-file-command-args:	txt = "-o";
@@ -50,6 +52,13 @@ rtrmgr {
 
     CONFIG_STDERR {
 	%create:;
+    }
+
+    config-directory {
+	%help:	short "Set the name of the directory with the configuration files";
+	%create:	xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
+	%set:		xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
+	%delete:		xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(DEFAULT)";
     }
 
     load-file-command {

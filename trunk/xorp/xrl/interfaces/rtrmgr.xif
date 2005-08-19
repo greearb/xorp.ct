@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.3 2005/07/02 04:20:22 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/rtrmgr.xif,v 1.4 2005/07/08 20:45:01 mjh Exp $ */
  
 /*
  * Router Manager XRL interface.
@@ -6,7 +6,9 @@
 
 interface rtrmgr/0.1 {
     get_pid ? -> pid:u32
-    /** Register a user and client process with the rtrmgr.  
+    /**
+     * Register a user and client process with the rtrmgr.
+     *
      * @param clientname name of xrl entity supporting
      * rtrmgr_client.xif methods.  
      */
@@ -38,4 +40,12 @@ interface rtrmgr/0.1 {
     save_config ? token:txt & target:txt & filename:txt
 
     load_config ? token:txt & target:txt & filename:txt
+
+    /**
+     * Set the name of the directory with the configuration files.
+     *
+     * @param config_directory the name of the directory with the configuration
+     * files.
+     */
+    set_config_directory ? config_directory:txt
 }

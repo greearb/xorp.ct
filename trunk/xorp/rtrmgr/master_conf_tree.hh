@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.29 2005/07/06 16:17:25 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.30 2005/07/08 16:42:35 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -86,6 +86,8 @@ public:
     bool load_config(const string& filename, uid_t user_id, string& errmsg,
 		     ConfigLoadCallBack cb);
 
+    void set_config_directory(const string& config_directory);
+
     ModuleManager& module_manager() const {
 	return _task_manager->module_manager();
     }
@@ -113,6 +115,8 @@ public:
     
 
 private:
+    string config_full_filename(const string& filename) const;
+
     void remove_tmp_config_file();
     bool set_config_file_permissions(FILE* fp, uid_t user_id, string& errmsg);
 
@@ -184,6 +188,7 @@ private:
     bool		_rtrmgr_config_node_found;
     XorpTimer		_save_config_completed_timer;
     string		_tmp_config_filename;
+    string		_config_directory;
 
     gid_t		_xorp_gid;
     bool		_is_xorp_gid_set;

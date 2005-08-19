@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.21 2005/07/02 04:20:21 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.22 2005/07/08 20:51:17 mjh Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -169,6 +169,16 @@ public:
 	const string& token, 
 	const string& target, 
 	const string& filename);
+
+    /**
+     *  Set the name of the directory with the configuration files.
+     *
+     *  @param config_directory the name of the directory with the
+     *  configuration files.
+     */
+    XrlCmdError rtrmgr_0_1_set_config_directory(
+	// Input values,
+	const string&	config_directory);
 
     XrlCmdError finder_event_observer_0_1_xrl_target_birth(
 	// Input values,
