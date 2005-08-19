@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.43 2005/07/28 23:18:32 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.45 2005/08/18 15:54:27 bms Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -60,6 +60,7 @@ public:
     virtual ~ConfigTreeNode();
 
     bool operator==(const ConfigTreeNode& them) const;
+    bool is_same(const ConfigTreeNode& them, bool ignore_nodenum) const;
     
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,

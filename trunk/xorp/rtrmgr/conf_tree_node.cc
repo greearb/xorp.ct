@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.81 2005/07/27 00:49:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.82 2005/07/28 23:18:32 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -202,6 +202,12 @@ ConfigTreeNode::~ConfigTreeNode()
 bool
 ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 {
+    return (is_same(them, false));
+}
+
+bool
+ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_nodenum) const
+{
     //
     // This comparison only cares about the declarative state of the node,
     // not about the ephemeral state such as when it was modified, deleted,
@@ -220,7 +226,7 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 		return false;
 	    }
 	}
-	if (_nodenum != them.nodenum()) {
+	if ((! ignore_nodenum) && (_nodenum != them.nodenum())) {
 	    return false;
 	}
     }
@@ -1078,7 +1084,7 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 	     ++their_iter) {
 	    ConfigTreeNode* their_child = *their_iter;
 	    // Are the nodes the same?
-	    if ((*my_child) == (*their_child)) {
+	    if (my_child->is_same(*their_child, true)) {
 		if (!my_child->retain_different_nodes(*their_child,
 						      retain_value_changed)) {
 		    retain_child = false;
