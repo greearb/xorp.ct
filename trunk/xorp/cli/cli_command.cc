@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.16 2005/07/27 23:32:52 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.17 2005/07/28 23:26:23 pavlin Exp $"
 
 
 //
@@ -491,8 +491,10 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     
     token_line = string(line, word_end);
     token = pop_token(token_line);
-    if (! cli_command->is_same_prefix(token))
-	return (false);
+    if ((! cli_command->is_same_prefix(token))
+	&& (! cli_command->is_wildcard())) {
+	    return (false);
+    }
     
     if (token_line.length()
 	&& (is_token_separator(token_line[0]) || (token == "|")))
@@ -502,8 +504,15 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     
     // Check if a potential sub-prefix
     if (! is_command_completed) {
-	int name_end = token.length();
-	string name_complete = name_string.substr(name_end);
+	string name_complete;
+
+	if (cli_command->is_wildcard()) {
+	    if (token.empty())
+		return (false);
+	    name_complete = "";
+	} else {
+	    name_complete = name_string.substr(token.length());
+	}
 	
 	if (cli_command->help_completion().size() > 0)
 	    type_suffix = cli_command->help_completion().c_str();
@@ -523,8 +532,10 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     }
     
     // Must be a complete command
-    if (! cli_command->is_same_command(token))
+    if ((! cli_command->is_same_command(token))
+	&& (! cli_command->is_wildcard())) {
 	return (false);
+    }
     
     bool is_child_completion = false;
     
@@ -678,12 +689,13 @@ CliCommand::find_command_help(const char *line, int word_end,
     
     token_line = string(line, word_end);
     token = pop_token(token_line);
-    if (! is_same_prefix(token))
+    if ((! is_same_prefix(token)) && (! is_wildcard()))
 	return (false);
     
     if (token_line.length()
 	&& is_token_separator(token_line[0])
-	&& (! is_same_command(token))) {
+	&& (! is_same_command(token))
+	&& (! is_wildcard())) {
 	// Not a match
 	return (false);
     }

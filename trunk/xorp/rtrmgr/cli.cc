@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.90 2005/08/18 00:11:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.91 2005/08/18 15:54:26 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2138,17 +2138,22 @@ RouterCLI::text_entry_children_func(const string& path) const
 		help_string = "-- no help available --";
 	    }
 	    if ((*tti)->segname() == "@") {
-#if 0
 		string typestr = "<" + (*tti)->typestr() + ">";
 		command_name = typestr;
 		CliCommandMatch ccm(command_name, help_string, is_executable,
 				    can_pipe);
+		ccm.set_wildcard(true);
 		children.insert(make_pair(command_name, ccm));
-#endif // 0
 	    } else {
 		command_name = (*tti)->segname();
-		CliCommandMatch ccm(command_name, help_string, is_executable,
-				    can_pipe);
+		bool is_executable_tmp = is_executable;
+		bool can_pipe_tmp = can_pipe;
+		if ((*tti)->is_tag()) {
+		    is_executable_tmp = false;
+		    can_pipe_tmp = false;
+		}
+		CliCommandMatch ccm(command_name, help_string,
+				    is_executable_tmp, can_pipe_tmp);
 		children.insert(make_pair(command_name, ccm));
 	    }
 	}
