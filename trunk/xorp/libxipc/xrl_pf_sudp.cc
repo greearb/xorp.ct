@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.40 2005/08/18 15:32:41 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.41 2005/08/19 06:57:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -458,7 +458,9 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlDispatcher* xr)
 {
     debug_msg("XrlPFSUDPListener\n");
 
-    _sock = comm_bind_udp4(NULL, 0, COMM_SOCK_NONBLOCKING);
+    in_addr myaddr = get_preferred_ipv4_addr();
+
+    _sock = comm_bind_udp4(&myaddr, 0, COMM_SOCK_NONBLOCKING);
     if (!_sock.is_valid()) {
 	xorp_throw(XrlPFConstructorError,
 		   c_format("Could not allocate listening IP socket."));
