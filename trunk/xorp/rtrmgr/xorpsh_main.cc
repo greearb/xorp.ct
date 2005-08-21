@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.47 2005/08/18 00:45:02 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.48 2005/08/18 15:54:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -252,7 +252,8 @@ XorpShell::run(const string& commands)
 	       _authfile.c_str());
 
 
-#if 1  // XXX: a hack to access the rtrmgr on a remote machine
+#ifdef NO_XORPSH_AUTHENTICATION
+// XXX: a hack to access the rtrmgr on a remote machine
     _authtoken = _authfile;
 #else
     FILE* file = fopen(_authfile.c_str(), "r");

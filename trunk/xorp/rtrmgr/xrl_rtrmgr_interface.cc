@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.42 2005/08/18 15:54:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.43 2005/08/19 20:09:41 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -216,7 +216,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 	return XrlCmdError::COMMAND_FAILED(err);
     }
 
-#if 1
+#ifdef NO_XORPSH_AUTHENTICATION
     //
     // XXX: a hack to return back the key itself in case we run
     // xorpsh on a remote machine.
