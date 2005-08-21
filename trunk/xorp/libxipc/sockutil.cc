@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.14 2005/03/29 23:10:20 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.16 2005/08/18 15:32:38 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -381,8 +381,8 @@ get_preferred_ipv4_addr()
     if (!addrs.empty())
 	addrs[0].copy_out(s_if_preferred);
 
-    XLOG_INFO("Using address %s for IPv4 based XRL communication.\n",
-	      inet_ntoa(s_if_preferred));
+//     XLOG_INFO("Using address %s for IPv4 based XRL communication.\n",
+// 	      inet_ntoa(s_if_preferred));
 
     return (s_if_preferred);
 }
