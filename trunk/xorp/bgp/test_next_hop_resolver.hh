@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/test_next_hop_resolver.hh,v 1.3 2004/06/10 22:40:37 hodson Exp $
+// $XORP: xorp/bgp/test_next_hop_resolver.hh,v 1.4 2005/03/25 02:52:49 pavlin Exp $
 
 #ifndef __BGP_TEST_NEXT_HOP_RESOLVER_HH__
 #define __BGP_TEST_NEXT_HOP_RESOLVER_HH__
@@ -55,5 +55,8 @@ template <class A>
 bool
 nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet);
 
+template <class A>
+bool
+nhr_test9(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet, int reg);
 
 #endif // __BGP_TEST_NEXT_HOP_RESOLVER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.22 2005/03/25 02:52:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_next_hop_resolver.cc,v 1.24 2005/08/18 15:58:08 bms Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1125,6 +1125,45 @@ nhr_test8(TestInfo& info, A nexthop, A real_nexthop, IPNet<A> subnet)
     return true;
 }
 
+/**
+ * On a loaded system many registrations and de-registrations may be
+ * queued while waiting for the RIB to respond.
+ *
+ * In this test the RIB will never respond. These used to be a bug in
+ * the next_hop_resolver that if a registration was made twice the
+ * first deregistration would throw away all the state. The second
+ * deregistration would then fail.
+ */
+template <class A>
+bool
+nhr_test9(TestInfo& info, A nexthop, A /*real_nexthop*/, IPNet<A> subnet,
+	  int reg)
+{
+    DOUT(info) << "nexthop: " << nexthop.str() << endl;
+
+    BGPMain bgp;
+    EventLoop& eventloop = bgp.eventloop();
+    DummyNextHopResolver2<A> nhr = DummyNextHopResolver2<A>(eventloop, bgp);
+
+    DummyNhLookupTable<A> nht(info, &nhr);
+
+    nhr.register_nexthop(nexthop, subnet, &nht);
+    nhr.register_nexthop(nexthop, subnet, &nht);
+    nhr.deregister_nexthop(nexthop, subnet, &nht);
+    nhr.deregister_nexthop(nexthop, subnet, &nht);
+
+    /*
+    ** Register interest in this nexthop.
+    */
+    for(int i = 0; i < reg; i++)
+	nhr.register_nexthop(nexthop, subnet, &nht);
+
+    for(int i = 0; i < reg; i++)
+	nhr.deregister_nexthop(nexthop, subnet, &nht);
+
+    return true;
+}
+
 /*
 ** This function is never called it exists to instantiate the
 ** templatised functions.
@@ -1157,4 +1196,7 @@ dummy()
 
     callback(nhr_test8<IPv4>);
     callback(nhr_test8<IPv6>);
+
+    callback(nhr_test9<IPv4>);
+    callback(nhr_test9<IPv6>);
 }

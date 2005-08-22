@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.13 2005/03/25 02:52:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.15 2005/08/18 15:58:08 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -175,6 +175,10 @@ main(int argc, char** argv)
 
 	    {"nhr.test8", callback(nhr_test8<IPv4>, nh4, rnh4, nlri4)},
 	    {"nhr.test8.ipv6", callback(nhr_test8<IPv6>, nh6, rnh6, nlri6)},
+
+	    {"nhr.test9", callback(nhr_test9<IPv4>, nh4, rnh4, nlri4, iter)},
+	    {"nhr.test9.ipv6", callback(nhr_test9<IPv6>, nh6, rnh6, nlri6,
+					iter)},
 	};
 
 	if("" == test_name) {
