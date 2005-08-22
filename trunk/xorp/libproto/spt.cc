@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/spt.cc,v 1.5 2005/05/12 00:08:13 atanu Exp $"
+#ident "$XORP: xorp/libproto/spt.cc,v 1.6 2005/08/01 23:08:43 atanu Exp $"
 
 // XXX
 //		THIS FILE IS NOW OBSOLETE
@@ -657,7 +657,7 @@ template class Node<string>;
 template class Spt<string>;
 
 template class Node<IPv4>;
-emplate class Spt<IPv4>;
+template class Spt<IPv4>;
 
 template class Node<IPv4Net>;
 template class Spt<IPv4Net>;
