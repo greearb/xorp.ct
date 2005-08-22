@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.31 2005/07/20 23:35:09 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.32 2005/07/27 17:59:47 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -897,9 +897,12 @@ template<class A>
 bool 
 FilterTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 {
+    BGPRouteTable<A>* parent = this->_parent;
+
+    XLOG_ASSERT(parent);
     XLOG_ASSERT(this->_next_table == next_table);
 
-    return this->_parent->get_next_message(this);
+    return parent->get_next_message(this);
 }
 
 template class FilterTable<IPv4>;
