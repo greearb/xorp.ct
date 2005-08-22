@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.42 2005/07/20 01:33:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.44 2005/08/18 15:58:05 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -78,7 +78,7 @@ bool
 NextHopResolver<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 				     NhLookupTable<A> *requester)
 {
-    debug_msg("nexthop %s net %s requested %p\n",
+    debug_msg("E nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
     /*
@@ -108,7 +108,7 @@ void
 NextHopResolver<A>::deregister_nexthop(A nexthop, IPNet<A> net_from_route,
 				    NhLookupTable<A> *requester)
 {
-    debug_msg("nexthop %s net %s requested %p\n",
+    debug_msg("E nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
     /*
     ** We haven't hooked up with a rib so just return.
@@ -535,7 +535,7 @@ template<class A>
 bool
 NextHopCache<A>::register_nexthop(A nexthop, int ref_cnt_incr)
 {
-    debug_msg("nexthop %s reference count %d\n", nexthop.str().c_str(),
+    debug_msg("C nexthop %s reference count incr %d\n", nexthop.str().c_str(),
 	      ref_cnt_incr);
 
     XLOG_ASSERT(0 != ref_cnt_incr);
@@ -561,6 +561,9 @@ NextHopCache<A>::register_nexthop(A nexthop, int ref_cnt_incr)
     else
 	en->_nexthop_references[nexthop] += ref_cnt_incr;
 
+    debug_msg("C nexthop %s reference count %d\n", nexthop.str().c_str(),
+	      en->_nexthop_references[nexthop]);
+
     return true;
 }
 
@@ -569,6 +572,8 @@ bool
 NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
 				    A& addr, uint32_t& prefix_len)
 {
+    debug_msg("C nexthop %s\n", nexthop.str().c_str());
+
     PrefixIterator pi = _next_hop_by_prefix.find(nexthop);
 
     if (pi == _next_hop_by_prefix.end())
@@ -579,6 +584,9 @@ NextHopCache<A>::deregister_nexthop(A nexthop, bool& last,
     typename map<A, int>::iterator nhp = en->_nexthop_references.find(nexthop);
     if (nhp == en->_nexthop_references.end())
 	return false;
+
+    debug_msg("C nexthop %s reference count %d\n", nexthop.str().c_str(),
+	      en->_nexthop_references[nexthop]);
 
     if (0 == --en->_nexthop_references[nexthop]) {
 	en->_nexthop_references.erase(nhp);
@@ -673,7 +681,7 @@ void
 NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 				       NhLookupTable<A> *requester)
 {
-    debug_msg("nexthop %s net %s requested %p\n",
+    debug_msg("R nexthop %s net %s requested %p\n",
 	      nexthop.str().c_str(), net_from_route.str().c_str(), requester);
 
     /*
@@ -686,9 +694,12 @@ NextHopRibRequest<A>::register_nexthop(A nexthop, IPNet<A> net_from_route,
 	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
 	if (rr && rr->nexthop() == nexthop) {
 	    rr->register_nexthop(net_from_route, requester);
+	    debug_msg("This registration is already queued\n");
 	    return;
 	}
     }
+
+    debug_msg("Queue registration\n");
 
     /*
     ** Construct a request.
@@ -715,6 +726,9 @@ void
 NextHopRibRequest<A>::deregister_from_rib(const A& base_addr,
 					  uint32_t prefix_len)
 {
+    debug_msg("R addr %s prefix_len %d\n",
+	      base_addr.str().c_str(), prefix_len);
+
     /*
     ** Its possible that we are already trying to deregister for this
     ** addr/prefix. In which case just return.
@@ -725,10 +739,14 @@ NextHopRibRequest<A>::deregister_from_rib(const A& base_addr,
 	    dynamic_cast<RibDeregisterQueueEntry<A> *>(*i);
 	if (dreg) {
 	    if (dreg->base_addr() == base_addr && 
-		dreg->prefix_len() == prefix_len)
+		dreg->prefix_len() == prefix_len) {
+		debug_msg("This deregistration is already queued\n");
 		return;
+	    }
 	}
     }
+
+    debug_msg("Queue deregistration\n");
 
     /*
     ** Construct a request.
@@ -1121,8 +1139,11 @@ NextHopRibRequest<A>::deregister_nexthop(A nexthop, IPNet<A> net_from_route,
     for (i = _queue.begin(); i != _queue.end(); i++) {
 	RibRegisterQueueEntry<A> *rr = 
 	    dynamic_cast<RibRegisterQueueEntry<A> *>(*i);
-	if (rr && rr->nexthop() == nexthop)
-	    return rr->deregister_nexthop(net_from_route, requester);
+	if (rr && rr->nexthop() == nexthop) {
+	    if (!rr->deregister_nexthop(net_from_route, requester))
+		XLOG_WARNING("Removing request %p probably failed", requester);
+	    return true;
+	}
     }
     return false;
 }
@@ -1383,12 +1404,12 @@ template <class A>
 bool
 NHRequest<A>::remove_request(IPNet<A> net, NhLookupTable<A> *requester)
 {
-    typename map <NhLookupTable<A> *, set<IPNet<A> > >::iterator i;
+    typename map <NhLookupTable<A> *, multiset<IPNet<A> > >::iterator i;
     i = _request_map.find(requester);
     if (i == _request_map.end())
 	return false;
-    set<IPNet<A> >* nets = &(i->second);
-    typename set<IPNet<A> >::iterator nets_iter = nets->find(net);
+    multiset<IPNet<A> >* nets = &(i->second);
+    typename multiset<IPNet<A> >::iterator nets_iter = nets->find(net);
     if (nets_iter == nets->end())
 	return false;
     nets->erase(nets_iter);
@@ -1401,11 +1422,26 @@ template <class A>
 const set <IPNet<A> >&
 NHRequest<A>::request_nets(NhLookupTable<A>* requester) const
 {
-    typename map <NhLookupTable<A> *, set<IPNet<A> > >::const_iterator i;
+    typename map <NhLookupTable<A> *, multiset<IPNet<A> > >::const_iterator i;
     i = _request_map.find(requester);
     assert(i != _request_map.end());
 
-    return i->second;
+    multiset<IPNet<A> > m = i->second;
+    set<IPNet<A> > result;
+    typename multiset<IPNet<A> >::iterator j;
+    for (j = m.begin(); j != m.end(); j++)
+	result.insert(*j);
+
+    // Internally the set of networks is held as a multiset so we can
+    // correctly handle multiple adds and deletes of the same
+    // network. The caller is expecting to see the winning set.
+
+    _answer[requester] = result;
+    typename map <NhLookupTable<A> *, set<IPNet<A> > >::const_iterator k;
+    k = _answer.find(requester);
+    XLOG_ASSERT(k != _answer.end());
+
+    return k->second;
 }
 
 //force these templates to be built

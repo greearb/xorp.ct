@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.27 2005/03/25 02:52:41 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.28 2005/07/20 01:33:14 atanu Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -749,7 +749,8 @@ public:
     const int requests() { return _request_total; }
 private:
     set <NhLookupTable<A> *> _requesters;
-    map <NhLookupTable<A> *, set<IPNet<A> > > _request_map;
+    map <NhLookupTable<A> *, multiset<IPNet<A> > > _request_map;
+    mutable map <NhLookupTable<A> *, set<IPNet<A> > > _answer;
     int _request_total;
 };
 

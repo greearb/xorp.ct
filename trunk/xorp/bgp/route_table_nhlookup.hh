@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.12 2004/06/10 22:40:35 hodson Exp $
+// $XORP: xorp/bgp/route_table_nhlookup.hh,v 1.13 2005/03/25 02:52:47 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_NHLOOKUP_HH__
 #define __BGP_ROUTE_TABLE_NHLOOKUP_HH__
@@ -90,6 +90,27 @@ private:
     multimap <A, const MessageQueueEntry<A>*> _queue_by_nexthop;
 
     NextHopResolver<A>* _next_hop_resolver;
+
+    /**
+     * Add the message queue entry to both queues.
+     */
+    void add_to_queue(const A& nexthop, const IPNet<A>& net,
+		      const MessageQueueEntry<A> &mqe);
+
+    /**
+     * Lookup subnet in the _queue_by_net.
+     *
+     * @param nexthop if non zero compare against the net that is found.
+     * @param net to lookup.
+     * @return a message queue entry if found else zero.
+     */
+    const MessageQueueEntry<A> *
+    lookup_in_queue(const A& nexthop, const IPNet<A>& net) const;
+
+    /**
+     * Find the message queue entry and remove from both queues.
+     */
+    void remove_from_queue(const A& nexthop, const IPNet<A>& net);
 };
 
 #endif // __BGP_ROUTE_TABLE_NHLOOKUP_HH__
