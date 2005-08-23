@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.37 2005/07/28 06:16:47 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.39 2005/08/18 15:48:42 bms Exp $"
 
 
 //
@@ -1341,7 +1341,7 @@ CliClient::process_command(const string& command_line)
     int syntax_error_offset_prev = syntax_error_offset_next;
     int i, old_len, new_len;
     string command_global_name;
-    bool wildcard_found = false;
+    bool found_type_match_cb = false;
     
     token_line = command_line;
     new_len = token_line.size();
@@ -1361,23 +1361,17 @@ CliClient::process_command(const string& command_line)
 	syntax_error_offset_next += old_len - new_len;
 	old_len = new_len;
 
-	if (child_cli_command == NULL) {
-	    //
-	    // Try to find a wildcard command
-	    //
-	    child_cli_command = parent_cli_command->command_find_wildcard();
-	    wildcard_found = true;
-	}
-	
 	if (child_cli_command != NULL) {
 	    parent_cli_command = child_cli_command;
 	    // Add the token to the command
 	    if (! command_global_name.empty())
 		command_global_name += " ";
-	    if (wildcard_found)
-		command_global_name += copy_token(token);
-	    else
+	    found_type_match_cb |= child_cli_command->has_type_match_cb();
+
+	    if (! found_type_match_cb)
 		command_global_name = child_cli_command->global_name();
+	    else
+		command_global_name += copy_token(token);
 	    continue;
 	}
 	

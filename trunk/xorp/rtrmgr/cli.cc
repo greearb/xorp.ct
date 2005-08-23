@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.91 2005/08/18 15:54:26 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.92 2005/08/19 06:24:58 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -554,7 +554,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	com1 = com0->add_command(ccm.command_name(), ccm.help_string(), false);
 	com1->set_global_name(ccm.command_name());
 	com1->set_can_pipe(ccm.can_pipe());
-	com1->set_wildcard(ccm.is_wildcard());
+	com1->set_type_match_cb(ccm.type_match_cb());
 	// Set the callback to generate the node's children
 	com1->set_dynamic_children_callback(callback(op_cmd_list(),
 						     &OpCommandList::childlist));
@@ -2129,26 +2129,29 @@ RouterCLI::text_entry_children_func(const string& path) const
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
 	     ++tti) {
+	    const TemplateTreeNode* ttn_child = *tti;
 	    // XXX: ignore deprecated subtrees
-	    if ((*tti)->is_deprecated())
+	    if (ttn_child->is_deprecated())
 		continue;
-	    help_string = (*tti)->help();
+	    help_string = ttn_child->help();
 	    string subpath;
 	    if (help_string == "") {
 		help_string = "-- no help available --";
 	    }
-	    if ((*tti)->segname() == "@") {
-		string typestr = "<" + (*tti)->typestr() + ">";
-		command_name = typestr;
+	    if (ttn_child->segname() == "@") {
+		string encoded_typestr = ttn_child->encoded_typestr();
+		command_name = encoded_typestr;
 		CliCommandMatch ccm(command_name, help_string, is_executable,
 				    can_pipe);
-		ccm.set_wildcard(true);
+		CliCommand::TypeMatchCb cb;
+		cb = callback(ttn_child, &TemplateTreeNode::type_match);
+		ccm.set_type_match_cb(cb);
 		children.insert(make_pair(command_name, ccm));
 	    } else {
-		command_name = (*tti)->segname();
+		command_name = ttn_child->segname();
 		bool is_executable_tmp = is_executable;
 		bool can_pipe_tmp = can_pipe;
-		if ((*tti)->is_tag()) {
+		if (ttn_child->is_tag()) {
 		    is_executable_tmp = false;
 		    can_pipe_tmp = false;
 		}

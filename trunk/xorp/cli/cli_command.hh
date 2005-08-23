@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.15 2005/07/28 23:26:24 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.16 2005/08/18 00:06:47 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -96,6 +96,8 @@ typedef CLI_COMPLETION_FUNC_(CLI_COMPLETION_FUNC);
  */
 class CliCommand {
 public:
+    typedef XorpCallback2<bool, const string&, string&>::RefPtr TypeMatchCb;
+
     /**
      * Constructor for a given parent command, command name, and command help.
      * 
@@ -311,12 +313,25 @@ public:
     void set_can_pipe(bool v) { _can_pipe = v; }
     
     /**
-     * Set whether this command name is a wildcard (i.e., it matches any
-     * string).
+     * Get the callback for type matching.
      * 
-     * @param v if true, this command's name is a wildcard.
+     * @return the callback for type matching.
      */
-    void set_wildcard(bool v) { _is_wildcard = v; }
+    const TypeMatchCb& type_match_cb() const { return (_type_match_cb); }
+
+    /**
+     * Set the callback for type matching.
+     * 
+     * @param cb the callback for type matching.
+     */
+    void set_type_match_cb(const TypeMatchCb& cb) { _type_match_cb = cb; }
+
+    /**
+     * Test if there is a callback for type matching.
+     * 
+     * @return true if there is a callback for type matching, otherwise false.
+     */
+    bool has_type_match_cb() const;
 
     /**
      * Get the global name of this command (i.e., the full name starting from
@@ -391,7 +406,7 @@ public:
     void set_cli_interrupt_callback(const CLI_INTERRUPT_CALLBACK& v) {
 	_cli_interrupt_callback = v;
     }
-    
+
 private:
     friend class CliClient;
     const string& name() const { return (_name); }
@@ -414,7 +429,6 @@ private:
     bool is_same_prefix(const string& token);
     bool is_same_command(const string& token);
     CliCommand *command_find(const string& token);
-    CliCommand *command_find_wildcard();
     bool is_multi_command_prefix(const string& command_line);
     
     bool find_command_help(const char *line, int word_end, string& ret_string);
@@ -445,7 +459,6 @@ private:
     bool can_pipe() const { return (_can_pipe); }
     CliCommand *cli_command_pipe();
     void set_cli_command_pipe(CliCommand *v) { _cli_command_pipe = v; }
-    bool is_wildcard() const { return (_is_wildcard); }
     
     CliCommand *root_command() { return (_root_command); }
     void set_root_command(CliCommand *v) { _root_command = v; }
@@ -463,7 +476,7 @@ private:
     string		_cd_prompt;		// The prompt if we can "cd"
     bool		_can_pipe;		// True if accepts "|" after it
     CliCommand		*_cli_command_pipe;	// The "|" pipe command
-    bool		_is_wildcard;		// True if the name is wildcard
+    TypeMatchCb		_type_match_cb;		// The type match callback
 };
 
 class CliCommandMatch {
@@ -471,23 +484,26 @@ public:
     CliCommandMatch(const string& command_name, const string& help_string,
 		    bool is_executable, bool can_pipe)
 	: _command_name(command_name), _help_string(help_string),
-	  _is_executable(is_executable), _can_pipe(can_pipe),
-	  _is_wildcard(false)
+	  _is_executable(is_executable), _can_pipe(can_pipe)
     {}
 
     const string& command_name() const { return (_command_name); }
     const string& help_string() const { return (_help_string); }
     bool is_executable() const { return (_is_executable); }
     bool can_pipe() const { return (_can_pipe); }
-    bool is_wildcard() const { return (_is_wildcard); }
-    void set_wildcard(bool v) { _is_wildcard = v; }
+    const CliCommand::TypeMatchCb& type_match_cb() const {
+	return (_type_match_cb);
+    }
+    void set_type_match_cb(const CliCommand::TypeMatchCb& cb) {
+	_type_match_cb = cb;
+    }
 
 private:
     string	_command_name;
     string	_help_string;
     bool	_is_executable;
     bool	_can_pipe;
-    bool	_is_wildcard;
+    CliCommand::TypeMatchCb _type_match_cb;
 };
 
 //

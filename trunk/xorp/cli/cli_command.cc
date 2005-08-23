@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.17 2005/07/28 23:26:23 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.18 2005/08/19 06:24:57 pavlin Exp $"
 
 
 //
@@ -68,7 +68,6 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     set_allow_cd(false, "");
     set_can_pipe(false);	// XXX: default
     set_cli_command_pipe(NULL);
-    set_wildcard(false);	// XXX: default
     
     // Set the command-completion help string
     // TODO: parameterize the hard-coded number
@@ -492,7 +491,7 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     token_line = string(line, word_end);
     token = pop_token(token_line);
     if ((! cli_command->is_same_prefix(token))
-	&& (! cli_command->is_wildcard())) {
+	&& (! cli_command->has_type_match_cb())) {
 	    return (false);
     }
     
@@ -506,16 +505,14 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     if (! is_command_completed) {
 	string name_complete;
 
-	if (cli_command->is_wildcard()) {
-	    if (token.empty())
-		return (false);
+	if (cli_command->has_type_match_cb()) {
 	    name_complete = "";
 	} else {
 	    name_complete = name_string.substr(token.length());
+	    if (cli_command->help_completion().size() > 0)
+		type_suffix = cli_command->help_completion().c_str();
 	}
 	
-	if (cli_command->help_completion().size() > 0)
-	    type_suffix = cli_command->help_completion().c_str();
 	// Add two empty spaces in front
 	string line_string = "  ";
 	if (token.empty()) {
@@ -532,8 +529,15 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     }
     
     // Must be a complete command
-    if ((! cli_command->is_same_command(token))
-	&& (! cli_command->is_wildcard())) {
+
+    bool is_token_match = false;
+    if (cli_command->has_type_match_cb()) {
+	string errmsg;
+	is_token_match = cli_command->type_match_cb()->dispatch(token, errmsg);
+    } else {
+	is_token_match = cli_command->is_same_command(token);
+    }
+    if (! is_token_match) {
 	return (false);
     }
     
@@ -592,26 +596,14 @@ CliCommand::command_find(const string& token)
 	 iter != child_command_list().end();
 	 ++iter) {
 	CliCommand *cli_command = *iter;
+	if (cli_command->has_type_match_cb()) {
+	    string errmsg;
+	    if (cli_command->type_match_cb()->dispatch(token, errmsg))
+		return (cli_command);
+	    continue;
+	}
 	if (cli_command->is_same_command(token)) {
 	    // XXX: assume that no two subcommands have the same name
-	    return (cli_command);
-	}
-    }
-    
-    return (NULL);
-}
-
-CliCommand *
-CliCommand::command_find_wildcard()
-{
-    list<CliCommand *>::iterator iter;
-    
-    for (iter = child_command_list().begin();
-	 iter != child_command_list().end();
-	 ++iter) {
-	CliCommand *cli_command = *iter;
-	if (cli_command->is_wildcard()) {
-	    // XXX: assume that no two subcommands are wildcards
 	    return (cli_command);
 	}
     }
@@ -689,13 +681,24 @@ CliCommand::find_command_help(const char *line, int word_end,
     
     token_line = string(line, word_end);
     token = pop_token(token_line);
-    if ((! is_same_prefix(token)) && (! is_wildcard()))
+
+    if ((! is_same_prefix(token)) && (! has_type_match_cb()))
 	return (false);
-    
+
+    //
+    // Test if the token matches the command
+    //
+    bool is_token_match = false;
+    if (has_type_match_cb()) {
+	string errmsg;
+	is_token_match = type_match_cb()->dispatch(token, errmsg);
+    } else {
+	is_token_match = is_same_command(token);
+    }
+
     if (token_line.length()
 	&& is_token_separator(token_line[0])
-	&& (! is_same_command(token))
-	&& (! is_wildcard())) {
+	&& (! is_token_match)) {
 	// Not a match
 	return (false);
     }
@@ -800,7 +803,13 @@ CliCommand::has_cli_interrupt_callback()
     return (!_cli_interrupt_callback.is_empty());
 }
 
-list<CliCommand *>&	
+bool
+CliCommand::has_type_match_cb() const
+{
+    return (! _type_match_cb.is_empty());
+}
+
+list<CliCommand *>&
 CliCommand::child_command_list()
 {
     if (_has_dynamic_children)
@@ -825,12 +834,11 @@ CliCommand::child_command_list()
 	    const string& help_string = ccm.help_string();
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
-	    bool is_wildcard = ccm.is_wildcard();
 	    new_cmd = add_command(command_name, help_string, false);
 	    string child_name = global_name() + " " + command_name;
 	    new_cmd->set_global_name(child_name);
 	    new_cmd->set_can_pipe(can_pipe);
-	    new_cmd->set_wildcard(is_wildcard);
+	    new_cmd->set_type_match_cb(ccm.type_match_cb());
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
 	    new_cmd->set_dynamic_interrupt_callback(_dynamic_interrupt_callback);

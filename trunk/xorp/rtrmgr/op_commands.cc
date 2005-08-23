@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.53 2005/08/05 12:53:30 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.54 2005/08/18 00:11:19 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -452,7 +452,9 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    const string& command_name = match;
 	    CliCommandMatch ccm(command_name, _help_string, is_executable(),
 				can_pipe());
-	    ccm.set_wildcard(true);	// XXX: the argument can be any value
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(this, &OpCommand::type_match);
+	    ccm.set_type_match_cb(cb);
 	    return_matches.insert(make_pair(command_name, ccm));
 	    break;
 	}
@@ -462,6 +464,21 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	return_matches.insert(make_pair(command_name, ccm));
 	break;
     } while (false);
+}
+
+bool
+OpCommand::type_match(const string& s, string& errmsg) const
+{
+    if (s.empty())
+	return (false);
+
+    UNUSED(errmsg);
+
+    //
+    // XXX: currently we don't support type-based matching, so
+    // any string can match.
+    //
+    return (true);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.29 2005/07/19 07:08:18 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.30 2005/08/18 00:11:20 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -119,6 +119,7 @@ public:
 		       SlaveConfigTree* sct, bool exact_match) const;
     void get_matches(size_t wordnum, SlaveConfigTree* sct,
 		     map<string, CliCommandMatch>& return_matches) const;
+    bool type_match(const string& s, string& errmsg) const;
     void add_instance(OpInstance* instance);
     void remove_instance(OpInstance* instance);
 
