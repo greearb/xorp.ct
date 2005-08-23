@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.6 2005/07/06 00:11:19 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.7 2005/08/04 10:30:17 bms Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -93,9 +93,12 @@ unix_path_to_native(const string& unixpath)
 inline bool
 is_absolute_path(const string& path, bool homeok = false)
 {
+    if (path.empty())
+	return false;
+
 #ifdef HOST_OS_WINDOWS
     if ((path.find(NT_PATH_UNC_PREFIX) == 0) ||
-	(isalpha(path[0]) && path[1] == ':'))
+	((path.size() >= 2) && isalpha(path[0]) && path[1] == ':'))
         return true;
     return false;
     UNUSED(homeok);
