@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.55 2005/08/02 20:52:15 zec Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.57 2005/08/18 15:54:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -375,6 +375,12 @@ TemplateTreeNode::subtree_str() const
     }
 
     return s;
+}
+
+string
+TemplateTreeNode::encoded_typestr() const
+{
+    return "<" + typestr() + ">";
 }
 
 bool

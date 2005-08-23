@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.33 2005/07/25 07:23:03 zec Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.34 2005/08/02 20:52:15 zec Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -78,6 +78,7 @@ public:
     virtual string str() const;
     virtual string typestr() const { return string("void"); }
     virtual string default_str() const { return string(""); }
+    virtual string encoded_typestr() const;
     virtual bool type_match(const string& s, string& errmsg) const;
     BaseCommand* command(const string& cmd_name);
     const BaseCommand* const_command(const string& cmd_name) const;
