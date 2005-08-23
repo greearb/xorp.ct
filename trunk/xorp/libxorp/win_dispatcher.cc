@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.2 2005/08/04 10:26:33 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -487,7 +487,7 @@ WinDispatcher::window_procedure(HWND hwnd, UINT uMsg,
 	// XXX: Temporarily block and restore FD_WRITE if enabled, to
 	// try to persuade Winsock to give us level-triggered events!
 	// XXX: This doesn't work. We need to do this the long way round;
-	// we need to know when a socket is blocked for furhter writes.
+	// we need to know when a socket is blocked for further writes.
 	if (ii->second & FD_WRITE) {
 	    ::WSAEventSelect(fd, NULL, 0);
 	    ::WSAAsyncSelect(fd, hwnd, XM_SOCKET, ii->second);
