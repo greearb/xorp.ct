@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/ospf/TODO,v 1.33 2005/08/13 08:13:30 atanu Exp $
 #
 
 TODO
@@ -47,6 +47,9 @@ backbone checks.
 
 23) In peer.cc "_peer.schedule_event("BackupSeen")" is an event that
 is not understood by process_scheduled_events().
+
+24) Move is_DR(), is_BDR(), is_DR_or_BDR() and possibly
+is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
 
 Possible issues
 ~~~~~~~~~~~~~~~
