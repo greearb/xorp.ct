@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.2 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -28,8 +28,8 @@
 // Observe information change about network interface configuration from
 // the underlying system.
 //
-// The mechanism to observe the information change is dummy (for testing
-// purpose).
+// The mechanism to observe the information is the IP Helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 

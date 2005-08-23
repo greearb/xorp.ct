@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_iphelper.cc,v 1.2 2005/08/18 15:45:44 bms Exp $"
 
 #include "fea_module.h"
 
@@ -31,7 +31,8 @@
 // received by the observer would specify the particular entry that
 // has changed.
 //
-// The mechanism to set the information is dummy (for testing purpose).
+// The mechanism to observe the information is the IP Helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 
@@ -80,7 +81,8 @@ FtiConfigEntryObserverIPHelper::stop(string& error_msg)
 }
 
 void
-FtiConfigEntryObserverIPHelper::receive_data(const uint8_t* data, size_t nbytes)
+FtiConfigEntryObserverIPHelper::receive_data(const uint8_t* data,
+					     size_t nbytes)
 {
     debug_msg("called\n");
 

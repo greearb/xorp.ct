@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.2 2005/08/18 15:45:44 bms Exp $"
 
 #include "fea_module.h"
 
@@ -38,7 +38,8 @@
 //
 // Get single-entry information from the unicast forwarding table.
 //
-// The mechanism to obtain the information is IP Helper.
+// The mechanism to obtain the information is the IP Helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 
@@ -92,7 +93,7 @@ FtiConfigEntryGetIPHelper::stop(string& error_msg)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return true on success, otherwise false
+ * @return true on success, otherwise false.
  */
 bool
 FtiConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
@@ -117,7 +118,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
  */
 bool
 FtiConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
-						  Fte4& fte)
+						    Fte4& fte)
 {
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -135,7 +136,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network4(const IPv4Net& dst,
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return true on success, otherwise false;
+ * @return true on success, otherwise false.
  */
 bool
 FtiConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
@@ -160,7 +161,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)
  */
 bool
 FtiConfigEntryGetIPHelper::lookup_route_by_network6(const IPv6Net& dst,
-						  Fte6& fte)
+						    Fte6& fte)
 { 
     FteX ftex(dst.af());
     bool ret_value = false;
@@ -316,7 +317,8 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
  * @return true on success, otherwise false.
  */
 bool
-FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
+FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
+						   FteX& fte)
 {
     // Zero the return information
     fte.zero();

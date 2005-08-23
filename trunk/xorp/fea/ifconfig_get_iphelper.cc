@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.2 2005/08/18 15:45:46 bms Exp $"
 
 #include "fea_module.h"
 
@@ -32,7 +32,7 @@
 
 
 //
-// Get information about the network interfaces from the underlying system.
+// Get information about network interfaces from the underlying system.
 //
 // The mechanism to obtain the information is the IP Helper API for
 // Windows (IPHLPAPI.DLL).
@@ -313,4 +313,4 @@ IfConfigGetIPHelper::read_config(IfTree& it)
     return true;
 }
 
-#endif // !HOST_OS_WINDOWS
+#endif // HOST_OS_WINDOWS

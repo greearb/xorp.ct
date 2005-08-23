@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.10 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_rtsock.cc,v 1.11 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,7 +28,7 @@
 // Observe information change about network interface configuration from
 // the underlying system.
 //
-// The mechanism to observe the information change is routing sockets.
+// The mechanism to observe the information is routing sockets.
 //
 
 

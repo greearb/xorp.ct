@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.28 2005/03/25 02:53:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.29 2005/08/18 15:45:44 bms Exp $"
 
 #include "fea_module.h"
 
@@ -96,7 +96,7 @@ FtiConfigEntryGetRtsock::stop(string& error_msg)
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return true on success, otherwise false
+ * @return true on success, otherwise false.
  */
 bool
 FtiConfigEntryGetRtsock::lookup_route_by_dest4(const IPv4& dst, Fte4& fte)
@@ -139,7 +139,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network4(const IPv4Net& dst,
  * @param dst host address to resolve.
  * @param fte return-by-reference forwarding table entry.
  *
- * @return true on success, otherwise false;
+ * @return true on success, otherwise false.
  */
 bool
 FtiConfigEntryGetRtsock::lookup_route_by_dest6(const IPv6& dst, Fte6& fte)

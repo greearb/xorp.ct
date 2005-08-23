@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.9 2005/03/25 02:53:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.10 2005/08/18 15:45:44 bms Exp $"
 
 #include "fea_module.h"
 
@@ -31,7 +31,7 @@
 // received by the observer would specify the particular entry that
 // has changed.
 //
-// The mechanism to set the information is dummy (for testing purpose).
+// The mechanism to observe the information is dummy (for testing purpose).
 //
 
 

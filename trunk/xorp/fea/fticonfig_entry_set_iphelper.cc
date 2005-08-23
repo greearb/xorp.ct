@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.2 2005/08/18 15:45:44 bms Exp $"
 
 #include "fea_module.h"
 
@@ -51,7 +51,8 @@
 //
 // Set single-entry information into the unicast forwarding table.
 //
-// The mechanism to set the information is routing sockets.
+// The mechanism to set the information is the IP helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 
@@ -214,20 +215,20 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
 #if 0
     debug_msg("About to call CreateIpForwardEntry() with the following:\n");
     debug_msg("%08lx %08lx %lu %08lx %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		ipfwdrow.dwForwardDest,
-		ipfwdrow.dwForwardMask ,
-		ipfwdrow.dwForwardPolicy ,
-		ipfwdrow.dwForwardNextHop ,
-		ipfwdrow.dwForwardIfIndex ,
-		ipfwdrow.dwForwardType ,
-		ipfwdrow.dwForwardProto ,
-		ipfwdrow.dwForwardAge ,
-		ipfwdrow.dwForwardNextHopAS ,
-		ipfwdrow.dwForwardMetric1 ,
-		ipfwdrow.dwForwardMetric2 ,
-		ipfwdrow.dwForwardMetric3 ,
-		ipfwdrow.dwForwardMetric4 ,
-		ipfwdrow.dwForwardMetric5 );
+	      ipfwdrow.dwForwardDest,
+	      ipfwdrow.dwForwardMask,
+	      ipfwdrow.dwForwardPolicy,
+	      ipfwdrow.dwForwardNextHop,
+	      ipfwdrow.dwForwardIfIndex,
+	      ipfwdrow.dwForwardType,
+	      ipfwdrow.dwForwardProto,
+	      ipfwdrow.dwForwardAge,
+	      ipfwdrow.dwForwardNextHopAS,
+	      ipfwdrow.dwForwardMetric1,
+	      ipfwdrow.dwForwardMetric2,
+	      ipfwdrow.dwForwardMetric3,
+	      ipfwdrow.dwForwardMetric4,
+	      ipfwdrow.dwForwardMetric5);
 #endif
 
     DWORD result = CreateIpForwardEntry(&ipfwdrow);
@@ -298,7 +299,7 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     }
 #else
     fte.net().masked_addr().get_ipv4().copy_out(
-(uint8_t*)&(ipfwdrow.dwForwardDest));
+	(uint8_t*)&(ipfwdrow.dwForwardDest));
     fte.net().netmask().get_ipv4().copy_out((uint8_t*)&ipfwdrow.dwForwardMask);
 
     fte.nexthop().get_ipv4().copy_out((uint8_t*)&ipfwdrow.dwForwardNextHop);
@@ -306,7 +307,8 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     ipfwdrow.dwForwardIfIndex = (DWORD)if_nametoindex(fte.vifname().c_str());
     ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
 
-    debug_msg("vifname = %s, ifindex = %lu\n", fte.vifname().c_str(), ipfwdrow.dwForwardIfIndex);
+    debug_msg("vifname = %s, ifindex = %lu\n", fte.vifname().c_str(),
+	      ipfwdrow.dwForwardIfIndex);
 
 #if 0
     // We need to tell Windows if the route is a connected route.
@@ -321,20 +323,20 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 #if 0
     debug_msg("About to call DeleteIpForwardEntry() with the following:\n");
     debug_msg("%08lx %08lx %lu %08lx %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-		ipfwdrow.dwForwardDest,
-		ipfwdrow.dwForwardMask ,
-		ipfwdrow.dwForwardPolicy ,
-		ipfwdrow.dwForwardNextHop ,
-		ipfwdrow.dwForwardIfIndex ,
-		ipfwdrow.dwForwardType ,
-		ipfwdrow.dwForwardProto ,
-		ipfwdrow.dwForwardAge ,
-		ipfwdrow.dwForwardNextHopAS ,
-		ipfwdrow.dwForwardMetric1 ,
-		ipfwdrow.dwForwardMetric2 ,
-		ipfwdrow.dwForwardMetric3 ,
-		ipfwdrow.dwForwardMetric4 ,
-		ipfwdrow.dwForwardMetric5 );
+	      ipfwdrow.dwForwardDest,
+	      ipfwdrow.dwForwardMask,
+	      ipfwdrow.dwForwardPolicy,
+	      ipfwdrow.dwForwardNextHop,
+	      ipfwdrow.dwForwardIfIndex,
+	      ipfwdrow.dwForwardType,
+	      ipfwdrow.dwForwardProto,
+	      ipfwdrow.dwForwardAge,
+	      ipfwdrow.dwForwardNextHopAS,
+	      ipfwdrow.dwForwardMetric1,
+	      ipfwdrow.dwForwardMetric2,
+	      ipfwdrow.dwForwardMetric3,
+	      ipfwdrow.dwForwardMetric4,
+	      ipfwdrow.dwForwardMetric5);
 #endif
 
     result = DeleteIpForwardEntry(&ipfwdrow);

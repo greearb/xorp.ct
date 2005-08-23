@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.2 2005/08/18 15:45:46 bms Exp $"
 
 #include "fea_module.h"
 
@@ -27,7 +27,8 @@
 //
 // Set whole-table information into the unicast forwarding table.
 //
-// The mechanism to set the information is routing sockets.
+// The mechanism to set the information is the IP Helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 

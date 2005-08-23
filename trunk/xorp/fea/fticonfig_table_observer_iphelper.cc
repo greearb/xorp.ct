@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_iphelper.cc,v 1.2 2005/08/18 15:45:45 bms Exp $"
 
 #include "fea_module.h"
 
@@ -30,6 +30,9 @@
 // E.g., if the forwarding table has changed, then the information
 // received by the observer would NOT specify the particular entry that
 // has changed.
+//
+// The mechanism to observe the information is the IP helper API for
+// Windows (IPHLPAPI.DLL).
 //
 
 
@@ -78,7 +81,8 @@ FtiConfigTableObserverIPHelper::stop(string& error_msg)
 }
 
 void
-FtiConfigTableObserverIPHelper::receive_data(const uint8_t* data, size_t nbytes)
+FtiConfigTableObserverIPHelper::receive_data(const uint8_t* data,
+					     size_t nbytes)
 {
     debug_msg("called\n");
     UNUSED(data);

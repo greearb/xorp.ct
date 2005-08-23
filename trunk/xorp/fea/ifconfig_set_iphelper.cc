@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.2 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -32,9 +32,10 @@
 
 
 //
-// Get information about the network interfaces from the underlying system.
+// Set information about network interfaces configuration with the
+// underlying system.
 //
-// The mechanism to obtain the information is the IP Helper API for
+// The mechanism to set the information is the IP Helper API for
 // Windows (IPHLPAPI.DLL).
 //
 
@@ -116,12 +117,12 @@ IfConfigSetIPHelper::config_end(string& error_msg)
 
 int
 IfConfigSetIPHelper::add_interface(const string& ifname,
-uint32_t if_index,
-string& error_msg)
+				   uint32_t if_index,
+				   string& error_msg)
 {
     debug_msg("add_interface "
-      "(ifname = %s if_index = %u)\n",
-      ifname.c_str(), if_index);
+	      "(ifname = %s if_index = %u)\n",
+	      ifname.c_str(), if_index);
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -133,13 +134,13 @@ string& error_msg)
 
 int
 IfConfigSetIPHelper::add_vif(const string& ifname,
-  const string& vifname,
-  uint32_t if_index,
-  string& error_msg)
+			     const string& vifname,
+			     uint32_t if_index,
+			     string& error_msg)
 {
     debug_msg("add_vif "
-      "(ifname = %s vifname = %s if_index = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index);
+	      "(ifname = %s vifname = %s if_index = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index);
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -152,19 +153,19 @@ IfConfigSetIPHelper::add_vif(const string& ifname,
 
 int
 IfConfigSetIPHelper::config_interface(const string& ifname,
-   uint32_t if_index,
-   uint32_t flags,
-   bool is_up,
-   bool is_deleted,
-   string& error_msg)
+				      uint32_t if_index,
+				      uint32_t flags,
+				      bool is_up,
+				      bool is_deleted,
+				      string& error_msg)
 {
     debug_msg("config_interface "
-      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-      "is_deleted = %s)\n",
-      ifname.c_str(), if_index,
-      XORP_UINT_CAST(flags),
-      (is_up)? "true" : "false",
-      (is_deleted)? "true" : "false");
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
+	      "is_deleted = %s)\n",
+	      ifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -179,29 +180,29 @@ IfConfigSetIPHelper::config_interface(const string& ifname,
 
 int
 IfConfigSetIPHelper::config_vif(const string& ifname,
-     const string& vifname,
-     uint32_t if_index,
-     uint32_t flags,
-     bool is_up,
-     bool is_deleted,
-     bool broadcast,
-     bool loopback,
-     bool point_to_point,
-     bool multicast,
-     string& error_msg)
+				const string& vifname,
+				uint32_t if_index,
+				uint32_t flags,
+				bool is_up,
+				bool is_deleted,
+				bool broadcast,
+				bool loopback,
+				bool point_to_point,
+				bool multicast,
+				string& error_msg)
 {
     debug_msg("config_vif "
-      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-      "point_to_point = %s multicast = %s)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      XORP_UINT_CAST(flags),
-      (is_up)? "true" : "false",
-      (is_deleted)? "true" : "false",
-      (broadcast)? "true" : "false",
-      (loopback)? "true" : "false",
-      (point_to_point)? "true" : "false",
-      (multicast)? "true" : "false");
+	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
+	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
+	      "point_to_point = %s multicast = %s)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false",
+	      (broadcast)? "true" : "false",
+	      (loopback)? "true" : "false",
+	      (point_to_point)? "true" : "false",
+	      (multicast)? "true" : "false");
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -221,13 +222,13 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
 
 int
 IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
-    uint32_t if_index,
-    const struct ether_addr& ether_addr,
-    string& error_msg)
+					       uint32_t if_index,
+					       const struct ether_addr& ether_addr,
+					       string& error_msg)
 {
     debug_msg("set_interface_mac "
-      "(ifname = %s if_index = %u mac = %s)\n",
-      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
+	      "(ifname = %s if_index = %u mac = %s)\n",
+	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -240,13 +241,13 @@ IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
-    uint32_t if_index,
-    uint32_t mtu,
-    string& error_msg)
+				       uint32_t if_index,
+				       uint32_t mtu,
+				       string& error_msg)
 {
     debug_msg("set_interface_mtu "
-      "(ifname = %s if_index = %u mtu = %u)\n",
-      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
+	      "(ifname = %s if_index = %u mtu = %u)\n",
+	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
     UNUSED(ifname);
     UNUSED(if_index);
@@ -259,22 +260,22 @@ IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address(const string& ifname,
-  const string& vifname,
-  uint32_t if_index,
-  bool is_broadcast,
-  bool is_p2p,
-  const IPvX& addr,
-  const IPvX& dst_or_bcast,
-  uint32_t prefix_len,
-  string& error_msg)
+				     const string& vifname,
+				     uint32_t if_index,
+				     bool is_broadcast,
+				     bool is_p2p,
+				     const IPvX& addr,
+				     const IPvX& dst_or_bcast,
+				     uint32_t prefix_len,
+				     string& error_msg)
 {
     debug_msg("add_vif_address "
-      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-      addr.str().c_str(), dst_or_bcast.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
+	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -292,22 +293,22 @@ IfConfigSetIPHelper::add_vif_address(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address4(const string& ifname,
-   const string& vifname,
-   uint32_t if_index,
-   bool is_broadcast,
-   bool is_p2p,
-   const IPvX& addr,
-   const IPvX& dst_or_bcast,
-   uint32_t prefix_len,
-   string& error_msg)
+				      const string& vifname,
+				      uint32_t if_index,
+				      bool is_broadcast,
+				      bool is_p2p,
+				      const IPvX& addr,
+				      const IPvX& dst_or_bcast,
+				      uint32_t prefix_len,
+				      string& error_msg)
 {
     debug_msg("add_vif_address4 "
-      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-      addr.str().c_str(), dst_or_bcast.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
+	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     return (XORP_ERROR);
 
@@ -324,21 +325,21 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address6(const string& ifname,
-   const string& vifname,
-   uint32_t if_index,
-   bool is_p2p,
-   const IPvX& addr,
-   const IPvX& dst,
-   uint32_t prefix_len,
-   string& error_msg)
+				      const string& vifname,
+				      uint32_t if_index,
+				      bool is_p2p,
+				      const IPvX& addr,
+				      const IPvX& dst,
+				      uint32_t prefix_len,
+				      string& error_msg)
 {
     debug_msg("add_vif_address6 "
-      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
-      "addr = %s dst = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_p2p)? "true" : "false", addr.str().c_str(),
-      dst.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
+	      "addr = %s dst = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_p2p)? "true" : "false", addr.str().c_str(),
+	      dst.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     return (XORP_ERROR);
 
@@ -354,17 +355,17 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
 
 int
 IfConfigSetIPHelper::delete_vif_address(const string& ifname,
-     const string& vifname,
-     uint32_t if_index,
-     const IPvX& addr,
-     uint32_t prefix_len,
-     string& error_msg)
+					const string& vifname,
+					uint32_t if_index,
+					const IPvX& addr,
+					uint32_t prefix_len,
+					string& error_msg)
 {
     debug_msg("delete_vif_address "
-      "(ifname = %s vifname = %s if_index = %u addr = %s "
-      "prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u addr = %s "
+	      "prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     UNUSED(ifname);
     UNUSED(vifname);
@@ -403,12 +404,12 @@ IfConfigSetIPHelper::config_end(string& error_msg)
 
 int
 IfConfigSetIPHelper::add_interface(const string& ifname,
-uint32_t if_index,
-string& error_msg)
+				   uint32_t if_index,
+				   string& error_msg)
 {
     debug_msg("add_interface "
-      "(ifname = %s if_index = %u)\n",
-      ifname.c_str(), if_index);
+	      "(ifname = %s if_index = %u)\n",
+	      ifname.c_str(), if_index);
 
     ; // nothing to do
 
@@ -420,13 +421,13 @@ string& error_msg)
 
 int
 IfConfigSetIPHelper::add_vif(const string& ifname,
-  const string& vifname,
-  uint32_t if_index,
-  string& error_msg)
+			     const string& vifname,
+			     uint32_t if_index,
+			     string& error_msg)
 {
     debug_msg("add_vif "
-      "(ifname = %s vifname = %s if_index = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index);
+	      "(ifname = %s vifname = %s if_index = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index);
 
     ; // nothing to do
 
@@ -439,19 +440,19 @@ IfConfigSetIPHelper::add_vif(const string& ifname,
 
 int
 IfConfigSetIPHelper::config_interface(const string& ifname,
-   uint32_t if_index,
-   uint32_t flags,
-   bool is_up,
-   bool is_deleted,
-   string& error_msg)
+				      uint32_t if_index,
+				      uint32_t flags,
+				      bool is_up,
+				      bool is_deleted,
+				      string& error_msg)
 {
     debug_msg("config_interface "
-      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
-      "is_deleted = %s)\n",
-      ifname.c_str(), if_index,
-      XORP_UINT_CAST(flags),
-      (is_up)? "true" : "false",
-      (is_deleted)? "true" : "false");
+	      "(ifname = %s if_index = %u flags = 0x%x is_up = %s "
+	      "is_deleted = %s)\n",
+	      ifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false");
 
     ; // nothing to do
 
@@ -466,29 +467,29 @@ IfConfigSetIPHelper::config_interface(const string& ifname,
 
 int
 IfConfigSetIPHelper::config_vif(const string& ifname,
-     const string& vifname,
-     uint32_t if_index,
-     uint32_t flags,
-     bool is_up,
-     bool is_deleted,
-     bool broadcast,
-     bool loopback,
-     bool point_to_point,
-     bool multicast,
-     string& error_msg)
+				const string& vifname,
+				uint32_t if_index,
+				uint32_t flags,
+				bool is_up,
+				bool is_deleted,
+				bool broadcast,
+				bool loopback,
+				bool point_to_point,
+				bool multicast,
+				string& error_msg)
 {
     debug_msg("config_vif "
-      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
-      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
-      "point_to_point = %s multicast = %s)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      XORP_UINT_CAST(flags),
-      (is_up)? "true" : "false",
-      (is_deleted)? "true" : "false",
-      (broadcast)? "true" : "false",
-      (loopback)? "true" : "false",
-      (point_to_point)? "true" : "false",
-      (multicast)? "true" : "false");
+	      "(ifname = %s vifname = %s if_index = %u flags = 0x%x "
+	      "is_up = %s is_deleted = %s broadcast = %s loopback = %s "
+	      "point_to_point = %s multicast = %s)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      XORP_UINT_CAST(flags),
+	      (is_up)? "true" : "false",
+	      (is_deleted)? "true" : "false",
+	      (broadcast)? "true" : "false",
+	      (loopback)? "true" : "false",
+	      (point_to_point)? "true" : "false",
+	      (multicast)? "true" : "false");
 
     MIB_IFROW ifrow;
     DWORD result;
@@ -499,7 +500,8 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
     result = GetIfEntry(&ifrow);
     if (result != NO_ERROR) {
 	error_msg = c_format("Cannot obtain existing MIB_IFROW for "
-			     "interface %u: error %d\n", if_index, (int)result);
+			     "interface %u: error %d\n", if_index,
+			     (int)result);
 	return (XORP_ERROR);
     }
     ifrow.dwAdminStatus = is_up ? MIB_IF_ADMIN_STATUS_UP :
@@ -507,7 +509,8 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
     result = SetIfEntry(&ifrow);
     if (result != NO_ERROR) {
 	error_msg = c_format("Cannot set administrative status of "
-			     "interface %u: error %d\n", if_index, (int)result);
+			     "interface %u: error %d\n", if_index,
+			     (int)result);
 	return (XORP_ERROR);
     }
 
@@ -525,13 +528,13 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
 
 int
 IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
-    uint32_t if_index,
-    const struct ether_addr& ether_addr,
-    string& error_msg)
+					       uint32_t if_index,
+					       const struct ether_addr& ether_addr,
+					       string& error_msg)
 {
     debug_msg("set_interface_mac "
-      "(ifname = %s if_index = %u mac = %s)\n",
-      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
+	      "(ifname = %s if_index = %u mac = %s)\n",
+	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
 
     error_msg = "method not supported";
 
@@ -543,13 +546,13 @@ IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
 
 int
 IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
-    uint32_t if_index,
-    uint32_t mtu,
-    string& error_msg)
+				       uint32_t if_index,
+				       uint32_t mtu,
+				       string& error_msg)
 {
     debug_msg("set_interface_mtu "
-      "(ifname = %s if_index = %u mtu = %u)\n",
-      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
+	      "(ifname = %s if_index = %u mtu = %u)\n",
+	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
     error_msg = "method not supported";
 
@@ -561,22 +564,22 @@ IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address(const string& ifname,
-  const string& vifname,
-  uint32_t if_index,
-  bool is_broadcast,
-  bool is_p2p,
-  const IPvX& addr,
-  const IPvX& dst_or_bcast,
-  uint32_t prefix_len,
-  string& error_msg)
+				     const string& vifname,
+				     uint32_t if_index,
+				     bool is_broadcast,
+				     bool is_p2p,
+				     const IPvX& addr,
+				     const IPvX& dst_or_bcast,
+				     uint32_t prefix_len,
+				     string& error_msg)
 {
     debug_msg("add_vif_address "
-      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-      addr.str().c_str(), dst_or_bcast.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
+	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     switch (addr.af()) {
     case AF_INET:
@@ -600,22 +603,22 @@ IfConfigSetIPHelper::add_vif_address(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address4(const string& ifname,
-   const string& vifname,
-   uint32_t if_index,
-   bool is_broadcast,
-   bool is_p2p,
-   const IPvX& addr,
-   const IPvX& dst_or_bcast,
-   uint32_t prefix_len,
-   string& error_msg)
+				      const string& vifname,
+				      uint32_t if_index,
+				      bool is_broadcast,
+				      bool is_p2p,
+				      const IPvX& addr,
+				      const IPvX& dst_or_bcast,
+				      uint32_t prefix_len,
+				      string& error_msg)
 {
     debug_msg("add_vif_address4 "
-      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
-      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
-      addr.str().c_str(), dst_or_bcast.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
+	      "is_p2p = %s addr = %s dst/bcast = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_broadcast)? "true" : "false", (is_p2p)? "true" : "false",
+	      addr.str().c_str(), dst_or_bcast.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     IPAddr	ipaddr;
     IPMask	ipmask;
@@ -654,21 +657,21 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
 
 int
 IfConfigSetIPHelper::add_vif_address6(const string& ifname,
-   const string& vifname,
-   uint32_t if_index,
-   bool is_p2p,
-   const IPvX& addr,
-   const IPvX& dst,
-   uint32_t prefix_len,
-   string& error_msg)
+				      const string& vifname,
+				      uint32_t if_index,
+				      bool is_p2p,
+				      const IPvX& addr,
+				      const IPvX& dst,
+				      uint32_t prefix_len,
+				      string& error_msg)
 {
     debug_msg("add_vif_address6 "
-      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
-      "addr = %s dst = %s prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index,
-      (is_p2p)? "true" : "false", addr.str().c_str(),
-      dst.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u is_p2p = %s "
+	      "addr = %s dst = %s prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index,
+	      (is_p2p)? "true" : "false", addr.str().c_str(),
+	      dst.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     error_msg = "method not supported";
 
@@ -686,17 +689,17 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
 
 int
 IfConfigSetIPHelper::delete_vif_address(const string& ifname,
-     const string& vifname,
-     uint32_t if_index,
-     const IPvX& addr,
-     uint32_t prefix_len,
-     string& error_msg)
+					const string& vifname,
+					uint32_t if_index,
+					const IPvX& addr,
+					uint32_t prefix_len,
+					string& error_msg)
 {
     debug_msg("delete_vif_address "
-      "(ifname = %s vifname = %s if_index = %u addr = %s "
-      "prefix_len = %u)\n",
-      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
-      XORP_UINT_CAST(prefix_len));
+	      "(ifname = %s vifname = %s if_index = %u addr = %s "
+	      "prefix_len = %u)\n",
+	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
+	      XORP_UINT_CAST(prefix_len));
 
     // Check that the family is supported
     switch (addr.af()) {
