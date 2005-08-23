@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.15 2005/03/09 22:50:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.16 2005/03/10 04:10:42 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -127,6 +127,8 @@ interfaces {
 
 	    address @: ipv4 {
 		%help:		short "Configure an IPv4 address";
+		%mandatory:	prefix-length;
+
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 		%list:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses4?ifname:txt=$(interface.@)&vif:txt->addresses:list";
@@ -181,6 +183,8 @@ interfaces {
 
 	    address @: ipv6 {
 		%help:		short "Configure an IPv6 address";
+		%mandatory:	prefix-length;
+
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%list:		xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_vif_addresses6?ifname:txt=$(interface.@)&vif:txt->addresses:list";
