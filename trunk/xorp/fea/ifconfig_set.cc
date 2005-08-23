@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.27 2005/08/17 16:24:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.28 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -537,6 +537,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	uint32_t prefix_len = a.prefix_len();
 	
 	const IfTreeAddr4* ap = NULL;
+	const IfTreeVif* vp = NULL;
 	do {
 	    IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
 	    if (ii == ifc().pulled_config().ifs().end())
@@ -544,6 +545,7 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    IfTreeInterface::VifMap::const_iterator vi = ii->second.get_vif(v.vifname());
 	    if (vi == ii->second.vifs().end())
 		break;
+	    vp = &vi->second;
 	    IfTreeVif::V4Map::const_iterator ai = vi->second.get_addr(a.addr());
 	    if (ai == vi->second.v4addrs().end())
 		break;
@@ -572,7 +574,22 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
 
-	if (add_vif_address(i.ifname(), v.vifname(), if_index, a.broadcast(),
+	//
+	// XXX: If the broadcast address was omitted, recompute it here.
+	// Note that we recompute it only if the underlying vif is
+	// broadcast-capable.
+	//
+	bool is_broadcast = a.broadcast();
+	if ((vp != NULL)
+	    && (! (a.broadcast() || a.point_to_point()))
+	    && (prefix_len > 0)
+	    && vp->broadcast()) {
+	    IPv4 mask = IPv4::make_prefix(prefix_len);
+	    oaddr = a.addr() | ~mask;
+	    is_broadcast = true;
+	}
+
+	if (add_vif_address(i.ifname(), v.vifname(), if_index, is_broadcast,
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
 			    prefix_len, error_msg)
 	    < 0) {
