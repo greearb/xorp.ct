@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.56 2005/08/18 15:54:27 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.57 2005/08/19 20:09:41 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -944,7 +944,7 @@ MasterConfigTree::config_full_filename(const string& filename) const
     //
     // If this is an absolute filename then return the filename itself
     //
-    if (filename[0] == PATH_DELIMITER_CHAR)
+    if (is_absolute_path(filename))
 	return (filename);
 
     //
