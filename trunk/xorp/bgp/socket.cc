@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.29 2005/05/13 16:24:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.31 2005/08/18 15:58:07 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -53,7 +53,7 @@ Socket::Socket(const Iptuple& iptuple, EventLoop& e)
 void
 Socket::create_listener()
 {
-    debug_msg("create_listener called");
+    debug_msg("create_listener called\n");
 
     size_t len;
     const struct sockaddr *sin = get_local_socket(len);
