@@ -1,9 +1,6 @@
 #ifndef lint
-#ifdef __unused
-__unused
-#endif
 static char const 
-yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $";
+yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $";
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -54,7 +51,6 @@ static int yygrowstack();
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
-
 #include <vector>
 #include <string>
 #include <list>
@@ -101,12 +97,12 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 	}
 }
 
-#line 55 "compilepolicy.y"
+#line 57 "compilepolicy.y"
 typedef union {
 	char *c_str;
 	yy_statements* statements;
 } YYSTYPE;
-#line 107 "yacc.yy_compile_policy.cc"
+#line 106 "yacc.yy_compile_policy.cc"
 #define YYERRCODE 256
 #define YY_INT 257
 #define YY_STR 258
@@ -305,9 +301,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -439,7 +435,7 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 77 "compilepolicy.y"
+#line 79 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -455,7 +451,7 @@ case 3:
 				}
 break;
 case 4:
-#line 91 "compilepolicy.y"
+#line 93 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -471,7 +467,7 @@ case 4:
 				}
 break;
 case 6:
-#line 108 "compilepolicy.y"
+#line 110 "compilepolicy.y"
 {
 	  	string type = yyvsp[-3].c_str;
 	  	string id = yyvsp[-2].c_str;
@@ -484,7 +480,7 @@ case 6:
 	  }
 break;
 case 7:
-#line 122 "compilepolicy.y"
+#line 124 "compilepolicy.y"
 {
 		string pname = yyvsp[-3].c_str;
 		free(yyvsp[-3].c_str);
@@ -510,7 +506,7 @@ case 7:
 	  }
 break;
 case 8:
-#line 150 "compilepolicy.y"
+#line 152 "compilepolicy.y"
 {
 	  	yy_tb* tb = new yy_tb;
 
@@ -524,7 +520,7 @@ case 8:
 	  }
 break;
 case 10:
-#line 166 "compilepolicy.y"
+#line 168 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -532,7 +528,7 @@ case 10:
 	}
 break;
 case 11:
-#line 175 "compilepolicy.y"
+#line 177 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -540,7 +536,7 @@ case 11:
 	}
 break;
 case 12:
-#line 184 "compilepolicy.y"
+#line 186 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -548,7 +544,7 @@ case 12:
 	}
 break;
 case 13:
-#line 192 "compilepolicy.y"
+#line 194 "compilepolicy.y"
 {
 	       
 	       	if (_yy_statements == NULL) {
@@ -563,7 +559,7 @@ case 13:
 		_yy_statements->push_back(statement);
 	       }
 break;
-#line 564 "yacc.yy_compile_policy.cc"
+#line 563 "yacc.yy_compile_policy.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;
