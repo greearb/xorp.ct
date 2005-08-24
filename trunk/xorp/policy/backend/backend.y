@@ -3,7 +3,9 @@
  * yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y
  */
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "libxorp/xorp.h"
 
