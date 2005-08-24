@@ -76,12 +76,12 @@ using namespace policy_parser;
 
 static ElementFactory _ef;
 
-#line 32 "policy.y"
+#line 36 "policy.y"
 typedef union {
 	char *c_str;
 	Node *node;
 } YYSTYPE;
-#line 81 "yacc.yy_policy_parser.cc"
+#line 85 "yacc.yy_policy_parser.cc"
 #define YYERRCODE 256
 #define YY_INT 257
 #define YY_UINT 258
@@ -535,158 +535,158 @@ yyreduce:
     switch (yyn)
     {
 case 1:
-#line 58 "policy.y"
+#line 62 "policy.y"
 { _parser_nodes->push_back(yyvsp[0].node); }
 break;
 case 2:
-#line 59 "policy.y"
+#line 63 "policy.y"
 { _parser_nodes->push_back(yyvsp[0].node); }
 break;
 case 4:
-#line 65 "policy.y"
+#line 69 "policy.y"
 { yyval.node = new NodeAssign(yyvsp[-3].c_str,yyvsp[-1].node,_parser_lineno); free(yyvsp[-3].c_str); }
 break;
 case 5:
-#line 66 "policy.y"
+#line 70 "policy.y"
 { yyval.node = new NodeAccept(_parser_lineno); }
 break;
 case 6:
-#line 67 "policy.y"
+#line 71 "policy.y"
 { yyval.node = new NodeReject(_parser_lineno); }
 break;
 case 7:
-#line 71 "policy.y"
+#line 75 "policy.y"
 { yyval.node = yyvsp[-1].node; }
 break;
 case 8:
-#line 76 "policy.y"
+#line 80 "policy.y"
 { yyval.node = new NodeProto(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 9:
-#line 77 "policy.y"
+#line 81 "policy.y"
 { yyval.node = new NodeUn(new OpNot,yyvsp[0].node,_parser_lineno); }
 break;
 case 10:
-#line 78 "policy.y"
+#line 82 "policy.y"
 { yyval.node = new NodeBin(new OpAnd,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 11:
-#line 79 "policy.y"
+#line 83 "policy.y"
 { yyval.node = new NodeBin(new OpXor,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 12:
-#line 80 "policy.y"
+#line 84 "policy.y"
 { yyval.node = new NodeBin(new OpOr,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 13:
-#line 82 "policy.y"
+#line 86 "policy.y"
 { yyval.node = new NodeBin(new OpEq,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 14:
-#line 83 "policy.y"
+#line 87 "policy.y"
 { yyval.node = new NodeBin(new OpNe,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 15:
-#line 85 "policy.y"
+#line 89 "policy.y"
 { yyval.node = new NodeBin(new OpLt,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 16:
-#line 86 "policy.y"
+#line 90 "policy.y"
 { yyval.node = new NodeBin(new OpGt,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 17:
-#line 87 "policy.y"
+#line 91 "policy.y"
 { yyval.node = new NodeBin(new OpLe,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 18:
-#line 88 "policy.y"
+#line 92 "policy.y"
 { yyval.node = new NodeBin(new OpGe,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 19:
-#line 89 "policy.y"
+#line 93 "policy.y"
 { yyval.node = new NodeBin(new OpNEInt, yyvsp[-2].node, yyvsp[0].node, _parser_lineno); }
 break;
 case 20:
-#line 91 "policy.y"
+#line 95 "policy.y"
 { yyval.node = yyvsp[-1].node; }
 break;
 case 21:
-#line 93 "policy.y"
+#line 97 "policy.y"
 { yyval.node = new NodeBin(new OpRegex, yyvsp[-2].node, yyvsp[0].node, _parser_lineno); }
 break;
 case 22:
-#line 97 "policy.y"
+#line 101 "policy.y"
 { yyval.node = new NodeBin(new OpAdd,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 23:
-#line 98 "policy.y"
+#line 102 "policy.y"
 { yyval.node = new NodeBin(new OpSub,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 24:
-#line 99 "policy.y"
+#line 103 "policy.y"
 { yyval.node = new NodeBin(new OpMul,yyvsp[-2].node,yyvsp[0].node,_parser_lineno); }
 break;
 case 25:
-#line 101 "policy.y"
+#line 105 "policy.y"
 { yyval.node = new NodeUn(new OpHead, yyvsp[0].node, _parser_lineno); }
 break;
 case 26:
-#line 102 "policy.y"
+#line 106 "policy.y"
 { yyval.node = new NodeBin(new OpCtr, yyvsp[-1].node, yyvsp[0].node, _parser_lineno); }
 break;
 case 27:
-#line 104 "policy.y"
+#line 108 "policy.y"
 { yyval.node = yyvsp[-1].node; }
 break;
 case 28:
-#line 106 "policy.y"
+#line 110 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemStr::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 29:
-#line 107 "policy.y"
+#line 111 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemU32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
 break;
 case 30:
-#line 108 "policy.y"
+#line 112 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemU32Range::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
 break;
 case 31:
-#line 109 "policy.y"
+#line 113 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemInt32::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str);}
 break;
 case 32:
-#line 110 "policy.y"
+#line 114 "policy.y"
 { yyval.node = new NodeVar(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 33:
-#line 111 "policy.y"
+#line 115 "policy.y"
 { yyval.node = new NodeSet(yyvsp[0].c_str,_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 34:
-#line 112 "policy.y"
+#line 116 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv4::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 35:
-#line 113 "policy.y"
+#line 117 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv4Range::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 36:
-#line 114 "policy.y"
+#line 118 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv6::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 37:
-#line 115 "policy.y"
+#line 119 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv6Range::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 38:
-#line 116 "policy.y"
+#line 120 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv4Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
 case 39:
-#line 117 "policy.y"
+#line 121 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv6Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
-#line 686 "yacc.yy_policy_parser.cc"
+#line 690 "yacc.yy_policy_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;
