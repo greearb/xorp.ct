@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.84 2005/08/18 06:30:37 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.85 2005/08/19 08:35:50 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -658,7 +658,8 @@ class Peer {
     /**
      * Used to notify the peer that a neighbour has become fully
      * adjacent or a neighbour is no longer fully adjacent. Used to
-     * trigger the generation or withdrawal of a network-LSA.
+     * trigger the generation or withdrawal of a network-LSA. Should
+     * only be called if the interface is in state DR.
      *
      * @param up true if the adjacency became full, false otherwise.
      */
@@ -723,6 +724,20 @@ class Peer {
      * Set the backup designated router.
      */
     bool set_backup_designated_router(OspfTypes::RouterID dr);
+
+    /**
+     * Called when this peer becomes the designated router or
+     * this peer was the designated router.
+     *
+     * @param yes true if the peer became the DR false if it is no
+     * longer the DR.
+     */
+    void designated_router_changed(bool yes);
+
+    /**
+     * Return a list of the fully adjacent routers.
+     */
+    void get_attached_routers(list<OspfTypes::RouterID>& routers);
 
     void start_hello_timer();
 

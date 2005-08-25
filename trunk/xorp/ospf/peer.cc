@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.122 2005/08/18 06:22:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.123 2005/08/19 08:35:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1739,10 +1739,54 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 
 template <typename A>
 void
-Peer<A>::adjacency_change(bool /*up*/)
+Peer<A>::designated_router_changed(bool yes)
+{
+    list<OspfTypes::RouterID> routers;
+
+    // Yipee we just became the DR.
+    if (yes) {
+	get_attached_routers(routers);
+	if (routers.empty())
+	    return;
+	get_area_router()->generate_network_lsa(get_peerid(), routers);
+    } else {
+	get_area_router()->withdraw_network_lsa(get_peerid());
+    }
+}
+
+template <typename A>
+void
+Peer<A>::adjacency_change(bool up)
 {
     XLOG_ASSERT(do_dr_or_bdr());
-    XLOG_WARNING("TBD - This is the DR modify the Network-LSA");
+    // XLOG_ASSERT(is_DR()); Enable this when TODO 24 is done.
+
+    list<OspfTypes::RouterID> routers;
+
+    if (up) {
+	get_attached_routers(routers);
+	if (1 == routers.size()) {
+	    get_area_router()->generate_network_lsa(get_peerid(), routers);
+	} else {
+	    get_area_router()->update_network_lsa(get_peerid(), routers);
+	}
+    } else {
+	if (routers.empty()) {
+	    get_area_router()->withdraw_network_lsa(get_peerid());
+	} else {
+	    get_area_router()->update_network_lsa(get_peerid(), routers);
+	}
+    }
+}
+
+template <typename A>
+void
+Peer<A>::get_attached_routers(list<OspfTypes::RouterID>& routers)
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if (Neighbour<A>::Full == (*n)->get_state())
+	    routers.push_back((*n)->get_candidate_id());
 }
 
 template <typename A>
@@ -1866,7 +1910,16 @@ template <typename A>
 void
 Peer<A>::change_state(InterfaceState state)
 {
+    InterfaceState previous_state = get_state();
     set_state(state);
+
+    if (previous_state == state)
+	return;
+
+    if (Peer<A>::DR == state)
+	designated_router_changed(true);
+    if (Peer<A>::DR == previous_state)
+	designated_router_changed(false);
 }
 
 template <typename A>
