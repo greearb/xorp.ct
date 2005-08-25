@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.124 2005/08/25 00:12:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.125 2005/08/25 00:56:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1742,6 +1742,15 @@ void
 Peer<A>::designated_router_changed(bool yes)
 {
     list<OspfTypes::RouterID> routers;
+    uint32_t network_mask = 0;
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	network_mask = get_network_mask();
+	break;
+    case OspfTypes::V3:
+	break;
+    }
 
     // Yipee we just became the DR.
     if (yes) {
@@ -1749,7 +1758,7 @@ Peer<A>::designated_router_changed(bool yes)
 	if (routers.empty())
 	    return;
 	get_area_router()->generate_network_lsa(get_peerid(),
-						routers, get_network_mask());
+						routers, network_mask);
     } else {
 	get_area_router()->withdraw_network_lsa(get_peerid());
     }
@@ -1763,22 +1772,31 @@ Peer<A>::adjacency_change(bool up)
     // XLOG_ASSERT(is_DR()); Enable this when TODO 24 is done.
 
     list<OspfTypes::RouterID> routers;
+    uint32_t network_mask = 0;
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	network_mask = get_network_mask();
+	break;
+    case OspfTypes::V3:
+	break;
+    }
 
     if (up) {
 	get_attached_routers(routers);
 	if (1 == routers.size()) {
 	    get_area_router()->generate_network_lsa(get_peerid(), routers,
-						    get_network_mask());
+						    network_mask);
 	} else {
 	    get_area_router()->update_network_lsa(get_peerid(), routers,
-						  get_network_mask());
+						  network_mask);
 	}
     } else {
 	if (routers.empty()) {
 	    get_area_router()->withdraw_network_lsa(get_peerid());
 	} else {
 	    get_area_router()->update_network_lsa(get_peerid(), routers,
-						  get_network_mask());
+						  network_mask);
 	}
     }
 }
