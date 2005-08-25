@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.37 2005/08/16 16:51:42 zec Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.38 2005/08/25 02:26:41 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -501,7 +501,9 @@ rtrmgr will then kill the process.
 that must be configured in the user configuration file or that must
 have a default value. This command can appear multiple times anywhere in the
 template tree. If it appears multiple times within the same template node,
-then all listed nodes are mandatory.
+then all listed nodes are mandatory. However, note that it cannot be used
+to specify a multi-value node such as
+{\tt $(interfaces.interface.@.vif.@.address.@)}.
 
 \subsubsection{The {\tt \%create} Command.}
 {\tt \%create} is used to create a new instance of an interior node in
