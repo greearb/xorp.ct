@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.40 2005/06/03 19:02:33 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.42 2005/08/18 15:35:30 bms Exp $"
 
 
 //
@@ -711,7 +711,7 @@ const char *
 Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 {
 
-    (void)message_type;
+    UNUSED(message_type);
 
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
