@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.82 2005/07/28 23:18:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.83 2005/08/19 20:04:19 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -535,8 +535,8 @@ ConfigTreeNode::check_config_tree(string& result) const
     //
     // An early check that the child nodes are not deprecated.
     // Note: we need to check the child nodes before the check for
-    // mandatory children so we will print a better error message
-    // if, say, a mandatory child node has been renamed and the old
+    // mandatory configuration nodes so we will print a better error
+    // message if, say, a mandatory node has been renamed and the old
     // one has been deprecated.
     //
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
@@ -552,27 +552,20 @@ ConfigTreeNode::check_config_tree(string& result) const
     }
 
     //
-    // Check that all mandatory child nodes are configured in place
+    // Check that all mandatory configuration nodes are configured in place
     //
     if ((! deleted()) && (_template_tree_node != NULL)) {
 	list<string>::const_iterator li;
-	for (li = _template_tree_node->mandatory_children().begin();
-	     li != _template_tree_node->mandatory_children().end();
+	for (li = _template_tree_node->mandatory_config_nodes().begin();
+	     li != _template_tree_node->mandatory_config_nodes().end();
 	     ++li) {
-	    const string& mandatory_child = *li;
-	    bool found = false;
-	    for (iter = _children.begin(); iter != _children.end(); ++iter) {
-		const ConfigTreeNode* ctn = *iter;
-		if (ctn->deleted())
-		    continue;
-		if (ctn->segname() == mandatory_child) {
-		    found = true;
-		    break;
-		}
-	    }
-	    if (! found) {
-		result = c_format("Node \"%s\" has no configured mandatory child node \"%s\"\n",
-				  _path.c_str(), mandatory_child.c_str());
+	    const string& mandatory_config_node = *li;
+	    string value;
+	    if (expand_variable(mandatory_config_node, value) != true) {
+		result = c_format("Missing mandatory configuration node "
+				  "\"%s\" required by node \"%s\"\n",
+				  mandatory_config_node.c_str(),
+				  _path.c_str());
 		return false;
 	    }
 	}
@@ -1030,19 +1023,21 @@ ConfigTreeNode::subtree_str() const
 }
 
 ConfigTreeNode* 
-ConfigTreeNode::find_node(list<string>& path)
+ConfigTreeNode::find_node(const list<string>& path)
 {
+    list<string> path_copy = path;
 
     // Are we looking for the root node?
-    if (path.empty())
+    if (path_copy.empty())
 	return this;
 
     if (_template_tree_node != NULL) {
-	if (path.front() == _segname) {
-	    if (path.size() == 1) {
+	// XXX: not a root node
+	if (path_copy.front() == _segname) {
+	    if (path_copy.size() == 1) {
 		return this;
 	    } else {
-		path.pop_front();
+		path_copy.pop_front();
 	    }
 	} else {
 	    // We must have screwed up
@@ -1052,8 +1047,8 @@ ConfigTreeNode::find_node(list<string>& path)
 
     list<ConfigTreeNode *>::const_iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	if ((*iter)->segname() == path.front()) {
-	    return ((*iter)->find_node(path));
+	if ((*iter)->segname() == path_copy.front()) {
+	    return ((*iter)->find_node(path_copy));
 	}
     }
 

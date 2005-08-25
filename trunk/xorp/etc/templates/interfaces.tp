@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.16 2005/03/10 04:10:42 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.17 2005/08/23 19:03:26 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -14,6 +14,9 @@ interfaces {
 	vif @: txt {
 	    disable:	toggle = false;
 	    enabled:	bool;			/* %deprecated */
+
+	    foo @: ipv4 {
+	    }
 
 	    address @: ipv4 {
 		prefix-length:		u32;
@@ -49,7 +52,7 @@ interfaces {
     %modinfo:	start_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/start_transaction->tid:u32=$(interfaces.TID)";
     %modinfo:	end_commit	xrl "$(interfaces.targetname)/ifmgr/0.1/commit_transaction?tid:u32=$(interfaces.TID)";
 
-    %mandatory:	targetname;
+    %mandatory:	$(@.targetname);
 
     targetname {
 	%help:	short "Set the target name";
@@ -127,7 +130,7 @@ interfaces {
 
 	    address @: ipv4 {
 		%help:		short "Configure an IPv4 address";
-		%mandatory:	prefix-length;
+		%mandatory:	$(@.prefix-length);
 
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(@)";
@@ -183,7 +186,7 @@ interfaces {
 
 	    address @: ipv6 {
 		%help:		short "Configure an IPv6 address";
-		%mandatory:	prefix-length;
+		%mandatory:	$(@.prefix-length);
 
 		%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/create_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";
 		%delete:	xrl "$(interfaces.targetname)/ifmgr/0.1/delete_address6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(@)";

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.40 2005/07/26 05:20:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.41 2005/08/03 13:12:03 zec Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -446,14 +446,7 @@ ConfigTree::show_unannotated_tree(bool numbered) const
 ConfigTreeNode*
 ConfigTree::find_node(const list<string>& path)
 {
-    // Copy the path so we can modify it while searching...
-    list<string> path_copy;
-    list<string>::const_iterator iter;
-
-    for (iter = path.begin(); iter != path.end(); ++iter) {
-	path_copy.push_back(*iter);
-    }
-    return root_node().find_node(path_copy);
+    return root_node().find_node(path);
 }
 
 ConfigTreeNode*

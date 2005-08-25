@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.13 2005/04/14 09:33:38 atanu Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.14 2005/04/15 00:18:21 pavlin Exp $ */
 
 protocols {
     snmp {
@@ -20,7 +20,7 @@ protocols {
 	%modinfo:	status_method	xrl "$(snmp.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl "$(snmp.targetname)/common/0.1/shutdown";
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	targetname {
 	    %help:	short "Set the target name";

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.34 2005/08/02 20:52:15 zec Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.35 2005/08/23 00:57:06 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -112,7 +112,7 @@ public:
     bool expand_expression(const string& expression, string& value) const;
     const TemplateTreeNode* find_varname_node(const string& varname) const;
 
-    const list<string>& mandatory_children() const { return _mandatory_children; }
+    const list<string>& mandatory_config_nodes() const { return _mandatory_config_nodes; }
     const string& help() const {
 	//if the node is a tag, the help is held on the child.
 	if (is_tag()) 
@@ -181,7 +181,7 @@ private:
     string _help;
     string _help_long;
 
-    list<string>	_mandatory_children;
+    list<string>	_mandatory_config_nodes;
 
     int _child_number;
 

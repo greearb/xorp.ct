@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.21 2005/07/05 21:37:27 zec Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.22 2005/07/22 02:09:58 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -69,7 +69,7 @@ protocols {
 	%modinfo:	shutdown_method xrl	"$(ripng.targetname)/common/0.1/shutdown";
 	%help:		short "Configure RIPng intra-domain routing." ;
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	targetname {
 	    %help:	short "Set the target name";

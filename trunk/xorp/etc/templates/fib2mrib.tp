@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.6 2004/06/07 18:16:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.7 2005/03/09 22:50:39 pavlin Exp $ */
 
 protocols {
     fib2mrib {
@@ -18,7 +18,7 @@ protocols {
 	%modinfo:	status_method	xrl "$(fib2mrib.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method	xrl "$(fib2mrib.targetname)/common/0.1/shutdown";
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	%activate:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
 

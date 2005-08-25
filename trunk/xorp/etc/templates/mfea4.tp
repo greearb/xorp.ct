@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea4.tp,v 1.9 2005/03/09 22:50:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea4.tp,v 1.10 2005/03/20 00:07:29 pavlin Exp $ */
 
 plumbing {
     mfea4 {
@@ -35,7 +35,7 @@ plumbing {
 	%modinfo:	startup_method	xrl "$(mfea4.targetname)/mfea/0.1/start_mfea";
 	%modinfo:	shutdown_method	xrl "$(mfea4.targetname)/common/0.1/shutdown";
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 /* TODO: remove this? */
 /*

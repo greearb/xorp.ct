@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.21 2005/07/09 00:32:43 abittau Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.22 2005/07/22 02:06:50 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -73,7 +73,7 @@ protocols {
 	%modinfo:	shutdown_method xrl	"$(rip.targetname)/common/0.1/shutdown" ;
 	%help:		short "Configure RIP intra-domain routing." ;
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	targetname {
 	    %help:	short "Set the target name";

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.53 2005/08/03 13:52:34 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.54 2005/08/12 12:19:40 abittau Exp $ */
 
 protocols {
     bgp {
@@ -116,9 +116,9 @@ protocols {
 	%modinfo: status_method xrl "$(bgp.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo: shutdown_method xrl "$(bgp.targetname)/common/0.1/shutdown";
 
-	%mandatory: bgp-id;
-	%mandatory: local-as;
-	%mandatory: targetname;
+	%mandatory: $(@.bgp-id);
+	%mandatory: $(@.local-as);
+	%mandatory: $(@.targetname);
 
 	targetname {
 	    %help: short "Set the target name";
@@ -137,11 +137,11 @@ protocols {
 	}
 
 	peer @ {
-	    %mandatory: as;
-	    %mandatory: next-hop;
-	    %mandatory: local-port;
-	    %mandatory: peer-port;
-	    %mandatory: local-ip;
+	    %mandatory: $(@.as);
+	    %mandatory: $(@.next-hop);
+	    %mandatory: $(@.local-port);
+	    %mandatory: $(@.peer-port);
+	    %mandatory: $(@.local-ip);
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
@@ -210,7 +210,7 @@ protocols {
 	}
 
 	network4 @: ipv4net {
-	    %mandatory: next-hop;
+	    %mandatory: $(@.next-hop);
 
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route4?nlri:ipv4net=$(@)&next_hop:ipv4=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route4?nlri:ipv4net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
@@ -229,7 +229,7 @@ protocols {
 	}
 
 	network6 @: ipv6net {
-	    %mandatory: next-hop;
+	    %mandatory: $(@.next-hop);
 
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/originate_route6?nlri:ipv6net=$(@)&next_hop:ipv6=$(@.next-hop)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/withdraw_route6?nlri:ipv6net=$(@)&unicast:bool=$(@.unicast)&multicast:bool=$(@.multicast)";

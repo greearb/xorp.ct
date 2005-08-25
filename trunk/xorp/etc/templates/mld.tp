@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.12 2005/06/01 00:36:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.13 2005/06/01 09:33:59 pavlin Exp $ */
 
 protocols {
     mld {
@@ -41,7 +41,7 @@ protocols {
 	%modinfo:	startup_method	xrl "$(mld.targetname)/mld6igmp/0.1/start_mld6igmp";
 	%modinfo:	shutdown_method	xrl "$(mld.targetname)/common/0.1/shutdown";
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	targetname {
 	    %help:	short "Set the target name";

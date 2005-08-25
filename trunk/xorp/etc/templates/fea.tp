@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.30 2005/01/20 00:45:36 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.31 2005/03/09 22:50:39 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -48,7 +48,7 @@ fea {
     %modinfo:	path		"fea/xorp_fea";
     %modinfo:	default_targetname "fea";
 
-    %mandatory:	targetname;
+    %mandatory:	$(@.targetname);
 
     targetname {
 	%help:	short "Set the target name";

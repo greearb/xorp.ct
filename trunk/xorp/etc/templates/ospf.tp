@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospf.tp,v 1.15 2004/06/12 05:41:55 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospf.tp,v 1.16 2005/03/09 22:50:40 pavlin Exp $ */
 
 protocols {
     ospf {
@@ -50,7 +50,7 @@ protocols {
 	%modinfo:	status_method	xrl "$(ospf.targetname)/common/0.1/get_status->status:u32&reason:txt";
 	%modinfo:	shutdown_method xrl "$(ospf.targetname)/common/0.1/shutdown";
 
-	%mandatory:	targetname;
+	%mandatory:	$(@.targetname);
 
 	targetname {
 	    %help:	short "Set the target name";
