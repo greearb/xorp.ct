@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.85 2005/08/19 08:35:50 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.86 2005/08/25 00:12:49 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -586,6 +586,11 @@ class Peer {
      * Set the network mask OSPFv2 only.
      */
     bool set_network_mask(uint32_t network_mask);
+
+    /**
+     * Set the network mask OSPFv2 only.
+     */
+    uint32_t get_network_mask() const;
 
     /**
      * Set the interface ID OSPFv3 only.

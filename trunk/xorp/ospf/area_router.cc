@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.59 2005/08/16 23:24:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.60 2005/08/25 00:10:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,7 +187,8 @@ AreaRouter<A>::new_router_links(PeerID peerid,
 template <typename A>
 bool 
 AreaRouter<A>::generate_network_lsa(PeerID /*peerid*/,
-				    list<OspfTypes::RouterID>& /*routers*/)
+				    list<OspfTypes::RouterID>& /*routers*/,
+				    uint32_t /*network_mask*/)
 {
     return true;
 }
@@ -195,7 +196,8 @@ AreaRouter<A>::generate_network_lsa(PeerID /*peerid*/,
 template <typename A>
 bool 
 AreaRouter<A>::update_network_lsa(PeerID /*peerid*/,
-				  list<OspfTypes::RouterID>& /*routers*/)
+				  list<OspfTypes::RouterID>& /*routers*/,
+				  uint32_t /*network_mask*/)
 {
     return true;
 }

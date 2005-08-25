@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.44 2005/08/16 22:13:52 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.45 2005/08/25 00:10:05 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -59,13 +59,15 @@ class AreaRouter {
      * Generate a Network-LSA for this peer.
      */
     bool generate_network_lsa(PeerID peer,
-			      list<OspfTypes::RouterID>& attached_routers);
+			      list<OspfTypes::RouterID>& attached_routers,
+			      uint32_t network_mask);
 
     /**
      * Update the Network-LSA for this peer.
      */
     bool update_network_lsa(PeerID peer,
-			    list<OspfTypes::RouterID>& attached_routers);
+			    list<OspfTypes::RouterID>& attached_routers,
+			    uint32_t network_mask);
 
     /**
      * Withdraw the Network-LSA for this peer by prematurely aging.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.123 2005/08/19 08:35:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.124 2005/08/25 00:12:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1748,7 +1748,8 @@ Peer<A>::designated_router_changed(bool yes)
 	get_attached_routers(routers);
 	if (routers.empty())
 	    return;
-	get_area_router()->generate_network_lsa(get_peerid(), routers);
+	get_area_router()->generate_network_lsa(get_peerid(),
+						routers, get_network_mask());
     } else {
 	get_area_router()->withdraw_network_lsa(get_peerid());
     }
@@ -1766,15 +1767,18 @@ Peer<A>::adjacency_change(bool up)
     if (up) {
 	get_attached_routers(routers);
 	if (1 == routers.size()) {
-	    get_area_router()->generate_network_lsa(get_peerid(), routers);
+	    get_area_router()->generate_network_lsa(get_peerid(), routers,
+						    get_network_mask());
 	} else {
-	    get_area_router()->update_network_lsa(get_peerid(), routers);
+	    get_area_router()->update_network_lsa(get_peerid(), routers,
+						  get_network_mask());
 	}
     } else {
 	if (routers.empty()) {
 	    get_area_router()->withdraw_network_lsa(get_peerid());
 	} else {
-	    get_area_router()->update_network_lsa(get_peerid(), routers);
+	    get_area_router()->update_network_lsa(get_peerid(), routers,
+						  get_network_mask());
 	}
     }
 }
@@ -1830,6 +1834,12 @@ Peer<A>::set_network_mask(uint32_t network_mask)
     return true;
 }
 
+template <typename A>
+uint32_t
+Peer<A>::get_network_mask() const
+{
+    return _hello_packet.get_network_mask();
+}
 
 template <typename A>
 bool
