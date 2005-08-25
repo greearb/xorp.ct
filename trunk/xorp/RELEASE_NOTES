@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.81 2005/07/21 09:06:20 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.82 2005/07/24 17:12:24 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -91,7 +91,10 @@ Release 1.2 (2005/??/??)
     - 
 
   RTRMGR:
-    - 
+    - Generalization of the %mandatory keyword syntax so now it can
+      be used to specify any node or variable (multi-value nodes excluded)
+      in the configuration tree. Previously it could be used to specify
+      only configuration child nodes or variables.
 
   XORPSH:
     - Addition of support to run xorpsh in non-interactive mode.
