@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.22 2005/08/05 04:49:14 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -260,7 +260,7 @@ populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
     
     switch(version) {
     case OspfTypes::V2:
-	nlsa->get_network_masks().push_back(0xffff0000);
+	nlsa->set_network_mask(0xffff0000);
 	break;
     case OspfTypes::V3:
 	break;

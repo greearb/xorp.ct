@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.41 2005/08/13 08:05:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -713,7 +713,8 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	uint8_t *start;
 	switch(version) {
 	case OspfTypes::V2:
-	    start = &buf[header_length];
+	    lsa->set_network_mask(extract_32(&buf[header_length]));
+	    start = &buf[header_length + 4];
 	    break;
 	case OspfTypes::V3:
 	    lsa->set_options(extract_32(&buf[header_length]) & 0xffffff);
@@ -721,18 +722,8 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-	// Extract the list of network masks (OSPFv2 only) and
-	// attached routers.
 	uint8_t *end = &buf[len];
 	while(start < end) {
-	    switch(version) {
-	    case OspfTypes::V2:
-		lsa->get_network_masks().push_back(extract_32(start));
-		start += 4;
-		break;
-	    case OspfTypes::V3:
-		break;
-	    }
 	    if (!(start < end))
 		xorp_throw(BadPacket, c_format("Network-LSA too short"));
 	    lsa->get_attached_routers().push_back(extract_32(start));
@@ -756,9 +747,7 @@ NetworkLsa::encode()
 
     switch(version) {
     case OspfTypes::V2:
-	XLOG_ASSERT(get_attached_routers().size() == 
-		    get_network_masks().size());
- 	len = _header.length() + 8 * get_attached_routers().size();
+ 	len = _header.length() + 4 + 4 * get_attached_routers().size();
 	break;
     case OspfTypes::V3:
 	len = _header.length() + 4 + 4 * get_attached_routers().size();
@@ -777,11 +766,10 @@ NetworkLsa::encode()
     XLOG_ASSERT(len > header_length);
 
     size_t index;
-    list<uint32_t>::iterator j;
     switch(version) {
     case OspfTypes::V2:
-	j = get_network_masks().begin();
-	index = header_length;
+	embed_32(&ptr[header_length], get_network_mask());
+	index = header_length + 4;
 	break;
     case OspfTypes::V3:
 	// Careful Options occupy 3 bytes, four bytes are written out.
@@ -796,9 +784,8 @@ NetworkLsa::encode()
     for (; i != ars.end(); i++) {
 	switch(version) {
 	case OspfTypes::V2:
-	    embed_32(&ptr[index], *j++);
-	    embed_32(&ptr[index + 4], *i);
-	    index += 8;
+	    embed_32(&ptr[index], *i);
+	    index += 4;
 	    break;
 	case OspfTypes::V3:
 	    embed_32(&ptr[index], *i);
@@ -826,14 +813,11 @@ NetworkLsa::str() const
     output += "Network-LSA:\n";
     output += _header.str();
 
-    list<uint32_t>::iterator j;
-    list<uint32_t> nms = _network_masks;
     switch(version) {
     case OspfTypes::V2:
-	j = nms.begin();
+	output += c_format("\n\tNetwork Mask %#x", get_network_mask());
 	break;
     case OspfTypes::V3:
-	XLOG_ASSERT(nms.begin() == nms.end());
 	output += c_format("\n\tOptions %#x %s", get_options(),
 			   cstring(Options(get_version(), get_options())));
 	break;
@@ -844,9 +828,6 @@ NetworkLsa::str() const
     for (; i != ars.end(); i++) {
 	switch(version) {
 	case OspfTypes::V2:
- 	    output += c_format("\n\tNetwork Mask %#x", *j);
-	    if (j != nms.end())
-		j++;
 	    break;
 	case OspfTypes::V3:
 	    break;

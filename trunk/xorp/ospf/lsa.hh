@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/lsa.hh,v 1.52 2005/08/16 22:16:49 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -945,9 +945,14 @@ class NetworkLsa : public Lsa {
 	return _options;
     }
 
-    list<uint32_t>& get_network_masks() {
+    void set_network_mask(uint32_t network_mask) {
 	XLOG_ASSERT(OspfTypes::V2 == get_version());
-	return _network_masks;
+	_network_mask = network_mask;
+    }
+
+    uint32_t get_network_mask() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _network_mask;
     }
 
     list<OspfTypes::RouterID>& get_attached_routers() {
@@ -962,7 +967,7 @@ class NetworkLsa : public Lsa {
  private:
     uint32_t _options;			// OSPFv3 only.
 
-    list<uint32_t> _network_masks;	// OSPFv2 only.
+    uint32_t _network_mask;		// OSPFv2 only.
     list<OspfTypes::RouterID> _attached_routers;
 };
 
