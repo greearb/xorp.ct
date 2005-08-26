@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.14 2005/08/18 15:54:29 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.15 2005/08/26 17:13:44 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -30,6 +30,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/exceptions.hh"
+#include "libxorp/utils.hh"
 
 #include "libxipc/xrl_parser.hh"
 
