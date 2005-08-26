@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.52 2005/08/16 22:16:49 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.53 2005/08/25 00:39:21 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -62,6 +62,11 @@ class Lsa_header {
     static size_t length() { return 20; }
 
     /**
+     * Get the length of the LSA from the buffer provided
+     */
+    static uint16_t get_lsa_len_from_buffer(uint8_t *ptr);
+
+    /**
      * Decode a LSA header and return a LSA header inline not a pointer.
      */
     Lsa_header decode(uint8_t *ptr) const throw(BadPacket);
@@ -70,7 +75,7 @@ class Lsa_header {
      * Decode this lsa header in this context.
      */
     void decode_inline(uint8_t *ptr) throw(BadPacket);
-    
+
     /**
      * Copy a wire format representation to the pointer provided.
      * @return the number of bytes written.

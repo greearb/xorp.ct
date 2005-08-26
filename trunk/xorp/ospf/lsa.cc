@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.41 2005/08/13 08:05:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.42 2005/08/25 00:39:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -72,6 +72,36 @@ compute_checksum(uint8_t *buf, size_t len, size_t offset)
     return (x << 8) | (y);
 }
 
+/**
+ * Get the length of this LSA and make sure that its less than the
+ * provided buffer. Otherwise throw an exception. Don't modify the
+ * value if its greater than the buffer.
+ */
+inline
+size_t
+get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len)
+    throw(BadPacket)
+{
+    size_t tlen = Lsa_header::get_lsa_len_from_buffer(buf);
+    if (tlen > len) {
+	xorp_throw(BadPacket,
+		   c_format("%s header len %u larger than buffer %u",
+			    caller,
+			    XORP_UINT_CAST(tlen),
+			    XORP_UINT_CAST(len)));
+    } else {
+	len = tlen;
+    }
+
+    return len;
+}
+
+uint16_t
+Lsa_header::get_lsa_len_from_buffer(uint8_t *ptr)
+{
+    return extract_16(&ptr[18]);
+}
+
 void
 Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
 {
@@ -95,7 +125,7 @@ Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
     header.set_advertising_router(extract_32(&ptr[8]));
     header.set_ls_sequence_number(extract_32(&ptr[12]));
     header.set_ls_checksum(extract_16(&ptr[16]));
-    header.set_length(extract_16(&ptr[18]));
+    header.set_length(get_lsa_len_from_buffer(&ptr[0]));
 
 //     return header;
 }
@@ -517,6 +547,9 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
 
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Router-LSA", buf, len);
+
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
@@ -699,6 +732,9 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 		   c_format("Network-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Network-LSA", buf, len);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))

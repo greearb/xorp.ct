@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.22 2005/08/05 04:49:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.23 2005/08/25 00:39:21 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -236,17 +236,6 @@ populate_router_lsa(RouterLsa *rlsa, OspfTypes::Version version)
 
 inline
 void
-populate_link_state_update(LinkStateUpdatePacket *lsup,
-			   OspfTypes::Version version)
-{
-    populate_standard_header(lsup, version);
-    RouterLsa *rlsa = new RouterLsa(version);
-    populate_router_lsa(rlsa, version);
-    lsup->get_lsas().push_back(Lsa::LsaRef(rlsa));
-}
-
-inline
-void
 populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
 {
     populate_lsa_header(nlsa->get_header(), version);
@@ -266,9 +255,34 @@ populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
 	break;
     }
     nlsa->get_attached_routers().push_back(set_id("128.16.64.16"));
+    nlsa->get_attached_routers().push_back(set_id("128.16.64.32"));
 
     // This will set the checksum and the length.
     nlsa->encode();
+}
+
+inline
+void
+populate_link_state_update(LinkStateUpdatePacket *lsup,
+			   OspfTypes::Version version)
+{
+    populate_standard_header(lsup, version);
+
+    RouterLsa *rlsa = new RouterLsa(version);
+    populate_router_lsa(rlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(rlsa));
+
+    rlsa = new RouterLsa(version);
+    populate_router_lsa(rlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(rlsa));
+
+    NetworkLsa *nlsa = new NetworkLsa(version);
+    populate_network_lsa(nlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(nlsa));
+
+    nlsa = new NetworkLsa(version);
+    populate_network_lsa(nlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(nlsa));
 }
 
 inline
@@ -423,6 +437,7 @@ link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder lsa_decoder(version);
     lsa_decoder.register_decoder(new RouterLsa(version));
+    lsa_decoder.register_decoder(new NetworkLsa(version));
 
     LinkStateUpdatePacket *lsup1;
     lsup1 = new LinkStateUpdatePacket(version, lsa_decoder);
