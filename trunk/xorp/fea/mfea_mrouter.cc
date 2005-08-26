@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.31 2005/06/20 22:44:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.32 2005/08/18 15:45:49 bms Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -845,7 +845,7 @@ MfeaMrouter::start_pim()
 #endif // HAVE_IPV6
 
     default:
-	(void)v;
+	UNUSED(v);
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
@@ -908,7 +908,7 @@ MfeaMrouter::stop_pim()
 #endif // HAVE_IPV6
 
     default:
-	(void)v;
+	UNUSED(v);
 	XLOG_UNREACHABLE();
 	return (XORP_ERROR);
     }
