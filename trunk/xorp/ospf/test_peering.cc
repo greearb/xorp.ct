@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.37 2005/08/16 21:52:09 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -530,9 +530,9 @@ two_peers(TestInfo& info, OspfTypes::Version version)
 	    eventloop.run();
 
     bool timeout = false;
-    XorpTimer t = eventloop.set_flag_after(TimeVal(15 * hello_interval, 0),
+    XorpTimer t = eventloop.set_flag_after(TimeVal(20 * hello_interval, 0),
 					   &timeout);
-    const int expected = 10;
+    const int expected = 15;
     while (ospf_1.running() && ospf_2.running() && !timeout) {
 	eventloop.run();
 	if (expected <= io_1.packets())
