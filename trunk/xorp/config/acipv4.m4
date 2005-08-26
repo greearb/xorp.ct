@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.2 2005/08/09 12:44:58 bms Exp $
 dnl
 
 dnl
@@ -79,6 +79,31 @@ AC_CHECK_HEADER(netinet/in_var.h,
 AC_CHECK_HEADER(netinet/ip_mroute.h,
   [test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"],
   [test_netinet_ip_mroute_h=""])
+AC_CHECK_HEADER(linux/mroute.h,
+  [test_linux_mroute_h=["
+#include <linux/types.h>
+#define _LINUX_IN_H	/* XXX: a hack because of broken Linux include files */
+#include <linux/mroute.h>
+"]
+   test_linux_mroute_h_missing_defines=["
+/*
+ * XXX: Conditionally add missing definitions from the <linux/mroute.h>
+ * header file.
+ */
+#ifndef IGMPMSG_NOCACHE
+#define IGMPMSG_NOCACHE 1
+#endif
+#ifndef IGMPMSG_WRONGVIF
+#define IGMPMSG_WRONGVIF 2
+#endif
+#ifndef IGMPMSG_WHOLEPKT
+#define IGMPMSG_WHOLEPKT 3
+#endif
+"]
+  ],
+  [test_linux_mroute_h=""
+   test_linux_mroute_h_missing_defines=""
+])
 
 test_multicast_routing_header_files=["
 #include <sys/types.h>
@@ -90,6 +115,8 @@ ${test_net_route_h}
 #include <netinet/in.h>
 ${test_netinet_in_var_h}
 ${test_netinet_ip_mroute_h}
+${test_linux_mroute_h}
+${test_linux_mroute_h_missing_defines}
 "]
 
 AC_MSG_CHECKING(whether the system IPv4 stack supports IPv4 multicast routing)
@@ -115,19 +142,6 @@ dummy += IGMPMSG_WHOLEPKT;
            [Define to 1 if you have IPv4 multicast routing])
  ipv4_multicast_routing=yes],
  AC_MSG_RESULT(no))
-
-dnl
-dnl XXX: For Linux, we hardcode the define, as a compile of the XORP
-dnl multicast routing protocols on Linux platforms will use multicast
-dnl header files from the XORP tree itself for consistency across
-dnl various Linux platforms.
-dnl
-case "${host_os}" in
- linux* )
-   AC_DEFINE(HAVE_IPV4_MULTICAST_ROUTING, 1,
-             [Define to 1 if you have IPv4 multicast routing])
- ;;
-esac
 
 dnl ---------------------------------------------------------------------------
 dnl IPv4 raw socket
