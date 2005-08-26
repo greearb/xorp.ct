@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.42 2005/08/25 00:39:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.43 2005/08/26 03:31:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -213,6 +213,24 @@ add_age(uint16_t current, uint16_t delta)
 
     // The largest acceptable age for an LSA is MaxAge.
     return age < OspfTypes::MaxAge ? age : OspfTypes::MaxAge;
+}
+
+void
+Lsa::update_age_and_seqno(TimeVal& now)
+{
+    XLOG_ASSERT(get_self_originating());
+    XLOG_ASSERT(get_header().get_ls_age() != OspfTypes::MaxAge);
+
+    // If this LSA has been transmitted then its okay to bump the
+    // sequence number.
+    if (get_transmitted()) {
+	set_transmitted(false);
+	increment_sequence_number();
+	get_header().set_ls_age(0);
+	record_creation_time(now);
+    }
+
+    encode();
 }
 
 void
