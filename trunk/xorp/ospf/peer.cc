@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.126 2005/08/25 07:25:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.127 2005/08/27 00:51:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -860,7 +860,30 @@ Peer<A>::event_wait_timer()
 	       "Event(%s) Interface(%s) State(%s) ", event_name,
 	       get_if_name().c_str(), pp_interface_state(get_state()).c_str());
 
-    event_backup_seen();
+    switch(get_state()) {
+    case Down:
+    case Loopback:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(get_state()).c_str());
+	break;
+    case Waiting:
+	compute_designated_router_and_backup_designated_router();
+
+	XLOG_ASSERT(get_state() == DR_other || get_state() == Backup ||
+		    get_state() == DR);
+
+	break;
+    case Point2Point:
+    case DR_other:
+    case Backup:
+    case DR:
+	XLOG_WARNING("Unexpected state %s",
+		     pp_interface_state(get_state()).c_str());
+	break;
+    }
+
+    update_router_links();
+
     // Start sending hello packets.
     start_hello_timer();
 }
@@ -2266,7 +2289,8 @@ Neighbour<A>::retransmitter()
 	list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	while (i != _lsa_rxmt.end()) {
 	    if ((*i)->valid() && (*i)->exists_nack(_neighbourid)) {
-		(*i)->update_age(now);
+		if (!(*i)->maxage())
+		    (*i)->update_age(now);
 		size_t len;
 		(*i)->lsa(len);
 		if (lsup.get_standard_header_length() + len + lsas_len < 
@@ -2611,6 +2635,11 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	event_1_way_received();
 	return;
     }
+
+    // If this is the time that we have reached state TwoWay
+    if (Init == get_state())
+	first = true;
+
     event_2_way_received();
 
     // Don't attempt to compute the DR or BDR if this is not BROADCAST or NBMA.
@@ -2620,14 +2649,15 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     if (first || previous_router_priority != hello->get_router_priority())
 	_peer.schedule_event("NeighbourChange");
 
-    bool is_dr = get_candidate_id() == hello->get_designated_router();
+    bool is_dr = _peer.get_designated_router() == 
+	hello->get_designated_router();
 
     bool was_dr;
 
     if (first)
 	was_dr = false;
     else
-	was_dr = get_candidate_id() == previous_dr;
+	was_dr = _peer.get_designated_router() == previous_dr;
 
     if (is_dr && 
 	OspfTypes::RouterID("0.0.0.0") == 
@@ -2637,17 +2667,18 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     } else if(is_dr != was_dr)
 	_peer.schedule_event("NeighbourChange");
 
-    bool is_bdr = get_candidate_id() == hello->get_backup_designated_router();
+    bool is_bdr = _peer.get_backup_designated_router() ==
+	hello->get_backup_designated_router();
 	  
     bool was_bdr;
     if (first)
 	was_bdr = false;
     else
-	was_bdr = get_candidate_id() == previous_bdr;
+	was_bdr = _peer.get_backup_designated_router() == previous_bdr;
 
     if (is_bdr && _peer.get_state() == Peer<A>::Waiting) {
 	_peer.schedule_event("BackupSeen");
-    } else  if(is_bdr != was_bdr)
+    } else if(is_bdr != was_bdr)
 	_peer.schedule_event("NeighbourChange");
 
     if (OspfTypes::NBMA == get_linktype())
