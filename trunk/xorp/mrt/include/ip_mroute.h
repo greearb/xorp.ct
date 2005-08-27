@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.9 2005/03/25 02:53:58 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.10 2005/08/18 15:36:59 bms Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -66,14 +66,31 @@
 #endif
 
 /*
- * Linux (Older versions)
- *
- * We ship our own Linux <netinet/mroute.h> header to
- * workaround broken headers on certain Linux variants.
+ * Linux hacks because of broken Linux header files
  */
 #if defined(HOST_OS_LINUX)
-# include "mrt/include/linux/netinet/mroute.h"
-#endif
+# include <linux/types.h>
+# ifndef _LINUX_IN_H
+#  define _LINUX_IN_H		/*  XXX: a hack to exclude <linux/in.h> */
+#  include <linux/mroute.h>
+#  undef _LINUX_IN_H
+# else
+#  include <linux/mroute.h>
+# endif
+/*
+ * XXX: Conditionally add missing definitions from the <linux/mroute.h>
+ * header file.
+ */
+# ifndef IGMPMSG_NOCACHE
+#  define IGMPMSG_NOCACHE 1
+# endif
+# ifndef IGMPMSG_WRONGVIF
+#  define IGMPMSG_WRONGVIF 2
+# endif
+# ifndef IGMPMSG_WHOLEPKT
+#  define IGMPMSG_WHOLEPKT 3
+# endif
+#endif /* HOST_OS_LINUX */
 
 /*
  * FreeBSD 4.3
