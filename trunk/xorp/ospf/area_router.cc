@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.62 2005/08/27 00:51:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.63 2005/08/27 09:40:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -530,7 +530,8 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
     if (!lsar->get_self_originating()) {
 	TimeVal now;
 	_ospf.get_eventloop().current_time(now);
-	lsar->update_age(now);
+	if (!lsar->maxage())
+	    lsar->update_age(now);
     }
 #endif
     if (OspfTypes::MaxAge != lsar->get_header().get_ls_age())
