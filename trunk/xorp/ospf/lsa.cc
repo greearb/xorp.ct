@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.43 2005/08/26 03:31:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.44 2005/08/26 21:23:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,6 +268,12 @@ Lsa::set_maxage()
 void
 Lsa::set_ls_age(uint16_t age)
 {
+    XLOG_ASSERT(age <= OspfTypes::MaxAge);
+
+    if (OspfTypes::MaxAge == _header.get_ls_age())
+	XLOG_WARNING("Age already MaxAge(%d) being set to %d",
+		     OspfTypes::MaxAge, age);
+
     // Update the stored age value.
     _header.set_ls_age(age);
 
