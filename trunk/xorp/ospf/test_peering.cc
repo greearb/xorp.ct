@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.37 2005/08/16 21:52:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.38 2005/08/26 21:25:28 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -420,6 +420,8 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     return true;
 }
 
+enum Stagger { NOSTAGGER, STAGGER1, STAGGER2};
+
 string suppress;
 
 /**
@@ -428,7 +430,7 @@ string suppress;
  */
 template <typename A> 
 bool
-two_peers(TestInfo& info, OspfTypes::Version version)
+two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
 {
     EventLoop eventloop;
 
@@ -522,7 +524,9 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     emu.bind_interfaces("ospf1", interface_1, vif_1, io_1);
     emu.bind_interfaces("ospf2", interface_2, vif_2, io_2);
 
-    ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
+    if (STAGGER1 != stagger)
+	ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
+    if (STAGGER2 != stagger)
     ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
 
     if (forever)
@@ -532,11 +536,15 @@ two_peers(TestInfo& info, OspfTypes::Version version)
     bool timeout = false;
     XorpTimer t = eventloop.set_flag_after(TimeVal(20 * hello_interval, 0),
 					   &timeout);
-    const int expected = 15;
+    const int expected = 32;
     while (ospf_1.running() && ospf_2.running() && !timeout) {
 	eventloop.run();
-	if (expected <= io_1.packets())
+	if (expected <= io_1.packets() + io_2.packets())
 	    break;
+	if (STAGGER1 == stagger && 1 == io_2.packets())
+	    ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
+	if (STAGGER2 == stagger && 1 == io_1.packets())
+	    ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
     }
     if (timeout) {
 	DOUT(info) << io_1.packets() << " packets sent " << expected <<
@@ -576,8 +584,14 @@ main(int argc, char **argv)
 	{"single_peerV2", callback(single_peer<IPv4>, OspfTypes::V2)},
 	{"single_peerV3", callback(single_peer<IPv6>, OspfTypes::V3)},
 
-	{"two_peersV2", callback(two_peers<IPv4>, OspfTypes::V2)},
-	{"two_peersV3", callback(two_peers<IPv6>, OspfTypes::V3)},
+	{"two_peersV2", callback(two_peers<IPv4>, OspfTypes::V2, NOSTAGGER)},
+	{"two_peersV3", callback(two_peers<IPv6>, OspfTypes::V3, NOSTAGGER)},
+
+	{"two_peersV2s1", callback(two_peers<IPv4>, OspfTypes::V2, STAGGER1)},
+	{"two_peersV3s1", callback(two_peers<IPv6>, OspfTypes::V3, STAGGER1)},
+
+	{"two_peersV2s2", callback(two_peers<IPv4>, OspfTypes::V2, STAGGER2)},
+	{"two_peersV3s2", callback(two_peers<IPv6>, OspfTypes::V3, STAGGER2)},
     };
 
     try {
