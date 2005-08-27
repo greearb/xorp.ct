@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.61 2005/08/25 00:56:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.62 2005/08/27 00:51:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -940,7 +940,8 @@ AreaRouter<A>::publish(const PeerID peerid, const OspfTypes::NeighbourID nid,
 	if (OspfTypes::MaxSequenceNumber == lsar->get_ls_sequence_number())
 	    XLOG_FATAL("TBD: Flush this LSA and generate a new LSA");
     } else {
-	lsar->update_age(now);
+	if (!lsar->maxage())
+	    lsar->update_age(now);
     }
 
     typename PeerMap::const_iterator i;
