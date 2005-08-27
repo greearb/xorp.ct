@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.127 2005/08/27 00:51:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.128 2005/08/27 22:17:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1051,6 +1051,7 @@ Peer<A>::process_scheduled_events()
 	XorpCallback0<void>::RefPtr cb;
     } events[] = {
 	{"NeighbourChange", callback(this, &Peer<A>::event_neighbour_change)},
+ 	{"BackupSeen", callback(this, &Peer<A>::event_backup_seen)},
     };
     list<string>::const_iterator e;
     for(e = _scheduled_events.begin(); e != _scheduled_events.end(); e++) {
