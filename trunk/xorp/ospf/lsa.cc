@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.44 2005/08/26 21:23:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.45 2005/08/27 00:46:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -196,8 +196,10 @@ Lsa_header::str() const
     }
 
     output += c_format(" LS type %#x", get_ls_type());
-    output += c_format(" Link State ID %#x", get_link_state_id());
-    output += c_format(" Advertising Router %#x", get_advertising_router());
+    output += c_format(" Link State ID %s",
+		       pr_id(get_link_state_id()).c_str());
+    output += c_format(" Advertising Router %s",
+		       pr_id(get_advertising_router()).c_str());
     output += c_format(" LS sequence number %#x", get_ls_sequence_number());
     output += c_format(" LS checksum %#x", get_ls_checksum());
     output += c_format(" length %u", get_length());
@@ -271,8 +273,8 @@ Lsa::set_ls_age(uint16_t age)
     XLOG_ASSERT(age <= OspfTypes::MaxAge);
 
     if (OspfTypes::MaxAge == _header.get_ls_age())
-	XLOG_WARNING("Age already MaxAge(%d) being set to %d",
-		     OspfTypes::MaxAge, age);
+	XLOG_WARNING("Age already MaxAge(%d) being set to %d\n%s",
+		     OspfTypes::MaxAge, age, str().c_str());
 
     // Update the stored age value.
     _header.set_ls_age(age);
