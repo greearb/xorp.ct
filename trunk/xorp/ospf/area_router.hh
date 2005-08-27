@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.45 2005/08/25 00:10:05 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.46 2005/08/25 00:56:27 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -59,6 +59,7 @@ class AreaRouter {
      * Generate a Network-LSA for this peer.
      */
     bool generate_network_lsa(PeerID peer,
+			      OspfTypes::RouterID link_state_id,
 			      list<OspfTypes::RouterID>& attached_routers,
 			      uint32_t network_mask);
 
@@ -66,13 +67,19 @@ class AreaRouter {
      * Update the Network-LSA for this peer.
      */
     bool update_network_lsa(PeerID peer,
+			    OspfTypes::RouterID link_state_id,
 			    list<OspfTypes::RouterID>& attached_routers,
 			    uint32_t network_mask);
 
     /**
      * Withdraw the Network-LSA for this peer by prematurely aging.
      */
-    bool withdraw_network_lsa(PeerID peer);
+    bool withdraw_network_lsa(PeerID peer, OspfTypes::RouterID link_state_id);
+
+    /**
+     * Refresh the Network-LSAs.
+     */
+    void refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar);
 
     /**
      * Add a network to be announced.
@@ -262,6 +269,12 @@ class AreaRouter {
      * this area. If its an external LSA flood it to all areas.
      */
     void maxage_reached(Lsa::LsaRef lsar, size_t index);
+
+    /**
+     * Prematurely age self originated LSAs, remove them from the
+     * database flood with age set to MAXAGE.
+     */
+    void premature_aging(Lsa::LsaRef lsar, size_t index);
 
     /**
      * Add this LSA to the database.

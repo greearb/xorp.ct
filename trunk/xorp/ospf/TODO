@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.33 2005/08/13 08:13:30 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.34 2005/08/23 01:37:23 atanu Exp $
 #
 
 TODO
@@ -67,6 +67,16 @@ generate no links. Its not clear what the correct behaviour should be.
 3) All LSAs carried in Link State Update Packets now have
 InfTransDelay added to them. InfTransDelay is being added to self
 originated LSAs as well is this correct?
+
+4) The Network-LSAs are not explicitly stored in the area router. It
+*may* improve performance to store a reference to any Network-LSAs in
+the PeerState data structure.
+
+5) The set_maxage() method on an LSA sets the age to MaxAge. It does
+not however manipulate the origination time. Therefore any subsequent
+erroneous calls to update_age() may revive an LSA. It may be safer to
+hold a separate flag in an LSA to stop the age being updated once it
+has been set to MaxAge.
 
 Done
 ~~~~

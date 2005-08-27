@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.125 2005/08/25 00:56:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.126 2005/08/25 07:25:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1752,15 +1752,18 @@ Peer<A>::designated_router_changed(bool yes)
 	break;
     }
 
+    get_attached_routers(routers);
+    if (routers.empty())
+	return;
+
     // Yipee we just became the DR.
     if (yes) {
-	get_attached_routers(routers);
-	if (routers.empty())
-	    return;
 	get_area_router()->generate_network_lsa(get_peerid(),
+						get_candidate_id(),
 						routers, network_mask);
     } else {
-	get_area_router()->withdraw_network_lsa(get_peerid());
+	get_area_router()->withdraw_network_lsa(get_peerid(),
+						get_candidate_id());
     }
 }
 
@@ -1782,20 +1785,28 @@ Peer<A>::adjacency_change(bool up)
 	break;
     }
 
+    get_attached_routers(routers);
+
     if (up) {
-	get_attached_routers(routers);
 	if (1 == routers.size()) {
-	    get_area_router()->generate_network_lsa(get_peerid(), routers,
+	    get_area_router()->generate_network_lsa(get_peerid(),
+						    get_candidate_id(),
+						    routers,
 						    network_mask);
 	} else {
-	    get_area_router()->update_network_lsa(get_peerid(), routers,
+	    get_area_router()->update_network_lsa(get_peerid(),
+						  get_candidate_id(),
+						  routers,
 						  network_mask);
 	}
     } else {
 	if (routers.empty()) {
-	    get_area_router()->withdraw_network_lsa(get_peerid());
+	    get_area_router()->withdraw_network_lsa(get_peerid(),
+						    get_candidate_id());
 	} else {
-	    get_area_router()->update_network_lsa(get_peerid(), routers,
+	    get_area_router()->update_network_lsa(get_peerid(),
+						  get_candidate_id(),
+						  routers,
 						  network_mask);
 	}
     }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.60 2005/08/25 00:10:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.61 2005/08/25 00:56:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -186,27 +186,128 @@ AreaRouter<A>::new_router_links(PeerID peerid,
 
 template <typename A>
 bool 
-AreaRouter<A>::generate_network_lsa(PeerID /*peerid*/,
-				    list<OspfTypes::RouterID>& /*routers*/,
-				    uint32_t /*network_mask*/)
+AreaRouter<A>::generate_network_lsa(PeerID peerid,
+				    OspfTypes::RouterID link_state_id,
+				    list<OspfTypes::RouterID>& routers,
+				    uint32_t network_mask)
 {
+    NetworkLsa *nlsa = new NetworkLsa(_ospf.get_version());
+    nlsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    nlsa->record_creation_time(now);
+
+    Lsa_header& header = nlsa->get_header();
+    header.set_link_state_id(link_state_id);
+    header.set_advertising_router(_ospf.get_router_id());
+
+    add_lsa(Lsa::LsaRef(nlsa));
+
+    update_network_lsa(peerid, link_state_id, routers, network_mask);
+    
     return true;
 }
 
 template <typename A>
 bool 
-AreaRouter<A>::update_network_lsa(PeerID /*peerid*/,
-				  list<OspfTypes::RouterID>& /*routers*/,
-				  uint32_t /*network_mask*/)
+AreaRouter<A>::update_network_lsa(PeerID peerid,
+				  OspfTypes::RouterID link_state_id,
+				  list<OspfTypes::RouterID>& routers,
+				  uint32_t network_mask)
 {
+    OspfTypes::Version version = _ospf.get_version();
+    Ls_request lsr(version, NetworkLsa(version).get_ls_type(),
+		   link_state_id, _ospf.get_router_id());
+
+    size_t index;
+    if (!find_lsa(lsr, index)) {
+	XLOG_FATAL("Couldn't find Network_lsa %s in LSA database",
+		   cstring(lsr));
+	return false;
+    }
+
+    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(_db[index].get());
+    XLOG_ASSERT(nlsa);
+
+    list<OspfTypes::RouterID>& attached_routers = nlsa->get_attached_routers();
+    if (&routers != &attached_routers) {
+	attached_routers.clear();
+	attached_routers.push_back(link_state_id); // Add this router.
+	attached_routers.insert(attached_routers.begin(),
+				routers.begin(), routers.end());
+    }
+
+    switch (version) {
+    case OspfTypes::V2:
+	nlsa->set_network_mask(network_mask);
+	nlsa->get_header().set_options(get_options());
+	break;
+    case OspfTypes::V3:
+	nlsa->set_options(get_options());
+	break;
+    }
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    nlsa->update_age_and_seqno(now);
+
+    // Prime this Network-LSA to be refreshed.
+    nlsa->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
+			 callback(this, &AreaRouter<A>::refresh_network_lsa,
+				  peerid,
+				  _db[index]));
+
+    publish_all(_db[index]);
+
     return true;
 }
 
 template <typename A>
 bool 
-AreaRouter<A>::withdraw_network_lsa(PeerID /*peerid*/)
+AreaRouter<A>::withdraw_network_lsa(PeerID /*peerid*/,
+				    OspfTypes::RouterID link_state_id)
 {
+    OspfTypes::Version version = _ospf.get_version();
+    Ls_request lsr(version, NetworkLsa(version).get_ls_type(),
+		   link_state_id, _ospf.get_router_id());
+
+    size_t index;
+    if (!find_lsa(lsr, index)) {
+	XLOG_FATAL("Couldn't find Network_lsa %s in LSA database",
+		   cstring(lsr));
+	return false;
+    }
+
+    Lsa::LsaRef lsar = _db[index];
+    lsar->set_maxage();
+    premature_aging(lsar, index);
+
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar)
+{
+    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    XLOG_ASSERT(nlsa->valid());
+
+    uint32_t network_mask = 0;
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	network_mask = nlsa->get_network_mask();
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    update_network_lsa(peerid,
+		       nlsa->get_header().get_link_state_id(),
+		       nlsa->get_attached_routers(),
+		       network_mask);
 }
 
 inline
@@ -421,16 +522,19 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
 
     if (i != index)
-	XLOG_FATAL("Indexes don't match %u != %u %s", XORP_UINT_CAST(i), XORP_UINT_CAST(index),
+	XLOG_FATAL("Indexes don't match %u != %u %s",  XORP_UINT_CAST(i),
+		   XORP_UINT_CAST(index),
 		   cstring(*_db[index]));
 
 #ifdef PARANOIA
-    TimeVal now;
-    _ospf.get_eventloop().current_time(now);
-    lsar->update_age(now);
-    if (OspfTypes::MaxAge != lsar->get_header().get_ls_age())
-	XLOG_FATAL("LSA has not reached maxage %s", cstring(*lsar));
+    if (!lsar->get_self_originating()) {
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	lsar->update_age(now);
+    }
 #endif
+    if (OspfTypes::MaxAge != lsar->get_header().get_ls_age())
+	XLOG_FATAL("LSA is not MaxAge %s", cstring(*lsar));
     
     delete_lsa(lsar, index, false /* Don't invalidate */);
     publish_all(lsar);
@@ -441,6 +545,14 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
     // Clear the timer otherwise there is a circular dependency.
     // The LSA contains a XorpTimer that points back to the LSA.
     lsar->get_timer().clear();
+}
+
+template <typename A>
+void
+AreaRouter<A>::premature_aging(Lsa::LsaRef lsar, size_t i)
+{
+    XLOG_ASSERT(lsar->get_self_originating());
+    maxage_reached(lsar, i);
 }
 
 template <typename A>
@@ -791,21 +903,9 @@ AreaRouter<A>::update_router_links()
 	break;
     }
 
-    // A new router LSA should have been generated before MaxAge was hit.
-    XLOG_ASSERT(router_lsa->get_header().get_ls_age() != OspfTypes::MaxAge);
-
-    // If this LSA has been transmitted then its okay to bump the
-    // sequence number.
-    if (router_lsa->get_transmitted()) {
-	router_lsa->set_transmitted(false);
-	router_lsa->increment_sequence_number();
-	router_lsa->get_header().set_ls_age(0);
-	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
-	router_lsa->record_creation_time(now);
-    }
-
-    router_lsa->encode();
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    router_lsa->update_age_and_seqno(now);
 
     // Prime this Router-LSA to be refreshed.
     router_lsa->get_timer() = _ospf.get_eventloop().
@@ -1038,6 +1138,7 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
     debug_msg("%s\n", lsar->str().c_str());
 
     RouterLsa *rlsa;
+    NetworkLsa *nlsa;
     if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
 	if (rlsa->get_v_bit())
 	    _TransitCapability = true;
@@ -1077,6 +1178,8 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 		break;
 	    }
 	}
+    } else if (0 != (nlsa = dynamic_cast<NetworkLsa *>(lsar.get()))) {
+	XLOG_WARNING("TBD - Network-LSA");
     } else {
 	XLOG_UNFINISHED();
     }
