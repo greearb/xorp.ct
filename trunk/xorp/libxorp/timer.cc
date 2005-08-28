@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.24 2005/08/04 10:20:41 bms Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.25 2005/08/23 01:49:34 atanu Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -247,7 +247,8 @@ TimerList::system_gettimeofday(TimeVal* tv)
     TimerList* instance = TimerList::instance();
     if (!instance) {
 	SystemClock s;
-	TimerList(&s).system_gettimeofday(tv);
+	TimerList timer = TimerList(&s);
+	timer.system_gettimeofday(tv);
     } else {
 	instance->advance_time();
 	instance->current_time(*tv);
