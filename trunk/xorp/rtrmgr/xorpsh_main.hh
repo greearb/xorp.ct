@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.26 2005/07/22 10:47:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.27 2005/08/18 15:54:28 bms Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -37,7 +37,7 @@ class RouterCLI;
 class SlaveConfigTree;
 class TemplateTree;
 
-class XorpShell : XorpShellBase {
+class XorpShell : public XorpShellBase {
 public:
     XorpShell(const string& IPCname, 
 	      const string& xorp_root_dir,
