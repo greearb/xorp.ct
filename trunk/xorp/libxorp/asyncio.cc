@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.18 2005/08/18 15:28:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.19 2005/08/29 22:36:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -493,7 +493,7 @@ AsyncFileWriter::start()
     EventLoop& e = _eventloop;
     if (e.add_ioevent_cb(_fd, IOT_WRITE,
 		       callback(this, &AsyncFileWriter::write)) == false) {
-	XLOG_ERROR("AsyncFileWriter: Failed to add io event callback.");
+	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
     }
     _running = true;
     debug_msg("%p start\n", this);

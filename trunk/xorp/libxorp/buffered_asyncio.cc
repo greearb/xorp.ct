@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.4 2005/03/25 02:53:37 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.5 2005/08/18 15:28:39 bms Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -115,7 +115,7 @@ BufferedAsyncReader::start()
 				  callback(this,
 					   &BufferedAsyncReader::io_event)) ==
 	false) {
-	XLOG_ERROR("BufferedAsyncReader: failed to add io event callback.");
+	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
     }
 
     if (_config.head_bytes >= _config.trigger_bytes) {
@@ -148,7 +148,7 @@ BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
     assert(tail_bytes >= 1);
     assert(tail + tail_bytes == &_buffer[0] + _buffer.size());
 
-    ssize_t read_bytes;
+    ssize_t read_bytes = -1;
 
 #ifdef HOST_OS_WINDOWS
     if (fd.is_socket()) {
@@ -200,7 +200,7 @@ BufferedAsyncReader::announce_event(Event ev)
 	// We might get here because a read returns more data than a user
 	// wants to process.  They exit the callback with more data in their
 	// buffer than the threshold event so we schedule a timer to
-	// prod them again, but in the meantime an io event occurs
+	// prod them again, but in the meantime an I/O event occurs
 	// and pre-empts the timer callback.
 	// Another example could be when a previous callback modifies
 	// the threshold value.
