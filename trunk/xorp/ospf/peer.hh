@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.86 2005/08/25 00:12:49 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.87 2005/08/25 00:56:28 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -146,6 +146,16 @@ class PeerOut {
      * Send (push) any queued LSAs.
      */
     bool push_lsas();
+
+    /**
+     * Are any of the neighbours of this peer in the state exchange or
+     * loading.
+     *
+     * @param area
+     *
+     * @return true if any of the neighbours are in state exchange or loading.
+     */
+    bool neighbours_exchange_or_loading(OspfTypes::AreaID area);
 
     /**
      * Is this LSA on this neighbours link state request list.
@@ -383,6 +393,14 @@ class Peer {
      * Another way of phrasing this is, is the linktype BROADCAST or NBMA?
      */
     bool do_dr_or_bdr() const;
+
+    /**
+     * Are any of the neighbours of this peer in the state exchange or
+     * loading.
+     *
+     * @return true if any of the neighbours are in state exchange or loading.
+     */
+    bool neighbours_exchange_or_loading() const;
 
     /**
      * Is this LSA on this neighbours link state request list.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.46 2005/08/25 00:56:27 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.47 2005/08/27 00:51:08 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -393,7 +393,6 @@ class AreaRouter {
     void push_all_areas();
 
     /**
-     *
      * @return true if any of the neigbours are in state Exchange or Loading.
      */
     bool neighbours_exchange_or_loading() const;

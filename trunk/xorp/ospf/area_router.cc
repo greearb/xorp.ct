@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.63 2005/08/27 09:40:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.64 2005/08/27 10:05:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1007,7 +1007,14 @@ template <typename A>
 bool
 AreaRouter<A>::neighbours_exchange_or_loading() const
 {
-    XLOG_UNFINISHED();
+    typename PeerMap::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	if (_ospf.get_peer_manager().
+	    neighbours_exchange_or_loading(i->first, _area))
+	    return true;
+    }
+
+    return false;
 }
 
 template <typename A>

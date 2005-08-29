@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.128 2005/08/27 22:17:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.129 2005/08/27 23:40:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -213,6 +213,18 @@ PeerOut<A>::push_lsas()
     }
 
     return true;
+}
+
+template <typename A>
+bool 
+PeerOut<A>::neighbours_exchange_or_loading(OspfTypes::AreaID area)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->neighbours_exchange_or_loading();
 }
 
 template <typename A>
@@ -491,6 +503,21 @@ Peer<A>::do_dr_or_bdr() const
 	break;
     }
     XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
+bool 
+Peer<A>::neighbours_exchange_or_loading() const
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	typename Neighbour<A>::State state = (*n)->get_state();
+	if (Neighbour<A>::Exchange == state ||
+	    Neighbour<A>::Loading == state)
+	    return true;
+    }
 
     return false;
 }

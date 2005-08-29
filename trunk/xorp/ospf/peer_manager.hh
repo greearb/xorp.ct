@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/peer_manager.hh,v 1.29 2005/08/13 08:10:44 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -145,6 +145,18 @@ class PeerManager {
      * @return true if this a known interface address.
      */
     bool known_interface_address(const A address) const;
+
+    /**
+     * Are any of the neighbours of this peer in the state exchange or
+     * loading.
+     *
+     * @param peerid
+     * @param area
+     *
+     * @return true if any of the neighbours are in state exchange or loading.
+     */
+    bool neighbours_exchange_or_loading(const PeerID peerid,
+					OspfTypes::AreaID area);
 
     /**
      * Is this LSA on this neighbours link state request list.
