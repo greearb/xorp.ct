@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.19 2005/07/08 20:51:16 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.20 2005/07/22 10:47:35 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -34,6 +34,85 @@
 class CommandTree;
 class ConfTemplate;
 class RouterCLI;
+
+/**
+ * @short A class for storing information regarding the current phase of
+ * commit operations.
+ */
+class CommitStatus {
+public:
+    enum Phase {
+	COMMIT_PHASE_NONE = 0,
+	COMMIT_PHASE_1,
+	COMMIT_PHASE_2,
+	COMMIT_PHASE_3,
+	COMMIT_PHASE_4,
+	COMMIT_PHASE_5,
+	COMMIT_PHASE_DONE
+    };
+
+    /**
+     * Default constructor.
+     */
+    CommitStatus() {
+	reset();
+    }
+
+    /**
+     * Reset the commit status.
+     */
+    void reset() {
+	_success = true;
+	_error_msg.clear();
+	_commit_phase = COMMIT_PHASE_NONE;
+    }
+
+    /**
+     * Test if the current phase has been successful.
+     * 
+     * @return true if the current phase has been successful, otherwise false.
+     */
+    bool success() const { return _success; }
+
+    /**
+     * Get a string with the current error message.
+     * 
+     * @return a string with the current error message.
+     */
+    const string& error_msg() const { return _error_msg; }
+
+    /**
+     * Set the commit status as being in error.
+     * 
+     * @param error_msg the message that describes the error.
+     */
+    void set_error(const string& error_msg) {
+        _success = false;
+        _error_msg = error_msg;
+    }
+
+    /**
+     * Get the current commit phase.
+     * 
+     * @return the current commit phase.
+     */
+    CommitStatus::Phase commit_phase() const { return _commit_phase; }
+
+    /**
+     * Set the current commit phase.
+     * 
+     * @param commit_phase the new value of the current commit phase.
+     */
+    void set_commit_phase(CommitStatus::Phase commit_phase) {
+	_commit_phase = commit_phase;
+    }
+
+private:
+    bool	_success;	// True if current commit phase is successful
+    string	_error_msg;	// The error message (if error)
+    Phase	_commit_phase;	// The current commit phase
+};
+
 
 class SlaveConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
@@ -90,16 +169,22 @@ public:
 	return reinterpret_cast<SlaveConfigTreeNode*>(ConfigTree::find_node(path));
     }
 
+    inline const CommitStatus& commit_status() { return _commit_status; }
+
+    inline void reset_commit_status() { _commit_status.reset(); }
+
 private:
-    SlaveConfigTreeNode _root_node;
-    XorpClient&	_xclient;
+    SlaveConfigTreeNode	_root_node;
+    XorpClient&		_xclient;
 
     XorpShellBase::LOCK_CALLBACK _stage2_cb;
 
-    string	_commit_errmsg;
-    string	_save_errmsg;
-    uint32_t    _clientid;
-    bool	_verbose;	// Set to true if output is verbose
+    string		_commit_errmsg;
+    string		_save_errmsg;
+    uint32_t		_clientid;
+    bool		_verbose;	// Set to true if output is verbose
+
+    CommitStatus	_commit_status;
 };
 
 #endif // __RTRMGR_SLAVE_CONF_FILE_HH__

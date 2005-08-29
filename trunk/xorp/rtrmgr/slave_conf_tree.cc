@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.29 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.30 2005/07/22 10:47:35 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -109,6 +109,7 @@ SlaveConfigTree::commit_changes(string& result, XorpShellBase& xorpsh,
 				CallBack cb)
 {
     bool success = true;
+    _commit_status.reset();
 
     XLOG_TRACE(_verbose,
 	       "##########################################################\n");
@@ -140,13 +141,17 @@ SlaveConfigTree::commit_changes(string& result, XorpShellBase& xorpsh,
 #else
     // Check the tree: whether all mandatory children nodes are present, etc.
     if (_root_node.check_config_tree(result) == false) {
+	_commit_status.set_error(result);
 	return false;
     }
     UNUSED(result);
 #endif
 
+    _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_1);
+
     _stage2_cb = callback(this, &SlaveConfigTree::commit_phase2, cb, &xorpsh);
     xorpsh.lock_config(_stage2_cb);
+
     return success;
 }
 
@@ -155,8 +160,11 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 			       const uint32_t* /* lock_holder */,
 			       CallBack cb, XorpShellBase* xorpsh)
 {
+    _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_2);
+
     if (!locked || (e != XrlError::OKAY())) {
 	cb->dispatch(false, "Failed to get lock");
+        _commit_status.set_error("Failed to get lock");
 	return;
     }
 
@@ -171,7 +179,8 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 
     XLOG_TRACE(_verbose, "deletions = >>>\n%s<<<\n", deletions.c_str());
 
-    xorpsh->commit_changes(deltas, deletions,
+    xorpsh->commit_changes(deltas,
+			   deletions,
 			   callback(this, &SlaveConfigTree::commit_phase3, cb,
 				    xorpsh),
 			   cb);
@@ -182,6 +191,7 @@ SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
 			       XorpShellBase* xorpsh)
 {
     XLOG_TRACE(_verbose, "commit_phase3\n");
+    _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_3);
 
     //
     // We get here when the rtrmgr has received our request, but before
@@ -193,6 +203,7 @@ SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
 	_commit_errmsg = e.note();
 	xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
 				       false, cb, xorpsh));
+	_commit_status.set_error(_commit_errmsg);
     }
     xorpsh->set_mode(XorpShellBase::MODE_COMMITTING);
 }
@@ -202,6 +213,7 @@ SlaveConfigTree::commit_phase4(bool success, const string& errmsg, CallBack cb,
 			       XorpShellBase* xorpsh)
 {
     XLOG_TRACE(_verbose, "commit_phase4\n");
+    _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_4);
 
     //
     // We get here when we're called back by the rtrmgr with the
@@ -219,12 +231,15 @@ SlaveConfigTree::commit_phase5(const XrlError& /* e */,
 			       XorpShellBase* /* xorpsh */)
 {
     XLOG_TRACE(_verbose, "commit_phase5\n");
+    _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_5);
 
     if (success) {
 	slave_root_node().finalize_commit();
 	cb->dispatch(true, "");
+	_commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_DONE);
     } else {
 	cb->dispatch(false, _commit_errmsg);
+	_commit_status.set_error(_commit_errmsg);
     }
 }
 
