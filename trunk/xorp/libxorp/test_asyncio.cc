@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.7 2005/03/25 02:53:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.9 2005/08/18 15:28:40 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -118,7 +118,7 @@ run_test()
 	// then we can check for corruption
 	memset(msg, i, msg_bytes); 
 	bool was_started = afr.start();
-	(void)was_started;
+	UNUSED(was_started);
 	assert(was_started == false); // can't start no buffer
 	// Choose number of buffers to use
 	int n = 1 + (random() % MAX_BUFFERS);

@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.22 2005/03/25 02:53:27 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.23 2005/08/18 15:32:38 bms Exp $"
 
 #include <functional>
 
 #include "finder_module.h"
 
-#include "libxorp/debug.h"
 #include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 #include "libxorp/asyncio.hh"
@@ -338,7 +338,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
     assert(fd == _lsock);
     assert(type == IOT_ACCEPT);
 
-    (void)fd;
+    UNUSED(fd);
     XorpFd sock;
 
     sock = comm_sock_accept(_lsock);

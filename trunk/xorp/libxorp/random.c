@@ -14,11 +14,13 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.1 2005/08/01 13:37:40 bms Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.2 2005/08/01 15:07:32 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "libxorp/xorp.h"
 
 #include "random.h"
 
@@ -332,7 +334,7 @@ srandomdev()
 	done = 0;
 #ifdef HOST_OS_WINDOWS
 	/* XXX: We need to use CAPI to get hardware randomness. */
-	(void)fd;
+	UNUSED(fd);
 #else
 	fd = _open("/dev/random", O_RDONLY, 0);
 	if (fd >= 0) {
