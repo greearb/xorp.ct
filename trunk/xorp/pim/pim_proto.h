@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.15 2005/07/15 19:38:05 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.16 2005/08/18 15:38:48 bms Exp $
  */
 
 
@@ -36,7 +36,7 @@
 #ifdef HAVE_NETINET_IN_SYSTM_H
 #include <netinet/in_systm.h>
 #endif
-#ifdef HAVENETINET_IP_H
+#ifdef HAVE_NETINET_IP_H
 #include <netinet/ip.h>
 #endif
 #ifdef HAVE_NETINET_IP6_H
