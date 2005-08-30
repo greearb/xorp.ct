@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.9 2005/08/18 15:28:40 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.10 2005/08/29 22:36:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -176,7 +176,7 @@ main(int /* argc */, char *argv[])
     // Initialize and start xlog
     //
     xlog_init(argv[0], NULL);
-    xlog_set_verbose(XLOG_VERBOSE_MAX);		// Least verbose messages
+    xlog_set_verbose(XLOG_VERBOSE_LOW);		// Least verbose messages
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     
