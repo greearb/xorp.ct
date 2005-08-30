@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.88 2005/06/01 00:36:59 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.89 2005/08/18 15:38:49 bms Exp $"
 
 #include "pim_module.h"
 
@@ -1245,8 +1245,8 @@ XrlPimNode::start_protocol_kernel_vif(uint32_t vif_index)
     PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot start in the kernel vif with vif_index %d: "
-		   "no such vif", vif_index);
+	XLOG_ERROR("Cannot start in the kernel vif with vif_index %u: "
+		   "no such vif", XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -1262,8 +1262,8 @@ XrlPimNode::stop_protocol_kernel_vif(uint32_t vif_index)
     PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot stop in the kernel vif with vif_index %d: "
-		   "no such vif", vif_index);
+	XLOG_ERROR("Cannot stop in the kernel vif with vif_index %u: "
+		   "no such vif", XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -1302,10 +1302,10 @@ XrlPimNode::send_start_stop_protocol_kernel_vif()
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot %s protocol vif with vif_index %d with the MFEA: "
+	XLOG_ERROR("Cannot %s protocol vif with vif_index %u with the MFEA: "
 		   "no such vif",
 		   (is_start)? "start" : "stop",
-		   vif_index);
+		   XORP_UINT_CAST(vif_index));
 	pop_xrl_task();
 	retry_xrl_task();
 	return;
@@ -1466,8 +1466,9 @@ XrlPimNode::join_multicast_group(uint32_t vif_index,
     PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot join group %s on vif with vif_index %d: "
-		   "no such vif", cstring(multicast_group), vif_index);
+	XLOG_ERROR("Cannot join group %s on vif with vif_index %u: "
+		   "no such vif", cstring(multicast_group),
+		   XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -1485,8 +1486,9 @@ XrlPimNode::leave_multicast_group(uint32_t vif_index,
     PimVif *pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot leave group %s on vif with vif_index %d: "
-		   "no such vif", cstring(multicast_group), vif_index);
+	XLOG_ERROR("Cannot leave group %s on vif with vif_index %u: "
+		   "no such vif", cstring(multicast_group),
+		   XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -1527,11 +1529,11 @@ XrlPimNode::send_join_leave_multicast_group()
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot %s group %s on vif with vif_index %d: "
+	XLOG_ERROR("Cannot %s group %s on vif with vif_index %u: "
 		   "no such vif",
 		   (is_join)? "join" : "leave",
 		   cstring(multicast_group),
-		   vif_index);
+		   XORP_UINT_CAST(vif_index));
 	pop_xrl_task();
 	retry_xrl_task();
 	return;
@@ -1683,12 +1685,12 @@ XrlPimNode::mfea_client_send_join_leave_multicast_group_cb(
 	//
 	// If a transient error, then try again
 	//
-	XLOG_ERROR("Failed to %s group %s on vif with vif_index %d "
+	XLOG_ERROR("Failed to %s group %s on vif with vif_index %u "
 		   "with the MFEA: %s. "
 		   "Will try again.",
 		   (is_join)? "join" : "leave",
 		   cstring(multicast_group),
-		   vif_index,
+		   XORP_UINT_CAST(vif_index),
 		   xrl_error.str().c_str());
 	retry_xrl_task();
 	break;
@@ -1809,7 +1811,7 @@ XrlPimNode::send_add_delete_mfc()
 	//
 	// If an error, then try again
 	//
-	XLOG_ERROR("Failed to %s MFC entry for (%s,%s) with the MFEA. "
+	XLOG_ERROR("Failed to %s MFC entry for (%s, %s) with the MFEA. "
 		   "Will try again.",
 		   (is_add)? "add" : "delete",
 		   cstring(source_addr),
@@ -2089,7 +2091,7 @@ XrlPimNode::send_add_delete_dataflow_monitor()
 	//
 	// If an error, then try again
 	//
-	XLOG_ERROR("Failed to %s dataflow entry for (%s,%s) with the MFEA. "
+	XLOG_ERROR("Failed to %s dataflow entry for (%s, %s) with the MFEA. "
 		   "Will try again.",
 		   (is_delete_all)? "delete all" : (is_add)? "add" : "delete",
 		   cstring(entry->source_addr()),
@@ -2174,8 +2176,8 @@ XrlPimNode::add_protocol_mld6igmp(uint32_t vif_index)
     
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot add protocol with MLD6IGMP "
-		   "for vif with vif_index %d: "
-		   "no such vif", vif_index);
+		   "for vif with vif_index %u: "
+		   "no such vif", XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -2198,8 +2200,8 @@ XrlPimNode::delete_protocol_mld6igmp(uint32_t vif_index)
     
     if (pim_vif == NULL) {
 	XLOG_ERROR("Cannot delete protocol with MLD6IGMP "
-		   "for vif with vif_index %d: "
-		   "no such vif", vif_index);
+		   "for vif with vif_index %u: "
+		   "no such vif", XORP_UINT_CAST(vif_index));
 	return (XORP_ERROR);
     }
 
@@ -2232,10 +2234,10 @@ XrlPimNode::send_add_delete_protocol_mld6igmp()
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot %s vif with vif_index %d with the MLD6IGMP: "
+	XLOG_ERROR("Cannot %s vif with vif_index %u with the MLD6IGMP: "
 		   "no such vif",
 		   (is_add)? "add" : "delete",
-		   vif_index);
+		   XORP_UINT_CAST(vif_index));
 	_add_delete_protocol_mld6igmp_queue.pop_front();
 	goto start_timer_label;
     }
@@ -2512,9 +2514,9 @@ XrlPimNode::send_protocol_message()
 
     pim_vif = PimNode::vif_find_by_vif_index(vif_index);
     if (pim_vif == NULL) {
-	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
+	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %u: "
 		   "no such vif",
-		   vif_index);
+		   XORP_UINT_CAST(vif_index));
 	pop_xrl_task();
 	retry_xrl_task();
 	return;
@@ -3225,8 +3227,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	string error_msg = c_format("Invalid module ID = %u",
+				    XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3283,8 +3285,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	string error_msg = c_format("Invalid module ID = %u",
+				    XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3339,8 +3341,8 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	string error_msg = c_format("Invalid module ID = %u",
+				    XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3393,8 +3395,8 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	string error_msg = c_format("Invalid module ID = %u",
+				    XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4524,14 +4526,14 @@ XrlPimNode::pim_0_1_add_config_cand_bsr4(
     }
 
     if (bsr_priority > 0xff) {
-	error_msg = c_format("Invalid BSR priority = %d",
-			     XORP_INT_CAST(bsr_priority));
+	error_msg = c_format("Invalid BSR priority = %u",
+			     XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     XORP_INT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4571,14 +4573,14 @@ XrlPimNode::pim_0_1_add_config_cand_bsr6(
     }
 
     if (bsr_priority > 0xff) {
-	error_msg = c_format("Invalid BSR priority = %d",
-			     XORP_INT_CAST(bsr_priority));
+	error_msg = c_format("Invalid BSR priority = %u",
+			     XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     XORP_INT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4670,14 +4672,14 @@ XrlPimNode::pim_0_1_add_config_cand_rp4(
     }
 
     if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     XORP_INT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	error_msg = c_format("Invalid RP holdtime = %d",
-			     XORP_INT_CAST(rp_holdtime));
+	error_msg = c_format("Invalid RP holdtime = %u",
+			     XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4717,14 +4719,14 @@ XrlPimNode::pim_0_1_add_config_cand_rp6(
     }
 
     if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     XORP_INT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	error_msg = c_format("Invalid RP holdtime = %d",
-			     XORP_INT_CAST(rp_holdtime));
+	error_msg = c_format("Invalid RP holdtime = %u",
+			     XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4824,14 +4826,14 @@ XrlPimNode::pim_0_1_add_config_static_rp4(
     }
 
     if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     XORP_INT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     XORP_INT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -4867,14 +4869,14 @@ XrlPimNode::pim_0_1_add_config_static_rp6(
     }
 
     if (rp_priority > 0xff) {
-	error_msg = c_format("Invalid RP priority = %d",
-			     XORP_INT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	error_msg = c_format("Invalid hash mask length = %d",
-			     XORP_INT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5142,10 +5144,10 @@ XrlPimNode::pim_0_1_set_vif_hello_triggered_delay(
     string error_msg;
     
     if (hello_triggered_delay > 0xffff) {
-	error_msg = c_format("Invalid Hello triggered delay value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(hello_triggered_delay),
-			     0xffff);
+	error_msg = c_format("Invalid Hello triggered delay value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(hello_triggered_delay),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5199,10 +5201,10 @@ XrlPimNode::pim_0_1_set_vif_hello_period(
     string error_msg;
     
     if (hello_period > 0xffff) {
-	error_msg = c_format("Invalid Hello period value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(hello_period),
-			     0xffff);
+	error_msg = c_format("Invalid Hello period value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(hello_period),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5251,10 +5253,10 @@ XrlPimNode::pim_0_1_set_vif_hello_holdtime(
     string error_msg;
     
     if (hello_holdtime > 0xffff) {
-	error_msg = c_format("Invalid Hello holdtime value %d: "
-			     "max allowed is %d",
-			     hello_holdtime,
-			     0xffff);
+	error_msg = c_format("Invalid Hello holdtime value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(hello_holdtime),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5304,11 +5306,11 @@ XrlPimNode::pim_0_1_set_vif_dr_priority(
 {
     string error_msg;
     
-    if (dr_priority > 0xffffffff) {
-	error_msg = c_format("Invalid DR priority value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(dr_priority),
-			     0xffffffff);
+    if (dr_priority > 0xffffffffU) {
+	error_msg = c_format("Invalid DR priority value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(dr_priority),
+			     0xffffffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5357,10 +5359,10 @@ XrlPimNode::pim_0_1_set_vif_propagation_delay(
     string error_msg;
     
     if (propagation_delay > 0xffff) {
-	error_msg = c_format("Invalid Propagation delay value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(propagation_delay),
-			     0xffff);
+	error_msg = c_format("Invalid Propagation delay value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(propagation_delay),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5412,10 +5414,10 @@ XrlPimNode::pim_0_1_set_vif_override_interval(
     string error_msg;
     
     if (override_interval > 0xffff) {
-	error_msg = c_format("Invalid Override interval value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(override_interval),
-			     0xffff);
+	error_msg = c_format("Invalid Override interval value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(override_interval),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5569,10 +5571,10 @@ XrlPimNode::pim_0_1_set_vif_join_prune_period(
     string error_msg;
     
     if (join_prune_period > 0xffff) {
-	error_msg = c_format("Invalid Join/Prune period value %d: "
-			     "max allowed is %d",
-			     XORP_INT_CAST(join_prune_period),
-			     0xffff);
+	error_msg = c_format("Invalid Join/Prune period value %u: "
+			     "max allowed is %u",
+			     XORP_UINT_CAST(join_prune_period),
+			     0xffffU);
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5845,21 +5847,21 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     } while (false);
     
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %d",
-			     	    XORP_INT_CAST(group_mask_len));
+	string error_msg = c_format("Invalid group mask length = %u",
+			     	    XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // XXX: Dupe?
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %d",
-			     	    XORP_INT_CAST(group_mask_len));
+	string error_msg = c_format("Invalid group mask length = %u",
+			     	    XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (holdtime > 0xffff) {
-	string error_msg = c_format("Invalid holdtime = %d",
-			     	    XORP_INT_CAST(holdtime));
+	string error_msg = c_format("Invalid holdtime = %u",
+			     	    XORP_UINT_CAST(holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5948,14 +5950,14 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     } while (false);
     
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %d",
-				    XORP_INT_CAST(group_mask_len));
+	string error_msg = c_format("Invalid group mask length = %u",
+				    XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (holdtime > 0xffff) {
-	string error_msg = c_format("Invalid holdtime = %d",
-				    XORP_INT_CAST(holdtime));
+	string error_msg = c_format("Invalid holdtime = %u",
+				    XORP_UINT_CAST(holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6129,20 +6131,20 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
     }
 
     if (bsr_priority > 0xff) {
-	string error_msg = c_format("Invalid BSR priority = %d",
-				    XORP_INT_CAST(bsr_priority));
+	string error_msg = c_format("Invalid BSR priority = %u",
+				    XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	string error_msg = c_format("Invalid hash mask length = %d",
-				    XORP_INT_CAST(hash_mask_len));
+	string error_msg = c_format("Invalid hash mask length = %u",
+				    XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (fragment_tag > 0xffff) {
-	string error_msg = c_format("Invalid fragment tag = %d",
-				    XORP_INT_CAST(fragment_tag));
+	string error_msg = c_format("Invalid fragment tag = %u",
+				    XORP_UINT_CAST(fragment_tag));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6186,20 +6188,20 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
     }
 
     if (bsr_priority > 0xff) {
-	string error_msg = c_format("Invalid BSR priority = %d",
-				    XORP_INT_CAST(bsr_priority));
+	string error_msg = c_format("Invalid BSR priority = %u",
+				    XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	string error_msg = c_format("Invalid hash mask length = %d",
-				    XORP_INT_CAST(hash_mask_len));
+	string error_msg = c_format("Invalid hash mask length = %u",
+				    XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (fragment_tag > 0xffff) {
-	string error_msg = c_format("Invalid fragment tag = %d",
-				    XORP_INT_CAST(fragment_tag));
+	string error_msg = c_format("Invalid fragment tag = %u",
+				    XORP_UINT_CAST(fragment_tag));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -6242,8 +6244,8 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
     }
 
     if (expected_rp_count > 0xff) {
-	string error_msg = c_format("Invalid expected RP count = %d",
-				    XORP_INT_CAST(expected_rp_count));
+	string error_msg = c_format("Invalid expected RP count = %u",
+				    XORP_UINT_CAST(expected_rp_count));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6286,8 +6288,8 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
     }
 
     if (expected_rp_count > 0xff) {
-	string error_msg = c_format("Invalid expected RP count = %d",
-				    XORP_INT_CAST(expected_rp_count));
+	string error_msg = c_format("Invalid expected RP count = %u",
+				    XORP_UINT_CAST(expected_rp_count));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6331,14 +6333,14 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
     }
 
     if (rp_priority > 0xff) {
-	string error_msg = c_format("Invalid RP priority = %d",
-				    XORP_INT_CAST(rp_priority));
+	string error_msg = c_format("Invalid RP priority = %u",
+				    XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	string error_msg = c_format("Invalid RP holdtime = %d",
-				    XORP_INT_CAST(rp_holdtime));
+	string error_msg = c_format("Invalid RP holdtime = %u",
+				    XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6383,14 +6385,14 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
     }
 
     if (rp_priority > 0xff) {
-	string error_msg = c_format("Invalid RP priority = %d",
-				    XORP_INT_CAST(rp_priority));
+	string error_msg = c_format("Invalid RP priority = %u",
+				    XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	string error_msg = c_format("Invalid RP holdtime = %d",
-				    XORP_INT_CAST(rp_holdtime));
+	string error_msg = c_format("Invalid RP holdtime = %u",
+				    XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

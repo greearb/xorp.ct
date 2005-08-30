@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.23 2005/05/11 23:44:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.24 2005/08/18 15:38:49 bms Exp $"
 
 
 //
@@ -460,9 +460,9 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     
     if (ip4->ip_v != source_addr.ip_version()) {
 	XLOG_WARNING("Cannot encapsulate IP packet: "
-		     "inner IP version (%d) != expected IP version (%d)",
-		     XORP_INT_CAST(ip4->ip_v),
-		     XORP_INT_CAST(source_addr.ip_version()));
+		     "inner IP version (%u) != expected IP version (%u)",
+		     XORP_UINT_CAST(ip4->ip_v),
+		     XORP_UINT_CAST(source_addr.ip_version()));
 	return (XORP_ERROR);
     }
     
