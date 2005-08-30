@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.40 2005/04/30 21:36:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_rpf.cc,v 1.41 2005/08/18 15:38:47 bms Exp $"
 
 //
 // PIM Multicast Routing Entry RPF handling
@@ -495,7 +495,7 @@ PimMre::recompute_mrib_rp_wc()
 {
     Mrib *old_mrib_rp = mrib_rp();
     Mrib *new_mrib_rp;
-    uint16_t old_rpf_interface_rp, new_rpf_interface_rp;
+    uint32_t old_rpf_interface_rp, new_rpf_interface_rp;
     
     if (! is_wc())
 	return;
@@ -565,7 +565,7 @@ PimMre::recompute_mrib_s_sg()
 {
     Mrib *old_mrib_s = mrib_s();
     Mrib *new_mrib_s;
-    uint16_t old_rpf_interface_s, new_rpf_interface_s;
+    uint32_t old_rpf_interface_s, new_rpf_interface_s;
     
     if (! is_sg())
 	return;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.29 2005/06/24 23:37:47 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.30 2005/08/18 15:38:47 bms Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -184,7 +184,7 @@ PimMrt::receive_data(uint32_t iif_vif_index, const IPvX& src, const IPvX& dst)
     bool is_keepalive_timer_restarted = false;
     bool is_wrong_iif = true;
     bool is_assert_sent = false;
-    uint16_t directly_connected_rpf_interface_s = Vif::VIF_INDEX_INVALID;
+    uint32_t directly_connected_rpf_interface_s = Vif::VIF_INDEX_INVALID;
     
     if (iif_vif_index == Vif::VIF_INDEX_INVALID) {
 	return;		// Invalid vif

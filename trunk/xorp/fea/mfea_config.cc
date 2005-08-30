@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_config.cc,v 1.12 2005/05/16 19:05:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_config.cc,v 1.13 2005/08/18 15:45:49 bms Exp $"
 
 //
 // TODO: a temporary solution for various MFEA configuration
@@ -370,7 +370,7 @@ MfeaNode::set_config_all_vifs_done(string& error_msg)
     //
     // Remove vifs that don't exist anymore
     //
-    for (uint16_t i = 0; i < maxvifs(); i++) {
+    for (uint32_t i = 0; i < maxvifs(); i++) {
 	Vif* node_vif = vif_find_by_vif_index(i);
 	if (node_vif == NULL)
 	    continue;

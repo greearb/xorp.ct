@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.20 2005/05/27 20:37:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_task.cc,v 1.21 2005/08/18 15:38:48 bms Exp $"
 
 //
 // PIM Multicast Routing Table task-related implementation.
@@ -392,7 +392,7 @@ PimMrt::add_task_pim_nbr_gen_id_changed(uint32_t vif_index,
 }
 
 void
-PimMrt::add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
+PimMrt::add_task_assert_rpf_interface_wc(uint32_t old_rpf_interface_rp,
 					 const IPvX& group_addr)
 {
     PimMreTask *pim_mre_task;
@@ -410,7 +410,7 @@ PimMrt::add_task_assert_rpf_interface_wc(uint16_t old_rpf_interface_rp,
 }
 
 void
-PimMrt::add_task_assert_rpf_interface_sg(uint16_t old_rpf_interface_s,
+PimMrt::add_task_assert_rpf_interface_sg(uint32_t old_rpf_interface_s,
 					 const IPvX& source_addr,
 					 const IPvX& group_addr)
 {

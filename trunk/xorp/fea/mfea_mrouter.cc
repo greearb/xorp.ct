@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.33 2005/08/26 21:52:39 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.34 2005/08/30 01:02:47 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1147,7 +1147,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 #endif
     if (mfea_node().is_log_trace()) {
 	string res;
-	for (uint16_t i = 0; i < mfea_node().maxvifs(); i++) {
+	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
 	    if (oifs_ttl[i] > 0)
 		res += "O";
 	    else
