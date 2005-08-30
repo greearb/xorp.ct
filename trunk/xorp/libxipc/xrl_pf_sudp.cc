@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.42 2005/08/19 19:17:02 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.43 2005/08/30 02:36:21 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -249,7 +249,8 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 				      callback(&XrlPFSUDPSender::recv));
 	} else {
 	    xorp_throw(XrlPFConstructorError,
-		       c_format("Could not create master socket.\n"));
+		       c_format("Could not create master socket: %s.\n",
+				comm_get_last_error_str()));
 	}
     }
     instance_count++;
@@ -318,8 +319,7 @@ XrlPFSUDPSender::send(const Xrl& 			x,
 		      sizeof(_destination)
 #endif
 		) != msg_bytes) {
-	debug_msg("Write failed: %s\n",
-		  comm_get_last_error_str());
+	debug_msg("Write failed: %s\n", comm_get_last_error_str());
 	requests_pending.erase(p.first);
 
 	if (direct_call) {
@@ -396,8 +396,7 @@ XrlPFSUDPSender::recv(XorpFd fd, IoEventType type)
 				    0, NULL, NULL);
 
     if (read_bytes < 0) {
-	debug_msg("recvfrom failed: %s\n",
-		  comm_get_last_error_str());
+	debug_msg("recvfrom failed: %s\n", comm_get_last_error_str());
 	return;
     }
     buf[read_bytes] = '\0';
@@ -463,12 +462,15 @@ XrlPFSUDPListener::XrlPFSUDPListener(EventLoop& e, XrlDispatcher* xr)
     _sock = comm_bind_udp4(&myaddr, 0, COMM_SOCK_NONBLOCKING);
     if (!_sock.is_valid()) {
 	xorp_throw(XrlPFConstructorError,
-		   c_format("Could not allocate listening IP socket."));
+		   c_format("Could not allocate listening IP socket: %s.",
+			    comm_get_last_error_str()));
     }
 
     // XXX: We don't check return values here.
-    (void)comm_sock_set_sndbuf(_sock, SO_SND_BUF_SIZE_MAX, SO_SND_BUF_SIZE_MIN);
-    (void)comm_sock_set_rcvbuf(_sock, SO_RCV_BUF_SIZE_MAX, SO_RCV_BUF_SIZE_MIN);
+    (void)comm_sock_set_sndbuf(_sock, SO_SND_BUF_SIZE_MAX,
+			       SO_SND_BUF_SIZE_MIN);
+    (void)comm_sock_set_rcvbuf(_sock, SO_RCV_BUF_SIZE_MAX,
+			       SO_RCV_BUF_SIZE_MIN);
 
     string addr;
     uint16_t port;
