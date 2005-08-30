@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.2 2005/08/18 15:28:43 bms Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -150,7 +150,7 @@ typedef _sigset_t sigset_t;	/* XXX: Appease libtecla. */
 typedef int xfd_t;
 typedef int xsock_t;
 
-/* Use Windows-a-likes for checking return values from i/o syscalls. */
+/* Use Windows-a-likes for checking return values from I/O syscalls. */
 #define XORP_BAD_FD		((xfd_t) -1)
 #define XORP_BAD_SOCKET		XORP_BAD_FD
 

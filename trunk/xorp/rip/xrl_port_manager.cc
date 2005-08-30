@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.18 2005/02/12 08:09:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.19 2005/03/25 02:54:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -253,7 +253,7 @@ XrlPortManager<A>::updates_made()
     debug_msg("XrlPortManager<IPv%u>::updates_made notification\n",
 	      XORP_UINT_CAST(A::ip_version()));
 
-    // Scan ports and enable/disable underlying i/o handler
+    // Scan ports and enable/disable underlying I/O handler
     // according to fea state
     typename PortManagerBase<A>::PortList::iterator pi;
     for (pi = this->ports().begin(); pi != this->ports().end(); ++pi) {

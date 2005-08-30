@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.5 2005/08/18 15:28:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.6 2005/08/29 23:10:25 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -171,12 +171,12 @@ BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
     if (read_bytes > 0) {
 	_config.head_bytes += read_bytes;
 	if (_config.head_bytes >= _config.trigger_bytes) {
-	    debug_msg("YES notify - buffered i/o %u / %u\n",
+	    debug_msg("YES notify - buffered I/O %u / %u\n",
 		      XORP_UINT_CAST(_config.head_bytes),
 		      XORP_UINT_CAST(_config.trigger_bytes));
 	    announce_event(DATA);
 	} else {
-	    debug_msg("NO notify - buffered i/o %u / %u read %d\n",
+	    debug_msg("NO notify - buffered I/O %u / %u read %d\n",
 		      XORP_UINT_CAST(_config.head_bytes),
 		      XORP_UINT_CAST(_config.trigger_bytes),
 		      XORP_INT_CAST(read_bytes));

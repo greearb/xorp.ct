@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.24 2005/03/25 02:53:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.25 2005/08/18 15:28:40 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -137,7 +137,7 @@ SelectorList::Node::run_hooks(SelectorMask m, XorpFd fd)
      * the bits already matched with the variable already_matched.
      *
      * An alternate fix is to change the semantics of add_ioevent_cb so
-     * there is one callback for each i/o event.
+     * there is one callback for each I/O event.
      *
      * Yet another alternative is to have an object, let's call it a
      * Selector that is a handle state of a file descriptor: ie an fd, a
@@ -233,8 +233,9 @@ SelectorList::add_ioevent_cb(XorpFd		   fd,
     if (_selector_entries[fd].add_okay(mask, type, cb) == false) {
 	return false;
     }
-    if (no_selectors_with_fd) _descriptor_count++;
-#endif // HOST_OS_WINDOWS
+    if (no_selectors_with_fd)
+	_descriptor_count++;
+#endif // ! HOST_OS_WINDOWS
 
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i)) {
@@ -273,7 +274,7 @@ SelectorList::remove_ioevent_cb(XorpFd fd, IoEventType type)
 	assert(FD_ISSET(fd, &_fds[SEL_WR_IDX]) == 0);
 	assert(FD_ISSET(fd, &_fds[SEL_EX_IDX]) == 0);
 #ifndef HOST_OS_WINDOWS
-	_descriptor_count --;
+	_descriptor_count--;
 #endif
     }
 }
@@ -411,7 +412,7 @@ SelectorList::wait_and_dispatch(TimeVal* timeout)
 	assert(!FD_ISSET(i, &testfds[SEL_EX_IDX]));	// paranoia
     }
 
-#endif // HOST_OS_WINDOWS
+#endif // ! HOST_OS_WINDOWS
 
     return n;
 }
@@ -440,7 +441,7 @@ SelectorList::get_max_fd() const
 {
     return _maxfd;
 }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
 void
 SelectorList::callback_bad_descriptors()
@@ -459,14 +460,14 @@ SelectorList::callback_bad_descriptors()
 	    /* Force callbacks, should force read/writes that fail and
 	     * client should remove descriptor from list. */
 	    XLOG_ERROR("SelectorList found file descriptor %d no longer "
-	       "valid.", fd);
+		       "valid.", fd);
 	    _selector_entries[fd].run_hooks(SEL_ALL, fd);
 	    bc++;
 	}
     }
     /* Assert should only fail if OS checks stat struct before fd (??) */
     assert(bc != 0);
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 void

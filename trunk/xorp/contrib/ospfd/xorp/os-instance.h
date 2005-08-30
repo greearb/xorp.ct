@@ -23,12 +23,12 @@
  */
 
 /* The name here is a (slight misnomer) OSInstance is really the
- * monitor interface i/o controller.  Deriving from OspfSysCalls is
+ * monitor interface I/O controller.  Deriving from OspfSysCalls is
  * not in practice useful, could just as well have as has-a object in
  * the real platform specific class, ie LinuxOspfd, XorpOspfd.  
  *
  * We've tweaked this code from the Linux version to include the
- * Xorp Eventloop and use it's selectorlist to detect i/o readiness.
+ * Xorp Eventloop and use it's selectorlist to detect I/O readiness.
  */
 
 #include "ospf_module.h"
