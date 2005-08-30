@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.37 2005/08/30 22:41:22 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.38 2005/08/30 22:50:34 pavlin Exp $"
 
 
 //
@@ -338,11 +338,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    bsr_zone->const_bsr_timer().time_remaining(tv_left);
 	    bsr_zone_left_sec = tv_left.sec();
 	}
-	cli_print(c_format("%-15s %3d %-15s %3d %-15s %7d %9d\n",
+	cli_print(c_format("%-15s %3u %-15s %3u %-15s %7d %9d\n",
 			   cstring(bsr_zone->bsr_addr()),
-			   bsr_zone->bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->bsr_priority()),
 			   cstring(bsr_zone->my_bsr_addr()),
-			   bsr_zone->my_bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->my_bsr_priority()),
 			   zone_state_string.c_str(),
 			   bsr_zone_left_sec,
 			   scope_zone_left_sec));
@@ -401,11 +401,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    bsr_zone->const_bsr_timer().time_remaining(tv_left);
 	    bsr_zone_left_sec = tv_left.sec();
 	}
-	cli_print(c_format("%-15s %3d %-15s %3d %-15s %7d %9d\n",
+	cli_print(c_format("%-15s %3u %-15s %3u %-15s %7d %9d\n",
 			   cstring(bsr_zone->bsr_addr()),
-			   bsr_zone->bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->bsr_priority()),
 			   cstring(bsr_zone->my_bsr_addr()),
-			   bsr_zone->my_bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->my_bsr_priority()),
 			   zone_state_string.c_str(),
 			   bsr_zone_left_sec,
 			   scope_zone_left_sec));
@@ -452,11 +452,11 @@ PimNodeCli::cli_show_pim_bootstrap(const vector<string>& argv)
 	    return (XORP_ERROR);
 	    break;
 	}
-	cli_print(c_format("%-15s %3d %-15s %3d %-15s %7d %9d\n",
+	cli_print(c_format("%-15s %3u %-15s %3u %-15s %7d %9d\n",
 			   cstring(bsr_zone->bsr_addr()),
-			   bsr_zone->bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->bsr_priority()),
 			   cstring(bsr_zone->my_bsr_addr()),
-			   bsr_zone->my_bsr_priority(),
+			   XORP_UINT_CAST(bsr_zone->my_bsr_priority()),
 			   zone_state_string.c_str(),
 			   -1,
 			   -1));
@@ -533,9 +533,9 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
 		    left_sec = tv_left.sec();
 		}
-		cli_print(c_format("%-15s %3d %7d %-18s %-15s %16d\n",
+		cli_print(c_format("%-15s %3u %7d %-18s %-15s %16d\n",
 				   cstring(bsr_rp->rp_addr()),
-				   bsr_rp->rp_priority(),
+				   XORP_UINT_CAST(bsr_rp->rp_priority()),
 				   left_sec,
 				   cstring(bsr_group_prefix->group_prefix()),
 				   cstring(bsr_zone->bsr_addr()),
@@ -573,9 +573,9 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    bsr_rp->const_candidate_rp_expiry_timer().time_remaining(tv_left);
 		    left_sec = tv_left.sec();
 		}
-		cli_print(c_format("%-15s %3d %7d %-18s %-15s %16d\n",
+		cli_print(c_format("%-15s %3u %7d %-18s %-15s %16d\n",
 				   cstring(bsr_rp->rp_addr()),
-				   bsr_rp->rp_priority(),
+				   XORP_UINT_CAST(bsr_rp->rp_priority()),
 				   left_sec,
 				   cstring(bsr_group_prefix->group_prefix()),
 				   cstring(bsr_zone->bsr_addr()),
@@ -615,9 +615,9 @@ PimNodeCli::cli_show_pim_bootstrap_rps(const vector<string>& argv)
 		    left_sec = tv_left.sec();
 		}
 		
-		cli_print(c_format("%-15s %3d %7d %-18s %-15s %16d\n",
+		cli_print(c_format("%-15s %3u %7d %-18s %-15s %16d\n",
 				   cstring(bsr_rp->rp_addr()),
-				   bsr_rp->rp_priority(),
+				   XORP_UINT_CAST(bsr_rp->rp_priority()),
 				   -1,
 				   cstring(bsr_group_prefix->group_prefix()),
 				   cstring(bsr_zone->bsr_addr()),
@@ -1300,29 +1300,32 @@ PimNodeCli::cli_show_pim_neighbors(const vector<string>& argv)
 	    PimNbr *pim_nbr = *iter;
 	    
 	    string dr_priority_string;
-	    if (pim_nbr->is_dr_priority_present())
-		dr_priority_string = c_format("%d",
-XORP_INT_CAST(pim_nbr->dr_priority()));
-	    else
+	    if (pim_nbr->is_dr_priority_present()) {
+		dr_priority_string = c_format(
+		    "%u",
+		    XORP_UINT_CAST(pim_nbr->dr_priority()));
+	    } else {
 		dr_priority_string = "none";
+	    }
 	    
 	    string nbr_timeout_sec_string;
 	    if (pim_nbr->const_neighbor_liveness_timer().scheduled()) {
 		TimeVal tv_left;
 		pim_nbr->const_neighbor_liveness_timer().time_remaining(tv_left);
-		nbr_timeout_sec_string = c_format("%d",
-XORP_INT_CAST(tv_left.sec()));
+		nbr_timeout_sec_string = c_format(
+		    "%d",
+		    XORP_INT_CAST(tv_left.sec()));
 	    } else {
 		nbr_timeout_sec_string = "None";
 	    }
 	    
-	    cli_print(c_format("%-12s %10s %-15s %1d %-6s %8d %7s\n",
+	    cli_print(c_format("%-12s %10s %-15s %1d %-6s %8u %7s\n",
 			       pim_vif->name().c_str(),
 			       dr_priority_string.c_str(),
 			       cstring(pim_nbr->primary_addr()),
 			       pim_nbr->proto_version(),
 			       pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
-			       pim_nbr->hello_holdtime(),
+			       XORP_UINT_CAST(pim_nbr->hello_holdtime()),
 			       nbr_timeout_sec_string.c_str()));
 	    // Print the secondary addresses
 	    list<IPvX>::const_iterator list_iter;
@@ -1380,13 +1383,13 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	Vif *vif = pim_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
+	cli_print(c_format("%-18s %-15s %-7s %-8u %10u %6u\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
-			   mrib->next_hop_vif_index(),
-			   XORP_INT_CAST(mrib->metric_preference()),
-			   XORP_INT_CAST(mrib->metric())));
+			   XORP_UINT_CAST(mrib->next_hop_vif_index()),
+			   XORP_UINT_CAST(mrib->metric_preference()),
+			   XORP_UINT_CAST(mrib->metric())));
 	return (XORP_OK);
     }
     
@@ -1405,13 +1408,13 @@ PimNodeCli::cli_show_pim_mrib(const vector<string>& argv)
 	Vif *vif = pim_node().vif_find_by_vif_index(mrib->next_hop_vif_index());
 	if (vif != NULL)
 	    vif_name = vif->name();
-	cli_print(c_format("%-18s %-15s %-7s %-8d %10d %6d\n",
+	cli_print(c_format("%-18s %-15s %-7s %-8u %10u %6u\n",
 			   cstring(mrib->dest_prefix()),
 			   cstring(mrib->next_hop_router_addr()),
 			   vif_name.c_str(),
-			   mrib->next_hop_vif_index(),
-			   XORP_INT_CAST(mrib->metric_preference()),
-			   XORP_INT_CAST(mrib->metric())));
+			   XORP_UINT_CAST(mrib->next_hop_vif_index()),
+			   XORP_UINT_CAST(mrib->metric_preference()),
+			   XORP_UINT_CAST(mrib->metric())));
     }
     
     return (XORP_OK);
@@ -1518,10 +1521,10 @@ PimNodeCli::cli_show_pim_rps(const vector<string>& argv)
 	    break;
 	}
 	
-	cli_print(c_format("%-15s %-9s %3d %8d %7d %12u %-18s\n",
+	cli_print(c_format("%-15s %-9s %3u %8d %7d %12u %-18s\n",
 			   cstring(pim_rp->rp_addr()),
 			   rp_type.c_str(),
-			   pim_rp->rp_priority(),
+			   XORP_UINT_CAST(pim_rp->rp_priority()),
 			   holdtime,
 			   left_sec,
 			   XORP_UINT_CAST(pim_rp->pim_mre_wc_list().size()
