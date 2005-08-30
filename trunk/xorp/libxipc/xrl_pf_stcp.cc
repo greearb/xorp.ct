@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.43 2005/08/19 19:17:02 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.44 2005/08/30 02:36:20 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -584,14 +584,18 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
     }
 
     if (comm_sock_set_blocking(_sock, 0) != XORP_OK) {
-	int err = comm_get_last_error();
 	debug_msg("failed to go non-blocking.\n");
-	XLOG_WARNING("Failed to set fd non-blocking: %s\n",
-		     comm_get_error_str(err));
+	int err = comm_get_last_error();
+	comm_close(_sock);
+	_sock.clear();
+	xorp_throw(XrlPFConstructorError,
+		   c_format("Failed to set fd non-blocking: %s\n",
+			    comm_get_error_str(err)));
     }
 
     _reader = new BufferedAsyncReader(e, _sock, 4 * 65536,
-callback(this, &XrlPFSTCPSender::read_event));
+				      callback(this,
+					       &XrlPFSTCPSender::read_event));
 
     _reader->set_trigger_bytes(sizeof(STCPPacketHeader));
     _reader->start();
