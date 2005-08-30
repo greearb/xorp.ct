@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.29 2005/08/13 08:10:44 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.30 2005/08/29 23:48:15 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -170,6 +170,19 @@ class PeerManager {
 				    const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar);
     
+    /**
+     * Generate a BadLSReq event.
+     *
+     * @param peerid
+     * @param area
+     * @param nid
+     *
+     * @return true if it is.
+     */
+    bool event_bad_link_state_request(const PeerID peerid,
+				      OspfTypes::AreaID area,
+				      const OspfTypes::NeighbourID nid);
+
     /**
      * Are any of neighbours of this area a virtual link endpoint.
      *

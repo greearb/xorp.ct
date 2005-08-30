@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.129 2005/08/27 23:40:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.130 2005/08/29 23:48:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -239,6 +239,19 @@ PeerOut<A>::on_link_state_request_list(OspfTypes::AreaID area,
     }
 
     return _areas[area]->on_link_state_request_list(nid, lsar);
+}
+
+template <typename A>
+bool 
+PeerOut<A>::event_bad_link_state_request(OspfTypes::AreaID area,
+					 const OspfTypes::NeighbourID nid)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->event_bad_link_state_request(nid);
 }
 
 template <typename A>
@@ -531,6 +544,22 @@ Peer<A>::on_link_state_request_list(const OspfTypes::NeighbourID nid,
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	if ((*n)->get_neighbour_id() == nid)
 	    return (*n)->on_link_state_request_list(lsar);
+
+    XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
+bool 
+Peer<A>::event_bad_link_state_request(const OspfTypes::NeighbourID nid)
+{
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_neighbour_id() == nid) {
+	    (*n)->event_bad_link_state_request();
+	    return true;
+	}
 
     XLOG_UNREACHABLE();
 

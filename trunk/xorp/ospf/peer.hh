@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.87 2005/08/25 00:56:28 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.88 2005/08/29 23:48:15 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -167,6 +167,16 @@ class PeerOut {
 				    const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar);
     
+    /**
+     * Generate a BadLSReq event.
+     *
+     * @param area
+     * @param nid
+     *
+     */
+    bool event_bad_link_state_request(OspfTypes::AreaID area,
+				      const OspfTypes::NeighbourID nid);
+
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
      *
@@ -410,6 +420,14 @@ class Peer {
      */
     bool on_link_state_request_list(const OspfTypes::NeighbourID nid,
 				    Lsa::LsaRef lsar) const;
+
+    /**
+     * Generate a BadLSReq event.
+     *
+     * @param nid
+     *
+     */
+    bool event_bad_link_state_request(const OspfTypes::NeighbourID nid);
 
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
@@ -957,6 +975,7 @@ class Neighbour {
 
     void event_kill_neighbour();
     void event_adj_ok();
+    void event_bad_link_state_request();
 
     /**
      * Pretty print the neighbour state.
@@ -1106,7 +1125,6 @@ class Neighbour {
     void event_negotiation_done();
     void event_sequence_number_mismatch();
     void event_exchange_done();
-    void event_bad_link_state_request();
     void event_loading_done();
 
     /**

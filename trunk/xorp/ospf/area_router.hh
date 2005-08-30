@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.47 2005/08/27 00:51:08 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.48 2005/08/29 23:48:15 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -409,12 +409,12 @@ class AreaRouter {
 				    Lsa::LsaRef lsar) const;
 
     /**
-     * Genearate a BadLSReq event.
+     * Generate a BadLSReq event.
      *
      * @param peerid
      * @param nid
      */
-    void event_bad_link_state_request(const PeerID peerid,
+    bool event_bad_link_state_request(const PeerID peerid,
 				      const OspfTypes::NeighbourID nid) const;
 
     /**
