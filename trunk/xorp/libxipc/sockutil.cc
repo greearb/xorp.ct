@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.16 2005/08/18 15:32:38 bms Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.17 2005/08/21 06:12:57 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -90,15 +90,16 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 	return false;
     }
 
-    /* Get address */
+    // Get address
     if (sin.sin_addr.s_addr != 0) {
 	addr = inet_ntoa(sin.sin_addr);
     } else {
 	static in_addr haddr;
 	if (haddr.s_addr == 0) {
-	    /* Socket is not associated with any particular to anything...
-	     * ... this is not great.
-	     */
+	    //
+	    // Socket is not associated with any particular to anything...
+	    // ... this is not great.
+	    //
 	    char hname[MAXHOSTNAMELEN + 1];
 	    hname[MAXHOSTNAMELEN] = '\0';
 	    if (gethostname(hname, MAXHOSTNAMELEN) < 0) {
@@ -107,9 +108,10 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 		return false;
 	    }
 
-	    /* Check hostname resolves otherwise anything that relies on
-	     *  this info is going to have problems.
-	     */
+	    //
+	    // Check hostname resolves otherwise anything that relies on
+	    // this info is going to have problems.
+	    //
 	    if (address_lookup(hname, haddr) == false) {
 		XLOG_ERROR("Local hostname %s does not resolve", hname);
 		return false;
@@ -192,7 +194,7 @@ bool
 split_address_slash_port(const string& address_slash_port,
 			 string& address, uint16_t& port)
 {
-    size_t slash = address_slash_port.find(":");
+    string::size_type slash = address_slash_port.find(":");
 
     if (slash == string::npos || 			// no slash
 	slash == address_slash_port.size() - 1 ||	// slash is last char
@@ -207,7 +209,8 @@ split_address_slash_port(const string& address_slash_port,
     return true;
 }
 
-string address_slash_port(const string& addr, uint16_t port)
+string
+address_slash_port(const string& addr, uint16_t port)
 {
     return c_format("%s:%d", addr.c_str(), port);
 }
@@ -295,7 +298,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 
     free(pAddrTable);
 
-#else
+#else // ! HOST_OS_WINDOWS
     uint32_t n = if_count();
 
     string if_name;
@@ -311,7 +314,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 	    addrs.push_back(IPv4(if_addr));
 	}
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 // Return true if a given IPv4 address is currently configured in the system.
@@ -395,7 +398,7 @@ get_preferred_ipv4_addr()
 static uint32_t
 if_count()
 {
-#if defined(__FreeBSD__)
+#ifdef HOST_OS_FREEBSD
     int cnt, error;
     size_t cntlen = sizeof(cnt);
     error = sysctlbyname("net.link.generic.system.ifcount",
@@ -434,7 +437,7 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
     UNUSED(name);
     UNUSED(addr);
     UNUSED(flags);
-#else
+#else // HAVE_IF_INDEXTONAME
     ifreq ifr;
 
     if (if_indextoname(index, ifr.ifr_name) == 0) {
@@ -465,6 +468,6 @@ if_probe(uint32_t index, string& name, in_addr& addr, uint16_t& flags)
 
     comm_close(s);
     return true;
-#endif
+#endif // HAVE_IF_INDEXTONAME
 }
 #endif // !HOST_OS_WINDOWS
