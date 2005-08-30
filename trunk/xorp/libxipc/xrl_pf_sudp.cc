@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.41 2005/08/19 06:57:37 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.42 2005/08/19 19:17:02 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -253,7 +253,7 @@ XrlPFSUDPSender::XrlPFSUDPSender(EventLoop& e, const char* address_slash_port)
 	}
     }
     instance_count++;
-    debug_msg("Created XrlPFSUDPSender %s instance count %d sender_sock %p\n",
+    debug_msg("Created XrlPFSUDPSender %s instance count %d sender_sock %s\n",
 	      address_slash_port, instance_count, sender_sock.str().c_str());
 }
 

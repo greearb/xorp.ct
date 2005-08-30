@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.23 2005/08/18 15:32:38 bms Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.24 2005/08/29 22:36:50 pavlin Exp $"
 
 #include <functional>
 
@@ -260,7 +260,7 @@ FinderTcpBase::close()
     _reader.flush_buffers();
     _reader.stop();
     comm_close(_sock);
-    debug_msg("Closing fd = %p\n", _sock.str().c_str());
+    debug_msg("Closing fd = %s\n", _sock.str().c_str());
     _sock.clear();
     close_event();
 }
@@ -305,7 +305,7 @@ FinderTcpListenerBase::~FinderTcpListenerBase()
     set_enabled(false);
     // XXX: duplicate call; set_enabled() will remove callback
     //_e.remove_ioevent_cb(_lsock, IOT_ACCEPT);
-    debug_msg("Destructing Listener with fd = %p\n", _lsock.str().c_str());
+    debug_msg("Destructing Listener with fd = %s\n", _lsock.str().c_str());
     comm_close(_lsock);
 }
 
@@ -357,7 +357,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
 
     IPv4 peer(name);
     if (host_is_permitted(peer)) {
-	debug_msg("Created socket %p\n", sock.str().c_str());
+	debug_msg("Created socket %s\n", sock.str().c_str());
 	if (comm_sock_set_blocking(sock, COMM_SOCK_NONBLOCKING) != XORP_OK) {
 	    XLOG_WARNING("Failed to set socket non-blocking.");
 	    return;

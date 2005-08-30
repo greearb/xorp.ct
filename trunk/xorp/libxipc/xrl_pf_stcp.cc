@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.42 2005/08/18 15:32:41 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.43 2005/08/19 19:17:02 bms Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -92,7 +92,8 @@ public:
 						     "life timer expired",
 						     true));
 	_reader.start();
-	debug_msg("STCPRequestHandler (%p) fd = %p\n", this, sock.str().c_str());
+	debug_msg("STCPRequestHandler (%p) fd = %s\n",
+		  this, sock.str().c_str());
     }
 
     ~STCPRequestHandler()
@@ -100,7 +101,8 @@ public:
 	_parent.remove_request_handler(this);
 	_reader.stop();
 	_writer.stop();
-	debug_msg("STCPRequestHandler (%p) fd = %p\n", this, _sock.str().c_str());
+	debug_msg("STCPRequestHandler (%p) fd = %s\n",
+		  this, _sock.str().c_str());
 	comm_close(_sock);
 	_sock.clear();
     }
@@ -574,7 +576,7 @@ XrlPFSTCPSender::XrlPFSTCPSender(EventLoop& e, const char* addr_slash_port)
       _keepalive_ms(DEFAULT_SENDER_KEEPALIVE_MS)
 {
     _sock = create_connected_tcp4_socket(addr_slash_port);
-    debug_msg("stcp sender (%p) fd = %p\n", this, _sock.str().c_str());
+    debug_msg("stcp sender (%p) fd = %s\n", this, _sock.str().c_str());
     if (!_sock.is_valid()) {
 	debug_msg("failed to connect to %s\n", addr_slash_port);
 	xorp_throw(XrlPFConstructorError,
