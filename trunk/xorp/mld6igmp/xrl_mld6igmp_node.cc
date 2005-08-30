@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.48 2005/06/03 19:04:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.49 2005/08/18 15:35:30 bms Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1099,7 +1099,7 @@ XrlMld6igmpNode::send_add_membership(const string& dst_module_instance_name,
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot send add_membership to %s for (%s,%s) on vif "
+	XLOG_ERROR("Cannot send add_membership to %s for (%s, %s) on vif "
 		   "with vif_index %d: no such vif",
 		   dst_module_instance_name.c_str(),
 		   cstring(source),
@@ -1134,7 +1134,7 @@ XrlMld6igmpNode::send_delete_membership(const string& dst_module_instance_name,
     Mld6igmpVif *mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(vif_index);
     
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot send delete_membership to %s for (%s,%s) on vif "
+	XLOG_ERROR("Cannot send delete_membership to %s for (%s, %s) on vif "
 		   "with vif_index %d: no such vif",
 		   dst_module_instance_name.c_str(),
 		   cstring(source),
@@ -1176,7 +1176,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 
     mld6igmp_vif = Mld6igmpNode::vif_find_by_vif_index(membership.vif_index());
     if (mld6igmp_vif == NULL) {
-	XLOG_ERROR("Cannot send %s for (%s,%s) on vif "
+	XLOG_ERROR("Cannot send %s for (%s, %s) on vif "
 		   "with vif_index %d to %s: no such vif",
 		   (is_add)? "add_membership" : "delete_membership",
 		   cstring(membership.source()),
@@ -1247,7 +1247,7 @@ XrlMld6igmpNode::send_add_delete_membership()
 	//
 	// If an error, then try again
 	//
-	XLOG_ERROR("Failed to send %s for (%s,%s) on vif %s to %s. "
+	XLOG_ERROR("Failed to send %s for (%s, %s) on vif %s to %s. "
 		   "Will try again.",
 		   (is_add)? "add_membership" : "delete_membership",
 		   cstring(membership.source()),

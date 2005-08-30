@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.34 2005/08/30 01:02:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.35 2005/08/30 02:05:15 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1154,7 +1154,7 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
 		res += ".";
 	}
 	XLOG_TRACE(mfea_node().is_log_trace(),
-		   "Add MFC entry: (%s,%s) iif = %d olist = %s",
+		   "Add MFC entry: (%s, %s) iif = %d olist = %s",
 		   cstring(source),
 		   cstring(group),
 		   iif_vif_index,
@@ -1377,7 +1377,7 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+	error_msg = c_format("add_bw_upcall(%s, %s) failed: "
 			     "dataflow monitor entry in the kernel "
 			     "is not supported",
 			     cstring(source), cstring(group));
@@ -1573,7 +1573,7 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+	error_msg = c_format("add_bw_upcall(%s, %s) failed: "
 			     "dataflow monitor entry in the kernel "
 			     "is not supported",
 			     cstring(source), cstring(group));
@@ -1745,7 +1745,7 @@ MfeaMrouter::delete_all_bw_upcall(const IPvX& source, const IPvX& group,
     // Check if the kernel supports the bandwidth-upcall mechanism.
     //
     if (! mrt_api_mrt_mfc_bw_upcall()) {
-	error_msg = c_format("add_bw_upcall(%s,%s) failed: "
+	error_msg = c_format("add_bw_upcall(%s, %s) failed: "
 			     "dataflow monitor entry in the kernel "
 			     "is not supported",
 			     cstring(source), cstring(group));

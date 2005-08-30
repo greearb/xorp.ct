@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.37 2005/05/04 03:36:00 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_join_prune.cc,v 1.38 2005/08/18 15:38:47 bms Exp $"
 
 //
 // PIM Multicast Routing Entry Join/Prune handling
@@ -2277,7 +2277,7 @@ PimMre::recompute_is_prune_desired_sg_rpt_sg()
     if (pim_mre_sg_rpt == NULL) {
 	XLOG_UNREACHABLE();
 	XLOG_ERROR("INTERNAL PimMrt ERROR: "
-		   "cannot create entry for (%s,%s) create_flags = %#x",
+		   "cannot create entry for (%s, %s) create_flags = %#x",
 		   cstring(source_addr()), cstring(group_addr()),
 		   PIM_MRE_SG_RPT);
 	return (false);

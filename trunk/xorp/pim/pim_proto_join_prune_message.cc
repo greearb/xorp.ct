@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.23 2005/04/30 21:36:46 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.24 2005/08/18 15:38:49 bms Exp $"
 
 
 //
@@ -697,7 +697,7 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
  pim_mre_find_error:
     XLOG_UNREACHABLE();
     XLOG_ERROR("INTERNAL PimMrt ERROR: "
-	       "cannot create entry for (%s,%s) create_flags = %#x",
+	       "cannot create entry for (%s, %s) create_flags = %#x",
 	       cstring(source_addr), cstring(group_addr),
 	       XORP_UINT_CAST(create_flags));
     return (XORP_ERROR);
