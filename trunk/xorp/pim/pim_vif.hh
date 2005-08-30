@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.35 2005/04/26 22:26:05 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.36 2005/06/01 00:36:59 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -348,7 +348,7 @@ public:
     // Misc. functions
     const TimeVal& jp_override_interval() const;
     list<PimNbr *>& pim_nbrs() { return (_pim_nbrs); }
-    int		pim_nbrs_number() const { return (_pim_nbrs.size()); }
+    size_t	pim_nbrs_number() const { return (_pim_nbrs.size()); }
     bool	i_am_dr() const;
     void	set_i_am_dr(bool v);
     PimNbr	*pim_nbr_find(const IPvX& nbr_addr);

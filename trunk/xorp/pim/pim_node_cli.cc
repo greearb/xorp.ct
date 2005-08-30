@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.36 2005/08/18 15:38:48 bms Exp $"
+#ident "$XORP: xorp/pim/pim_node_cli.cc,v 1.37 2005/08/30 22:41:22 pavlin Exp $"
 
 
 //
@@ -667,7 +667,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 	}
 	if (! do_print)
 	    continue;
-	cli_print(c_format("%-12s %-8s %-6s %1d %-8s %8u %-15s %9d\n",
+	cli_print(c_format("%-12s %-8s %-6s %1d %-8s %8u %-15s %9u\n",
 			   pim_vif->name().c_str(),
 			   pim_vif->state_str().c_str(),
 			   pim_vif->proto_is_pimsm()? "Sparse" : "Dense",
@@ -677,7 +677,7 @@ PimNodeCli::cli_show_pim_interface(const vector<string>& argv)
 			   pim_vif->i_am_dr()? "DR" : "NotDR",
 			   XORP_UINT_CAST(pim_vif->dr_priority().get()),
 			   cstring(pim_vif->dr_addr()),
-			   pim_vif->pim_nbrs_number()));
+			   XORP_UINT_CAST(pim_vif->pim_nbrs_number())));
     }
     
     return (XORP_OK);
