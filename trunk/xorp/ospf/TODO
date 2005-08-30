@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.35 2005/08/27 00:51:08 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.36 2005/08/30 00:15:40 atanu Exp $
 #
 
 TODO
@@ -50,6 +50,10 @@ is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
 
 25) A neighbour should only be listed in a hello packet if a hello
 packet has been seen from it in the last RouterDeadInterval seconds.
+
+26) send_lsa() has not been tested.
+
+27) update_router_linksV2(), the DR_other case looks bogus.
 
 Possible issues
 ~~~~~~~~~~~~~~~
