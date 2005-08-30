@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.4 2005/03/25 02:53:46 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.6 2005/08/18 15:28:41 bms Exp $"
 
 //
 // test program to the Observer classes for TimerList and SelectorList
@@ -86,7 +86,7 @@ class mySelectorListObserver : public SelectorListObserverBase {
 void 
 mySelectorListObserver::notify_added(XorpFd fd, const SelectorMask& mask)
 {
-    fprintf(stderr, "notif added fd: %s mask:%#0x\n", fd.str().c_str(), mask);
+    fprintf(stderr, "notif added fd: %s mask: %#0x\n", fd.str().c_str(), mask);
     add_rem_fd_counter+=fd;
     add_rem_mask_counter+=mask;
     switch (mask) {
@@ -100,7 +100,8 @@ mySelectorListObserver::notify_added(XorpFd fd, const SelectorMask& mask)
 void 
 mySelectorListObserver::notify_removed(XorpFd fd, const SelectorMask& mask)
 {
-    fprintf(stderr, "notif removed fd: %s mask:%#0x\n", fd.str().c_str(), mask);
+    fprintf(stderr, "notif removed fd: %s mask: %#0x\n", fd.str().c_str(),
+	    mask);
     add_rem_fd_counter-=fd;
     add_rem_mask_counter-=mask;
     if (no_notifications_beyond_this_point) {
@@ -154,14 +155,14 @@ void run_test()
     }
     fd[0] = XorpFd(pipefds[0]);
     fd[1] = XorpFd(pipefds[1]);
-#else
+#else // HOST_OS_WINDOWS
     if (_pipe(pipefds, 65536, _O_BINARY)) {
 	fprintf(stderr, "unable to generate file descriptors for test\n");
 	exit(2);
     }
     fd[0] = XorpFd(_get_osfhandle(pipefds[0]));
     fd[1] = XorpFd(_get_osfhandle(pipefds[1]));
-#endif
+#endif // HOST_OS_WINDOWS
 
     XorpCallback2<void,XorpFd,IoEventType>::RefPtr cb = callback(do_the_twist);
     e.selector_list().add_ioevent_cb(fd[0], IOT_READ, cb);
@@ -172,15 +173,15 @@ void run_test()
 	assert(zzz.scheduled());    
 	e.run(); // run will return after one or more pending events
 		 // have fired.
-	e.selector_list().remove_ioevent_cb(fd[0],IOT_READ);
-	e.selector_list().remove_ioevent_cb(fd[1],IOT_WRITE);
-	e.selector_list().remove_ioevent_cb(fd[0],IOT_EXCEPTION);
+	e.selector_list().remove_ioevent_cb(fd[0], IOT_READ);
+	e.selector_list().remove_ioevent_cb(fd[1], IOT_WRITE);
+	e.selector_list().remove_ioevent_cb(fd[0], IOT_EXCEPTION);
     }
     zzz.unschedule();
     // these should not raise notifications since they have already been removed
     no_notifications_beyond_this_point = true;
-    e.selector_list().remove_ioevent_cb(fd[0],IOT_READ);
-    e.selector_list().remove_ioevent_cb(fd[1],IOT_WRITE);
+    e.selector_list().remove_ioevent_cb(fd[0], IOT_READ);
+    e.selector_list().remove_ioevent_cb(fd[1], IOT_WRITE);
 #ifndef HOST_OS_WINDOWS
     close(fd[0]);
     close(fd[1]);
@@ -194,7 +195,7 @@ void run_test()
     if (!one_fd_rem_per_each_fd_add_notif) {
 	fprintf(stderr, "cumulative fd and mask should both be 0 but are ");
 	fprintf(stderr, "fd: %d mask: %d\n", add_rem_fd_counter,
-	    add_rem_mask_counter);
+		add_rem_mask_counter);
 	exit(1);
     }
     if (!(fd_read_notification_called && fd_write_notification_called &&
@@ -210,6 +211,7 @@ void run_test()
 
 int main(int /* argc */, const char* argv[]) 
 {
+    // TODO: enable the test for Windows
 #ifndef HOST_OS_WINDOWS
 
     //
@@ -233,8 +235,8 @@ int main(int /* argc */, const char* argv[])
     xlog_stop();
     xlog_exit();
 
-#else
+#else // HOST_OS_WINDOWS
     UNUSED(argv);
-#endif
+#endif // HOST_OS_WINDOWS
     return 0;
 }
