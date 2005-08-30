@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.20 2005/07/22 10:47:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.21 2005/08/29 18:18:40 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -63,7 +63,7 @@ public:
      */
     void reset() {
 	_success = true;
-	_error_msg.clear();
+	_error_msg = "";
 	_commit_phase = COMMIT_PHASE_NONE;
     }
 
