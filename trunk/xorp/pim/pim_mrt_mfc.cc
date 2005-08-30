@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.30 2005/08/18 15:38:47 bms Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.31 2005/08/30 02:05:15 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -459,25 +459,25 @@ PimMrt::signal_dataflow_recv(const IPvX& source_addr,
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "RX DATAFLOW signal: "
 	       "source = %s group = %s "
-	       "threshold_interval_sec = %d threshold_interval_usec = %d "
-	       "measured_interval_sec = %d measured_interval_usec = %d "
-	       "threshold_packets = %d threshold_bytes = %d "
-	       "measured_packets = %d measured_bytes = %d "
-	       "is_threshold_in_packets = %d is_threshold_in_bytes = %d "
-	       "is_geq_upcall = %d is_leq_upcall = %d",
+	       "threshold_interval_sec = %u threshold_interval_usec = %u "
+	       "measured_interval_sec = %u measured_interval_usec = %u "
+	       "threshold_packets = %u threshold_bytes = %u "
+	       "measured_packets = %u measured_bytes = %u "
+	       "is_threshold_in_packets = %u is_threshold_in_bytes = %u "
+	       "is_geq_upcall = %u is_leq_upcall = %u",
 	       cstring(source_addr), cstring(group_addr),
-	       XORP_INT_CAST(threshold_interval_sec),
-	       XORP_INT_CAST(threshold_interval_usec),
-	       XORP_INT_CAST(measured_interval_sec),
-	       XORP_INT_CAST(measured_interval_usec),
-	       XORP_INT_CAST(threshold_packets),
-	       XORP_INT_CAST(threshold_bytes),
-	       XORP_INT_CAST(measured_packets),
-	       XORP_INT_CAST(measured_bytes),
-	       XORP_INT_CAST(is_threshold_in_packets),
-	       XORP_INT_CAST(is_threshold_in_bytes),
-	       XORP_INT_CAST(is_geq_upcall),
-	       XORP_INT_CAST(is_leq_upcall));
+	       XORP_UINT_CAST(threshold_interval_sec),
+	       XORP_UINT_CAST(threshold_interval_usec),
+	       XORP_UINT_CAST(measured_interval_sec),
+	       XORP_UINT_CAST(measured_interval_usec),
+	       XORP_UINT_CAST(threshold_packets),
+	       XORP_UINT_CAST(threshold_bytes),
+	       XORP_UINT_CAST(measured_packets),
+	       XORP_UINT_CAST(measured_bytes),
+	       XORP_UINT_CAST(is_threshold_in_packets),
+	       XORP_UINT_CAST(is_threshold_in_bytes),
+	       XORP_UINT_CAST(is_geq_upcall),
+	       XORP_UINT_CAST(is_leq_upcall));
     
     pim_mfc = pim_mfc_find(source_addr, group_addr, false);
     
