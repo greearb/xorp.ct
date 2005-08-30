@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.46 2005/08/27 09:09:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.47 2005/08/27 09:39:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -546,12 +546,37 @@ RouterLink::str() const
     string output;
 
     output = c_format("Type %u", get_type());
-    output += c_format(" Metric %u", get_metric());
 
     switch(get_version()) {
     case OspfTypes::V2:
-	output += c_format(" Link ID %#x", get_link_id());
-	output += c_format(" Link Data %#x", get_link_data());
+	switch(get_type()) {
+	case p2p:
+	    output += c_format(" Point-to-point");
+	    output += c_format(" Neighbours Router ID %s",
+			       pr_id(get_link_id()).c_str());
+	    output += c_format(" MIB-II ifIndex %u", get_link_data());
+	    break;
+	case transit:
+	    output += c_format(" Transit network");
+	    output += c_format(" Designated Router ID %s",
+			       pr_id(get_link_id()).c_str());
+	    output += c_format(" Routers interface address %s",
+			       pr_id(get_link_data()).c_str());
+	    break;
+	case stub:
+	    output += c_format(" Stub network");
+	    output += c_format(" Subnet number %s",
+			       pr_id(get_link_id()).c_str());
+	    output += c_format(" Mask %s", pr_id(get_link_data()).c_str());
+	    break;
+	case vlink:
+	    output += c_format(" Virtual Link");
+	    output += c_format(" Neighbours Router ID %s",
+			       pr_id(get_link_id()).c_str());
+	    output += c_format(" Routers interface address %s",
+			       pr_id(get_link_data()).c_str());
+	    break;
+	}
 	break;
     case OspfTypes::V3:
 	output += c_format(" Interface ID %#x", get_interface_id());
@@ -561,6 +586,8 @@ RouterLink::str() const
 			   get_neighbour_router_id());
 	break;
     }
+
+    output += c_format(" Metric %u", get_metric());
 
     return output;
 }
