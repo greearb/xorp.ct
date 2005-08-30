@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.66 2005/08/30 00:47:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.67 2005/08/30 03:59:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -993,7 +993,7 @@ AreaRouter<A>::flood_all_areas(Lsa::LsaRef lsar, bool add)
     debug_msg("Flood all areas %s : %s\n", add ? "add" : "delete",
 	      cstring(*lsar));
 
-    XLOG_WARNING("TBD sent external-LSAs to other areas");
+    XLOG_WARNING("TBD send external-LSAs to other areas");
 }
 
 template <typename A>
