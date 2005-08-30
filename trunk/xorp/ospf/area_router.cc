@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.65 2005/08/29 23:48:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.66 2005/08/30 00:47:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1038,11 +1038,11 @@ AreaRouter<A>::event_bad_link_state_request(const PeerID peerid,
 
 template <typename A>
 bool
-AreaRouter<A>::send_lsa(const PeerID /*peerid*/,
-			const OspfTypes::NeighbourID /*nid*/,
-			Lsa::LsaRef /*lsar*/) const
+AreaRouter<A>::send_lsa(const PeerID peerid,
+			const OspfTypes::NeighbourID nid,
+			Lsa::LsaRef lsar) const
 {
-    XLOG_UNFINISHED();
+    return _ospf.get_peer_manager().send_lsa(peerid, _area, nid, lsar);
 }
 
 template <>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.48 2005/08/29 23:48:15 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.49 2005/08/30 00:47:51 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -418,7 +418,8 @@ class AreaRouter {
 				      const OspfTypes::NeighbourID nid) const;
 
     /**
-     * Send this LSA directly to the neighbour.
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
      *
      * @param peerid
      * @param nid

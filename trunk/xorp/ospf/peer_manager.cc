@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.43 2005/08/29 23:48:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.44 2005/08/30 00:47:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -360,6 +360,19 @@ PeerManager<A>::event_bad_link_state_request(const PeerID peerid,
     }
 
     return _peers[peerid]->event_bad_link_state_request(area, nid);
+}
+
+template <typename A>
+bool
+PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
+			 const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->send_lsa(area, nid, lsar);
 }
 
 template <typename A>

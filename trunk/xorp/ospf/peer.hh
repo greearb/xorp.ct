@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.88 2005/08/29 23:48:15 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.89 2005/08/30 00:47:51 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -176,6 +176,19 @@ class PeerOut {
      */
     bool event_bad_link_state_request(OspfTypes::AreaID area,
 				      const OspfTypes::NeighbourID nid);
+
+    /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param area
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
+		  Lsa::LsaRef lsar);
 
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
@@ -427,7 +440,18 @@ class Peer {
      * @param nid
      *
      */
-    bool event_bad_link_state_request(const OspfTypes::NeighbourID nid);
+    bool event_bad_link_state_request(const OspfTypes::NeighbourID nid) const;
+
+    /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const;
 
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
@@ -954,6 +978,16 @@ class Neighbour {
      * @return true if it is.
      */
     bool on_link_state_request_list(Lsa::LsaRef lsar) const;
+
+    /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(Lsa::LsaRef lsar);
 
     /**
      * @return the link type.

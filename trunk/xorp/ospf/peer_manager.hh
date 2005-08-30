@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.30 2005/08/29 23:48:15 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.31 2005/08/30 00:47:51 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -161,6 +161,7 @@ class PeerManager {
     /**
      * Is this LSA on this neighbours link state request list.
      * @param peerid
+     * @param area
      * @param nid
      *
      * @return true if it is.
@@ -182,6 +183,22 @@ class PeerManager {
     bool event_bad_link_state_request(const PeerID peerid,
 				      OspfTypes::AreaID area,
 				      const OspfTypes::NeighbourID nid);
+
+    /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param peerid
+     * @param area
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(const PeerID peerid, OspfTypes::AreaID area,
+		  const OspfTypes::NeighbourID nid,
+		  Lsa::LsaRef lsar);
+
 
     /**
      * Are any of neighbours of this area a virtual link endpoint.
