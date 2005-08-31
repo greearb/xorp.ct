@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_manager.hh,v 1.7 2005/03/25 02:54:28 pavlin Exp $
+// $XORP: xorp/rip/port_manager.hh,v 1.8 2005/08/31 16:53:59 zec Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
@@ -41,7 +41,7 @@ public:
     typedef System<A>		SystemType;
 
 public:
-    PortManagerBase(SystemType& system, IfMgrIfTree iftree)
+    PortManagerBase(SystemType& system, const IfMgrIfTree& iftree)
 	: _system(system), _iftree(iftree) {}
 
     /**
@@ -97,7 +97,7 @@ protected:
 protected:
     SystemType&	_system;
     PortList	_ports;
-    IfMgrIfTree& _iftree;
+    const IfMgrIfTree& _iftree;
 };
 
 // ----------------------------------------------------------------------------
