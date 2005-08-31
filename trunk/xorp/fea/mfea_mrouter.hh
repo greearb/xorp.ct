@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_mrouter.hh,v 1.10 2005/03/25 02:53:10 pavlin Exp $
+// $XORP: xorp/fea/mfea_mrouter.hh,v 1.11 2005/08/18 15:45:49 bms Exp $
 
 
 #ifndef __FEA_MFEA_MROUTER_HH__
@@ -110,7 +110,7 @@ public:
      * 
      * The mrouter socket is used for various multicast-related access.
      * 
-     * @return the socket value if valid, otherwise XORP_ERROR.
+     * @return the socket value.
      */
     XorpFd	mrouter_socket() const { return (_mrouter_socket); }
     
@@ -121,7 +121,7 @@ public:
      * Note that no more than one mrouter socket (per address family)
      * should be open at a time.
      * 
-     * @return the socket value on success, otherwise XORP_ERROR.
+     * @return the socket value.
      */
     XorpFd	open_mrouter_socket();
     
@@ -131,7 +131,7 @@ public:
      * When the MfeaMrouter adopts control over the mrouter socket,
      * it is the one that will be reading from that socket.
      * 
-     * @return the socket value on success, otherwise XORP_ERROR.
+     * @return the socket value.
      */
     XorpFd	adopt_mrouter_socket();
     

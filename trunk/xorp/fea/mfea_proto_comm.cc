@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.32 2005/06/23 19:19:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.33 2005/08/18 15:45:50 bms Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -373,7 +373,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 #ifdef IPV6_RECVPKTINFO
 	// The new option (applies to receiving only)
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVPKTINFO,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVPKTINFO, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -381,7 +381,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 #else
 	// The old option (see RFC-2292)
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_PKTINFO,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_PKTINFO, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -393,14 +393,14 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVHOPLIMIT
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVHOPLIMIT,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVHOPLIMIT, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_HOPLIMIT,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_HOPLIMIT, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -412,7 +412,7 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVTCLASS
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVTCLASS,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVTCLASS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -424,14 +424,14 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 	//
 #ifdef IPV6_RECVHOPOPTS
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_RECVHOPOPTS,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_RECVHOPOPTS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
 	}
 #else
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_HOPOPTS,
-		XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_HOPOPTS, %u) failed: %s",
 		       bool_flag, strerror(errno));
 	    return (XORP_ERROR);
@@ -470,7 +470,7 @@ ProtoComm::set_multicast_ttl(int ttl)
 	u_char ip_ttl = ttl; // XXX: In IPv4 the value argument is 'u_char'
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_TTL,
-		XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
+		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_TTL, %u) failed: %s",
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
@@ -489,7 +489,7 @@ ProtoComm::set_multicast_ttl(int ttl)
 	int ip_ttl = ttl;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-		XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
+		       XORP_SOCKOPT_CAST(&ip_ttl), sizeof(ip_ttl)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_HOPS, %u) failed: %s",
 		       ip_ttl, strerror(errno));
 	    return (XORP_ERROR);
@@ -528,7 +528,7 @@ ProtoComm::set_multicast_loop(bool is_enabled)
 	u_char loop = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_LOOP,
-		XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
+		       XORP_SOCKOPT_CAST(&loop), sizeof(loop)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_LOOP, %u) failed: %s",
 		       loop, strerror(errno));
 	    return (XORP_ERROR);
@@ -547,7 +547,7 @@ ProtoComm::set_multicast_loop(bool is_enabled)
 	uint loop6 = is_enabled;
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-		XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
+		       XORP_SOCKOPT_CAST(&loop6), sizeof(loop6)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_LOOP, %u) failed: %s",
 		       loop6, strerror(errno));
 	    return (XORP_ERROR);
@@ -595,7 +595,7 @@ ProtoComm::set_default_multicast_vif(uint32_t vif_index)
 	}
 	mfea_vif->addr_ptr()->copy_out(in_addr);
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_MULTICAST_IF,
-		XORP_SOCKOPT_CAST(&in_addr), sizeof(in_addr)) < 0) {
+		       XORP_SOCKOPT_CAST(&in_addr), sizeof(in_addr)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_MULTICAST_IF, %s) failed: %s",
 		       cstring(*mfea_vif->addr_ptr()), strerror(errno));
 	    return (XORP_ERROR);
@@ -614,7 +614,7 @@ ProtoComm::set_default_multicast_vif(uint32_t vif_index)
 	u_int pif_index = mfea_vif->pif_index();
 	
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
+		       XORP_SOCKOPT_CAST(&pif_index), sizeof(pif_index)) < 0) {
 	    XLOG_ERROR("setsockopt(IPV6_MULTICAST_IF, %s) failed: %s",
 		       mfea_vif->name().c_str(), strerror(errno));
 	    return (XORP_ERROR);
@@ -674,7 +674,7 @@ ProtoComm::join_multicast_group(uint32_t vif_index, const IPvX& group)
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
-		XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
+		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    XLOG_ERROR("Cannot join group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -696,7 +696,7 @@ ProtoComm::join_multicast_group(uint32_t vif_index, const IPvX& group)
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = mfea_vif->pif_index();
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_JOIN_GROUP,
-		XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
+		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    XLOG_ERROR("Cannot join group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -756,7 +756,7 @@ ProtoComm::leave_multicast_group(uint32_t vif_index, const IPvX& group)
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_DROP_MEMBERSHIP,
-		XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
+		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    XLOG_ERROR("Cannot leave group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -778,7 +778,7 @@ ProtoComm::leave_multicast_group(uint32_t vif_index, const IPvX& group)
 	group.copy_out(mreq6.ipv6mr_multiaddr);
 	mreq6.ipv6mr_interface = mfea_vif->pif_index();
 	if (setsockopt(_proto_socket, IPPROTO_IPV6, IPV6_LEAVE_GROUP,
-		XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
+		       XORP_SOCKOPT_CAST(&mreq6), sizeof(mreq6)) < 0) {
 	    XLOG_ERROR("Cannot leave group %s on vif %s: %s",
 		       cstring(group), mfea_vif->name().c_str(), 
 		       strerror(errno));
@@ -899,7 +899,7 @@ ProtoComm::open_proto_socket()
 	    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
-		XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
+			   XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
 		close_proto_socket();
 		XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s",
 			   strerror(errno));
@@ -966,15 +966,14 @@ ProtoComm::close_proto_socket()
     do {
 	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
 	    if (_proto_socket == mfea_node().mfea_mrouter().mrouter_socket()) {
-		if (
-!mfea_node().mfea_mrouter().adopt_mrouter_socket().is_valid()) {
+		if (!mfea_node().mfea_mrouter().adopt_mrouter_socket().is_valid()) {
 		    //
 		    // XXX: the control over the socket passed
 		    // to the MfeaMrouter
 		    //
 		    _proto_socket.clear();
+		    return (XORP_OK);
 		}
-		return (XORP_OK);
 	    }
 	}
 	break;

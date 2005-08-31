@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.35 2005/08/30 02:05:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.36 2005/08/30 23:50:14 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -282,7 +282,7 @@ MfeaMrouter::have_multicast_routing4() const
     // Success
     close(s);
     return (true);
-#endif
+#endif // HAVE_IPV4_MULTICAST_ROUTING
 }
 
 /**
@@ -362,7 +362,7 @@ MfeaMrouter::kernel_mrouter_ipproto() const
  * 
  * Open the mrouter socket (used for various multicast routing kernel calls).
  * 
- * Return value: The socket value on success, otherwise %XORP_ERROR.
+ * Return value: The socket value.
  **/
 XorpFd
 MfeaMrouter::open_mrouter_socket()
@@ -409,7 +409,7 @@ MfeaMrouter::open_mrouter_socket()
  * When the #MfeaMrouter adopts control over the mrouter socket,
  * it is the one that will be reading from that socket.
  * 
- * Return value: The adopted socket value on success, otherwise %XORP_ERROR.
+ * Return value: The adopted socket value.
  **/
 XorpFd
 MfeaMrouter::adopt_mrouter_socket()
@@ -1272,6 +1272,11 @@ MfeaMrouter::delete_mfc(const IPvX& source, const IPvX& group)
     UNUSED(source);
     UNUSED(group);
 #endif
+
+    XLOG_TRACE(mfea_node().is_log_trace(),
+	       "Delete MFC entry: (%s, %s)",
+	       cstring(source),
+	       cstring(group));
 
     switch (family()) {
     case AF_INET:

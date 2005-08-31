@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.45 2005/03/25 02:53:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.46 2005/08/18 15:45:52 bms Exp $"
 
 #include "mfea_module.h"
 
@@ -1781,8 +1781,8 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1792,8 +1792,9 @@ XORP_INT_CAST(protocol_id));
     if (MfeaNode::add_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add protocol instance '%s' "
-			     "with module_id = %d",
-			     xrl_sender_name.c_str(), src_module_id);
+			     "with module_id = %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(src_module_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1869,8 +1870,8 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1880,8 +1881,9 @@ XORP_INT_CAST(protocol_id));
     if (MfeaNode::add_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot add protocol instance '%s' "
-			     "with module_id = %d",
-			     xrl_sender_name.c_str(), src_module_id);
+			     "with module_id = %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(src_module_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1957,8 +1959,8 @@ XrlMfeaNode::mfea_0_1_delete_protocol4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -1968,8 +1970,9 @@ XORP_INT_CAST(protocol_id));
     if (MfeaNode::delete_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete protocol instance '%s' "
-			     "with module_id =  %d",
-			     xrl_sender_name.c_str(), src_module_id);
+			     "with module_id =  %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(src_module_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2002,8 +2005,8 @@ XrlMfeaNode::mfea_0_1_delete_protocol6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2013,8 +2016,9 @@ XORP_INT_CAST(protocol_id));
     if (MfeaNode::delete_protocol(xrl_sender_name, src_module_id) < 0) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot delete protocol instance '%s' "
-			     "with module_id =  %d",
-			     xrl_sender_name.c_str(), src_module_id);
+			     "with module_id =  %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(src_module_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2049,8 +2053,8 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2060,10 +2064,10 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif4(
     if (MfeaNode::start_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot start protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(),
-				    XORP_INT_CAST(vif_index));
+	error_msg = c_format("Cannot start protocol instance '%s' "
+			     "on vif_index %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2098,8 +2102,8 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2109,10 +2113,10 @@ XrlMfeaNode::mfea_0_1_start_protocol_vif6(
     if (MfeaNode::start_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot start protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(),
-				    XORP_INT_CAST(vif_index));
+	error_msg = c_format("Cannot start protocol instance '%s' "
+			     "on vif_index %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2147,8 +2151,8 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2158,10 +2162,10 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif4(
     if (MfeaNode::stop_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot stop protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(),
-				    XORP_INT_CAST(vif_index));
+	error_msg = c_format("Cannot stop protocol instance '%s' "
+			     "on vif_index %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2196,8 +2200,8 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2207,10 +2211,10 @@ XrlMfeaNode::mfea_0_1_stop_protocol_vif6(
     if (MfeaNode::stop_protocol_vif(xrl_sender_name, src_module_id, vif_index)
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot stop protocol instance '%s' "
-				    "on vif_index %d",
-				    xrl_sender_name.c_str(),
-				    XORP_INT_CAST(vif_index));
+	error_msg = c_format("Cannot stop protocol instance '%s' "
+			     "on vif_index %u",
+			     xrl_sender_name.c_str(),
+			     XORP_UINT_CAST(vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2235,8 +2239,8 @@ XrlMfeaNode::mfea_0_1_allow_signal_messages(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2244,22 +2248,22 @@ XrlMfeaNode::mfea_0_1_allow_signal_messages(
 	if (MfeaNode::add_allow_kernel_signal_messages(xrl_sender_name,
 						       src_module_id)
 	    != XORP_OK) {
-	    string error_msg = c_format("Failed to enable kernel signal "
-					"messages for target %s with "
-					"protocol_id = %d",
-					xrl_sender_name.c_str(),
-					XORP_INT_CAST(protocol_id));
+	    error_msg = c_format("Failed to enable kernel signal "
+				 "messages for target %s with "
+				 "protocol_id = %u",
+				 xrl_sender_name.c_str(),
+				 XORP_UINT_CAST(protocol_id));
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     } else {
 	if (MfeaNode::delete_allow_kernel_signal_messages(xrl_sender_name,
 							  src_module_id)
 	    != XORP_OK) {
-	    string error_msg = c_format("Failed to disable kernel signal "
-					"messages for target %s with "
-					"protocol_id = %d",
-					xrl_sender_name.c_str(),
-					XORP_INT_CAST(protocol_id));
+	    error_msg = c_format("Failed to disable kernel signal "
+				 "messages for target %s with "
+				 "protocol_id = %u",
+				 xrl_sender_name.c_str(),
+				 XORP_UINT_CAST(protocol_id));
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
@@ -2296,8 +2300,8 @@ XrlMfeaNode::mfea_0_1_join_multicast_group4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2333,7 +2337,7 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     //
     if (! MfeaNode::is_ipv6()) {
 	error_msg = c_format("Received protocol message with "
-				    "invalid address family: IPv6");
+			     "invalid address family: IPv6");
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -2342,13 +2346,13 @@ XrlMfeaNode::mfea_0_1_join_multicast_group6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    if (MfeaNode::join_multicast_group(xrl_sender_name, src_module_id, vif_index,
-				       IPvX(group_address)) < 0) {
+    if (MfeaNode::join_multicast_group(xrl_sender_name, src_module_id,
+				       vif_index, IPvX(group_address)) < 0) {
 	// TODO: must find-out and return the reason for failure
 	error_msg = c_format("Cannot join group %s on vif %s",
 			     group_address.str().c_str(),
@@ -2388,8 +2392,8 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2434,8 +2438,8 @@ XrlMfeaNode::mfea_0_1_leave_multicast_group6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2482,10 +2486,10 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
-	string error_msg = c_format("Received 'add_mfc' with invalid "
-				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    XORP_UINT_CAST(max_vifs_oiflist),
-				    XORP_UINT_CAST(mifset.size()));
+	error_msg = c_format("Received 'add_mfc' with invalid "
+			     "'max_vifs_oiflist' = %u (expected <= %u)",
+			     XORP_UINT_CAST(max_vifs_oiflist),
+			     XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2502,12 +2506,12 @@ XrlMfeaNode::mfea_0_1_add_mfc4(
 			  IPvX(rp_address))
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add MFC for "
-				    "source %s and group %s "
-				    "with iif_vif_index = %d",
-				    source_address.str().c_str(),
-				    group_address.str().c_str(),
-				    XORP_INT_CAST(iif_vif_index));
+	error_msg = c_format("Cannot add MFC for "
+			     "source %s and group %s "
+			     "with iif_vif_index = %u",
+			     source_address.str().c_str(),
+			     group_address.str().c_str(),
+			     XORP_UINT_CAST(iif_vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2545,10 +2549,10 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
     // Check the number of covered interfaces
     if (max_vifs_oiflist > mifset.size()) {
 	// Invalid number of covered interfaces
-	string error_msg = c_format("Received 'add_mfc' with invalid "
-				    "'max_vifs_oiflist' = %u (expected <= %u)",
-				    XORP_UINT_CAST(max_vifs_oiflist),
-				    XORP_UINT_CAST(mifset.size()));
+	error_msg = c_format("Received 'add_mfc' with invalid "
+			     "'max_vifs_oiflist' = %u (expected <= %u)",
+			     XORP_UINT_CAST(max_vifs_oiflist),
+			     XORP_UINT_CAST(mifset.size()));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2565,12 +2569,12 @@ XrlMfeaNode::mfea_0_1_add_mfc6(
 			  IPvX(rp_address))
 	< 0) {
 	// TODO: must find-out and return the reason for failure
-	string error_msg = c_format("Cannot add MFC for "
-				    "source %s and group %s "
-				    "with iif_vif_index = %d",
-				    source_address.str().c_str(),
-				    group_address.str().c_str(),
-				    XORP_INT_CAST(iif_vif_index));
+	error_msg = c_format("Cannot add MFC for "
+			     "source %s and group %s "
+			     "with iif_vif_index = %u",
+			     source_address.str().c_str(),
+			     group_address.str().c_str(),
+			     XORP_UINT_CAST(iif_vif_index));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2679,8 +2683,8 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2744,8 +2748,8 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %d",
-				    XORP_INT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

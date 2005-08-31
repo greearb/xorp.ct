@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.16 2005/03/25 02:53:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.17 2005/08/18 15:45:49 bms Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -281,12 +281,12 @@ MfeaNodeCli::cli_show_mfea_dataflow(const vector<string>& argv)
 	    // The threshold values
 	    if (mfea_dfe->is_threshold_in_packets())
 		s1 = c_format("%u",
-XORP_UINT_CAST(mfea_dfe->threshold_packets()));
+			      XORP_UINT_CAST(mfea_dfe->threshold_packets()));
 	    else
 		s1 = "?";
 	    if (mfea_dfe->is_threshold_in_bytes())
 		s2 = c_format("%u",
-XORP_UINT_CAST(mfea_dfe->threshold_bytes()));
+			      XORP_UINT_CAST(mfea_dfe->threshold_bytes()));
 	    else
 		s2 = "?";
 	    thresh_s = c_format("%u.%u|%s|%s",
