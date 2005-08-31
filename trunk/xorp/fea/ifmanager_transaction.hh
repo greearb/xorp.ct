@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.10 2005/03/25 02:53:08 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.11 2005/08/18 15:45:48 bms Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -244,11 +244,11 @@ public:
     }
 
     string str() const {
-	string s = c_format("SetInterfaceMTU: %s %d", ifname().c_str(),
-			    XORP_INT_CAST(_mtu));
+	string s = c_format("SetInterfaceMTU: %s %u", ifname().c_str(),
+			    XORP_UINT_CAST(_mtu));
 	if (_mtu < MIN_MTU || _mtu > MAX_MTU) {
-	    s += c_format(" (valid range %d--%d)",
-			  XORP_INT_CAST(MIN_MTU), XORP_INT_CAST(MAX_MTU));
+	    s += c_format(" (valid range %u--%u)",
+			  XORP_UINT_CAST(MIN_MTU), XORP_UINT_CAST(MAX_MTU));
 	}
 	return s;
     }
@@ -599,11 +599,11 @@ public:
     }
 
     string str() const {
-	string s = c_format("SetAddr4Prefix: %s %d", path().c_str(),
-			    XORP_INT_CAST(_prefix_len));
+	string s = c_format("SetAddr4Prefix: %s %u", path().c_str(),
+			    XORP_UINT_CAST(_prefix_len));
 	if (_prefix_len > MAX_PREFIX_LEN)
-	    s += c_format(" (valid range 0--%d)",
-			  XORP_INT_CAST(MAX_PREFIX_LEN));
+	    s += c_format(" (valid range 0--%u)",
+			  XORP_UINT_CAST(MAX_PREFIX_LEN));
 	return s;
     }
 
@@ -761,11 +761,11 @@ public:
     }
 
     string str() const {
-	string s = c_format("SetAddr6Prefix: %s %d", path().c_str(),
-			    XORP_INT_CAST(_prefix_len));
+	string s = c_format("SetAddr6Prefix: %s %u", path().c_str(),
+			    XORP_UINT_CAST(_prefix_len));
 	if (_prefix_len > MAX_PREFIX_LEN)
-	    s += c_format(" (valid range 0--%d)",
-			  XORP_INT_CAST(MAX_PREFIX_LEN));
+	    s += c_format(" (valid range 0--%u)",
+			  XORP_UINT_CAST(MAX_PREFIX_LEN));
 	return s;
     }
 

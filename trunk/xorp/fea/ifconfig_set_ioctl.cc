@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.37 2005/07/26 19:24:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.38 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -409,7 +409,7 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     error_msg = "method not supported";
 
     return (XORP_ERROR);
-};
+}
 
 int
 IfConfigSetIoctl::add_vif_address6(const string& ifname,
@@ -851,13 +851,13 @@ IfConfigSetIoctl::add_vif_address4(const string& ifname,
     }
     return (XORP_OK);
 #else
-    return (XORP_ERROR);
     UNUSED(ifname);
     UNUSED(is_p2p);
     UNUSED(addr);
     UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
     UNUSED(error_msg);
+    return (XORP_ERROR);
 #endif
 }
 
@@ -902,7 +902,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	return (XORP_ERROR);
     }
 
-# if defined(SIOCAIFADDR_IN6)
+#if defined(SIOCAIFADDR_IN6)
     //
     // Add an alias address
     //
@@ -927,7 +927,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     }
     return (XORP_OK);
 
-# elif defined(SIOCSIFADDR)
+#elif defined(SIOCSIFADDR)
 
     //
     // Set a new address
@@ -963,8 +963,7 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
 	}
     }
     return (XORP_OK);
-# else
-    return (XORP_ERROR);
+#else
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
@@ -972,7 +971,8 @@ IfConfigSetIoctl::add_vif_address6(const string& ifname,
     UNUSED(addr);
     UNUSED(dst);
     UNUSED(prefix_len);
-# endif
+    return (XORP_ERROR);
+#endif
 
 #endif // HAVE_IPV6
 }
@@ -1044,10 +1044,10 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	    return (XORP_ERROR);
 	}
 #else
-	return (XORP_ERROR);	
 	UNUSED(ifname);
 	UNUSED(addr);
 	UNUSED(error_msg);
+	return (XORP_ERROR);	
 #endif
 	return (XORP_OK);
 	break;
@@ -1095,10 +1095,10 @@ IfConfigSetIoctl::delete_vif_address(const string& ifname,
 	}
 	return (XORP_OK);
 #else
-	return (XORP_ERROR);
 	UNUSED(ifname);
 	UNUSED(prefix_len);
 	UNUSED(if_index);
+	return (XORP_ERROR);
 #endif
 
 	break;

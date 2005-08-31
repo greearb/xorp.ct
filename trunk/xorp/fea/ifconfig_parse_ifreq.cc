@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.23 2005/03/25 02:53:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.24 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -232,7 +232,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	}
 	if (is_newlink || (mtu != fi.mtu()))
 	    fi.set_mtu(mtu);
-	debug_msg("MTU: %d\n", XORP_INT_CAST(fi.mtu()));
+	debug_msg("MTU: %u\n", XORP_UINT_CAST(fi.mtu()));
 	
 	//
 	// Get the flags
@@ -546,12 +546,12 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
     return true;
 #else /* HOST_OS_WINDOWS */
     XLOG_FATAL("WinSock2 does not support struct ifreq.");
-    return false;
 
     UNUSED(it);
     UNUSED(family);
     UNUSED(buf);
     UNUSED(buf_bytes);
+    return false;
 #endif /* HOST_OS_WINDOWS */
 }
 

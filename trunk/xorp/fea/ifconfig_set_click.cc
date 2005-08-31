@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.26 2005/07/06 19:34:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.27 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -848,7 +848,7 @@ IfConfigSetClick::regenerate_xorp_iftree_config() const
 					      fa4.addr().str().c_str());
 		preamble = "\t\t";
 		config += preamble + c_format("prefix-length: %u\n",
-XORP_UINT_CAST(fa4.prefix_len()));
+					      XORP_UINT_CAST(fa4.prefix_len()));
 		if (fa4.broadcast()) {
 		    config += preamble + c_format("broadcast: %s\n",
 						  fa4.bcast().str().c_str());
@@ -875,7 +875,7 @@ XORP_UINT_CAST(fa4.prefix_len()));
 					      fa6.addr().str().c_str());
 		preamble = "\t\t";
 		config += preamble + c_format("prefix-length: %u\n",
-XORP_UINT_CAST(fa6.prefix_len()));
+					      XORP_UINT_CAST(fa6.prefix_len()));
 		if (fa6.point_to_point()) {
 		    config += preamble + c_format("destination: %s\n",
 						  fa6.endpoint().str().c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.34 2005/03/25 05:41:55 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.35 2005/08/18 15:45:44 bms Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -627,10 +627,10 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigEntryObserverDummy	 _ftic_entry_observer_dummy;
-    FtiConfigEntryObserverRtsock _ftic_entry_observer_rtsock;
-    FtiConfigEntryObserverNetlink _ftic_entry_observer_netlink;
-    FtiConfigEntryObserverIPHelper _ftic_entry_observer_iphelper;
+    FtiConfigEntryObserverDummy		_ftic_entry_observer_dummy;
+    FtiConfigEntryObserverRtsock	_ftic_entry_observer_rtsock;
+    FtiConfigEntryObserverNetlink	_ftic_entry_observer_netlink;
+    FtiConfigEntryObserverIPHelper	_ftic_entry_observer_iphelper;
 
     //
     // The primary mechanisms to get the whole table information
@@ -682,17 +682,17 @@ private:
     // XXX: Ordering is important: the last that is supported
     // is the one to use.
     //
-    FtiConfigTableObserverDummy	 _ftic_table_observer_dummy;
-    FtiConfigTableObserverRtsock _ftic_table_observer_rtsock;
-    FtiConfigTableObserverNetlink _ftic_table_observer_netlink;
-    FtiConfigTableObserverIPHelper _ftic_table_observer_iphelper;
+    FtiConfigTableObserverDummy		_ftic_table_observer_dummy;
+    FtiConfigTableObserverRtsock	_ftic_table_observer_rtsock;
+    FtiConfigTableObserverNetlink	_ftic_table_observer_netlink;
+    FtiConfigTableObserverIPHelper	_ftic_table_observer_iphelper;
     
     //
     // Original state from the underlying system before the FEA was started
     //
-    bool _unicast_forwarding_enabled4;
-    bool _unicast_forwarding_enabled6;
-    bool _accept_rtadv_enabled6;
+    bool	_unicast_forwarding_enabled4;
+    bool	_unicast_forwarding_enabled6;
+    bool	_accept_rtadv_enabled6;
 
     //
     // Misc other state
