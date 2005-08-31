@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.41 2005/03/25 02:53:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.42 2005/08/18 15:45:43 bms Exp $"
 
 #include "fea_module.h"
 
@@ -1952,8 +1952,11 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	UNUSED(enable);
     }
 #elif defined(HOST_OS_WINDOWS)
-
-    ; // do nothing
+    {
+	// XXX: nothing to do in case of Windows
+	error_msg = "";
+	UNUSED(enable);
+    }
 
 #else
 #error "OS not supported: don't know how to enable/disable"
