@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.5 2005/08/01 23:08:43 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.6 2005/08/04 20:38:16 atanu Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -40,7 +40,11 @@ template <>
 string
 RouteCmd<string>::str() const
 {
-    return c() + " node: " + _node + " nexthop: " + _nexthop;
+    return c() + " node: " + _node + " nexthop: " + _nexthop +
+	" weight: " + c_format("%d", _weight) + 
+	" next hop changed: " + (_next_hop_changed ? "true" : "false") +
+	" weight changed: " + (_weight_changed ? "true" : "false");
+
 }
 
 /**
@@ -351,13 +355,13 @@ test6(TestInfo& info)
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "t", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "t", "y", 8));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "x", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "x", "y", 9));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "y", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "y", "y", 5));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "z", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "z", "y", 7));
 
     if (!verify(info, routes, expected_routes))
 	return false;
@@ -373,13 +377,17 @@ test6(TestInfo& info)
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "t", "t"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "t", "t", 10, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "x", "t"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "x", "t", 11, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "y", "t"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "y", "t", 12, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "z", "t"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "z", "t", 14, true, true));
 
     if (!verify(info, routes, expected_routes))
 	return false;
@@ -396,7 +404,18 @@ test6(TestInfo& info)
 
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
-    // No change.
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "t", "t", 1, false, true));
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "x", "t", 2, false, true));
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "y", "t", 3, false, true));
+    expected_routes.
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "z", "t", 5, false, true));
 
     if (!verify(info, routes, expected_routes))
 	return false;
@@ -414,13 +433,17 @@ test6(TestInfo& info)
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "t", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "t", "y", 8, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "x", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "x", "y", 9, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE, "y", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::REPLACE,
+				   "y", "y", 5, true, true));
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::DELETE, "z", "z"));
+	push_back(RouteCmd<string>(RouteCmd<string>::DELETE,
+				   "z", "z"));
 
     if (!verify(info, routes, expected_routes))
 	return false;
@@ -463,7 +486,7 @@ test6(TestInfo& info)
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "z", "y"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "z", "y", 7));
 
     if (!verify(info, routes, expected_routes))
 	return false;
@@ -535,13 +558,13 @@ test8(TestInfo& info)
     for_each(routes.begin(), routes.end(), Pr<string>(info));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "a", "a"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "a", "a", 10));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "b", "b"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "b", "b", 3));
 
     expected_routes.
-	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "c", "b"));
+	push_back(RouteCmd<string>(RouteCmd<string>::ADD, "c", "b", 6));
 
     if (!verify(info, routes, expected_routes)) {
 	DOUT(info) << "verify failed" << endl;

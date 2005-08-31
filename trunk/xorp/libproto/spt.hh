@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.5 2005/08/01 23:08:43 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.6 2005/08/04 20:38:16 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -421,18 +421,27 @@ class RouteCmd {
 
     RouteCmd() {}
 
-    RouteCmd(Cmd cmd, A node, A nexthop) :
-	_cmd(cmd), _node(node), _nexthop(nexthop)
+    RouteCmd(Cmd cmd, A node, A nexthop, int weight = 0,
+	     bool next_hop_changed = false, bool weight_changed = false) :
+	_cmd(cmd), _node(node), _nexthop(nexthop), _weight(weight),
+	_next_hop_changed(next_hop_changed), _weight_changed(weight_changed)
+	
     {}
 
     Cmd cmd() const { return _cmd; }
     A node() const { return _node; }
     A nexthop() const { return _nexthop; }
+    int weight() const { return _weight; }
+    bool next_hop_changed() const { return _next_hop_changed; }
+    bool weight_changed() const { return _weight_changed; }
 
     bool operator==(const RouteCmd& lhs) {
 	return _cmd == lhs._cmd &&
 	    _node == lhs._node &&
-	    _nexthop == lhs._nexthop;
+	    _nexthop == lhs._nexthop &&
+	    _weight == lhs._weight &&
+	    _next_hop_changed == lhs._next_hop_changed &&
+	    _weight_changed == lhs._weight_changed;
     }
 
     string c() const {
@@ -451,14 +460,24 @@ class RouteCmd {
 	return cmd;
     }
 
+
     string str() const {
-	return c() + " node: " + _node.str() + " nexthop: " + _nexthop.str();
+	return c() + " node: " + _node.str() +
+	    " nexthop: " + _nexthop.str() +
+	    " weight: " + c_format("%d", _weight) +
+	    " next hop changed: " + (_next_hop_changed ? "true" : "false") +
+	    " weight changed: " + (_weight_changed ? "true" : "false");
     }
+
  private:
     Cmd _cmd;
     A _node;
     A _nexthop;
+    int _weight;
+    bool _next_hop_changed;
+    bool _weight_changed;
 };
+
 template <typename A>
 Spt<A>::~Spt()
 {
@@ -954,7 +973,8 @@ Node<A>::delta(RouteCmd<A>& rcmd)
     if (!p._valid) {
 	XLOG_ASSERT(_current._valid);
 	rcmd = RouteCmd<A>(RouteCmd<A>::ADD, nodename(),
-			   _current._first_hop->nodename());
+			   _current._first_hop->nodename(),
+			   _current._path_length);
 	return true;
     }
 
@@ -962,11 +982,14 @@ Node<A>::delta(RouteCmd<A>& rcmd)
     XLOG_ASSERT(p._valid);
 
     // If nothing has changed, nothing to report.
-    if (c._first_hop == p._first_hop)
+    if (c._first_hop == p._first_hop && c._path_length == p._path_length)
 	return false;
 
     rcmd = RouteCmd<A>(RouteCmd<A>::REPLACE, nodename(),
-			   _current._first_hop->nodename());
+		       _current._first_hop->nodename(),
+		       _current._path_length,
+		       c._first_hop != p._first_hop,
+		       c._path_length != p._path_length);
 
     return true;
 }
