@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.25 2005/03/25 02:54:42 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.26 2005/07/08 02:06:25 abittau Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -327,9 +327,9 @@ StaticRoutesNode::updates_made()
 	// Calculate whether the next-hop router was directly connected
 	// before and now.
 	//
-	if (is_directly_connected(_iftree, static_route.nexthop()))
+	if (_iftree.is_directly_connected(static_route.nexthop()))
 	    is_old_directly_connected = true;
-	if (is_directly_connected(ifmgr_iftree(), static_route.nexthop()))
+	if (ifmgr_iftree().is_directly_connected(static_route.nexthop()))
 	    is_new_directly_connected = true;
 
 	if ((is_old_interface_up == is_new_interface_up)
@@ -364,98 +364,6 @@ StaticRoutesNode::updates_made()
     // Update the local copy of the interface tree
     //
     _iftree = ifmgr_iftree();
-}
-
-bool
-StaticRoutesNode::is_directly_connected(const IfMgrIfTree& iftree,
-					const IPvX& addr) const
-{
-    IfMgrIfTree::IfMap::const_iterator if_iter;
-
-    for (if_iter = iftree.ifs().begin();
-	 if_iter != iftree.ifs().end();
-	 ++if_iter) {
-	const IfMgrIfAtom& iface = if_iter->second;
-
-	// Test if interface is enabled
-	if (! iface.enabled())
-	    continue;
-
-	IfMgrIfAtom::VifMap::const_iterator vif_iter;
-	for (vif_iter = iface.vifs().begin();
-	     vif_iter != iface.vifs().end();
-	     ++vif_iter) {
-	    const IfMgrVifAtom& vif = vif_iter->second;
-
-	    // Test if vif is enabled
-	    if (! vif.enabled())
-		continue;
-
-	    // Test if there is matching IPv4 address
-	    if (addr.is_ipv4()) {
-		IPv4 addr4 = addr.get_ipv4();
-		IfMgrVifAtom::V4Map::const_iterator a4_iter;
-
-		for (a4_iter = vif.ipv4addrs().begin();
-		     a4_iter != vif.ipv4addrs().end();
-		     ++a4_iter) {
-		    const IfMgrIPv4Atom& a4 = a4_iter->second;
-
-		    if (! a4.enabled())
-			continue;
-
-		    // Test if my own address
-		    if (a4.addr() == addr4)
-			return (true);
-
-		    // Test if p2p address
-		    if (a4.has_endpoint()) {
-			if (a4.endpoint_addr() == addr4)
-			    return (true);
-		    }
-
-		    // Test if same subnet
-		    if (IPv4Net(addr4, a4.prefix_len())
-			== IPv4Net(a4.addr(), a4.prefix_len())) {
-			return (true);
-		    }
-		}
-	    }
-
-	    // Test if there is matching IPv6 address
-	    if (addr.is_ipv6()) {
-		IPv6 addr6 = addr.get_ipv6();
-		IfMgrVifAtom::V6Map::const_iterator a6_iter;
-
-		for (a6_iter = vif.ipv6addrs().begin();
-		     a6_iter != vif.ipv6addrs().end();
-		     ++a6_iter) {
-		    const IfMgrIPv6Atom& a6 = a6_iter->second;
-
-		    if (! a6.enabled())
-			continue;
-
-		    // Test if my own address
-		    if (a6.addr() == addr6)
-			return (true);
-
-		    // Test if p2p address
-		    if (a6.has_endpoint()) {
-			if (a6.endpoint_addr() == addr6)
-			    return (true);
-		    }
-
-		    // Test if same subnet
-		    if (IPv6Net(addr6, a6.prefix_len())
-			== IPv6Net(a6.addr(), a6.prefix_len())) {
-			return (true);
-		    }
-		}
-	    }
-	}
-    }
-
-    return (false);
 }
 
 /**
@@ -952,7 +860,7 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 	if ((vif_atom != NULL) && (vif_atom->enabled()))
 	    inform_rib_route_change(route);
     } else {
-	if (is_directly_connected(_iftree, route.nexthop()))
+	if (_iftree.is_directly_connected(route.nexthop()))
 	    inform_rib_route_change(route);
     }
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.18 2005/03/05 02:08:27 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.19 2005/03/25 02:54:42 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -676,20 +676,6 @@ private:
      * @param static_route the route with the request that would be canceled.
      */
     virtual void cancel_rib_route_change(const StaticRoute& static_route) = 0;
-
-    /**
-     * Test if an address is directly connected to an interface.
-     * 
-     * If an interface toward an address is down, then the address is not
-     * considered as directly connected.
-     * 
-     * @param iftree the tree with the interface state.
-     * @param addr the address to test.
-     * @return true if @ref addr is directly connected to an interface
-     * contained inside @ref iftree, otherwise false.
-     */
-    bool is_directly_connected(const IfMgrIfTree& iftree,
-			       const IPvX& addr) const;
 
     /**
      * Update a route received from the user configuration.
