@@ -2,8 +2,9 @@
 
 set -e
 
-# srcdir is set by make for check target
+# Conditionally set ${srcdir} if it wasn't assigned (e.g., by `gmake check`)
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
+
 . ${srcdir}/../utils/xrl_shell_lib.sh
 
 test_xrl_sockets4_udp() 
