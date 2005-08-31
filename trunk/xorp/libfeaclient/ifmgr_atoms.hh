@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.17 2005/08/18 15:34:24 bms Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.18 2005/08/31 00:41:39 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -148,7 +148,10 @@ public:
     bool operator==(const IfMgrIfTree& o) const;
 
     /**
-     * Test if an IPv4 address is directly connected.
+     * Test if an IPv4 address is directly connected to an interface.
+     * 
+     * If an interface toward an address is down, then the address is not
+     * considered as directly connected.
      * 
      * @param addr the address to test.
      * @return true if the address is directly connected, otherwise false.
@@ -156,7 +159,10 @@ public:
     bool is_directly_connected(const IPv4& addr) const;
 
     /**
-     * Test if an IPv6 address is directly connected.
+     * Test if an IPv6 address is directly connected to an interface.
+     * 
+     * If an interface toward an address is down, then the address is not
+     * considered as directly connected.
      * 
      * @param addr the address to test.
      * @return true if the address is directly connected, otherwise false.
@@ -164,7 +170,10 @@ public:
     bool is_directly_connected(const IPv6& addr) const;
 
     /**
-     * Test if an IPvX address is directly connected.
+     * Test if an IPvX address is directly connected to an interface.
+     * 
+     * If an interface toward an address is down, then the address is not
+     * considered as directly connected.
      * 
      * @param addr the address to test.
      * @return true if the address is directly connected, otherwise false.
