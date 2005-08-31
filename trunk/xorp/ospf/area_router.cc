@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.67 2005/08/30 03:59:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.68 2005/08/30 04:07:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1141,6 +1141,40 @@ AreaRouter<A>::routing_begin()
 
 template <typename A>
 void
+AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
+{
+    //  RFC 2328 Section  13.2. Installing LSAs in the database
+
+    debug_msg("%s\n", lsar->str().c_str());
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_delete(Lsa::LsaRef /*lsar*/)
+{
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_end()
+{
+}
+
+#if	0
+template <typename A>
+void
+AreaRouter<A>::routing_begin()
+{
+    _TransitCapability = false;
+#ifdef  PARANOIA
+    list<RouteCmd<Vertex> > r;
+    _spt.compute(r);
+    XLOG_ASSERT(r.empty());
+#endif
+}
+
+template <typename A>
+void
 AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 {
     //  RFC 2328 Section  13.2. Installing LSAs in the database
@@ -1170,16 +1204,24 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 	for(; i != rl.end(); i++) {
 	    Vertex dst;
 	    dst.set_version(_ospf.get_version());
-	    dst.set_type(Vertex::Router);
 	    switch (_ospf.get_version()) {
 	    case OspfTypes::V2:
  		switch(i->get_type()) {
 		case RouterLink::p2p:
+		    XLOG_UNFINISHED();
+		    break;
 		case RouterLink::transit:
-		case RouterLink::stub:
-		case RouterLink::vlink:
+		    dst.set_type(Vertex::Router);
 		    dst.set_nodeid(i->get_link_id());
 		    _spt.add_edge(v, i->get_metric(), dst);
+		    break;
+		case RouterLink::stub:
+		    dst.set_type(Vertex::Network);
+		    dst.set_nodeid(i->get_link_id());
+		    _spt.add_edge(v, i->get_metric(), dst);
+		    break;
+		case RouterLink::vlink:
+		    XLOG_UNFINISHED();
 		    break;
 		}
 		break;
@@ -1227,6 +1269,7 @@ AreaRouter<A>::routing_end()
     for(i = r.begin(); i != r.end(); i++)
 	XLOG_WARNING("TBD: Add route: %s", i->str().c_str());
 }
+#endif
 
 template class AreaRouter<IPv4>;
 template class AreaRouter<IPv6>;
