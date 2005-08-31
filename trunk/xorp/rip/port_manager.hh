@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_manager.hh,v 1.6 2004/06/10 22:41:45 hodson Exp $
+// $XORP: xorp/rip/port_manager.hh,v 1.7 2005/03/25 02:54:28 pavlin Exp $
 
 #ifndef __RIP_PORT_MANAGER_HH__
 #define __RIP_PORT_MANAGER_HH__
 
 #include <list>
+
+#include "libfeaclient/ifmgr_atoms.hh"
 
 template <typename A>
 class Port;
@@ -39,7 +41,8 @@ public:
     typedef System<A>		SystemType;
 
 public:
-    PortManagerBase(SystemType& system) : _system(system) {}
+    PortManagerBase(SystemType& system, IfMgrIfTree iftree)
+	: _system(system), _iftree(iftree) {}
 
     /**
      * Destructor
@@ -75,6 +78,11 @@ public:
      */
     inline const EventLoop& eventloop() const	{ return _system.eventloop(); }
 
+    /**
+     * Get IfMgrIfTree.
+     */
+    inline const IfMgrIfTree& iftree() const	{ return _iftree; }
+
 protected:
     /**
      * Get list of managed RIP Ports.
@@ -89,6 +97,7 @@ protected:
 protected:
     SystemType&	_system;
     PortList	_ports;
+    IfMgrIfTree& _iftree;
 };
 
 // ----------------------------------------------------------------------------

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.17 2005/03/04 07:55:53 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.18 2005/03/25 02:54:27 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -129,6 +129,7 @@ public:
 
     inline uint16_t addr_family() const 	{ return ntohs(_af); }
     inline uint16_t tag() const			{ return ntohs(_tag); }
+    inline IPv4     addr() const		{ return IPv4(_addr); }
     inline uint32_t prefix_len() const;
     inline IPv4Net  net() const;
     inline IPv4     nexthop() const		{ return IPv4(_nh); }

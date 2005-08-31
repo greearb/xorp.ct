@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.16 2005/03/25 02:54:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.18 2005/08/18 15:41:27 bms Exp $"
 
 #include <set>
 
@@ -95,8 +95,8 @@ IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s)
-	: PortManagerBase<A>(s)
+    SpoofPortManager(System<A>& s, IfMgrIfTree iftree)
+	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
     }
@@ -183,13 +183,15 @@ static const IPv4	REQUESTING_HOST = IPv4("10.0.100.1");
 static const uint16_t	REQUESTING_PORT = 1092;
 static const uint8_t	ROUTE_COST	= 5;
 
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
 class RequestPacketTester {
 public:
     static const uint32_t INJECTED_ROUTES  = 10;
     static const uint32_t REQUESTED_ROUTES = 25;
 
 public:
-    RequestPacketTester() : _e(), _rip_system(_e), _pm(_rip_system)
+    RequestPacketTester() : _e(), _rip_system(_e), _pm(_rip_system, ift_dummy)
     {
 	_portio	= new SpoofPortIO<IPv4>(*_pm.the_port());
 	_pm.the_port()->set_io_handler(_portio, false);

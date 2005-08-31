@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.43 2005/07/05 21:37:27 zec Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.44 2005/08/18 15:41:27 bms Exp $"
 
 #include "rip_module.h"
 
@@ -853,6 +853,9 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 			   uint32_t				n_entries)
 {
     static IPv4 net_filter("255.0.0.0");
+    static IPv4 class_b_net("128.0.0.0");
+    static IPv4 class_c_net("192.0.0.0");
+    static IPv4 class_d_net("224.0.0.0");
     static IPv4 class_e_net("240.0.0.0");
     IPv4 zero;
 
@@ -877,12 +880,27 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    continue;
 	}
 
-	if (entries[i].prefix_len() > Addr::ADDR_BITLEN) {
+	uint32_t prefix_len = entries[i].prefix_len();
+	if (prefix_len > Addr::ADDR_BITLEN) {
 	    record_bad_packet("bad prefix length", src_addr, src_port, p);
 	    continue;
 	}
 
 	IPv4Net net = entries[i].net();
+	IPv4 addr = entries[i].addr();
+	if (prefix_len == 0 && addr != zero) {
+	    // Subnet mask not specified, thus apply a clasfull mask
+	    if (addr < class_b_net) {
+	        prefix_len = 8;			// Class A
+	    } else if (addr < class_c_net) {
+		prefix_len = 16;		// Class B
+	    } else if (addr < class_d_net) {
+		prefix_len = 24;		// Class C
+	    } else {
+		prefix_len = 32;		// XXX check RFC!
+	    }
+	    net = IPv4Net(IPv4(addr), prefix_len);
+	}
 	if (net == RIP_AF_CONSTANTS<Addr>::DEFAULT_ROUTE() &&
 	    accept_default_route() == false) {
 	    continue;
@@ -911,13 +929,22 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    }
 	}
 
-	//
-	// XXX review
-	// Should we check nh is visible to us here or not?
-	//
 	IPv4 nh = entries[i].nexthop();
 	if (nh == zero) {
 	    nh = src_addr;
+	} else if (nh == _pio->address()) {
+	    record_bad_route("nexthop points to us", src_addr, src_port, p);
+	    continue;
+        } else {
+	    // Test if nh is on the receiving subnet
+	    const IfMgrIfTree& iftree = _pm.iftree();
+	    const IfMgrIPv4Atom* ifa = iftree.find_addr(_pio->ifname(),
+							_pio->vifname(),
+							_pio->address());
+	    if (IPv4Net(nh, ifa->prefix_len())
+		!= IPv4Net(ifa->addr(), ifa->prefix_len())) {
+		nh = src_addr;
+	    }
 	}
 
 	metric += cost();
