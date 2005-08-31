@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.16 2005/03/25 02:53:22 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.17 2005/08/18 15:34:24 bms Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -24,6 +24,10 @@
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+#include "libxorp/ipvx.hh"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv6net.hh"
+#include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
 
 class IfMgrIfAtom;
@@ -142,6 +146,30 @@ public:
      * @return true if this instance and o are the same, false otherwise.
      */
     bool operator==(const IfMgrIfTree& o) const;
+
+    /**
+     * Test if an IPv4 address is directly connected.
+     * 
+     * @param addr the address to test.
+     * @return true if the address is directly connected, otherwise false.
+     */
+    bool is_directly_connected(const IPv4& addr) const;
+
+    /**
+     * Test if an IPv6 address is directly connected.
+     * 
+     * @param addr the address to test.
+     * @return true if the address is directly connected, otherwise false.
+     */
+    bool is_directly_connected(const IPv6& addr) const;
+
+    /**
+     * Test if an IPvX address is directly connected.
+     * 
+     * @param addr the address to test.
+     * @return true if the address is directly connected, otherwise false.
+     */
+    bool is_directly_connected(const IPvX& addr) const;
 
 protected:
     IfMap _ifs;

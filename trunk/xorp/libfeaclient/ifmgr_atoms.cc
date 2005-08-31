@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.8 2004/06/10 22:41:02 hodson Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.9 2005/03/25 02:53:22 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -194,6 +194,132 @@ bool
 IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 {
     return o.ifs() == ifs();
+}
+
+bool
+IfMgrIfTree::is_directly_connected(const IPv4& addr) const
+{
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	// Test if interface is enabled
+	if (! iface.enabled())
+	    continue;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    // Test if vif is enabled
+	    if (! vif.enabled())
+		continue;
+
+	    // Test if there is matching IPv4 address
+	    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+
+	    for (a4_iter = vif.ipv4addrs().begin();
+		 a4_iter != vif.ipv4addrs().end();
+		 ++a4_iter) {
+		const IfMgrIPv4Atom& a4 = a4_iter->second;
+
+		if (! a4.enabled())
+		    continue;
+
+		// Test if my own address
+		if (a4.addr() == addr)
+		    return (true);
+
+		// Test if p2p address
+		if (a4.has_endpoint()) {
+		    if (a4.endpoint_addr() == addr)
+			return (true);
+		}
+
+		// Test if same subnet
+		if (IPv4Net(addr, a4.prefix_len())
+		    == IPv4Net(a4.addr(), a4.prefix_len())) {
+		    return (true);
+		}
+	    }
+	}
+    }
+
+    return (false);
+}
+
+bool
+IfMgrIfTree::is_directly_connected(const IPv6& addr) const
+{
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	// Test if interface is enabled
+	if (! iface.enabled())
+	    continue;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    // Test if vif is enabled
+	    if (! vif.enabled())
+		continue;
+
+	    // Test if there is matching IPv6 address
+	    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+
+	    for (a6_iter = vif.ipv6addrs().begin();
+		 a6_iter != vif.ipv6addrs().end();
+		 ++a6_iter) {
+		const IfMgrIPv6Atom& a6 = a6_iter->second;
+
+		if (! a6.enabled())
+		    continue;
+
+		// Test if my own address
+		if (a6.addr() == addr)
+		    return (true);
+
+		// Test if p2p address
+		if (a6.has_endpoint()) {
+		    if (a6.endpoint_addr() == addr)
+			return (true);
+		}
+
+		// Test if same subnet
+		if (IPv6Net(addr, a6.prefix_len())
+		    == IPv6Net(a6.addr(), a6.prefix_len())) {
+		    return (true);
+		}
+	    }
+	}
+    }
+
+    return (false);
+}
+
+bool
+IfMgrIfTree::is_directly_connected(const IPvX& addr) const
+{
+    if (addr.is_ipv4()) {
+	IPv4 addr4 = addr.get_ipv4();
+	return (is_directly_connected(addr4));
+    }
+
+    if (addr.is_ipv6()) {
+	IPv6 addr6 = addr.get_ipv6();
+	return (is_directly_connected(addr6));
+    }
+
+    return (false);
 }
 
 
