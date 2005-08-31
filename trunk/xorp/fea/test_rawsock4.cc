@@ -12,9 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.12 2005/04/01 01:30:46 pavlin Exp $"
-
-#define DEBUG_LOGGING
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.13 2005/08/18 15:45:52 bms Exp $"
 
 #include "fea_module.h"
 
