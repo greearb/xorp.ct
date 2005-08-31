@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.19 2005/06/21 00:03:59 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.21 2005/08/18 15:41:27 bms Exp $"
 
 #include <set>
 
@@ -168,8 +168,8 @@ private:
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s)
-	: PortManagerBase<A>(s)
+    SpoofPortManager(System<A>& s, IfMgrIfTree iftree)
+	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
 	this->_ports.push_back(new SpoofPort<A>(*this, OtherPeer<A>::get()));
@@ -485,13 +485,16 @@ public:
 // write this code out twice.  OutputClass is only referenced in one location
 // so it's not rocket science to comprehend this.
 //
+
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
 template <typename A, typename OutputClass>
 class OutputTester
 {
 public:
     OutputTester(const set<IPNet<A> >& test_peer_nets,
 		 const set<IPNet<A> >& other_peer_nets)
-	: _e(), _rip_system(_e), _pm(_rip_system),
+	: _e(), _rip_system(_e), _pm(_rip_system, ift_dummy),
 	  _tpn(test_peer_nets), _opn(other_peer_nets)
     {
 	_pm.test_port()->constants().set_expiry_secs(10);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.13 2005/03/25 02:54:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_update_queue.cc,v 1.15 2005/08/18 15:41:28 bms Exp $"
 
 #include <set>
 
@@ -94,8 +94,8 @@ IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s)
-	: PortManagerBase<A>(s)
+    SpoofPortManager(System<A>& s, IfMgrIfTree iftree)
+	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
     }
@@ -124,12 +124,14 @@ public:
 
 
 
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
 template <typename A>
 class UpdateQueueTester
 {
 public:
     UpdateQueueTester(EventLoop& e)
-	: _e(e), _rip_system(_e), _pm(_rip_system)
+	: _e(e), _rip_system(_e), _pm(_rip_system, ift_dummy)
     {
 	_pm.the_port()->constants().set_expiry_secs(3);
 	_pm.the_port()->constants().set_deletion_secs(2);

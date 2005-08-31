@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.36 2005/08/18 15:41:27 bms Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.37 2005/08/31 19:11:14 pavlin Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -107,12 +107,14 @@ test_timers_LDADD		+= $(LDADD)
 test_update_queue_SOURCES	 = test_update_queue.cc test_utils.hh
 test_update_queue_LDADD		 = ./librip.la ./libripng.la
 test_update_queue_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+test_update_queue_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_update_queue_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_update_queue_LDADD		+= $(LDADD)
 
 test_outputs_SOURCES		 = test_outputs.cc test_utils.hh
 test_outputs_LDADD		 = ./librip.la ./libripng.la
 test_outputs_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+test_outputs_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_outputs_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_outputs_LDADD		+= $(LDADD)
 
