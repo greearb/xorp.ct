@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.23 2005/08/18 15:45:43 bms Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.24 2005/08/31 02:02:30 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -681,8 +681,8 @@ ClickSocket::mount_click_file_system(string& error_msg)
 #if defined(HOST_OS_WINDOWS)
     // Whilst Cygwin has a mount(), it is very different.
     // Windows itself has no mount().
-    return (XORP_ERROR);
     UNUSED(error_msg);
+    return (XORP_ERROR);
 #else
     if (_kernel_click_mount_directory.empty()) {
 	error_msg = c_format("Kernel Click mount directory is empty");
@@ -764,8 +764,8 @@ int
 ClickSocket::unmount_click_file_system(string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
-    return (XORP_OK);
     UNUSED(error_msg);
+    return (XORP_OK);
 #else
     if (_mounted_kernel_click_mount_directory.empty())
 	return (XORP_OK);	// Directory not mounted
@@ -860,7 +860,6 @@ ClickSocket::write_config(const string& element, const string& handler,
 			  string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
-    return (0);
     UNUSED(element);
     UNUSED(handler);
     UNUSED(has_kernel_config);
@@ -868,6 +867,7 @@ ClickSocket::write_config(const string& element, const string& handler,
     UNUSED(has_user_config);
     UNUSED(user_config);
     UNUSED(error_msg);
+    return (0);
 #else /* !HOST_OS_WINDOWS */
     if (is_kernel_click() && has_kernel_config) {
 	//
@@ -1005,10 +1005,10 @@ ssize_t
 ClickSocket::write(XorpFd fd, const void* data, size_t nbytes)
 {
 #ifdef HOST_OS_WINDOWS
-    return (0);
     UNUSED(fd);
     UNUSED(data);
     UNUSED(nbytes);
+    return (0);
 #else
     _seqno++;
     return ::write(fd, data, nbytes);
@@ -1134,10 +1134,10 @@ ClickSocket::force_read_message(XorpFd fd, vector<uint8_t>& message,
 				string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
-    return (XORP_ERROR);
     UNUSED(fd);
     UNUSED(message);
     UNUSED(error_msg);
+    return (XORP_ERROR);
 #else /* !HOST_OS_WINDOWS */
     vector<uint8_t> buffer(CLSOCK_BYTES);
 
