@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.14 2005/03/05 01:58:51 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.15 2005/03/25 02:53:21 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -681,20 +681,6 @@ private:
      * @param fib2mrib_route the route with the request that would be canceled.
      */
     virtual void cancel_rib_route_change(const Fib2mribRoute& fib2mrib_route) = 0;
-
-    /**
-     * Test if an address is directly connected to an interface.
-     * 
-     * If an interface toward an address is down, then the address is not
-     * considered as directly connected.
-     * 
-     * @param iftree the tree with the interface state.
-     * @param addr the address to test.
-     * @return true if @ref addr is directly connected to an interface
-     * contained inside @ref iftree, otherwise false.
-     */
-    bool is_directly_connected(const IfMgrIfTree& iftree,
-			       const IPvX& addr) const;
 
     /**
      * Update a route received from the FEA.
