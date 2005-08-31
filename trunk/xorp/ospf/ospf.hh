@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/ospf.hh,v 1.39 2005/08/11 20:36:32 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -77,6 +77,11 @@ struct OspfTypes {
      * An opaque handle that identifies a neighbour.
      */
     typedef uint32_t NeighbourID;
+
+    /**
+     * The IP protocol number used by OSPF.
+     */
+    static const uint16_t IP_PROTCOL_NUMBER = 89;
 
     /** 
      * An identifier meaning all neighbours. No single neighbour can
@@ -261,6 +266,18 @@ class Ospf {
      * Disable this interface/vif from receiving frames.
      */
     bool disable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * On the interface/vif join this multicast group.
+     */
+    bool join_multicast_group(const string& interface, const string& vif,
+			      A mcast);
+    
+    /**
+     * On the interface/vif leave this multicast group.
+     */
+    bool leave_multicast_group(const string& interface, const string& vif,
+			       A mcast);
 
     /**
      * Set the interface ID OSPFv3 only.
