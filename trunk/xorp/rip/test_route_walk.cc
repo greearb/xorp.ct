@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.11 2005/03/25 02:54:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.13 2005/08/18 15:41:27 bms Exp $"
 
 #include <set>
 
@@ -95,8 +95,8 @@ IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s)
-	: PortManagerBase<A>(s)
+    SpoofPortManager(System<A>& s, const IfMgrIfTree& iftree)
+	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
     }
@@ -133,8 +133,8 @@ template <typename A>
 class RouteWalkTester
 {
 public:
-    RouteWalkTester()
-	: _e(), _rip_system(_e), _pm(_rip_system)
+    RouteWalkTester(const IfMgrIfTree& iftree)
+	: _e(), _rip_system(_e), _pm(_rip_system, iftree)
     {
 	_pm.the_port()->constants().set_expiry_secs(3);
 	_pm.the_port()->constants().set_deletion_secs(2);
@@ -350,11 +350,13 @@ main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	{
-	    RouteWalkTester<IPv4> rwt4;
+	    IfMgrIfTree iftree;
+	    RouteWalkTester<IPv4> rwt4(iftree);
 	    rval = rwt4.run_test();
 	}
 	{
-	    RouteWalkTester<IPv6> rwt6;
+	    IfMgrIfTree iftree;
+	    RouteWalkTester<IPv6> rwt6(iftree);
 	    rval |= rwt6.run_test();
 	}
     } catch (...) {

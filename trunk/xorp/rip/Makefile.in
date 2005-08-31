@@ -127,13 +127,13 @@ test_packets_SOURCES = test_packets.cc test_utils.hh
 test_packets_LDADD = ./librip.la $(LDADD)
 
 test_request_SOURCES = test_request.cc test_utils.hh
-test_request_LDADD = ./librip.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
+test_request_LDADD = ./librip.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 test_route_walk_SOURCES = test_route_walk.cc test_utils.hh
-test_route_walk_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
+test_route_walk_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 test_timers_SOURCES = test_timers.cc test_utils.hh
-test_timers_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
+test_timers_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 test_update_queue_SOURCES = test_update_queue.cc test_utils.hh
 test_update_queue_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
@@ -231,6 +231,7 @@ am_test_request_OBJECTS = test_request.$(OBJEXT)
 test_request_OBJECTS = $(am_test_request_OBJECTS)
 test_request_DEPENDENCIES = ./librip.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_request_LDFLAGS =
@@ -238,6 +239,7 @@ am_test_route_walk_OBJECTS = test_route_walk.$(OBJEXT)
 test_route_walk_OBJECTS = $(am_test_route_walk_OBJECTS)
 test_route_walk_DEPENDENCIES = ./librip.la ./libripng.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_route_walk_LDFLAGS =
@@ -245,6 +247,7 @@ am_test_timers_OBJECTS = test_timers.$(OBJEXT)
 test_timers_OBJECTS = $(am_test_timers_OBJECTS)
 test_timers_DEPENDENCIES = ./librip.la ./libripng.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_timers_LDFLAGS =

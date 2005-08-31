@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/rip/Makefile.am,v 1.34 2004/11/23 22:43:47 bms Exp $
+## $XORP: xorp/rip/Makefile.am,v 1.36 2005/08/18 15:41:27 bms Exp $
 ##
 
 SUBDIRS 			 = . tools
@@ -86,18 +86,21 @@ test_packets_LDADD		 = ./librip.la $(LDADD)
 test_request_SOURCES		 = test_request.cc test_utils.hh
 test_request_LDADD		 = ./librip.la
 test_request_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+test_request_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_request_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_request_LDADD		+= $(LDADD)
 
 test_route_walk_SOURCES		 = test_route_walk.cc test_utils.hh
 test_route_walk_LDADD		 = ./librip.la ./libripng.la
 test_route_walk_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+test_route_walk_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_route_walk_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_route_walk_LDADD		+= $(LDADD)
 
 test_timers_SOURCES		 = test_timers.cc test_utils.hh
 test_timers_LDADD		 = ./librip.la ./libripng.la
 test_timers_LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+test_timers_LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 test_timers_LDADD		+= $(top_builddir)/libxipc/libxipc.la
 test_timers_LDADD		+= $(LDADD)
 
