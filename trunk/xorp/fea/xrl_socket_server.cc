@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.25 2005/08/18 15:45:53 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_socket_server.cc,v 1.26 2005/08/19 07:31:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -328,13 +328,13 @@ XrlSocketServer::RemoteSocket<A>::set_data_recv_enable(bool en)
 {
     EventLoop& eventloop = _ss.eventloop();
     if (en) {
-	debug_msg("Adding io event hook for %s\n", _fd.str().c_str());
+	debug_msg("Adding I/O event hook for %s\n", _fd.str().c_str());
 	if (eventloop.add_ioevent_cb(_fd, IOT_READ,
 			callback(this, &RemoteSocket::data_io_cb)) == false) {
-	    XLOG_ERROR("FAILED TO ADD IO CALLBACK %s\n", _fd.str().c_str());
+	    XLOG_ERROR("FAILED TO ADD I/O CALLBACK %s\n", _fd.str().c_str());
 	}
     } else {
-	debug_msg("Removing io event hook for %s\n", _fd.str().c_str());
+	debug_msg("Removing I/O event hook for %s\n", _fd.str().c_str());
 	eventloop.remove_ioevent_cb(_fd);
     }
 }
@@ -405,7 +405,7 @@ XrlSocketServer::RemoteSocket<A>::accept_io_cb(XorpFd fd, IoEventType)
     if (!afd.is_valid()) {
 	ref_ptr<XrlSocketCommandBase*> ecmd = new
 	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
-comm_get_last_error_str(), false);
+					comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
@@ -415,7 +415,7 @@ comm_get_last_error_str(), false);
     if (error != 0) {
 	ref_ptr<XrlSocketCommandBase*> ecmd = new
 	    SocketUserSendErrorEvent<A>(owner()->tgt_name(), sockid(),
-comm_get_last_error_str(), false);
+					comm_get_last_error_str(), false);
 	owner().enqueue(ecmd);
 	return;
     }
@@ -873,8 +873,8 @@ XrlSocketServer::socket4_0_1_udp_open_bind_connect(
 
     int in_progress = 0;
     XorpFd fd = comm_bind_connect_udp4(&ia, htons(local_port),
-				    &ra, htons(remote_port),
-				    is_blocking, &in_progress);
+				       &ra, htons(remote_port),
+				       is_blocking, &in_progress);
     if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1014,7 +1014,7 @@ XrlSocketServer::socket4_0_1_send(
 	RemoteSocket<IPv4>* rs = ci->get();
 	if (rs->sockid() == sockid) {
 	    int out = send(rs->fd(),
-reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+			   reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
 			   data.size(), 0);
 	    if (out == (int)data.size()) {
 		return XrlCmdError::OKAY();
@@ -1049,7 +1049,7 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 	    flags |= MSG_OOB;
 #else
 	if (out_of_band)
-	    XLOG_WARNING("sendto with end_of_record, "
+	    XLOG_WARNING("sendto with out_of_band, "
 			 "but platform has no MSG_OOB\n");
 #endif
 
@@ -1057,10 +1057,9 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_file)
+	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
-	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1073,7 +1072,7 @@ XrlSocketServer::socket4_0_1_send_with_flags(
 #endif
 
 	int out = send(rs->fd(),
-reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+		       reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
 			data.size(), flags);
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
@@ -1103,7 +1102,7 @@ XrlSocketServer::socket4_0_1_send_to(const string&		sockid,
 	    }
 	    sai.sin_port = htons(remote_port);
 	    int out = sendto(rs->fd(),
-reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
+			     reinterpret_cast<char *>(const_cast<uint8_t *>(&data[0])),
 			     data.size(), 0,
 			     reinterpret_cast<const sockaddr*>(&sai),
 			     sizeof(sai));
@@ -1148,7 +1147,7 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	    flags |= MSG_OOB;
 #else
 	if (out_of_band)
-	    XLOG_WARNING("sendto with end_of_record, "
+	    XLOG_WARNING("sendto with out_of_band, "
 			 "but platform has no MSG_OOB\n");
 #endif
 
@@ -1156,10 +1155,9 @@ XrlSocketServer::socket4_0_1_send_to_with_flags(const string&	sockid,
 	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_file)
+	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
-	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1254,7 +1252,7 @@ XrlSocketServer::socket4_0_1_set_socket_option(const string&	sockid,
 
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (setsockopt(fd, IPPROTO_IP, IP_MULTICAST_LOOP,
-const_cast<char*>(reinterpret_cast<const char*>(&optval)),
+		       const_cast<char*>(reinterpret_cast<const char*>(&optval)),
 		       sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
@@ -1298,7 +1296,7 @@ XrlSocketServer::socket4_0_1_get_socket_option(const string&	sockid,
 	}
     } else if (strcasecmp(o_cstr, "multicast_ttl") == 0) {
 	if (getsockopt(fd, IPPROTO_IP, IP_MULTICAST_TTL,
-			XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
+		       XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {
@@ -1422,7 +1420,7 @@ XrlSocketServer::socket6_0_1_udp_open_bind_join(const string&	creator,
     mcast_addr.copy_out(grp);
 
     XorpFd fd = comm_bind_join_udp6(&grp, pif_index, htons(local_port), reuse,
-				 is_blocking);
+				    is_blocking);
     if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1544,8 +1542,8 @@ XrlSocketServer::socket6_0_1_udp_open_bind_connect(
 
     int in_progress = 0;
     XorpFd fd = comm_bind_connect_udp6(&ia, htons(local_port),
-				    &ra, htons(remote_port),
-				    is_blocking, &in_progress);
+				       &ra, htons(remote_port),
+				       is_blocking, &in_progress);
     if (!fd.is_valid()) {
 	return XrlCmdError::COMMAND_FAILED(last_comm_error());
     }
@@ -1740,7 +1738,7 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 	    flags |= MSG_OOB;
 #else
 	if (out_of_band)
-	    XLOG_WARNING("sendto with end_of_record, "
+	    XLOG_WARNING("sendto with out_of_band, "
 			 "but platform has no MSG_OOB\n");
 #endif
 
@@ -1748,10 +1746,9 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_file)
+	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
-	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1764,7 +1761,7 @@ XrlSocketServer::socket6_0_1_send_with_flags(
 #endif
 
 	int out = send(rs->fd(), _FEA_BUF_CONST_CAST(&data[0]),
-			data.size(), flags);
+		       data.size(), flags);
 	if (out == (int)data.size()) {
 	    return XrlCmdError::OKAY();
 	}
@@ -1843,7 +1840,7 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	    flags |= MSG_OOB;
 #else
 	if (out_of_band)
-	    XLOG_WARNING("sendto with end_of_record, "
+	    XLOG_WARNING("sendto with out_of_band, "
 			 "but platform has no MSG_OOB\n");
 #endif
 
@@ -1851,10 +1848,9 @@ XrlSocketServer::socket6_0_1_send_to_with_flags(const string&	sockid,
 	if (end_of_record)
 	    flags |= MSG_EOR;
 #else
-	if (end_of_file)
+	if (end_of_record)
 	    XLOG_WARNING("sendto with end_of_record, "
 			 "but platform has no MSG_EOR\n");
-	UNUSED(end_of_record);
 #endif
 
 #ifdef MSG_EOF
@@ -1927,16 +1923,16 @@ XrlSocketServer::socket6_0_1_send_from_multicast_if(
 
     // Restore old multicast interface
     setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_IF,
-		XORP_SOCKOPT_CAST(&old_pi), sizeof(old_pi));
+	       XORP_SOCKOPT_CAST(&old_pi), sizeof(old_pi));
     return r;
-#else
+#else // ! HAVE_IPV6
     UNUSED(sockid);
     UNUSED(group_addr);
     UNUSED(group_port);
     UNUSED(if_addr);
     UNUSED(data);
     return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
-#endif
+#endif // ! HAVE_IPV6
 }
 
 XrlCmdError
@@ -1962,12 +1958,12 @@ XrlSocketServer::socket6_0_1_set_socket_option(const string&	sockid,
 
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-			XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
+		       XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
 	if (setsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_HOPS,
-			XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
+		       XORP_SOCKOPT_CAST(&optval), sizeof(optval)) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else {
@@ -1975,12 +1971,12 @@ XrlSocketServer::socket6_0_1_set_socket_option(const string&	sockid,
     }
 
     return XrlCmdError::OKAY();
-#else
+#else // ! HAVE_IPV6
     UNUSED(sockid);
     UNUSED(optname);
     UNUSED(optval);
     return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
-#endif
+#endif // ! HAVE_IPV6
 }
 
 XrlCmdError
@@ -2006,7 +2002,7 @@ XrlSocketServer::socket6_0_1_get_socket_option(const string&	sockid,
     socklen_t			optlen = sizeof(optval);
     if (strcasecmp(o_cstr, "multicast_loopback") == 0) {
 	if (getsockopt(fd, IPPROTO_IPV6, IPV6_MULTICAST_LOOP,
-			XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
+		       XORP_SOCKOPT_CAST(&optval), &optlen) != 0) {
 	    return XrlCmdError::COMMAND_FAILED(strerror(errno));
 	}
     } else if (strcasecmp(o_cstr, "multicast_hops") == 0) {
@@ -2019,12 +2015,12 @@ XrlSocketServer::socket6_0_1_get_socket_option(const string&	sockid,
     }
 
     return XrlCmdError::OKAY();
-#else
+#else // ! HAVE_IPV6
     UNUSED(sockid);
     UNUSED(optname);
     UNUSED(optval);
     return XrlCmdError::COMMAND_FAILED(NO_IPV6_MSG);
-#endif
+#endif // ! HAVE_IPV6
 }
 
 
