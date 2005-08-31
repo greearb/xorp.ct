@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/io.hh,v 1.8 2005/08/05 04:49:14 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -27,6 +27,13 @@ template <typename A>
 class IO {
  public:
     virtual ~IO() {}
+
+    /**
+     * Get OSPF protocol number.
+     */
+    uint16_t get_ip_protocol_number() const {
+	return OspfTypes::IP_PROTCOL_NUMBER;
+    }
 
     /**
      * Send Raw frames.
@@ -55,7 +62,20 @@ class IO {
      */
     virtual bool disable_interface_vif(const string& interface,
 				       const string& vif) = 0;
+
+    /**
+     * On the interface/vif join this multicast group.
+     */
+    virtual bool join_multicast_group(const string& interface,
+				      const string& vif, A mcast) = 0;
     
+
+    /**
+     * On the interface/vif leave this multicast group.
+     */
+    virtual bool leave_multicast_group(const string& interface,
+				       const string& vif, A mcast) = 0;
+
     /**
      * Add route
      *

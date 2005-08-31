@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.131 2005/08/30 00:47:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.132 2005/08/30 03:59:43 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -288,6 +288,9 @@ PeerOut<A>::bring_up_peering()
 {
     // Start receiving packets on this peering.
     _ospf.enable_interface_vif(_interface, _vif);
+    _ospf.join_multicast_group(_interface, _vif, A::OSPFIGP_ROUTERS());
+    _ospf.join_multicast_group(_interface, _vif,
+			       A::OSPFIGP_DESIGNATED_ROUTERS());
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
@@ -304,6 +307,9 @@ template <typename A>
 void
 PeerOut<A>::take_down_peering()
 {
+    _ospf.leave_multicast_group(_interface, _vif, A::OSPFIGP_ROUTERS());
+    _ospf.leave_multicast_group(_interface, _vif,
+			       A::OSPFIGP_DESIGNATED_ROUTERS());
     _ospf.disable_interface_vif(_interface, _vif);
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;

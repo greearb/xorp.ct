@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.29 2005/08/11 20:36:32 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -115,6 +115,28 @@ Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     return _io->disable_interface_vif(interface, vif);
+}
+
+template <typename A>
+bool
+Ospf<A>::join_multicast_group(const string& interface, const string& vif,
+			      A mcast)
+{
+    debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
+
+    return _io->join_multicast_group(interface, vif, mcast);
+}
+
+template <typename A>
+bool
+Ospf<A>::leave_multicast_group(const string& interface, const string& vif,
+			      A mcast)
+{
+    debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
+
+    return _io->leave_multicast_group(interface, vif, mcast);
 }
 
 template <typename A>

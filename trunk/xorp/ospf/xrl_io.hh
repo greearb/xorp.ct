@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/xrl_io.hh,v 1.5 2005/08/05 04:49:14 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -54,6 +54,19 @@ class XrlIO : public IO<A> {
      * Disable this interface/vif from receiving frames.
      */
     bool disable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * On the interface/vif join this multicast group.
+     */
+    bool join_multicast_group(const string& interface, const string& vif,
+			      A mcast);
+    
+
+    /**
+     * On the interface/vif leave this multicast group.
+     */
+    bool leave_multicast_group(const string& interface, const string& vif,
+			       A mcast);
 
     /**
      * Add route to RIB.

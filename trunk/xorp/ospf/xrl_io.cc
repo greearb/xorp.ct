@@ -13,12 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.5 2005/08/05 04:49:14 atanu Exp $"
 
 #include "config.h"
+#include <list>
+#include <set>
+
 #include "ospf_module.h"
 
-#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
@@ -27,6 +29,9 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
 
+#include "libxorp/eventloop.hh"
+
+#include "ospf.hh"
 #include "xrl_io.hh"
 
 template <typename A>
@@ -70,6 +75,32 @@ bool
 XrlIO<A>::disable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+template <typename A>
+bool
+XrlIO<A>::join_multicast_group(const string& interface, const string& vif,
+			       A mcast)
+{
+    debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+template <typename A>
+bool
+XrlIO<A>::leave_multicast_group(const string& interface, const string& vif,
+			       A mcast)
+{
+    debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
+	      vif.c_str(), cstring(mcast));
 
     XLOG_UNFINISHED();
 

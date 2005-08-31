@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.38 2005/08/26 21:25:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.39 2005/08/27 23:47:13 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -153,6 +153,30 @@ class DebugIO : public IO<A> {
     {
 	DOUT(_info) << "disable_interface_vif(" << interface << "," << vif <<
 	    "...)" << endl;
+
+	return true;
+    }
+
+    /**
+     * On the interface/vif join this multicast group.
+     */
+    bool join_multicast_group(const string& interface, const string& vif,
+			      A mcast)
+    {
+	DOUT(_info) << "join_multicast_group(" << interface << "," << vif <<
+	    "," << mcast.str() << ")" << endl;
+
+	return true;
+    }
+
+    /**
+     * On the interface/vif leave this multicast group.
+     */
+    bool leave_multicast_group(const string& interface, const string& vif,
+			      A mcast)
+    {
+	DOUT(_info) << "leave_multicast_group(" << interface << "," << vif <<
+	    "," << mcast.str() << ")" << endl;
 
 	return true;
     }
