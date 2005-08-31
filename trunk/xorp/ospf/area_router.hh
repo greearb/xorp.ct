@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.49 2005/08/30 00:47:51 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.50 2005/08/30 03:59:43 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -325,6 +325,16 @@ class AreaRouter {
      * @return true if an LSA was found. 
      */
     bool find_lsa(Lsa::LsaRef lsar, size_t& index) const;
+
+    /**
+     * Find Network-LSA.
+     *
+     * @param link_state_id
+     * @param index into LSA database if search succeeded.
+     *
+     * @return true if an LSA was found. 
+     */
+    bool find_network_lsa(uint32_t link_state_id, size_t& index) const;
 
     /**
      * Compare this LSA to 

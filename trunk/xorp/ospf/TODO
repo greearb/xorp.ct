@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.36 2005/08/30 00:15:40 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.37 2005/08/30 23:43:33 atanu Exp $
 #
 
 TODO
@@ -54,6 +54,12 @@ packet has been seen from it in the last RouterDeadInterval seconds.
 26) send_lsa() has not been tested.
 
 27) update_router_linksV2(), the DR_other case looks bogus.
+
+28) An LSA can be looked up by type,id and advertising router
+(find_lsa()). In an exception to this Network-LSAs can be looked up by
+id only (find_network_lsa()). The two lookups are currently linear
+scans of the database. Add a map for each lookup type to speed up
+lookup.
 
 Possible issues
 ~~~~~~~~~~~~~~~

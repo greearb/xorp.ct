@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.68 2005/08/30 04:07:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.69 2005/08/31 16:14:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -665,6 +665,30 @@ AreaRouter<A>::find_lsa(Lsa::LsaRef lsar, size_t& index) const
 		   lsah.get_link_state_id(), lsah.get_advertising_router());
 
     return find_lsa(lsr, index);
+}
+
+template <typename A>
+bool
+AreaRouter<A>::find_network_lsa(uint32_t link_state_id, size_t& index) const
+{
+    uint32_t ls_type = NetworkLsa(_ospf.get_version()).get_ls_type();
+
+    for(index = 0 ; index < _last_entry; index++) {
+	if (!_db[index]->valid())
+	    continue;
+	Lsa_header& dblsah = _db[index]->get_header();
+	if (dblsah.get_ls_type() != ls_type)
+	    continue;
+
+	if (dblsah.get_link_state_id() != link_state_id)
+	    continue;
+
+	// Note we deliberately don't check for advertising router.
+
+	return true;
+    }
+
+    return false;
 }
 
 /**
