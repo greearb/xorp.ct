@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.89 2005/08/18 15:38:49 bms Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.90 2005/08/30 23:43:41 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -3227,8 +3227,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %u",
-				    XORP_UINT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3285,8 +3285,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %u",
-				    XORP_UINT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3341,8 +3341,8 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message4(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %u",
-				    XORP_UINT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3395,8 +3395,8 @@ XrlPimNode::mfea_client_0_1_recv_kernel_signal_message6(
     //
     xorp_module_id src_module_id = static_cast<xorp_module_id>(protocol_id);
     if (! is_valid_module_id(src_module_id)) {
-	string error_msg = c_format("Invalid module ID = %u",
-				    XORP_UINT_CAST(protocol_id));
+	error_msg = c_format("Invalid module ID = %u",
+			     XORP_UINT_CAST(protocol_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3568,9 +3568,8 @@ XrlPimNode::redist_transaction4_0_1_commit_transaction(
     }
 
     if (_mrib_transaction_manager.commit(tid) != true) {
-	string error_msg = c_format("Cannot commit MRIB transaction "
-				    "for tid %u",
-				    XORP_UINT_CAST(tid));
+	error_msg = c_format("Cannot commit MRIB transaction for tid %u",
+			     XORP_UINT_CAST(tid));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3596,8 +3595,8 @@ XrlPimNode::redist_transaction4_0_1_abort_transaction(
     }
 
     if (_mrib_transaction_manager.abort(tid) != true) {
-	string error_msg = c_format("Cannot abort MRIB transaction for tid %u",
-				    XORP_UINT_CAST(tid));
+	error_msg = c_format("Cannot abort MRIB transaction for tid %u",
+			     XORP_UINT_CAST(tid));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3768,9 +3767,8 @@ XrlPimNode::redist_transaction6_0_1_commit_transaction(
     }
 
     if (_mrib_transaction_manager.commit(tid) != true) {
-	string error_msg = c_format("Cannot commit MRIB transaction "
-				    "for tid %u",
-				    XORP_UINT_CAST(tid));
+	error_msg = c_format("Cannot commit MRIB transaction for tid %u",
+			     XORP_UINT_CAST(tid));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -3796,8 +3794,8 @@ XrlPimNode::redist_transaction6_0_1_abort_transaction(
     }
 
     if (_mrib_transaction_manager.abort(tid) != true) {
-	string error_msg = c_format("Cannot abort MRIB transaction for tid %u",
-				    XORP_UINT_CAST(tid));
+	error_msg = c_format("Cannot abort MRIB transaction for tid %u",
+			     XORP_UINT_CAST(tid));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5847,21 +5845,21 @@ XrlPimNode::pim_0_1_add_test_jp_entry4(
     } while (false);
     
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %u",
-			     	    XORP_UINT_CAST(group_mask_len));
+	error_msg = c_format("Invalid group mask length = %u",
+			     XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // XXX: Dupe?
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %u",
-			     	    XORP_UINT_CAST(group_mask_len));
+	error_msg = c_format("Invalid group mask length = %u",
+			     XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (holdtime > 0xffff) {
-	string error_msg = c_format("Invalid holdtime = %u",
-			     	    XORP_UINT_CAST(holdtime));
+	error_msg = c_format("Invalid holdtime = %u",
+			     XORP_UINT_CAST(holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -5950,14 +5948,14 @@ XrlPimNode::pim_0_1_add_test_jp_entry6(
     } while (false);
     
     if (group_mask_len > 0xff) {
-	string error_msg = c_format("Invalid group mask length = %u",
-				    XORP_UINT_CAST(group_mask_len));
+	error_msg = c_format("Invalid group mask length = %u",
+			     XORP_UINT_CAST(group_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (holdtime > 0xffff) {
-	string error_msg = c_format("Invalid holdtime = %u",
-				    XORP_UINT_CAST(holdtime));
+	error_msg = c_format("Invalid holdtime = %u",
+			     XORP_UINT_CAST(holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6131,20 +6129,20 @@ XrlPimNode::pim_0_1_add_test_bsr_zone4(
     }
 
     if (bsr_priority > 0xff) {
-	string error_msg = c_format("Invalid BSR priority = %u",
-				    XORP_UINT_CAST(bsr_priority));
+	error_msg = c_format("Invalid BSR priority = %u",
+			     XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	string error_msg = c_format("Invalid hash mask length = %u",
-				    XORP_UINT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (fragment_tag > 0xffff) {
-	string error_msg = c_format("Invalid fragment tag = %u",
-				    XORP_UINT_CAST(fragment_tag));
+	error_msg = c_format("Invalid fragment tag = %u",
+			     XORP_UINT_CAST(fragment_tag));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6188,20 +6186,20 @@ XrlPimNode::pim_0_1_add_test_bsr_zone6(
     }
 
     if (bsr_priority > 0xff) {
-	string error_msg = c_format("Invalid BSR priority = %u",
-				    XORP_UINT_CAST(bsr_priority));
+	error_msg = c_format("Invalid BSR priority = %u",
+			     XORP_UINT_CAST(bsr_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (hash_mask_len > 0xff) {
-	string error_msg = c_format("Invalid hash mask length = %u",
-				    XORP_UINT_CAST(hash_mask_len));
+	error_msg = c_format("Invalid hash mask length = %u",
+			     XORP_UINT_CAST(hash_mask_len));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (fragment_tag > 0xffff) {
-	string error_msg = c_format("Invalid fragment tag = %u",
-				    XORP_UINT_CAST(fragment_tag));
+	error_msg = c_format("Invalid fragment tag = %u",
+			     XORP_UINT_CAST(fragment_tag));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -6244,8 +6242,8 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix4(
     }
 
     if (expected_rp_count > 0xff) {
-	string error_msg = c_format("Invalid expected RP count = %u",
-				    XORP_UINT_CAST(expected_rp_count));
+	error_msg = c_format("Invalid expected RP count = %u",
+			     XORP_UINT_CAST(expected_rp_count));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6288,8 +6286,8 @@ XrlPimNode::pim_0_1_add_test_bsr_group_prefix6(
     }
 
     if (expected_rp_count > 0xff) {
-	string error_msg = c_format("Invalid expected RP count = %u",
-				    XORP_UINT_CAST(expected_rp_count));
+	error_msg = c_format("Invalid expected RP count = %u",
+			     XORP_UINT_CAST(expected_rp_count));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6333,14 +6331,14 @@ XrlPimNode::pim_0_1_add_test_bsr_rp4(
     }
 
     if (rp_priority > 0xff) {
-	string error_msg = c_format("Invalid RP priority = %u",
-				    XORP_UINT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	string error_msg = c_format("Invalid RP holdtime = %u",
-				    XORP_UINT_CAST(rp_holdtime));
+	error_msg = c_format("Invalid RP holdtime = %u",
+			     XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6385,14 +6383,14 @@ XrlPimNode::pim_0_1_add_test_bsr_rp6(
     }
 
     if (rp_priority > 0xff) {
-	string error_msg = c_format("Invalid RP priority = %u",
-				    XORP_UINT_CAST(rp_priority));
+	error_msg = c_format("Invalid RP priority = %u",
+			     XORP_UINT_CAST(rp_priority));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
     if (rp_holdtime > 0xffff) {
-	string error_msg = c_format("Invalid RP holdtime = %u",
-				    XORP_UINT_CAST(rp_holdtime));
+	error_msg = c_format("Invalid RP holdtime = %u",
+			     XORP_UINT_CAST(rp_holdtime));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
