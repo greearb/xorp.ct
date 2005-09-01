@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.33 2005/08/18 15:45:50 bms Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.34 2005/08/31 22:39:30 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -967,13 +967,13 @@ ProtoComm::close_proto_socket()
 	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
 	    if (_proto_socket == mfea_node().mfea_mrouter().mrouter_socket()) {
 		if (!mfea_node().mfea_mrouter().adopt_mrouter_socket().is_valid()) {
-		    //
-		    // XXX: the control over the socket passed
-		    // to the MfeaMrouter
-		    //
 		    _proto_socket.clear();
-		    return (XORP_OK);
 		}
+		//
+		// XXX: the control over the socket passed
+		// to the MfeaMrouter
+		//
+		return (XORP_OK);
 	    }
 	}
 	break;
