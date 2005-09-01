@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.32 2005/08/24 22:38:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.33 2005/08/24 22:45:01 atanu Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -426,7 +426,7 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
     const struct sockaddr *local = get_bind_socket(len);
 
     /* Bind the local endpoint to the supplied address */
-    if (XORP_BAD_SOCKET == comm_sock_bind(sock, local)) {
+    if (XORP_ERROR == comm_sock_bind(sock, local)) {
 
 	/*
 	** This endpoint is now screwed so shut it.
