@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.22 2005/06/20 21:37:49 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.24 2005/07/26 12:12:18 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -396,7 +396,7 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
  * bind to all in network order.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-xsock_t
+int
 comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
 {
     switch (sin->sa_family) {

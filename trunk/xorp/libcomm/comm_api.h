@@ -31,7 +31,7 @@
  */
 
 /*
- * $XORP: xorp/libcomm/comm_api.h,v 1.17 2005/05/16 14:00:38 bms Exp $
+ * $XORP: xorp/libcomm/comm_api.h,v 1.20 2005/07/26 12:12:18 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_API_H__
@@ -504,7 +504,7 @@ extern int	comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
  * bind to all in network order.
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
-extern xsock_t	comm_sock_bind(xsock_t sock, const struct sockaddr *sin);
+extern int	comm_sock_bind(xsock_t sock, const struct sockaddr *sin);
 
 /**
  * Join an IPv4 multicast group on a socket (and an interface).
