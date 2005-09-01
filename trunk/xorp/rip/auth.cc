@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.13 2005/03/25 02:54:26 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.15 2005/08/18 15:41:27 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -87,7 +87,8 @@ bool
 NullAuthHandler::authenticate(const uint8_t*		     packet,
 			      size_t			     packet_bytes,
 			      const PacketRouteEntry<IPv4>*& entries,
-			      uint32_t&			     n_entries)
+			      uint32_t&			     n_entries,
+			      bool)
 {
     entries = 0;
     n_entries = 0;
@@ -186,7 +187,8 @@ bool
 PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
 				   size_t			  packet_bytes,
 				   const PacketRouteEntry<IPv4>*& entries,
-				   uint32_t&			  n_entries)
+				   uint32_t&			  n_entries,
+				   bool)
 {
     entries = 0;
     n_entries = 0;
@@ -422,7 +424,8 @@ bool
 MD5AuthHandler::authenticate(const uint8_t*		    packet,
 			     size_t			    packet_bytes,
 			     const PacketRouteEntry<IPv4>*& entries,
-			     uint32_t&			    n_entries)
+			     uint32_t&			    n_entries,
+			     bool			    new_peer)
 {
     static_assert(sizeof(MD5PacketTrailer) == 20);
 
@@ -480,7 +483,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 	return false;
     }
 
-    if (k->packets_received() &&
+    if (k->packets_received() && !(new_peer && mpr->seqno() == 0) &&
 	(mpr->seqno() == k->last_seqno_recv() ||
 	 mpr->seqno() - k->last_seqno_recv() >= 0x7fffffff)) {
 	set_error(c_format("bad sequence number 0x%08x < 0x%08x",

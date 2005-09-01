@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.5 2004/06/10 22:41:43 hodson Exp $
+// $XORP: xorp/rip/auth.hh,v 1.6 2005/03/25 02:54:26 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -52,7 +52,9 @@ public:
     virtual bool authenticate(const uint8_t*			packet,
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries,
-			      uint32_t&				n_entries) = 0;
+			      uint32_t&				n_entries,
+			      bool				new_peer
+			      ) = 0;
 
     /**
      * Outbound authentication method.
@@ -118,7 +120,8 @@ public:
     bool authenticate(const uint8_t*			packet,
 		      size_t				packet_bytes,
 		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries);
+		      uint32_t&				n_entries,
+		      bool				new_peer);
 
     uint32_t authenticate(const uint8_t*	  packet,
 			  size_t		  packet_bytes,
@@ -143,7 +146,8 @@ public:
     bool authenticate(const uint8_t*			packet,
 		      size_t				packet_bytes,
 		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries);
+		      uint32_t&				n_entries,
+		      bool				new_peer);
 
     uint32_t authenticate(const uint8_t*	  packet,
 			  size_t		  packet_bytes,
@@ -300,7 +304,8 @@ public:
     bool authenticate(const uint8_t*			packet,
 		      size_t				packet_bytes,
 		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries
+		      uint32_t&				n_entries,
+		      bool				new_peer
 		      );
 
     uint32_t authenticate(const uint8_t*	  packet,

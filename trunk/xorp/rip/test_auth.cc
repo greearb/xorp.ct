@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.14 2005/03/25 02:54:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.16 2005/08/18 15:41:27 bms Exp $"
 
 #include "rip_module.h"
 
@@ -116,7 +116,8 @@ check_auth_packet(const vector<uint8_t>& pkt,
     const PacketRouteEntry<IPv4>* entries = 0;
     uint32_t n_entries = 0;
 
-    if (ah.authenticate(&pkt[0], pkt.size(), entries, n_entries) == false) {
+    if (ah.authenticate(&pkt[0], pkt.size(), entries, n_entries, false)
+	== false) {
 	if (expect_fail == false) {
 	    verbose_log("Unexpected failure (actual entries %u, "
 			"expected %u) - %s\n",
