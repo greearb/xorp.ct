@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.42 2005/07/20 01:29:21 abittau Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.43 2005/08/18 15:58:05 bms Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -465,7 +465,7 @@ private:
 	    return *this;
 	}
 	string str() {
-	    return c_format("fd(%p)", _serverfd.str().c_str());
+	    return c_format("fd(%s)", _serverfd.str().c_str());
 
 	}
 	XorpFd _serverfd;
