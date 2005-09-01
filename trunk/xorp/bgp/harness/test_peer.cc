@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.31 2005/03/25 02:52:54 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.33 2005/08/18 15:58:10 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -544,7 +544,7 @@ TestPeer::zap(XorpFd& fd, const char *msg)
     fd.clear();
 
    _eventloop.remove_ioevent_cb(tempfd);
-   debug_msg("Removing io event cb for fd = %s\n", tempfd.str().c_str());
+   debug_msg("Removing I/O event cb for fd = %s\n", tempfd.str().c_str());
    if (comm_sock_close(tempfd) == -1) {
 	XLOG_WARNING("Close of %s failed: %s", msg, comm_get_last_error_str());
 	return false;
@@ -623,12 +623,12 @@ TestPeer::connect_attempt(XorpFd fd, IoEventType type)
     ** from the eventloop and close the file descriptor.
     */
    _eventloop.remove_ioevent_cb(fd);
-   debug_msg("Removing io event cb for fd = %s\n", fd.str().c_str());
+   debug_msg("Removing I/O event cb for fd = %s\n", fd.str().c_str());
    if (XORP_ERROR == comm_sock_close(fd))
 	XLOG_WARNING("Close failed");
 
    /*
-   ** If there is a coordinator then add an io event callback.
+   ** If there is a coordinator then add an I/O event callback.
    */
    if(0 != _coordinator.length() &&
        !_eventloop.add_ioevent_cb(connfd, IOT_READ,
