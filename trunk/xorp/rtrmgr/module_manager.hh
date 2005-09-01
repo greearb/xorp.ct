@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.31 2005/03/25 02:54:36 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.32 2005/08/18 15:54:27 bms Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -67,11 +67,9 @@ private:
     vector<string> _argv;	// command line arguments
     uid_t       _userid;        // userid to execute process as, zero
 				// for current user
+    pid_t	_pid;
 #ifdef HOST_OS_WINDOWS
-    pid_t	_pid;
     HANDLE	_phand;
-#else
-    pid_t	_pid;
 #endif
     bool	_do_exec;	// false indicates we're running in test mode,
 				// when we may not actually start any processes

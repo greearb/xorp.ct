@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.12 2005/03/25 02:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.14 2005/08/18 15:54:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -98,7 +98,7 @@ UserDB::load_password_file()
     string username("Administrator");
     uint32_t userid = 0;
     add_user(userid, username, userid);
-#else
+#else // ! HOST_OS_WINDOWS
     struct passwd* pwent;
 
     pwent = getpwent();
@@ -109,7 +109,7 @@ UserDB::load_password_file()
 	pwent = getpwent();
     }
     endpwent();
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 User* 
@@ -143,10 +143,10 @@ UserDB::add_user(uint32_t user_id, const string& username,
 	} else {
 	    XLOG_ERROR("Group \"xorp\" does not exist on this system.");
 	}
-#else
+#else // ! HOST_OS_WINDOWS
 	UNUSED(pw_gid);
 	newuser->add_acl_capability("config");
-#endif
+#endif // ! HOST_OS_WINDOWS
 	_users[user_id] = newuser;
 	return newuser;
     } else {

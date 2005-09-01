@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.44 2005/06/17 20:43:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.46 2005/08/18 15:54:27 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -207,7 +207,7 @@ child_handler(int x)
 	XLOG_UNREACHABLE();
     }
 }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
 Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
     : GenericModule(name), _mmgr(mmgr),
@@ -428,10 +428,8 @@ Module::set_execution_path(const string& path)
 	_expath = _path;
     }
 
-#ifdef HOST_OS_WINDOWS
     _path += EXECUTABLE_SUFFIX;
     _expath += EXECUTABLE_SUFFIX;
-#endif
 
     struct stat sb;
     if (stat(_expath.c_str(), &sb) < 0) {
@@ -470,7 +468,7 @@ Module::set_userid(uid_t userid) {
 #ifdef HOST_OS_WINDOWS
     UNUSED(userid);
 #else
-    //don't call thiss if you don't want to setuid.
+    // Don't call this if you don't want to setuid.
     XLOG_ASSERT(userid != NO_SETUID_ON_EXEC);
 
     _userid = userid;
@@ -553,7 +551,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 	    _phand = pi.hProcess;
 	}
 
-#else /* !HOST_OS_WINDOWS */
+#else // ! HOST_OS_WINDOWS
 	// We need to start a new process
 	signal(SIGCHLD, child_handler);
 	_pid = fork();
@@ -591,7 +589,7 @@ Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
 		}
 	    }
 	}
-#endif /* HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
 	debug_msg("New module has PID %p\n", (void *)_pid);
 
 	// Insert the new process in the map of processes

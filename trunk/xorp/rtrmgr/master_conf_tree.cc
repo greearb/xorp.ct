@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.57 2005/08/19 20:09:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.58 2005/08/23 20:57:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -798,7 +798,7 @@ MasterConfigTree::save_to_file(const string& filename,
 	    umask(orig_mask);
 	    return false;
 	}
-#endif
+#endif // ! HOST_OS_WINDOWS
 
 	file = fopen(full_filename.c_str(), "r");
 	if (file != NULL) {
@@ -993,11 +993,11 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 					      string& errmsg)
 {
 #ifdef HOST_OS_WINDOWS
-    return true;
     UNUSED(fp);
     UNUSED(user_id);
     UNUSED(errmsg);
-#else
+    return true;
+#else // ! HOST_OS_WINDOWS
     //
     // Set the user and group owner of the file, and change its permissions
     // so it is group-writable.
@@ -1023,7 +1023,7 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
     }
 
     return true;
-#endif // HOST_OS_WINDOWS
+#endif // ! HOST_OS_WINDOWS
 }
 
 bool

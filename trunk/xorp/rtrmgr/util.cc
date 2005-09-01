@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.15 2005/07/28 23:11:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.17 2005/08/18 15:54:28 bms Exp $"
 
 
 #include <list>
@@ -116,7 +116,7 @@ xorp_real_path(const string& path)
 {
 #ifdef HOST_OS_WINDOWS
     return path;
-#else
+#else // ! HOST_OS_WINDOWS
     debug_msg("path: %s\n", path.c_str());
 
     char rp[MAXPATHLEN];
@@ -128,7 +128,7 @@ xorp_real_path(const string& path)
     // XLOG_WARNING("realpath(%s) failed.", path.c_str());
     debug_msg("return %s\n", path.c_str());
     return path;
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 void
@@ -294,7 +294,7 @@ find_executable_filename(const string& program_filename)
     if (is_absolute_path(executable_filename)) {
 	// Absolute path name
 	if (stat(executable_filename.c_str(), &statbuf) == 0 &&
-	    // access(program_filename.c_str(), X_OK) == 0 &&
+	    // access(executable_filename.c_str(), X_OK) == 0 &&
 	    S_ISREG(statbuf.st_mode)) {
 	    return executable_filename;
 	}

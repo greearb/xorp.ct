@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.15 2005/03/25 02:54:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/randomness.cc,v 1.17 2005/08/18 15:54:28 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -84,7 +84,7 @@ RandomGen::RandomGen()
 	}
 	fclose(file);
     }
-#endif /* !HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
 
     if ((!_urandom_exists && !_random_exists) || not_enough_randomness) {
 	//
@@ -231,7 +231,7 @@ RandomGen::RandomGen()
 	    fwrite(&d, 1, sizeof(d), file);
 	    fclose(file);
 	}
-#endif /* !HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
     }
 }
 

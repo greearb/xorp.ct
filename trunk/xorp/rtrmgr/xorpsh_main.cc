@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.48 2005/08/18 15:54:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.49 2005/08/21 08:59:53 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -184,7 +184,7 @@ XorpShell::~XorpShell()
 	    _fddesc[i].clear();
 	}
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 void
@@ -215,9 +215,9 @@ XorpShell::run(const string& commands)
 	// xorpsh_write_commands_fd = pipedesc[1];
 	_fddesc[0] = xorpsh_input_fd = pipedesc[0];
 	_fddesc[1] = xorpsh_write_commands_fd = pipedesc[1];
-	xorpsh_output_fd = fileno(stdout);
+	xorpsh_output_fd = FILENO(stdout);
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
     // Signal handlers so we can clean up when we're killed
     signal(SIGTERM, signal_handler);
@@ -253,9 +253,9 @@ XorpShell::run(const string& commands)
 
 
 #ifdef NO_XORPSH_AUTHENTICATION
-// XXX: a hack to access the rtrmgr on a remote machine
+    // XXX: a hack to access the rtrmgr on a remote machine
     _authtoken = _authfile;
-#else
+#else // ! NO_XORPSH_AUTHENTICATION
     FILE* file = fopen(_authfile.c_str(), "r");
     if (file == NULL) {
 	XLOG_FATAL("Failed to open authfile %s", _authfile.c_str());
@@ -274,9 +274,9 @@ XorpShell::run(const string& commands)
 	XLOG_WARNING("xorpsh is unable to unlink temporary file %s",
 		     _authfile.c_str());
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
     _authtoken = buf;
-#endif
+#endif // ! NO_XORPSH_AUTHENTICATION
 
     XLOG_TRACE(_verbose, "authtoken = >%s<\n", _authtoken.c_str());
 
@@ -350,11 +350,11 @@ XorpShell::run(const string& commands)
 	    WriteFile(xorpsh_write_commands_fd, modified_commands.c_str(),
 		  modified_commands.size(), &written, NULL);
 	    CloseHandle(xorpsh_write_commands_fd);
-#else
+#else // ! HOST_OS_WINDOWS
 	    write(xorpsh_write_commands_fd, modified_commands.c_str(),
 		  modified_commands.size());
 	    close(xorpsh_write_commands_fd);
-#endif
+#endif // ! HOST_OS_WINDOWS
 	    xorpsh_write_commands_fd.clear();
 	}
     }
@@ -617,7 +617,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 
 #ifdef HOST_OS_WINDOWS
     string username("root");
-#else
+#else // ! HOST_OS_WINDOWS
     // Notify the user that the config changed
     struct passwd *pwent = getpwuid(user_id);
     string username;
@@ -625,7 +625,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
     else
 	username = pwent->pw_name;
-#endif
+#endif // ! HOST_OS_WINDOWS
     
     string alert = "The configuration had been changed by user " +
 	username + "\n";
