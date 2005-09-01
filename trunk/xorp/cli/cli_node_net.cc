@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.40 2005/07/26 06:49:52 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.42 2005/08/18 15:48:42 bms Exp $"
 
 
 //
@@ -142,7 +142,7 @@ CliNode::accept_connection(XorpFd fd, IoEventType type)
 {
     string error_msg;
 
-    debug_msg("Received connection on socket = %p, family = %d\n",
+    debug_msg("Received connection on socket = %s, family = %d\n",
 	      fd.str().c_str(), family());
     
     XLOG_ASSERT(type == IOT_ACCEPT);
@@ -418,7 +418,7 @@ CliClient::poll_conin()
 	client_read(input_fd(), IOT_READ);
     return true;
 }
-#endif
+#endif // HOST_OS_WINDOWS
 
 #ifdef HOST_OS_WINDOWS
 #define CONIN_POLL_INTERVAL	250	// milliseconds
@@ -430,12 +430,11 @@ CliClient::start_connection(string& error_msg)
 #ifdef HOST_OS_WINDOWS
     UNUSED(error_msg);
     if (!is_interactive()) {
-#endif
-    if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
-					    callback(this, &CliClient::client_read))
-	== false)
-	return (XORP_ERROR);
-#ifdef HOST_OS_WINDOWS
+	if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
+						  callback(this, &CliClient::client_read))
+	    == false) {
+	    return (XORP_ERROR);
+	}
     } else {
 	// stdio, so schedule a periodic timer every 400ms
 	// to poll for input.
@@ -445,8 +444,14 @@ CliClient::start_connection(string& error_msg)
 	_poll_conin_timer = cli_node().eventloop().new_periodic(
 				CONIN_POLL_INTERVAL,
 				callback(this, &CliClient::poll_conin));
-    } // !is_interactive
-#endif
+    }
+#else // ! HOST_OS_WINDOWS
+    if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
+					      callback(this, &CliClient::client_read))
+	== false) {
+	return (XORP_ERROR);
+    }
+#endif // ! HOST_OS_WINDOWS
     
     //
     // Setup the telnet options
@@ -504,7 +509,7 @@ CliClient::start_connection(string& error_msg)
 	    }
 	}
     }
-#endif /* HAVE_TERMIOS_H */
+#endif // HAVE_TERMIOS_H
     
     //
     // Setup the read/write file descriptors
@@ -549,8 +554,7 @@ CliClient::start_connection(string& error_msg)
 	    term_name = DEFAULT_TERM_TYPE;	// Set to default
     }
 
-    // XXX: struct winsize is a tty-ism
-#if 0
+#ifdef HAVE_TERMIOS_H
     // Get the terminal size
     if (is_output_tty()) {
 	struct winsize window_size;
@@ -589,7 +593,7 @@ CliClient::start_connection(string& error_msg)
 		      XORP_UINT_CAST(window_height()));
 	}
     }
-#endif
+#endif // HAVE_TERMIOS_H
 
     // Change the input and output streams for libtecla
     if (gl_change_terminal(_gl, _input_fd_file, _output_fd_file,
@@ -673,7 +677,7 @@ CliClient::stop_connection(string& error_msg)
 	    }
 	}
     }
-#endif /* HAVE_TERMIOS_H */
+#endif // HAVE_TERMIOS_H
 
     error_msg = "";
     return (XORP_OK);
