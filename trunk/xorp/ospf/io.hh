@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.8 2005/08/05 04:49:14 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.9 2005/08/31 23:38:46 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -32,7 +32,7 @@ class IO {
      * Get OSPF protocol number.
      */
     uint16_t get_ip_protocol_number() const {
-	return OspfTypes::IP_PROTCOL_NUMBER;
+	return OspfTypes::IP_PROTOCOL_NUMBER;
     }
 
     /**

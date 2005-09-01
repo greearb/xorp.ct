@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.39 2005/08/11 20:36:32 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.40 2005/08/31 23:29:14 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -81,7 +81,7 @@ struct OspfTypes {
     /**
      * The IP protocol number used by OSPF.
      */
-    static const uint16_t IP_PROTCOL_NUMBER = 89;
+    static const uint16_t IP_PROTOCOL_NUMBER = 89;
 
     /** 
      * An identifier meaning all neighbours. No single neighbour can
