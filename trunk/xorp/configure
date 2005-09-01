@@ -15367,7 +15367,7 @@ echo "${ECHO_T}no" >&6
 
   done
 
-	for ac_flag in "-ftemplate-depth-22"
+	for ac_flag in "-ftemplate-depth-25"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
   ac_ext=cc
