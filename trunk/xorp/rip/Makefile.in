@@ -136,10 +136,10 @@ test_timers_SOURCES = test_timers.cc test_utils.hh
 test_timers_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 test_update_queue_SOURCES = test_update_queue.cc test_utils.hh
-test_update_queue_LDADD = ./librip.la ./libripng.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
+test_update_queue_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 test_outputs_SOURCES = test_outputs.cc test_utils.hh
-test_outputs_LDADD = ./librip.la ./libripng.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
+test_outputs_LDADD = ./librip.la ./libripng.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/libxipc/libxipc.la $(LDADD)
 
 # -- RIP Core Library Sources
 librip_la_CXXFLAGS = -DINSTANTIATE_IPV4
@@ -219,6 +219,7 @@ am_test_outputs_OBJECTS = test_outputs.$(OBJEXT)
 test_outputs_OBJECTS = $(am_test_outputs_OBJECTS)
 test_outputs_DEPENDENCIES = ./librip.la ./libripng.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_outputs_LDFLAGS =
@@ -255,6 +256,7 @@ am_test_update_queue_OBJECTS = test_update_queue.$(OBJEXT)
 test_update_queue_OBJECTS = $(am_test_update_queue_OBJECTS)
 test_update_queue_DEPENDENCIES = ./librip.la ./libripng.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_update_queue_LDFLAGS =
