@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.6 2005/08/04 20:38:16 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.7 2005/08/31 03:21:43 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -53,14 +53,14 @@ class Spt {
      *
      * @return false if the node doesn't exist, otherwise true.
      */
-    bool set_origin(A node);
+    bool set_origin(const A& node);
 
     /**
      * Add node
      *
      * @return false if the node already exists, otherwise true.
      */
-    bool add_node(A node);
+    bool add_node(const A& node);
 
     /**
      * Remove node
@@ -68,14 +68,14 @@ class Spt {
      * @return false if the node doesn't exist or has already been
      * removed, otherwise true.
      */
-    bool remove_node(A node);
+    bool remove_node(const A& node);
 
     /**
      * Does this node exist?
      *
      * @return true if the node exists.
      */
-    bool exists_node(A node);
+    bool exists_node(const A& node);
 
     /**
      * Add a new edge.
@@ -85,7 +85,7 @@ class Spt {
      * @param dst destination node, created if necessary.
      * @return true on success.
      */
-    bool add_edge(A src, int weight, A dst);
+    bool add_edge(const A& src, int weight, const A& dst);
 
     /**
      * Update existing edge weight.
@@ -95,7 +95,7 @@ class Spt {
      * @param dst destination node must exist
      * @return true on success.
      */
-    bool update_edge_weight(A src, int weight, A dst);
+    bool update_edge_weight(const A& src, int weight, const A& dst);
 
     /**
      * Get edge weight.
@@ -105,7 +105,7 @@ class Spt {
      * @param dst destination node must exist
      * @return true on success.
      */
-    bool get_edge_weight(A src, int& weight, A dst);
+    bool get_edge_weight(const A& src, int& weight, const A& dst);
 
     /**
      * Remove an edge
@@ -114,7 +114,7 @@ class Spt {
      * @param dst destination node must exist
      * @return true on success.
      */
-    bool remove_edge(A src, A dst);
+    bool remove_edge(const A& src, const A& dst);
     
     /**
      * Compute the tree.
@@ -150,7 +150,7 @@ class Spt {
     /**
      * Find this node.
      */
-    typename Node<A>::NodeRef find_node(A node);
+    typename Node<A>::NodeRef find_node(const A& node);
 
     /**
      * Remove all the nodes that have been marked for deletion.
@@ -487,7 +487,7 @@ Spt<A>::~Spt()
 
 template <typename A>
 bool
-Spt<A>::set_origin(A node)
+Spt<A>::set_origin(const A& node)
 {
     // Lookup this node. It must exist.
     typename Node<A>::NodeRef srcnode = find_node(node);
@@ -502,7 +502,7 @@ Spt<A>::set_origin(A node)
 
 template <typename A>
 bool
-Spt<A>::add_node(A node)
+Spt<A>::add_node(const A& node)
 {
     // If a valid node already exists return false
     typename Node<A>::NodeRef srcnode = find_node(node);
@@ -528,7 +528,7 @@ Spt<A>::add_node(A node)
 
 template <typename A>
 bool
-Spt<A>::remove_node(A node)
+Spt<A>::remove_node(const A& node)
 {
     // If a valid node doesn't exist return false
     typename Node<A>::NodeRef srcnode = find_node(node);
@@ -548,14 +548,14 @@ Spt<A>::remove_node(A node)
 
 template <typename A>
 bool
-Spt<A>::exists_node(A node)
+Spt<A>::exists_node(const A& node)
 {
     return _nodes.count(node);
 }
 
 template <typename A>
 bool
-Spt<A>::add_edge(A src, int weight, A dst)
+Spt<A>::add_edge(const A& src, int weight, const A& dst)
 {
     // Find the src node it must exist.
     typename Node<A>::NodeRef srcnode = find_node(src);
@@ -586,7 +586,7 @@ Spt<A>::add_edge(A src, int weight, A dst)
 
 template <typename A>
 bool
-Spt<A>::update_edge_weight(A src, int weight, A dst)
+Spt<A>::update_edge_weight(const A& src, int weight, const A& dst)
 {
     typename Node<A>::NodeRef srcnode = find_node(src);
     if (srcnode.is_empty()) {
@@ -605,7 +605,7 @@ Spt<A>::update_edge_weight(A src, int weight, A dst)
 
 template <typename A>
 bool
-Spt<A>::get_edge_weight(A src, int& weight, A dst)
+Spt<A>::get_edge_weight(const A& src, int& weight, const A& dst)
 {
     typename Node<A>::NodeRef srcnode = find_node(src);
     if (srcnode.is_empty()) {
@@ -624,7 +624,7 @@ Spt<A>::get_edge_weight(A src, int& weight, A dst)
 
 template <typename A>
 bool
-Spt<A>::remove_edge(A src, A dst)
+Spt<A>::remove_edge(const A& src, const A& dst)
 {
     typename Node<A>::NodeRef srcnode = find_node(src);
     if (srcnode.is_empty()) {
@@ -759,7 +759,7 @@ Spt<A>::incremental_spt()
 
 template <typename A>
 typename Node<A>::NodeRef
-Spt<A>::find_node(A node)
+Spt<A>::find_node(const A& node)
 {
     typename map<A, typename Node<A>::NodeRef>::iterator i = _nodes.find(node);
 
@@ -773,6 +773,7 @@ Spt<A>::find_node(A node)
 //    Node<A> *n = 0;
     return typename Node<A>::NodeRef(/*n*/);
 }
+
 template <typename A>
 Node<A>::Node(A nodename)
     :  _valid(true), _nodename(nodename)
