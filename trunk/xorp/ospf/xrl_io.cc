@@ -13,7 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.5 2005/08/05 04:49:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.6 2005/08/31 23:38:47 atanu Exp $"
+
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include <list>
@@ -29,6 +32,7 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
 
+#include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
@@ -44,8 +48,6 @@ XrlIO<A>::send(const string& interface, const string& vif,
 	      interface.c_str(), vif.c_str(),
 	      dst.str().c_str(), src.str().c_str(),
 	      data, len);
-
-    XLOG_UNFINISHED();
 
     return true;
 }
@@ -65,8 +67,6 @@ XrlIO<A>::enable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
-    XLOG_UNFINISHED();
-
     return true;
 }
 
@@ -75,8 +75,6 @@ bool
 XrlIO<A>::disable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
-
-    XLOG_UNFINISHED();
 
     return true;
 }
@@ -89,8 +87,6 @@ XrlIO<A>::join_multicast_group(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
 	      vif.c_str(), cstring(mcast));
 
-    XLOG_UNFINISHED();
-
     return true;
 }
 
@@ -101,8 +97,6 @@ XrlIO<A>::leave_multicast_group(const string& interface, const string& vif,
 {
     debug_msg("Interface %s Vif %s mcast %s\n", interface.c_str(),
 	      vif.c_str(), cstring(mcast));
-
-    XLOG_UNFINISHED();
 
     return true;
 }
@@ -116,8 +110,6 @@ XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
 	      discard ? "true" : "false");
 
-    XLOG_UNFINISHED();
-
     return true;
 }
 
@@ -130,8 +122,6 @@ XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
 	      discard ? "true" : "false");
 
-    XLOG_UNFINISHED();
-
     return true;
 }
 
@@ -140,8 +130,6 @@ bool
 XrlIO<A>::delete_route(IPNet<A> net)
 {
     debug_msg("Net %s\n", cstring(net));
-
-    XLOG_UNFINISHED();
 
     return true;
 }
