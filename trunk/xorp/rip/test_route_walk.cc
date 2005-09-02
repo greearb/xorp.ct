@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.13 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.14 2005/08/31 19:11:14 pavlin Exp $"
 
 #include <set>
 
@@ -129,12 +129,14 @@ public:
 // Walk tester class
 //
 
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
 template <typename A>
 class RouteWalkTester
 {
 public:
-    RouteWalkTester(const IfMgrIfTree& iftree)
-	: _e(), _rip_system(_e), _pm(_rip_system, iftree)
+    RouteWalkTester()
+	: _e(), _rip_system(_e), _pm(_rip_system, ift_dummy)
     {
 	_pm.the_port()->constants().set_expiry_secs(3);
 	_pm.the_port()->constants().set_deletion_secs(2);
@@ -350,13 +352,11 @@ main(int argc, char* const argv[])
     XorpUnexpectedHandler x(xorp_unexpected_handler);
     try {
 	{
-	    IfMgrIfTree iftree;
-	    RouteWalkTester<IPv4> rwt4(iftree);
+	    RouteWalkTester<IPv4> rwt4;
 	    rval = rwt4.run_test();
 	}
 	{
-	    IfMgrIfTree iftree;
-	    RouteWalkTester<IPv6> rwt6(iftree);
+	    RouteWalkTester<IPv6> rwt6;
 	    rval |= rwt6.run_test();
 	}
     } catch (...) {

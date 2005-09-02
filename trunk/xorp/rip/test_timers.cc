@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.15 2005/08/18 15:41:28 bms Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.16 2005/08/31 19:11:14 pavlin Exp $"
 
 #include <set>
 
@@ -150,6 +150,8 @@ public:
 //----------------------------------------------------------------------------
 // The test
 
+static const IfMgrIfTree ift_dummy = IfMgrIfTree();
+
 template <typename A>
 static int
 test_main()
@@ -160,8 +162,7 @@ test_main()
 
     EventLoop		e;
     System<A>		rip_system(e);
-    IfMgrIfTree		iftree;
-    SpoofPortManager<A>	spm(rip_system, iftree);
+    SpoofPortManager<A>	spm(rip_system, ift_dummy);
 
     RouteDB<A>& 	rdb  = rip_system.route_db();
     Peer<A>* 		peer = spm.the_peer();
