@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.50 2005/08/30 03:59:43 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.51 2005/08/31 16:42:11 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -239,7 +239,18 @@ class AreaRouter {
     
     DelayQueue<Lsa::LsaRef> _queue;	// Router LSA queue.
 
-    bool _TransitCapability;		// Used by the spt computation.
+    uint32_t _TransitCapability;	// Used by the spt computation.
+
+    // XXX - This needs a better name.
+    struct Bucket {
+	Bucket(size_t index, bool known) : _index(index), _known(known)
+	{}
+	size_t _index;
+	bool _known;
+    };
+
+    list<Bucket> _new_lsas;		// Indexes of new LSAs that
+					// have arrived recently.
 
     /**
      * Internal state that is required about this peer.
@@ -493,6 +504,28 @@ class AreaRouter {
      * 2) Possibly generate new sumamry LSAs.
      */
     void routing_end();
+
+    /**
+     * Create a fresh link state database by performing a pass over
+     * the whole database.
+     */
+    void routing_total_recompute();
+
+    /**
+     * Does this Network-LSA point back to the router link that points
+     * at it.
+     */
+    bool bidirectional(const RouterLink& rl, NetworkLsa *nlsa);
+
+    /**
+     * Add this newly arrived or changed Router-LSA to the SPT.
+     */
+    void routing_router_lsaV2(const Vertex& v, const RouterLsa *rlsa);
+
+    /**
+     * Add this newly arrived or changed Router-LSA to the SPT.
+     */
+    void routing_router_lsaV3(const Vertex& v, const RouterLsa *rlsa);
 };
 
 /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.69 2005/08/31 16:14:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.70 2005/08/31 16:42:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,8 +39,6 @@
 
 #include "libproto/spt.hh"
 
-#include "libproto/spt.hh"
-
 #include "ospf.hh"
 #include "delay_queue.hh"
 #include "vertex.hh"
@@ -52,8 +50,9 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     : _ospf(ospf), _area(area), _area_type(area_type),
       _last_entry(0), _allocated_entries(0), _readers(0),
       _queue(ospf.get_eventloop(),
-			  OspfTypes::MinLSInterval,
-			  callback(this, &AreaRouter<A>::publish_all))
+	     OspfTypes::MinLSInterval,
+	     callback(this, &AreaRouter<A>::publish_all)),
+      _TransitCapability(0)
 {
     // Never need to delete this as the ref_ptr will tidy up.
     // An entry to be placed in invalid slots.
@@ -590,6 +589,10 @@ AreaRouter<A>::delete_lsa(Lsa::LsaRef lsar, size_t index, bool invalidate)
 		lsar->get_header().get_advertising_router());
 
     XLOG_ASSERT(_db[index]->valid());
+
+    // This LSA is being deleted remove it from the routing computation.
+    routing_delete(lsar);
+
     if (invalidate)
 	_db[index]->invalidate();
     _db[index] = _invalid_lsa;
@@ -1150,149 +1153,276 @@ AreaRouter<A>::RouterVertex(Vertex& v)
     v.set_type(Vertex::Router);
     v.set_nodeid(_ospf.get_router_id());
 }
-
 template <typename A>
 void
 AreaRouter<A>::routing_begin()
 {
-    _TransitCapability = false;
-#ifdef  PARANOIA
-    list<RouteCmd<Vertex> > r;
-    _spt.compute(r);
-    XLOG_ASSERT(r.empty());
-#endif
-}
-
-template <typename A>
-void
-AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool /*known*/)
-{
-    //  RFC 2328 Section  13.2. Installing LSAs in the database
-
-    debug_msg("%s\n", lsar->str().c_str());
-}
-
-template <typename A>
-void
-AreaRouter<A>::routing_delete(Lsa::LsaRef /*lsar*/)
-{
-}
-
-template <typename A>
-void
-AreaRouter<A>::routing_end()
-{
-}
-
-#if	0
-template <typename A>
-void
-AreaRouter<A>::routing_begin()
-{
-    _TransitCapability = false;
-#ifdef  PARANOIA
-    list<RouteCmd<Vertex> > r;
-    _spt.compute(r);
-    XLOG_ASSERT(r.empty());
-#endif
 }
 
 template <typename A>
 void
 AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 {
-    //  RFC 2328 Section  13.2. Installing LSAs in the database
-
-    debug_msg("%s\n", lsar->str().c_str());
-
-    RouterLsa *rlsa;
-    NetworkLsa *nlsa;
-    if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
-	if (rlsa->get_v_bit())
-	    _TransitCapability = true;
-	    
-	Vertex v;
-
-	v.set_version(_ospf.get_version());
-	v.set_type(Vertex::Router);
-	v.set_nodeid(rlsa->get_header().get_link_state_id());
-
-	// XXX We really want to remove all the links but removing a
-	// node and putting it back has the same effect.
-	if (known)
-	    _spt.remove_node(v);
-	_spt.add_node(v);
-
-	list<RouterLink> &rl = rlsa->get_router_links();
-	list<RouterLink>::const_iterator i = rl.begin();
-	for(; i != rl.end(); i++) {
-	    Vertex dst;
-	    dst.set_version(_ospf.get_version());
-	    switch (_ospf.get_version()) {
-	    case OspfTypes::V2:
- 		switch(i->get_type()) {
-		case RouterLink::p2p:
-		    XLOG_UNFINISHED();
-		    break;
-		case RouterLink::transit:
-		    dst.set_type(Vertex::Router);
-		    dst.set_nodeid(i->get_link_id());
-		    _spt.add_edge(v, i->get_metric(), dst);
-		    break;
-		case RouterLink::stub:
-		    dst.set_type(Vertex::Network);
-		    dst.set_nodeid(i->get_link_id());
-		    _spt.add_edge(v, i->get_metric(), dst);
-		    break;
-		case RouterLink::vlink:
-		    XLOG_UNFINISHED();
-		    break;
-		}
-		break;
-	    case OspfTypes::V3:
-		XLOG_WARNING("TBD - Compute OSPFv3 node and edge");
-		break;
-	    }
-	}
-    } else if (0 != (nlsa = dynamic_cast<NetworkLsa *>(lsar.get()))) {
-	XLOG_WARNING("TBD - Network-LSA");
-    } else {
-	XLOG_UNFINISHED();
-    }
-}
-
-template <typename A>
-void
-AreaRouter<A>::routing_delete(Lsa::LsaRef /*lsar*/)
-{
+    debug_msg("%s known %s\n", cstring(*lsar), known ? "true" : "false");
 }
 
 template <typename A>
 void
 AreaRouter<A>::routing_end()
 {
-    // XXX
-    // The edges from this router are not being tracked. So deleting
-    // and adding back this routers vertex fill remove all the edges.
-    // 1) When an interface changes state operate on the router vertex
-    // immediately.
-    // 2) Add a method to the spt code to remove all edges from a
-    // node.
+    routing_total_recompute();
+}
 
-//     Vertex v;
-//     RouterVertex(v);
-//     _spt.remove_node(v);
+template <typename A>
+void 
+AreaRouter<A>::routing_total_recompute()
+{
+}
 
+template <typename A>
+bool 
+AreaRouter<A>::bidirectional(const RouterLink& rl, NetworkLsa *nlsa)
+{
+    XLOG_ASSERT(0 != nlsa);
+    XLOG_ASSERT(rl.get_type() == RouterLink::transit);
+
+    // This is the edge from the Router-LSA to the Network-LSA.
+    XLOG_ASSERT(rl.get_link_id() == nlsa->get_header().get_link_state_id());
+
+    // Does the Network-LSA know about the Router-LSA.
+    list<OspfTypes::RouterID>& routers = nlsa->get_attached_routers();
+    list<OspfTypes::RouterID>::const_iterator i;
+    for (i = routers.begin(); i != routers.end(); i++)
+	if (rl.get_link_id() == *i)
+	    return true;
+
+    return false;
+}
+
+/**
+ * XXX
+ * This is temporary until SPT supports a single call to update an
+ * edge adding the edge if necessary.
+ *
+ */
+template <typename A>
+inline
+void
+update_edge(Spt<A>& spt, const Vertex& src, int metric, const Vertex& dst)
+{
+    if (!spt.add_edge(src, metric, dst))
+	if (!spt.update_edge_weight(src, metric, dst))
+	    XLOG_FATAL("Couldn't add edge between %s and %s",
+		       cstring(src), cstring(dst));
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_router_lsaV2(const Vertex& src, const RouterLsa *rlsa)
+{
+    debug_msg("Vertex %s \n%s", cstring(src), cstring(*rlsa));
+
+    const list<RouterLink> &rl = 
+	const_cast<RouterLsa *>(rlsa)->get_router_links();
+    list<RouterLink>::const_iterator l = rl.begin();
+    for(; l != rl.end(); l++) {
+	Vertex dst;
+	dst.set_version(_ospf.get_version());
+	switch(l->get_type()) {
+	case RouterLink::p2p:
+	    XLOG_UNFINISHED();
+	    break;
+	case RouterLink::transit: {
+	    size_t index;
+	    if (find_network_lsa(l->get_link_id(), index)) {
+		Lsa::LsaRef lsan = _db[index];
+		// This can probably never happen
+		if (lsan->maxage()) {
+		    XLOG_WARNING("LSA in database MaxAge\n%s",
+				 cstring(*lsan));
+		    break;
+		}
+		// Both nodes exist check for
+		// bi-directional connectivity.
+		if (!bidirectional(*l, dynamic_cast<
+				   NetworkLsa *>(lsan.get()))) {
+				
+		    break;
+		}
+		// Put both links back. If the network
+		// vertex is not in the SPT put it in.
+		// Create a destination node.
+		printf("Cool %s\n", cstring(*_db[index]));
+		dst.set_type(Vertex::Network);
+		dst.set_nodeid(lsan->get_header().
+			       get_link_state_id());
+		printf("%s Adding %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(dst));
+		if (!_spt.exists_node(dst))
+		    _spt.add_node(dst);
+		printf("%s Edge %s %d %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(src),
+		       l->get_metric(),
+		       cstring(dst));
+		update_edge(_spt, src, l->get_metric(), dst);
+		
+	    }
+	}
+	    break;
+	case RouterLink::stub:
+#if	0
+	    dst.set_type(Vertex::Network);
+	    dst.set_nodeid(l->get_link_id());
+	    _spt.add_edge(v, l->get_metric(), dst);
+#endif
+	    break;
+	case RouterLink::vlink:
+	    XLOG_UNFINISHED();
+	    break;
+	}
+	break;
+    }
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_router_lsaV3(const Vertex& v, const RouterLsa *rlsa)
+{
+    debug_msg("Vertex %s \n%s", cstring(v), cstring(*rlsa));
+
+    XLOG_WARNING("TBD - add to SPT");
+}
+
+
+/*************************************************************************/
+
+#ifdef	UNFINISHED_INCREMENTAL_UPDATE
+template <typename A>
+void
+AreaRouter<A>::routing_begin()
+{
+    XLOG_ASSERT(_new_lsas.empty());
+
+#ifdef  PARANOIA
+    list<RouteCmd<Vertex> > r;
+    _spt.compute(r);
+    XLOG_ASSERT(r.empty());
+#endif
     // Put back this routers interfaces.
     routing_add(_router_lsa, true);
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
+{
+    debug_msg("%s\n", cstring(*lsar));
+
+    // XXX - This lookup is currently expensive after TODO 28 it will
+    // be fine.
+    size_t index;
+    if (!find_lsa(lsar, index))
+	XLOG_FATAL("This LSA must be in the database\n%s", cstring(*lsar));
+
+    _new_lsas.push_back(Bucket(index, known));
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_delete(Lsa::LsaRef lsar)
+{
+    debug_msg("%s\n", cstring(*lsar));
+
+    RouterLsa *rlsa;
+    if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+	if (rlsa->get_v_bit())
+	    _TransitCapability--;
+    }
+
+    XLOG_WARNING("TBD \n%s", cstring(*lsar));
+}
+
+template <typename A>
+void
+AreaRouter<A>::routing_end()
+{
+    typename list<Bucket>::iterator i;
+
+    RouterLsa *rlsa;
+    NetworkLsa *nlsa;
+
+    // First part of the routing computation only consider Router-LSAs
+    i = _new_lsas.begin();
+    while (i != _new_lsas.end()) {
+	Lsa::LsaRef lsar = _db[i->_index];
+	if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+
+	    if (rlsa->get_v_bit())
+		_TransitCapability++;
+	    
+	    Vertex v;
+
+	    v.set_version(_ospf.get_version());
+	    v.set_type(Vertex::Router);
+	    v.set_nodeid(rlsa->get_header().get_link_state_id());
+
+	    // XXX 
+	    // Really want to remove all the links but removing a node
+	    // and putting it back has the same effect.
+	    if (i->_known && _spt.exists_node(v)) {
+		printf("%s Remove %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+		_spt.remove_node(v);
+	    } else {
+		printf("%s New %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+	    }
+
+	    printf("%s Add %s\n",
+		   pr_id(_ospf.get_router_id()).c_str(),
+		   cstring(v));
+	    _spt.add_node(v);
+
+	    switch(_ospf.get_version()) {
+		case OspfTypes::V2:
+		    routing_router_lsaV2(v, rlsa);
+		    break;
+		case OspfTypes::V3:
+		    routing_router_lsaV3(v, rlsa);
+		    break;
+	    }
+
+	    _new_lsas.erase(i++);
+	}  else if (0 != (nlsa = dynamic_cast<NetworkLsa *>(lsar.get()))) {
+	    
+	    printf("%s %s", pr_id(_ospf.get_router_id()).c_str(),
+		   cstring(*nlsa));
+	    i++;
+	} else {
+	    i++;
+	}
+    }
+
+    i = _new_lsas.begin();
+    while (i != _new_lsas.end()) {
+	_new_lsas.erase(i++);
+    }
 
     list<RouteCmd<Vertex> > r;
     _spt.compute(r);
 
-    list<RouteCmd<Vertex> >::const_iterator i;
-    for(i = r.begin(); i != r.end(); i++)
-	XLOG_WARNING("TBD: Add route: %s", i->str().c_str());
+    list<RouteCmd<Vertex> >::const_iterator ri;
+    for(ri = r.begin(); ri != r.end(); ri++)
+	XLOG_WARNING("TBD: Add route:\n%s %s",
+		     pr_id(_ospf.get_router_id()).c_str(),
+		     ri->str().c_str());
 }
+
+
 #endif
 
 template class AreaRouter<IPv4>;
