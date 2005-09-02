@@ -1,0 +1,96 @@
+/* $XORP$ */
+
+protocols {
+    ospf4 {
+	targetname: txt = "ospfv2";
+	router-id: ipv4;
+	
+	area @: ipv4 {
+	    area-type:		txt = "border";
+
+	    interface @: txt {
+		mtu:		u32 = 1500;	/* XXX Temporary */
+
+		linktype:	txt = "broadcast";
+		
+		vif @: txt {
+
+		    address @: ipv4 {
+			disable:		toggle = false;
+			prefix-length:		u32;	/* XXX Temporary */
+
+			priority:		u32 = 128;
+			hello-interval:		u32 = 10;
+			router-dead-interval:   u32 = 40;
+			interface-cost:		u32 = 1;
+			inftransdelay:		u32 = 1;
+		    }
+		}
+	    }
+	}
+    }
+}
+
+protocols {
+    ospf4 {
+	%modinfo: provides ospf4;
+	%modinfo: depends rib;
+	%modinfo: depends policy;
+	%modinfo: path "ospf/xorp_ospfv2";
+	%modinfo: default_targetname "ospfv2";
+	%modinfo: status_method xrl "$(ospf4.targetname)/common/0.1/get_status->status:u32&reason:txt";
+	%modinfo: shutdown_method xrl "$(ospf4.targetname)/common/0.1/shutdown";
+	%mandatory: $(@.router-id);
+
+	router-id {
+	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_id?id:ipv4=$(@)";
+	}
+	
+	area @: ipv4 {
+	    %mandatory: $(@.area-type);
+
+	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
+	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
+
+	    interface @: txt {
+		%mandatory: $(@.linktype);
+		%mandatory: $(@.mtu);		/* Temporary */
+
+		vif @: txt {
+
+		    address @ {
+			%mandatory: $(@.prefix-length);
+			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=$(@.prefix-length)&mtu:u32=$(interface.@.mtu)&type:txt=$(interface.@.linktype)&area:ipv4=$(area.@)";
+			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=interface.@&vifname:txt=vif.@";
+
+			priority {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
+			}
+
+			hello-interval {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			}
+
+			router-dead-interval {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+			}
+
+			interface-cost {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
+			}
+
+			inftransdelay {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
+			}
+
+			disable {
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
+			}
+
+		    }
+		}
+	    }
+	}
+    }
+}
+	

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/xrl_target.hh,v 1.2 2005/04/20 15:02:41 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -59,7 +59,116 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      */
     XrlCmdError ospfv2_0_1_set_router_id(
 	// Input values,
-	const uint32_t&	id);
+	const IPv4&	id);
+
+    /**
+     *  @param type of area "border", "stub", "nssa"
+     */
+    XrlCmdError ospfv2_0_1_create_area_router(
+	// Input values,
+	const IPv4&	area,
+	const string&	type);
+
+    /**
+     *  Destroy area.
+     */
+    XrlCmdError ospfv2_0_1_destroy_area_router(
+	// Input values,
+	const IPv4&	area);
+
+    /**
+     *  Create a binding to an interface.
+     *
+     *  @param ifname the interface that owns vif that has address.
+     *
+     *  @param vifname virtual interface owning address.
+     *
+     *  @param addr the address to be added.
+     *
+     *  @param prefix_len the prefix length XXX temporary.
+     *
+     *  @param mtu maximum transmission unit XXX temporary.
+     *
+     *  @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
+     */
+    XrlCmdError ospfv2_0_1_create_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	prefix_len,
+	const uint32_t&	mtu,
+	const string&	type,
+	const IPv4&	area);
+
+    /**
+     *  Delete peer.
+     */
+    XrlCmdError ospfv2_0_1_delete_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname);
+
+    /**
+     *  Set the peer state up or down.
+     */
+    XrlCmdError ospfv2_0_1_set_peer_state(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const bool&	enable);
+
+    /**
+     *  Used in the designated router election.
+     */
+    XrlCmdError ospfv2_0_1_set_router_priority(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  The interval between hello messages.
+     */
+    XrlCmdError ospfv2_0_1_set_hello_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  The period to wait before considering a router dead.
+     */
+    XrlCmdError ospfv2_0_1_set_router_dead_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  The edge cost of this interface.
+     */
+    XrlCmdError ospfv2_0_1_set_interface_cost(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	cost);
+
+    /**
+     *  Update packet will have their age incremented by this amount before
+     *  transmission. This value should take into account transmission and
+     *  propagation delays; it must be greater than zero.
+     */
+    XrlCmdError ospfv2_0_1_set_inftransdelay(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	delay);
 
  private:
     Ospf<IPv4>& _ospf;

@@ -13,7 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.3 2005/06/05 01:31:37 atanu Exp $"
+
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include <set>
@@ -23,6 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
+#include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
 
@@ -79,10 +83,11 @@ XrlOspfV3Target::common_0_1_get_version(string&	version)
 }
 
 XrlCmdError
-XrlOspfV2Target::common_0_1_get_status(uint32_t& /*status*/,
-				       string& /*reason*/)
+XrlOspfV2Target::common_0_1_get_status(uint32_t& status,
+				       string& reason)
 {
-    XLOG_UNFINISHED();
+
+    status = _ospf.status(reason);
 
     return XrlCmdError::OKAY();
 }
@@ -99,7 +104,7 @@ XrlOspfV3Target::common_0_1_get_status(uint32_t& /*status*/,
 XrlCmdError
 XrlOspfV2Target::common_0_1_shutdown()
 {
-    XLOG_UNFINISHED();
+    _ospf.shutdown();
 
     return XrlCmdError::OKAY();
 }
@@ -113,9 +118,11 @@ XrlOspfV3Target::common_0_1_shutdown()
 }
 
 XrlCmdError
-XrlOspfV2Target::ospfv2_0_1_set_router_id(const uint32_t& /*id*/)
+XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
 {
-    XLOG_UNFINISHED();
+    OspfTypes::RouterID rid = ntohl(id.addr());
+
+    _ospf.set_router_id(rid);
 
     return XrlCmdError::OKAY();
 }
@@ -124,6 +131,210 @@ XrlCmdError
 XrlOspfV3Target::ospfv3_0_1_set_router_id(const uint32_t& /*id*/)
 {
     XLOG_UNFINISHED();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_create_area_router(const IPv4& a,
+					       const string& type)
+{
+    bool status;
+    OspfTypes::AreaType t = from_string_to_area_type(type, status);
+    if (!status)
+	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+	
+    OspfTypes::AreaID area = ntohl(a.addr());
+    if (!_ospf.get_peer_manager().create_area_router(area, t))
+	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
+					   pr_id(area));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_destroy_area_router(const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    if (!_ospf.get_peer_manager().destroy_area_router(area))
+	return XrlCmdError::COMMAND_FAILED("Failed to destroy area " +
+					   pr_id(area));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
+					const string& vifname,
+					const IPv4& addr,
+					const uint32_t& prefix_len,
+					const uint32_t&	mtu,
+					const string& type,
+					const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    bool status;
+    OspfTypes::LinkType linktype = from_string_to_link_type(type, status);
+    if (!status)
+	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+
+    try {
+	_ospf.get_peer_manager().create_peer(ifname, vifname, addr, prefix_len,
+					     mtu, linktype, area);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
+					const string& vifname)
+{
+    debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().delete_peer(peerid))
+	return XrlCmdError::COMMAND_FAILED("Failed to delete peer");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
+					   const string& vifname,
+					   const bool& enable)
+{
+    debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
+	      vifname.c_str(), pb(enable));
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_state_peer(peerid, enable))
+	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
+						const string& vifname,
+						const IPv4& a,
+						const uint32_t& priority)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s priority %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), priority);
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_router_priority(peerid, area, priority))
+	return XrlCmdError::COMMAND_FAILED("Failed to set priority");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_hello_interval(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_hello_interval(peerid, area, interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set hello interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
+						     const string& vifname,
+						     const IPv4& a,
+						     const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_router_dead_interval(peerid, area,
+							   interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "router dead interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const uint32_t& cost)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), cost);
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_interface_cost(peerid, area, cost))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "interface cost");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
+					      const string& vifname,
+					      const IPv4& a,
+					      const uint32_t& delay)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), delay);
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().set_inftransdelay(peerid, area, delay))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "inftransdelay delay");
 
     return XrlCmdError::OKAY();
 }

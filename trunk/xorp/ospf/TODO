@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.37 2005/08/30 23:43:33 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.38 2005/08/31 16:42:10 atanu Exp $
 #
 
 TODO
@@ -60,6 +60,10 @@ packet has been seen from it in the last RouterDeadInterval seconds.
 id only (find_network_lsa()). The two lookups are currently linear
 scans of the database. Add a map for each lookup type to speed up
 lookup.
+
+29) In xrl_target.cc calls are made directly to the peer_manager,
+equivalent calls exist in the ospf class and should be used in
+preference.
 
 Possible issues
 ~~~~~~~~~~~~~~~
