@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.70 2005/08/31 16:42:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.71 2005/09/02 01:46:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1168,6 +1168,13 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
 
 template <typename A>
 void
+AreaRouter<A>::routing_delete(Lsa::LsaRef lsar)
+{
+    debug_msg("%s\n", cstring(*lsar));
+}
+
+template <typename A>
+void
 AreaRouter<A>::routing_end()
 {
     routing_total_recompute();
@@ -1421,7 +1428,6 @@ AreaRouter<A>::routing_end()
 		     pr_id(_ospf.get_router_id()).c_str(),
 		     ri->str().c_str());
 }
-
 
 #endif
 
