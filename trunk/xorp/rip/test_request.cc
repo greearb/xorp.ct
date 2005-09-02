@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.18 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.19 2005/08/31 16:53:59 zec Exp $"
 
 #include <set>
 
@@ -95,7 +95,7 @@ IPv6 DefaultPeer<IPv6>::get() { return IPv6("10::1"); }
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s, IfMgrIfTree iftree)
+    SpoofPortManager(System<A>& s, const IfMgrIfTree& iftree)
 	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.21 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.22 2005/08/31 22:45:45 zec Exp $"
 
 #include <set>
 
@@ -168,7 +168,7 @@ private:
 template <typename A>
 class SpoofPortManager : public PortManagerBase<A> {
 public:
-    SpoofPortManager(System<A>& s, IfMgrIfTree iftree)
+    SpoofPortManager(System<A>& s, const IfMgrIfTree& iftree)
 	: PortManagerBase<A>(s, iftree)
     {
 	this->_ports.push_back(new SpoofPort<A>(*this, DefaultPeer<A>::get()));
