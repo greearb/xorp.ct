@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.1 2005/09/02 12:17:05 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -63,6 +63,9 @@ protocols {
 			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=$(@.prefix-length)&mtu:u32=$(interface.@.mtu)&type:txt=$(interface.@.linktype)&area:ipv4=$(area.@)";
 			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=interface.@&vifname:txt=vif.@";
 
+			prefix-length {
+			    %set:;
+			}
 			priority {
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
 			}
@@ -93,4 +96,3 @@ protocols {
 	}
     }
 }
-	
