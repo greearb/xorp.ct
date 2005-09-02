@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.55 2005/08/26 21:23:32 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.56 2005/08/27 09:39:51 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -231,7 +231,8 @@ class Lsa {
 
     Lsa(OspfTypes::Version version)
 	:  _header(version), _version(version), _valid(true),
-	   _self_originating(false),  _initial_age(0), _transmitted(false)
+	   _self_originating(false),  _initial_age(0), _transmitted(false),
+	   _trace(false)
     {}
 
     /**
