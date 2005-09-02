@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.24 2005/08/31 02:02:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.25 2005/08/31 02:10:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1209,7 +1209,7 @@ struct ClickSocketPlumber {
     unplumb(ClickSocket& r, ClickSocketObserver* o)
     {
 	ObserverList& ol = r._ol;
-	debug_msg("Unplumbing ClickSocketObserver%p from "
+	debug_msg("Unplumbing ClickSocketObserver %p from "
 		  "ClickSocket %p\n", o, &r);
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
 	XLOG_ASSERT(i != ol.end());

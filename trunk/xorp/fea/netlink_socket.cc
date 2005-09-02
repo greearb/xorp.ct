@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.31 2005/05/08 19:27:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.32 2005/08/18 15:45:50 bms Exp $"
 
 #include "fea_module.h"
 
@@ -561,7 +561,7 @@ struct NetlinkSocketPlumber {
     unplumb(NetlinkSocket& r, NetlinkSocketObserver* o)
     {
 	ObserverList& ol = r._ol;
-	debug_msg("Unplumbing NetlinkSocketObserver%p from "
+	debug_msg("Unplumbing NetlinkSocketObserver %p from "
 		  "NetlinkSocket %p\n", o, &r);
 	ObserverList::iterator i = find(ol.begin(), ol.end(), o);
 	XLOG_ASSERT(i != ol.end());
