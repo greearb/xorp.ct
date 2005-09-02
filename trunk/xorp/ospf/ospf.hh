@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.40 2005/08/31 23:29:14 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.41 2005/09/01 00:05:07 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -203,6 +203,31 @@ pp_link_type(OspfTypes::LinkType link_type)
 }
 
 /**
+ * Convert from a string to the type of area
+ */
+inline
+OspfTypes::LinkType
+from_string_to_link_type(const string& type, bool& status)
+{
+    status = true;
+    if (type == "p2p")
+	return OspfTypes::PointToPoint;
+    else if (type == "broadcast")
+	return OspfTypes::BROADCAST;
+    else if (type == "nbma")
+	return OspfTypes::NBMA;
+    else if (type == "p2m")
+	return OspfTypes::PointToMultiPoint;
+    else if (type == "vlink")
+	return OspfTypes::VirtualLink;
+
+    XLOG_WARNING("Unable to match %s", type.c_str());
+    status = false;
+
+    return OspfTypes::BROADCAST;
+}
+
+/**
  * Pretty print the area type.
  */
 inline
@@ -218,6 +243,34 @@ pp_area_type(OspfTypes::AreaType area_type)
 	return "NSSA";
     }
     XLOG_UNREACHABLE();
+}
+
+/**
+ * Convert from a string to the type of area
+ */
+inline
+OspfTypes::AreaType
+from_string_to_area_type(const string& type, bool& status)
+{
+    status = true;
+    if (type == "border")
+	return OspfTypes::BORDER;
+    else if (type == "stub")
+	return OspfTypes::STUB;
+    else if (type == "nssa")
+	return OspfTypes::NSSA;
+
+    XLOG_WARNING("Unable to match %s", type.c_str());
+    status = false;
+
+    return OspfTypes::BORDER;
+}
+
+inline
+const char *
+pb(bool val)
+{
+    return val ? "true" : "false";
 }
 
 #include "io.hh"
@@ -243,6 +296,21 @@ class Ospf {
      * @return true if ospf should still be running.
      */
     bool running() { return _running; }
+
+    /**
+     * XXX - Temporary hack to get us up an running.
+     */
+    ProcessStatus status(string& reason) {
+	reason = "Ready";
+	return PROC_READY;
+    }
+
+    /**
+     * XXX - Temporary hack to get us up an running.
+     */
+    void shutdown() {
+	_running = false;
+    }
 
     /**
      * Used to send traffic on the IO interface.
