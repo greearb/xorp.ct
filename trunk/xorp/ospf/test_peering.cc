@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.40 2005/08/31 23:38:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.41 2005/09/02 20:06:40 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -246,7 +246,7 @@ template <typename A>
 class EmulateSubnet {
  public:
     EmulateSubnet(TestInfo& info, EventLoop& eventloop)
-	: _info(info), _eventloop(eventloop)
+	: _info(info), _eventloop(eventloop), _queue_add(1), _queue_remove(2)
     {}
 
     /**
@@ -269,11 +269,13 @@ class EmulateSubnet {
 		    << "," << len
 		    <<  "...)" << endl;
 	
-	_queue.push_back(Frame(interface, vif, dst, src, data, len, instance));
+	_queue[_queue_add].
+	    push_back(Frame(interface, vif, dst, src, data, len, instance));
 	if (_timer.scheduled())
 	    return;
+	XLOG_ASSERT(_queue[_queue_add].size() == 1);
 	 _timer = _eventloop.
-	     new_oneoff_after_ms(0, callback(this, &EmulateSubnet::next));
+	     new_oneoff_after_ms(10, callback(this, &EmulateSubnet::next));
     }
 
     /**
@@ -329,13 +331,22 @@ class EmulateSubnet {
     };
 
     XorpTimer _timer;
-    deque<Frame> _queue;
+    deque<Frame> _queue[2];
+    int _queue_add;
+    int _queue_remove;
     
     void
     next() {
-	while (!_queue.empty()) {
-	    Frame frame = _queue.front();
-	    _queue.pop_front();
+	if (0 == _queue_add) {
+	    _queue_add = 1;
+	    _queue_remove = 0;
+	} else {
+	    _queue_add = 0;
+	    _queue_remove = 1;
+	}
+	while (!_queue[_queue_remove].empty()) {
+	    Frame frame = _queue[_queue_remove].front();
+	    _queue[_queue_remove].pop_front();
 	    forward(frame);
 	}
     }
