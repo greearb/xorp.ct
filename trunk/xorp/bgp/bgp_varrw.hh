@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.10 2005/07/20 23:35:09 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.11 2005/09/04 18:35:49 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -145,8 +145,12 @@ private:
 template <class A>
 class BGPVarRWCallbacks {
 public:
-    typedef map<string, typename BGPVarRW<A>::ReadCallback>  ReadMap;
-    typedef map<string, typename BGPVarRW<A>::WriteCallback> WriteMap;
+    // XXX don't know how to refer to BGPVarRW<A>::ReadCallback in gcc 2.95
+    typedef Element* (BGPVarRW<A>::*RCB)();
+    typedef void (BGPVarRW<A>::*WCB)(const Element&);
+	    
+    typedef map<string, RCB>  ReadMap;
+    typedef map<string, WCB> WriteMap;
 
     BGPVarRWCallbacks();
 
