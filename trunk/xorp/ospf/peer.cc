@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.133 2005/08/31 23:38:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.134 2005/09/02 12:17:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3262,16 +3262,27 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
     list<Lsa_header>::iterator i;
     list<Lsa::LsaRef>::iterator j;
     for (i = headers.begin(); i != headers.end(); i++) {
+	// Neither the found or partial variable are required they
+	// exist solely for monitoring. The double lookup is also
+	// unnecessary. A call to compare_all_header_fields is all
+	// that is required.
 	bool found = false;
+	bool partial = false;
 	for (j = _lsa_rxmt.begin(); j != _lsa_rxmt.end(); j++) {
 	    if ((*i) == (*j)->get_header()) {
-		found = true;
-		(*j)->remove_nack(get_neighbour_id());
-		_lsa_rxmt.erase(j);
-		break;
+		partial = true;
+		if (compare_all_header_fields((*i),(*j)->get_header())) {
+		    found = true;
+		    (*j)->remove_nack(get_neighbour_id());
+		    _lsa_rxmt.erase(j);
+		    break;
+		}
 	    }
 	}
-	if (!found) {
+	// Its probably going to be a common occurence that an ACK
+	// arrives for a LSA that has since been updated. A LSA that
+	// we don't know about at all is more interesting.
+	if (!found && !partial) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
 		       "Ack for LSA not in retransmission list.\n%s\n%s",
 		       cstring(*i), cstring(*lsap));

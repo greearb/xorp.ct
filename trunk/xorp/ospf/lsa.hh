@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.56 2005/08/27 09:39:51 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.57 2005/09/02 02:11:27 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -212,6 +212,36 @@ operator==(const Lsa_header& lhs, const Lsa_header& rhs)
 
     if (lhs.get_advertising_router() != rhs.get_advertising_router())
 	return false;
+
+    return true;
+}
+
+/**
+ * RFC 2328 Section 13.7.  Receiving link state acknowledgments
+ *
+ * All the fields in the header need to be compared except for the age.
+ */
+inline
+bool
+compare_all_header_fields(const Lsa_header& lhs, const Lsa_header& rhs)
+{
+    // We could check for lhs == rhs this will be such a rare
+    // occurence why bother.
+
+    // Try and order the comparisons so in the no match case we blow
+    // out early.
+
+#define	lsa_header_compare(func)	if (lhs.func != rhs.func) return false;
+
+    lsa_header_compare(get_ls_checksum());
+    lsa_header_compare(get_length());
+    lsa_header_compare(get_options());
+    lsa_header_compare(get_ls_sequence_number());
+    lsa_header_compare(get_ls_type());
+    lsa_header_compare(get_link_state_id());
+    lsa_header_compare(get_advertising_router());
+
+#undef lsa_header_compare
 
     return true;
 }

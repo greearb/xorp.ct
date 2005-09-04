@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.38 2005/08/31 16:42:10 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.39 2005/09/02 12:17:05 atanu Exp $
 #
 
 TODO
@@ -64,6 +64,23 @@ lookup.
 29) In xrl_target.cc calls are made directly to the peer_manager,
 equivalent calls exist in the ospf class and should be used in
 preference.
+
+30) It is a requirement that LSAs should not be originated more
+frequently than MinLSInterval (5 seconds). It is also a requirement
+that an LSA is not accepted if it arrives more frequently than
+MinLSArrival (1 second). Generated LSAs are added to the delay queue
+in the area_router. If an LSA arrives more frequently than 1 second it
+is ignored. When as part of the database exchange process an LSA is
+requested it is returned immediately (not delayed by 5 seconds). As
+soon as routers become adjacent a new Router-LSA is generated. This
+Router-LSA is ignored because in the regression tests it typically
+arrives before 1 second. The retransmission of the Router-LSA
+eventually fixes the problem. We should probably delay the sending of
+the Router-LSA somehow after an adjacency is formed. Adding a
+timestamp to LSAs could be used to stop this problem or the delay
+queue could be prodded when a self originated LSA is requested. We
+could also perhaps be a little more permissive about the first LSA
+that violates the 1 second rule.
 
 Possible issues
 ~~~~~~~~~~~~~~~
