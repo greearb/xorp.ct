@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.1 2005/09/02 12:17:05 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.2 2005/09/02 20:28:41 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -11,7 +11,7 @@ protocols {
 	    interface @: txt {
 		mtu:		u32 = 1500;	/* XXX Temporary */
 
-		linktype:	txt = "broadcast";
+		link-type:	txt = "broadcast";
 		
 		vif @: txt {
 
@@ -43,50 +43,84 @@ protocols {
 	%mandatory: $(@.router-id);
 
 	router-id {
+	    %help: short "A unique 32-bit identifier within this AS";
+	    %help: long
+"A 32-bit number assigned to each router running
+the OSPF protocol. This number uniquely identifies 
+the router within an Autonomous System";
+
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_id?id:ipv4=$(@)";
 	}
 	
 	area @: ipv4 {
+	    %help: short "The OSPF area to which the attached network belongs";
+
 	    %mandatory: $(@.area-type);
+
+/* XXX Enable this when we support anything but border.
+	    area-type {
+		%help: short "Type of area";
+		
+		%allow: $(@) "border" "stub" "nssa";
+
+		%set:;
+	    }
+*/
 
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
 
 	    interface @: txt {
-		%mandatory: $(@.linktype);
+		%mandatory: $(@.link-type);
 		%mandatory: $(@.mtu);		/* Temporary */
 
 		vif @: txt {
 
 		    address @ {
 			%mandatory: $(@.prefix-length);
-			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=$(@.prefix-length)&mtu:u32=$(interface.@.mtu)&type:txt=$(interface.@.linktype)&area:ipv4=$(area.@)";
+			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=$(@.prefix-length)&mtu:u32=$(interface.@.mtu)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
 			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=interface.@&vifname:txt=vif.@";
 
 			prefix-length {
+			    %help: short "Prefix length of this address";
 			    %set:;
 			}
+
 			priority {
+			    %help: short "Priority used in DR election";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
 			}
 
 			hello-interval {
+			    %help: short
+				"Hello packets sent every interval seconds";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
 
 			router-dead-interval {
+			    %help: short
+	"Seconds to wait before considering a neighbour dead";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
 
 			interface-cost {
+			    %help: short "Cost of this address";
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
 			}
 
 			inftransdelay {
+			    %help: short
+				"Add to age field of all transmitted LSAs";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
 			}
 
 			disable {
+			    %help: short "disable OSPF on address";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
 			}
 
