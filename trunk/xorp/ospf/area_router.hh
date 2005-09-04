@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.51 2005/08/31 16:42:11 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.52 2005/09/02 01:46:14 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -267,6 +267,11 @@ class AreaRouter {
     typedef map<PeerID, PeerStateRef> PeerMap;
     PeerMap _peers;		// Peers of this area.
 
+    bool _routing_recompute_scheduled;	// Is a routing recompute scheduled?
+    uint32_t _routing_recompute_delay;	// How many seconds to wait
+					// before recompting.
+    XorpTimer _routing_recompute_timer;	// Timer to cause recompute.
+    
     /**
      * Start aging LSA.
      *
@@ -488,6 +493,9 @@ class AreaRouter {
     /**
      * Add this LSA to the routing computation.
      *
+     * The calls to this method are bracketed between a call to
+     * routing begin and routing end.
+     *
      * @param lsar LSA to be added to the database.
      * @param known true if this LSA is already in the database.
      */
@@ -495,6 +503,9 @@ class AreaRouter {
 
     /**
      * Remove this LSA from the routing computation.
+     *
+     * The calls to this method are *NOT* bracketed between a call to
+     * routing begin and routing end.
      */
     void routing_delete(Lsa::LsaRef lsar);
 
@@ -504,6 +515,16 @@ class AreaRouter {
      * 2) Possibly generate new sumamry LSAs.
      */
     void routing_end();
+
+    /**
+     * Schedule recomputing the whole table.
+     */
+    void routing_schedule_total_recompute();
+
+    /**
+     * Callback routine that causes route recomputation.
+     */
+    void routing_timer();
 
     /**
      * Create a fresh link state database by performing a pass over
