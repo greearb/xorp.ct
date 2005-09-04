@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.6 2005/08/04 15:26:58 bms Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.7 2005/09/04 18:35:49 abittau Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,9 +47,17 @@ SingleVarRW::read(const string& id) {
 	if(!_did_first_read) {
 	    start_read();
 	    _did_first_read = true;
-	}
 
-	initialize(id, single_read(id));
+	    // try again, old clients initialize on start_read()
+	    i = _map.find(id);
+
+	    // no luck... need to explicitly read...
+	    if (i == _map.end())
+		initialize(id, single_read(id));
+	}
+	// client already had chance to initialize... but apparently didn't...
+	else
+	   initialize(id, single_read(id));
 
 	// the client may have initialized the variables after the start_read
 	// marker, so try reading again...
