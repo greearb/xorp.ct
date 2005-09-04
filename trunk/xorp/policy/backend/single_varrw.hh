@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.3 2005/03/25 02:54:13 pavlin Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.4 2005/07/08 02:06:22 abittau Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -111,6 +112,16 @@ public:
      * @param e value of variable.
      */
     virtual void single_write(const string& id, const Element& e) = 0;
+
+    /**
+     * Read of a variable.  The VarRW needs to read a particular element.  This
+     * may return NULL indicating ElemNull---i.e. variable not present in THIS
+     * route.
+     *
+     * @return variable requested.
+     * @param id the id of the variable.
+     */
+    virtual Element* single_read(const string& id) = 0;
 
     /**
      * Marks the end of writes in case there were any modified fields.

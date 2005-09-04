@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.3 2004/10/04 17:55:07 abittau Exp $
+// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.4 2005/03/25 02:54:42 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
@@ -34,8 +34,8 @@ public:
 
     // SingleVarRW inteface:
     void start_read();
+    Element* single_read(const string& id);
     void single_write(const string& id, const Element& e);
-   
 
 private:
     StaticRoute&	_route;

@@ -13,15 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.9 2005/07/20 01:29:21 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.10 2005/07/20 23:35:09 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
 
 #include "policy/backend/single_varrw.hh"
 #include "policy/common/element_factory.hh"
-
 #include "internal_message.hh"
+
+template <class A>
+class BGPVarRWCallbacks;
 
 /**
  * @short Allows reading an modifying a BGP route.
@@ -32,6 +34,9 @@
 template <class A>
 class BGPVarRW : public SingleVarRW {
 public:
+    typedef Element* (BGPVarRW::*ReadCallback)();
+    typedef void (BGPVarRW::*WriteCallback)(const Element& e);
+
     /**
      * This varrw allows for routes to remain untouched even though they are
      * filtered. This is useful in order to check if a route will be accepted
@@ -53,7 +58,8 @@ public:
     InternalMessage<A>* filtered_message();
     
     // SingleVarRW interface
-    void start_read();
+    Element* single_read(const string& id);
+
     void single_write(const string& id, const Element& e);
     void end_write();
 
@@ -64,16 +70,14 @@ public:
      * @return true if route was modified. False otherwise.
      */
     bool modified();
-   
 
     /**
      * Output basic BGP specific information.
      *
      * @return BGP trace based on verbosity level returned from trace().
      */
-   virtual string more_tracelog();
+    virtual string more_tracelog();
 
-protected:
     /**
      * Reads the neighbor variable.  This is different on input/output branch.
      *
@@ -81,47 +85,50 @@ protected:
      */
     virtual Element* read_neighbor();
 
+    Element* read_policytags();
+    Element* read_filter_im();
+    Element* read_filter_sm();
+    Element* read_filter_ex();
+
+    Element* read_network4();
+    Element* read_network6();
+
+    Element* read_nexthop4();
+    Element* read_nexthop6();
+    Element* read_aspath();
+    Element* read_origin();
+
+    Element* read_localpref();
+    Element* read_community();
+    Element* read_med();
+
+    void write_filter_im(const Element& e);
+    void write_filter_sm(const Element& e);
+    void write_filter_ex(const Element& e);
+    void write_policytags(const Element& e);
+
+    void write_nexthop4(const Element& e);
+    void write_nexthop6(const Element& e);
+    void write_aspath(const Element& e);
+    void write_origin(const Element& e);
+
+    void write_localpref(const Element& e);
+    void write_community(const Element& e);
+    void write_med(const Element& e);
+
+protected:
     ElementFactory		_ef;
     string			_name;
 
 private:
-    /**
-     * Specialized template which reads the correct address family of nexthop
-     * and network addresses.
-     *
-     * @param route route to read addressed from.
-     */
-    void read_route_nexthop(const SubnetRoute<A>& route);
+    void clone_palist();
 
-    /**
-     * Attempts to write the nexthop address.
-     * @param id variable to write.
-     * @param e value to write.
-     * @return true if value was written. False otherwise.
-     */
-    bool write_nexthop(const string& id, const Element& e);
-
-    /**
-     * Read the community attribute.
-     *
-     * @param attr the attributes of the route.
-     * @return the element representing the community.
-     */
-    Element* read_community(const PathAttributeList<A>& attr);
-    
-    /**
-     * Write the community attribute.
-     *
-     * @param e the value of the new community.
-     */
-    void write_community(const Element& e);
-    
     const InternalMessage<A>&	_orig_rtmsg;
     InternalMessage<A>*		_filtered_rtmsg;
     bool			_got_fmsg;
     PolicyTags			_ptags;
     bool			_wrote_ptags;
-    PathAttributeList<A>	_palist;
+    PathAttributeList<A>*	_palist;
     bool			_no_modify;
     bool			_modified;
     RefPf			_pfilter[3];
@@ -131,7 +138,20 @@ private:
     // not impl
     BGPVarRW(const BGPVarRW&);
     BGPVarRW& operator=(const BGPVarRW&);
+
+    static BGPVarRWCallbacks<A> _callbacks;
 };
 
+template <class A>
+class BGPVarRWCallbacks {
+public:
+    typedef map<string, typename BGPVarRW<A>::ReadCallback>  ReadMap;
+    typedef map<string, typename BGPVarRW<A>::WriteCallback> WriteMap;
+
+    BGPVarRWCallbacks();
+
+    ReadMap  _read_map;
+    WriteMap _write_map;
+};
 
 #endif // __BGP_BGP_VARRW_HH__

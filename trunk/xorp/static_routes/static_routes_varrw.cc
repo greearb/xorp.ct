@@ -13,14 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.4 2005/03/05 02:08:43 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_varrw.cc,v 1.5 2005/03/25 02:54:42 pavlin Exp $"
 
 #include "static_routes_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
 #include "static_routes_varrw.hh"
 
 StaticRoutesVarRW::StaticRoutesVarRW(StaticRoute& route)
@@ -70,4 +68,10 @@ StaticRoutesVarRW::single_write(const string& id, const Element& e)
     if (id == "policytags") {
 	_route.set_policytags(e);
     }
+}
+
+Element*
+StaticRoutesVarRW::single_read(const string& /* id */)
+{
+    XLOG_UNREACHABLE();
 }

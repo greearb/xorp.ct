@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.5 2005/07/20 01:29:23 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.6 2005/08/04 15:26:58 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,7 +48,9 @@ SingleVarRW::read(const string& id) {
 	    start_read();
 	    _did_first_read = true;
 	}
-	
+
+	initialize(id, single_read(id));
+
 	// the client may have initialized the variables after the start_read
 	// marker, so try reading again...
 	i = _map.find(id);

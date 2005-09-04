@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.17 2005/07/20 23:35:09 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.18 2005/07/22 21:46:40 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -26,11 +26,14 @@
 using namespace policy_utils;
 
 template <class A>
+BGPVarRWCallbacks<A> BGPVarRW<A>::_callbacks;
+
+template <class A>
 BGPVarRW<A>::BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify, 
 		      const string& name)
     : _name(name), _orig_rtmsg(rtmsg), _filtered_rtmsg(NULL), 
       _got_fmsg(false), _wrote_ptags(false), 
-      _palist(*(rtmsg.route()->attributes())), // XXX: pointer deref in ctr
+      _palist(NULL),
       _no_modify(no_modify),
       _modified(false), _route_modify(false)
 {
@@ -48,59 +51,134 @@ BGPVarRW<A>::~BGPVarRW()
 	    _filtered_rtmsg->route()->unref();
 
 	delete _filtered_rtmsg;
-    }	
-}
+    }
 
-template <class A>
-void
-BGPVarRW<A>::start_read()
-{
-    // intialize policy stuff
-    initialize("policytags", _orig_rtmsg.route()->policytags().element());
-
-    initialize(VersionFilters::filter_import,
-	       new ElemFilter(_orig_rtmsg.route()->policyfilter(0)));
-    initialize(VersionFilters::filter_sm,
-	       new ElemFilter(_orig_rtmsg.route()->policyfilter(1)));
-    initialize(VersionFilters::filter_ex,
-	       new ElemFilter(_orig_rtmsg.route()->policyfilter(2)));
-
-    // initialize BGP vars
-    const SubnetRoute<A>* route = _orig_rtmsg.route();
-
-    read_route_nexthop(*route);
-    
-    const PathAttributeList<A>* attr = route->attributes();
-
-    initialize("aspath",
-	       _ef.create(ElemStr::id, attr->aspath().short_str().c_str()));
-    
-    uint32_t origin = attr->origin();
-    initialize("origin", _ef.create(ElemU32::id, to_str(origin).c_str()));
-
-    const LocalPrefAttribute* lpref = attr->local_pref_att();
-    Element* e = NULL;
-    if (lpref)
-	e = _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str());
-    initialize("localpref", e);
-
-    // XXX don't support community yet
-    initialize("community", read_community(*attr));
-
-    initialize("neighbor", read_neighbor());
-
-    e = NULL;
-    const MEDAttribute* med = attr->med_att();
-    if(med) 
-	e = _ef.create(ElemU32::id, to_str(med->med()).c_str());
-    initialize("med", e);
+    if (_palist)
+	delete _palist;
 }
 
 template <class A>
 Element*
-BGPVarRW<A>::read_community(const PathAttributeList<A>& attr)
+BGPVarRW<A>::read_policytags()
 {
-    const CommunityAttribute* ca = attr.community_att();
+    return _orig_rtmsg.route()->policytags().element();
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_filter_im()
+{
+    return new ElemFilter(_orig_rtmsg.route()->policyfilter(0));
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_filter_sm()
+{
+    return new ElemFilter(_orig_rtmsg.route()->policyfilter(1));
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_filter_ex()
+{
+    return new ElemFilter(_orig_rtmsg.route()->policyfilter(2));
+}
+
+template <>
+Element*
+BGPVarRW<IPv4>::read_network4()
+{
+    return _ef.create(ElemIPv4Net::id, 
+		      _orig_rtmsg.route()->net().str().c_str());
+}
+
+template <>
+Element*
+BGPVarRW<IPv6>::read_network4()
+{
+    return NULL;
+}
+
+template <>
+Element*
+BGPVarRW<IPv6>::read_network6()
+{
+    return _ef.create(ElemIPv6Net::id, 
+		      _orig_rtmsg.route()->net().str().c_str());
+}
+
+template <>
+Element*
+BGPVarRW<IPv4>::read_network6()
+{
+    return NULL;
+}
+
+template <>
+Element*
+BGPVarRW<IPv6>::read_nexthop6()
+{
+    return _ef.create(ElemIPv6::id, 
+		      _orig_rtmsg.route()->nexthop().str().c_str());
+}
+
+template <>
+Element*
+BGPVarRW<IPv4>::read_nexthop6()
+{
+    return NULL;
+}
+
+template <>
+Element*
+BGPVarRW<IPv4>::read_nexthop4()
+{
+    return _ef.create(ElemIPv4::id, 
+		      _orig_rtmsg.route()->nexthop().str().c_str());
+}
+
+template <>
+Element*
+BGPVarRW<IPv6>::read_nexthop4()
+{
+    return NULL;
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_aspath()
+{
+    return _ef.create(ElemStr::id, _orig_rtmsg.route()->attributes()
+				    ->aspath().short_str().c_str());
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_origin()
+{
+    uint32_t origin = _orig_rtmsg.route()->attributes()->origin();
+    return _ef.create(ElemStr::id, to_str(origin).c_str());
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_localpref()
+{
+    const LocalPrefAttribute* lpref = _orig_rtmsg.route()->attributes()->
+					local_pref_att();
+    if (lpref)
+	return _ef.create(ElemU32::id, to_str(lpref->localpref()).c_str());
+    else
+	return NULL;
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_community()
+{
+    const CommunityAttribute* ca = _orig_rtmsg.route()->attributes()->
+				    community_att();
 
     // no community!
     if (!ca)
@@ -116,6 +194,37 @@ BGPVarRW<A>::read_community(const PathAttributeList<A>& attr)
 }
 
 template <class A>
+Element*
+BGPVarRW<A>::read_med()
+{
+    const MEDAttribute* med = _orig_rtmsg.route()->attributes()->med_att();
+    if (med)
+	return _ef.create(ElemU32::id, to_str(med->med()).c_str());
+    else
+	return NULL;
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::single_read(const string& id)
+{
+    typename BGPVarRWCallbacks<A>::ReadMap::iterator i = 
+		_callbacks._read_map.find(id);
+
+    XLOG_ASSERT (i != _callbacks._read_map.end());
+
+    ReadCallback cb = i->second;
+    return (this->*cb)();
+}
+
+template <class A>
+void
+BGPVarRW<A>::clone_palist()
+{
+    _palist = new PathAttributeList<A>(*_orig_rtmsg.route()->attributes());
+}
+
+template <class A>
 void
 BGPVarRW<A>::write_community(const Element& e)
 {
@@ -123,8 +232,11 @@ BGPVarRW<A>::write_community(const Element& e)
 
     const ElemSetCom32& es = dynamic_cast<const ElemSetCom32&>(e);
 
-    if (_palist.community_att())
-	_palist.remove_attribute_by_type(COMMUNITY);
+    if (!_palist)
+	clone_palist();
+
+    if (_palist->community_att())
+	_palist->remove_attribute_by_type(COMMUNITY);
 	
     CommunityAttribute ca;
    
@@ -133,7 +245,7 @@ BGPVarRW<A>::write_community(const Element& e)
 	ca.add_community( (*i).val());
     }	
     
-    _palist.add_path_attribute(ca);
+    _palist->add_path_attribute(ca);
 }
 
 template <class A>
@@ -147,34 +259,6 @@ BGPVarRW<A>::read_neighbor()
     return e;
 }
 
-template<>
-void
-BGPVarRW<IPv4>::read_route_nexthop(const SubnetRoute<IPv4>& route)
-{
-    initialize("network4", _ef.create(ElemIPv4Net::id,
-				      route.net().str().c_str()));
-
-    initialize("nexthop4", _ef.create(ElemIPv4::id,
-				      route.nexthop().str().c_str()));
-
-    initialize("network6", NULL);
-    initialize("nexthop6", NULL);
-}
-
-template<>
-void
-BGPVarRW<IPv6>::read_route_nexthop(const SubnetRoute<IPv6>& route)
-{
-    initialize("network6", _ef.create(ElemIPv6Net::id,
-				      route.net().str().c_str()));
-
-    initialize("nexthop6", _ef.create(ElemIPv6::id,
-				      route.nexthop().str().c_str()));
-
-    initialize("network4", NULL);
-    initialize("nexthop4", NULL);
-}
-
 template <class A>
 InternalMessage<A>*
 BGPVarRW<A>::filtered_message()
@@ -186,110 +270,163 @@ BGPVarRW<A>::filtered_message()
 
 template <class A>
 void
+BGPVarRW<A>::write_filter_im(const Element& e)
+{
+    const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+    _pfilter[0] = ef.val();
+    _wrote_pfilter[0] = true;
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_filter_sm(const Element& e)
+{
+    const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+    _pfilter[1] = ef.val();
+    _wrote_pfilter[1] = true;
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_filter_ex(const Element& e)
+{
+    const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+    _pfilter[2] = ef.val();
+    _wrote_pfilter[2] = true;
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_policytags(const Element& e)
+{
+    _ptags = e;
+    _wrote_ptags = true;
+    
+    // XXX: maybe we should make policytags be like filter pointers... i.e. meta
+    // information, rather than real route information...
+    _route_modify = true;
+}
+
+template <>
+void
+BGPVarRW<IPv4>::write_nexthop4(const Element& e)
+{
+    _route_modify = true;
+    const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
+    XLOG_ASSERT(eip != NULL);
+
+    IPv4 nh(eip->val());
+
+    if (!_palist)
+	clone_palist();
+    _palist->replace_nexthop(nh);
+}
+
+template <>
+void
+BGPVarRW<IPv6>::write_nexthop4(const Element& /* e */)
+{
+}
+
+template <>
+void
+BGPVarRW<IPv6>::write_nexthop6(const Element& e)
+{
+    _route_modify = true;
+    const ElemIPv6* eip = dynamic_cast<const ElemIPv6*>(&e);
+    XLOG_ASSERT(eip != NULL);
+
+    IPv6 nh(eip->val());
+
+    if (!_palist)
+	clone_palist();
+    _palist->replace_nexthop(nh);
+}
+
+template <>
+void
+BGPVarRW<IPv4>::write_nexthop6(const Element& /* e */)
+{
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_aspath(const Element& e)
+{
+    _route_modify = true;
+
+    AsPath aspath(e.str().c_str());
+
+    if (!_palist)
+	clone_palist();
+    _palist->replace_AS_path(aspath);
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_med(const Element& e)
+{
+    _route_modify = true;
+
+    if (!_palist)
+	clone_palist();
+    if (_palist->med_att())
+	_palist->remove_attribute_by_type(MED);
+	
+    const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
+    MEDAttribute med(u32.val());
+    _palist->add_path_attribute(med);
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_localpref(const Element& e)
+{
+    _route_modify = true;
+
+    if (!_palist)
+	clone_palist();
+    if (_palist->local_pref_att())
+	_palist->remove_attribute_by_type(LOCAL_PREF);
+	
+    const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
+    LocalPrefAttribute lpref(u32.val());
+    _palist->add_path_attribute(lpref);
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_origin(const Element& e)
+{
+    _route_modify = true;
+
+    const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
+    OriginType origin = INCOMPLETE;
+
+    if (u32.val() > INCOMPLETE)
+	XLOG_FATAL("Unknown origin: %d\n", u32.val());
+	
+    origin = static_cast<OriginType>(u32.val());
+    
+    if (!_palist)
+	clone_palist();
+    _palist->replace_origin(origin);
+}
+
+template <class A>
+void
 BGPVarRW<A>::single_write(const string& id, const Element& e)
 {
     if (_no_modify)
 	return;
     
-    // XXX need to tidy up this whole class...
+    typename BGPVarRWCallbacks<A>::WriteMap::iterator i = 
+		_callbacks._write_map.find(id);
 
-    // MODIFY META ROUTING INFORMATION:
-try {    
-    if (id == VersionFilters::filter_import) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
+    XLOG_ASSERT (i != _callbacks._write_map.end());
 
-	_pfilter[0] = ef.val();
-	_wrote_pfilter[0] = true;
-	return;
-    }
-
-    if (id == VersionFilters::filter_sm) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
-
-	_pfilter[1] = ef.val();
-	_wrote_pfilter[1] = true;
-	return;
-    }
-    
-    if (id == VersionFilters::filter_ex) {
-	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(e);
-
-	_pfilter[2] = ef.val();
-	_wrote_pfilter[2] = true;
-	return;
-    }
-} catch(const bad_cast& ex) {
-    XLOG_FATAL("Bad cast when writing ElemFilter %s (Type=%s) (val=%s)", 
-	       id.c_str(), e.type().c_str(), e.str().c_str());
-}
-
-    // now we modify "real stuff"
-    // XXX: maybe we should make policytags be like filter pointers... i.e. meta
-    // information, rather than real route information...
-    _route_modify = true;
-    
-
-    if (id == "policytags") {
-	_ptags = e;
-	_wrote_ptags = true;
-	return;
-    }
-
-    if (write_nexthop(id, e))
-	return;
-
-    const ElemU32* u32 = NULL;
-
-    if (e.type() == ElemU32::id) {
-	u32 = dynamic_cast<const ElemU32*>(&e);
-	XLOG_ASSERT(u32 != NULL);
-    }	
-
-    if (id == "aspath") {
-	AsPath aspath(e.str().c_str());
-	_palist.replace_AS_path(aspath);
-	return;
-    }
-    if (id == "med") {
-	if (_palist.med_att())
-	    _palist.remove_attribute_by_type(MED);
-	
-	XLOG_ASSERT(u32 != NULL);
-	
-	MEDAttribute med(u32->val());
-        _palist.add_path_attribute(med);
-	return;
-    }
-    if (id == "localpref") {
-	if (_palist.local_pref_att())
-	    _palist.remove_attribute_by_type(LOCAL_PREF);
-
-	XLOG_ASSERT(u32 != NULL);
-	
-	LocalPrefAttribute lpref(u32->val());
-	_palist.add_path_attribute(lpref);
-	return;
-    }
-    if (id == "community") {
-	write_community(e);
-	return;
-    }
-    if (id == "origin") {
-	XLOG_ASSERT(u32 != NULL);
-
-	OriginType origin = INCOMPLETE;
-
-	if (u32->val() > INCOMPLETE)
-		XLOG_FATAL("Unknown origin: %d\n", u32->val());
-	
-	origin = static_cast<OriginType>(u32->val());
-    
-	_palist.replace_origin(origin);
-	return;
-    }
-    
-    // XXX: writing a variable we don't know about!
-    XLOG_FATAL("Don't know how to write: %s\n", id.c_str());
+    WriteCallback cb = i->second;
+    (this->*cb)(e);
 }
 
 template <class A>
@@ -315,11 +452,13 @@ BGPVarRW<A>::end_write()
 	return;
     }
 
-    _palist.rehash();
+    if (_palist)
+        _palist->rehash();
 
     const SubnetRoute<A>* old_route = _orig_rtmsg.route();
     SubnetRoute<A>* new_route = new SubnetRoute<A>(_orig_rtmsg.net(),
-						   &_palist,
+						   _palist ? _palist :
+						   old_route->attributes(),
 						   old_route->original_route(),
 						   old_route->igp_metric());
     // propagate policy tags
@@ -364,40 +503,6 @@ BGPVarRW<A>::end_write()
     _modified = true;
 }
 
-
-template <>
-bool
-BGPVarRW<IPv4>::write_nexthop(const string& id, const Element& e)
-{
-    if (id == "nexthop4" && e.type() == ElemIPv4::id) {
-	const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
-	XLOG_ASSERT(eip != NULL);
-
-	IPv4 nh(eip->val());
-
-	_palist.replace_nexthop(nh);
-	return true;
-    }
-    return false;
-}
-
-
-template <>
-bool
-BGPVarRW<IPv6>::write_nexthop(const string& id, const Element& e)
-{
-    if (id == "nexthop6" && e.type() == ElemIPv6::id) {
-	const ElemIPv6* eip = dynamic_cast<const ElemIPv6*>(&e);
-	XLOG_ASSERT(eip != NULL);
-
-	IPv6 nh(eip->val());
-
-	_palist.replace_nexthop(nh);
-	return true;
-    }
-    return false;
-}
-
 template <class A>
 bool
 BGPVarRW<A>::modified()
@@ -426,5 +531,45 @@ BGPVarRW<A>::more_tracelog()
     return x;
 }
 
+template <class A>
+BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
+{
+    _read_map["neighbor"] = &BGPVarRW<A>::read_neighbor;
+
+    _read_map["policytags"] = &BGPVarRW<A>::read_policytags;
+    _read_map[VersionFilters::filter_import] = &BGPVarRW<A>::read_filter_im;
+    _read_map[VersionFilters::filter_sm] = &BGPVarRW<A>::read_filter_sm;
+    _read_map[VersionFilters::filter_ex] = &BGPVarRW<A>::read_filter_ex;
+    
+    _read_map["network4"] = &BGPVarRW<A>::read_network4;
+    _read_map["network6"] = &BGPVarRW<A>::read_network6;
+
+    _read_map["nexthop4"] = &BGPVarRW<A>::read_nexthop4;
+    _read_map["nexthop6"] = &BGPVarRW<A>::read_nexthop6;
+    _read_map["aspath"] = &BGPVarRW<A>::read_aspath;
+    _read_map["origin"] = &BGPVarRW<A>::read_origin;
+    
+    _read_map["localpref"] = &BGPVarRW<A>::read_localpref;
+    _read_map["community"] = &BGPVarRW<A>::read_community;
+    _read_map["med"] = &BGPVarRW<A>::read_med;
+    
+    _write_map["policytags"] = &BGPVarRW<A>::write_policytags;
+    _write_map[VersionFilters::filter_import] = &BGPVarRW<A>::write_filter_im;
+    _write_map[VersionFilters::filter_sm] = &BGPVarRW<A>::write_filter_sm;
+    _write_map[VersionFilters::filter_ex] = &BGPVarRW<A>::write_filter_ex;
+    
+    _write_map["nexthop4"] = &BGPVarRW<A>::write_nexthop4;
+    _write_map["nexthop6"] = &BGPVarRW<A>::write_nexthop6;
+    _write_map["aspath"] = &BGPVarRW<A>::write_aspath;
+    _write_map["origin"] = &BGPVarRW<A>::write_origin;
+    
+    _write_map["localpref"] = &BGPVarRW<A>::write_localpref;
+    _write_map["community"] = &BGPVarRW<A>::write_community;
+    _write_map["med"] = &BGPVarRW<A>::write_med;
+}
+
 template class BGPVarRW<IPv4>;
 template class BGPVarRW<IPv6>;
+
+template class BGPVarRWCallbacks<IPv4>;
+template class BGPVarRWCallbacks<IPv6>;

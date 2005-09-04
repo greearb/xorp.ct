@@ -13,15 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.4 2004/10/04 17:55:06 abittau Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.5 2005/03/25 02:54:28 pavlin Exp $"
 
 #include "rip_module.h"
-
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-
 #include "policy/common/policy_utils.hh"
-
 #include "rip_varrw.hh"
 
 template <class A>
@@ -40,6 +37,13 @@ RIPVarRW<A>::start_read()
 
     initialize("metric", new ElemU32(_route.cost()));
     initialize("tag", new ElemU32(_route.tag()));
+}
+
+template <class A>
+Element*
+RIPVarRW<A>::single_read(const string& /* id */)
+{
+    XLOG_UNREACHABLE();
 }
 
 template <class A>
@@ -74,7 +78,6 @@ RIPVarRW<A>::single_write(const string& id, const Element& e)
     }
 }
 
-
 #ifdef INSTANTIATE_IPV4
 
 template <>
@@ -93,6 +96,7 @@ RIPVarRW<IPv4>::write_nexthop(const string& id, const Element& e)
     }
     return false;
 }
+
 template <>
 void
 RIPVarRW<IPv4>::read_route_nexthop(RouteEntry<IPv4>& route)
@@ -106,7 +110,6 @@ RIPVarRW<IPv4>::read_route_nexthop(RouteEntry<IPv4>& route)
 
 template class RIPVarRW<IPv4>;
 #endif // INSTANTIATE_IPV4
-
 
 #ifdef INSTANTIATE_IPV6
 template <>
@@ -126,7 +129,6 @@ RIPVarRW<IPv6>::write_nexthop(const string& id, const Element& e)
     return false;
 }
 
-
 template <>
 void
 RIPVarRW<IPv6>::read_route_nexthop(RouteEntry<IPv6>& route)
@@ -137,7 +139,6 @@ RIPVarRW<IPv6>::read_route_nexthop(RouteEntry<IPv6>& route)
     initialize("network4", NULL);
     initialize("nexthop4", NULL);
 }
-
 
 template class RIPVarRW<IPv6>;
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.12 2005/08/04 14:14:03 bms Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.13 2005/08/17 16:39:26 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -79,6 +79,8 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 	accepted = _policy_filters.run_filter(_filter_type, *varrw);
 
 	if (varrw->trace()) {
+	    XLOG_FATAL("[BGP] XXX tracing is now broken!");
+
 	    // Rerun the filter on a dummy rtmsg to obtain a trace
 	    BGPVarRW<A>* dummy_varrw = get_varrw(dummy_rtmsg, no_modify);
 	    dummy_varrw->allow_trace(true);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_varrw.hh,v 1.4 2004/10/04 17:55:06 abittau Exp $
+// $XORP: xorp/rib/rib_varrw.hh,v 1.5 2005/03/25 02:54:21 pavlin Exp $
 
 #ifndef __RIB_RIB_VARRW_HH__
 #define __RIB_RIB_VARRW_HH__
@@ -48,6 +48,8 @@ public:
      * @param e value of variable.
      */
     void single_write(const string& id, const Element& e);
+
+    Element* single_read(const string& id);
 
 private:
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/rip_varrw.hh,v 1.4 2004/10/04 17:55:06 abittau Exp $
+// $XORP: xorp/rip/rip_varrw.hh,v 1.5 2005/03/25 02:54:28 pavlin Exp $
 
 #ifndef __RIP_RIP_VARRW_HH__
 #define __RIP_RIP_VARRW_HH__
@@ -35,6 +35,7 @@ public:
 
     // SingleVarRW interface
     void start_read();
+    Element* single_read(const string& id);
     void single_write(const string& id, const Element& e);
 
 private:

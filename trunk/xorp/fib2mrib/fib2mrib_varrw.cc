@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.3 2005/03/05 02:01:12 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.4 2005/03/25 02:53:21 pavlin Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -70,4 +70,10 @@ Fib2mribVarRW::single_write(const string& id, const Element& e)
     if (id == "policytags") {
 	_route.set_policytags(e);
     }
+}
+
+Element*
+Fib2mribVarRW::single_read(const string& /*id */)
+{
+    XLOG_UNREACHABLE();
 }
