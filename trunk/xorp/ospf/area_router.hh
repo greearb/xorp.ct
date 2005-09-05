@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.52 2005/09/02 01:46:14 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.53 2005/09/04 03:58:46 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -171,7 +171,7 @@ class AreaRouter {
      * 
      */
     bool get_lsas(const list<Ls_request>& requests,
-		  list<Lsa::LsaRef>& lsas) const;
+		  list<Lsa::LsaRef>& lsas);
 
     /**
      * Open database
@@ -217,13 +217,20 @@ class AreaRouter {
      */
     void close_database(DataBaseHandle& dbh);
 
+    /**
+     * Print link state database.
+     */
+    void print_link_state_database() const;
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
 
+#ifdef	UNFINISHED_INCREMENTAL_UPDATE
     Spt<Vertex> _spt;			// SPT computation unit.
+#endif
 
     Lsa::LsaRef _invalid_lsa;		// An invalid LSA to overwrite slots
 
@@ -541,12 +548,14 @@ class AreaRouter {
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
      */
-    void routing_router_lsaV2(const Vertex& v, const RouterLsa *rlsa);
+    void routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& v,
+			      const RouterLsa *rlsa);
 
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
      */
-    void routing_router_lsaV3(const Vertex& v, const RouterLsa *rlsa);
+    void routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
+			      const RouterLsa *rlsa);
 };
 
 /**

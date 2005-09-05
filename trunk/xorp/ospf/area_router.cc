@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.73 2005/09/02 12:17:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.74 2005/09/04 03:58:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -83,11 +83,13 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 //     _db.push_back(_router_lsa);
 //     _last_entry = 1;
 
+#ifdef	UNFINISHED_INCREMENTAL_UPDATE
     // Add this router to the SPT table.
     Vertex v;
     RouterVertex(v);
     _spt.add_node(v);
     _spt.set_origin(v);
+#endif
 }
 
 template <typename A>
@@ -374,6 +376,23 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	size_t index;
 	LsaSearch search = compare_lsa(lsah, index);
 
+#ifdef	DEBUG_LOGGING
+	debug_msg("Searching for %s\n", cstring(*(*i)));
+	switch(search) {
+	case NOMATCH:
+	    debug_msg("No match\n");
+	    break;
+	case NEWER:
+	    debug_msg("is newer than \n%s\n", cstring(*_db[index]));
+	    break;
+	case OLDER:
+	    debug_msg("is older than \n%s\n", cstring(*_db[index]));
+	    break;
+	case EQUIVALENT:
+	    debug_msg("is equivalent to \n%s\n", cstring(*_db[index]));
+	    break;
+	}
+#endif
 	// (4) MaxAge
 	if (OspfTypes::MaxAge == lsah.get_ls_age()) {
 	    if (NOMATCH == search) {
@@ -392,8 +411,18 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    if (NEWER == search) {
 		TimeVal then;
 		_db[index]->get_creation_time(then);
-		if ((now - then) < TimeVal(OspfTypes::MinLSArrival))
+		if ((now - then) < TimeVal(OspfTypes::MinLSArrival, 0)) {
+		    debug_msg("Rejecting LSA last one arrived less than "
+			      "%d second(s) ago\n %s\n%s",
+			      OspfTypes::MinLSArrival,
+			      cstring(*(*i)) , cstring(*(_db[index])));
+		    XLOG_TRACE(_ospf.trace()._input_errors,
+			       "Rejecting LSA last one arrived less than "
+			       "%d second(s) ago\n%s\n%s",
+			       OspfTypes::MinLSArrival,
+			       cstring(*(*i)) , cstring(*(_db[index])));
 		    continue;
+		}
 	    }
 	    // This is out of sequence but doing it later makes no sense.
 	    // (f) Self orignating LSAs 
@@ -754,7 +783,6 @@ AreaRouter<A>::compare_lsa(const Lsa_header& lsah, size_t& index) const
 	TimeVal now;
 	_ospf.get_eventloop().current_time(now);
 	_db[index]->update_age(now);
-
 	return compare_lsa(lsah, _db[index]->get_header());
     }
 
@@ -789,7 +817,7 @@ AreaRouter<A>::newer_lsa(const Lsa_header& lsah) const
 template <typename A>
 bool
 AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
-			list<Lsa::LsaRef>& lsas) const
+			list<Lsa::LsaRef>& lsas)
 {
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
@@ -801,8 +829,13 @@ AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
 	    XLOG_WARNING("Unable to find %s", cstring(*i));
 	    return false;
 	}
-	_db[index]->update_age(now);
-	lsas.push_back(_db[index]);
+	Lsa::LsaRef lsar = _db[index];
+	// Start the delay timer so we won't transmit any more self
+	// originating LSAs until the appropriate time has passed.
+	if (lsar->get_self_originating())
+	    _queue.fire();
+        lsar->update_age(now);
+	lsas.push_back(lsar);
     }
     
     return true;
@@ -898,6 +931,21 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
 }
 
 template <typename A>
+void
+AreaRouter<A>:: print_link_state_database() const
+{
+  for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid())
+	    continue;
+	// Please leave this as a printf its for debugging only.
+	printf("%s database %s\n",
+	       pr_id(_ospf.get_router_id()).c_str(),
+	       cstring(*lsar));
+  }
+}
+
+template <typename A>
 bool
 AreaRouter<A>::update_router_links()
 {
@@ -938,10 +986,12 @@ AreaRouter<A>::update_router_links()
     _ospf.get_eventloop().current_time(now);
     router_lsa->update_age_and_seqno(now);
 
+#if	0
     // Prime this Router-LSA to be refreshed.
     router_lsa->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_router_lsa));
+#endif
 
     return true;
 }
@@ -1211,7 +1261,71 @@ template <typename A>
 void 
 AreaRouter<A>::routing_total_recompute()
 {
-    XLOG_WARNING("TBD: Compute routing table");
+//     print_link_state_database();
+
+    Spt<Vertex> spt;
+    bool transit_capability = false;
+
+    // Add this router to the SPT table.
+    Vertex rv;
+    RouterVertex(rv);
+    spt.add_node(rv);
+    spt.set_origin(rv);
+
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage())
+	    continue;
+
+	RouterLsa *rlsa;
+	
+	if (0 != (rlsa = dynamic_cast<RouterLsa *>(lsar.get()))) {
+
+	    if (rlsa->get_v_bit())
+		transit_capability = true;
+	    
+	    Vertex v;
+
+	    v.set_version(_ospf.get_version());
+	    v.set_type(Vertex::Router);
+	    v.set_nodeid(rlsa->get_header().get_link_state_id());
+
+	    // Don't add this router back again.
+	    if (spt.exists_node(v)) {
+		debug_msg("%s Router %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+	    } else {
+		debug_msg("%s Add %s\n",
+		       pr_id(_ospf.get_router_id()).c_str(),
+		       cstring(v));
+		spt.add_node(v);
+	    }
+
+	    debug_msg("%s Router-Lsa %s\n",
+		   pr_id(_ospf.get_router_id()).c_str(),
+		   cstring(*rlsa));
+
+	    switch(_ospf.get_version()) {
+	    case OspfTypes::V2:
+		routing_router_lsaV2(spt, v, rlsa);
+		break;
+	    case OspfTypes::V3:
+		routing_router_lsaV3(spt, v, rlsa);
+		break;
+	    }
+	}
+    }
+
+    // Print the new routing table.
+    list<RouteCmd<Vertex> > r;
+    spt.compute(r);
+
+    list<RouteCmd<Vertex> >::const_iterator ri;
+    for(ri = r.begin(); ri != r.end(); ri++)
+	XLOG_WARNING("TBD: Add route:\n%s %s",
+		     pr_id(_ospf.get_router_id()).c_str(),
+		     ri->str().c_str());
 }
 
 template <typename A>
@@ -1245,17 +1359,25 @@ inline
 void
 update_edge(Spt<A>& spt, const Vertex& src, int metric, const Vertex& dst)
 {
-    if (!spt.add_edge(src, metric, dst))
+    if (!spt.add_edge(src, metric, dst)) {
+	// XXX
+	// This warning should not appear during absolute calculation.
+	// It may be normal for it to appear when doing incremental
+	// updates when it should be removed.
+	XLOG_WARNING("Edge exists between %s and %s", cstring(src),
+		     cstring(dst));
 	if (!spt.update_edge_weight(src, metric, dst))
 	    XLOG_FATAL("Couldn't add edge between %s and %s",
 		       cstring(src), cstring(dst));
+    }
 }
 
 template <typename A>
 void
-AreaRouter<A>::routing_router_lsaV2(const Vertex& src, const RouterLsa *rlsa)
+AreaRouter<A>::routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& src,
+				    const RouterLsa *rlsa)
 {
-    debug_msg("Vertex %s \n%s", cstring(src), cstring(*rlsa));
+    debug_msg("Vertex %s \n%s\n", cstring(src), cstring(*rlsa));
 
     const list<RouterLink> &rl = 
 	const_cast<RouterLsa *>(rlsa)->get_router_links();
@@ -1287,22 +1409,31 @@ AreaRouter<A>::routing_router_lsaV2(const Vertex& src, const RouterLsa *rlsa)
 		// Put both links back. If the network
 		// vertex is not in the SPT put it in.
 		// Create a destination node.
-		printf("Cool %s\n", cstring(*_db[index]));
+// 		printf("%s Cool %s\n", 
+// 		       pr_id(_ospf.get_router_id()).c_str(),
+// 		       cstring(*_db[index]));
 		dst.set_type(Vertex::Network);
 		dst.set_nodeid(lsan->get_header().
 			       get_link_state_id());
-		printf("%s Adding %s\n",
-		       pr_id(_ospf.get_router_id()).c_str(),
-		       cstring(dst));
-		if (!_spt.exists_node(dst))
-		    _spt.add_node(dst);
-		printf("%s Edge %s %d %s\n",
-		       pr_id(_ospf.get_router_id()).c_str(),
-		       cstring(src),
-		       l->get_metric(),
-		       cstring(dst));
-		update_edge(_spt, src, l->get_metric(), dst);
 		
+		if (!spt.exists_node(dst)) {
+		    spt.add_node(dst);
+// 		    printf("%s Adding %s\n",
+// 			   pr_id(_ospf.get_router_id()).c_str(),
+// 			   cstring(dst));
+		}
+// 		printf("%s Edge %s %d %s\n",
+// 		       pr_id(_ospf.get_router_id()).c_str(),
+// 		       cstring(src),
+// 		       l->get_metric(),
+// 		       cstring(dst));
+		update_edge(spt, src, l->get_metric(), dst);
+		// Reverse edge
+		update_edge(spt, dst, 0, src);
+	    } else {
+// 		printf("%s Network-Lsa not found for\n%s\n",
+// 		       pr_id(_ospf.get_router_id()).c_str(),
+// 		       cstring(*rlsa));
 	    }
 	}
 	    break;
@@ -1323,9 +1454,11 @@ AreaRouter<A>::routing_router_lsaV2(const Vertex& src, const RouterLsa *rlsa)
 
 template <typename A>
 void
-AreaRouter<A>::routing_router_lsaV3(const Vertex& v, const RouterLsa *rlsa)
+AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
+				    const RouterLsa *rlsa)
 {
-    debug_msg("Vertex %s \n%s", cstring(v), cstring(*rlsa));
+    debug_msg("Spt %s Vertex %s \n%s\n", cstring(spt), cstring(v),
+	      cstring(*rlsa));
 
     XLOG_WARNING("TBD - add to SPT");
 }
@@ -1359,7 +1492,7 @@ AreaRouter<A>::routing_add(Lsa::LsaRef lsar, bool known)
     // be fine.
     size_t index;
     if (!find_lsa(lsar, index))
-	XLOG_FATAL("This LSA must be in the database\n%s", cstring(*lsar));
+	XLOG_FATAL("This LSA must be in the database\n%s\n", cstring(*lsar));
 
     _new_lsas.push_back(Bucket(index, known));
 }
@@ -1434,7 +1567,7 @@ AreaRouter<A>::routing_end()
 	    _new_lsas.erase(i++);
 	}  else if (0 != (nlsa = dynamic_cast<NetworkLsa *>(lsar.get()))) {
 	    
-	    printf("%s %s", pr_id(_ospf.get_router_id()).c_str(),
+	    printf("%s %s\n", pr_id(_ospf.get_router_id()).c_str(),
 		   cstring(*nlsa));
 	    i++;
 	} else {
