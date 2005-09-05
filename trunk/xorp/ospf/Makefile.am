@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.12 2005/08/18 15:37:47 bms Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.13 2005/09/05 18:58:04 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -16,10 +16,12 @@ bin_PROGRAMS	 = xorp_ospfv2 xorp_ospfv3
 check_PROGRAMS	 = test_packet
 check_PROGRAMS	+= test_checksum
 check_PROGRAMS	+= test_peering
+check_PROGRAMS	+= test_routing
 
 TESTS		 = test_packet$(EXEEXT)
 TESTS		+= test_checksum$(EXEEXT)
 TESTS		+= test_peering$(EXEEXT)
+TESTS		+= test_routing$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libospf.la
@@ -47,6 +49,8 @@ test_packet_SOURCES		= test_packet.cc
 test_checksum_SOURCES		= test_checksum.cc
 
 test_peering_SOURCES		= test_peering.cc
+
+test_routing_SOURCES		= test_routing.cc
 
 # -- Library Sources
 libospf_la_SOURCES  = area_router.hh

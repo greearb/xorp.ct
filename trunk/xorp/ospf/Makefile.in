@@ -98,9 +98,9 @@ SUBDIRS =
 bin_PROGRAMS = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
-check_PROGRAMS = test_packet test_checksum test_peering
+check_PROGRAMS = test_packet test_checksum test_peering test_routing
 
-TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT)
+TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT) test_routing$(EXEEXT)
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = libospf.la
@@ -118,6 +118,8 @@ test_packet_SOURCES = test_packet.cc
 test_checksum_SOURCES = test_checksum.cc
 
 test_peering_SOURCES = test_peering.cc
+
+test_routing_SOURCES = test_routing.cc
 
 # -- Library Sources
 libospf_la_SOURCES = area_router.hh exceptions.hh debug_io.hh delay_queue.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh area_router.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc routing_table.cc xrl_io.cc xrl_target.cc
@@ -142,7 +144,7 @@ am_libospf_la_OBJECTS = area_router.lo fletcher_checksum.lo lsa.lo \
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
-	test_peering$(EXEEXT)
+	test_peering$(EXEEXT) test_routing$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_test_checksum_OBJECTS = test_checksum.$(OBJEXT)
@@ -190,6 +192,21 @@ test_peering_DEPENDENCIES = libospf.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/libproto/libproto.la
 test_peering_LDFLAGS =
+am_test_routing_OBJECTS = test_routing.$(OBJEXT)
+test_routing_OBJECTS = $(am_test_routing_OBJECTS)
+test_routing_LDADD = $(LDADD)
+test_routing_DEPENDENCIES = libospf.la \
+	$(top_builddir)/xrl/targets/libospfv2base.la \
+	$(top_builddir)/xrl/targets/libospfv3base.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libproto/libproto.la
+test_routing_LDFLAGS =
 am_xorp_ospfv2_OBJECTS = xorp_ospfv2.$(OBJEXT)
 xorp_ospfv2_OBJECTS = $(am_xorp_ospfv2_OBJECTS)
 xorp_ospfv2_LDADD = $(LDADD)
@@ -233,9 +250,9 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/peer.Plo $(DEPDIR)/peer_manager.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/routing_table.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_checksum.Po $(DEPDIR)/test_packet.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/xorp_ospfv2.Po \
-@AMDEP_TRUE@	$(DEPDIR)/xorp_ospfv3.Po $(DEPDIR)/xrl_io.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/xrl_target.Plo
+@AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/test_routing.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xorp_ospfv2.Po $(DEPDIR)/xorp_ospfv3.Po \
+@AMDEP_TRUE@	$(DEPDIR)/xrl_io.Plo $(DEPDIR)/xrl_target.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -255,7 +272,8 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 DIST_SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) \
 	$(test_packet_SOURCES) $(test_peering_SOURCES) \
-	$(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
+	$(test_routing_SOURCES) $(xorp_ospfv2_SOURCES) \
+	$(xorp_ospfv3_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -263,7 +281,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
+SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(test_routing_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
 
 all: all-recursive
 
@@ -326,6 +344,9 @@ test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES)
 test_peering$(EXEEXT): $(test_peering_OBJECTS) $(test_peering_DEPENDENCIES) 
 	@rm -f test_peering$(EXEEXT)
 	$(CXXLINK) $(test_peering_LDFLAGS) $(test_peering_OBJECTS) $(test_peering_LDADD) $(LIBS)
+test_routing$(EXEEXT): $(test_routing_OBJECTS) $(test_routing_DEPENDENCIES) 
+	@rm -f test_routing$(EXEEXT)
+	$(CXXLINK) $(test_routing_LDFLAGS) $(test_routing_OBJECTS) $(test_routing_LDADD) $(LIBS)
 xorp_ospfv2$(EXEEXT): $(xorp_ospfv2_OBJECTS) $(xorp_ospfv2_DEPENDENCIES) 
 	@rm -f xorp_ospfv2$(EXEEXT)
 	$(CXXLINK) $(xorp_ospfv2_LDFLAGS) $(xorp_ospfv2_OBJECTS) $(xorp_ospfv2_LDADD) $(LIBS)
@@ -350,6 +371,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_checksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peering.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ospfv2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ospfv3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_io.Plo@am__quote@
