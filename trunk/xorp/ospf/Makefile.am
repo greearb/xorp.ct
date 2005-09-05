@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.11 2005/08/05 04:02:41 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.12 2005/08/18 15:37:47 bms Exp $
 ##
 
 # -- Subdirectories
@@ -51,6 +51,7 @@ test_peering_SOURCES		= test_peering.cc
 # -- Library Sources
 libospf_la_SOURCES  = area_router.hh
 libospf_la_SOURCES  += exceptions.hh
+libospf_la_SOURCES  += debug_io.hh
 libospf_la_SOURCES  += delay_queue.hh
 libospf_la_SOURCES  += fletcher_checksum.hh
 libospf_la_SOURCES  += lsa.hh
