@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.76 2005/09/05 21:10:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.77 2005/09/05 22:03:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,7 +53,9 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
       _queue(ospf.get_eventloop(),
 	     OspfTypes::MinLSInterval,
 	     callback(this, &AreaRouter<A>::publish_all)),
+#ifdef	UNFINISHED_INCREMENTAL_UPDATE
       _TransitCapability(0),
+#endif
       _routing_recompute_delay(5)	// In seconds.
 {
     // Never need to delete this as the ref_ptr will tidy up.

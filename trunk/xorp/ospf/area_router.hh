@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.54 2005/09/05 07:52:23 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.55 2005/09/05 21:10:29 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -260,6 +260,7 @@ class AreaRouter {
     
     DelayQueue<Lsa::LsaRef> _queue;	// Router LSA queue.
 
+#ifdef	UNFINISHED_INCREMENTAL_UPDATE
     uint32_t _TransitCapability;	// Used by the spt computation.
 
     // XXX - This needs a better name.
@@ -272,6 +273,7 @@ class AreaRouter {
 
     list<Bucket> _new_lsas;		// Indexes of new LSAs that
 					// have arrived recently.
+#endif
 
     /**
      * Internal state that is required about this peer.
