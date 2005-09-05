@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.3 2005/06/05 01:31:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.4 2005/09/02 12:17:06 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -236,13 +236,7 @@ XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
     debug_msg("interface %s vif %s area %s priority %d\n", ifname.c_str(),
 	      vifname.c_str(), pr_id(area).c_str(), priority);
 
-    PeerID peerid;
-    try {
-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
-    if (!_ospf.get_peer_manager().set_router_priority(peerid, area, priority))
+    if (!_ospf.set_router_priority(ifname, vifname, area, priority))
 	return XrlCmdError::COMMAND_FAILED("Failed to set priority");
 
     return XrlCmdError::OKAY();
@@ -258,13 +252,7 @@ XrlOspfV2Target::ospfv2_0_1_set_hello_interval(const string& ifname,
     debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
 	      vifname.c_str(), pr_id(area).c_str(), interval);
 
-    PeerID peerid;
-    try {
-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
-    if (!_ospf.get_peer_manager().set_hello_interval(peerid, area, interval))
+    if (!_ospf.set_hello_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set hello interval");
 
     return XrlCmdError::OKAY();
@@ -280,14 +268,7 @@ XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
     debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
 	      vifname.c_str(), pr_id(area).c_str(), interval);
 
-    PeerID peerid;
-    try {
-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
-    if (!_ospf.get_peer_manager().set_router_dead_interval(peerid, area,
-							   interval))
+    if (!_ospf.set_router_dead_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "router dead interval");
 
@@ -304,13 +285,7 @@ XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
     debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
 	      vifname.c_str(), pr_id(area).c_str(), cost);
 
-    PeerID peerid;
-    try {
-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
-    if (!_ospf.get_peer_manager().set_interface_cost(peerid, area, cost))
+    if (!_ospf.set_interface_cost(ifname, vifname, area, cost))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "interface cost");
     return XrlCmdError::OKAY();
@@ -326,13 +301,7 @@ XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
     debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
 	      vifname.c_str(), pr_id(area).c_str(), delay);
 
-    PeerID peerid;
-    try {
-	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
-    } catch(XorpException& e) {
-	return XrlCmdError::COMMAND_FAILED(e.str());
-    }
-    if (!_ospf.get_peer_manager().set_inftransdelay(peerid, area, delay))
+    if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "inftransdelay delay");
 
