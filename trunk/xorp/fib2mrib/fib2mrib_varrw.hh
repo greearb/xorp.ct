@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_varrw.hh,v 1.2 2005/03/25 02:53:21 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_varrw.hh,v 1.3 2005/09/04 18:35:49 abittau Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_VARRW_HH__
 #define __FIB2MRIB_FIB2MRIB_VARRW_HH__
@@ -35,7 +35,7 @@ public:
     // SingleVarRW inteface:
     void     start_read();
     void     single_write(const string& id, const Element& e);
-    Element* single_read (const string& id);   
+    Element* single_read(const string& id);   
 
 private:
     Fib2mribRoute&	_route;
