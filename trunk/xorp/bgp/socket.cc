@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.33 2005/08/24 22:45:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.34 2005/09/01 20:53:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -462,10 +462,11 @@ SocketClient::connect_socket(XorpFd sock, string raddr, uint16_t port,
     int in_progress = 0;
     if (XORP_ERROR == comm_sock_connect(sock, servername, blocking,
 					&in_progress)) {
-	debug_msg("connect failed in progress %s\n",
-		  in_progress ? "yes" : "no");
-	if (in_progress)
+	if (in_progress && (comm_sock_is_connected(sock) != XORP_OK)) {
+	    debug_msg("connect failed in progress %s\n",
+		      in_progress ? "yes" : "no");
 	    return;
+	}
     }
 
     // 1) If an error apart from in_progress occured call the completion
