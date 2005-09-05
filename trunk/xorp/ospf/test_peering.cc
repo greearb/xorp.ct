@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.42 2005/09/04 21:27:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.43 2005/09/05 18:58:04 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -189,8 +189,6 @@ template <typename A>
 bool
 single_peer(TestInfo& info, OspfTypes::Version version)
 {
-    DOUT(info) << "hello" << endl;
-
     EventLoop eventloop;
     DebugIO<A> io(info, version, eventloop);
     
@@ -203,8 +201,13 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     const uint16_t interface_cost = 10;
     const uint16_t inftransdelay = 2;
 
+    PeerManager<A>& pm = ospf.get_peer_manager();
+
     // Create an area
-    ospf.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
+    if (!pm.create_area_router(area, OspfTypes::BORDER)) {
+	DOUT(info) << "Failed to create area\n";
+	return false;
+    }
 
     // Create a peer associated with this area.
     const string interface = "eth0";
@@ -223,20 +226,38 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 	break;
     }
 
-    PeerID peerid = ospf.get_peer_manager().
+    PeerID peerid = pm.
 	create_peer(interface, vif, src, interface_prefix_length,
 		    interface_mtu,
 		    OspfTypes::BROADCAST,
 		    area);
 
-    ospf.get_peer_manager().set_hello_interval(peerid, area, hello_interval);
-    ospf.get_peer_manager().set_router_dead_interval(peerid, area,
-						     4 * hello_interval);
-    ospf.get_peer_manager().set_interface_cost(peerid, area, interface_cost);
-    ospf.get_peer_manager().set_inftransdelay(peerid, area, inftransdelay);
+    if (!ospf.set_hello_interval(interface, vif, area, hello_interval)) {
+	DOUT(info) << "Failed to set hello interval\n";
+	return false;
+    }
+
+    if (!ospf.set_router_dead_interval(interface, vif, area,
+				       4 * hello_interval)) {
+	DOUT(info) << "Failed to set router dead interval\n";
+	return false;
+    }
+
+    if (!ospf.set_interface_cost(interface, vif, area, interface_cost)) {
+	DOUT(info) << "Failed to set interface cost\n";
+	return false;
+    }
+
+    if (!ospf.set_inftransdelay(interface, vif,area, inftransdelay)) {
+	DOUT(info) << "Failed to set inftransdelay\n";
+	return false;
+    }
 
     // Bring the peering up
-    ospf.get_peer_manager().set_state_peer(peerid, true);
+    if (!pm.set_state_peer(peerid, true)) {
+	DOUT(info) << "Failed enable peer\n";
+	return false;
+    }
 
     if (forever)
 	while (ospf.running())
@@ -256,7 +277,22 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     }
 
     // Take the peering down
-    ospf.get_peer_manager().set_state_peer(peerid, false);
+    if (!pm.set_state_peer(peerid, false)) {
+	DOUT(info) << "Failed to disable peer\n";
+	return false;
+    }
+
+    // Delete the peer.
+    if (!pm.delete_peer(peerid)) {
+	DOUT(info) << "Failed to delete peer\n";
+	return false;
+    }
+
+    // Delete the area
+    if (!pm.destroy_area_router(area)) {
+	DOUT(info) << "Failed to delete area\n";
+	return false;
+    }
 
     return true;
 }
@@ -311,8 +347,11 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
 
-    ospf_1.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
-    ospf_2.get_peer_manager().create_area_router(area, OspfTypes::BORDER);
+    PeerManager<A>& pm_1 = ospf_1.get_peer_manager();
+    PeerManager<A>& pm_2 = ospf_2.get_peer_manager();
+
+    pm_1.create_area_router(area, OspfTypes::BORDER);
+    pm_2.create_area_router(area, OspfTypes::BORDER);
 
     const string interface_1 = "eth1";
     const string interface_2 = "eth2";
@@ -333,32 +372,27 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
 	XLOG_FATAL("Unknown IP version %d", src_1.ip_version());
 	break;
     }
-    
-    PeerID peerid_1 = ospf_1.get_peer_manager().
+
+    PeerID peerid_1 = pm_1.
 	create_peer(interface_1, vif_1, src_1, interface_prefix_length,
 		    interface_mtu, 
 		    OspfTypes::BROADCAST, area);
-    PeerID peerid_2 = ospf_2.get_peer_manager().
+    PeerID peerid_2 = pm_2.
 	create_peer(interface_2, vif_2, src_2, interface_prefix_length,
 		    interface_mtu,
 		    OspfTypes::BROADCAST, area);
 
-    ospf_1.get_peer_manager().set_hello_interval(peerid_1, area,
-						 hello_interval);
-    ospf_1.get_peer_manager().set_router_dead_interval(peerid_1, area,
-						       4 * hello_interval);
-    ospf_1.get_peer_manager().set_interface_cost(peerid_1, area,
-						 interface_cost);
-    ospf_1.get_peer_manager().set_inftransdelay(peerid_1, area,
-						inftransdelay);
-    ospf_2.get_peer_manager().set_hello_interval(peerid_2, area,
-						 hello_interval);
-    ospf_2.get_peer_manager().set_router_dead_interval(peerid_2, area,
-						       4 * hello_interval);
-    ospf_2.get_peer_manager().set_interface_cost(peerid_2, area,
-						 interface_cost);
-    ospf_2.get_peer_manager().set_inftransdelay(peerid_2, area,
-						inftransdelay);
+    ospf_1.set_hello_interval(interface_1, vif_1, area, hello_interval);
+    ospf_1.set_router_dead_interval(interface_1, vif_1, area,
+				    4 * hello_interval);
+    ospf_1.set_interface_cost(interface_1, vif_1, area, interface_cost);
+    ospf_1.set_inftransdelay(interface_1, vif_1, area, inftransdelay);
+
+    ospf_2.set_hello_interval(interface_2, vif_2, area, hello_interval);
+    ospf_2.set_router_dead_interval(interface_2, vif_2, area,
+				    4 * hello_interval);
+    ospf_2.set_interface_cost(interface_2, vif_2, area, interface_cost);
+    ospf_2.set_inftransdelay(interface_2, vif_2, area, inftransdelay);
 
     EmulateSubnet<A> emu(info, eventloop);
 
@@ -366,9 +400,9 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
     emu.bind_interfaces("ospf2", interface_2, vif_2, io_2);
 
     if (STAGGER1 != stagger)
-	ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
+	pm_1.set_state_peer(peerid_1, true);
     if (STAGGER2 != stagger)
-    ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
+	pm_2.set_state_peer(peerid_2, true);
 
     if (forever)
 	while (ospf_1.running() && ospf_2.running())
@@ -383,9 +417,9 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
 	if (expected <= io_1.packets() + io_2.packets())
 	    break;
 	if (STAGGER1 == stagger && 1 == io_2.packets())
-	    ospf_1.get_peer_manager().set_state_peer(peerid_1, true);
+	    pm_1.set_state_peer(peerid_1, true);
 	if (STAGGER2 == stagger && 1 == io_1.packets())
-	    ospf_2.get_peer_manager().set_state_peer(peerid_2, true);
+	    pm_2.set_state_peer(peerid_2, true);
     }
     if (timeout) {
 	DOUT(info) << io_1.packets() << " packets sent " << expected <<
@@ -394,8 +428,31 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
     }
 
     // Take the peering down
-    ospf_1.get_peer_manager().set_state_peer(peerid_1, false);
-    ospf_2.get_peer_manager().set_state_peer(peerid_2, false);
+    pm_1.set_state_peer(peerid_1, false);
+    pm_2.set_state_peer(peerid_2, false);
+
+    // Delete the peers.
+    if (!pm_1.delete_peer(peerid_1)) {
+	DOUT(info) << "Failed to delete peer\n";
+	return false;
+    }
+
+    if (!pm_2.delete_peer(peerid_2)) {
+	DOUT(info) << "Failed to delete peer\n";
+	return false;
+    }
+
+    // Delete the areas.
+    if (!pm_1.destroy_area_router(area)) {
+	DOUT(info) << "Failed to delete area\n";
+	return false;
+    }
+
+    // Delete the areas.
+    if (!pm_2.destroy_area_router(area)) {
+	DOUT(info) << "Failed to delete area\n";
+	return false;
+    }
 
     return true;
 }
