@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.39 2005/09/02 12:17:05 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.40 2005/09/04 21:17:52 atanu Exp $
 #
 
 TODO
@@ -81,6 +81,9 @@ timestamp to LSAs could be used to stop this problem or the delay
 queue could be prodded when a self originated LSA is requested. We
 could also perhaps be a little more permissive about the first LSA
 that violates the 1 second rule.
+
+This problem has been partially fixes by firing the delay timer when a
+self originating LSA is requested in a link state request packet.
 
 Possible issues
 ~~~~~~~~~~~~~~~

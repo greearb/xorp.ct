@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/delay_queue.hh,v 1.4 2005/05/29 07:43:21 atanu Exp $
 
 #ifndef __OSPF_DELAY_QUEUE_HH__
 #define __OSPF_DELAY_QUEUE_HH__
@@ -37,6 +37,11 @@ public:
      */
     void add(_Entry entry);
 
+    /**
+     * Start the timer running but don't add anything to the queue.
+     */
+    void fire();
+
 private:
     EventLoop& _eventloop;
     deque<_Entry> _queue;
@@ -58,7 +63,6 @@ DelayQueue<_Entry>::add(_Entry entry)
     if (_queue.end() != find(_queue.begin(), _queue.end(), entry))
 	return;
 
-
     // If the timer is running push this entry to the back of the
     // queue and return.
     if (_timer.scheduled()) {
@@ -72,8 +76,19 @@ DelayQueue<_Entry>::add(_Entry entry)
 
     _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
 					 callback(this, &DelayQueue::next));
-    
+
     _forward->dispatch(entry);
+}
+
+template <typename _Entry>
+void
+DelayQueue<_Entry>::fire()
+{
+    if (_timer.scheduled())
+	return;
+    
+    _timer = _eventloop.new_oneoff_after(TimeVal(_delay, 0),
+					 callback(this, &DelayQueue::next));
 }
 
 template <typename _Entry>
