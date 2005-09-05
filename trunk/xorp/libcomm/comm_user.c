@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.17 2005/05/11 00:32:35 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.18 2005/05/12 17:34:36 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -352,14 +352,14 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
     switch (sock->sa_family) {
     case AF_INET:
 	{
-	    const struct sockaddr_in *sin = (const struct sockaddr_in *)sock;
+	    const struct sockaddr_in *sin = (const struct sockaddr_in *)((const void *)sock);
 	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
 	}
 	break;
 #ifdef AF_INET6
     case AF_INET6:
 	{
-	    const struct sockaddr_in6 *sin = (const struct sockaddr_in6 *)sock;
+	    const struct sockaddr_in6 *sin = (const struct sockaddr_in6 *)((const void *)sock);
 	    return comm_bind_tcp6(&sin->sin6_addr, sin->sin6_port,
 				  is_blocking);
 	}

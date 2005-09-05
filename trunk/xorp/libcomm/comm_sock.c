@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.25 2005/09/01 20:50:13 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.26 2005/09/05 18:06:45 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -402,14 +402,14 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
     switch (sin->sa_family) {
     case AF_INET:
 	{
-	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)sin;
+	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)((const void *)sin);
 	    return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port);
 	}
 	break;
 #ifdef AF_INET6
     case AF_INET6:
 	{
-	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sin;
+	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
 	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_port);
 	}
 	break;
@@ -813,7 +813,7 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
     switch (sin->sa_family) {
     case AF_INET:
 	{
-	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)sin;
+	    const struct sockaddr_in *sin4 = (const struct sockaddr_in *)((const void *)sin);
 	    return comm_sock_connect4(sock, &sin4->sin_addr, sin4->sin_port,
 				      is_blocking, in_progress);
 	}
@@ -821,7 +821,7 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
 #ifdef AF_INET6
     case AF_INET6:
 	{
-	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)sin;
+	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
 	    return comm_sock_connect6(sock, &sin6->sin6_addr, sin6->sin6_port,
 				      is_blocking, in_progress);
 	}
