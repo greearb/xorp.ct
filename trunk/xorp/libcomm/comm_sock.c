@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.24 2005/07/26 12:12:18 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.25 2005/09/01 20:50:13 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1446,6 +1446,16 @@ comm_sock_is_connected(xsock_t sock)
     struct sockaddr_storage ss;
     int err;
     socklen_t sslen;
+
+#ifndef HOST_OS_WINDOWS
+    /*
+     * Short-circuit the test by doing a zero-byte read, as some
+     * socket implementations allow non-blocking connections via loopback
+     * to succeed immediately (but still return EINPROGRESS). -bms
+     */
+    if (read(sock, 0, 0) == 0)
+    	return (XORP_OK);
+#endif
 
     sslen = sizeof(ss);
     memset(&ss, 0, sslen);
