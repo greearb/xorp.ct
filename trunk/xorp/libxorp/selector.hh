@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.13 2005/03/25 02:53:45 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.15 2005/08/18 15:28:40 bms Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -44,6 +44,7 @@ class TimeVal;
  * Selector event type masks.
  */
 enum SelectorMask {
+    SEL_NONE	= 0x0,				// No events
     SEL_RD	= 0x01,				// Read events
     SEL_WR	= 0x02,				// Write events
     SEL_EX	= 0x04,				// Exception events

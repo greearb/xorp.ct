@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.25 2005/08/18 15:28:40 bms Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.26 2005/08/30 01:02:47 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -44,7 +44,7 @@
 static SelectorMask
 map_ioevent_to_selectormask(const IoEventType type)
 {
-    SelectorMask mask;
+    SelectorMask mask = SEL_NONE;
 
     // Convert new event type to legacy UNIX event mask used by SelectorList.
     switch (type) {
