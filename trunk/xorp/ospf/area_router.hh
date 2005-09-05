@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.53 2005/09/04 03:58:46 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.54 2005/09/05 07:52:23 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -222,6 +222,20 @@ class AreaRouter {
      */
     void print_link_state_database() const;
 
+    /**
+     * Debugging enty point to add an LSA to the database.
+     */
+    bool debugging_add_lsa(Lsa::LsaRef lsar) {
+	return add_lsa(lsar);
+    }
+
+    /**
+     * Debugging enty point to force a toal routing computation.
+     */
+    void debugging_routing_total_recompute() {
+	routing_total_recompute();
+    }
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
@@ -274,7 +288,6 @@ class AreaRouter {
     typedef map<PeerID, PeerStateRef> PeerMap;
     PeerMap _peers;		// Peers of this area.
 
-    bool _routing_recompute_scheduled;	// Is a routing recompute scheduled?
     uint32_t _routing_recompute_delay;	// How many seconds to wait
 					// before recompting.
     XorpTimer _routing_recompute_timer;	// Timer to cause recompute.

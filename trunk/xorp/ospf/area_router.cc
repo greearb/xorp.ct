@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.74 2005/09/04 03:58:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.75 2005/09/05 07:52:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,7 +54,6 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 	     OspfTypes::MinLSInterval,
 	     callback(this, &AreaRouter<A>::publish_all)),
       _TransitCapability(0),
-      _routing_recompute_scheduled(false),
       _routing_recompute_delay(5)	// In seconds.
 {
     // Never need to delete this as the ref_ptr will tidy up.
@@ -1240,9 +1239,9 @@ template <typename A>
 void 
 AreaRouter<A>::routing_schedule_total_recompute()
 {
-    if (_routing_recompute_scheduled)
+    if (_routing_recompute_timer.scheduled())
 	return;
-    _routing_recompute_scheduled = true;
+
     _routing_recompute_timer = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(_routing_recompute_delay),
 			 callback(this, &AreaRouter<A>::routing_timer));
@@ -1253,7 +1252,6 @@ template <typename A>
 void 
 AreaRouter<A>::routing_timer()
 {
-    _routing_recompute_scheduled = false;
     routing_total_recompute();
 }
 
