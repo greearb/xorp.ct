@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/vertex.hh,v 1.2 2005/08/05 03:45:16 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -46,6 +46,13 @@ class Vertex {
 	}
 	return _nodeid < other.get_nodeid();
     }
+
+#if	0
+    bool operator==(const Vertex& other) const {
+	XLOG_ASSERT(get_version() == other.get_version());
+	return _nodeid == other.get_nodeid() && _t ==  other.get_type();
+    }
+#endif
 
     void set_version(OspfTypes::Version v) {
 	_version = v;
