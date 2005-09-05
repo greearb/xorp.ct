@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.57 2005/09/02 02:11:27 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.58 2005/09/04 21:17:52 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -235,7 +235,13 @@ compare_all_header_fields(const Lsa_header& lhs, const Lsa_header& rhs)
 
     lsa_header_compare(get_ls_checksum());
     lsa_header_compare(get_length());
-    lsa_header_compare(get_options());
+    switch(lhs.get_version()) {
+    case OspfTypes::V2:
+	lsa_header_compare(get_options());
+	break;
+    case OspfTypes::V3:
+	break;
+    }
     lsa_header_compare(get_ls_sequence_number());
     lsa_header_compare(get_ls_type());
     lsa_header_compare(get_link_state_id());
