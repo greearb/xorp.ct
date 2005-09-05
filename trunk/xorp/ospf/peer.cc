@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.134 2005/09/02 12:17:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.135 2005/09/04 21:17:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1197,7 +1197,7 @@ Peer<A>::send_options()
     // Set/UnSet E-Bit.
     Options options(_ospf.get_version(), 0);
     switch(_area_type) {
-    case OspfTypes::BORDER:
+    case OspfTypes::NORMAL:
 	options.set_e_bit(true);
 	break;
     case OspfTypes::STUB:
@@ -3028,7 +3028,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 
 	    // Deal with AS-external-LSA's (LS type = 5, 0x4005).
 	    switch(_peer.get_area_type()) {
-	    case OspfTypes::BORDER:
+	    case OspfTypes::NORMAL:
 		break;
 	    case OspfTypes::STUB:
 	    case OspfTypes::NSSA:

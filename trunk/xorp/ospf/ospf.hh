@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.41 2005/09/01 00:05:07 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.42 2005/09/02 12:09:40 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -63,7 +63,7 @@ struct OspfTypes {
      * Area Type
      */
     enum AreaType {
-	BORDER,		// Border Area
+	NORMAL,		// Normal Area
 	STUB,		// Stub Area
 	NSSA,		// Not-So-Stubby Area
     };
@@ -235,8 +235,8 @@ string
 pp_area_type(OspfTypes::AreaType area_type)
 {
     switch(area_type) {
-    case OspfTypes::BORDER:
-	return "BORDER";
+    case OspfTypes::NORMAL:
+	return "NORMAL";
     case OspfTypes::STUB:
 	return "STUB";
     case OspfTypes::NSSA:
@@ -253,8 +253,8 @@ OspfTypes::AreaType
 from_string_to_area_type(const string& type, bool& status)
 {
     status = true;
-    if (type == "border")
-	return OspfTypes::BORDER;
+    if (type == "normal")
+	return OspfTypes::NORMAL;
     else if (type == "stub")
 	return OspfTypes::STUB;
     else if (type == "nssa")
@@ -263,7 +263,7 @@ from_string_to_area_type(const string& type, bool& status)
     XLOG_WARNING("Unable to match %s", type.c_str());
     status = false;
 
-    return OspfTypes::BORDER;
+    return OspfTypes::NORMAL;
 }
 
 inline

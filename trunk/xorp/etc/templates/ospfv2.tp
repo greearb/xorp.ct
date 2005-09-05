@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.2 2005/09/02 20:28:41 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.3 2005/09/04 00:38:40 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -6,7 +6,7 @@ protocols {
 	router-id: ipv4;
 	
 	area @: ipv4 {
-	    area-type:		txt = "border";
+	    area-type:		txt = "normal";
 
 	    interface @: txt {
 		mtu:		u32 = 1500;	/* XXX Temporary */
@@ -57,11 +57,11 @@ the router within an Autonomous System";
 
 	    %mandatory: $(@.area-type);
 
-/* XXX Enable this when we support anything but border.
+/* XXX Enable this when we support anything but normal.
 	    area-type {
 		%help: short "Type of area";
 		
-		%allow: $(@) "border" "stub" "nssa";
+		%allow: $(@) "normal" "stub" "nssa";
 
 		%set:;
 	    }

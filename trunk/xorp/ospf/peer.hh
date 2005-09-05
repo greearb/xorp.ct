@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.89 2005/08/30 00:47:51 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.90 2005/08/30 03:59:43 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -734,7 +734,7 @@ class Peer {
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     const OspfTypes::AreaID _area_id;	// Area that is being represented.
-    const OspfTypes::AreaType _area_type;// BORDER or STUB or NSSA.
+    const OspfTypes::AreaType _area_type;// NORMAL or STUB or NSSA.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.

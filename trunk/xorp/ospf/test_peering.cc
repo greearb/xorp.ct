@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.43 2005/09/05 18:58:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.44 2005/09/05 20:20:45 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -204,7 +204,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     PeerManager<A>& pm = ospf.get_peer_manager();
 
     // Create an area
-    if (!pm.create_area_router(area, OspfTypes::BORDER)) {
+    if (!pm.create_area_router(area, OspfTypes::NORMAL)) {
 	DOUT(info) << "Failed to create area\n";
 	return false;
     }
@@ -350,8 +350,8 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
     PeerManager<A>& pm_1 = ospf_1.get_peer_manager();
     PeerManager<A>& pm_2 = ospf_2.get_peer_manager();
 
-    pm_1.create_area_router(area, OspfTypes::BORDER);
-    pm_2.create_area_router(area, OspfTypes::BORDER);
+    pm_1.create_area_router(area, OspfTypes::NORMAL);
+    pm_2.create_area_router(area, OspfTypes::NORMAL);
 
     const string interface_1 = "eth1";
     const string interface_2 = "eth2";

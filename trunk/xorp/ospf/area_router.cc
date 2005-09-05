@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.75 2005/09/05 07:52:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.76 2005/09/05 21:10:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -363,7 +363,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
 	// (3) In stub areas discard AS-external-LSA's (LS type = 5, 0x4005).
 	switch(_area_type) {
-	case OspfTypes::BORDER:
+	case OspfTypes::NORMAL:
 	    break;
 	case OspfTypes::STUB:
 	case OspfTypes::NSSA:
