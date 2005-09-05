@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.45 2005/08/31 16:53:59 zec Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.46 2005/09/01 01:39:17 zec Exp $"
 
 #include "rip_module.h"
 
@@ -935,7 +935,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	if (nh == zero) {
 	    nh = src_addr;
 	} else if (nh == _pio->address()) {
-	    record_bad_route("nexthop points to us", src_addr, src_port, p);
+	    // Nexthop points to us, ignore route (either poison-rev or bogus)
 	    continue;
         } else {
 	    // Test if nh is on the receiving subnet
