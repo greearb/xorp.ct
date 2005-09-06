@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.34 2005/08/31 22:39:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.35 2005/09/01 02:37:26 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1677,8 +1677,10 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	if (is_router_alert) {
 	    // Space for Router Alert option
 #ifdef HAVE_RFC3542
-	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1)
+	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1) {
 		XLOG_ERROR("inet6_opt_init(NULL) failed");
+		return (XORP_ERROR);
+	    }
 	    if ((hbhlen = inet6_opt_append(NULL, 0, hbhlen,
 					   IP6OPT_ROUTER_ALERT, 2,
 					   2, NULL)) == -1) {
