@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.49 2005/09/02 12:17:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.50 2005/09/06 20:11:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1018,7 +1018,7 @@ SummaryNetworkLsa::encode()
 
     switch(version) {
     case OspfTypes::V2:
- 	len = _header.length() + 12;
+ 	len = _header.length() + 8;
 	break;
     case OspfTypes::V3:
 	len = _header.length() + 8 + 
@@ -1037,10 +1037,12 @@ SummaryNetworkLsa::encode()
     size_t header_length = _header.copy_out(ptr);
     XLOG_ASSERT(len > header_length);
 
+    size_t index;
     switch(version) {
     case OspfTypes::V2:
 	embed_32(&ptr[header_length], get_network_mask());
 	embed_24(&ptr[header_length + 5], get_metric());
+	index = header_length + 8;
 	break;
     case OspfTypes::V3:
 	embed_24(&ptr[header_length + 1], get_metric());
@@ -1056,8 +1058,11 @@ SummaryNetworkLsa::encode()
 	memcpy(static_cast<void *>(&ptr[header_length + 8]),
 	       static_cast<void *>(&buf[0]),
 	       bytes);
+	index = header_length + 8 + bytes;
 	break;
     }
+
+    XLOG_ASSERT(len == index);
 
     // Compute the checksum and write the whole header out again.
     _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
@@ -1093,6 +1098,138 @@ SummaryNetworkLsa::str() const
 	output += c_format("\n\tNetwork %s", cstring(get_network()));
 	output += c_format("\n\tMetric %d", get_metric());
 	output += c_format("\n\tPrefixOptions %#x", get_prefix_options());
+	break;
+    }
+
+    return output;
+}
+
+Lsa::LsaRef
+SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(BadPacket,
+		   c_format("Summary-LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Summary-LSA", buf, len);
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+
+    SummaryRouterLsa *lsa;
+    try {
+	lsa = new SummaryRouterLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	switch(version) {
+	case OspfTypes::V2:
+	    lsa->set_network_mask(extract_32(&buf[header_length]));
+	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+	    break;
+	case OspfTypes::V3:
+	    lsa->set_options(extract_24(&buf[header_length + 1]));
+	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+	    lsa->set_destination_id(extract_32(&buf[header_length + 8]));
+	    break;
+	}
+
+    } catch(BadPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+bool
+SummaryRouterLsa::encode()
+{
+    OspfTypes::Version version = get_version();
+
+    size_t len;
+
+    switch(version) {
+    case OspfTypes::V2:
+ 	len = _header.length() + 8;
+	break;
+    case OspfTypes::V3:
+	len = _header.length() + 12;
+	break;
+    }
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    size_t index;
+    switch(version) {
+    case OspfTypes::V2:
+	embed_32(&ptr[header_length], get_network_mask());
+	embed_24(&ptr[header_length + 5], get_metric());
+	index = header_length + 8;
+	break;
+    case OspfTypes::V3:
+	embed_24(&ptr[header_length + 1], get_options());
+	embed_24(&ptr[header_length + 5], get_metric());
+	embed_32(&ptr[header_length + 8], get_destination_id());
+	index = header_length + 12;
+	break;
+    }
+
+    XLOG_ASSERT(len == index);
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
+
+    return true;
+}
+
+string
+SummaryRouterLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+
+    string output;
+
+    switch(version) {
+    case OspfTypes::V2:
+	output = "Summary-LSA:\n";
+	break;
+    case OspfTypes::V3:
+	output = "Inter-Area-Router-LSA:\n";
+	break;
+    }
+
+    output += _header.str();
+
+    switch(version) {
+    case OspfTypes::V2:
+	output += c_format("\n\tNetwork Mask %#x", get_network_mask());
+	output += c_format("\n\tMetric %d", get_metric());
+	break;
+    case OspfTypes::V3:
+	output += c_format("\n\tOptions %#x", get_options());
+	output += c_format("\n\tMetric %d", get_metric());
+	output += c_format("\n\tDestination Router ID %s",
+			   pr_id(get_destination_id()).c_str());
 	break;
     }
 
