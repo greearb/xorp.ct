@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.135 2005/09/04 21:17:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.136 2005/09/05 22:03:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1247,8 +1247,6 @@ Peer<A>::send_hello_packet()
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
-	XLOG_UNFINISHED();
-	break;
     case OspfTypes::BROADCAST:
 	transmit = new SimpleTransmit<A>(pkt, A::OSPFIGP_ROUTERS(), 
 					 _peerout.get_interface_address());
