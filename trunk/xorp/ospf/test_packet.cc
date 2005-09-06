@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.24 2005/08/26 03:31:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.25 2005/09/02 20:06:40 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -264,6 +264,30 @@ populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
 
 inline
 void
+populate_summary_network_lsa(SummaryNetworkLsa *snlsa,
+			     OspfTypes::Version version)
+{
+    populate_lsa_header(snlsa->get_header(), version);
+
+    snlsa->set_metric(5);
+    
+    switch(version) {
+    case OspfTypes::V2:
+	snlsa->set_network_mask(0xffff0000);
+	break;
+    case OspfTypes::V3:
+	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
+	snlsa->set_network(net);
+	snlsa->set_prefix_options(0x5);
+	break;
+    }
+
+    // This will set the checksum and the length.
+    snlsa->encode();
+}
+
+inline
+void
 populate_link_state_update(LinkStateUpdatePacket *lsup,
 			   OspfTypes::Version version)
 {
@@ -284,6 +308,14 @@ populate_link_state_update(LinkStateUpdatePacket *lsup,
     nlsa = new NetworkLsa(version);
     populate_network_lsa(nlsa, version);
     lsup->get_lsas().push_back(Lsa::LsaRef(nlsa));
+
+    SummaryNetworkLsa *snlsa = new SummaryNetworkLsa(version);
+    populate_summary_network_lsa(snlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(snlsa));
+
+    snlsa = new SummaryNetworkLsa(version);
+    populate_summary_network_lsa(snlsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(snlsa));
 }
 
 inline
@@ -439,6 +471,7 @@ link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
     LsaDecoder lsa_decoder(version);
     lsa_decoder.register_decoder(new RouterLsa(version));
     lsa_decoder.register_decoder(new NetworkLsa(version));
+    lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
 
     LinkStateUpdatePacket *lsup1;
     lsup1 = new LinkStateUpdatePacket(version, lsa_decoder);
@@ -689,6 +722,26 @@ network_lsa_print(TestInfo& info)
 }
 
 bool
+summary_network_lsa_print(TestInfo& info)
+{
+    SummaryNetworkLsa *snlsa = new SummaryNetworkLsa(OspfTypes::V2);
+    populate_summary_network_lsa(snlsa, OspfTypes::V2);
+
+    DOUT(info) << snlsa->str() << endl;
+
+    delete snlsa;
+
+    snlsa = new SummaryNetworkLsa(OspfTypes::V3);
+    populate_summary_network_lsa(snlsa, OspfTypes::V3);
+
+    DOUT(info) << snlsa->str() << endl;
+
+    delete snlsa;
+
+    return true;
+}
+
+bool
 router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 {
     RouterLsa *rlsa1= new RouterLsa(version);
@@ -775,6 +828,49 @@ network_lsa_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+summary_network_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    SummaryNetworkLsa *snlsa1= new SummaryNetworkLsa(version);
+    populate_summary_network_lsa(snlsa1, version);
+
+    DOUT(info) << snlsa1->str() << endl;
+
+    // Encode the SummaryNetwork-LSA.
+    snlsa1->encode();
+    size_t len1;
+    uint8_t *ptr1 = snlsa1->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    SummaryNetworkLsa *snlsa2= new SummaryNetworkLsa(version);
+
+    Lsa::LsaRef snlsa3 = snlsa2->decode(ptr1, len1);
+
+    DOUT(info) << snlsa3->str() << endl;
+
+    // Encode the second packet and compare.
+    snlsa3->encode();
+
+    DOUT(info) << snlsa3->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = snlsa3->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete snlsa1;
+    delete snlsa2;
+
+    return true;
+}
+
+bool
 lsa_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder dec(version);
@@ -842,6 +938,7 @@ main(int argc, char **argv)
 	 callback(link_state_acknowledgement_packet_print)},
 	{"router_lsa_print", callback(router_lsa_print)},
 	{"network_lsa_print", callback(network_lsa_print)},
+	{"summary_network_lsa_print", callback(summary_network_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
@@ -875,6 +972,10 @@ main(int argc, char **argv)
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
 	{"network_lsa_compareV2",callback(network_lsa_compare, OspfTypes::V2)},
 	{"network_lsa_compareV3",callback(network_lsa_compare, OspfTypes::V3)},
+	{"summary_network_lsa_compareV2",
+	 callback(summary_network_lsa_compare, OspfTypes::V2)},
+	{"summary_network_lsa_compareV3",
+	 callback(summary_network_lsa_compare, OspfTypes::V3)},
 	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
 	{"lsa_decoder2V2", callback(lsa_decoder2, OspfTypes::V2)},

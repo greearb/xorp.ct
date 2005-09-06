@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.58 2005/09/04 21:17:52 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.59 2005/09/05 01:02:39 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -813,7 +813,7 @@ class RouterLsa : public Lsa {
     {}
 
     /**
-     * @return the minimum length of a RouterLSA.
+     * @return the minimum length of a Router-LSA.
      */
     size_t min_length() const {
 	switch(get_version()) {
@@ -941,7 +941,7 @@ class NetworkLsa : public Lsa {
     {}
 
     /**
-     * @return the minimum length of a RouterLSA.
+     * @return the minimum length of a Network-LSA.
      */
     size_t min_length() const {
 	switch(get_version()) {
@@ -1022,6 +1022,119 @@ class NetworkLsa : public Lsa {
 
     uint32_t _network_mask;		// OSPFv2 only.
     list<OspfTypes::RouterID> _attached_routers;
+};
+
+/**
+ * OSPFv2: Summary-LSA Type 3
+ * OSPFv3: Inter-Area-Prefix-LSA
+ */
+class SummaryNetworkLsa : public Lsa {
+ public:
+    SummaryNetworkLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {
+	_header.set_ls_type(get_ls_type());
+    }
+
+    SummaryNetworkLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {}
+
+    /**
+     * @return the minimum length of a RouterLSA.
+     */
+    size_t min_length() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 8;
+	    break;
+	case OspfTypes::V3:
+	    return 12;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    uint16_t get_ls_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 3;
+	    break;
+	case OspfTypes::V3:
+	    return 0x2003;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    /**
+     * @return False this is not an AS-external-LSA.
+     */
+    bool external() const {return false; };
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
+    bool encode();
+
+    void set_metric(uint32_t metric) {
+	_metric = metric;
+    }
+
+    uint32_t get_metric() const {
+	return _metric;
+    }
+
+    void set_network_mask(uint32_t network_mask) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_network_mask = network_mask;
+    }
+
+    uint32_t get_network_mask() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _network_mask;
+    }
+
+    void set_network(IPNet<IPv6>& network) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_network = network;
+    }
+
+    IPNet<IPv6> get_network() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _network;
+    }
+
+    void set_prefix_options(uint8_t prefix_options) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_prefix_options = prefix_options;
+    }
+
+    uint32_t get_prefix_options() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _prefix_options;
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+    
+ private:
+    uint32_t _metric;
+
+    uint32_t _network_mask;		// OSPFv2 only.
+    uint8_t _prefix_options;		// OSPFv3 only.
+    IPNet<IPv6> _network;		// OSPFv3 only.
 };
 
 #if	0

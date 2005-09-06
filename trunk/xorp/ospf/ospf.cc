@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.30 2005/08/31 23:38:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.31 2005/09/02 12:17:05 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -43,6 +43,7 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     // Register the LSAs and packets with the associated decoder.
     _lsa_decoder.register_decoder(new RouterLsa(version));
     _lsa_decoder.register_decoder(new NetworkLsa(version));
+    _lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
 
     _packet_decoder.register_decoder(new HelloPacket(version));
     _packet_decoder.register_decoder(new DataDescriptionPacket(version));

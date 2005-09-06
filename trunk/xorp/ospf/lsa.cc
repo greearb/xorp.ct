@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.48 2005/08/30 08:25:01 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.49 2005/09/02 12:17:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,6 +71,16 @@ compute_checksum(uint8_t *buf, size_t len, size_t offset)
     fletcher_checksum(buf, len, offset, x, y);
 
     return (x << 8) | (y);
+}
+
+/**
+ * RFC 2470 A.4.1 IPv6 Prefix Representation
+ */
+inline
+size_t
+bytes_per_prefix(uint8_t prefix)
+{
+    return ((prefix + 31) / 32) * 4;
 }
 
 /**
@@ -929,6 +939,161 @@ NetworkLsa::str() const
 	    break;
 	}
 	output += "\n\tAttached Router " + pr_id(*i);
+    }
+
+    return output;
+}
+
+Lsa::LsaRef
+SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+{
+    OspfTypes::Version version = get_version();
+
+    size_t header_length = _header.length();
+    size_t required = header_length + min_length();
+
+    if (len < required)
+	xorp_throw(BadPacket,
+		   c_format("Summary-LSA too short %u, must be at least %u",
+			    XORP_UINT_CAST(len),
+			    XORP_UINT_CAST(required)));
+
+    // This guy throws an exception of there is a problem.
+    len = get_lsa_len_from_header("Summary-LSA", buf, len);
+
+    // Verify the checksum.
+    if (!verify_checksum(buf + 2, len - 2, 16 - 2))
+	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+
+    SummaryNetworkLsa *lsa;
+    try {
+	lsa = new SummaryNetworkLsa(version, buf, len);
+
+	// Decode the LSA Header.
+	lsa->_header.decode_inline(buf);
+	switch(version) {
+	case OspfTypes::V2:
+	    lsa->set_network_mask(extract_32(&buf[header_length]));
+	    lsa->set_metric(extract_24(&buf[header_length + 5]));
+	    break;
+	case OspfTypes::V3:
+	    lsa->set_metric(extract_24(&buf[header_length + 1]));
+	    uint8_t prefix_length = buf[header_length + 4];
+	    lsa->set_prefix_options(buf[header_length + 5]);
+
+	    uint8_t addr[IPv6::ADDR_BITLEN / 8];
+	    uint32_t bytes = bytes_per_prefix(prefix_length);
+	    if (bytes > sizeof(addr)) 
+		xorp_throw(BadPacket,
+			   c_format("Summary-LSA prefix length %u "
+				    "larger than 16",
+				    bytes));
+
+	    memset(&addr[0], 0, IPv6::ADDR_BITLEN / 8);
+	    memcpy(static_cast<void *>(&addr[0]),
+		   static_cast<void *>(&buf[header_length + 8]),
+		   bytes);
+	    IPv6 v6;
+	    v6.set_addr(&addr[0]);
+	    IPNet<IPv6> v6net(v6, prefix_length);
+	    lsa->set_network(v6net);
+	    break;
+	}
+
+    } catch(BadPacket& e) {
+	delete lsa;
+	throw e;
+    }
+
+    return Lsa::LsaRef(lsa);
+}
+
+
+bool
+SummaryNetworkLsa::encode()
+{
+    OspfTypes::Version version = get_version();
+
+    size_t len;
+
+    switch(version) {
+    case OspfTypes::V2:
+ 	len = _header.length() + 12;
+	break;
+    case OspfTypes::V3:
+	len = _header.length() + 8 + 
+	    bytes_per_prefix(get_network().prefix_len());
+	break;
+    }
+
+    _pkt.resize(len);
+    uint8_t *ptr = &_pkt[0];
+//     uint8_t *ptr = new uint8_t[len];
+    memset(ptr, 0, len);
+
+    // Copy the header into the packet
+    _header.set_ls_checksum(0);
+    _header.set_length(len);
+    size_t header_length = _header.copy_out(ptr);
+    XLOG_ASSERT(len > header_length);
+
+    switch(version) {
+    case OspfTypes::V2:
+	embed_32(&ptr[header_length], get_network_mask());
+	embed_24(&ptr[header_length + 5], get_metric());
+	break;
+    case OspfTypes::V3:
+	embed_24(&ptr[header_length + 1], get_metric());
+	IPNet<IPv6> v6net = get_network();
+
+	ptr[header_length + 4] = v6net.prefix_len();
+	ptr[header_length + 5] = get_prefix_options();
+
+	IPv6 v6 = v6net.masked_addr();
+	uint8_t buf[IPv6::ADDR_BITLEN / 8];
+	v6.copy_out(&buf[0]);
+	uint32_t bytes = bytes_per_prefix(v6net.prefix_len());
+	memcpy(static_cast<void *>(&ptr[header_length + 8]),
+	       static_cast<void *>(&buf[0]),
+	       bytes);
+	break;
+    }
+
+    // Compute the checksum and write the whole header out again.
+    _header.set_ls_checksum(compute_checksum(ptr + 2, len - 2, 16 - 2));
+    _header.copy_out(ptr);
+
+    return true;
+}
+
+string
+SummaryNetworkLsa::str() const
+{
+    OspfTypes::Version version = get_version();
+
+    string output;
+
+    switch(version) {
+    case OspfTypes::V2:
+	output = "Summary-LSA:\n";
+	break;
+    case OspfTypes::V3:
+	output = "Inter-Area-Prefix-LSA:\n";
+	break;
+    }
+
+    output += _header.str();
+
+    switch(version) {
+    case OspfTypes::V2:
+	output += c_format("\n\tNetwork Mask %#x", get_network_mask());
+	output += c_format("\n\tMetric %d", get_metric());
+	break;
+    case OspfTypes::V3:
+	output += c_format("\n\tNetwork %s", cstring(get_network()));
+	output += c_format("\n\tMetric %d", get_metric());
+	output += c_format("\n\tPrefixOptions %#x", get_prefix_options());
+	break;
     }
 
     return output;
