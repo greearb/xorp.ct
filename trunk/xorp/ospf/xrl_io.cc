@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.6 2005/08/31 23:38:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.7 2005/09/02 12:02:31 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -77,6 +77,36 @@ XrlIO<A>::disable_interface_vif(const string& interface, const string& vif)
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     return true;
+}
+
+template <typename A>
+bool
+XrlIO<A>::enabled(const string& interface, const string& vif, A address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    return true;
+}
+
+template <typename A>
+uint32_t
+XrlIO<A>::get_prefix_length(const string& interface, const string& vif,
+			    A address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    return 0;
+}
+
+template <typename A>
+uint32_t
+XrlIO<A>::get_mtu(const string& interface)
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    return 0;
 }
 
 template <typename A>

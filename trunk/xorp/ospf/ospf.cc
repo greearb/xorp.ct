@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.33 2005/09/06 22:34:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.34 2005/09/07 05:06:53 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -119,6 +119,36 @@ Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
     return _io->disable_interface_vif(interface, vif);
+}
+
+template <typename A>
+bool
+Ospf<A>::enabled(const string& interface, const string& vif, A address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    return _io->enabled(interface, vif, address);
+}
+
+template <typename A>
+uint32_t
+Ospf<A>::get_prefix_length(const string& interface, const string& vif,
+			    A address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    return _io->get_prefix_length(interface, vif, address);
+}
+
+template <typename A>
+uint32_t
+Ospf<A>::get_mtu(const string& interface)
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    return _io->get_mtu(interface);
 }
 
 template <typename A>

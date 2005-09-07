@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.42 2005/09/02 12:09:40 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.43 2005/09/05 22:03:29 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -334,6 +334,24 @@ class Ospf {
      * Disable this interface/vif from receiving frames.
      */
     bool disable_interface_vif(const string& interface, const string& vif);
+
+    /**
+     * Is this interface/vif/address enabled?
+     *
+     * @return true if it is.
+     */
+    bool enabled(const string& interface, const string& vif, A address);
+
+    /**
+     * @return prefix length for this address.
+     */
+    uint32_t get_prefix_length(const string& interface, const string& vif,
+			       A address);
+
+    /**
+     * @return the mtu for this interface.
+     */
+    uint32_t get_mtu(const string& interface);
 
     /**
      * On the interface/vif join this multicast group.
