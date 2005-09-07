@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.3 2005/09/02 12:17:06 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.4 2005/09/05 22:03:30 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -53,6 +53,40 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Receive an IPv4 packet from a raw socket.
+     *
+     *  @param if_name the interface name the packet arrived on.
+     *
+     *  @param vif_name the vif name the packet arrived on.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     *  the received value is unknown.
+     *
+     *  @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If it
+     *  has a negative value, then the received value is unknown.
+     *
+     *  @param ip_router_alert if true, the IP Router Alert option was included
+     *  in the IP packet.
+     */
+    XrlCmdError raw_packet4_client_0_1_recv(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&	src_address,
+	const IPv4&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
+	const vector<uint8_t>&	payload);
 
     /**
      *  Set router id
@@ -209,6 +243,74 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      *  Request clean shutdown of Xrl Target
      */
     XrlCmdError common_0_1_shutdown();
+
+    /**
+     *  Receive an IPv4 packet from a raw socket.
+     *
+     *  @param if_name the interface name the packet arrived on.
+     *
+     *  @param vif_name the vif name the packet arrived on.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     *  the received value is unknown.
+     *
+     *  @param ip_tos the Type of Service (Diffserv/ECN bits for IPv4). If it
+     *  has a negative value, then the received value is unknown.
+     *
+     *  @param ip_router_alert if true, the IP Router Alert option was included
+     *  in the IP packet.
+     */
+    XrlCmdError raw_packet4_client_0_1_recv(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&	src_address,
+	const IPv4&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
+	const vector<uint8_t>&	payload);
+
+    /**
+     *  Receive an IPv6 packet from a raw socket.
+     *
+     *  @param if_name the interface name the packet arrived on.
+     *
+     *  @param vif_name the vif name the packet arrived on.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, then
+     *  the received value is unknown.
+     *
+     *  @param ip_tos the Type Of Service (IP traffic class for IPv4). If it
+     *  has a negative value, then the received value is unknown.
+     *
+     *  @param ip_router_alert if true, the IP Router Alert option was included
+     *  in the IP packet.
+     */
+    XrlCmdError raw_packet6_client_0_1_recv(
+	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv6&	src_address,
+	const IPv6&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
+	const vector<uint8_t>&	payload);
 
     /**
      *  Set router id

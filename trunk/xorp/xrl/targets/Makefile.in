@@ -867,9 +867,12 @@ $(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
 		$(INTERFACES_DIR)/ospf.xif
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
 		$(INTERFACES_DIR)/ospfv2.xif
 $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/ospfv3.xif
 $(srcdir)/packet_acl_base.hh $(srcdir)/packet_acl_base.cc:		\
 		$(INTERFACES_DIR)/common.xif				\

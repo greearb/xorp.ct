@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xorp_ospfv2.cc,v 1.5 2005/08/31 23:38:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/xorp_ospfv2.cc,v 1.6 2005/09/02 12:17:06 atanu Exp $"
 
 #include "config.h"
 #include <set>
@@ -54,11 +54,14 @@ main(int /*argc*/, char **argv)
     try {
 	EventLoop eventloop;
 
+	string feaname = "fea";
 	string ribname = "rib";
-	XrlIO<IPv4> io(eventloop, ribname);
-	Ospf<IPv4> ospf(OspfTypes::V2, eventloop, &io);
 
 	XrlStdRouter xrl_router(eventloop, "ospfv2");
+
+	XrlIO<IPv4> io(eventloop, xrl_router, feaname, ribname);
+	Ospf<IPv4> ospf(OspfTypes::V2, eventloop, &io);
+
 	XrlOspfV2Target v2target(&xrl_router, ospf, io);
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 

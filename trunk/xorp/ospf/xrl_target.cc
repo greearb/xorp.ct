@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.4 2005/09/02 12:17:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.5 2005/09/05 20:28:20 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -113,6 +113,84 @@ XrlCmdError
 XrlOspfV3Target::common_0_1_shutdown()
 {
     XLOG_UNFINISHED();
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::raw_packet4_client_0_1_recv(
+    // Input values,
+    const string&	if_name,
+    const string&	vif_name,
+    const IPv4&		src_address,
+    const IPv4&		dst_address,
+    const uint32_t&	ip_protocol,
+    const int32_t&	ip_ttl,
+    const int32_t&	ip_tos,
+    const bool&		ip_router_alert,
+    const vector<uint8_t>& payload)
+{
+    _xrl_io.recv(if_name,
+		 vif_name,
+		 src_address,
+		 dst_address,
+		 ip_protocol,
+		 ip_ttl,
+		 ip_tos,
+		 ip_router_alert,
+		 payload);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::raw_packet4_client_0_1_recv(
+    // Input values,
+    const string&	if_name,
+    const string&	vif_name,
+    const IPv4&		src_address,
+    const IPv4&		dst_address,
+    const uint32_t&	ip_protocol,
+    const int32_t&	ip_ttl,
+    const int32_t&	ip_tos,
+    const bool&		ip_router_alert,
+    const vector<uint8_t>& payload)
+{
+    _xrl_io_ipv4.recv(if_name,
+		      vif_name,
+		      src_address,
+		      dst_address,
+		      ip_protocol,
+		      ip_ttl,
+		      ip_tos,
+		      ip_router_alert,
+		      payload);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::raw_packet6_client_0_1_recv(
+    // Input values,
+    const string&	if_name,
+    const string&	vif_name,
+    const IPv6&		src_address,
+    const IPv6&		dst_address,
+    const uint32_t&	ip_protocol,
+    const int32_t&	ip_ttl,
+    const int32_t&	ip_tos,
+    const bool&		ip_router_alert,
+    const vector<uint8_t>& payload)
+{
+    _xrl_io_ipv6.recv(if_name,
+		      vif_name,
+		      src_address,
+		      dst_address,
+		      ip_protocol,
+		      ip_ttl,
+		      ip_tos,
+		      ip_router_alert,
+		      payload);
 
     return XrlCmdError::OKAY();
 }

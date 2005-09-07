@@ -1,7 +1,9 @@
-/* $XORP$ */
+/* $XORP: xorp/xrl/targets/ospfv2.tgt,v 1.1 2004/12/28 09:49:16 atanu Exp $ */
 
 #include "common.xif"
+#include "fea_rawpkt4_client.xif"
 #include "ospfv2.xif"
 
 target ospfv2 implements	common/0.1,				\
+				raw_packet4_client/0.1,			\
 				ospfv2/0.1

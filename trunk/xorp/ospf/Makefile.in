@@ -106,7 +106,7 @@ TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT) test_r
 noinst_LTLIBRARIES = libospf.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = libospf.la $(top_builddir)/xrl/targets/libospfv2base.la $(top_builddir)/xrl/targets/libospfv3base.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libproto/libproto.la
+LDADD = libospf.la $(top_builddir)/xrl/targets/libospfv2base.la $(top_builddir)/xrl/targets/libospfv3base.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/xrl/interfaces/libfearawpkt4.la $(top_builddir)/xrl/interfaces/libfearawpkt6.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la $(top_builddir)/libproto/libproto.la
 
 # -- Program Sources
 xorp_ospfv2_SOURCES = xorp_ospfv2.cc
@@ -157,6 +157,8 @@ test_checksum_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
@@ -172,6 +174,8 @@ test_packet_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
@@ -187,6 +191,8 @@ test_peering_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
@@ -202,6 +208,8 @@ test_routing_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
@@ -217,6 +225,8 @@ xorp_ospfv2_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \
@@ -232,6 +242,8 @@ xorp_ospfv3_DEPENDENCIES = libospf.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la \

@@ -13,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.6 2005/08/31 23:38:47 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.7 2005/09/07 08:58:10 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
+
+#include "libxipc/xrl_router.hh"
 
 #include "io.hh"
 
@@ -28,10 +30,28 @@ class EventLoop;
 template <typename A>
 class XrlIO : public IO<A> {
  public:
-    XrlIO(EventLoop& eventloop, string ribname)
-	: _eventloop(eventloop), _ribname(ribname)
+    XrlIO(EventLoop& eventloop, XrlRouter& xrl_router, const string& feaname,
+	  const string& ribname)
+	: _eventloop(eventloop),
+	  _xrl_router(xrl_router),
+	  _class_name(xrl_router.class_name()),
+	  _instance_name(xrl_router.instance_name()),
+	  _feaname(feaname),
+	  _ribname(ribname)
     {}
 
+    /**
+     * Receiver Raw frames.
+     */
+    void recv(const string& interface,
+	      const string& vif,
+	      A src,
+	      A dst,
+	      uint32_t ip_protocol,
+	      int32_t ip_ttl,
+	      int32_t ip_tos,
+	      bool ip_router_alert,
+	      const vector<uint8_t>& payload);
 
     /**
      * Send Raw frames.
@@ -122,9 +142,23 @@ class XrlIO : public IO<A> {
     bool delete_route(IPNet<A> net);
 
  private:
-    EventLoop& _eventloop;
-    string _ribname;
+    void send_cb(const XrlError& xrl_error, string interface, string vif);
+    void enable_interface_vif_cb(const XrlError& xrl_error, string interface,
+				 string vif);
+    void disable_interface_vif_cb(const XrlError& xrl_error, string interface,
+				  string vif);
+    void join_multicast_group_cb(const XrlError& xrl_error, string interface,
+				 string vif);
+    void leave_multicast_group_cb(const XrlError& xrl_error, string interface,
+				  string vif);
 
-    typename IO<A>::ReceiveCallback _cb;
+    EventLoop&	_eventloop;
+    XrlRouter&	_xrl_router;
+    string	_class_name;
+    string	_instance_name;
+    string	_feaname;
+    string	_ribname;
+
+    typename IO<A>::ReceiveCallback _receive_cb;
 };
 #endif // __OSPF_XRL_IO_HH__

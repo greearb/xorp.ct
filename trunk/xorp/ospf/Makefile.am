@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.13 2005/09/05 18:58:04 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.14 2005/09/05 22:06:57 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -34,6 +34,8 @@ LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt4.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfearawpkt6.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la

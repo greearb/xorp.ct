@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.55 2005/02/19 02:51:54 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.56 2005/03/03 07:43:27 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -218,12 +218,15 @@ $(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
 libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
 		$(INTERFACES_DIR)/ospfv2.xif
 
 # OSPF V3
 libospfv3base_la_SOURCES = ospfv3_base.hh ospfv3_base.cc
 $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
+		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/fea_rawpkt6_client.xif		\
 		$(INTERFACES_DIR)/ospfv3.xif
 
 # FIREWALL (FEA)
