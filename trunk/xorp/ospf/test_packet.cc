@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.27 2005/09/06 22:34:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.28 2005/09/07 05:06:53 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -547,6 +547,7 @@ link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
     lsa_decoder.register_decoder(new NetworkLsa(version));
     lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
     lsa_decoder.register_decoder(new SummaryRouterLsa(version));
+    lsa_decoder.register_decoder(new ASExternalLsa(version));
 
     LinkStateUpdatePacket *lsup1;
     lsup1 = new LinkStateUpdatePacket(version, lsa_decoder);
