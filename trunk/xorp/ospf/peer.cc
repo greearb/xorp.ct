@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.136 2005/09/05 22:03:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.137 2005/09/06 03:09:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1238,8 +1238,10 @@ Peer<A>::send_hello_packet()
     // Put the neighbours into the hello packet.
     _hello_packet.get_neighbours().clear();
     typename list<Neighbour<A> *>::iterator n;
-    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	_hello_packet.get_neighbours().push_back((*n)->get_router_id());
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	if ((*n)->announce_in_hello_packet())
+	    _hello_packet.get_neighbours().push_back((*n)->get_router_id());
+    }
 
     _hello_packet.encode(pkt);
 
@@ -1392,6 +1394,8 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     typename list<Neighbour<A> *>::const_iterator n;
     for (n = _neighbours.begin(); n != _neighbours.end(); n++) {
 	const HelloPacket *hello = (*n)->get_hello_packet();
+	if (0 == hello)
+	    continue;
 	// A priority of 0 means a router is not a candidate.
 	if (0 != hello->get_router_priority() &&
 	    Neighbour<A>::TwoWay <= (*n)->get_state()) {
@@ -1590,6 +1594,7 @@ Peer<IPv6>::get_designated_router_interface_id(IPv6) const
 	list<Neighbour<IPv6> *>::const_iterator n;
 	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	    if (get_designated_router() == (*n)->get_router_id()) {
+		XLOG_ASSERT((*n)->get_hello_packet());
 		return (*n)->get_hello_packet()->get_interface_id();
 		break;
 	    }
@@ -1780,6 +1785,7 @@ Peer<IPv6>::update_router_linksV3(list<RouterLink>& router_links)
 	if (n != _neighbours.end() &&
 	    Neighbour<IPv6>::Full == (*n)->get_state()) {
 	    router_link.set_type(RouterLink::p2p);
+	    XLOG_ASSERT((*n)->get_hello_packet());
 	    router_link.set_neighbour_interface_id((*n)->get_hello_packet()->
 						   get_interface_id());
 	    router_link.set_neighbour_router_id((*n)->get_router_id());
@@ -2042,6 +2048,13 @@ Peer<A>::set_router_dead_interval(uint32_t router_dead_interval)
 }
 
 template <typename A>
+uint32_t
+Peer<A>::get_router_dead_interval() const
+{
+    return _hello_packet.get_router_dead_interval();
+}
+
+template <typename A>
 bool
 Peer<A>::set_rxmt_interval(uint32_t rxmt_interval)
 {
@@ -2226,6 +2239,22 @@ Neighbour<A>::is_neighbour_DR_or_BDR()
 	return true;
 
     return false;
+}
+
+template <typename A>
+void
+Neighbour<A>::start_inactivity_timer()
+{
+    _inactivity_timer = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(_peer.get_router_dead_interval(), 0),
+			 callback(this, &Neighbour::event_inactivity_timer));
+}
+
+template <typename A>
+void
+Neighbour<A>::stop_inactivity_timer()
+{
+    _inactivity_timer.unschedule();
 }
 
 /**
@@ -2657,6 +2686,7 @@ template <typename A>
 void
 Neighbour<A>::tear_down_state(State previous_state)
 {
+    stop_inactivity_timer();
     stop_rxmt_timer("Tear Down State");
     _all_headers_sent = false;
     _ls_request_list.clear();
@@ -2701,6 +2731,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     OspfTypes::RouterID previous_dr;
     OspfTypes::RouterID previous_bdr;
     if (first) {
+	XLOG_ASSERT(!_inactivity_timer.scheduled());
     } else {
 	if (_peer.do_dr_or_bdr()) {
 	    previous_router_priority = _hello_packet->get_router_priority();
@@ -2710,6 +2741,8 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	delete _hello_packet;
     }
     _hello_packet = hello;
+
+    start_inactivity_timer();
 
     // Search for this router in the neighbour list.
     list<OspfTypes::RouterID> li = hello->get_neighbours();
@@ -3769,6 +3802,31 @@ Neighbour<A>::event_adj_ok()
 	    change_state(TwoWay);
 	break;
     }
+}
+
+template <typename A>
+void
+Neighbour<A>::event_inactivity_timer()
+{
+    const char *event_name = "InactivityTimer";
+    XLOG_TRACE(_ospf.trace()._neighbour_events, 
+	       "Event(%s) Interface(%s) Neighbour(%s) State(%s)",
+	       event_name,
+	       _peer.get_if_name().c_str(),
+	       pr_id(get_candidate_id()).c_str(),
+	       pp_state(get_state()).c_str());
+
+    debug_msg("ID = %s interface state <%s> neighbour state <%s>\n",
+	      pr_id(get_candidate_id()).c_str(),
+	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
+	      pp_state(get_state()).c_str());
+
+    change_state(Down);
+    // The saved hello packet is no longer required as it has timed
+    // out. Use the presence of a hello packet to decide if this
+    // neighbour should be included in this routers hello packets.
+    delete _hello_packet;
+    _hello_packet = 0;
 }
 
 template <typename A>

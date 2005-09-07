@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.90 2005/08/30 03:59:43 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.91 2005/09/05 22:03:30 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -688,6 +688,11 @@ class Peer {
     bool set_router_dead_interval(uint32_t router_dead_interval);
 
     /**
+     * Get the router dead interval in seconds.
+     */
+    uint32_t get_router_dead_interval() const;
+
+    /**
      * Set RxmtInterval.
      */
     bool set_rxmt_interval(uint32_t rxmt_interval);
@@ -934,6 +939,15 @@ class Neighbour {
     bool is_neighbour_DR_or_BDR() const;
 
     /**
+     * Should this neighbour be announced in hello packet.
+     *
+     * @return true if it should.
+     */
+    bool announce_in_hello_packet() const {
+	return _hello_packet;
+    }
+	
+    /**
      * Get a copy of the last hello packet that was received.
      */
     HelloPacket *get_hello_packet() { return _hello_packet; }
@@ -1042,6 +1056,7 @@ class Neighbour {
     list<Lsa::LsaRef> _lsa_queue;	// Queue of LSAs waiting to be sent.
     list<Lsa::LsaRef> _lsa_rxmt;	// Unacknowledged LSAs
 					// awaiting retransmission.
+    XorpTimer _inactivity_timer;	// Inactivity timer.
 
     /**
      * Get the area router.
@@ -1077,6 +1092,18 @@ class Neighbour {
      * @return true if this router is the DR or BDR.
      */
     bool is_DR_or_BDR() const;
+
+    /**
+     * Start the inactivity timer.
+     * Used to track Hello packets from the neighbour.
+     */
+    void start_inactivity_timer();
+
+    /**
+     * Stop the inactivity timer.
+     * Used to track Hello packets from the neighbour.
+     */
+    void stop_inactivity_timer();
 
     /**
      * Start the retransmit timer.
@@ -1160,6 +1187,7 @@ class Neighbour {
     void event_sequence_number_mismatch();
     void event_exchange_done();
     void event_loading_done();
+    void event_inactivity_timer();
 
     /**
      * Common code for:
