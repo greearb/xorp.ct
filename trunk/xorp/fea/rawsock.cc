@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.1 2005/09/07 20:15:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.2 2005/09/07 21:17:18 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -911,6 +911,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 
     UNUSED(fd);
     UNUSED(type);
+    UNUSED(int_val);
 
 #ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
     // Zero and reset various fields
@@ -1407,6 +1408,8 @@ RawSocket::proto_socket_write(const string& if_name,
     int		ret;
     const IfTreeInterface* iftree_if = NULL;
     const IfTreeVif* iftree_vif = NULL;
+
+    UNUSED(int_val);
 
     find_interface_vif_by_name(if_name, vif_name, iftree_if, iftree_vif);
     
