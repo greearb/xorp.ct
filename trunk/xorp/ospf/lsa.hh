@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.60 2005/09/06 20:11:19 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.61 2005/09/06 22:34:27 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1119,7 +1119,7 @@ class SummaryNetworkLsa : public Lsa {
 	_prefix_options = prefix_options;
     }
 
-    uint32_t get_prefix_options() const {
+    uint8_t get_prefix_options() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	return _prefix_options;
     }
@@ -1252,6 +1252,222 @@ class SummaryRouterLsa : public Lsa {
 
     uint8_t _options;			// OSPFv3 only.
     OspfTypes::RouterID _destination_id;// OSPFv3 only.
+};
+
+/**
+ * AS-external-LSA
+ */
+class ASExternalLsa : public Lsa {
+ public:
+    ASExternalLsa(OspfTypes::Version version)
+	: Lsa(version)
+    {
+	_header.set_ls_type(get_ls_type());
+    }
+
+    ASExternalLsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: Lsa(version, buf, len)
+    {}
+
+    /**
+     * @return the minimum length of an AS-external-LSA.
+     */
+    size_t min_length() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 16;
+	    break;
+	case OspfTypes::V3:
+	    return 12;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    uint16_t get_ls_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 5;
+	    break;
+	case OspfTypes::V3:
+	    return 0x4005;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    /**
+     * @return False this is not an AS-external-LSA.
+     */
+    bool external() const {return true; };
+
+    /**
+     * Decode an LSA.
+     * @param buf pointer to buffer.
+     * @param len length of the buffer on input set to the number of
+     * bytes consumed on output.
+     *
+     * @return A reference to an LSA that manages its own memory.
+     */
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+
+    bool encode();
+
+    void set_network_mask(uint32_t network_mask) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_network_mask = network_mask;
+    }
+
+    uint32_t get_network_mask() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _network_mask;
+    }
+
+    void set_network(IPNet<IPv6>& network) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_network = network;
+    }
+
+    IPNet<IPv6> get_network() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _network;
+    }
+
+    void set_e_bit(bool bit) {
+	_e_bit = bit;
+    }
+
+    bool get_e_bit() const {
+	return _e_bit;
+    }
+
+    void set_f_bit(bool bit) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_f_bit = bit;
+    }
+
+    bool get_f_bit() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _f_bit;
+    }
+
+    void set_t_bit(bool bit) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_t_bit = bit;
+    }
+
+    bool get_t_bit() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _t_bit;
+    }
+
+    void set_prefix_options(uint8_t prefix_options) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_prefix_options = prefix_options;
+    }
+
+    uint8_t get_prefix_options() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _prefix_options;
+    }
+
+    void set_referenced_ls_type(uint16_t referenced_ls_type) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_referenced_ls_type = referenced_ls_type;
+    }
+
+    uint16_t get_referenced_ls_type() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _referenced_ls_type;
+    }
+
+    void set_forwarding_address_ipv6(IPv6 forwarding_address_ipv6) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(_f_bit);
+	_forwarding_address_ipv6 = forwarding_address_ipv6;
+    }
+
+    IPv6 get_forwarding_address_ipv6() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(_f_bit);
+	return _forwarding_address_ipv6;
+    }
+
+    void set_metric(uint32_t metric) {
+	_metric = metric;
+    }
+
+    uint32_t get_metric() const {
+	return _metric;
+    }
+
+    void set_forwarding_address_ipv4(IPv4 forwarding_address_ipv4) {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	_forwarding_address_ipv4 = forwarding_address_ipv4;
+    }
+
+    IPv4 get_forwarding_address_ipv4() const {
+	XLOG_ASSERT(OspfTypes::V2 == get_version());
+	return _forwarding_address_ipv4;
+    }
+
+    void set_external_route_tag(uint32_t external_route_tag) {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    XLOG_ASSERT(_t_bit);
+	    break;
+	}
+	_external_route_tag = external_route_tag;
+    }
+
+    uint32_t get_external_route_tag() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    break;
+	case OspfTypes::V3:
+	    XLOG_ASSERT(_t_bit);
+	    break;
+	}
+	return _external_route_tag;
+    }
+
+    void set_referenced_link_state_id(uint32_t referenced_link_state_id) {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(0 != _referenced_ls_type);
+	_referenced_link_state_id = referenced_link_state_id;
+    }
+
+    uint32_t get_referenced_link_state_id() const {
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	XLOG_ASSERT(0 != _referenced_ls_type);
+	return _referenced_link_state_id;
+    }
+
+    /**
+     * Generate a printable representation.
+     */
+    string str() const;
+    
+ private:
+    uint32_t _network_mask;		// OSPFv2 only.
+    IPNet<IPv6> _network;		// OSPFv3 only.
+    bool _e_bit;
+    bool _f_bit;			// OSPFv3 only.
+    bool _t_bit;			// OSPFv3 only.
+
+    uint8_t _prefix_options;		// OSPFv3 only.
+    uint16_t _referenced_ls_type;	// OSPFv3 only.
+    IPv6 _forwarding_address;		// OSPFv3 only.
+    
+    uint32_t _metric;
+    IPv4 _forwarding_address_ipv4;	// OSPFv2 only.
+    IPv6 _forwarding_address_ipv6;	// OSPFv3 only.
+    uint32_t _external_route_tag;
+    uint32_t _referenced_link_state_id;	// OSPFv3 only.
 };
 
 #if	0

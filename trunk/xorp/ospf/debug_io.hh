@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.2 2005/09/06 20:11:19 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.3 2005/09/06 22:34:26 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -32,6 +32,7 @@ class DebugIO : public IO<A> {
 	_lsa_decoder.register_decoder(new NetworkLsa(version));
 	_lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
 	_lsa_decoder.register_decoder(new SummaryRouterLsa(version));
+	_lsa_decoder.register_decoder(new ASExternalLsa(version));
 
 	_dec.register_decoder(new HelloPacket(version));
 	_dec.register_decoder(new DataDescriptionPacket(version));

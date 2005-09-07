@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.26 2005/09/06 20:11:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.27 2005/09/06 22:34:27 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -311,6 +311,41 @@ populate_summary_router_lsa(SummaryRouterLsa *srlsa,
 
 inline
 void
+populate_as_external_lsa(ASExternalLsa *aelsa,
+			 OspfTypes::Version version)
+{
+    populate_lsa_header(aelsa->get_header(), version);
+
+    aelsa->set_metric(5);
+    
+    switch(version) {
+    case OspfTypes::V2:
+	aelsa->set_network_mask(0xffff0000);
+	aelsa->set_e_bit(true);
+	aelsa->set_forwarding_address_ipv4(IPv4("10.10.10.10"));
+	break;
+    case OspfTypes::V3:
+	aelsa->set_e_bit(true);
+	aelsa->set_f_bit(true);
+	aelsa->set_t_bit(true);
+	aelsa->set_prefix_options(0x5);
+	aelsa->set_referenced_ls_type(2);
+	IPNet<IPv6> net("2001:468:e21:c800:220:edff:fe61:f033", 64);
+	aelsa->set_network(net);
+	aelsa->set_forwarding_address_ipv6(
+			      IPv6("2001:468:e21:c800:220:edff:fe61:f033"));
+	aelsa->set_referenced_link_state_id(0x10);
+	break;
+    }
+
+    aelsa->set_external_route_tag(0x42);
+
+    // This will set the checksum and the length.
+    aelsa->encode();
+}
+
+inline
+void
 populate_link_state_update(LinkStateUpdatePacket *lsup,
 			   OspfTypes::Version version)
 {
@@ -347,6 +382,14 @@ populate_link_state_update(LinkStateUpdatePacket *lsup,
     srlsa = new SummaryRouterLsa(version);
     populate_summary_router_lsa(srlsa, version);
     lsup->get_lsas().push_back(Lsa::LsaRef(srlsa));
+
+    ASExternalLsa *aelsa = new ASExternalLsa(version);
+    populate_as_external_lsa(aelsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(aelsa));
+
+    aelsa = new ASExternalLsa(version);
+    populate_as_external_lsa(aelsa, version);
+    lsup->get_lsas().push_back(Lsa::LsaRef(aelsa));
 }
 
 inline
@@ -794,6 +837,26 @@ summary_router_lsa_print(TestInfo& info)
 }
 
 bool
+as_external_lsa_print(TestInfo& info)
+{
+    ASExternalLsa *aelsa = new ASExternalLsa(OspfTypes::V2);
+    populate_as_external_lsa(aelsa, OspfTypes::V2);
+
+    DOUT(info) << aelsa->str() << endl;
+
+    delete aelsa;
+
+    aelsa = new ASExternalLsa(OspfTypes::V3);
+    populate_as_external_lsa(aelsa, OspfTypes::V3);
+
+    DOUT(info) << aelsa->str() << endl;
+
+    delete aelsa;
+
+    return true;
+}
+
+bool
 router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 {
     RouterLsa *rlsa1= new RouterLsa(version);
@@ -966,6 +1029,49 @@ summary_router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+as_external_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    ASExternalLsa *aelsa1= new ASExternalLsa(version);
+    populate_as_external_lsa(aelsa1, version);
+
+    DOUT(info) << aelsa1->str() << endl;
+
+    // Encode the AS-External-LSA.
+    aelsa1->encode();
+    size_t len1;
+    uint8_t *ptr1 = aelsa1->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    ASExternalLsa *aelsa2= new ASExternalLsa(version);
+
+    Lsa::LsaRef aelsa3 = aelsa2->decode(ptr1, len1);
+
+    DOUT(info) << aelsa3->str() << endl;
+
+    // Encode the second packet and compare.
+    aelsa3->encode();
+
+    DOUT(info) << aelsa3->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = aelsa3->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete aelsa1;
+    delete aelsa2;
+
+    return true;
+}
+
+bool
 lsa_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder dec(version);
@@ -1035,6 +1141,7 @@ main(int argc, char **argv)
 	{"network_lsa_print", callback(network_lsa_print)},
 	{"summary_network_lsa_print", callback(summary_network_lsa_print)},
 	{"summary_router_lsa_print", callback(summary_router_lsa_print)},
+	{"as_external_lsa_print", callback(as_external_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
@@ -1076,6 +1183,11 @@ main(int argc, char **argv)
 	 callback(summary_router_lsa_compare, OspfTypes::V2)},
 	{"summary_router_lsa_compareV3",
 	 callback(summary_router_lsa_compare, OspfTypes::V3)},
+	{"as_external_lsa_compareV2",
+	 callback(as_external_lsa_compare, OspfTypes::V2)},
+	{"as_external_lsa_compareV3",
+	 callback(as_external_lsa_compare, OspfTypes::V3)},
+
 	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},
 	{"lsa_decoder2V2", callback(lsa_decoder2, OspfTypes::V2)},

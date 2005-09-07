@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.40 2005/09/04 21:17:52 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.41 2005/09/05 01:06:17 atanu Exp $
 #
 
 TODO
@@ -84,6 +84,10 @@ that violates the 1 second rule.
 
 This problem has been partially fixes by firing the delay timer when a
 self originating LSA is requested in a link state request packet.
+
+31) AS-External-Lsa.
+It is possible that when addresses are being read in with copy_in that
+network byte order issues are not being correctly handled. 
 
 Possible issues
 ~~~~~~~~~~~~~~~
