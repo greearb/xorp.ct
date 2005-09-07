@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.1 2005/09/07 20:15:44 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -109,6 +109,15 @@
 
 // IPv6 Router Alert stuff
 #ifdef HAVE_IPV6
+#ifndef IP6OPT_RTALERT
+#define IP6OPT_RTALERT		0x05
+#endif
+#ifndef IP6OPT_RTALERT_LEN
+#define IP6OPT_RTALERT_LEN	4
+#endif
+#ifndef IP6OPT_RTALERT_MLD
+#define IP6OPT_RTALERT_MLD	0
+#endif
 #ifndef IP6OPT_ROUTER_ALERT	// XXX: for compatibility with older systems
 #define IP6OPT_ROUTER_ALERT IP6OPT_RTALERT
 #endif
