@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.46 2005/09/02 12:17:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.47 2005/09/05 22:03:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -530,7 +530,7 @@ PeerManager<A>::area_border_router_p() const
     return 1 < _areas.size() ? true : false;
 }
 
-const OspfTypes::AreaID BACKBONE = OspfTypes::BACKBONE;
+static const OspfTypes::AreaID BACKBONE = OspfTypes::BACKBONE;
 
 template <typename A>
 bool
