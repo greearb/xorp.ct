@@ -12,232 +12,47 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.13 2005/03/25 02:53:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.14 2005/08/18 15:45:51 bms Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
-
-#include "libcomm/comm_api.h"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-#ifdef HAVE_FCNTL_H
-#include <fcntl.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-
-/* Windows has no 'struct ip', so ship one. */
-#ifdef HOST_OS_WINDOWS
-#include "ip.h"
-/* XXX */
-typedef char *caddr_t;
-#endif
+#include "libxorp/ipvx.hh"
 
 #include "rawsock4.hh"
 
 /* ------------------------------------------------------------------------- */
 /* RawSocket4 methods */
 
-RawSocket4::RawSocket4(uint32_t protocol) throw (RawSocket4Exception)
+RawSocket4::RawSocket4(EventLoop& eventloop, uint32_t ip_protocol,
+		       const IfTree& iftree)
+    : RawSocket(eventloop, IPv4::af(), ip_protocol, iftree)
 {
-    _fd = socket(AF_INET, SOCK_RAW, protocol);
-    if (!_fd.is_valid())
-	xorp_throw(RawSocket4Exception, "socket", errno);
-
-#ifdef IP_HDRINCL
-    int on = 1;
-
-    if (setsockopt(_fd, IPPROTO_IP, IP_HDRINCL, XORP_SOCKOPT_CAST(&on),
-	sizeof(on)) < 0)
-	xorp_throw(RawSocket4Exception, "setsockopt (IP_HDRINCL)", errno);
-# if 0
-    if (setsockopt(_fd, SOL_SOCKET, SO_DONTROUTE, XORP_SOCKOPT_CAST(&on),
-	sizeof(on)) < 0)
-	xorp_throw(RawSocket4Exception, "setsockopt (SO_DONTROUTE)", errno);
-# endif
-#endif
 }
 
 RawSocket4::~RawSocket4()
 {
-    	if (_fd.is_valid())
-	    comm_close(_fd);
-}
+    string error_msg;
 
-ssize_t
-RawSocket4::write(const uint8_t* buf, size_t nbytes) const
-{
-    /* length field is in host order */
-    static_assert(sizeof(struct ip) == 20);
-
-    if (nbytes < sizeof(struct ip)) {
-	XLOG_ERROR("attempting to write a raw ip packet of %u (<20) bytes.",
-		   XORP_UINT_CAST(nbytes));
-	return -1;
-    }
-
-    const struct ip* hdr = reinterpret_cast<const struct ip*>(buf);
-    if (hdr->ip_hl < 5) {
-	XLOG_ERROR("bad header length %d", hdr->ip_hl);
-	return -1;
-    } else if (hdr->ip_v != 4) {
-	XLOG_ERROR("bad ip version %d", hdr->ip_v);
-	return -1;
-    }
-
-    struct iovec iov[2];
-
-#ifdef IPV4_RAW_OUTPUT_IS_RAW
-    iov[0].iov_base = reinterpret_cast<caddr_t>(const_cast<uint8_t*>(buf));
-    iov[0].iov_len = nbytes;
-    iov[1].iov_base = 0;
-    iov[1].iov_len = 0;
-#else
-    /*
-     * For not quite raw output the ip packet length needs nobbling from
-     * network to host order.
-     */
-    struct ip newhdr;
-    memcpy(&newhdr, buf, sizeof(newhdr));
-    newhdr.ip_len = ntohs(newhdr.ip_len);
-
-    iov[0].iov_base = reinterpret_cast<caddr_t>(&newhdr);
-    iov[0].iov_len = sizeof(newhdr);
-    iov[1].iov_base = reinterpret_cast<caddr_t>(const_cast<uint8_t*>(buf))
-	+ sizeof(newhdr);
-    iov[1].iov_len  = nbytes - sizeof(newhdr);
-#endif /* IPV4_RAW_OUTPUT_IS_RAW */
-
-    int iovcnt = (iov[1].iov_len == 0) ? 1 : 2;
-
-    struct sockaddr_in who;
-    memset(&who, 0, sizeof(who));
-    who.sin_family = AF_INET;
-    who.sin_addr = hdr->ip_dst;
-#ifdef HAVE_SIN_LEN
-    who.sin_len = sizeof(sockaddr_in);
-#endif /* HAVE_SIN_LEN */
-
-#ifdef HOST_OS_WINDOWS
-    DWORD sent, error;
-    error = WSASendTo(_fd, reinterpret_cast<WSABUF *>(iov), iovcnt, &sent, 0,
-		      reinterpret_cast<struct sockaddr *>(&who), sizeof(who),
-		      NULL, NULL);
-    return sent;
-#else
-    struct msghdr mh;
-    mh.msg_name = (caddr_t)&who;
-    mh.msg_namelen = sizeof(who);
-    mh.msg_iov = iov;
-    mh.msg_iovlen = iovcnt;
-    mh.msg_control = 0;
-    mh.msg_controllen = 0;
-    mh.msg_flags = 0;
-    return ::sendmsg(_fd, &mh, 0);
-#endif
-}
-
-/* ------------------------------------------------------------------------- */
-/* IoRawSocket4 methods */
-
-IoRawSocket4::IoRawSocket4(EventLoop&	eventloop,
-			   uint32_t	protocol,
-			   bool		autohook)
-    throw (RawSocket4Exception)
-    : RawSocket4(protocol), _eventloop(eventloop), _autohook(autohook)
-{
-    if (comm_sock_set_blocking(_fd, 0) != XORP_OK)
-	xorp_throw(RawSocket4Exception, "fcntl (O_NON_BLOCK)", errno);
-
-    _recvbuf.reserve(RECVBUF_BYTES);
-    if (_recvbuf.capacity() != RECVBUF_BYTES)
-	xorp_throw(RawSocket4Exception, "receive buffer reserve() failed", 0);
-
-    ssize_t sz = RECVBUF_BYTES;
-    if (setsockopt(_fd, SOL_SOCKET, SO_RCVBUF, XORP_SOCKOPT_CAST(&sz),
-	sizeof(sz)) < 0)
-	xorp_throw(RawSocket4Exception, "setsockopt (SO_RCVBUF)", errno);
-
-    if (_autohook)
-	eventloop_hook();
-}
-
-IoRawSocket4::~IoRawSocket4()
-{
-    if (_autohook)
-	eventloop_unhook();
-}
-
-void
-IoRawSocket4::recv(XorpFd /* fd */, IoEventType /* m */)
-{
-    struct sockaddr_storage from;
-    socklen_t from_len = sizeof(from);
-
-    ssize_t n = recvfrom(_fd, XORP_SOCKOPT_CAST(&_recvbuf[0]),
-			 RECVBUF_BYTES, 0,
-			 (struct sockaddr *)&from, &from_len);
-    debug_msg("Read fd %s, %d bytes, from_len %d\n",
-	      _fd.str().c_str(), XORP_INT_CAST(n), XORP_INT_CAST(from_len));
-    if (n <= 0) {
-	return;
-    }
-    _recvbuf.resize(n);
-
-#ifndef IPV4_RAW_INPUT_IS_RAW
-    struct ip* hdr = reinterpret_cast<struct ip*>(&_recvbuf[0]);
-    hdr->ip_len = htons(hdr->ip_len);
-#endif
-
-    process_recv_data(_recvbuf);
-}
-
-bool
-IoRawSocket4::eventloop_hook()
-{
-    debug_msg("hooking\n");
-    return _eventloop.add_ioevent_cb(_fd, IOT_READ,
-				   callback(this, &IoRawSocket4::recv));
-}
-
-void
-IoRawSocket4::eventloop_unhook()
-{
-    debug_msg("unhooking\n");
-    _eventloop.remove_ioevent_cb(_fd);
+    RawSocket::stop(error_msg);
 }
 
 /* ------------------------------------------------------------------------- */
 /* FilterRawSocket4 methods */
 
-FilterRawSocket4::FilterRawSocket4(EventLoop& eventloop, int protocol)
-    throw (RawSocket4Exception)
-    : IoRawSocket4(eventloop, protocol, false)
+FilterRawSocket4::FilterRawSocket4(EventLoop& eventloop, uint32_t protocol,
+				   const IfTree& iftree)
+    : RawSocket4(eventloop, protocol, iftree)
 {
 }
 
 FilterRawSocket4::~FilterRawSocket4()
 {
     if (_filters.empty() == false) {
-	eventloop_unhook();
+	string dummy_error_msg;
+	RawSocket::stop(dummy_error_msg);
 
 	do {
 	    InputFilter* i = _filters.front();
@@ -262,7 +77,11 @@ FilterRawSocket4::add_filter(InputFilter* filter)
 
     _filters.push_back(filter);
     if (_filters.front() == filter) {
-	eventloop_hook();
+	string error_msg;
+	if (RawSocket4::start(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return false;
+	}
     }
     return true;
 }
@@ -279,18 +98,165 @@ FilterRawSocket4::remove_filter(InputFilter* filter)
 
     _filters.erase(i);
     if (_filters.empty()) {
-	eventloop_unhook();
+	string error_msg;
+	if (RawSocket4::stop(error_msg) != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return false;
+	}
     }
     return true;
 }
 
-void
-FilterRawSocket4::process_recv_data(const vector<uint8_t>& buf)
+int
+FilterRawSocket4::proto_socket_write(const string&	if_name,
+				     const string&	vif_name,
+				     const IPv4&	src_address,
+				     const IPv4&	dst_address,
+				     int32_t		ip_ttl,
+				     int32_t		ip_tos,
+				     bool		ip_router_alert,
+				     const vector<uint8_t>& payload,
+				     string&		error_msg)
 {
-    XLOG_ASSERT(buf.size() >= sizeof(struct ip));
+    return (RawSocket4::proto_socket_write(if_name,
+					   vif_name,
+					   IPvX(src_address),
+					   IPvX(dst_address),
+					   ip_ttl,
+					   ip_tos,
+					   ip_router_alert,
+					   payload,
+					   error_msg));
+}
+
+void
+FilterRawSocket4::process_recv_data(const string&	if_name,
+				    const string&	vif_name,
+				    const IPvX&		src_address,
+				    const IPvX&		dst_address,
+				    int32_t		ip_ttl,
+				    int32_t		ip_tos,
+				    bool		ip_router_alert,
+				    const vector<uint8_t>& payload)
+{
+    struct IPv4HeaderInfo header;
+
+    XLOG_ASSERT(src_address.is_ipv4());
+    XLOG_ASSERT(dst_address.is_ipv4());
+
+    header.if_name = if_name;
+    header.vif_name = vif_name;
+    header.src_address = src_address.get_ipv4();
+    header.dst_address = dst_address.get_ipv4();
+    header.ip_protocol = RawSocket4::ip_protocol();
+    header.ip_ttl = ip_ttl;
+    header.ip_tos = ip_tos;
+    header.ip_router_alert = ip_router_alert;
 
     for (list<InputFilter*>::iterator i = _filters.begin();
 	 i != _filters.end(); ++i) {
-	(*i)->recv(buf);
+	(*i)->recv(header, payload);
     }
+}
+
+int
+FilterRawSocket4::join_multicast_group(const string&	if_name,
+				       const string&	vif_name,
+				       const IPv4&	group_address,
+				       const string&	receiver_name,
+				       string&		error_msg)
+{
+    JoinedGroupsTable::iterator iter;
+
+    //
+    // Check the arguments
+    //
+    if (! group_address.is_multicast()) {
+	error_msg = c_format("Cannot join group %s: not a multicast address",
+			     group_address.str().c_str());
+	return (XORP_ERROR);
+    }
+    if (if_name.empty()) {
+	error_msg = c_format("Cannot join group %s: empty interface name",
+			     group_address.str().c_str());
+	return (XORP_ERROR);
+    }
+    if (vif_name.empty()) {
+	error_msg = c_format("Cannot join group %s on interface %s: "
+			     "empty vif name",
+			     group_address.str().c_str(),
+			     if_name.c_str());
+	return (XORP_ERROR);
+    }
+    if (receiver_name.empty()) {
+	error_msg = c_format("Cannot join group %s on interface %s vif %s: "
+			     "empty receiver name",
+			     group_address.str().c_str(),
+			     if_name.c_str(),
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+
+    JoinedMulticastGroup init_jmg(if_name, vif_name, group_address);
+    iter = _joined_groups_table.find(init_jmg);
+    if (iter == _joined_groups_table.end()) {
+	//
+	// First receiver, hence join the multicast group first to check
+	// for errors.
+	//
+	if (RawSocket::join_multicast_group(if_name,
+					    vif_name,
+					    IPvX(group_address),
+					    error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	_joined_groups_table.insert(make_pair(init_jmg, init_jmg));
+	iter = _joined_groups_table.find(init_jmg);
+    }
+    XLOG_ASSERT(iter != _joined_groups_table.end());
+    JoinedMulticastGroup& jmg = iter->second;
+
+    jmg.add_receiver(receiver_name);
+
+    return (XORP_OK);
+}
+
+int
+FilterRawSocket4::leave_multicast_group(const string&	if_name,
+					const string&	vif_name,
+					const IPv4&	group_address,
+					const string&	receiver_name,
+					string&		error_msg)
+{
+    JoinedGroupsTable::iterator iter;
+
+    JoinedMulticastGroup init_jmg(if_name, vif_name, group_address);
+    iter = _joined_groups_table.find(init_jmg);
+    if (iter == _joined_groups_table.end()) {
+	error_msg = c_format("Cannot leave group %s on interface %s vif %s: "
+			     "the group was not joined",
+			     group_address.str().c_str(),
+			     if_name.c_str(),
+			     vif_name.c_str());
+	return (XORP_ERROR);
+    }
+    JoinedMulticastGroup& jmg = iter->second;
+
+    jmg.delete_receiver(receiver_name);
+    if (jmg.empty()) {
+	//
+	// The last receiver, hence leave the group
+	//
+	_joined_groups_table.erase(iter);
+	if (RawSocket::leave_multicast_group(if_name,
+					     vif_name,
+					     IPvX(group_address),
+					     error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+    }
+
+    return (XORP_OK);
 }

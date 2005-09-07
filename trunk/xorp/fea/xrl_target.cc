@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.72 2005/04/28 02:32:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.73 2005/08/18 15:45:53 bms Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2233,20 +2233,20 @@ XrlFeaTarget::redist_transaction6_0_1_delete_all_routes(
 // ----------------------------------------------------------------------------
 // IPv4 Raw Socket related
 
-static const char* XRL_RAW_SOCKET4_NULL = "XrlRawSocket4Manager not present" ;
+static const string XRL_RAW_SOCKET4_NULL = "XrlRawSocket4Manager not present";
 
 XrlCmdError
 XrlFeaTarget::raw_packet4_0_1_send(
-				   // Input values,
-				   const IPv4&		  src_address,
-				   const IPv4&		  dst_address,
-				   const string&	  vifname,
-				   const uint32_t&	  proto,
-				   const uint32_t&	  ttl,
-				   const uint32_t&	  tos,
-				   const vector<uint8_t>& options,
-				   const vector<uint8_t>& payload
-				   )
+    // Input values,
+    const string&		if_name,
+    const string&		vif_name,
+    const IPv4&			src_address,
+    const IPv4&			dst_address,
+    const uint32_t&		ip_protocol,
+    const int32_t&		ip_ttl,
+    const int32_t&		ip_tos,
+    const bool&			ip_router_alert,
+    const vector<uint8_t>&	payload)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -2254,16 +2254,18 @@ XrlFeaTarget::raw_packet4_0_1_send(
     if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
-    return _xrsm4->send(src_address, dst_address, vifname,
-		       proto, ttl, tos, options, payload);
+    return _xrsm4->send(if_name, vif_name, src_address, dst_address,
+			ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+			payload);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet4_0_1_send_raw(
-				       // Input values,
-				       const string&		vifname,
-				       const vector<uint8_t>&	packet
-				       )
+XrlFeaTarget::raw_packet4_0_1_register_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -2271,96 +2273,148 @@ XrlFeaTarget::raw_packet4_0_1_send_raw(
     if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
-    return _xrsm4->send(vifname, packet);
+    return _xrsm4->register_receiver(xrl_target_name, if_name, vif_name,
+				     ip_protocol);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet4_0_1_register_vif_receiver(
-						   // Input values,
-						   const string&   router_name,
-						   const string&   ifname,
-						   const string&   vifname,
-						   const uint32_t& proto
-						   )
+XrlFeaTarget::raw_packet4_0_1_unregister_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol)
 {
     if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
-    return _xrsm4->register_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm4->unregister_receiver(xrl_target_name, if_name, vif_name,
+				       ip_protocol);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet4_0_1_unregister_vif_receiver(
-						     // Input values,
-						     const string& router_name,
-						     const string& ifname,
-						     const string& vifname,
-						     const uint32_t& proto
-						     )
+XrlFeaTarget::raw_packet4_0_1_join_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol,
+    const IPv4&		group_address)
 {
     if (_xrsm4 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
-    return _xrsm4->unregister_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm4->join_multicast_group(xrl_target_name, if_name, vif_name,
+					ip_protocol, group_address);
+}
+
+XrlCmdError
+XrlFeaTarget::raw_packet4_0_1_leave_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol,
+    const IPv4&		group_address)
+{
+    if (_xrsm4 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
+    }
+    return _xrsm4->leave_multicast_group(xrl_target_name, if_name, vif_name,
+					 ip_protocol, group_address);
 }
 
 // ----------------------------------------------------------------------------
 // IPv6 Raw Socket related
 
-static const char* XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present" ;
+static const string XRL_RAW_SOCKET6_NULL = "XrlRawSocket6Manager not present";
 
 XrlCmdError
-XrlFeaTarget::raw_packet6_0_1_send_raw(
-				// Input values,
-				const IPv6&	src_address,
-				const IPv6&	dst_address,
-				const string&	vif_name,
-				const uint32_t&	proto,
-				const uint32_t&	tclass,
-				const uint32_t&	hoplimit,
-				const vector<uint8_t>&	hopopts,
-				const vector<uint8_t>&	packet)
+XrlFeaTarget::raw_packet6_0_1_send(
+    // Input values,
+    const string&	if_name,
+    const string&	vif_name,
+    const IPv6&		src_address,
+    const IPv6&		dst_address,
+    const uint32_t&	ip_protocol,
+    const int32_t&	ip_ttl,
+    const int32_t&	ip_tos,
+    const bool&		ip_router_alert,
+    const vector<uint8_t>&	payload)
 {
-
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
-    return _xrsm6->send(src_address, dst_address, vif_name, proto,
-			tclass, hoplimit, hopopts, packet);
+    return _xrsm6->send(if_name, vif_name, src_address, dst_address,
+			ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+			payload);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet6_0_1_register_vif_receiver(
-						   // Input values,
-						   const string&   router_name,
-						   const string&   ifname,
-						   const string&   vifname,
-						   const uint32_t& proto
-						   )
+XrlFeaTarget::raw_packet6_0_1_register_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol)
 {
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
-    return _xrsm6->register_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm6->register_receiver(xrl_target_name, if_name, vif_name,
+				     ip_protocol);
 }
 
 XrlCmdError
-XrlFeaTarget::raw_packet6_0_1_unregister_vif_receiver(
-						     // Input values,
-						     const string& router_name,
-						     const string& ifname,
-						     const string& vifname,
-						     const uint32_t& proto
-						     )
+XrlFeaTarget::raw_packet6_0_1_unregister_receiver(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol)
 {
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
-    return _xrsm6->unregister_vif_receiver(router_name, ifname, vifname, proto);
+    return _xrsm6->unregister_receiver(xrl_target_name, if_name, vif_name,
+				       ip_protocol);
 }
+
+XrlCmdError
+XrlFeaTarget::raw_packet6_0_1_join_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol,
+    const IPv6&		group_address)
+{
+    if (_xrsm6 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+    }
+    return _xrsm6->join_multicast_group(xrl_target_name, if_name, vif_name,
+					ip_protocol, group_address);
+}
+
+XrlCmdError
+XrlFeaTarget::raw_packet6_0_1_leave_multicast_group(
+    // Input values,
+    const string&	xrl_target_name,
+    const string&	if_name,
+    const string&	vif_name,
+    const uint32_t&	ip_protocol,
+    const IPv6&		group_address)
+{
+    if (_xrsm6 == 0) {
+	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
+    }
+    return _xrsm6->leave_multicast_group(xrl_target_name, if_name, vif_name,
+					 ip_protocol, group_address);
+}
+
 
 // ----------------------------------------------------------------------------
 // Socket Server related

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock6.hh,v 1.1 2004/11/29 09:18:19 bms Exp $
+// $XORP: xorp/fea/xrl_rawsock6.hh,v 1.2 2005/03/25 02:53:17 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK6_HH__
 #define __FEA_XRL_RAWSOCK6_HH__
@@ -23,9 +23,9 @@
 
 #include "rawsock6.hh"
 
-class InterfaceManager;
+class IfTree;
 class XrlRouter;
-class XrlRawSocket6Filter;
+class XrlFilterRawSocket6;
 
 /**
  * @short A class that manages raw sockets as used by the XORP Xrl Interface.
@@ -38,59 +38,138 @@ class XrlRawSocket6Filter;
  * then the relevent filter is created and associated with the
  * RawSocket.
  */
-
-class XrlRawSocket6Manager
-{
+class XrlRawSocket6Manager {
 public:
     /**
-     * Contructor for XrlRawSocket6Manager instances.
-     *
-     * May throw RawSocket6Exception since a raw socket is contructed and
-     * this requires root privelage.
+     * Constructor for XrlRawSocket6Manager instances.
      */
-    XrlRawSocket6Manager(EventLoop& eventloop, InterfaceManager& ifmgr,
-			 XrlRouter& xr)
-	throw (RawSocket6Exception);
+    XrlRawSocket6Manager(EventLoop& eventloop, const IfTree& iftree,
+			 XrlRouter& xr);
 
     ~XrlRawSocket6Manager();
 
-    XrlCmdError send(const IPv6& src,
-		     const IPv6& dst,
-		     const string& vifname,
-		     uint8_t proto,
-		     uint8_t tclass,
-		     uint8_t hoplimit,
-		     const vector<uint8_t>& hopopts,
-		     const vector<uint8_t>& payload);
+    /**
+     * Send an IPv6 packet on a raw socket.
+     *
+     * @param if_name the interface to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param vif_name the vif to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_protocol the IP protocol number. It must be between 1 and
+     * 255.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
+     * TTL will be set internally before transmission.
+     * @param ip_tos the Type Of Service (IP traffic class for IPv6). If it
+     * has a negative value, the TOS will be set internally before
+     * transmission.
+     * @param ip_router_alert if true, then add the IP Router Alert option to
+     * the IP packet.
+     * @param payload the payload, everything after the IP header and options.
+     */
+    XrlCmdError send(
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv6&	src_address,
+	const IPv6&	dst_address,
+	uint32_t	ip_protocol,
+	int32_t		ip_ttl,
+	int32_t		ip_tos,
+	bool		ip_router_alert,
+	const vector<uint8_t>&	payload);
 
-    XrlCmdError register_vif_receiver(const string&		tgt,
-				      const string&		ifname,
-				      const string&		vifname,
-				      const uint32_t& 		proto);
+    /**
+     * Register to receive IPv6 packets. The receiver is expected to support
+     * raw_packet6_client/0.1 interface.
+     *
+     * @param xrl_target_name the receiver's XRL target name.
+     * @param if_name the interface through which packets should be accepted.
+     * @param vif_name the vif through which packets should be accepted.
+     * @param ip_protocol the IP protocol number that the receiver is
+     * interested in. It must be between 0 and 255. A protocol number of 0 is
+     * used to specify all protocols.
+     */
+    XrlCmdError register_receiver(
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	uint32_t	ip_protocol);
 
-    XrlCmdError unregister_vif_receiver(const string&		tgt,
-					const string&		ifname,
-					const string&		vifname,
-					const uint32_t& 	proto);
+    /**
+     * Unregister to receive IPv6 packets.
+     *
+     * @param xrl_target_name the receiver's XRL target name.
+     * @param if_name the interface through which packets should not be
+     * accepted.
+     * @param vif_name the vif through which packets should not be accepted.
+     * @param ip_protocol the IP Protocol number that the receiver is not
+     * interested in anymore. It must be between 0 and 255. A protocol number
+     * of 0 is used to specify all protocols.
+     */
+    XrlCmdError unregister_receiver(
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	uint32_t	ip_protocol);
 
-    XrlRouter&	      router() { return _xrlrouter; }
-    InterfaceManager& ifmgr()  { return _ifmgr; }
+    /**
+     * Join an IPv6 multicast group.
+     *
+     * @param xrl_target_name the receiver's XRL target name.
+     * @param if_name the interface through which packets should be accepted.
+     * @param vif_name the vif through which packets should be accepted.
+     * @param ip_protocol the IP protocol number that the receiver is
+     * interested in. It must be between 0 and 255. A protocol number of 0 is
+     * used to specify all protocols.
+     * @param group_address the multicast group address to join.
+     */
+    XrlCmdError join_multicast_group(
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	uint32_t	ip_protocol,
+	const IPv6&	group_address);
 
-    /** Method to be called by Xrl sending filter invoker */
-    void xrl_vif_send_handler(const XrlError& e, string tgt_name);
+    /**
+     * Leave an IPv6 multicast group.
+     *
+     * @param xrl_target_name the receiver's XRL target name.
+     * @param if_name the interface through which packets should not be
+     * accepted.
+     * @param vif_name the vif through which packets should not be accepted.
+     * @param ip_protocol the IP protocol number that the receiver is not
+     * interested in anymore. It must be between 0 and 255. A protocol number
+     * of 0 is used to specify all protocols.
+     * @param group_address the multicast group address to leave.
+     */
+    XrlCmdError leave_multicast_group(
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	uint32_t	ip_protocol,
+	const IPv6&	group_address);
+
+    XrlRouter&		router() { return _xrlrouter; }
+    const IfTree&	iftree() const { return _iftree; }
+
+    /**
+     * Method to be called by Xrl sending filter invoker
+     */
+    void xrl_send_recv_cb(const XrlError& e, string xrl_target_name);
 
 protected:
-    EventLoop&	      _eventloop;
-    InterfaceManager& _ifmgr;
-    XrlRouter&	      _xrlrouter;
+    EventLoop&		_eventloop;
+    const IfTree&	_iftree;
+    XrlRouter&		_xrlrouter;
 
     // Collection of IPv6 raw sockets keyed by protocol.
     typedef map<uint8_t, FilterRawSocket6*> SocketTable6;
-    SocketTable6 _sockets;
+    SocketTable6	_sockets;
 
     // Collection of RawSocketFilters created by XrlRawSocketManager
-    typedef multimap<string, XrlRawSocket6Filter*> FilterBag6;
-    FilterBag6 _filters;
+    typedef multimap<string, XrlFilterRawSocket6*> FilterBag6;
+    FilterBag6		_filters;
 
 protected:
     void erase_filters(const FilterBag6::iterator& begin,

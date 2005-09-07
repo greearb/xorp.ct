@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.5 2005/03/25 02:53:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.6 2005/08/18 15:45:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -21,132 +21,152 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-
 #include "xrl/interfaces/fea_rawpkt6_client_xif.hh"
 
-#include "ifmanager.hh"
+#include "iftree.hh"
 #include "rawsock6.hh"
 #include "xrl_rawsock6.hh"
 
-static const size_t MIN_IP6_PKT_BYTES = 4;
-static const size_t MAX_IP6_PKT_BYTES = 131072;
-
-class XrlRawSocket6Filter : public FilterRawSocket6::InputFilter {
+class XrlFilterRawSocket6 : public FilterRawSocket6::InputFilter {
 public:
-    XrlRawSocket6Filter(XrlRawSocket6Manager&	rsm6,
-			const string&		tgt_name,
-			const uint32_t&		proto)
-	: _rsm6(rsm6), _tgt(tgt_name), _proto(proto) {}
-
-    const string& target() const 	{ return _tgt; }
-
-    XrlRawSocket6Manager& manager() 	{ return _rsm6; }
-
-    const uint32_t& protocol() const	{ return _proto; }
-
-protected:
-    XrlRawSocket6Manager& _rsm6;
-    const string	  _tgt;
-    uint32_t		  _proto;
-};
-
-// Filter class for checking incoming raw packets and checking whether
-// to forward them.
-
-class XrlVifInputFilter6 : public XrlRawSocket6Filter {
-public:
-    XrlVifInputFilter6(XrlRawSocket6Manager&	rsm6,
-		      const string&		tgt_name,
-		      const string&		ifname,
-		      const string&		vifname,
-		      const uint32_t&		proto)
-	: XrlRawSocket6Filter(rsm6, tgt_name, proto),
-	  _if(ifname), _vif(vifname)
+    XrlFilterRawSocket6(XrlRawSocket6Manager&	rsm,
+			const string&		xrl_target_name,
+			uint32_t		ip_protocol)
+	: _rsm(rsm),
+	  _xrl_target_name(xrl_target_name),
+	  _ip_protocol(ip_protocol)
     {}
 
-    void recv(const struct IPv6HeaderInfo& hdrinfo,
-	      const vector<uint8_t>& hopopts,
-	      const vector<uint8_t>& payload) {
+    XrlRawSocket6Manager& manager()		{ return _rsm; }
+    const string&	xrl_target_name() const	{ return _xrl_target_name; }
+    uint32_t		ip_protocol() const	{ return _ip_protocol; }
 
-	const IfTree& it = _rsm6.ifmgr().iftree();
+protected:
+    XrlRawSocket6Manager&	_rsm;
+    const string		_xrl_target_name;
+    const uint32_t		_ip_protocol;
+};
 
-	//
-	// Find Interface
-	//
-	IfTree::IfMap::const_iterator ii = it.get_if(_if);
-	if (ii == it.ifs().end()) {
-	    debug_msg("Got packet on non-configured interface.");
+//
+// Filter class for checking incoming raw packets and checking whether
+// to forward them.
+//
+class XrlVifInputFilter6 : public XrlFilterRawSocket6 {
+public:
+    XrlVifInputFilter6(XrlRawSocket6Manager&	rsm,
+		       FilterRawSocket6&	rs,
+		       const string&		xrl_target_name,
+		       const string&		if_name,
+		       const string&		vif_name,
+		       uint32_t			ip_protocol)
+	: XrlFilterRawSocket6(rsm, xrl_target_name, ip_protocol),
+	  _rs(rs),
+	  _if_name(if_name),
+	  _vif_name(vif_name)
+    {}
+
+    virtual ~XrlVifInputFilter6() {
+	leave_all_multicast_groups();
+    }
+
+    void recv(const struct IPv6HeaderInfo& header,
+	      const vector<uint8_t>& payload)
+    {
+	// Check the protocol
+	if ((ip_protocol() != 0) && (ip_protocol() != header.ip_protocol)) {
+	    debug_msg("Ignore packet with protocol %u (watching for %u)\n",
+		      XORP_UINT_CAST(header.ip_protocol),
+		      XORP_UINT_CAST(ip_protocol()));
 	    return;
 	}
-	const IfTreeInterface& fi = ii->second;
 
-	//
-	// Find Vif
-	//
-	IfTreeInterface::VifMap::const_iterator vi = fi.get_vif(_vif);
-	if (vi == fi.vifs().end()) {
-	    debug_msg("Got packet on non-configured vif.");
+	// Check the interface name
+	if ((! _if_name.empty()) && (_if_name != header.if_name)) {
+	    debug_msg("Ignore packet with interface %s (watching for %s)\n",
+		      header.if_name.c_str(),
+		      _if_name.c_str());
 	    return;
 	}
-	const IfTreeVif& fv = vi->second;
 
-	//
-	// Find Address
-	//
-	IfTreeVif::V6Map::const_iterator ai = fv.get_addr(hdrinfo.dst);
-	if ( ai == fv.v6addrs().end() ) {
-	    debug_msg("Got packet for address not associated with vif.");
+	// Check the vif name
+	if ((! _vif_name.empty()) && (_vif_name != header.vif_name)) {
+	    debug_msg("Ignore packet with vif %s (watching for %s)\n",
+		      header.vif_name.c_str(),
+		      _vif_name.c_str());
 	    return;
 	}
 
 	//
 	// Instantiate client sending interface
 	//
-	XrlRawPacket6ClientV0p1Client cl(&_rsm6.router());
+	XrlRawPacket6ClientV0p1Client cl(&_rsm.router());
 
+	//
 	// Send notification, note callback goes to owning
 	// XrlRawSocket6Manager instance since send failure to xrl_target
 	// is useful for reaping all filters to connected to target.
-	cl.send_recv_raw(
-	    _tgt.c_str(), _if, _vif, hdrinfo.src, hdrinfo.dst, _proto,
-	    hdrinfo.tclass, hdrinfo.hoplimit, hopopts, payload,
-	    callback(&_rsm6, &XrlRawSocket6Manager::xrl_vif_send_handler, _tgt)
-	    );
+	//
+	cl.send_recv(_xrl_target_name.c_str(),
+		     header.if_name,
+		     header.vif_name,
+		     header.src_address,
+		     header.dst_address,
+		     header.ip_protocol,
+		     header.ip_ttl,
+		     header.ip_tos,
+		     header.ip_router_alert,
+		     payload,
+		     callback(&_rsm,
+			      &XrlRawSocket6Manager::xrl_send_recv_cb,
+			      _xrl_target_name));
     }
 
     void bye() {}
+    const string& if_name() const { return _if_name; }
+    const string& vif_name() const { return _vif_name; }
 
-    const string& ifname() const { return _if; }
-    const string& vifname() const { return _vif; }
+    int join_multicast_group(const IPv6& group_address, string& error_msg) {
+	if (_rs.join_multicast_group(if_name(), vif_name(), group_address,
+				     xrl_target_name(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	_joined_multicast_groups.insert(group_address);
+	return (XORP_OK);
+    }
+
+    int leave_multicast_group(const IPv6& group_address, string& error_msg) {
+	_joined_multicast_groups.erase(group_address);
+	if (_rs.leave_multicast_group(if_name(), vif_name(), group_address,
+				      xrl_target_name(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	return (XORP_OK);
+    }
+
+    void leave_all_multicast_groups() {
+	string error_msg;
+	while (! _joined_multicast_groups.empty()) {
+	    const IPv6& group_address = *(_joined_multicast_groups.begin());
+	    leave_multicast_group(group_address, error_msg);
+	}
+    }
 
 protected:
-    const string _if;
-    const string _vif;
+    FilterRawSocket6&	_rs;
+    const string	_if_name;
+    const string	_vif_name;
+    set<IPv6>           _joined_multicast_groups;
 };
 
 // ----------------------------------------------------------------------------
 // XrlRawSocket6Manager code
 
-XrlRawSocket6Manager::XrlRawSocket6Manager(EventLoop&	     eventloop,
-					   InterfaceManager& ifmgr,
-					   XrlRouter&	     xr)
-    throw (RawSocket6Exception)
-    : _eventloop(eventloop), _ifmgr(ifmgr), _xrlrouter(xr)
+XrlRawSocket6Manager::XrlRawSocket6Manager(EventLoop&		eventloop,
+					   const IfTree&	iftree,
+					   XrlRouter&		xr)
+    : _eventloop(eventloop), _iftree(iftree), _xrlrouter(xr)
 {
 }
 
@@ -161,9 +181,9 @@ XrlRawSocket6Manager::erase_filters(const FilterBag6::iterator& begin,
 {
     FilterBag6::iterator fi(begin);
     while (fi != end) {
-	XrlRawSocket6Filter* filter = fi->second;
+	XrlFilterRawSocket6* filter = fi->second;
 
-	SocketTable6::iterator sti = _sockets.find(filter->protocol());
+	SocketTable6::iterator sti = _sockets.find(filter->ip_protocol());
 	XLOG_ASSERT(sti != _sockets.end());
 	FilterRawSocket6* rs = sti->second;
 	XLOG_ASSERT(rs != NULL);
@@ -176,161 +196,261 @@ XrlRawSocket6Manager::erase_filters(const FilterBag6::iterator& begin,
 }
 
 XrlCmdError
-XrlRawSocket6Manager::send(const IPv6& src,
-			   const IPv6& dst,
-			   const string& vifname,
-			   const uint8_t proto,
-			   const uint8_t tclass,
-			   const uint8_t hoplimit,
-			   const vector<uint8_t>& hopopts,
+XrlRawSocket6Manager::send(const string&	if_name,
+			   const string&	vif_name,
+			   const IPv6&		src_address,
+			   const IPv6&		dst_address,
+			   uint32_t		ip_protocol,
+			   int32_t		ip_ttl,
+			   int32_t		ip_tos,
+			   bool			ip_router_alert,
 			   const vector<uint8_t>& payload)
 {
-    UNUSED(tclass);
-    UNUSED(hoplimit);
-    UNUSED(hopopts);
+    string error_msg;
 
-    // Find the socket associated with this protocol.
-    SocketTable6::iterator sti = _sockets.find(proto);
+    // Find the socket associated with this protocol
+    SocketTable6::iterator sti = _sockets.find(ip_protocol);
     if (sti == _sockets.end()) {
-	return XrlCmdError::COMMAND_FAILED("protocol not registered.");
+	error_msg = c_format("Protocol %u is not registered",
+			     XORP_UINT_CAST(ip_protocol));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     FilterRawSocket6* rs = sti->second;
     XLOG_ASSERT(rs != NULL);
 
-    // XXX Todo
-    if (vifname.empty() == false) {
-	return XrlCmdError::COMMAND_FAILED("vifname parameter not supported");
+    if (rs->proto_socket_write(if_name,
+			       vif_name,
+			       src_address,
+			       dst_address,
+			       ip_ttl,
+			       ip_tos,
+			       ip_router_alert,
+			       payload,
+			       error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-
-    // Minimal size check
-    if (payload.size() <= MIN_IP6_PKT_BYTES ||
-	payload.size() > MAX_IP6_PKT_BYTES) {
-	return XrlCmdError::COMMAND_FAILED(
-	    c_format("Packet size, %u bytes, out of bounds %u-%u bytes)",
-		     XORP_UINT_CAST(payload.size()),
-		     XORP_UINT_CAST(MIN_IP6_PKT_BYTES),
-		     XORP_UINT_CAST(MAX_IP6_PKT_BYTES))
-	    );
-    }
-
-    errno = 0;
-    ssize_t bytes_out = rs->write(src, dst, &payload[0], payload.size());
-
-    if (bytes_out > 0) {
-	return XrlCmdError::OKAY();
-    }
-    if (errno != 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format("Send failed: %s",
-						    strerror(errno)));
-    }
-    return XrlCmdError::COMMAND_FAILED("Send failed, consult FEA xlog to "
-				       "determine cause");
-}
-
-XrlCmdError
-XrlRawSocket6Manager::register_vif_receiver(const string&	tgt,
-					    const string&	ifname,
-					    const string&	vifname,
-					    const uint32_t&	proto)
-{
-
-    // IPv6 raw sockets *must* have their protocol type specified at
-    // creation time. Look in the SocketTable for a socket matching
-    // this protocol. If a socket does not yet exist, create one.
-
-    SocketTable6::iterator sti = _sockets.find(proto);
-    FilterRawSocket6* rs = NULL;
-    if (sti == _sockets.end()) {
-	rs = new FilterRawSocket6(_eventloop, proto);
-	_sockets[proto] = rs;
-    } else {
-	rs = sti->second;
-    }
-    XLOG_ASSERT(rs != NULL);
-
-    FilterBag6::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag6::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
-	XrlVifInputFilter6* filter =
-	    dynamic_cast<XrlVifInputFilter6*>(fi->second);
-
-	if (filter == NULL)
-	    continue; // Not a vif filter
-
-	if (filter->protocol() == proto &&
-	    filter->ifname() == ifname &&
-	    filter->vifname() == vifname) {
-	    return XrlCmdError::OKAY();
-	}
-    }
-
-    // Create filter for vif. The kernel filters protocols for us.
-    XrlVifInputFilter6* new_filter =
-	new XrlVifInputFilter6(*this, tgt, ifname, vifname, proto);
-
-    // Add filter to appropriate raw_socket
-    rs->add_filter(new_filter);
-
-    // Add filter to those associated with xrl_target
-    _filters.insert(FilterBag6::value_type(tgt, new_filter));
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRawSocket6Manager::unregister_vif_receiver(const string&	tgt,
-					      const string&	ifname,
-					      const string&	vifname,
-					      const uint32_t&	proto)
+XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
+					const string&	if_name,
+					const string&	vif_name,
+					uint32_t	ip_protocol)
 {
+    XrlVifInputFilter6* filter;
 
-    // Find the socket associated with this protocol, if it exists.
-    SocketTable6::iterator sti = _sockets.find(proto);
+    //
+    // Look in the SocketTable for a socket matching this protocol.
+    // If a socket does not yet exist, create one.
+    //
+    SocketTable6::iterator sti = _sockets.find(ip_protocol);
+    FilterRawSocket6* rs = NULL;
     if (sti == _sockets.end()) {
-	return XrlCmdError::COMMAND_FAILED("protocol not registered.");
+	rs = new FilterRawSocket6(_eventloop, ip_protocol, iftree());
+	_sockets[ip_protocol] = rs;
+    } else {
+	rs = sti->second;
+    }
+    XLOG_ASSERT(rs != NULL);
+
+    FilterBag6::iterator fi;
+    FilterBag6::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	filter = dynamic_cast<XrlVifInputFilter6*>(fi->second);
+	if (filter == NULL)
+	    continue; // Not a vif filter
+
+	//
+	// Search if we have already the filter
+	//
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Already have this filter
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    //
+    // Create the filter
+    //
+    filter = new XrlVifInputFilter6(*this, *rs, xrl_target_name, if_name,
+				    vif_name, ip_protocol);
+
+    // Add the filter to the appropriate raw socket
+    rs->add_filter(filter);
+
+    // Add the filter to those associated with xrl_target_name
+    _filters.insert(FilterBag6::value_type(xrl_target_name, filter));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRawSocket6Manager::unregister_receiver(const string&	xrl_target_name,
+					  const string&	if_name,
+					  const string&	vif_name,
+					  uint32_t	ip_protocol)
+{
+    string error_msg;
+
+    //
+    // Find the socket associated with this protocol
+    //
+    SocketTable6::iterator sti = _sockets.find(ip_protocol);
+    if (sti == _sockets.end()) {
+	error_msg = c_format("Protocol %u is not registered",
+			     XORP_UINT_CAST(ip_protocol));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     FilterRawSocket6* rs = sti->second;
     XLOG_ASSERT(rs != NULL);
 
-    // Walk through list of filters looking for matching vif.
-    FilterBag6::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag6::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
+    //
+    // Walk through list of filters looking for matching interface and vif
+    //
+    FilterBag6::iterator fi;
+    FilterBag6::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter6* filter;
+	filter = dynamic_cast<XrlVifInputFilter6*>(fi->second);
 
-	XrlVifInputFilter6* filter =
-	    dynamic_cast<XrlVifInputFilter6*>(fi->second);
+	// If filter found, remove it and delete it
+	if ((filter != NULL) &&
+	    (filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
 
-	// If found, remove and delete the filter.
-	if (filter && filter->protocol() == proto &&
-	    filter->ifname() == ifname &&
-	    filter->vifname() == vifname) {
-
-	    // Remove the filter and delete it.
+	    // Remove the filter
 	    rs->remove_filter(filter);
+
+	    // Remove the filter from the group associated with this target
 	    _filters.erase(fi);
+
+	    // Destruct the filter
 	    delete filter;
 
-	    // Reference counting: If there are now no listeners on
+	    //
+	    // Reference counting: if there are now no listeners on
 	    // this protocol socket (and hence no filters), remove it
 	    // from the table and delete it.
+	    //
 	    if (rs->empty()) {
-		_sockets.erase(proto);
+		_sockets.erase(ip_protocol);
 		delete rs;
 	    }
 
 	    return XrlCmdError::OKAY();
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("target, interface, vif combination not"
-				       " registered.");
+
+    error_msg = c_format("Cannot find registration for target %s interface %s "
+			 "and vif %s",
+			 xrl_target_name.c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str());
+    return XrlCmdError::COMMAND_FAILED(error_msg);
+}
+
+XrlCmdError
+XrlRawSocket6Manager::join_multicast_group(const string& xrl_target_name,
+					   const string& if_name,
+					   const string& vif_name,
+					   uint32_t	 ip_protocol,
+					   const IPv6&	 group_address)
+{
+    string error_msg;
+
+    //
+    // Search if we have already the filter
+    //
+    FilterBag6::iterator fi;
+    FilterBag6::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter6* filter;
+	filter = dynamic_cast<XrlVifInputFilter6*>(fi->second);
+	if (filter == NULL)
+	    continue; // Not a vif filter
+
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Filter found
+	    if (filter->join_multicast_group(group_address, error_msg)
+		!= XORP_OK) {
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	    }
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    error_msg = c_format("Cannot join group %s on interface %s vif %s "
+			 "protocol %u target %s: the target has not "
+			 "registered as a receiver",
+			 group_address.str().c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str(),
+			 XORP_UINT_CAST(ip_protocol),
+			 xrl_target_name.c_str());
+
+    return XrlCmdError::COMMAND_FAILED(error_msg);
+}
+
+XrlCmdError
+XrlRawSocket6Manager::leave_multicast_group(const string& xrl_target_name,
+					    const string& if_name,
+					    const string& vif_name,
+					    uint32_t	  ip_protocol,
+					    const IPv6&	  group_address)
+{
+    string error_msg;
+
+    //
+    // Search if we have already the filter
+    //
+    FilterBag6::iterator fi;
+    FilterBag6::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter6* filter;
+	filter = dynamic_cast<XrlVifInputFilter6*>(fi->second);
+	if (filter == NULL)
+	    continue; // Not a vif filter
+
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Filter found
+	    if (filter->leave_multicast_group(group_address, error_msg)
+		!= XORP_OK) {
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	    }
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    error_msg = c_format("Cannot leave group %s on interface %s vif %s "
+			 "protocol %u target %s: the target has not "
+			 "registered as a receiver",
+			 group_address.str().c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str(),
+			 XORP_UINT_CAST(ip_protocol),
+			 xrl_target_name.c_str());
+
+    return XrlCmdError::COMMAND_FAILED(error_msg);
 }
 
 void
-XrlRawSocket6Manager::xrl_vif_send_handler(const XrlError& e, string tgt)
+XrlRawSocket6Manager::xrl_send_recv_cb(const XrlError& e,
+				       string xrl_target_name)
 {
     if (e == XrlError::OKAY())
 	return;
 
-    debug_msg("xrl_vif_send_handler: error %s\n",
-	      e.str().c_str());
+    debug_msg("xrl_send_recv_cb: error %s\n", e.str().c_str());
 
     //
     // Sending Xrl generated an error.
@@ -338,5 +458,6 @@ XrlRawSocket6Manager::xrl_vif_send_handler(const XrlError& e, string tgt)
     // Remove all filters associated with Xrl Target that are tied to a raw
     // socket and then erase filters.
     //
-    erase_filters(_filters.lower_bound(tgt), _filters.upper_bound(tgt));
+    erase_filters(_filters.lower_bound(xrl_target_name),
+		  _filters.upper_bound(xrl_target_name));
 }

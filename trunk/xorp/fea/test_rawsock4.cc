@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.13 2005/08/18 15:45:52 bms Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.14 2005/08/31 22:40:52 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/xorp.h"
+#include "libxorp/ipvx.hh"
 
 #include "libcomm/comm_api.h"
 
@@ -55,6 +56,7 @@
 #include "ip.h"
 #endif
 
+#include "iftree.hh"
 #include "rawsock4.hh"
 
 /* ------------------------------------------------------------------------- */
@@ -165,7 +167,7 @@ private:
 /*
  * Pinger.  Highly simplified "ping" class.
  *
- * This class is a child of IoRawSocket and is able to send and parse
+ * This class is a child of FilterRawSocket4 and is able to send and parse
  * ICMP echo request and responses.  The class is clocked off a single
  * timeout timer.  When the timer expires it schedules the sending of
  * the next ICMP echo request.  If the last ICMP packet request has
@@ -174,11 +176,14 @@ private:
  * The pinger stop sending pings when the sum of the good and bad responses
  * equals the constructor argument "count".
  */
+static const string local_if_name = "lo0";
+static const string local_vif_name = "lo0";
 
-class Pinger : public IoRawSocket4 {
+class Pinger : public FilterRawSocket4 {
 public:
-    Pinger(EventLoop& e, IPv4 src, IPv4 dst, size_t count = 3)
-	: IoRawSocket4(e, IPPROTO_ICMP),
+    Pinger(EventLoop& e, const IfTree& iftree, const IPv4& src,
+	   const IPv4& dst, size_t count = 3)
+	: FilterRawSocket4(e, IPPROTO_ICMP, iftree),
 	  _src(src), _dst(dst),
 	  _sent(0), _good(0), _bad(0), _count(count)
     {
@@ -204,34 +209,23 @@ protected:
 	_timeout.schedule_after_ms(1000);
 	_seq++;
 
-	struct ip hdr;
-	static_assert(sizeof(struct ip) == 20);
-	hdr.ip_v = 4;
-	hdr.ip_hl = 5;
-	hdr.ip_tos = 0;
-	hdr.ip_len = htons(sizeof(hdr) + sizeof(IcmpEchoHeader));
-	hdr.ip_id = _seq;
-	hdr.ip_off = 0;
-	hdr.ip_ttl = 64;
-	hdr.ip_p = IPPROTO_ICMP;
-	hdr.ip_sum = 0;
-	hdr.ip_src.s_addr = _src.addr();
-	hdr.ip_dst.s_addr = _dst.addr();
-	hdr.ip_sum = inet_cksum((const uint16_t*)&hdr, sizeof(hdr));
-
 	IcmpEchoHeader icmp_hdr(IcmpEchoHeader::TYPE_REQUEST, _id, _seq);
 
-	size_t  tsz = sizeof(struct ip) + sizeof(IcmpEchoHeader);
-	uint8_t tbuf[tsz];
-
-	memcpy(tbuf, &hdr, sizeof(hdr));
-	memcpy(tbuf + sizeof(hdr), &icmp_hdr, sizeof(IcmpEchoHeader));
+	vector<uint8_t> payload(sizeof(IcmpEchoHeader));
+	memcpy(&payload[0], &icmp_hdr, sizeof(IcmpEchoHeader));
 
 	verbose_log("Sending id %d seqno %d cksum 0x%04x\n",
 		    icmp_hdr.id(), icmp_hdr.seq(), icmp_hdr.cksum());
 
-	if (write(tbuf, tsz) < 0) {
-	    fprintf(stderr, "error: %d %s\n", errno, strerror(errno));
+	string error_msg;
+	int32_t ip_ttl = 64;
+	int32_t ip_tos = -1;
+	if (proto_socket_write(local_if_name, local_vif_name,
+			       _src, _dst, ip_ttl, ip_tos,
+			       false, payload, error_msg)
+	    
+	    != XORP_OK) {
+	    fprintf(stderr, "error: %s\n", error_msg.c_str());
 	    exit(EXIT_FAILURE);
 	}
 
@@ -240,31 +234,30 @@ protected:
 	return true;
     }
 
-    void process_recv_data(const vector<uint8_t>& pkt)
+    void process_recv_data(const string&	if_name,
+			   const string&	vif_name,
+			   const IPvX&		src_address,
+			   const IPvX&		dst_address,
+			   int32_t		ip_ttl,
+			   int32_t		ip_tos,
+			   bool			ip_router_alert,
+			   const vector<uint8_t>& payload)
     {
-	const uint8_t* buf = &pkt[0];
-	size_t bufbytes = pkt.size();
+	UNUSED(if_name);
+	UNUSED(vif_name);
+	UNUSED(src_address);
+	UNUSED(dst_address);
+	UNUSED(ip_ttl);
+	UNUSED(ip_tos);
+	UNUSED(ip_router_alert);
 
-	if (bufbytes < sizeof(struct ip)) {
-	    verbose_log("Ignoring short packet (%u bytes).\n",
-			XORP_UINT_CAST(bufbytes));
-	    return;
-	}
-
-	const struct ip* hdr = reinterpret_cast<const struct ip*>(buf);
-	if (hdr->ip_p != IPPROTO_ICMP) {
-	    verbose_log("Ignoring non-icmp packet (ip_p = %d).\n", hdr->ip_p);
-	    return;
-	}
-
-	size_t payload_bytes = ntohs(hdr->ip_len) - 4 * hdr->ip_hl;
-	if (payload_bytes < sizeof(IcmpEchoHeader)) {
+	if (payload.size() < sizeof(IcmpEchoHeader)) {
 	    verbose_log("Ignoring small ICMP packet (payload = %u bytes).\n",
-			XORP_UINT_CAST(payload_bytes));
+			XORP_UINT_CAST(payload.size()));
 	    return;
 	}
 
-	IcmpEchoHeader eh(buf + 4 * hdr->ip_hl, payload_bytes);
+	IcmpEchoHeader eh(&payload[0], payload.size());
 
 	if (eh.id() != _id) {
 	    verbose_log("Ignoring packet with id %d (!= %d)\n", eh.id(), _id);
@@ -453,8 +446,42 @@ main(int argc, char* const* argv)
 
     try {
 	EventLoop e;
-	Pinger pinger(e, src, dst, count);
 
+	// Create the interface tree
+	IfTree iftree;
+	iftree.add_if(local_if_name);
+	IfTree::IfMap::iterator ii = iftree.get_if(local_if_name);
+	XLOG_ASSERT(ii != iftree.ifs().end());
+	IfTreeInterface& fi = ii->second;
+	fi.add_vif(local_vif_name);
+	IfTreeInterface::VifMap::iterator vi = fi.get_vif(local_vif_name);
+	XLOG_ASSERT(vi != fi.vifs().end());
+	IfTreeVif& fv = vi->second;
+	fv.add_addr(src);
+	IfTreeVif::V4Map::iterator ai4 = fv.get_addr(src);
+	XLOG_ASSERT(ai4 != fv.v4addrs().end());
+	IfTreeAddr4& a4 = ai4->second;
+	if (src != dst) {
+	    //
+	    // XXX: a hack so the dst address appears directly connected
+	    // so we can find the corresponding interface and vif.
+	    //
+	    fv.set_point_to_point(true);
+	    a4.set_endpoint(dst);
+	    a4.set_point_to_point(true);
+	}
+	
+	fi.set_enabled(true);
+	fv.set_enabled(true);
+	a4.set_enabled(true);
+	
+	Pinger pinger(e, iftree, src, dst, count);
+	string error_msg;
+	if (pinger.start(error_msg) != XORP_OK) {
+	    fprintf(stderr, "Cannot start pinger: %s", error_msg.c_str());
+	    exit(EXIT_FAILURE);
+	}
+	
 	while (pinger.done() == false)
 	    e.run();
 

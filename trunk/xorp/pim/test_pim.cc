@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.54 2005/05/12 02:22:07 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.55 2005/08/18 15:38:49 bms Exp $"
 
 
 //
@@ -46,6 +46,8 @@
 #include "fea/nexthop_port_mapper.hh"
 #include "fea/xrl_ifupdate.hh"
 #include "fea/xrl_mfea_node.hh"
+#include "fea/xrl_rawsock4.hh"
+#include "fea/xrl_rawsock6.hh"
 #include "fea/xrl_socket_server.hh"
 #include "fea/xrl_target.hh"
 
@@ -256,8 +258,10 @@ pim_main(const string& finder_hostname, uint16_t finder_port,
     }
 
     //
-    // Raw Socket TODO
+    // Raw Sockets
     //
+    XrlRawSocket4Manager xrsm4(eventloop, iftree, xrl_std_router_fea);
+    XrlRawSocket6Manager xrsm6(eventloop, iftree, xrl_std_router_fea);
 
     //
     // Xrl Socket Server and related components
@@ -274,11 +278,9 @@ pim_main(const string& finder_hostname, uint16_t finder_port,
     //
     // XRL Target
     //
-    XrlFeaTarget xrl_fea_target(
-	eventloop,
-	xrl_std_router_fea,
-	fticonfig, ifm, xrl_ifc_reporter, profile,
-	NULL, NULL, &lfc_bridge, &xss);
+    XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
+				fticonfig, ifm, xrl_ifc_reporter,
+				profile, &xrsm4, &xrsm6, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
     //

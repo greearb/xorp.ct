@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.14 2005/03/25 02:53:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock4.cc,v 1.15 2005/08/18 15:45:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -21,110 +21,78 @@
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-#ifdef HAVE_NETINET_IN_SYSTM_H
-#include <netinet/in_systm.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_NETINET_IP_H
-#include <netinet/ip.h>
-#endif
-
-/* Windows has no 'struct ip', so ship one. */
-#ifdef HOST_OS_WINDOWS
-#include "ip.h"
-#endif
-
 #include "xrl/interfaces/fea_rawpkt4_client_xif.hh"
 
-#include "ifmanager.hh"
+#include "iftree.hh"
 #include "rawsock4.hh"
 #include "xrl_rawsock4.hh"
 
-static const size_t MIN_IP_PKT_BYTES = 20;
-static const size_t MAX_IP_PKT_BYTES = 65535;
-
-class XrlRawSocket4Filter : public FilterRawSocket4::InputFilter {
+class XrlFilterRawSocket4 : public FilterRawSocket4::InputFilter {
 public:
-    XrlRawSocket4Filter(XrlRawSocket4Manager&	rsm,
-		       const string&		tgt_name,
-		       const uint32_t&		proto)
-	: _rsm(rsm), _tgt(tgt_name), _proto(proto) {}
-
-    const string& target() const 	{ return _tgt; }
-
-    const uint32_t& protocol() const	{ return _proto; }
-
-    XrlRawSocket4Manager& manager() 	{ return _rsm; }
-
-protected:
-    XrlRawSocket4Manager& _rsm;
-    const string	  _tgt;
-    const uint32_t	  _proto;
-};
-
-// Filter class for checking incoming raw packets and checking whether
-// to forward them.
-
-class XrlVifInputFilter4 : public XrlRawSocket4Filter {
-public:
-    XrlVifInputFilter4(XrlRawSocket4Manager&	rsm,
-		      const string&		tgt_name,
-		      const string&		ifname,
-		      const string&		vifname,
-		      uint32_t			proto)
-	: XrlRawSocket4Filter(rsm, tgt_name, proto), _if(ifname), _vif(vifname)
+    XrlFilterRawSocket4(XrlRawSocket4Manager&	rsm,
+			const string&		xrl_target_name,
+			uint32_t		ip_protocol)
+	: _rsm(rsm),
+	  _xrl_target_name(xrl_target_name),
+	  _ip_protocol(ip_protocol)
     {}
 
-    void recv(const vector<uint8_t>& data)
+    XrlRawSocket4Manager& manager()		{ return _rsm; }
+    const string&	xrl_target_name() const { return _xrl_target_name; }
+    uint32_t		ip_protocol() const	{ return _ip_protocol; }
+
+protected:
+    XrlRawSocket4Manager&	_rsm;
+    const string		_xrl_target_name;
+    const uint32_t		_ip_protocol;
+};
+
+//
+// Filter class for checking incoming raw packets and checking whether
+// to forward them.
+//
+class XrlVifInputFilter4 : public XrlFilterRawSocket4 {
+public:
+    XrlVifInputFilter4(XrlRawSocket4Manager&	rsm,
+		       FilterRawSocket4&	rs,
+		       const string&		xrl_target_name,
+		       const string&		if_name,
+		       const string&		vif_name,
+		       uint32_t			ip_protocol)
+	: XrlFilterRawSocket4(rsm, xrl_target_name, ip_protocol),
+	  _rs(rs),
+	  _if_name(if_name),
+	  _vif_name(vif_name)
+    {}
+
+    virtual ~XrlVifInputFilter4() {
+	leave_all_multicast_groups();
+    }
+
+    void recv(const struct IPv4HeaderInfo& header,
+	      const vector<uint8_t>& payload)
     {
-
-	XLOG_ASSERT(data.size() >= MIN_IP_PKT_BYTES);
-
-	const struct ip* hdr = reinterpret_cast<const ip*>(&data[0]);
-	if (hdr->ip_p != protocol()) {
-	    debug_msg("Ignore packet with proto %u (watching for %u)\n",
-		      XORP_UINT_CAST(hdr->ip_p),
-		      XORP_UINT_CAST(protocol()));
+	// Check the protocol
+	if ((ip_protocol() != 0) && (ip_protocol() != header.ip_protocol)) {
+	    debug_msg("Ignore packet with protocol %u (watching for %u)\n",
+		      XORP_UINT_CAST(header.ip_protocol),
+		      XORP_UINT_CAST(ip_protocol()));
 	    return;
 	}
-	const IfTree& it = _rsm.ifmgr().iftree();
 
-	//
-	// Find Interface
-	//
-	IfTree::IfMap::const_iterator ii = it.get_if(_if);
-	if (ii == it.ifs().end()) {
-	    debug_msg("Got packet on non-configured interface.");
+	// Check the interface name
+	if ((! _if_name.empty()) && (_if_name != header.if_name)) {
+	    debug_msg("Ignore packet with interface %s (watching for %s)\n",
+		      header.if_name.c_str(),
+		      _if_name.c_str());
 	    return;
 	}
-	const IfTreeInterface& fi = ii->second;
 
-	//
-	// Find Vif
-	//
-	IfTreeInterface::VifMap::const_iterator vi = fi.get_vif(_vif);
-	if (vi == fi.vifs().end()) {
-	    debug_msg("Got packet on non-configured vif.");
-	    return;
-	}
-	const IfTreeVif& fv = vi->second;
-
-	//
-	// Find Address
-	//
-	IfTreeVif::V4Map::const_iterator ai =
-	    fv.get_addr( IPv4(hdr->ip_dst.s_addr) );
-
-	if ( ai == fv.v4addrs().end() ) {
-	    debug_msg("Got packet for address not associated with vif.");
+	// Check the vif name
+	if ((! _vif_name.empty()) && (_vif_name != header.vif_name)) {
+	    debug_msg("Ignore packet with vif %s (watching for %s)\n",
+		      header.vif_name.c_str(),
+		      _vif_name.c_str());
 	    return;
 	}
 
@@ -133,35 +101,72 @@ public:
 	//
 	XrlRawPacket4ClientV0p1Client cl(&_rsm.router());
 
+	//
 	// Send notification, note callback goes to owning
 	// XrlRawSocket4Manager instance since send failure to xrl_target
-	// is useful for reaping all filters to connected to target
-	cl.send_recv_raw(
-	    _tgt.c_str(), _if, _vif, data,
-	    callback(&_rsm, &XrlRawSocket4Manager::xrl_vif_send_handler, _tgt)
-	    );
+	// is useful for reaping all filters to connected to target.
+	//
+	cl.send_recv(_xrl_target_name.c_str(),
+		     header.if_name,
+		     header.vif_name,
+		     header.src_address,
+		     header.dst_address,
+		     header.ip_protocol,
+		     header.ip_ttl,
+		     header.ip_tos,
+		     header.ip_router_alert,
+		     payload,
+		     callback(&_rsm,
+			      &XrlRawSocket4Manager::xrl_send_recv_cb,
+			      _xrl_target_name));
     }
 
-    void bye()
-    {}
+    void bye() {}
+    const string& if_name() const { return _if_name; }
+    const string& vif_name() const { return _vif_name; }
 
-    const string& ifname() const { return _if; }
+    int join_multicast_group(const IPv4& group_address, string& error_msg) {
+	if (_rs.join_multicast_group(if_name(), vif_name(), group_address,
+				     xrl_target_name(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	_joined_multicast_groups.insert(group_address);
+	return (XORP_OK);
+    }
 
-    const string& vifname() const { return _vif; }
+    int leave_multicast_group(const IPv4& group_address, string& error_msg) {
+	_joined_multicast_groups.erase(group_address);
+	if (_rs.leave_multicast_group(if_name(), vif_name(), group_address,
+				      xrl_target_name(), error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	return (XORP_OK);
+    }
+
+    void leave_all_multicast_groups() {
+	string error_msg;
+	while (! _joined_multicast_groups.empty()) {
+	    const IPv4& group_address = *(_joined_multicast_groups.begin());
+	    leave_multicast_group(group_address, error_msg);
+	}
+    }
 
 protected:
-    const string _if;
-    const string _vif;
+    FilterRawSocket4&	_rs;
+    const string	_if_name;
+    const string	_vif_name;
+    set<IPv4>		_joined_multicast_groups;
 };
 
 // ----------------------------------------------------------------------------
 // XrlRawSocket4Manager code
 
-XrlRawSocket4Manager::XrlRawSocket4Manager(EventLoop&	     eventloop,
-					   InterfaceManager& ifmgr,
-					   XrlRouter&	     xr)
-    throw (RawSocket4Exception)
-    : _eventloop(eventloop), _ifmgr(ifmgr), _xrlrouter(xr), _rs(_eventloop, 0)
+XrlRawSocket4Manager::XrlRawSocket4Manager(EventLoop&		eventloop,
+					   const IfTree&	iftree,
+					   XrlRouter&		xr)
+    : _eventloop(eventloop), _iftree(iftree), _xrlrouter(xr)
 {
 }
 
@@ -176,187 +181,276 @@ XrlRawSocket4Manager::erase_filters(const FilterBag4::iterator& begin,
 {
     FilterBag4::iterator fi(begin);
     while (fi != end) {
-	XrlRawSocket4Filter* filter = fi->second;
+	XrlFilterRawSocket4* filter = fi->second;
 
-	_rs.remove_filter(filter);
+	SocketTable4::iterator sti = _sockets.find(filter->ip_protocol());
+	XLOG_ASSERT(sti != _sockets.end());
+	FilterRawSocket4* rs = sti->second;
+	XLOG_ASSERT(rs != NULL);
+
+	rs->remove_filter(filter);
 	delete filter;
 
 	_filters.erase(fi++);
-
-	// Assert count of filters on rawsocket matches number we've added
-	XLOG_ASSERT(_rs.empty() == _filters.empty());
     }
 }
 
 XrlCmdError
-XrlRawSocket4Manager::send(const string& vifname, const vector<uint8_t>& pkt)
-{
-    // XXX Todo
-    if (vifname.empty() == false) {
-	return XrlCmdError::COMMAND_FAILED("vifname parameter not supported");
-    }
-
-    // Minimal size check
-    if (pkt.size() < MIN_IP_PKT_BYTES || pkt.size() > MAX_IP_PKT_BYTES) {
-	return XrlCmdError::COMMAND_FAILED(
-	    c_format("Packet size, %u bytes, out of bounds %u-%u bytes)",
-		     XORP_UINT_CAST(pkt.size()),
-		     XORP_UINT_CAST(MIN_IP_PKT_BYTES),
-		     XORP_UINT_CAST(MAX_IP_PKT_BYTES))
-	    );
-    }
-
-    errno = 0;
-    ssize_t bytes_out = _rs.write(&pkt[0], pkt.size());
-
-    if (bytes_out > 0) {
-	return XrlCmdError::OKAY();
-    }
-    if (errno != 0) {
-	return XrlCmdError::COMMAND_FAILED(c_format("Send failed: %s",
-						    strerror(errno)));
-    }
-    return XrlCmdError::COMMAND_FAILED("Send failed, consult FEA xlog to "
-				       "determine cause");
-}
-
-static inline size_t round_up(size_t val, size_t step)
-{
-    //
-    // Fast, but not entirely comprehensible.
-    //
-    // Not limited to powers of two for step in case thought occurs...
-    //
-    return (val & (step - 1)) ? (1 + (val | (step - 1))) : val;
-
-    //
-    // Slower but obvious
-    //    return ((val + step - 1) / step) * step;
-    //
-    // Dog slow, nearly obvious
-    //	  return ((step - (v % step)) % step) + v;
-    //
-}
-
-XrlCmdError
-XrlRawSocket4Manager::send(const IPv4&		  src,
-			   const IPv4&		  dst,
-			   const string&	  vifname,
-			   const uint32_t&	  proto,
-			   const uint32_t&	  ttl,
-			   const uint32_t&	  tos,
-			   const vector<uint8_t>& options,
+XrlRawSocket4Manager::send(const string&	if_name,
+			   const string&	vif_name,
+			   const IPv4&		src_address,
+			   const IPv4&		dst_address,
+			   uint32_t		ip_protocol,
+			   int32_t		ip_ttl,
+			   int32_t		ip_tos,
+			   bool			ip_router_alert,
 			   const vector<uint8_t>& payload)
 {
-    // Sanity check
-    static_assert(sizeof(struct ip) == MIN_IP_PKT_BYTES);
+    string error_msg;
 
-    // Calculate options size
-    size_t osz = round_up(options.size(), 4);
-
-    // Set aside zero'ed buffer to use as IP packet
-    vector<uint8_t> pkt(0, sizeof(struct ip) + osz + payload.size());
-
-    // Fill in header fields
-    struct ip* hdr = reinterpret_cast<struct ip*>(&pkt[0]);
-    hdr->ip_v = IPVERSION;
-    hdr->ip_hl	= osz + sizeof(struct ip) / 4;
-    hdr->ip_tos = (uint8_t)tos;
-    hdr->ip_len = (uint16_t)pkt.size();
-    hdr->ip_ttl = (uint8_t)ttl;
-    hdr->ip_p = (uint8_t)proto;
-    hdr->ip_sum = 0;
-    hdr->ip_src.s_addr = src.addr();
-    hdr->ip_dst.s_addr = dst.addr();
-
-    // Copy options into packet
-    if (osz > 0)
-	memcpy(hdr + 1, &options[0], options.size());
-
-    // Copy payload into packet
-    if (payload.size() > 0)
-	memcpy(&pkt[hdr->ip_hl * 4], &payload[0], payload.size());
-
-    return send(vifname, pkt);
-}
-
-XrlCmdError
-XrlRawSocket4Manager::register_vif_receiver(const string&	tgt,
-					    const string&	ifname,
-					    const string&	vifname,
-					    const uint32_t&	proto)
-{
-
-    FilterBag4::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag4::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
-	XrlVifInputFilter4* filter =
-	    dynamic_cast<XrlVifInputFilter4*>(fi->second);
-
-	if (filter == 0)
-	    continue; // Not a vif filter
-
-	if (filter->protocol() == proto &&
-	    filter->ifname() == ifname &&
-	    filter->vifname() == vifname) {
-	    // Already have filter for protocol
-	    return XrlCmdError::OKAY();
-	}
+    // Find the socket associated with this protocol
+    SocketTable4::iterator sti = _sockets.find(ip_protocol);
+    if (sti == _sockets.end()) {
+	error_msg = c_format("Protocol %u is not registered",
+			     XORP_UINT_CAST(ip_protocol));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
+    FilterRawSocket4* rs = sti->second;
+    XLOG_ASSERT(rs != NULL);
 
-    // Create filter for vif / protocol
-    XrlVifInputFilter4* new_filter =
-	new XrlVifInputFilter4(*this, tgt, ifname, vifname, proto);
-
-    // Add filter to appropriate raw_socket
-    _rs.add_filter(new_filter);
-
-    // Add filter to those associated with xrl_target
-    _filters.insert(FilterBag4::value_type(tgt, new_filter));
+    if (rs->proto_socket_write(if_name,
+			       vif_name,
+			       src_address,
+			       dst_address,
+			       ip_ttl,
+			       ip_tos,
+			       ip_router_alert,
+			       payload,
+			       error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRawSocket4Manager::unregister_vif_receiver(const string&	tgt,
-					      const string&	ifname,
-					      const string&	vifname,
-					      const uint32_t&	proto)
+XrlRawSocket4Manager::register_receiver(const string&	xrl_target_name,
+					const string&	if_name,
+					const string&	vif_name,
+					uint32_t	ip_protocol)
 {
-    XrlVifInputFilter4* filter = 0;
+    XrlVifInputFilter4* filter;
 
-    // Walk through list of iterators looking for matching vif / protocol
-    // combination
-    FilterBag4::iterator end = _filters.upper_bound(tgt);
-    for (FilterBag4::iterator fi = _filters.lower_bound(tgt); fi != end; ++fi) {
+    //
+    // Look in the SocketTable for a socket matching this protocol.
+    // If a socket does not yet exist, create one.
+    //
+    SocketTable4::iterator sti = _sockets.find(ip_protocol);
+    FilterRawSocket4* rs = NULL;
+    if (sti == _sockets.end()) {
+	rs = new FilterRawSocket4(_eventloop, ip_protocol, iftree());
+	_sockets[ip_protocol] = rs;
+    } else {
+	rs = sti->second;
+    }
+    XLOG_ASSERT(rs != NULL);
 
+    //
+    // Search if we have already the filter
+    //
+    FilterBag4::iterator fi;
+    FilterBag4::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
 	filter = dynamic_cast<XrlVifInputFilter4*>(fi->second);
-	if (filter && filter->protocol() == proto &&
-	    filter->ifname() == ifname &&
-	    filter->vifname() == vifname) {
-	    // Remove filter from socket
-	    _rs.remove_filter(filter);
+	if (filter == NULL)
+	    continue; // Not a vif filter
 
-	    // Remove filter from group associated with target
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Already have this filter
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    //
+    // Create the filter
+    //
+    filter = new XrlVifInputFilter4(*this, *rs, xrl_target_name, if_name,
+				    vif_name, ip_protocol);
+
+    // Add the filter to the appropriate raw socket
+    rs->add_filter(filter);
+
+    // Add the filter to those associated with xrl_target_name
+    _filters.insert(FilterBag4::value_type(xrl_target_name, filter));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRawSocket4Manager::unregister_receiver(const string&	xrl_target_name,
+					  const string&	if_name,
+					  const string&	vif_name,
+					  uint32_t	ip_protocol)
+{
+    string error_msg;
+
+    //
+    // Find the socket associated with this protocol
+    //
+    SocketTable4::iterator sti = _sockets.find(ip_protocol);
+    if (sti == _sockets.end()) {
+	error_msg = c_format("Protocol %u is not registered",
+			     XORP_UINT_CAST(ip_protocol));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    FilterRawSocket4* rs = sti->second;
+    XLOG_ASSERT(rs != NULL);
+
+    //
+    // Walk through list of filters looking for matching interface and vif
+    //
+    FilterBag4::iterator fi;
+    FilterBag4::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter4* filter;
+	filter = dynamic_cast<XrlVifInputFilter4*>(fi->second);
+
+	// If filter found, remove it and delete it
+	if ((filter != NULL) &&
+	    (filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    
+	    // Remove the filter
+	    rs->remove_filter(filter);
+
+	    // Remove the filter from the group associated with this target
 	    _filters.erase(fi);
 
-	    // Destruct filter
+	    // Destruct the filter
 	    delete filter;
+
+	    //
+	    // Reference counting: if there are now no listeners on
+	    // this protocol socket (and hence no filters), remove it
+	    // from the table and delete it.
+	    //
+	    if (rs->empty()) {
+		_sockets.erase(ip_protocol);
+		delete rs;
+	    }
 
 	    return XrlCmdError::OKAY();
 	}
     }
-    return XrlCmdError::COMMAND_FAILED("target, interface, vif combination not"
-				       " registered.");
+
+    error_msg = c_format("Cannot find registration for target %s interface %s "
+			 "and vif %s",
+			 xrl_target_name.c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str());
+    return XrlCmdError::COMMAND_FAILED(error_msg);
+}
+
+XrlCmdError
+XrlRawSocket4Manager::join_multicast_group(const string& xrl_target_name,
+					   const string& if_name,
+					   const string& vif_name,
+					   uint32_t	 ip_protocol,
+					   const IPv4&	 group_address)
+{
+    string error_msg;
+
+    //
+    // Search if we have already the filter
+    //
+    FilterBag4::iterator fi;
+    FilterBag4::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter4* filter;
+	filter = dynamic_cast<XrlVifInputFilter4*>(fi->second);
+	if (filter == NULL)
+	    continue; // Not a vif filter
+
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Filter found
+	    if (filter->join_multicast_group(group_address, error_msg)
+		!= XORP_OK) {
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	    }
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    error_msg = c_format("Cannot join group %s on interface %s vif %s "
+			 "protocol %u target %s: the target has not "
+			 "registered as a receiver",
+			 group_address.str().c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str(),
+			 XORP_UINT_CAST(ip_protocol),
+			 xrl_target_name.c_str());
+
+    return XrlCmdError::COMMAND_FAILED(error_msg);
+}
+
+XrlCmdError
+XrlRawSocket4Manager::leave_multicast_group(const string& xrl_target_name,
+					    const string& if_name,
+					    const string& vif_name,
+					    uint32_t	  ip_protocol,
+					    const IPv4&	  group_address)
+{
+    string error_msg;
+
+    //
+    // Search if we have already the filter
+    //
+    FilterBag4::iterator fi;
+    FilterBag4::iterator fi_end = _filters.upper_bound(xrl_target_name);
+    for (fi = _filters.lower_bound(xrl_target_name); fi != fi_end; ++fi) {
+	XrlVifInputFilter4* filter;
+	filter = dynamic_cast<XrlVifInputFilter4*>(fi->second);
+	if (filter == NULL)
+	    continue; // Not a vif filter
+
+	if ((filter->ip_protocol() == ip_protocol) &&
+	    (filter->if_name() == if_name) &&
+	    (filter->vif_name() == vif_name)) {
+	    // Filter found
+	    if (filter->leave_multicast_group(group_address, error_msg)
+		!= XORP_OK) {
+		return XrlCmdError::COMMAND_FAILED(error_msg);
+	    }
+	    return XrlCmdError::OKAY();
+	}
+    }
+
+    error_msg = c_format("Cannot leave group %s on interface %s vif %s "
+			 "protocol %u target %s: the target has not "
+			 "registered as a receiver",
+			 group_address.str().c_str(),
+			 if_name.c_str(),
+			 vif_name.c_str(),
+			 XORP_UINT_CAST(ip_protocol),
+			 xrl_target_name.c_str());
+
+    return XrlCmdError::COMMAND_FAILED(error_msg);
 }
 
 void
-XrlRawSocket4Manager::xrl_vif_send_handler(const XrlError& e, string tgt)
+XrlRawSocket4Manager::xrl_send_recv_cb(const XrlError& e,
+				       string xrl_target_name)
 {
     if (e == XrlError::OKAY())
 	return;
 
-    debug_msg("xrl_vif_send_handler: error %s\n",
-	      e.str().c_str());
+    debug_msg("xrl_send_recv_cb: error %s\n", e.str().c_str());
 
     //
     // Sending Xrl generated an error.
@@ -364,5 +458,6 @@ XrlRawSocket4Manager::xrl_vif_send_handler(const XrlError& e, string tgt)
     // Remove all filters associated with Xrl Target that are tied to a raw
     // socket and then erase filters
     //
-    erase_filters(_filters.lower_bound(tgt), _filters.upper_bound(tgt));
+    erase_filters(_filters.lower_bound(xrl_target_name),
+		  _filters.upper_bound(xrl_target_name));
 }

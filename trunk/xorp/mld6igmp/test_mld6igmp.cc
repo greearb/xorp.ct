@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.43 2005/03/25 02:53:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.45 2005/08/18 15:35:30 bms Exp $"
 
 
 //
@@ -45,6 +45,8 @@
 #include "fea/nexthop_port_mapper.hh"
 #include "fea/xrl_ifupdate.hh"
 #include "fea/xrl_mfea_node.hh"
+#include "fea/xrl_rawsock4.hh"
+#include "fea/xrl_rawsock6.hh"
 #include "fea/xrl_socket_server.hh"
 #include "fea/xrl_target.hh"
 
@@ -208,8 +210,10 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port,
     }
 
     //
-    // Raw Socket TODO
+    // Raw Sockets
     //
+    XrlRawSocket4Manager xrsm4(eventloop, iftree, xrl_std_router_fea);
+    XrlRawSocket6Manager xrsm6(eventloop, iftree, xrl_std_router_fea);
 
     //
     // Xrl Socket Server and related components
@@ -227,7 +231,7 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port,
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
 				fticonfig, ifm, xrl_ifc_reporter,
-				profile, 0, 0, &lfc_bridge, &xss);
+				profile, &xrsm4, &xrsm6, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
     //

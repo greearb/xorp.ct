@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.50 2005/01/20 00:43:17 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.51 2005/03/25 02:53:18 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -1006,64 +1006,267 @@ public:
     // IPv4 Raw Socket Server Interface
     //
 
+    /**
+     *  Send an IPv4 packet on a raw socket.
+     *
+     *  @param if_name the interface to send the packet on. It is essential for
+     *  multicast. In the unicast case this field may be empty.
+     *
+     *  @param vif_name the vif to send the packet on. It is essential for
+     *  multicast. In the unicast case this field may be empty.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number. It must be between 1 and
+     *  255.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
+     *  TTL will be set internally before transmission.
+     *
+     *  @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4). If it
+     *  has a negative value, the TOS will be set internally before
+     *  transmission.
+     *
+     *  @param ip_router_alert if true, then add the IP Router Alert option to
+     *  the IP packet.
+     *
+     *  @param payload the payload, everything after the IP header and options.
+     */
     XrlCmdError raw_packet4_0_1_send(
 	// Input values,
-	const IPv4&		src_address,
-	const IPv4&		dst_address,
-	const string&		vifname,
-	const uint32_t&		proto,
-	const uint32_t&		ttl,
-	const uint32_t&		tos,
-	const vector<uint8_t>&	options,
+	const string&	if_name,
+	const string&	vif_name,
+	const IPv4&	src_address,
+	const IPv4&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
 	const vector<uint8_t>&	payload);
 
-    XrlCmdError raw_packet4_0_1_send_raw(
+    /**
+     *  Register to receive IPv4 packets. The receiver is expected to support
+     *  raw_packet4_client/0.1 interface.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is
+     *  interested in. It must be between 0 and 255. A protocol number of 0 is
+     *  used to specify all protocols.
+     */
+    XrlCmdError raw_packet4_0_1_register_receiver(
 	// Input values,
-	const string&		vifname,
-	const vector<uint8_t>&	packet);
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError raw_packet4_0_1_register_vif_receiver(
+    /**
+     *  Unregister to receive IPv4 packets.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ip_protocol the IP Protocol number that the receiver is not
+     *  interested in anymore. It must be between 0 and 255. A protocol number
+     *  of 0 is used to specify all protocols.
+     */
+    XrlCmdError raw_packet4_0_1_unregister_receiver(
 	// Input values,
-	const string&	router_name,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	proto);
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError raw_packet4_0_1_unregister_vif_receiver(
+    /**
+     *  Join an IPv4 multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is
+     *  interested in. It must be between 0 and 255. A protocol number of 0 is
+     *  used to specify all protocols.
+     *
+     *  @param group_address the multicast group address to join.
+     */
+    XrlCmdError raw_packet4_0_1_join_multicast_group(
 	// Input values,
-	const string&	router_name,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	proto);
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol,
+	const IPv4&	group_address);
+
+    /**
+     *  Leave an IPv4 multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is not
+     *  interested in anymore. It must be between 0 and 255. A protocol number
+     *  of 0 is used to specify all protocols.
+     *
+     *  @param group_address the multicast group address to leave.
+     */
+    XrlCmdError raw_packet4_0_1_leave_multicast_group(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol,
+	const IPv4&	group_address);
 
     //
     // IPv6 Raw Socket Server Interface
     //
 
-    XrlCmdError raw_packet6_0_1_send_raw(
+    /**
+     *  Send an IPv6 packet on a raw socket.
+     *
+     *  @param if_name the interface to send the packet on. It is essential for
+     *  multicast. In the unicast case this field may be empty.
+     *
+     *  @param vif_name the vif to send the packet on. It is essential for
+     *  multicast. In the unicast case this field may be empty.
+     *
+     *  @param src_address the IP source address.
+     *
+     *  @param dst_address the IP destination address.
+     *
+     *  @param ip_protocol the IP protocol number. It must be between 1 and
+     *  255.
+     *
+     *  @param ip_ttl the IP TTL (hop-limit). If it has a negative value, the
+     *  TTL will be set internally before transmission.
+     *
+     *  @param ip_tos the Type Of Service (IP traffic class for IPv6). If it
+     *  has a negative value, the TOS will be set internally before
+     *  transmission.
+     *
+     *  @param ip_router_alert if true, then add the IP Router Alert option to
+     *  the IP packet.
+     *
+     *  @param payload the payload, everything after the IP header and options.
+     */
+    XrlCmdError raw_packet6_0_1_send(
 	// Input values,
+	const string&	if_name,
+	const string&	vif_name,
 	const IPv6&	src_address,
 	const IPv6&	dst_address,
+	const uint32_t&	ip_protocol,
+	const int32_t&	ip_ttl,
+	const int32_t&	ip_tos,
+	const bool&	ip_router_alert,
+	const vector<uint8_t>&	payload);
+
+    /**
+     *  Register to receive IPv6 packets. The receiver is expected to support
+     *  raw_packet6_client/0.1 interface.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is
+     *  interested in. It must be between 0 and 255. A protocol number of 0 is
+     *  used to specify all protocols.
+     */
+    XrlCmdError raw_packet6_0_1_register_receiver(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
 	const string&	vif_name,
-	const uint32_t&	proto,
-	const uint32_t&	tclass,
-	const uint32_t&	hoplimit,
-	const vector<uint8_t>&	hopopts,
-	const vector<uint8_t>&	packet);
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError raw_packet6_0_1_register_vif_receiver(
+    /**
+     *  Unregister to receive IPv6 packets.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ip_protocol the IP Protocol number that the receiver is not
+     *  interested in anymore. It must be between 0 and 255. A protocol number
+     *  of 0 is used to specify all protocols.
+     */
+    XrlCmdError raw_packet6_0_1_unregister_receiver(
 	// Input values,
-	const string&	router_name,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	proto);
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol);
 
-    XrlCmdError raw_packet6_0_1_unregister_vif_receiver(
+    /**
+     *  Join an IPv6 multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should be accepted.
+     *
+     *  @param vif_name the vif through which packets should be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is
+     *  interested in. It must be between 0 and 255. A protocol number of 0 is
+     *  used to specify all protocols.
+     *
+     *  @param group_address the multicast group address to join.
+     */
+    XrlCmdError raw_packet6_0_1_join_multicast_group(
 	// Input values,
-	const string&	router_name,
-	const string&	ifname,
-	const string&	vifname,
-	const uint32_t&	proto);
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol,
+	const IPv6&	group_address);
+
+    /**
+     *  Leave an IPv6 multicast group.
+     *
+     *  @param xrl_target_name the receiver's XRL target name.
+     *
+     *  @param if_name the interface through which packets should not be
+     *  accepted.
+     *
+     *  @param vif_name the vif through which packets should not be accepted.
+     *
+     *  @param ip_protocol the IP protocol number that the receiver is not
+     *  interested in anymore. It must be between 0 and 255. A protocol number
+     *  of 0 is used to specify all protocols.
+     *
+     *  @param group_address the multicast group address to leave.
+     */
+    XrlCmdError raw_packet6_0_1_leave_multicast_group(
+	// Input values,
+	const string&	xrl_target_name,
+	const string&	if_name,
+	const string&	vif_name,
+	const uint32_t&	ip_protocol,
+	const IPv6&	group_address);
 
     //
     // Socket Locator interface(s)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.22 2005/03/25 02:53:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.23 2005/08/18 15:45:52 bms Exp $"
 
 //
 // MFEA test program.
@@ -41,6 +41,8 @@
 #include "nexthop_port_mapper.hh"
 #include "xrl_ifupdate.hh"
 #include "xrl_mfea_node.hh"
+#include "xrl_rawsock4.hh"
+#include "xrl_rawsock6.hh"
 #include "xrl_socket_server.hh"
 #include "xrl_target.hh"
 
@@ -202,8 +204,10 @@ mfea_main(const string& finder_hostname, uint16_t finder_port,
     }
 
     //
-    // Raw Socket TODO
+    // Raw Sockets
     //
+    XrlRawSocket4Manager xrsm4(eventloop, iftree, xrl_std_router_fea);
+    XrlRawSocket6Manager xrsm6(eventloop, iftree, xrl_std_router_fea);
 
     //
     // Xrl Socket Server and related components
@@ -221,7 +225,7 @@ mfea_main(const string& finder_hostname, uint16_t finder_port,
     //
     XrlFeaTarget xrl_fea_target(eventloop, xrl_std_router_fea,
 				fticonfig, ifm, xrl_ifc_reporter,
-				profile, 0, 0, &lfc_bridge, &xss);
+				profile, &xrsm4, &xrsm6, &lfc_bridge, &xss);
     wait_until_xrl_router_is_ready(eventloop, xrl_std_router_fea);
 
     //

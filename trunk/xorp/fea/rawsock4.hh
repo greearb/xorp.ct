@@ -12,108 +12,59 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.8 2005/07/08 07:17:06 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.9 2005/08/18 15:45:51 bms Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
 
 #include <list>
 #include <vector>
+#include <set>
 
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/eventloop.hh"
 
-/** Exception class for RawSocket Constructors */
-struct RawSocket4Exception : public XorpReasonedException {
-    RawSocket4Exception(const char* file, size_t line,
-		       const char* cmd, int error_no) :
-	XorpReasonedException("RawSocket4Exception", file, line,
-			      c_format("%s: %s", cmd, strerror(error_no))) {}
-};
+#include "rawsock.hh"
 
 /**
- * Base class for raw sockets.  Supports write only.
+ * Base class for raw IPv4 sockets.
  */
-
-class RawSocket4 {
+class RawSocket4 : public RawSocket {
 public:
-    RawSocket4(uint32_t protocol) throw (RawSocket4Exception);
+    RawSocket4(EventLoop& eventloop, uint32_t ip_protocol,
+	       const IfTree& iftree);
 
     virtual ~RawSocket4();
-
-    inline uint32_t protocol() const { return _pf; }
-
-    /**
-     * Write data to raw socket.
-     *
-     * @param buf pointer to raw IPv4 packet.  Packet fields are expected to be
-     * in network order.
-     *
-     * @param bufbytes number of bytes in packet pointed to by @ref buf.
-     *
-     * @return number of bytes written on success.  If return value is
-     * negative check errno for system errors.  Invalid IPv4 fields
-     * may cause packet to be rejected before being passed to system,
-     * in which case errno will not indicate an error.  The error is
-     * recorded in the xlog.
-     */
-    ssize_t write(const uint8_t* buf, size_t bufbytes) const;
 
 private:
     RawSocket4(const RawSocket4&);		// Not implemented.
     RawSocket4& operator=(const RawSocket4&);	// Not implemented.
-
-protected:
-    XorpFd  _fd;
-    uint32_t _pf;
 };
 
 /**
- * Raw socket class supporting input and output.  Output is handled
- * with write() and writev() methods inherited from RawSocket.  Reads
- * are handled asynchronously.  When data arrives on the underlying
- * socket, recv is called and reads it into a per instance buffer.
- * The abstract method process_recv_data is then called with a
- * reference to a buffer containing the data.
+ * Simple structure used to cache commonly passed IPv4 header information
+ * which comes from socket control message headers. This is used when
+ * reading from the kernel, so we use C types, rather than XORP C++ Class
+ * Library types.
  */
-
-class IoRawSocket4 : public RawSocket4
-{
-public:
-    IoRawSocket4(EventLoop& eventloop, uint32_t protocol, bool autohook = true)
-	throw (RawSocket4Exception);
-
-    ~IoRawSocket4();
-
-protected:
-    virtual void process_recv_data(const vector<uint8_t>& buf) = 0;
-
-protected:
-    void recv(XorpFd fd, IoEventType type);
-
-    bool eventloop_hook();
-
-    void eventloop_unhook();
-
-private:
-    IoRawSocket4(const IoRawSocket4&);			// Not implemented.
-    IoRawSocket4& operator=(const IoRawSocket4&);	// Not implemented.
-
-private:
-    enum { RECVBUF_BYTES = 65536 };
-    EventLoop&		_eventloop;
-    bool		_autohook;
-    vector<uint8_t>	_recvbuf;
+struct IPv4HeaderInfo {
+    string	if_name;
+    string	vif_name;
+    IPv4	src_address;
+    IPv4	dst_address;
+    uint32_t	ip_protocol;
+    int32_t	ip_ttl;
+    int32_t	ip_tos;
+    bool	ip_router_alert;
 };
 
 /**
  * A RawSocketClass that allows arbitrary filters to receive the data
  * associated with a raw socket.
  */
-class FilterRawSocket4 : public IoRawSocket4
-{
+class FilterRawSocket4 : public RawSocket4 {
 public:
     /**
      * Filter class.
@@ -125,7 +76,8 @@ public:
 	 * Method invoked when data arrives on associated FilterRawSocket4
 	 * instance.
 	 */
-	virtual void recv(const vector<uint8_t>& data) = 0;
+	virtual void recv(const struct IPv4HeaderInfo& header,
+			  const vector<uint8_t>& payload) = 0;
 
 	/**
 	 * Method invoked by the destructor of the associated
@@ -138,33 +90,166 @@ public:
 	virtual void bye() = 0;
     };
 
+    /**
+     * Joined multicast group class.
+     */
+    class JoinedMulticastGroup {
+    public:
+	JoinedMulticastGroup(const string& if_name, const string& vif_name,
+			     const IPv4& group_address)
+	    : _if_name(if_name),
+	      _vif_name(vif_name),
+	      _group_address(group_address)
+	{}
+	virtual ~JoinedMulticastGroup() {}
+
+	/**
+	 * Less-Than Operator
+	 *
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically smaller
+	 * than the right-hand operand.
+	 */
+	bool operator<(const JoinedMulticastGroup& other) const {
+	    return ((_if_name < other._if_name) &&
+		    (_vif_name < other._vif_name) &&
+		    (_group_address < other._group_address));
+	}
+
+	/**
+	 * Add a receiver.
+	 *
+	 * @param receiver_name the name of the receiver to add.
+	 */
+	void add_receiver(const string& receiver_name) {
+	    _receivers.insert(receiver_name);
+	}
+
+	/**
+	 * Delete a receiver.
+	 *
+	 * @param receiver_name the name of the receiver to delete.
+	 */
+	void delete_receiver(const string& receiver_name) {
+	    _receivers.erase(receiver_name);
+	}
+
+	/**
+	 * @return true if there are no receivers associated with this group.
+	 */
+	bool empty() const { return _receivers.empty(); }
+
+    private:
+	string		_if_name;
+	string		_vif_name;
+	IPv4		_group_address;
+	set<string>	_receivers;
+    };
+
 public:
-    FilterRawSocket4(EventLoop& eventloop, int protocol)
-	throw (RawSocket4Exception);
+    FilterRawSocket4(EventLoop& eventloop, uint32_t protocol,
+		     const IfTree& iftree);
     ~FilterRawSocket4();
 
-    /** Add a filter to list of input filters.  The FilterRawSocket4 class
+    /**
+     * Add a filter to list of input filters.  The FilterRawSocket4 class
      * assumes that the callee will be responsible for managing the memory
      * associated with the filter and will call remove_filter() if the
      * filter is deleted or goes out of scope.
      */
     bool add_filter(InputFilter* filter);
 
-    /** Remove filter from list of input filters. */
+    /**
+     * Remove filter from list of input filters.
+     */
     bool remove_filter(InputFilter* filter);
 
-    /** @return true if there are no filters associated with this instance. */
+    /**
+     * @return true if there are no filters associated with this instance.
+     */
     bool empty() const { return _filters.empty(); }
 
+    /**
+     * Send an IPv4 packet on a raw socket.
+     *
+     * @param if_name the interface to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param vif_name the vif to send the packet on. It is essential for
+     * multicast. In the unicast case this field may be empty.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param ip_ttl the IP TTL (hop-limit). If it has a negative value,
+     * the TTL will be set internally before transmission.
+     * @param ip_tos the Type Of Service (Diffserv/ECN bits for IPv4).
+     * If it has a negative value, the TOS will be
+     * set internally before transmission.
+     * @param ip_router_alert if true, then add the IP Router Alert option to
+     * the IP packet.
+     * @param payload the payload, everything after the IP header and options.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		proto_socket_write(const string&	if_name,
+				   const string&	vif_name,
+				   const IPv4&		src_address,
+				   const IPv4&		dst_address,
+				   int32_t		ip_ttl,
+				   int32_t		ip_tos,
+				   bool			ip_router_alert,
+				   const vector<uint8_t>& payload,
+				   string&		error_msg);
+
+    /**
+     * Join an IPv4 multicast group.
+     * 
+     * @param if_name the interface through which packets should be accepted.
+     * @param vif_name the vif through which packets should be accepted.
+     * @param group_address the multicast group address to join.
+     * @param receiver_name the name of the receiver.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		join_multicast_group(const string&	if_name,
+				     const string&	vif_name,
+				     const IPv4&	group_address,
+				     const string&	receiver_name,
+				     string&		error_msg);
+
+    /**
+     * Leave an IPv4 multicast group.
+     * 
+     * @param if_name the interface through which packets should not be
+     * accepted.
+     * @param vif_name the vif through which packets should not be accepted.
+     * @param group_address the multicast group address to leave.
+     * @param receiver_name the name of the receiver.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		leave_multicast_group(const string&	if_name,
+				      const string&	vif_name,
+				      const IPv4&	group_address,
+				      const string&	receiver_name,
+				      string&		error_msg);
+    
 protected:
-    void process_recv_data(const vector<uint8_t>& buf);
+    void	process_recv_data(const string&		if_name,
+				  const string&		vif_name,
+				  const IPvX&		src_address,
+				  const IPvX&		dst_address,
+				  int32_t		ip_ttl,
+				  int32_t		ip_tos,
+				  bool			ip_router_alert,
+				  const vector<uint8_t>& payload);
 
 private:
     FilterRawSocket4(const FilterRawSocket4&);		 // Not implemented.
     FilterRawSocket4& operator=(const FilterRawSocket4&); // Not implemented.
 
 protected:
-    list<InputFilter*> _filters;
+    list<InputFilter*>		_filters;
+    typedef map<JoinedMulticastGroup, JoinedMulticastGroup> JoinedGroupsTable;
+    JoinedGroupsTable		_joined_groups_table;
 };
 
 #endif // __FEA_RAWSOCK4_HH__
