@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.44 2005/09/05 20:20:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.45 2005/09/05 22:03:30 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -307,7 +307,9 @@ string suppress;
  */
 template <typename A> 
 bool
-two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
+two_peers(TestInfo& info, OspfTypes::Version version, 
+	  OspfTypes:: LinkType linktype,
+	  Stagger stagger)
 {
     EventLoop eventloop;
 
@@ -375,12 +377,10 @@ two_peers(TestInfo& info, OspfTypes::Version version, Stagger stagger)
 
     PeerID peerid_1 = pm_1.
 	create_peer(interface_1, vif_1, src_1, interface_prefix_length,
-		    interface_mtu, 
-		    OspfTypes::BROADCAST, area);
+		    interface_mtu, linktype, area);
     PeerID peerid_2 = pm_2.
 	create_peer(interface_2, vif_2, src_2, interface_prefix_length,
-		    interface_mtu,
-		    OspfTypes::BROADCAST, area);
+		    interface_mtu, linktype, area);
 
     ospf_1.set_hello_interval(interface_1, vif_1, area, hello_interval);
     ospf_1.set_router_dead_interval(interface_1, vif_1, area,
@@ -482,14 +482,27 @@ main(int argc, char **argv)
 	{"single_peerV2", callback(single_peer<IPv4>, OspfTypes::V2)},
 	{"single_peerV3", callback(single_peer<IPv6>, OspfTypes::V3)},
 
-	{"two_peersV2", callback(two_peers<IPv4>, OspfTypes::V2, NOSTAGGER)},
-	{"two_peersV3", callback(two_peers<IPv6>, OspfTypes::V3, NOSTAGGER)},
+	{"two_peersV2", callback(two_peers<IPv4>, OspfTypes::V2,
+				 OspfTypes::BROADCAST, NOSTAGGER)},
+	{"two_peersV3", callback(two_peers<IPv6>, OspfTypes::V3,
+				 OspfTypes::BROADCAST, NOSTAGGER)},
 
-	{"two_peersV2s1", callback(two_peers<IPv4>, OspfTypes::V2, STAGGER1)},
-	{"two_peersV3s1", callback(two_peers<IPv6>, OspfTypes::V3, STAGGER1)},
+	{"two_peersV2s1", callback(two_peers<IPv4>, OspfTypes::V2,
+				   OspfTypes::BROADCAST, STAGGER1)},
+	{"two_peersV3s1", callback(two_peers<IPv6>, OspfTypes::V3,
+				   OspfTypes::BROADCAST, STAGGER1)},
 
-	{"two_peersV2s2", callback(two_peers<IPv4>, OspfTypes::V2, STAGGER2)},
-	{"two_peersV3s2", callback(two_peers<IPv6>, OspfTypes::V3, STAGGER2)},
+	{"two_peersV2s2", callback(two_peers<IPv4>, OspfTypes::V2,
+				   OspfTypes::BROADCAST, STAGGER2)},
+	{"two_peersV3s2", callback(two_peers<IPv6>, OspfTypes::V3,
+				   OspfTypes::BROADCAST, STAGGER2)},
+
+#if	0
+	{"p2pV2", callback(two_peers<IPv4>, OspfTypes::V2,
+				 OspfTypes::PointToPoint, NOSTAGGER)},
+	{"p2pV3", callback(two_peers<IPv6>, OspfTypes::V3,
+				 OspfTypes::PointToPoint, NOSTAGGER)},
+#endif
     };
 
     try {
