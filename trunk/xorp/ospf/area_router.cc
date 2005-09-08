@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.80 2005/09/08 20:33:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.81 2005/09/08 21:08:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -132,10 +132,7 @@ AreaRouter<A>::peer_up(PeerID peerid)
     PeerStateRef psr = i->second;
     psr->_up = true;
 
-    if (update_router_links()) {
-	// publish the router LSA.
-	_queue.add(_router_lsa);
-    }
+    refresh_router_lsa();
 
     return true;
 }
@@ -156,11 +153,8 @@ AreaRouter<A>::peer_down(PeerID peerid)
     PeerStateRef psr = i->second;
     psr->_up = false;
 
-    if (update_router_links()) {
-	// publish the router LSA.
-	_queue.add(_router_lsa);
-    }
-		   
+    refresh_router_lsa();
+
     return true;
 }
 
@@ -181,10 +175,7 @@ AreaRouter<A>::new_router_links(PeerID peerid,
     psr->_router_links.insert(psr->_router_links.begin(),
 			      router_links.begin(), router_links.end());
 
-    if (update_router_links()) {
-	// publish the router LSA.
-	_queue.add(_router_lsa);
-    }
+    refresh_router_lsa();
 
     return true;
 }
@@ -983,12 +974,10 @@ AreaRouter<A>::update_router_links()
     _ospf.get_eventloop().current_time(now);
     router_lsa->update_age_and_seqno(now);
 
-#if	0
     // Prime this Router-LSA to be refreshed.
     router_lsa->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_router_lsa));
-#endif
 
     return true;
 }
