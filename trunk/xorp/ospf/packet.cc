@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.24 2005/08/11 21:35:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.25 2005/09/02 12:17:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -74,7 +74,7 @@ checksum(uint8_t *ptr, size_t len)
     uint16_t result = sum;
     result ^= 0xffff;
 
-    return result;
+    return htons(result);	// XXX - Fix the callers.
 }
 
 #ifdef	DEBUG_RAW_PACKETS
