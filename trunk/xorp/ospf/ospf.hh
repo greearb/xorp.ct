@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.43 2005/09/05 22:03:29 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.44 2005/09/07 08:58:10 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -152,12 +152,12 @@ struct OspfTypes {
      * The value used for LS Sequence Number when originating the first
      * instance of any LSA.
      */
-    static const uint32_t InitialSequenceNumber = 0x80000001;
+    static const int32_t InitialSequenceNumber = 0x80000001;
 
     /*
      * The maximum value that LS Sequence Number can attain.
      */
-    static const uint32_t MaxSequenceNumber = 0x7fffffff;
+    static const int32_t MaxSequenceNumber = 0x7fffffff;
 };
 
 /**

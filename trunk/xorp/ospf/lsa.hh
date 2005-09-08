@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.61 2005/09/06 22:34:27 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.62 2005/09/07 05:06:53 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -148,7 +148,7 @@ class Lsa_header {
 	_ls_sequence_number = ls_sequence_number;
     }
 
-    uint32_t get_ls_sequence_number() const {
+    int32_t get_ls_sequence_number() const {
 	return _ls_sequence_number;
     }
 
@@ -184,7 +184,7 @@ class Lsa_header {
     uint16_t	_ls_type;	// OSPFv2 1 byte, OSPFv3 2 bytes.
     uint32_t	_link_state_id;
     uint32_t	_advertising_router;
-    uint32_t	_ls_sequence_number;
+    int32_t	_ls_sequence_number;
     uint16_t	_ls_checksum;
     uint16_t	_length;
 };
@@ -433,14 +433,14 @@ class Lsa {
     /**
      * Get the LS Sequence Number.
      */
-    uint32_t get_ls_sequence_number() const {
+    int32_t get_ls_sequence_number() const {
 	return _header.get_ls_sequence_number();
     }
 
     /**
      * Set the LS Sequence Number.
      */
-    void set_ls_sequence_number(uint32_t seqno) {
+    void set_ls_sequence_number(int32_t seqno) {
 	_header.set_ls_sequence_number(seqno);
     }
 
@@ -448,8 +448,11 @@ class Lsa {
      * Increment sequence number.
      */
     void increment_sequence_number() {
-	uint32_t seqno = _header.get_ls_sequence_number();
-	seqno = seqno == OspfTypes::InitialSequenceNumber ? 0 : seqno + 1;
+	int32_t seqno = _header.get_ls_sequence_number();
+	if (OspfTypes:: MaxSequenceNumber == seqno)
+	    XLOG_FATAL("Bummer sequence number reached %d",
+		       OspfTypes::MaxSequenceNumber);
+	seqno += 1;
 	_header.set_ls_sequence_number(seqno);
     }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.77 2005/09/05 22:03:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.78 2005/09/05 22:46:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -739,14 +739,10 @@ AreaRouter<A>::compare_lsa(const Lsa_header& candidate,
     debug_msg("\ncandidate: %s\ncurrent: %s\n", cstring(candidate),
 	      cstring(current));
 
-    const uint32_t candidate_seqno = candidate.get_ls_sequence_number();
-    const uint32_t current_seqno = current.get_ls_sequence_number();
+    const int32_t candidate_seqno = candidate.get_ls_sequence_number();
+    const int32_t current_seqno = current.get_ls_sequence_number();
 
     if (current_seqno != candidate_seqno) {
-	if (OspfTypes::InitialSequenceNumber == candidate_seqno)
-	    return OLDER;
-	if (OspfTypes::InitialSequenceNumber == current_seqno)
-	    return NEWER;
 	if (current_seqno > candidate_seqno)
 	    return OLDER;
 	if (current_seqno < candidate_seqno)
