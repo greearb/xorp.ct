@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.41 2005/09/05 01:06:17 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.42 2005/09/07 05:06:53 atanu Exp $
 #
 
 TODO
@@ -88,6 +88,10 @@ self originating LSA is requested in a link state request packet.
 31) AS-External-Lsa.
 It is possible that when addresses are being read in with copy_in that
 network byte order issues are not being correctly handled. 
+
+32) The IP checksum is consistently mis-used through the code. To fix
+this problem the checksum is returned byte-swapped. Fix the code to
+deal with the checksum correctly.
 
 Possible issues
 ~~~~~~~~~~~~~~~
