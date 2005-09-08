@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.79 2005/09/08 05:21:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.80 2005/09/08 20:33:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1185,7 +1185,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 	_db[index]->set_ls_sequence_number(lsar->get_ls_sequence_number());
 	lsar = _db[index];
 	lsar->increment_sequence_number();
-	lsar->update();
+	lsar->encode();
 	return true;
     }
 
