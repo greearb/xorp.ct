@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.51 2005/09/06 22:34:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.52 2005/09/07 05:06:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -469,7 +469,7 @@ RouterLink::length() const
 {
     switch (get_version()) {
     case OspfTypes::V2:
-	return 16;
+	return 12;
 	break;
     case OspfTypes::V3:
 	return 16;
