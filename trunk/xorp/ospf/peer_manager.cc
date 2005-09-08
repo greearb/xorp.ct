@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.47 2005/09/05 22:03:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.48 2005/09/07 21:13:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -199,6 +199,19 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 		   c_format("Unknown Area %s", pr_id(area).c_str()));
 
     PeerID peerid = create_peerid(interface, vif);
+
+    // Get the prefix length.
+    interface_prefix_length = _ospf.get_prefix_length(interface, vif, source);
+    if (0 == interface_prefix_length)
+	xorp_throw(BadPeer, 
+		   c_format("Unable to get prefix length for %s/%s/%s",
+			    interface.c_str(), vif.c_str(), cstring(source)));
+
+    // Get the MTU.
+    interface_mtu = _ospf.get_mtu(interface);
+    if (0 == interface_mtu)
+	xorp_throw(BadPeer, 
+		   c_format("Unable to get MTU for %s", interface.c_str()));
 
     // If we got this far create_peerid did not throw an exception so
     // this interface/vif is unique.
