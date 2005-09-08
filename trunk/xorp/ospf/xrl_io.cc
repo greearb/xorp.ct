@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.8 2005/09/07 08:58:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.9 2005/09/07 22:48:53 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -77,7 +77,6 @@ XrlIO<A>::recv(const string& interface,
 			  payload_copy.size());
 
 }
-
 
 template <>
 bool
@@ -347,25 +346,72 @@ XrlIO<A>::disable_interface_vif_cb(const XrlError& xrl_error, string interface,
     }
 }
 
-template <typename A>
+template <>
 bool
-XrlIO<A>::enabled(const string& interface, const string& vif, A address)
+XrlIO<IPv4>::enabled(const string& interface, const string& vif,
+		     IPv4 address)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
-    return true;
+    const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
 }
 
-template <typename A>
-uint32_t
-XrlIO<A>::get_prefix_length(const string& interface, const string& vif,
-			    A address)
+template <>
+bool
+XrlIO<IPv6>::enabled(const string& interface, const string& vif,
+		     IPv6 address)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
-    return 0;
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
+}
+
+template <>
+uint32_t
+XrlIO<IPv4>::get_prefix_length(const string& interface, const string& vif,
+			       IPv4 address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
+}
+
+template <>
+uint32_t
+XrlIO<IPv6>::get_prefix_length(const string& interface, const string& vif,
+			       IPv6 address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
 }
 
 template <typename A>
@@ -374,7 +420,11 @@ XrlIO<A>::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
 
-    return 0;
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    if (fi == NULL)
+	return 0;
+
+    return (fi->mtu_bytes());
 }
 
 template <>

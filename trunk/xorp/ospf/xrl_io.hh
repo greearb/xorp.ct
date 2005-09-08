@@ -13,12 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.7 2005/09/07 08:58:10 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.8 2005/09/07 22:48:53 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
 
 #include "libxipc/xrl_router.hh"
+
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 
 #include "io.hh"
 
@@ -28,7 +30,10 @@ class EventLoop;
  * Concrete implementation of IO using XRLs.
  */
 template <typename A>
-class XrlIO : public IO<A> {
+class XrlIO : public IO<A>,
+	      public IfMgrHintObserver,
+	      public ServiceBase,
+	      public ServiceChangeObserverBase {
  public:
     XrlIO(EventLoop& eventloop, XrlRouter& xrl_router, const string& feaname,
 	  const string& ribname)
@@ -37,8 +42,61 @@ class XrlIO : public IO<A> {
 	  _class_name(xrl_router.class_name()),
 	  _instance_name(xrl_router.instance_name()),
 	  _feaname(feaname),
-	  _ribname(ribname)
-    {}
+	  _ribname(ribname),
+	  _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
+		 _xrl_router.finder_port())
+    {
+	_ifmgr.set_observer(this);
+	_ifmgr.attach_hint_observer(this);
+
+	//
+	// TODO: for now startup inside the constructor. Ideally, we want
+	// to startup after the FEA birth event.
+	//
+	startup();
+    }
+
+    ~XrlIO() {
+	//
+	// TODO: for now shutdown inside the destructor. Ideally, we want
+	// to shutdown gracefully before we call the destructor.
+	//
+	shutdown();
+
+	_ifmgr.detach_hint_observer(this);
+	_ifmgr.unset_observer(this);
+    }
+
+    /**
+     * Startup operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool startup() {
+	//
+	// XXX: when the startup is completed,
+	// IfMgrHintObserver::tree_complete() will be called.
+	//
+	if (_ifmgr.startup() != true) {
+	    ServiceBase::set_status(SERVICE_FAILED);
+	    return (false);
+	}
+
+	return (true);
+    }
+
+    /**
+     * Shutdown operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool shutdown() {
+	//
+	// XXX: when the shutdown is completed, XrlIO::status_change()
+	// will be called.
+	//
+	return (_ifmgr.shutdown());
+    }
 
     /**
      * Receiver Raw frames.
@@ -98,7 +156,6 @@ class XrlIO : public IO<A> {
      */
     bool join_multicast_group(const string& interface, const string& vif,
 			      A mcast);
-    
 
     /**
      * On the interface/vif leave this multicast group.
@@ -142,6 +199,39 @@ class XrlIO : public IO<A> {
     bool delete_route(IPNet<A> net);
 
  private:
+    /**
+     * A method invoked when the status of a service changes.
+     *
+     * @param service the service whose status has changed.
+     * @param old_status the old status
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*  service,
+		       ServiceStatus old_status,
+		       ServiceStatus new_status) {
+	// TODO: nothing to do for now
+	UNUSED(service);
+	UNUSED(old_status);
+	UNUSED(new_status);
+    }
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(&_ifmgr);
+    }
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
+
+    //
+    // IfMgrHintObserver methods
+    //
+    void tree_complete() {
+	// TODO: nothing to do for now
+    }
+    void updates_made() {
+	// TODO: nothing to do for now
+    }
+
+    //
+    // XRL allbacks
+    //
     void send_cb(const XrlError& xrl_error, string interface, string vif);
     void enable_interface_vif_cb(const XrlError& xrl_error, string interface,
 				 string vif);
@@ -152,12 +242,14 @@ class XrlIO : public IO<A> {
     void leave_multicast_group_cb(const XrlError& xrl_error, string interface,
 				  string vif);
 
-    EventLoop&	_eventloop;
-    XrlRouter&	_xrl_router;
-    string	_class_name;
-    string	_instance_name;
-    string	_feaname;
-    string	_ribname;
+    EventLoop&		_eventloop;
+    XrlRouter&		_xrl_router;
+    string		_class_name;
+    string		_instance_name;
+    string		_feaname;
+    string		_ribname;
+
+    IfMgrXrlMirror	_ifmgr;
 
     typename IO<A>::ReceiveCallback _receive_cb;
 };
