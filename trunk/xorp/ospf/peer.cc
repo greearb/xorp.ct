@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.138 2005/09/07 08:12:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.139 2005/09/08 09:21:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -415,7 +415,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     if (src == get_interface_address() &&
 	(dst == A::OSPFIGP_ROUTERS() ||
 	 dst == A::OSPFIGP_DESIGNATED_ROUTERS())) {
-	    XLOG_TRACE(_ospf.trace()._input_errors,
+	    XLOG_TRACE(_ospf.trace()._input_errors_that_happen,
 		       "Dropping self originated packet %s\n%s",
 		       cstring(src), cstring(*packet));
 	return false;
