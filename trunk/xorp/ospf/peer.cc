@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.137 2005/09/06 03:09:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.138 2005/09/07 08:12:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1442,12 +1442,17 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	recompute = true;
 
     if (recompute) {
-	typename list<Candidate>::iterator i = candidates.begin();
-	// Verify that the first entry in the candidate list is this router.
-	XLOG_ASSERT((*i)._router_id == get_candidate_id());
-	// Update the DR and BDR
-	(*i)._dr = dr;
-	(*i)._bdr = bdr;
+	// If this router was the DR or BDR and the priority was set
+	// to 0 we can get here.
+	if (0 != _hello_packet.get_router_priority()) {
+	    typename list<Candidate>::iterator i = candidates.begin();
+	    // Verify that the first entry in the candidate list is
+	    // this router.
+	    XLOG_ASSERT((*i)._router_id == get_candidate_id());
+	    // Update the DR and BDR
+	    (*i)._dr = dr;
+	    (*i)._bdr = bdr;
+	}
 	// Repeat steps (2) and (3).
 	bdr = backup_designated_router(candidates);
 	dr = designated_router(candidates);
