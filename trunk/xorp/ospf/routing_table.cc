@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.1 2005/08/05 04:02:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.2 2005/09/09 12:32:41 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -79,17 +79,29 @@ RoutingTable<A>::end()
     typename Trie<A, RouteEntry<A> >::iterator tic;
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	if (_current->end() == _current->lookup_node(tip.key())) {
-	    _ospf.delete_route(/*tip.key()*/);
+	    if (!_ospf.delete_route(tip.key())) {
+		XLOG_WARNING("Delete of %s failed", cstring(tip.key()));
+	    }
 	}
     }
 
     for (tic = _current->begin(); tic != _current->begin(); tic++) {
 	tip = _previous->lookup_node(tic.key());
-// 	RouteEntry rt = *tic;
-// 	uint32_t cost = rt._cost;
+ 	RouteEntry<A>& rt = tic.payload();
 	if (_previous->end() == tip) {
-	    _ospf.add_route(/*tip.key(), */);
+	    if (!_ospf.add_route(tip.key(), rt._nexthop, rt._cost,
+				 false /* equal */, false /* discard */)) {
+		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
+	    }
 	} else {
+	    RouteEntry<A>& rt_previous = tip.payload();
+	    if (rt._nexthop != rt_previous._nexthop) {
+		if (!_ospf.replace_route(tip.key(), rt._nexthop, rt._cost,
+					 false /* equal */,
+					 false /* discard */)) {
+		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
+		}
+	    }
 	}
     }
 }
