@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.45 2005/09/08 16:56:15 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.46 2005/09/08 17:16:19 atanu Exp $
 #
 
 TODO
@@ -107,6 +107,10 @@ of the prefix length and MTU.
 error message is printed. Until this is fixed in the FEA the code has
 a new trace variable trace._input_errors_that_happen that is set to false.
 As soon as its fixed remove this trace variable.
+
+36) There is a queue to which route adds and deletes are added. The
+queue does not handle replace or discard routes. Plus policy tags
+should be passed in somehow.
 
 Possible issues
 ~~~~~~~~~~~~~~~

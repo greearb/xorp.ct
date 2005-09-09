@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.9 2005/09/08 12:00:46 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.10 2005/09/09 15:32:35 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -21,10 +21,72 @@
 #include "libxipc/xrl_router.hh"
 
 #include "libfeaclient/ifmgr_xrl_mirror.hh"
+#include "policy/backend/policytags.hh"
 
 #include "io.hh"
 
 class EventLoop;
+
+/**
+ * XXX - This should be moved to its own file.
+ *
+ * Queue route adds and deletes to the RIB.
+ */
+template <class A>
+class XrlQueue {
+public:
+    XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
+
+    void queue_add_route(string ribname, const IPNet<A>& net,
+			 const A& nexthop/*, const PolicyTags& policytags*/);
+
+    void queue_delete_route(string ribname, const IPNet<A>& net);
+
+    bool busy();
+private:
+    static const size_t WINDOW = 100;	// Maximum number of XRLs
+					// allowed in flight.
+
+    EventLoop& _eventloop;
+    XrlRouter& _xrl_router;
+
+    struct Queued {
+	bool add;
+	string ribname;
+	IPNet<A> net;
+	A nexthop;
+	string comment;
+	PolicyTags policytags;
+    };
+
+    deque <Queued> _xrl_queue;
+    size_t _flying; //XRLs currently in flight
+
+    /**
+     * Maximum number in flight
+     */
+    inline bool maximum_number_inflight() const {
+	return _flying >= WINDOW;
+    }
+
+    /**
+     * Start the transmission of XRLs to tbe RIB.
+     */
+    void start();
+
+    /**
+     * The specialised method called by sendit to deal with IPv4/IPv6.
+     *
+     * @param q the queued command.
+     * @param protocol "ospf"
+     * @return True if the add/delete was queued.
+     */
+    bool sendit_spec(Queued& q, const char *protocol);
+
+    inline EventLoop& eventloop() const;
+
+    void route_command_done(const XrlError& error, const string comment);
+};
 
 /**
  * Concrete implementation of IO using XRLs.

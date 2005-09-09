@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.11 2005/09/09 15:32:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.12 2005/09/09 20:02:56 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -727,6 +727,282 @@ XrlIO<A>::delete_route(IPNet<A> net)
     debug_msg("Net %s\n", cstring(net));
 
     return true;
+}
+
+template<class A>
+XrlQueue<A>::XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router)
+    : _eventloop(eventloop), _xrl_router(xrl_router), _flying(0)
+{
+}
+
+template<class A>
+EventLoop& 
+XrlQueue<A>::eventloop() const 
+{ 
+    return _eventloop;
+}
+
+template<class A>
+void
+XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
+			     const A& nexthop
+			     /*, const PolicyTags& policytags*/)
+{
+    Queued q;
+
+#if	0
+    if (_bgp.profile().enabled(profile_route_rpc_in))
+	_bgp.profile().log(profile_route_rpc_in,
+			   c_format("add %s", net.str().c_str()));
+#endif
+
+    q.add = true;
+    q.ribname = ribname;
+    q.net = net;
+    q.nexthop = nexthop;
+    q.comment = 
+	c_format("add_route: ribname %s net %s nexthop %s",
+		 ribname.c_str(),
+		 net.str().c_str(),
+		 nexthop.str().c_str());
+#if	0
+    q.policytags = policytags;
+#endif
+
+    _xrl_queue.push_back(q);
+
+    start();
+}
+
+template<class A>
+void
+XrlQueue<A>::queue_delete_route(string ribname, const IPNet<A>& net)
+{
+    Queued q;
+
+#if	0
+    if (_bgp.profile().enabled(profile_route_rpc_in))
+	_bgp.profile().log(profile_route_rpc_in,
+			   c_format("delete %s", net.str().c_str()));
+#endif
+
+    q.add = false;
+    q.ribname = ribname;
+    q.net = net;
+    q.comment = c_format("delete_route: ribname %s net %s",
+			 ribname.c_str(),
+			 net.str().c_str());
+
+    _xrl_queue.push_back(q);
+
+    start();
+}
+
+template<class A>
+bool
+XrlQueue<A>::busy()
+{
+    return 0 != _flying;
+}
+
+template<class A>
+void
+XrlQueue<A>::start()
+{
+    // If we are currently busy don't attempt to send any more XRLs.
+#if	0
+    if (busy())
+	return;
+#else
+    if (maximum_number_inflight())
+	return;
+#endif
+
+    // Now there are no outstanding XRLs try and send as many of the queued
+    // route commands as possible as possible.
+
+    for(;;) {
+	debug_msg("queue length %u\n", XORP_UINT_CAST(_xrl_queue.size()));
+
+	if(_xrl_queue.empty()) {
+	    debug_msg("Output no longer busy\n");
+#if	0
+	    _rib_ipc_handler.output_no_longer_busy();
+#endif
+	    return;
+	}
+
+	typename deque<typename XrlQueue<A>::Queued>::const_iterator qi;
+
+	qi = _xrl_queue.begin();
+
+	XLOG_ASSERT(qi != _xrl_queue.end());
+
+	Queued q = *qi;
+
+	const char *protocol = "ospf";
+	bool sent = sendit_spec(q, protocol);
+
+	if (sent) {
+	    _flying++;
+	    _xrl_queue.pop_front();
+	    if (maximum_number_inflight())
+		return;
+ 	    continue;
+	}
+	
+	// We expect that the send may fail if the socket buffer is full.
+	// It should therefore be the case that we have some route
+	// adds/deletes in flight. If _flying is zero then something
+	// unexpected has happended. We have no outstanding sends and
+	// still its gone to poo.
+
+	XLOG_ASSERT(0 != _flying);
+
+	// We failed to send the last XRL. Don't attempt to send any more.
+	return;
+    }
+}
+
+template<>
+bool
+XrlQueue<IPv4>::sendit_spec(Queued& q, const char *protocol)
+{
+    bool sent;
+    bool unicast = true;
+    bool multicast = false;
+
+    XrlRibV0p1Client rib(&_xrl_router);
+    if(q.add) {
+	debug_msg("adding route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("add %s", q.net.str().c_str()));
+#endif
+	sent = rib.
+	    send_add_route4(q.ribname.c_str(),
+			    protocol,
+			    unicast, multicast,
+			    q.net, q.nexthop, /*metric*/0,
+			    q.policytags.xrl_atomlist(),
+			    callback(this, &XrlQueue::route_command_done,
+				     q.comment));
+	if (!sent)
+	    XLOG_WARNING("scheduling add route %s failed",
+			 q.net.str().c_str());
+    } else {
+	debug_msg("deleting route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("delete %s", q.net.str().c_str()));
+#endif
+	sent = rib.
+	    send_delete_route4(q.ribname.c_str(),
+			       protocol,
+			       unicast, multicast,
+			       q.net,
+			       ::callback(this,
+					  &XrlQueue::route_command_done,
+					  q.comment));
+	if (!sent)
+	    XLOG_WARNING("scheduling delete route %s failed",
+			 q.net.str().c_str());
+    }
+
+    return sent;
+}
+
+template<>
+bool
+XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
+{
+    bool sent;
+    bool unicast = true;
+    bool multicast = false;
+
+    XrlRibV0p1Client rib(&_xrl_router);
+    if(q.add) {
+	debug_msg("adding route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("add %s", q.net.str().c_str()));
+#endif
+	sent = rib.
+	    send_add_route6(q.ribname.c_str(),
+			    protocol,
+			    unicast, multicast,
+			    q.net, q.nexthop, /*metric*/0, 
+			    q.policytags.xrl_atomlist(),
+			    callback(this, &XrlQueue::route_command_done,
+				     q.comment));
+	if (!sent)
+	    XLOG_WARNING("scheduling add route %s failed",
+			 q.net.str().c_str());
+    } else {
+	debug_msg("deleting route from %s peer to rib\n", protocol);
+#if	0
+	if (_bgp.profile().enabled(profile_route_rpc_out))
+	    _bgp.profile().log(profile_route_rpc_out, 
+			       c_format("delete %s", q.net.str().c_str()));
+#endif
+	sent = rib.
+	    send_delete_route6(q.ribname.c_str(),
+			       protocol,
+			       unicast, multicast,
+			       q.net,
+			       callback(this, &XrlQueue::route_command_done,
+					q.comment));
+	if (!sent)
+	    XLOG_WARNING("scheduling delete route %s failed",
+			 q.net.str().c_str());
+    }
+
+    return sent;
+}
+
+template<class A>
+void
+XrlQueue<A>::route_command_done(const XrlError& error,
+				const string comment)
+{
+    _flying--;
+    debug_msg("callback %s %s\n", comment.c_str(), error.str().c_str());
+
+    switch (error.error_code()) {
+    case OKAY:
+	break;
+
+    case REPLY_TIMED_OUT:
+	// We should really be using a reliable transport where
+	// this error cannot happen. But it has so lets retry if we can.
+	XLOG_WARNING("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
+    case NO_SUCH_METHOD:
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+
+    case NO_FINDER:
+	// XXX - Temporarily code dump if this condition occurs.
+	XLOG_FATAL("NO FINDER");
+// 	_ospf.finder_death(__FILE__, __LINE__);
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case INTERNAL_ERROR:
+	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	break;
+    }
+
+    // Fire of more requests.
+    start();
 }
 
 template class XrlIO<IPv4>;
