@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.142 2005/09/09 01:53:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.143 2005/09/09 02:16:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2626,9 +2626,9 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
     case OspfTypes::BROADCAST: {
 	A dest;
 	if (is_DR_or_BDR()) {
-	    dest = A::OSPFIGP_DESIGNATED_ROUTERS();
-	} else {
 	    dest = A::OSPFIGP_ROUTERS();
+	} else {
+	    dest = A::OSPFIGP_DESIGNATED_ROUTERS();
 	}
 	transmit = new SimpleTransmit<A>(pkt,
 					 dest, 
