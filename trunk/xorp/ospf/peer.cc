@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.140 2005/09/08 17:16:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.141 2005/09/09 00:13:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2738,6 +2738,20 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	      Peer<A>::pp_interface_state(_peer.get_state()).c_str(),
 	      pp_state(get_state()).c_str(),
 	      cstring(*hello));
+
+    switch(get_state()) {
+    case Down:
+	change_state(Init);
+	break;
+    case Attempt:
+    case Init:
+    case TwoWay:
+    case ExStart:
+    case Exchange:
+    case Loading:
+    case Full:
+	break;
+    }
 
     bool first = 0 ==_hello_packet;
     uint8_t previous_router_priority;
