@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.2 2005/09/09 12:32:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.3 2005/09/09 13:00:05 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -65,6 +65,24 @@ template <typename A>
 void
 RoutingTable<A>::end()
 {
+    typename Trie<A, RouteEntry<A> >::iterator tip;
+    typename Trie<A, RouteEntry<A> >::iterator tic;
+
+    // If there is no previous routing table just install the current
+    // table and return.
+
+    if (0 == _previous) {
+	for (tic = _current->begin(); tic != _current->begin(); tic++) {
+	    tip = _previous->lookup_node(tic.key());
+	    RouteEntry<A>& rt = tic.payload();
+	    if (!_ospf.add_route(tip.key(), rt._nexthop, rt._cost,
+				 false /* equal */, false /* discard */)) {
+		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
+	    }
+	}
+	return;
+    }
+
     // Sweep through the previous table looking up routes in the
     // current table. If no route is found then: delete route.
 
@@ -75,8 +93,6 @@ RoutingTable<A>::end()
     //		- If the routes match do nothing.
     //		- If the routes are different: replace route.
 
-    typename Trie<A, RouteEntry<A> >::iterator tip;
-    typename Trie<A, RouteEntry<A> >::iterator tic;
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	if (_current->end() == _current->lookup_node(tip.key())) {
 	    if (!_ospf.delete_route(tip.key())) {
