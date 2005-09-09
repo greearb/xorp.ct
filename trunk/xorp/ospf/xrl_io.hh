@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.8 2005/09/07 22:48:53 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.9 2005/09/08 12:00:46 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -43,8 +43,10 @@ class XrlIO : public IO<A>,
 	  _instance_name(xrl_router.instance_name()),
 	  _feaname(feaname),
 	  _ribname(ribname),
+	  _running(0),
 	  _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
 		 _xrl_router.finder_port())
+
     {
 	_ifmgr.set_observer(this);
 	_ifmgr.attach_hint_observer(this);
@@ -53,7 +55,7 @@ class XrlIO : public IO<A>,
 	// TODO: for now startup inside the constructor. Ideally, we want
 	// to startup after the FEA birth event.
 	//
-	startup();
+// 	startup();
     }
 
     ~XrlIO() {
@@ -61,7 +63,7 @@ class XrlIO : public IO<A>,
 	// TODO: for now shutdown inside the destructor. Ideally, we want
 	// to shutdown gracefully before we call the destructor.
 	//
-	shutdown();
+// 	shutdown();
 
 	_ifmgr.detach_hint_observer(this);
 	_ifmgr.unset_observer(this);
@@ -82,7 +84,17 @@ class XrlIO : public IO<A>,
 	    return (false);
 	}
 
+ 	register_rib();
+	_running++;
+
 	return (true);
+    }
+
+    /**
+     * Return true while the IO subsystem is running.
+     */
+    bool running() {
+	return _running;
     }
 
     /**
@@ -95,6 +107,10 @@ class XrlIO : public IO<A>,
 	// XXX: when the shutdown is completed, XrlIO::status_change()
 	// will be called.
 	//
+
+	unregister_rib();
+	_running--;
+
 	return (_ifmgr.shutdown());
     }
 
@@ -162,6 +178,18 @@ class XrlIO : public IO<A>,
      */
     bool leave_multicast_group(const string& interface, const string& vif,
 			       A mcast);
+
+    /**
+     * Register with the RIB.
+     */
+    void register_rib();
+
+    /**
+     * Remove registration from the RIB.
+     */
+    void unregister_rib();
+
+    void rib_command_done(const XrlError& error, bool up, const char *comment);
 
     /**
      * Add route to RIB.
@@ -248,6 +276,7 @@ class XrlIO : public IO<A>,
     string		_instance_name;
     string		_feaname;
     string		_ribname;
+    uint32_t		_running;
 
     IfMgrXrlMirror	_ifmgr;
 

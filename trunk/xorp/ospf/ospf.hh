@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.46 2005/09/09 12:27:20 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.47 2005/09/09 12:58:24 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -303,21 +303,23 @@ class Ospf {
     /**
      * @return true if ospf should still be running.
      */
-    bool running() { return _running; }
+    bool running() { return _io->running(); }
 
     /**
      * XXX - Temporary hack to get us up an running.
      */
     ProcessStatus status(string& reason) {
-	reason = "Ready";
-	return PROC_READY;
+	reason = _reason;
+	return _process_status;
     }
 
     /**
-     * XXX - Temporary hack to get us up an running.
+     * Shutdown the IO subsystem.
      */
     void shutdown() {
-	_running = false;
+	_io->shutdown();
+	_reason = "shutting down";
+	_process_status = PROC_SHUTDOWN;
     }
 
     /**
@@ -497,7 +499,8 @@ class Ospf {
     IO<A>* _io;			// Indirection for sending and
 				// receiving packets, as well as
 				// adding and deleting routes. 
-    bool _running;		// Are we running?
+    string _reason;
+    ProcessStatus _process_status;
 
     PacketDecoder _packet_decoder;	// Packet decoders.
     LsaDecoder _lsa_decoder;		// LSA decoders.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.4 2005/09/07 05:06:53 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.5 2005/09/07 08:58:09 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -25,7 +25,7 @@ template <typename A>
 class DebugIO : public IO<A> {
  public:
     DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
-	: _info(info), _eventloop(eventloop), _packets(0),
+	: _info(info), _eventloop(eventloop), _packets(0), _running(false),
 	  _lsa_decoder(version)
     {
 	_lsa_decoder.register_decoder(new RouterLsa(version));
@@ -66,6 +66,20 @@ class DebugIO : public IO<A> {
 		endl;
 	}
 
+    }
+
+    bool startup() {
+	_running = true;
+	return true;
+    }
+    
+    bool running() {
+	return _running;
+    }
+
+    bool shutdown() {
+	_running = false;
+	return true;
     }
 
     /**
@@ -238,6 +252,7 @@ class DebugIO : public IO<A> {
     EventLoop& _eventloop;
     PacketDecoder _dec;
     int _packets;
+    bool _running;
     LsaDecoder _lsa_decoder;
 
     typename IO<A>::ReceiveCallback _forward_cb;

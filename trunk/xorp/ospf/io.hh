@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.10 2005/09/01 00:05:07 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.11 2005/09/07 08:58:10 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -34,6 +34,23 @@ class IO {
     uint16_t get_ip_protocol_number() const {
 	return OspfTypes::IP_PROTOCOL_NUMBER;
     }
+
+
+    /**
+     * Startup the IO subsystem.
+     */
+    virtual bool startup() = 0;
+
+    /**
+     * Once startup is called this should return true.
+     */
+    virtual bool running() = 0;
+
+    /**
+     * Shutdown the IO subsystem. Once the shutdown is complete
+     * running should return false.
+     */
+    virtual bool shutdown() = 0;
 
     /**
      * Send Raw frames.

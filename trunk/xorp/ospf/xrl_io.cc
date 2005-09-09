@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.9 2005/09/07 22:48:53 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.10 2005/09/08 12:00:46 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -37,10 +37,10 @@
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
+#include "xrl/interfaces/rib_xif.hh"
 
 #include "ospf.hh"
 #include "xrl_io.hh"
-
 
 template <typename A>
 void
@@ -591,6 +591,81 @@ XrlIO<A>::leave_multicast_group_cb(const XrlError& xrl_error, string interface,
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }
+}
+
+template <typename A>
+void
+XrlIO<A>::register_rib()
+{
+    XrlRibV0p1Client rib(&_xrl_router);
+    
+    //create our tables
+    //ebgp - v4
+    //name - "ebgp"
+    //unicast - true
+    //multicast - true
+    if(!rib.send_add_igp_table4(_ribname.c_str(),
+				"ospf", _xrl_router.class_name(),
+				_xrl_router.instance_name(), true, true,
+				callback(this,
+					 &XrlIO<A>::rib_command_done,
+					 true,
+					 "add_table"))) {
+	XLOG_FATAL("Failed to add OSPF table to RIB");
+    }
+
+    if(!rib.send_add_igp_table6(_ribname.c_str(),
+				"ospf", _xrl_router.class_name(),
+				_xrl_router.instance_name(), true, true,
+				callback(this, 
+					 &XrlIO<A>::rib_command_done,
+					 true,
+					 "add_table"))) {
+	XLOG_FATAL("Failed to add OSPF table to RIB");
+    }
+
+}
+
+template <typename A>
+void
+XrlIO<A>::unregister_rib()
+{
+    XrlRibV0p1Client rib(&_xrl_router);
+
+    if(!rib.send_delete_igp_table4(_ribname.c_str(),
+				   "ospf", _xrl_router.class_name(),
+				   _xrl_router.instance_name(), true, true,
+				   callback(this, 
+					    &XrlIO<A>::rib_command_done,
+					    false,
+					    "delete table"))) {
+	XLOG_FATAL("Failed to delete OSPF table to RIB");
+    }
+
+    if(!rib.send_delete_igp_table6(_ribname.c_str(),
+				   "ospf", _xrl_router.class_name(),
+				   _xrl_router.instance_name(), true, true,
+				   callback(this, 
+					    &XrlIO<A>::rib_command_done,
+					    false,
+					    "delete table"))) {
+	XLOG_FATAL("Failed to delete OSPF table to RIB");
+    }
+
+}
+
+template <typename A>
+void
+XrlIO<A>::rib_command_done(const XrlError& error, bool up, const char *comment)
+{
+    debug_msg("callback %s %s\n", comment, error.str().c_str());
+    if(XrlError::OKAY() != error) {
+	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+    }
+    if (up)
+	_running++;
+    else
+	_running--;
 }
 
 template <typename A>
