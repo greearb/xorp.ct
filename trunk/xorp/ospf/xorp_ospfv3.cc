@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.6 2005/09/02 12:17:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.7 2005/09/07 22:48:53 pavlin Exp $"
 
 #include "config.h"
 #include <set>
@@ -64,6 +64,7 @@ main(int /*argc*/, char **argv)
 	XrlOspfV3Target v3target(&xrl_router, ospf_ipv4, ospf_ipv6,
 				 io_ipv4, io_ipv6);
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
+	io.startup();
 
 	while (ospf_ipv4.running() && ospf_ipv6.running())
 	    eventloop.run();
