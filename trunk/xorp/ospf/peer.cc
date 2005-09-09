@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.141 2005/09/09 00:13:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.142 2005/09/09 01:53:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -156,6 +156,11 @@ template <typename A>
 bool
 PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
 {
+    if (!_running) {
+	XLOG_WARNING("Attempt to transmit while peer is not running");
+	return false;
+    }
+
     do {
 	if (!tr->valid())
 	    return true;
@@ -175,6 +180,13 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 {
     debug_msg("dst %s src %s %s\n", cstring(dst), cstring(src),
 	      cstring(*packet));
+
+    if (!_running) {
+	// There is a window that may occasionally get hit.
+	XLOG_WARNING("Packet arrived while peer is not running");
+	return false;
+    }
+
     OspfTypes::AreaID area = packet->get_area_id();
     // Does the area ID in the packet match any that are expecting.
     if (0 == _areas.count(area)) {
