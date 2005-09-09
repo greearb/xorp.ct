@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.10 2005/09/09 15:32:35 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.11 2005/09/09 21:05:51 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -38,7 +38,8 @@ public:
     XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
 
     void queue_add_route(string ribname, const IPNet<A>& net,
-			 const A& nexthop/*, const PolicyTags& policytags*/);
+			 const A& nexthop, uint32_t metric
+			 /*, const PolicyTags& policytags*/);
 
     void queue_delete_route(string ribname, const IPNet<A>& net);
 
@@ -55,6 +56,7 @@ private:
 	string ribname;
 	IPNet<A> net;
 	A nexthop;
+	uint32_t metric;
 	string comment;
 	PolicyTags policytags;
     };
@@ -107,7 +109,8 @@ class XrlIO : public IO<A>,
 	  _ribname(ribname),
 	  _running(0),
 	  _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
-		 _xrl_router.finder_port())
+		 _xrl_router.finder_port()),
+	  _rib_queue(eventloop, xrl_router)
 
     {
 	_ifmgr.set_observer(this);
@@ -341,6 +344,7 @@ class XrlIO : public IO<A>,
     uint32_t		_running;
 
     IfMgrXrlMirror	_ifmgr;
+    XrlQueue<A>		_rib_queue;
 
     typename IO<A>::ReceiveCallback _receive_cb;
 };

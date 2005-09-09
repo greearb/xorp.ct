@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.12 2005/09/09 20:02:56 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.13 2005/09/09 21:05:51 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -745,7 +745,7 @@ XrlQueue<A>::eventloop() const
 template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
-			     const A& nexthop
+			     const A& nexthop, uint32_t metric
 			     /*, const PolicyTags& policytags*/)
 {
     Queued q;
@@ -760,6 +760,7 @@ XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
     q.ribname = ribname;
     q.net = net;
     q.nexthop = nexthop;
+    q.metric = metric;
     q.comment = 
 	c_format("add_route: ribname %s net %s nexthop %s",
 		 ribname.c_str(),
@@ -884,7 +885,7 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *protocol)
 	    send_add_route4(q.ribname.c_str(),
 			    protocol,
 			    unicast, multicast,
-			    q.net, q.nexthop, /*metric*/0,
+			    q.net, q.nexthop, q.metric,
 			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
@@ -934,7 +935,7 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *protocol)
 	    send_add_route6(q.ribname.c_str(),
 			    protocol,
 			    unicast, multicast,
-			    q.net, q.nexthop, /*metric*/0, 
+			    q.net, q.nexthop, q.metric, 
 			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
