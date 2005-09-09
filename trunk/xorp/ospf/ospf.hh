@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.44 2005/09/07 08:58:10 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.45 2005/09/08 05:21:09 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -66,6 +66,14 @@ struct OspfTypes {
 	NORMAL,		// Normal Area
 	STUB,		// Stub Area
 	NSSA,		// Not-So-Stubby Area
+    };
+
+    /*
+     * Routing Entry Type.
+     */
+    enum VertexType {
+	Router,
+	Network
     };
 
     /**
