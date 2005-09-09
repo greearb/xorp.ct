@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.91 2005/09/05 22:03:30 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.92 2005/09/07 08:12:59 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -77,6 +77,20 @@ class PeerOut {
      */
     uint16_t get_interface_mtu() const {
 	return _interface_mtu;
+    }
+
+    /**
+     * Join multicast group on this interface/vif.
+     */
+    void join_multicast_group(A address) {
+	_ospf.join_multicast_group(_interface, _vif, address);
+    }
+
+    /**
+     * Leave multicast group on this interface/vif.
+     */
+    void leave_multicast_group(A address) {
+	_ospf.leave_multicast_group(_interface, _vif, address);
     }
 
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.139 2005/09/08 09:21:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.140 2005/09/08 17:16:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -289,9 +289,7 @@ PeerOut<A>::bring_up_peering()
 {
     // Start receiving packets on this peering.
     _ospf.enable_interface_vif(_interface, _vif);
-    _ospf.join_multicast_group(_interface, _vif, A::OSPFIGP_ROUTERS());
-    _ospf.join_multicast_group(_interface, _vif,
-			       A::OSPFIGP_DESIGNATED_ROUTERS());
+    join_multicast_group(A::OSPFIGP_ROUTERS());
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
@@ -308,11 +306,6 @@ template <typename A>
 void
 PeerOut<A>::take_down_peering()
 {
-    _ospf.leave_multicast_group(_interface, _vif, A::OSPFIGP_ROUTERS());
-    _ospf.leave_multicast_group(_interface, _vif,
-			       A::OSPFIGP_DESIGNATED_ROUTERS());
-    _ospf.disable_interface_vif(_interface, _vif);
-
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
     for(i = _areas.begin(); i != _areas.end(); i++) {
@@ -322,6 +315,10 @@ PeerOut<A>::take_down_peering()
 	XLOG_ASSERT(area_router);
 	area_router->peer_down(_peerid);
     }
+
+    // Stop receiving packets on this peering.
+    leave_multicast_group(A::OSPFIGP_ROUTERS());
+    _ospf.disable_interface_vif(_interface, _vif);
 }
 
 template <typename A> 
@@ -2089,6 +2086,17 @@ Peer<A>::change_state(InterfaceState state)
 	designated_router_changed(true);
     if (Peer<A>::DR == previous_state)
 	designated_router_changed(false);
+
+    bool was_dr_or_bdr = Peer<A>::DR == previous_state || 
+	Peer<A>::Backup == previous_state;
+    bool is_dr_or_bdr = Peer<A>::DR == state || Peer<A>::Backup == state;
+    if (is_dr_or_bdr != was_dr_or_bdr) {
+	if (is_dr_or_bdr) {
+	    _peerout.join_multicast_group(A::OSPFIGP_DESIGNATED_ROUTERS());
+	} else {
+	    _peerout.leave_multicast_group(A::OSPFIGP_DESIGNATED_ROUTERS());
+	}
+    }
 }
 
 template <typename A>
