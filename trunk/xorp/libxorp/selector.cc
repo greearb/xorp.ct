@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.26 2005/08/30 01:02:47 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.27 2005/09/05 20:20:04 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@ map_ioevent_to_selectormask(const IoEventType type)
 	mask = SEL_RD;
 	break;
     case IOT_CONNECT:
-	mask = SEL_RD;
+	mask = SEL_WR;
 	break;
     case IOT_DISCONNECT:
 	mask = SEL_EX;	// XXX: Disconnection isn't a distinct event in UNIX
