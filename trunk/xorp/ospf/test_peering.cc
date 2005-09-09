@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.45 2005/09/05 22:03:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.46 2005/09/07 08:19:46 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -191,6 +191,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
 {
     EventLoop eventloop;
     DebugIO<A> io(info, version, eventloop);
+    io.startup();
     
     Ospf<A> ospf(version, eventloop, &io);
     ospf.set_router_id(set_id("0.0.0.1"));
@@ -334,7 +335,9 @@ two_peers(TestInfo& info, OspfTypes::Version version,
 		   info.verbose_level(), info.out());
 
     DebugIO<A> io_1(info1, version, eventloop);
+    io_1.startup();
     DebugIO<A> io_2(info2, version, eventloop);
+    io_2.startup();
     
     Ospf<A> ospf_1(version, eventloop, &io_1);
     Ospf<A> ospf_2(version, eventloop, &io_2);
