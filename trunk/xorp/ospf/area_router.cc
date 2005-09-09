@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.81 2005/09/08 21:08:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.82 2005/09/08 23:21:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -767,10 +767,12 @@ AreaRouter<A>::compare_lsa(const Lsa_header& lsah, size_t& index) const
 		   lsah.get_link_state_id(), lsah.get_advertising_router());
 
     if (find_lsa(lsr, index)) {
-	// Update the age before checking this field.
-	TimeVal now;
-	_ospf.get_eventloop().current_time(now);
-	_db[index]->update_age(now);
+	if (!_db[index]->maxage()) {
+	    // Update the age before checking this field.
+	    TimeVal now;
+	    _ospf.get_eventloop().current_time(now);
+	    _db[index]->update_age(now);
+	}
 	return compare_lsa(lsah, _db[index]->get_header());
     }
 
