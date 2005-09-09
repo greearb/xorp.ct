@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.45 2005/09/08 05:21:09 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.46 2005/09/09 12:27:20 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -425,15 +425,32 @@ class Ospf {
 			   uint16_t inftransdelay);
 
     /**
-     * XXX
-     * Be sure to capture the multipath capability of OSPF.
+     * Add route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
      */
-    bool add_route();
+    bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		   bool discard);
+    /**
+     * Replace route
+     *
+     * @param net network
+     * @param nexthop
+     * @param metric to network
+     * @param equal true if this in another route to the same destination.
+     * @param discard true if this is a discard route.
+     */
+    bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		       bool discard);
 
     /**
-     * Delete route.
+     * Delete route
      */
-    bool delete_route();
+    bool delete_route(IPNet<A> net);
 
     /**
      * Get the current OSPF version.

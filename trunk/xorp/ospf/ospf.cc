@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.34 2005/09/07 05:06:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.35 2005/09/07 08:58:10 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -311,16 +311,35 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
     
 template <typename A>
 bool
-Ospf<A>::add_route()
+Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+		   bool discard)
 {
-    return true;
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
+	      discard ? "true" : "false");
+
+    return _io->add_route(net, nexthop, metric, equal, discard);
 }
 
 template <typename A>
 bool
-Ospf<A>::delete_route()
+Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
+			bool discard)
 {
-    return true;
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
+	      discard ? "true" : "false");
+
+    return _io->replace_route(net, nexthop, metric, equal, discard);
+}
+
+template <typename A>
+bool
+Ospf<A>::delete_route(IPNet<A> net)
+{
+    debug_msg("Net %s\n", cstring(net));
+
+    return _io->delete_route(net);
 }
 
 template class Ospf<IPv4>;
