@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.82 2005/09/08 23:21:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.83 2005/09/09 00:14:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1192,7 +1192,7 @@ void
 AreaRouter<A>::RouterVertex(Vertex& v)
 {
     v.set_version(_ospf.get_version());
-    v.set_type(Vertex::Router);
+    v.set_type(OspfTypes::Router);
     v.set_nodeid(_ospf.get_router_id());
 }
 
@@ -1245,9 +1245,23 @@ AreaRouter<A>::routing_timer()
     routing_total_recompute();
 }
 
-template <typename A>
+/**
+ * XXX - Using the advertising router field it probably wrong just
+ * want to put something in the routing table.
+ *
+ * This LSA is a direct neighbour that is a nexthop extract an actual
+ * address to use.
+ */
+inline
+IPv4
+extract_nexthop(Lsa::LsaRef nexthop)
+{
+    return IPv4(nexthop->get_header().get_advertising_router());
+}
+
+template <>
 void 
-AreaRouter<A>::routing_total_recompute()
+AreaRouter<IPv4>::routing_total_recompute()
 {
 //     print_link_state_database();
 
@@ -1275,7 +1289,7 @@ AreaRouter<A>::routing_total_recompute()
 	    Vertex v;
 
 	    v.set_version(_ospf.get_version());
-	    v.set_type(Vertex::Router);
+	    v.set_type(OspfTypes::Router);
 	    v.set_nodeid(rlsa->get_header().get_link_state_id());
 
 	    // Don't add this router back again.
@@ -1305,15 +1319,69 @@ AreaRouter<A>::routing_total_recompute()
 	}
     }
 
-    // Print the new routing table.
+    RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
+    routing_table.begin();
+
+    // Compute the SPT.
     list<RouteCmd<Vertex> > r;
     spt.compute(r);
 
     list<RouteCmd<Vertex> >::const_iterator ri;
-    for(ri = r.begin(); ri != r.end(); ri++)
-	XLOG_WARNING("TBD: Add route:\n%s %s",
-		     pr_id(_ospf.get_router_id()).c_str(),
-		     ri->str().c_str());
+    for(ri = r.begin(); ri != r.end(); ri++) {
+	debug_msg("Add route:\n%s %s",
+		  pr_id(_ospf.get_router_id()).c_str(),
+		  ri->str().c_str());
+	// This is already directly connected no need to add it to the
+	// routing table.
+	if (ri->node() == ri->nexthop())
+	    continue;
+	// If the nexthop is a router we don't care about it unless it
+	// is an AS boundary router or an area border router.
+	Vertex node = ri->node();
+	Lsa::LsaRef lsar = node.get_lsa();
+	RouterLsa *rlsa;
+	NetworkLsa *nlsa;
+	RouteEntry<IPv4> route_entry;
+	IPNet<IPv4> net;
+	if (OspfTypes::Router == node.get_type()) {
+	    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+	    XLOG_ASSERT(rlsa);
+	    if (!(rlsa->get_e_bit() || rlsa->get_b_bit()))
+		continue;
+	    // Originating routers Router ID.
+	    route_entry._id = rlsa->get_header().get_link_state_id();
+	    IPv4 addr = IPv4(route_entry._id);
+	    net = IPNet<IPv4>(addr, 32);
+	} else {
+	    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+	    XLOG_ASSERT(nlsa);
+	    route_entry._address = nlsa->get_header().get_link_state_id();
+	    IPv4 addr = IPv4(route_entry._id);
+	    IPv4 mask = IPv4(nlsa->get_network_mask());
+	    net = IPNet<IPv4>(addr, mask.mask_len());
+	}
+	route_entry._destination_type = node.get_type();
+	route_entry._path_type = RouteEntry<IPv4>::intra_area;
+	route_entry._cost = ri->weight();
+	route_entry._type_2_cost = 0;
+
+	// Nexthop node.
+	Lsa::LsaRef nexthop = ri->nexthop().get_lsa();
+	route_entry._nexthop = extract_nexthop(nexthop);
+
+	route_entry._advertising_router = lsar->get_header().
+	    get_advertising_router();
+
+	routing_table.add_entry(net, route_entry);
+    }
+
+    routing_table.end();
+}
+
+template <>
+void 
+AreaRouter<IPv6>::routing_total_recompute()
+{
 }
 
 template <typename A>
@@ -1400,7 +1468,7 @@ AreaRouter<A>::routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& src,
 // 		printf("%s Cool %s\n", 
 // 		       pr_id(_ospf.get_router_id()).c_str(),
 // 		       cstring(*_db[index]));
-		dst.set_type(Vertex::Network);
+		dst.set_type(OspfTypes::Network);
 		dst.set_nodeid(lsan->get_header().
 			       get_link_state_id());
 		
