@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.10 2005/09/08 12:00:46 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.11 2005/09/09 15:32:35 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -656,12 +656,40 @@ XrlIO<A>::unregister_rib()
 
 template <typename A>
 void
-XrlIO<A>::rib_command_done(const XrlError& error, bool up, const char *comment)
+XrlIO<A>::rib_command_done(const XrlError& error, bool up,
+			   const char *comment)
 {
-    debug_msg("callback %s %s\n", comment, error.str().c_str());
-    if(XrlError::OKAY() != error) {
-	XLOG_WARNING("callback: %s %s",  comment, error.str().c_str());
+    debug_msg("callback %s %s\n", comment, cstring(error));
+
+    switch (error.error_code()) {
+    case OKAY:
+	break;
+
+    case REPLY_TIMED_OUT:
+	// We should really be using a reliable transport where
+	// this error cannot happen. But it has so lets retry if we can.
+	XLOG_ERROR("callback: %s %s",  comment, cstring(error));
+	break;
+
+    case RESOLVE_FAILED:
+    case SEND_FAILED:
+    case SEND_FAILED_TRANSIENT:
+    case NO_SUCH_METHOD:
+	XLOG_ERROR("callback: %s %s",  comment, error.str().c_str());
+	break;
+
+    case NO_FINDER:
+	// XXX - Temporarily code dump if this condition occurs.
+	XLOG_FATAL("NO FINDER");
+	break;
+
+    case BAD_ARGS:
+    case COMMAND_FAILED:
+    case INTERNAL_ERROR:
+	XLOG_FATAL("callback: %s %s",  comment, error.str().c_str());
+	break;
     }
+
     if (up)
 	_running++;
     else
