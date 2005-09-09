@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.2 2005/08/05 03:45:16 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.3 2005/09/05 00:40:30 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -24,7 +24,6 @@
 
 class Vertex {
  public:
-    enum Type {Router, Network};
 
     bool operator<(const Vertex& other) const {
 	XLOG_ASSERT(get_version() == other.get_version());
@@ -35,9 +34,9 @@ class Vertex {
 	    break;
 	case OspfTypes::V3:
 	    switch(_t) {
-	    case Router:
+	    case OspfTypes::Router:
 		break;
-	    case Network:
+	    case OspfTypes::Network:
 		if (_nodeid == other.get_nodeid())
 		    return _interface_id < other.get_interface_id();
 		break;
@@ -47,7 +46,7 @@ class Vertex {
 	return _nodeid < other.get_nodeid();
     }
 
-#if	0
+#if	1
     bool operator==(const Vertex& other) const {
 	XLOG_ASSERT(get_version() == other.get_version());
 	return _nodeid == other.get_nodeid() && _t ==  other.get_type();
@@ -62,11 +61,11 @@ class Vertex {
 	return _version;
     }
 
-    void set_type(Type t) {
+    void set_type(OspfTypes::VertexType t) {
 	_t = t;
     }
 
-    Type get_type() const {
+    OspfTypes::VertexType get_type() const {
 	return _t;
     }
 
@@ -78,6 +77,19 @@ class Vertex {
 	return _nodeid;
     }
 
+    /**
+     * Set the LSA that is responsible for this vertex.
+     */
+    void set_lsa(Lsa::LsaRef lsar) {
+	_lsar = lsar;
+    }
+
+    /**
+     * Get the LSA that is responsible for this vertex.
+     */
+    Lsa::LsaRef get_lsa() const {
+	return _lsar;
+    }
 
     void set_interface_id(uint32_t interface_id) {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
@@ -95,10 +107,10 @@ class Vertex {
 	case OspfTypes::V2:
 	    output = "OSPFv2";
 	    switch(_t) {
-	    case Router:
+	    case OspfTypes::Router:
 		output += " Router";
 		break;
-	    case Network:
+	    case OspfTypes::Network:
 		output += " Network";
 		break;
 	    }
@@ -107,10 +119,10 @@ class Vertex {
 	case OspfTypes::V3:
 	    output = "OSPFv3";
 	    switch(_t) {
-	    case Router:
+	    case OspfTypes::Router:
 		output += c_format(" Router %#x", _nodeid);
 		break;
-	    case Network:
+	    case OspfTypes::Network:
 		output += c_format(" Transit %#x %#x", _nodeid, _interface_id);
 		break;
 	    }
@@ -122,9 +134,11 @@ class Vertex {
  private:
     /*const */OspfTypes::Version _version;
     
-    Type _t;			// Router or Network (Transit in OSPFv3) 
+    OspfTypes::VertexType _t;	// Router or Network (Transit in OSPFv3) 
     uint32_t _nodeid;
     uint32_t _interface_id;	// OSPFv3 Only
+
+    Lsa::LsaRef _lsar;
 
     // RFC 2328 Section 16.1.  Calculating the shortest-path tree for an area:
     // Vertex (node) ID
