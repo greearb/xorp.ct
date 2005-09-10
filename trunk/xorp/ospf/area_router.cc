@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.83 2005/09/09 00:14:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.84 2005/09/09 12:31:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1194,6 +1194,7 @@ AreaRouter<A>::RouterVertex(Vertex& v)
     v.set_version(_ospf.get_version());
     v.set_type(OspfTypes::Router);
     v.set_nodeid(_ospf.get_router_id());
+    v.set_lsa(_router_lsa);
 }
 
 template <typename A>
@@ -1291,6 +1292,7 @@ AreaRouter<IPv4>::routing_total_recompute()
 	    v.set_version(_ospf.get_version());
 	    v.set_type(OspfTypes::Router);
 	    v.set_nodeid(rlsa->get_header().get_link_state_id());
+  	    v.set_lsa(lsar);
 
 	    // Don't add this router back again.
 	    if (spt.exists_node(v)) {
@@ -1471,6 +1473,7 @@ AreaRouter<A>::routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& src,
 		dst.set_type(OspfTypes::Network);
 		dst.set_nodeid(lsan->get_header().
 			       get_link_state_id());
+		dst.set_lsa(lsan);
 		
 		if (!spt.exists_node(dst)) {
 		    spt.add_node(dst);
