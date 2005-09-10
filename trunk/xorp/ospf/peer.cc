@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.143 2005/09/09 02:16:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.144 2005/09/09 08:02:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1960,7 +1960,6 @@ Peer<A>::tear_down_state()
 {
     _hello_timer.clear();
     _wait_timer.clear();
-    _neighbours.clear();
 }
 
 template <typename A>
