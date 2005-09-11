@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.28 2005/09/07 05:06:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.29 2005/09/07 05:21:36 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -73,6 +73,36 @@ compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
 }
 
 /**
+ * Compute legal values for the options fields.
+ */
+inline
+uint32_t
+compute_options(OspfTypes::Version version, OspfTypes::AreaType area_type)
+{
+    // Set/UnSet E-Bit.
+    Options options(version, 0);
+    switch(area_type) {
+    case OspfTypes::NORMAL:
+	options.set_e_bit(true);
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	options.set_e_bit(false);
+	break;
+    }
+
+    switch (version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	options.set_v6_bit(true);
+	break;
+    }
+
+    return options.get_options();
+}
+
+/**
  * Fill all the fields except for the 8 byte auth in a V2 hello packet.
  */
 inline
@@ -85,7 +115,7 @@ populate_helloV2(HelloPacket *hello)
 
     hello->set_network_mask(0xffff0000);
     hello->set_hello_interval(9876);
-    hello->set_options(0xfe);
+    hello->set_options(compute_options(OspfTypes::V2, OspfTypes::NORMAL));
     hello->set_router_priority(42);
     hello->set_router_dead_interval(66000);
     hello->set_designated_router(set_id("1.2.3.4"));
@@ -109,7 +139,7 @@ populate_helloV3(HelloPacket *hello)
 
     hello->set_interface_id(0x12345678);
     hello->set_hello_interval(98760);
-    hello->set_options(0xfefefe);
+    hello->set_options(compute_options(OspfTypes::V3, OspfTypes::NORMAL));
     hello->set_router_priority(42);
     hello->set_router_dead_interval(6600);
     hello->set_designated_router(set_id("1.2.3.4"));
@@ -158,7 +188,7 @@ populate_lsa_header(Lsa_header& header, OspfTypes::Version version)
     header.set_ls_age(500);
     switch(version) {
     case OspfTypes::V2:
-	header.set_options(0xff);
+	header.set_options(compute_options(version, OspfTypes::NORMAL));
 	break;
     case OspfTypes::V3:
 	break;
@@ -211,7 +241,7 @@ populate_router_lsa(RouterLsa *rlsa, OspfTypes::Version version)
 	break;
     case OspfTypes::V3:
 	rlsa->set_w_bit(true);
-	rlsa->set_options(0x010203);
+	rlsa->set_options(compute_options(version, OspfTypes::NORMAL));
 	break;
     }
     
@@ -244,7 +274,7 @@ populate_network_lsa(NetworkLsa *nlsa, OspfTypes::Version version)
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	nlsa->set_options(0x010203);
+	nlsa->set_options(compute_options(version, OspfTypes::NORMAL));
 	break;
     }
     
@@ -300,7 +330,7 @@ populate_summary_router_lsa(SummaryRouterLsa *srlsa,
 	srlsa->set_network_mask(0xffff0000);
 	break;
     case OspfTypes::V3:
-	srlsa->set_options(0x5);
+	srlsa->set_options(compute_options(version, OspfTypes::NORMAL));
 	srlsa->set_destination_id(set_id("128.16.64.32"));
 	break;
     }
