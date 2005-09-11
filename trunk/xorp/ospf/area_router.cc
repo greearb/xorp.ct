@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.85 2005/09/10 00:25:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.86 2005/09/11 09:07:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -771,6 +771,9 @@ AreaRouter<A>::compare_lsa(const Lsa_header& candidate,
 	return OLDER;
     if (current.get_ls_checksum() < candidate.get_ls_checksum())
 	return NEWER;
+
+    if (current.get_ls_age() == candidate.get_ls_age())
+	return EQUIVALENT;
 
     if (current.get_ls_age() == OspfTypes::MaxAge)
 	return OLDER;
