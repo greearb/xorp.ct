@@ -13,11 +13,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.84 2005/09/09 12:31:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.85 2005/09/10 00:25:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 #define PARANOIA
+
+// The original design did not leave MaxAge LSAs in the database. When
+// an LSA reached MaxAge it was removed from the database and existed
+// only in retransmission lists. If an LSA was received which seemed
+// to be from a previous incarnation of OSPF it had its age set to
+// MaxAge and was fired out, also not being added to the database.
+// If while a MaxAge LSA is on the retransmission only, either a new
+// LSA such as a Network-LSA is generated or an updated LSA arrives a
+// second LSA can be created with the same <Type,ID,ADV> tuple. Two LSAs
+// can exist on the retransmission list. Leaving the a MaxAge LSA in
+// the database solves both problems.
+#define MAX_AGE_IN_DATABASE
 
 #include "config.h"
 #include <map>
@@ -197,7 +209,17 @@ AreaRouter<A>::generate_network_lsa(PeerID peerid,
     header.set_link_state_id(link_state_id);
     header.set_advertising_router(_ospf.get_router_id());
 
+#ifdef	MAX_AGE_IN_DATABASE
+    size_t index;
+    Lsa::LsaRef lsar = Lsa::LsaRef(nlsa);
+    if (find_lsa(lsar, index)) {
+	update_lsa(lsar, index);
+    } else {
+	add_lsa(lsar);
+    }
+#else
     add_lsa(Lsa::LsaRef(nlsa));
+#endif
 
     update_network_lsa(peerid, link_state_id, routers, network_mask);
     
@@ -560,7 +582,9 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
     if (OspfTypes::MaxAge != lsar->get_header().get_ls_age())
 	XLOG_FATAL("LSA is not MaxAge %s", cstring(*lsar));
     
+#ifndef	MAX_AGE_IN_DATABASE
     delete_lsa(lsar, index, false /* Don't invalidate */);
+#endif
     publish_all(lsar);
 
     if (lsar->external())
@@ -583,6 +607,9 @@ template <typename A>
 bool
 AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
 {
+    size_t index;
+    XLOG_ASSERT(!find_lsa(lsar, index));
+
     // If there are no readers we can put this LSA into an empty slot.
     if (0 == _readers && !_empty_slots.empty()) {
 	_db[_empty_slots.front()] = lsar;
@@ -824,7 +851,8 @@ AreaRouter<A>::get_lsas(const list<Ls_request>& reqs,
 	// originating LSAs until the appropriate time has passed.
 	if (lsar->get_self_originating())
 	    _queue.fire();
-        lsar->update_age(now);
+	if (!lsar->maxage())
+	    lsar->update_age(now);
 	lsas.push_back(lsar);
     }
     
@@ -852,14 +880,35 @@ AreaRouter<A>::open_database(bool& empty)
 
 template <typename A>
 bool
-AreaRouter<A>::valid_entry_database(size_t index) const
+AreaRouter<A>::valid_entry_database(size_t index)
 {
+    Lsa::LsaRef lsar = _db[index];
+
     // This LSA is not valid.
-    if (!_db[index]->valid())
+    if (!lsar->valid())
 	return false;
 
+    if (!lsar->maxage()) {
+	TimeVal now;
+	_ospf.get_eventloop().current_time(now);
+	lsar->update_age(now);
+    }
+
+    if (lsar->maxage()) {
+#ifdef	MAX_AGE_IN_DATABASE
+	// XXX - This is the only way that a MaxAge LSA gets removed
+	// from the database. When this code is removed make
+	// valid_entry and subsequent const again.
+	// If we find a LSA with MaxAge in the database and the nack
+	// list is empty it can be removed from the database.
+	if (lsar->empty_nack())
+	    delete_lsa(lsar, index, true /* Invalidate */);
+#endif	
+	return false;
+    }
+
     // There is no wire format for this LSA.
-    if (!_db[index]->available())
+    if (!lsar->available())
 	return false;
 
     return true;
@@ -867,7 +916,7 @@ AreaRouter<A>::valid_entry_database(size_t index) const
 
 template <typename A>
 bool
-AreaRouter<A>::subsequent(DataBaseHandle& dbh) const
+AreaRouter<A>::subsequent(DataBaseHandle& dbh)
 {
     bool another = false;
     for (size_t index = dbh.position(); index < dbh.last(); index++) {
@@ -1183,6 +1232,9 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     // This is a spurious LSA that was probably originated by us in
     // the past just get rid of it by setting it to MaxAge.
     lsar->set_maxage();
+#ifdef	MAX_AGE_IN_DATABASE
+    add_lsa(lsar);
+#endif
 
     return true;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.55 2005/09/05 21:10:29 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.56 2005/09/05 22:46:57 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -190,7 +190,7 @@ class AreaRouter {
      *
      * @return true if this entry is valid.
      */
-    bool valid_entry_database(size_t index) const;
+    bool valid_entry_database(size_t index);
 
     /**
      * Is there another database entry following this one.
@@ -199,7 +199,7 @@ class AreaRouter {
      *
      * @return true if there is a subsequent entry.
      */
-    bool subsequent(DataBaseHandle& dbh) const;
+    bool subsequent(DataBaseHandle& dbh);
 
     /**
      * Next database entry

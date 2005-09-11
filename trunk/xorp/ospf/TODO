@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.47 2005/09/09 21:05:51 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.48 2005/09/11 02:45:40 atanu Exp $
 #
 
 TODO
@@ -108,6 +108,29 @@ As soon as its fixed remove this trace variable.
 36) There is a queue to which route adds and deletes are added. The
 queue does not handle replace or discard routes. Plus policy tags
 should be passed in somehow.
+
+37) The original design did not leave MaxAge LSAs in the
+database. When an LSA reached MaxAge it was removed from the database
+and existed only in retransmission lists. If an LSA was received which
+seemed to be from a previous incarnation of OSPF it had its age set to
+MaxAge and was fired out, also not being added to the database.  If
+while a MaxAge LSA is on the retransmission only, either a new LSA
+such as a Network-LSA is generated or an updated LSA arrives a second
+LSA can be created with the same <Type,ID,ADV> tuple. Two LSAs can
+exist on the retransmission list. Leaving the a MaxAge LSA in the
+database solves both problems but doesn't deal with when to purge the
+LSA. The indicator that an LSA can be purged is when its NACK list
+becomes empty.
+
+Currently the MaxAge LSAs are purged in valid_entry_database() this
+method is called to build the list of LSAs during database exchange.
+
+Remove the purge code from valid_entry_database() make it and
+subsequent() const again. When a MaxAge LSA is removed from the
+retransmission list and the NACK list becomes empty have it callback
+to the area code from the peer code to remove the LSA from the
+database. One possible implementation is to actually put a callback in
+the LSA itself that the peer code invokes.
 
 Possible issues
 ~~~~~~~~~~~~~~~
