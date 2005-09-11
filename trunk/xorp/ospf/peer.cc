@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.145 2005/09/10 00:42:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.146 2005/09/11 02:45:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2743,6 +2743,8 @@ Neighbour<A>::tear_down_state(State previous_state)
     stop_inactivity_timer();
     stop_rxmt_timer("Tear Down State");
     _all_headers_sent = false;
+    if (_database_handle.valid())
+	get_area_router()->close_database(_database_handle);
     _ls_request_list.clear();
     // If this assertion ever occurs then the nack list on the LSAs on
     // the queue must be cleared. The top of push_lsas shows how this
