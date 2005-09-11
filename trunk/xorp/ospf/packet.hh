@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.19 2005/08/11 21:35:32 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.20 2005/09/06 08:43:18 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -614,7 +614,7 @@ class LinkStateAcknowledgementPacket : public Packet {
 };
 
 /**
- * Helper class to manipulate the options field in packets.
+ * Helper class to manipulate the options field in packets and LSAs.
  */
 class Options {
  public:
