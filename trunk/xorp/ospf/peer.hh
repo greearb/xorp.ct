@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.92 2005/09/07 08:12:59 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.93 2005/09/09 00:13:07 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -430,6 +430,21 @@ class Peer {
      * Another way of phrasing this is, is the linktype BROADCAST or NBMA?
      */
     bool do_dr_or_bdr() const;
+
+    /**
+     * @return true if this router is the DR.
+     */
+    bool is_DR() const;
+
+    /**
+     * @return true if this router is the BDR.
+     */
+    bool is_BDR() const;
+
+    /**
+     * @return true if this router is the DR or BDR.
+     */
+    bool is_DR_or_BDR() const;
 
     /**
      * Are any of the neighbours of this peer in the state exchange or

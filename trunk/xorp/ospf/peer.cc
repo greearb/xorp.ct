@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.144 2005/09/09 08:02:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.145 2005/09/10 00:42:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -520,7 +520,6 @@ template <typename A>
 bool
 Peer<A>::push_lsas()
 {
-
     typename list<Neighbour<A> *>::iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	if (!(*n)->push_lsas())
@@ -545,6 +544,49 @@ Peer<A>::do_dr_or_bdr() const
 	break;
     }
     XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
+bool
+Peer<A>::is_DR() const
+{
+    XLOG_ASSERT(do_dr_or_bdr());
+
+    if (DR == get_state()) {
+	XLOG_ASSERT(get_candidate_id() == get_designated_router());
+	return true;
+    }
+
+    return false;
+}
+
+template <typename A>
+bool
+Peer<A>::is_BDR() const
+{
+    XLOG_ASSERT(do_dr_or_bdr());
+
+    if (Backup == get_state()) {
+	XLOG_ASSERT(get_candidate_id() == get_backup_designated_router());
+	return true;
+    }
+
+    return false;
+}
+
+template <typename A>
+bool
+Peer<A>::is_DR_or_BDR() const
+{
+    XLOG_ASSERT(do_dr_or_bdr());
+
+    if (is_DR())
+	return true;
+
+    if (is_BDR())
+	return true;
 
     return false;
 }
@@ -1904,7 +1946,7 @@ void
 Peer<A>::adjacency_change(bool up)
 {
     XLOG_ASSERT(do_dr_or_bdr());
-    // XLOG_ASSERT(is_DR()); Enable this when TODO 24 is done.
+    XLOG_ASSERT(is_DR());
 
     list<OspfTypes::RouterID> routers;
     uint32_t network_mask = 0;
@@ -2216,10 +2258,7 @@ Neighbour<A>::is_DR() const
 {
     XLOG_ASSERT(_peer.do_dr_or_bdr());
 
-    if (_peer.get_candidate_id() == _peer.get_designated_router())
-	return true;
-
-    return false;
+    return _peer.is_DR();
 }
 
 template <typename A>
@@ -2228,10 +2267,7 @@ Neighbour<A>::is_BDR() const
 {
     XLOG_ASSERT(_peer.do_dr_or_bdr());
 
-    if (_peer.get_candidate_id() == _peer.get_backup_designated_router())
-	return true;
-
-    return false;
+    return _peer.is_BDR();
 }
 
 template <typename A>
@@ -2240,13 +2276,7 @@ Neighbour<A>::is_DR_or_BDR() const
 {
     XLOG_ASSERT(_peer.do_dr_or_bdr());
 
-    if (is_DR())
-	return true;
-
-    if (is_BDR())
-	return true;
-
-    return false;
+    return _peer.is_DR_or_BDR();
 }
 
 template <typename A>

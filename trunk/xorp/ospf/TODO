@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.46 2005/09/08 17:16:19 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.47 2005/09/09 21:05:51 atanu Exp $
 #
 
 TODO
@@ -44,9 +44,6 @@ secction 8.2, receiving protocol packets covers the virtual link
 backbone checks.
 
 22) Perform authentication.
-
-24) Move is_DR(), is_BDR(), is_DR_or_BDR() and possibly
-is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
 
 25) A neighbour should only be listed in a hello packet if a hello
 packet has been seen from it in the last RouterDeadInterval seconds.
@@ -204,5 +201,10 @@ configured with one area internal_router_p will return true.
 
 23) In peer.cc "_peer.schedule_event("BackupSeen")" is an event that
 is not understood by process_scheduled_events().
+
+[DONE]
+
+24) Move is_DR(), is_BDR(), is_DR_or_BDR() and possibly
+is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
 
 [DONE]
