@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.5 2005/09/07 08:58:09 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.6 2005/09/09 15:32:35 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -208,11 +208,11 @@ class DebugIO : public IO<A> {
     bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 		   bool discard)
     {
-	DOUT(_info) << "Net" << net.str() <<
-	    " nexthop" << nexthop.str() <<
-	    " metric" << metric <<
-	    " equal" << equal <<
-	    " discard" << discard << endl;
+	DOUT(_info) << "Net: " << net.str() <<
+	    " nexthop: " << nexthop.str() <<
+	    " metric: " << metric <<
+	    " equal: " << pb(equal) <<
+	    " discard: " << pb(discard) << endl;
 	return true;
     }
 
@@ -222,11 +222,11 @@ class DebugIO : public IO<A> {
     bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 		   bool discard)
     {
-	DOUT(_info) << "Net" << net.str() <<
-	    " nexthop" << nexthop.str() <<
-	    " metric" << metric <<
-	    " equal" << equal <<
-	    " discard" << discard << endl;
+	DOUT(_info) << "Net: " << net.str() <<
+	    " nexthop: " << nexthop.str() <<
+	    " metric: " << metric <<
+	    " equal: " << pb(equal) <<
+	    " discard: " << pb(discard) << endl;
 	return true;
     }
 
@@ -235,7 +235,7 @@ class DebugIO : public IO<A> {
      */
     bool delete_route(IPNet<A> net)
     {
-	DOUT(_info) << "Net" << net.str() << endl;
+	DOUT(_info) << "Net: " << net.str() << endl;
 	
 	return true;
     }
