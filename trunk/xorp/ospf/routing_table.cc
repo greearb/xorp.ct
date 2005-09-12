@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.3 2005/09/09 13:00:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.4 2005/09/09 13:16:02 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -47,6 +47,8 @@ template <typename A>
 void
 RoutingTable<A>::begin()
 {
+    debug_msg("\n");
+
     delete _previous;
     _previous = _current;
     _current = new Trie<A, RouteEntry<A> >;
@@ -56,6 +58,8 @@ template <typename A>
 bool
 RoutingTable<A>::add_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
+    debug_msg("%s\n", cstring(net));
+
     _current->insert(net, rt);
 
     return true;
@@ -65,6 +69,8 @@ template <typename A>
 void
 RoutingTable<A>::end()
 {
+    debug_msg("\n");
+
     typename Trie<A, RouteEntry<A> >::iterator tip;
     typename Trie<A, RouteEntry<A> >::iterator tic;
 
@@ -72,10 +78,9 @@ RoutingTable<A>::end()
     // table and return.
 
     if (0 == _previous) {
-	for (tic = _current->begin(); tic != _current->begin(); tic++) {
-	    tip = _previous->lookup_node(tic.key());
+	for (tic = _current->begin(); tic != _current->end(); tic++) {
 	    RouteEntry<A>& rt = tic.payload();
-	    if (!_ospf.add_route(tip.key(), rt._nexthop, rt._cost,
+	    if (!_ospf.add_route(tic.key(), rt._nexthop, rt._cost,
 				 false /* equal */, false /* discard */)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
