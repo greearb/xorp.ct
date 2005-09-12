@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.52 2005/09/07 05:06:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.53 2005/09/08 04:22:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -603,7 +603,8 @@ RouterLink::str() const
 	    output += c_format(" Point-to-point");
 	    output += c_format(" Neighbours Router ID %s",
 			       pr_id(get_link_id()).c_str());
-	    output += c_format(" MIB-II ifIndex %u", get_link_data());
+	    output += c_format(" Routers interface address %s",
+			       pr_id(get_link_data()).c_str());
 	    break;
 	case transit:
 	    output += c_format(" Transit network");
