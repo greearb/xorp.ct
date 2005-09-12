@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.29 2005/09/07 05:21:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.30 2005/09/11 04:24:22 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -38,6 +38,7 @@
 
 #include "ospf.hh"
 #include "packet.hh"
+#include "test_common.hh"
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
@@ -70,36 +71,6 @@ compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
     }
 
     return true;
-}
-
-/**
- * Compute legal values for the options fields.
- */
-inline
-uint32_t
-compute_options(OspfTypes::Version version, OspfTypes::AreaType area_type)
-{
-    // Set/UnSet E-Bit.
-    Options options(version, 0);
-    switch(area_type) {
-    case OspfTypes::NORMAL:
-	options.set_e_bit(true);
-	break;
-    case OspfTypes::STUB:
-    case OspfTypes::NSSA:
-	options.set_e_bit(false);
-	break;
-    }
-
-    switch (version) {
-    case OspfTypes::V2:
-	break;
-    case OspfTypes::V3:
-	options.set_v6_bit(true);
-	break;
-    }
-
-    return options.get_options();
 }
 
 /**
