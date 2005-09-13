@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.3 2005/08/16 21:52:45 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.4 2005/09/09 12:32:41 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -33,6 +33,8 @@ class RouteEntry {
     OspfTypes::VertexType _destination_type;
     uint32_t _address;			// If dest type is Network
     OspfTypes:: RouterID _id;		// If dest type is Router
+    bool _area_border_router;		// Only valid if dest type is router
+    bool _as_boundary_router;		// Only valid if dest type is router
 
 //     uint32_t _prefix_length;		// Not convinced this is required.
     OspfTypes::AreaID _area;		// Associated area.
@@ -55,10 +57,32 @@ class RoutingTable {
 
     bool add_entry(IPNet<A> net, RouteEntry<A>& rt);
 
+    bool replace_entry(IPNet<A> net, RouteEntry<A>& rt);
+
     bool delete_entry(IPNet<A> net);
 
     void end();
     
+    /**
+     * Lookup address A in the routing table exact match.
+     *
+     * @param router address being looked up.
+     * @param rt if a match is found fill this in.
+     * 
+     * @return true if an entry is found.
+     */
+    bool lookup_entry(A router, RouteEntry<A>& rt);
+
+    /**
+     * Lookup network in the routing table exact match.
+     *
+     * @param network address being looked up.
+     * @param rt if a match is found fill this in.
+     * 
+     * @return true if an entry is found.
+     */
+    bool lookup_entry(IPNet<A> net, RouteEntry<A>& rt);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 

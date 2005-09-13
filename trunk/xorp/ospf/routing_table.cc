@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.4 2005/09/09 13:16:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.5 2005/09/12 18:00:12 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -61,6 +61,54 @@ RoutingTable<A>::add_entry(IPNet<A> net, RouteEntry<A>& rt)
     debug_msg("%s\n", cstring(net));
 
     _current->insert(net, rt);
+
+    return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::replace_entry(IPNet<A> net, RouteEntry<A>& rt)
+{
+    debug_msg("%s\n", cstring(net));
+
+    _current->erase(net);
+    _current->insert(net, rt);
+
+    return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
+{
+    debug_msg("%s\n", cstring(router));
+
+    IPNet<A> net(router, A::ADDR_BITLEN);
+
+    typename Trie<A, RouteEntry<A> >::iterator i = _current->lookup_node(net);
+    if (_current->end() == i)
+	return false;
+
+    RouteEntry<A>& rtentry = i.payload();
+
+    rt = rtentry;
+
+    return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
+{
+    debug_msg("%s\n", cstring(net));
+
+    typename Trie<A, RouteEntry<A> >::iterator i = _current->lookup_node(net);
+    if (_current->end() == i)
+	return false;
+
+    RouteEntry<A>& rtentry = i.payload();
+
+    rt = rtentry;
 
     return true;
 }
@@ -116,7 +164,8 @@ RoutingTable<A>::end()
 	    }
 	} else {
 	    RouteEntry<A>& rt_previous = tip.payload();
-	    if (rt._nexthop != rt_previous._nexthop) {
+	    if (rt._nexthop != rt_previous._nexthop ||
+		rt._cost != rt_previous._cost) {
 		if (!_ospf.replace_route(tip.key(), rt._nexthop, rt._cost,
 					 false /* equal */,
 					 false /* discard */)) {
