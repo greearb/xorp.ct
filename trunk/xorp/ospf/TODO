@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.48 2005/09/11 02:45:40 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.49 2005/09/11 09:07:04 atanu Exp $
 #
 
 TODO
@@ -131,6 +131,10 @@ retransmission list and the NACK list becomes empty have it callback
 to the area code from the peer code to remove the LSA from the
 database. One possible implementation is to actually put a callback in
 the LSA itself that the peer code invokes.
+
+38) The debug IO subsytem should store all the routes which are sent
+to it. Thus allowing the regression tests to check the table at the
+end of a run.
 
 Possible issues
 ~~~~~~~~~~~~~~~
