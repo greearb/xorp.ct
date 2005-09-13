@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.1 2005/09/05 22:06:57 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.2 2005/09/09 20:58:34 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,9 +45,145 @@
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
+#include "test_common.hh"
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
+
+void
+p2p(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
+    uint32_t metric)
+{
+     RouterLink rl(version);
+
+     rl.set_type(RouterLink::p2p);
+     rl.set_metric(metric);
+
+    switch(version) {
+    case OspfTypes::V2:
+	// The link id is the router id and the link data is the
+	// interface address. They may be the same, they are not
+	// interchangeable. Adding one to the link data should allow
+	// us the catch any misuse in the code.
+	rl.set_link_id(id);
+	rl.set_link_data(id + 1);
+	break;
+    case OspfTypes::V3:
+	rl.set_interface_id(id);
+	rl.set_neighbour_interface_id(0);
+	rl.set_neighbour_router_id(id);
+	break;
+    }
+    rlsa->get_router_links().push_back(rl);
+}
+
+void
+stub(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
+    uint32_t metric)
+{
+     RouterLink rl(version);
+
+    switch(version) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	return;
+	break;
+    }
+
+     rl.set_type(RouterLink::stub);
+     rl.set_metric(metric);
+
+     id <<= 16;
+
+     switch(version) {
+     case OspfTypes::V2:
+	 rl.set_link_id(id);
+	 rl.set_link_data(0xffff0000);
+	break;
+     case OspfTypes::V3:
+	 rl.set_interface_id(id);
+	 rl.set_neighbour_interface_id(0);
+	 rl.set_neighbour_router_id(id);
+	 break;
+     }
+     rlsa->get_router_links().push_back(rl);
+}
+
+// This is the origin.
+
+Lsa::LsaRef
+create_RT6(OspfTypes::Version version)
+{
+     RouterLsa *rlsa = new RouterLsa(version);
+     Lsa_header& header = rlsa->get_header();
+
+     uint32_t options = compute_options(version, OspfTypes::NORMAL);
+
+     // Set the header fields.
+     switch(version) {
+     case OspfTypes::V2:
+	 header.set_options(options);
+	 break;
+     case OspfTypes::V3:
+	 rlsa->set_options(options);
+	 break;
+     }
+     header.set_link_state_id(6);
+     header.set_advertising_router(6);
+
+     // Link to RT3
+     p2p(version, rlsa, 3, 6);
+
+     // Link to RT5
+     p2p(version, rlsa, 5, 6);
+
+     // Link to RT10 XXX need to look at this more carefully.
+     p2p(version, rlsa, 10, 7);
+
+     rlsa->encode();
+
+     rlsa->set_self_originating(true);
+
+     return Lsa::LsaRef(rlsa);
+}
+
+Lsa::LsaRef
+create_RT3(OspfTypes::Version version)
+{
+     RouterLsa *rlsa = new RouterLsa(version);
+     Lsa_header& header = rlsa->get_header();
+
+     uint32_t options = compute_options(version, OspfTypes::NORMAL);
+
+     // Set the header fields.
+     switch(version) {
+     case OspfTypes::V2:
+	 header.set_options(options);
+	 break;
+     case OspfTypes::V3:
+	 rlsa->set_options(options);
+	 break;
+     }
+     header.set_link_state_id(3);
+     header.set_advertising_router(3);
+
+     // Link to RT6
+     p2p(version, rlsa, 6, 8);
+
+     // Network to N4
+     stub(version, rlsa, 4, 2);
+
+     // Network to N3
+//      network(version, rlsa, 3, 1);
+
+     rlsa->encode();
+
+     return Lsa::LsaRef(rlsa);
+}
+
+// Some of the routers from Figure 2. in RFC 2328. Single area.
+// This router is R6.
 
 template <typename A> 
 bool
@@ -60,7 +196,7 @@ routing1(TestInfo& info, OspfTypes::Version version)
     io.startup();
     
     Ospf<A> ospf(version, eventloop, &io);
-    ospf.set_router_id(set_id("0.0.0.1"));
+    ospf.set_router_id(set_id("0.0.0.6"));
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
     const uint16_t interface_prefix_length = 16;
@@ -103,7 +239,21 @@ routing1(TestInfo& info, OspfTypes::Version version)
     AreaRouter<A> *ar = pm.get_area_router(area);
     XLOG_ASSERT(ar);
 
-    ar->debugging_routing_total_recompute();
+    ar->testing_replace_router_lsa(create_RT6(version));
+
+    ar->testing_add_lsa(create_RT3(version));
+
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    ar->testing_delete_lsa(create_RT3(version));
+
+    // Now delete the routes.
+
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
 
     // Take the peering down
     if (!pm.set_state_peer(peerid, false)) {
