@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vertex.hh,v 1.3 2005/09/05 00:40:30 atanu Exp $
+// $XORP: xorp/ospf/vertex.hh,v 1.4 2005/09/09 12:29:00 atanu Exp $
 
 #ifndef __OSPF_VERTEX_HH__
 #define __OSPF_VERTEX_HH__
@@ -24,6 +24,8 @@
 
 class Vertex {
  public:
+    Vertex() : _origin(false), _address(0)
+    {}
 
     bool operator<(const Vertex& other) const {
 	XLOG_ASSERT(get_version() == other.get_version());
@@ -101,11 +103,29 @@ class Vertex {
 	return _interface_id;
     }
 
+    void set_origin(bool origin) {
+	_origin = origin;
+    }
+
+    bool get_origin() const {
+	return _origin;
+    }
+
+    void set_address(uint32_t address) {
+	_address = address;
+    }
+
+    uint32_t get_address() const {
+	return _address;
+    }
+
     string str() const {
 	string output;
 	switch(_version) {
 	case OspfTypes::V2:
 	    output = "OSPFv2";
+	    if (_origin)
+		output += "(Origin)";
 	    switch(_t) {
 	    case OspfTypes::Router:
 		output += " Router";
@@ -114,7 +134,8 @@ class Vertex {
 		output += " Network";
 		break;
 	    }
-	    output += c_format(" %s(%#x)", pr_id(_nodeid).c_str(), _nodeid);
+	    output += c_format(" %s(%#x) %s(%#x)", pr_id(_nodeid).c_str(), 
+			       _nodeid, pr_id(_address).c_str(), _address);
 	    break;
 	case OspfTypes::V3:
 	    output = "OSPFv3";
@@ -138,6 +159,9 @@ class Vertex {
     uint32_t _nodeid;
     uint32_t _interface_id;	// OSPFv3 Only
 
+    bool _origin;		// Is this the vertex of the router.
+    uint32_t _address;		// The address of the Vertex that
+				// should be used as the nexthop by the origin.
     Lsa::LsaRef _lsar;
 
     // RFC 2328 Section 16.1.  Calculating the shortest-path tree for an area:
