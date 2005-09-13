@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.57 2005/09/11 09:07:04 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.58 2005/09/13 18:38:34 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -585,8 +585,7 @@ class AreaRouter {
     void routing_timer();
 
     /**
-     * Create a fresh link state database by performing a pass over
-     * the whole database.
+     * Totally recompute the routing table from the LSA database.
      */
     void routing_total_recompute();
     void routing_total_recomputeV2();
@@ -598,6 +597,20 @@ class AreaRouter {
     void routing_inter_area();
     void routing_inter_areaV2();
     void routing_inter_areaV3();
+
+    /**
+     * Compute the transit area routes.
+     */
+    void routing_transit_area();
+    void routing_transit_areaV2();
+    void routing_transit_areaV3();
+
+    /**
+     * Compute the AS external routes.
+     */
+    void routing_as_external();
+    void routing_as_externalV2();
+    void routing_as_externalV3();
 
     /**
      * Does this Router-LSA point back to the router link that points

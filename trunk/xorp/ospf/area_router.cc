@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.87 2005/09/11 09:53:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.88 2005/09/13 18:38:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1319,6 +1319,8 @@ AreaRouter<A>::routing_total_recompute()
 }
 
 template <> void AreaRouter<IPv4>::routing_inter_areaV2();
+template <> void AreaRouter<IPv4>::routing_transit_areaV2();
+template <> void AreaRouter<IPv4>::routing_as_externalV2();
 
 template <>
 void 
@@ -1447,6 +1449,15 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	 _ospf.get_peer_manager().area_border_router_p()))
 	routing_inter_areaV2();
 
+    // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs
+    if (transit_capability &&
+	_ospf.get_peer_manager().area_border_router_p())
+	routing_transit_areaV2();
+
+    // RFC 2328 Section 16.4.  Calculating AS external routes
+
+    routing_as_externalV2();
+
     routing_table.end();
 }
 
@@ -1503,6 +1514,8 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	    metric = srlsa->get_metric();
 	    mask = IPv4::ALL_ONES();
 	}
+	if (0 == snlsa && 0 == srlsa)
+	    continue;
 	if (OspfTypes::LSInfinity == metric)
 	    continue;
 
@@ -1573,6 +1586,19 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	if (replace_entry)
 	    routing_table.replace_entry(n, rtentry);
     }
+}
+
+template <>
+void 
+AreaRouter<IPv4>::routing_transit_areaV2()
+{
+    XLOG_WARNING("TBD");
+}
+
+template <>
+void 
+AreaRouter<IPv4>::routing_as_externalV2()
+{
 }
 
 template <typename A>
