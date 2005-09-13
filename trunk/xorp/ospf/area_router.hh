@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.56 2005/09/05 22:46:57 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.57 2005/09/11 09:07:04 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -220,19 +220,55 @@ class AreaRouter {
     /**
      * Print link state database.
      */
-    void print_link_state_database() const;
+    void testing_print_link_state_database() const;
 
     /**
-     * Debugging enty point to add an LSA to the database.
+     * Testing entry point to add this router Router-LSA to the
+     * database replacing the one that is already there.
      */
-    bool debugging_add_lsa(Lsa::LsaRef lsar) {
+    bool testing_replace_router_lsa(Lsa::LsaRef lsar) {
+	RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+	XLOG_ASSERT(rlsa);
+	XLOG_ASSERT(rlsa->get_self_originating());
+	XLOG_ASSERT(_ospf.get_router_id() ==
+		    rlsa->get_header().get_link_state_id());
+	XLOG_ASSERT(_ospf.get_router_id() ==
+		    rlsa->get_header().get_advertising_router());
+
+	size_t index;
+	if (find_lsa(_router_lsa, index)) {
+	    delete_lsa(_router_lsa, index, true);
+	}
+	_router_lsa = lsar;
+	add_lsa(_router_lsa);
+	return true;
+    }
+
+    /**
+     * Testing entry point to add an LSA to the database.
+     */
+    bool testing_add_lsa(Lsa::LsaRef lsar) {
 	return add_lsa(lsar);
     }
 
     /**
-     * Debugging enty point to force a toal routing computation.
+     * Testing entry point to delete an LSA from the database.
      */
-    void debugging_routing_total_recompute() {
+    bool testing_delete_lsa(Lsa::LsaRef lsar) {
+	size_t index;
+	if (find_lsa(lsar, index)) {
+	    delete_lsa(lsar, index, true);
+	    return true;
+	}
+	XLOG_FATAL("Attempt to delete LSA that is not in database \n%s",
+		   cstring(*lsar));
+	return false;
+    }
+
+    /**
+     * Testing enty point to force a toal routing computation.
+     */
+    void testing_routing_total_recompute() {
 	routing_total_recompute();
     }
 
@@ -553,6 +589,38 @@ class AreaRouter {
      * the whole database.
      */
     void routing_total_recompute();
+    void routing_total_recomputeV2();
+    void routing_total_recomputeV3();
+
+    /**
+     * Compute the inter-area routes.
+     */
+    void routing_inter_area();
+    void routing_inter_areaV2();
+    void routing_inter_areaV3();
+
+    /**
+     * Does this Router-LSA point back to the router link that points
+     * at it.
+     *
+     * @param rl_type type of link p2p or vlink
+     * @param link_state_id from RouterLSA that points at rlsa.
+     * @param rl link from RouterLSA that points at rlsa.
+     * @param rlsa that is pointed at by previous two arguments.
+     * @param metric (out argument) from rlsa back to link_state_id if the back
+     * pointer exists.
+     * @param interface_address (out argument) if the back pointer exists.
+     *
+     * @return true if the back pointer exists also fill in the metric
+     * and interface address.
+     * value.
+     */
+    bool bidirectional(RouterLink::Type rl_type,
+		       const uint32_t link_state_id,
+		       const RouterLink& rl,
+		       RouterLsa *rlsa,
+		       uint16_t& metric,
+		       uint32_t& interface_address);
 
     /**
      * Does this Network-LSA point back to the router link that points
@@ -563,14 +631,23 @@ class AreaRouter {
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
      */
-    void routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& v,
-			      const RouterLsa *rlsa);
+    void routing_router_lsaV2(Spt<Vertex>& spt, const Vertex& src,
+			      RouterLsa *rlsa);
+
+    void routing_router_link_p2p_vlinkV2(Spt<Vertex>& spt, const Vertex& src,
+					 RouterLsa *rlsa, RouterLink rl);
+
+    void routing_router_link_transitV2(Spt<Vertex>& spt, const Vertex& src,
+				       RouterLsa *rlsa, RouterLink rl);
+
+    void routing_router_link_stubV2(Spt<Vertex>& spt, const Vertex& src,
+				    RouterLsa *rlsa, RouterLink rl);
 
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
      */
     void routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
-			      const RouterLsa *rlsa);
+			      RouterLsa *rlsa);
 };
 
 /**
