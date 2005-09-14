@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.13 2005/09/09 21:05:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.14 2005/09/09 21:18:39 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -705,6 +705,8 @@ XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
 	      discard ? "true" : "false");
 
+    _rib_queue.queue_add_route(_ribname, net, nexthop, metric);
+
     return true;
 }
 
@@ -717,6 +719,10 @@ XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
 	      discard ? "true" : "false");
 
+    // XXX - The queue should support replace see TODO 36.
+    _rib_queue.queue_delete_route(_ribname, net);
+    _rib_queue.queue_add_route(_ribname, net, nexthop, metric);
+
     return true;
 }
 
@@ -725,6 +731,8 @@ bool
 XrlIO<A>::delete_route(IPNet<A> net)
 {
     debug_msg("Net %s\n", cstring(net));
+
+    _rib_queue.queue_delete_route(_ribname, net);
 
     return true;
 }
