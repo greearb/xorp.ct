@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.49 2005/09/11 09:07:04 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.50 2005/09/13 18:09:38 atanu Exp $
 #
 
 TODO
@@ -135,6 +135,9 @@ the LSA itself that the peer code invokes.
 38) The debug IO subsytem should store all the routes which are sent
 to it. Thus allowing the regression tests to check the table at the
 end of a run.
+
+39) The code that processes AS-External-LSAs will need to be
+re-examined when multiple areas are fully supported.
 
 Possible issues
 ~~~~~~~~~~~~~~~

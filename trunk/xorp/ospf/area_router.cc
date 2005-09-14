@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.88 2005/09/13 18:38:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.89 2005/09/13 20:23:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1599,6 +1599,108 @@ template <>
 void 
 AreaRouter<IPv4>::routing_as_externalV2()
 {
+    // RFC 2328 Section 16.4.  Calculating AS external routes
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage() || lsar->get_self_originating())
+	    continue;
+
+	ASExternalLsa *aselsa;
+	if (0 == (aselsa = dynamic_cast<ASExternalLsa *>(lsar.get()))) {
+	    continue;
+	}
+
+	if (OspfTypes::LSInfinity == aselsa->get_metric())
+	    continue;
+
+	IPv4 mask(htonl(aselsa->get_network_mask()));
+	uint32_t lsid = lsar->get_header().get_link_state_id();
+	IPNet<IPv4> n(IPv4(htonl(lsid)), mask.mask_len());
+	
+	// (3)
+	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
+	RouteEntry<IPv4> rt;
+	if (!routing_table.lookup_entry(n, rt))
+	    continue;
+
+	if (!rt._as_boundary_router)
+	    return;
+
+	// XXX
+	// This will trip when we move to multiple areas. When that
+	// happens the code should be fixed to find the entry for this
+	// area if present.
+	XLOG_ASSERT(rt._area == _area);
+
+	IPv4 forwarding = aselsa->get_forwarding_address_ipv4();
+	if (IPv4(static_cast<uint32_t>(0)) == forwarding) {
+	    forwarding = rt._nexthop;
+	}
+
+	RouteEntry<IPv4> rtf;
+	if (!routing_table.lookup_entry(forwarding, rtf))
+	    continue;
+	if (RouteEntry<IPv4>::intra_area != rtf._path_type &&
+	    RouteEntry<IPv4>::inter_area != rtf._path_type)
+	    continue;
+	uint32_t x = rtf._cost;	// Cost specified by ASBR/forwarding address
+	uint32_t y = aselsa->get_metric();
+
+	RouteEntry<IPv4> rtentry;
+	if (!aselsa->get_e_bit()) {	// Type 1
+	    rtentry._path_type = RouteEntry<IPv4>::type1;
+	    rtentry._cost = x + y;
+	} else {			// Type 2
+	    rtentry._path_type = RouteEntry<IPv4>::type2;
+	    rtentry._cost = x;
+	    rtentry._type_2_cost = y;
+	}
+
+	// (5)
+	bool add_entry = false;
+	bool replace_entry = false;
+	RouteEntry<IPv4> rtnet;
+	if (routing_table.lookup_entry(n, rtnet)) {
+	    switch(rtnet._path_type) {
+	    case RouteEntry<IPv4>::intra_area:
+		break;
+	    case RouteEntry<IPv4>::inter_area:
+		break;
+	    case RouteEntry<IPv4>::type1:
+		if (RouteEntry<IPv4>::type2 == rtentry._path_type) {
+		    break;
+		}
+		if (rtentry._cost < rtnet._cost)
+		    replace_entry = true;
+		break;
+	    case RouteEntry<IPv4>::type2:
+		if (RouteEntry<IPv4>::type1 == rtentry._path_type) {
+		    replace_entry = true;
+		    break;
+		}
+		if (rtentry._type_2_cost < rtnet._type_2_cost)
+		    replace_entry = true;
+		break;
+	    }
+	} else {
+	    add_entry = true;
+	}
+	if (!add_entry && !replace_entry)
+	    continue;
+
+	rtentry._destination_type = OspfTypes::Network;
+	rtentry._address = lsid;
+	rtentry._area = _area;
+	rtentry._nexthop = rtnet._nexthop;
+	rtentry._advertising_router = aselsa->get_header().
+	    get_advertising_router();
+
+	if (add_entry)
+	    routing_table.add_entry(n, rtentry);
+	if (replace_entry)
+	    routing_table.replace_entry(n, rtentry);
+	
+    }
 }
 
 template <typename A>
