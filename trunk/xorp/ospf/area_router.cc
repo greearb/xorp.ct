@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.90 2005/09/14 08:11:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.91 2005/09/14 09:03:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1369,6 +1369,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 		debug_msg("%s Add %s\n",
 		       pr_id(_ospf.get_router_id()).c_str(),
 		       cstring(v));
+		spt.add_node(v);
 	    }
 
 	    debug_msg("%s Router-Lsa %s\n",
