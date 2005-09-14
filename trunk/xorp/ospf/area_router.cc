@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.89 2005/09/13 20:23:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.90 2005/09/14 08:11:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1773,7 +1773,7 @@ update_edge(Spt<A>& spt, const Vertex& src, int metric, const Vertex& dst)
 	XLOG_WARNING("Edge exists between %s and %s", cstring(src),
 		     cstring(dst));
 	if (!spt.update_edge_weight(src, metric, dst))
-	    XLOG_FATAL("Couldn't add edge between %s and %s",
+	    XLOG_FATAL("Couldn't update edge between %s and %s",
 		       cstring(src), cstring(dst));
     }
 }
