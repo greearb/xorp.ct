@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.91 2005/09/14 09:03:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.92 2005/09/14 09:11:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -976,17 +976,15 @@ template <typename A>
 void
 AreaRouter<A>::testing_print_link_state_database() const
 {
-    fprintf(stderr, "****** DATABASE ******\n");
+    fprintf(stderr, "****** DATABASE START ******\n");
     for (size_t index = 0 ; index < _last_entry; index++) {
 	Lsa::LsaRef lsar = _db[index];
 	if (!lsar->valid())
 	    continue;
 	// Please leave this as a fprintf its for debugging only.
-	fprintf(stderr, "%s database %s\n",
-	       pr_id(_ospf.get_router_id()).c_str(),
-	       cstring(*lsar));
+	fprintf(stderr, "%s\n", cstring(*lsar));
     }
-    fprintf(stderr, "****** DATABASE ******\n");
+    fprintf(stderr, "****** DATABASE END ********\n");
 }
 
 template <typename A>
@@ -1326,7 +1324,9 @@ template <>
 void 
 AreaRouter<IPv4>::routing_total_recomputeV2()
 {
-//     debugging_print_link_state_database();
+#ifdef	DEBUG_LOGGING
+    testing_print_link_state_database();
+#endif
 
     // RFC 2328 16.1.  Calculating the shortest-path tree for an area
 
