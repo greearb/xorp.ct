@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.95 2005/09/15 05:02:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.96 2005/09/15 09:50:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1535,7 +1535,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	    continue;
 
 	uint32_t lsid = lsar->get_header().get_link_state_id();
-	IPNet<IPv4> n(IPv4(htonl(lsid)), mask.mask_len());
+	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
 
 	// (3) 
 	if (snlsa) {
@@ -1623,10 +1623,10 @@ AreaRouter<IPv4>::routing_as_externalV2()
 
 	if (OspfTypes::LSInfinity == aselsa->get_metric())
 	    continue;
-
-	IPv4 mask(htonl(aselsa->get_network_mask()));
+	
+	IPv4 mask = IPv4(htonl(aselsa->get_network_mask()));
 	uint32_t lsid = lsar->get_header().get_link_state_id();
-	IPNet<IPv4> n(IPv4(htonl(lsid)), mask.mask_len());
+	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
 	
 	// (3)
 	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
