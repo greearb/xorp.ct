@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.53 2005/09/08 04:22:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.54 2005/09/12 17:55:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -233,11 +233,11 @@ Lsa_header::str() const
 {
     string output;
 
-    output = c_format("LS age %u", get_ls_age());
+    output = c_format("LS age %4u", get_ls_age());
 
     switch(get_version()) {
     case OspfTypes::V2:
-	output += c_format(" Options %#x %s", get_options(),
+	output += c_format(" Options %#4x %s", get_options(),
 			   cstring(Options(get_version(), get_options())));
 	break;
     case OspfTypes::V3:
