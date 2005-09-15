@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.94 2005/09/15 00:04:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.95 2005/09/15 05:02:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1890,7 +1890,6 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     // Both nodes exist check for
     // bi-directional connectivity.
     if (!bidirectional(rl, dynamic_cast<NetworkLsa *>(lsan.get()))) {
-				
 	return;
     }
     // Put both links back. If the network
@@ -1903,6 +1902,11 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     dst.set_nodeid(lsan->get_header().get_link_state_id());
     dst.set_lsa(lsan);
 		
+    // If the src is the origin then set the address of the
+    // dest. This is the nexthop address from the origin.
+    if (src.get_origin()) {
+	dst.set_address(lsan->get_header().get_link_state_id());
+    }
     if (!spt.exists_node(dst)) {
 	spt.add_node(dst);
     }
@@ -1933,7 +1937,7 @@ AreaRouter<A>::routing_router_link_stubV2(Spt<Vertex>& spt,
     Lsa::LsaRef lsan = Lsa::LsaRef(nlsa);
     // 
     dst.set_lsa(lsan);
-    // 
+    //
     if (!spt.exists_node(dst)) {
 	spt.add_node(dst);
     }
