@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.146 2005/09/11 02:45:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.147 2005/09/11 07:49:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -969,11 +969,10 @@ Peer<A>::event_interface_up()
 	// Not eligible to be the designated router.
 	if (0 == _hello_packet.get_router_priority()) {
 	    change_state(DR_other);
-
-	    // Start sending hello packets.
 	    start_hello_timer();
 	} else {
 	    change_state(Waiting);
+	    start_hello_timer();
 	    start_wait_timer();
 	}
 	break;
@@ -1004,7 +1003,7 @@ Peer<A>::event_wait_timer()
     switch(get_state()) {
     case Down:
     case Loopback:
-	XLOG_WARNING("Unexpected state %s",
+	XLOG_FATAL("Unexpected state %s",
 		     pp_interface_state(get_state()).c_str());
 	break;
     case Waiting:
@@ -1018,8 +1017,8 @@ Peer<A>::event_wait_timer()
     case DR_other:
     case Backup:
     case DR:
-	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(get_state()).c_str());
+	XLOG_FATAL("Unexpected state %s",
+		   pp_interface_state(get_state()).c_str());
 	break;
     }
 
@@ -1041,10 +1040,11 @@ Peer<A>::event_backup_seen()
     switch(get_state()) {
     case Down:
     case Loopback:
-	XLOG_WARNING("Unexpected state %s",
+	XLOG_FATAL("Unexpected state %s",
 		     pp_interface_state(get_state()).c_str());
 	break;
     case Waiting:
+	stop_wait_timer();
 	compute_designated_router_and_backup_designated_router();
 
 	XLOG_ASSERT(get_state() == DR_other || get_state() == Backup ||
@@ -1055,8 +1055,8 @@ Peer<A>::event_backup_seen()
     case DR_other:
     case Backup:
     case DR:
-	XLOG_WARNING("Unexpected state %s",
-		     pp_interface_state(get_state()).c_str());
+	XLOG_FATAL("Unexpected state %s",
+		   pp_interface_state(get_state()).c_str());
 	break;
     }
 
@@ -1233,11 +1233,25 @@ Peer<A>::start_hello_timer()
 
 template <typename A>
 void
+Peer<A>::stop_hello_timer()
+{
+    _hello_timer.clear();
+}
+
+template <typename A>
+void
 Peer<A>::start_wait_timer()
 {
     _wait_timer = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(_hello_packet.get_router_dead_interval()),
 			 callback(this, &Peer<A>::event_wait_timer));
+}
+
+template <typename A>
+void
+Peer<A>::stop_wait_timer()
+{
+    _wait_timer.clear();
 }
 
 #if	0
@@ -2000,8 +2014,8 @@ template <typename A>
 void
 Peer<A>::tear_down_state()
 {
-    _hello_timer.clear();
-    _wait_timer.clear();
+    stop_hello_timer();
+    stop_wait_timer();
 }
 
 template <typename A>
@@ -2828,17 +2842,26 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 	return;
     }
 
-    // If this is the time that we have reached state TwoWay
-    if (Init == get_state())
-	first = true;
-
     event_2_way_received();
 
     // Don't attempt to compute the DR or BDR if this is not BROADCAST or NBMA.
     if (!_peer.do_dr_or_bdr())
 	return;
 
-    if (first || previous_router_priority != hello->get_router_priority())
+    // Everything below here it trying to figure out if a
+    // "NeighbourChange" event should be scheduled. Which is not
+    // allowed in state Waiting.
+    if (Peer<A>::Waiting == _peer.get_state()) {
+	if ((get_candidate_id() == hello->get_designated_router() &&
+	    OspfTypes::RouterID("0.0.0.0") == 
+	     hello->get_backup_designated_router()) ||
+	    get_candidate_id() == hello->get_backup_designated_router()) {
+	    _peer.schedule_event("BackupSeen");
+	}
+	return;
+    }
+
+    if (previous_router_priority != hello->get_router_priority())
 	_peer.schedule_event("NeighbourChange");
 
     bool is_dr = _peer.get_designated_router() == 
@@ -2851,12 +2874,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     else
 	was_dr = _peer.get_designated_router() == previous_dr;
 
-    if (is_dr && 
-	OspfTypes::RouterID("0.0.0.0") == 
-	hello->get_backup_designated_router() &&
-	_peer.get_state() == Peer<A>::Waiting) {
-	_peer.schedule_event("BackupSeen");
-    } else if(is_dr != was_dr)
+    if(is_dr != was_dr)
 	_peer.schedule_event("NeighbourChange");
 
     bool is_bdr = _peer.get_backup_designated_router() ==
@@ -2868,9 +2886,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     else
 	was_bdr = _peer.get_backup_designated_router() == previous_bdr;
 
-    if (is_bdr && _peer.get_state() == Peer<A>::Waiting) {
-	_peer.schedule_event("BackupSeen");
-    } else if(is_bdr != was_bdr)
+    if(is_bdr != was_bdr)
 	_peer.schedule_event("NeighbourChange");
 
     if (OspfTypes::NBMA == get_linktype())

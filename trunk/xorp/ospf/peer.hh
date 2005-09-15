@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.93 2005/09/09 00:13:07 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.94 2005/09/11 02:45:40 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -839,8 +839,10 @@ class Peer {
     void get_attached_routers(list<OspfTypes::RouterID>& routers);
 
     void start_hello_timer();
+    void stop_hello_timer();
 
     void start_wait_timer();
+    void stop_wait_timer();
 
     bool send_hello_packet();
     
