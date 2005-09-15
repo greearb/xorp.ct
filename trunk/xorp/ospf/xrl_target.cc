@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.5 2005/09/05 20:28:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.6 2005/09/07 22:48:53 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -300,6 +300,62 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
     }
     if (!_ospf.get_peer_manager().set_state_peer(peerid, enable))
 	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_add_neighbour(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4& addr,
+					  const IPv4& neighbour_address,
+					  const IPv4& neighbour_id)
+{
+    OspfTypes::AreaID area = ntohl(addr.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), 
+	      cstring(neighbour_address),pr_id(rid).c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().add_neighbour(peerid, area,
+						neighbour_address,
+						rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to add neighbour " +
+					   neighbour_address.str());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
+					     const string& vifname,
+					     const IPv4& addr,
+					     const IPv4& neighbour_address,
+					     const IPv4& neighbour_id)
+{
+    OspfTypes::AreaID area = ntohl(addr.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), 
+	      cstring(neighbour_address),pr_id(rid).c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf.get_peer_manager().remove_neighbour(peerid, area,
+						   neighbour_address,
+						   rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to remove neighbour" +
+					   neighbour_address.str());
 
     return XrlCmdError::OKAY();
 }

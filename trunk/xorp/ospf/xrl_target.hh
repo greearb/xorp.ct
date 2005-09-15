@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.4 2005/09/05 22:03:30 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.5 2005/09/07 22:48:54 pavlin Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -151,6 +151,28 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	ifname,
 	const string&	vifname,
 	const bool&	enable);
+
+    /**
+     *  Add a neighbour to the peer.
+     */
+    XrlCmdError ospfv2_0_1_add_neighbour(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv4&	neighbour_address,
+	const IPv4&	neighbour_id);
+
+    /**
+     *  Remove a neighbour from the peer.
+     */
+    XrlCmdError ospfv2_0_1_remove_neighbour(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv4&	neighbour_address,
+	const IPv4&	neighbour_id);
 
     /**
      *  Used in the designated router election.

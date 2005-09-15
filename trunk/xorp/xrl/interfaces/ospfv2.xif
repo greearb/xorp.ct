@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.1 2004/12/28 09:49:15 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.2 2005/09/02 12:17:06 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -58,6 +58,24 @@ interface ospfv2/0.1 {
     set_peer_state ? ifname:txt \
 		   & vifname:txt \
 		   & enable:bool
+
+    /**
+     * Add a neighbour to the peer.
+     */
+    add_neighbour ? ifname:txt \
+		  & vifname:txt \
+		  & area:ipv4 \
+		  & neighbour_address:ipv4 \
+		  & neighbour_id:ipv4
+
+    /**
+     * Remove a neighbour from the peer.
+     */
+    remove_neighbour ? ifname:txt \
+		  & vifname:txt \
+		  & area:ipv4 \
+		  & neighbour_address:ipv4 \
+		  & neighbour_id:ipv4
 
     /**
      * Used in the designated router election.
