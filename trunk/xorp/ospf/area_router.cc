@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.92 2005/09/14 09:11:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.93 2005/09/14 23:58:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -199,6 +199,9 @@ AreaRouter<A>::generate_network_lsa(PeerID peerid,
 				    list<OspfTypes::RouterID>& routers,
 				    uint32_t network_mask)
 {
+    debug_msg("PeerID %u link state id %s\n", peerid,
+	      pr_id(link_state_id).c_str());
+
     NetworkLsa *nlsa = new NetworkLsa(_ospf.get_version());
     nlsa->set_self_originating(true);
     TimeVal now;
@@ -233,6 +236,9 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 				  list<OspfTypes::RouterID>& routers,
 				  uint32_t network_mask)
 {
+    debug_msg("PeerID %u link state id %s\n", peerid,
+	      pr_id(link_state_id).c_str());
+
     OspfTypes::Version version = _ospf.get_version();
     Ls_request lsr(version, NetworkLsa(version).get_ls_type(),
 		   link_state_id, _ospf.get_router_id());
@@ -283,9 +289,12 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 
 template <typename A>
 bool 
-AreaRouter<A>::withdraw_network_lsa(PeerID /*peerid*/,
+AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
 				    OspfTypes::RouterID link_state_id)
 {
+    debug_msg("PeerID %u link state id %s\n", peerid,
+	      pr_id(link_state_id).c_str());
+
     OspfTypes::Version version = _ospf.get_version();
     Ls_request lsr(version, NetworkLsa(version).get_ls_type(),
 		   link_state_id, _ospf.get_router_id());
