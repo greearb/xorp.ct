@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.14 2005/09/09 21:18:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.15 2005/09/14 08:24:10 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -1006,7 +1006,9 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_FATAL("callback: %s %s",  comment.c_str(), error.str().c_str());
+	// XXX - Make this XLOG_FATAL when this has been debugged.
+	// TODO 40.
+	XLOG_ERROR("callback: %s %s",  comment.c_str(), error.str().c_str());
 	break;
     }
 

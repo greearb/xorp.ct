@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.50 2005/09/13 18:09:38 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.51 2005/09/14 08:11:25 atanu Exp $
 #
 
 TODO
@@ -138,6 +138,9 @@ end of a run.
 
 39) The code that processes AS-External-LSAs will need to be
 re-examined when multiple areas are fully supported.
+
+40) When the adding of routes is more robust change the XLOG_ERROR to
+an XLOG_FATAL in route_command_done().
 
 Possible issues
 ~~~~~~~~~~~~~~~
