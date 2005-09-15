@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.93 2005/09/14 23:58:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.94 2005/09/15 00:04:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -763,7 +763,7 @@ AreaRouter<A>::compare_lsa(const Lsa_header& candidate,
 			   const Lsa_header& current) const
 {
     debug_msg("router id: %s\n", pr_id(_ospf.get_router_id()).c_str());
-    debug_msg("\ncandidate: %s\ncurrent: %s\n", cstring(candidate),
+    debug_msg("\ncandidate: %s\n  current: %s\n", cstring(candidate),
 	      cstring(current));
 
     const int32_t candidate_seqno = candidate.get_ls_sequence_number();
@@ -1181,7 +1181,7 @@ AreaRouter<IPv4>::self_originated_by_interface(Lsa::LsaRef lsar, IPv4) const
     if (0 == dynamic_cast<NetworkLsa *>(lsar.get()))
 	return false;
 
-    IPv4 address(lsar->get_header().get_link_state_id());
+    IPv4 address(htonl(lsar->get_header().get_link_state_id()));
     return _ospf.get_peer_manager().known_interface_address(address);
 }
 
@@ -1199,7 +1199,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 {
     // RFC 2328 Section 13.4. Receiving self-originated LSAs
 
-    debug_msg("lsar: %s\noriginated: %s index: %u\n", cstring((*lsar)),
+    debug_msg("lsar: %s\nexists: %s index: %u\n", cstring((*lsar)),
 	      lsa_exists ? "true" : "false", XORP_UINT_CAST(index));
     if (lsa_exists)
 	debug_msg("database copy: %s\n", cstring((*_db[index])));
@@ -1245,6 +1245,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     // the past just get rid of it by setting it to MaxAge.
     lsar->set_maxage();
 #ifdef	MAX_AGE_IN_DATABASE
+    debug_msg("Adding MaxAge lsa to database\n%s\n", cstring(*lsar));
     add_lsa(lsar);
 #endif
 
