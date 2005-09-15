@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.95 2005/09/15 04:47:49 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.96 2005/09/15 16:41:04 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -121,6 +121,18 @@ class PeerOut {
      */
     bool remove_area(OspfTypes::AreaID area);
 
+    /**
+     * Add a neighbour to the peer.
+     */
+    bool add_neighbour(OspfTypes::AreaID area, A neighbour_address,
+		       OspfTypes::RouterID);
+
+    /**
+     * Remove a neighbour from the peer.
+     */
+    bool remove_neighbour(OspfTypes::AreaID area, A neighbour_address,
+			  OspfTypes::RouterID rid);
+    
     /**
      * Set the state of this peer.
      */
@@ -401,6 +413,16 @@ class Peer {
     bool transmit(typename Transmit<A>::TransmitRef tr) {
 	return _peerout.transmit(tr);
     }
+
+    /**
+     * Add neighbour
+     */
+    bool add_neighbour(A neighbour_address, OspfTypes::RouterID rid);
+
+    /**
+     * Remove neighbour
+     */
+    bool remove_neighbour(A neighbour_address, OspfTypes::RouterID rid);
 
     /**
      * Packets for this peer are received here.
@@ -1065,6 +1087,11 @@ class Neighbour {
      * Pretty print the neighbour state.
      */
     static string pp_state(State is);
+
+    string str() {
+	return "Address: " + _neighbour_address.str() +
+	    "RouterID: " + pr_id(_router_id);
+    }
 
     static OspfTypes::NeighbourID _ticket;	// Allocator for NeighbourID's
  private:

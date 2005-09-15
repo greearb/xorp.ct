@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.148 2005/09/15 04:47:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.149 2005/09/15 16:41:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -123,6 +123,32 @@ PeerOut<A>::remove_area(OspfTypes::AreaID area)
 	return true;
     else
 	return false;
+}
+
+template <typename A>
+bool
+PeerOut<A>::add_neighbour(OspfTypes::AreaID area, A neighbour_address,
+			  OspfTypes::RouterID rid)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->add_neighbour(neighbour_address, rid);
+}
+
+template <typename A>
+bool
+PeerOut<A>::remove_neighbour(OspfTypes::AreaID area, A neighbour_address,
+			     OspfTypes::RouterID rid)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->remove_neighbour(neighbour_address, rid);
 }
 
 template <typename A>
@@ -395,6 +421,50 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 }
 
 /****************************************/
+
+template <typename A>
+bool
+Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
+{
+    Neighbour<A> *n = find_neighbour(neighbour_address, rid);
+
+    if (0 == n) {
+	n = new Neighbour<A>(_ospf, *this, rid, neighbour_address,
+			     Neighbour<A>::_ticket++, get_linktype());
+	_neighbours.push_back(n);
+    } else {
+	XLOG_ERROR("Neighbour exists %s", cstring(*n));
+	return false;
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::remove_neighbour(A neighbour_address, OspfTypes::RouterID rid)
+{
+    Neighbour<A> *n = find_neighbour(neighbour_address, rid);
+
+    if (0 == n) {
+	XLOG_ERROR("Neighbour not found Address: %s RouterID %s",
+		   cstring(neighbour_address),
+		   pr_id(rid).c_str());
+	return false;
+    }
+
+    typename list<Neighbour<A> *>::iterator ni;
+    for(ni = _neighbours.begin(); ni != _neighbours.end(); ni++) {
+	if (*ni == n) {
+	    (*ni)->event_kill_neighbour();
+	    delete (*ni);
+	    _neighbours.erase(ni);
+	    return true;
+	}
+    }
+
+    return false;
+}
 
 template <typename A>
 bool
