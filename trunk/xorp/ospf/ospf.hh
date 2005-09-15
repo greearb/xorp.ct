@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.47 2005/09/09 12:58:24 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.48 2005/09/09 15:32:35 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -314,7 +314,7 @@ class Ospf {
     }
 
     /**
-     * Shutdown the IO subsystem.
+     * Shutdown OSPF.
      */
     void shutdown() {
 	_io->shutdown();
