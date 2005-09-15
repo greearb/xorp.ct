@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.94 2005/09/11 02:45:40 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.95 2005/09/15 04:47:49 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -510,11 +510,16 @@ class Peer {
 			  list<Lsa_header>& ack);
 
     /*
-     * Find neighbour that this packet should be associated with.
+     * Find neighbour that this address or router ID is associated
+     * with. If the linktype is Virtual Link or PointToPoint the
+     * router ID is used otherwise the src address is used.
+     *
+     * @param src address of neighbour.
+     * @param rid router ID of neighbour
      *
      * @return neighbour or 0 if no match.
      */
-    Neighbour<A> *find_neighbour(A src, Packet *packet);
+    Neighbour<A> *find_neighbour(A src, OspfTypes::RouterID rid);
 
     /**
      * @return true if this routers neighbour is the DR or BDR.

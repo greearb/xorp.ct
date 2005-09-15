@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.147 2005/09/11 07:49:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.148 2005/09/15 04:47:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -724,7 +724,7 @@ Peer<A>::send_delayed_acks(OspfTypes::NeighbourID /*nid*/,
 
 template <typename A>
 Neighbour<A> *
-Peer<A>::find_neighbour(A src, Packet *packet)
+Peer<A>::find_neighbour(A src, OspfTypes::RouterID rid)
 {
     typename list<Neighbour<A> *>::iterator n;
     switch(get_linktype()) {
@@ -738,7 +738,7 @@ Peer<A>::find_neighbour(A src, Packet *packet)
     case OspfTypes::VirtualLink:
     case OspfTypes::PointToPoint:
 	for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	    if ((*n)->get_router_id() == packet->get_router_id())
+	    if ((*n)->get_router_id() == rid)
 		return *n;
 	break;
     }
@@ -818,7 +818,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	    return false;
     }
 
-    Neighbour<A> *n = find_neighbour(src, hello);
+    Neighbour<A> *n = find_neighbour(src, hello->get_router_id());
 
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
@@ -839,7 +839,7 @@ Peer<A>::process_data_description_packet(A dst,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*dd));
 
-    Neighbour<A> *n = find_neighbour(src, dd);
+    Neighbour<A> *n = find_neighbour(src, dd->get_router_id());
 
     if (0 == n) {
 	XLOG_TRACE(_ospf.trace()._input_errors,
@@ -871,7 +871,7 @@ Peer<A>::process_link_state_request_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsrp));
 
-    Neighbour<A> *n = find_neighbour(src, lsrp);
+    Neighbour<A> *n = find_neighbour(src, lsrp->get_router_id());
 
     if (0 == n) {
 	XLOG_TRACE(_ospf.trace()._input_errors,
@@ -894,7 +894,7 @@ Peer<A>::process_link_state_update_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsup));
 
-    Neighbour<A> *n = find_neighbour(src, lsup);
+    Neighbour<A> *n = find_neighbour(src, lsup->get_router_id());
 
     if (0 == n) {
 	XLOG_TRACE(_ospf.trace()._input_errors,
@@ -917,7 +917,7 @@ Peer<A>::process_link_state_acknowledgement_packet(A dst, A src,
 {
     debug_msg("dst %s src %s %s\n",cstring(dst),cstring(src),cstring(*lsap));
 
-    Neighbour<A> *n = find_neighbour(src, lsap);
+    Neighbour<A> *n = find_neighbour(src, lsap->get_router_id());
 
     if (0 == n) {
 	XLOG_TRACE(_ospf.trace()._input_errors,
