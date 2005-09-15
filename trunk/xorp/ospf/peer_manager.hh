@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.31 2005/08/30 00:47:51 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.32 2005/08/30 03:59:43 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -101,6 +101,21 @@ class PeerManager {
      * Take a peer up or down.
      */
     bool set_state_peer(const PeerID, bool state);
+
+    /**
+     * Add a neighbour to the peer.
+     */
+    bool add_neighbour(const PeerID,
+		       OspfTypes::AreaID area, A neighbour_address,
+		       OspfTypes::RouterID);
+
+    /**
+     * Remove a neighbour from the peer.
+     */
+    bool remove_neighbour(const PeerID,
+			  OspfTypes::AreaID area, A neighbour_address,
+			  OspfTypes::RouterID rid);
+
 
     /**
      * Demultiplex incoming packets to the associated peer. If the

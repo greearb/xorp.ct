@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.48 2005/09/07 21:13:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.49 2005/09/08 16:56:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -275,6 +275,32 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
     _peers[peerid]->set_state(state);
 
     return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::add_neighbour(const PeerID peerid, OspfTypes::AreaID area,
+			      A neighbour_address, OspfTypes::RouterID rid)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->add_neighbour(area, neighbour_address, rid);
+}
+
+template <typename A>
+bool
+PeerManager<A>::remove_neighbour(const PeerID peerid, OspfTypes::AreaID area,
+				 A neighbour_address, OspfTypes::RouterID rid)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->remove_neighbour(area, neighbour_address, rid);
 }
 
 template <typename A>
