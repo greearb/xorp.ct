@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.48 2005/09/09 15:32:35 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.49 2005/09/15 17:31:52 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -346,7 +346,9 @@ class Ospf {
     bool disable_interface_vif(const string& interface, const string& vif);
 
     /**
-     * Is this interface/vif/address enabled?
+     * Is this interface/vif/address enabled? 
+     * This is a question asked of the FEA, has the interface/vif been
+     * marked as up.
      *
      * @return true if it is.
      */
