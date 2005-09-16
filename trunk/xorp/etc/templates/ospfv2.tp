@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.4 2005/09/05 22:03:29 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.5 2005/09/08 16:56:14 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -21,6 +21,10 @@ protocols {
 			router-dead-interval:   u32 = 40;
 			interface-cost:		u32 = 1;
 			inftransdelay:		u32 = 1;
+
+			neighbour @: ipv4 {
+			    router-id:  ipv4;
+			}
 		    }
 		}
 	    }
@@ -70,6 +74,14 @@ the router within an Autonomous System";
 	    interface @: txt {
 		%mandatory: $(@.link-type);
 
+		link-type {
+		    %help: short "Tye of link";
+
+		    %allow: $(@) "broadcast" "p2p";
+
+		    %set:;
+		}
+
 		vif @: txt {
 
 		    address @ {
@@ -114,6 +126,20 @@ the router within an Autonomous System";
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
 			}
 
+			neighbour @: ipv4 {
+			    %help: short "Neighbours address";
+			    
+			    %mandatory: $(@.router-id);
+
+			    router-id {
+				%help: short "Neighbours router-id";
+
+				%set:;
+			    }
+
+			    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv4=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv4=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			}
 		    }
 		}
 	    }
