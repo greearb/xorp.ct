@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.37 2005/09/09 15:32:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.38 2005/09/12 17:56:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,19 +45,8 @@ Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
       _lsa_decoder(version), _peer_manager(*this), _routing_table(*this)
 {
     // Register the LSAs and packets with the associated decoder.
-    _lsa_decoder.register_decoder(new RouterLsa(version));
-    _lsa_decoder.register_decoder(new NetworkLsa(version));
-    _lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
-    _lsa_decoder.register_decoder(new SummaryRouterLsa(version));
-    _lsa_decoder.register_decoder(new ASExternalLsa(version));
-
-    _packet_decoder.register_decoder(new HelloPacket(version));
-    _packet_decoder.register_decoder(new DataDescriptionPacket(version));
-    _packet_decoder.register_decoder(new LinkStateUpdatePacket(version,
-							       _lsa_decoder));
-    _packet_decoder.register_decoder(new LinkStateRequestPacket(version));
-    _packet_decoder.
-	register_decoder(new LinkStateAcknowledgementPacket(version));
+    initialise_lsa_decoder(version, _lsa_decoder);
+    initialise_packet_decoder(version, _packet_decoder, _lsa_decoder);
 
     // Now that all the packet decoders are in place register for
     // receiving packets.

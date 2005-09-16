@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.63 2005/09/08 05:21:09 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.64 2005/09/11 11:03:33 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1596,5 +1596,20 @@ class Ls_request {
     uint32_t 	_link_state_id;
     uint32_t	_advertising_router;
 };
+
+/**
+ * The definitive list of LSAs. All decoder lists should be primed
+ * using this function.
+ */
+inline
+void
+initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
+{
+    lsa_decoder.register_decoder(new RouterLsa(version));
+    lsa_decoder.register_decoder(new NetworkLsa(version));
+    lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
+    lsa_decoder.register_decoder(new SummaryRouterLsa(version));
+    lsa_decoder.register_decoder(new ASExternalLsa(version));
+}
 
 #endif // __OSPF_LSA_HH__

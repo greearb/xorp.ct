@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.20 2005/09/06 08:43:18 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.21 2005/09/11 03:44:08 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -612,6 +612,25 @@ class LinkStateAcknowledgementPacket : public Packet {
  private:
     list<Lsa_header> _lsa_headers;
 };
+
+/**
+ * The definitive list of packets. All decoder lists should be primed
+ * using this function.
+ */
+inline
+void
+initialise_packet_decoder(OspfTypes::Version version,
+			  PacketDecoder& packet_decoder, 
+			  LsaDecoder& lsa_decoder)
+{
+    packet_decoder.register_decoder(new HelloPacket(version));
+    packet_decoder.register_decoder(new DataDescriptionPacket(version));
+    packet_decoder.register_decoder(new LinkStateUpdatePacket(version,
+							       lsa_decoder));
+    packet_decoder.register_decoder(new LinkStateRequestPacket(version));
+    packet_decoder.
+	register_decoder(new LinkStateAcknowledgementPacket(version));
+}
 
 /**
  * Helper class to manipulate the options field in packets and LSAs.
