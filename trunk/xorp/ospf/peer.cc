@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.150 2005/09/15 17:13:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.151 2005/09/16 03:02:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -909,6 +909,9 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
     Neighbour<A> *n = find_neighbour(src, hello->get_router_id());
 
     if (0 == n) {
+	// If this isn't a BROADCAST interface don't just make friends.
+	if (OspfTypes::BROADCAST != _peerout.get_linktype())
+	    return false;
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
 			     Neighbour<A>::_ticket++, get_linktype());
 	_neighbours.push_back(n);
