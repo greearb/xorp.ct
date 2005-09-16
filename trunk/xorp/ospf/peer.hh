@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.96 2005/09/15 16:41:04 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.97 2005/09/15 17:13:15 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -381,16 +381,20 @@ class Peer {
     }
 
     /**
-     * Adress of the p2p neighbour.
+     * Address of the p2p neighbour.
      *
      * @return p2p neighbour address.
      */
     A get_p2p_neighbour_address() const {
 	XLOG_ASSERT(OspfTypes::PointToPoint == get_linktype());
-	XLOG_UNFINISHED();
+	XLOG_ASSERT(1 == _neighbours.size());
+
 	// When an P2P interface is configured a single neighbour will
 	// exist. Fetch the address from the neighbour structure.
-	return 0;
+	typename list<Neighbour<A> *>::const_iterator ni = _neighbours.begin();
+	XLOG_ASSERT(ni != _neighbours.end());
+
+	return (*ni)->get_neighbour_address();
     }
 
     /**

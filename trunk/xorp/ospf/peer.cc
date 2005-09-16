@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.149 2005/09/15 16:41:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.150 2005/09/15 17:13:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -166,8 +166,8 @@ PeerOut<A>::set_state(bool state)
 	break;
     case false:
 	if (true == state) {
-	    bring_up_peering();
 	    _running = true;
+	    bring_up_peering();
 	}
 	break;
     }
@@ -426,6 +426,23 @@ template <typename A>
 bool
 Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 {
+    switch(get_linktype()) {
+    case OspfTypes::PointToPoint:
+	if (0 != _neighbours.size()) {
+	    XLOG_ERROR("A PointToPoint link should have only one neighbour");
+	    return false;
+	}
+	break;
+    case OspfTypes::BROADCAST:
+	// Just allow it there isn't any harm.
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
+
     Neighbour<A> *n = find_neighbour(neighbour_address, rid);
 
     if (0 == n) {
@@ -651,6 +668,7 @@ bool
 Peer<A>::is_DR_or_BDR() const
 {
     XLOG_ASSERT(do_dr_or_bdr());
+    XLOG_ASSERT(!(is_DR() && is_BDR()));
 
     if (is_DR())
 	return true;
@@ -1034,6 +1052,7 @@ Peer<A>::event_interface_up()
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
 	change_state(Point2Point);
+	start_hello_timer();
 	break;
     case OspfTypes::BROADCAST:
 	// Not eligible to be the designated router.
@@ -1660,13 +1679,15 @@ Peer<A>::update_router_links()
 			_router_links.begin(), _router_links.end());
     _router_links.clear();
 
-    switch(version) {
-    case OspfTypes::V2:
-	update_router_linksV2(_router_links);
-	break;
-    case OspfTypes::V3:
-	update_router_linksV3(_router_links);
-	break;
+    if (0 != _neighbours.size()) {
+	switch(version) {
+	case OspfTypes::V2:
+	    update_router_linksV2(_router_links);
+	    break;
+	case OspfTypes::V3:
+	    update_router_linksV3(_router_links);
+	    break;
+	}
     }
 
      list<RouterLink>::iterator i, j;
@@ -3372,15 +3393,21 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     }
 
     list<Lsa_header> direct_ack, delayed_ack;
-
+    bool dr = false;
+    bool bdr = false;
+    if (_peer.do_dr_or_bdr()) {
+	dr = is_DR();
+	bdr = is_BDR();
+    }
+    
     get_area_router()->
 	receive_lsas(_peer.get_peerid(),
 		     _neighbourid,
 		     lsup->get_lsas(),
 		     direct_ack,
 		     delayed_ack,
-		     _peer.get_state() == Peer<A>::Backup,
-		     _peer.get_designated_router() == get_candidate_id());
+		     bdr,
+		     dr);
 
     // A more efficient way of sending the direct ack.
 //     bool multicast_on_peer;
