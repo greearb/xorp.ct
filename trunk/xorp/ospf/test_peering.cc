@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.46 2005/09/07 08:19:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.47 2005/09/09 20:58:34 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -385,6 +385,20 @@ two_peers(TestInfo& info, OspfTypes::Version version,
 	create_peer(interface_2, vif_2, src_2, interface_prefix_length,
 		    interface_mtu, linktype, area);
 
+    switch(linktype) {
+    case OspfTypes::PointToPoint:
+	pm_1.add_neighbour(peerid_1, area, src_2, ospf_2.get_router_id());
+	pm_2.add_neighbour(peerid_2, area, src_1, ospf_1.get_router_id());
+	break;
+    case OspfTypes::BROADCAST:
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
+    }
+
     ospf_1.set_hello_interval(interface_1, vif_1, area, hello_interval);
     ospf_1.set_router_dead_interval(interface_1, vif_1, area,
 				    4 * hello_interval);
@@ -428,6 +442,22 @@ two_peers(TestInfo& info, OspfTypes::Version version,
 	DOUT(info) << io_1.packets() << " packets sent " << expected <<
 	    " expected test timed out\n";
 	return false;
+    }
+
+
+    // Delete the neighbours
+    switch(linktype) {
+    case OspfTypes::PointToPoint:
+	pm_1.remove_neighbour(peerid_1, area, src_2, ospf_2.get_router_id());
+	pm_2.remove_neighbour(peerid_2, area, src_1, ospf_1.get_router_id());
+	break;
+    case OspfTypes::BROADCAST:
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	XLOG_UNFINISHED();
+	break;
     }
 
     // Take the peering down
@@ -500,12 +530,10 @@ main(int argc, char **argv)
 	{"two_peersV3s2", callback(two_peers<IPv6>, OspfTypes::V3,
 				   OspfTypes::BROADCAST, STAGGER2)},
 
-#if	0
 	{"p2pV2", callback(two_peers<IPv4>, OspfTypes::V2,
 				 OspfTypes::PointToPoint, NOSTAGGER)},
 	{"p2pV3", callback(two_peers<IPv6>, OspfTypes::V3,
 				 OspfTypes::PointToPoint, NOSTAGGER)},
-#endif
     };
 
     try {
