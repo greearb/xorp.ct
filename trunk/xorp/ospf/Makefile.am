@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.15 2005/09/07 22:48:53 pavlin Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.16 2005/09/07 23:38:13 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -50,13 +50,15 @@ xorp_ospfv2_SOURCES		= xorp_ospfv2.cc
 
 xorp_ospfv3_SOURCES		= xorp_ospfv3.cc
 
-test_packet_SOURCES		= test_packet.cc
+test_packet_SOURCES		 = test_common.hh
+test_packet_SOURCES		+= test_packet.cc
 
 test_checksum_SOURCES		= test_checksum.cc
 
 test_peering_SOURCES		= test_peering.cc
 
-test_routing_SOURCES		= test_routing.cc
+test_routing_SOURCES		 = test_common.hh
+test_routing_SOURCES		+= test_routing.cc
 
 # -- Library Sources
 libospf_la_SOURCES  = area_router.hh
