@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.151 2005/09/16 03:02:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.152 2005/09/16 04:18:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,6 +45,30 @@
 #include "vertex.hh"
 #include "area_router.hh"
 #include "peer.hh"
+
+/**
+ * Oh which linktype should multicast be enabled.
+ */
+inline
+bool
+do_multicast(OspfTypes::LinkType linktype)
+{
+    switch(linktype) {
+    case OspfTypes::PointToPoint:
+    case OspfTypes::BROADCAST:
+	return true;
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	return false;
+	break;
+    }
+
+    XLOG_UNREACHABLE();
+
+    return true;
+}
 
 template <typename A>
 PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif, 
@@ -327,7 +351,9 @@ PeerOut<A>::bring_up_peering()
 {
     // Start receiving packets on this peering.
     _ospf.enable_interface_vif(_interface, _vif);
-    join_multicast_group(A::OSPFIGP_ROUTERS());
+
+    if (do_multicast(get_linktype()))
+	join_multicast_group(A::OSPFIGP_ROUTERS());
 
     typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
 
@@ -355,7 +381,8 @@ PeerOut<A>::take_down_peering()
     }
 
     // Stop receiving packets on this peering.
-    leave_multicast_group(A::OSPFIGP_ROUTERS());
+    if (do_multicast(get_linktype()))
+	leave_multicast_group(A::OSPFIGP_ROUTERS());
     _ospf.disable_interface_vif(_interface, _vif);
 }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.98 2005/09/16 03:02:03 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.99 2005/09/16 04:19:01 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -83,16 +83,14 @@ class PeerOut {
      * Join multicast group on this interface/vif.
      */
     void join_multicast_group(A address) {
-	if (OspfTypes::BROADCAST == get_linktype())
-	    _ospf.join_multicast_group(_interface, _vif, address);
+	_ospf.join_multicast_group(_interface, _vif, address);
     }
 
     /**
      * Leave multicast group on this interface/vif.
      */
     void leave_multicast_group(A address) {
-	if (OspfTypes::BROADCAST == get_linktype())
-	    _ospf.leave_multicast_group(_interface, _vif, address);
+	_ospf.leave_multicast_group(_interface, _vif, address);
     }
 
     /**
