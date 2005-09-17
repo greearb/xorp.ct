@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.21 2005/09/11 03:44:08 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.22 2005/09/16 23:33:28 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -42,9 +42,12 @@ class Packet {
      * Used by the derived classes to extract the standard header and
      * options field.
      *
+     * @param len if the frame is larger than what is specified by the
+     * header length field drop the length down to the header length.
+     *
      * @return the offset where the specific header starts.
      */
-    size_t decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket);
+    size_t decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket);
 
     /**
      * Decode the packet.

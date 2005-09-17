@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.25 2005/09/02 12:17:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.26 2005/09/08 00:01:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -97,7 +97,7 @@ dump_packet(uint8_t *ptr, size_t len)
 /* Packet */
 
 size_t
-Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
+Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 {
     debug_msg("ptr %p len %u\n", ptr, XORP_UINT_CAST(len));
 #ifdef	DEBUG_RAW_PACKETS
@@ -153,11 +153,17 @@ Packet::decode_standard_header(uint8_t *ptr, size_t len) throw(BadPacket)
     // Verify that the length in the packet and the length of received
     // data match.
     uint32_t packet_length = extract_16(&ptr[2]);
-    if (packet_length != len)
-	xorp_throw(BadPacket,
-		   c_format("Packet length mismatch expected %u received %u",
+    if (packet_length != len) {
+	// If the frame is too small complain.
+	if (len < packet_length)
+	    xorp_throw(BadPacket,
+		       c_format("Packet length expected %u received %u",
 			    packet_length,
 			    XORP_UINT_CAST(len)));
+	// "Be liberal in what you accept, and conservative in what you send."
+	// -- Jon Postel
+	len = packet_length;	// Drop the length and continue.
+    }
 
     set_router_id(extract_32(&ptr[4]));
     set_area_id(extract_32(&ptr[8]));

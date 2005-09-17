@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.30 2005/09/11 04:24:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.31 2005/09/12 17:52:22 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,6 +70,56 @@ compare_packets(TestInfo& info, vector<uint8_t>& pkt1, vector<uint8_t>& pkt2)
 	return false;
     }
 
+    return true;
+}
+
+/**
+ * Modify the frame lengths to see if we can freak the decoder.
+ */
+inline
+bool
+packet_bad_length(TestInfo& info, OspfTypes::Version version,
+		  vector<uint8_t>& pkt)
+{
+    PacketDecoder packet_decoder;
+    LsaDecoder lsa_decoder(version);
+
+    initialise_lsa_decoder(version, lsa_decoder);
+    initialise_packet_decoder(version, packet_decoder, lsa_decoder);
+
+    uint8_t *ptr = &pkt[0];
+    Packet *packet = packet_decoder.decode(ptr, pkt.size());
+
+    // Try shortening the frame.
+    try {
+	packet = packet_decoder.decode(ptr, pkt.size() - 1);
+	DOUT(info) << "Accepted short frame (bad)\n";
+	return false;
+    } catch(BadPacket& e) {
+	DOUT(info) << "Rejected short frame (good): " << e.str() << endl;
+    }
+
+    // Make the frame longer.
+    for (int i = 0; i < 64; i++) {
+	try {
+	    packet = packet_decoder.decode(ptr, pkt.size() + i);
+	    DOUT(info) << "Accepted large frame (good)\n";
+	} catch(BadPacket& e) {
+	    DOUT(info) << "Didn't accept large frame (bad): " << e.str() << 
+		endl;
+	    return false;
+	}
+	vector<uint8_t> pktn;
+	packet->encode(pktn);
+	if (!compare_packets(info, pkt, pktn)) {
+	    DOUT(info) << " The frame is " << i << 
+		" bytes larger decoded differently " << packet->str() << endl;
+	    return false;
+	}
+    }
+
+    DOUT(info) << packet->str() << endl;
+    
     return true;
 }
 
@@ -462,6 +512,23 @@ hello_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+hello_packet_bad_length(TestInfo& info, OspfTypes::Version version)
+{
+    HelloPacket *packet = new HelloPacket(version);
+    populate_hello(packet, version);
+
+    DOUT(info) << packet->str() << endl;
+
+    // Encode the hello packet.
+    vector<uint8_t> pkt;
+    packet->encode(pkt);
+
+    delete packet;
+
+    return packet_bad_length(info, version, pkt);
+}
+
+bool
 data_description_packet_print(TestInfo& info)
 {
     DataDescriptionPacket *ddp= new DataDescriptionPacket(OspfTypes::V2);
@@ -518,6 +585,23 @@ data_description_packet_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+data_description_packet_bad_length(TestInfo& info, OspfTypes::Version version)
+{
+    DataDescriptionPacket *packet = new DataDescriptionPacket(version);
+    populate_data_description(packet, version);
+
+    DOUT(info) << packet->str() << endl;
+
+    // Encode the hello packet.
+    vector<uint8_t> pkt;
+    packet->encode(pkt);
+
+    delete packet;
+
+    return packet_bad_length(info, version, pkt);
+}
+
+bool
 link_state_update_packet_print(TestInfo& info)
 {
     LsaDecoder lsa_decoder(OspfTypes::V2);
@@ -544,11 +628,7 @@ bool
 link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder lsa_decoder(version);
-    lsa_decoder.register_decoder(new RouterLsa(version));
-    lsa_decoder.register_decoder(new NetworkLsa(version));
-    lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
-    lsa_decoder.register_decoder(new SummaryRouterLsa(version));
-    lsa_decoder.register_decoder(new ASExternalLsa(version));
+    initialise_lsa_decoder(version, lsa_decoder);
 
     LinkStateUpdatePacket *lsup1;
     lsup1 = new LinkStateUpdatePacket(version, lsa_decoder);
@@ -583,6 +663,26 @@ link_state_update_packet_compare(TestInfo& info, OspfTypes::Version version)
     delete lsup3;
 
     return true;
+}
+
+bool
+link_state_update_packet_bad_length(TestInfo& info, OspfTypes::Version version)
+{
+    LsaDecoder lsa_decoder(OspfTypes::V2);
+    
+    LinkStateUpdatePacket *packet = new LinkStateUpdatePacket(version,
+							      lsa_decoder);
+    populate_link_state_update(packet, version);
+
+    DOUT(info) << packet->str() << endl;
+
+    // Encode the hello packet.
+    vector<uint8_t> pkt;
+    packet->encode(pkt);
+
+    delete packet;
+
+    return packet_bad_length(info, version, pkt);
 }
 
 bool
@@ -639,6 +739,24 @@ link_state_request_packet_compare(TestInfo& info, OspfTypes::Version version)
     delete lsrp3;
 
     return true;
+}
+
+bool
+link_state_request_packet_bad_length(TestInfo& info,
+				     OspfTypes::Version version)
+{
+    LinkStateRequestPacket *packet = new LinkStateRequestPacket(version);
+    populate_link_state_request(packet, version);
+
+    DOUT(info) << packet->str() << endl;
+
+    // Encode the hello packet.
+    vector<uint8_t> pkt;
+    packet->encode(pkt);
+
+    delete packet;
+
+    return packet_bad_length(info, version, pkt);
 }
 
 bool
@@ -699,6 +817,25 @@ link_state_acknowledgement_packet_compare(TestInfo& info,
     delete lsrp3;
 
     return true;
+}
+
+bool
+link_state_acknowledgement_packet_bad_length(TestInfo& info,
+					     OspfTypes::Version version)
+{
+    LinkStateAcknowledgementPacket *packet = 
+	new LinkStateAcknowledgementPacket(version);
+    populate_link_state_acknowledgement(packet, version);
+
+    DOUT(info) << packet->str() << endl;
+
+    // Encode the hello packet.
+    vector<uint8_t> pkt;
+    packet->encode(pkt);
+
+    delete packet;
+
+    return packet_bad_length(info, version, pkt);
 }
 
 bool
@@ -1147,25 +1284,43 @@ main(int argc, char **argv)
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
+	{"hello_badlenV2", callback(hello_packet_bad_length, OspfTypes::V2)},
+	{"hello_badlenV3", callback(hello_packet_bad_length, OspfTypes::V2)},
 
 	{"ddp_compareV2", callback(data_description_packet_compare,
 				   OspfTypes::V2)},
 	{"ddp_compareV3", callback(data_description_packet_compare,
+				   OspfTypes::V3)},
+	{"ddp_badlenV2", callback(data_description_packet_bad_length,
+				   OspfTypes::V2)},
+	{"ddp_badlenV3", callback(data_description_packet_bad_length,
 				   OspfTypes::V3)},
 
 	{"lsup_compareV2", callback(link_state_update_packet_compare,
 				   OspfTypes::V2)},
 	{"lsup_compareV3", callback(link_state_update_packet_compare,
 				   OspfTypes::V3)},
+	{"lsup_badlenV2", callback(link_state_update_packet_bad_length,
+				   OspfTypes::V2)},
+	{"lsup_badlenV3", callback(link_state_update_packet_bad_length,
+				   OspfTypes::V3)},
 
 	{"lsrp_compareV2", callback(link_state_request_packet_compare,
 				   OspfTypes::V2)},
 	{"lsrp_compareV3", callback(link_state_request_packet_compare,
 				   OspfTypes::V3)},
+	{"lsrp_badlenV2", callback(link_state_request_packet_bad_length,
+				   OspfTypes::V2)},
+	{"lsrp_badlenV3", callback(link_state_request_packet_bad_length,
+				   OspfTypes::V3)},
 
 	{"lsap_compareV2", callback(link_state_acknowledgement_packet_compare,
 				   OspfTypes::V2)},
 	{"lsap_compareV3", callback(link_state_acknowledgement_packet_compare,
+				   OspfTypes::V3)},
+	{"lsap_badlenV2",callback(link_state_acknowledgement_packet_bad_length,
+				   OspfTypes::V2)},
+	{"lsap_badlenV3",callback(link_state_acknowledgement_packet_bad_length,
 				   OspfTypes::V3)},
 
 	{"packet_decoder1V2", callback(packet_decoder1, OspfTypes::V2)},
