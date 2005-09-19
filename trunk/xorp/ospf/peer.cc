@@ -13,12 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.152 2005/09/16 04:18:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.153 2005/09/17 03:55:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
+
+
 #include <map>
 #include <list>
 #include <set>
@@ -39,6 +41,19 @@
 #include "libxorp/eventloop.hh"
 
 #include "libproto/spt.hh"
+
+// XXX
+// The system header files are here to get the sizeof an ipv4 and ipv6
+// header. Really should have a define somewhere in XORP for this.
+#ifdef HAVE_NETINET_IN_SYSTM_H
+#include <netinet/in_systm.h>
+#endif
+#ifdef HAVE_NETINET_IP_H
+#include <netinet/ip.h>
+#endif
+#ifdef HAVE_NETINET_IP6_H
+#include <netinet/ip6.h>
+#endif
 
 #include "ospf.hh"
 #include "delay_queue.hh"
@@ -110,6 +125,24 @@ PeerOut<A>::set_mask(Peer<A> *peer)
     peer->
 	set_network_mask(ntohl(IPv4::make_prefix(get_interface_prefix_length())
 			       .addr()));
+}
+
+template <typename A>
+uint16_t
+PeerOut<A>::get_frame_size() const
+{
+    uint16_t frame = get_interface_mtu();
+
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	frame -= (sizeof(struct ip) +  4*sizeof(uint8_t) /* Router Alert */);
+	break;
+    case OspfTypes::V3:
+	frame -= sizeof(struct ip6_hdr);
+	break;
+    }
+
+    return frame;
 }
 
 template <typename A>
@@ -2562,7 +2595,7 @@ Neighbour<A>::retransmitter()
 	for (i = _ls_request_list.begin(); i != _ls_request_list.end(); i++) {
 	    if (lsrp.get_standard_header_length() +
 		Ls_request::length() + lsr_len < 
-		_peer.get_interface_mtu()) {
+		_peer.get_frame_size()) {
 		lsr_len += Ls_request::length();
 		lsrp.get_ls_request().
 		    push_back(Ls_request(i->get_version(),
@@ -2601,7 +2634,7 @@ Neighbour<A>::retransmitter()
 		size_t len;
 		(*i)->lsa(len);
 		if (lsup.get_standard_header_length() + len + lsas_len < 
-		    _peer.get_interface_mtu()) {
+		    _peer.get_frame_size()) {
 		    lsas_len += len;
 		    lsup.get_lsas().push_back(*i);
 		} else {
@@ -2655,7 +2688,7 @@ Neighbour<A>::build_data_description_packet()
 	// compare against the constant LSA header length each time.
 	vector<uint8_t> pkt;
 	_data_description_packet.encode(pkt);
-	if (pkt.size() + Lsa_header::length() >= _peer.get_interface_mtu())
+	if (pkt.size() + Lsa_header::length() >= _peer.get_frame_size())
 	    return;
     } while(last == false);
 
@@ -3376,7 +3409,7 @@ Neighbour<A>::link_state_request_received(LinkStateRequestPacket *lsrp)
 	(*i)->lsa(len);
 	(*i)->set_transmitted(true);
 	if (lsup.get_standard_header_length() + len + lsas_len < 
-	    _peer.get_interface_mtu()) {
+	    _peer.get_frame_size()) {
 	    lsas_len += len;
 	    lsup.get_lsas().push_back(*i);
 	} else {
@@ -3680,7 +3713,7 @@ Neighbour<A>::push_lsas()
 	    (*i)->lsa(len);
 	    (*i)->set_transmitted(true);
 	    if (lsup.get_standard_header_length() + len + lsas_len < 
-		_peer.get_interface_mtu()) {
+		_peer.get_frame_size()) {
 		lsas_len += len;
 		lsup.get_lsas().push_back(*i);
 	    } else {

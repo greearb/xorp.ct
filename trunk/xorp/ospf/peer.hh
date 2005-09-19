@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.99 2005/09/16 04:19:01 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.100 2005/09/17 03:55:15 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -78,6 +78,13 @@ class PeerOut {
     uint16_t get_interface_mtu() const {
 	return _interface_mtu;
     }
+
+    /**
+     * The maximum size of an OSPF frame, the MTU minus the IP header.
+     *
+     * @return maximum frame size.
+     */
+    uint16_t get_frame_size() const;
 
     /**
      * Join multicast group on this interface/vif.
@@ -402,6 +409,15 @@ class Peer {
      */
     uint16_t get_interface_mtu() const {
 	return _peerout.get_interface_mtu();
+    }
+
+    /**
+     * The maximum size of an OSPF frame, the MTU minus the IP header.
+     *
+     * @return maximum frame size.
+     */
+    uint16_t get_frame_size() const {
+	return _peerout.get_frame_size();
     }
 
     /**
