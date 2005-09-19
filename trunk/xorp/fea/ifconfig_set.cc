@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.28 2005/08/18 15:45:47 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.29 2005/08/23 19:06:37 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -589,12 +589,21 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	    is_broadcast = true;
 	}
 
+	//
+	// Try to add the address.
+	// If the address exists already (e.g., with different prefix length),
+	// then delete it first.
+	//
+	if (ap != NULL) {
+	    delete_vif_address(i.ifname(), v.vifname(), if_index,
+			       IPvX(a.addr()), ap->prefix_len(), error_msg);
+	}
 	if (add_vif_address(i.ifname(), v.vifname(), if_index, is_broadcast,
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
 			    prefix_len, error_msg)
 	    < 0) {
 	    error_msg = c_format("Failed to configure address: %s",
-			      error_msg.c_str());
+				 error_msg.c_str());
 	    ifc().er().vifaddr_error(i.ifname(), v.vifname(), a.addr(),
 				     error_msg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
@@ -698,6 +707,15 @@ IfConfigSet::push_vif_address(const IfTreeInterface&	i,
 	if (! new_address)
 	    break;		// Ignore: the address hasn't changed
 
+	//
+	// Try to add the address.
+	// If the address exists already (e.g., with different prefix length),
+	// then delete it first.
+	//
+	if (ap != NULL) {
+	    delete_vif_address(i.ifname(), v.vifname(), if_index,
+			       IPvX(a.addr()), ap->prefix_len(), error_msg);
+	}
 	if (add_vif_address(i.ifname(), v.vifname(), if_index, false,
 			    a.point_to_point(), IPvX(a.addr()), IPvX(oaddr),
 			    prefix_len, error_msg)
