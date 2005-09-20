@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.49 2005/08/21 08:59:53 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.50 2005/09/01 19:44:20 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -577,10 +577,12 @@ void
 XorpShell::config_changed(uid_t user_id, const string& deltas,
 			  const string& deletions)
 {
+#if 0
     if (_mode == MODE_COMMITTING) {
 	// This is the response back to our own request
 	return;
     }
+#endif
     if (_mode == MODE_INITIALIZING) {
 	// We were just starting up
 	XLOG_ASSERT(deletions == "");
@@ -626,7 +628,16 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
     else
 	username = pwent->pw_name;
 #endif // ! HOST_OS_WINDOWS
-    
+
+
+    if (_mode == MODE_COMMITTING) {
+	// This is the response back to our own request
+	return;
+    }
+
+    //
+    // Print the configuration change alert
+    //
     string alert = "The configuration had been changed by user " +
 	username + "\n";
     if (! deltas.empty()) {

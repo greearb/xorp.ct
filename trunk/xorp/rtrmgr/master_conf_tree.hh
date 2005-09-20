@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.30 2005/07/08 16:42:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.31 2005/08/19 20:09:41 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -35,6 +35,7 @@ class MasterTemplateTree;
 
 class MasterConfigTree : public ConfigTree {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigChangeCallBack;
     typedef XorpCallback2<void, bool, string>::RefPtr ConfigSaveCallBack;
     typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigLoadCallBack;
 
@@ -79,7 +80,11 @@ public:
 		   uint32_t& holder);
     bool unlock_node(const string& node, uid_t user_id);
 
-    bool apply_config_change(uid_t user_id, CallBack cb, string& errmsg);
+    bool change_config(uid_t user_id, CallBack cb, string& errmsg);
+    bool apply_config_change(uid_t user_id, string& errmsg,
+			     const string& deltas,
+			     const string& deletions,
+			     ConfigChangeCallBack cb);
     bool save_config(const string& filename, uid_t user_id,
 		     const string& save_hook, string& errmsg,
 		     ConfigSaveCallBack cb);
@@ -120,6 +125,8 @@ private:
     void remove_tmp_config_file();
     bool set_config_file_permissions(FILE* fp, uid_t user_id, string& errmsg);
 
+    void apply_config_commit_changes_cb(bool success, string errmsg,
+					ConfigChangeCallBack cb);
     void save_config_file_sent_cb(bool success, string errmsg,
 				  string filename, uid_t user_id,
 				  ConfigSaveCallBack cb);
@@ -194,6 +201,8 @@ private:
     bool		_is_xorp_gid_set;
     RunCommand::ExecId	_exec_id;
     bool		_enable_program_exec_id;
+
+    MasterConfigTree*	_config_tree_copy;
 };
 
 #endif // __RTRMGR_MASTER_CONF_TREE_HH__

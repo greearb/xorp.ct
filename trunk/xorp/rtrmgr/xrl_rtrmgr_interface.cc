@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.43 2005/08/19 20:09:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.44 2005/08/21 08:59:53 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -526,29 +526,15 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 	       "\nXRL got config change: deltas: \n%s\nend deltas\ndeletions:\n%s\nend deletions\n",
 	       deltas.c_str(), deletions.c_str());
 
-    string response;
-    if (_master_config_tree->apply_deltas(user_id, deltas, 
-					  /* provisional change */ true,
-					  response) == false) {
-	return XrlCmdError::COMMAND_FAILED(response);
-    }
-    if (_master_config_tree->apply_deletions(user_id, deletions, 
-					     /* provisional change */ true,
-					     response) == false) {
-	return XrlCmdError::COMMAND_FAILED(response);
-    }
-    // Add nodes providing default values.  Note: they shouldn't be
-    // needed, but adding them here acts as a safety mechanism against
-    // a client that forgets to add them.
-    _master_config_tree->add_default_children();
-
-    CallBack cb;
+    ConfigChangeCallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
-		  user_id, string(target), string(deltas), string(deletions));
+		  user_id, string(target));
 
     string errmsg;
-    if (_master_config_tree->apply_config_change(user_id, cb, errmsg) != true)
+    if (_master_config_tree->apply_config_change(user_id, errmsg, deltas,
+						 deletions, cb) != true) {
 	return XrlCmdError::COMMAND_FAILED(errmsg);
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -556,10 +542,10 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 void
 XrlRtrmgrInterface::apply_config_change_done(bool success,
 					     string errmsg,
-					     uid_t user_id,
-					     string target,
 					     string deltas,
-					     string deletions)
+					     string deletions,
+					     uid_t user_id,
+					     string target)
 {
     XLOG_TRACE(_verbose,
 	       "apply_config_change_done: status: %d response: %s target: %s",
@@ -889,8 +875,8 @@ XrlRtrmgrInterface::load_config_done(bool success,
 				     string target)
 {
     // Propagate the changes to all clients
-    apply_config_change_done(success, errmsg, user_id, target,
-			     deltas, deletions);
+    apply_config_change_done(success, errmsg, deltas, deletions,
+			     user_id, target);
 
     UNUSED(filename);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.22 2005/07/08 20:51:17 mjh Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.23 2005/08/19 20:09:42 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -39,6 +39,7 @@ class Rtrmgr;
 
 class XrlRtrmgrInterface : public XrlRtrmgrTargetBase {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
+    typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigChangeCallBack;
     typedef XorpCallback2<void, bool, string>::RefPtr ConfigSaveCallBack;
     typedef XorpCallback4<void, bool, string, string, string>::RefPtr ConfigLoadCallBack;
 
@@ -120,10 +121,10 @@ public:
 	const string& deletions);
 
     void apply_config_change_done(bool success, string errmsg,
-				  uid_t user_id,
-				  string target,
 				  string deltas,
-				  string deletions);
+				  string deletions,
+				  uid_t user_id,
+				  string target);
 
     void config_saved_done_cb(const XrlError&);
     void apply_config_change_done_cb(const XrlError&);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.58 2005/08/23 20:57:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.59 2005/09/01 19:44:20 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,7 +96,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
       // programs during (re)configuration. Note that this doesn't apply
       // for running the XORP processes themselves.
       //
-      _enable_program_exec_id(false)
+      _enable_program_exec_id(false),
+      _config_tree_copy(NULL)
 {
     string configuration;
     string errmsg;
@@ -146,7 +147,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
 MasterConfigTree::MasterConfigTree(TemplateTree* tt, bool verbose)
     : ConfigTree(tt, verbose),
       _root_node(verbose),
-      _task_manager(NULL)
+      _task_manager(NULL),
+      _config_tree_copy(NULL)
 {
     _current_node = &_root_node;
 }
@@ -156,6 +158,9 @@ MasterConfigTree::~MasterConfigTree()
     remove_tmp_config_file();
 
     delete _task_manager;
+
+    if (_config_tree_copy != NULL)
+	delete _config_tree_copy;
 }
 
 MasterConfigTree&
@@ -1027,8 +1032,7 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 }
 
 bool
-MasterConfigTree::apply_config_change(uid_t user_id, CallBack cb,
-				      string& errmsg)
+MasterConfigTree::change_config(uid_t user_id, CallBack cb, string& errmsg)
 {
     string dummy_errmsg;
 
@@ -1048,6 +1052,68 @@ MasterConfigTree::apply_config_change(uid_t user_id, CallBack cb,
 
     return true;
 }
+
+bool
+MasterConfigTree::apply_config_change(uid_t user_id, string& errmsg,
+				      const string& deltas,
+				      const string& deletions,
+				      ConfigChangeCallBack cb)
+{
+    //
+    // Create a copy of the local tree that will be used later to compute
+    // the configuration changes.
+    //
+    if (_config_tree_copy != NULL)
+	delete _config_tree_copy;
+    _config_tree_copy = new MasterConfigTree(_template_tree, verbose());
+    *_config_tree_copy = *this;
+
+    //
+    // Apply the configuration changes
+    //
+    if (apply_deltas(user_id, deltas, /* provisional change */ true, errmsg)
+	== false) {
+	return (false);
+    }
+    if (apply_deletions(user_id, deletions, /* provisional change */ true,
+			errmsg)
+	== false) {
+	return (false);
+    }
+    //
+    // Add nodes providing default values.  Note: they shouldn't be
+    // needed, but adding them here acts as a safety mechanism against
+    // a client that forgets to add them.
+    //
+    add_default_children();
+
+    CallBack cb2 = callback(this,
+			    &MasterConfigTree::apply_config_commit_changes_cb,
+			    cb);
+
+    return (change_config(user_id, cb2, errmsg));
+}
+
+void
+MasterConfigTree::apply_config_commit_changes_cb(bool success,
+						 string errmsg,
+						 ConfigChangeCallBack cb)
+{
+    string deltas, deletions;
+    MasterConfigTree delta_tree(_template_tree, _verbose);
+    MasterConfigTree deletion_tree(_template_tree, _verbose);
+
+    //
+    // Compute the configuration changes
+    //
+    XLOG_ASSERT(_config_tree_copy != NULL);
+    _config_tree_copy->diff_configs(*this, delta_tree, deletion_tree);
+    deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
+    deletions = deletion_tree.show_unannotated_tree(/*numbered*/ true);
+    
+    cb->dispatch(success, errmsg, deltas, deletions);
+}
+
 
 bool
 MasterConfigTree::save_config(const string& filename, uid_t user_id,
@@ -1208,7 +1274,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     CallBack save_cb;
     save_cb = callback(this, &MasterConfigTree::save_config_file_sent_cb,
 		       filename, user_id, cb);
-    if (apply_config_change(user_id, save_cb, errmsg) != true) {
+    if (change_config(user_id, save_cb, errmsg) != true) {
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1289,7 +1355,7 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
     CallBack cleanup_cb;
     cleanup_cb = callback(this, &MasterConfigTree::save_config_file_cleanup_cb,
 			  orig_success, orig_errmsg, filename, user_id, cb);
-    if (apply_config_change(user_id, cleanup_cb, errmsg) != true) {
+    if (change_config(user_id, cleanup_cb, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg);
 	return;
@@ -1396,7 +1462,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	CallBack cb2 = callback(this,
 				&MasterConfigTree::load_config_commit_changes_cb,
 				deltas, deletions, cb);
-	if (apply_config_change(user_id, cb2, errmsg) != true) {
+	if (change_config(user_id, cb2, errmsg) != true) {
 	    discard_changes();
 	    return false;
 	}
@@ -1491,7 +1557,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     CallBack load_cb;
     load_cb = callback(this, &MasterConfigTree::load_config_file_received_cb,
 		       filename, user_id, cb);
-    if (apply_config_change(user_id, load_cb, errmsg) != true) {
+    if (change_config(user_id, load_cb, errmsg) != true) {
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1616,7 +1682,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     cleanup_cb = callback(this, &MasterConfigTree::load_config_file_cleanup_cb,
 			  orig_success, orig_errmsg, rtrmgr_config_value,
 			  filename, user_id, cb);
-    if (apply_config_change(user_id, cleanup_cb, errmsg) != true) {
+    if (change_config(user_id, cleanup_cb, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
@@ -1719,7 +1785,7 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     CallBack cb2 = callback(this,
 			    &MasterConfigTree::load_config_commit_changes_cb,
 			    deltas, deletions, cb);
-    if (apply_config_change(user_id, cb2, errmsg) != true) {
+    if (change_config(user_id, cb2, errmsg) != true) {
 	discard_changes();
 	cb->dispatch(false, errmsg, deltas, deletions);
 	return;
