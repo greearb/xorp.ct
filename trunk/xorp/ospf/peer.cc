@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.153 2005/09/17 03:55:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.154 2005/09/19 23:33:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -131,11 +131,12 @@ template <typename A>
 uint16_t
 PeerOut<A>::get_frame_size() const
 {
-    uint16_t frame = get_interface_mtu();
+    uint16_t router_alert = 4 * sizeof(uint8_t);// Router Alert 
+    uint16_t frame = get_interface_mtu() - router_alert;
 
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
-	frame -= (sizeof(struct ip) +  4*sizeof(uint8_t) /* Router Alert */);
+	frame -= sizeof(struct ip);
 	break;
     case OspfTypes::V3:
 	frame -= sizeof(struct ip6_hdr);
