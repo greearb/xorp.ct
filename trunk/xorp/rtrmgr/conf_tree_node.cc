@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.83 2005/08/19 20:04:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.84 2005/08/25 02:23:43 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1573,11 +1573,8 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	    XLOG_UNREACHABLE();
 	    break;
 	case NODE_VALUE: 
-	    errmsg = c_format("Attempt to set variable \"%s\" "
-			      "which is the name of a configuration node",
-			      varname.c_str());
-	    XLOG_ERROR("%s", errmsg.c_str());
-	    return false;
+	    node->set_value(value, _user_id);
+	    return true;
 	case NODE_OPERATOR: 
 	    errmsg = c_format("Attempt to set variable operator \"%s\" "
 			      "which is the name of a configuration node",
