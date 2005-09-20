@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.29 2005/08/23 19:06:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.30 2005/09/19 21:41:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -231,14 +231,16 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     string error_msg;
     uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
     XLOG_ASSERT(if_index > 0);
+    uint32_t new_flags = 0;
+    bool new_up = false;
+    bool deleted = false;
 
     //
     // Set the flags
     //
     do {
 	uint32_t pulled_flags = 0;
-	uint32_t new_flags;
-	bool pulled_up, new_up, deleted, enabled;
+	bool pulled_up, enabled;
 	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
 
 	deleted = i.is_marked(IfTreeItem::DELETED);
@@ -255,10 +257,11 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	if ( (!pulled_up) && enabled)
 	    new_flags |= IFF_UP;
 
+	new_up = (new_flags & IFF_UP)? true : false;
+
 	if (is_primary() && (new_flags == pulled_flags))
 	    break;		// XXX: nothing changed
 
-	new_up = (new_flags & IFF_UP)? true : false;
 	if (config_interface(i.ifname(), if_index, new_flags, new_up,
 			     deleted, error_msg)
 	    < 0) {
@@ -308,6 +311,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     // Set the MAC address
     //
     do {
+	bool was_disabled = false;
 	Mac new_mac = i.mac();
 	Mac pulled_mac;
 	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
@@ -325,20 +329,6 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 
 	if (is_primary() && (new_mac == pulled_mac))
 	    break;		// Ignore: the MAC hasn't changed
-	
-	if (is_primary()
-	    && (ii != ifc().pulled_config().ifs().end())
-	    && ii->second.enabled()) {
-	    //
-	    // XXX: we don't allow the set the MAC address if the interface
-	    // is not DOWN (limitation imposed by Linux).
-	    //
-	    error_msg = c_format("Cannot set Ethernet MAC address: "
-				 "the interface is not DOWN");
-	    ifc().er().interface_error(i.name(), error_msg);
-	    XLOG_ERROR(ifc().er().last_error().c_str());
-	    return;
-	}
 
 	struct ether_addr ea;
 	try {
@@ -360,13 +350,34 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	    return;
 	}
 
+	if (is_primary()
+	    && (ii != ifc().pulled_config().ifs().end())
+	    && new_up) {
+	    //
+	    // XXX: Set the interface DOWN otherwise we may not be able to
+	    // set the MAC address (limitation imposed by the Linux kernel).
+	    //
+	    config_interface(i.ifname(), if_index, new_flags & ~IFF_UP, false,
+			     deleted, error_msg);
+	    was_disabled = true;
+	}
+
 	if (set_interface_mac_address(i.ifname(), if_index, ea, error_msg)
 	    < 0) {
 	    error_msg = c_format("Failed to set the MAC address: %s",
 				 error_msg.c_str());
 	    ifc().er().interface_error(i.name(), error_msg);
 	    XLOG_ERROR(ifc().er().last_error().c_str());
+	    if (was_disabled) {
+		config_interface(i.ifname(), if_index, new_flags, true,
+				 deleted, error_msg);
+	    }
 	    return;
+	}
+
+	if (was_disabled) {
+	    config_interface(i.ifname(), if_index, new_flags, true,
+			     deleted, error_msg);
 	}
 
 	break;
