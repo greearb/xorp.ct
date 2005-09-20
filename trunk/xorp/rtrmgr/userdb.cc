@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.14 2005/08/18 15:54:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.15 2005/09/01 19:44:20 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -156,8 +156,15 @@ UserDB::add_user(uint32_t user_id, const string& username,
 }
 
 const User* 
-UserDB::find_user_by_user_id(uint32_t user_id) const
+UserDB::find_user_by_user_id(uint32_t user_id)
 {
+    //
+    // XXX: we always reloads the cache on each access to the
+    // find_user_by_user_id(). This is not optimal, but guarantees that
+    // the user accounts in the system and the rtrmgr are in-sync.
+    //
+    load_password_file();
+
     map<uint32_t,User*>::const_iterator iter = _users.find(user_id);
 
     if (iter == _users.end())
@@ -177,7 +184,7 @@ UserDB::remove_user(uint32_t user_id)
 }
 
 bool
-UserDB::has_capability(uint32_t user_id, const string& capability) const
+UserDB::has_capability(uint32_t user_id, const string& capability)
 {
     const User* user = find_user_by_user_id(user_id);
 
