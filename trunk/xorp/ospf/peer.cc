@@ -13,13 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.154 2005/09/19 23:33:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.155 2005/09/20 02:38:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
-
 
 #include <map>
 #include <list>
@@ -139,7 +138,11 @@ PeerOut<A>::get_frame_size() const
 	frame -= sizeof(struct ip);
 	break;
     case OspfTypes::V3:
+#ifdef HAVE_NETINET_IP6_H
 	frame -= sizeof(struct ip6_hdr);
+#else
+	frame -= 40;
+#endif
 	break;
     }
 
