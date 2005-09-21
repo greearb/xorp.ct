@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.51 2005/03/25 02:53:18 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.52 2005/09/07 20:15:45 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -1059,13 +1059,18 @@ public:
      *  @param ip_protocol the IP protocol number that the receiver is
      *  interested in. It must be between 0 and 255. A protocol number of 0 is
      *  used to specify all protocols.
+     *
+     *  @param enable_multicast_loopback if true then enable delivering of
+     *  multicast datagrams back to this host (assuming the host is a member of
+     *  the same multicast group.
      */
     XrlCmdError raw_packet4_0_1_register_receiver(
 	// Input values,
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	const uint32_t&	ip_protocol);
+	const uint32_t&	ip_protocol,
+	const bool&	enable_multicast_loopback);
 
     /**
      *  Unregister to receive IPv4 packets.
@@ -1192,13 +1197,18 @@ public:
      *  @param ip_protocol the IP protocol number that the receiver is
      *  interested in. It must be between 0 and 255. A protocol number of 0 is
      *  used to specify all protocols.
+     *
+     *  @param enable_multicast_loopback if true then enable delivering of
+     *  multicast datagrams back to this host (assuming the host is a member of
+     *  the same multicast group.
      */
     XrlCmdError raw_packet6_0_1_register_receiver(
 	// Input values,
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	const uint32_t&	ip_protocol);
+	const uint32_t&	ip_protocol,
+	const bool&	enable_multicast_loopback);
 
     /**
      *  Unregister to receive IPv6 packets.

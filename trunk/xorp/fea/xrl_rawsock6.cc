@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.6 2005/08/18 15:45:53 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.7 2005/09/07 20:15:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,12 +62,15 @@ public:
 	: XrlFilterRawSocket6(rsm, xrl_target_name, ip_protocol),
 	  _rs(rs),
 	  _if_name(if_name),
-	  _vif_name(vif_name)
+	  _vif_name(vif_name),
+	  _enable_multicast_loopback(false)
     {}
 
     virtual ~XrlVifInputFilter6() {
 	leave_all_multicast_groups();
     }
+
+    void set_enable_multicast_loopback(bool v) { _enable_multicast_loopback = v; }
 
     void recv(const struct IPv6HeaderInfo& header,
 	      const vector<uint8_t>& payload)
@@ -93,6 +96,17 @@ public:
 	    debug_msg("Ignore packet with vif %s (watching for %s)\n",
 		      header.vif_name.c_str(),
 		      _vif_name.c_str());
+	    return;
+	}
+
+	// Check if multicast loopback is enabled
+	if (header.dst_address.is_multicast()
+	    && is_my_address(header.src_address)
+	    && (! _enable_multicast_loopback)) {
+	    debug_msg("Ignore packet with src %s dst %s: "
+		      "multicast loopback is disabled\n",
+		      header.src_address.str().c_str(),
+		      header.dst_address.str().c_str());
 	    return;
 	}
 
@@ -154,10 +168,30 @@ public:
     }
 
 protected:
+    bool is_my_address(const IPv6& addr) const {
+	const IfTreeInterface* iftree_if = NULL;
+	const IfTreeVif* iftree_vif = NULL;
+
+	if (_rs.find_interface_vif_by_addr(IPvX(addr), iftree_if, iftree_vif)
+	    != true) {
+	    return (false);
+	}
+	if (iftree_if->enabled() && iftree_vif->enabled()) {
+	    IfTreeVif::V6Map::const_iterator iter = iftree_vif->get_addr(addr);
+	    if (iter != iftree_vif->v6addrs().end()) {
+		const IfTreeAddr6* iftree_a6 = &iter->second;
+		if (iftree_a6->enabled())
+		    return (true);
+	    }
+	}
+	return (false);
+    }
+
     FilterRawSocket6&	_rs;
     const string	_if_name;
     const string	_vif_name;
     set<IPv6>           _joined_multicast_groups;
+    bool		_enable_multicast_loopback;
 };
 
 // ----------------------------------------------------------------------------
@@ -238,7 +272,8 @@ XrlCmdError
 XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
 					const string&	if_name,
 					const string&	vif_name,
-					uint32_t	ip_protocol)
+					uint32_t	ip_protocol,
+					bool		enable_multicast_loopback)
 {
     XrlVifInputFilter6* filter;
 
@@ -270,6 +305,7 @@ XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
 	    (filter->if_name() == if_name) &&
 	    (filter->vif_name() == vif_name)) {
 	    // Already have this filter
+	    filter->set_enable_multicast_loopback(enable_multicast_loopback);
 	    return XrlCmdError::OKAY();
 	}
     }
@@ -279,6 +315,7 @@ XrlRawSocket6Manager::register_receiver(const string&	xrl_target_name,
     //
     filter = new XrlVifInputFilter6(*this, *rs, xrl_target_name, if_name,
 				    vif_name, ip_protocol);
+    filter->set_enable_multicast_loopback(enable_multicast_loopback);
 
     // Add the filter to the appropriate raw socket
     rs->add_filter(filter);

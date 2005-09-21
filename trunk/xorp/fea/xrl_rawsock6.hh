@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_rawsock6.hh,v 1.2 2005/03/25 02:53:17 pavlin Exp $
+// $XORP: xorp/fea/xrl_rawsock6.hh,v 1.3 2005/09/07 20:15:44 pavlin Exp $
 
 #ifndef __FEA_XRL_RAWSOCK6_HH__
 #define __FEA_XRL_RAWSOCK6_HH__
@@ -89,12 +89,17 @@ public:
      * @param ip_protocol the IP protocol number that the receiver is
      * interested in. It must be between 0 and 255. A protocol number of 0 is
      * used to specify all protocols.
+     *
+     *  @param enable_multicast_loopback if true then enable delivering of
+     *  multicast datagrams back to this host (assuming the host is a member of
+     *  the same multicast group.
      */
     XrlCmdError register_receiver(
 	const string&	xrl_target_name,
 	const string&	if_name,
 	const string&	vif_name,
-	uint32_t	ip_protocol);
+	uint32_t	ip_protocol,
+	bool		enable_multicast_loopback);
 
     /**
      * Unregister to receive IPv6 packets.

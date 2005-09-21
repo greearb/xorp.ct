@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.73 2005/08/18 15:45:53 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.74 2005/09/07 20:15:45 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2265,7 +2265,8 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
     const string&	xrl_target_name,
     const string&	if_name,
     const string&	vif_name,
-    const uint32_t&	ip_protocol)
+    const uint32_t&	ip_protocol,
+    const bool&		enable_multicast_loopback)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
@@ -2274,7 +2275,7 @@ XrlFeaTarget::raw_packet4_0_1_register_receiver(
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET4_NULL);
     }
     return _xrsm4->register_receiver(xrl_target_name, if_name, vif_name,
-				     ip_protocol);
+				     ip_protocol, enable_multicast_loopback);
 }
 
 XrlCmdError
@@ -2359,13 +2360,14 @@ XrlFeaTarget::raw_packet6_0_1_register_receiver(
     const string&	xrl_target_name,
     const string&	if_name,
     const string&	vif_name,
-    const uint32_t&	ip_protocol)
+    const uint32_t&	ip_protocol,
+    const bool&		enable_multicast_loopback)
 {
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
     return _xrsm6->register_receiver(xrl_target_name, if_name, vif_name,
-				     ip_protocol);
+				     ip_protocol, enable_multicast_loopback);
 }
 
 XrlCmdError

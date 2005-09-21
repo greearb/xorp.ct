@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.2 2004/11/29 09:18:21 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_rawpkt6.xif,v 1.3 2005/09/07 20:15:47 pavlin Exp $ */
 
 /*
  * Interface for sending IPv6 packets on a raw socket.
@@ -52,11 +52,17 @@ interface raw_packet6/0.1 {
 	 *                    It must be between 0 and 255.
 	 *                    A protocol number of 0 is used to specify all
 	 *                    protocols.
+	 * @param enable_multicast_loopback if true then enable delivering
+	 *                                  of multicast datagrams back to
+	 *                                  this host (assuming the host is
+	 *                                  a member of the same multicast
+	 *                                  group.
 	 */
 	register_receiver	? xrl_target_name:txt			\
 				& if_name:txt				\
 				& vif_name:txt				\
-				& ip_protocol:u32
+				& ip_protocol:u32			\
+				& enable_multicast_loopback:bool
 
 	/**
 	 * Unregister to receive IPv6 packets.
