@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.22 2005/08/04 10:39:25 bms Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.23 2005/08/18 15:28:42 bms Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -302,6 +302,8 @@ public:
     inline TimeVal operator/(const double& d) const;
 
 private:
+    TimeVal(int i);		// Not implemented
+
     int32_t _sec;		// The number of seconds
     int32_t _usec;		// The number of microseconds
 };
