@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.38 2005/08/25 02:26:41 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.39 2005/08/25 02:32:41 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -1050,7 +1050,7 @@ program {\tt /bin/cat} will be executed with the value of that variable as
 its argument. The rtrmgr will store the stdout and stderr output of
 that program internally inside local variables {\tt \$(rtrmgr.CONFIG)}
 and {\tt \$(rtrmgr.CONFIG\_STDERR)} respectively (note that those variables
-should be declared as leaf nodes without type).
+should be declared as leaf nodes either with or without type).
 Then those values can be used by other actions such as the {\tt \%set}
 action for the {\tt save} node in the above example.
 
