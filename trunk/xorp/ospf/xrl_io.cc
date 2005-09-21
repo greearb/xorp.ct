@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.16 2005/09/15 05:30:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.17 2005/09/21 00:29:27 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -197,6 +197,7 @@ XrlIO<IPv4>::enable_interface_vif(const string& interface, const string& vif)
 	interface,
 	vif,
 	get_ip_protocol_number(),
+	false,			// disable multicast loopback
 	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
 
     return success;
@@ -217,6 +218,7 @@ XrlIO<IPv6>::enable_interface_vif(const string& interface, const string& vif)
 	interface,
 	vif,
 	get_ip_protocol_number(),
+	false,			// disable multicast loopback
 	callback(this, &XrlIO::enable_interface_vif_cb, interface, vif));
 
     return success;
