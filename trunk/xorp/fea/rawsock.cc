@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.3 2005/09/07 21:53:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.4 2005/09/21 05:01:22 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -55,6 +55,10 @@
 #include <netinet6/in6_var.h>
 #endif
 
+#ifdef HOST_OS_WINDOWS
+#include <mswsock.h>
+#endif
+
 #include "libcomm/comm_api.h"
 #include "mrt/include/ip_mroute.h"
 
@@ -91,6 +95,59 @@
 //
 // Local structures/classes, typedefs and macros
 //
+
+#ifdef HOST_OS_WINDOWS
+
+#define cmsghdr wsacmsghdr
+typedef char *caddr_t;
+
+#ifdef __MINGW32__
+#ifndef _ALIGNBYTES
+#define _ALIGNBYTES	(sizeof(int) - 1)
+#endif
+
+#ifndef _ALIGN
+#define _ALIGN(p)	(((unsigned)(p) + _ALIGNBYTES) & ~_ALIGNBYTES)
+#endif
+
+#define CMSG_DATA(cmsg)		\
+	((unsigned char *)(cmsg) + _ALIGN(sizeof(struct cmsghdr))) 
+#define CMSG_NXTHDR(mhdr, cmsg)	\
+	(((char *)(cmsg) + _ALIGN((cmsg)->cmsg_len) + \
+		_ALIGN(sizeof(struct cmsghdr)) > \
+		(char *)(mhdr)->Control.buf + (mhdr)->Control.len) ? \
+		(struct cmsghdr *)0 : \
+		(struct cmsghdr *)((char *)(cmsg) + _ALIGN((cmsg)->cmsg_len)))
+#define CMSG_FIRSTHDR(mhdr) \
+	((mhdr)->Control.len >= sizeof(struct cmsghdr) ? \
+	 (struct cmsghdr *)(mhdr)->Control.buf : \
+	 (struct cmsghdr *)NULL)
+#define CMSG_SPACE(l)	(_ALIGN(sizeof(struct cmsghdr)) + _ALIGN(l))
+#define CMSG_LEN(l)	(_ALIGN(sizeof(struct cmsghdr)) + (l))
+
+typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
+				       LPWSAOVERLAPPED,
+				       LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+
+#define WSAID_WSARECVMSG \
+	{ 0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22} }
+
+#else // ! __MINGW32__
+
+#define CMSG_FIRSTHDR(msg)	WSA_CMSG_FIRSTHDR(msg)
+#define CMSG_NXTHDR(msg, cmsg)	WSA_CMSG_NEXTHDR(msg, cmsg)
+#define CMSG_DATA(cmsg)		WSA_CMSG_DATA(cmsg)
+#define CMSG_SPACE(len)		WSA_CMSG_SPACE(len)
+#define CMSG_LEN(len)		WSA_CMSG_LEN(len)
+
+#endif ! __MINGW32__
+
+static const GUID guidWSARecvMsg = WSAID_WSARECVMSG;
+static LPFN_WSARECVMSG lpWSARecvMsg = NULL;
+
+#endif // HOST_OS_WINDOWS
+
+
 #ifndef CMSG_LEN
 #define CMSG_LEN(l) (ALIGN(sizeof(struct cmsghdr)) + (l)) // XXX
 #endif
@@ -155,36 +212,8 @@ RawSocket::RawSocket(EventLoop& eventloop, int init_family,
     _sndbuf1 = new uint8_t[IO_BUF_SIZE];
     _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
-    
-    // recvmsg() and sendmsg() related initialization
-    switch (family()) {
-    case AF_INET:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
-	_rcvmh.msg_name		= (caddr_t)&_from4;
-	_sndmh.msg_name		= (caddr_t)&_to4;
-	_rcvmh.msg_namelen	= sizeof(_from4);
-	_sndmh.msg_namelen	= sizeof(_to4);
-#endif
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
-	_rcvmh.msg_name		= (caddr_t)&_from6;
-	_sndmh.msg_name		= (caddr_t)&_to6;
-	_rcvmh.msg_namelen	= sizeof(_from6);
-	_sndmh.msg_namelen	= sizeof(_to6);
-#endif
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-#ifdef HAVE_STRUCT_MSGHDR_MSG_IOV
-    _rcvmh.msg_iov		= _rcviov;
-    _sndmh.msg_iov		= _sndiov;
-    _rcvmh.msg_iovlen		= 1;
-    _sndmh.msg_iovlen		= 1;
+
+    // Scatter/gatter array initialization
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
     _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
     _rcviov[0].iov_len		= IO_BUF_SIZE;
@@ -193,16 +222,37 @@ RawSocket::RawSocket(EventLoop& eventloop, int init_family,
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
     _sndiov[1].iov_len		= 0;
-#else
-    XLOG_FATAL("Needs rewritten to use WinSock2 WSABUFS");
-#endif
-   
-#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
+
+    // recvmsg() and sendmsg() related initialization
+#ifndef HOST_OS_WINDOWS    
+    switch (family()) {
+    case AF_INET:
+	_rcvmh.msg_name		= (caddr_t)&_from4;
+	_sndmh.msg_name		= (caddr_t)&_to4;
+	_rcvmh.msg_namelen	= sizeof(_from4);
+	_sndmh.msg_namelen	= sizeof(_to4);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	_rcvmh.msg_name		= (caddr_t)&_from6;
+	_sndmh.msg_name		= (caddr_t)&_to6;
+	_rcvmh.msg_namelen	= sizeof(_from6);
+	_sndmh.msg_namelen	= sizeof(_to6);
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+    _rcvmh.msg_iov		= _rcviov;
+    _sndmh.msg_iov		= _sndiov;
+    _rcvmh.msg_iovlen		= 1;
+    _sndmh.msg_iovlen		= 1;
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 RawSocket::~RawSocket()
@@ -787,7 +837,41 @@ RawSocket::open_proto_socket(string& error_msg)
 	    return (XORP_ERROR);
 	}
     } while (false);
-    
+
+#ifdef HOST_OS_WINDOWS
+    switch (family()) {
+    case AF_INET:
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	// Obtain the pointer to the extension function WSARecvMsg() if needed
+	if (lpWSARecvMsg == NULL) {
+	    int result;
+	    DWORD nbytes;
+
+	    result = WSAIoctl(_proto_socket,
+			      SIO_GET_EXTENSION_FUNCTION_POINTER,
+			      const_cast<GUID *>(&guidWSARecvMsg),
+			      sizeof(guidWSARecvMsg),
+			      &lpWSARecvMsg, sizeof(lpWSARecvMsg), &nbytes,
+			      NULL, NULL);
+	    if (result == SOCKET_ERROR) {
+		XLOG_ERROR("Cannot obtain WSARecvMsg function pointer; "
+			   "unable to receive raw IPv6 traffic.");
+		lpWSARecvMsg = NULL;
+	    }
+	}
+    }
+    break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family %d", family());
+	return (XORP_ERROR);
+    }
+#endif // HOST_OS_WINDOWS
+
     // Set various socket options
     // Lots of input buffering
     if (comm_sock_set_rcvbuf(_proto_socket, SO_RCV_BUF_SIZE_MAX,
@@ -889,6 +973,23 @@ RawSocket::close_proto_socket(string& error_msg)
     // Remove it just in case, even though it may not be select()-ed
     eventloop().remove_ioevent_cb(_proto_socket);
 
+#ifdef HOST_OS_WINDOWS
+    switch (family()) {
+    case AF_INET:
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	// Reset the pointer to the extension function WSARecvMsg()
+	lpWSARecvMsg = NULL;
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family %d", family());
+	return (XORP_ERROR);
+    }
+#endif // HOST_OS_WINDOWS
+
     comm_close(_proto_socket);
     _proto_socket.clear();
     
@@ -913,26 +1014,21 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     UNUSED(type);
     UNUSED(int_val);
 
-#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
+#ifndef HOST_OS_WINDOWS
     // Zero and reset various fields
     _rcvmh.msg_controllen = CMSG_BUF_SIZE;
-#endif
 
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {
     case AF_INET:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	memset(&_from4, 0, sizeof(_from4));
 	_rcvmh.msg_namelen = sizeof(_from4);
-#endif
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
 	memset(&_from6, 0, sizeof(_from6));
 	_rcvmh.msg_namelen = sizeof(_from6);
-#endif
 	break;
 #endif // HAVE_IPV6
     default:
@@ -940,7 +1036,6 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	return;			// Error
     }
    
-#ifdef HAVE_RECVMSG
     // Read from the socket
     nbytes = recvmsg(_proto_socket, &_rcvmh, 0);
     if (nbytes < 0) {
@@ -949,10 +1044,60 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	XLOG_ERROR("recvmsg() failed: %s", strerror(errno));
 	return;			// Error
     }
-#else
-    XLOG_FATAL("Needs rewritten to use WSARecv() with WinSock2");
-    UNUSED(nbytes);
-#endif
+
+#else // HOST_OS_WINDOWS
+
+    switch (family()) {
+    case AF_INET:
+    {
+	struct sockaddr_storage from;
+	socklen_t from_len = sizeof(from);
+
+	nbytes = recvfrom(_proto_socket, XORP_BUF_CAST(_rcvbuf0), IO_BUF_SIZE,
+			  0, (struct sockaddr *)&from, &from_len);
+	debug_msg("Read fd %s, %d bytes\n",
+		  _proto_socket.str().c_str(), XORP_INT_CAST(nbytes));
+	if (nbytes < 0) {
+	    // XLOG_ERROR("recvfrom() failed: %s", strerror(errno));
+	    return;			// Error
+	}
+    }
+    break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	WSAMSG mh;
+	DWORD error, nrecvd;
+	struct sockaddr_in6 from;
+
+	mh.name = (LPSOCKADDR)&from;
+	mh.namelen = sizeof(from);
+	mh.lpBuffers = (LPWSABUF)_rcviov;
+	mh.dwBufferCount = 1;
+	mh.Control.len = CMSG_BUF_SIZE;
+	mh.Control.buf = (caddr_t)_rcvcmsgbuf;
+	mh.dwFlags = 0;
+
+	if (lpWSARecvMsg == NULL) {
+	    XLOG_ERROR("lpWSARecvMsg is NULL");
+	    return;			// Error
+	}
+	error = lpWSARecvMsg(_proto_socket, &mh, &nrecvd, NULL, NULL);
+	nbytes = (ssize_t)nrecvd;
+	debug_msg("Read fd %s, %d bytes\n",
+		  _proto_socket.str().c_str(), XORP_INT_CAST(nbytes));
+	if (nbytes < 0) {
+	    // XLOG_ERROR("lpWSARecvMsg() failed: %s", strerror(errno));
+	    return;			// Error
+	}
+    }
+    break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	return;			// Error
+    }
+#endif // HOST_OS_WINDOWS
     
     // Check if it is a signal from the kernel to the user-level
     switch (_ip_protocol) {
@@ -1041,16 +1186,15 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     // Not a kernel signal. Pass to the registered processing function
     //
 
-#ifdef HAVE_STRUCT_CMSGHDR
-    // XXX: Above should actually be 'if we can see struct ip' and cmsghdr
+    //
     // Input check.
     // Get source and destination address, IP TTL (a.k.a. hop-limit),
     // and (eventually) interface address (IPv6 only).
+    //
     switch (family()) {
     case AF_INET:
     {
 	struct ip *ip;
-	struct cmsghdr *cmsgp;
 	bool is_datalen_error = false;
 	
 	// Input check
@@ -1062,7 +1206,12 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 			 XORP_UINT_CAST(sizeof(*ip)));
 	    return;		// Error
 	}
+#ifndef HOST_OS_WINDOWS
+	// TODO: get rid of this and always use ip->ip_src ??
 	src_address.copy_in(_from4);
+#else
+	src_address.copy_in(ip->ip_src);
+#endif
 	dst_address.copy_in(ip->ip_dst);
 	ip_ttl = ip->ip_ttl;
 	ip_tos = ip->ip_tos;
@@ -1095,11 +1244,13 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    is_datalen_error = true;
 		    break;
 		}
+		//
 		// XXX: the *BSD kernel might truncate the encapsulated data
 		// in PIM Register messages before passing the message up
 		// to user level. The reason for the truncation is to reduce
 		// the bandwidth overhead, but the price for this is
 		// messages with weird IP header. Sigh...
+		//
 		is_datalen_error = false;
 		break;
 	    }
@@ -1114,8 +1265,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
 	    return;		// Error
 	}
-	
-	for (cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+
+#ifndef HOST_OS_WINDOWS
+	for (struct cmsghdr *cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
 	     cmsgp != NULL;
 	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
 	    if (cmsgp->cmsg_level != IPPROTO_IP)
@@ -1136,6 +1288,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		break;
 	    }
 	}
+#endif // ! HOST_OS_WINDOWS
 	
 	//
 	// Check for Router Alert option
@@ -1167,7 +1320,6 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	struct cmsghdr *cmsgp;
 	struct in6_pktinfo *pi = NULL;
 	
 	src_address.copy_in(_from6);
@@ -1192,7 +1344,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	//
 	// Get pif_index, hop limit, Router Alert option, etc.
 	//
-	for (cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+	for (struct cmsghdr *cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
 	     cmsgp != NULL;
 	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
 	    if (cmsgp->cmsg_level != IPPROTO_IPV6)
@@ -1321,10 +1473,12 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    return;		// Error
 	}
     }
-    
+
+    //
     // Find the interface and the vif this message was received on.
     // XXX: note that in case of IPv4 (except Linux?) we may be able
     // only to "guess" by using the sender or the destination address.
+    //
     const IfTreeInterface* iftree_if = NULL;
     const IfTreeVif* iftree_vif = NULL;
     do {
@@ -1369,20 +1523,6 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		      is_router_alert,
 		      payload);
 
-#else // HAVE_STRUCT_CMSGHDR
-    //
-    // XXX: We don't have cmsgs, so we will need to deal with
-    // IP options in a very different way.
-    //
-    UNUSED(ip_hdr_len);
-    UNUSED(ip_data_len);
-    UNUSED(int_val);
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(is_router_alert);
-    UNUSED(pif_index);
-#endif // HAVE_STRUCT_CMSGHDR
-    
     return;			// OK
 }
 
@@ -1397,9 +1537,7 @@ RawSocket::proto_socket_write(const string& if_name,
 			      const vector<uint8_t>& payload,
 			      string& error_msg)
 {
-#ifndef HOST_OS_WINDOWS
     struct ip	*ip;
-#endif
     uint32_t	ip_option;
     uint32_t	*ip_option_p;
     int		ip_hdr_len = 0;
@@ -1492,7 +1630,6 @@ RawSocket::proto_socket_write(const string& if_name,
     //
     switch (family()) {
     case AF_INET:
-#ifndef HOST_OS_WINDOWS
 	ip = (struct ip *)_sndbuf0;
 	if (is_router_alert) {
 	    // Include the Router Alert option
@@ -1527,9 +1664,13 @@ RawSocket::proto_socket_write(const string& if_name,
 	ip->ip_sum = 0;					// Let kernel fill in
 	
 	// Now hook the data
+#ifndef HOST_OS_WINDOWS
 	dst_address.copy_out(_to4);
 	_sndmh.msg_namelen	= sizeof(_to4);
 	_sndmh.msg_iovlen	= 2;
+	_sndmh.msg_control	= NULL;
+	_sndmh.msg_controllen	= 0;
+#endif // ! HOST_OS_WINDOWS
 	_sndiov[0].iov_len	= ip_hdr_len;
 	if (payload.size() > IO_BUF_SIZE) {
 	    error_msg = c_format("proto_socket_write() failed: "
@@ -1547,22 +1688,6 @@ RawSocket::proto_socket_write(const string& if_name,
     	memcpy(_sndbuf1, &payload[0], payload.size()); // XXX: goes to _sndiov[1].iov_base
 	// _sndiov[1].iov_base	= (caddr_t)&payload[0];
 	_sndiov[1].iov_len	= payload.size();
-#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
-	_sndmh.msg_control	= NULL;
-	_sndmh.msg_controllen	= 0;
-#endif
-	
-#else /* HOST_OS_WINDOWS */
-	XLOG_FATAL("WinSock2 lacks a 'struct ip' definition");
-	UNUSED(ip_option);
-	UNUSED(ip_option_p);
-	UNUSED(ip_hdr_len);
-	UNUSED(setloop);
-	UNUSED(ret);
-	UNUSED(src_address);
-	UNUSED(dst_address);
-	UNUSED(payload);
-#endif /* !HOST_OS_WINDOWS */
 	break;
 
 #ifdef HAVE_IPV6
@@ -1731,9 +1856,11 @@ RawSocket::proto_socket_write(const string& if_name,
 	//
 	// Now hook the data
 	//
+#ifndef HOST_OS_WINDOWS
 	dst_address.copy_out(_to6);
 	_sndmh.msg_namelen  = sizeof(_to6);
 	_sndmh.msg_iovlen   = 1;
+#endif // ! HOST_OS_WINDOWS
 	if (payload.size() > IO_BUF_SIZE) {
 	    error_msg = c_format("proto_socket_write() failed: "
 				 "error sending packet on interface %s vif %s "
@@ -1795,9 +1922,51 @@ RawSocket::proto_socket_write(const string& if_name,
 				 strerror(errno));
 	}
     }
-#else
-    XLOG_FATAL("Needs to be rewritten to use WSASend() with WinSock2");
-#endif
+
+#else // HOST_OS_WINDOWS
+
+    ret = XORP_OK;
+    switch (family()) {
+    case AF_INET:
+    {
+	struct sockaddr_in to;
+	DWORD sent, error;
+
+	dst_address.copy_out(to);
+	error = WSASendTo(_proto_socket, reinterpret_cast<WSABUF *>(_sndiov),
+			  2, &sent, 0,
+			  reinterpret_cast<struct sockaddr *>(&to),
+			  sizeof(to), NULL, NULL);
+	if (error != 0) {
+	    ret = XORP_ERROR;
+	}
+    }
+    break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+    {
+	struct sockaddr_in6 to;
+	DWORD sent, error;
+
+	dst_address.copy_out(to);
+	error = WSASendTo(_proto_socket, reinterpret_cast<WSABUF *>(_sndiov),
+			  1, &sent, 0,
+			  reinterpret_cast<struct sockaddr *>(&to),
+			  sizeof(to), NULL, NULL);
+	if (error != 0) {
+	    ret = XORP_ERROR;
+	}
+    }
+    break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family %d", family());
+	return (XORP_ERROR);
+    }
+
+#endif // HOST_OS_WINDOWS
+
     if (setloop) {
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
