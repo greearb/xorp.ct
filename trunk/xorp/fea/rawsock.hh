@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/rawsock.hh,v 1.1 2005/09/07 20:15:44 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -258,37 +258,6 @@ public:
 				   bool			ip_router_alert,
 				   const vector<uint8_t>& payload) = 0;
 
-private:
-    /**
-     * Open a protocol socket.
-     * 
-     * The protocol socket is specific to the particular protocol of
-     * this entry.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		open_proto_socket(string& error_msg);
-    
-    /**
-     * Close the protocol socket.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int		close_proto_socket(string& error_msg);
-
-    /**
-     * Read data from a protocol socket, and then call the appropriate protocol
-     * module to process it.
-     *
-     * This is called as a IoEventCb callback.
-     * @param fd file descriptor that with event caused this method to be
-     * called.
-     * @param type the event type.
-     */
-    void	proto_socket_read(XorpFd fd, IoEventType type);
-
     /**
      * Find an interface and a vif by interface and vif name.
      * 
@@ -344,6 +313,37 @@ private:
 	const IPvX& addr,
 	const IfTreeInterface*& iftree_if,
 	const IfTreeVif*& iftree_vif) const;
+
+private:
+    /**
+     * Open a protocol socket.
+     * 
+     * The protocol socket is specific to the particular protocol of
+     * this entry.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		open_proto_socket(string& error_msg);
+    
+    /**
+     * Close the protocol socket.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		close_proto_socket(string& error_msg);
+
+    /**
+     * Read data from a protocol socket, and then call the appropriate protocol
+     * module to process it.
+     *
+     * This is called as a IoEventCb callback.
+     * @param fd file descriptor that with event caused this method to be
+     * called.
+     * @param type the event type.
+     */
+    void	proto_socket_read(XorpFd fd, IoEventType type);
 
     // Private state
     EventLoop&	_eventloop;	// The event loop to use
