@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.156 2005/09/20 20:34:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.157 2005/09/20 20:42:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1401,7 +1401,7 @@ void
 Peer<A>::start_wait_timer()
 {
     _wait_timer = _ospf.get_eventloop().
-	new_oneoff_after(TimeVal(_hello_packet.get_router_dead_interval()),
+	new_oneoff_after(TimeVal(_hello_packet.get_router_dead_interval(), 0),
 			 callback(this, &Peer<A>::event_wait_timer));
 }
 

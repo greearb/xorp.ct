@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.96 2005/09/15 09:50:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.97 2005/09/15 15:52:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1300,7 +1300,7 @@ AreaRouter<A>::routing_schedule_total_recompute()
 	return;
 
     _routing_recompute_timer = _ospf.get_eventloop().
-	new_oneoff_after(TimeVal(_routing_recompute_delay),
+	new_oneoff_after(TimeVal(_routing_recompute_delay, 0),
 			 callback(this, &AreaRouter<A>::routing_timer));
     
 }
