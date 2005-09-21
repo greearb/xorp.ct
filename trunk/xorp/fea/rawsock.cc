@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.2 2005/09/07 21:17:18 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.3 2005/09/07 21:53:52 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1766,6 +1766,10 @@ RawSocket::proto_socket_write(const string& if_name,
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
+	//
+	// XXX: we need to enable the multicast loopback so other processes
+	// on the same host can receive the multicast packets.
+	//
 	if (enable_multicast_loopback(true, error_msg) != XORP_OK) {
 	    return (XORP_ERROR);
 	}
