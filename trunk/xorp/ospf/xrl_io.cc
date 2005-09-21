@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.15 2005/09/14 08:24:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.16 2005/09/15 05:30:07 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -65,7 +65,7 @@ XrlIO<A>::recv(const string& interface,
 	      (ip_router_alert)? "true" : "false",
 	      XORP_UINT_CAST(payload.size()));
 
-    if (_receive_cb.is_empty())
+    if (IO<A>::_receive_cb.is_empty())
 	return;
 
     //
@@ -73,9 +73,8 @@ XrlIO<A>::recv(const string& interface,
     // is not const-ified.
     //
     vector<uint8_t> payload_copy(payload);
-    _receive_cb->dispatch(interface, vif, dst, src, &payload_copy[0],
-			  payload_copy.size());
-
+    IO<A>::_receive_cb->dispatch(interface, vif, dst, src, &payload_copy[0],
+				 payload_copy.size());
 }
 
 template <>
@@ -181,15 +180,6 @@ XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }
-}
-
-template <typename A>
-bool
-XrlIO<A>::register_receive(typename IO<A>::ReceiveCallback cb)
-{
-    _receive_cb = cb;
-
-    return true;
 }
 
 template <>
@@ -1014,6 +1004,206 @@ XrlQueue<A>::route_command_done(const XrlError& error,
 
     // Fire of more requests.
     start();
+}
+
+template<class A>
+void
+XrlIO<A>::tree_complete()
+{
+    //
+    // XXX: we use same actions when the tree is completed or updates are made
+    //
+    updates_made();
+}
+
+template<>
+void
+XrlIO<IPv4>::updates_made()
+{
+    IfMgrIfTree::IfMap::const_iterator ii;
+    IfMgrIfAtom::VifMap::const_iterator vi;
+    IfMgrVifAtom::V4Map::const_iterator ai;
+    const IfMgrIfAtom* if_atom;
+    const IfMgrVifAtom* vif_atom;
+    const IfMgrIPv4Atom* addr_atom;
+    const IfMgrIPv4Atom* other_addr_atom;
+
+    if (_interface_status_cb.is_empty())
+	return;		// XXX: no callback to invoke
+
+    //
+    // Check whether all old addresses are still there
+    //
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	if_atom = &ii->second;
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+	    for (ai = vif_atom->ipv4addrs().begin();
+		 ai != vif_atom->ipv4addrs().end();
+		 ++ai) {
+		addr_atom = &ai->second;
+
+		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
+							   vif_atom->name(),
+							   addr_atom->addr());
+		if (other_addr_atom == NULL) {
+		    // The new address has disappeared
+		    if (addr_atom->enabled()) {
+			_interface_status_cb->dispatch(if_atom->name(),
+						       vif_atom->name(),
+						       addr_atom->addr(),
+						       false);
+		    }
+		    continue;
+		}
+		if (addr_atom->enabled() != other_addr_atom->enabled()) {
+		    _interface_status_cb->dispatch(if_atom->name(),
+						   vif_atom->name(),
+						   addr_atom->addr(),
+						   other_addr_atom->enabled());
+		    continue;
+		}
+	    }
+	}
+    }
+
+    //
+    // Check for new addresses
+    //
+    for (ii = ifmgr_iftree().ifs().begin();
+	 ii != ifmgr_iftree().ifs().end();
+	 ++ii) {
+	if_atom = &ii->second;
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+	    for (ai = vif_atom->ipv4addrs().begin();
+		 ai != vif_atom->ipv4addrs().end();
+		 ++ai) {
+		addr_atom = &ai->second;
+
+		other_addr_atom = _iftree.find_addr(if_atom->name(),
+						    vif_atom->name(),
+						    addr_atom->addr());
+		if (other_addr_atom == NULL) {
+		    // This is a new address
+		    if (addr_atom->enabled()) {
+			_interface_status_cb->dispatch(if_atom->name(),
+						       vif_atom->name(),
+						       addr_atom->addr(),
+						       true);
+		    }
+		    continue;
+		}
+		if (addr_atom->enabled() != other_addr_atom->enabled()) {
+		    _interface_status_cb->dispatch(if_atom->name(),
+						   vif_atom->name(),
+						   addr_atom->addr(),
+						   addr_atom->enabled());
+		    continue;
+		}
+	    }
+	}
+    }
+
+    //
+    // Update the local copy of the interface tree
+    //
+    _iftree = ifmgr_iftree();
+}
+
+template<>
+void
+XrlIO<IPv6>::updates_made()
+{
+    IfMgrIfTree::IfMap::const_iterator ii;
+    IfMgrIfAtom::VifMap::const_iterator vi;
+    IfMgrVifAtom::V6Map::const_iterator ai;
+    const IfMgrIfAtom* if_atom;
+    const IfMgrVifAtom* vif_atom;
+    const IfMgrIPv6Atom* addr_atom;
+    const IfMgrIPv6Atom* other_addr_atom;
+
+    if (_interface_status_cb.is_empty())
+	return;		// XXX: no callback to invoke
+
+    //
+    // Check whether all old addresses are still there
+    //
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	if_atom = &ii->second;
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+	    for (ai = vif_atom->ipv6addrs().begin();
+		 ai != vif_atom->ipv6addrs().end();
+		 ++ai) {
+		addr_atom = &ai->second;
+
+		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
+							   vif_atom->name(),
+							   addr_atom->addr());
+		if (other_addr_atom == NULL) {
+		    // The new address has disappeared
+		    if (addr_atom->enabled()) {
+			_interface_status_cb->dispatch(if_atom->name(),
+						       vif_atom->name(),
+						       addr_atom->addr(),
+						       false);
+		    }
+		    continue;
+		}
+		if (addr_atom->enabled() != other_addr_atom->enabled()) {
+		    _interface_status_cb->dispatch(if_atom->name(),
+						   vif_atom->name(),
+						   addr_atom->addr(),
+						   other_addr_atom->enabled());
+		    continue;
+		}
+	    }
+	}
+    }
+
+    //
+    // Check for new addresses
+    //
+    for (ii = ifmgr_iftree().ifs().begin();
+	 ii != ifmgr_iftree().ifs().end();
+	 ++ii) {
+	if_atom = &ii->second;
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+	    for (ai = vif_atom->ipv6addrs().begin();
+		 ai != vif_atom->ipv6addrs().end();
+		 ++ai) {
+		addr_atom = &ai->second;
+
+		other_addr_atom = _iftree.find_addr(if_atom->name(),
+						    vif_atom->name(),
+						    addr_atom->addr());
+		if (other_addr_atom == NULL) {
+		    // This is a new address
+		    if (addr_atom->enabled()) {
+			_interface_status_cb->dispatch(if_atom->name(),
+						       vif_atom->name(),
+						       addr_atom->addr(),
+						       true);
+		    }
+		    continue;
+		}
+		if (addr_atom->enabled() != other_addr_atom->enabled()) {
+		    _interface_status_cb->dispatch(if_atom->name(),
+						   vif_atom->name(),
+						   addr_atom->addr(),
+						   addr_atom->enabled());
+		    continue;
+		}
+	    }
+	}
+    }
+
+    //
+    // Update the local copy of the interface tree
+    //
+    _iftree = ifmgr_iftree();
 }
 
 template class XrlIO<IPv4>;

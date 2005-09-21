@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.11 2005/09/07 08:58:10 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.12 2005/09/09 15:32:35 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -66,7 +66,7 @@ class IO {
     /**
      * Register for receiving raw frames.
      */
-    virtual bool register_receive(ReceiveCallback) = 0;
+    void register_receive(ReceiveCallback cb) { _receive_cb = cb; }
 
     /**
      * Enable the interface/vif to receive frames.
@@ -88,6 +88,22 @@ class IO {
      */
     virtual bool enabled(const string& interface, const string& vif,
 			 A address) = 0;
+
+    typedef typename XorpCallback4<void, const string&, const string&, A,
+				   bool>::RefPtr InterfaceStatusCb;
+
+    /**
+     * Add a callback for tracking the interface/vif/address status.
+     *
+     * The callback will be invoked whenever the status of the tuple
+     * (interface, vif, address) is changed from disabled to enabled
+     * or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_interface_status(InterfaceStatusCb cb) {
+	_interface_status_cb = cb;
+    }
 
     /**
      * @return prefix length for this address.
@@ -148,5 +164,9 @@ class IO {
      * Delete route
      */
     virtual bool delete_route(IPNet<A> net) = 0;
+
+ protected:
+    ReceiveCallback	_receive_cb;
+    InterfaceStatusCb	_interface_status_cb;
 };
 #endif // __OSPF_IO_HH__

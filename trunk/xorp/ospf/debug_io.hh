@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.7 2005/09/12 17:58:19 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.8 2005/09/16 23:33:28 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -101,16 +101,6 @@ class DebugIO : public IO<A> {
     }
 
     /**
-     * Register for receiving raw frames.
-     */
-    bool register_receive(typename IO<A>::ReceiveCallback cb)
-    {
-	_receive_cb = cb;
-
-	return true;
-    }
-
-    /**
      * Receive frames. Specific to DebugIO.
      */
     void receive(const string& interface, const string& vif, 
@@ -119,8 +109,8 @@ class DebugIO : public IO<A> {
     {
 	pp("RECEIVE", 1, interface, vif, dst, src, data, len);
 
-	if (!_receive_cb.is_empty())
-	    _receive_cb->dispatch(interface, vif, dst, src, data, len);
+	if (! IO<A>::_receive_cb.is_empty())
+	    IO<A>::_receive_cb->dispatch(interface, vif, dst, src, data, len);
     }
 
     /**
@@ -247,6 +237,5 @@ class DebugIO : public IO<A> {
     LsaDecoder _lsa_decoder;
 
     typename IO<A>::ReceiveCallback _forward_cb;
-    typename IO<A>::ReceiveCallback _receive_cb;
 };
 #endif // __OSPF_DEBUG_IO_HH__

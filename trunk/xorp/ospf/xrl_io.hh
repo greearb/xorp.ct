@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.11 2005/09/09 21:05:51 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.12 2005/09/09 21:18:39 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -200,11 +200,6 @@ class XrlIO : public IO<A>,
 	      uint8_t* data, uint32_t len);
 
     /**
-     * Register for receiving raw frames.
-     */
-    bool register_receive(typename IO<A>::ReceiveCallback cb);
-
-    /**
      * Enable the interface/vif to receive frames.
      */
     bool enable_interface_vif(const string& interface, const string& vif);
@@ -315,12 +310,8 @@ class XrlIO : public IO<A>,
     //
     // IfMgrHintObserver methods
     //
-    void tree_complete() {
-	// TODO: nothing to do for now
-    }
-    void updates_made() {
-	// TODO: nothing to do for now
-    }
+    void tree_complete();
+    void updates_made();
 
     //
     // XRL allbacks
@@ -346,6 +337,9 @@ class XrlIO : public IO<A>,
     IfMgrXrlMirror	_ifmgr;
     XrlQueue<A>		_rib_queue;
 
-    typename IO<A>::ReceiveCallback _receive_cb;
+    //
+    // A local copy with the interface state information
+    //
+    IfMgrIfTree		_iftree;
 };
 #endif // __OSPF_XRL_IO_HH__
