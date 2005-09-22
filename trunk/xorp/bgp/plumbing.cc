@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.68 2005/07/22 01:20:11 abittau Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.70 2005/08/18 15:58:06 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -653,6 +653,20 @@ BGPPlumbingAF<A>::stop_peering(PeerHandler* peer_handler)
 	}
     }
 
+#if 0
+    //XXX Atanu, please enable this if you're happy it works.
+    uint32_t genid;
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    iter2 = _in_map.find(peer_handler);
+    if (iter2 == _in_map.end())
+	XLOG_FATAL("BGPPlumbingAF<A>::peering_went_down: peer %p not found",
+		   peer_handler);
+
+    RibInTable<A> *rib_in;
+    rib_in = iter2->second;
+    genid = rib_in->genid();
+    prevrt->peering_went_down(peer_handler, genid, _fanout_table);
+#endif
     prevrt->set_parent(NULL);
     _fanout_table->remove_next_table(prevrt);
     return 0;
