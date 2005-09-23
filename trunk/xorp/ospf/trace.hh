@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/trace.hh,v 1.2 2005/04/27 01:30:42 atanu Exp $
+// $XORP: xorp/ospf/trace.hh,v 1.3 2005/09/08 17:16:19 atanu Exp $
 
 #ifndef __OSPF_TRACE_HH__
 #define __OSPF_TRACE_HH__
@@ -26,12 +26,10 @@ struct Trace {
     // XXX - Enable all tracing during development.
     // atanu@xorp.org 2005-04-26
     Trace() : _input_errors(true),
-	      _input_errors_that_happen(false),
 	      _interface_events(true),
 	      _neighbour_events(true)
 	{}
     bool _input_errors;
-    bool _input_errors_that_happen;
     bool _interface_events;
     bool _neighbour_events;
 };
