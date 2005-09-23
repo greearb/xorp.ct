@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.63 2005/07/08 23:16:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.65 2005/08/18 15:58:10 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -467,6 +467,128 @@ mrtd_traffic_file_read(FILE *fp, size_t& len)
 
     return buf;
 }
+
+#if	0
+// Code to read from a MRTD table dump.
+// In order to hook this code up:
+// 1) Modify send_dump to support "routeview" as well as "update".
+// 2) Compare with mrtd_routeview_dump and rename to mrtd_routview_read.
+// 3) Update the manual.
+// Contributed by Ratul Mahajan
+
+struct mrt_table {
+     uint16_t view;
+     uint16_t seqno;
+     uint32_t prefix;
+     uint8_t  prefix_len;
+     uint8_t  status;
+     uint32_t time;
+     uint32_t peerip;
+     uint16_t peeras;
+     uint16_t att_len;
+};
+
+inline
+const
+uint8_t *
+mrtd_table_file_read(FILE *fp, size_t& len)
+{
+     mrt_header header;
+
+     if(fread(&header, sizeof(header), 1, fp) != 1) {
+	if(feof(fp))
+	    return 0;
+	XLOG_WARNING("fread failed:%s", strerror(errno));
+	return 0;
+     }
+
+     uint16_t type = ntohs(header.type);
+
+     if (type == 12) {   // TABLE_DUMP
+	mrt_table table;
+
+	//sizeof(mrt_table) gives 24 which is incorrect
+	size_t sizeof_table = 22;
+
+
+	/*
+      	 ** this did not work for me: the struct was not being populated
+	 ** correctly. no clue why!
+	 */
+	//    	if(fread(&table, sizeof_table, 1, fp) != 1) {
+	//		if(feof(fp))
+	//	    		return 0;
+	//		XLOG_WARNING("fread failed:%s",strerror(errno));
+	//		return 0;
+	//    	}
+
+         //uglier version of the above
+	if (! (fread(&table.view, 2, 1, fp)       == 1 &&
+	       fread(&table.seqno, 2, 1, fp)      == 1 &&
+	       fread(&table.prefix, 4, 1, fp)     == 1 &&
+	       fread(&table.prefix_len, 1, 1, fp) == 1 &&
+	       fread(&table.status, 1, 1, fp)     == 1 &&
+	       fread(&table.time, 4, 1, fp)       == 1 &&
+	       fread(&table.peerip, 4, 1, fp)     == 1 &&
+	       fread(&table.peeras, 2, 1, fp)     == 1 &&
+	       fread(&table.att_len, 2, 1, fp)    == 1
+	       ) ) {
+	    if (feof(fp)) return 0;
+	      XLOG_WARNING("fread failed:%s", strerror(errno));
+	      return 0;
+	}
+	
+	UpdatePacket update;
+	
+	size_t pa_len = ntohl(header.length) - sizeof_table;
+	uint8_t * attributes = new uint8_t[pa_len];
+	if(fread(attributes, pa_len, 1, fp) != 1) {
+	    if(feof(fp)) return 0;
+	    XLOG_WARNING("fread failed:%s", strerror(errno));
+	    return 0;
+	}
+
+	// this didn't work for me. i thought it should have, but didn't
+	// look closely when it didn't.
+	//update.add_nlri(BGPUpdateAttrib(IPv4(ntohl(table.prefix)),
+	//				 ntohs(table.prefix_len)));
+
+	//stupid way to do the above
+	uint8_t *pfx = new uint8_t[5];
+	memcpy(pfx, &(table.prefix_len), 1);
+	memcpy(pfx+1, &(table.prefix), 4);
+
+  	BGPUpdateAttrib nlri(pfx);
+  	update.add_nlri(nlri);
+	delete [] pfx;
+
+	uint8_t * d = attributes;
+	while (pa_len > 0) {
+	    size_t used = 0;
+	    PathAttribute *pa = PathAttribute::create(d, pa_len, used);
+	    if (used == 0)
+		xorp_throw(CorruptMessage,
+			   c_format("failed to read path attribute"),
+			   UPDATEMSGERR, ATTRLEN);
+	
+	    update.add_pathatt(pa);
+	    d += used;
+	    pa_len -= used;
+	}
+
+	delete [] attributes;
+
+	debug_msg("update packet = %s\n", update.str().c_str());
+
+	const uint8_t *buf = update.encode(len);
+	return buf;
+     }
+     else {
+	XLOG_WARNING("incorrect record type: %d", type);
+	return 0;
+     }
+}
+#endif
 
 /*
 ** peer send dump mrtd update fname <count>
