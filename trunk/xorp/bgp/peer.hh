@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.22 2005/04/09 00:31:40 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.23 2005/08/18 15:58:06 bms Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -66,6 +66,7 @@ enum PeerOutputState {
 
 class BGPMain;
 class PeerHandler;
+class AcceptSession;
 
 class BGPPeer {
 public:
@@ -73,6 +74,8 @@ public:
     virtual ~BGPPeer();
 
     void connected(XorpFd s);
+    void remove_accept_attempt(AcceptSession *conn);
+    SocketClient *swap_sockets(SocketClient *new_sock);
     XorpFd get_sock();
 
     /**
@@ -97,6 +100,7 @@ public:
 		const uint8_t*data = 0, const size_t len = 0);
 
     FSMState state()			{ return _state; }
+    static const char *pretty_print_state(FSMState s);
     void clear_all_timers();
     void start_connect_retry_timer();
     void clear_connect_retry_timer();
@@ -112,7 +116,8 @@ public:
     void start_stopped_timer();
     void clear_stopped_timer();
 
-    bool get_message(BGPPacket::Status status, const uint8_t *buf, size_t len);
+    bool get_message(BGPPacket::Status status, const uint8_t *buf, size_t len,
+		     SocketClient *socket_client);
     PeerOutputState send_message(const BGPPacket& p);
     void send_message_complete(SocketClient::Event, const uint8_t *buf);
 
@@ -120,6 +125,7 @@ public:
     bool is_connected() const		{ return _SocketClient->is_connected(); }
     bool still_reading() const		{ return _SocketClient->still_reading(); }
     LocalData* _localdata;
+    IPv4 id() const		        { return _localdata->id(); }
     BGPMain* main()			{ return _mainprocess; }
     const BGPPeerData* peerdata() const	{ return _peerdata; }
     bool ibgp() const			{ return peerdata()->get_internal_peer(); }
@@ -171,6 +177,7 @@ private:
     BGPPeerData* _peerdata;
     BGPMain* _mainprocess;
     PeerHandler *_handler;
+    list<AcceptSession *> _accept_attempt;
     string _peername;
 
     XorpTimer _timer_connect_retry;
@@ -209,7 +216,6 @@ private:
      * open/connect if restart = true
      */
     void set_state(FSMState s, bool restart = false);
-    static const char *pretty_print_state(FSMState s);
     bool remote_ip_ge_than(const BGPPeer& peer);
 private:
     friend class BGPMain;
@@ -225,6 +231,146 @@ private:
     bool _activated;
     void set_activate_state(bool state) {_activated = state;}
     bool get_activate_state() {return _activated;}
+};
+
+/*
+ * All incoming TCP connection attempts are handled through this class.
+ * The BGPPeer class handles outgoing connection attempts.
+ *
+ * Under normal circumstances only one connection attempt will be
+ * taking place. When both BGP processes at either end of a session
+ * attempt to make a conection at the same time there may be a
+ * connection collision in this case it is necessary to hold two TCP
+ * connections until an open message is seen by the peer to decide
+ * which session should be selected. If a connection collision is
+ * detected this class does *not* send an open message, it waits for
+ * the peers open message. It should be noted that the BGPPeer class
+ * is not aware that a connection collision condition exists, hence it
+ * does not check the IDs. The assumptions are that:
+ * 1) The IDs will be identical in both open messages so it's only
+ *    necessary to check one of the two open messages.
+ * 2) A BGP process will actually send a open message after making a
+ *    connection. 
+ *
+ * This class could be used to get rid of the XORP invented STOPPED
+ * state in state machine.
+ */
+class AcceptSession {
+ public:
+     AcceptSession(BGPPeer& peer, XorpFd sock);
+
+     ~AcceptSession();
+
+     /**
+      * Start the FSM.
+      */
+     void start();
+
+     /**
+      * Timeout routine that is called if no messages are seen from the
+      * peer. Ideally an open message should be seen from the peer.
+      */
+     void no_open_received();
+
+     /**
+      * This FSM has done its job signal to the peer to remove this
+      * class. This should be the last method to be called in any methods.
+      */
+     void remove();
+
+     /**
+      * Send a notification.
+      */
+     void send_notification_accept(const NotificationPacket& np);
+
+     /**
+      * Notification callback.
+      */
+     void send_notification_cb(SocketClient::Event ev, const uint8_t* buf);
+
+     /**
+      * Send a cease.
+      */
+     void cease();
+
+     /**
+      * The main FSM is in state OPENCONFIRM so both IDs are available
+      * to resolve the collision.
+      */
+     void collision();
+
+     /**
+      * An open message has just been received on the accept socket
+      * decide and keep the winner.
+      */
+     void event_openmess_accept(const OpenPacket& p);
+
+     /**
+      * Swap the socket in this class with the one in the main FSM.
+      */
+     void swap_sockets();
+
+     /**
+      * Replace this socket with the one in the main FSM and feed in
+      * an open packet.
+      */
+     void swap_sockets(const OpenPacket& p);
+
+
+     void notify_peer_of_error_accept(const int error, const int subcode,
+				      const uint8_t*data = 0,
+				      const size_t len = 0);
+
+     void event_tranfatal_accept();
+
+    /**
+     * Called if the TCP connection is closed.
+     */ 
+     void event_closed_accept();
+
+    /**
+     * Called if a keepalive message is seen.
+     */ 
+     void event_keepmess_accept();
+
+    /**
+     * Called if a update message is seen.
+     */ 
+     void event_recvupdate_accept(const UpdatePacket& p);
+
+    /**
+     * Called if a notify message is seen.
+     */ 
+     void event_recvnotify_accept(const NotificationPacket& p);
+
+    /**
+     * Handle incoming messages.
+     */ 
+     bool get_message_accept(BGPPacket::Status status, const uint8_t *buf,
+			     size_t len, SocketClient *socket_client);
+
+     bool is_connected() { return _socket_client->is_connected(); }
+
+     bool still_reading() { return _socket_client->still_reading(); }
+
+     void ignore_message() { _accept_messages = false; }
+
+     bool accept_message() const { return _accept_messages; }
+
+     string str() {
+	 return _peer.str();
+     }
+
+ private:
+     BGPPeer& _peer;
+     XorpFd _sock;
+     SocketClient *_socket_client;
+     bool _accept_messages;
+
+     XorpTimer _open_wait;	// Wait for an open message from the peer.
+
+     BGPMain *main()			{ return _peer.main(); }
+     FSMState state()			{ return _peer.state(); }
 };
 
 #endif // __BGP_PEER_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.13 2005/05/11 07:28:51 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.15 2005/08/18 15:58:07 bms Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -192,8 +192,8 @@ public:
      * @param const uint8_t* pointer to data.
      * @param size_t length of data.
      */
-    typedef XorpCallback3<bool,BGPPacket::Status,const uint8_t*,size_t>::RefPtr
-    MessageCallback;
+    typedef XorpCallback4<bool,BGPPacket::Status,const uint8_t*,size_t,
+			  SocketClient*>::RefPtr MessageCallback;
 
     /**
      * Set the callback for incoming data.

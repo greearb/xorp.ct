@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.11 2004/12/20 21:29:49 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.12 2005/03/15 00:08:59 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -12,8 +12,6 @@ check_update_packet (peer.cc) and the validity of network reachability
 field.
 
 ---added 2002-09-24 by mjh---
-
-21) Ensure we keep the right connection during simultaneous open.
 
 22) Why is the BGPPeer stopped timer 10 seconds?
 
@@ -46,6 +44,17 @@ asyncio library not the buffered asyncio library this will be
 adversely affecting performance.
 
 -- added 2005-03-10 by AG
+
+36) BGP has a state of our own invention STOPPED that is used to wait
+for a notify message to be sent. When it is necessary to send a notify
+the socket could be switched to AcceptSession and the STOPPED state
+will no longer be required.
+
+-- added 2005-09-23 by AG
+
+37) The header file timer_const.hh is not used, it should be used or deleted.
+
+-- added 2005-09-23 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
@@ -160,6 +169,8 @@ completed before allowing exiting. A hook has been left to determine
 if deletion has completed (DeleteAllNodes::running()).
 
 -- added 2004-05-05 AG
+
+21) Ensure we keep the right connection during simultaneous open.
 
 ------------------------------ TESTING --------------------------
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/timer_const.hh,v 1.3 2004/06/10 22:40:38 hodson Exp $
+// $XORP: xorp/bgp/timer_const.hh,v 1.4 2005/03/25 02:52:50 pavlin Exp $
 
 #ifndef __BGP_TIMER_CONST_HH__
 #define __BGP_TIMER_CONST_HH__
@@ -23,12 +23,9 @@ class BGPTimerConst
 {
 public:
     BGPTimerConst()				{
-	    _hold_duration = 1000 * 90;
-	    _retry_duration = 1000 * 120;
-	    _keepalive_duration = 1000 * 30;
-	    // _hold_duration = 90;
-	    // _retry_duration = 120;
-	    // _keepalive_duration = 30;
+	    _hold_duration = 90;
+	    _retry_duration = 120;
+	    _keepalive_duration = 30;
     }
 
     uint32_t get_hold_duration()		{ return _hold_duration; }
@@ -38,7 +35,8 @@ public:
     uint32_t get_keepalive_duration()		{ return _keepalive_duration; }
     void set_keepalive_duration(uint32_t d)	{ _keepalive_duration = d; }
 private:
-    uint32_t _hold_duration;		// XXX what units are these ?
+    // In seconds.
+    uint32_t _hold_duration;
     uint32_t _retry_duration;
     uint32_t _keepalive_duration;
 };

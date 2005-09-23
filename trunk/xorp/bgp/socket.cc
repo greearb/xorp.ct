@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.36 2005/09/07 14:23:42 bms Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.37 2005/09/09 16:48:54 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -283,7 +283,7 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 		XLOG_ERROR("Illegal length value %u",
 			   XORP_UINT_CAST(fh_length));
 		if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,
-					buf, buf_bytes))
+					 buf, buf_bytes, this))
 		    return;
 	    }
 	    /*
@@ -291,7 +291,7 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 	     */
 	    if (buf_bytes == fh_length) {
 		if (_callback->dispatch(BGPPacket::GOOD_MESSAGE,
-				       buf, buf_bytes))
+					buf, buf_bytes, this))
 		    async_read_start();		// ready for next message
 	    } else {				// read rest of the message
 		async_read_start(fh_length, buf_bytes);
@@ -302,10 +302,13 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 	** have buffers into which we expect data.
 	*/
 	if (_async_reader && 0 == _async_reader->buffers_remaining())
-	    XLOG_WARNING("No outstanding reads");
+	    XLOG_WARNING("No outstanding reads %s socket %p async_reader %p",
+			 is_connected() ? "connected" : "not connected",
+			 this, _async_reader);
 	
 	XLOG_ASSERT(!_async_reader ||
-		    (_async_reader && _async_reader->buffers_remaining() > 0));
+		    (_async_reader &&
+		     _async_reader->buffers_remaining() > 0));
 	break;
 
     case AsyncFileReader::WOULDBLOCK:
@@ -317,15 +320,14 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 
     case AsyncFileReader::OS_ERROR:
 	debug_msg("Read failed: %d\n", _async_reader->error());
-	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
+	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
 	break;
 
     case AsyncFileReader::END_OF_FILE:
 	debug_msg("End of file\n");
-	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0);
+	_callback->dispatch(BGPPacket::CONNECTION_CLOSED, 0, 0, this);
 	break;
     }
-
 }
 
 void

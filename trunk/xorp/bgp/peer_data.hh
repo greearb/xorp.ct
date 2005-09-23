@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.14 2005/01/31 20:02:50 pavlin Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.15 2005/03/25 02:52:43 pavlin Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -232,7 +232,7 @@ private:
     IPv4 _id;
 
     /*
-    ** These values in milliseconds.
+    ** These values in seconds.
     */
     uint32_t _hold_duration;
     uint32_t _retry_duration;
