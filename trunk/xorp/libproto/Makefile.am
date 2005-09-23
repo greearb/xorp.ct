@@ -1,16 +1,18 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.11 2005/03/28 20:38:29 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.13 2005/08/18 15:33:38 bms Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- No-install Programs
-check_PROGRAMS	 = test_spt
+check_PROGRAMS	 = test_config_node_id
+check_PROGRAMS	+= test_spt
 
 # -- Test Programs
-TESTS		 = test_spt$(EXEEXT)
+TESTS		 = test_config_node_id$(EXEEXT)
+TESTS		+= test_spt$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libproto.la
@@ -20,11 +22,13 @@ LDADD		 = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
+test_config_node_id_SOURCES = test_config_node_id.cc
 test_spt_SOURCES	 = test_spt.cc
 
 # -- Library Sources
 libproto_la_SOURCES	 = libproto_module.h
 
+libproto_la_SOURCES	+= config_node_id.hh
 libproto_la_SOURCES	+= proto_node.hh
 libproto_la_SOURCES	+= proto_node_cli.hh
 libproto_la_SOURCES	+= proto_register.hh
