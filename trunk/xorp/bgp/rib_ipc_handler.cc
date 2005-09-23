@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.65 2005/06/28 01:50:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.66 2005/06/28 09:30:14 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -593,7 +593,8 @@ XrlQueue<A>::start()
 	// unexpected has happended. We have no outstanding sends and
 	// still its gone to poo.
 
-	XLOG_ASSERT(0 != _flying);
+	if (0 == _flying)
+		XLOG_WARNING("No XRLs in flight, however send could not be scheduled");
 
 	// We failed to send the last XRL. Don't attempt to send any more.
 	return;
