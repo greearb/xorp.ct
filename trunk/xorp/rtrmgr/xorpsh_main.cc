@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.50 2005/09/01 19:44:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.51 2005/09/20 15:03:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -306,7 +306,7 @@ XorpShell::run(const string& commands)
 
     XLOG_TRACE(_verbose,
 	       "==========================================================\n");
-    XLOG_TRACE(_verbose, "%s", _configuration.c_str());
+    XLOG_TRACE(_verbose, "\n%s", _configuration.c_str());
     XLOG_TRACE(_verbose,
 	       "==========================================================\n");
 
