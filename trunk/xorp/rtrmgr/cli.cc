@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.92 2005/08/19 06:24:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.93 2005/08/23 01:19:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1296,37 +1296,37 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
-	 CliCommand* com;
-	 string subpath;
+	CliCommand* com;
+	string subpath;
 
 	// XXX: ignore deprecated subtrees
-	 if ((*tti)->is_deprecated())
-	     continue;
+	if ((*tti)->is_deprecated())
+	    continue;
 
-	 if (pathstr().empty())
-	     subpath = (*tti)->segname();
-	 else
-	     subpath = pathstr() + " " + (*tti)->segname();
+	if (pathstr().empty())
+	    subpath = (*tti)->segname();
+	else
+	    subpath = pathstr() + " " + (*tti)->segname();
 
-	 string help = (*tti)->help();
-	 if (help == "") {
-	     help = "-- no help available --";
-	 }
+	string help = (*tti)->help();
+	if (help == "") {
+	    help = "-- no help available --";
+	}
 
-	 com = com0->add_command((*tti)->segname(),
-				 help, false,
-				 callback(this, &RouterCLI::text_entry_func));
-	 if (com == NULL) {
-	     XLOG_FATAL("AI: add_command %s for template failed",
-			(*tti)->segname().c_str());
-	 } else {
-	     com->set_global_name(subpath);
-	 }
-	 com->set_dynamic_children_callback(
-	     callback(this, &RouterCLI::text_entry_children_func));
-	 com->set_dynamic_process_callback(
-	     callback(this, &RouterCLI::text_entry_func));
-	 com->set_can_pipe(false);
+	com = com0->add_command((*tti)->segname(),
+				help, false,
+				callback(this, &RouterCLI::text_entry_func));
+	if (com == NULL) {
+	    XLOG_FATAL("AI: add_command %s for template failed",
+		       (*tti)->segname().c_str());
+	} else {
+	    com->set_global_name(subpath);
+	}
+	com->set_dynamic_children_callback(
+	    callback(this, &RouterCLI::text_entry_children_func));
+	com->set_dynamic_process_callback(
+	    callback(this, &RouterCLI::text_entry_func));
+	com->set_can_pipe(false);
     }
 }
 
