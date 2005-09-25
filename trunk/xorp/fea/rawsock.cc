@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.4 2005/09/21 05:01:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.5 2005/09/21 20:17:43 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -140,7 +140,7 @@ typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
 #define CMSG_SPACE(len)		WSA_CMSG_SPACE(len)
 #define CMSG_LEN(len)		WSA_CMSG_LEN(len)
 
-#endif ! __MINGW32__
+#endif // ! __MINGW32__
 
 static const GUID guidWSARecvMsg = WSAID_WSARECVMSG;
 static LPFN_WSARECVMSG lpWSARecvMsg = NULL;
