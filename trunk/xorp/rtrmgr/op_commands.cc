@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.54 2005/08/18 00:11:19 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.55 2005/08/23 01:19:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -504,29 +504,51 @@ OpCommand::remove_instance(OpInstance* instance)
     _instances.erase(iter);
     _ocl.decr_running_op_instances_n();
 }
+OpCommandList::OpCommandList(const TemplateTree* tt, SlaveModuleManager& mmgr)
+    : _running_op_instances_n(0),
+      _template_tree(tt),
+      _mmgr(mmgr)
+{
+}
 
 OpCommandList::OpCommandList(const string& config_template_dir,
 			     const TemplateTree* tt,
 			     SlaveModuleManager& mmgr) throw (InitError)
     : _running_op_instances_n(0),
+      _template_tree(tt),
       _mmgr(mmgr)
 {
-    list<string> files;
     string errmsg;
 
-    _template_tree = tt;
+    if (read_templates(config_template_dir, errmsg) != XORP_OK)
+	xorp_throw(InitError, errmsg);
+}
+
+OpCommandList::~OpCommandList()
+{
+    while (!_op_commands.empty()) {
+	delete _op_commands.front();
+	_op_commands.pop_front();
+    }
+}
+
+int
+OpCommandList::read_templates(const string& config_template_dir,
+			      string& errmsg)
+{
+    list<string> files;
 
     struct stat dir_data;
     if (stat(config_template_dir.c_str(), &dir_data) < 0) {
 	errmsg = c_format("Error reading config directory %s: %s",
 			  config_template_dir.c_str(), strerror(errno));
-	xorp_throw(InitError, errmsg);
+	return (XORP_ERROR);
     }
 
     if ((dir_data.st_mode & S_IFDIR) == 0) {
 	errmsg = c_format("Error reading config directory %s: not a directory",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return (XORP_ERROR);
     }
 
     // TODO: file suffix is hardcoded here!
@@ -536,14 +558,14 @@ OpCommandList::OpCommandList(const string& config_template_dir,
 	globfree(&pglob);
 	errmsg = c_format("Failed to find config files in %s",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return (XORP_ERROR);
     }
 
     if (pglob.gl_pathc == 0) {
 	globfree(&pglob);
 	errmsg = c_format("Failed to find any template files in %s",
 			  config_template_dir.c_str());
-	xorp_throw(InitError, errmsg);
+	return (XORP_ERROR);
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
@@ -551,31 +573,26 @@ OpCommandList::OpCommandList(const string& config_template_dir,
 	    globfree(&pglob);
 	    errmsg = c_format("Failed to open template file: %s",
 			      config_template_dir.c_str());
-	    xorp_throw(InitError, errmsg);
+	    return (XORP_ERROR);
 	}
 	try {
 	    parse_opcmd();
 	} catch (const ParseError& pe) {
 	    globfree(&pglob);
-	    xorp_throw(InitError, pe.why());
+	    errmsg = pe.why();
+	    return (XORP_ERROR);
 	}
 	if (_path_segments.size() != 0) {
 	    globfree(&pglob);
 	    errmsg = c_format("File %s is not terminated properly",
 			      pglob.gl_pathv[i]);
-	    xorp_throw(InitError, errmsg);
+	    return (XORP_ERROR);
 	}
     }
 
     globfree(&pglob);
-}
 
-OpCommandList::~OpCommandList()
-{
-    while (!_op_commands.empty()) {
-	delete _op_commands.front();
-	_op_commands.pop_front();
-    }
+    return (XORP_OK);
 }
 
 bool

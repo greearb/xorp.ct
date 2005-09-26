@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.30 2005/08/18 00:11:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.31 2005/08/23 01:19:00 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -139,15 +139,16 @@ private:
 
 class OpCommandList {
 public:
+    OpCommandList(const TemplateTree* tt, SlaveModuleManager& mmgr);
     OpCommandList(const string& config_template_dir, const TemplateTree* tt,
-		  SlaveModuleManager& mmgr)
-	throw (InitError);
+		  SlaveModuleManager& mmgr) throw (InitError);
     ~OpCommandList();
 
     bool done() const;
     void incr_running_op_instances_n();
     void decr_running_op_instances_n();
 
+    int read_templates(const string& config_template_dir, string& errmsg);
     void set_slave_config_tree(SlaveConfigTree* sct) { _slave_config_tree = sct; }
     bool check_variable_name(const string& variable_name) const;
     OpCommand* find_op_command(const list<string>& command_parts);
@@ -160,6 +161,8 @@ public:
 			RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, CliCommandMatch> top_level_commands() const;
     map<string, CliCommandMatch> childlist(const string& path) const;
+
+    list<OpCommand*>& op_commands() { return _op_commands; }
 
 private:
     list<OpCommand*>	_op_commands;
