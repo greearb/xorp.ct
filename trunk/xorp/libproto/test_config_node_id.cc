@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.1 2005/09/23 19:10:41 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.2 2005/09/27 17:20:05 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -265,6 +265,18 @@ test_config_node_id_operators()
 }
 
 /**
+ * Test ConfigNodeId constant values.
+ */
+void
+test_config_node_id_const()
+{
+    //
+    // Test pre-defined constant values
+    //
+    verbose_assert(ConfigNodeId::ZERO() == ConfigNodeId("0 0"), "ZERO()");
+}
+
+/**
  * Test ConfigNodeId miscellaneous methods.
  */
 void
@@ -427,6 +439,7 @@ main(int argc, char * const argv[])
 	test_config_node_id_valid_copy_in_out();
 	test_config_node_id_invalid_copy_in_out();
 	test_config_node_id_operators();
+	test_config_node_id_const();
 	test_config_node_id_misc();
 	test_config_node_id_map();
 	ret_value = failures() ? 1 : 0;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/config_node_id.hh,v 1.1 2005/09/23 19:10:41 pavlin Exp $
+// $XORP: xorp/libproto/config_node_id.hh,v 1.2 2005/09/27 17:20:05 pavlin Exp $
 
 
 #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
@@ -148,6 +148,11 @@ public:
      * @return true if the node ID is empty, otherwise false.
      */
     bool is_empty() const { return (_unique_node_id == 0); }
+
+    /**
+     * Pre-defined constants.
+     */
+    static ConfigNodeId ZERO() { return ConfigNodeId(0, 0); }
 
 private:
     UniqueNodeId	_unique_node_id;	// The unique node ID
