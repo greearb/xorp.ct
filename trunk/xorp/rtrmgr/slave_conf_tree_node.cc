@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.22 2005/07/08 20:51:16 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.23 2005/07/23 01:22:12 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -40,11 +40,11 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 					 const string &path, 
 					 const TemplateTreeNode *ttn,
 					 SlaveConfigTreeNode *parent,
-					 uint64_t nodenum,
+					 const ConfigNodeId& node_id,
 					 uid_t user_id,
 					 uint32_t clientid,
 					 bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, 
+    : ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id, 
 		     clientid, verbose)
 {
 
@@ -52,11 +52,12 @@ SlaveConfigTreeNode::SlaveConfigTreeNode(const string& nodename,
 
 ConfigTreeNode*
 SlaveConfigTreeNode::create_node(const string& segment, const string& path,
-				 const TemplateTreeNode* ttn, 
-				 ConfigTreeNode* parent_node, 
-				 uint64_t nodenum,
-				 uid_t user_id, 
-				 uint32_t clientid, bool verbose)
+				 const TemplateTreeNode* ttn,
+				 ConfigTreeNode* parent_node,
+				 const ConfigNodeId& node_id,
+				 uid_t user_id,
+				 uint32_t clientid,
+				 bool verbose)
 {
     SlaveConfigTreeNode *new_node, *parent;
     parent = dynamic_cast<SlaveConfigTreeNode *>(parent_node);
@@ -66,7 +67,7 @@ SlaveConfigTreeNode::create_node(const string& segment, const string& path,
 	XLOG_ASSERT(parent != NULL);
 
     new_node = new SlaveConfigTreeNode(segment, path, ttn, parent, 
-				       nodenum, user_id, clientid, verbose);
+				       node_id, user_id, clientid, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
 

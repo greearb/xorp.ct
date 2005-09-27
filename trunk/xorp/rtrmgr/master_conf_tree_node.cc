@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.14 2005/07/10 23:14:44 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.15 2005/07/20 22:12:17 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -44,10 +44,10 @@ MasterConfigTreeNode::MasterConfigTreeNode(const string& nodename,
 					   const string& path, 
 					   const TemplateTreeNode* ttn,
 					   MasterConfigTreeNode* parent,
-					   uint64_t nodenum,
+					   const ConfigNodeId& node_id,
 					   uid_t user_id,
 					   bool verbose)
-    : ConfigTreeNode(nodename, path, ttn, parent, nodenum, user_id, 
+    : ConfigTreeNode(nodename, path, ttn, parent, node_id, user_id, 
 		     /* clientid */ 0, verbose),
       _actions_pending(0),
       _actions_succeeded(true),
@@ -67,9 +67,10 @@ ConfigTreeNode*
 MasterConfigTreeNode::create_node(const string& segment, const string& path,
 				  const TemplateTreeNode* ttn, 
 				  ConfigTreeNode* parent_node, 
-				  uint64_t nodenum,
+				  const ConfigNodeId& node_id,
 				  uint32_t clientid,
-				  uid_t user_id, bool verbose)
+				  uid_t user_id,
+				  bool verbose)
 {
     UNUSED(clientid);
     MasterConfigTreeNode *new_node, *parent;
@@ -80,7 +81,7 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
 	XLOG_ASSERT(parent != NULL);
 
     new_node = new MasterConfigTreeNode(segment, path, ttn, parent, 
-					nodenum, user_id, verbose);
+					node_id, user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(new_node);
 }
 

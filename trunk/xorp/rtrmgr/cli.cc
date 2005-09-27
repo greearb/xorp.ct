@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.93 2005/08/23 01:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.94 2005/09/24 01:59:39 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1901,7 +1901,7 @@ RouterCLI::text_entry_func(const string& ,
 		ctn = new SlaveConfigTreeNode(value, 
 					      makepath(path_segments),
 					      data_ttn, ctn,
-					      /* nodenum */ 0,
+					      ConfigNodeId::ZERO(),
 					      getuid(),
 					      clientid(),
 					      _verbose);
@@ -2016,7 +2016,7 @@ RouterCLI::text_entry_func(const string& ,
 	    ctn = new SlaveConfigTreeNode(ttn->segname(), 
 					  makepath(path_segments),
 					  ttn, ctn,
-					  /* nodenum */ 0,
+					  ConfigNodeId::ZERO(),
 					  getuid(),
 					  clientid(),
 					  _verbose);
@@ -2354,7 +2354,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	newnode = new SlaveConfigTreeNode(path_parts.back(),
 					  newpath, ttn,
 					  ctn,
-					  /* nodenum */ 0,
+					  ConfigNodeId::ZERO(),
 					  myuid,
 					  clientid(),
 					  _verbose);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.59 2005/09/01 19:44:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.60 2005/09/20 15:03:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -273,14 +273,14 @@ ConfigTreeNode*
 MasterConfigTree::create_node(const string& segment, const string& path,
 			      const TemplateTreeNode* ttn, 
 			      ConfigTreeNode* parent_node, 
-			      uint64_t nodenum,
+			      const ConfigNodeId& node_id,
 			      uid_t user_id, bool verbose)
 {
     MasterConfigTreeNode *ctn, *parent;
     parent = dynamic_cast<MasterConfigTreeNode *>(parent_node);
     if (parent_node != NULL)
 	XLOG_ASSERT(parent != NULL);
-    ctn = new MasterConfigTreeNode(segment, path, ttn, parent, nodenum,
+    ctn = new MasterConfigTreeNode(segment, path, ttn, parent, node_id,
 				   user_id, verbose);
     return reinterpret_cast<ConfigTreeNode*>(ctn);
 }

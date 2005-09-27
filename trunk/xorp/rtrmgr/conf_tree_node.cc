@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.84 2005/08/25 02:23:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.85 2005/09/20 14:55:03 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -33,10 +33,12 @@
 extern int booterror(const char *s) throw (ParseError);
 
 bool 
-CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b) {
-    //if the nodes have the same template, then we sort according to
-    //their own sort order, otherwise we sort them into template tree
-    //order
+CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
+{
+    //
+    // If the nodes have the same template, then we sort according to their
+    // own sort order, otherwise we sort them into template tree order.
+    //
     if (a->template_tree_node() == b->template_tree_node()) {
 	TTSortOrder order = a->template_tree_node()->order();
 	switch (order) {
@@ -67,20 +69,23 @@ CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b) {
 	}
     }
 
-    //nodes have different templates, so sort by template file order
+    // Nodes have different templates, so sort by template file order
     return (a->child_number() < b->child_number());
 }
 
 
-bool 
-CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b) {
-    //if the nodes have the same template, then we sort according to
-    //their own sort order, otherwise we leave them as they are
+bool
+CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
+{
+    //
+    // If the nodes have the same template, then we sort according to
+    // their own sort order, otherwise we leave them as they are.
+    //
     if (a->template_tree_node() == b->template_tree_node()) {
 	TTSortOrder order = a->template_tree_node()->order();
 	switch (order) {
 	case ORDER_UNSORTED:
-	    //don't sort
+	    // Don't sort
 	    return false;
 	case ORDER_SORTED_NUMERIC:
 	    if (a->is_tag()) {
@@ -107,7 +112,7 @@ CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b) {
 	}
     }
 
-    //nodes have different templates, so don't sort them
+    // Nodes have different templates, so don't sort them
     return false;
 }
 
@@ -119,6 +124,8 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _operator(OP_NONE),
       _committed_operator(OP_NONE),
       _parent(NULL),
+      _node_id(ConfigNodeId::ZERO()),
+      _node_id_generator(ConfigNodeId::ZERO()),
       _user_id(0),
       _committed_user_id(0),
       _clientid(0),
@@ -134,7 +141,7 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       const string& path, 
 			       const TemplateTreeNode* ttn,
 			       ConfigTreeNode* parent,
-			       uint64_t nodenum,
+			       const ConfigNodeId& node_id,
 			       uid_t user_id,
 			       uint32_t clientid,
 			       bool verbose)
@@ -146,7 +153,8 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _segname(nodename),
       _path(path),
       _parent(parent),
-      _nodenum(nodenum),
+      _node_id(node_id),
+      _node_id_generator(ConfigNodeId::ZERO()),
       _user_id(user_id),
       _committed_user_id(0),
       _clientid(clientid),
@@ -157,9 +165,10 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _verbose(verbose)
 {
     TimerList::system_gettimeofday(&_modification_time);
+    _node_id_generator.set_instance_id(_clientid);
     parent->add_child(this);
-    if (nodenum == 0) {
-	allocate_unique_nodenum();
+    if (node_id.is_empty()) {
+	allocate_unique_node_id();
     }
 }
 
@@ -174,7 +183,8 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _segname(ctn._segname),
       _path(ctn._path),
       _parent(NULL),
-      _nodenum(ctn._nodenum),
+      _node_id(ctn._node_id),
+      _node_id_generator(ctn._node_id_generator),
       _user_id(ctn._user_id),
       _committed_user_id(ctn._committed_user_id),
       _clientid(ctn._clientid),
@@ -206,7 +216,7 @@ ConfigTreeNode::operator==(const ConfigTreeNode& them) const
 }
 
 bool
-ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_nodenum) const
+ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_node_id) const
 {
     //
     // This comparison only cares about the declarative state of the node,
@@ -226,7 +236,7 @@ ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_nodenum) const
 		return false;
 	    }
 	}
-	if ((! ignore_nodenum) && (_nodenum != them.nodenum())) {
+	if ((! ignore_node_id) && (_node_id != them.node_id())) {
 	    return false;
 	}
     }
@@ -298,7 +308,7 @@ ConfigTreeNode::add_default_children()
 		string path = _path + " " + name;
 		ConfigTreeNode *new_node = create_node(name, path, *tci,
 						       this, 
-						       /* XXX: nodenum */ 0,
+						       ConfigNodeId::ZERO(),
 						       _user_id,
 						       _clientid,
 						       _verbose);
@@ -361,7 +371,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = _operator;
 		    _operator = delta_node.get_operator();
-		    _nodenum = delta_node.nodenum();
+		    _node_id = delta_node.node_id();
 		    _committed_user_id = _user_id;
 		    _user_id = user_id;
 		    _clientid = delta_node.clientid();
@@ -373,7 +383,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = delta_node.get_operator();
 		    _operator = delta_node.get_operator();
-		    _nodenum = delta_node.nodenum();
+		    _node_id = delta_node.node_id();
 		    _committed_user_id = delta_node.user_id();
 		    _user_id = delta_node.user_id();
 		    _clientid = delta_node.clientid();
@@ -420,7 +430,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 				   delta_child->path(),
 				   delta_child->template_tree_node(),
 				   this,
-				   delta_child->nodenum(),
+				   delta_child->node_id(),
 				   user_id,
 				   delta_child->clientid(),
 				   _verbose);
@@ -685,13 +695,6 @@ ConfigTreeNode::value() const
     return _segname;
 }
 
-uint64_t 
-ConfigTreeNode::nodenum() const
-{
-    return _nodenum;
-}
-
-
 ConfigOperator
 ConfigTreeNode::get_operator() const
 {
@@ -780,7 +783,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 		    break;
 		} while (false);
 	    }
-	    s += my_in + show_nodenum(numbered, child_ctn->nodenum()) 
+	    s += my_in + show_node_id(numbered, child_ctn->node_id()) 
 		+ _segname + " " +
 		child_ctn->show_subtree(show_top, depth, indent, false, 
 					numbered, annotate,
@@ -812,9 +815,9 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	}
 
 	if (do_indent) {
-	    s = s2 + my_in + show_nodenum(numbered, nodenum()) + _segname;
+	    s = s2 + my_in + show_node_id(numbered, node_id()) + _segname;
 	} else {
-	    // no need to show the node number here
+	    // no need to show the node ID here
 	    XLOG_ASSERT(_parent->is_tag());
 	    if ((type() == NODE_TEXT) && has_empty_space(_segname)) {
 		s += quoted_value(_segname);
@@ -1168,9 +1171,9 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	value = varname_node->show_operator();
 	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
 	return true;
-    case NODE_NUMBER:
+    case NODE_ID:
 	XLOG_ASSERT(varname_node != NULL);
-	value = c_format("%llu", varname_node->nodenum());
+	value = varname_node->node_id().str();
 	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
 	return true;
     case NAMED:
@@ -1274,7 +1277,7 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 
     if (varname == "$(#)") {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
-	type = NODE_NUMBER;
+	type = NODE_ID;
 	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
@@ -1420,10 +1423,10 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 	}
     }
 
-    // The name might refer to this node for a node number
+    // The name might refer to this node for a node ID
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "#")) {
-	    type = NODE_NUMBER;
+	    type = NODE_ID;
 	    debug_msg("varname # node is >%s<\n", _segname.c_str());
 	    return this;
 	}
@@ -1581,8 +1584,8 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
-	case NODE_NUMBER: 
-	    errmsg = c_format("Attempt to set variable node number \"%s\" "
+	case NODE_ID: 
+	    errmsg = c_format("Attempt to set variable node ID \"%s\" "
 			      "which is not user-settable",
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
@@ -1648,8 +1651,8 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
 	    return false;
-	case NODE_NUMBER:
-	    errmsg = c_format("Attempt to set node number \"%s\" "
+	case NODE_ID:
+	    errmsg = c_format("Attempt to set node ID \"%s\" "
 			      "which is not user-settable",
 			      varname.c_str());
 	    XLOG_ERROR("%s", errmsg.c_str());
@@ -1711,45 +1714,42 @@ ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
 } 
 
 string
-ConfigTreeNode::show_nodenum(bool numbered, uint64_t nodenum) const 
+ConfigTreeNode::show_node_id(bool numbered, const ConfigNodeId& node_id) const 
 {
     string s;
     if (numbered) {
-	s = c_format("%%%llu%% ", nodenum);
+	s = c_format("%%%s%% ", node_id.str().c_str());
     }
     return s;
 }
 
-/* minimum offset between two nodes - this is to allow for using the
-   least significant bits to avoid collisions when two xorpsh instances
-   simultaneously edit the config */
-#define MIN_NODENUM_INTERVAL ((uint64_t)10000)
-
-/* what the initial distance is between two neighbouring nodes*/
-#define NODENUM_INCREMENT (((uint64_t)10000)*MIN_NODENUM_INTERVAL)
-
-/* initial nodenuum when we don't yet have any children of a node */
-#define INITIAL_NODENUM (((uint64_t)100)*NODENUM_INCREMENT)
-
 void
-ConfigTreeNode::allocate_unique_nodenum() 
+ConfigTreeNode::allocate_unique_node_id() 
 {
-    XLOG_ASSERT(_nodenum == 0);
-    /* node numbers are guaranteed to be unique among the children of
-       the same parent node.  If the parent node is a tag, they're
-       guaranteed to be unique among the children of the tag's parent
-       node */
     ConfigTreeNode *prev = NULL, *next = NULL;
-    if (_parent == NULL) return;
+    ConfigTreeNode *effective_parent = _parent;
+
+    XLOG_ASSERT(_node_id.is_empty());
+
+    if (_parent == NULL)
+	return;
+
+    //
+    // Node IDs are guaranteed to be unique among the children of
+    // the same parent node.  If the parent node is a tag, they're
+    // guaranteed to be unique among the children of the tag's parent
+    // node.
+    //
     debug_msg("finding order (phase 1)...\n");
     list<ConfigTreeNode *> sorted_children = _parent->children();
     sort_by_value(sorted_children);
     bool found_this = false;
     list<ConfigTreeNode*>::iterator iter;
     for (iter = sorted_children.begin(); 
-	 iter != sorted_children.end(); ++iter) {
+	 iter != sorted_children.end();
+	 ++iter) {
 	if ((*iter) == this) {
-	    /* we found this node */
+	    // We found this node
 	    found_this = true;
 	    debug_msg("found this: %s\n", _segname.c_str());
 	    continue;
@@ -1757,29 +1757,36 @@ ConfigTreeNode::allocate_unique_nodenum()
 	if (found_this) {
 	    if (next == NULL)
 		next = *iter;
-	    debug_msg("next: %s %llu\n", next->segname().c_str(), next->nodenum());
+	    debug_msg("next: %s %s\n", next->segname().c_str(),
+		      next->node_id().str().c_str());
 	} else {
 	    prev = *iter;
-	    debug_msg("prev: %s %llu\n", prev->segname().c_str(), prev->nodenum());
+	    debug_msg("prev: %s %s\n", prev->segname().c_str(),
+		      prev->node_id().str().c_str());
 	}
     }
-	
+
+    //
+    // Found the previous and the next (ordered) sibling
+    //
     bool found_prev = false;
     if (prev != NULL)
 	found_prev = true;
-
     if (_parent->is_tag() && (!is_tag()) && (_parent->parent() != NULL)) {
-	ConfigTreeNode *effective_parent = _parent->parent();
+	effective_parent = _parent->parent();
+	XLOG_ASSERT(effective_parent != NULL);
 
-	debug_msg("node: %s effective parent: %s\n", _segname.c_str(), effective_parent->segname().c_str());
+	debug_msg("node: %s effective parent: %s\n", _segname.c_str(),
+		  effective_parent->segname().c_str());
 	found_this = false;
 	debug_msg("finding order (phase 2)...\n");
 	list<ConfigTreeNode *> sorted_children = effective_parent->children();
 	sort_by_value(sorted_children);
 	for (iter = sorted_children.begin(); 
-	     iter != sorted_children.end(); ++iter) {
+	     iter != sorted_children.end();
+	     ++iter) {
 	    if ((*iter) == _parent) {
-		/* we found the tag parent) */
+		// We found the tag parent
 		found_this = true;
 		debug_msg("found this: %s\n", _segname.c_str());
 		if (next != NULL)
@@ -1788,39 +1795,31 @@ ConfigTreeNode::allocate_unique_nodenum()
 	    }
 	    if (found_this) {
 		next = *iter;
-		debug_msg("next: %s %llu\n", next->segname().c_str(), next->nodenum());
+		debug_msg("next: %s %s\n", next->segname().c_str(),
+			  next->node_id().str().c_str());
 		break;
 	    } else {
 		if (!found_prev) {
 		    prev = *iter;
-		    debug_msg("prev: %s %llu\n", prev->segname().c_str(), prev->nodenum());
+		    debug_msg("prev: %s %s\n", prev->segname().c_str(),
+			      prev->node_id().str().c_str());
 		}
 	    }
 	}
     }
-    
-    if (prev == NULL && next == NULL) {
-	_nodenum = INITIAL_NODENUM; /* arbitrary large value */
-	debug_msg("1 node %s initial: %llu", _segname.c_str(), _nodenum);
-    } else if (prev == NULL && next != NULL) {
-	_nodenum = next->nodenum() - NODENUM_INCREMENT;
-	debug_msg("2 node %s: %llu (next: %llu)", _segname.c_str(), _nodenum, next->nodenum());
-    } else if (prev != NULL && next == NULL) {
-	_nodenum = prev->nodenum() + NODENUM_INCREMENT;
-	debug_msg("3 node %s: %llu (prev: %llu)", _segname.c_str(), _nodenum, prev->nodenum());
-    } else if (prev != NULL && next != NULL) {
-	XLOG_ASSERT((next->nodenum() - prev->nodenum()) >= (2*MIN_NODENUM_INTERVAL));
-	_nodenum = (next->nodenum() + prev->nodenum())/2;
-	debug_msg("4 node %s: %llu (prev: %llu) (next: %llu)", _segname.c_str(), _nodenum, prev->nodenum(), next->nodenum());
+
+    //
+    // Calculate the unique part of the node ID
+    //
+    _node_id = effective_parent->node_id_generator().generate_unique_node_id();
+    if (prev == NULL) {
+	_node_id.set_position(0);	// XXX: the first node
+    } else {
+	_node_id.set_position(prev->node_id().unique_node_id());
     }
+    debug_msg("node %s node_id %s", _segname.c_str(), _node_id.str().c_str());
 
-    // blank out the least significant bits
-    _nodenum -= _nodenum % MIN_NODENUM_INTERVAL;
-
-    // set the LSBs according to our client ID
-    _nodenum += _clientid;
-
-    return;
+    XLOG_ASSERT(! _node_id.is_empty());
 }
 
 string

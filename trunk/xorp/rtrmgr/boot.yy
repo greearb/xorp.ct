@@ -43,7 +43,7 @@
 %token ARITH
 %token INFIX_OPERATOR
 %token SYNTAX_ERROR
-%token LINENUM
+%token CONFIG_NODE_ID
 
 %%
 
@@ -63,30 +63,29 @@ short_nodename:	literal { push_path(); }
 long_nodename:	literals { push_path(); }
 		;
 
-literal:	LITERAL { nodenum = 0;
-                          extend_path($1, NODE_VOID, nodenum); }
-		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
-		                    free($1);
-				    extend_path($2, NODE_VOID, nodenum); }
+literal:	LITERAL { node_id = ""; extend_path($1, NODE_VOID, node_id); }
+		| CONFIG_NODE_ID LITERAL { node_id = $1;
+					   free($1);
+					   extend_path($2, NODE_VOID, node_id); }
 		;
 
 literals:	literals literal
-		| literal STRING { extend_path($2, NODE_TEXT, nodenum); }
-		| literal LITERAL { extend_path($2, NODE_TEXT, nodenum); }
-		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, nodenum); }
-		| literal UINTRANGE_VALUE { extend_path($2, NODE_UINTRANGE, nodenum); }
-		| literal UINT_VALUE { extend_path($2, NODE_UINT, nodenum); }
-		| literal IPV4RANGE_VALUE { extend_path($2, NODE_IPV4RANGE, nodenum); }
-		| literal IPV4_VALUE { extend_path($2, NODE_IPV4, nodenum); }
-		| literal IPV4NET_VALUE { extend_path($2, NODE_IPV4NET, nodenum); }
-		| literal IPV6RANGE_VALUE { extend_path($2, NODE_IPV6RANGE, nodenum); }
-		| literal IPV6_VALUE { extend_path($2, NODE_IPV6, nodenum); }
-		| literal IPV6NET_VALUE { extend_path($2, NODE_IPV6NET, nodenum); }
-		| literal MACADDR_VALUE { extend_path($2, NODE_MACADDR, nodenum); }
-		| literal URL_FILE_VALUE { extend_path($2, NODE_URL_FILE, nodenum); }
-		| literal URL_FTP_VALUE { extend_path($2, NODE_URL_FTP, nodenum); }
-		| literal URL_HTTP_VALUE { extend_path($2, NODE_URL_HTTP, nodenum); }
-		| literal URL_TFTP_VALUE { extend_path($2, NODE_URL_TFTP, nodenum); }
+		| literal STRING { extend_path($2, NODE_TEXT, node_id); }
+		| literal LITERAL { extend_path($2, NODE_TEXT, node_id); }
+		| literal BOOL_VALUE { extend_path($2, NODE_BOOL, node_id); }
+		| literal UINTRANGE_VALUE { extend_path($2, NODE_UINTRANGE, node_id); }
+		| literal UINT_VALUE { extend_path($2, NODE_UINT, node_id); }
+		| literal IPV4RANGE_VALUE { extend_path($2, NODE_IPV4RANGE, node_id); }
+		| literal IPV4_VALUE { extend_path($2, NODE_IPV4, node_id); }
+		| literal IPV4NET_VALUE { extend_path($2, NODE_IPV4NET, node_id); }
+		| literal IPV6RANGE_VALUE { extend_path($2, NODE_IPV6RANGE, node_id); }
+		| literal IPV6_VALUE { extend_path($2, NODE_IPV6, node_id); }
+		| literal IPV6NET_VALUE { extend_path($2, NODE_IPV6NET, node_id); }
+		| literal MACADDR_VALUE { extend_path($2, NODE_MACADDR, node_id); }
+		| literal URL_FILE_VALUE { extend_path($2, NODE_URL_FILE, node_id); }
+		| literal URL_FTP_VALUE { extend_path($2, NODE_URL_FTP, node_id); }
+		| literal URL_HTTP_VALUE { extend_path($2, NODE_URL_HTTP, node_id); }
+		| literal URL_TFTP_VALUE { extend_path($2, NODE_URL_TFTP, node_id); }
 		;
 
 nodegroup:	long_nodegroup
@@ -108,11 +107,10 @@ statement:	terminal
 emptystatement:	END
 		;
 
-term_literal:	LITERAL { nodenum = 0;
-			  extend_path($1, NODE_VOID, nodenum); }
-		| LINENUM LITERAL { nodenum = strtoll($1, (char **)NULL, 10);
-		                    free($1);
-				    extend_path($2, NODE_VOID, nodenum);}
+term_literal:	LITERAL { node_id = ""; extend_path($1, NODE_VOID, node_id); }
+		| CONFIG_NODE_ID LITERAL { node_id = $1;
+					   free($1);
+					   extend_path($2, NODE_VOID, node_id);}
 		;
 
 terminal:	term_literal END {
@@ -197,18 +195,30 @@ extern int boot_linenum;
 extern "C" int bootparse();
 extern int bootlex();
 
+void booterror(const char *s) throw (ParseError);
+
 static ConfigTree *config_tree = NULL;
 static string boot_filename;
 static string lastsymbol;
-static uint64_t nodenum;
+static string node_id;
 
 
 static void
-extend_path(char* segment, int type, uint64_t node_num)
+extend_path(char* segment, int type, const string& node_id_str)
 {
     lastsymbol = segment;
-    config_tree->extend_path(string(segment), type, node_num);
+
+    string segment_copy = segment;
     free(segment);
+
+    try {
+	ConfigNodeId config_node_id(node_id_str);
+	config_tree->extend_path(segment_copy, type, config_node_id);
+    } catch (const InvalidString& e) {
+	string s = c_format("Invalid config tree node ID: %s",
+	    e.str().c_str());
+	booterror(s.c_str());
+    }
 }
 
 static void

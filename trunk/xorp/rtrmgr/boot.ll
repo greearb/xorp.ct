@@ -328,10 +328,10 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 	return LITERAL;
 	}
 
-\%[0-9]+\% {
+\%[0-9]+[ ][0-9]+\% {
 	bootlval = strdup(boottext+1);
 	bootlval[strlen(bootlval)-1]=0;
-	return LINENUM;
+	return CONFIG_NODE_ID;
 }
 
 \"			{

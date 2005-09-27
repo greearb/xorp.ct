@@ -25,4 +25,4 @@
 #define ARITH 277
 #define INFIX_OPERATOR 278
 #define SYNTAX_ERROR 279
-#define LINENUM 280
+#define CONFIG_NODE_ID 280

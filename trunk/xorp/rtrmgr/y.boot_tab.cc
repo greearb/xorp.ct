@@ -87,7 +87,7 @@ static int yygrowstack();
 #define ARITH 277
 #define INFIX_OPERATOR 278
 #define SYNTAX_ERROR 279
-#define LINENUM 280
+#define CONFIG_NODE_ID 280
 const short bootlhs[] = {                                        -1,
     0,    0,    0,    0,    1,    1,    6,    4,    8,    8,
     9,    9,    9,    9,    9,    9,    9,    9,    9,    9,
@@ -192,7 +192,7 @@ const char * const bootname[] = {
 "IPV4RANGE_VALUE","IPV4NET_VALUE","IPV6_VALUE","IPV6RANGE_VALUE",
 "IPV6NET_VALUE","MACADDR_VALUE","URL_FILE_VALUE","URL_FTP_VALUE",
 "URL_HTTP_VALUE","URL_TFTP_VALUE","LITERAL","STRING","ARITH","INFIX_OPERATOR",
-"SYNTAX_ERROR","LINENUM",
+"SYNTAX_ERROR","CONFIG_NODE_ID",
 };
 const char * const bootrule[] = {
 "$accept : input",
@@ -205,7 +205,7 @@ const char * const bootrule[] = {
 "short_nodename : literal",
 "long_nodename : literals",
 "literal : LITERAL",
-"literal : LINENUM LITERAL",
+"literal : CONFIG_NODE_ID LITERAL",
 "literals : literals literal",
 "literals : literal STRING",
 "literals : literal LITERAL",
@@ -233,7 +233,7 @@ const char * const bootrule[] = {
 "statement : emptystatement",
 "emptystatement : END",
 "term_literal : LITERAL",
-"term_literal : LINENUM LITERAL",
+"term_literal : CONFIG_NODE_ID LITERAL",
 "terminal : term_literal END",
 "terminal : term_literal INFIX_OPERATOR STRING END",
 "terminal : term_literal INFIX_OPERATOR BOOL_VALUE END",
@@ -284,25 +284,37 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 194 "boot.yy"
+#line 192 "boot.yy"
 
 extern void boot_scan_string(const char *configuration);
 extern int boot_linenum;
 extern "C" int bootparse();
 extern int bootlex();
 
+void booterror(const char *s) throw (ParseError);
+
 static ConfigTree *config_tree = NULL;
 static string boot_filename;
 static string lastsymbol;
-static uint64_t nodenum;
+static string node_id;
 
 
 static void
-extend_path(char* segment, int type, uint64_t node_num)
+extend_path(char* segment, int type, const string& node_id_str)
 {
     lastsymbol = segment;
-    config_tree->extend_path(string(segment), type, node_num);
+
+    string segment_copy = segment;
     free(segment);
+
+    try {
+	ConfigNodeId config_node_id(node_id_str);
+	config_tree->extend_path(segment_copy, type, config_node_id);
+    } catch (const InvalidString& e) {
+	string s = c_format("Invalid config tree node ID: %s",
+	    e.str().c_str());
+	booterror(s.c_str());
+    }
 }
 
 static void
@@ -400,7 +412,7 @@ ConfigOperator boot_lookup_operator(const char* s)
     }
     XLOG_UNREACHABLE();
 }
-#line 405 "y.boot_tab.c"
+#line 417 "y.boot_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -605,223 +617,221 @@ case 8:
 break;
 case 9:
 #line 66 "boot.yy"
-{ nodenum = 0;
-                          extend_path(yyvsp[0], NODE_VOID, nodenum); }
+{ node_id = ""; extend_path(yyvsp[0], NODE_VOID, node_id); }
 break;
 case 10:
-#line 68 "boot.yy"
-{ nodenum = strtoll(yyvsp[-1], (char **)NULL, 10);
-		                    free(yyvsp[-1]);
-				    extend_path(yyvsp[0], NODE_VOID, nodenum); }
+#line 67 "boot.yy"
+{ node_id = yyvsp[-1];
+					   free(yyvsp[-1]);
+					   extend_path(yyvsp[0], NODE_VOID, node_id); }
 break;
 case 12:
-#line 74 "boot.yy"
-{ extend_path(yyvsp[0], NODE_TEXT, nodenum); }
+#line 73 "boot.yy"
+{ extend_path(yyvsp[0], NODE_TEXT, node_id); }
 break;
 case 13:
-#line 75 "boot.yy"
-{ extend_path(yyvsp[0], NODE_TEXT, nodenum); }
+#line 74 "boot.yy"
+{ extend_path(yyvsp[0], NODE_TEXT, node_id); }
 break;
 case 14:
-#line 76 "boot.yy"
-{ extend_path(yyvsp[0], NODE_BOOL, nodenum); }
+#line 75 "boot.yy"
+{ extend_path(yyvsp[0], NODE_BOOL, node_id); }
 break;
 case 15:
-#line 77 "boot.yy"
-{ extend_path(yyvsp[0], NODE_UINTRANGE, nodenum); }
+#line 76 "boot.yy"
+{ extend_path(yyvsp[0], NODE_UINTRANGE, node_id); }
 break;
 case 16:
-#line 78 "boot.yy"
-{ extend_path(yyvsp[0], NODE_UINT, nodenum); }
+#line 77 "boot.yy"
+{ extend_path(yyvsp[0], NODE_UINT, node_id); }
 break;
 case 17:
-#line 79 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV4RANGE, nodenum); }
+#line 78 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV4RANGE, node_id); }
 break;
 case 18:
-#line 80 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV4, nodenum); }
+#line 79 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV4, node_id); }
 break;
 case 19:
-#line 81 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV4NET, nodenum); }
+#line 80 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV4NET, node_id); }
 break;
 case 20:
-#line 82 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV6RANGE, nodenum); }
+#line 81 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV6RANGE, node_id); }
 break;
 case 21:
-#line 83 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV6, nodenum); }
+#line 82 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV6, node_id); }
 break;
 case 22:
-#line 84 "boot.yy"
-{ extend_path(yyvsp[0], NODE_IPV6NET, nodenum); }
+#line 83 "boot.yy"
+{ extend_path(yyvsp[0], NODE_IPV6NET, node_id); }
 break;
 case 23:
-#line 85 "boot.yy"
-{ extend_path(yyvsp[0], NODE_MACADDR, nodenum); }
+#line 84 "boot.yy"
+{ extend_path(yyvsp[0], NODE_MACADDR, node_id); }
 break;
 case 24:
-#line 86 "boot.yy"
-{ extend_path(yyvsp[0], NODE_URL_FILE, nodenum); }
+#line 85 "boot.yy"
+{ extend_path(yyvsp[0], NODE_URL_FILE, node_id); }
 break;
 case 25:
-#line 87 "boot.yy"
-{ extend_path(yyvsp[0], NODE_URL_FTP, nodenum); }
+#line 86 "boot.yy"
+{ extend_path(yyvsp[0], NODE_URL_FTP, node_id); }
 break;
 case 26:
-#line 88 "boot.yy"
-{ extend_path(yyvsp[0], NODE_URL_HTTP, nodenum); }
+#line 87 "boot.yy"
+{ extend_path(yyvsp[0], NODE_URL_HTTP, node_id); }
 break;
 case 27:
-#line 89 "boot.yy"
-{ extend_path(yyvsp[0], NODE_URL_TFTP, nodenum); }
+#line 88 "boot.yy"
+{ extend_path(yyvsp[0], NODE_URL_TFTP, node_id); }
 break;
 case 29:
-#line 93 "boot.yy"
+#line 92 "boot.yy"
 { pop_path(); }
 break;
 case 30:
-#line 96 "boot.yy"
+#line 95 "boot.yy"
 { pop_path(); }
 break;
 case 37:
-#line 111 "boot.yy"
-{ nodenum = 0;
-			  extend_path(yyvsp[0], NODE_VOID, nodenum); }
+#line 110 "boot.yy"
+{ node_id = ""; extend_path(yyvsp[0], NODE_VOID, node_id); }
 break;
 case 38:
-#line 113 "boot.yy"
-{ nodenum = strtoll(yyvsp[-1], (char **)NULL, 10);
-		                    free(yyvsp[-1]);
-				    extend_path(yyvsp[0], NODE_VOID, nodenum);}
+#line 111 "boot.yy"
+{ node_id = yyvsp[-1];
+					   free(yyvsp[-1]);
+					   extend_path(yyvsp[0], NODE_VOID, node_id);}
 break;
 case 39:
-#line 118 "boot.yy"
+#line 116 "boot.yy"
 {
 			terminal(strdup(""), NODE_VOID, OP_NONE);
 		}
 break;
 case 40:
-#line 121 "boot.yy"
+#line 119 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_TEXT, boot_lookup_operator(yyvsp[-2])); 
 			free(yyvsp[-2]);
 		}
 break;
 case 41:
-#line 125 "boot.yy"
+#line 123 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_BOOL, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 42:
-#line 129 "boot.yy"
+#line 127 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_UINTRANGE, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 43:
-#line 133 "boot.yy"
+#line 131 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_UINT, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 44:
-#line 137 "boot.yy"
+#line 135 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV4RANGE, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 45:
-#line 141 "boot.yy"
+#line 139 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV4, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 46:
-#line 145 "boot.yy"
+#line 143 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV4NET, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 47:
-#line 149 "boot.yy"
+#line 147 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV6RANGE, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 48:
-#line 153 "boot.yy"
+#line 151 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV6, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 49:
-#line 157 "boot.yy"
+#line 155 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_IPV6NET, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 50:
-#line 161 "boot.yy"
+#line 159 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_MACADDR, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 51:
-#line 165 "boot.yy"
+#line 163 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_FILE, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 52:
-#line 169 "boot.yy"
+#line 167 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_FTP, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 53:
-#line 173 "boot.yy"
+#line 171 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_HTTP, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 54:
-#line 177 "boot.yy"
+#line 175 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_URL_TFTP, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 55:
-#line 181 "boot.yy"
+#line 179 "boot.yy"
 {
 			terminal(yyvsp[-1], NODE_ARITH, boot_lookup_operator(yyvsp[-2]));
 			free(yyvsp[-2]);
 		}
 break;
 case 56:
-#line 187 "boot.yy"
+#line 185 "boot.yy"
 {
 			booterror("syntax error");
 		}
 break;
-#line 826 "y.boot_tab.c"
+#line 836 "y.boot_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

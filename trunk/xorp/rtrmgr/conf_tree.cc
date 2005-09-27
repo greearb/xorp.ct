@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.41 2005/08/03 13:12:03 zec Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.42 2005/08/25 02:23:43 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -107,7 +107,7 @@ ConfigTree::path_as_segments() const
 
     while (ctn->parent() != NULL) {
 	path_segments.push_front(ConfPathSegment(ctn->segname(), 
-						 ctn->type(), ctn->nodenum()));
+						 ctn->type(), ctn->node_id()));
 	ctn = ctn->parent();
     }
     return path_segments;
@@ -145,10 +145,11 @@ ConfigTree::path_as_string(const list<string>& path_segments) const
 }
 
 void
-ConfigTree::extend_path(const string& segment, int type, uint64_t nodenum)
+ConfigTree::extend_path(const string& segment, int type,
+			const ConfigNodeId& node_id)
 {
-   debug_msg("extend_path: %s, %llu\n", segment.c_str(), nodenum);
-    _path_segments.push_back(ConfPathSegment(segment, type, nodenum));
+   debug_msg("extend_path: %s, %s\n", segment.c_str(), node_id.str().c_str());
+    _path_segments.push_back(ConfPathSegment(segment, type, node_id));
 }
 
 void
@@ -177,14 +178,15 @@ ConfigTree::push_path()
 
     list<ConfPathSegment>::const_iterator iter;
     for (iter = _path_segments.begin(); iter != _path_segments.end(); ++iter) {
-	add_node(iter->segname(), iter->type(), iter->nodenum());
+	add_node(iter->segname(), iter->type(), iter->node_id());
     }
 
     _path_segments.clear();
 }
 
 void
-ConfigTree::add_node(const string& segment, int type, uint64_t nodenum) 
+ConfigTree::add_node(const string& segment, int type,
+		     const ConfigNodeId& node_id)
     throw (ParseError)
 {
     list<ConfigTreeNode*>::const_iterator iter;
@@ -241,7 +243,7 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 	_current_node = found;
     } else {
 	list<ConfPathSegment> path_segments = path_as_segments();
-	path_segments.push_back(ConfPathSegment(segment, type, nodenum));
+	path_segments.push_back(ConfPathSegment(segment, type, node_id));
 	const TemplateTreeNode* ttn = find_template_by_type(path_segments);
 	if (ttn == NULL) {
 	    booterror("No template found in template map");
@@ -255,7 +257,7 @@ ConfigTree::add_node(const string& segment, int type, uint64_t nodenum)
 	    debug_msg("segment: >%s<\n", segment.c_str());
 	    path += " " + segment;
 	}
-	found = create_node(segment, path, ttn, _current_node, nodenum, 
+	found = create_node(segment, path, ttn, _current_node, node_id,
 			    /* user_id */ 0, _verbose);
 	_current_node = found;
     }

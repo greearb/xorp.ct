@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.58 2005/08/23 00:57:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.59 2005/08/25 02:23:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -593,7 +593,7 @@ TemplateTreeNode::find_varname_node(const string& varname) const
     if (varname == "$(@)" /* current value of a node */
 	|| (varname == "$(DEFAULT)") /* default value of a node */
 	|| (varname == "$(<>)") /* operator for a terminal node */
-	|| (varname == "$(#)") /* the node number of a node */
+	|| (varname == "$(#)") /* the node ID of a node */
 	|| (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(! is_tag());
 	if (varname == "$(DEFAULT)") {
@@ -688,7 +688,7 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
 	}
     }
 
-    // The name might refer to the node number of this node
+    // The name might refer to the node ID of this node
     if ((var_parts.size() == 2) && (var_parts.back() == "#")) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
 	    return this;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.46 2005/08/19 20:04:19 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.47 2005/08/25 02:23:43 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -29,6 +29,8 @@
 #endif
 
 #include "libxorp/timeval.hh"
+#include "libproto/config_node_id.hh"
+
 #include "config_operators.hh"
 
 
@@ -55,18 +57,18 @@ public:
     ConfigTreeNode(const ConfigTreeNode& ctn);
     ConfigTreeNode(const string& node_name, const string& path, 
 		   const TemplateTreeNode* ttn, ConfigTreeNode* parent,
-		   uint64_t nodenum,
+		   const ConfigNodeId& node_id,
 		   uid_t user_id, uint32_t clientid, bool verbose);
     virtual ~ConfigTreeNode();
 
     bool operator==(const ConfigTreeNode& them) const;
-    bool is_same(const ConfigTreeNode& them, bool ignore_nodenum) const;
+    bool is_same(const ConfigTreeNode& them, bool ignore_node_id) const;
     
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
-					uint64_t nodenum,
+					const ConfigNodeId& node_id,
 					uid_t user_id, 
 					uint32_t clientid, 
 					bool verbose) = 0;
@@ -105,7 +107,8 @@ public:
     string typestr() const;
     const string& segname() const { return _segname; }
     const string& value() const;
-    uint64_t nodenum() const;
+    const ConfigNodeId& node_id() const { return _node_id; }
+    ConfigNodeId& node_id_generator() { return _node_id_generator; }
     uint32_t clientid() const { return _clientid; }
     bool has_value() const { return _has_value; }
     ConfigOperator get_operator() const;
@@ -151,7 +154,7 @@ protected:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
     string join_up_varname(const list<string>& var_parts) const;
-    enum VarType { NONE, NODE_VALUE, NODE_OPERATOR, NODE_NUMBER, 
+    enum VarType { NONE, NODE_VALUE, NODE_OPERATOR, NODE_ID, 
 		   NAMED, TEMPLATE_DEFAULT };
     ConfigTreeNode* find_varname_node(const string& varname, VarType& type);
     const ConfigTreeNode* find_const_varname_node(const string& varname, 
@@ -161,8 +164,8 @@ protected:
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
     void sort_by_value(list <ConfigTreeNode*>& children) const;
-    string show_nodenum(bool numbered, uint64_t nodenum) const;
-    virtual void allocate_unique_nodenum();
+    string show_node_id(bool numbered, const ConfigNodeId& node_id) const;
+    virtual void allocate_unique_node_id();
     string quoted_value(const string& value) const;
 
 
@@ -178,7 +181,8 @@ protected:
     string _path;
     ConfigTreeNode* _parent;
     list<ConfigTreeNode *> _children;
-    uint64_t _nodenum;
+    ConfigNodeId _node_id;
+    ConfigNodeId _node_id_generator;
     uid_t _user_id;	// the user ID of the user who last changed this node
     uid_t _committed_user_id;	// The user ID of the user who last changed
 				// this node before the last commit

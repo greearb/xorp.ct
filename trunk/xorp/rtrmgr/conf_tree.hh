@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.24 2005/07/21 09:01:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.25 2005/07/26 05:20:51 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -21,6 +21,8 @@
 #include <map>
 #include <list>
 #include <set>
+
+#include "libproto/config_node_id.hh"
 
 #include "conf_tree_node.hh"
 #include "module_manager.hh"
@@ -34,15 +36,17 @@ class ConfTemplate;
 
 class ConfPathSegment {
 public:
-    ConfPathSegment(const string& segname, int type, uint64_t nodenum)
-	: _segname(segname), _type(type), _nodenum(nodenum) {}
+    ConfPathSegment(const string& segname, int type,
+		    const ConfigNodeId& node_id)
+	: _segname(segname), _type(type), _node_id(node_id) {}
     const string& segname() const { return _segname; }
     int type() const { return _type; }
-    uint64_t nodenum() const {return _nodenum; }
+    const ConfigNodeId& node_id() const { return _node_id; }
+
 private:
-    string _segname;
-    int _type;
-    uint64_t _nodenum;
+    string		_segname;
+    int			_type;
+    ConfigNodeId	_node_id;
 };
 
 class ConfigTree {
@@ -56,15 +60,17 @@ public:
     bool parse(const string& configuration, const string& config_file,
 	       string& errmsg);
     void push_path();
-    void extend_path(const string& segment, int type, uint64_t nodenum);
+    void extend_path(const string& segment, int type,
+		     const ConfigNodeId& node_id);
     void pop_path();
-    void add_node(const string& nodename, int type, uint64_t nodenum) 
+    void add_node(const string& nodename, int type,
+		  const ConfigNodeId& node_id) 
 	throw (ParseError);
     virtual ConfigTreeNode* create_node(const string& segment, 
 					const string& path,
 					const TemplateTreeNode* ttn, 
 					ConfigTreeNode* parent_node, 
-					uint64_t nodenum,
+					const ConfigNodeId& node_id,
 					uid_t user_id, bool verbose) = 0;
     virtual ConfigTree* create_tree(TemplateTree *tt, bool verbose) = 0;
     void terminal_value(const string& value,
