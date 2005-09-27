@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.1 2005/09/23 19:10:41 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -136,34 +136,40 @@ usage(const char* progname)
 void
 test_config_node_id_valid_constructors()
 {
-    // Test values for node position and node ID: "1" and "2"
+    // Test values for node ID and node position: "1" and "2"
     const string config_node_id_string = "1 2";
-    const ConfigNodeId::Position position = 1;
-    const ConfigNodeId::UniqueNodeId unique_node_id = 2;
-
-    //
-    // Default constructor.
-    //
-    ConfigNodeId config_node_id1;
-    verbose_match(config_node_id1.str(), "0 0");
+    const string config_node_id_empty_string = "";
+    const ConfigNodeId::UniqueNodeId unique_node_id = 1;
+    const ConfigNodeId::Position position = 2;
 
     //
     // Constructor from a string.
     //
-    ConfigNodeId config_node_id2(config_node_id_string);
-    verbose_match(config_node_id2.str(), config_node_id_string);
+    ConfigNodeId config_node_id1(config_node_id_string);
+    verbose_match(config_node_id1.str(), config_node_id_string);
+
+    //
+    // Constructor from an empty string.
+    //
+    ConfigNodeId config_node_id1_1(config_node_id_empty_string);
+    verbose_match(config_node_id1_1.str(), string("0 0"));
+    verbose_assert(config_node_id1_1.is_empty(), "is_empty()");
 
     //
     // Constructor from another ConfigNodeId.
     //
-    ConfigNodeId config_node_id3(config_node_id2);
-    verbose_match(config_node_id3.str(), config_node_id_string);
+    ConfigNodeId config_node_id2(config_node_id1);
+    verbose_match(config_node_id2.str(), config_node_id_string);
 
     //
     // Constructor from integer values.
     //
-    ConfigNodeId config_node_id4(position, unique_node_id);
-    verbose_match(config_node_id4.str(), config_node_id_string);
+    ConfigNodeId config_node_id3(unique_node_id, position);
+    verbose_match(config_node_id3.str(), config_node_id_string);
+    verbose_assert(config_node_id3.unique_node_id() == unique_node_id,
+		   "compare unique_node_id()");
+    verbose_assert(config_node_id3.position() == position,
+		   "compare position()");
 }
 
 /**
@@ -172,11 +178,11 @@ test_config_node_id_valid_constructors()
 void
 test_config_node_id_invalid_constructors()
 {
-    // Invalid test values for node position and node ID: "A" and "B"
+    // Invalid test values for node ID and node position: "A" and "B"
     const string invalid_config_node_id_string = "A B";
 
     //
-    // Constructor from an invalid address string.
+    // Constructor from an invalid init string.
     //
     try {
 	// Invalid init string
@@ -188,6 +194,194 @@ test_config_node_id_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
+}
+
+/**
+ * Test ConfigNodeId valid copy in/out methods.
+ */
+void
+test_config_node_id_valid_copy_in_out()
+{
+    // Test values for node ID and node position: "1" and "2"
+    const string config_node_id_string = "1 2";
+
+    //
+    // Copy a node ID from a string into ConfigNodeId structure.
+    //
+    ConfigNodeId config_node_id1(0, 0);
+    verbose_assert(config_node_id1.copy_in(config_node_id_string) == 3,
+		   "copy_in(string&) for ConfigNodeId");
+    verbose_match(config_node_id1.str(), config_node_id_string);
+}
+
+/**
+ * Test ConfigNodeId invalid copy in/out methods.
+ */
+void
+test_config_node_id_invalid_copy_in_out()
+{
+    // Invalid test values for node ID and node position: "A" and "B"
+    const string invalid_config_node_id_string = "A B";
+
+    //
+    // Constructor from an invalid init string.
+    //
+    try {
+	// Invalid init string
+	ConfigNodeId config_node_id(0, 0);
+	config_node_id.copy_in(invalid_config_node_id_string);
+	verbose_log("Cannot catch invalid ConfigNodeId string \"A B\" : FAIL\n");
+	incr_failures();
+	UNUSED(config_node_id);
+    } catch (const InvalidString& e) {
+	// The problem was caught
+	verbose_log("%s : OK\n", e.str().c_str());
+    }
+}
+
+/**
+ * Test ConfigNodeId operators.
+ */
+void
+test_config_node_id_operators()
+{
+    ConfigNodeId config_node_id_a("1 2");
+    ConfigNodeId config_node_id_b("1 3");
+    ConfigNodeId config_node_id_c("2 3");
+
+    //
+    // Equality Operator
+    //
+    verbose_assert(config_node_id_a == config_node_id_a, "operator==");
+    verbose_assert(!(config_node_id_a == config_node_id_b), "operator==");
+    verbose_assert(!(config_node_id_a == config_node_id_c), "operator==");
+
+    //
+    // Not-Equal Operator
+    //
+    verbose_assert(!(config_node_id_a != config_node_id_a), "operator!=");
+    verbose_assert(config_node_id_a != config_node_id_b, "operator!=");
+    verbose_assert(config_node_id_a != config_node_id_c, "operator!=");
+}
+
+/**
+ * Test ConfigNodeId miscellaneous methods.
+ */
+void
+test_config_node_id_misc()
+{
+    ConfigNodeId::UniqueNodeId unique_node_id = 1;
+    const ConfigNodeId::Position position = 2;
+    const ConfigNodeId::InstanceId instance_id = 3;
+
+    //
+    // Test ConfigNodeId::set_instance_id()
+    //
+    ConfigNodeId config_node_id1(unique_node_id, position);
+    verbose_match(config_node_id1.str(), "1 2");
+    config_node_id1.set_instance_id(instance_id);
+    verbose_match(config_node_id1.str(), "12884901889 2");
+
+    //
+    // Test ConfigNodeId::generate_unique_node_id()
+    //
+    ConfigNodeId config_node_id2(unique_node_id, position);
+    config_node_id2.set_instance_id(instance_id);
+    ConfigNodeId config_node_id3 = config_node_id2.generate_unique_node_id();
+    verbose_match(config_node_id3.str(), config_node_id2.str());
+    verbose_match(config_node_id3.str(), "12884901890 2");
+}
+
+/**
+ * Test ConfigNodeIdMap class.
+ */
+void
+test_config_node_id_map()
+{
+    ConfigNodeId config_node_id1("3 0");
+    ConfigNodeId config_node_id2("2 3");
+    ConfigNodeId config_node_id3("1 2");
+    ConfigNodeId config_node_id_unknown("10 20");
+    ConfigNodeIdMap<uint32_t> node_id_map;
+    ConfigNodeIdMap<uint32_t>::iterator iter;
+    string test_string;
+    uint32_t foo = 1;
+
+    //
+    // Insert the elements
+    //
+    verbose_assert(node_id_map.insert(config_node_id1, foo++).second == true,
+		   "insert(config_node_id1)");
+    verbose_assert(node_id_map.insert(config_node_id2, foo++).second == true,
+		   "insert(config_node_id2)");
+    verbose_assert(node_id_map.insert(config_node_id3, foo++).second == true,
+		   "insert(config_node_id3)");
+    test_string = config_node_id1.str() + ", " + config_node_id2.str() + ", "
+	+ config_node_id3.str();
+    verbose_match(node_id_map.str(), test_string);
+
+    // Test for an unknown element
+    verbose_assert(node_id_map.find(config_node_id_unknown)
+		   == node_id_map.end(), "find(config_node_id_unknown)");
+
+    // Test the elements
+    verbose_assert(node_id_map.size() == 3, "size(3)");
+    verbose_assert(node_id_map.empty() == false, "empty()");
+    iter = node_id_map.begin();
+    verbose_match(iter->first.str(), config_node_id1.str());
+    verbose_assert(node_id_map.find(config_node_id1) == iter,
+		   "find(config_node_id1)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id2.str());
+    verbose_assert(node_id_map.find(config_node_id2) == iter,
+		   "find(config_node_id2)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id3.str());
+    verbose_assert(node_id_map.find(config_node_id3) == iter,
+		   "find(config_node_id3)");
+
+    // Erase the first element by using an interator
+    iter = node_id_map.begin();
+    node_id_map.erase(iter);
+
+    // Test the remaining elements
+    verbose_assert(node_id_map.size() == 2, "size(2)");
+    verbose_assert(node_id_map.empty() == false, "empty()");
+    verbose_assert(node_id_map.find(config_node_id1) == node_id_map.end(),
+		   "find(config_node_id1)");
+    test_string = config_node_id2.str() + ", " + config_node_id3.str();
+    verbose_match(node_id_map.str(), test_string);
+    iter = node_id_map.begin();
+    verbose_match(iter->first.str(), config_node_id2.str());
+    verbose_assert(node_id_map.find(config_node_id2) == iter,
+		   "find(config_node_id2)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id3.str());
+    verbose_assert(node_id_map.find(config_node_id3) == iter,
+		   "find(config_node_id3)");
+
+    // Erase the new first element by using a node ID
+    iter = node_id_map.begin();
+    node_id_map.erase(iter->first);
+
+    // Test the remaining elements
+    verbose_assert(node_id_map.size() == 1, "size(1)");
+    verbose_assert(node_id_map.empty() == false, "empty()");
+    verbose_assert(node_id_map.find(config_node_id2) == node_id_map.end(),
+		   "find(config_node_id2)");
+    test_string = config_node_id3.str();
+    verbose_match(node_id_map.str(), test_string);
+    iter = node_id_map.begin();
+    verbose_match(iter->first.str(), config_node_id3.str());
+    verbose_assert(node_id_map.find(config_node_id3) == iter,
+		   "find(config_node_id3)");
+
+    // Remove all elements
+    node_id_map.clear();
+    verbose_assert(node_id_map.size() == 0, "size(0)");
+    verbose_assert(node_id_map.empty() == true, "empty()");
+    verbose_assert(node_id_map.find(config_node_id3) == node_id_map.end(),
+		   "find(config_node_id3)");
 }
 
 int
@@ -230,6 +424,11 @@ main(int argc, char * const argv[])
     try {
 	test_config_node_id_valid_constructors();
 	test_config_node_id_invalid_constructors();
+	test_config_node_id_valid_copy_in_out();
+	test_config_node_id_invalid_copy_in_out();
+	test_config_node_id_operators();
+	test_config_node_id_misc();
+	test_config_node_id_map();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {
 	// Internal error
