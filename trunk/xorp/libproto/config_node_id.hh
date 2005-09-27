@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/config_node_id.hh,v 1.2 2005/09/27 17:20:05 pavlin Exp $
+// $XORP: xorp/libproto/config_node_id.hh,v 1.3 2005/09/27 17:49:56 pavlin Exp $
 
 
 #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
@@ -384,7 +384,6 @@ inline typename ConfigNodeIdMap<V>::iterator
 ConfigNodeIdMap<V>::find(const ConfigNodeId& node_id)
 {
     typename NodeId2IterMap::iterator node_id_iter;
-    typename ValuesList::iterator values_iter;
 
     node_id_iter = _node_id2iter.find(node_id.unique_node_id());
     if (node_id_iter == _node_id2iter.end())
@@ -398,7 +397,6 @@ inline typename ConfigNodeIdMap<V>::const_iterator
 ConfigNodeIdMap<V>::find(const ConfigNodeId& node_id) const
 {
     typename NodeId2IterMap::const_iterator node_id_iter;
-    typename ValuesList::const_iterator values_iter;
 
     node_id_iter = _node_id2iter.find(node_id.unique_node_id());
     if (node_id_iter == _node_id2iter.end())
