@@ -1,6 +1,7 @@
 %{
 
 #include "config.h"
+#include "policy_module.h"
 #include "libxorp/xorp.h"
 
 #include "policy/common/policy_utils.hh"

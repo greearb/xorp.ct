@@ -15,6 +15,7 @@
 #include "config.h"
 #endif
 
+#include "policy_module.h"
 #include "libxorp/xorp.h"
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"

@@ -23,6 +23,7 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
 
+#include "policy_module.h"
 #include "libxorp/xorp.h"
 
 #define FLEX_SCANNER
