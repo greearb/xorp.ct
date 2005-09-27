@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.5 2005/08/04 15:26:59 bms Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.6 2005/08/06 11:10:46 bms Exp $"
 
 /*
  * EXIT CODES:
@@ -33,6 +33,8 @@
 #include "config.h"
 #endif
 
+#include "policy/policy_module.h"
+#include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "policy/configuration.hh"
 

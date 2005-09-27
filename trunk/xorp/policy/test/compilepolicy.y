@@ -6,6 +6,9 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "policy/policy_module.h"
+#include "libxorp/xorp.h"
+#include "libproto/config_node_id.hh"
 #include <vector>
 #include <string>
 #include <list>
@@ -28,7 +31,10 @@ static yy_statements* _yy_statements = NULL;
 
 
 // add blocks to configuration, and delete stuff from memory
-static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
+static void
+add_blocks(const string& pname, const string& tname, yy_tb& term)
+{
+
 	// source, action, dest
 	for(int i = 0; i < 3; i++) {
 		yy_statements* statements = term.block[i];
@@ -37,16 +43,20 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 		if(statements == 0)
 			continue;
 
-		int order = 0;
+		ConfigNodeId order_generator(0, i);
+		ConfigNodeId prev_order(ConfigNodeId::ZERO());
+		ConfigNodeId order(ConfigNodeId::ZERO());
 		for(yy_statements::iterator j = statements->begin();
 		    j != statements->end(); ++j) {
 
 		    yy_statement* statement = *j;
 
+		    order = order_generator.generate_unique_node_id();
+		    order.set_position(prev_order.unique_node_id());
+		    prev_order = order;
 		    _yy_configuration.update_term_block(pname, tname, i, order,
 		    					*statement);
 		    delete statement;
-		    order++;
 		}
 		delete statements;
 	}
@@ -126,20 +136,24 @@ policy_statement:
 		free($2);
 
 		_yy_configuration.create_policy(pname);
-		
-		int order = 0;
+
+		ConfigNodeId order_generator(ConfigNodeId::ZERO());
+		ConfigNodeId prev_order(ConfigNodeId::ZERO());
+		ConfigNodeId order(ConfigNodeId::ZERO());
 		for(vector<yy_tb*>::iterator i = _yy_terms.begin();
 		    i != _yy_terms.end(); ++i) {
 
 			yy_tb* term = *i;
 
 			string& tname = term->name;
+			order = order_generator.generate_unique_node_id();
+			order.set_position(prev_order.unique_node_id());
+			prev_order = order;
 			_yy_configuration.create_term(pname, order, tname);
 
 			add_blocks(pname, tname, *term);
 
 			delete term;
-			order++;
 		}
 
 	  	_yy_terms.clear();

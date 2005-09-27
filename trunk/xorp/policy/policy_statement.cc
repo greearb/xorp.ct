@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.4 2005/07/09 00:32:45 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.5 2005/08/04 15:26:55 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -25,25 +25,25 @@
 using namespace policy_utils;
 
 PolicyStatement::PolicyStatement(const string& name, SetMap& smap) : 
-    _name(name), _smap(smap) 
+    _name(name), _smap(smap)
 {
 }
 
 PolicyStatement::~PolicyStatement()
 {
     del_dependancies();
-    policy_utils::clear_map(_terms);
+    policy_utils::clear_map_container(_terms);
 }
    
 void 
-PolicyStatement::add_term(uint64_t order, Term* term)
+PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
 {
     if(_terms.find(order) != _terms.end()) {
 	throw PolicyException("Term already present in position: " +
-			      to_str(order));
+			      order.str());
     }
 
-    _terms[order] = term;
+    _terms.insert(order, term);
 }
 
 PolicyStatement::TermContainer::iterator 

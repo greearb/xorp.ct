@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/policy_utils.hh,v 1.3 2005/07/13 21:58:40 abittau Exp $
+// $XORP: xorp/policy/common/policy_utils.hh,v 1.4 2005/07/15 02:27:09 abittau Exp $
 
 #ifndef __POLICY_COMMON_POLICY_UTILS_HH__
 #define __POLICY_COMMON_POLICY_UTILS_HH__
@@ -95,6 +95,24 @@ template <class A, class T>
 void 
 clear_map(map<A,T*>& m) {
     for(typename map<A,T*>::iterator i = m.begin();
+	i != m.end(); ++i)  {
+
+	if((*i).second)
+	    delete (*i).second;
+    }	
+    m.clear();
+}
+
+/**
+ * Delets objects of a map-like container and clears the map at the end.
+ * Checks for null objects.
+ *
+ * @param m map-like container to be deleted and cleared.
+ */
+template <class T>
+void 
+clear_map_container(T& m) {
+    for(typename T::iterator i = m.begin();
 	i != m.end(); ++i)  {
 
 	if((*i).second)

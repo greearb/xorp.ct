@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.6 2005/07/15 02:27:07 abittau Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.7 2005/08/04 15:26:56 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,9 +82,20 @@ XrlPolicyTarget::policy_0_1_create_term(const string&   policy,
 					const string&   order,
 				        const string&   term)
 {
+    ConfigNodeId config_node_id(ConfigNodeId::ZERO());
+
     try {
-	uint64_t o = strtoll(order.c_str(), NULL, 10);
-	_policy_target.create_term(policy, o, term);
+	config_node_id.copy_in(order);
+    } catch (const InvalidString& e) {
+        return XrlCmdError::COMMAND_FAILED("Create of policy " + policy
+					   + " term " + term + " failed "
+					   + "because of invalid node ID "
+					   + "\"" + order + "\" : "
+					   + e.str());
+    }
+
+    try {
+	_policy_target.create_term(policy, config_node_id, term);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("create_term failed: " + e.str());
     }
@@ -112,9 +123,20 @@ XrlPolicyTarget::policy_0_1_update_term_block(const string&   policy,
 					      const string&   order,
 					      const string&   statement)
 {
+    ConfigNodeId config_node_id(ConfigNodeId::ZERO());
+
     try {
-	uint64_t o = strtoll(order.c_str(), NULL, 10);
-	_policy_target.update_term_block(policy, term, block, o, statement);
+	config_node_id.copy_in(order);
+    } catch (const InvalidString& e) {
+        return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
+					   + " term " + term + " failed "
+					   + "because of invalid node ID "
+					   + "\"" + order + "\" : "
+					   + e.str());
+    }
+    try {
+	_policy_target.update_term_block(policy, term, block, config_node_id,
+					 statement);
     } catch(const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Update of policy " + policy
 					   + " term " + term + " failed: "

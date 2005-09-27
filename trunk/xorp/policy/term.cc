@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.11 2005/07/15 23:37:31 abittau Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.12 2005/08/04 15:26:56 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,13 +42,13 @@ Term::Term(const string& name) : _name(name),
 Term::~Term()
 {
     for(unsigned int i = 0; i < LAST_BLOCK; i++) {
-	clear_map(*_block_nodes[i]);
+	clear_map_container(*_block_nodes[i]);
 	delete _block_nodes[i];
     }
 }
 
 void
-Term::set_block(const uint32_t& block, const uint64_t& order,
+Term::set_block(const uint32_t& block, const ConfigNodeId& order,
 		const string& statement)
 {
     if (block >= LAST_BLOCK) {
@@ -91,11 +91,11 @@ Term::set_block(const uint32_t& block, const uint64_t& order,
     }
     XLOG_ASSERT(nodes->size() == 1); // XXX a single statement!
 
-    conf_block[order] = nodes->front();
+    conf_block.insert(order, nodes->front());
 }
 
 void
-Term::del_block(const uint32_t& block, const uint64_t& order)
+Term::del_block(const uint32_t& block, const ConfigNodeId& order)
 {
     XLOG_ASSERT (block < LAST_BLOCK);
 
@@ -104,7 +104,7 @@ Term::del_block(const uint32_t& block, const uint64_t& order)
     Nodes::iterator i = conf_block.find(order);
     if (i == conf_block.end()) {
 	throw term_syntax_error("Want to delete an empty position: " 
-				+ to_str(order));
+				+ order.str());
     }
     conf_block.erase(i);
 }

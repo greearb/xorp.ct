@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.5 2005/07/12 00:47:51 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.6 2005/07/15 02:27:06 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -57,10 +57,10 @@ public:
      * Exception is thrown on error.
      *
      * @param policy policy in which term should be created.
-     * @param order position of term.
+     * @param order node ID with position of term.
      * @param term name of term to create.
      */
-    void create_term(const string& policy, const uint64_t& order,
+    void create_term(const string& policy, const ConfigNodeId& order,
 		     const string& term);
 
     /**
@@ -81,13 +81,13 @@ public:
      * @param policy the name of the policy.
      * @param term the name of the term.
      * @param block the block to update (0:source, 1:dest, 2:action).
-     * @param order numerical position (local) of statement.
+     * @param order node ID with position of term.
      * @param statement the statement to insert.
      */
     void update_term_block(const string& policy,
 			   const string& term,
 			   const uint32_t& block,
-			   const uint64_t& order,
+			   const ConfigNodeId& order,
 			   const string& statement);
     
     /**

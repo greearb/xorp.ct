@@ -51,6 +51,9 @@ static int yygrowstack();
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+#include "policy/policy_module.h"
+#include "libxorp/xorp.h"
+#include "libproto/config_node_id.hh"
 #include <vector>
 #include <string>
 #include <list>
@@ -73,7 +76,10 @@ static yy_statements* _yy_statements = NULL;
 
 
 /* add blocks to configuration, and delete stuff from memory*/
-static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
+static void
+add_blocks(const string& pname, const string& tname, yy_tb& term)
+{
+
 	/* source, action, dest*/
 	for(int i = 0; i < 3; i++) {
 		yy_statements* statements = term.block[i];
@@ -82,27 +88,31 @@ static void add_blocks (const string& pname, const string& tname, yy_tb& term) {
 		if(statements == 0)
 			continue;
 
-		int order = 0;
+		ConfigNodeId order_generator(0, i);
+		ConfigNodeId prev_order(ConfigNodeId::ZERO());
+		ConfigNodeId order(ConfigNodeId::ZERO());
 		for(yy_statements::iterator j = statements->begin();
 		    j != statements->end(); ++j) {
 
 		    yy_statement* statement = *j;
 
+		    order = order_generator.generate_unique_node_id();
+		    order.set_position(prev_order.unique_node_id());
+		    prev_order = order;
 		    _yy_configuration.update_term_block(pname, tname, i, order,
 		    					*statement);
 		    delete statement;
-		    order++;
 		}
 		delete statements;
 	}
 }
 
-#line 57 "compilepolicy.y"
+#line 67 "compilepolicy.y"
 typedef union {
 	char *c_str;
 	yy_statements* statements;
 } YYSTYPE;
-#line 106 "yacc.yy_compile_policy.cc"
+#line 116 "yacc.yy_compile_policy.cc"
 #define YYERRCODE 256
 #define YY_INT 257
 #define YY_STR 258
@@ -435,7 +445,7 @@ yyreduce:
     switch (yyn)
     {
 case 3:
-#line 79 "compilepolicy.y"
+#line 89 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -451,7 +461,7 @@ case 3:
 				}
 break;
 case 4:
-#line 93 "compilepolicy.y"
+#line 103 "compilepolicy.y"
 {
 				list<string> tmp;
 
@@ -467,7 +477,7 @@ case 4:
 				}
 break;
 case 6:
-#line 110 "compilepolicy.y"
+#line 120 "compilepolicy.y"
 {
 	  	string type = yyvsp[-3].c_str;
 	  	string id = yyvsp[-2].c_str;
@@ -480,33 +490,37 @@ case 6:
 	  }
 break;
 case 7:
-#line 124 "compilepolicy.y"
+#line 134 "compilepolicy.y"
 {
 		string pname = yyvsp[-3].c_str;
 		free(yyvsp[-3].c_str);
 
 		_yy_configuration.create_policy(pname);
-		
-		int order = 0;
+
+		ConfigNodeId order_generator(ConfigNodeId::ZERO());
+		ConfigNodeId prev_order(ConfigNodeId::ZERO());
+		ConfigNodeId order(ConfigNodeId::ZERO());
 		for(vector<yy_tb*>::iterator i = _yy_terms.begin();
 		    i != _yy_terms.end(); ++i) {
 
 			yy_tb* term = *i;
 
 			string& tname = term->name;
+			order = order_generator.generate_unique_node_id();
+			order.set_position(prev_order.unique_node_id());
+			prev_order = order;
 			_yy_configuration.create_term(pname, order, tname);
 
 			add_blocks(pname, tname, *term);
 
 			delete term;
-			order++;
 		}
 
 	  	_yy_terms.clear();
 	  }
 break;
 case 8:
-#line 152 "compilepolicy.y"
+#line 166 "compilepolicy.y"
 {
 	  	yy_tb* tb = new yy_tb;
 
@@ -520,7 +534,7 @@ case 8:
 	  }
 break;
 case 10:
-#line 168 "compilepolicy.y"
+#line 182 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -528,7 +542,7 @@ case 10:
 	}
 break;
 case 11:
-#line 177 "compilepolicy.y"
+#line 191 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -536,7 +550,7 @@ case 11:
 	}
 break;
 case 12:
-#line 186 "compilepolicy.y"
+#line 200 "compilepolicy.y"
 {
 		yy_statements* tmp = _yy_statements;
 		_yy_statements = NULL;
@@ -544,7 +558,7 @@ case 12:
 	}
 break;
 case 13:
-#line 194 "compilepolicy.y"
+#line 208 "compilepolicy.y"
 {
 	       
 	       	if (_yy_statements == NULL) {
@@ -559,7 +573,7 @@ case 13:
 		_yy_statements->push_back(statement);
 	       }
 break;
-#line 563 "yacc.yy_compile_policy.cc"
+#line 577 "yacc.yy_compile_policy.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

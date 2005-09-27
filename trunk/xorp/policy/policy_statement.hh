@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.3 2005/07/01 22:54:33 abittau Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.4 2005/07/09 00:32:45 abittau Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
 
+#include "libproto/config_node_id.hh"
 #include "policy/common/policy_exception.hh"
 
 #include "set_map.hh"
@@ -41,7 +42,7 @@ public:
     };
 
     
-    typedef map<uint64_t, Term*> TermContainer;
+    typedef ConfigNodeIdMap<Term*> TermContainer;
 
     /**
      * @param name the name of the policy.
@@ -55,10 +56,10 @@ public:
      *
      * Caller must not delete / modify pointer.
      *
-     * @param order position of term.
+     * @param order node ID with position of term.
      * @param term term to append to policy.
      */
-    void add_term(uint64_t order, Term* term);
+    void add_term(const ConfigNodeId& order, Term* term);
   
     /**
      * Throws exception if no term is found.

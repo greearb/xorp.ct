@@ -13,15 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.7 2005/07/09 00:32:45 abittau Exp $
+// $XORP: xorp/policy/term.hh,v 1.8 2005/07/12 00:47:51 abittau Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
 
+#include "libproto/config_node_id.hh"
 #include "policy/common/policy_exception.hh"
+
 #include <map>
 #include <string>
 #include "node_base.hh"
+
 
 /**
  * @short A term is an atomic policy unit. 
@@ -42,7 +45,7 @@ public:
 
     // the integer is the "line number", the node is the parsed structure [AST]
     // of the statement(s) in that line.
-    typedef map<uint64_t, Node*> Nodes;
+    typedef ConfigNodeIdMap<Node*> Nodes;
 
     /**
      * @short Exception thrown on a syntax error while parsing configuration.
@@ -67,19 +70,19 @@ public:
      * Updates the source/dest/action block of a term.
      *
      * @param block the block to update (0:source, 1:dest, 2:action).
-     * @param order numerical position (local) of statement.
+     * @param order node ID with position of term.
      * @param statement the statement to insert.
      */
-    void set_block(const uint32_t& block, const uint64_t& order, 
+    void set_block(const uint32_t& block, const ConfigNodeId& order,
 		   const string& statement);
 
     /**
      * Deletes statements in the location specified by order and block.
      *
      * @param block the block to update (0:source, 1:dest, 2:action).
-     * @param order numerical position (local) of statement.
+     * @param order node ID with position of term.
      */
-    void del_block(const uint32_t& block, const uint64_t& order); 
+    void del_block(const uint32_t& block, const ConfigNodeId& order);
 
     /**
      * Visitor implementation.
@@ -115,7 +118,7 @@ public:
 
 private:
     string _name;
-   
+
     Nodes* _block_nodes[3];
 
     Nodes*& _source_nodes; 
