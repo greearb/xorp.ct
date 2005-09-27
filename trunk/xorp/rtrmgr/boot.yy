@@ -7,6 +7,7 @@
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 
 #include "conf_tree.hh"
 #include "conf_tree_node.hh"

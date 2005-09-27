@@ -6,6 +6,7 @@
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 
 #include "template_tree_node.hh"
 #include "template_tree.hh"

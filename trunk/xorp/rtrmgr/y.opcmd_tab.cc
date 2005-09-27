@@ -1,17 +1,3 @@
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#include "libxorp/xorp.h"
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#else
-#ifndef __unused
-#define __unused
-#endif
-#ifndef __P
-#define __P(x) x
-#endif
-#endif
 #ifndef lint
 #ident "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $"
 #endif
@@ -66,6 +52,7 @@ static int yygrowstack();
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
 
 #include "op_commands.hh"
 #include "util.hh"
@@ -73,7 +60,7 @@ static int yygrowstack();
 /* XXX: sigh - -p flag to yacc should do this for us */
 #define yystacksize opcmdstacksize
 #define yysslim opcmdsslim
-#line 64 "y.opcmd_tab.c"
+#line 65 "y.opcmd_tab.c"
 #define YYERRCODE 256
 #define UPLEVEL 257
 #define DOWNLEVEL 258
@@ -220,7 +207,7 @@ short *yyss;
 short *yysslim;
 YYSTYPE *yyvs;
 int yystacksize;
-#line 116 "op_commands.yy"
+#line 117 "op_commands.yy"
 
 extern "C" int opcmdparse();
 extern int opcmdlex();
@@ -605,7 +592,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 596 "y.opcmd_tab.c"
+#line 597 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -801,78 +788,78 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 43 "op_commands.yy"
+#line 44 "op_commands.yy"
 { }
 break;
 case 6:
-#line 47 "op_commands.yy"
+#line 48 "op_commands.yy"
 { }
 break;
 case 10:
-#line 55 "op_commands.yy"
+#line 56 "op_commands.yy"
 { append_path_word(yyvsp[0]); }
 break;
 case 11:
-#line 58 "op_commands.yy"
+#line 59 "op_commands.yy"
 { append_path_variable(yyvsp[0]); }
 break;
 case 12:
-#line 61 "op_commands.yy"
+#line 62 "op_commands.yy"
 { append_path_word(yyvsp[0]); }
 break;
 case 13:
-#line 64 "op_commands.yy"
+#line 65 "op_commands.yy"
 { }
 break;
 case 14:
-#line 67 "op_commands.yy"
+#line 68 "op_commands.yy"
 { push_path(); }
 break;
 case 15:
-#line 70 "op_commands.yy"
+#line 71 "op_commands.yy"
 { pop_path(); }
 break;
 case 22:
-#line 83 "op_commands.yy"
+#line 84 "op_commands.yy"
 {
 				add_cmd_module(yyvsp[-1]);
 			}
 break;
 case 23:
-#line 88 "op_commands.yy"
+#line 89 "op_commands.yy"
 {
 				add_cmd_command(yyvsp[-2]);
 			}
 break;
 case 24:
-#line 93 "op_commands.yy"
+#line 94 "op_commands.yy"
 {
 				add_cmd_opt_parameter(yyvsp[-2]);
 			}
 break;
 case 25:
-#line 98 "op_commands.yy"
+#line 99 "op_commands.yy"
 {
 				add_cmd_tag(yyvsp[-2], yyvsp[-1]);
 			}
 break;
 case 26:
-#line 103 "op_commands.yy"
+#line 104 "op_commands.yy"
 {
 				add_cmd_help_tag(yyvsp[0]);
 			}
 break;
 case 27:
-#line 106 "op_commands.yy"
+#line 107 "op_commands.yy"
 {
 				add_cmd_help_string(yyvsp[0]);
 			}
 break;
 case 28:
-#line 111 "op_commands.yy"
+#line 112 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 863 "y.opcmd_tab.c"
+#line 864 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
