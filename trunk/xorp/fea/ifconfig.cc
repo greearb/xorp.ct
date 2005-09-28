@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.45 2005/03/25 02:53:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.46 2005/08/18 15:45:46 bms Exp $"
 
 #include "fea_module.h"
 
@@ -1008,7 +1008,7 @@ void
 IfConfigErrorReporter::interface_error(const string& ifname,
 				       const string& error_msg)
 {
-    string preamble(c_format("On %s: ", ifname.c_str()));
+    string preamble(c_format("Interface error on %s: ", ifname.c_str()));
     log_error(preamble + error_msg);
 }
 
@@ -1017,7 +1017,8 @@ IfConfigErrorReporter::vif_error(const string& ifname,
 				 const string& vifname,
 				 const string& error_msg)
 {
-    string preamble(c_format("On %s/%s: ", ifname.c_str(), vifname.c_str()));
+    string preamble(c_format("Interface/Vif error on %s/%s: ",
+			     ifname.c_str(), vifname.c_str()));
     log_error(preamble + error_msg);
 }
 
@@ -1027,7 +1028,7 @@ IfConfigErrorReporter::vifaddr_error(const string& ifname,
 				     const IPv4&   addr,
 				     const string& error_msg)
 {
-    string preamble(c_format("On %s/%s/%s: ",
+    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
 			     ifname.c_str(),
 			     vifname.c_str(),
 			     addr.str().c_str()));
@@ -1040,7 +1041,7 @@ IfConfigErrorReporter::vifaddr_error(const string& ifname,
 				     const IPv6&   addr,
 				     const string& error_msg)
 {
-    string preamble(c_format("On %s/%s/%s: ",
+    string preamble(c_format("Interface/Vif/Address error on %s/%s/%s: ",
 			     ifname.c_str(),
 			     vifname.c_str(),
 			     addr.str().c_str()));
