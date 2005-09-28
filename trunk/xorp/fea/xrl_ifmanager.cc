@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.15 2005/03/05 01:41:29 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.16 2005/03/25 02:53:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -183,6 +183,8 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 {
     IfTree& local_config = iftree();		// The current configuration
     IfTree& old_local_config = old_iftree();	// The previous configuration
+    bool is_error = false;
+    string errmsg;
 
     if (_itm.commit(tid) != true)
 	return XrlCmdError::COMMAND_FAILED(BAD_ID);
@@ -198,10 +200,26 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
     //
     // Push the configuration
     //
-    if (ifconfig().push_config(local_config) != true) {
-	// TODO: we should reverse-back to the previous working configuration
-	return XrlCmdError::COMMAND_FAILED(ifconfig().push_error());
-    }
+    do {
+	if (ifconfig().push_config(local_config) == true)
+	    break;		// Success
+
+	errmsg = ifconfig().push_error();
+	is_error = true;
+
+	// Reverse-back to the previously working configuration
+	local_config = old_local_config;
+	if (ifconfig().push_config(local_config) == true)
+	    break;		// Finalize the reverse-back
+
+	// Failed to reverse back
+	string errmsg2 = ifconfig().push_error();
+	errmsg2 = c_format("[Also, failed to reverse-back to the previous "
+			   "config: %s]",
+			   errmsg2.c_str());
+	errmsg = errmsg + " " + errmsg2;
+	return XrlCmdError::COMMAND_FAILED(errmsg);
+    } while (false);
 
     //
     // Pull the new device configuration
@@ -225,7 +243,8 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
     //
     // Propagate the configuration changes to all listeners.
     //
-    ifconfig().report_updates(local_config, false);
+    if (! is_error)
+	ifconfig().report_updates(local_config, false);
 
     //
     // Flush-out config state
@@ -235,8 +254,13 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
     //
     // Save a backup copy of the configuration state
     //
-    old_local_config = local_config;
-    old_local_config.finalize_state();
+    if (! is_error) {
+	old_local_config = local_config;
+	old_local_config.finalize_state();
+    }
 
-    return XrlCmdError::OKAY();
+    if (is_error)
+	return XrlCmdError::COMMAND_FAILED(errmsg);
+    else
+	return XrlCmdError::OKAY();
 }
