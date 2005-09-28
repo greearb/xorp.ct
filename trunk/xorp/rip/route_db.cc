@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.22 2005/07/08 02:06:24 abittau Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.24 2005/08/18 15:41:27 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -158,12 +158,11 @@ RouteDB<A>::do_filtering(Route* r)
 		  r->net().str().c_str());
 
 	bool accepted = _policy_filters.run_filter(filter::IMPORT, varrw);
-	
+
 	if (!accepted)
 	    return false;
 
 	RIPVarRW<A> varrw2(*r);
-
 
 	debug_msg("[RIP] Running source match filter on route %s\n",
 		  r->net().str().c_str());
