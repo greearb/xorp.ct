@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.39 2005/08/18 15:48:42 bms Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.40 2005/08/23 01:18:59 pavlin Exp $"
 
 
 //
@@ -1588,7 +1588,10 @@ CliClient::interrupt_command()
     //
     // Ignore current line, reset buffer, line, cursor, prompt
     //
-    cli_print("\n");                // XXX: new line
+    if (current_cli_command() != NULL) {
+	set_current_cli_prompt(current_cli_command()->cd_prompt());
+    }
+    cli_print("\n");			// XXX: new line
     gl_redisplay_line(gl());
     gl_reset_line(gl());
     set_buff_curpos(0);
