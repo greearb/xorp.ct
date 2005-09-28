@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.40 2005/07/08 02:06:18 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.41 2005/07/08 19:20:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -246,7 +246,7 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	// But we'll just ignore this error, and log a warning.
 	string s = "Attempt to delete route for net " + rtmsg.net().str()
 	    + " that wasn't in RIB-In\n";
-	XLOG_WARNING(s.c_str());
+	XLOG_WARNING("%s", s.c_str());
 	return -1;
     }
     return 0;

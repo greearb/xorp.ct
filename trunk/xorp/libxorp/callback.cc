@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/callback.cc,v 1.5 2005/07/29 20:06:30 bms Exp $"
+#ident "$XORP: xorp/libxorp/callback.cc,v 1.6 2005/08/18 15:28:39 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -86,7 +86,7 @@ trace_dispatch_leave()
 			    "%d.%06d seconds\n",
 			    e.file, e.line, delta.secs(), delta.usecs());
 	if (xlog_is_running()) {
-	    XLOG_ERROR(s.c_str());
+	    XLOG_ERROR("%s", s.c_str());
 	} else {
 	    fprintf(stderr, "ERROR: %s\n", s.c_str());
 	}

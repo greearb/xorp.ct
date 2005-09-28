@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.42 2005/08/18 15:45:43 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.43 2005/08/31 02:10:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -138,17 +138,17 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
     if (_have_ipv4) {
 	if (unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
 					error_msg) < 0) {
-	    XLOG_FATAL(error_msg.c_str());
+	    XLOG_FATAL("%s", error_msg.c_str());
 	}
     }
 #ifdef HAVE_IPV6
     if (_have_ipv6) {
 	if (unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
 					error_msg) < 0) {
-	    XLOG_FATAL(error_msg.c_str());
+	    XLOG_FATAL("%s", error_msg.c_str());
 	}
 	if (accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
-	    XLOG_FATAL(error_msg.c_str());
+	    XLOG_FATAL("%s", error_msg.c_str());
 	}
     }
 #endif // HAVE_IPV6
@@ -1369,7 +1369,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv4 unicast forwarding "
 			     "is enabled: IPv4 is not supported");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1389,7 +1389,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	    != 0) {
 	    error_msg = c_format("Get sysctl(IPCTL_FORWARDING) failed: %s",
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -1401,14 +1401,14 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	    error_msg = c_format("Cannot open file %s for reading: %s",
 				 PROC_LINUX_FILE_FORWARDING_V4,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	if (fscanf(fh, "%d", &enabled) != 1) {
 	    error_msg = c_format("Error reading file %s: %s",
 				 PROC_LINUX_FILE_FORWARDING_V4,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    fclose(fh);
 	    return (XORP_ERROR);
 	}
@@ -1459,7 +1459,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
     ret_value = false;
     error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
 			 "is enabled: IPv6 is not supported");
-    XLOG_ERROR(error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
@@ -1468,7 +1468,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	ret_value = false;
 	error_msg = c_format("Cannot test whether IPv6 unicast forwarding "
 			     "is enabled: IPv6 is not supported");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1488,7 +1488,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	    != 0) {
 	    error_msg = c_format("Get sysctl(IPV6CTL_FORWARDING) failed: %s",
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -1500,14 +1500,14 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	    error_msg = c_format("Cannot open file %s for reading: %s",
 				 PROC_LINUX_FILE_FORWARDING_V6,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	if (fscanf(fh, "%d", &enabled) != 1) {
 	    error_msg = c_format("Error reading file %s: %s",
 				 PROC_LINUX_FILE_FORWARDING_V6,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    fclose(fh);
 	    return (XORP_ERROR);
 	}
@@ -1561,7 +1561,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
     error_msg = c_format("Cannot test whether the acceptance of IPv6 "
 			 "Router Advertisement messages is enabled: "
 			 "IPv6 is not supported");
-    XLOG_ERROR(error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
@@ -1571,7 +1571,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 	error_msg = c_format("Cannot test whether the acceptance of IPv6 "
 			     "Router Advertisement messages is enabled: "
 			     "IPv6 is not supported");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1591,7 +1591,7 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 	    != 0) {
 	    error_msg = c_format("Get sysctl(IPV6CTL_ACCEPT_RTADV) failed: %s",
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -1639,7 +1639,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	}
 	error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: "
 			     "IPv4 is not supported", (v) ? "true": "false");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1666,7 +1666,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPCTL_FORWARDING) to %s failed: %s",
 				 (v) ? "true" : "false", strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -1678,7 +1678,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	    error_msg = c_format("Cannot open file %s for writing: %s",
 				 PROC_LINUX_FILE_FORWARDING_V4,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	if (fprintf(fh, "%d", enable) != 1) {
@@ -1686,7 +1686,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 				 enable,
 				 PROC_LINUX_FILE_FORWARDING_V4,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    fclose(fh);
 	    return (XORP_ERROR);
 	}
@@ -1698,7 +1698,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	DWORD result = EnableRouter(&hFwd, &_overlapped);
 	if (result != ERROR_IO_PENDING) {
 	    error_msg = c_format("Error %lu from EnableRouter", GetLastError());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	++_enablecnt;
@@ -1706,7 +1706,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	if (_enablecnt == 0) {
 	    error_msg = c_format("UnableRouter() called without any previous "
 				 "call to EnableRouter()");
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 
@@ -1714,7 +1714,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	if (result != NO_ERROR) {
 	    error_msg = c_format("Error %lu from UnenableRouter",
 				 GetLastError());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	--_enablecnt;
@@ -1754,7 +1754,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 
     error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
 			 "IPv6 is not supported", (v) ? "true": "false");
-    XLOG_ERROR(error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
@@ -1770,7 +1770,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 
 	error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: "
 			     "IPv6 is not supported", (v) ? "true": "false");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1802,7 +1802,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPV6CTL_FORWARDING) to %s failed: %s",
 				 (v) ? "true" : "false", strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    // Restore the old accept_rtadv value
 	    if (old_value_accept_rtadv != !v) {
 		string dummy_error_msg;
@@ -1820,7 +1820,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	    error_msg = c_format("Cannot open file %s for writing: %s",
 				 PROC_LINUX_FILE_FORWARDING_V6,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	if (fprintf(fh, "%d", enable) != 1) {
@@ -1828,7 +1828,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 				 enable,
 				 PROC_LINUX_FILE_FORWARDING_V6,
 				 strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    // Restore the old accept_rtadv value
 	    if (old_value_accept_rtadv != !v) {
 		string dummy_error_msg;
@@ -1896,7 +1896,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 			 "Router Advertisement messages to %s: "
 			 "IPv6 is not supported",
 			 (v) ? "true": "false");
-    XLOG_ERROR(error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
 #else // HAVE_IPV6
@@ -1914,7 +1914,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 			     "Router Advertisement messages to %s: "
 			     "IPv6 is not supported",
 			     (v) ? "true": "false");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1941,7 +1941,7 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	    != 0) {
 	    error_msg = c_format("Set sysctl(IPV6CTL_ACCEPT_RTADV) to %s failed: %s",
 				 (v) ? "true" : "false", strerror(errno));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.41 2005/06/03 19:07:29 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.42 2005/08/18 15:38:46 bms Exp $"
 
 
 //
@@ -190,7 +190,7 @@ PimNode::set_vif_proto_version(const string& vif_name, int proto_version,
 	error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -199,7 +199,7 @@ PimNode::set_vif_proto_version(const string& vif_name, int proto_version,
 	error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "invalid protocol version %d",
 			     vif_name.c_str(), proto_version);
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -222,7 +222,7 @@ PimNode::reset_vif_proto_version(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset protocol version for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -270,7 +270,7 @@ PimNode::set_vif_ip_router_alert_option_check(const string& vif_name,
 			     "flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -297,7 +297,7 @@ PimNode::reset_vif_ip_router_alert_option_check(const string& vif_name,
 			     "flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -343,7 +343,7 @@ PimNode::set_vif_hello_triggered_delay(const string& vif_name,
 	error_msg = c_format("Cannot set Hello triggered delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -369,7 +369,7 @@ PimNode::reset_vif_hello_triggered_delay(const string& vif_name,
 	error_msg = c_format("Cannot reset Hello triggered delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -414,7 +414,7 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
 	error_msg = c_format("Cannot set Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -448,7 +448,7 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset Hello period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -503,7 +503,7 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
 	error_msg = c_format("Cannot set Hello holdtime for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -537,7 +537,7 @@ PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset Hello holdtime for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -590,7 +590,7 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
 	error_msg = c_format("Cannot set DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -623,7 +623,7 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset DR priority for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -677,7 +677,7 @@ PimNode::set_vif_propagation_delay(const string& vif_name,
 	error_msg = c_format("Cannot set Propagation delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -707,7 +707,7 @@ PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset Propagation delay for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -758,7 +758,7 @@ PimNode::set_vif_override_interval(const string& vif_name,
 	error_msg = c_format("Cannot set Override interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -788,7 +788,7 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset Override interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -839,7 +839,7 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
 	error_msg = c_format("Cannot set Tracking support disabled flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -870,7 +870,7 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
 	error_msg = c_format("Cannot reset Tracking support disabled flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -921,7 +921,7 @@ PimNode::set_vif_accept_nohello_neighbors(const string& vif_name,
 	error_msg = c_format("Cannot set Accept nohello neighbors flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -952,7 +952,7 @@ PimNode::reset_vif_accept_nohello_neighbors(const string& vif_name,
 	error_msg = c_format("Cannot reset Accept nohello neighbors flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -998,7 +998,7 @@ PimNode::set_vif_join_prune_period(const string& vif_name,
 	error_msg = c_format("Cannot set Join/Prune period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1023,7 +1023,7 @@ PimNode::reset_vif_join_prune_period(const string& vif_name, string& error_msg)
 	error_msg = c_format("Cannot reset Join/Prune period for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1122,7 +1122,7 @@ PimNode::add_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot add configure scope zone with vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1149,7 +1149,7 @@ PimNode::add_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot add configure scope zone with vif address %s: "
 			     "no such vif",
 			     cstring(vif_addr));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1176,7 +1176,7 @@ PimNode::delete_config_scope_zone_by_vif_name(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot delete configure scope zone with vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1204,7 +1204,7 @@ PimNode::delete_config_scope_zone_by_vif_addr(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot delete configure scope zone with vif address %s: "
 			     "no such vif",
 			     cstring(vif_addr));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1243,7 +1243,7 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot add configure BSR with vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1254,7 +1254,7 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
 	    error_msg = c_format("Cannot add configure BSR with vif %s: "
 				 "the vif has no configured address",
 				 vif_name.c_str());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);	// The vif has no address yet
 	}
 	my_cand_bsr_addr = pim_vif->domain_wide_addr();
@@ -1267,7 +1267,7 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
 				 "the address does not belong to this vif",
 				 vif_name.c_str(),
 				 cstring(my_cand_bsr_addr));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);	// Invalid address
 	}
     }
@@ -1293,7 +1293,7 @@ PimNode::add_config_cand_bsr(const IPvXNet& scope_zone_id,
 			     cstring(my_cand_bsr_addr),
 			     cstring(zone_id),
 			     local_error_msg.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1327,7 +1327,7 @@ PimNode::delete_config_cand_bsr(const IPvXNet& scope_zone_id,
 	error_msg = c_format("Cannot delete configure BSR for zone %s: "
 			     "zone not found",
 			     cstring(zone_id));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1384,7 +1384,7 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 	error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1395,7 +1395,7 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 	    error_msg = c_format("Cannot add configure Cand-RP with vif %s: "
 				 "the vif has no configured address",
 				 vif_name.c_str());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);	// The vif has no address yet
 	}
 	my_cand_rp_addr = pim_vif->domain_wide_addr();
@@ -1409,7 +1409,7 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 				 "the address does not belong to this vif",
 				 vif_name.c_str(),
 				 cstring(my_cand_rp_addr));
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);	// Invalid address
 	}
     }
@@ -1435,7 +1435,7 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 				 cstring(group_prefix),
 				 (is_scope_zone)? "scoped" : "non-scoped",
 				 local_error_msg.c_str());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	is_new_zone = true;
@@ -1453,7 +1453,7 @@ PimNode::add_config_cand_rp(const IPvXNet& group_prefix,
 			     cstring(group_prefix),
 			     (is_scope_zone)? "scoped" : "non-scoped",
 			     local_error_msg.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	if (is_new_zone)
 	    pim_bsr().delete_config_bsr_zone(config_bsr_zone);
 	return (XORP_ERROR);
@@ -1494,7 +1494,7 @@ PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
 	error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -1505,7 +1505,7 @@ PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
 	    error_msg = c_format("Cannot delete configure Cand-RP with vif %s: "
 				 "the vif has no configured address",
 				 vif_name.c_str());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);	// The vif has no address yet
 	}
 	my_cand_rp_addr = pim_vif->domain_wide_addr();
@@ -1528,7 +1528,7 @@ PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
 			     "group prefix %s (%s): zone not found",
 			     cstring(group_prefix),
 			     (is_scope_zone)? "scoped" : "non-scoped");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1542,7 +1542,7 @@ PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
 			     "group prefix %s (%s): prefix not found",
 			     cstring(group_prefix),
 			     (is_scope_zone)? "scoped" : "non-scoped");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1557,7 +1557,7 @@ PimNode::delete_config_cand_rp(const IPvXNet& group_prefix,
 			     cstring(group_prefix),
 			     (is_scope_zone)? "scoped" : "non-scoped",
 			     cstring(my_cand_rp_addr));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1615,7 +1615,7 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 			     "not a multicast address",
 			     cstring(rp_addr),
 			     cstring(group_prefix));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1624,7 +1624,7 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 	error_msg = c_format("Cannot add configure static RP with address %s: "
 			     "not an unicast address",
 			     cstring(rp_addr));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1641,7 +1641,7 @@ PimNode::add_config_static_rp(const IPvXNet& group_prefix,
 			     cstring(rp_addr),
 			     rp_priority,
 			     cstring(group_prefix));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1674,7 +1674,7 @@ PimNode::delete_config_static_rp(const IPvXNet& group_prefix,
 			     "for group prefix %s",
 			     cstring(rp_addr),
 			     cstring(group_prefix));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1704,7 +1704,7 @@ PimNode::delete_config_all_static_group_prefixes_rp(const IPvX& rp_addr,
 	// XXX: don't call end_config(error_msg);
 	error_msg = c_format("Cannot delete configure static RP with address %s",
 			     cstring(rp_addr));
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1731,7 +1731,7 @@ PimNode::delete_config_all_static_rps(string& error_msg)
 	!= XORP_OK) {
 	// XXX: don't call end_config(error_msg);
 	error_msg = c_format("Cannot delete configure all static RPs");
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     

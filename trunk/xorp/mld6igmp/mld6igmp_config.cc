@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.8 2005/06/03 19:04:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.9 2005/08/18 15:35:30 bms Exp $"
 
 
 //
@@ -162,7 +162,7 @@ Mld6igmpNode::set_vif_proto_version(const string& vif_name, int proto_version,
 	error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -171,7 +171,7 @@ Mld6igmpNode::set_vif_proto_version(const string& vif_name, int proto_version,
         error_msg = c_format("Cannot set protocol version for vif %s: "
 			     "invalid protocol version %d",
 			     vif_name.c_str(), proto_version);
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -195,7 +195,7 @@ Mld6igmpNode::reset_vif_proto_version(const string& vif_name,
 	error_msg = c_format("Cannot reset protocol version for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -243,7 +243,7 @@ Mld6igmpNode::set_vif_ip_router_alert_option_check(const string& vif_name,
 			     "flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -270,7 +270,7 @@ Mld6igmpNode::reset_vif_ip_router_alert_option_check(const string& vif_name,
 			     "flag for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -316,7 +316,7 @@ Mld6igmpNode::set_vif_query_interval(const string& vif_name,
 	error_msg = c_format("Cannot set Query Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -342,7 +342,7 @@ Mld6igmpNode::reset_vif_query_interval(const string& vif_name,
 	error_msg = c_format("Cannot reset Query Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -388,7 +388,7 @@ Mld6igmpNode::set_vif_query_last_member_interval(const string& vif_name,
 	error_msg = c_format("Cannot set Last Member Query Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -414,7 +414,7 @@ Mld6igmpNode::reset_vif_query_last_member_interval(const string& vif_name,
 	error_msg = c_format("Cannot reset Last Member Query Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -460,7 +460,7 @@ Mld6igmpNode::set_vif_query_response_interval(const string& vif_name,
 	error_msg = c_format("Cannot set Query Response Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -486,7 +486,7 @@ Mld6igmpNode::reset_vif_query_response_interval(const string& vif_name,
 	error_msg = c_format("Cannot reset Query Response Interval for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -532,7 +532,7 @@ Mld6igmpNode::set_vif_robust_count(const string& vif_name,
 	error_msg = c_format("Cannot set Robustness Variable count for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -558,7 +558,7 @@ Mld6igmpNode::reset_vif_robust_count(const string& vif_name,
 	error_msg = c_format("Cannot reset Robustness Variable count for vif %s: "
 			     "no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     

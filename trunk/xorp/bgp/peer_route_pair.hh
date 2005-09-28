@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_route_pair.hh,v 1.13 2005/04/02 16:29:51 mjh Exp $
+// $XORP: xorp/bgp/peer_route_pair.hh,v 1.15 2005/08/18 15:58:06 bms Exp $
 
 #ifndef __BGP_PEER_ROUTE_PAIR_HH__
 #define __BGP_PEER_ROUTE_PAIR_HH__
@@ -112,7 +112,7 @@ public:
 		string s = "Peer seems to have permanently locked up\n";
 		s += "Time now: " + now.str() + 
 		    ", time then: " + _wakeup_sent.str() + "\n";
-		XLOG_FATAL(s.c_str());
+		XLOG_FATAL("%s", s.c_str());
 	    }
 	} else {
 	    XLOG_ASSERT(_wakeup_sent != TimeVal::ZERO());

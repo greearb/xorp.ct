@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/profile.hh,v 1.4 2005/03/25 02:53:43 pavlin Exp $
+// $XORP: xorp/libxorp/profile.hh,v 1.5 2005/03/25 05:28:37 pavlin Exp $
 
 #ifndef __LIBXORP_PROFILE_HH__
 #define __LIBXORP_PROFILE_HH__
@@ -246,7 +246,7 @@ class ProfileUtils {
 		      Profile *profile)
     {
 	if (XrlError::OKAY() != error) {
-	    XLOG_WARNING(error.error_msg());
+	    XLOG_WARNING("%s", error.error_msg());
 	    // Unlock the log entry.
 	    profile->release_log(pname);
 	    return;
@@ -274,7 +274,7 @@ class ProfileUtils {
 			       const string /*pname*/)
     {
 	if (XrlError::OKAY() != error)
-	    XLOG_WARNING(error.error_msg());
+	    XLOG_WARNING("%s", error.error_msg());
     }
 
  private:    

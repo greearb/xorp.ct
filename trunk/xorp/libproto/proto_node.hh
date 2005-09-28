@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.30 2005/03/25 02:53:24 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.31 2005/08/18 15:33:38 bms Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -1083,7 +1083,7 @@ ProtoNode<V>::add_config_vif(const string& vif_name, uint32_t vif_index,
     if (iter != _configured_vifs.end()) {
 	error_msg = c_format("Cannot add vif %s: already have such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1097,7 +1097,7 @@ ProtoNode<V>::add_config_vif(const string& vif_name, uint32_t vif_index,
 				 "already have vif %s with same vif_index",
 				 vif_name.c_str(), vif_index,
 				 tmp_vif->name().c_str());
-	    XLOG_ERROR(error_msg.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     }
@@ -1124,7 +1124,7 @@ ProtoNode<V>::delete_config_vif(const string& vif_name, string& error_msg)
     if (iter == _configured_vifs.end()) {
 	error_msg = c_format("Cannot delete vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1150,7 +1150,7 @@ ProtoNode<V>::add_config_vif_addr(const string& vif_name, const IPvX& addr,
     if (iter == _configured_vifs.end()) {
 	error_msg = c_format("Cannot add address to vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1161,7 +1161,7 @@ ProtoNode<V>::add_config_vif_addr(const string& vif_name, const IPvX& addr,
 	error_msg = c_format("Cannot add address %s to vif %s: "
 			     "already have such address",
 			     cstring(addr), vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1186,7 +1186,7 @@ ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
     if (iter == _configured_vifs.end()) {
 	error_msg = c_format("Cannot delete address from vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1197,7 +1197,7 @@ ProtoNode<V>::delete_config_vif_addr(const string& vif_name, const IPvX& addr,
 	error_msg = c_format("Cannot delete address %s from vif %s: "
 			     "no such address",
 			     cstring(addr), vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
     }
     
     // Delete the address
@@ -1222,7 +1222,7 @@ ProtoNode<V>::set_config_pif_index(const string& vif_name,
     if (iter == _configured_vifs.end()) {
 	error_msg = c_format("Cannot set pif_index for vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1254,7 +1254,7 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
     if (iter == _configured_vifs.end()) {
 	error_msg = c_format("Cannot set flags for vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     

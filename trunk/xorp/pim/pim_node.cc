@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.73 2005/08/18 15:38:48 bms Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.74 2005/08/30 23:50:15 pavlin Exp $"
 
 
 //
@@ -396,7 +396,7 @@ PimNode::add_vif(const Vif& vif, string& error_msg)
 	// Cannot add this new vif
 	error_msg = c_format("Cannot add vif %s: internal error",
 			     vif.name().c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	
 	delete pim_vif;
 	return (XORP_ERROR);
@@ -487,14 +487,14 @@ PimNode::delete_vif(const string& vif_name, string& error_msg)
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot delete vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (ProtoNode<PimVif>::delete_vif(pim_vif) != XORP_OK) {
 	error_msg = c_format("Cannot delete vif %s: internal error",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	delete pim_vif;
 	return (XORP_ERROR);
     }
@@ -523,7 +523,7 @@ PimNode::set_vif_flags(const string& vif_name,
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot set flags vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -578,7 +578,7 @@ PimNode::add_vif_addr(const string& vif_name,
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot add address on vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -591,7 +591,7 @@ PimNode::add_vif_addr(const string& vif_name,
 	error_msg = c_format("Cannot add address on vif %s: "
 			     "invalid unicast address: %s",
 			     vif_name.c_str(), addr.str().c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     if ((addr.af() != family())
@@ -601,7 +601,7 @@ PimNode::add_vif_addr(const string& vif_name,
 	error_msg = c_format("Cannot add address on vif %s: "
 			     "invalid address family: %s ",
 			     vif_name.c_str(), vif_addr.str().c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -693,7 +693,7 @@ PimNode::delete_vif_addr(const string& vif_name,
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot delete address on vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -702,7 +702,7 @@ PimNode::delete_vif_addr(const string& vif_name,
 	error_msg = c_format("Cannot delete address on vif %s: "
 			     "invalid address %s",
 			     vif_name.c_str(), addr.str().c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
 
@@ -790,7 +790,7 @@ PimNode::enable_vif(const string& vif_name, string& error_msg)
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot enable vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -815,7 +815,7 @@ PimNode::disable_vif(const string& vif_name, string& error_msg)
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot disable vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -840,14 +840,14 @@ PimNode::start_vif(const string& vif_name, string& error_msg)
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot start vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->start(error_msg) != XORP_OK) {
 	error_msg = c_format("Cannot start vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -870,14 +870,14 @@ PimNode::stop_vif(const string& vif_name, string& error_msg)
     if (pim_vif == NULL) {
 	error_msg = c_format("Cannot stop vif %s: no such vif",
 			     vif_name.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
     if (pim_vif->stop(error_msg) != XORP_OK) {
 	error_msg = c_format("Cannot stop vif %s: %s",
 			     vif_name.c_str(), error_msg.c_str());
-	XLOG_ERROR(error_msg.c_str());
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -1019,11 +1019,11 @@ PimNode::delete_all_vifs()
 	 vif_names_iter != vif_names.end();
 	 ++vif_names_iter) {
 	const string& vif_name = *vif_names_iter;
-	string err;
-	if (delete_vif(vif_name, err) != XORP_OK) {
-	    err = c_format("Cannot delete vif %s: internal error",
-			   vif_name.c_str());
-	    XLOG_ERROR(err.c_str());
+	string error_msg;
+	if (delete_vif(vif_name, error_msg) != XORP_OK) {
+	    error_msg = c_format("Cannot delete vif %s: internal error",
+				 vif_name.c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	}
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.33 2005/08/18 15:58:10 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.34 2005/09/01 20:51:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -677,7 +677,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 	uint8_t buf[64000];
 	if(-1 == (len = recv(fd, (char *)buf, sizeof(buf), 0))) {
 	    string error = c_format("read error: %s", strerror(errno));
-	    XLOG_WARNING(error.c_str());
+	    XLOG_WARNING("%s", error.c_str());
 	    datain(ERROR, _bgp_buf, _bgp_bytes, error);
 	    return;
 	}
@@ -700,7 +700,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 
     if (-1 == (len = recv(fd, (char *)&_bgp_buf[_bgp_bytes], get, 0))) {
 	string error = c_format("read error: %s", strerror(errno));
-	XLOG_WARNING(error.c_str());
+	XLOG_WARNING("%s", error.c_str());
 	datain(ERROR, _bgp_buf, _bgp_bytes, error);
 	_bgp_bytes = 0;
 	comm_sock_close(fd);
@@ -728,7 +728,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 	u_short length = ntohs(header->length);
 	if(length < MINPACKETSIZE || length > sizeof(_bgp_buf)) {
 	    string error = c_format("Illegal length value %d", length);
-	    XLOG_ERROR(error.c_str());
+	    XLOG_ERROR("%s", error.c_str());
 	    datain(ERROR, _bgp_buf, _bgp_bytes, error);
 	    _bgp_bytes = 0;
 	    return;
