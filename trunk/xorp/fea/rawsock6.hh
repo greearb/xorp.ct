@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock6.hh,v 1.10 2005/08/18 15:45:51 bms Exp $
+// $XORP: xorp/fea/rawsock6.hh,v 1.11 2005/09/07 20:15:44 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK6_HH__
 #define __FEA_RAWSOCK6_HH__
@@ -110,9 +110,24 @@ public:
 	 * than the right-hand operand.
 	 */
 	bool operator<(const JoinedMulticastGroup& other) const {
-	    return ((_if_name < other._if_name) &&
-		    (_vif_name < other._vif_name) &&
-		    (_group_address < other._group_address));
+	    if (_if_name != other._if_name)
+		return (_if_name < other._if_name);
+	    if (_vif_name != other._vif_name)
+		return (_vif_name < other._vif_name);
+	    return (_group_address < other._group_address);
+	}
+
+	/**
+	 * Equality Operator
+	 *
+	 * @param other the right-hand operand to compare against.
+	 * @return true if the left-hand operand is numerically same as the
+	 * right-hand operand.
+	 */
+	bool operator==(const JoinedMulticastGroup& other) const {
+	    return ((_if_name == other._if_name) &&
+		    (_vif_name == other._vif_name) &&
+		    (_group_address == other._group_address));
 	}
 
 	/**
