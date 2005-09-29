@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.6 2005/07/21 18:54:47 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.7 2005/07/24 17:19:50 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -157,6 +157,90 @@ command line, copying the deleted text to the cut buffer.
 inserting it at the
 current cursor location.
 \end{itemize}
+
+\newpage
+\subsection{Command Output Displaying}
+
+The \xorpsh command output is displayed on the screen that is running
+\xorpsh. If the command output can fit within the screen, it is printed
+followed by the XORP prompt so the user can input new commands.
+
+If the command output is too large to fit, the \xorpsh uses
+the UNIX {\bf more}-like interface to display it one screen at a time.
+In that case the bottom of the display shows a {\bf --More--} prompt.
+If the screen displays the end of the output, the prompt
+is {\bf --More-- (END)}.
+Typing 'h' at the {\bf --More--} prompt can be used to display help
+information about available commands:
+
+\begin{verbatim}
+                   SUMMARY OF MORE COMMANDS
+
+    -- Get Help --
+  h                 *  Display this help.
+
+    -- Scroll Down --
+  Enter   Return  j *  Scroll down one line.
+  ^M  ^N  DownArrow
+  Tab d   ^D  ^X    *  Scroll down one-half screen.
+  Space   ^F        *  Scroll down one whole screen.
+  ^E  G             *  Scroll down to the bottom of the output.
+  N                 *  Display the output all at once instead of one
+                       screen at a time. (Same as specifying the
+                       | no-more command.)
+
+    -- Scroll Up --
+  k   ^H  ^P        *  Display the previous line of output.
+  UpArrow
+  u   ^U            *  Scroll up one-half screen.
+  b   ^B            *  Scroll up one whole screen.
+  ^A  g             *  Scroll up to the top of the output.
+
+    -- Misc Commands --
+  ^L                *  Redraw the output on the screen.
+  q   Q   ^C  ^K    *  Interrupt the display of output.
+
+
+
+ --More-- (END)
+\end{verbatim}
+
+
+\newpage
+\subsection{Command Output Filtering}
+
+The output of a \xorpsh command can be filtered or modified by applying
+various filter commands. If a \xorpsh command allows its output to be
+filtered, then displaying help about such command will list the
+UNIX-like pipe command '$\mid$' as one of the options:
+
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}[l]{\textwidth}
+\begin{alltt}
+\begin{tabbing}
+Xorp> \textbf{show | ?}\\
+Po\=ssible compl\=etions:\\
+\>count           \>Count occurrences\\
+\>except          \>Show only text that does not match a pattern\\
+\>find            \>Search for the first occurrence of a pattern\\
+\>hold            \>Hold text without exiting the --More-- prompt\\
+\>match           \>Show only text that matches a pattern\\
+\>no-more         \>Don't paginate output\\
+\>resolve         \>Resolve IP addresses (NOT IMPLEMENTED YET)\\
+\>save            \>Save output text to a file (NOT IMPLEMENTED YET)\\
+\>trim            \>Trip specified number of columns from the start line\\
+\>                \>(NOT IMPLEMENTED YET)
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+%%
+%% TODO: add detailed description for each pipe command
+%%
 
 \newpage
 \section{Command Modes}
