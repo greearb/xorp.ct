@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.7 2005/04/30 21:58:29 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.8 2005/07/15 09:34:17 pavlin Exp $"
 
 
 //
@@ -170,7 +170,7 @@ CliPipe::name2help(const string& pipe_name)
     case CLI_PIPE_COMPARE_ROLLBACK:
 	return ("Compare configuration changes with a prior rollback version");
     case CLI_PIPE_COUNT:
-	return ("Count occurences");    
+	return ("Count occurrences");    
     case CLI_PIPE_DISPLAY:
 	return ("Display additional configuration information");
     case CLI_PIPE_DISPLAY_DETAIL:
@@ -182,7 +182,7 @@ CliPipe::name2help(const string& pipe_name)
     case CLI_PIPE_EXCEPT:
 	return ("Show only text that does not match a pattern");
     case CLI_PIPE_FIND:
-	return ("Search for the first occurence of a pattern");
+	return ("Search for the first occurrence of a pattern");
     case CLI_PIPE_HOLD:
 	return ("Hold text without exiting the --More-- prompt");
     case CLI_PIPE_MATCH:
