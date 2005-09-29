@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.158 2005/09/21 02:38:30 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.159 2005/09/23 10:21:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1748,35 +1748,34 @@ Peer<A>::update_router_links()
 			_router_links.begin(), _router_links.end());
     _router_links.clear();
 
-    if (0 != _neighbours.size()) {
-	switch(version) {
-	case OspfTypes::V2:
-	    update_router_linksV2(_router_links);
-	    break;
-	case OspfTypes::V3:
+    switch(version) {
+    case OspfTypes::V2:
+	update_router_linksV2(_router_links);
+	break;
+    case OspfTypes::V3:
+	if (0 != _neighbours.size())
 	    update_router_linksV3(_router_links);
-	    break;
-	}
+	break;
     }
 
-     list<RouterLink>::iterator i, j;
-     bool equal = false;
-     if (router_links.size() == _router_links.size()) {
-	 for (i = router_links.begin(); i != router_links.end(); i++) {
-	     equal = false;
-	     for (j = _router_links.begin(); j != _router_links.end(); j++) {
-		 if(*i == *j) {
-		     equal = true;
-		     break;
-		 }
-	     }
-	     if (equal == false)
-		 break;
-	 }
-     }
-     if (equal == false) {
-	 get_area_router()->new_router_links(get_peerid(), _router_links);
-     }
+    list<RouterLink>::iterator i, j;
+    bool equal = false;
+    if (router_links.size() == _router_links.size()) {
+	for (i = router_links.begin(); i != router_links.end(); i++) {
+	    equal = false;
+	    for (j = _router_links.begin(); j != _router_links.end(); j++) {
+		if(*i == *j) {
+		    equal = true;
+		    break;
+		}
+	    }
+	    if (equal == false)
+		break;
+	}
+    }
+    if (equal == false) {
+	get_area_router()->new_router_links(get_peerid(), _router_links);
+    }
 }
 
 template <>
