@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.28 2005/06/01 00:37:00 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.29 2005/06/01 09:36:10 pavlin Exp $ */
 
 
 interfaces {
@@ -128,20 +128,6 @@ protocols {
 
 protocols {
     rip {
-/* Redistribute routes for connected interfaces */
-/*
-	export connected {
-	    metric: 0
-	    tag: 0
-	}
-*/
-/* Redistribute static routes */
-/*
-	export static {
-	    metric: 1
-	    tag: 0
-	}
-*/
 /* Run on specified network interface addresses */
 /*
 	interface dc0 {
