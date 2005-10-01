@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.8 2005/10/01 03:25:01 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.9 2005/10/01 03:37:35 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -50,6 +50,14 @@ class RouteEntry {
 
     A _nexthop;
     uint32_t	_advertising_router;
+
+    string str() {
+	string output;
+
+	output = c_format("nexthop %s metric %u", cstring(_nexthop), _cost);
+
+	return output;
+    }
 };
 
 /**
