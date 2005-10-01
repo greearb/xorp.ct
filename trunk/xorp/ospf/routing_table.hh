@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.10 2005/10/01 05:10:39 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.11 2005/10/01 05:28:31 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -143,13 +143,13 @@ class RoutingTable {
     Trie<A, InternalRouteEntry<A> > *_current;
     Trie<A, InternalRouteEntry<A> > *_previous;
 
-    // Yes the RouteEntry contains the nexthop and the metric but they
+    // Yes the RouteEntry contains the area, nexthop and metric but they
     // are functionally distinct.
-    bool add_route(IPNet<A> net, A nexthop, uint32_t metric,
-		   RouteEntry<A>& rt);
-    bool delete_route(IPNet<A> net);
-    bool replace_route(IPNet<A> net, A nexthop, uint32_t metric,
-		       RouteEntry<A>& rt);
+    bool add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
+		   uint32_t metric, RouteEntry<A>& rt);
+    bool delete_route(OspfTypes::AreaID area, IPNet<A> net);
+    bool replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
+		       uint32_t metric, RouteEntry<A>& rt);
 };
 
 #if	0
