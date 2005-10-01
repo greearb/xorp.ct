@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.32 2005/08/30 03:59:43 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.33 2005/09/15 17:28:24 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -31,6 +31,7 @@ static const PeerID ALLPEERS = 0;
 template <typename A> class Ospf;
 template <typename A> class PeerOut;
 template <typename A> class AreaRouter;
+template <typename A> class RouteEntry;
 
 /**
  * Peer Manager:
@@ -298,6 +299,21 @@ class PeerManager {
      * Number of areas this router serves.
      */
     size_t number_of_areas() const { return _areas.size(); }
+
+    /**
+     * A new route has been added to the routing table announce it to
+     * all areas as it is a candidate for Summary-LSA generation.
+     */
+
+    void summary_announce(OspfTypes::AreaID area, IPNet<A> net,
+			  RouteEntry<A>& rt);
+
+    /**
+     * A route has been deleted from the routing table. It may
+     * previously have caused a Summary-LSA which now needs to be
+     * withdrawn.
+     */
+    void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net);
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.

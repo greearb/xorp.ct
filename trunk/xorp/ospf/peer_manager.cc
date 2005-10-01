@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.49 2005/09/08 16:56:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.50 2005/09/15 17:28:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -590,6 +590,27 @@ PeerManager<A>::as_boundary_router_p() const
     // routes from another protocol.
     return false;
 }
+
+template <typename A>
+void
+PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
+				 RouteEntry<A>& rt)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    XLOG_WARNING("TBD: summary announce");
+}
+
+template <typename A>
+void
+PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net)
+{
+    debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    XLOG_WARNING("TBD: summary withdraw");
+}
+
 
 template class PeerManager<IPv4>;
 template class PeerManager<IPv6>;
