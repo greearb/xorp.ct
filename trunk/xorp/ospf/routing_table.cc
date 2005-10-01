@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.7 2005/10/01 03:09:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.8 2005/10/01 03:22:16 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -147,8 +147,7 @@ RoutingTable<A>::end()
     if (0 == _previous) {
 	for (tic = _current->begin(); tic != _current->end(); tic++) {
 	    RouteEntry<A>& rt = tic.payload().get_entry();
-	    if (!_ospf.add_route(tic.key(), rt._nexthop, rt._cost,
-				 false /* equal */, false /* discard */)) {
+	    if (!add_route(tic.key(), rt._nexthop, rt._cost)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
 	}
@@ -167,7 +166,7 @@ RoutingTable<A>::end()
 
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	if (_current->end() == _current->lookup_node(tip.key())) {
-	    if (!_ospf.delete_route(tip.key())) {
+	    if (!delete_route(tip.key())) {
 		XLOG_WARNING("Delete of %s failed", cstring(tip.key()));
 	    }
 	}
@@ -177,22 +176,48 @@ RoutingTable<A>::end()
 	tip = _previous->lookup_node(tic.key());
  	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (_previous->end() == tip) {
-	    if (!_ospf.add_route(tip.key(), rt._nexthop, rt._cost,
-				 false /* equal */, false /* discard */)) {
+	    if (!add_route(tip.key(), rt._nexthop, rt._cost)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
 	} else {
 	    RouteEntry<A>& rt_previous = tip.payload().get_entry();
 	    if (rt._nexthop != rt_previous._nexthop ||
 		rt._cost != rt_previous._cost) {
-		if (!_ospf.replace_route(tip.key(), rt._nexthop, rt._cost,
-					 false /* equal */,
-					 false /* discard */)) {
+		if (!replace_route(tip.key(), rt._nexthop, rt._cost)) {
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
 	    }
 	}
     }
+}
+
+template <typename A>
+bool
+RoutingTable<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric)
+{
+    bool result = _ospf.add_route(net, nexthop, metric,
+				  false /* equal */, false /* discard */);
+
+    return result;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::delete_route(IPNet<A> net)
+{
+    bool result = _ospf.delete_route(net);
+
+    return result;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric)
+{
+    bool result = _ospf.replace_route(net, nexthop, metric,
+				      false /* equal */, false /* discard */);
+
+    return result;
 }
 
 template <typename A>
