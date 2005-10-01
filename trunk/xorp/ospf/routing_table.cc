@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.6 2005/09/13 18:14:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.7 2005/10/01 03:09:19 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -56,7 +56,8 @@ RoutingTable<A>::begin()
 
 template <typename A>
 bool
-RoutingTable<A>::add_entry(IPNet<A> net, RouteEntry<A>& rt)
+RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
+			   RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
@@ -69,25 +70,26 @@ RoutingTable<A>::add_entry(IPNet<A> net, RouteEntry<A>& rt)
     }
 
     InternalRouteEntry<A>& irentry = i.payload();
-    irentry.add_entry(rt._area, rt);
+    irentry.add_entry(area, rt);
 
     return true;
 }
 
 template <typename A>
 bool
-RoutingTable<A>::replace_entry(IPNet<A> net, RouteEntry<A>& rt)
+RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
+			       RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
     if (_current->end() == i) {
-	return add_entry(net, rt);
+	return add_entry(area, net, rt);
     }
 
     InternalRouteEntry<A>& irentry = i.payload();
-    irentry.replace_entry(rt._area, rt);
+    irentry.replace_entry(area, rt);
 
     return true;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.97 2005/09/15 15:52:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.98 2005/09/21 02:38:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1451,7 +1451,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	route_entry._advertising_router = lsar->get_header().
 	    get_advertising_router();
 
-	routing_table.add_entry(net, route_entry);
+	routing_table.add_entry(_area, net, route_entry);
     }
 
     // RFC 2328 Section 16.2.  Calculating the inter-area routes
@@ -1593,9 +1593,9 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	rtentry._advertising_router = rt._advertising_router;
 
 	if (add_entry)
-	    routing_table.add_entry(n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry);
 	if (replace_entry)
-	    routing_table.replace_entry(n, rtentry);
+	    routing_table.replace_entry(_area, n, rtentry);
     }
 }
 
@@ -1707,9 +1707,9 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	    get_advertising_router();
 
 	if (add_entry)
-	    routing_table.add_entry(n, rtentry);
+	    routing_table.add_entry(_area, n, rtentry);
 	if (replace_entry)
-	    routing_table.replace_entry(n, rtentry);
+	    routing_table.replace_entry(_area, n, rtentry);
 	
     }
 }
