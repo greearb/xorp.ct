@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.5 2005/09/12 18:00:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.6 2005/09/13 18:14:35 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -51,7 +51,7 @@ RoutingTable<A>::begin()
 
     delete _previous;
     _previous = _current;
-    _current = new Trie<A, RouteEntry<A> >;
+    _current = new Trie<A, InternalRouteEntry<A> >;
 }
 
 template <typename A>
@@ -60,7 +60,16 @@ RoutingTable<A>::add_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
-    _current->insert(net, rt);
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->lookup_node(net);
+    if (_current->end() == i) {
+	InternalRouteEntry<A> ire;
+	_current->insert(net, ire);
+	i = _current->lookup_node(net);
+    }
+
+    InternalRouteEntry<A>& irentry = i.payload();
+    irentry.add_entry(rt._area, rt);
 
     return true;
 }
@@ -71,8 +80,14 @@ RoutingTable<A>::replace_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
-    _current->erase(net);
-    _current->insert(net, rt);
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->lookup_node(net);
+    if (_current->end() == i) {
+	return add_entry(net, rt);
+    }
+
+    InternalRouteEntry<A>& irentry = i.payload();
+    irentry.replace_entry(rt._area, rt);
 
     return true;
 }
@@ -85,13 +100,14 @@ RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
 
     IPNet<A> net(router, A::ADDR_BITLEN);
 
-    typename Trie<A, RouteEntry<A> >::iterator i = _current->lookup_node(net);
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->lookup_node(net);
     if (_current->end() == i)
 	return false;
 
-    RouteEntry<A>& rtentry = i.payload();
+    InternalRouteEntry<A>& irentry = i.payload();
 
-    rt = rtentry;
+    rt = irentry.get_entry();
 
     return true;
 }
@@ -102,13 +118,14 @@ RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
 
-    typename Trie<A, RouteEntry<A> >::iterator i = _current->lookup_node(net);
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->lookup_node(net);
     if (_current->end() == i)
 	return false;
 
-    RouteEntry<A>& rtentry = i.payload();
+    InternalRouteEntry<A>& irentry = i.payload();
 
-    rt = rtentry;
+    rt = irentry.get_entry();
 
     return true;
 }
@@ -119,15 +136,15 @@ RoutingTable<A>::end()
 {
     debug_msg("\n");
 
-    typename Trie<A, RouteEntry<A> >::iterator tip;
-    typename Trie<A, RouteEntry<A> >::iterator tic;
+    typename Trie<A, InternalRouteEntry<A> >::iterator tip;
+    typename Trie<A, InternalRouteEntry<A> >::iterator tic;
 
     // If there is no previous routing table just install the current
     // table and return.
 
     if (0 == _previous) {
 	for (tic = _current->begin(); tic != _current->end(); tic++) {
-	    RouteEntry<A>& rt = tic.payload();
+	    RouteEntry<A>& rt = tic.payload().get_entry();
 	    if (!_ospf.add_route(tic.key(), rt._nexthop, rt._cost,
 				 false /* equal */, false /* discard */)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
@@ -156,14 +173,14 @@ RoutingTable<A>::end()
 
     for (tic = _current->begin(); tic != _current->begin(); tic++) {
 	tip = _previous->lookup_node(tic.key());
- 	RouteEntry<A>& rt = tic.payload();
+ 	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (_previous->end() == tip) {
 	    if (!_ospf.add_route(tip.key(), rt._nexthop, rt._cost,
 				 false /* equal */, false /* discard */)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
 	} else {
-	    RouteEntry<A>& rt_previous = tip.payload();
+	    RouteEntry<A>& rt_previous = tip.payload().get_entry();
 	    if (rt._nexthop != rt_previous._nexthop ||
 		rt._cost != rt_previous._cost) {
 		if (!_ospf.replace_route(tip.key(), rt._nexthop, rt._cost,
@@ -174,6 +191,74 @@ RoutingTable<A>::end()
 	    }
 	}
     }
+}
+
+template <typename A>
+bool
+InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area, RouteEntry<A>& rt)
+{
+    // An entry for this *area* should not already exist.
+    XLOG_ASSERT(0 == _entries.count(area));
+    if (0 == _entries.size()) {
+	_entries[area] = rt;
+	_winner = &_entries[area];
+	return true;
+    }
+    // Add the entry and compute the winner.
+    _entries[area] = rt;
+    reset_winner();
+
+    return true;
+}
+
+template <typename A>
+bool
+InternalRouteEntry<A>::replace_entry(OspfTypes::AreaID area, RouteEntry<A>& rt)
+{
+    bool winner_changed;
+    delete_entry(area, winner_changed);
+    return add_entry(area, rt);
+}
+
+template <typename A>
+bool
+InternalRouteEntry<A>::delete_entry(OspfTypes::AreaID area,
+				    bool& winner_changed)
+{
+    if (0 == _entries.count(area))
+	return false;
+
+    _entries.erase(_entries.find(area));
+    
+    winner_changed = reset_winner();
+
+    return true;
+}
+
+template <typename A>
+RouteEntry<A>&
+InternalRouteEntry<A>::get_entry() const
+{
+    return *_winner;
+}
+
+template <typename A>
+bool
+InternalRouteEntry<A>::reset_winner()
+{
+    bool winner_changed = false;
+
+    typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
+    for (i = _entries.begin(); i != _entries.end(); i++) {
+	RouteEntry<A>& comp = i->second;
+	if (comp._path_type <= _winner->_path_type)
+	    if (comp._cost < _winner->_cost) {
+		_winner = &comp;
+		winner_changed = true;
+	    }
+    }
+
+    return winner_changed;
 }
 
 template class RoutingTable<IPv4>;

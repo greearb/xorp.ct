@@ -13,21 +13,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.4 2005/09/09 12:32:41 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.5 2005/09/13 18:14:35 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
 
 #include <libxorp/trie.hh>
 
+/**
+ * Externally view of a routing entry.
+ */
 template <typename A>
 class RouteEntry {
  public:
+    /**
+     * The ordering is important used to select the best route.
+     */
     enum Path_type {
-	intra_area,
-	inter_area,
-	type1,
-	type2
+	intra_area = 0,
+	inter_area = 1,
+	type1 = 2,
+	type2 = 3
     };
     
     OspfTypes::VertexType _destination_type;
@@ -44,6 +50,45 @@ class RouteEntry {
 
     A _nexthop;
     uint32_t	_advertising_router;
+};
+
+/**
+ * Internal routing entry, potentially one per area.
+ */
+template <typename A>
+class InternalRouteEntry {
+ public:
+    InternalRouteEntry() : _winner(0)
+    {}
+
+    /**
+     * Add entry indexed by area.
+     * @return true on sucess.
+     */
+    bool add_entry(OspfTypes::AreaID area, RouteEntry<A>& rt);
+    
+    bool replace_entry(OspfTypes::AreaID area, RouteEntry<A>& rt);
+    
+    /**
+     * Delete entry. Perfectly safe to attempt to delete an entry for
+     * an area even if no entry exists.
+     *
+     * @param area area ID.
+     * @param winner_changed out parameter set to true if this entry
+     * was the winner.
+     * @return true if an entry was deleted.
+     */
+    bool delete_entry(OspfTypes::AreaID, bool& winner_changed);
+
+    /**
+     * Get the winning entry.
+     */
+    RouteEntry<A>& get_entry() const;
+ private:
+    RouteEntry<A> *_winner; // Winning route.
+    map<OspfTypes::AreaID, RouteEntry<A> > _entries; // Routes by area.
+
+    bool reset_winner();
 };
 
 template <typename A>
@@ -86,8 +131,8 @@ class RoutingTable {
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
 
-    Trie<A, RouteEntry<A> > *_current;
-    Trie<A, RouteEntry<A> > *_previous;
+    Trie<A, InternalRouteEntry<A> > *_current;
+    Trie<A, InternalRouteEntry<A> > *_previous;
 };
 
 #if	0
