@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.24 2005/03/05 01:31:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.25 2005/03/25 02:54:22 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -113,8 +113,14 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    // Store the fact that this was unresolved for later
 	    debug_msg("nexthop %s was unresolved\n",
 		      nexthop_addr.str().c_str());
-	    _ip_unresolved_nexthops.insert(
-		pair<A, const IPRouteEntry<A>* >(rt_nexthop->addr(), &route));
+	    UnresolvedIPRouteEntry<A>* unresolved_route;
+	    unresolved_route = new UnresolvedIPRouteEntry<A>(&route);
+	    _ip_unresolved_table.insert(make_pair(route.net(),
+						  unresolved_route));
+	    typename UnresolvedRouteBackLink::iterator backlink;
+	    backlink = _ip_unresolved_nexthops.insert(
+		make_pair(rt_nexthop->addr(), unresolved_route));
+	    unresolved_route->set_backlink(backlink);
 	    return XORP_ERROR;
 	} else {
 	    Vif* vif = nexthop_route->vif();
@@ -170,10 +176,9 @@ ExtIntTable<A>::resolve_and_store_route(const IPRouteEntry<A>& route,
 	_resolving_routes.insert(nexthop_route->net(), nexthop_route);
     }
 
-    typename RouteBackLink::iterator backlink;
-    backlink = _ip_igp_parents.insert(
-	pair<const IPRouteEntry<A>* , ResolvedIPRouteEntry<A>* >
-	(nexthop_route, resolved_route));
+    typename ResolvedRouteBackLink::iterator backlink;
+    backlink = _ip_igp_parents.insert(make_pair(nexthop_route,
+						resolved_route));
     resolved_route->set_backlink(backlink);
 
     return resolved_route;
@@ -327,7 +332,7 @@ template<class A>
 void
 ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route)
 {
-    typename multimap<A, const IPRouteEntry<A>* >::iterator rpair, nextpair;
+    typename multimap<A, UnresolvedIPRouteEntry<A>* >::iterator rpair, nextpair;
 
     A unresolved_nexthop, new_subnet;
     size_t prefix_len = nexthop_route.net().prefix_len();
@@ -342,16 +347,20 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route
 	unresolved_nexthop = rpair->first;
 	if (new_subnet == unresolved_nexthop.mask_by_prefix_len(prefix_len)) {
 	    // The unresolved nexthop matches our subnet
+	    UnresolvedIPRouteEntry<A>* unresolved_entry = rpair->second;
+	    const IPRouteEntry<A>* unresolved_route = unresolved_entry->route();
+
 	    debug_msg("resolve_unresolved_nexthops: resolving %s\n",
-		      (*rpair->second).str().c_str());
+		      unresolved_route->str().c_str());
 
 	    // We're going to erase rpair, so preserve the state.
-	    const IPRouteEntry<A>* unresolved_route = rpair->second;
 	    nextpair = rpair;
 	    ++nextpair;
 
 	    // Remove it from the unresolved table
 	    _ip_unresolved_nexthops.erase(rpair);
+	    _ip_unresolved_table.erase(unresolved_route->net());
+	    delete unresolved_entry;
 
 	    // Instantiate a route for it in the resolved_route table
 	    const ResolvedIPRouteEntry<A>* resolved_route;
@@ -380,19 +389,17 @@ ExtIntTable<A>::delete_unresolved_nexthop(const IPRouteEntry<A>* route)
 {
     debug_msg("delete_unresolved_nexthop %s\n", route->str().c_str());
 
-    typename multimap<A, const IPRouteEntry<A>* >::iterator rpair;
-    IPNextHop<A>* rt_nexthop;
-    rt_nexthop = reinterpret_cast<IPNextHop<A>* >(route->nexthop());
-    rpair = _ip_unresolved_nexthops.find(rt_nexthop->addr());
-    while ((rpair != _ip_unresolved_nexthops.end()) &&
-	   (rpair->first == rt_nexthop->addr())) {
-	if (rpair->second == route) {
-	    _ip_unresolved_nexthops.erase(rpair);
-	    return true;
-	}
-	++rpair;
-    }
-    return false;
+    typename map<IPNet<A>, UnresolvedIPRouteEntry<A>* >::iterator iter;
+    iter = _ip_unresolved_table.find(route->net());
+    if (iter == _ip_unresolved_table.end())
+	return false;
+
+    UnresolvedIPRouteEntry<A>* unresolved_entry = iter->second;
+    _ip_unresolved_table.erase(iter);
+    _ip_unresolved_nexthops.erase(unresolved_entry->backlink());
+    delete unresolved_entry;
+
+    return true;
 }
 
 template<class A>
@@ -402,7 +409,7 @@ ExtIntTable<A>::lookup_by_igp_parent(const IPRouteEntry<A>* route)
     debug_msg("lookup_by_igp_parent %p -> %s\n",
 	      route, route->net().str().c_str());
 
-    typename RouteBackLink::iterator iter;
+    typename ResolvedRouteBackLink::iterator iter;
     iter = _ip_igp_parents.find(route);
     if (iter == _ip_igp_parents.end()) {
 	debug_msg("Found no routes with this IGP parent\n");
@@ -427,7 +434,7 @@ ExtIntTable<A>::lookup_next_by_igp_parent(const IPRouteEntry<A>* route,
     // this can be very inefficient.
     //
 
-    typename RouteBackLink::iterator iter;
+    typename ResolvedRouteBackLink::iterator iter;
     iter = _ip_igp_parents.find(route);
     while (iter != _ip_igp_parents.end()
 	   && iter->first == route

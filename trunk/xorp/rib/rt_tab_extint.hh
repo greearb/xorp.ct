@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_extint.hh,v 1.11 2004/10/06 21:16:32 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_extint.hh,v 1.12 2005/03/25 02:54:22 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_EXTINT_HH__
 #define __RIB_RT_TAB_EXTINT_HH__
@@ -155,7 +155,8 @@ public:
     string str() const;
 
 private:
-    typedef typename ResolvedIPRouteEntry<A>::RouteBackLink RouteBackLink;
+    typedef typename ResolvedIPRouteEntry<A>::RouteBackLink ResolvedRouteBackLink;
+    typedef typename UnresolvedIPRouteEntry<A>::RouteBackLink UnresolvedRouteBackLink;
 
     int delete_ext_route(const IPRouteEntry<A>* route,
 			 bool& is_delete_propagated);
@@ -191,7 +192,8 @@ private:
     RouteTable<A>*				_ext_table;
     RouteTable<A>*				_int_table;
     Trie<A, const ResolvedIPRouteEntry<A>* >	_ip_route_table;
-    multimap<A, const IPRouteEntry<A>* >	_ip_unresolved_nexthops;
+    multimap<A, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_nexthops;
+    map<IPNet<A>, UnresolvedIPRouteEntry<A>* >	_ip_unresolved_table;
 
     // _ip_igp_parents gives us a fast way of finding a route
     // affected by a change in an igp parent route

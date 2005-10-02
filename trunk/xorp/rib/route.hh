@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/route.hh,v 1.17 2005/03/04 08:40:10 pavlin Exp $
+// $XORP: xorp/rib/route.hh,v 1.18 2005/03/25 02:54:21 pavlin Exp $
 
 #ifndef __RIB_ROUTE_HH__
 #define __RIB_ROUTE_HH__
@@ -361,5 +361,86 @@ ResolvedIPRouteEntry<A>::backlink() const
 
 typedef ResolvedIPRouteEntry<IPv4> ResolvedIPv4RouteEntry;
 typedef ResolvedIPRouteEntry<IPv6> ResolvedIPv6RouteEntry;
+
+/**
+ * @short Extended Unresolved RouteEntry, used by ExtIntTable.
+ *
+ * This class stored an extended unresolved routing table entry, for use in
+ * ExtIntTable.  When a route with a non-local nexthop arrives, the
+ * ExtIntTable attempts to discover a local nexthop by finding the
+ * route that packets to the non-local nexthop would use.  If the local
+ * nexthop is not found, this entry is used to store the unresolved route.
+ *
+ * This is a template class, where A is either a the IPv4 class or the
+ * IPv6 class.
+ */
+template <class A>
+class UnresolvedIPRouteEntry {
+public:
+    typedef multimap<A, UnresolvedIPRouteEntry<A>* > RouteBackLink;
+
+public:
+    /**
+     * Constructor for a given IPRouteEntry.
+     *
+     * @param route the IPRouteEntry route.
+     */
+    UnresolvedIPRouteEntry(const IPRouteEntry<A>* route)
+	: _route(route) {}
+
+    /**
+     * Get the route.
+     *
+     * @return the route.
+     */
+    inline const IPRouteEntry<A>* route() const { return _route; }
+
+    /**
+     * Set the backlink.  When an unresolved route is created, the
+     * ExtIntTable will store a link to it in a multimap that is
+     * indexed by the unresolved nexthop.  This will allow all the routes
+     * affected by a change (e.g., resolving the nexthop) to be found easily.
+     * However, if the EGP parent goes away, we need to remove the
+     * links from this multimap, and the backlink provides an iterator
+     * into the multimap that makes this operation very efficient.
+     *
+     * @param backlink the ExtIntTable multimap iterator for this route.
+     */
+    inline void set_backlink(typename RouteBackLink::iterator v);
+
+    /**
+     * Get the backlink.
+     * @see UnresolvedIPRouteEntry<A>::set_backlink
+     *
+     * @return the backlink iterator.
+     */
+    inline typename RouteBackLink::iterator backlink() const;
+
+private:
+    //
+    // _backlink is used for removing the corresponding entry from the
+    // RouteTable's map that is indexed by the unresolved nexthop.
+    // Without it, route deletion would be expensive.
+    //
+    typename RouteBackLink::iterator	_backlink;
+    const IPRouteEntry<A>*		_route;
+};
+
+template <typename A>
+inline void
+UnresolvedIPRouteEntry<A>::set_backlink(typename RouteBackLink::iterator v)
+{
+    _backlink = v;
+}
+
+template <typename A>
+inline typename UnresolvedIPRouteEntry<A>::RouteBackLink::iterator
+UnresolvedIPRouteEntry<A>::backlink() const
+{
+    return _backlink;
+}
+
+typedef UnresolvedIPRouteEntry<IPv4> UnresolvedIPv4RouteEntry;
+typedef UnresolvedIPRouteEntry<IPv6> UnresolvedIPv6RouteEntry;
 
 #endif // __RIB_ROUTE_HH__
