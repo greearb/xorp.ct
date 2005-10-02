@@ -5,9 +5,11 @@
 %}
 	int opcmd_linenum = 1;
 	extern char* opcmdlval;
+	string opcmd_parsebuf;
 %option noyywrap
 %option nounput
 %x comment
+%x string
 
 
 %%
@@ -66,14 +68,52 @@
 	}
 
 [a-zA-Z0-9_/\.][a-zA-Z0-9\-_/\.]*	{
+	/*
+	 * Note that we explicitly allow a literal to start with not only
+	 * by a letter and '/', ut a digit, '_' or '.' .
+	 * Also, allow '.' to be part of the literal elsewhere.
+	 * Thus, we can specify more liberally a filename (e.g., now a filename
+	 * can start with a digit, it can contain dots, etc).
+	 */
 	opcmdlval = strdup(opcmdtext);
 	return LITERAL;
 	}
 
-\"[a-zA-Z0-9\-_\[\]:/&\.,<>!@#$%^*()+=|\\~`'{}<>? \t]*\"	{
-	opcmdlval = strdup(opcmdtext);
-	return STRING;
-	}
+\"			{
+			BEGIN(string);
+			/* XXX: include the original quote */
+			opcmd_parsebuf="\"";
+			}
+
+<string>[^\\\n\"]*	/* normal text */ {
+			opcmd_parsebuf += opcmdtext;
+			}
+
+<string>\\+\"		/* allow quoted quotes */ {
+			opcmd_parsebuf += "\"";
+			}
+
+<string>\\+\\		/* allow quoted backslash */ {
+			opcmd_parsebuf += "\\";
+			}
+
+<string>\n		/* allow unquoted newlines */ {
+			opcmd_linenum++;
+			opcmd_parsebuf += "\n";
+			}
+
+<string>\\+n		/* allow C-style quoted newlines */ {
+			/* XXX: don't increment the line number */
+			opcmd_parsebuf += "\n";
+			}
+
+<string>\"		{
+			BEGIN(INITIAL);
+			/* XXX: include the original quote */
+			opcmd_parsebuf += "\"";
+			opcmdlval = strdup(opcmd_parsebuf.c_str());
+			return STRING;
+			}
 
 "/*"			BEGIN(comment);
 
