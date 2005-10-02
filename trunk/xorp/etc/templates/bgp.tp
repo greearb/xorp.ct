@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.54 2005/08/12 12:19:40 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.55 2005/08/25 02:23:44 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -71,6 +71,7 @@ policy {
 		nexthop6: ipv6range;
 
 		as-path: txt;
+		as-path-list: txt;
 		community: txt;
 
 		neighbor: ipv4range;
@@ -83,7 +84,7 @@ policy {
 		nexthop4: ipv4;
 		nexthop6: ipv6;
 
-		as-path-prepend: txt;
+		as-path-prepend: u32;
 		as-path-expand: u32;
 		
 		community: txt;
@@ -339,16 +340,16 @@ protocols {
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=txt&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aspath&type:txt=aspath&access:txt=rw&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=community&type:txt=set_com32&access:txt=rw&id:u32=18";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r&id:u32=16";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw&id:u32=15";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
 
     policy-statement @: txt {
         term @: txt {
@@ -415,6 +416,10 @@ policy {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aspath REGEX '$(@)';";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
+		as-path-list {
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aspath REGEX SET $(@);";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
 		community {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=community ne_int (ctr 'set_com32' '$(@)');";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
@@ -450,11 +455,11 @@ policy {
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		as-path-prepend {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = '$(@)' add ',' add aspath;";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) add aspath;";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		as-path-expand {
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = ((head aspath) add ', ') * $(@) add aspath;";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) * aspath;";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		community {

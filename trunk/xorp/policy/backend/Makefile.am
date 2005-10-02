@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/backend/Makefile.am,v 1.4 2005/07/08 02:06:22 abittau Exp $
+## $XORP: xorp/policy/backend/Makefile.am,v 1.5 2005/07/20 01:29:23 abittau Exp $
 ##
 
 # -- No-install Libraries
@@ -40,11 +40,13 @@ libpolicybackend_la_SOURCES		+= yacc.yy_policy_backend_parser.cc
 libpolicybackend_la_SOURCES		+= yacc.yy_policy_backend_parser.h
 
 # XXX find a way to link libpolicycommon
-libpolicybackend_la_LIBADD		 = ../common/dispatcher.lo
+libpolicybackend_la_LIBADD               = ../common/aspath.lo
+libpolicybackend_la_LIBADD		+= ../common/dispatcher.lo
 libpolicybackend_la_LIBADD		+= ../common/elem_set.lo
 libpolicybackend_la_LIBADD		+= ../common/element.lo
 libpolicybackend_la_LIBADD		+= ../common/element_factory.lo
 libpolicybackend_la_LIBADD		+= ../common/filter.lo
+libpolicybackend_la_LIBADD		+= ../common/operator.lo
 libpolicybackend_la_LIBADD		+= ../common/policy_utils.lo
 libpolicybackend_la_LIBADD		+= ../common/register_elements.lo
 libpolicybackend_la_LIBADD		+= ../common/register_operations.lo

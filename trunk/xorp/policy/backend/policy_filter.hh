@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filter.hh,v 1.3 2005/07/08 02:06:22 abittau Exp $
+// $XORP: xorp/policy/backend/policy_filter.hh,v 1.4 2005/07/20 01:29:23 abittau Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTER_HH__
 #define __POLICY_BACKEND_POLICY_FILTER_HH__
@@ -23,6 +23,7 @@
 #include "policy_instr.hh"
 #include "set_manager.hh"
 #include "filter_base.hh"
+#include "iv_exec.hh"
 #include "libxorp/ref_ptr.hh"
 #include <string>
 #include <map>
@@ -72,6 +73,7 @@ public:
 private:
     vector<PolicyInstr*>* _policies;
     SetManager _sman;
+    IvExec _exec;
 
     // not impl
     PolicyFilter(const PolicyFilter&);

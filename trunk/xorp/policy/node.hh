@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.4 2005/07/15 02:27:06 abittau Exp $
+// $XORP: xorp/policy/node.hh,v 1.5 2005/07/20 01:29:22 abittau Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
 
 #include "policy/common/operator_base.hh"
+#include "policy/common/varrw.hh"
 #include "node_base.hh"
 #include "visitor.hh"
 #include <string>
@@ -50,7 +51,7 @@ private:
 /**
  * A node that holds a variable [such as aspath].
  */
-typedef NodeAny<string>		NodeVar;
+typedef NodeAny<string>	NodeVar;
 
 /**
  * @short A node which holds an element.

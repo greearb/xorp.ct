@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.1 2005/07/08 02:06:18 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,14 +35,12 @@ PolicyTableExport<A>::PolicyTableExport(const string& tablename,
 }
 
 template <class A>
-BGPVarRW<A>*
-PolicyTableExport<A>::get_varrw(const InternalMessage<A>& rtmsg, 
-			        bool no_modify) const
+void
+PolicyTableExport<A>::init_varrw()
 {
-    return new 
-	   BGPVarRWExport<A>(rtmsg, no_modify,
-			     filter::filter2str(PolicyTable<A>::_filter_type),
-			     _neighbor);
+    this->_varrw = new BGPVarRWExport<A>(
+                        filter::filter2str(PolicyTable<A>::_filter_type),
+                        _neighbor);
 }
 
 template class PolicyTableExport<IPv4>;

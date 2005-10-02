@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.5 2005/08/17 16:39:27 zec Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.6 2005/09/28 16:48:44 zec Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -34,6 +34,18 @@
  */
 class VarRW {
 public:
+    typedef int Id;
+    enum {
+        VAR_TRACE = 0,
+        VAR_POLICYTAGS,
+        VAR_FILTER_IM,
+        VAR_FILTER_SM,
+        VAR_FILTER_EX,
+
+        VAR_PROTOCOL = 10,  // protocol specific vars start here
+        VAR_MAX = 32 // must be last
+    };
+
     VarRW();
     virtual ~VarRW();
    
@@ -54,7 +66,7 @@ public:
      * @param id The variable that is being requested [such as metric].
      *
      */
-    virtual const Element& read(const string& id) = 0;
+    virtual const Element& read(const Id& id) = 0;
 
     /**
      * Write a variable to a route.
@@ -65,7 +77,7 @@ public:
      * @param e Value that must be written to the variable.
      *
      */
-    virtual void write(const string& id, const Element& e) = 0;
+    virtual void write(const Id& id, const Element& e) = 0;
 
     /**
      * VarRW must perform all pending writes to the route now.
@@ -83,13 +95,14 @@ public:
      * Disable generating trace strings / output.
      *
      */
-    void suppress_trace() { _allow_trace = false; };
+    void suppress_trace() { _allow_trace = false; }
+    void allow_trace() { _allow_trace = true; }
 
     /**
      * Return true if trace strings should be generated.
      *
      */
-    inline const bool trace_allowed() { return _allow_trace; };
+    inline const bool trace_allowed() { return _allow_trace; }
 
     /**
      * Support for tracing reads.  Executor will call this.
@@ -98,7 +111,7 @@ public:
      * @param id variable to read.
      * @return variable desired.
      */
-    const Element& read_trace(const string& id); 
+    const Element& read_trace(const Id& id); 
 
     /**
      * Support for tracing writes.  Executor will call this.
@@ -107,7 +120,7 @@ public:
      * @ param id variable to write to.
      * @param e value to write.
      */
-    void write_trace(const string& id, const Element& e);
+    void write_trace(const Id& id, const Element& e);
 
     /**
      * Obtain the final trace value.  Should be called after executing the
@@ -131,6 +144,8 @@ public:
      * @return string representation of specific VarRW traces.
      */
     virtual string more_tracelog();
+
+    void reset_trace();
 
 private:
     bool _allow_trace;

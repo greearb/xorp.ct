@@ -13,16 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/version_filter.cc,v 1.1 2005/07/20 01:29:23 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/version_filter.cc,v 1.2 2005/07/20 02:06:28 abittau Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
 #include "libxorp/xlog.h"
 #include "version_filter.hh"
-#include "policy/common/element.hh"
+#include "policy/common/elem_filter.hh"
 #include <typeinfo>
 
-VersionFilter::VersionFilter(const string& fname) : _filter(new PolicyFilter), _fname(fname)
+VersionFilter::VersionFilter(const VarRW::Id& fname) : 
+		    _filter(new PolicyFilter), 
+		    _fname(fname)
 {
 }
 
@@ -61,9 +63,17 @@ bool
 VersionFilter::acceptRoute(VarRW& varrw)
 {
     // get the associated filter
-try {    
-    const ElemFilter& ef = dynamic_cast<const ElemFilter&>(varrw.read(_fname));
-    RefPf filter = ef.val();
+    RefPf filter;
+    try {    
+	const ElemFilter& ef = dynamic_cast<const ElemFilter&>(varrw.read(_fname));
+	filter = ef.val();
+    } catch(const bad_cast& exp) {
+	const Element& e = varrw.read(_fname);
+
+	XLOG_FATAL("Reading %d but didn't get ElemFilter! Got %s: (%s)", 
+		   _fname, e.type(), e.str().c_str());
+	throw PolicyException("Reading filter but didn't get ElemFilter!");
+    }
 
     // filter exists... run it
     if(!filter.is_empty())
@@ -77,12 +87,4 @@ try {
 
     XLOG_ASSERT(!_filter.is_empty());
     return _filter->acceptRoute(varrw);
-} catch(const bad_cast& exp) {
-    const Element& e = varrw.read(_fname);
-
-    XLOG_FATAL("Reading %s but didn't get ElemFilter! Got %s: (%s)", 
-	       _fname.c_str(), e.type().c_str(), e.str().c_str());
-    throw PolicyException("Reading filter but didn't get ElemFilter!");
-}
-
 }

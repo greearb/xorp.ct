@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/backend/version_filters.hh,v 1.1 2005/07/20 01:29:23 abittau Exp $
 
 #ifndef __POLICY_BACKEND_VERSION_FILTERS_HH__
 #define __POLICY_BACKEND_VERSION_FILTERS_HH__
@@ -38,10 +38,6 @@
  */
 class VersionFilters : public PolicyFilters {
 public:
-    static const string filter_import;
-    static const string filter_sm;
-    static const string filter_ex;
-
     VersionFilters();
 };
 

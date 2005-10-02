@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.4 2005/07/08 02:06:22 abittau Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.5 2005/09/04 18:35:49 abittau Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -21,8 +21,7 @@
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_utils.hh"
 #include "policy/common/element_base.hh"
-#include <map>
-#include <set>
+#include <list>
 
 /**
  * @short An interface to VarRW which deals with memory management.
@@ -52,7 +51,7 @@ public:
      * @return variable requested.
      * @param id identifier of variable to be read.
      */
-    const Element& read(const string& id);
+    const Element& read(const Id& id);
 
     /**
      * Implementation of VarRW write.
@@ -60,7 +59,7 @@ public:
      * @param id identifier of variable to be written to.
      * @param e value of variable to be written to.
      */
-    void write(const string& id, const Element& e);
+    void write(const Id& id, const Element& e);
 
     /**
      * Implementation of VarRW sync.
@@ -71,7 +70,6 @@ public:
      * trash is also emptied upon completion.
      */
     void sync();
-
 
     // XXX: be smart: register callback for element writing
     /**
@@ -86,16 +84,13 @@ public:
      * @param id identifier of variable that may be read.
      * @param e value of variable.
      */
-    void initialize(const string& id, Element* e);
-
-
+    void initialize(const Id& id, Element* e);
 
     /**
      * If any reads are performed, this is a marker which informs the derived
      * class that reads will now start.
      */
     virtual void start_read() {} 
-
 
     /**
      * If any writes were performed, this is a marker which informs the derived
@@ -111,7 +106,7 @@ public:
      * @param id identifier of variable to be written to.
      * @param e value of variable.
      */
-    virtual void single_write(const string& id, const Element& e) = 0;
+    virtual void single_write(const Id& id, const Element& e) = 0;
 
     /**
      * Read of a variable.  The VarRW needs to read a particular element.  This
@@ -121,7 +116,7 @@ public:
      * @return variable requested.
      * @param id the id of the variable.
      */
-    virtual Element* single_read(const string& id) = 0;
+    virtual Element* single_read(const Id& id) = 0;
 
     /**
      * Marks the end of writes in case there were any modified fields.
@@ -129,15 +124,14 @@ public:
     virtual void end_write() {}
 
 private:
-    // pointers that has to be deleted when we are done.
-    set<Element*> _trash;
+    Element* _trash[16];
+    unsigned _trashc;
 
     // Map that caches element read/write's 
-    typedef map<string,const Element*> Map;
-    Map _map;
+    const Element* _elems[VAR_MAX];
 
     // variable id's that changed
-    set<string> _modified;
+    bool _modified[VAR_MAX];
 
     bool _did_first_read;
 

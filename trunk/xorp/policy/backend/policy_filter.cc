@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.5 2005/08/04 15:26:58 bms Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.6 2005/08/17 16:39:27 zec Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -32,6 +32,7 @@ using policy_backend_parser::policy_backend_parse;
 
 PolicyFilter::PolicyFilter() : _policies(NULL) 
 {
+    _exec.set_set_manager(&_sman);
 }
 
 void PolicyFilter::configure(const string& str) 
@@ -55,6 +56,7 @@ void PolicyFilter::configure(const string& str)
     // replace with new conf
     _policies = policies;
     _sman.replace_sets(sets);
+    _exec.set_policies(_policies);
 }
 
 PolicyFilter::~PolicyFilter()
@@ -67,6 +69,7 @@ void PolicyFilter::reset()
     if(_policies) {
 	delete_vector(_policies);
 	_policies = NULL;
+	_exec.set_policies(NULL);
     }
     _sman.clear();
 }
@@ -87,9 +90,7 @@ bool PolicyFilter::acceptRoute(VarRW& varrw)
 
     // run policies
     ostringstream os;
-    IvExec ive(*_policies, _sman, varrw, &os);
-
-    IvExec::FlowAction fa = ive.run();
+    IvExec::FlowAction fa = _exec.run(&varrw, &os);
 
     // print any trace data...
     uint32_t level = varrw.trace();

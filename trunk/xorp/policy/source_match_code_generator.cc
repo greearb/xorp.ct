@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.5 2005/07/15 02:27:07 abittau Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.6 2005/08/04 15:26:56 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,8 +22,10 @@
 #include "policy_module.h"
 #include "source_match_code_generator.hh"
 
-SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart) : 
-				_currtag(tagstart) 
+SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,
+				const VarMap& varmap) : 
+				 CodeGenerator(varmap),
+				 _currtag(tagstart) 
 {
 }
 
@@ -133,9 +135,9 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
     // as an action, store policy tags...
     _os << "PUSH u32 " << _currtag << endl;
-    _os << "LOAD policytags\n";
+    _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
     _os << "+\n";
-    _os << "STORE policytags\n";
+    _os << "STORE " << VarRW::VAR_POLICYTAGS << "\n";
 
 
     _os << "TERM_END\n";
@@ -181,4 +183,10 @@ uint32_t
 SourceMatchCodeGenerator::next_tag() const
 {
     return _currtag;
+}
+
+const string&
+SourceMatchCodeGenerator::protocol()
+{
+    return _protocol;
 }

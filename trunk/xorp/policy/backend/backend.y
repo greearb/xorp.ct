@@ -9,6 +9,7 @@
 
 #include "libxorp/xorp.h"
 
+#include "policy/common/varrw.hh"
 #include "policy_backend_parser.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
@@ -100,13 +101,25 @@ statement:
 				}
 
 	| YY_LOAD YY_ARG	{
-				_yy_instructions->push_back(new Load($2));
+				char* err = 0;
+				VarRW::Id id = strtoul($2, &err, 10);
 				free($2);
+				if (*err) {
+					yyerror("Need numeric var ID");
+					YYERROR;
+				}
+				_yy_instructions->push_back(new Load(id));
 				}
 
 	| YY_STORE YY_ARG	{
-				_yy_instructions->push_back(new Store($2));
+				char* err = 0;
+				VarRW::Id id = strtoul($2, &err, 10);
 				free($2);
+				if (*err) {
+					yyerror("Need numeric var ID");
+					YYERROR;
+				}
+				_yy_instructions->push_back(new Store(id));
 				}
 
 	| YY_ACCEPT		{ _yy_instructions->push_back(new Accept()); }

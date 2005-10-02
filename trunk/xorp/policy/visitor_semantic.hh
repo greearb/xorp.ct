@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.3 2005/07/15 02:27:07 abittau Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.4 2005/08/04 15:26:56 bms Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
@@ -55,11 +55,12 @@ public:
 
     /**
      * @param varrw semantic VarRW used to simulate a protocol.
+     * @param varmap the varmap.
      * @param setmap the SetMap to check if sets exist.
      * @param protocol the protocol which instantiates the policy.
      * @param ptype the type of policy [import/export].
      */
-    VisitorSemantic(SemanticVarRW& varrw, SetMap& setmap,
+    VisitorSemantic(SemanticVarRW& varrw, VarMap& varmap, SetMap& setmap,
 		    const string& protocol, PolicyType ptype);
     
     const Element* visit(PolicyStatement& policy);
@@ -83,15 +84,19 @@ public:
     }
 
 private:
+    void change_protocol(const string& proto);
+    const string& current_protocol();
+
     SemanticVarRW& _varrw;
+    VarMap& _varmap;
     SetMap& _setmap;
     Dispatcher _disp;
 
     set<string> _sets;
 
     string _protocol;
-
     string _current_protocol;
+    string _semantic_proto;
 
     PolicyType _ptype;
 

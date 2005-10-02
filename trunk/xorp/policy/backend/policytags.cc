@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.4 2005/07/15 17:03:40 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.5 2005/08/04 15:26:58 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -48,7 +48,8 @@ PolicyTags::PolicyTags(const Element& element)
     // we only support set elements
     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
     if(!es)
-	throw PolicyTagsError("Element is not a set: " + element.type());
+	throw PolicyTagsError(string("Element is not a set: ") + 
+			      element.type());
 
     // go through all the set elements.
     for(ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {

@@ -12,14 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_instr.hh,v 1.1 2004/09/17 13:48:56 abittau Exp $
+// $XORP: xorp/policy/backend/policy_instr.hh,v 1.2 2005/03/25 02:54:13 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_INSTR_HH__
 #define __POLICY_BACKEND_POLICY_INSTR_HH__
 
-#include "policy/common/policy_utils.hh"
 #include "term_instr.hh"
-
 #include <vector>
 #include <string>
 
@@ -36,25 +34,45 @@ public:
      * @param terms terms of the policy. Caller must not delete terms.
      */
     PolicyInstr(const string& name, vector<TermInstr*>* terms) :
-        _name(name), _terms(terms) { }
+        _name(name) { 
+   
+	int i = 0;
+
+	vector<TermInstr*>::iterator iter;
+
+	_termc = terms->size();
+	_terms = new TermInstr*[_termc];
+	for (iter = terms->begin(); iter != terms->end(); ++iter) {
+	    _terms[i] = *iter;
+	    i++;
+	}
+	
+	delete terms;
+    }
 
     ~PolicyInstr() {
-	policy_utils::delete_vector(_terms);
+	for (int i = 0; i < _termc; i++)
+	    delete _terms[i];
+	
+	delete _terms;
     }
 
     /**
      * @return terms of this policy. Caller must not delete terms.
      */
-    vector<TermInstr*>& terms() { return *_terms; }
+    TermInstr** terms() { return _terms; }
 
     /**
      * @return name of the policy.
      */
     const string& name() { return _name; }
 
+    int termc() const { return _termc; }
+
 private:
     string _name;
-    vector<TermInstr*>* _terms;
+    TermInstr** _terms;
+    int _termc;
 
     // not impl
     PolicyInstr(const PolicyInstr&);

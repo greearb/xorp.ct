@@ -13,25 +13,33 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.2 2005/07/20 01:29:21 abittau Exp $"
+#ident "$XORP$"
 
-#include "bgp_module.h"
+#ifdef HAVE_CONFIG_H
 #include "config.h"
-#include "bgp_varrw_export.hh"
+#endif
 
-template <class A>
-BGPVarRWExport<A>::BGPVarRWExport(const string& name,
-				  const string& neighbor)
-    : BGPVarRW<A>(name), _neighbor(neighbor)
-{
-}
+#include "operator.hh"
 
-template <class A>
-Element*
-BGPVarRWExport<A>::read_neighbor()
-{
-    return BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str());
-}
+// Initialization of static members.
+Oper::Hash OpAnd::_hash = 0;
+Oper::Hash OpOr::_hash = 0;
+Oper::Hash OpXor::_hash = 0;
+Oper::Hash OpNot::_hash = 0;
 
-template class BGPVarRWExport<IPv4>;
-template class BGPVarRWExport<IPv6>;
+Oper::Hash OpEq::_hash = 0;
+Oper::Hash OpNe::_hash = 0;
+Oper::Hash OpLt::_hash = 0;
+Oper::Hash OpGt::_hash = 0;
+Oper::Hash OpLe::_hash = 0;
+Oper::Hash OpGe::_hash = 0;
+
+Oper::Hash OpAdd::_hash = 0;
+Oper::Hash OpSub::_hash = 0;
+Oper::Hash OpMul::_hash = 0;
+
+Oper::Hash OpRegex::_hash = 0;
+Oper::Hash OpCtr::_hash = 0;
+Oper::Hash OpNEInt::_hash = 0;
+
+Oper::Hash OpHead::_hash = 0;

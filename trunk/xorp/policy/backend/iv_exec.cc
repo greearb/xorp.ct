@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.5 2005/08/04 15:26:57 bms Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.6 2005/08/17 16:39:27 zec Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,30 +24,48 @@
 #include "policy/common/elem_null.hh"
 #include "policy/common/element.hh"
 
-IvExec::IvExec(vector<PolicyInstr*>& policies, SetManager& sman, VarRW& varrw,
-	       ostream* os) : 
-	       _policies(policies), _sman(sman), _varrw(varrw),
-	       _finished(false), _fa(DEFAULT), _os(os) 
+IvExec::IvExec() : 
+	       _policies(NULL), _policy_count(0), _sman(NULL), _varrw(NULL),
+	       _finished(false), _fa(DEFAULT), _trash(NULL), _trashc(0),
+	       _trashs(2000), _os(NULL) 
 {
-    if (!varrw.trace_allowed())
-	_os = NULL;
+    unsigned ss = 128;
+    _trash = new Element*[_trashs];
+
+    _stack = new const Element*[ss];
+    _stackptr = &_stack[0];
+    _stackptr--;
+    _stackend = &_stack[ss];
 }
 
 IvExec::~IvExec()
 {
+    if (_policies)
+	delete _policies;
+    
     clear_trash();
+    delete _trash;
+    delete _stack;
 }
 
 IvExec::FlowAction 
-IvExec::run()
+IvExec::run(VarRW* varrw, ostream* os)
 {
-    vector<PolicyInstr*>::iterator i;
-    
+    _varrw = varrw;
+    _os = os;
+
+    XLOG_ASSERT(_policies);
+    XLOG_ASSERT(_sman);
+    XLOG_ASSERT(_varrw);
+
+    if (!_varrw->trace_allowed())
+	_os = NULL;
+
     FlowAction ret = DEFAULT;
 
     // execute all policies
-    for(i = _policies.begin(); i != _policies.end(); ++i) {
-	FlowAction fa = runPolicy(*(*i));
+    for(unsigned i = 0; i < _policy_count; ++i) {
+	FlowAction fa = runPolicy(*_policies[i]);
 
 	// if a policy rejected/accepted a route then terminate.
 	if(fa != DEFAULT) {
@@ -60,7 +78,7 @@ IvExec::run()
 	*_os << "Outcome of whole filter: " << fa2str(ret) << endl;
 
     // important because varrw may hold pointers to trash elements
-    _varrw.sync();
+    _varrw->sync();
     clear_trash();
 
     
@@ -70,18 +88,17 @@ IvExec::run()
 IvExec::FlowAction 
 IvExec::runPolicy(PolicyInstr& pi)
 {
-    vector<TermInstr*>& terms = pi.terms();
-    
-    vector<TermInstr*>::iterator i;
-
+    TermInstr** terms = pi.terms();
+    int termc = pi.termc();
+   
     FlowAction outcome = DEFAULT;
 
     if(_os)
 	*_os << "Running policy: " << pi.name() << endl;
 
     // run all terms
-    for(i = terms.begin(); i != terms.end(); ++i) {
-	FlowAction fa = runTerm( *(*i));
+    for(int i = 0; i < termc ; ++i) {
+	FlowAction fa = runTerm(*terms[i]);
 
 	// if term accepted/rejected route, then terminate.
 	if(fa != DEFAULT) {
@@ -105,18 +122,18 @@ IvExec::runTerm(TermInstr& ti)
     _fa = DEFAULT;
 
     // clear stack
-    while(!_stack.empty())
-	_stack.pop();
+    _stackptr = &_stack[0];
+    _stackptr--;
 
-    vector<Instruction*>& instr = ti.instructions();
-    vector<Instruction*>::iterator i;
+    int instrc = ti.instrc();
+    Instruction** instr = ti.instructions();
 
     if(_os)
 	*_os << "Running term: " << ti.name() << endl;
 
     // run all instructions
-    for(i = instr.begin(); i != instr.end(); ++i) {
-	(*i)->accept(*this);
+    for(int i = 0; i < instrc; ++i) {
+	(instr[i])->accept(*this);
 
 	// a flow action occured [accept/reject/default -- exit]
 	if(_finished)
@@ -134,7 +151,9 @@ IvExec::visit(Push& p)
 {
     const Element& e = p.elem();
     // node owns element [no need to trash]
-    _stack.push(&e);
+    _stackptr++;
+    XLOG_ASSERT(_stackptr < _stackend);
+    *_stackptr = &e;
     
     if(_os)
 	*_os << "PUSH " << e.type() << " " << e.str() << endl;
@@ -144,10 +163,12 @@ void
 IvExec::visit(PushSet& ps)
 {
     string name = ps.setid();
-    const Element& s = _sman.getSet(name);
+    const Element& s = _sman->getSet(name);
 
     // set manager owns set [no need to trash]
-    _stack.push(&s);
+    _stackptr++;
+    XLOG_ASSERT(_stackptr < _stackend);
+    *_stackptr = &s;
 
     if(_os)
 	*_os << "PUSH_SET " << s.type() << " " << name
@@ -157,15 +178,15 @@ IvExec::visit(PushSet& ps)
 void 
 IvExec::visit(OnFalseExit& /* x */)
 {
-    if(_stack.empty())
+    if (_stackptr < _stack)
 	throw RuntimeError("Got empty stack on ON_FALSE_EXIT");
 
     // we expect a bool at the top.
-    const ElemBool* t = dynamic_cast<const ElemBool*>(_stack.top());
+    const ElemBool* t = dynamic_cast<const ElemBool*>(*_stackptr);
     if(!t) {
 	// but maybe it is a ElemNull... in which case its a NOP
-	const Element* e = _stack.top();
-	if(e->type() == ElemNull::id) {
+	const Element* e = *_stackptr;
+	if(e->hash() == ElemNull::_hash) {
 	    if(_os)
 		*_os << "GOT NULL ON TOP OF STACK, GOING TO NEXT TERM" << endl;
 	    _finished = true;
@@ -174,8 +195,7 @@ IvExec::visit(OnFalseExit& /* x */)
 
 	// if it is anything else, its an error
         else {
-	   throw RuntimeError("Expected bool on top of stack instead: " +
-			      e->type());
+	   throw RuntimeError("Expected bool on top of stack instead: ");
 	}
 	    
     }
@@ -198,24 +218,27 @@ IvExec::visit(OnFalseExit& /* x */)
 void 
 IvExec::visit(Load& l)
 {
-    const Element& x = _varrw.read_trace(l.var());
+    const Element& x = _varrw->read_trace(l.var());
 
     if(_os)
 	*_os << "LOAD " << l.var() << ": " << x.str() << endl;
     // varrw owns element [do not trash]
-    _stack.push(&x);
+    _stackptr++;
+    XLOG_ASSERT(_stackptr < _stackend);
+    *_stackptr = &x;
 }
 
 void 
 IvExec::visit(Store& s)
 {
-    if(_stack.empty())
+    if (_stackptr < _stack)
 	throw RuntimeError("Stack empty on assign of " + s.var());
 
-    const Element* arg = _stack.top();
-    _stack.pop();
+    const Element* arg = *_stackptr;
+    _stackptr--;
+    XLOG_ASSERT( _stackptr >= (_stack-1));
 
-    if(arg->type() == ElemNull::id) {
+    if(arg->hash() == ElemNull::_hash) {
 	if(_os)
 	    *_os << "STORE NULL [treated as NOP]" << endl;
 	return;
@@ -225,7 +248,7 @@ IvExec::visit(Store& s)
     // if it had to be trashed, it would have been trashed on creation, so do
     // NOT trash now. And yes, it likely is an element we do not have to
     // trash anyway.
-    _varrw.write_trace(s.var(),*arg);
+    _varrw->write_trace(s.var(),*arg);
     if(_os)
 	*_os << "STORE " << s.var() << ": " << arg->str() << endl;
 }
@@ -254,35 +277,26 @@ IvExec::visit(Reject& /* r */)
 void
 IvExec::visit(NaryInstr& nary)
 {
-    unsigned size = _stack.size();
     unsigned arity = nary.op().arity();
 
-    // check if we have enough elements on stack
-    if(size < arity) {
-	ostringstream oss;
-
-	oss << "Stack size " << size << " on operation " 
-	    << nary.op().str() << " with arity " << arity;
-
-	throw RuntimeError(oss.str());
-    }
-
-    // prepare arguments
-    Dispatcher::ArgList args;
-
-    for(unsigned i = 0; i < arity; ++i) {
-	args.push_back(_stack.top());
-	_stack.pop();
-    }
+    XLOG_ASSERT(_stackptr-arity+1 >= _stack);
 
     // execute the operation
-    Element* r = _disp.run(nary.op(),args);
+    Element* r = _disp.run(nary.op(), arity, _stackptr-arity+1);
+    if (arity)
+	_stackptr -= arity -1;
+    else
+	_stackptr++;
 
     // trash the result for deletion on completion
-    _trash.insert(r);
+    _trash[_trashc] = r;
+    _trashc++;
+
+    XLOG_ASSERT(_trashc < _trashs);
 
     // store result on stack
-    _stack.push(r);
+    XLOG_ASSERT(_stackptr < _stackend && _stackptr >= _stack);
+    *_stackptr = r;
 
     // output trace
     if(_os)
@@ -292,9 +306,11 @@ IvExec::visit(NaryInstr& nary)
 void
 IvExec::clear_trash()
 {
-    policy_utils::clear_container(_trash);
-}
+    for (unsigned i = 0; i< _trashc; i++)
+	delete _trash[i];
 
+    _trashc = 0;
+}
 
 string
 IvExec::fa2str(const FlowAction& fa)
@@ -311,4 +327,37 @@ IvExec::fa2str(const FlowAction& fa)
     }
 
     return "Unknown";
+}
+
+void
+IvExec::set_policies(vector<PolicyInstr*>* policies)
+{
+    if (_policies) {
+	delete _policies;
+	_policies = NULL;
+    }
+
+    // resetting...
+    if (!policies) {
+	_policy_count = 0;
+	return;
+    }
+
+    _policy_count = policies->size();
+
+    _policies = new PolicyInstr*[_policy_count];
+
+    vector<PolicyInstr*>::iterator iter;
+
+    unsigned i = 0;
+    for (iter = policies->begin(); iter != policies->end(); ++iter) {
+	_policies[i] = *iter;
+	i++;
+    }
+}
+
+void
+IvExec::set_set_manager(SetManager* sman)
+{
+    _sman = sman;
 }

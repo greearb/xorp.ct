@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.6 2005/07/15 02:27:06 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.7 2005/09/27 18:50:42 pavlin Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -187,9 +187,11 @@ public:
      * @param variable name of the variable.
      * @param type the type of the variable.
      * @param access the permissions on the variable (r/rw).
+     * @param id the id used for VarRW interaction.
      */
     void add_varmap(const string& protocol, const string& name,
-		    const string& type, const string& access);
+		    const string& type, const string& access,
+		    const VarRW::Id& id);
 
     /**
      * This method should be called once at initialization to set the

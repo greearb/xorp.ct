@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/semantic_varrw.hh,v 1.1 2004/09/17 13:48:51 abittau Exp $
+// $XORP: xorp/policy/semantic_varrw.hh,v 1.2 2005/03/25 02:54:09 pavlin Exp $
 
 #ifndef __POLICY_SEMANTIC_VARRW_HH__
 #define __POLICY_SEMANTIC_VARRW_HH__
@@ -23,7 +24,6 @@
 #include "policy/common/policy_exception.hh"
 #include "var_map.hh"
 #include <string>
-
 
 /**
  * @short A VarRW used for semantic checking.
@@ -62,7 +62,7 @@ public:
      * @return dummy element initialized to a default value.
      * @param id name of variable.
      */
-    const Element& read(const string& id);
+    const Element& read(const Id& id);
 
     /**
      * VarRW write interface.
@@ -74,7 +74,7 @@ public:
      * @param id name of variable.
      * @param elem value of variable.
      */
-    void write(const string& id, const Element& elem);
+    void write(const Id& id, const Element& elem);
 
     /**
      * VarRW sync interface.

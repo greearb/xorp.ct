@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.6 2005/07/15 02:27:06 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.7 2005/09/27 18:50:42 pavlin Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -22,6 +22,7 @@
 #include "process_watch.hh"
 #include "configuration.hh"
 #include "filter_manager.hh"
+#include "policy/common/varrw.hh"
 #include <string>
 
 /**
@@ -172,9 +173,11 @@ public:
      * @param variable the name of the variable.
      * @param type the type of the variable.
      * @param access the permissions on the variable (r/rw).
+     * @param id the varrw interface id.
      */
     void add_varmap(const string& protocol, const string& variable,
-		    const string& type, const string& access);
+		    const string& type, const string& access,
+		    const VarRW::Id& id);
 
     /**
      * Commit all configuration changes, but trigger a delayed update to the

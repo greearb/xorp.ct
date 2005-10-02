@@ -13,16 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_varrw.hh,v 1.5 2005/03/25 02:54:21 pavlin Exp $
+// $XORP: xorp/rib/rib_varrw.hh,v 1.6 2005/09/04 18:35:50 abittau Exp $
 
 #ifndef __RIB_RIB_VARRW_HH__
 #define __RIB_RIB_VARRW_HH__
 
 #include "policy/backend/single_varrw.hh"
 #include "policy/common/element_factory.hh"
-
 #include "route.hh"
-
 
 /**
  * @short Enables reading and writing variables to a RIB route.
@@ -33,6 +31,14 @@
 template <class A>
 class RIBVarRW : public SingleVarRW {
 public:
+    enum {
+	VAR_NETWORK4 = VAR_PROTOCOL,
+	VAR_NEXTHOP4,
+	VAR_NETWORK6,
+	VAR_NEXTHOP6,
+	VAR_METRIC
+    };
+
     /**
      * @param route route to filter and possibly modify.
      */
@@ -47,9 +53,9 @@ public:
      * @param id variablea to write.
      * @param e value of variable.
      */
-    void single_write(const string& id, const Element& e);
+    void single_write(const Id& id, const Element& e);
 
-    Element* single_read(const string& id);
+    Element* single_read(const Id& id);
 
 private:
     /**
@@ -62,7 +68,6 @@ private:
     void read_route_nexthop(IPRouteEntry<A>& r);
 
     IPRouteEntry<A>&	_route;
-
     ElementFactory	_ef;
 };
 

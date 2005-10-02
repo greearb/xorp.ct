@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.4 2005/03/25 02:53:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_varrw.cc,v 1.5 2005/09/04 18:35:49 abittau Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -31,49 +31,49 @@ Fib2mribVarRW::Fib2mribVarRW(Fib2mribRoute& route)
 void
 Fib2mribVarRW::start_read()
 {
-    initialize("policytags", _route.policytags().element());
+    initialize(VAR_POLICYTAGS, _route.policytags().element());
 
     if (_is_ipv4) {
-	initialize("network4",
+	initialize(VAR_NETWORK4,
 		   _ef.create(ElemIPv4Net::id,
 			      _route.network().str().c_str()));
-	initialize("nexthop4",
+	initialize(VAR_NEXTHOP4,
 		   _ef.create(ElemIPv4::id,
 			      _route.nexthop().str().c_str()));
 	
-	initialize("network6", NULL);
-	initialize("nexthop6", NULL);
+	initialize(VAR_NETWORK6, NULL);
+	initialize(VAR_NEXTHOP6, NULL);
     }
 
     if (_is_ipv6) {
-	initialize("network6",
+	initialize(VAR_NETWORK6,
 		   _ef.create(ElemIPv6Net::id,
 			      _route.network().str().c_str()));
-	initialize("nexthop6",
+	initialize(VAR_NEXTHOP6,
 		   _ef.create(ElemIPv6::id,
 			      _route.nexthop().str().c_str()));
 
-	initialize("network4", NULL);
-	initialize("nexthop4", NULL);
+	initialize(VAR_NETWORK4, NULL);
+	initialize(VAR_NEXTHOP4, NULL);
     }
 
     ostringstream oss;
 
     oss << _route.metric();
 
-    initialize("metric", _ef.create(ElemU32::id, oss.str().c_str()));
+    initialize(VAR_METRIC, _ef.create(ElemU32::id, oss.str().c_str()));
 }
 
 void
-Fib2mribVarRW::single_write(const string& id, const Element& e)
+Fib2mribVarRW::single_write(const Id& id, const Element& e)
 {
-    if (id == "policytags") {
+    if (id == VAR_POLICYTAGS) {
 	_route.set_policytags(e);
     }
 }
 
 Element*
-Fib2mribVarRW::single_read(const string& /*id */)
+Fib2mribVarRW::single_read(const Id& /*id */)
 {
     XLOG_UNREACHABLE();
 }

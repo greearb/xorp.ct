@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.3 2005/07/15 02:27:06 abittau Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.4 2005/08/04 15:26:55 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -345,7 +345,7 @@ FilterManager::update_queue(const string& protocol,
 	const string& name = *iter;
         const Element& e = _sets.getSet(*iter);
 	
-	conf += "SET " + e.type() + " " + name + " \"";
+	conf += string("SET ") + e.type() + " " + name + " \"";
         conf += e.str();
         conf += "\"\n";
     }

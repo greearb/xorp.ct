@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_generator.hh,v 1.2 2005/03/25 02:54:06 pavlin Exp $
+// $XORP: xorp/policy/code_generator.hh,v 1.3 2005/07/15 02:27:06 abittau Exp $
 
 #ifndef __POLICY_CODE_GENERATOR_HH__
 #define __POLICY_CODE_GENERATOR_HH__
 
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
+#include "var_map.hh"
 #include "visitor.hh"
 #include "code.hh"
 #include "policy_statement.hh"
@@ -45,9 +46,8 @@ public:
 	CodeGeneratorErr(const string& err) : PolicyException(err) {}
     };
 
+    CodeGenerator(const VarMap& varmap); // used by source match code generator.
     
-    CodeGenerator();
-
     /**
      * Generate code for a specific protocol and filter [target]/
      *
@@ -55,19 +55,20 @@ public:
      *
      * @param proto target protocol.
      * @param filter target filter type.
+     * @param varmap varmap.
      */
-    CodeGenerator(const string& proto, const filter::Filter& filter);
+    CodeGenerator(const string& proto, const filter::Filter& filter,
+		  const VarMap& varmap);
     
     /**
      * Initialize code generation for an import of a specific protocol.
      *
      * @param proto target protocol.
+     * @param varmap varmap.
      */
-    CodeGenerator(const string& proto);
+    CodeGenerator(const string& proto, const VarMap& varmap);
 
     virtual ~CodeGenerator();
-
-    
 
     const Element* visit(NodeUn& node);
     const Element* visit(NodeBin& node);
@@ -94,9 +95,14 @@ protected:
     virtual const Element* visit_term(Term& term);
     virtual const Element* visit_proto(NodeProto& node);
 
+    virtual const string& protocol();
 
     Code _code;
     ostringstream _os;
+    const VarMap& _varmap;
+
+private:
+    string _protocol;
 };
 
 #endif // __POLICY_CODE_GENERATOR_HH__

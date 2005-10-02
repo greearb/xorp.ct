@@ -93,7 +93,7 @@ install_sh = @install_sh@
 noinst_LTLIBRARIES = libpolicycommon.la
 
 # Common policy library
-libpolicycommon_la_SOURCES = dispatcher.hh elem_null.hh elem_set.hh element.hh element_base.hh element_factory.hh filter.hh operator.hh operator_base.hh policy_exception.hh policy_utils.hh register_elements.hh register_operations.hh varrw.hh dispatcher.cc elem_set.cc element.cc element_factory.cc filter.cc policy_utils.cc register_elements.cc register_operations.cc varrw.cc
+libpolicycommon_la_SOURCES = ../../bgp/aspath.hh dispatcher.hh elem_bgp.hh elem_filter.hh elem_null.hh elem_set.hh element.hh element_base.hh element_factory.hh filter.hh operator.hh operator_base.hh policy_exception.hh policy_utils.hh register_elements.hh register_operations.hh varrw.hh ../../bgp/aspath.cc dispatcher.cc elem_set.cc element.cc element_factory.cc filter.cc operator.cc policy_utils.cc register_elements.cc register_operations.cc varrw.cc
 
 
 ################################################################
@@ -106,9 +106,10 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libpolicycommon_la_LDFLAGS =
 libpolicycommon_la_LIBADD =
-am_libpolicycommon_la_OBJECTS = dispatcher.lo elem_set.lo element.lo \
-	element_factory.lo filter.lo policy_utils.lo \
-	register_elements.lo register_operations.lo varrw.lo
+am_libpolicycommon_la_OBJECTS = aspath.lo dispatcher.lo elem_set.lo \
+	element.lo element_factory.lo filter.lo operator.lo \
+	policy_utils.lo register_elements.lo register_operations.lo \
+	varrw.lo
 libpolicycommon_la_OBJECTS = $(am_libpolicycommon_la_OBJECTS)
 
 DEFS = @DEFS@
@@ -117,9 +118,10 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/dispatcher.Plo $(DEPDIR)/elem_set.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/element.Plo $(DEPDIR)/element_factory.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/filter.Plo $(DEPDIR)/policy_utils.Plo \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/aspath.Plo $(DEPDIR)/dispatcher.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/elem_set.Plo $(DEPDIR)/element.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/element_factory.Plo $(DEPDIR)/filter.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/operator.Plo $(DEPDIR)/policy_utils.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/register_elements.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/register_operations.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/varrw.Plo
@@ -167,6 +169,7 @@ Makefile: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.in  $(top_builddir)/config.s
 
 clean-noinstLTLIBRARIES:
 	-test -z "$(noinst_LTLIBRARIES)" || rm -f $(noinst_LTLIBRARIES)
+aspath.lo: ../../bgp/aspath.cc
 libpolicycommon.la: $(libpolicycommon_la_OBJECTS) $(libpolicycommon_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libpolicycommon_la_LDFLAGS) $(libpolicycommon_la_OBJECTS) $(libpolicycommon_la_LIBADD) $(LIBS)
 
@@ -176,11 +179,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/aspath.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/dispatcher.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/elem_set.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/element.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/element_factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/filter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/operator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_utils.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_elements.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/register_operations.Plo@am__quote@
@@ -206,6 +211,24 @@ distclean-depend:
 @AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+aspath.o: ../../bgp/aspath.cc
+@AMDEP_TRUE@	source='../../bgp/aspath.cc' object='aspath.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/aspath.Po' tmpdepfile='$(DEPDIR)/aspath.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o aspath.o `test -f ../../bgp/aspath.cc || echo '$(srcdir)/'`../../bgp/aspath.cc
+
+aspath.obj: ../../bgp/aspath.cc
+@AMDEP_TRUE@	source='../../bgp/aspath.cc' object='aspath.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/aspath.Po' tmpdepfile='$(DEPDIR)/aspath.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o aspath.obj `cygpath -w ../../bgp/aspath.cc`
+
+aspath.lo: ../../bgp/aspath.cc
+@AMDEP_TRUE@	source='../../bgp/aspath.cc' object='aspath.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/aspath.Plo' tmpdepfile='$(DEPDIR)/aspath.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o aspath.lo `test -f ../../bgp/aspath.cc || echo '$(srcdir)/'`../../bgp/aspath.cc
 CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 

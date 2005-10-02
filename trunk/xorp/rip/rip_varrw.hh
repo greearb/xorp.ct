@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/rip_varrw.hh,v 1.5 2005/03/25 02:54:28 pavlin Exp $
+// $XORP: xorp/rip/rip_varrw.hh,v 1.6 2005/09/04 18:35:50 abittau Exp $
 
 #ifndef __RIP_RIP_VARRW_HH__
 #define __RIP_RIP_VARRW_HH__
@@ -28,6 +28,15 @@
 template <class A>
 class RIPVarRW : public SingleVarRW {
 public:
+    enum {
+	VAR_NETWORK4 = VAR_PROTOCOL,
+	VAR_NEXTHOP4,
+	VAR_NETWORK6,
+	VAR_NEXTHOP6,
+	VAR_METRIC,
+	VAR_TAG
+    };
+    
     /**
      * @param route route to read/write values from.
      */
@@ -35,8 +44,8 @@ public:
 
     // SingleVarRW interface
     void start_read();
-    Element* single_read(const string& id);
-    void single_write(const string& id, const Element& e);
+    Element* single_read(const Id& id);
+    void single_write(const Id& id, const Element& e);
 
 private:
     /**
@@ -52,7 +61,7 @@ private:
      * @param e value of variable.
      * @return true if write was performed, false otherwise.
      */
-    bool write_nexthop(const string& id, const Element& e);
+    bool write_nexthop(const Id& id, const Element& e);
 
     RouteEntry<A>&	_route;
 };

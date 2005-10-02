@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.4 2005/07/08 02:53:24 abittau Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.5 2005/07/08 04:01:52 abittau Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -69,17 +70,18 @@ public:
         L arg1;
         R arg2;
 
-        ArgList args;
+	assign_op_hash(op);
+	assign_elem_hash(arg1);
+	assign_elem_hash(arg2);
+	
+	const Element* args[] = { &arg1, &arg2 };
 
-        args.push_back(&arg1);
-        args.push_back(&arg2);
-    
-        Key key = makeKey(op,args);
+        Key key = makeKey(op, 2, args);
 
         struct Local {
-            static Element* Trampoline(const Element& left, const Element& right) {
-                return funct(dynamic_cast<const L&>(left),
-                             dynamic_cast<const R&>(right));
+            static inline Element* Trampoline(const Element& left, const Element& right) {
+                return funct(static_cast<const L&>(left),
+                             static_cast<const R&>(right));
             }
         };
 
@@ -99,15 +101,16 @@ public:
 	// XXX: ugly
 	T arg;
 
-	ArgList args;
+	assign_op_hash(op);
+	assign_elem_hash(arg);
 
-        args.push_back(&arg);
+	const Element* args[] = { &arg };
 
-        Key key = makeKey(op,args);
+        Key key = makeKey(op,1, args);
 
         struct Local {
-	    static Element* Trampoline(const Element& arg) {
-                return funct(dynamic_cast<const T&>(arg));
+	    static inline Element* Trampoline(const Element& arg) {
+                return funct(static_cast<const T&>(arg));
             }
         };
 
@@ -123,7 +126,7 @@ public:
      * @param op operation to dispatch.
      * @param args arguments of operation.
      */
-    Element* run(const Oper& op, const ArgList& args) const;
+    Element* run(const Oper& op, unsigned argc, const Element** argv) const;
 
     /**
      * Execute an unary operation.
@@ -132,7 +135,7 @@ public:
      * @param op Operation to perform.
      * @param arg Argument of operation.
      */
-    Element* run(const UnOper& op, const Element& arg) const ;
+    Element* run(const UnOper& op, const Element& arg) const;
     
     /**
      * Execute a binary operation.
@@ -154,7 +157,7 @@ private:
     typedef Element* (*CB_un)(const Element&);
 
     // Key which relates to a callback
-    typedef string Key;
+    typedef unsigned Key;
 
     // A key relates to either a binary (x)or unary operation.
     typedef union {
@@ -172,7 +175,27 @@ private:
      * @param op requested operation.
      * @param args the arguments for the operation.
      */
-    Key makeKey(const Oper& op, const ArgList& args) const;
+    inline Key makeKey(const Oper& op, unsigned argc, const Element** argv) const {
+	XLOG_ASSERT(op.arity() == argc);
+	XLOG_ASSERT(argc <= 2);
+
+	unsigned key = 0;
+
+	key |= op.hash();
+	XLOG_ASSERT(key);
+
+
+	for (unsigned i = 0; i < argc; i++) {
+	    const Element* arg = argv[i];
+	    unsigned eh = arg->hash();
+
+	    XLOG_ASSERT(eh);
+
+	    key |= eh << (5*(i+1));
+	}
+
+	return key;
+    }
 
     // XXX: definition moved in header file to allow compilation on 2.95.x
     /**
@@ -183,40 +206,27 @@ private:
      * @param op operation to perform.
      * @param args the arguments of the operation.
      */
-    Value lookup(const Oper& op, const ArgList& args) const
+    inline Value lookup(const Oper& op, unsigned argc, const Element** argv) const
     {
-	XLOG_ASSERT(op.arity() == args.size());
-  
+	XLOG_ASSERT(op.arity() == argc);
+
         // find callback
-        Key key = makeKey(op,args);
-        Map::iterator i = _map.find(key);
-
-
-        // none found
-        if(i == _map.end()) {
-	    ostringstream oss;
-
-	    oss << "No operation registered for OP: " << op.str()
-		<< " Arity: " << op.arity() << " args:";
-
-            for(ArgList::const_iterator i = args.begin();
-                i != args.end(); ++i) {
-        
-	        const Element* arg = *i;
-	        oss << " " << arg->type();
-            }
-            throw OpNotFound(oss.str());
-        }                    
-
-        return (*i).second;
+        Key key = makeKey(op, argc, argv);
+        return _map[key];
     }
+
+    void assign_op_hash(const Oper&);
+    void assign_elem_hash(Element&);
 
     // Only one global map. Creating multiple dispatcher is thus harmless.
     // However, we may not have different dispatchers.
-    static Map _map;
+    static Value _map[32768];
 
     // Do initial registration of callbacks.
     static RegisterOperations _regops;
+
+    static unsigned _ophash;
+    static unsigned _elemhash;
 };
 
 #endif // __POLICY_COMMON_DISPATCHER_HH__

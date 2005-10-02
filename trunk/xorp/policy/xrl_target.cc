@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.7 2005/08/04 15:26:56 bms Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.8 2005/09/27 18:50:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -257,10 +257,11 @@ XrlCmdError
 XrlPolicyTarget::policy_0_1_add_varmap(const string& protocol,
 				       const string& variable,
 				       const string& type,
-				       const string& access)
+				       const string& access,
+				       const uint32_t& id)
 {
     try {
-	_policy_target.add_varmap(protocol, variable, type, access);
+	_policy_target.add_varmap(protocol, variable, type, access, id);
     } catch(const PolicyException& e) {
         return XrlCmdError::COMMAND_FAILED("Adding varmap failed for protocol: " 
 					   + protocol + " var: " + variable

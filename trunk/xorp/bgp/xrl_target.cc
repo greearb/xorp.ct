@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.37 2005/03/25 02:52:51 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.39 2005/08/18 15:58:08 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1011,6 +1011,7 @@ XrlCmdError
 XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter, 
 					   const string& conf) {
     try {
+	debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
 	_bgp.configure_filter(filter,conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
@@ -1032,6 +1033,7 @@ XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter) {
 
 XrlCmdError
 XrlBgpTarget::policy_backend_0_1_push_routes() {
+    debug_msg("[BGP] Route Push\n");
     _bgp.push_routes();
     return XrlCmdError::OKAY();
 }

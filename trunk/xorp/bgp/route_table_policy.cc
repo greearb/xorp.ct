@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.17 2005/09/05 16:41:07 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.18 2005/09/28 16:48:43 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -36,12 +36,18 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
     : BGPRouteTable<A>(tablename, safi), _filter_type(type),
       _policy_filters(pfs)
 {
-    this->_parent = parent;		
+    this->_parent = parent;
+    init_varrw();
+    XLOG_ASSERT(_varrw);
+	
+    // Performance optimization - suppress generation of trace strings
+    _varrw->suppress_trace();
 }
 
 template <class A>
 PolicyTable<A>::~PolicyTable()
 {
+    delete _varrw;
 }
 
 template <class A>
@@ -49,9 +55,8 @@ const InternalMessage<A>*
 PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg, 
 			     bool no_modify) const
 {
-    BGPVarRW<A>* varrw = get_varrw(rtmsg, no_modify);
+    _varrw->attach_route(rtmsg, no_modify);
 
-    XLOG_ASSERT(varrw);
     try {
 	bool accepted = true;
 
@@ -75,16 +80,14 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 		  filter::filter2str(_filter_type).c_str(),
 		  rtmsg.str().c_str(), pf);
 
-	// Performance optimization - suppress generation of trace strings
-	varrw->suppress_trace();
+	accepted = _policy_filters.run_filter(_filter_type, *_varrw);
 
-	accepted = _policy_filters.run_filter(_filter_type, *varrw);
-
-	if (varrw->trace()) {
+	if (_varrw->trace()) {
 	    // If requested by the filter simply rerun it to obtain a trace
-	    BGPVarRW<A>* dummy_varrw = get_varrw(rtmsg, no_modify);
-	    _policy_filters.run_filter(_filter_type, *dummy_varrw);
-	    delete dummy_varrw;
+	    _varrw->attach_route(rtmsg, no_modify);
+	    _varrw->allow_trace();
+	    _policy_filters.run_filter(_filter_type, *_varrw);
+	    _varrw->suppress_trace();
 	};
 
 	pf = rtmsg.route()->policyfilter(pfi).get();
@@ -96,41 +99,29 @@ PolicyTable<A>::do_filtering(const InternalMessage<A>& rtmsg,
 	}
 
 	if (!accepted) {
-	    delete varrw;
 	    return NULL;
 	}
 
 	// we only want to check if filter accepted / rejecd route
 	// [for route lookups]
 	if (no_modify) {
-	    delete varrw;
 	    return &rtmsg;
 	}    
 
-	if (!varrw->modified()) {
-	    delete varrw;
+	if (!_varrw->modified()) {
 	    return &rtmsg;
 	}    
 
 
-	InternalMessage<A>* fmsg = varrw->filtered_message();
+	InternalMessage<A>* fmsg = _varrw->filtered_message();
 
 	debug_msg("[BGP] filter modified message: %s\n", fmsg->str().c_str());
 
-	delete varrw;
 	return fmsg;
     } catch(const PolicyException& e) {
 	XLOG_FATAL("Policy filter error %s", e.str().c_str());
 	XLOG_UNFINISHED();
-	delete varrw;
     }
-}
-
-template <class A>
-BGPVarRW<A>*
-PolicyTable<A>::get_varrw(const InternalMessage<A>& rtmsg, bool no_modify) const
-{
-    return new BGPVarRW<A>(rtmsg, no_modify, filter::filter2str(_filter_type));
 }
 
 template <class A>
@@ -474,6 +465,13 @@ PolicyTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
     XLOG_ASSERT(parent);
 
     parent->route_used(rt, in_use);
+}
+
+template <class A>
+void
+PolicyTable<A>::init_varrw()
+{
+    _varrw = new BGPVarRW<A>(filter::filter2str(_filter_type));
 }
 
 template class PolicyTable<IPv4>;

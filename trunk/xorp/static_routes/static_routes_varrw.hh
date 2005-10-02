@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.4 2005/03/25 02:54:42 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_varrw.hh,v 1.5 2005/09/04 18:35:50 abittau Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_VARRW_HH__
@@ -27,6 +27,13 @@
  */
 class StaticRoutesVarRW : public SingleVarRW {
 public:
+    enum {
+	VAR_NETWORK4 = VAR_PROTOCOL,
+	VAR_NEXTHOP4,
+	VAR_NETWORK6,
+	VAR_NEXTHOP6,
+	VAR_METRIC
+    };
     /**
      * @param route route to read/write values from.
      */
@@ -34,8 +41,8 @@ public:
 
     // SingleVarRW inteface:
     void start_read();
-    Element* single_read(const string& id);
-    void single_write(const string& id, const Element& e);
+    Element* single_read(const Id& id);
+    void single_write(const Id& id, const Element& e);
 
 private:
     StaticRoute&	_route;

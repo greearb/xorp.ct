@@ -1,13 +1,16 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/policy/common/Makefile.am,v 1.3 2004/11/12 02:44:47 bms Exp $
+## $XORP: xorp/policy/common/Makefile.am,v 1.4 2005/07/08 02:06:22 abittau Exp $
 ##
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libpolicycommon.la
 
 # Common policy library
-libpolicycommon_la_SOURCES              = dispatcher.hh
+libpolicycommon_la_SOURCES              = ../../bgp/aspath.hh
+libpolicycommon_la_SOURCES             += dispatcher.hh
+libpolicycommon_la_SOURCES             += elem_bgp.hh
+libpolicycommon_la_SOURCES             += elem_filter.hh
 libpolicycommon_la_SOURCES             += elem_null.hh
 libpolicycommon_la_SOURCES             += elem_set.hh
 libpolicycommon_la_SOURCES             += element.hh
@@ -22,16 +25,17 @@ libpolicycommon_la_SOURCES             += register_elements.hh
 libpolicycommon_la_SOURCES             += register_operations.hh
 libpolicycommon_la_SOURCES             += varrw.hh
 
+libpolicycommon_la_SOURCES             += ../../bgp/aspath.cc
 libpolicycommon_la_SOURCES             += dispatcher.cc
 libpolicycommon_la_SOURCES             += elem_set.cc
 libpolicycommon_la_SOURCES             += element.cc
 libpolicycommon_la_SOURCES             += element_factory.cc
 libpolicycommon_la_SOURCES             += filter.cc
+libpolicycommon_la_SOURCES             += operator.cc
 libpolicycommon_la_SOURCES             += policy_utils.cc
 libpolicycommon_la_SOURCES             += register_elements.cc
 libpolicycommon_la_SOURCES             += register_operations.cc
 libpolicycommon_la_SOURCES             += varrw.cc
-
 
 ################################################################
 ##

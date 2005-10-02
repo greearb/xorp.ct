@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.6 2005/07/27 07:04:52 zec Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.7 2005/08/04 15:26:59 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,12 +24,12 @@
 #include <algorithm>
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const Set& val) : Element(id), _val(val) 
+ElemSetAny<T>::ElemSetAny(const Set& val) : _val(val) 
 {
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(id) 
+ElemSetAny<T>::ElemSetAny(const char* c_str)
 {
     if(!c_str)
 	return;
@@ -46,7 +46,7 @@ ElemSetAny<T>::ElemSetAny(const char* c_str) : Element(id)
 }
 
 template <class T>
-ElemSetAny<T>::ElemSetAny() : Element(id) 
+ElemSetAny<T>::ElemSetAny()
 {
 }
 
@@ -255,18 +255,44 @@ ElemSetAny<T>::end() const
     return _val.end();
 }
 
+template <class T>
+void
+ElemSetAny<T>::set_hash(const Hash& x)
+{
+    _hash = x;
+}
+
+template <class T>
+Element::Hash
+ElemSetAny<T>::hash() const
+{
+    return _hash;
+}
+
+template <class T>
+const char*
+ElemSetAny<T>::type() const
+{
+    return id;
+}
+
 // define the various sets
 template class ElemSetAny<ElemU32>;
 template <> const char* ElemSetU32::id = "set_u32";
+template <> Element::Hash ElemSetU32::_hash = 0;
 
 template class ElemSetAny<ElemCom32>;
 template <> const char* ElemSetCom32::id = "set_com32";
+template <> Element::Hash ElemSetCom32::_hash = 0;
 
 template class ElemSetAny<ElemIPv4Net>;
 template <> const char* ElemSetIPv4Net::id = "set_ipv4net";
+template <> Element::Hash ElemSetIPv4Net::_hash = 0;
 
 template class ElemSetAny<ElemIPv6Net>;
 template <> const char* ElemSetIPv6Net::id = "set_ipv6net";
+template <> Element::Hash ElemSetIPv6Net::_hash = 0;
 
 template class ElemSetAny<ElemStr>;
 template <> const char* ElemSetStr::id = "set_str";
+template <> Element::Hash ElemSetStr::_hash = 0;

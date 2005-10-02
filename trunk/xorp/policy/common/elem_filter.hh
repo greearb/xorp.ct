@@ -13,25 +13,33 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.2 2005/07/20 01:29:21 abittau Exp $"
+// $XORP$
 
-#include "bgp_module.h"
-#include "config.h"
-#include "bgp_varrw_export.hh"
+#ifndef __POLICY_COMMON_ELEM_FILTER_HH__
+#define __POLICY_COMMON_ELEM_FILTER_HH__
 
-template <class A>
-BGPVarRWExport<A>::BGPVarRWExport(const string& name,
-				  const string& neighbor)
-    : BGPVarRW<A>(name), _neighbor(neighbor)
-{
-}
+#include "policy/backend/policy_filter.hh"
+#include "element_base.hh"
+#include "libxorp/ref_ptr.hh"
+#include <string>
 
-template <class A>
-Element*
-BGPVarRWExport<A>::read_neighbor()
-{
-    return BGPVarRW<A>::_ef.create(ElemIPv4::id, _neighbor.c_str());
-}
+/**
+ * @short a filter element.  Used when versioning.
+ */
+class ElemFilter : public Element {
+public:
+    static Hash _hash;
+    
+    ElemFilter(const RefPf& pf) : _pf(pf) {}
+    string str() const { return "policy filter"; }
+    const RefPf& val() const { return _pf; }
 
-template class BGPVarRWExport<IPv4>;
-template class BGPVarRWExport<IPv6>;
+    void set_hash(const Hash& x) { _hash = x; }
+    Hash hash() const { return _hash; }
+    const char* type() const { return "filter"; }
+
+private:
+    RefPf _pf;
+};
+
+#endif // __POLICY_COMMON_ELEM_FILTER_HH__

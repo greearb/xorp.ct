@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.7 2005/08/04 15:26:55 bms Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.8 2005/09/27 18:50:42 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,6 +21,7 @@
 #include "policy_module.h"
 #include "policy_target.hh"
 #include "policy/common/policy_utils.hh"
+#include "policy/common/varrw.hh"
 
 // static members
 string PolicyTarget::policy_target_name = "policy";
@@ -140,9 +141,10 @@ PolicyTarget::update_export(const string& protocol,
 
 void
 PolicyTarget::add_varmap(const string& protocol, const string& variable,
-			 const string& type, const string& access)
+			 const string& type, const string& access,
+			 const VarRW::Id& id)
 {
-    _conf.add_varmap(protocol, variable, type, access);
+    _conf.add_varmap(protocol, variable, type, access, id);
 }
 
 void

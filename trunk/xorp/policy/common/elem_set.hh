@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/elem_set.hh,v 1.5 2005/07/20 16:56:52 zec Exp $
+// $XORP: xorp/policy/common/elem_set.hh,v 1.6 2005/07/27 07:04:52 zec Exp $
 
 #ifndef __POLICY_COMMON_ELEM_SET_HH__
 #define __POLICY_COMMON_ELEM_SET_HH__
@@ -37,6 +37,11 @@ public:
     typedef typename Set::const_iterator const_iterator;
 
     static const char* id;
+    static Hash _hash;
+
+    void set_hash(const Hash& x);
+    Hash hash() const;
+    
     ElemSetAny(const Set& val);
 
     /**
@@ -198,6 +203,8 @@ public:
      * @return const iterator for the end of the set.
      */
     const_iterator end() const;
+
+    const char* type() const;
 
 private:
     Set _val;

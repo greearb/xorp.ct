@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,15 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/var_map.hh,v 1.3 2005/07/01 22:54:35 abittau Exp $
+// $XORP: xorp/policy/var_map.hh,v 1.4 2005/07/08 02:06:21 abittau Exp $
 
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
 
 #include "policy/common/policy_exception.hh"
-
+#include "policy/common/varrw.hh"
 #include "process_watch.hh"
-
 #include <string>
 #include <map>
 
@@ -35,8 +35,6 @@
  */
 class VarMap {
 public:
-    static const string TRACE;
-
     /**
      * @short Exception thrown on VarMap errors such as on unknown variables.
      */
@@ -61,10 +59,20 @@ public:
 	Access access;
 	string name;
 	string type;
+	VarRW::Id id;
 
-	Variable(const string& n, const string& t, Access a) : 
-		    access(a), name(n), type(t) 
+	Variable(const string& n, const string& t, Access a,
+		 VarRW::Id i) :
+		    access(a), name(n), type(t), id(i)
 	{
+	}
+
+	Variable(const Variable& v)
+	{
+	    access = v.access;
+	    name = v.name;
+	    type = v.type;
+	    id = v.id;
 	}
 
 	bool writable() const 
@@ -73,8 +81,7 @@ public:
 	}
     };
 
-    typedef map<string,Variable*> VariableMap;
-
+    typedef map<VarRW::Id,Variable*> VariableMap;
     typedef map<string,VariableMap*> ProtoMap;
 
     /**
@@ -89,7 +96,9 @@ public:
      * @param varname name of variable interested in.
      */
     const Variable& variable(const string& protocol, 
-			     const string& varname) const;
+			     const VarRW::Id& varname) const;
+
+    VarRW::Id var2id(const string& protocol, const string& varname) const;
 
     /**
      * As the VarMap learns about new protocols, it will register interest with
@@ -111,12 +120,9 @@ public:
      * Add a variable to a protocol.
      *
      * @param protocol protocol for which variable should be added.
-     * @param varname name of variable.
-     * @param type type [id] of the variable.
-     * @param acc access [r/rw] of the variable.
+     * @param var the variable to add.  Do not delete.
      */
-    void add_protocol_variable(const string& protocol, const string& varname, 
-			       const string& type, Access acc);
+    void add_protocol_variable(const string& protocol, Variable* var);
 
     
     /**
@@ -130,22 +136,17 @@ private:
     /**
      * Use this if you want a variable to be present for all protocols.
      *
-     * @param varname the name of the variable.  Watch out for clashes!
-     * @param type type of variable.
-     * @param acc access of variable.
+     * @param var the variable to add.  Watch out for clashes and don't delete.
      */
-    void add_metavariable(const string& varname, const string& type, Access acc);
+    void add_metavariable(Variable *var);
 
     /**
      * Add a variable to a specific protocol.
      *
      * @param vm VariableMap where variable should be added.
-     * @param varname name of the variable.
-     * @param type the type [id] of the variable/element.
-     * @param acc the access of the variable.
+     * @param var the variable to add.  Do not delete.
      */
-    void add_variable(VariableMap& vm, const string& varname, 
-		      const string& type, Access acc);
+    void add_variable(VariableMap& vm, Variable* var);
 
     /**
      * A VariableMap relates a variable name to its Variable information [access
@@ -161,10 +162,9 @@ private:
     ProtoMap _protocols;
     ProcessWatchBase& _process_watch;
 
-    typedef map<string, Variable*> MetaVarContainer;
+    typedef VariableMap MetaVarContainer;
     MetaVarContainer _metavars;
     
-
     // not impl
     VarMap(const VarMap&);
     VarMap& operator=(const VarMap&);

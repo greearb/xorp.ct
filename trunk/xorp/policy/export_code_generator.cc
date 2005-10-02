@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.4 2005/07/09 00:32:44 abittau Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.5 2005/08/04 15:26:55 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,10 +23,11 @@
 #include "libxorp/xlog.h"
 #include "export_code_generator.hh"
 
-ExportCodeGenerator::ExportCodeGenerator(const string& proto, 
-					 const SourceMatchCodeGenerator::Tags& t
-					 ) : 
-	CodeGenerator(proto, filter::EXPORT), _tags(t)
+ExportCodeGenerator::ExportCodeGenerator(
+			const string& proto, 
+			const SourceMatchCodeGenerator::Tags& t,
+			const VarMap& varmap) : 
+	CodeGenerator(proto, filter::EXPORT, varmap), _tags(t)
 {
     _tags_iter = _tags.begin();
 }
@@ -48,7 +49,7 @@ ExportCodeGenerator::visit_term(Term& term)
     // tags are linear.. for each term, match the tag in the source block.
     const SourceMatchCodeGenerator::Taginfo& ti = *_tags_iter;
     if (ti.first) {
-        _os << "LOAD policytags\n";
+        _os << "LOAD " << VarRW::VAR_POLICYTAGS << "\n";
         _os << "PUSH u32 " << (ti.second) << endl;
         _os << "<=\n";
         _os << "ONFALSE_EXIT" << endl;

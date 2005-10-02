@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/term_instr.hh,v 1.1 2004/09/17 13:48:57 abittau Exp $
+// $XORP: xorp/policy/backend/term_instr.hh,v 1.2 2005/03/25 02:54:14 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_TERM_INSTR_HH__
 #define __POLICY_BACKEND_TERM_INSTR_HH__
@@ -35,25 +35,44 @@ public:
      * @param instr list of instructions of this term. Caller must not delete.
      */
     TermInstr(const string& name, vector<Instruction*>* instr) :
-	    _name(name), _instructions(instr) { }
+	    _name(name) { 
+
+	_instrc	= instr->size();
+	_instructions = new Instruction*[_instrc];
+
+	vector<Instruction*>::iterator iter;
+	int i = 0;
+
+	for (iter = instr->begin(); iter != instr->end(); iter++) {
+	    _instructions[i] = *iter;
+	    i++;
+	}
+	
+	delete instr;
+    }
     
     ~TermInstr() {
-	policy_utils::delete_vector(_instructions);
+	for (int i = 0; i < _instrc; i++)
+	    delete _instructions[i];
+	delete _instructions;
     }
 
     /**
      * @return the instructions of this term. Caller must not delete.
      */
-    vector<Instruction*>& instructions() { return *_instructions; }
+    Instruction** instructions() { return _instructions; }
 
     /**
      * @return name of the term
      */
-    const string& name() { return _name; }     
+    const string& name() { return _name; }
+
+    int instrc() { return _instrc; }
 
 private:
     string _name;
-    vector<Instruction*>* _instructions;
+    Instruction** _instructions;
+    int		  _instrc;
 
     // not impl
     TermInstr(const TermInstr&);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/operator_base.hh,v 1.1 2004/09/17 13:48:59 abittau Exp $
+// $XORP: xorp/policy/common/operator_base.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
 
 #ifndef __POLICY_COMMON_OPERATOR_BASE_HH__
 #define __POLICY_COMMON_OPERATOR_BASE_HH__
@@ -27,6 +27,7 @@
  */
 class Oper {
 public:
+    typedef unsigned char Hash;
     virtual ~Oper() {};
 
     /**
@@ -40,6 +41,9 @@ public:
      * @return string representation of operation.
      */
     virtual string str() const = 0;
+
+    virtual Hash hash() const = 0;
+    virtual void set_hash(const Hash&) const = 0;
 };
 
 
@@ -57,6 +61,8 @@ public:
      */
     unsigned arity() const { return 1; }
 
+    virtual Hash hash() const = 0;
+    virtual void set_hash(const Hash&) const = 0;
 };
 
 /**
@@ -73,6 +79,8 @@ public:
      */
     unsigned arity() const { return 2; }
 
+    virtual Hash hash() const = 0;
+    virtual void set_hash(const Hash&) const = 0;
 };
 
 #endif // __POLICY_COMMON_OPERATOR_BASE_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/policy/backend/version_filter.hh,v 1.1 2005/07/20 01:29:23 abittau Exp $
 
 #ifndef __POLICY_BACKEND_VERSION_FILTER_HH__
 #define __POLICY_BACKEND_VERSION_FILTER_HH__
@@ -43,7 +43,7 @@ public:
     /**
      * @param fname the variable to read/write in order to access filter.
      */
-    VersionFilter(const string& fname);
+    VersionFilter(const VarRW::Id& fname);
     ~VersionFilter();
     
     /**
@@ -72,7 +72,7 @@ public:
 
 private:
     RefPf _filter;
-    string _fname;
+    VarRW::Id _fname;
 };
 
 #endif // __POLICY_BACKEND_VERSION_FILTER_HH__

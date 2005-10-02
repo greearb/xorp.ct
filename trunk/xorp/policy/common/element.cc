@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,29 +13,58 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.4 2005/07/20 16:56:52 zec Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.5 2005/07/25 07:37:19 zec Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
+#include "elem_filter.hh"
+#include "elem_bgp.hh"
 
 // Initialization of static members.
 // Remember to be unique in id's.
 const char* ElemInt32::id = "i32";
+Element::Hash ElemInt32::_hash = 0;
+
 const char* ElemU32::id = "u32";
+Element::Hash ElemU32::_hash = 0;
+
 const char* ElemCom32::id = "com32";
+Element::Hash ElemCom32::_hash = 0;
+
 const char* ElemStr::id = "txt";
+Element::Hash ElemStr::_hash = 0;
+
 const char* ElemBool::id = "bool";
+Element::Hash ElemBool::_hash = 0;
 
 template<> const char* ElemIPv4::id = "ipv4";
+template<> Element::Hash ElemIPv4::_hash = 0;
+
 template<> const char* ElemIPv4Range::id = "ipv4range";
+template<> Element::Hash ElemIPv4Range::_hash = 0;
+
 template<> const char* ElemIPv6::id = "ipv6";
+template<> Element::Hash ElemIPv6::_hash = 0;
+
 template<> const char* ElemIPv6Range::id = "ipv6range";
+template<> Element::Hash ElemIPv6Range::_hash = 0;
+
 template<> const char* ElemIPv4Net::id = "ipv4net";
+template<> Element::Hash ElemIPv4Net::_hash = 0;
+
 template<> const char* ElemIPv6Net::id = "ipv6net";
+template<> Element::Hash ElemIPv6Net::_hash = 0;
+
 template<> const char* ElemU32Range::id = "u32range";
+template<> Element::Hash ElemU32Range::_hash = 0;
+
+template<> const char* ElemAsPath::id = "aspath";
+template<> Element::Hash ElemAsPath::_hash = 0;
 
 const char* ElemNull::id = "null";
+Element::Hash ElemNull::_hash = 1;
 
+Element::Hash ElemFilter::_hash = 0;
 
 /**
  * @short Well-known communities per RFC1997
@@ -46,7 +76,6 @@ static struct { string text; uint32_t value; } com_aliases[] = {
     { "", 0 }
 };
 
-
 /**
  * @short Element constructor with a parser for a BGP community syntax.
  *    "N" -> (uint32_t) N
@@ -54,7 +83,7 @@ static struct { string text; uint32_t value; } com_aliases[] = {
  *  "N:"  -> ((uint16_t) N) << 16
  *  "N:M" -> (((uint16_t) N) << 16) + (uint16_t) M
  */
-ElemCom32::ElemCom32(const char* c_str) : Element(id) {
+ElemCom32::ElemCom32(const char* c_str) {
     // Semantic checker needs this
     if(c_str == NULL) {
 	_val = 0;
@@ -93,4 +122,3 @@ ElemCom32::str() const {
     oss << (_val >> 16) << ":" << (_val & 0xffff);
     return(oss.str());
 }
-

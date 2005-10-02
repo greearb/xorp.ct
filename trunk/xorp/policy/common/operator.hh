@@ -13,29 +13,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/operator.hh,v 1.3 2005/07/12 22:07:24 abittau Exp $
+// $XORP: xorp/policy/common/operator.hh,v 1.4 2005/07/13 21:58:40 abittau Exp $
 
 #ifndef __POLICY_COMMON_OPERATOR_HH__
 #define __POLICY_COMMON_OPERATOR_HH__
 
 #include "operator_base.hh"
 
-#define DEFINE_UNOPER(name,human) \
-class name : public UnOper { \
+#define DEFINE_OPER(name,human,parent) \
+class name : public parent { \
 public: \
+    static Hash _hash; \
     ~name() {} \
     string str() const { return #human; } \
+    Hash hash() const { return _hash; } \
+    void set_hash(const Hash& x) const { _hash = x; } \
 }; 
 
-// Macro ugliness
-// name is the name of the class/operation
-// Human is the human readable version [str()]
+#define DEFINE_UNOPER(name,human) \
+DEFINE_OPER(name,human,UnOper)
+
 #define DEFINE_BINOPER(name,human) \
-class name : public BinOper { \
-public: \
-    ~name() {} \
-    string str() const { return #human; } \
-}; 
+DEFINE_OPER(name,human,BinOper)
 
 // Logical operators
 DEFINE_BINOPER(OpAnd,AND)

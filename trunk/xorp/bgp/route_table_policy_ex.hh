@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/route_table_policy_ex.hh,v 1.1 2005/07/08 02:06:18 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_EX_HH__
 #define __BGP_ROUTE_TABLE_POLICY_EX_HH__
@@ -44,15 +44,8 @@ public:
 		      const string& neighbor);
 		      
 protected:
-    /**
-     * Obtain varrw for a route.
-     *
-     * @param rtmsg the route to read/write from.
-     * @param no_modify if true, no writes will go through.
-     * @return varrw suitable for export filters [different neighbor]
-     */
-    BGPVarRW<A>* get_varrw(const InternalMessage<A>& rtmsg, 
-			   bool no_modify) const;
+    void init_varrw();
+
 private:
     const string _neighbor;
 };

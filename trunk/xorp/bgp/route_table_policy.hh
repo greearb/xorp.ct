@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy.hh,v 1.5 2005/03/25 02:52:47 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy.hh,v 1.6 2005/07/08 02:06:18 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_HH__
 #define __BGP_ROUTE_TABLE_POLICY_HH__
@@ -88,17 +88,10 @@ public:
 					   bool no_modify) const;
 
 protected:
-    /**
-     * Obtain a varrw for this route.
-     *
-     * @param rtmsg the route.
-     * @param no_modify if true, the varrw will not modify the route.
-     * @return the varrw for this route.
-     */
-    virtual BGPVarRW<A>* get_varrw(const InternalMessage<A>& rtmsg,
-				   bool no_modify) const;
-   
     const filter::Filter	_filter_type;
+    
+    virtual void init_varrw();
+    BGPVarRW<A>*		_varrw;
 
 private:
     PolicyFilters&		_policy_filters;

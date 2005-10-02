@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.4 2005/07/15 02:27:08 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.5 2005/08/04 15:26:57 bms Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -22,6 +22,7 @@
 #include "config.h"
 #endif
 
+#include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
 #include "instruction.hh"
@@ -29,7 +30,6 @@
 #include "term_instr.hh"
 #include "policy_instr.hh"
 #include <stack>
-#include "policy/common/dispatcher.hh"
 
 /**
  * @short Visitor that executes instructions
@@ -60,23 +60,16 @@ public:
 	RuntimeError(const string& err) : PolicyException(err) {}
     };
 
-    /**
-     * Execute the give policies with the given varrw [i.e. route].
-     *
-     * @param policies policies to execute.
-     * @param sman set manager to use for loading sets.
-     * @param varrw interface to read/write route variables.
-     * @param os if not null, an execution trace will be output to stream.
-     */
-    IvExec(vector<PolicyInstr*>& policies, SetManager& sman, 
-	   VarRW& varrw,
-	   ostream* os);
+    IvExec();
     ~IvExec();
-    
+   
+    void set_policies(vector<PolicyInstr*>* policies);
+    void set_set_manager(SetManager* sman);
+   
     /**
      * Execute the policies.
      */
-    FlowAction run();
+    FlowAction run(VarRW* varrw, ostream* os);
 
     /**
      * Execute a policy.
@@ -144,14 +137,22 @@ private:
      */
     void clear_trash();
 
-    vector<PolicyInstr*>& _policies;
-    stack<const Element*> _stack;
-    SetManager& _sman;
-    VarRW& _varrw;
+    PolicyInstr** _policies;
+    unsigned _policy_count;
+
+    const Element** _stack;
+    const Element**  _stackend;
+    const Element**  _stackptr;
+
+    SetManager* _sman;
+    VarRW* _varrw;
     bool _finished;
     Dispatcher _disp;
     FlowAction _fa;
-    set<Element*> _trash;
+
+    Element** _trash;
+    unsigned _trashc;
+    unsigned _trashs;
     ostream* _os;
 
     // not impelmented

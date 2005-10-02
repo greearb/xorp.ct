@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.5 2005/07/20 16:56:52 zec Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.6 2005/07/25 07:37:19 zec Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -22,24 +22,10 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-#include "libxorp/ref_ptr.hh"
 #include "element_base.hh"
 #include "policy_exception.hh"
 #include "policy_utils.hh"
-#include "policy/backend/policy_filter.hh"
-
-/**
- * @short a filter element.  Used when versioning.
- */
-class ElemFilter : public Element {
-public:
-    ElemFilter(const RefPf& pf) : Element("filter"), _pf(pf) {}
-    string str() const { return "policy filter"; }
-    const RefPf& val() const { return _pf; }
-
-private:
-    RefPf _pf;
-};
+#include "policy/policy_module.h"
 
 /**
  * @short 32bit signed integer.
@@ -50,8 +36,14 @@ public:
      * The identifier [type] of the element.
      */
     static const char* id;
+    static Hash _hash;
 
-    ElemInt32() : Element(id) {}
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemInt32() {}
 
     /**
      * Construct via c-style string.
@@ -63,13 +55,13 @@ public:
      *
      * @param c_str initialize via string, or assign default value if null.
      */
-    ElemInt32(const char* c_str) : Element(id) {
+    ElemInt32(const char* c_str) {
 	if(c_str)
 	    _val = strtol(c_str,NULL,10);
 	else
 	    _val = 0;
     }
-    ElemInt32(const int32_t val) : Element(id), _val(val) {}
+    ElemInt32(const int32_t val) : _val(val) {}
 
     /**
      * @return string representation of integer
@@ -83,6 +75,8 @@ public:
      */
     int32_t val() const { return _val; }
 
+    const char* type() const { return id; }
+
 private:
     int32_t _val;
 };
@@ -93,20 +87,28 @@ private:
 class ElemU32 : public Element {
 public:
     static const char* id;
-    ElemU32() : Element(id) {}
-    ElemU32(const char* c_str) : Element(id) {
+    static Hash _hash;
+
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemU32() {}
+    ElemU32(const char* c_str) {
 	if(c_str)
 	    _val = strtoul(c_str,NULL,10); 
 	else
 	    _val = 0;
     }
-    ElemU32(const uint32_t val) : Element(id), _val(val) {}
+    ElemU32(const uint32_t val) : _val(val) {}
 
     string str() const {
 	return policy_utils::to_str(_val);
     }
 
     uint32_t val() const { return _val; }
+    const char* type() const { return id; }
 
     bool operator==(const ElemU32& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemU32& rhs) const { return _val < rhs._val; }
@@ -125,12 +127,20 @@ private:
 class ElemCom32 : public Element {
 public:
     static const char* id;
-    ElemCom32() : Element(id) {}
+    static Hash _hash;
+
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemCom32() {}
     ElemCom32(const char*);		// in element.cc
-    ElemCom32(const uint32_t val) : Element(id), _val(val) {}
+    ElemCom32(const uint32_t val) : _val(val) {}
 
     string str() const;			// in element.cc
     uint32_t val() const { return _val; }
+    const char* type() const { return id; }
 
     bool operator==(const ElemCom32& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemCom32& rhs) const { return _val < rhs._val; }
@@ -146,19 +156,27 @@ private:
 class ElemStr : public Element {
 public:
     static const char* id;
-    ElemStr() : Element(id) {}
+    static Hash _hash;
 
-    ElemStr(const char* val) : Element(id) {
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemStr() {}
+
+    ElemStr(const char* val) {
 	if(val)
 	    _val = val;
 	else
 	    _val = "";
     }
 
-    ElemStr(const string& str) : Element(id), _val(str) {}
+    ElemStr(const string& str) : _val(str) {}
 
     string str() const { return _val; }
     string val() const { return _val; }
+    const char* type() const { return id; }
 
     bool operator==(const ElemStr& rhs) const { return _val == rhs._val; }
     bool operator<(const ElemStr& rhs) const { return _val < rhs._val; }
@@ -173,15 +191,22 @@ private:
 class ElemBool : public Element {
 public:
     static const char* id;
-    ElemBool() : Element(id) {}
+    static Hash _hash;
+
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemBool() {}
     ~ElemBool() {}
-    ElemBool(const char* c_str) : Element(id) {
+    ElemBool(const char* c_str) {
 	if(c_str && (strcmp(c_str,"true") == 0) )
 	    _val = true;
 	else
 	    _val = false;
     }
-    ElemBool(const bool val) : Element(id), _val(val) {}
+    ElemBool(const bool val) : _val(val) {}
 
     string str() const {
 	if(_val)
@@ -191,6 +216,7 @@ public:
     }	    
 
     bool val() const { return _val; }
+    const char* type() const { return id; }
 
 private:
     bool _val;
@@ -218,16 +244,22 @@ public:
 
 
     static const char* id;
+    static Hash _hash;
 
-    ElemAny() : Element(id), _val() {}
-    ElemAny(const T& val) : Element(id), _val(val) {}
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+
+    ElemAny() : _val() {}
+    ElemAny(const T& val) : _val(val) {}
 
     /**
      * If the c-style constructor of the wrapped class throws and exception,
      * it is caught and an ElemInitError exception is thrown. The original
      * exception is lost.
      */
-    ElemAny(const char* c_str) : Element(id), _val() {
+    ElemAny(const char* c_str) : _val() {
 	if(c_str) {
 	    try {
 		_val = T(c_str);
@@ -276,18 +308,120 @@ public:
      * @return the actual object of the class being wrapped.
      */
     const T& val() const { return _val; }
+    
+    const char* type() const { return id; }
 
 private:
     T _val;
 };
 
+template<class T>
+class ElemRefAny : public Element {
+public:
+    /**
+     * @short exception thrown if c-stype string initialization fails.
+     */
+    class ElemInitError : public PolicyException {
+    public:
+        ElemInitError(const string& err) : PolicyException(err) {}
+    };
+
+    
+    static const char* id;
+    static Hash _hash;
+
+    void set_hash(const Hash& x) {
+	_hash = x;
+    }
+    Hash hash() const { return _hash; }
+    
+    ElemRefAny() : _val(new T()), _free(true) {}
+    ElemRefAny(const T& val) : _val(&val), _free(false) {}
+    ElemRefAny(const T& val, bool f) : _val(&val), _free(f) {}
+    ~ElemRefAny() { if (_free) delete _val; }
+
+    /**
+     * If the c-style constructor of the wrapped class throws and exception,
+     * it is caught and an ElemInitError exception is thrown. The original
+     * exception is lost.
+     */
+    ElemRefAny(const char* c_str) : _val(NULL), _free(false) {
+        if(c_str) {
+            try {
+                _val = new T(c_str);
+                _free = true;
+            } catch(...) {
+                string err = "Unable to initialize element of type ";
+                err += id;
+                err += " with ";
+                err += c_str;
+
+                throw ElemInitError(err);
+
+            }
+
+        }
+	// else leave it to the default value
+	else {
+	    _val = new T();
+	    _free = true;
+        }
+    }
+
+    /**
+     * Invokes the == operator on the actual classes being wrapped.
+     *
+     * @return whether the two values are equal.
+     * @param rhs element to compare with.
+     */
+    bool operator==(const ElemRefAny<T>& rhs) const {
+        return (*_val) == rhs.val();
+    }
+
+    /**
+     * Invoke the < operator in the wrapped class.
+     *
+     * @return whether this is less than argument.
+     * @param rhs element to compare with.
+     */
+    bool operator<(const ElemRefAny<T>& rhs) const {
+        return (*_val) < rhs.val();
+    }
+
+    /**
+     * Invokes the str() method of the actual class being wrapped.
+     *
+     * @return string representation of element.
+     */
+    string str() const { return _val->str(); }
+
+    /**
+     * @return the actual object of the class being wrapped.
+     */
+    const T& val() const { return *_val; }
+
+    const char* type() const { return id; }
+
+    ElemRefAny(const ElemRefAny<T>& copy) : Element() {
+	_val = copy._val;
+	_free = copy._free;
+	copy._free = false;
+    }
+
+private:
+    ElemRefAny& operator=(const ElemRefAny<T>&);
+
+    const T* _val;
+    mutable bool _free;
+};
+
 // User defined types
-typedef ElemAny<IPv4>		ElemIPv4;
-typedef ElemAny<IPv6>		ElemIPv6;
-typedef ElemAny<IPv4Range>	ElemIPv4Range;
-typedef ElemAny<IPv6Range>	ElemIPv6Range;
-typedef ElemAny<IPNet<IPv4> >	ElemIPv4Net;
-typedef ElemAny<IPNet<IPv6> >	ElemIPv6Net;
-typedef ElemAny<U32Range>	ElemU32Range;
+typedef ElemRefAny<IPv4>	    ElemIPv4;
+typedef ElemAny<IPv6>		    ElemIPv6;
+typedef ElemAny<IPv4Range>	    ElemIPv4Range;
+typedef ElemAny<IPv6Range>	    ElemIPv6Range;
+typedef ElemRefAny<IPNet<IPv4> >    ElemIPv4Net;
+typedef ElemAny<IPNet<IPv6> >	    ElemIPv6Net;
+typedef ElemAny<U32Range>	    ElemU32Range;
 
 #endif // __POLICY_COMMON_ELEMENT_HH__

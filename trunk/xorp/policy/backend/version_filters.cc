@@ -13,19 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/policy/backend/version_filters.cc,v 1.1 2005/07/20 01:29:23 abittau Exp $"
 
 #include "config.h"
 #include "version_filters.hh"
 #include "version_filter.hh"
 
-const string VersionFilters::filter_import("filter_im");
-const string VersionFilters::filter_sm("filter_sm");
-const string VersionFilters::filter_ex("filter_ex");
-
 VersionFilters::VersionFilters() : PolicyFilters(
-				    new VersionFilter(filter_import),
-				    new VersionFilter(filter_sm),
-				    new VersionFilter(filter_ex))
+				    new VersionFilter(VarRW::VAR_FILTER_IM),
+				    new VersionFilter(VarRW::VAR_FILTER_SM),
+				    new VersionFilter(VarRW::VAR_FILTER_EX))
 {
 }

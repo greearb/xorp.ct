@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,14 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.3 2005/03/25 02:54:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.4 2005/08/04 15:26:59 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "policy/common/policy_utils.hh"
-
 #include "file_varrw.hh"
 
 FileVarRW::FileVarRW(const string& fname) {
@@ -91,14 +91,20 @@ FileVarRW::doLine(const string& str) {
     cout << "FileVarRW adding variable " << varname 
 	 << " of type " << type << ": " << e->str() << endl;
 
-    _map[varname] = e;
+   
+    char* err = 0;
+    Id id = strtol(varname.c_str(), &err, 10);
+    if (*err) {
+	throw Error(string("Varname must be ID [numeric]: ") + err);
+    }
+
+    _map[id] = e;
 
     return true;
 }
 
-
 const Element&
-FileVarRW::read(const string& id) {
+FileVarRW::read(const Id& id) {
     Map::iterator i = _map.find(id);
 
     if(i == _map.end())
@@ -113,7 +119,7 @@ FileVarRW::read(const string& id) {
 }
 
 void
-FileVarRW::write(const string& id, const Element& e) {
+FileVarRW::write(const Id& id, const Element& e) {
     cout << "FileVarRW WRITE " << id << ": " 
 	 << e.str() << endl;
 
@@ -128,7 +134,6 @@ FileVarRW::sync() {
 
     clear_trash();
 }
-
 
 void
 FileVarRW::clear_trash() {

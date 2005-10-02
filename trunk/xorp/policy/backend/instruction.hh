@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.3 2005/07/15 02:27:08 abittau Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.4 2005/08/04 15:26:57 bms Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
@@ -25,6 +25,7 @@
 #include "policy/common/element_base.hh"
 #include "policy/common/operator_base.hh"
 #include "policy/common/policy_exception.hh"
+#include "policy/common/varrw.hh"
 #include "instr_visitor.hh"
 #include "instruction_base.hh"
 #include <string>
@@ -119,17 +120,17 @@ public:
     /**
      * @param var identifier of variable to load.
      */
-    Load(const string& var) : _var(var) {}
+    Load(const VarRW::Id& var) : _var(var) {}
 
     INSTR_VISITABLE();
     
     /**
      * @return identifier of variable to read.
      */
-    const string& var() const { return _var; }
+    const VarRW::Id& var() const { return _var; }
 
 private:
-    string _var;
+    VarRW::Id _var;
 };
 
 /**
@@ -143,17 +144,17 @@ public:
     /**
      * @param var identifier of variable to store.
      */
-    Store(const string& var) : _var(var) {}
+    Store(const VarRW::Id& var) : _var(var) {}
 
     INSTR_VISITABLE();
 
     /**
      * @return identifier of variable to write.
      */
-    const string& var() const { return _var; }
+    const VarRW::Id& var() const { return _var; }
 
 private:
-    string _var;
+    VarRW::Id _var;
 };
 
 /**

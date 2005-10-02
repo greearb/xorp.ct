@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.5 2005/07/15 02:27:07 abittau Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.6 2005/08/04 15:26:56 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,8 +28,6 @@
 
 using namespace policy_utils;
 
-const string VarMap::TRACE = "trace";
-
 const VarMap::VariableMap&
 VarMap::variablemap(const string& protocol) const
 {
@@ -44,15 +42,18 @@ VarMap::variablemap(const string& protocol) const
 }
 
 const VarMap::Variable&
-VarMap::variable(const string& protocol, const string& varname) const
+VarMap::variable(const string& protocol, const VarRW::Id& varname) const
 {
     const VariableMap& vmap = variablemap(protocol);
 
     VariableMap::const_iterator i = vmap.find(varname);
 
-    if(i == vmap.end())
-	throw VarMapErr("Unknown variable: " + varname + " in protocol " +
-			protocol);
+    if(i == vmap.end()) {
+	ostringstream oss;
+
+	oss << "Unknown variable: " << varname << " in protocol " << protocol;
+	throw VarMapErr(oss.str());
+    }			
 
     const Variable* v = (*i).second;
 
@@ -62,7 +63,7 @@ VarMap::variable(const string& protocol, const string& varname) const
 
 VarMap::VarMap(ProcessWatchBase& pw) : _process_watch(pw) 
 {
-    add_metavariable(TRACE, "u32", WRITE);
+    add_metavariable(new Variable("trace", "u32", WRITE, VarRW::VAR_TRACE));
 }
 
 VarMap::~VarMap()
@@ -86,31 +87,36 @@ VarMap::protocol_known(const string& protocol)
 }
 
 void 
-VarMap::add_variable(VariableMap& vm, const string& varname, 
-		     const string& type, Access acc)
+VarMap::add_variable(VariableMap& vm, Variable* var)
 {
+    VariableMap::iterator i = vm.find(var->id);
 
-    VariableMap::iterator i = vm.find(varname);
+    if(i != vm.end()) {
+	ostringstream oss;
 
-    if(i != vm.end()) 
-	throw VarMapErr("Variable " + varname + " exists already");
+	oss << "Variable " << var->id << " exists already";
+	delete var;
+	throw VarMapErr(oss.str());
+    }	
     
-    Variable* var = new Variable(varname,type,acc);
-    vm[varname] = var;
+    vm[var->id] = var;
 }
 
 void 
-VarMap::add_protocol_variable(const string& protocol, 
-			      const string& varname, 
-			      const string& type, Access acc)
+VarMap::add_protocol_variable(const string& protocol, Variable* var)
 {
 
-    debug_msg("[POLICY] VarMap added proto: %s, var: %s, type: %s, R/W: %d\n",
-	      protocol.c_str(), varname.c_str(), type.c_str(), acc);
+    debug_msg("[POLICY] VarMap adding proto: %s, var: %s, type: %s, R/W: %d, ID: %d\n",
+	      protocol.c_str(), var->name.c_str(), 
+	      var->type.c_str(), var->access, var->id);
 
-    if (!ElementFactory::can_create(type)) {
-	throw VarMapErr("Unable to create element of type: " + type
-			+ " in proto: " + protocol + " varname: " + varname);
+    if (!ElementFactory::can_create(var->type)) {
+	ostringstream oss;
+
+	oss << "Unable to create element of type: " << var->type
+	    << " in proto: " << protocol << " varname: " << var->name;
+	delete var;    
+	throw VarMapErr(oss.str());
     }
 
     ProtoMap::iterator iter = _protocols.find(protocol);
@@ -128,26 +134,29 @@ VarMap::add_protocol_variable(const string& protocol,
 	     _metavars.end(); ++i) {
 	    
 	    Variable* v = i->second;
-	    add_variable(*vm, v->name, v->type, v->access);
+	    add_variable(*vm, new Variable(*v));
 	}
     }
     // or else just update existing one
     else 
         vm = (*iter).second;
 
-    add_variable(*vm,varname,type,acc);
+    add_variable(*vm, var);
 
 }
 
 void
-VarMap::add_metavariable(const string& variable, const string& type, Access acc)
+VarMap::add_metavariable(Variable* v)
 {
-    if (_metavars.find(variable) != _metavars.end()) {
-	throw VarMapErr("Metavar: " + variable + " exists already");
+    if (_metavars.find(v->id) != _metavars.end()) {
+	ostringstream oss;
+
+	oss << "Metavar: " << v->id << " exists already" << endl;
+	delete v;
+	throw VarMapErr(oss.str());
     }
 
-    Variable* v = new Variable(variable, type, acc);
-    _metavars[variable] = v;
+    _metavars[v->id] = v;
 }
 
 string
@@ -175,4 +184,25 @@ VarMap::str()
     }
 
     return out.str();
+}
+
+VarRW::Id
+VarMap::var2id(const string& protocol, const string& varname) const
+{
+    ProtoMap::const_iterator i = _protocols.find(protocol);
+
+    if (i == _protocols.end())
+	throw VarMapErr("Unknown protocol: " + protocol);
+
+    const VariableMap* vm = i->second;
+
+    // XXX slow & lame.  Semantic checking / compilation will be slow.
+    for (VariableMap::const_iterator j = vm->begin(); j != vm->end(); ++j) {
+	const Variable* v = j->second;
+
+	if (v->name == varname)
+	    return v->id;
+    }
+
+    throw VarMapErr("Unknown variable: " + varname);
 }

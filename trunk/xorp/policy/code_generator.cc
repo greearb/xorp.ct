@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.5 2005/07/15 02:27:06 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.6 2005/08/04 15:26:54 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,21 +21,25 @@
 
 #include "policy_module.h"
 #include "code_generator.hh"    
-    
-CodeGenerator::CodeGenerator()
+
+CodeGenerator::CodeGenerator(const VarMap& varmap) : _varmap(varmap)
 {
 }
 
 CodeGenerator::CodeGenerator(const string& proto, 
-			     const filter::Filter& filter)
+			     const filter::Filter& filter,
+			     const VarMap& varmap) : _varmap(varmap)
 {
+    _protocol = proto;
     _code._target.protocol = proto;
     _code._target.filter = filter;
 }
 
 // constructor for import policies
-CodeGenerator::CodeGenerator(const string& proto)
+CodeGenerator::CodeGenerator(const string& proto, const VarMap& varmap) : 
+				_varmap(varmap)
 {
+    _protocol = proto;
     _code._target.protocol = proto;
     _code._target.filter = filter::IMPORT;
 }
@@ -121,7 +125,9 @@ CodeGenerator::visit(NodeAssign& node)
 {
     node.rvalue().accept(*this);
 
-    _os << "STORE " << node.varid() << endl;
+    VarRW::Id id = _varmap.var2id(protocol(), node.varid());
+
+    _os << "STORE " << id << endl;
     return NULL;
 }
 
@@ -136,7 +142,9 @@ CodeGenerator::visit(NodeElem& node)
 const Element* 
 CodeGenerator::visit(NodeVar& node)
 {
-    _os << "LOAD " << node.val() << endl;
+    VarRW::Id id = _varmap.var2id(protocol(), node.val());
+
+    _os << "LOAD " << id << endl;
     return NULL;
 }
 
@@ -194,4 +202,10 @@ const Element*
 CodeGenerator::visit(NodeProto& proto)
 {
     return visit_proto(proto);
+}
+
+const string&
+CodeGenerator::protocol()
+{
+    return _protocol;
 }

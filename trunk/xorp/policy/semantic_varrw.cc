@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.3 2005/07/08 02:06:21 abittau Exp $"
+#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.4 2005/08/04 15:26:56 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -32,7 +33,7 @@ SemanticVarRW::~SemanticVarRW() {
 }
 
 const Element& 
-SemanticVarRW::read(const string& id) {
+SemanticVarRW::read(const Id& id) {
     const VarMap::Variable& var = _vars.variable(_protocol,id);
 
     Element* e =  _ef.create(var.type,NULL);
@@ -42,7 +43,7 @@ SemanticVarRW::read(const string& id) {
 }
 
 void 
-SemanticVarRW::write(const string& id, const Element& elem) {
+SemanticVarRW::write(const Id& id, const Element& elem) {
     // this will throw exception on unknown variable
     const VarMap::Variable& var = _vars.variable(_protocol,id);
 

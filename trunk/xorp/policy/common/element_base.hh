@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element_base.hh,v 1.1 2004/09/17 13:48:58 abittau Exp $
+// $XORP: xorp/policy/common/element_base.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_BASE_HH__
 #define __POLICY_COMMON_ELEMENT_BASE_HH__
@@ -27,14 +28,7 @@
  */
 class Element {
 public:
-    /**
-     * Every element has a type which is representable by a string. This type is
-     * later used by the policy semantic checker to ensure validity of policy
-     * statements.
-     *
-     * @param type unique string representation of element type.
-     */
-    Element(const std::string& type) : _type(type) {}
+    typedef unsigned char Hash;
 
     virtual ~Element() {}
 
@@ -50,15 +44,10 @@ public:
     /**
      * @return string representation of element type.
      */
-    const std::string& type() const { return _type; }
+    virtual const char* type() const = 0;
 
-
-private:
-    /**
-     * Type must be unique as it is used by dispatcher for determining the
-     * correct callback to execute.
-     */
-    const std::string _type;
+    virtual Hash hash() const = 0;
+    virtual void set_hash(const Hash&) = 0;
 };
 
 #endif // __POLICY_COMMON_ELEMENT_BASE_HH__

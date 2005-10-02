@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.6 2005/07/14 01:10:22 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.7 2005/08/04 15:26:59 bms Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -31,101 +31,69 @@
 #include "register_operations.hh"
 
 // init static members
-Dispatcher::Map Dispatcher::_map;
+Dispatcher::Value Dispatcher::_map[32768];
 RegisterOperations Dispatcher::_regops;
+unsigned Dispatcher::_ophash = 1;
+unsigned Dispatcher::_elemhash = 1;
 
 Dispatcher::Dispatcher()
 {
 }
 
-Dispatcher::Key
-Dispatcher::makeKey(const Oper& op, const ArgList& args) const
-{
-    XLOG_ASSERT(op.arity() == args.size());
-   
-    // XXX: key has to be fast to compute!!!
-    string key("");
-
-    // make key unique based on operation
-    key += op.str();
-
-    for(ArgList::const_iterator i = args.begin();
-	i != args.end(); ++i) {
-    
-	const Element* arg = *i;
-
-	// delimiter
-	key += "_";
-
-	// unique based on type / arg position
-	key += arg->type();
-    }	
-                    
-    return key;
-}   
-
 Element*
-Dispatcher::run(const Oper& op, const ArgList& args) const
+Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 {
-    unsigned arity = op.arity();
-    unsigned argno = args.size();
+    XLOG_ASSERT(op.arity() == argc);
 
-    // make sure we got correct # of args
-    if(arity != argno) {
-	ostringstream oss;
+    unsigned key = 0;
+    key |= op.hash();
+    XLOG_ASSERT(key);
 
-	oss << "Wrong number of args. Arity: " << arity 
-	    << " Args supplied: " << argno;
-
-	throw OpNotFound(oss.str());
-    }
-
-    const Element* first_args[2];
-    int j = 0;
     // check for null arguments and special case them: return null
-    for(ArgList::const_iterator i = args.begin();
-	i != args.end(); ++i) {
+    for (unsigned i = 0; i < argc; i++) {
     
-	const Element* arg = *i;
+	const Element* arg = argv[i];
+	unsigned char h = arg->hash();
 
-	if (j < 2) {
-	    first_args[j] = arg;
-	    j++;
-	}
+	XLOG_ASSERT(h);
 
-	if(arg->type() == ElemNull::id)
+	if(h == ElemNull::_hash)
 	    return new ElemNull();
-    }
 
+	key |= h << (5*(argc-i));
+	    
+    }
+    
     // check for constructor
-    if (argno == 2 && typeid(op) == typeid(OpCtr)) {
-	string arg1type = first_args[0]->type();
+    if (argc == 2 && typeid(op) == typeid(OpCtr)) {
+	string arg1type = argv[1]->type();
 
 	if (arg1type != ElemStr::id)
 	    throw OpNotFound("First argument of ctr must be txt type, but is: " 
 			     + arg1type);
 	
-	const ElemStr& es = dynamic_cast<const ElemStr&>(*first_args[0]);
+	const ElemStr& es = dynamic_cast<const ElemStr&>(*argv[1]);
 
-	return operations::ctr(es, *(first_args[1]));
+	return operations::ctr(es, *(argv[0]));
     }
-
-    // find function
-    Value funct = lookup(op,args);
-
     
+    // find function
+    Value funct = _map[key];
+
     // expand args and execute function
-    switch(arity) {
+    switch(argc) {
 	case 1:
-	    return funct.un(*(args[0]));
+	    XLOG_ASSERT(funct.un);
+	    return funct.un(*(argv[0]));
 	
 	case 2:
-	    return funct.bin(*(args[0]),*(args[1]));
+	    XLOG_ASSERT(funct.bin);
+	    return funct.bin(*(argv[1]),*(argv[0]));
 
 	// the infrastructure is ready however.
 	default:
 	    throw OpNotFound("Operations of arity: " +
-			     policy_utils::to_str(arity) + 
+			     policy_utils::to_str(argc) + 
 			     " not supported");
     }
     // unreach
@@ -135,12 +103,12 @@ Dispatcher::run(const Oper& op, const ArgList& args) const
 Element* 
 Dispatcher::run(const UnOper& op, const Element& arg) const
 {
-    // prepare arglist
-    ArgList args;
-    args.push_back(&arg);
+    static const Element* argv[1];
 
+    argv[0] = &arg;
     // execute generic run
-    return run(op,args);
+
+    return run(op, 1, argv);
 }
 
 Element* 
@@ -148,11 +116,43 @@ Dispatcher::run(const BinOper& op,
 		const Element& left, 
 		const Element& right) const
 {
-    // prepare arglist and execute generic run
-    ArgList args;
+    static const Element* argv[2];
 
-    args.push_back(&left);
-    args.push_back(&right);
+    argv[0] = &right;
+    argv[1] = &left;
 
-    return run(op,args);
+    return run(op, 2, argv);
+}
+
+void
+Dispatcher::assign_op_hash(const Oper& op)
+{
+    if (op.hash())
+	return;
+
+    // XXX
+    if (_ophash > 31) {
+	throw PolicyException("Too many operations for dispatcher---find a better hashing mechanism\n");
+    }
+
+    op.set_hash(_ophash);
+    _ophash++;
+}
+
+void
+Dispatcher::assign_elem_hash(Element& e)
+{
+    if (e.hash())
+	return;
+
+    if (_elemhash == ElemNull::_hash)
+	_elemhash++;
+
+    // XXX
+    if (_elemhash > 31) {
+	throw PolicyException("Too many elems for dispatcher---find a better hashing mechanism\n");
+    }
+
+    e.set_hash(_elemhash);
+    _elemhash++;
 }

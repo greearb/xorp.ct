@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.5 2005/03/25 02:54:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.6 2005/09/04 18:35:50 abittau Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"
@@ -31,26 +31,26 @@ template <class A>
 void
 RIPVarRW<A>::start_read()
 {
-    initialize("policytags", _route.policytags().element());
+    initialize(VAR_POLICYTAGS, _route.policytags().element());
 
     read_route_nexthop(_route);
 
-    initialize("metric", new ElemU32(_route.cost()));
-    initialize("tag", new ElemU32(_route.tag()));
+    initialize(VAR_METRIC, new ElemU32(_route.cost()));
+    initialize(VAR_TAG, new ElemU32(_route.tag()));
 }
 
 template <class A>
 Element*
-RIPVarRW<A>::single_read(const string& /* id */)
+RIPVarRW<A>::single_read(const Id& /* id */)
 {
     XLOG_UNREACHABLE();
 }
 
 template <class A>
 void
-RIPVarRW<A>::single_write(const string& id, const Element& e)
+RIPVarRW<A>::single_write(const Id& id, const Element& e)
 {
-    if (id == "policytags") {
+    if (id == VAR_POLICYTAGS) {
 	_route.set_policytags(e);
 	return;
     }
@@ -64,13 +64,13 @@ RIPVarRW<A>::single_write(const string& id, const Element& e)
 	XLOG_ASSERT(u32 != NULL);
     }
 
-    if (id == "metric") {
+    if (id == VAR_METRIC) {
 	XLOG_ASSERT(u32 != NULL);
 
 	_route.set_cost(u32->val());
 	return;
     }
-    if (id == "tag") {
+    if (id == VAR_TAG) {
 	XLOG_ASSERT(u32 != NULL);
 
 	_route.set_tag(u32->val());
@@ -82,9 +82,9 @@ RIPVarRW<A>::single_write(const string& id, const Element& e)
 
 template <>
 bool
-RIPVarRW<IPv4>::write_nexthop(const string& id, const Element& e)
+RIPVarRW<IPv4>::write_nexthop(const Id& id, const Element& e)
 {
-    if (id == "nexthop4" && e.type() == ElemIPv4::id) {
+    if (id == VAR_NEXTHOP4 && e.type() == ElemIPv4::id) {
 	const ElemIPv4* v4 = dynamic_cast<const ElemIPv4*>(&e);
 
 	XLOG_ASSERT(v4 != NULL);
@@ -101,11 +101,11 @@ template <>
 void
 RIPVarRW<IPv4>::read_route_nexthop(RouteEntry<IPv4>& route)
 {
-    initialize("network4", new ElemIPv4Net(route.net()));
-    initialize("nexthop4", new ElemIPv4(route.nexthop()));
+    initialize(VAR_NETWORK4, new ElemIPv4Net(route.net()));
+    initialize(VAR_NEXTHOP4, new ElemIPv4(route.nexthop()));
     
-    initialize("network6", NULL);
-    initialize("nexthop6", NULL);
+    initialize(VAR_NETWORK6, NULL);
+    initialize(VAR_NEXTHOP6, NULL);
 }
 
 template class RIPVarRW<IPv4>;
@@ -114,9 +114,9 @@ template class RIPVarRW<IPv4>;
 #ifdef INSTANTIATE_IPV6
 template <>
 bool
-RIPVarRW<IPv6>::write_nexthop(const string& id, const Element& e)
+RIPVarRW<IPv6>::write_nexthop(const Id& id, const Element& e)
 {
-    if (id == "nexthop6" && e.type() == ElemIPv6::id) {
+    if (id == VAR_NEXTHOP6 && e.type() == ElemIPv6::id) {
 	const ElemIPv6* v6 = dynamic_cast<const ElemIPv6*>(&e);
 
 	XLOG_ASSERT(v6 != NULL);
@@ -133,11 +133,11 @@ template <>
 void
 RIPVarRW<IPv6>::read_route_nexthop(RouteEntry<IPv6>& route)
 {
-    initialize("network6", new ElemIPv6Net(route.net()));
-    initialize("nexthop6", new ElemIPv6(route.nexthop()));
+    initialize(VAR_NETWORK6, new ElemIPv6Net(route.net()));
+    initialize(VAR_NEXTHOP6, new ElemIPv6(route.nexthop()));
     
-    initialize("network4", NULL);
-    initialize("nexthop4", NULL);
+    initialize(VAR_NETWORK4, NULL);
+    initialize(VAR_NEXTHOP4, NULL);
 }
 
 template class RIPVarRW<IPv6>;

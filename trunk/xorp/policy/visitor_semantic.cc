@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.7 2005/07/16 00:27:28 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.8 2005/08/04 15:26:56 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,10 +29,11 @@
 #include <sstream>
 
 VisitorSemantic::VisitorSemantic(SemanticVarRW& varrw, 
+				 VarMap& varmap,
 				 SetMap& setmap,
 				 const string& protocol, 
 				 PolicyType ptype) : 
-		_varrw(varrw), _setmap(setmap), 
+		_varrw(varrw), _varmap(varmap), _setmap(setmap), 
 		_protocol(protocol), _ptype(ptype) 
 {
 }
@@ -66,7 +67,7 @@ VisitorSemantic::visit(Term& term)
     _current_protocol = "";
     // assume import policy, so set protocol to whatever protocol instantiated
     // the policy
-    _varrw.set_protocol(_protocol);
+    change_protocol(_protocol);
 
     // go through the source block
     bool empty_source = true;
@@ -78,7 +79,7 @@ VisitorSemantic::visit(Term& term)
 
     // if it was an export policy maybe varrw was switched to some other
     // protocol during source match, so replace it with original protocol.
-    _varrw.set_protocol(_protocol);
+    change_protocol(_protocol);
 
     // if it is an export policy, a source protocol must be specified [XXX: need
     // to fix this]
@@ -168,7 +169,8 @@ VisitorSemantic::visit(NodeAssign& node)
 
     // try assignment
     try {
-    _varrw.write(node.varid(),*rvalue);
+	VarRW::Id id = _varmap.var2id(current_protocol(), node.varid());
+	_varrw.write(id, *rvalue);
     } catch(SemanticVarRW::var_error e) {
         ostringstream error;
 
@@ -184,7 +186,8 @@ VisitorSemantic::visit(NodeVar& node)
 {
     // try reading a variable
     try {
-    return &_varrw.read(node.val());
+	VarRW::Id id = _varmap.var2id(current_protocol(), node.val());
+	return &_varrw.read(id);
     } catch(SemanticVarRW::var_error e) {
         ostringstream error;
 
@@ -255,6 +258,19 @@ VisitorSemantic::visit(NodeProto& node)
     // do the switch
     _current_protocol = proto;
     // make the varrw emulate the new protocol
-    _varrw.set_protocol(_current_protocol);
+    change_protocol(_current_protocol);
     return NULL;
+}
+
+void
+VisitorSemantic::change_protocol(const string& proto)
+{
+    _semantic_proto = proto;
+    _varrw.set_protocol(_semantic_proto);
+}
+
+const string&
+VisitorSemantic::current_protocol()
+{
+    return _semantic_proto;
 }

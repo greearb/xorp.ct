@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor.hh,v 1.3 2005/07/01 22:54:35 abittau Exp $
+// $XORP: xorp/policy/visitor.hh,v 1.4 2005/07/15 02:27:07 abittau Exp $
 
 #ifndef __POLICY_VISITOR_HH__
 #define __POLICY_VISITOR_HH__
@@ -22,7 +22,6 @@
 #include <string>
 
 template<class T> class NodeAny;
-
 typedef NodeAny<string>	NodeVar;
 
 class NodeElem;

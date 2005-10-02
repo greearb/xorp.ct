@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/bgp_varrw_export.hh,v 1.1 2005/07/08 02:06:17 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_EXPORT_HH__
 #define __BGP_BGP_VARRW_EXPORT_HH__
@@ -32,13 +32,10 @@ public:
     /**
      * same as BGPVarRW but returns a different neighbor.
      *
-     * @param rtmsg the message to filter and possibly modify.
-     * @param no_modify if true, the route will not be modified.
      * @param name the name of the filter printed while tracing.
      * @param neighbor value to return for neighbor variable.
      */
-    BGPVarRWExport(const InternalMessage<A>& rtmsg, bool no_modify, 
-		   const string& name, const string& neighbor);
+    BGPVarRWExport(const string& name, const string& neighbor);
 
 protected:
     /**

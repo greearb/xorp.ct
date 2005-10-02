@@ -1,2 +1,2 @@
-policytags	set_u32 123
-aspath		txt 7865
+1	set_u32 123
+14	txt 7865

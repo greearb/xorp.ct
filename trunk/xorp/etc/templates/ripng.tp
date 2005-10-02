@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.23 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.24 2005/09/30 15:09:57 zec Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -213,10 +213,10 @@ protocols {
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=network6&type:txt=ipv6net&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=metric&type:txt=u32&access:txt=rw";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=tag&type:txt=u32&access:txt=rw";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=nexthop6&type:txt=ipv6&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ripng&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=15";
 
     policy-statement @: txt {
 	term @: txt {

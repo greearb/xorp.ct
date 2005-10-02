@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.3 2005/07/09 00:32:45 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.4 2005/08/04 15:26:55 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -192,7 +192,7 @@ PolicyList::semantic_check(PolicyStatement& ps,
     // [i.e. protocol and import/export pair].
     SemanticVarRW varrw(_varmap);
 
-    VisitorSemantic sem_check(varrw,_smap,_protocol,type);
+    VisitorSemantic sem_check(varrw, _varmap, _smap,_protocol,type);
 
     // exception will be thrown if all goes wrong.
     ps.accept(sem_check);
@@ -207,7 +207,7 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
     semantic_check(ps,VisitorSemantic::IMPORT);
 
     // generate the code
-    CodeGenerator cg(_protocol);
+    CodeGenerator cg(_protocol, _varmap);
     ps.accept(cg);
 
     // make a copy of the code
@@ -236,14 +236,14 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
 			   uint32_t& tagstart)
 {
     // make sure policy makes sense
-    semantic_check(ps,VisitorSemantic::EXPORT);
+    semantic_check(ps, VisitorSemantic::EXPORT);
 
     // generate source match code
-    SourceMatchCodeGenerator smcg(tagstart);
+    SourceMatchCodeGenerator smcg(tagstart, _varmap);
     ps.accept(smcg);
 
     // generate Export code
-    ExportCodeGenerator ecg(_protocol, smcg.tags());
+    ExportCodeGenerator ecg(_protocol, smcg.tags(), _varmap);
     ps.accept(ecg);
 
     // update the global tag start

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.12 2005/08/02 20:52:15 zec Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.13 2005/08/04 15:26:59 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,6 +24,7 @@
 #include "element.hh"
 #include "elem_set.hh"
 #include "elem_null.hh"
+#include "elem_bgp.hh"
 #include "operator.hh"
 #include "element_factory.hh"
 #include "policy_utils.hh"
@@ -199,6 +200,63 @@ str_setregex(const ElemStr& left, const ElemSetStr& right)
     return new ElemBool(false);
 }
 
+Element*
+aspath_prepend(const ElemU32& left, const ElemAsPath& right)
+{
+    AsPath* path = new AsPath(right.val());
+    path->prepend_as(AsNum(left.val()));
+
+    ElemAsPath* ret = new ElemAsPath(*path, true);
+
+    return ret;
+}
+
+Element*
+aspath_expand(const ElemU32& left, const ElemAsPath& right)
+{
+    AsPath* path = new AsPath(right.val());
+
+    if (path->path_length()) {
+        const AsNum& head = path->first_asnum();
+
+	unsigned times = left.val();
+        for (unsigned i = 0; i < times; ++i)
+	   path->prepend_as(head);
+    }	   
+
+    ElemAsPath* ret = new ElemAsPath(*path, true);
+    return ret;
+}
+
+Element*
+aspath_contains(const ElemAsPath& left, const ElemU32& right)
+{
+    return new ElemBool(left.val().contains(AsNum(right.val())));
+}
+
+Element*
+aspath_regex(const ElemAsPath& left, const ElemStr& right)
+{
+    return new ElemBool(policy_utils::regex(left.val().short_str(), right.val()));
+}
+
+Element*
+aspath_regex(const ElemAsPath& left, const ElemSetStr& right)
+{
+    string str = left.val().short_str();
+
+    // go through all regexps...
+    // only 1 needs to match...
+    for (ElemSetStr::const_iterator i = right.begin(); i != right.end(); ++i) {
+	const ElemStr& re = *i;
+
+	if (policy_utils::regex(str, re.val()))
+	    return new ElemBool(true);
+    }
+
+    return new ElemBool(false);
+}
+
 } // namespace
 
 // XXX: hack to compile on 2.95.x [may not use &operation::op... with templates]
@@ -272,6 +330,14 @@ do {									\
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_ne_int>(OpNEInt());
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_add>(OpAdd());
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_del>(OpSub());
+
+    // ASPATH operations
+    disp.add<ElemU32, ElemAsPath, operations::aspath_prepend>(OpAdd());
+    disp.add<ElemU32, ElemAsPath, operations::aspath_expand>(OpMul());
+    disp.add<ElemAsPath, ElemU32, operations::aspath_contains>(OpNEInt());
+    disp.add<ElemAsPath, ElemStr, operations::aspath_regex>(OpRegex());
+    disp.add<ElemAsPath, ElemSetStr, operations::aspath_regex>(OpRegex());
+
 
 #define ADD_LSETBINOP(set, arg)						\
 do {									\

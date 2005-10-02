@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.6 2005/08/06 11:10:46 bms Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.7 2005/09/27 18:50:44 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -28,7 +29,6 @@
  *
  */
 
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -37,10 +37,8 @@
 #include "libxorp/xorp.h"
 #include "policy/common/policy_utils.hh"
 #include "policy/configuration.hh"
-
 #include "process_watch_fake.hh"
 #include "filter_manager_fake.hh"
-
 #include <string>
 #include <iostream>
 #include <fstream>
@@ -53,7 +51,6 @@
 #endif
 
 using namespace policy_utils;
-
 
 ProcessWatchFake pw;
 FilterManagerFake fm;
@@ -193,8 +190,8 @@ void configure_varmap(const string& conf) {
 
     unsigned state = 0;
 
-    // protocol, variable, type, access
-    string tokens[4];
+    // protocol, variable, type, access, id
+    string tokens[5];
 
     while(!iss.eof()) {
 	string token;
@@ -210,9 +207,10 @@ void configure_varmap(const string& conf) {
 	state++;
 	
 	// yacc =D
-	if(state == 4) {
+	if(state == 5) {
 	    _yy_configuration.add_varmap(tokens[0], tokens[1], 
-					 tokens[2], tokens[3]);
+					 tokens[2], tokens[3],
+					 atoi(tokens[4].c_str()));
 	    state = 0;
 	}
     }

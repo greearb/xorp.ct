@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/export_code_generator.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
+// $XORP: xorp/policy/export_code_generator.hh,v 1.3 2005/07/09 00:32:44 abittau Exp $
 
 #ifndef __POLICY_EXPORT_CODE_GENERATOR_HH__
 #define __POLICY_EXPORT_CODE_GENERATOR_HH__
@@ -34,9 +34,11 @@ public:
     /**
      * @param proto Protocol for which code will be generated.
      * @param t information on which tags should be used.
+     * @param varmap varmap.
      */
     ExportCodeGenerator(const string& proto, 
-			const SourceMatchCodeGenerator::Tags& t);
+			const SourceMatchCodeGenerator::Tags& t,
+			const VarMap& varmap);
 
     const Element* visit_term(Term& term);
 

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.22 2005/08/03 13:52:34 zec Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.23 2005/08/25 02:23:45 pavlin Exp $ */
 
 protocols {
     static {
@@ -316,8 +316,8 @@ protocols {
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=network4&type:txt=ipv4net&access:txt=r";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=metric&type:txt=u32&access:txt=rw";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=static_routes&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
 
     policy-statement @: txt {
 	term @: txt {

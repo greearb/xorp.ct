@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.11 2005/09/04 18:35:49 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.12 2005/09/04 20:15:21 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -34,6 +34,21 @@ class BGPVarRWCallbacks;
 template <class A>
 class BGPVarRW : public SingleVarRW {
 public:
+    enum {
+	VAR_NETWORK4 = VAR_PROTOCOL,
+        VAR_NEXTHOP4,
+        VAR_NETWORK6,
+        VAR_NEXTHOP6,
+        VAR_ASPATH,
+        VAR_ORIGIN,
+        VAR_NEIGHBOR,
+        VAR_LOCALPREF,
+        VAR_COMMUNITY,
+        VAR_MED,
+
+	VAR_BGPMAX // must be last
+    };
+
     typedef Element* (BGPVarRW::*ReadCallback)();
     typedef void (BGPVarRW::*WriteCallback)(const Element& e);
 
@@ -42,12 +57,18 @@ public:
      * filtered. This is useful in order to check if a route will be accepted
      * or rejected, without caring about its modifications.
      *
-     * @param rtmsg the message to filter and possibly modify.
-     * @param no_modify if true, the route will not be modified.
      * @param name the name of the filter to print in case of tracing.
      */
-    BGPVarRW(const InternalMessage<A>& rtmsg, bool no_modify, const string& name);
+    BGPVarRW(const string& name);
     virtual ~BGPVarRW();
+
+    /**
+     * Attach a route to the varrw.
+     *
+     * @param rtmsg the message to filter and possibly modify.
+     * @param no_modify if true, the route will not be modified.
+     */
+    void attach_route(const InternalMessage<A>& rtmsg, bool no_modify);
 
     /**
      * Caller owns the message [responsible for delete].
@@ -58,9 +79,9 @@ public:
     InternalMessage<A>* filtered_message();
     
     // SingleVarRW interface
-    Element* single_read(const string& id);
+    Element* single_read(const Id& id);
 
-    void single_write(const string& id, const Element& e);
+    void single_write(const Id& id, const Element& e);
     void end_write();
 
     /**
@@ -122,11 +143,12 @@ protected:
 
 private:
     void clone_palist();
+    void cleanup();
 
-    const InternalMessage<A>&	_orig_rtmsg;
+    const InternalMessage<A>*	_orig_rtmsg;
     InternalMessage<A>*		_filtered_rtmsg;
     bool			_got_fmsg;
-    PolicyTags			_ptags;
+    PolicyTags*			_ptags;
     bool			_wrote_ptags;
     PathAttributeList<A>*	_palist;
     bool			_no_modify;
@@ -148,14 +170,13 @@ public:
     // XXX don't know how to refer to BGPVarRW<A>::ReadCallback in gcc 2.95
     typedef Element* (BGPVarRW<A>::*RCB)();
     typedef void (BGPVarRW<A>::*WCB)(const Element&);
-	    
-    typedef map<string, RCB>  ReadMap;
-    typedef map<string, WCB> WriteMap;
+
+    void init_rw(const VarRW::Id&, RCB, WCB);
 
     BGPVarRWCallbacks();
 
-    ReadMap  _read_map;
-    WriteMap _write_map;
+    RCB _read_map[BGPVarRW<A>::VAR_BGPMAX];
+    WCB _write_map[BGPVarRW<A>::VAR_BGPMAX];
 };
 
 #endif // __BGP_BGP_VARRW_HH__
