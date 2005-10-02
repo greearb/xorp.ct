@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.8 2005/07/12 00:47:51 abittau Exp $
+// $XORP: xorp/policy/term.hh,v 1.9 2005/09/27 18:50:43 pavlin Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -117,9 +117,13 @@ public:
     static string block2str(uint32_t num); 
 
 private:
+    list<pair<ConfigNodeId, Node*> >::iterator find_out_of_order_node(
+	const uint32_t& block, const ConfigNodeId& order);
+
     string _name;
 
     Nodes* _block_nodes[3];
+    list<pair<ConfigNodeId, Node*> > _out_of_order_nodes[3];
 
     Nodes*& _source_nodes; 
     Nodes*& _dest_nodes;

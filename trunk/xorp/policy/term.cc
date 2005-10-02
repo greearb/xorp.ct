@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.12 2005/08/04 15:26:56 bms Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.13 2005/09/27 18:50:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,6 +44,13 @@ Term::~Term()
     for(unsigned int i = 0; i < LAST_BLOCK; i++) {
 	clear_map_container(*_block_nodes[i]);
 	delete _block_nodes[i];
+
+	list<pair<ConfigNodeId, Node*> >::iterator iter;
+	for (iter = _out_of_order_nodes[i].begin();
+	     iter != _out_of_order_nodes[i].end();
+	     ++iter) {
+	    delete iter->second;
+	}
     }
 }
 
@@ -67,7 +74,9 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
     // localpref: 101
     // setting localpref: 102 in same node will cause this...
     Nodes& conf_block = *_block_nodes[block];
-    if (conf_block.find(order) != conf_block.end()) {
+    if ((conf_block.find(order) != conf_block.end())
+	|| (find_out_of_order_node(block, order)
+	    != _out_of_order_nodes[block].end())) {
 	debug_msg("[POLICY] Deleting previous statement...\n");
 	del_block(block, order);
 /*	
@@ -91,7 +100,40 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
     }
     XLOG_ASSERT(nodes->size() == 1); // XXX a single statement!
 
-    conf_block.insert(order, nodes->front());
+    pair<Nodes::iterator, bool> res;
+    res = conf_block.insert(order, nodes->front());
+    if (res.second != true) {
+	//
+	// Failed to add the entry, probably because it was received out of
+	// order. Add it to the list of entries that need to be added later.
+	//
+	_out_of_order_nodes[block].push_back(make_pair(order, nodes->front()));
+	return;
+    }
+
+    //
+    // Try to add any entries that are out of order.
+    // Note that we need to keep trying traversing the list until
+    // no entry is added.
+    //
+    while (true) {
+	bool entry_added = false;
+	list<pair<ConfigNodeId, Node*> >::iterator iter;
+	for (iter = _out_of_order_nodes[block].begin();
+	     iter != _out_of_order_nodes[block].end();
+	     ++iter) {
+	    res = conf_block.insert(iter->first, iter->second);
+	    if (res.second == true) {
+		// Entry added successfully
+		entry_added = true;
+		_out_of_order_nodes[block].erase(iter);
+		break;
+	    }
+	}
+	
+	if (! entry_added)
+	    break;
+    }
 }
 
 void
@@ -103,10 +145,35 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
 
     Nodes::iterator i = conf_block.find(order);
     if (i == conf_block.end()) {
+	// Try to delete from the list of out-of-order nodes
+	list<pair<ConfigNodeId, Node*> >::iterator iter;
+	iter = find_out_of_order_node(block, order);
+	if (iter != _out_of_order_nodes[block].end()) {
+	    _out_of_order_nodes[block].erase(iter);
+	}
+
 	throw term_syntax_error("Want to delete an empty position: " 
 				+ order.str());
     }
     conf_block.erase(i);
+}
+
+list<pair<ConfigNodeId, Node*> >::iterator
+Term::find_out_of_order_node(const uint32_t& block, const ConfigNodeId& order)
+{
+    list<pair<ConfigNodeId, Node*> >::iterator iter;
+
+    XLOG_ASSERT (block < LAST_BLOCK);
+
+    for (iter = _out_of_order_nodes[block].begin();
+	 iter != _out_of_order_nodes[block].end();
+	 ++iter) {
+	const ConfigNodeId& list_order = iter->first;
+	if (list_order.unique_node_id() == order.unique_node_id())
+	    return (iter);
+    }
+
+    return (_out_of_order_nodes[block].end());
 }
 
 string
