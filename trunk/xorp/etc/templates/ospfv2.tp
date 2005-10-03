@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.6 2005/09/16 04:20:10 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.7 2005/10/03 21:10:32 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -86,10 +86,7 @@ the router within an Autonomous System";
 		advertise {
 		    %help: short "Advertise or DoNotAdvertise";
 
-/* XXX Enable this when it works.
-		    %set: "$(ospf4.targetname)/ospfv2/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.$)&advertise:bool=$(@)";
-*/
-		    %set:; /* XXX Remove this when the above works */
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.@)&advertise:bool=$(@)";
 		}
 	    }
 
