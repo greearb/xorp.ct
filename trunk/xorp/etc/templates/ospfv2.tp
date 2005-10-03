@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.5 2005/09/08 16:56:14 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.6 2005/09/16 04:20:10 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -7,6 +7,10 @@ protocols {
 	
 	area @: ipv4 {
 	    area-type:		txt = "normal";
+
+	    area-range @: ipv4net {
+		advertise:	bool = true;
+	    }
 
 	    interface @: txt {
 		link-type:	txt = "broadcast";
@@ -71,11 +75,29 @@ the router within an Autonomous System";
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
 
+	    area-range @: ipv4net {
+		%help: short "Area range for generating summaries";
+
+		%mandatory: $(@.advertise);
+
+		%create: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_add?area:ipv4=$(area.@)&net:ipv4net=$(@)&advertise:bool=$(@.advertise)";
+		%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_delete?area:ipv4=$(area.@)&net:ipv4net=$(@)";
+
+		advertise {
+		    %help: short "Advertise or DoNotAdvertise";
+
+/* XXX Enable this when it works.
+		    %set: "$(ospf4.targetname)/ospfv2/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.$)&advertise:bool=$(@)";
+*/
+		    %set:; /* XXX Remove this when the above works */
+		}
+	    }
+
 	    interface @: txt {
 		%mandatory: $(@.link-type);
 
 		link-type {
-		    %help: short "Tye of link";
+		    %help: short "Type of link";
 
 		    %allow: $(@) "broadcast" "p2p";
 
