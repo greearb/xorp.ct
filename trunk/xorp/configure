@@ -868,6 +868,7 @@ Optional Features:
   --enable-stl-debug      enable STL debugging (requires GCC)
   --enable-optimize       enable compiler optimizations
   --enable-profile        enable profiling
+  --disable-compiler-pipe disable compiler's -pipe compilation option
   --enable-callback-debug enable callback debugging
   --disable-ipv6          disable IPv6 support
   --enable-sim            enable simulator (unimplemented)
@@ -4172,7 +4173,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4175 "configure"' > conftest.$ac_ext
+  echo '#line 4176 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -4447,6 +4448,14 @@ fi;
 if test "${enable_profile+set}" = set; then
   enableval="$enable_profile"
 
+fi;
+
+# Check whether --enable-compiler-pipe or --disable-compiler-pipe was given.
+if test "${enable_compiler_pipe+set}" = set; then
+  enableval="$enable_compiler_pipe"
+
+else
+  enable_compiler_pipe=yes;
 fi;
 
 # Check whether --enable-callback-debug or --disable-callback-debug was given.
@@ -15445,7 +15454,8 @@ echo "${ECHO_T}no" >&6
   done
 
 
-					for ac_flag in "-pipe"
+					if test "${enable_compiler_pipe}" == "yes" ; then
+		for ac_flag in "-pipe"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
   ac_ext=c
@@ -15522,7 +15532,7 @@ echo "${ECHO_T}no" >&6
 
   done
 
-	for ac_flag in "-pipe"
+		for ac_flag in "-pipe"
   do
       ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
   ac_ext=cc
@@ -15599,6 +15609,7 @@ echo "${ECHO_T}no" >&6
 
   done
 
+	fi
 
 					if test "${enable_optimize}" != "yes" ; then
 										CFLAGS=`echo $CFLAGS | sed 's/-O2//g'`

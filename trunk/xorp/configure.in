@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.141 2005/08/18 15:24:05 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.142 2005/09/01 18:03:54 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.141 2005/08/18 15:24:05 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.142 2005/09/01 18:03:54 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -202,6 +202,15 @@ dnl ----------------------------
 AC_ARG_ENABLE([profile],
 	      AC_HELP_STRING([--enable-profile],
 			     [enable profiling]))
+
+dnl ----------------------------------------
+dnl --disable-compiler-pipe (XXX: enabled by default)
+dnl ----------------------------------------
+AC_ARG_ENABLE([compiler-pipe],
+	      AC_HELP_STRING([--disable-compiler-pipe],
+			     [disable compiler's -pipe compilation option]),
+	      [],
+	      [enable_compiler_pipe=yes;])
 
 dnl ----------------------------
 dnl --enable-callback-debug
@@ -856,8 +865,10 @@ if test "${GCC}" = "yes" ; then
 	dnl Try to add the -pipe option, which can significantly speed up
 	dnl compile runs by avoiding the use of temporary files.
 	dnl
-	XR_TRY_ADD_CFLAGS("-pipe")
-	XR_TRY_ADD_CXXFLAGS("-pipe")
+	if test "${enable_compiler_pipe}" == "yes" ; then
+		XR_TRY_ADD_CFLAGS("-pipe")
+		XR_TRY_ADD_CXXFLAGS("-pipe")
+	fi
 
 	dnl
 	dnl Default compiler flags have optimization turned on which
