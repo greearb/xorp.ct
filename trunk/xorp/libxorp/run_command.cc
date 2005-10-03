@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.7 2005/08/01 14:08:47 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.8 2005/08/18 15:28:40 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -312,7 +312,21 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
     } else {
 	// Something bad happened
 	// XXX ideally we'd figure out what.
-	_error_msg += "\nsomething bad happened\n";
+	string prefix, suffix;
+	if (_error_msg.size()) {
+	    prefix = "[";
+	    suffix = "]";
+	}
+	_error_msg += prefix;
+	int error = 0;
+	if (buffer == _stdout_buffer)
+	    error = _stdout_file_reader->error();
+	else
+	    error = _stderr_file_reader->error();
+	_error_msg += c_format("Something bad happened: event = 0x%x "
+			       "(error = %d)",
+			       event, error);
+	_error_msg += suffix;
 	done(event);
     }
 }
