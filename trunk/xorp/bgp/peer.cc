@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.95 2005/08/18 15:58:06 bms Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.96 2005/09/23 17:02:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2194,6 +2194,7 @@ void
 AcceptSession::event_closed_accept()
 {
     // The socket is closed so out of here.
+    _socket_client->disconnect();
     remove();
 }
 
