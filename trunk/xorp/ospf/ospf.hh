@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.49 2005/09/15 17:31:52 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.50 2005/09/15 17:38:16 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -427,6 +427,22 @@ class Ospf {
     bool set_inftransdelay(const string& interface, const string& vif,
 			   OspfTypes::AreaID area,
 			   uint16_t inftransdelay);
+
+    /**
+     * Add area range.
+     */
+    bool area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise);
+
+    /**
+     * Delete area range.
+     */
+    bool area_range_delete(OspfTypes::AreaID area, IPNet<A> net);
+
+    /**
+     * Change the advertised state of this area.
+     */
+    bool area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
+				 bool advertise);
 
     /**
      * Add route

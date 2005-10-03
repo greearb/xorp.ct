@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.50 2005/09/15 17:28:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.51 2005/10/01 05:13:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -126,6 +126,61 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     _areas.erase(_areas.find(area));
 
     return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::area_range_add(OspfTypes::AreaID area, IPNet<A> net,
+			       bool advertise)
+{
+    debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    AreaRouter<A> *area_router = get_area_router(area);
+
+    // Verify that this area is known.
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return area_router->area_range_add(net, advertise);
+}
+
+template <typename A>
+bool
+PeerManager<A>::area_range_delete(OspfTypes::AreaID area, IPNet<A> net)
+{
+    debug_msg("Area %s Net %s\n", pr_id(area).c_str(), cstring(net));
+
+    AreaRouter<A> *area_router = get_area_router(area);
+
+    // Verify that this area is known.
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return area_router->area_range_delete(net);
+}
+
+template <typename A>
+bool
+PeerManager<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
+					bool advertise)
+{
+    debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    AreaRouter<A> *area_router = get_area_router(area);
+
+    // Verify that this area is known.
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return area_router->area_range_change_state(net, advertise);
 }
 
 template <typename A>
@@ -610,7 +665,6 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net)
 
     XLOG_WARNING("TBD: summary withdraw");
 }
-
 
 template class PeerManager<IPv4>;
 template class PeerManager<IPv6>;

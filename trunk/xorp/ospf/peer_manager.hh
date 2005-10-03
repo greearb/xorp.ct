@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.34 2005/10/01 05:13:09 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.35 2005/10/01 05:14:31 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -67,6 +67,21 @@ class PeerManager {
      */
     bool destroy_area_router(OspfTypes::AreaID area);
 
+    /**
+     * Add area range.
+     */
+    bool area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise);
+
+    /**
+     * Delete area range.
+     */
+    bool area_range_delete(OspfTypes::AreaID area, IPNet<A> net);
+
+    /**
+     * Change the advertised state of this area.
+     */
+    bool area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
+				 bool advertise);
 
     /**
      * Convert an interface/vif to a PeerID.
@@ -74,7 +89,6 @@ class PeerManager {
      */
     PeerID get_peerid(const string& interface, const string& vif) 
 	throw(BadPeer);
-
 
     /**
      * Create a peer.

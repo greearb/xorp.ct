@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.58 2005/09/13 18:38:34 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.59 2005/09/13 20:23:04 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -49,6 +49,21 @@ class AreaRouter {
      * Peer went down
      */
     bool peer_down(PeerID peer);
+
+    /**
+     * Add area range.
+     */
+    bool area_range_add(IPNet<A> net, bool advertise);
+
+    /**
+     * Delete area range.
+     */
+    bool area_range_delete(IPNet<A> net);
+
+    /**
+     * Change the advertised state of this area.
+     */
+    bool area_range_change_state(IPNet<A> net, bool advertise);
 
     /**
      * A new set of router links.
@@ -312,7 +327,7 @@ class AreaRouter {
 #endif
 
     /**
-     * Internal state that is required about this peer.
+     * Internal state that is required about each peer.
      */
     struct PeerState {
 	PeerState()
@@ -330,6 +345,16 @@ class AreaRouter {
 					// before recompting.
     XorpTimer _routing_recompute_timer;	// Timer to cause recompute.
     
+    /**
+     * Range to be summarised or suppressed from other areas.
+     */
+    struct Range {
+	bool _advertise;	// Should this range be advertised.
+	list<Lsa_header> _lsas;	// LSAs that are being aggregated.
+    };
+
+    Trie<A, Range> _area_range;	// Area range for summary generation.
+
     /**
      * Start aging LSA.
      *
@@ -661,6 +686,7 @@ class AreaRouter {
      */
     void routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
 			      RouterLsa *rlsa);
+
 };
 
 /**

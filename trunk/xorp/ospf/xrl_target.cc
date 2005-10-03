@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.6 2005/09/07 22:48:53 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.7 2005/09/15 18:33:27 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -438,6 +438,75 @@ XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
     if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "inftransdelay delay");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_area_range_add(const IPv4& a,
+					   const IPv4Net& net,
+					   const bool& advertise)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    if (!_ospf.area_range_add(area, net, advertise))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to add area range "
+				    "area %s net %s advertise %s\n",
+				    pr_id(area).c_str(), cstring(net),
+				    pb(advertise)));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_area_range_delete(const IPv4& a,
+					      const IPv4Net& net)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    if (!_ospf.area_range_delete(area, net))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to delete area range "
+				    "area %s net %s\n",
+				    pr_id(area).c_str(), cstring(net)));
+
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_area_range_change_state(const IPv4& a,
+						    const IPv4Net& net,
+						    const bool&	advertise)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    if (!_ospf.area_range_change_state(area, net, advertise))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to change area range "
+				    "area %s net %s advertise %s\n",
+				    pr_id(area).c_str(), cstring(net),
+				    pb(advertise)));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
+						     const uint32_t& index,
+						     bool& valid,
+						     bool& toohigh,
+						     vector<uint8_t>& /*lsa*/)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s index %u valid %s toohigh %s\n", pr_id(area).c_str(),
+	      index, pb(valid), pb(toohigh));
 
     return XrlCmdError::OKAY();
 }

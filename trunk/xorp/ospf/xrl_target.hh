@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.5 2005/09/07 22:48:54 pavlin Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.6 2005/09/15 18:33:27 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -225,6 +225,57 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	vifname,
 	const IPv4&	area,
 	const uint32_t&	delay);
+
+    /**
+     *  Add area range.
+     */
+    XrlCmdError ospfv2_0_1_area_range_add(
+	// Input values,
+	const IPv4&	area,
+	const IPv4Net&	net,
+	const bool&	advertise);
+
+    /**
+     *  Delete area range.
+     */
+    XrlCmdError ospfv2_0_1_area_range_delete(
+	// Input values,
+	const IPv4&	area,
+	const IPv4Net&	net);
+
+    /**
+     *  Change the advertised state of this area.
+     */
+    XrlCmdError ospfv2_0_1_area_range_change_state(
+	// Input values,
+	const IPv4&	area,
+	const IPv4Net&	net,
+	const bool&	advertise);
+
+    /**
+     *  Get a single lsa from an area. A stateless mechanism to get LSAs. The
+     *  client of this interface should start from zero and continue to request
+     *  LSAs (incrementing index) until toohigh becomes true.
+     *
+     *  @param area database that is being searched.
+     *
+     *  @param index into database starting from 0.
+     *
+     *  @param valid true if a LSA has been returned. Some index values do not
+     *  contain LSAs. This should not be considered an error.
+     *
+     *  @param toohigh true if no more LSA exist after this index.
+     *
+     *  @param lsa if valid is true the LSA at index.
+     */
+    XrlCmdError ospfv2_0_1_get_lsa(
+	// Input values,
+	const IPv4&	area,
+	const uint32_t&	index,
+	// Output values,
+	bool&	valid,
+	bool&	toohigh,
+	vector<uint8_t>&	lsa);
 
  private:
     Ospf<IPv4>& _ospf;

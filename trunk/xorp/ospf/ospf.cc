@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.38 2005/09/12 17:56:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.39 2005/09/16 23:33:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -300,6 +300,36 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
 	return false;
     }
     return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise)
+{
+    debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    return _peer_manager.area_range_add(area, net, advertise);
+}
+
+template <typename A>
+bool
+Ospf<A>::area_range_delete(OspfTypes::AreaID area, IPNet<A> net)
+{
+    debug_msg("Area %s Net %s\n", pr_id(area).c_str(), cstring(net));
+
+    return _peer_manager.area_range_delete(area, net);
+}
+
+template <typename A>
+bool
+Ospf<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
+				 bool advertise)
+{
+    debug_msg("Area %s Net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    return _peer_manager.area_range_change_state(area, net, advertise);
 }
     
 template <typename A>

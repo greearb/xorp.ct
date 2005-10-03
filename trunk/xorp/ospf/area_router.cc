@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.98 2005/09/21 02:38:29 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.99 2005/10/01 03:22:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -166,6 +166,39 @@ AreaRouter<A>::peer_down(PeerID peerid)
     psr->_up = false;
 
     refresh_router_lsa();
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::area_range_add(IPNet<A> net, bool advertise)
+{
+    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+
+    XLOG_WARNING("TBD - area range add");
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::area_range_delete(IPNet<A> net)
+{
+    debug_msg("Net %s\n", cstring(net));
+
+    XLOG_WARNING("TBD - area range delete");
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::area_range_change_state(IPNet<A> net, bool advertise)
+{
+    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+
+    XLOG_WARNING("TBD - area range change state");
 
     return true;
 }
@@ -1954,8 +1987,6 @@ AreaRouter<A>::routing_router_lsaV3(Spt<Vertex>& spt, const Vertex& v,
 
     XLOG_WARNING("TBD - add to SPT");
 }
-
-
 /*************************************************************************/
 
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
