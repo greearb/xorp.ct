@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.27 2005/09/05 20:20:04 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.28 2005/09/09 16:48:54 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -455,8 +455,7 @@ SelectorList::callback_bad_descriptors()
 	/* Check fd is valid.  NB we call fstat without a stat struct to
 	 * avoid copy.  fstat will always fail as a result.
 	 */
-	fstat(fd, 0);
-	if (errno == EBADF) {
+	if ((fstat(fd, 0) < 0) && (errno == EBADF)) {
 	    /* Force callbacks, should force read/writes that fail and
 	     * client should remove descriptor from list. */
 	    XLOG_ERROR("SelectorList found file descriptor %d no longer "
