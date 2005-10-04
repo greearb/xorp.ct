@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.7 2005/10/03 21:10:32 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.8 2005/10/03 23:07:09 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -38,6 +38,7 @@ protocols {
 
 protocols {
     ospf4 {
+	%help:	  short "Configure the OSPF protocol";
 	%modinfo: provides ospf4;
 	%modinfo: depends rib;
 	%modinfo: depends policy;
