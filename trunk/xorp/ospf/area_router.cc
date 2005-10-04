@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.101 2005/10/04 04:11:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.102 2005/10/04 17:13:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -202,6 +202,33 @@ AreaRouter<A>::area_range_change_state(IPNet<A> net, bool advertise)
     XLOG_WARNING("TBD - area range change state");
 
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
+				RouteEntry<A>& rt)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    XLOG_ASSERT(area != _area);
+    XLOG_ASSERT(area != rt.get_area());
+
+    XLOG_WARNING("TBD: summary announce");
+}
+
+template <typename A>
+void
+AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
+				RouteEntry<A>& rt)
+{
+    debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    XLOG_ASSERT(area != _area);
+    XLOG_ASSERT(area != rt.get_area());
+
+    XLOG_WARNING("TBD: summary withdraw");
 }
 
 template <typename A>
@@ -1518,7 +1545,7 @@ template <typename A>
 void 
 AreaRouter<A>::routing_total_recomputeV3()
 {
-    XLOG_WARNING("TBD - routing computaion for V3");
+    XLOG_WARNING("TBD - routing computation for V3");
 }
 
 /**

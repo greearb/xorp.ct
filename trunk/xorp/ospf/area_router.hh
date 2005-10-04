@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.61 2005/10/04 04:11:35 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.62 2005/10/04 19:16:56 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -69,6 +69,21 @@ class AreaRouter {
      * A new set of router links.
      */
     bool new_router_links(PeerID peer, const list<RouterLink>& router_link);
+
+    /**
+     * A new route has been added to the routing table it is being
+     * presented to this area for possible Summary-LSA generation.
+     */
+    void summary_announce(OspfTypes::AreaID area, IPNet<A> net,
+			  RouteEntry<A>& rt);
+
+    /**
+     * A route has been deleted from the routing table. It may
+     * previously have caused a Summary-LSA which now needs to be
+     * withdrawn.
+     */
+    void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
+			  RouteEntry<A>& rt);
 
     /**
      * Generate a Network-LSA for this peer.
