@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.11 2005/10/01 05:28:31 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.12 2005/10/01 05:42:22 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -29,27 +29,121 @@ class RouteEntry {
     /**
      * The ordering is important used to select the best route.
      */
-    enum Path_type {
-	intra_area = 0,
-	inter_area = 1,
-	type1 = 2,
-	type2 = 3
+    enum PathType {
+	intra_area = 1,
+	inter_area = 2,
+	type1 = 3,
+	type2 = 4
     };
-    
-    OspfTypes::VertexType _destination_type;
-    uint32_t _address;			// If dest type is Network
-    OspfTypes:: RouterID _id;		// If dest type is Router
-    bool _area_border_router;		// Only valid if dest type is router
-    bool _as_boundary_router;		// Only valid if dest type is router
 
-//     uint32_t _prefix_length;		// Not convinced this is required.
-    OspfTypes::AreaID _area;		// Associated area.
-    Path_type _path_type;
-    uint32_t _cost;
-    uint32_t _type_2_cost;
+    RouteEntry() : _destination_type(OspfTypes::Router),
+		   _address(0),
+		   _id(0),
+		   _area_border_router(false),
+		   _as_boundary_router(false),
+		   _area(0),
+		   _path_type(intra_area),
+		   _cost(0),
+		   _type_2_cost(0),
+		   _nexthop(A::ZERO()),
+		   _advertising_router(0)
+    {}
 
-    A _nexthop;
-    uint32_t	_advertising_router;
+    void set_destination_type(OspfTypes::VertexType destination_type) {
+	_destination_type = destination_type;
+    }
+
+    OspfTypes::VertexType get_destination_type() const {
+	return _destination_type;
+    }
+
+    void set_address(uint32_t address) {
+	XLOG_ASSERT(OspfTypes::Network == _destination_type);
+	_address = address;
+    }
+
+    uint32_t get_address() const {
+	XLOG_ASSERT(OspfTypes::Network == _destination_type);
+	return _address;
+    }
+
+    void set_router_id(OspfTypes::RouterID id) {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	_id = id;
+    }
+
+    OspfTypes::RouterID get_router_id() const {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	return _id;
+    }
+
+    void set_area_border_router(bool area_border_router) {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	_area_border_router = area_border_router;
+    }
+
+    bool get_area_border_router() const {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	return _area_border_router;
+    }
+
+    void set_as_boundary_router(bool as_boundary_router) {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	_as_boundary_router = as_boundary_router;
+    }
+
+    bool get_as_boundary_router() const {
+	XLOG_ASSERT(OspfTypes::Router == _destination_type);
+	return _as_boundary_router;
+    }
+
+    void set_area(OspfTypes::AreaID area) {
+	_area = area;
+    }
+
+    OspfTypes::AreaID get_area() const {
+	return _area;
+    }
+
+    void set_path_type(PathType path_type) {
+	_path_type = path_type;
+    }
+
+    PathType get_path_type() const {
+	return _path_type;
+    }
+
+    void set_cost(uint32_t cost) {
+	_cost = cost;
+    }
+
+    uint32_t get_cost() const {
+	return _cost;
+    }
+
+    void set_type_2_cost(uint32_t type_2_cost) {
+	_type_2_cost = type_2_cost;
+    }
+
+    uint32_t get_type_2_cost() const {
+	return _type_2_cost;
+    }
+
+    void set_nexthop(A nexthop) {
+	_nexthop = nexthop;
+    }
+
+    A get_nexthop() const {
+	return _nexthop;
+    }
+
+    void set_advertising_router(uint32_t _advertising_router) {
+	_advertising_router = _advertising_router;
+    }
+
+    uint32_t get_advertising_router() const {
+	return _advertising_router;
+    }
 
     string str() {
 	string output;
@@ -58,6 +152,23 @@ class RouteEntry {
 
 	return output;
     }
+
+ private:
+    OspfTypes::VertexType _destination_type;
+
+    uint32_t _address;			// If dest type is Network
+
+    OspfTypes:: RouterID _id;		// If dest type is Router
+    bool _area_border_router;		// Only valid if dest type is router
+    bool _as_boundary_router;		// Only valid if dest type is router
+
+    OspfTypes::AreaID _area;		// Associated area.
+    PathType _path_type;
+    uint32_t _cost;
+    uint32_t _type_2_cost;
+
+    A _nexthop;
+    uint32_t	_advertising_router;
 };
 
 /**
@@ -147,7 +258,7 @@ class RoutingTable {
     // are functionally distinct.
     bool add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 		   uint32_t metric, RouteEntry<A>& rt);
-    bool delete_route(OspfTypes::AreaID area, IPNet<A> net);
+    bool delete_route(OspfTypes::AreaID area, IPNet<A> net, RouteEntry<A>& rt);
     bool replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 		       uint32_t metric, RouteEntry<A>& rt);
 };

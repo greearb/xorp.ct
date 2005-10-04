@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.10 2005/10/01 05:28:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.11 2005/10/01 05:42:22 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -147,7 +147,8 @@ RoutingTable<A>::end()
     if (0 == _previous) {
 	for (tic = _current->begin(); tic != _current->end(); tic++) {
 	    RouteEntry<A>& rt = tic.payload().get_entry();
-	    if (!add_route(rt._area, tic.key(), rt._nexthop, rt._cost, rt)) {
+	    if (!add_route(rt.get_area(), tic.key(),
+			   rt.get_nexthop(), rt.get_cost(), rt)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
 	}
@@ -167,7 +168,7 @@ RoutingTable<A>::end()
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	if (_current->end() == _current->lookup_node(tip.key())) {
 	    RouteEntry<A>& rt = tip.payload().get_entry();
-	    if (!delete_route(rt._area, tip.key())) {
+	    if (!delete_route(rt.get_area(), tip.key(), rt)) {
 		XLOG_WARNING("Delete of %s failed", cstring(tip.key()));
 	    }
 	}
@@ -177,14 +178,16 @@ RoutingTable<A>::end()
 	tip = _previous->lookup_node(tic.key());
  	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (_previous->end() == tip) {
-	    if (!add_route(rt._area, tip.key(), rt._nexthop, rt._cost, rt)) {
+	    if (!add_route(rt.get_area(), tip.key(),
+			   rt.get_nexthop(), rt.get_cost(), rt)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
 	} else {
 	    RouteEntry<A>& rt_previous = tip.payload().get_entry();
-	    if (rt._nexthop != rt_previous._nexthop ||
-		rt._cost != rt_previous._cost) {
-		if (!replace_route(rt._area, tip.key(), rt._nexthop, rt._cost,
+	    if (rt.get_nexthop() != rt_previous.get_nexthop() ||
+		rt.get_cost() != rt_previous.get_cost()) {
+		if (!replace_route(rt.get_area(), tip.key(),
+				   rt.get_nexthop(), rt.get_cost(),
 				   rt)) {
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
@@ -208,11 +211,12 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 
 template <typename A>
 bool
-RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net)
+RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
+			      RouteEntry<A>& rt)
 {
     bool result = _ospf.delete_route(net);
 
-    _ospf.get_peer_manager().summary_withdraw(area, net);
+    _ospf.get_peer_manager().summary_withdraw(area, net, rt);
 
     return result;
 }
@@ -225,7 +229,7 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
     bool result = _ospf.replace_route(net, nexthop, metric,
 				      false /* equal */, false /* discard */);
 
-    _ospf.get_peer_manager().summary_withdraw(area, net);
+    _ospf.get_peer_manager().summary_withdraw(area, net, rt);
     _ospf.get_peer_manager().summary_announce(area, net, rt);
 
     return result;
@@ -289,8 +293,8 @@ InternalRouteEntry<A>::reset_winner()
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
     for (i = _entries.begin(); i != _entries.end(); i++) {
 	RouteEntry<A>& comp = i->second;
-	if (comp._path_type <= _winner->_path_type)
-	    if (comp._cost < _winner->_cost) {
+	if (comp.get_path_type() <= _winner->get_path_type())
+	    if (comp.get_cost() < _winner->get_cost()) {
 		_winner = &comp;
 		winner_changed = true;
 	    }
