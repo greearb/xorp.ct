@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.82 2005/07/24 17:12:24 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.83 2005/08/25 02:33:07 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -95,6 +95,9 @@ Release 1.2 (2005/??/??)
       be used to specify any node or variable (multi-value nodes excluded)
       in the configuration tree. Previously it could be used to specify
       only configuration child nodes or variables.
+
+    - Addition of support for read-only nodes (specified by the new
+      %read-only template command).
 
   XORPSH:
     - Addition of support to run xorpsh in non-interactive mode.
