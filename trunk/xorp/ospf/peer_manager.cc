@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.51 2005/10/01 05:13:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.52 2005/10/03 20:24:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -647,6 +647,19 @@ PeerManager<A>::as_boundary_router_p() const
 }
 
 template <typename A>
+bool
+PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
+				  RouteEntry<A>& rt)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    XLOG_WARNING("TBD: Is this a candidate for summarisation");
+
+    return true;
+}
+
+template <typename A>
 void
 PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 				 RouteEntry<A>& rt)
@@ -654,14 +667,21 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
 	      cstring(net), cstring(rt));
 
+    if (!summary_candidate(area, net, rt))
+	return;
+
     XLOG_WARNING("TBD: summary announce");
 }
 
 template <typename A>
 void
-PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net)
+PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
+				 RouteEntry<A>& rt)
 {
     debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    if (!summary_candidate(area, net, rt))
+	return;
 
     XLOG_WARNING("TBD: summary withdraw");
 }

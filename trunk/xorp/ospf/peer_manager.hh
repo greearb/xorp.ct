@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.35 2005/10/01 05:14:31 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.36 2005/10/03 20:24:06 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -326,7 +326,8 @@ class PeerManager {
      * previously have caused a Summary-LSA which now needs to be
      * withdrawn.
      */
-    void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net);
+    void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
+			  RouteEntry<A>& rt);
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
@@ -352,6 +353,23 @@ class PeerManager {
      */
     void destroy_peerid(const string& interface, const string& vif)
 	throw(BadPeer);
+
+
+    /**
+     * @return true if this route is a candidate for summarisation.
+     */
+    bool summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
+			   RouteEntry<A>& rt);
+
+    /**
+     * Saved summaries that can be introduced into a new area.
+     */
+    struct Summary {
+	OspfTypes::AreaID _area;
+	RouteEntry<A> _rtentry;
+    };
+
+    map<IPNet<A> , Summary> _summaries;
 };
 
 #endif // __OSPF_PEER_MANAGER_HH__
