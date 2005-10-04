@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.99 2005/10/01 03:22:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.100 2005/10/03 20:24:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,6 +61,7 @@ template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  OspfTypes::AreaType area_type) 
     : _ospf(ospf), _area(area), _area_type(area_type),
+      _summaries(true), _stub_default_cost(0),
       _last_entry(0), _allocated_entries(0), _readers(0),
       _queue(ospf.get_eventloop(),
 	     OspfTypes::MinLSInterval,

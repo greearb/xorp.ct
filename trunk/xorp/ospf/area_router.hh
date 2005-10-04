@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.59 2005/09/13 20:23:04 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.60 2005/10/03 20:24:06 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -292,6 +292,11 @@ class AreaRouter {
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
+    bool _summaries;			// True if summaries should be
+					// generated into a stub area.
+    uint32_t _stub_default_cost;	// The cost of the default
+					// route that is injected into
+					// a stub area.
 
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
     Spt<Vertex> _spt;			// SPT computation unit.
