@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.60 2005/10/03 20:24:06 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.61 2005/10/04 04:11:35 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -600,7 +600,7 @@ class AreaRouter {
     /**
      * Routing changes are completed.
      * 1) Update the routing table if necessary.
-     * 2) Possibly generate new sumamry LSAs.
+     * 2) Possibly generate new summary LSAs.
      */
     void routing_end();
 
