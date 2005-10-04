@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.85 2005/09/20 14:55:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.86 2005/09/27 18:37:30 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -32,7 +32,7 @@
 
 extern int booterror(const char *s) throw (ParseError);
 
-bool 
+bool
 CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
 {
     //
@@ -253,7 +253,7 @@ ConfigTreeNode::is_same(const ConfigTreeNode& them, bool ignore_node_id) const
 }
 
 
-void 
+void
 ConfigTreeNode::add_child(ConfigTreeNode* child)
 {
     _children.push_back(child);
@@ -262,7 +262,7 @@ ConfigTreeNode::add_child(ConfigTreeNode* child)
     _children = sorted_children;
 }
 
-void 
+void
 ConfigTreeNode::remove_child(ConfigTreeNode* child)
 {
     //
@@ -319,7 +319,7 @@ ConfigTreeNode::add_default_children()
     }
 }
 
-void 
+void
 ConfigTreeNode::recursive_add_default_children()
 {
     list<ConfigTreeNode *>::const_iterator iter;
@@ -532,7 +532,7 @@ ConfigTreeNode::check_config_tree(string& result) const
     list<ConfigTreeNode *>::const_iterator iter;
 
     //
-    // Check that the node is not deprecated
+    // Check that the node is not deprecated or read-only
     //
     if (_template_tree_node != NULL) {
 	if (_template_tree_node->is_deprecated()) {
@@ -541,9 +541,19 @@ ConfigTreeNode::check_config_tree(string& result) const
 			      _template_tree_node->deprecated_reason().c_str());
 	    return false;
 	}
+	if (_template_tree_node->is_read_only()
+	    && (is_leaf_value())
+	    && (! is_default_value())) {
+	    string reason = read_only_reason();
+	    result = c_format("Node \"%s\" is read-only", _path.c_str());
+	    if (! reason.empty())
+		result += c_format(": %s", reason.c_str());
+	    result += "\n";
+	    return false;
+	}
     }
     //
-    // An early check that the child nodes are not deprecated.
+    // An early check that the child nodes are not deprecated or read-only.
     // Note: we need to check the child nodes before the check for
     // mandatory configuration nodes so we will print a better error
     // message if, say, a mandatory node has been renamed and the old
@@ -557,6 +567,16 @@ ConfigTreeNode::check_config_tree(string& result) const
 	    result = c_format("Node \"%s\" is deprecated: %s\n",
 			      (*iter)->path().c_str(),
 			      ttn->deprecated_reason().c_str());
+	    return false;
+	}
+	if (ttn->is_read_only()
+	    && (is_leaf_value())
+	    && (! is_default_value())) {
+	    string reason = ttn->read_only_reason();
+	    result = c_format("Node \"%s\" is read-only", _path.c_str());
+	    if (! reason.empty())
+		result += c_format(": %s", reason.c_str());
+	    result += "\n";
 	    return false;
 	}
     }
@@ -643,13 +663,13 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
     return result;
 }
 
-int 
+int
 ConfigTreeNode::type() const
 {
     return _template_tree_node->type();
 }
 
-bool 
+bool
 ConfigTreeNode::is_tag() const
 {
     /*only the root node does not have a template tree node, and it is
@@ -660,7 +680,7 @@ ConfigTreeNode::is_tag() const
     return _template_tree_node->is_tag();
 }
 
-bool 
+bool
 ConfigTreeNode::is_leaf_value() const
 {
     if (_has_value)
@@ -672,7 +692,25 @@ ConfigTreeNode::is_leaf_value() const
     return false;
 }
 
-unsigned int 
+bool
+ConfigTreeNode::is_read_only() const
+{
+    if (_template_tree_node == NULL)
+	return false;
+    return (_template_tree_node->is_read_only());
+}
+
+const string&
+ConfigTreeNode::read_only_reason() const
+{
+    if (_template_tree_node == NULL) {
+	static const string empty_reason;
+	return empty_reason;
+    }
+    return (_template_tree_node->read_only_reason());
+}
+
+unsigned int
 ConfigTreeNode::depth() const
 {
     if (is_root_node())
@@ -681,7 +719,7 @@ ConfigTreeNode::depth() const
 	return (1 + _parent->depth());
 }
 
-const string& 
+const string&
 ConfigTreeNode::value() const
 {
     if (_has_value)
@@ -973,13 +1011,13 @@ ConfigTreeNode::clone_subtree(const ConfigTreeNode& orig_node)
     }
 }
 
-string 
+string
 ConfigTreeNode::typestr() const
 {
     return _template_tree_node->typestr();
 }
 
-string 
+string
 ConfigTreeNode::node_str() const
 {
     string tmp;
@@ -1025,7 +1063,7 @@ ConfigTreeNode::subtree_str() const
     return s;
 }
 
-ConfigTreeNode* 
+ConfigTreeNode*
 ConfigTreeNode::find_node(const list<string>& path)
 {
     list<string> path_copy = path;
@@ -1243,7 +1281,7 @@ ConfigTreeNode::expand_expression(const string& expression,
     return true;
 }
 
-const ConfigTreeNode* 
+const ConfigTreeNode*
 ConfigTreeNode::find_const_varname_node(const string& varname,
 					VarType& type) const
 {
@@ -1576,6 +1614,16 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 	    XLOG_UNREACHABLE();
 	    break;
 	case NODE_VALUE: 
+	    if (node->is_read_only()) {
+		string reason = node->read_only_reason();
+		errmsg = c_format("Attempt to set node \"%s\" "
+				  "which is read-only",
+				  varname.c_str());
+		if (! reason.empty())
+		    errmsg += c_format(": %s", reason.c_str());
+		XLOG_ERROR("%s", errmsg.c_str());
+		return false;
+	    }
 	    node->set_value(value, _user_id);
 	    return true;
 	case NODE_OPERATOR: 
@@ -1678,7 +1726,7 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
     return false;
 }
 
-void 
+void
 ConfigTreeNode::set_named_value(const string& varname, const string& value)
 {
     debug_msg("set_named_value %s=%s\n", varname.c_str(), value.c_str());
@@ -1853,6 +1901,21 @@ ConfigTreeNode::is_default_value() const
 	return (false);
 
     return (value() == _template_tree_node->default_str());
+}
+
+bool
+ConfigTreeNode::is_default_value(const string& test_value) const
+{
+    if (test_value.empty())
+	return (false);
+
+    if (_template_tree_node == NULL)
+	return (false);
+
+    if (! _template_tree_node->has_default())
+	return (false);
+
+    return (test_value == _template_tree_node->default_str());
 }
 
 string

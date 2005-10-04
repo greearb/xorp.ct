@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.94 2005/09/24 01:59:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.95 2005/09/27 18:37:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1128,9 +1128,10 @@ RouterCLI::add_edit_subtree()
     current_config_node->create_command_tree(
 	cmd_tree,
 	cmds,
-	true,  /* include_intermediate_nodes */
-	false, /* include_children_templates */
-	false  /* include_leaf_value_nodes */);
+	true,	/* include_intermediate_nodes */
+	false,	/* include_children_templates */
+	false,	/* include_leaf_value_nodes */
+	true	/* include_read_only_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("edit subtree is:\n\n");
@@ -1173,9 +1174,10 @@ RouterCLI::add_delete_subtree()
     current_config_node->create_command_tree(
 	cmd_tree,
 	cmds,
-	true,  /* include_intermediate_nodes */
-	false, /* include_children_templates */
-	true   /* include_leaf_value_nodes */);
+	true,	/* include_intermediate_nodes */
+	false,	/* include_children_templates */
+	true,	/* include_leaf_value_nodes */
+	false	/* include_read_only_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("delete subtree is:\n\n");
@@ -1206,9 +1208,10 @@ RouterCLI::add_set_subtree()
     current_config_node->create_command_tree(
 	cmd_tree,
 	cmds,
-	false, /* include_intermediate_nodes */
-	true,  /* include_children_templates */
-	true   /* include_leaf_value_nodes */);
+	false,	/* include_intermediate_nodes */
+	true,	/* include_children_templates */
+	true,	/* include_leaf_value_nodes */
+	false	/* include_read_only_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("set subtree is:\n\n");
@@ -1243,9 +1246,10 @@ RouterCLI::add_show_subtree()
     current_config_node->create_command_tree(
 	cmd_tree,
 	cmds,
-	true,  /* include_intermediate_nodes */
-	false, /* include_children_templates */
-	true   /* include_leaf_value_nodes */);
+	true,	/* include_intermediate_nodes */
+	false,	/* include_children_templates */
+	true,	/* include_leaf_value_nodes */
+	true	/* include_read_only_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("show subtree is:\n\n");
@@ -1296,29 +1300,34 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
+	TemplateTreeNode* ttn = *tti;
 	CliCommand* com;
 	string subpath;
 
 	// XXX: ignore deprecated subtrees
-	if ((*tti)->is_deprecated())
+	if (ttn->is_deprecated())
+	    continue;
+
+	// XXX: ignore read-only nodes
+	if (ttn->is_read_only())
 	    continue;
 
 	if (pathstr().empty())
-	    subpath = (*tti)->segname();
+	    subpath = ttn->segname();
 	else
-	    subpath = pathstr() + " " + (*tti)->segname();
+	    subpath = pathstr() + " " + ttn->segname();
 
-	string help = (*tti)->help();
+	string help = ttn->help();
 	if (help == "") {
 	    help = "-- no help available --";
 	}
 
-	com = com0->add_command((*tti)->segname(),
+	com = com0->add_command(ttn->segname(),
 				help, false,
 				callback(this, &RouterCLI::text_entry_func));
 	if (com == NULL) {
 	    XLOG_FATAL("AI: add_command %s for template failed",
-		       (*tti)->segname().c_str());
+		       ttn->segname().c_str());
 	} else {
 	    com->set_global_name(subpath);
 	}
@@ -1786,6 +1795,22 @@ RouterCLI::text_entry_func(const string& ,
     //
 
     //
+    // Test if the node is read-only.
+    //
+    if (ctn->is_read_only()) {
+	string reason = ctn->read_only_reason();
+	string errmsg = c_format("ERROR: node \"%s\" "
+				 "is read-only",
+				 ctn->segname().c_str());
+	if (! reason.empty())
+	    errmsg += c_format(": %s", reason.c_str());
+	errmsg += ".\n";
+
+	cli_client().cli_print(errmsg);
+	goto cleanup;
+    }
+
+    //
     // Test if the node was already created.
     //
     if (new_path_segments.empty() && (! ctn->deleted())) {
@@ -1872,6 +1897,9 @@ RouterCLI::text_entry_func(const string& ,
 		    // XXX: ignore deprecated subtrees
 		    if ((*tti)->is_deprecated())
 			continue;
+		    // XXX: ignore read-only nodes
+		    if ((*tti)->is_read_only())
+			continue;
 		    if ((*tti)->type_match(value, errhelp)) {
 			data_ttn = (*tti);
 			break;
@@ -1907,7 +1935,7 @@ RouterCLI::text_entry_func(const string& ,
 					      _verbose);
 		_changes_made = true;
 		value_expected = false;
-	    } else if (ctn->is_leaf_value()) {
+	    } else if (ctn->is_leaf_value() && (! ctn->is_read_only())) {
 		// It must be a leaf, and we're expecting a value
 		string errhelp;
 		if (ttn->type_match(value, errhelp)) {
@@ -2008,6 +2036,20 @@ RouterCLI::text_entry_func(const string& ,
 					 "is not valid: %s.\n",
 					 makepath(path_segments).c_str(),
 					 deprecated_ttn->deprecated_reason().c_str());
+		cli_client().cli_print(errmsg);
+		goto cleanup;
+	    }
+	    //
+	    // Test if we are dealing with read-only leaf node
+	    //
+	    if (ttn->is_read_only()) {
+		string reason = ttn->read_only_reason();
+		string errmsg = c_format("ERROR: node \"%s\" "
+					 "is read-only",
+					 makepath(path_segments).c_str());
+		if (! reason.empty())
+		    errmsg += c_format(": %s", reason.c_str());
+		errmsg += ".\n";
 		cli_client().cli_print(errmsg);
 		goto cleanup;
 	    }
@@ -2125,13 +2167,16 @@ RouterCLI::text_entry_children_func(const string& path) const
     const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
     is_executable = true;
     can_pipe = false;
-    if (ttn != NULL && (! ttn->is_deprecated())) {
+    if (ttn != NULL && (! ttn->is_deprecated()) && (! ttn->is_read_only())) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
 	     ++tti) {
 	    const TemplateTreeNode* ttn_child = *tti;
 	    // XXX: ignore deprecated subtrees
 	    if (ttn_child->is_deprecated())
+		continue;
+	    // XXX: ignore read-only nodes
+	    if (ttn_child->is_read_only())
 		continue;
 	    help_string = ttn_child->help();
 	    string subpath;
@@ -2316,7 +2361,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 	ttn = ctn->template_tree_node();
     }
 
-    XLOG_ASSERT(ctn != NULL && ttn != NULL);
+    XLOG_ASSERT(ctn != NULL && ttn != NULL && (! ctn->is_read_only()));
 
     if (argv.size() != 1) {
 	string result = c_format("ERROR: \"set %s\" should take "
@@ -2465,6 +2510,7 @@ RouterCLI::show_func(const string& ,
 {
     bool is_show_all = false;
     bool suppress_default_values = true;
+    bool show_top = false;
     const string show_command_name = "show";
     const string show_all_command_name = "show -all";
     string errmsg;
@@ -2525,7 +2571,17 @@ RouterCLI::show_func(const string& ,
 	path = path.substr(ix + 1, path.size() - ix + 1);
     }
 
-    string result = config_tree()->show_subtree(false, path_segments, false,
+    //
+    // XXX: if we explicitly specify to show the value of a leaf node,
+    // then always show it without suppressing it.
+    //
+    SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
+    if ((ctn != NULL) && ctn->is_leaf_value()) {
+	suppress_default_values = false;
+	show_top = true;
+    }
+
+    string result = config_tree()->show_subtree(show_top, path_segments, false,
 						suppress_default_values);
     cli_client().cli_print(result + "\n");
     config_mode_prompt();

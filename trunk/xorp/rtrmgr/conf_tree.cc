@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.42 2005/08/25 02:23:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.43 2005/09/27 18:37:30 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -367,6 +367,14 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    ", and value " + svalue + " is not a valid " + ctn->typestr();
 	booterror(err.c_str());
     }
+
+    if (ctn->is_read_only()
+	&& ctn->is_leaf_value()
+	&& (! ctn->is_default_value(svalue))) {
+	string err = "\"" + path + "\" is read-only node";
+	booterror(err.c_str());
+    }
+
     ctn->set_value(svalue, /* userid */ 0);
     ctn->set_operator(op, /* userid */ 0);
     return;

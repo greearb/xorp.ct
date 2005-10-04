@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.35 2005/08/23 00:57:06 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.36 2005/08/25 02:23:43 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -103,6 +103,7 @@ public:
 #endif
     bool check_command_tree(const list<string>& commands, 
 			    bool include_intermediate_nodes,
+			    bool include_read_only_nodes,
 			    size_t depth) const;
     bool has_default() const { return _has_default; }
     bool check_variable_name(const vector<string>& parts, size_t part) const;
@@ -136,6 +137,9 @@ public:
     void set_deprecated(bool v) { _is_deprecated = v; }
     const string& deprecated_reason() const { return _deprecated_reason; }
     void set_deprecated_reason(const string& v) { _deprecated_reason = v; }
+
+    bool is_read_only() const { return _is_read_only; }
+    const string& read_only_reason() const { return _read_only_reason; }
 
     /**
      * @return the oldest deprecated ancestor or NULL if no ancestor
@@ -190,6 +194,8 @@ private:
     bool		_verbose;	 // Set to true if output is verbose
     bool		_is_deprecated;	// True if node's usage is deprecated
     string		_deprecated_reason; // The reason for deprecation
+    bool		_is_read_only;	// True if a read-only node
+    string		_read_only_reason; // The reason for read-only
 };
 
 class UIntTemplate : public TemplateTreeNode {

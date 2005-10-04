@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.59 2005/08/25 02:23:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.60 2005/09/27 18:37:31 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -53,7 +53,8 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _is_tag(false),
       _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
-      _is_deprecated(false)
+      _is_deprecated(false),
+      _is_read_only(false)
 {
     if (_parent != NULL) {
 	_parent->add_child(this);
@@ -124,6 +125,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	// Nothing to do - the work is done by add_action
     } else if (cmd == "%deprecated") {
 	// Nothing to do - the work is done by add_action
+    } else if (cmd == "%read-only") {
+	_is_read_only = true;
     } else if (cmd == "%order") {
 	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
@@ -165,7 +168,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
 	errmsg += "Valid commands are %create, %delete, %set, %unset, %get, ";
 	errmsg += "%default, %modinfo, %activate, %update, %allow, ";
-	errmsg += "%allow-range, %mandatory, %deprecated, %order\n";
+	errmsg += "%allow-range, %mandatory, %deprecated, %read-only, ";
+	errmsg += "%order\n";
 	xorp_throw(ParseError, errmsg);
     }
 }
@@ -246,6 +250,19 @@ TemplateTreeNode::add_action(const string& cmd,
 	} else {
 	    // XXX really should say why it's bad.
 	    XLOG_WARNING("Bad %%deprecated specification in template file ignored\n");
+	}
+    } else if (cmd == "%read-only") {
+	if (action_list.size() == 0) {
+	    _is_read_only = true;
+	} else if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    // Trim off quotes if present
+	    string reason = unquote(*li);
+	    _is_read_only = true;
+	    _read_only_reason = reason;
+	} else {
+	    // XXX really should say why it's bad.
+	    XLOG_WARNING("Bad %%read-only specification in template file ignored\n");
 	}
     } else if (cmd == "%order") {
 	if (action_list.size() == 1) {
@@ -766,13 +783,18 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 				     bool include_intermediate_nodes,
+				     bool include_read_only_nodes,
 				     size_t depth) const
 {
     bool instantiated = false;
 
     // XXX: ignore deprecated subtrees
     if (is_deprecated())
-	    return false;
+	return false;
+
+    // XXX: ignore read-only leaf nodes
+    if (is_read_only() && (! include_read_only_nodes) && is_leaf_value())
+	return false;
 
     debug_msg("TTN:check_command_tree %s type %s depth %u\n",
 	      _segname.c_str(), typestr().c_str(), XORP_UINT_CAST(depth));
@@ -810,6 +832,7 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 	for (tti = _children.begin(); tti != _children.end(); ++tti) {
 	    if ((*tti)->check_command_tree(cmd_names,
 					   include_intermediate_nodes,
+					   include_read_only_nodes,
 					   depth + 1)) {
 		instantiated = true;
 		break;

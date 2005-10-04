@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.23 2005/07/23 01:22:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.24 2005/09/27 18:37:31 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -87,18 +87,17 @@ SlaveConfigTreeNode::create_node(const ConfigTreeNode& ctn)
     return new_node;
 }
 
-
-
-
 void
 SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
 					 const list<string>& cmd_names,
 					 bool include_intermediate_nodes,
 					 bool include_children_templates,
-					 bool include_leaf_value_nodes) const
+					 bool include_leaf_value_nodes,
+					 bool include_read_only_nodes) const
 {
     build_command_tree(cmd_tree, cmd_names, 0, include_intermediate_nodes,
-		       include_children_templates, include_leaf_value_nodes);
+		       include_children_templates, include_leaf_value_nodes,
+		       include_read_only_nodes);
 }
 
 bool
@@ -107,7 +106,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					int depth,
 					bool include_intermediate_nodes,
 					bool include_children_templates,
-					bool include_leaf_value_nodes) const
+					bool include_leaf_value_nodes,
+					bool include_read_only_nodes) const
 {
     bool instantiated = false;
 
@@ -141,10 +141,14 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	    // edit commands, which can show or edit any point in the
 	    // hierarchy.
 	    //
-	    debug_msg("ACTIVATE NODE: %s\n", _path.c_str());
-	    cmd_tree.instantiate(this, _template_tree_node,
-				 true /* has_command */);
-	    instantiated = true;
+	    // XXX: ignore read-only nodes
+	    if (! (_template_tree_node->is_read_only()
+		   && (! include_read_only_nodes))) {
+		debug_msg("ACTIVATE NODE: %s\n", _path.c_str());
+		cmd_tree.instantiate(this, _template_tree_node,
+				     true /* has_command */);
+		instantiated = true;
+	    }
 	} else {
 	    // Check to see if this node has a command that matches
 	    // what we're looking for.
@@ -156,9 +160,13 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 		    break;
 		}
 	    }
-	    cmd_tree.instantiate(this, _template_tree_node,
-				 has_command);
-	    instantiated = true;
+	    if (is_leaf_value() && include_leaf_value_nodes)
+		has_command = true;
+	    if (! (_template_tree_node->is_read_only()
+		   && (! include_read_only_nodes))) {
+		cmd_tree.instantiate(this, _template_tree_node, has_command);
+		instantiated = true;
+	    }
 	}
     }
 
@@ -170,7 +178,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	done = sctn->build_command_tree(cmd_tree, cmd_names, depth + 1,
 					include_intermediate_nodes,
 					include_children_templates,
-					include_leaf_value_nodes);
+					include_leaf_value_nodes,
+					include_read_only_nodes);
 	if (done) {
 	    templates_done.insert(sctn->template_tree_node());
 	    instantiated = true;
@@ -219,7 +228,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 		}
 
 		if ((*ttn_iter)->check_command_tree(cmd_names,
-						    include_intermediate_nodes, 
+						    include_intermediate_nodes,
+						    include_read_only_nodes,
 						    /* depth */ 0)) {
 
 		    XLOG_TRACE(_verbose, "***done == true\n");
