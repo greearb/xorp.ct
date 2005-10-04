@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.39 2005/08/25 02:32:41 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.40 2005/09/21 08:03:45 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -503,7 +503,7 @@ have a default value. This command can appear multiple times anywhere in the
 template tree. If it appears multiple times within the same template node,
 then all listed nodes are mandatory. However, note that it cannot be used
 to specify a multi-value node such as
-{\tt $(interfaces.interface.@.vif.@.address.@)}.
+{\tt \$(interfaces.interface.@.vif.@.address.@)}.
 
 \subsubsection{The {\tt \%create} Command.}
 {\tt \%create} is used to create a new instance of an interior node in
@@ -795,6 +795,23 @@ of the variable to be restricted.  This is typically
 \texttt{\"\$(@)\"}.  The {\it lowValue} and {\it highVal} parameters
 specify the lower and upper bound of the allowed range of values.
 
+An example of use appears in the interface address prefix
+specification:
+
+\begin{verbatim}
+       address @: ipv4 {
+         prefix-length: u32;
+       }
+       ...
+       address @: ipv4 {
+         prefix-length {
+           %allow-range: $(@) "1" "32";
+           %set: xrl "...";
+           %get: xrl "...";
+         }
+       }
+\end{verbatim}
+
 \subsubsection{The {\tt \%help} Command.}
 
 The {\tt \%help} command specifies the CLI configuration-mode help string.
@@ -821,22 +838,29 @@ If, however, somehow the xorpsh sends to the rtrmgr configuration
 that contains a deprecated statement, the rtrmgr returns an error to xorpsh,
 and the error message will contain the string with the reason.
 
-An example of use appears in the interface address prefix
-specification:
+\subsubsection{The {\tt \%read-only} Command.}
 
-\begin{verbatim}
-       address @: ipv4 {
-         prefix-length: u32;
-       }
-       ...
-       address @: ipv4 {
-         prefix-length {
-           %allow-range: $(@) "1" "32";
-           %set: xrl "...";
-           %get: xrl "...";
-         }
-       }
-\end{verbatim}
+The {\tt \%read-only} command can be used to specify a template tree
+node as read-only.
+The syntax is:
+
+\texttt{\%read-only: } \texttt{"String with reason"} \texttt{;}
+
+or
+
+\texttt{\%read-only:;}
+
+If a leaf node is marked as a read-only, then its value cannot be
+changed from the default template value. For example, a read-only
+leaf node could be part of the startup configuration, but if its
+value is different from the default template value the rtrmgr
+will reject the configuration.
+
+If a non-leaf node is marked as read-only, then the subtree below
+it is not marked as read-only (e.g., the values of the leaf nodes
+in the subtree can be changed, etc). However, the read-only
+non-leaf node itself can be added as part of the startup configuration,
+but it cannot be deleted or added later via xorpsh.
 
 \subsubsection{The {\tt \%order} Command.}
 
