@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.55 2005/10/05 00:30:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.56 2005/10/05 00:56:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,6 +80,8 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
     }
 
     _areas[area] = new AreaRouter<A>(_ospf, area, area_type);
+
+    _areas[area]->start();
     
     return true;
 }
@@ -110,6 +112,8 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
 	XLOG_ERROR("Area %s doesn't exist\n", pr_id(area).c_str());
 	return false;
     }
+
+    _areas[area]->shutdown();
 
     // Notify the peers that this area is being removed. If this is
     // the only area that the peer belonged to the peer can signify
@@ -692,7 +696,7 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (!summary_candidate(area, net, rt))
 	return;
 
-    // Save this route for later replay.
+    // Save this route for possible later replay.
     XLOG_ASSERT(0 == _summaries.count(net));
     Summary s(area, rt);
     _summaries[net] = s;
@@ -727,6 +731,32 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     for (i = _areas.begin(); i != _areas.end(); i++)
 	if ((*i).first != area)
 	    (*i).second->summary_withdraw(area, net, rt);
+}
+
+template <typename A>
+void
+PeerManager<A>::summary_push(OspfTypes::AreaID area)
+{
+    debug_msg("Area %s\n", pr_id(area).c_str());
+
+
+    AreaRouter<A> *area_router = get_area_router(area);
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
+	return;
+    }
+
+    if (!area_border_router_p())
+	return;
+
+    typename map<IPNet<A>, Summary>::const_iterator i;
+    for (i = _summaries.begin(); i != _summaries.end(); i++) {
+	IPNet<A> net = (*i).first;
+	Summary s = (*i).second;
+	if (s._area == area)
+	    continue;
+	area_router->summary_announce(s._area, net, s._rtentry);
+    }
 }
 
 template class PeerManager<IPv4>;

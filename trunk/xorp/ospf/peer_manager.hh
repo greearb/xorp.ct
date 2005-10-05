@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.37 2005/10/04 17:19:54 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.38 2005/10/05 00:30:45 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -317,6 +317,8 @@ class PeerManager {
     /**
      * A new route has been added to the routing table announce it to
      * all areas as it is a candidate for Summary-LSA generation.
+     *
+     * @param area that the route was introduced by.
      */
     void summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
@@ -325,9 +327,20 @@ class PeerManager {
      * A route has been deleted from the routing table. It may
      * previously have caused a Summary-LSA which now needs to be
      * withdrawn.
+     *
+     * @param area that the route was introduced by.
      */
     void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
+
+    /**
+     * Send all the summary information to specified area.  New areas
+     * or stub areas that change from do not advertise can use this
+     * hook to force all routes to be sent to the specified area.
+     *
+     * @param area that all routes should be sent to.
+     */
+    void summary_push(OspfTypes::AreaID area);
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
@@ -375,7 +388,7 @@ class PeerManager {
 	RouteEntry<A> _rtentry;
     };
 
-    map<IPNet<A> , Summary> _summaries;
+    map<IPNet<A>, Summary> _summaries;
 };
 
 #endif // __OSPF_PEER_MANAGER_HH__

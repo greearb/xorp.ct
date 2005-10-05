@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.50 2005/09/15 17:38:16 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.51 2005/10/03 20:24:06 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -528,6 +528,52 @@ class Ospf {
     OspfTypes::RouterID _router_id;	// Router ID.
 
     Trace _trace;		// Trace variables.
+};
+
+/**
+ * A class that should be inherited by all major subsytems that can be
+ * used to cleanly shutdown OSPF.
+ *
+ * XXX 
+ * At the moment this class is just a placeholder but in the future
+ * the constructor can be implemented to add all classes to a static
+ * list of objects that can be systematically shutdown.   
+ */
+class Subsystem {
+ public:
+    virtual ~Subsystem()
+    {}
+
+    /**
+     * To be implemented by the subsystem.
+     * Called to start the subsystem.
+     */
+    virtual void start() = 0;
+
+    /**
+     * To be implemented by the subsystem.
+     * Called to shutdown the subsystem.
+     */
+    virtual void shutdown() = 0;
+
+    /**
+     * To be implemented by the subsystem.
+     * @return true if the subsystem is running.
+     */
+    virtual bool running() = 0;
+
+    /**
+     * To be implemented by the subsystem.
+     * @return the name of the subsystem.
+     */
+    virtual string str() = 0;
+
+    /**
+     * To be called by the subsystem when the shutdown is complete.
+     */
+    void shutdown_complete() {
+	XLOG_INFO("Shutdown complete %s", str().c_str());
+    }
 };
 
 #endif // __OSPF_OSPF_HH__

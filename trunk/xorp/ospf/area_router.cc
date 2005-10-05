@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.102 2005/10/04 17:13:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.103 2005/10/04 19:25:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -104,6 +104,31 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
     _spt.add_node(v);
     _spt.set_origin(v);
 #endif
+}
+
+template <typename A>
+void
+AreaRouter<A>::start()
+{
+    // If there are multiple areas request that the peer manager
+    // injects the routes that are candidates for summarisation now.
+    // Do this last as it will cause a callback into this class.
+    PeerManager<A>& pm = _ospf.get_peer_manager();
+    pm.summary_push(_area);
+}
+
+template <typename A>
+void
+AreaRouter<A>::shutdown()
+{
+    shutdown_complete();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::running()
+{
+    return true;
 }
 
 template <typename A>
@@ -213,7 +238,7 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 	      cstring(net), cstring(rt));
 
     XLOG_ASSERT(area != _area);
-    XLOG_ASSERT(area != rt.get_area());
+    XLOG_ASSERT(area == rt.get_area());
 
     XLOG_WARNING("TBD: summary announce");
 }
@@ -226,7 +251,7 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
 
     XLOG_ASSERT(area != _area);
-    XLOG_ASSERT(area != rt.get_area());
+    XLOG_ASSERT(area == rt.get_area());
 
     XLOG_WARNING("TBD: summary withdraw");
 }

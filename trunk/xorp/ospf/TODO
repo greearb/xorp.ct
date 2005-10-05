@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.51 2005/09/14 08:11:25 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.52 2005/09/15 05:30:07 atanu Exp $
 #
 
 TODO
@@ -141,6 +141,15 @@ re-examined when multiple areas are fully supported.
 
 40) When the adding of routes is more robust change the XLOG_ERROR to
 an XLOG_FATAL in route_command_done().
+
+41) While adding support for multiple areas created an abstract class
+Subsystem that includes start() and shutdown() methods. It should be
+possible to enhance this class to allow clean shutdown. Both total
+shutdown and the removal of a single area. That is withdraw all
+announced LSAs before shutting down. The peer manager currently calls
+shutdown on the an area then proceeds to delete the area. It might be
+cleaner to wait for the area to signal that shutdown is complete,
+either by polling running() or by waiting for the shutdown_complete().
 
 Possible issues
 ~~~~~~~~~~~~~~~
