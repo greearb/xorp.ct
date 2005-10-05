@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.54 2005/10/04 19:14:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.55 2005/10/05 00:30:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -654,7 +654,6 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
 	      cstring(net), cstring(rt));
 
-    XLOG_WARNING("TBD: Is this a candidate for summarisation");
     // RFC 2328 Section 12.4.3. Sumamry-LSAs
     // Select routes that are candidate for summarisation.
 
@@ -701,7 +700,10 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (!area_border_router_p())
 	return;
 
-    XLOG_WARNING("TBD: summary announce");
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++)
+	if ((*i).first != area)
+	    (*i).second->summary_announce(area, net, rt);
 }
 
 template <typename A>
@@ -721,7 +723,10 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     if (!area_border_router_p())
 	return;
 
-    XLOG_WARNING("TBD: summary withdraw");
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++)
+	if ((*i).first != area)
+	    (*i).second->summary_withdraw(area, net, rt);
 }
 
 template class PeerManager<IPv4>;
