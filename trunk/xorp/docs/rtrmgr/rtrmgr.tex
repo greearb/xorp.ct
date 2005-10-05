@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.41 2005/10/04 06:48:18 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.42 2005/10/05 06:12:03 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -879,6 +879,9 @@ If a node is marked as permanent, the node itself cannot be deleted
 directly. However, deleting the parent node will delete the permanent
 node as well. Also, adding or deleting children of a permanent node
 is allowed.
+
+If a permanent node never should be deleted, then all its ancestors
+should be marked as permanent.
 
 \subsubsection{The {\tt \%order} Command.}
 
