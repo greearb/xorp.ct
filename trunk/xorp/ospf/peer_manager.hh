@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.36 2005/10/03 20:24:06 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.37 2005/10/04 17:19:54 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -365,6 +365,12 @@ class PeerManager {
      * Saved summaries that can be introduced into a new area.
      */
     struct Summary {
+	Summary()
+	{}
+	Summary(OspfTypes::AreaID area, RouteEntry<A>& rt)
+	    : _area(area), _rtentry(rt)
+	{}
+
 	OspfTypes::AreaID _area;
 	RouteEntry<A> _rtentry;
     };

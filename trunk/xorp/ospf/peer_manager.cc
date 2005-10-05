@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.53 2005/10/04 17:19:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.54 2005/10/04 19:14:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -693,6 +693,14 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (!summary_candidate(area, net, rt))
 	return;
 
+    // Save this route for later replay.
+    XLOG_ASSERT(0 == _summaries.count(net));
+    Summary s(area, rt);
+    _summaries[net] = s;
+
+    if (!area_border_router_p())
+	return;
+
     XLOG_WARNING("TBD: summary announce");
 }
 
@@ -704,6 +712,13 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
 
     if (!summary_candidate(area, net, rt))
+	return;
+
+    // Remove this saved route.
+    XLOG_ASSERT(1 == _summaries.count(net));
+    _summaries.erase(_summaries.find(net));
+
+    if (!area_border_router_p())
 	return;
 
     XLOG_WARNING("TBD: summary withdraw");
