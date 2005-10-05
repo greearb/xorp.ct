@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.95 2005/09/27 18:37:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.96 2005/10/04 06:08:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1131,7 +1131,8 @@ RouterCLI::add_edit_subtree()
 	true,	/* include_intermediate_nodes */
 	false,	/* include_children_templates */
 	false,	/* include_leaf_value_nodes */
-	true	/* include_read_only_nodes */);
+	true,	/* include_read_only_nodes */
+	true	/* include_permanent_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("edit subtree is:\n\n");
@@ -1177,7 +1178,8 @@ RouterCLI::add_delete_subtree()
 	true,	/* include_intermediate_nodes */
 	false,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
-	false	/* include_read_only_nodes */);
+	true,	/* include_read_only_nodes */
+	false	/* include_permanent_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("delete subtree is:\n\n");
@@ -1211,7 +1213,8 @@ RouterCLI::add_set_subtree()
 	false,	/* include_intermediate_nodes */
 	true,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
-	false	/* include_read_only_nodes */);
+	false,	/* include_read_only_nodes */
+	true	/* include_permanent_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("set subtree is:\n\n");
@@ -1249,7 +1252,8 @@ RouterCLI::add_show_subtree()
 	true,	/* include_intermediate_nodes */
 	false,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
-	true	/* include_read_only_nodes */);
+	true,	/* include_read_only_nodes */
+	true	/* include_permanent_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("show subtree is:\n\n");
@@ -1306,10 +1310,6 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
 	// XXX: ignore deprecated subtrees
 	if (ttn->is_deprecated())
-	    continue;
-
-	// XXX: ignore read-only nodes
-	if (ttn->is_read_only())
 	    continue;
 
 	if (pathstr().empty())
@@ -1795,22 +1795,6 @@ RouterCLI::text_entry_func(const string& ,
     //
 
     //
-    // Test if the node is read-only.
-    //
-    if (ctn->is_read_only()) {
-	string reason = ctn->read_only_reason();
-	string errmsg = c_format("ERROR: node \"%s\" "
-				 "is read-only",
-				 ctn->segname().c_str());
-	if (! reason.empty())
-	    errmsg += c_format(": %s", reason.c_str());
-	errmsg += ".\n";
-
-	cli_client().cli_print(errmsg);
-	goto cleanup;
-    }
-
-    //
     // Test if the node was already created.
     //
     if (new_path_segments.empty() && (! ctn->deleted())) {
@@ -1897,9 +1881,6 @@ RouterCLI::text_entry_func(const string& ,
 		    // XXX: ignore deprecated subtrees
 		    if ((*tti)->is_deprecated())
 			continue;
-		    // XXX: ignore read-only nodes
-		    if ((*tti)->is_read_only())
-			continue;
 		    if ((*tti)->type_match(value, errhelp)) {
 			data_ttn = (*tti);
 			break;
@@ -1935,8 +1916,23 @@ RouterCLI::text_entry_func(const string& ,
 					      _verbose);
 		_changes_made = true;
 		value_expected = false;
-	    } else if (ctn->is_leaf_value() && (! ctn->is_read_only())) {
+	    } else if (ctn->is_leaf_value()) {
 		// It must be a leaf, and we're expecting a value
+
+		// We cannot modify a read-only node
+		if (ctn->is_read_only() && (! ctn->is_default_value(value))) {
+		    string reason = ctn->read_only_reason();
+		    string errmsg = c_format("ERROR: node \"%s\" "
+					     "is read-only",
+					     ctn->segname().c_str());
+		    if (! reason.empty())
+			errmsg += c_format(": %s", reason.c_str());
+		    errmsg += ".\n";
+
+		    cli_client().cli_print(errmsg);
+		    goto cleanup;
+		}
+
 		string errhelp;
 		if (ttn->type_match(value, errhelp)) {
 		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
@@ -2036,20 +2032,6 @@ RouterCLI::text_entry_func(const string& ,
 					 "is not valid: %s.\n",
 					 makepath(path_segments).c_str(),
 					 deprecated_ttn->deprecated_reason().c_str());
-		cli_client().cli_print(errmsg);
-		goto cleanup;
-	    }
-	    //
-	    // Test if we are dealing with read-only leaf node
-	    //
-	    if (ttn->is_read_only()) {
-		string reason = ttn->read_only_reason();
-		string errmsg = c_format("ERROR: node \"%s\" "
-					 "is read-only",
-					 makepath(path_segments).c_str());
-		if (! reason.empty())
-		    errmsg += c_format(": %s", reason.c_str());
-		errmsg += ".\n";
 		cli_client().cli_print(errmsg);
 		goto cleanup;
 	    }
@@ -2167,16 +2149,13 @@ RouterCLI::text_entry_children_func(const string& path) const
     const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
     is_executable = true;
     can_pipe = false;
-    if (ttn != NULL && (! ttn->is_deprecated()) && (! ttn->is_read_only())) {
+    if (ttn != NULL && (! ttn->is_deprecated())) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
 	     ++tti) {
 	    const TemplateTreeNode* ttn_child = *tti;
 	    // XXX: ignore deprecated subtrees
 	    if (ttn_child->is_deprecated())
-		continue;
-	    // XXX: ignore read-only nodes
-	    if (ttn_child->is_read_only())
 		continue;
 	    help_string = ttn_child->help();
 	    string subpath;
@@ -2205,7 +2184,7 @@ RouterCLI::text_entry_children_func(const string& path) const
 		children.insert(make_pair(command_name, ccm));
 	    }
 	}
-#if 0
+#if 1
 	if (ttn->is_tag()) {
 	    is_executable = false;
 	    can_pipe = false;
@@ -2231,26 +2210,12 @@ RouterCLI::delete_func(const string& ,
 		       const vector<string>& argv)
 {
     string errmsg;
-
-    if (! argv.empty()) {
-	//
-	// XXX: The arguments to the "delete" command should refer
-	// to a valid node in the configuration tree, and argument
-	// "command_global_name" should include the name of that node.
-	// Hence, "argv" should always be empty. If "argv" is not empty,
-	// then it is an error.
-	//
-	errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
-			  "exist.\n",
-			  makepath(argv).c_str());
-	cli_client().cli_print(errmsg);
-	return (XORP_ERROR);
-    }
-
-    string cmd_name = command_global_name;
-    XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
-    string path = cmd_name.substr(7, cmd_name.size() - 7);
+    string cmd_name, path;
     list<string> path_segments;
+
+    cmd_name = command_global_name;
+    XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
+    path = cmd_name.substr(7, cmd_name.size() - 7);
 
     while (! path.empty()) {
 	string::size_type ix = path.find(' ');
@@ -2260,6 +2225,37 @@ RouterCLI::delete_func(const string& ,
 	}
 	path_segments.push_back(path.substr(0, ix));
 	path = path.substr(ix + 1, path.size() - ix + 1);
+    }
+
+    if (! argv.empty()) {
+	//
+	// XXX: The arguments to the "delete" command should refer
+	// to a valid node in the configuration tree, and argument
+	// "command_global_name" should include the name of that node.
+	// Hence, "argv" should always be empty. If "argv" is not empty,
+	// then it is an error.
+	//
+
+	//
+	// First test whether this is not an existing node that cannot
+	// be removed.
+	//
+	vector<string>::const_iterator iter;
+	for (iter = argv.begin(); iter != argv.end(); ++iter) {
+	    path_segments.push_back(*iter);
+	}
+	SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
+	if ((ctn != NULL) && ctn->is_permanent()) {
+	    errmsg = c_format("ERROR: cannot delete \"%s\" because it is "
+			      "a permanent node.\n",
+			      makepath(argv).c_str());
+	} else {
+	    errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
+			      "exist.\n",
+			      makepath(argv).c_str());
+	}
+	cli_client().cli_print(errmsg);
+	return (XORP_ERROR);
     }
 
     //

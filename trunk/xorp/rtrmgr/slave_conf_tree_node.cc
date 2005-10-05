@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.24 2005/09/27 18:37:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.25 2005/10/04 06:08:18 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -93,11 +93,12 @@ SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
 					 bool include_intermediate_nodes,
 					 bool include_children_templates,
 					 bool include_leaf_value_nodes,
-					 bool include_read_only_nodes) const
+					 bool include_read_only_nodes,
+					 bool include_permanent_nodes) const
 {
     build_command_tree(cmd_tree, cmd_names, 0, include_intermediate_nodes,
 		       include_children_templates, include_leaf_value_nodes,
-		       include_read_only_nodes);
+		       include_read_only_nodes, include_permanent_nodes);
 }
 
 bool
@@ -107,7 +108,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					bool include_intermediate_nodes,
 					bool include_children_templates,
 					bool include_leaf_value_nodes,
-					bool include_read_only_nodes) const
+					bool include_read_only_nodes,
+					bool include_permanent_nodes) const
 {
     bool instantiated = false;
 
@@ -132,38 +134,43 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     if (depth > 0) {
 	XLOG_ASSERT(_template_tree_node != NULL);
 	cmd_tree.push(_segname);
-	if (include_intermediate_nodes
-	    && (_template_tree_node->is_tag() == false)
-	    && (_template_tree_node->children().empty() == false)) {
-	    //
-	    // Include_intermediate_nodes indicates that we want to include all
-	    // true subtree interior nodes.  This is needed for show and
-	    // edit commands, which can show or edit any point in the
-	    // hierarchy.
-	    //
-	    // XXX: ignore read-only nodes
-	    if (! (_template_tree_node->is_read_only()
-		   && (! include_read_only_nodes))) {
+
+	//
+	// XXX: ignore read-only nodes and permanent nodes
+	//
+	bool include_node = true;
+	if (is_read_only() && (! include_read_only_nodes))
+	    include_node = false;
+	if (is_permanent() && (! include_permanent_nodes))
+	    include_node = false;
+
+	if (include_node) {
+	    if (include_intermediate_nodes
+		&& (_template_tree_node->is_tag() == false)
+		&& (_template_tree_node->children().empty() == false)) {
+		//
+		// Include_intermediate_nodes indicates that we want to
+		// include all true subtree interior nodes.  This is needed
+		// for show and edit commands, which can show or edit any
+		// point in the hierarchy.
+		//
 		debug_msg("ACTIVATE NODE: %s\n", _path.c_str());
 		cmd_tree.instantiate(this, _template_tree_node,
 				     true /* has_command */);
 		instantiated = true;
-	    }
-	} else {
-	    // Check to see if this node has a command that matches
-	    // what we're looking for.
-	    list<string>::const_iterator iter;
-	    bool has_command = false;
-	    for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
-		if (_template_tree_node->const_command(*iter) != NULL) {
-		    has_command = true;
-		    break;
+	    } else {
+		// Check to see if this node has a command that matches
+		// what we're looking for.
+		list<string>::const_iterator iter;
+		bool has_command = false;
+		for (iter = cmd_names.begin(); iter != cmd_names.end(); ++iter) {
+		    if (_template_tree_node->const_command(*iter) != NULL) {
+			has_command = true;
+			break;
+		    }
 		}
-	    }
-	    if (is_leaf_value() && include_leaf_value_nodes)
-		has_command = true;
-	    if (! (_template_tree_node->is_read_only()
-		   && (! include_read_only_nodes))) {
+		if (is_leaf_value() && include_leaf_value_nodes)
+		    has_command = true;
 		cmd_tree.instantiate(this, _template_tree_node, has_command);
 		instantiated = true;
 	    }
@@ -179,7 +186,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					include_intermediate_nodes,
 					include_children_templates,
 					include_leaf_value_nodes,
-					include_read_only_nodes);
+					include_read_only_nodes,
+					include_permanent_nodes);
 	if (done) {
 	    templates_done.insert(sctn->template_tree_node());
 	    instantiated = true;
@@ -230,6 +238,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 		if ((*ttn_iter)->check_command_tree(cmd_names,
 						    include_intermediate_nodes,
 						    include_read_only_nodes,
+						    include_permanent_nodes,
 						    /* depth */ 0)) {
 
 		    XLOG_TRACE(_verbose, "***done == true\n");

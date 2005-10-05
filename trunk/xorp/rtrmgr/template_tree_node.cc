@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.60 2005/09/27 18:37:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.61 2005/10/04 06:08:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -54,7 +54,8 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
       _is_deprecated(false),
-      _is_read_only(false)
+      _is_read_only(false),
+      _is_permanent(false)
 {
     if (_parent != NULL) {
 	_parent->add_child(this);
@@ -126,7 +127,17 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else if (cmd == "%deprecated") {
 	// Nothing to do - the work is done by add_action
     } else if (cmd == "%read-only") {
+	// XXX: only leaf nodes should have %read-only command
+	if (! is_leaf_value()) {
+	    errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+	    errmsg += "This command only applies to leaf nodes that have ";
+	    errmsg += "values.\n";
+	    xorp_throw(ParseError, errmsg);
+	}
 	_is_read_only = true;
+	_is_permanent = true;	// XXX: read-only also implies permanent node
+    } else if (cmd == "%permanent") {
+	_is_permanent = true;
     } else if (cmd == "%order") {
 	// Nothing to do - the work is done by add_action
     } else if ((cmd == "%create")
@@ -169,7 +180,7 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	errmsg += "Valid commands are %create, %delete, %set, %unset, %get, ";
 	errmsg += "%default, %modinfo, %activate, %update, %allow, ";
 	errmsg += "%allow-range, %mandatory, %deprecated, %read-only, ";
-	errmsg += "%order\n";
+	errmsg += "%permanent, %order\n";
 	xorp_throw(ParseError, errmsg);
     }
 }
@@ -254,15 +265,30 @@ TemplateTreeNode::add_action(const string& cmd,
     } else if (cmd == "%read-only") {
 	if (action_list.size() == 0) {
 	    _is_read_only = true;
+	    _is_permanent = true; // XXX: read-only also implies permanent node
 	} else if (action_list.size() == 1) {
 	    list<string>::const_iterator li = action_list.begin();
 	    // Trim off quotes if present
 	    string reason = unquote(*li);
 	    _is_read_only = true;
 	    _read_only_reason = reason;
+	    _is_permanent = true; // XXX: read-only also implies permanent node
 	} else {
 	    // XXX really should say why it's bad.
 	    XLOG_WARNING("Bad %%read-only specification in template file ignored\n");
+	}
+    } else if (cmd == "%permanent") {
+	if (action_list.size() == 0) {
+	    _is_permanent = true;
+	} else if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    // Trim off quotes if present
+	    string reason = unquote(*li);
+	    _is_permanent = true;
+	    _permanent_reason = reason;
+	} else {
+	    // XXX really should say why it's bad.
+	    XLOG_WARNING("Bad %%permanent specification in template file ignored\n");
 	}
     } else if (cmd == "%order") {
 	if (action_list.size() == 1) {
@@ -778,12 +804,13 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
 
     return true;
 }
-#endif
+#endif // 0
 
 bool
 TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 				     bool include_intermediate_nodes,
 				     bool include_read_only_nodes,
+				     bool include_permanent_nodes,
 				     size_t depth) const
 {
     bool instantiated = false;
@@ -792,8 +819,10 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
     if (is_deprecated())
 	return false;
 
-    // XXX: ignore read-only leaf nodes
-    if (is_read_only() && (! include_read_only_nodes) && is_leaf_value())
+    // XXX: ignore read-only nodes and permanent nodes
+    if (is_read_only() && (! include_read_only_nodes))
+	return false;
+    if (is_permanent() && (! include_permanent_nodes))
 	return false;
 
     debug_msg("TTN:check_command_tree %s type %s depth %u\n",
@@ -833,6 +862,7 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 	    if ((*tti)->check_command_tree(cmd_names,
 					   include_intermediate_nodes,
 					   include_read_only_nodes,
+					   include_permanent_nodes,
 					   depth + 1)) {
 		instantiated = true;
 		break;

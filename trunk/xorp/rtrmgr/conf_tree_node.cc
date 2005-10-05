@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.86 2005/09/27 18:37:30 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.87 2005/10/04 06:08:18 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -708,6 +708,24 @@ ConfigTreeNode::read_only_reason() const
 	return empty_reason;
     }
     return (_template_tree_node->read_only_reason());
+}
+
+bool
+ConfigTreeNode::is_permanent() const
+{
+    if (_template_tree_node == NULL)
+	return false;
+    return (_template_tree_node->is_permanent());
+}
+
+const string&
+ConfigTreeNode::permanent_reason() const
+{
+    if (_template_tree_node == NULL) {
+	static const string empty_reason;
+	return empty_reason;
+    }
+    return (_template_tree_node->permanent_reason());
 }
 
 unsigned int

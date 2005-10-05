@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.36 2005/08/25 02:23:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.37 2005/10/04 06:08:19 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -104,6 +104,7 @@ public:
     bool check_command_tree(const list<string>& commands, 
 			    bool include_intermediate_nodes,
 			    bool include_read_only_nodes,
+			    bool include_permanent_nodes,
 			    size_t depth) const;
     bool has_default() const { return _has_default; }
     bool check_variable_name(const vector<string>& parts, size_t part) const;
@@ -140,6 +141,8 @@ public:
 
     bool is_read_only() const { return _is_read_only; }
     const string& read_only_reason() const { return _read_only_reason; }
+    bool is_permanent() const { return _is_permanent; }
+    const string& permanent_reason() const { return _permanent_reason; }
 
     /**
      * @return the oldest deprecated ancestor or NULL if no ancestor
@@ -196,6 +199,8 @@ private:
     string		_deprecated_reason; // The reason for deprecation
     bool		_is_read_only;	// True if a read-only node
     string		_read_only_reason; // The reason for read-only
+    bool		_is_permanent;	// True if a permanent node
+    string		_permanent_reason; // The reason for permanent
 };
 
 class UIntTemplate : public TemplateTreeNode {
