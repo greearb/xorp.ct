@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.40 2005/09/21 08:03:45 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.41 2005/10/04 06:48:18 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -850,17 +850,35 @@ or
 
 \texttt{\%read-only:;}
 
-If a leaf node is marked as a read-only, then its value cannot be
+Only a leaf node that contains a value can be marked as read-only.
+If a node is marked as a read-only, then its value cannot be
 changed from the default template value. For example, a read-only
-leaf node could be part of the startup configuration, but if its
+node could be part of the startup configuration, but if its
 value is different from the default template value the rtrmgr
 will reject the configuration.
 
-If a non-leaf node is marked as read-only, then the subtree below
-it is not marked as read-only (e.g., the values of the leaf nodes
-in the subtree can be changed, etc). However, the read-only
-non-leaf node itself can be added as part of the startup configuration,
-but it cannot be deleted or added later via xorpsh.
+Note that by definition a read-only node is also permanent
+(see Section \ref{sec:permanent-command}):
+it cannot be deleted directly, but it will be removed if its
+parent is deleted.
+
+\subsubsection{The {\tt \%permanent} Command.}
+\label{sec:permanent-command}
+
+The {\tt \%permanent} command can be used to specify a template tree
+node as a permanent node that cannot be deleted.
+The syntax is:
+
+\texttt{\%permanent: } \texttt{"String with reason"} \texttt{;}
+
+or
+
+\texttt{\%permanent:;}
+
+If a node is marked as permanent, the node itself cannot be deleted
+directly. However, deleting the parent node will delete the permanent
+node as well. Also, adding or deleting children of a permanent node
+is allowed.
 
 \subsubsection{The {\tt \%order} Command.}
 
