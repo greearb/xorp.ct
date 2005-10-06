@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.103 2005/10/04 19:25:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.104 2005/10/05 03:16:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -121,6 +121,7 @@ template <typename A>
 void
 AreaRouter<A>::shutdown()
 {
+    _ospf.get_routing_table().remove_area(_area);
     shutdown_complete();
 }
 
