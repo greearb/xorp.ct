@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.13 2005/10/06 03:17:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.14 2005/10/06 07:23:14 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -126,6 +126,24 @@ RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
+    if (_current->end() == i)
+	return false;
+
+    InternalRouteEntry<A>& irentry = i.payload();
+
+    rt = irentry.get_entry();
+
+    return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::longest_match_entry(A nexthop, RouteEntry<A>& rt)
+{
+    debug_msg("%s\n", cstring(nexthop));
+
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->find(nexthop);
     if (_current->end() == i)
 	return false;
 
