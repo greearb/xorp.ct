@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.56 2005/10/05 00:56:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.57 2005/10/05 03:16:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -724,8 +724,13 @@ PeerManager<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     XLOG_ASSERT(1 == _summaries.count(net));
     _summaries.erase(_summaries.find(net));
 
-    if (!area_border_router_p())
-	return;
+    // This is an optimisation that will cause problems if the area
+    // remove in the routing table becomes a background task. If we
+    // transition from two areas to one area and the routes from the
+    // other area are withdrawn in the background this test will stop
+    // the withdraws making it through.
+//     if (!area_border_router_p())
+// 	return;
 
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++)
