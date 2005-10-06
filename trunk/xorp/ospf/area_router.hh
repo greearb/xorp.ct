@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.63 2005/10/04 19:25:55 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.64 2005/10/05 03:16:21 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -266,6 +266,13 @@ class AreaRouter : Subsystem {
     void close_database(DataBaseHandle& dbh);
 
     /**
+     * Is this the backbone area?
+     */
+    bool backbone() const {
+	return OspfTypes::BACKBONE == _area;
+    }
+
+    /**
      * Print link state database.
      */
     void testing_print_link_state_database() const;
@@ -366,6 +373,17 @@ class AreaRouter : Subsystem {
 
     list<Bucket> _new_lsas;		// Indexes of new LSAs that
 					// have arrived recently.
+#else
+    bool _TransitCapability;		// Does this area support
+					// transit traffic?
+
+    void set_transit_capability(bool t) {
+	_TransitCapability = t;
+    }
+
+    bool get_transit_capability() const {
+	return _TransitCapability;
+    }
 #endif
 
     /**
