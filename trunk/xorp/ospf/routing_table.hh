@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.12 2005/10/01 05:42:22 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.13 2005/10/04 17:13:35 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -203,6 +203,14 @@ class InternalRouteEntry {
      * Get the winning entry.
      */
     RouteEntry<A>& get_entry() const;
+
+    /**
+     * Are there any entries?
+     */
+    bool empty() const {
+	return 0 == _winner;
+    }
+
  private:
     RouteEntry<A> *_winner; // Winning route.
     map<OspfTypes::AreaID, RouteEntry<A> > _entries; // Routes by area.
@@ -214,9 +222,13 @@ template <typename A>
 class RoutingTable {
  public:
     RoutingTable(Ospf<A> &ospf)
-	: _ospf(ospf), _current(0), _previous(0)
+	: _ospf(ospf), _in_transaction(false), _current(0), _previous(0)
     {}
 
+    /**
+     * Before [add|replace|delete]_entry can be called, this method
+     * must be called to start the transaction.
+     */
     void begin();
 
     bool add_entry(OspfTypes::AreaID area, IPNet<A> net, RouteEntry<A>& rt);
@@ -224,8 +236,15 @@ class RoutingTable {
     bool replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 		       RouteEntry<A>& rt);
 
+    /**
+     * Delete an entry from the current table.
+     */
     bool delete_entry(OspfTypes::AreaID area, IPNet<A> net);
 
+    /**
+     * For the [add|replace|delete]_entry calls to take effect this
+     * method must be called.
+     */
     void end();
     
     /**
@@ -248,11 +267,23 @@ class RoutingTable {
      */
     bool lookup_entry(IPNet<A> net, RouteEntry<A>& rt);
 
+    /**
+     * This call notifies the routing table that this area no longer
+     * exists, therefore all routes that came from this area should be
+     * removed. All other areas also need to be notified so that any
+     * summarisation information can be removed.
+     */
+    void remove_area(OspfTypes::AreaID area);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
+    bool _in_transaction;		// Flag to verify that the
+					// routing table is only
+					// manipulated during a transaction.
 
     Trie<A, InternalRouteEntry<A> > *_current;
     Trie<A, InternalRouteEntry<A> > *_previous;
+
 
     // Yes the RouteEntry contains the area, nexthop and metric but they
     // are functionally distinct.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.11 2005/10/01 05:42:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.12 2005/10/04 17:13:35 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -48,6 +48,8 @@ void
 RoutingTable<A>::begin()
 {
     debug_msg("\n");
+    XLOG_ASSERT(!_in_transaction);
+    _in_transaction = true;
 
     delete _previous;
     _previous = _current;
@@ -60,6 +62,7 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 			   RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
+    XLOG_ASSERT(_in_transaction);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -81,6 +84,7 @@ RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 			       RouteEntry<A>& rt)
 {
     debug_msg("%s\n", cstring(net));
+    XLOG_ASSERT(_in_transaction);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -137,6 +141,8 @@ void
 RoutingTable<A>::end()
 {
     debug_msg("\n");
+    XLOG_ASSERT(_in_transaction);
+    _in_transaction = false;
 
     typename Trie<A, InternalRouteEntry<A> >::iterator tip;
     typename Trie<A, InternalRouteEntry<A> >::iterator tic;
@@ -192,6 +198,46 @@ RoutingTable<A>::end()
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
 	    }
+	}
+    }
+}
+
+template <typename A>
+void
+RoutingTable<A>::remove_area(OspfTypes::AreaID area)
+{
+    XLOG_ASSERT(!_in_transaction);
+
+    // Sweep through the current table and delete any routes that came
+    // from this area.
+
+    // XXX - Should consider this a candidate for running as a
+    // background task.
+
+    typename Trie<A, InternalRouteEntry<A> >::iterator tic;
+    for (tic = _current->begin(); tic != _current->begin(); tic++) {
+ 	InternalRouteEntry<A>& ire = tic.payload();
+	RouteEntry<A>& rt = ire.get_entry();
+	// If the winning entry is for this area delete it from the
+	// routing table.
+	if (rt.get_area() == area)
+	    delete_route(area, tic.key(), rt);
+	    
+	// Unconditionally remove the area, it may be a losing route.
+	bool winner_changed;
+	if (!ire.delete_entry(area, winner_changed))
+	    continue;
+
+	// No more route entries exist so remove this internal entry.
+	if (ire.empty()) {
+	    _current->erase(tic);
+	    continue;
+	}
+
+	// If a new winner has emerged add it to the routing table.
+	if (winner_changed) {
+	    add_route(area, tic.key(), rt.get_nexthop(), rt.get_cost(),
+		      ire.get_entry());
 	}
     }
 }
@@ -288,19 +334,18 @@ template <typename A>
 bool
 InternalRouteEntry<A>::reset_winner()
 {
-    bool winner_changed = false;
-
+    RouteEntry<A> *old_winner = _winner;
+    _winner = 0;
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
     for (i = _entries.begin(); i != _entries.end(); i++) {
 	RouteEntry<A>& comp = i->second;
 	if (comp.get_path_type() <= _winner->get_path_type())
 	    if (comp.get_cost() < _winner->get_cost()) {
 		_winner = &comp;
-		winner_changed = true;
 	    }
     }
 
-    return winner_changed;
+    return _winner != old_winner;
 }
 
 template class RoutingTable<IPv4>;
