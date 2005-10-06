@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.12 2005/10/04 17:13:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.13 2005/10/06 03:17:40 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -207,6 +207,9 @@ void
 RoutingTable<A>::remove_area(OspfTypes::AreaID area)
 {
     XLOG_ASSERT(!_in_transaction);
+
+    if (0 == _current)
+	return;
 
     // Sweep through the current table and delete any routes that came
     // from this area.
