@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.23 2005/08/25 02:23:45 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.24 2005/10/02 22:21:49 abittau Exp $ */
 
 protocols {
     static {
@@ -124,7 +124,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -149,7 +149,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -175,7 +175,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -200,7 +200,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -226,7 +226,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -251,7 +251,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -278,7 +278,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
@@ -303,7 +303,7 @@ protocols {
 
 	    metric {
 		%help:	short "Configure the routing metric";
-		%allow-range: $(@) "0" "65535";
+		%allow-range: $(@) "1" "65535";
 		%set:;
 	    }
 	}
