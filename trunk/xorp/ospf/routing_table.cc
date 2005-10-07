@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.14 2005/10/06 07:23:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.15 2005/10/06 08:16:41 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -45,7 +45,7 @@
 
 template <typename A>
 void
-RoutingTable<A>::begin()
+RoutingTable<A>::begin(OspfTypes::AreaID area)
 {
     debug_msg("\n");
     XLOG_ASSERT(!_in_transaction);
@@ -54,6 +54,29 @@ RoutingTable<A>::begin()
     delete _previous;
     _previous = _current;
     _current = new Trie<A, InternalRouteEntry<A> >;
+
+    // It is possible that multiple areas have added route to the
+    // routing table. This area is about to add or replace all its
+    // routes again. All routes from other areas must be preserved.
+
+    if (0 == _previous)	// First time
+	return;
+
+    typename Trie<A, InternalRouteEntry<A> >::iterator tip;
+    for (tip = _previous->begin(); tip != _previous->end(); tip++) {
+	// This should be a copy not a reference.
+ 	InternalRouteEntry<A> ire = tip.payload();
+
+	// If this entry contains a route from this area delete it.
+	bool winner_changed;
+	ire.delete_entry(area, winner_changed);
+	
+	// If there are no other routes don't put a copy in current.
+	if (ire.empty())
+	    continue;
+
+	_current->insert(tip.key(), ire);
+    }
 }
 
 template <typename A>

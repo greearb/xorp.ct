@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.105 2005/10/06 07:24:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.106 2005/10/07 07:09:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1687,7 +1687,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
     set_transit_capability(transit_capability);
 
     RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
-    routing_table.begin();
+    routing_table.begin(_area);
 
     // Compute the SPT.
     list<RouteCmd<Vertex> > r;
