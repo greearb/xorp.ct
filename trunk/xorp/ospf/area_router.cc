@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.104 2005/10/05 03:16:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.105 2005/10/06 07:24:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,6 +68,8 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 	     callback(this, &AreaRouter<A>::publish_all)),
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
       _TransitCapability(0),
+#else
+      _TransitCapability(false),
 #endif
       _routing_recompute_delay(5)	// In seconds.
 {
@@ -230,6 +232,195 @@ AreaRouter<A>::area_range_change_state(IPNet<A> net, bool advertise)
     return true;
 }
 
+/**
+ * XXX - When we support this appendix; hook up the correct code for
+ * the time being don't set any host bits.
+ */
+inline
+uint32_t
+appendixe(uint32_t link_state_id)
+{
+    return link_state_id;
+}
+
+template <>
+void 
+AreaRouter<IPv4>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
+					      IPNet<IPv4> net)
+{
+    Lsa_header& header = snlsa->get_header();
+    header.set_link_state_id(appendixe(ntohl(net.masked_addr().addr())));
+    snlsa->set_network_mask(ntohl(net.netmask().addr()));
+}
+
+template <>
+void 
+AreaRouter<IPv6>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
+					      IPNet<IPv6> net)
+{
+    snlsa->set_network(net);
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::summary_network_lsa_intra_area(OspfTypes::AreaID area,
+					      IPNet<A> net,
+					      RouteEntry<A>& rt, bool announce)
+{
+    debug_msg("Area %s net %s rentry %s announce %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt), pb(announce));
+
+    XLOG_ASSERT(rt.get_path_type() == RouteEntry<A>::intra_area);
+    XLOG_ASSERT(rt.get_destination_type() == OspfTypes::Network);
+
+    Lsa::LsaRef summary_lsa;
+
+    // Construct that 
+
+    // Look for this network in our configured ranges.
+//     typename Trie<A, Range>::iterator i = _area_range.find(net);
+
+    return summary_lsa;
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
+			     RouteEntry<A>& rt, bool announce)
+{
+    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt));
+
+    Lsa::LsaRef summary_lsa;
+
+    // Only intra-area routes are advertised into the backbone
+    switch (rt.get_path_type()) {
+    case RouteEntry<A>::intra_area:
+	break;
+    case RouteEntry<A>::inter_area:
+	if (backbone())
+	    return summary_lsa;
+	break;
+    case RouteEntry<A>::type1:
+    case RouteEntry<A>::type2:
+	// The peer manager should already have filtered out these two
+	// types of routes.
+	XLOG_UNREACHABLE();
+	break;
+    }
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+	if (!_summaries)
+	    return summary_lsa;
+	// RFC 2328 Section 12.4.3.1 Originating summary-LSAs into stub areas
+	//  Type 4 summary-LSAs	(ASBR-summary-LSAs) are never
+	//  originated into stub areas.
+	if (rt.get_destination_type() && rt.get_as_boundary_router())
+	    return summary_lsa;
+	break;
+    case OspfTypes::NSSA:
+	XLOG_UNFINISHED();
+	break;
+    }
+    
+    // RFC 2328 Section 12.4.3. Summary-LSAs
+    // All the sanity checks upto "is  this our own area" have already
+    // been performed?
+    
+    RoutingTable<A>& routing_table = _ospf.get_routing_table();
+
+    // If the nexthop falls into this area don't generate a summary.
+    RouteEntry<A> nexthop_rt;
+    if (routing_table.longest_match_entry(rt.get_nexthop(), nexthop_rt)) {
+	if (nexthop_rt.get_area() == _area)
+	    return summary_lsa;
+    }
+
+    //  If the routing table cost equals or exceeds the value
+    //  LSInfinity, a summary-LSA cannot be generated for this route.
+    if (rt.get_cost() >= OspfTypes::LSInfinity)
+	return summary_lsa;
+
+    OspfTypes::Version version = _ospf.get_version();
+
+    switch (rt.get_destination_type()) {
+    case OspfTypes::Router: {
+	XLOG_ASSERT(rt.get_as_boundary_router());
+
+	SummaryRouterLsa *srlsa = new SummaryRouterLsa(version);
+
+	Lsa_header& header = srlsa->get_header();
+	// AS  boundary router's Router ID
+	header.set_link_state_id(rt.get_router_id());
+// 	header.set_advertising_router(_ospf.get_router_id());
+
+	switch (version) {
+	case OspfTypes::V2:
+	    srlsa->set_network_mask(0);
+	    header.set_options(get_options());
+	    break;
+	case OspfTypes::V3:
+	    // XXX - The setting of all the OSPFv3 fields need close attention.
+	    XLOG_WARNING("setting destination ID "
+			 "to router ID is this correct?");
+	    srlsa->set_destination_id(rt.get_router_id());
+	    srlsa->set_options(get_options());
+	    break;
+	}
+
+	srlsa->set_metric(rt.get_cost());
+
+	summary_lsa = Lsa::LsaRef(srlsa);
+    }
+	break;
+    case OspfTypes::Network: {
+
+	SummaryNetworkLsa *snlsa = 0;
+	Lsa_header& header = snlsa->get_header();
+
+	switch (rt.get_path_type()) {
+	case RouteEntry<A>::intra_area: {
+	    return summary_network_lsa_intra_area(area, net, rt, announce);
+	}
+	    break;
+	case RouteEntry<A>::inter_area:
+	    snlsa = new SummaryNetworkLsa(version);
+
+	    header.set_link_state_id(rt.get_router_id());
+// 	    header.set_advertising_router(_ospf.get_router_id());
+	    // Note for OSPFv2 the link state id is reset in here.
+    	    summary_network_lsa_set_net(snlsa, net);
+	    snlsa->set_metric(rt.get_cost());
+
+	    switch (version) {
+	    case OspfTypes::V2:
+		header.set_options(get_options());
+		break;
+	    case OspfTypes::V3:
+		// XXX - The setting of all the OSPFv3 fields needs
+		// close attention.
+		XLOG_WARNING("TBD: Inter-Area-Prefix-LSA set field values");
+		break;
+	    }
+	    break;
+	case RouteEntry<A>::type1:
+	case RouteEntry<A>::type2:
+	    // The peer manager should already have filtered out these two
+	    // types of routes.
+	    XLOG_UNREACHABLE();
+	    break;
+	}
+	summary_lsa = Lsa::LsaRef(snlsa);
+    }
+	break;
+    }
+
+    return summary_lsa;
+}
+
 template <typename A>
 void
 AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
@@ -241,7 +432,16 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     XLOG_ASSERT(area != _area);
     XLOG_ASSERT(area == rt.get_area());
 
-    XLOG_WARNING("TBD: summary announce");
+    Lsa::LsaRef summary_lsa = summary_build(area, net, rt, true /*announce*/);
+    if (0 == summary_lsa.get())
+	return;
+
+    // Set the general fields.
+    summary_lsa->get_header().set_advertising_router(_ospf.get_router_id());
+    summary_lsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    summary_lsa->record_creation_time(now);
 }
 
 template <typename A>
@@ -1484,6 +1684,8 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	}
     }
 
+    set_transit_capability(transit_capability);
+
     RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
     routing_table.begin();
 
@@ -1544,8 +1746,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 
     // RFC 2328 Section 16.2.  Calculating the inter-area routes
     if (_ospf.get_peer_manager().internal_router_p() ||
-	(OspfTypes::BACKBONE == _area &&
-	 _ospf.get_peer_manager().area_border_router_p()))
+	(backbone() && _ospf.get_peer_manager().area_border_router_p()))
 	routing_inter_areaV2();
 
     // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs

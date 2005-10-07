@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.64 2005/10/05 03:16:21 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.65 2005/10/06 09:22:58 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -414,6 +414,28 @@ class AreaRouter : Subsystem {
     };
 
     Trie<A, Range> _area_range;	// Area range for summary generation.
+
+    /**
+     * Set the network components of the LSA.
+     */
+    void summary_network_lsa_set_net(SummaryNetworkLsa *snlsa, IPNet<A> net);
+
+    /**
+     * Generate a Summary-LSA for an intra area path taking into
+     * account area ranges. An announcement may not generate an LSA
+     * and a withdraw may not cause an LSA to be removed.
+     */
+    Lsa::LsaRef summary_network_lsa_intra_area(OspfTypes::AreaID area,
+					       IPNet<A> net,
+					       RouteEntry<A>& rt,
+					       bool announce);
+    /**
+     * Construct a summary LSA if appropriate.
+     * @param announce true if this in an announce false if its a withdraw.
+     * @return the LSA can be empty.
+     */
+    Lsa::LsaRef summary_build(OspfTypes::AreaID area, IPNet<A> net,
+			      RouteEntry<A>& rt, bool announce);
 
     /**
      * Start aging LSA.
