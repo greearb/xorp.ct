@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.65 2005/10/06 09:22:58 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.66 2005/10/07 07:09:11 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -82,6 +82,12 @@ class AreaRouter : Subsystem {
      * Change the advertised state of this area.
      */
     bool area_range_change_state(IPNet<A> net, bool advertise);
+
+    /**
+     * Is network covered by an area range and if it is should it be
+     * advertised.
+     */
+    bool area_range_covered(IPNet<A> net, bool& advertise);
 
     /**
      * A new set of router links.
@@ -410,7 +416,6 @@ class AreaRouter : Subsystem {
      */
     struct Range {
 	bool _advertise;	// Should this range be advertised.
-	list<Lsa_header> _lsas;	// LSAs that are being aggregated.
     };
 
     Trie<A, Range> _area_range;	// Area range for summary generation.
@@ -697,6 +702,13 @@ class AreaRouter : Subsystem {
     void routing_total_recompute();
     void routing_total_recomputeV2();
     void routing_total_recomputeV3();
+
+    /**
+     * Compute the discard routes related to area ranges.
+     */
+    void routing_area_ranges(list<RouteCmd<Vertex> >& r);
+    void routing_area_rangesV2(list<RouteCmd<Vertex> >& r);
+    void routing_area_rangesV3(list<RouteCmd<Vertex> >& r);
 
     /**
      * Compute the inter-area routes.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.106 2005/10/07 07:09:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.107 2005/10/07 22:30:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -205,7 +205,11 @@ AreaRouter<A>::area_range_add(IPNet<A> net, bool advertise)
 {
     debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
 
-    XLOG_WARNING("TBD - area range add");
+    Range r;
+    r._advertise = advertise;
+    _area_range.insert(net, r);
+
+    routing_schedule_total_recompute();
 
     return true;
 }
@@ -216,7 +220,9 @@ AreaRouter<A>::area_range_delete(IPNet<A> net)
 {
     debug_msg("Net %s\n", cstring(net));
 
-    XLOG_WARNING("TBD - area range delete");
+    _area_range.erase(net);
+
+    routing_schedule_total_recompute();
 
     return true;
 }
@@ -227,7 +233,34 @@ AreaRouter<A>::area_range_change_state(IPNet<A> net, bool advertise)
 {
     debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
 
-    XLOG_WARNING("TBD - area range change state");
+    typename Trie<A, Range>::iterator i = _area_range.lookup_node(net);
+    if (_area_range.end() == i) {
+	XLOG_WARNING("Area range %s not found", cstring(net));
+	return false;
+    }
+
+    Range& r = i.payload();
+    if (r._advertise == advertise)
+	return true;
+
+    r._advertise = advertise;
+
+    routing_schedule_total_recompute();
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::area_range_covered(IPNet<A> net, bool& advertise)
+{
+    debug_msg("Net %s advertise %s\n", cstring(net), pb(advertise));
+
+    typename Trie<A, Range>::iterator i = _area_range.find(net);
+    if (_area_range.end() == i)
+	return false;
+
+    advertise = i.payload()._advertise;
 
     return true;
 }
@@ -1613,6 +1646,8 @@ AreaRouter<A>::routing_total_recompute()
     }
 }
 
+template <> void AreaRouter<IPv4>::
+routing_area_rangesV2(list<RouteCmd<Vertex> >& r);
 template <> void AreaRouter<IPv4>::routing_inter_areaV2();
 template <> void AreaRouter<IPv4>::routing_transit_areaV2();
 template <> void AreaRouter<IPv4>::routing_as_externalV2();
@@ -1692,6 +1727,9 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
     // Compute the SPT.
     list<RouteCmd<Vertex> > r;
     spt.compute(r);
+
+    // Compute the area range summaries.
+    routing_area_rangesV2(r);
 
     list<RouteCmd<Vertex> >::const_iterator ri;
     for(ri = r.begin(); ri != r.end(); ri++) {
@@ -1773,6 +1811,75 @@ void
 AreaRouter<A>::routing_total_recomputeV3()
 {
     XLOG_WARNING("TBD - routing computation for V3");
+}
+
+template <>
+void 
+AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
+{
+    // If there is only one area there are no other areas for which to
+    // compute summaries.
+    if (_ospf.get_peer_manager().internal_router_p())
+ 	return;
+
+    // Do any of our intra area path fall within the summary range and
+    // if they do is it an advertised range. If a network falls into
+    // an advertised range then use the largest cost of the covered
+    // networks.
+
+    map<IPNet<IPv4>, RouteEntry<IPv4> > ranges;
+
+    list<RouteCmd<Vertex> >::const_iterator ri;
+    for(ri = r.begin(); ri != r.end(); ri++) {
+	if (ri->node() == ri->nexthop())
+	    continue;
+	if (ri->node().get_type() == OspfTypes::Router)
+	    continue;
+	Vertex node = ri->node();
+	Lsa::LsaRef lsar = node.get_lsa();
+	RouteEntry<IPv4> route_entry;
+	route_entry.set_destination_type(OspfTypes::Network);
+	IPNet<IPv4> net;
+	NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+	XLOG_ASSERT(nlsa);
+	route_entry.set_address(nlsa->get_header().get_link_state_id());
+	IPv4 addr = IPv4(htonl(route_entry.get_address()));
+	IPv4 mask = IPv4(htonl(nlsa->get_network_mask()));
+	net = IPNet<IPv4>(addr, mask.mask_len());
+	
+	// Does this network fall into an area range?
+	bool advertise;
+	if (!area_range_covered(net, advertise))
+	    continue;
+	if (!advertise)
+	    continue;
+	route_entry.set_path_type(RouteEntry<IPv4>::intra_area);
+	route_entry.set_cost(ri->weight());
+	route_entry.set_type_2_cost(0);
+
+	route_entry.set_nexthop(IPv4(htonl(ri->nexthop().get_address())));
+
+	route_entry.set_advertising_router(lsar->get_header().
+					   get_advertising_router());
+	
+	// Mark this as a discard route.
+	route_entry.set_discard(true);
+	if (0 != ranges.count(net)) {
+	    RouteEntry<IPv4> r = ranges[net];
+	    if (route_entry.get_cost() < r.get_cost())
+		continue;
+	} 
+	ranges[net] = route_entry;
+    }
+ 
+    // Send in the discard routes.
+    RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
+    map<IPNet<IPv4>, RouteEntry<IPv4> >::const_iterator i;
+    for (i = ranges.begin(); i != ranges.end(); i++) {
+	IPNet<IPv4> net = i->first;
+	RouteEntry<IPv4> route_entry = i->second;
+	routing_table.add_entry(_area, net, route_entry);
+    }
 }
 
 /**
