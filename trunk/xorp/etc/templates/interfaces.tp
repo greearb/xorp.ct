@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.17 2005/08/23 19:03:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.18 2005/08/25 02:23:44 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -14,9 +14,6 @@ interfaces {
 	vif @: txt {
 	    disable:	toggle = false;
 	    enabled:	bool;			/* %deprecated */
-
-	    foo @: ipv4 {
-	    }
 
 	    address @: ipv4 {
 		prefix-length:		u32;
