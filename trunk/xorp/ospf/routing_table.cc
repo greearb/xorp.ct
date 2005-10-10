@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.16 2005/10/07 22:30:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.17 2005/10/10 05:12:46 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -86,6 +86,7 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 {
     debug_msg("%s\n", cstring(net));
     XLOG_ASSERT(_in_transaction);
+    XLOG_ASSERT(area == rt.get_area());
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
