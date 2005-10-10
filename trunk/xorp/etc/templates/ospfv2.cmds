@@ -1,0 +1,12 @@
+/* $XORP$ */
+
+show ospf4 {
+    %command: "" %help: "Display information about OSPFv2";
+    %module: ospfv2;
+}
+
+show ospf4 database $(protocols.ospf4.area.*) {
+    %command: "ospf/tools/print_lsas -a $4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show LSA database";
+}
