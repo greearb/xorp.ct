@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.67 2005/10/10 04:40:59 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.68 2005/10/10 05:44:57 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -284,6 +284,10 @@ class AreaRouter : Subsystem {
 	return OspfTypes::BACKBONE == _area;
     }
 
+    bool backbone(OspfTypes::AreaID area) const {
+	return OspfTypes::BACKBONE == area;
+    }
+
     /**
      * Print link state database.
      */
@@ -431,6 +435,9 @@ class AreaRouter : Subsystem {
      */
     void summary_network_lsa_set_net(SummaryNetworkLsa *snlsa, IPNet<A> net);
 
+
+    Lsa::LsaRef summary_network_lsa(IPNet<A> net, RouteEntry<A>& rt);
+
     /**
      * Generate a Summary-LSA for an intra area path taking into
      * account area ranges. An announcement may not generate an LSA
@@ -439,14 +446,14 @@ class AreaRouter : Subsystem {
     Lsa::LsaRef summary_network_lsa_intra_area(OspfTypes::AreaID area,
 					       IPNet<A> net,
 					       RouteEntry<A>& rt,
-					       bool announce);
+					       bool& announce);
     /**
      * Construct a summary LSA if appropriate.
      * @param announce true if this in an announce false if its a withdraw.
      * @return the LSA can be empty.
      */
     Lsa::LsaRef summary_build(OspfTypes::AreaID area, IPNet<A> net,
-			      RouteEntry<A>& rt, bool announce);
+			      RouteEntry<A>& rt, bool& announce);
 
     /**
      * Start aging LSA.
