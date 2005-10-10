@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.66 2005/10/07 07:09:11 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.67 2005/10/10 04:40:59 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -97,9 +97,15 @@ class AreaRouter : Subsystem {
     /**
      * A new route has been added to the routing table it is being
      * presented to this area for possible Summary-LSA generation.
+     *
+     * @param area the route came from
+     * @param net
+     * @param rt routing entry.
+     * @param push true if the routes are arriving as a consquence of
+     * calling summary_push()
      */
     void summary_announce(OspfTypes::AreaID area, IPNet<A> net,
-			  RouteEntry<A>& rt);
+			  RouteEntry<A>& rt, bool push);
 
     /**
      * A route has been deleted from the routing table. It may

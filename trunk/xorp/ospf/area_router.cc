@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.108 2005/10/10 04:40:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.109 2005/10/10 05:04:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -457,10 +457,10 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
 template <typename A>
 void
 AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
-				RouteEntry<A>& rt)
+				RouteEntry<A>& rt, bool push)
 {
-    debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
-	      cstring(net), cstring(rt));
+    debug_msg("Area %s net %s rentry %s push %s\n", pr_id(area).c_str(),
+	      cstring(net), cstring(rt), pb(push));
 
     XLOG_ASSERT(area != _area);
     XLOG_ASSERT(area == rt.get_area());

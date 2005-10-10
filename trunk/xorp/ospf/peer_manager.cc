@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.57 2005/10/05 03:16:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.58 2005/10/06 07:38:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -707,7 +707,7 @@ PeerManager<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++)
 	if ((*i).first != area)
-	    (*i).second->summary_announce(area, net, rt);
+	    (*i).second->summary_announce(area, net, rt, false);
 }
 
 template <typename A>
@@ -760,7 +760,7 @@ PeerManager<A>::summary_push(OspfTypes::AreaID area)
 	Summary s = (*i).second;
 	if (s._area == area)
 	    continue;
-	area_router->summary_announce(s._area, net, s._rtentry);
+	area_router->summary_announce(s._area, net, s._rtentry, true);
     }
 }
 
