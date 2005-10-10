@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.159 2005/09/23 10:21:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.160 2005/09/29 02:39:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -503,7 +503,11 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 	// Just allow it there isn't any harm.
 	break;
     case OspfTypes::NBMA:
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::PointToMultiPoint:
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
 	break;
@@ -1138,6 +1142,9 @@ Peer<A>::event_interface_up()
 	XLOG_UNFINISHED();
 	break;
     case OspfTypes::PointToMultiPoint:
+	change_state(Point2Point);
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::VirtualLink:
 	change_state(Point2Point);
 	XLOG_UNFINISHED();
@@ -1477,7 +1484,11 @@ Peer<A>::send_hello_packet()
 					 _peerout.get_interface_address());
 	break;
     case OspfTypes::NBMA:
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::PointToMultiPoint:
+	XLOG_UNFINISHED();
+	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
 	break;
