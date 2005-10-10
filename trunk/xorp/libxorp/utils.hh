@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.7 2005/08/04 10:30:17 bms Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.8 2005/08/23 20:46:53 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -110,6 +110,23 @@ is_absolute_path(const string& path, bool homeok = false)
     return false;
 #endif
 }
+
+/**
+ * Tokenize a string by breaking into separate strings when separator
+ * character is encountered.
+ *
+ * @param s string to be tokenized.
+ * @param sep separator to break string it.
+ * @return list of tokens.
+ */
+list<string> split(const string& s, char sep);
+
+/**
+ * Return basename of a path.
+ *
+ * @param argv0 the argv[0] supplied to main().
+ */
+const char* xorp_basename(const char* argv0);
 
 /**
  * Template to delete a list of pointers, and the objects pointed to.

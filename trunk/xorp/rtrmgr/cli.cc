@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.97 2005/10/05 05:48:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.98 2005/10/05 06:00:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,6 +27,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #include "cli.hh"
 #include "command_tree.hh"
@@ -35,7 +36,6 @@
 #include "slave_conf_tree_node.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-#include "util.hh"
 
 #ifdef HOST_OS_WINDOWS
 inline uid_t getuid() { return 0; }

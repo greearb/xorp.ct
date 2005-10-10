@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.55 2005/08/23 01:19:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.56 2005/09/26 20:22:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -44,13 +44,13 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/run_command.hh"
+#include "libxorp/utils.hh"
 
 #include "cli.hh"
 #include "op_commands.hh"
 #include "slave_conf_tree.hh"
 #include "template_tree.hh"
 #include "slave_module_manager.hh"
-#include "util.hh"
 #include "y.opcmd_tab.h"
 
 #ifdef HOST_OS_WINDOWS

@@ -12,20 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.9 2005/07/28 23:11:25 pavlin Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.10 2005/07/28 23:20:35 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
-
-/**
- * Tokenize a string by breaking into separate strings when separator
- * character is encountered.
- *
- * @param s string to be tokenized.
- * @param sep separator to break string it.
- * @return list of tokens.
- */
-list<string> split(const string& s, char sep);
 
 /**
  * Initialize paths.
@@ -88,13 +78,6 @@ string xorp_xrl_targets_dir();
  * value.
  */
 string xorp_boot_file();
-
-/**
- * Return basename of binary.
- *
- * @param argv0 the argv[0] supplied to main().
- */
-const char* xorp_basename(const char* argv0);
 
 /**
  * Remove enclosing quotes from string.

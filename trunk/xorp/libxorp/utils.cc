@@ -13,11 +13,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.3 2005/07/08 01:27:13 atanu Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.4 2005/08/04 10:32:47 bms Exp $"
 
 #include "xorp.h"
 #include "c_format.hh"
 #include "utils.hh"
+
+
+list<string>
+split(const string& s, char ch)
+{
+    list<string> parts;
+    string s2 = s;
+    size_t ix;
+
+    ix = s2.find(ch);
+    while (ix != string::npos) {
+	parts.push_back(s2.substr(0, ix));
+	s2 = s2.substr(ix + 1, s2.size() - ix);
+	ix = s2.find(ch);
+    }
+    if (!s2.empty())
+	parts.push_back(s2);
+    return parts;
+}
+
+const char*
+xorp_basename(const char* argv0)
+{
+    const char* p = strrchr(argv0, PATH_DELIMITER_CHAR);
+    if (p != NULL) {
+	return p + 1;
+    }
+    return argv0;
+}
 
 FILE*
 xorp_make_temporary_file(const string& tmp_dir,

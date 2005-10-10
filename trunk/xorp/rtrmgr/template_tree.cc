@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.37 2005/08/18 15:54:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.38 2005/08/23 00:58:41 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,13 +29,13 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #include "conf_tree.hh"
 #include "conf_tree_node.hh"
 #include "template_commands.hh"
 #include "template_tree.hh"
 #include "template_tree_node.hh"
-#include "util.hh"
 
 #ifdef HOST_OS_WINDOWS
 #define	stat	_stat
