@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.56 2005/09/26 20:22:32 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.57 2005/10/10 04:10:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -66,13 +66,13 @@ extern int opcmderror(const char *s);
 OpInstance::OpInstance(EventLoop&			eventloop,
 		       OpCommand&			op_command,
 		       const string&			executable_filename,
-		       const string&			command_arguments,
+		       const list<string>&		command_argument_list,
 		       RouterCLI::OpModePrintCallback	print_cb,
 		       RouterCLI::OpModeDoneCallback	done_cb)
     : _eventloop(eventloop),
       _op_command(op_command),
       _executable_filename(executable_filename),
-      _command_arguments(command_arguments),
+      _command_argument_list(command_argument_list),
       _run_command(NULL),
       _print_cb(print_cb),
       _done_cb(done_cb)
@@ -91,20 +91,27 @@ OpInstance::OpInstance(EventLoop&			eventloop,
 	    break;
 	}
 
-	string program_request = _executable_filename;
-	if (! _command_arguments.empty())
-	    program_request = program_request + " " + _command_arguments;
-
 	// Run the program
 	XLOG_ASSERT(_run_command == NULL);
 	_run_command = new RunCommand(
 	    _eventloop,
 	    _executable_filename,
-	    _command_arguments,
+	    _command_argument_list,
 	    callback(this, &OpInstance::stdout_cb),
 	    callback(this, &OpInstance::stderr_cb),
-	    callback(this, &OpInstance::done_cb));
+	    callback(this, &OpInstance::done_cb),
+	    true /* redirect_stderr_to_stdout */);
 	if (_run_command->execute() != XORP_OK) {
+	    // Create the string with the command name and its arguments
+	    string program_request = _executable_filename;
+	    list<string>::iterator iter;
+	    for (iter = _command_argument_list.begin();
+		 iter != _command_argument_list.end();
+		 ++iter) {
+		program_request += " ";
+		program_request += iter->c_str();
+	    }
+
 	    delete _run_command;
 	    _run_command = NULL;
 	    errmsg = c_format("Could not execute program %s",
@@ -140,8 +147,8 @@ void
 OpInstance::stderr_cb(RunCommand* run_command, const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
-    // XXX: accumulate the error message and print it later
-    _error_msg += output;
+    // XXX: print immediately the stderr along with the stdout
+    _print_cb->dispatch(output);
 }
 
 void
@@ -224,7 +231,7 @@ OpCommand::command_parts2command_name(const list<string>& command_parts)
 }
 
 string
-OpCommand::select_positional_argument(const list<string>& arguments,
+OpCommand::select_positional_argument(const list<string>& argument_list,
 				      const string& position,
 				      string& error_msg)
 {
@@ -251,12 +258,12 @@ OpCommand::select_positional_argument(const list<string>& arguments,
     //
     const string pos_str = position.substr(1, string::npos);
     int pos = atoi(pos_str.c_str());
-    if ((pos < 0) || (pos > static_cast<int>(arguments.size()))) {
+    if ((pos < 0) || (pos > static_cast<int>(argument_list.size()))) {
 	error_msg = c_format("Invalid positional argument \"%s\": "
 			     "expected values must be in interval "
 			     "[0, %u]",
 			     position.c_str(),
-			     XORP_UINT_CAST(arguments.size()));
+			     XORP_UINT_CAST(argument_list.size()));
 	return string("");
     }
 
@@ -264,7 +271,9 @@ OpCommand::select_positional_argument(const list<string>& arguments,
     list<string>::const_iterator iter;
     if (pos == 0) {
 	// Add all arguments
-	for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
+	for (iter = argument_list.begin();
+	     iter != argument_list.end();
+	     ++iter) {
 	    if (! resolved_str.empty())
 		resolved_str += " ";
 	    resolved_str += *iter;
@@ -272,7 +281,9 @@ OpCommand::select_positional_argument(const list<string>& arguments,
     } else {
 	// Select a single argument
 	int tmp_pos = 0;
-	for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
+	for (iter = argument_list.begin();
+	     iter != argument_list.end();
+	     ++iter) {
 	    tmp_pos++;
 	    if (tmp_pos == pos) {
 		resolved_str += *iter;
@@ -290,7 +301,7 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 		   RouterCLI::OpModePrintCallback print_cb,
 		   RouterCLI::OpModeDoneCallback done_cb)
 {
-    string command_arguments_str;
+    list<string> resolved_command_argument_list;
     list<string>::const_iterator iter;
 
     if (! is_executable()) {
@@ -302,19 +313,15 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
     // Add all arguments. If an argument is positional (e.g., $0, $1, etc),
     // then resolve it by using the strings from the command line.
     //
-    for (iter = _command_action_arguments.begin();
-	 iter != _command_action_arguments.end();
+    for (iter = _command_action_argument_list.begin();
+	 iter != _command_action_argument_list.end();
 	 ++iter) {
 	const string& arg = *iter;
 	XLOG_ASSERT(! arg.empty());
 
-	// Add an extra space between arguments
-	if (! command_arguments_str.empty())
-	    command_arguments_str += " ";
-
 	// If the argument is not positional, then just add it
 	if (arg[0] != '$') {
-	    command_arguments_str += arg;
+	    resolved_command_argument_list.push_back(arg);
 	    continue;
 	}
 
@@ -328,12 +335,12 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 	if (resolved_str.empty()) {
 	    XLOG_FATAL("Internal programming error: %s", error_msg.c_str());
 	}
-	command_arguments_str += resolved_str;
+	resolved_command_argument_list.push_back(resolved_str);
     }
 
     OpInstance *opinst = new OpInstance(eventloop, *this,
 					_command_executable_filename,
-					command_arguments_str,
+					resolved_command_argument_list,
 					print_cb, done_cb);
     
     return opinst;

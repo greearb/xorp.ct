@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.27 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.28 2005/08/31 22:02:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1065,15 +1065,18 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
     }
     fclose(fp);
 
-    _command_arguments = _tmp_filename;	// XXX: the filename is the argument
+    // XXX: the filename is the argument
+    _command_argument_list.clear();
+    _command_argument_list.push_back(_tmp_filename);
 
     _run_command = new RunCommand(
 	_eventloop,
 	_command_name,
-	_command_arguments,
+	_command_argument_list,
 	callback(this, &IfConfigSetClick::ClickConfigGenerator::stdout_cb),
 	callback(this, &IfConfigSetClick::ClickConfigGenerator::stderr_cb),
-	callback(this, &IfConfigSetClick::ClickConfigGenerator::done_cb));
+	callback(this, &IfConfigSetClick::ClickConfigGenerator::done_cb),
+	false /* redirect_stderr_to_stdout */);
     if (_run_command->execute() != XORP_OK) {
 	delete _run_command;
 	_run_command = NULL;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.32 2005/07/08 16:42:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.33 2005/07/18 21:32:52 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -45,11 +45,11 @@ public:
 	: _module_name(module_name), _verbose(verbose) {};
     virtual ~Validation() {};
 
-    virtual void validate(RunCommand::ExecId exec_id, CallBack cb) = 0;
+    virtual void validate(RunShellCommand::ExecId exec_id, CallBack cb) = 0;
 
 protected:
     const string	_module_name;
-    RunCommand::ExecId	_exec_id;
+    RunShellCommand::ExecId _exec_id;
     bool		_verbose;	 // Set to true if output is verbose
 };
 
@@ -58,7 +58,7 @@ public:
     DelayValidation(const string& module_name, EventLoop& eventloop,
 		    uint32_t ms, bool verbose);
 
-    void validate(RunCommand::ExecId exec_id, CallBack cb);
+    void validate(RunShellCommand::ExecId exec_id, CallBack cb);
 
 private:
     void timer_expired();
@@ -75,7 +75,7 @@ public:
 			TaskManager& taskmgr);
     virtual ~XrlStatusValidation() {}
 
-    void validate(RunCommand::ExecId exec_id, CallBack cb);
+    void validate(RunShellCommand::ExecId exec_id, CallBack cb);
 
 protected:
     void dummy_response();
@@ -98,7 +98,7 @@ public:
 			    TaskManager& taskmgr);
     virtual ~ProgramStatusValidation();
 
-    void validate(RunCommand::ExecId exec_id, CallBack cb);
+    void validate(RunShellCommand::ExecId exec_id, CallBack cb);
 
 protected:
     virtual void handle_status_response(bool success,
@@ -111,13 +111,13 @@ protected:
     CallBack		_cb;
 
 private:
-    void stdout_cb(RunCommand* run_command, const string& output);
-    void stderr_cb(RunCommand* run_command, const string& output);
-    void done_cb(RunCommand* run_command, bool success,
+    void stdout_cb(RunShellCommand* run_command, const string& output);
+    void stderr_cb(RunShellCommand* run_command, const string& output);
+    void done_cb(RunShellCommand* run_command, bool success,
 		 const string& error_msg);
     void execute_done(bool success);
 
-    RunCommand*		_run_command;
+    RunShellCommand*	_run_command;
     string		_command_stdout;
     string		_command_stderr;
     XorpTimer		_delay_timer;
@@ -218,7 +218,8 @@ public:
     Startup(const string& module_name, bool verbose);
     virtual ~Startup() {}
 
-    virtual void startup(const RunCommand::ExecId& exec_id, CallBack cb) = 0;
+    virtual void startup(const RunShellCommand::ExecId& exec_id,
+			 CallBack cb) = 0;
 
 protected:
     const string _module_name;
@@ -231,7 +232,7 @@ public:
 	       TaskManager& taskmgr);
     virtual ~XrlStartup() {}
 
-    void startup(const RunCommand::ExecId& exec_id, CallBack cb);
+    void startup(const RunShellCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -251,13 +252,13 @@ public:
 		   TaskManager& taskmgr);
     virtual ~ProgramStartup();
 
-    void startup(const RunCommand::ExecId& exec_id, CallBack cb);
+    void startup(const RunShellCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
-    void stdout_cb(RunCommand* run_command, const string& output);
-    void stderr_cb(RunCommand* run_command, const string& output);
-    void done_cb(RunCommand* run_command, bool success,
+    void stdout_cb(RunShellCommand* run_command, const string& output);
+    void stderr_cb(RunShellCommand* run_command, const string& output);
+    void done_cb(RunShellCommand* run_command, bool success,
 		 const string& error_msg);
     void execute_done(bool success);
 
@@ -265,7 +266,7 @@ private:
     TaskManager&	_task_manager;
     CallBack		_cb;
 
-    RunCommand*		_run_command;
+    RunShellCommand*	_run_command;
     string		_command_stdout;
     string		_command_stderr;
     XorpTimer		_delay_timer;
@@ -277,7 +278,8 @@ public:
     Shutdown(const string& module_name, bool verbose);
     virtual ~Shutdown() {}
 
-    virtual void shutdown(const RunCommand::ExecId& exec_id, CallBack cb) = 0;
+    virtual void shutdown(const RunShellCommand::ExecId& exec_id,
+			  CallBack cb) = 0;
 
 protected:
     const string _module_name;
@@ -290,7 +292,7 @@ public:
 		TaskManager& taskmgr);
     virtual ~XrlShutdown() {}
 
-    void shutdown(const RunCommand::ExecId& exec_id, CallBack cb);
+    void shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
@@ -310,13 +312,13 @@ public:
 		    TaskManager& taskmgr);
     virtual ~ProgramShutdown();
 
-    void shutdown(const RunCommand::ExecId& exec_id, CallBack cb);
+    void shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb);
     EventLoop& eventloop() const;
 
 private:
-    void stdout_cb(RunCommand* run_command, const string& output);
-    void stderr_cb(RunCommand* run_command, const string& output);
-    void done_cb(RunCommand* run_command, bool success,
+    void stdout_cb(RunShellCommand* run_command, const string& output);
+    void stderr_cb(RunShellCommand* run_command, const string& output);
+    void done_cb(RunShellCommand* run_command, bool success,
 		 const string& error_msg);
     void execute_done(bool success);
 
@@ -324,7 +326,7 @@ private:
     TaskManager&	_task_manager;
     CallBack		_cb;
 
-    RunCommand*		_run_command;
+    RunShellCommand*	_run_command;
     string		_command_stdout;
     string		_command_stderr;
     XorpTimer		_delay_timer;
@@ -386,13 +388,13 @@ public:
     void unschedule();
 
 private:
-    void stdout_cb(RunCommand* run_command, const string& output);
-    void stderr_cb(RunCommand* run_command, const string& output);
-    void done_cb(RunCommand* run_command, bool success,
+    void stdout_cb(RunShellCommand* run_command, const string& output);
+    void stderr_cb(RunShellCommand* run_command, const string& output);
+    void done_cb(RunShellCommand* run_command, bool success,
 		 const string& error_msg);
 
     UnexpandedProgram		_unexpanded_program;
-    RunCommand*			_run_command;
+    RunShellCommand*		_run_command;
     string			_command_stdout;
     string			_command_stderr;
     TaskProgramItem::ProgramCallback _program_cb;
@@ -428,14 +430,14 @@ public:
      * @return a reference to the ExecId object that is used
      * for setting the execution ID when running the task.
      */
-    const RunCommand::ExecId& exec_id() const { return _exec_id; }
+    const RunShellCommand::ExecId& exec_id() const { return _exec_id; }
 
     /**
      * Set the execution ID for executing the task.
      * 
      * @param v the execution ID.
      */
-    void set_exec_id(const RunCommand::ExecId& v) { _exec_id = v; }
+    void set_exec_id(const RunShellCommand::ExecId& v) { _exec_id = v; }
 
     const string& name() const { return _name; }
     EventLoop& eventloop() const;
@@ -493,7 +495,7 @@ private:
     bool	_config_done;	// True if we changed the module's config
     CallBack	_task_complete_cb; // The task completion callback
     XorpTimer	_wait_timer;
-    RunCommand::ExecId _exec_id;
+    RunShellCommand::ExecId _exec_id;
     bool	_verbose;	 // Set to true if output is verbose
 };
 
@@ -556,14 +558,14 @@ public:
      * @return a reference to the ExecId object that is used
      * for setting the execution ID when running the tasks.
      */
-    const RunCommand::ExecId& exec_id() const { return _exec_id; }
+    const RunShellCommand::ExecId& exec_id() const { return _exec_id; }
 
     /**
      * Set the execution ID for executing the tasks.
      * 
      * @param v the execution ID.
      */
-    void set_exec_id(const RunCommand::ExecId& v) { _exec_id = v; }
+    void set_exec_id(const RunShellCommand::ExecId& v) { _exec_id = v; }
 
 
 private:
@@ -594,7 +596,7 @@ private:
 
     map<string, const ModuleCommand*> _module_commands;
 
-    RunCommand::ExecId _exec_id;
+    RunShellCommand::ExecId _exec_id;
 
     CallBack _completion_cb;
 };

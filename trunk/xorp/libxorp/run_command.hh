@@ -13,11 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.5 2005/07/08 16:33:15 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.6 2005/08/18 15:28:40 bms Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
 
+
+#include <list>
 
 #include "libxorp/asyncio.hh"
 #include "libxorp/callback.hh"
@@ -26,37 +28,32 @@ class EventLoop;
 
 
 /**
- * @short Class for running an external command.
+ * @short Base virtual class for running an external command.
  */
-class RunCommand {
+class RunCommandBase {
 public:
-    typedef XorpCallback2<void, RunCommand*, const string&>::RefPtr OutputCallback;
-    typedef XorpCallback3<void, RunCommand*, bool, const string&>::RefPtr DoneCallback;
     class ExecId;
 
     /**
-     * Constructor for a given command and its arguments.
+     * Constructor for a given command.
      *
      * @param eventloop the event loop.
      * @param command the command to execute.
-     * @param arguments the arguments for the command to execute.
-     * @param stdout_cb the callback to call when there is data on the
-     * standard output.
-     * @param stderr_cb the callback to call when there is data on the
-     * standard error.
-     * @param done_cb the callback to call when the command is completed.
      */
-    RunCommand(EventLoop&			eventloop,
-	       const string&			command,
-	       const string&			arguments,
-	       RunCommand::OutputCallback	stdout_cb,
-	       RunCommand::OutputCallback	stderr_cb,
-	       RunCommand::DoneCallback		done_cb);
+    RunCommandBase(EventLoop&				eventloop,
+		   const string&			command);
 
     /**
      * Destructor.
      */
-    ~RunCommand();
+    virtual ~RunCommandBase();
+
+    /**
+     * Set the list with the arguments for the command to execute.
+     * 
+     * @param v the list with the arguments for the command to execute.
+     */
+    void set_argument_list(const list<string>& v) { _argument_list = v; }
 
     /**
      * Execute the command.
@@ -78,11 +75,11 @@ public:
     const string& command() const { return _command; }
 
     /**
-     * Get the arguments of the command to execute.
+     * Get the list with the arguments of the command to execute.
      *
      * @return a string with the arguments of the command to execute.
      */
-    const string& arguments() const { return _arguments; }
+    const list<string>& argument_list() const { return _argument_list; }
 
     /**
      * Get a reference to the ExecId object.
@@ -215,6 +212,39 @@ public:
 
 private:
     /**
+     * A pure virtual method called when there is output on the program's
+     * stdout.
+     * 
+     * @param output the string with the output.
+     */
+    virtual void stdout_cb_dispatch(const string& output) = 0;
+
+    /**
+     * A pure virtual method called when there is output on the program's
+     * stderr.
+     * 
+     * @param output the string with the output.
+     */
+    virtual void stderr_cb_dispatch(const string& output) = 0;
+
+    /**
+     * A pure virtual method called when the program execution is completed.
+     * 
+     * @param success if true the program execution has succeeded, otherwise
+     * it has failed.
+     * @param error_msg if error, the string with the error message.
+     */
+    virtual void done_cb_dispatch(bool success, const string& error_msg) = 0;
+
+    /**
+     * Test if the stderr should be redirected to stdout.
+     * 
+     * @return true if the stderr should be redirected to stdout, otherwise
+     * false.
+     */
+    virtual bool redirect_stderr_to_stdout() const = 0;
+
+    /**
      * Close the output for the command.
      */
     void close_output();
@@ -245,10 +275,7 @@ private:
     static const size_t	BUF_SIZE = 8192;
     EventLoop&		_eventloop;
     string		_command;
-    string		_arguments;
-    OutputCallback	_stdout_cb;
-    OutputCallback	_stderr_cb;
-    DoneCallback	_done_cb;
+    list<string>	_argument_list;
 
     AsyncFileReader*	_stdout_file_reader;
     AsyncFileReader*	_stderr_file_reader;
@@ -274,6 +301,162 @@ private:
     int			_command_term_sig;
     bool		_command_is_coredump;
     int			_command_stop_signal;
+};
+
+/**
+ * @short A class for running an external command.
+ */
+class RunCommand : public RunCommandBase {
+public:
+    typedef XorpCallback2<void, RunCommand*, const string&>::RefPtr OutputCallback;
+    typedef XorpCallback3<void, RunCommand*, bool, const string&>::RefPtr DoneCallback;
+
+    /**
+     * Constructor for a given command and its list with arguments.
+     *
+     * @param eventloop the event loop.
+     * @param command the command to execute.
+     * @param argument_list the list with the arguments for the command
+     * to execute.
+     * @param stdout_cb the callback to call when there is data on the
+     * standard output.
+     * @param stderr_cb the callback to call when there is data on the
+     * standard error.
+     * @param done_cb the callback to call when the command is completed.
+     * @param redirect_stderr_to_stdout if true redirect the stderr to stdout.
+     */
+    RunCommand(EventLoop&			eventloop,
+	       const string&			command,
+	       const list<string>&		argument_list,
+	       RunCommand::OutputCallback	stdout_cb,
+	       RunCommand::OutputCallback	stderr_cb,
+	       RunCommand::DoneCallback		done_cb,
+	       bool				redirect_stderr_to_stdout);
+
+private:
+    /**
+     * A method called when there is output on the program's stdout.
+     * 
+     * @param output the string with the output.
+     */
+    void stdout_cb_dispatch(const string& output) {
+	_stdout_cb->dispatch(this, output);
+    }
+
+    /**
+     * A method called when there is output on the program's stderr.
+     * 
+     * @param output the string with the output.
+     */
+    void stderr_cb_dispatch(const string& output) {
+	_stderr_cb->dispatch(this, output);
+    }
+
+    /**
+     * A method called when the program execution is completed.
+     * 
+     * @param success if true the program execution has succeeded, otherwise
+     * it has failed.
+     * @param error_msg if error, the string with the error message.
+     */
+    void done_cb_dispatch(bool success, const string& error_msg) {
+	_done_cb->dispatch(this, success, error_msg);
+    }
+
+    /**
+     * Test if the stderr should be redirected to stdout.
+     * 
+     * @return true if the stderr should be redirected to stdout, otherwise
+     * false.
+     */
+    bool redirect_stderr_to_stdout() const {
+	return (_redirect_stderr_to_stdout);
+    }
+
+    OutputCallback	_stdout_cb;
+    OutputCallback	_stderr_cb;
+    DoneCallback	_done_cb;
+
+    bool		_redirect_stderr_to_stdout;
+};
+
+/**
+ * @short A class for running an external command by invoking a shell.
+ */
+class RunShellCommand : public RunCommandBase {
+public:
+    typedef XorpCallback2<void, RunShellCommand*, const string&>::RefPtr OutputCallback;
+    typedef XorpCallback3<void, RunShellCommand*, bool, const string&>::RefPtr DoneCallback;
+
+    /**
+     * Constructor for a given command and its list with arguments.
+     *
+     * @param eventloop the event loop.
+     * @param command the command to execute.
+     * @param argument_string the string with the arguments for the command
+     * to execute.
+     * @param stdout_cb the callback to call when there is data on the
+     * standard output.
+     * @param stderr_cb the callback to call when there is data on the
+     * standard error.
+     * @param done_cb the callback to call when the command is completed.
+     */
+    RunShellCommand(EventLoop&				eventloop,
+		    const string&			command,
+		    const string&			argument_string,
+		    RunShellCommand::OutputCallback	stdout_cb,
+		    RunShellCommand::OutputCallback	stderr_cb,
+		    RunShellCommand::DoneCallback	done_cb);
+
+private:
+    /**
+     * A method called when there is output on the program's stdout.
+     * 
+     * @param output the string with the output.
+     */
+    void stdout_cb_dispatch(const string& output) {
+	_stdout_cb->dispatch(this, output);
+    }
+
+    /**
+     * A method called when there is output on the program's stderr.
+     * 
+     * @param output the string with the output.
+     */
+    void stderr_cb_dispatch(const string& output) {
+	_stderr_cb->dispatch(this, output);
+    }
+
+    /**
+     * A method called when the program execution is completed.
+     * 
+     * @param success if true the program execution has succeeded, otherwise
+     * it has failed.
+     * @param error_msg if error, the string with the error message.
+     */
+    void done_cb_dispatch(bool success, const string& error_msg) {
+	_done_cb->dispatch(this, success, error_msg);
+    }
+
+    /**
+     * Test if the stderr should be redirected to stdout.
+     * 
+     * @return true if the stderr should be redirected to stdout, otherwise
+     * false.
+     */
+    bool redirect_stderr_to_stdout() const {
+	//
+	// XXX: Redirecting stderr to stdout is always disabled by defailt.
+	// If we want stderr to be redirected, this should be specified
+	// by the executed command itself. E.g.:
+	//     "my_command my_args 2>&1"
+	//
+	return (false);
+    }
+
+    OutputCallback	_stdout_cb;
+    OutputCallback	_stderr_cb;
+    DoneCallback	_done_cb;
 };
 
 #endif // __LIBXORP_RUN_COMMAND_HH__

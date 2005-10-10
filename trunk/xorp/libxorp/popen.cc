@@ -57,13 +57,14 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.3 2005/04/12 07:49:00 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.5 2005/08/04 10:12:53 bms Exp $"
 
 #include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -100,7 +101,7 @@ extern char **_environ;
 extern char **environ;
 #endif
 
-/* XXX: static instance */
+// XXX: static instance
 static struct pid_s {
     struct pid_s *next;
     FILE *fp_out;
@@ -115,7 +116,8 @@ static struct pid_s {
 
 
 pid_t
-popen2(const string& command, FILE *& outstream, FILE *&errstream)
+popen2(const string& command, const list<string>& arguments,
+       FILE *& outstream, FILE *&errstream, bool redirect_stderr_to_stdout)
 {
 #ifdef HOST_OS_WINDOWS
     struct pid_s *cur;
@@ -151,24 +153,38 @@ popen2(const string& command, FILE *& outstream, FILE *&errstream)
     SetNamedPipeHandleState(herr[1], &pipemode, NULL, NULL);
 #endif
 
-    /*
-     * XXX: Windows has no notion of non-blocking file handles;
-     * there is overlapped I/O which is broadly similar to POSIX aio.
-     * XXX: We're using ASCII, not Unicode, APIs here, because all the
-     * strings we pass in are 8-bit.
-     */
+    //
+    // XXX: Windows has no notion of non-blocking file handles;
+    // there is overlapped I/O which is broadly similar to POSIX aio.
+    // XXX: We're using ASCII, not Unicode, APIs here, because all the
+    // strings we pass in are 8-bit.
+    //
     GetStartupInfoA(&si);
     si.dwFlags = STARTF_USESTDHANDLES;
-    //si.hStdInput = NULL;		/* XXX: is this OK? */
+    //si.hStdInput = NULL;		// XXX: is this OK?
     si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     si.hStdOutput = hout[1];
     si.hStdError = herr[1];
 
-    debug_msg("Trying to execute: '%s'\n", command.c_str());
+    string final_command = command;
+    list<string>::const_iterator iter;
+    for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
+	final_command += " ";
+	final_command += *iter;
+    }
 
-    if (CreateProcessA(NULL, const_cast<char *>(command.c_str()), NULL, NULL,
-TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
-&si, &pi) == 0) {
+    if (redirect_stderr_to_stdout) {
+	//
+	// Redirect stderr to stdout
+	//
+	// TODO: implement it!
+    }
+
+    debug_msg("Trying to execute: '%s'\n", final_command.c_str());
+
+    if (CreateProcessA(NULL, final_command.c_str(), NULL, NULL, TRUE,
+		       CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
+		       &si, &pi) == 0) {
 	DWORD err = GetLastError();
 	XLOG_WARNING("CreateProcessA failed: %u", XORP_UINT_CAST(err));
 	CloseHandle(hout[0]);
@@ -181,8 +197,8 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
     /* Parent; assume _fdopen can't fail. */
     iop_out = _fdopen(_open_osfhandle((long)hout[0], _O_RDONLY|_O_TEXT), "r");
     iop_err = _fdopen(_open_osfhandle((long)herr[0], _O_RDONLY|_O_TEXT), "r");
-    setvbuf(iop_out, NULL, _IONBF, 0 );
-    setvbuf(iop_err, NULL, _IONBF, 0 );
+    setvbuf(iop_out, NULL, _IONBF, 0);
+    setvbuf(iop_err, NULL, _IONBF, 0);
 #if 0
     CloseHandle(hout[1]);
     CloseHandle(herr[1]);
@@ -203,20 +219,25 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
     ResumeThread(pi.hThread);
     return (cur->pid);
 
-#else /* !HOST_OS_WINDOWS */
+#else // !HOST_OS_WINDOWS
+
     struct pid_s *cur;
     FILE *iop_out, *iop_err;
     int pdes_out[2], pdes_err[2], pid;
-    const char *argv[4];
+    size_t argv_size = 1 + arguments.size() + 1;
+    const char **argv = reinterpret_cast<const char**>(malloc(argv_size * sizeof(char *)));
     struct pid_s *p;
     outstream = NULL;
     errstream = NULL;
 
-    if (pipe(pdes_out) < 0)
+    if (pipe(pdes_out) < 0) {
+	free(argv);
 	return 0;
+    }
     if (pipe(pdes_err) < 0) {
 	(void)close(pdes_out[0]);
 	(void)close(pdes_out[1]);
+	free(argv);
 	return 0;
     }
 
@@ -225,6 +246,7 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
+	free(argv);
 	return 0;
     }
 
@@ -238,6 +260,7 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
+	free(argv);
 	return 0;
     }
     fl = fcntl(pdes_err[0], F_GETFL);
@@ -248,15 +271,22 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 	(void)close(pdes_out[1]);
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
+	free(argv);
 	return 0;
     }
 
-    string a1 = "sh";
-    string a2 = "-c";
-    argv[0] = a1.c_str();
-    argv[1] = a2.c_str();
-    argv[2] = command.c_str();
-    argv[3] = NULL;
+    //
+    // Create the array with the command and the arguments
+    //
+    argv[0] = xorp_basename(command.c_str());
+    size_t i;
+    list<string>::const_iterator iter;
+    for (i = 0, iter = arguments.begin();
+	 iter != arguments.end();
+	 ++i, ++iter) {
+	argv[i + 1] = iter->c_str();
+    }
+    argv[argv_size - 1] = NULL;
 
     switch (pid = vfork()) {
     case -1:				/* Error. */
@@ -265,6 +295,7 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 	(void)close(pdes_err[0]);
 	(void)close(pdes_err[1]);
 	free(cur);
+	free(argv);
 	return 0;
 	/* NOTREACHED */
     case 0:				/* Child. */
@@ -278,30 +309,61 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 	 */
 	(void)close(pdes_out[0]);
 	(void)close(pdes_err[0]);
-	if (pdes_out[1] != STDOUT_FILENO) {
-	    (void)dup2(pdes_out[1], STDOUT_FILENO);
-	    (void)close(pdes_out[1]);
-	} 
-	if (pdes_err[1] != STDERR_FILENO) {
-	    (void)dup2(pdes_err[1], STDERR_FILENO);
-	    (void)close(pdes_err[1]);
-	} 
+
+	if (redirect_stderr_to_stdout) {
+	    //
+	    // Redirect stderr to stdout
+	    //
+	    bool do_close_pdes_out = false;
+	    bool do_close_pdes_err = false;
+	    if ((pdes_out[1] != STDOUT_FILENO)
+		&& (pdes_out[1] != STDERR_FILENO)) {
+		do_close_pdes_out = true;
+	    }
+	    if ((pdes_err[1] != STDOUT_FILENO)
+		&& (pdes_err[1] != STDERR_FILENO)) {
+		do_close_pdes_err = true;
+	    }
+	    if (pdes_out[1] != STDOUT_FILENO) {
+		(void)dup2(pdes_out[1], STDOUT_FILENO);
+	    }
+	    if (pdes_out[1] != STDERR_FILENO) {
+		(void)dup2(pdes_out[1], STDERR_FILENO);
+	    }
+	    if (do_close_pdes_out)
+		(void)close(pdes_out[1]);
+	    if (do_close_pdes_err)
+		(void)close(pdes_err[1]);
+	} else {
+	    if (pdes_out[1] != STDOUT_FILENO) {
+		(void)dup2(pdes_out[1], STDOUT_FILENO);
+		(void)close(pdes_out[1]);
+	    }
+	    if (pdes_err[1] != STDERR_FILENO) {
+		(void)dup2(pdes_err[1], STDERR_FILENO);
+		(void)close(pdes_err[1]);
+	    }
+	}
 	for (p = pidlist; p; p = p->next) {
 	    (void)close(fileno(p->fp_out));
 	    (void)close(fileno(p->fp_err));
 	}
 	// Set the process as a group leader
 	setpgid(0, 0);
-	execve(_PATH_BSHELL, const_cast<char**>(argv), environ);
-	exit(127);
+	execve(const_cast<char*>(command.c_str()), const_cast<char**>(argv),
+	       environ);
+	_exit(127);
 	/* NOTREACHED */
     }
 
     /* Parent; assume fdopen can't fail. */
     iop_out = fdopen(pdes_out[0], "r");
     iop_err = fdopen(pdes_err[0], "r");
+    setvbuf(iop_out, NULL, _IONBF, 0);
+    setvbuf(iop_err, NULL, _IONBF, 0);
     (void)close(pdes_out[1]);
     (void)close(pdes_err[1]);
+    free(argv);
 
     /* Link into list of file descriptors. */
     cur->fp_out = iop_out;
@@ -314,7 +376,7 @@ TRUE, CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
     errstream = iop_err;
 
     return pid;
-#endif /* HOST_OS_WINDOWS */
+#endif // !HOST_OS_WINDOWS
 }
 
 /*

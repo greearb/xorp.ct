@@ -12,12 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/popen.hh,v 1.2 2005/03/25 02:53:43 pavlin Exp $
+// $XORP: xorp/libxorp/popen.hh,v 1.3 2005/08/04 10:14:54 bms Exp $
 
 #ifndef __LIBXORP_POPEN_HH__
 #define __LIBXORP_POPEN_HH__
 
-pid_t	popen2(const string& command, FILE *& outstream, FILE *& errstream);
+#include<list>
+
+pid_t	popen2(const string& command, const list<string>& arguments,
+	       FILE *& outstream, FILE *& errstream,
+	       bool redirect_stderr_to_stdout);
 int	pclose2(FILE *iop_out);
 
 #ifdef HOST_OS_WINDOWS

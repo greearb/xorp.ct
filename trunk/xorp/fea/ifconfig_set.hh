@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.37 2005/07/06 19:34:56 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.38 2005/08/18 15:45:47 bms Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -683,7 +683,7 @@ private:
 	IfConfigSetClick& _ifc_set_click;
 	EventLoop&	_eventloop;
 	string		_command_name;
-	string		_command_arguments;
+	list<string>	_command_argument_list;
 	RunCommand*	_run_command;
 	string		_command_stdout;
 	string		_tmp_filename;

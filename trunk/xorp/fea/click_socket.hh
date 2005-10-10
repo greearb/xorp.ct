@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.18 2005/04/13 02:59:18 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.19 2005/08/18 15:45:43 bms Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -453,11 +453,11 @@ private:
      * Execute the user-level Click command.
      *
      * @param command the command to execute.
-     * @param arguments the command arguments.
+     * @param argument_list the list with the command arguments.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int execute_user_click_command(const string& command,
-				   const string& arguments);
+				   const list<string>& argument_list);
 
     /**
      * Terminate the user-level Click command.

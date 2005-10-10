@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.31 2005/08/23 01:19:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.32 2005/09/26 20:22:32 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -38,7 +38,7 @@ public:
     OpInstance(EventLoop&			eventloop,
 	       OpCommand&			op_command,
 	       const string&			executable_filename,
-	       const string&			command_arguments,
+	       const list<string>&		command_argument_list,
 	       RouterCLI::OpModePrintCallback	print_cb,
 	       RouterCLI::OpModeDoneCallback	done_cb);
     ~OpInstance();
@@ -56,7 +56,7 @@ private:
     EventLoop&		_eventloop;
     OpCommand&		_op_command;
     string		_executable_filename;
-    string		_command_arguments;
+    list<string>	_command_argument_list;
 
     RunCommand*		_run_command;
     string		_error_msg;
@@ -78,7 +78,7 @@ public:
     void set_module(const string& v) { _module = v; }
     void set_command_action(const string& v) { _command_action = v; }
     void set_command_action_filename(const string& v) { _command_action_filename = v; }
-    void set_command_action_arguments(const list<string>& v) { _command_action_arguments = v; }
+    void set_command_action_argument_list(const list<string>& v) { _command_action_argument_list = v; }
     void set_command_executable_filename(const string& v) { _command_executable_filename = v; }
     bool is_executable() const { return (! _command_action.empty()); }
     bool can_pipe() const { return is_executable(); }
@@ -90,21 +90,22 @@ public:
     /**
      * Select a positional argument.
      *
-     * @param arguments the list with the arguments.
+     * @param argument_list the list with the arguments.
      * @param position the positional argument (e.g., "$0" specifies all
      * arguments, "$1" is the first argument, "$2" the second argument, etc.)
      * @param error_msg the error message (if error).
      * @return if @ref position is valid, then the string with the selected
      * argument, or an empty string if an error.
      */
-    static string select_positional_argument(const list<string>& arguments,
+    static string select_positional_argument(const list<string>& argument_list,
 					     const string& position,
 					     string& error_msg);
     /**
      * Execute an operational mode command.
      *
      * @param eventloop the event loop.
-     * @param command_line command to execute and arguments
+     * @param command_line the list with the command to execute and the
+     * arguments.
      * @param print_cb callback to be invoked with output from command.
      * @param done_cb callback to invoke when the command terminates.
      *
@@ -131,7 +132,7 @@ private:
     string		_module;
     string		_command_action;
     string		_command_action_filename;
-    list<string>	_command_action_arguments;
+    list<string>	_command_action_argument_list;
     string		_command_executable_filename;
     map<string, string>	_opt_params;	// Optional parameters and the CLI help
     set<OpInstance*>	_instances;

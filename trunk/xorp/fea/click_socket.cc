@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.25 2005/08/31 02:10:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.26 2005/09/02 20:42:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,6 +24,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/run_command.hh"
+#include "libxorp/utils.hh"
 
 #include "libcomm/comm_api.h"
 
@@ -141,13 +142,20 @@ ClickSocket::start(string& error_msg)
 	if (_user_click_command_execute_on_startup) {
 	    // Compose the command and the arguments
 	    string command = _user_click_command_file;
-	    string arguments = c_format("-f %s -p %u",
-					_user_click_startup_config_file.c_str(),
-					_user_click_control_socket_port);
-	    if (! _user_click_command_extra_arguments.empty())
-		arguments += " " + _user_click_command_extra_arguments;
+	    list<string> argument_list;
+	    argument_list.push_back("-f");
+	    argument_list.push_back(_user_click_startup_config_file);
+	    argument_list.push_back("-p");
+	    argument_list.push_back(c_format("%u",
+					 _user_click_control_socket_port));
+	    if (! _user_click_command_extra_arguments.empty()) {
+		list<string> l = split(_user_click_command_extra_arguments,
+				       ' ');
+		argument_list.insert(argument_list.end(), l.begin(), l.end());
+	    }
 
-	    if (execute_user_click_command(command, arguments) != XORP_OK) {
+	    if (execute_user_click_command(command, argument_list)
+		!= XORP_OK) {
 		error_msg = c_format("Could not execute the user-level Click");
 		return (XORP_ERROR);
 	    }
@@ -797,15 +805,18 @@ ClickSocket::unmount_click_file_system(string& error_msg)
 
 int
 ClickSocket::execute_user_click_command(const string& command,
-					const string& arguments)
+					const list<string>& argument_list)
 {
     if (_user_click_run_command != NULL)
 	return (XORP_ERROR);	// XXX: command is already running
 
-    _user_click_run_command = new RunCommand(_eventloop, command, arguments,
+    _user_click_run_command = new RunCommand(_eventloop,
+					     command,
+					     argument_list,
 					     callback(this, &ClickSocket::user_click_command_stdout_cb),
 					     callback(this, &ClickSocket::user_click_command_stderr_cb),
-					     callback(this, &ClickSocket::user_click_command_done_cb));
+					     callback(this, &ClickSocket::user_click_command_done_cb),
+					     false /* redirect_stderr_to_stdout */);
     if (_user_click_run_command->execute() != XORP_OK) {
 	delete _user_click_run_command;
 	_user_click_run_command = NULL;

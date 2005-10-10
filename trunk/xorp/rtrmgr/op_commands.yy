@@ -338,12 +338,12 @@ add_cmd_command(char *s)
     // Split the arguments and verify that the positional arguments
     // (e.g., $0, $1, etc) are resolvable.
     //
-    list<string> command_action_arguments;
+    list<string> command_action_argument_list;
     string current_argument;
     for (size_t i = 0; i < arguments.length(); i++) {
 	if ((arguments[i] == ' ') || (arguments[i] == '\t')) {
 	    if (! current_argument.empty()) {
-		command_action_arguments.push_back(current_argument);
+		command_action_argument_list.push_back(current_argument);
 		current_argument.erase();
 	    }
 	    continue;
@@ -352,13 +352,13 @@ add_cmd_command(char *s)
     }
     // Add the last argument
     if (! current_argument.empty()) {
-	command_action_arguments.push_back(current_argument);
+	command_action_argument_list.push_back(current_argument);
 	current_argument.erase();
     }
     // Verify the positional arguments
     list<string>::const_iterator iter;
-    for (iter = command_action_arguments.begin();
-	 iter != command_action_arguments.end();
+    for (iter = command_action_argument_list.begin();
+	 iter != command_action_argument_list.end();
 	 ++iter) {
 	const string& arg = *iter;
 	if (arg.empty()) {
@@ -378,7 +378,7 @@ add_cmd_command(char *s)
 
     op_command.set_command_action(command);
     op_command.set_command_action_filename(filename);
-    op_command.set_command_action_arguments(command_action_arguments);
+    op_command.set_command_action_argument_list(command_action_argument_list);
     op_command.set_command_executable_filename(executable_filename);
 
     if (is_help_tag) {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/misc.cmds,v 1.4 2005/07/18 21:56:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.5 2005/10/06 06:04:34 pavlin Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
@@ -9,7 +9,11 @@ ping <host> {
      * XXX: Redirect the stderr to stdout, in case some implementations
      * of ping print some output to stderr.
      */
-    %command: "ping $2 2>&1" %help: "Give a hostname or IP address to ping.";
+    %command: "ping $2" %help: "Give a hostname or IP address to ping.";
+}
+
+pav {
+    %command: "/tmp/test" %help: "Test.";
 }
 
 traceroute {
@@ -23,5 +27,5 @@ traceroute <host> {
      * be lost there (e.g., if the facility for running an external program
      * prints the stderr output only if the program failed).
      */
-    %command: "traceroute $2 2>&1" %help: "Give a hostname or IP address to traceroute to.";
+    %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
 }

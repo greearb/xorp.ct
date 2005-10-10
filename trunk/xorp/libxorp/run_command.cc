@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.8 2005/08/18 15:28:40 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.9 2005/10/03 04:49:24 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -21,6 +21,10 @@
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
+#endif
+
+#ifdef HAVE_PATHS_H
+#include <paths.h>
 #endif
 
 #include "libxorp_module.h"
@@ -37,16 +41,44 @@
 
 RunCommand::RunCommand(EventLoop&			eventloop,
 		       const string&			command,
-		       const string&			arguments,
+		       const list<string>&		argument_list,
 		       RunCommand::OutputCallback	stdout_cb,
 		       RunCommand::OutputCallback	stderr_cb,
-		       RunCommand::DoneCallback		done_cb)
-    : _eventloop(eventloop),
-      _command(command),
-      _arguments(arguments),
+		       RunCommand::DoneCallback		done_cb,
+		       bool				redirect_stderr_to_stdout)
+    : RunCommandBase(eventloop, command),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb),
+      _redirect_stderr_to_stdout(redirect_stderr_to_stdout)
+{
+    set_argument_list(argument_list);
+}
+
+RunShellCommand::RunShellCommand(EventLoop&			eventloop,
+				 const string&			command,
+				 const string&			argument_string,
+				 RunShellCommand::OutputCallback stdout_cb,
+				 RunShellCommand::OutputCallback stderr_cb,
+				 RunShellCommand::DoneCallback	done_cb)
+    : RunCommandBase(eventloop, command),
+      _stdout_cb(stdout_cb),
+      _stderr_cb(stderr_cb),
+      _done_cb(done_cb)
+{
+    list<string> l;
+
+    l.push_back(_PATH_BSHELL);
+    l.push_back("-c");
+    l.push_back(argument_string);
+
+    set_argument_list(l);
+}
+
+RunCommandBase::RunCommandBase(EventLoop&			eventloop,
+			       const string&			command)
+    : _eventloop(eventloop),
+      _command(command),
       _stdout_file_reader(NULL),
       _stderr_file_reader(NULL),
       _stdout_stream(NULL),
@@ -68,23 +100,27 @@ RunCommand::RunCommand(EventLoop&			eventloop,
     memset(_stderr_buffer, 0, BUF_SIZE);
 }
 
-RunCommand::~RunCommand()
+RunCommandBase::~RunCommandBase()
 {
     if (_is_running)
 	terminate();
 }
 
 int
-RunCommand::execute()
+RunCommandBase::execute()
 {
     string error_msg;
 
     if (_is_running)
 	return (XORP_OK);	// XXX: already running
 
+    // Create a single string with the command name and the arguments
     string final_command = _command;
-    if (! _arguments.empty())
-	final_command += " " + _arguments;
+    list<string>::const_iterator iter;
+    for (iter = _argument_list.begin(); iter != _argument_list.end(); ++iter) {
+	final_command += " ";
+	final_command += *iter;
+    }
 
     //
     // Save the current execution ID, and set the new execution ID
@@ -98,7 +134,8 @@ RunCommand::execute()
     }
 
     // Run the command
-    _pid = popen2(final_command, _stdout_stream, _stderr_stream);
+    _pid = popen2(_command, _argument_list, _stdout_stream, _stderr_stream,
+		  redirect_stderr_to_stdout());
     if (_stdout_stream == NULL) {
 	XLOG_ERROR("Failed to execute command %s", final_command.c_str());
 	terminate();
@@ -122,7 +159,7 @@ RunCommand::execute()
     // We can't rely on end-of-file indicators alone on Win32 to determine
     // when a child process died; we must wait for it in the event loop.
     if (!_eventloop.add_ioevent_cb(_ph, IOT_READ,
-			      callback(this, &RunCommand::win_proc_done_cb)))
+				   callback(this, &RunCommandBase::win_proc_done_cb)))
 	XLOG_FATAL("Cannot add child process handle to event loop.\n");
 #endif
 
@@ -135,7 +172,7 @@ RunCommand::execute()
 #endif
      );
     _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
-				    callback(this, &RunCommand::append_data));
+				    callback(this, &RunCommandBase::append_data));
     if (! _stdout_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stdout reader for command %s",
 		   final_command.c_str());
@@ -152,7 +189,7 @@ RunCommand::execute()
 #endif
      );
     _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-				    callback(this, &RunCommand::append_data));
+				    callback(this, &RunCommandBase::append_data));
     if (! _stderr_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stderr reader for command %s",
 		   final_command.c_str());
@@ -172,7 +209,7 @@ RunCommand::execute()
 }
 
 void
-RunCommand::terminate()
+RunCommandBase::terminate()
 {
     // Kill the process group
     if (0 != _pid) {
@@ -193,7 +230,7 @@ RunCommand::terminate()
 }
 
 void
-RunCommand::close_output()
+RunCommandBase::close_output()
 {
     if (_stdout_file_reader != NULL) {
 	delete _stdout_file_reader;
@@ -244,10 +281,10 @@ RunCommand::close_output()
 }
 
 void
-RunCommand::append_data(AsyncFileOperator::Event	event,
-			const uint8_t*			buffer,
-			size_t				/* buffer_bytes */,
-			size_t				offset)
+RunCommandBase::append_data(AsyncFileOperator::Event	event,
+			    const uint8_t*		buffer,
+			    size_t			/* buffer_bytes */,
+			    size_t			offset)
 {
     size_t* last_offset_ptr = NULL;
     if (buffer == _stderr_buffer) {
@@ -280,9 +317,9 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 	    debug_msg("len = %u\n", XORP_UINT_CAST(len));
 	    if (!_is_error) {
 		if (buffer == _stdout_buffer)
-		    _stdout_cb->dispatch(this, string(p, len));
+		    stdout_cb_dispatch(string(p, len));
 		else
-		    _stderr_cb->dispatch(this, string(p, len));
+		    stderr_cb_dispatch(string(p, len));
 	    } else {
 		_error_msg.append(p, p + len);
 	    }
@@ -300,12 +337,12 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 	    if (buffer == _stdout_buffer) {
 		memset(_stdout_buffer, 0, BUF_SIZE);
 		_stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
-						callback(this, &RunCommand::append_data));
+						callback(this, &RunCommandBase::append_data));
 		_stdout_file_reader->start();
 	    } else {
 		memset(_stderr_buffer, 0, BUF_SIZE);
 		_stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-						callback(this, &RunCommand::append_data));
+						callback(this, &RunCommandBase::append_data));
 		_stderr_file_reader->start();
 	    }
 	}
@@ -332,7 +369,7 @@ RunCommand::append_data(AsyncFileOperator::Event	event,
 }
 
 void
-RunCommand::done(AsyncFileOperator::Event event)
+RunCommandBase::done(AsyncFileOperator::Event event)
 {
     if (event != AsyncFileOperator::END_OF_FILE) {
 	_is_error = true;
@@ -346,19 +383,19 @@ RunCommand::done(AsyncFileOperator::Event event)
     if (_command_is_coredump)
 	_is_error = true;
 
-    _done_cb->dispatch(this, !_is_error, _error_msg);
+    done_cb_dispatch(!_is_error, _error_msg);
 
     // XXX: the callback will delete us. Don't do anything more in this method.
     // delete this;
 }
 
 void
-RunCommand::set_exec_id(const ExecId& v)
+RunCommandBase::set_exec_id(const ExecId& v)
 {
     _exec_id = v;
 }
 
-RunCommand::ExecId::ExecId()
+RunCommandBase::ExecId::ExecId()
     : _uid(0),
       _gid(0),
       _is_uid_set(false),
@@ -370,7 +407,7 @@ RunCommand::ExecId::ExecId()
 
 }
 
-RunCommand::ExecId::ExecId(uid_t uid)
+RunCommandBase::ExecId::ExecId(uid_t uid)
     : _uid(uid),
       _gid(0),
       _is_uid_set(true),
@@ -382,7 +419,7 @@ RunCommand::ExecId::ExecId(uid_t uid)
 
 }
 
-RunCommand::ExecId::ExecId(uid_t uid, gid_t gid)
+RunCommandBase::ExecId::ExecId(uid_t uid, gid_t gid)
     : _uid(uid),
       _gid(gid),
       _is_uid_set(true),
@@ -395,7 +432,7 @@ RunCommand::ExecId::ExecId(uid_t uid, gid_t gid)
 }
 
 void
-RunCommand::ExecId::save_current_exec_id()
+RunCommandBase::ExecId::save_current_exec_id()
 {
 #ifndef HOST_OS_WINDOWS
     _saved_uid = getuid();
@@ -405,7 +442,7 @@ RunCommand::ExecId::save_current_exec_id()
 }
 
 int
-RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
+RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 {
 #ifdef HOST_OS_WINDOWS
     UNUSED(error_msg);
@@ -430,7 +467,7 @@ RunCommand::ExecId::restore_saved_exec_id(string& error_msg) const
 }
 
 int
-RunCommand::ExecId::set_effective_exec_id(string& error_msg)
+RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
     UNUSED(error_msg);
@@ -465,13 +502,13 @@ RunCommand::ExecId::set_effective_exec_id(string& error_msg)
 }
 
 bool
-RunCommand::ExecId::is_set() const
+RunCommandBase::ExecId::is_set() const
 {
     return (is_uid_set() || is_gid_set());
 }
 
 void
-RunCommand::ExecId::reset()
+RunCommandBase::ExecId::reset()
 {
     _uid = 0;
     _gid = 0;
@@ -485,7 +522,7 @@ RunCommand::ExecId::reset()
 #ifdef HOST_OS_WINDOWS
 // Hack to get asynchronous notification of Win32 process death.
 void
-RunCommand::win_proc_done_cb(XorpFd fd, IoEventType type)
+RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
 {
     XLOG_ASSERT(type == IOT_READ);
     UNUSED(fd);

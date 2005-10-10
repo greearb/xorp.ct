@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.5 2005/06/27 08:38:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.7 2005/08/04 10:58:09 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,7 +39,7 @@
 #define AWK_PATH	"/usr/bin/awk"
 #endif
 
-#define SLEEP_ARGS	"10000"
+#define SLEEP_ARGUMENT	"10000"
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM
@@ -233,15 +233,19 @@ test_execute_invalid_command()
     //
     // Try to start an invalid command.
     //
+    list<string> argument_list;
+    argument_list.push_back("-no-such-flags");
+    argument_list.push_back("-more-bogus-flags");
     RunCommand run_command(eventloop,
 			   "/no/such/command",
-			   "-no-such-flags -more-bogus-flags",
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     int ret_value = run_command.execute();
     if (ret_value != XORP_OK) {
@@ -285,15 +289,19 @@ test_execute_invalid_arguments()
     //
     // Try to start an invalid command.
     //
+    list<string> argument_list;
+    argument_list.push_back("-no-such-flags");
+    argument_list.push_back("-more-bogus-flags");
     RunCommand run_command(eventloop,
 			   SLEEP_PATH,
-			   "-no-such-flags -more-bogus-flags",
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     int ret_value = run_command.execute();
     if (ret_value != XORP_OK) {
@@ -337,15 +345,18 @@ test_execute_terminate_command()
     //
     // Start a sleep(1) command that should not terminate anytime soon
     //
+    list<string> argument_list;
+    argument_list.push_back(SLEEP_ARGUMENT);
     RunCommand run_command(eventloop,
 			   SLEEP_PATH,
-			   SLEEP_ARGS,
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     if (run_command.execute() != XORP_OK) {
 	verbose_log("Cannot execute command %s : FAIL\n",
@@ -412,20 +423,22 @@ test_command_stdout_reading()
     //
     // Try to start an invalid command.
     //
-    string args = c_format("'BEGIN { "
-			   "printf(\"%s\") > \"/dev/stdout\"; "
-			   "exit 0;}'",
-			   stdout_msg_in.c_str());
-
+    string awk_script = c_format("BEGIN { "
+				 "printf(\"%s\") > \"/dev/stdout\"; "
+				 "exit 0;}",
+				 stdout_msg_in.c_str());
+    list<string> argument_list;
+    argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
 			   AWK_PATH,
-			   args,
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     int ret_value = run_command.execute();
     if (ret_value != XORP_OK) {
@@ -486,22 +499,24 @@ test_command_stderr_reading()
     //
     // Try to start an invalid command.
     //
-    string args = c_format("'BEGIN { "
-			   "printf(\"%s\") > \"/dev/stdout\"; "
-			   "printf(\"%s\") > \"/dev/stderr\"; "
-			   "exit 1;}'",
-			   stdout_msg_in.c_str(),
-			   stderr_msg_in.c_str());
-
+    string awk_script = c_format("BEGIN { "
+				 "printf(\"%s\") > \"/dev/stdout\"; "
+				 "printf(\"%s\") > \"/dev/stderr\"; "
+				 "exit 1;}",
+				 stdout_msg_in.c_str(),
+				 stderr_msg_in.c_str());
+    list<string> argument_list;
+    argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
 			   AWK_PATH,
-			   args,
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     int ret_value = run_command.execute();
     if (ret_value != XORP_OK) {
@@ -547,6 +562,81 @@ test_command_stderr_reading()
 }
 
 /**
+ * Test RunCommand command redirect stderr to stdout reading.
+ */
+static void
+test_command_redirect_stderr_to_stdout_reading()
+{
+    EventLoop eventloop;
+    TestRunCommand test_run_command;
+    bool done = false;
+    string stderr_msg_in = "Line1 on stderr";
+    string stdout_msg_out = stderr_msg_in;
+
+    //
+    // Try to start an invalid command.
+    //
+    string awk_script = c_format("BEGIN { "
+				 "printf(\"%s\") > \"/dev/stderr\"; "
+				 "exit 0;}",
+				 stderr_msg_in.c_str());
+    list<string> argument_list;
+    argument_list.push_back(awk_script);
+    RunCommand run_command(eventloop,
+			   AWK_PATH,
+			   argument_list,
+			   callback(test_run_command,
+				    &TestRunCommand::command_stdout_cb),
+			   callback(test_run_command,
+				    &TestRunCommand::command_stderr_cb),
+			   callback(test_run_command,
+				    &TestRunCommand::command_done_cb),
+			   true /* redirect_stderr_to_stdout */);
+
+    int ret_value = run_command.execute();
+    if (ret_value != XORP_OK) {
+	verbose_assert(false, "Command redirect stderr to stdout reading");
+	return;
+    }
+
+    XorpTimer timeout_timer = eventloop.set_flag_after(TimeVal(10, 0),
+						       &done, true);
+    while (!done) {
+	if (is_interrupted
+	    || test_run_command.is_done_received()) {
+	    break;
+	}
+	eventloop.run();
+    }
+
+    if (is_interrupted) {
+	verbose_log("Command interrupted by user\n");
+	incr_failures();
+	run_command.terminate();
+	return;
+    }
+
+    bool success = false;
+    do {
+	if (! test_run_command.is_done_received())
+	    break;
+	if (test_run_command.is_done_failed())
+	    break;
+	if (test_run_command.is_stderr_received())
+	    break;
+	if (! test_run_command.is_stdout_received())
+	    break;
+	if (test_run_command.stdout_msg() != stdout_msg_out)
+	    break;
+	success = true;
+	break;
+    } while (false);
+
+    verbose_assert(success, "Command redirect stderr to stdout reading");
+    run_command.terminate();
+}
+
+/**
  * Test RunCommand command termination failure.
  */
 static void
@@ -561,20 +651,22 @@ test_command_termination_failure()
     //
     // Try to start an invalid command.
     //
-    string args = c_format("'BEGIN { "
-			   "printf(\"%s\") > \"/dev/stdout\"; "
-			   "exit 1;}'",
-			   stdout_msg_in.c_str());
-
+    string awk_script = c_format("BEGIN { "
+				 "printf(\"%s\") > \"/dev/stdout\"; "
+				 "exit 1;}",
+				 stdout_msg_in.c_str());
+    list<string> argument_list;
+    argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
 			   AWK_PATH,
-			   args,
+			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
 			   callback(test_run_command,
 				    &TestRunCommand::command_stderr_cb),
 			   callback(test_run_command,
-				    &TestRunCommand::command_done_cb));
+				    &TestRunCommand::command_done_cb),
+			   false /* redirect_stderr_to_stdout */);
 
     int ret_value = run_command.execute();
     if (ret_value != XORP_OK) {
@@ -669,6 +761,7 @@ main(int argc, char * const argv[])
 	test_execute_terminate_command();
 	test_command_stdout_reading();
 	test_command_stderr_reading();
+	test_command_redirect_stderr_to_stdout_reading();
 	test_command_termination_failure();
 	ret_value = failures() ? 1 : 0;
     } catch (...) {

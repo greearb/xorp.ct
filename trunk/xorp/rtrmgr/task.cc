@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.52 2005/07/14 00:08:30 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.53 2005/07/18 21:32:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,7 +50,7 @@ DelayValidation::DelayValidation(const string& module_name,
 }
 
 void
-DelayValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
+DelayValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 {
     _cb = cb;
     _timer = _eventloop.new_oneoff_after_ms(_delay_in_ms,
@@ -85,7 +85,7 @@ XrlStatusValidation::eventloop()
 }
 
 void
-XrlStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
+XrlStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 {
     debug_msg("validate\n");
 
@@ -255,7 +255,7 @@ ProgramStatusValidation::eventloop()
 }
 
 void
-ProgramStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
+ProgramStatusValidation::validate(RunShellCommand::ExecId exec_id, CallBack cb)
 {
     debug_msg("validate\n");
 
@@ -316,7 +316,7 @@ ProgramStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 	XLOG_TRACE(_verbose, "Validating with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
-	_run_command = new RunCommand(
+	_run_command = new RunShellCommand(
 	    eventloop(),
 	    executable_filename,
 	    program_arguments,
@@ -344,7 +344,7 @@ ProgramStatusValidation::validate(RunCommand::ExecId exec_id, CallBack cb)
 }
 
 void
-ProgramStatusValidation::stdout_cb(RunCommand* run_command,
+ProgramStatusValidation::stdout_cb(RunShellCommand* run_command,
 				   const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -352,7 +352,7 @@ ProgramStatusValidation::stdout_cb(RunCommand* run_command,
 }
 
 void
-ProgramStatusValidation::stderr_cb(RunCommand* run_command,
+ProgramStatusValidation::stderr_cb(RunShellCommand* run_command,
 				   const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -360,7 +360,7 @@ ProgramStatusValidation::stderr_cb(RunCommand* run_command,
 }
 
 void
-ProgramStatusValidation::done_cb(RunCommand* run_command,
+ProgramStatusValidation::done_cb(RunShellCommand* run_command,
 				 bool success,
 				 const string& error_msg)
 {
@@ -738,7 +738,7 @@ XrlStartup::eventloop() const
 }
 
 void
-XrlStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
+XrlStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -853,7 +853,7 @@ ProgramStartup::eventloop() const
 }
 
 void
-ProgramStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
+ProgramStartup::startup(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -913,7 +913,7 @@ ProgramStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 	XLOG_TRACE(_verbose, "Startup with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
-	_run_command = new RunCommand(
+	_run_command = new RunShellCommand(
 	    eventloop(),
 	    executable_filename,
 	    program_arguments,
@@ -943,7 +943,7 @@ ProgramStartup::startup(const RunCommand::ExecId& exec_id, CallBack cb)
 }
 
 void
-ProgramStartup::stdout_cb(RunCommand* run_command,
+ProgramStartup::stdout_cb(RunShellCommand* run_command,
 			  const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -951,7 +951,7 @@ ProgramStartup::stdout_cb(RunCommand* run_command,
 }
 
 void
-ProgramStartup::stderr_cb(RunCommand* run_command,
+ProgramStartup::stderr_cb(RunShellCommand* run_command,
 			  const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -959,7 +959,7 @@ ProgramStartup::stderr_cb(RunCommand* run_command,
 }
 
 void
-ProgramStartup::done_cb(RunCommand* run_command,
+ProgramStartup::done_cb(RunShellCommand* run_command,
 			bool success,
 			const string& error_msg)
 {
@@ -1013,7 +1013,7 @@ XrlShutdown::eventloop() const
 }
 
 void
-XrlShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
+XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
     XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
@@ -1145,7 +1145,7 @@ ProgramShutdown::eventloop() const
 }
 
 void
-ProgramShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
+ProgramShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
     XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
@@ -1207,7 +1207,7 @@ ProgramShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 	XLOG_TRACE(_verbose, "Shutdown with program: >%s<\n",
 		   program_request.c_str());
 	XLOG_ASSERT(_run_command == NULL);
-	_run_command = new RunCommand(
+	_run_command = new RunShellCommand(
 	    eventloop(),
 	    executable_filename,
 	    program_arguments,
@@ -1237,7 +1237,7 @@ ProgramShutdown::shutdown(const RunCommand::ExecId& exec_id, CallBack cb)
 }
 
 void
-ProgramShutdown::stdout_cb(RunCommand* run_command,
+ProgramShutdown::stdout_cb(RunShellCommand* run_command,
 			   const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -1245,7 +1245,7 @@ ProgramShutdown::stdout_cb(RunCommand* run_command,
 }
 
 void
-ProgramShutdown::stderr_cb(RunCommand* run_command,
+ProgramShutdown::stderr_cb(RunShellCommand* run_command,
 			   const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -1253,7 +1253,7 @@ ProgramShutdown::stderr_cb(RunCommand* run_command,
 }
 
 void
-ProgramShutdown::done_cb(RunCommand* run_command,
+ProgramShutdown::done_cb(RunShellCommand* run_command,
 			 bool success,
 			 const string& error_msg)
 {
@@ -1484,7 +1484,7 @@ TaskProgramItem::~TaskProgramItem()
 bool
 TaskProgramItem::execute(string& errmsg)
 {
-    const RunCommand::ExecId& exec_id = task().exec_id();
+    const RunShellCommand::ExecId& exec_id = task().exec_id();
 
     if (task().do_exec())
 	XLOG_TRACE(_verbose, "Expanding %s\n",
@@ -1517,7 +1517,7 @@ TaskProgramItem::execute(string& errmsg)
 
 	XLOG_TRACE(_verbose, "Executing program: >%s<\n",
 		   program_request.c_str());
-	_run_command = new RunCommand(
+	_run_command = new RunShellCommand(
 	    task().eventloop(),
 	    executable_filename,
 	    program_arguments,
@@ -1572,7 +1572,7 @@ TaskProgramItem::unschedule()
 }
 
 void
-TaskProgramItem::stdout_cb(RunCommand* run_command, const string& output)
+TaskProgramItem::stdout_cb(RunShellCommand* run_command, const string& output)
 {
     debug_msg("TaskProgramItem::stdout_cb\n");
 
@@ -1581,7 +1581,7 @@ TaskProgramItem::stdout_cb(RunCommand* run_command, const string& output)
 }
 
 void
-TaskProgramItem::stderr_cb(RunCommand* run_command, const string& output)
+TaskProgramItem::stderr_cb(RunShellCommand* run_command, const string& output)
 {
     debug_msg("TaskProgramItem::stderr_cb\n");
 
@@ -1590,7 +1590,7 @@ TaskProgramItem::stderr_cb(RunCommand* run_command, const string& output)
 }
 
 void
-TaskProgramItem::done_cb(RunCommand* run_command,
+TaskProgramItem::done_cb(RunShellCommand* run_command,
 			 bool success,
 			 const string& error_msg)
 {
