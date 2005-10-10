@@ -1,19 +1,11 @@
-/* $XORP: xorp/etc/templates/misc.cmds,v 1.5 2005/10/06 06:04:34 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.6 2005/10/10 04:50:48 pavlin Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
 }
 
 ping <host> {
-    /*
-     * XXX: Redirect the stderr to stdout, in case some implementations
-     * of ping print some output to stderr.
-     */
     %command: "ping $2" %help: "Give a hostname or IP address to ping.";
-}
-
-pav {
-    %command: "/tmp/test" %help: "Test.";
 }
 
 traceroute {
@@ -21,11 +13,5 @@ traceroute {
 }
 
 traceroute <host> {
-    /*
-     * XXX: Redirect the stderr to stdout, because traceroute's initial
-     * banner output "traceroute to ..." is printed to stderr and it may
-     * be lost there (e.g., if the facility for running an external program
-     * prints the stderr output only if the program failed).
-     */
     %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
 }
