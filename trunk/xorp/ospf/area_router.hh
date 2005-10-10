@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.69 2005/10/10 07:01:29 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.70 2005/10/10 09:39:37 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -89,6 +89,12 @@ class AreaRouter : Subsystem {
      */
     bool area_range_covered(IPNet<A> net, bool& advertise);
 
+    /**
+     * get lsa at index if it exists.
+     */
+    bool get_lsa(const uint32_t index, bool& valid, bool& toohigh,
+		 vector<uint8_t>& lsa);
+    
     /**
      * A new set of router links.
      */

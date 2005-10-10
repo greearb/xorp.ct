@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.39 2005/10/05 03:16:21 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.40 2005/10/10 06:03:25 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -82,6 +82,21 @@ class PeerManager {
      */
     bool area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
 				 bool advertise);
+
+    /**
+     *  Get a single lsa from an area. A stateless mechanism to get LSAs. The
+     *  client of this interface should start from zero and continue to request
+     *  LSAs (incrementing index) until toohigh becomes true.
+     *
+     *  @param area database that is being searched.
+     *  @param index into database starting from 0.
+     *  @param valid true if a LSA has been returned. Some index values do not
+     *  contain LSAs. This should not be considered an error.
+     *  @param toohigh true if no more LSA exist after this index.
+     *  @param lsa if valid is true the LSA at index.
+     */
+    bool get_lsa(const OspfTypes::AreaID area, const uint32_t index,
+		 bool& valid, bool& toohigh, vector<uint8_t>& lsa);
 
     /**
      * Convert an interface/vif to a PeerID.
