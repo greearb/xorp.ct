@@ -1,10 +1,10 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.16 2005/09/07 23:38:13 pavlin Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.17 2005/09/17 22:25:51 pavlin Exp $
 ##
 
 # -- Subdirectories
-SUBDIRS =
+SUBDIRS = . tools
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)

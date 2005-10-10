@@ -92,7 +92,7 @@ install_sh = @install_sh@
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
-SUBDIRS = 
+SUBDIRS = . tools
 
 # -- Real Programs
 bin_PROGRAMS = xorp_ospfv2 xorp_ospfv3
