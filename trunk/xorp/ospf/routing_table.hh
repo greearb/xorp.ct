@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.15 2005/10/06 08:16:41 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.16 2005/10/07 22:30:08 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -37,6 +37,7 @@ class RouteEntry {
     };
 
     RouteEntry() : _destination_type(OspfTypes::Router),
+		   _discard(false),
 		   _address(0),
 		   _id(0),
 		   _area_border_router(false),
@@ -55,6 +56,14 @@ class RouteEntry {
 
     OspfTypes::VertexType get_destination_type() const {
 	return _destination_type;
+    }
+
+    void set_discard(bool discard) {
+	_discard = discard;
+    }
+
+    void get_discard() const {
+	return _discard;
     }
 
     void set_address(uint32_t address) {
@@ -155,6 +164,7 @@ class RouteEntry {
 
  private:
     OspfTypes::VertexType _destination_type;
+    bool _discard;			// True if this is a discard route.
 
     uint32_t _address;			// If dest type is Network
 
