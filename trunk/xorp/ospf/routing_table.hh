@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.16 2005/10/07 22:30:08 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.17 2005/10/10 04:38:58 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -62,7 +62,7 @@ class RouteEntry {
 	_discard = discard;
     }
 
-    void get_discard() const {
+    bool get_discard() const {
 	return _discard;
     }
 

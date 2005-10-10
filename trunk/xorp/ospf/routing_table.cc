@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.15 2005/10/06 08:16:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.16 2005/10/07 22:30:08 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -291,8 +291,14 @@ bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			   uint32_t metric, RouteEntry<A>& rt)
 {
-    bool result = _ospf.add_route(net, nexthop, metric,
-				  false /* equal */, false /* discard */);
+    bool result;
+    if (!rt.get_discard()) {
+	result = _ospf.add_route(net, nexthop, metric,
+				 false /* equal */, false /*  discard */);
+    }  else {
+	XLOG_WARNING("TBD - installing discard routes");
+	result = false;
+    }
 
     _ospf.get_peer_manager().summary_announce(area, net, rt);
 
@@ -304,7 +310,13 @@ bool
 RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt)
 {
-    bool result = _ospf.delete_route(net);
+    bool result;
+    if (!rt.get_discard()) {
+	result = _ospf.delete_route(net);
+    } else {
+	XLOG_WARNING("TBD - removing discard routes");
+	result = false;
+    }
 
     _ospf.get_peer_manager().summary_withdraw(area, net, rt);
 
