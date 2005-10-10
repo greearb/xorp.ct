@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.68 2005/10/10 05:44:57 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.69 2005/10/10 07:01:29 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -454,6 +454,12 @@ class AreaRouter : Subsystem {
      */
     Lsa::LsaRef summary_build(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt, bool& announce);
+
+    /**
+     * Announce this Summary-LSA to all neighbours and refresh it as
+     * appropriate.
+     */
+    void refresh_summary_lsa(Lsa::LsaRef lsar);
 
     /**
      * Start aging LSA.
