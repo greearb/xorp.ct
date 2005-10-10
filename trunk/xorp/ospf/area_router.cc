@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.107 2005/10/07 22:30:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.108 2005/10/10 04:40:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1882,22 +1882,6 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
     }
 }
 
-/**
- * XXX - As soon as we support summaries hook this up.
- * Is this one of the summary ranges and is it active?
- */
-inline
-bool
-summary_address_range(IPNet<IPv4> net, bool& active)
-{
-    debug_msg("%s\n", cstring(net));
-
-    XLOG_WARNING("TBD - Check summaries");
-
-    active = false;
-    return false;
-}
-
 template <>
 void 
 AreaRouter<IPv4>::routing_inter_areaV2()
@@ -1936,7 +1920,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	// (3) 
 	if (snlsa) {
 	    bool active;
-	    if (summary_address_range(n, active)) {
+	    if (area_range_covered(n, active)) {
 		if (active)
 		    continue;
 	    }
