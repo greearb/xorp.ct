@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/misc.cmds,v 1.6 2005/10/10 04:50:48 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.7 2005/10/10 06:15:37 pavlin Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
@@ -8,10 +8,26 @@ ping <host> {
     %command: "ping $2" %help: "Give a hostname or IP address to ping.";
 }
 
+ping6 {
+    %command: "" %help: "Ping an IPv6 hostname or IPv6 address";
+}
+
+ping6 <host> {
+    %command: "ping6 $2" %help: "Give an IPv6 hostname or IPv6 address to ping.";
+}
+
 traceroute {
     %command: "" %help: "Trace the IP route to a hostname or IP address";
 }
 
 traceroute <host> {
     %command: "traceroute $2" %help: "Give a hostname or IP address to traceroute to.";
+}
+
+traceroute6 {
+    %command: "" %help: "Trace the IPv6 route to a hostname or IPv6 address";
+}
+
+traceroute6 <host> {
+    %command: "traceroute6 $2" %help: "Give an IPv6 hostname or IPv6 address to traceroute to.";
 }
