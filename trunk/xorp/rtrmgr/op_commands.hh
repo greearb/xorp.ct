@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.32 2005/09/26 20:22:32 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.33 2005/10/10 04:50:50 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -124,6 +124,9 @@ public:
     void add_instance(OpInstance* instance);
     void remove_instance(OpInstance* instance);
 
+    bool is_invalid() const { return (_is_invalid); }
+    void set_is_invalid(bool v) { _is_invalid = v; }
+
 private:
     OpCommandList&	_ocl;
     list<string>	_command_parts;
@@ -136,6 +139,7 @@ private:
     string		_command_executable_filename;
     map<string, string>	_opt_params;	// Optional parameters and the CLI help
     set<OpInstance*>	_instances;
+    bool		_is_invalid;	// If true, this command is invalid
 };
 
 class OpCommandList {

@@ -215,6 +215,7 @@ extern FILE *opcmdin;
 extern int opcmd_linenum;
 
 void opcmderror(const char *s) throw (ParseError);
+void opcmd_warning(const char *s);
 
 static OpCommandList *ocl = NULL;
 static list<string> path_segments;
@@ -329,30 +330,32 @@ pop_path()
 
     OpCommand& op_command = op_command_stack.back();
 
-    // Resolve the command help (if tagged)
-    string& op_command_tag_help = op_command_tag_help_stack.back();
-    if (! op_command_tag_help.empty()) {
-	resolve_tag(op_command_tag_help, help);
-	op_command.set_help_string(help);
-    }
+    if (! op_command.is_invalid()) {
+	// Resolve the command help (if tagged)
+	string& op_command_tag_help = op_command_tag_help_stack.back();
+	if (! op_command_tag_help.empty()) {
+	    resolve_tag(op_command_tag_help, help);
+	    op_command.set_help_string(help);
+	}
 
-    // Resolve the optional parameters help (if tagged)
-    map<string, string>& opt_params_tag_help = opt_params_tag_help_stack.back();
-    map<string, string>::iterator iter;
-    for (iter = opt_params_tag_help.begin();
-	 iter != opt_params_tag_help.end();
-	 ++iter) {
-	 string opt_param = iter->first;
-	 string tag = iter->second;
-	 resolve_tag(tag, help);
-	 op_command.add_opt_param(opt_param, help);
-    }
+	// Resolve the optional parameters help (if tagged)
+	map<string, string>& opt_params_tag_help = opt_params_tag_help_stack.back();
+	map<string, string>::iterator iter;
+	for (iter = opt_params_tag_help.begin();
+	    iter != opt_params_tag_help.end();
+	    ++iter) {
+	    string opt_param = iter->first;
+	    string tag = iter->second;
+	    resolve_tag(tag, help);
+	    op_command.add_opt_param(opt_param, help);
+	}
 
-    // Add the command
-    if (ocl->add_op_command(op_command) == NULL) {
-	string errmsg = c_format("Cannot add command %s: internal error",
-				 op_command.command_name().c_str());
-	opcmderror(errmsg.c_str());
+	// Add the command
+	if (ocl->add_op_command(op_command) == NULL) {
+	    string errmsg = c_format("Cannot add command %s: internal error",
+				     op_command.command_name().c_str());
+	    opcmderror(errmsg.c_str());
+	}
     }
 
     // Clear the path segments
@@ -408,17 +411,6 @@ add_cmd_command(char *s)
     if (filename.empty())
 	filename = command;
 
-    // Find the executable filename
-    string executable_filename;
-    if (! filename.empty()) {
-	executable_filename = find_executable_filename(filename);
-	if (executable_filename.empty()) {
-	    string errmsg = c_format("Executable file not found: %s",
-				     filename.c_str());
-	    opcmderror(errmsg.c_str());
-	}
-    }
-
     // Get a reference to the OpCommand instance
     OpCommand& op_command = op_command_stack.back();
     if (! op_command.command_action().empty()) {
@@ -426,6 +418,19 @@ add_cmd_command(char *s)
 				 "(only one action allowed per command)",
 				 op_command.command_action().c_str());
 	opcmderror(errmsg.c_str());
+    }
+
+    // Find the executable filename
+    string executable_filename;
+    if (! filename.empty()) {
+	executable_filename = find_executable_filename(filename);
+	if (executable_filename.empty()) {
+	    op_command.set_is_invalid(true);
+	    string errmsg = c_format("Executable file not found: %s",
+				     filename.c_str());
+	    opcmd_warning(errmsg.c_str());
+	    return;
+	}
     }
 
     //
@@ -572,6 +577,16 @@ opcmderror(const char *s) throw (ParseError)
     xorp_throw(ParseError, errmsg);
 }
 
+void
+opcmd_warning(const char *s)
+{
+    string errmsg;
+
+    errmsg = c_format("[Operational Command File: %s line %d]: %s",
+		      opcmd_filename.c_str(), opcmd_linenum, s);
+    XLOG_WARNING("%s", errmsg.c_str());
+}
+
 int
 init_opcmd_parser(const char *filename, OpCommandList *o)
 {
@@ -592,7 +607,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 597 "y.opcmd_tab.c"
+#line 612 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -859,7 +874,7 @@ case 28:
 #line 112 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 864 "y.opcmd_tab.c"
+#line 879 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;

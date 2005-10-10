@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.57 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.58 2005/10/10 04:50:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -178,7 +178,8 @@ OpInstance::execute_done(bool success)
 
 OpCommand::OpCommand(OpCommandList& ocl, const list<string>& command_parts)
     : _ocl(ocl),
-      _command_parts(command_parts)
+      _command_parts(command_parts),
+      _is_invalid(false)
 {
     _command_name = command_parts2command_name(command_parts);
 }
