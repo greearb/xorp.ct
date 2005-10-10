@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.38 2005/10/05 00:30:45 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.39 2005/10/05 03:16:21 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -342,6 +342,19 @@ class PeerManager {
      */
     void summary_push(OspfTypes::AreaID area);
 
+    /**
+     * In the specified area is the net covered by an area range.
+     *
+     * @param area being checked.
+     * @param net that may be covered.
+     * @param advertise if the area is covered set to advertise or do
+     * not advertise.
+     *
+     * @return true if the area is covered.
+     */
+    bool area_range_covered(OspfTypes::AreaID area, IPNet<A> net,
+			    bool& advertise);
+    
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     

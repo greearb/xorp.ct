@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.58 2005/10/06 07:38:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.59 2005/10/10 05:44:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -744,7 +744,6 @@ PeerManager<A>::summary_push(OspfTypes::AreaID area)
 {
     debug_msg("Area %s\n", pr_id(area).c_str());
 
-
     AreaRouter<A> *area_router = get_area_router(area);
     if (0 == area_router) {
 	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
@@ -762,6 +761,22 @@ PeerManager<A>::summary_push(OspfTypes::AreaID area)
 	    continue;
 	area_router->summary_announce(s._area, net, s._rtentry, true);
     }
+}
+
+template <typename A>
+bool
+PeerManager<A>::area_range_covered(OspfTypes::AreaID area, IPNet<A> net,
+				   bool& advertise)
+{
+    debug_msg("Area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    AreaRouter<A> *area_router = get_area_router(area);
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return area_router->area_range_covered(net, advertise);
 }
 
 template class PeerManager<IPv4>;
