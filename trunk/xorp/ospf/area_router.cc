@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.113 2005/10/10 09:39:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.114 2005/10/10 12:21:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -276,12 +276,14 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
 	valid = false;
 	toohigh = true;
 	return true;
+    } else {
+	toohigh = false;
     }
 
     Lsa::LsaRef lsar = _db[index];
 
     if (!lsar->valid()) {
-	valid = toohigh = false;
+	valid = false;
 	return true;
     }
 
@@ -290,7 +292,7 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
     lsa.resize(len);
     memcpy(&lsa[0], ptr, len);
 
-    valid = toohigh = true;
+    valid = true;
 
     return true;
 }
