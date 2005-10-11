@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.163 2005/10/11 07:29:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.164 2005/10/11 07:43:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1907,9 +1907,9 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(0);
 	break;
-	// RFC 2328 Section 12.4.1.2.Describing broadcast and NBMA interfaces
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA: {
+	// RFC 2328 Section 12.4.1.2.Describing broadcast and NBMA interfaces
 	bool adjacent = false;
 	switch(get_state()) {
 	case Down:
@@ -1971,8 +1971,26 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     }
     
 	break;
-    case OspfTypes::PointToMultiPoint:
-	XLOG_UNFINISHED();
+    case OspfTypes::PointToMultiPoint: {
+	// RFC 2328 Section 12.4.1.4. Describing Point-to-MultiPoint interfaces
+	router_link.set_type(RouterLink::stub);
+	router_link.set_link_id(ntohl(get_interface_address().addr()));
+	router_link.set_link_data(0xffffffff);
+	router_link.set_metric(0);
+	router_links.push_back(router_link);
+	list<Neighbour<IPv4> *>::iterator n;
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	    if (Neighbour<IPv4>::Full == (*n)->get_state()) {
+		router_link.set_type(RouterLink::p2p);
+		router_link.set_link_id((*n)->get_router_id());
+		router_link.
+		    set_link_data(ntohl(get_interface_address().addr()));
+		router_link.set_metric(_peerout.get_interface_cost());
+		router_links.push_back(router_link);
+	    }
+	}
+	return;
+    }
 	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
