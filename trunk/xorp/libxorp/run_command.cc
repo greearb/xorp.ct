@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.9 2005/10/03 04:49:24 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.10 2005/10/10 04:50:49 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,16 +61,16 @@ RunShellCommand::RunShellCommand(EventLoop&			eventloop,
 				 RunShellCommand::OutputCallback stdout_cb,
 				 RunShellCommand::OutputCallback stderr_cb,
 				 RunShellCommand::DoneCallback	done_cb)
-    : RunCommandBase(eventloop, command),
+    : RunCommandBase(eventloop, _PATH_BSHELL),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb)
 {
     list<string> l;
+    string final_command_argument_string = command + " " + argument_string;
 
-    l.push_back(_PATH_BSHELL);
     l.push_back("-c");
-    l.push_back(argument_string);
+    l.push_back(final_command_argument_string);
 
     set_argument_list(l);
 }
