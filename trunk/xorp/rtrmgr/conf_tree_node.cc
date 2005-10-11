@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.89 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.90 2005/10/11 17:59:42 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -686,12 +686,21 @@ ConfigTreeNode::type() const
 bool
 ConfigTreeNode::is_tag() const
 {
-    /*only the root node does not have a template tree node, and it is
-      not a tag*/
+    //
+    // Only the root node does not have a template tree node, and it is
+    //
     if (_template_tree_node == NULL)
 	return false;
 
     return _template_tree_node->is_tag();
+}
+
+bool
+ConfigTreeNode::is_multi_value_node() const
+{
+    if (_parent == NULL)
+	return false;
+    return (_parent->is_tag());
 }
 
 bool
@@ -1167,6 +1176,7 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 		break;
 	    }
 	}
+
 	if (retain_child == false) {
 	    remove_child(my_child);
 	    delete my_child;
