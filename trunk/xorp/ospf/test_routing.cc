@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.2 2005/09/09 20:58:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.3 2005/09/13 18:47:33 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -249,6 +249,24 @@ routing1(TestInfo& info, OspfTypes::Version version)
 
     ar->testing_delete_lsa(create_RT3(version));
 
+    // At the time of writing the OSPFv3 routing table computations
+    // were not complete, when they are remove this test.
+    if (OspfTypes::V2 == version) {
+	// At this point there should be a single route in the routing
+	// table.
+	const uint32_t routes = 1;
+	if (routes != io.routing_table_size()) {
+	    DOUT(info) << "Expecting " << routes << " routes " << "got " <<
+		io.routing_table_size() << endl;
+	    return false;
+	}
+	if (!io.routing_table_verify(IPNet<A>("0.4.0.0/16"),
+				    A("0.0.0.7"), 8, false, false)) {
+	    DOUT(info) << "Mismatch in routing table\n";
+	    return false;
+	}
+    }
+
     // Now delete the routes.
 
     if (info.verbose())
@@ -270,6 +288,13 @@ routing1(TestInfo& info, OspfTypes::Version version)
     // Delete the area
     if (!pm.destroy_area_router(area)) {
 	DOUT(info) << "Failed to delete area\n";
+	return false;
+    }
+
+    // The routing table should be empty now.
+    if (0 != io.routing_table_size()) {
+	DOUT(info) << "Expecting no routes " << "got " <<
+	    io.routing_table_size() << endl;
 	return false;
     }
 
