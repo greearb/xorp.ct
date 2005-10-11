@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.8 2005/09/04 20:52:32 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.9 2005/10/02 22:21:53 abittau Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,8 +26,8 @@
 
 SingleVarRW::SingleVarRW() : _trashc(0), _did_first_read(false) 
 {
-    bzero(&_elems, sizeof(_elems));
-    bzero(&_modified, sizeof(_modified));
+    memset(&_elems, 0, sizeof(_elems));
+    memset(&_modified, 0, sizeof(_modified));
 }
 
 
@@ -107,7 +107,7 @@ SingleVarRW::sync() {
     end_write();
 
     // clear cache
-    bzero(&_elems, sizeof(_elems));
+    memset(&_elems, 0, sizeof(_elems));
     
     // delete all garbage
     for (unsigned i = 0; i < _trashc; i++)
