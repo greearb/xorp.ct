@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.8 2005/09/16 23:33:28 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.9 2005/09/21 00:29:27 pavlin Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -194,6 +194,16 @@ class DebugIO : public IO<A> {
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
 	    " discard: " << pb(discard) << endl;
+
+	XLOG_ASSERT(0 == _routing_table.count(net));
+	DebugRouteEntry dre;
+	dre._nexthop = nexthop;
+	dre._metric = metric;
+	dre._equal = equal;
+	dre._discard = discard;
+
+	_routing_table[net] = dre;
+
 	return true;
     }
 
@@ -208,7 +218,11 @@ class DebugIO : public IO<A> {
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
 	    " discard: " << pb(discard) << endl;
-	return true;
+
+	if (!delete_route(net))
+	    return false;
+
+	return add_route(net, nexthop, metric, equal, discard);
     }
 
     /**
@@ -217,7 +231,63 @@ class DebugIO : public IO<A> {
     bool delete_route(IPNet<A> net)
     {
 	DOUT(_info) << "Net: " << net.str() << endl;
+
+	XLOG_ASSERT(1 == _routing_table.count(net));
+	_routing_table.erase(_routing_table.find(net));
 	
+	return true;
+    }
+
+    /**
+     * A debugging entry point.
+     * Empty the routing table.
+     */
+    void routing_table_empty() {
+	_routing_table.clear();
+    }
+
+    uint32_t routing_table_size() {
+	return _routing_table.size();
+    }
+
+    /**
+     * Verify that this route is in the routing table.
+     */
+    bool routing_table_verify(IPNet<A> net, A nexthop, uint32_t metric,
+			      bool equal, bool discard) {
+	DOUT(_info) << "Net: " << net.str() <<
+	    " nexthop: " << nexthop.str() <<
+	    " metric: " << metric <<
+	    " equal: " << pb(equal) <<
+	    " discard: " << pb(discard) << endl;
+
+	if (0 == _routing_table.count(net)) {
+	    DOUT(_info) << "Net: " << net.str() << " not in table\n";
+	    return false;
+	}
+
+	DebugRouteEntry dre = _routing_table[net];
+	if (dre._nexthop != nexthop) {
+	    DOUT(_info) << "Nexthop mismatch: " << nexthop.str() << " " <<
+		dre._nexthop.str() << endl;
+	    return false;
+	}
+	if (dre._metric != metric) {
+	    DOUT(_info) << "Metric mismatch: " << metric << " " <<
+		dre._metric << endl;
+	    return false;
+	}
+	if (dre._equal != equal) {
+	    DOUT(_info) << "Equal mismatch: " << pb(equal) << " " <<
+		pb(dre._equal) << endl;
+	    return false;
+	}
+	if (dre._discard != discard) {
+	    DOUT(_info) << "Discard mismatch: " << pb(discard) << " " <<
+		pb(dre._discard) << endl;
+	    return false;
+	}
+
 	return true;
     }
 
@@ -237,5 +307,14 @@ class DebugIO : public IO<A> {
     LsaDecoder _lsa_decoder;
 
     typename IO<A>::ReceiveCallback _forward_cb;
+
+    struct DebugRouteEntry {
+	A _nexthop;
+	uint32_t _metric;
+	bool _equal;
+	bool _discard;
+    };
+
+    map<IPNet<A>, DebugRouteEntry> _routing_table;
 };
 #endif // __OSPF_DEBUG_IO_HH__
