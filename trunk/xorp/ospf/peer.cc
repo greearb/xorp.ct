@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.160 2005/09/29 02:39:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.161 2005/10/10 10:01:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -506,7 +506,7 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 	XLOG_UNFINISHED();
 	break;
     case OspfTypes::PointToMultiPoint:
-	XLOG_UNFINISHED();
+	// Allow multiple neighbours to be added.
 	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
