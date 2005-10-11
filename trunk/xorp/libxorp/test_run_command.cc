@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.7 2005/08/04 10:58:09 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.8 2005/10/10 04:50:49 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -189,28 +189,58 @@ public:
     const string& done_error_msg() const { return _done_error_msg; }
 
     void command_stdout_cb(RunCommand* run_command, const string& output) {
-	_is_stdout_received = true;
-	_stdout_msg += output;
+	private_stdout_cb(output);
 	UNUSED(run_command);
     }
 
     void command_stderr_cb(RunCommand* run_command, const string& output) {
-	_is_stderr_received = true;
-	_stderr_msg += output;
+	private_stderr_cb(output);
 	UNUSED(run_command);
     }
 
     void command_done_cb(RunCommand* run_command, bool success,
 			 const string& error_msg) {
+	private_done_cb(success, error_msg);
+	UNUSED(run_command);
+    }
+
+    void shell_command_stdout_cb(RunShellCommand* run_command,
+				 const string& output) {
+	private_stdout_cb(output);
+	UNUSED(run_command);
+    }
+
+    void shell_command_stderr_cb(RunShellCommand* run_command,
+				 const string& output) {
+	private_stderr_cb(output);
+	UNUSED(run_command);
+    }
+
+    void shell_command_done_cb(RunShellCommand* run_command, bool success,
+			       const string& error_msg) {
+	private_done_cb(success, error_msg);
+	UNUSED(run_command);
+    }
+
+private:
+    void private_stdout_cb(const string& output) {
+	_is_stdout_received = true;
+	_stdout_msg += output;
+    }
+
+    void private_stderr_cb(const string& output) {
+	_is_stderr_received = true;
+	_stderr_msg += output;
+    }
+
+    void private_done_cb(bool success, const string& error_msg) {
 	_is_done_received = true;
 	if (! success) {
 	    _is_done_failed = !success;
 	    _done_error_msg += error_msg;
 	}
-	UNUSED(run_command);
     }
 
-private:
     bool	_is_stdout_received;
     bool	_is_stderr_received;
     bool	_is_done_received;
@@ -480,6 +510,78 @@ test_command_stdout_reading()
     } while (false);
 
     verbose_assert(success, "Command stdout reading");
+    run_command.terminate();
+}
+
+/**
+ * Test RunShellCommand command stdout reading.
+ */
+static void
+test_shell_command_stdout_reading()
+{
+    EventLoop eventloop;
+    TestRunCommand test_run_command;
+    bool done = false;
+    string stdout_msg_in = "Line1 on stdout";
+    string stdout_msg_out = stdout_msg_in;
+
+    //
+    // Try to start an invalid command.
+    //
+    string awk_script = c_format("'BEGIN { "
+				 "printf(\"%s\") > \"/dev/stdout\"; "
+				 "exit 0;}'",
+				 stdout_msg_in.c_str());
+    RunShellCommand run_command(eventloop,
+				AWK_PATH,
+				awk_script,
+				callback(test_run_command,
+					 &TestRunCommand::shell_command_stdout_cb),
+				callback(test_run_command,
+					 &TestRunCommand::shell_command_stderr_cb),
+				callback(test_run_command,
+					 &TestRunCommand::shell_command_done_cb));
+
+    int ret_value = run_command.execute();
+    if (ret_value != XORP_OK) {
+	verbose_assert(false, "Shell command stdout reading");
+	return;
+    }
+
+    XorpTimer timeout_timer = eventloop.set_flag_after(TimeVal(10, 0),
+						       &done, true);
+    while (!done) {
+	if (is_interrupted
+	    || test_run_command.is_done_received()) {
+	    break;
+	}
+	eventloop.run();
+    }
+
+    if (is_interrupted) {
+	verbose_log("Command interrupted by user\n");
+	incr_failures();
+	run_command.terminate();
+	return;
+    }
+
+    bool success = false;
+    do {
+	if (! test_run_command.is_done_received())
+	    break;
+	if (test_run_command.is_done_failed())
+	    break;
+	if (test_run_command.is_stderr_received())
+	    break;
+	if (! test_run_command.is_stdout_received())
+	    break;
+	if (test_run_command.stdout_msg() != stdout_msg_out)
+	    break;
+	success = true;
+	break;
+    } while (false);
+
+    verbose_assert(success, "Shell command stdout reading");
     run_command.terminate();
 }
 
@@ -760,6 +862,7 @@ main(int argc, char * const argv[])
 	test_execute_invalid_arguments();
 	test_execute_terminate_command();
 	test_command_stdout_reading();
+	test_shell_command_stdout_reading();
 	test_command_stderr_reading();
 	test_command_redirect_stderr_to_stdout_reading();
 	test_command_termination_failure();
