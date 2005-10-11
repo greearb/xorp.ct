@@ -57,7 +57,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.5 2005/08/04 10:12:53 bms Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.6 2005/10/10 04:50:49 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -182,7 +182,8 @@ popen2(const string& command, const list<string>& arguments,
 
     debug_msg("Trying to execute: '%s'\n", final_command.c_str());
 
-    if (CreateProcessA(NULL, final_command.c_str(), NULL, NULL, TRUE,
+    if (CreateProcessA(NULL, const_cast<char *>(final_command.c_str()),
+		       NULL, NULL, TRUE,
 		       CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 		       &si, &pi) == 0) {
 	DWORD err = GetLastError();
