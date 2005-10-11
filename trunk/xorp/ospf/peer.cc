@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.161 2005/10/10 10:01:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.162 2005/10/11 07:21:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1143,7 +1143,7 @@ Peer<A>::event_interface_up()
 	break;
     case OspfTypes::PointToMultiPoint:
 	change_state(Point2Point);
-	XLOG_UNFINISHED();
+	start_hello_timer();
 	break;
     case OspfTypes::VirtualLink:
 	change_state(Point2Point);
