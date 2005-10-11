@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.8 2005/10/03 23:07:09 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.9 2005/10/04 22:26:33 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -95,9 +95,9 @@ the router within an Autonomous System";
 		%mandatory: $(@.link-type);
 
 		link-type {
-		    %help: short "Type of link";
+		    %help: short "broadcast or p2p or p2m";
 
-		    %allow: $(@) "broadcast" "p2p";
+		    %allow: $(@) "broadcast" "p2p" "p2m";
 
 		    %set:;
 		}
