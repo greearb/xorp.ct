@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.25 2005/07/26 05:20:51 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.26 2005/09/27 18:37:30 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -93,7 +93,8 @@ public:
     string tree_str() const;
 
     bool apply_deltas(uid_t user_id, const string& deltas, 
-		      bool provisional_change, string& response);
+		      bool provisional_change, bool preserve_node_id,
+		      string& response);
     bool apply_deletions(uid_t user_id, const string& deletions, 
 			 bool provisional_change, string& response);
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.88 2005/10/05 05:48:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.89 2005/10/10 04:10:51 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -356,6 +356,7 @@ bool
 ConfigTreeNode::merge_deltas(uid_t user_id,
 			     const ConfigTreeNode& delta_node, 
 			     bool provisional_change,
+			     bool preserve_node_id,
 			     string& response)
 {
     XLOG_ASSERT(_segname == delta_node.segname());
@@ -372,7 +373,12 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = _operator;
 		    _operator = delta_node.get_operator();
-		    _node_id = delta_node.node_id();
+		    if (preserve_node_id)
+			_node_id = delta_node.node_id();
+		    else {
+			_node_id = ConfigNodeId::ZERO();
+			allocate_unique_node_id();
+		    }
 		    _committed_user_id = _user_id;
 		    _user_id = user_id;
 		    _clientid = delta_node.clientid();
@@ -384,7 +390,10 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 		    _value = delta_node.value();
 		    _committed_operator = delta_node.get_operator();
 		    _operator = delta_node.get_operator();
-		    _node_id = delta_node.node_id();
+		    if (preserve_node_id)
+			_node_id = delta_node.node_id();
+		    else
+			allocate_unique_node_id();
 		    _committed_user_id = delta_node.user_id();
 		    _user_id = delta_node.user_id();
 		    _clientid = delta_node.clientid();
@@ -417,6 +426,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 		delta_child_done = true;
 		bool success = my_child->merge_deltas(user_id, *delta_child,
 						      provisional_change,
+						      preserve_node_id,
 						      response);
 		if (success == false) {
 		    // If something failed, abort the merge
@@ -427,18 +437,21 @@ XXXXXXX to be copied to MasterConfigTreeNode
 	}
 	if (delta_child_done == false) {
 	    ConfigTreeNode* new_node;
+	    ConfigNodeId new_node_id = ConfigNodeId::ZERO();
+	    if (preserve_node_id)
+		new_node_id = delta_child->node_id();
 	    new_node = create_node(delta_child->segname(),
 				   delta_child->path(),
 				   delta_child->template_tree_node(),
 				   this,
-				   delta_child->node_id(),
+				   new_node_id,
 				   user_id,
 				   delta_child->clientid(),
 				   _verbose);
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
 	    new_node->merge_deltas(user_id, *delta_child, provisional_change,
-				   response);
+				   preserve_node_id, response);
 	}
     }
     return true;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.60 2005/09/20 15:03:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.61 2005/09/27 18:37:31 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1071,11 +1071,14 @@ MasterConfigTree::apply_config_change(uid_t user_id, string& errmsg,
     //
     // Apply the configuration changes
     //
-    if (apply_deltas(user_id, deltas, /* provisional change */ true, errmsg)
+    if (apply_deltas(user_id, deltas,
+		     true /* provisional_change */,
+		     true /* preserve_node_id */,
+		     errmsg)
 	== false) {
 	return (false);
     }
-    if (apply_deletions(user_id, deletions, /* provisional change */ true,
+    if (apply_deletions(user_id, deletions, /* provisional_change */ true,
 			errmsg)
 	== false) {
 	return (false);
@@ -1240,7 +1243,9 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     // Add the temporary save file to the configuration
     //
     if (apply_deltas(user_id, save_file_config,
-		     /* provisional change */ true, errmsg)
+		     true /* provisional_change */,
+		     false /* preserve_node_id */,
+		     errmsg)
 	!= true) {
 	errmsg = c_format("Cannot save the configuration file: %s",
 			  errmsg.c_str());
@@ -1331,7 +1336,7 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
 	delete_save_file_config = RTRMGR_CONFIG;
     }
     if (apply_deletions(user_id, delete_save_file_config,
-			/* provisional change */ true, errmsg)
+			/* provisional_change */ true, errmsg)
 	!= true) {
 	errmsg = c_format("Cannot save the configuration file because of "
 			  "internal error: %s", errmsg.c_str());
@@ -1523,7 +1528,9 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     // Add the temporary load file to the configuration
     //
     if (apply_deltas(user_id, load_file_config,
-		     /* provisional change */ true, errmsg)
+		     true /* provisional_change */,
+		     false /* preserve_node_id */,
+		     errmsg)
 	!= true) {
 	errmsg = c_format("Cannot load the configuration file: %s",
 			  errmsg.c_str());
@@ -1657,7 +1664,7 @@ MasterConfigTree::load_config_file_received_cb(bool success,
 	delete_load_file_config = RTRMGR_CONFIG;
     }
     if (apply_deletions(user_id, delete_load_file_config,
-			/* provisional change */ true, errmsg)
+			/* provisional_change */ true, errmsg)
 	!= true) {
 	errmsg = c_format("Cannot load the configuration file because of "
 			  "internal error: %s", errmsg.c_str());
@@ -1760,14 +1767,16 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
 
     string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
-				  /* provisional change */ true, response)) {
+				   true /* provisional_change */,
+				   false /* preserve_node_id */,
+				   response)) {
 	errmsg = response;
 	discard_changes();
 	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
 	return;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
-				      /* provisional change */ true,
+				      true /* provisional_change */,
 				      response)) {
 	errmsg = response;
 	discard_changes();
@@ -1870,14 +1879,16 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
 
     string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
-				  /* provisional change */ true, response)) {
+				   true /* provisional_change */,
+				   false /* preserve_node_id */,
+				   response)) {
 	errmsg = response;
 	discard_changes();
 	return false;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
-				     /* provisional change */ true,
-				     response)) {
+				      true /* provisional_change */,
+				      response)) {
 	errmsg = response;
 	discard_changes();
 	return false;

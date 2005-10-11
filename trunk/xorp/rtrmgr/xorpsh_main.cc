@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.52 2005/09/24 02:07:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.53 2005/10/10 04:10:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -594,7 +594,8 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 
     string response;
     if (!_ct->apply_deltas(user_id, deltas,
-			   /* this is not a provisional change */ false,
+			   false /* this is not a provisional change */,
+			   true /* preserve_node_id */,
 			   response)) {
 	_router_cli->notify_user("WARNING: Failed to merge deltas "
 				 "from rtrmgr\n",

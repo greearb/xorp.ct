@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.49 2005/10/04 06:08:18 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.50 2005/10/05 05:48:58 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -84,8 +84,9 @@ public:
     void mark_subtree_as_uncommitted();
 
     bool merge_deltas(uid_t user_id,
-		      const ConfigTreeNode& delta_node, 
+		      const ConfigTreeNode& delta_node,
 		      bool provisional_change,
+		      bool preserve_node_id,
 		      string& response);
 
     bool merge_deletions(uid_t user_id, const ConfigTreeNode& deletion_node, 
