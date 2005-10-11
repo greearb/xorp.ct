@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.162 2005/10/11 07:21:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.163 2005/10/11 07:29:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1487,7 +1487,14 @@ Peer<A>::send_hello_packet()
 	XLOG_UNFINISHED();
 	break;
     case OspfTypes::PointToMultiPoint:
-	XLOG_UNFINISHED();
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	    transmit = new SimpleTransmit<A>(pkt,
+					     (*n)->get_neighbour_address(), 
+					     _peerout.get_interface_address());
+	    typename Transmit<A>::TransmitRef tr(transmit);
+	    _peerout.transmit(tr);
+	}
+	return true;
 	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
