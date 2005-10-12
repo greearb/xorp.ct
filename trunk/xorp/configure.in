@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.143 2005/10/03 23:33:48 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.144 2005/10/10 12:50:10 atanu Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.143 2005/10/03 23:33:48 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.144 2005/10/10 12:50:10 atanu Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -312,6 +312,14 @@ AC_ARG_WITH([path-to-net-snmp-config],
 	     net_snmp_config="net-snmp-config";]
 )
 
+dnl ----------------------------
+dnl --with-windows-dispatcher
+dnl ----------------------------
+AC_ARG_WITH([windows-dispatcher],
+	    AC_HELP_STRING([--with-windows-dispatcher],
+			   [use native Win32 event dispatch]),
+	    [AC_DEFINE(USE_WINDOWS_DISPATCHER, 1,
+	     [Define to 1 if native Win32 event dispatch should be used])])
 
 dnl ---------------------------------------------------------------------------
 dnl Additional tool probes

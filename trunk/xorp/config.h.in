@@ -562,6 +562,9 @@
 /* Define to 1 if your <sys/time.h> declares `struct tm'. */
 #undef TM_IN_SYS_TIME
 
+/* Define to 1 if native Win32 event dispatch should be used */
+#undef USE_WINDOWS_DISPATCHER
+
 /* Version number of package */
 #undef VERSION
 
