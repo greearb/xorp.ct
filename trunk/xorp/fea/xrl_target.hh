@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.52 2005/09/07 20:15:45 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.53 2005/09/21 04:58:22 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -266,6 +266,10 @@ public:
     //
     // FEA network interface management interface
     //
+
+    XrlCmdError ifmgr_0_1_set_restore_original_config_on_shutdown(
+	// Input values,
+	const bool&	enable);
 
     XrlCmdError ifmgr_0_1_get_system_interface_names(
 	// Output values,

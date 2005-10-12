@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.74 2005/09/07 20:15:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.75 2005/09/21 04:58:22 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -557,6 +557,17 @@ XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     return _xftm.delete_fib_client6(target_name);
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_set_restore_original_config_on_shutdown(
+    // Input values,
+    const bool&	enable)
+{
+    IfConfig& ifc = _xifmgr.ifconfig();
+    ifc.set_restore_original_config_on_shutdown(enable);
+
+    return XrlCmdError::OKAY();
 }
 
 XrlCmdError

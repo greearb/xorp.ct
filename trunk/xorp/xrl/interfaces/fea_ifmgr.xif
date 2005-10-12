@@ -1,10 +1,12 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.13 2004/04/06 07:10:26 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.14 2004/11/05 03:37:15 bms Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
  */
 
 interface ifmgr/0.1 {
+	set_restore_original_config_on_shutdown ? enable:bool
+
 	get_configured_interface_names -> ifnames:list
 
 	get_configured_vif_names ? ifname:txt -> vifs:list
