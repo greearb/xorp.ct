@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.11 2004/06/10 22:40:31 hodson Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.12 2005/03/25 02:52:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,7 @@ BGPPacket::basic_encode(size_t len, uint8_t *buf) const
 {
     if (buf == 0)
 	buf = new uint8_t[len];
+    XLOG_ASSERT(len >= MARKER_SIZE + 3);
     memcpy(buf, Marker, MARKER_SIZE);
     buf[MARKER_SIZE] = (len >> 8) & 0xff;
     buf[MARKER_SIZE+1] = len & 0xff;

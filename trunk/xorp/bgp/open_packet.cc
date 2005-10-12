@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.21 2005/03/25 02:52:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.23 2005/08/18 15:58:05 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -43,7 +43,7 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
 {
     if (d != 0) {	// have a buffer, check length
 	// XXX this should become an exception
-        assert (len >= MINOPENPACKET + _OptParmLen);
+        XLOG_ASSERT(len >= MINOPENPACKET + _OptParmLen);
     }
     len = MINOPENPACKET + _OptParmLen;
     d = basic_encode(len, d);
@@ -60,6 +60,7 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
 	size_t i = MINOPENPACKET;
 	ParameterList::const_iterator pi = _parameter_list.begin();
 	while(pi != _parameter_list.end()) {
+	    XLOG_ASSERT(i + (*pi)->length() <= len);
 	    memcpy(d + i, (*pi)->data(), (*pi)->length());
 	    i += (*pi)->length();
 	    pi++;
@@ -78,15 +79,17 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 
     _OptParmLen = 0;
 
-    size_t i, myOptParmLen;
+    size_t i, myOptParmLen, remaining;
 
     if (l < MINOPENPACKET) {
 	debug_msg("Open message too short\n");
 	xorp_throw(CorruptMessage, "Open message too short",
 		   MSGHEADERERR, BADMESSLEN);
     }
+    remaining = l;
 
     d += BGP_COMMON_HEADER_LEN;	// skip common header
+    remaining -= BGP_COMMON_HEADER_LEN;
 
     _Version = d[0];
 
@@ -97,10 +100,24 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     _id = IPv4(d+5);
     myOptParmLen = i = d[9];
     d += 10;		// skip over fixed open header
+    remaining -= 10;
+
+    // we shouldn't trust myOptParmLen yet - make sure it's not
+    // greater than the amount of data we actually received.
+    if (remaining < myOptParmLen) {
+	debug_msg("Open message too short\n");
+	xorp_throw(CorruptMessage, "Open message too short",
+		   MSGHEADERERR, BADMESSLEN);
+    }
 
     while (i > 0) {
 	size_t len;
 	debug_msg("Length of unread parameters : %u\n", XORP_UINT_CAST(i));
+	if (remaining < 2) {
+	    debug_msg("Open message too short\n");
+	    xorp_throw(CorruptMessage, "Parameter is too short",
+		       MSGHEADERERR, 0);
+	}
 
 	BGPParameter *p = BGPParameter::create(d, i, len);
 	if (p != NULL)
@@ -108,6 +125,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 	// This assert is safe because if len is bad an exception
 	// should already have been thrown.
 	XLOG_ASSERT(len > 0);
+	XLOG_ASSERT(i >= len);
 	i -= len;
 	d += len;
     }
