@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.28 2005/03/25 02:53:08 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.29 2005/08/18 15:45:48 bms Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -192,6 +192,26 @@ public:
      * @return modified configuration structure.
      */
     IfTree& align_with(const IfTree& other);
+
+    /**
+     * Prepare configuration for pushing and replacing previous configuration.
+     *
+     * If the previous configuration is to be replaced with new configuration,
+     * we need to prepare the state that will delete, update, and add the
+     * new state as appropriate.
+     * The preparation works as follows:
+     * - All items in the local tree are preserved and marked as created.
+     * - All items in the other tree that are not in the local tree are
+     *   added to the local tree and are marked as deleted.
+     *   Only if the interface is marked as "soft" or "discard_emulated",
+     *   or if the item in the other state is marked as disabled, then it
+     *   is not added.
+     *
+     * @param other the configuration tree to be used to prepare the
+     * replacement state.
+     * @return modified configuration structure.
+     */
+    IfTree& prepare_replacement_state(const IfTree& other);
 
     /**
      * Prune bogus deleted state.

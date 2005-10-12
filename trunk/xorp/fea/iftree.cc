@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.27 2005/03/25 02:53:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.28 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -347,6 +347,136 @@ IfTree::align_with(const IfTree& o)
 		} else {
 		    if (! ai6->second.is_same_state(oa6->second))
 			ai6->second.copy_state(oa6->second);
+		}
+	    }
+	}
+    }
+
+    return *this;
+}
+
+/**
+ * Prepare configuration for pushing and replacing previous configuration.
+ *
+ * If the previous configuration is to be replaced with new configuration,
+ * we need to prepare the state that will delete, update, and add the
+ * new state as appropriate.
+ * The preparation works as follows:
+ * - All items in the local tree are preserved and are marked as created.
+ * - All items in the other tree that are not in the local tree are
+ *   added to the local tree and are marked as deleted.
+ *   Only if the interface is marked as "soft" or "discard_emulated",
+ *   or if the item in the other state is marked as disabled, then it
+ *   is not added.
+ *
+ * @param other the configuration tree to be used to prepare the
+ * replacement state.
+ * @return modified configuration structure.
+ */
+IfTree&
+IfTree::prepare_replacement_state(const IfTree& o)
+{
+    IfTree::IfMap::iterator ii;
+    IfTree::IfMap::const_iterator oi;
+
+    //
+    // Mark all entries in the local tree as created
+    //
+    for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
+	ii->second.mark(CREATED);
+	IfTreeInterface::VifMap::iterator vi;
+	for (vi = ii->second.vifs().begin();
+	     vi != ii->second.vifs().end(); ++vi) {
+	    vi->second.mark(CREATED);
+	    IfTreeVif::V4Map::iterator ai4;
+	    for (ai4 = vi->second.v4addrs().begin();
+		 ai4 != vi->second.v4addrs().end(); ++ai4) {
+		ai4->second.mark(CREATED);
+	    }
+	    IfTreeVif::V6Map::iterator ai6;
+	    for (ai6 = vi->second.v6addrs().begin();
+		 ai6 != vi->second.v6addrs().end(); ++ai6) {
+		ai6->second.mark(CREATED);
+	    }
+	}
+    }
+
+    for (oi = o.ifs().begin(); oi != o.ifs().end(); ++oi) {
+	if (! oi->second.enabled())
+	    continue;		// XXX: ignore disabled state
+	const string& ifname = oi->second.ifname();
+	ii = get_if(ifname);
+	if (ii == ifs().end()) {
+	    //
+	    // Add local interface and mark it for deletion.
+	    //
+	    // Mark local interface for deletion, not present in other,
+	    // unless the local interface is marked as "soft" or
+	    // "discard_emulated".
+	    //
+	    if (! (oi->second.is_soft() || oi->second.is_discard_emulated())) {
+		add_if(ifname);
+		ii = get_if(ifname);
+		XLOG_ASSERT(ii != ifs().end());
+		ii->second.copy_state(oi->second);
+		ii->second.mark(DELETED);
+	    }
+	}
+
+	IfTreeInterface::VifMap::const_iterator ov;
+	for (ov = oi->second.vifs().begin();
+	     ov != oi->second.vifs().end(); ++ov) {
+	    if (! ov->second.enabled())
+		continue;	// XXX: ignore disabled state
+	    const string& vifname = ov->second.vifname();
+	    IfTreeInterface::VifMap::iterator vi =
+		ii->second.get_vif(vifname);
+	    if (vi == ii->second.vifs().end()) {
+		//
+		// Add local vif and mark it for deletion.
+		//
+		ii->second.add_vif(vifname);
+		vi = ii->second.get_vif(vifname);
+		XLOG_ASSERT(vi != ii->second.vifs().end());
+		vi->second.copy_state(ov->second);
+		vi->second.mark(DELETED);
+	    }
+
+	    IfTreeVif::V4Map::const_iterator oa4;
+	    for (oa4 = ov->second.v4addrs().begin();
+		 oa4 != ov->second.v4addrs().end(); ++oa4) {
+		if (! oa4->second.enabled())
+		    continue;	// XXX: ignore disabled state
+		IfTreeVif::V4Map::iterator ai4 =
+		    vi->second.get_addr(oa4->second.addr());
+		if (ai4 == vi->second.v4addrs().end()) {
+		    //
+		    // Add local IPv4 address and mark it for deletion.
+		    //
+		    vi->second.add_addr(oa4->second.addr());
+		    ai4 = vi->second.get_addr(oa4->second.addr());
+		    XLOG_ASSERT(ai4 != vi->second.v4addrs().end());
+		    ai4->second.copy_state(oa4->second);
+		    ai4->second.mark(DELETED);
+		}
+	    }
+
+	    IfTreeVif::V6Map::const_iterator oa6;
+	    for (oa6 = ov->second.v6addrs().begin();
+		 oa6 != ov->second.v6addrs().end(); ++oa6) {
+		if (! oa6->second.enabled())
+		    continue;	// XXX: ignore disabled state
+		IfTreeVif::V6Map::iterator ai6 =
+		    vi->second.get_addr(oa6->second.addr());
+		if (ai6 == vi->second.v6addrs().end()) {
+		    //
+		    // Add local IPv6 address and mark it for deletion.
+		    //
+		    vi->second.add_addr(oa6->second.addr());
+		    ai6 = vi->second.get_addr(oa6->second.addr());
+		    XLOG_ASSERT(ai6 != vi->second.v6addrs().end());
+		    ai6->second.copy_state(oa6->second);
+		    ai6->second.mark(DELETED);
 		}
 	    }
 	}
