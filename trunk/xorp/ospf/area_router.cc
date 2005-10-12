@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.114 2005/10/10 12:21:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.115 2005/10/10 13:19:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1079,10 +1079,14 @@ AreaRouter<A>::add_lsa(Lsa::LsaRef lsar)
 {
     size_t index;
     XLOG_ASSERT(!find_lsa(lsar, index));
+    XLOG_ASSERT(lsar->valid());
 
     // If there are no readers we can put this LSA into an empty slot.
     if (0 == _readers && !_empty_slots.empty()) {
-	_db[_empty_slots.front()] = lsar;
+	size_t esi = _empty_slots.front();
+	if (esi >= _last_entry)
+	    _last_entry = esi + 1;
+	_db[esi] = lsar;
 	_empty_slots.pop_front();
 	return true;
     }
