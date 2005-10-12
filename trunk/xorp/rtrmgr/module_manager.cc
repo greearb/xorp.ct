@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.46 2005/08/18 15:54:27 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.47 2005/09/01 19:44:20 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -70,7 +70,7 @@ restart_module(Module* module)
     XLOG_INFO("Restarting module %s ...", module->name().c_str());
     XorpCallback1<void, bool>::RefPtr run_cb
 	= callback(module, &Module::module_run_done);
-    if (module->run(true, run_cb) < 0) {
+    if (module->run(true, false, run_cb) < 0) {
 	XLOG_ERROR("Failed to restart module %s.", module->name().c_str());
 	return (XORP_ERROR);
     }
@@ -476,11 +476,13 @@ Module::set_userid(uid_t userid) {
 }
 
 int
-Module::run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb)
+Module::run(bool do_exec, bool is_verification,
+	    XorpCallback1<void, bool>::RefPtr cb)
 {
     bool is_process_running = false;
 
-    XLOG_INFO("Running module: %s (%s)", _name.c_str(), _path.c_str());
+    if (! is_verification)
+	XLOG_INFO("Running module: %s (%s)", _name.c_str(), _path.c_str());
 
     _do_exec = do_exec;
 
@@ -723,12 +725,13 @@ ModuleManager::new_module(const string& module_name, const string& path)
 
 int
 ModuleManager::start_module(const string& module_name, bool do_exec,
+			    bool is_verification,
 			    XorpCallback1<void, bool>::RefPtr cb)
 {
     Module* module = (Module*)find_module(module_name);
 
     XLOG_ASSERT(module != NULL);
-    return module->run(do_exec, cb);
+    return module->run(do_exec, is_verification, cb);
 }
 
 int
@@ -821,7 +824,8 @@ ModuleManager::shutdown_complete()
 
 int 
 ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			     ModuleManager::CallBack cb, bool do_exec)
+			     ModuleManager::CallBack cb, bool do_exec,
+			     bool is_verification)
 {
     if (!new_module(argv[0], argv[0])) {
 	return XORP_ERROR;
@@ -831,7 +835,7 @@ ModuleManager::shell_execute(uid_t userid, const vector<string>& argv,
     module->set_argv(argv);
     XorpCallback1<void, bool>::RefPtr run_cb 
 	= callback(module, &Module::module_run_done);
-    if (module->run(do_exec, run_cb) != XORP_OK) {
+    if (module->run(do_exec, is_verification, run_cb) != XORP_OK) {
 	cb->dispatch(false, "Failed to execute" + argv[0]);
 	return XORP_ERROR;
     }

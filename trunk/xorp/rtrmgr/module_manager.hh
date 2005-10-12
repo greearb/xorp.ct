@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.32 2005/08/18 15:54:27 bms Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.33 2005/09/01 19:44:20 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -47,7 +47,8 @@ public:
     int set_execution_path(const string& path);
     void set_argv(const vector<string>& argv);
     void set_userid(uid_t userid);
-    int run(bool do_exec, XorpCallback1<void, bool>::RefPtr cb);
+    int run(bool do_exec, bool is_verification,
+	    XorpCallback1<void, bool>::RefPtr cb);
     void module_run_done(bool success);
     void set_stalled();
     void normal_exit();
@@ -88,8 +89,9 @@ public:
     ~ModuleManager();
 
     bool new_module(const string& module_name, const string& path);
-    int start_module(const string& module_name, bool do_exec, 
-		   XorpCallback1<void, bool>::RefPtr cb);
+    int start_module(const string& module_name, bool do_exec,
+		     bool is_verification,
+		     XorpCallback1<void, bool>::RefPtr cb);
     int kill_module(const string& module_name, 
 		   XorpCallback0<void>::RefPtr cb);
     void module_shutdown_cb();
@@ -115,11 +117,15 @@ public:
      * handling of SIGCHILD.
      *
      * @param userid the UID of the user to run the task as.
-     * @param argv the command and arguements to run
-     * @param callback callback to call when the child process terminates
+     * @param argv the command and arguments to run.
+     * @param cb callback to call when the child process terminates.
+     * @param do_exec if true then do execute the external processes.
+     * @param is_verification if true then this execution is for verification
+     * purpose only.
      */
     int shell_execute(uid_t userid, const vector<string>& argv, 
-		      ModuleManager::CallBack cb, bool do_exec);
+		      ModuleManager::CallBack cb, bool do_exec,
+		      bool is_verification);
     MasterConfigTree* master_config_tree() const { return _master_config_tree; }
     void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
 #if 0

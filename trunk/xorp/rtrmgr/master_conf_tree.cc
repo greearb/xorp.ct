@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.62 2005/10/11 17:59:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.63 2005/10/12 03:12:27 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -528,7 +528,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     /*******************************************************************/
 
     _task_manager->reset();
-    _task_manager->set_do_exec(false);
+    _task_manager->set_do_exec(false, true);
     _task_manager->set_exec_id(_exec_id);
     _commit_cb = cb;
 
@@ -621,7 +621,7 @@ MasterConfigTree::commit_changes_pass2()
     list<string>::const_iterator iter;
 
     _task_manager->reset();
-    _task_manager->set_do_exec(true);
+    _task_manager->set_do_exec(true, false);
     _task_manager->set_exec_id(_exec_id);
 
     master_root_node().initialize_commit();

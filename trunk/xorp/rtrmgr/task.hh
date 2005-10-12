@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.33 2005/07/18 21:32:52 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.34 2005/10/10 04:50:50 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -422,6 +422,7 @@ public:
     void run(CallBack cb);
     void item_done(bool success, bool fatal, string errmsg); 
     bool do_exec() const;
+    bool is_verification() const;
     XorpClient& xorp_client() const;
 
     /**
@@ -509,7 +510,7 @@ public:
 			     bool verbose);
     ~TaskManager();
 
-    void set_do_exec(bool do_exec);
+    void set_do_exec(bool do_exec, bool is_verification);
     void reset();
     int add_module(const ModuleCommand& mod_cmd);
     void add_xrl(const string& module_name, const UnexpandedXrl& xrl, 
@@ -523,6 +524,7 @@ public:
     ModuleManager& module_manager() const { return _module_manager; }
     MasterConfigTree& config_tree() const { return _config_tree; }
     bool do_exec() const { return _current_do_exec; }
+    bool is_verification() const { return _is_verification; }
     bool verbose() const { return _verbose; }
     EventLoop& eventloop() const;
 
@@ -583,6 +585,8 @@ private:
 					// to execute anything because we're
 					// in a debug mode
     bool		_current_do_exec;
+    bool		_is_verification; // Set to true if current execution
+					  // is for verification purpose
     bool		_verbose;	// Set to true if output is verbose
 
     // _tasks provides fast access to a Task by name

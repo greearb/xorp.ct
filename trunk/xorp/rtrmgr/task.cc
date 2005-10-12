@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.53 2005/07/18 21:32:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.54 2005/10/10 04:50:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1015,7 +1015,8 @@ XrlShutdown::eventloop() const
 void
 XrlShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
-    XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
+    if (! _task_manager.is_verification())
+	XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -1147,7 +1148,8 @@ ProgramShutdown::eventloop() const
 void
 ProgramShutdown::shutdown(const RunShellCommand::ExecId& exec_id, CallBack cb)
 {
-    XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
+    if (! _task_manager.is_verification())
+	XLOG_INFO("Shutting down module: %s\n", _module_name.c_str());
 
     _cb = cb;
     if (_task_manager.do_exec()) {
@@ -1734,7 +1736,8 @@ Task::step1_start()
 
     if (_start_module) {
 	_taskmgr.module_manager().start_module(_module_name, do_exec(),
-					callback(this, &Task::step1_done));
+					       is_verification(),
+					       callback(this, &Task::step1_done));
     } else {
 	step2_wait();
     }
@@ -2005,6 +2008,12 @@ Task::do_exec() const
     return _taskmgr.do_exec();
 }
 
+bool
+Task::is_verification() const
+{
+    return _taskmgr.is_verification();
+}
+
 XorpClient&
 Task::xorp_client() const
 {
@@ -2028,6 +2037,7 @@ TaskManager::TaskManager(MasterConfigTree& config_tree, ModuleManager& mmgr,
       _module_manager(mmgr),
       _xorp_client(xclient),
       _global_do_exec(global_do_exec),
+      _is_verification(false),
       _verbose(verbose)
 {
 }
@@ -2038,9 +2048,10 @@ TaskManager::~TaskManager()
 }
 
 void
-TaskManager::set_do_exec(bool do_exec)
+TaskManager::set_do_exec(bool do_exec, bool is_verification)
 {
     _current_do_exec = do_exec && _global_do_exec;
+    _is_verification = is_verification;
 }
 
 void
@@ -2210,7 +2221,8 @@ TaskManager::run_task()
     debug_msg("TaskManager::run_task()\n");
 
     if (_tasklist.empty()) {
-	XLOG_INFO("No more tasks to run\n");
+	if (! is_verification())
+	    XLOG_INFO("No more tasks to run\n");
 	_completion_cb->dispatch(true, "");
 	return;
     }
@@ -2290,5 +2302,6 @@ int
 TaskManager::shell_execute(uid_t userid, const vector<string>& argv, 
 			   TaskManager::CallBack cb)
 {
-    return _module_manager.shell_execute(userid, argv, cb, do_exec());
+    return _module_manager.shell_execute(userid, argv, cb, do_exec(),
+					 is_verification());
 }
