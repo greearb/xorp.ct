@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.29 2005/06/01 09:36:10 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.30 2005/09/30 16:41:42 zec Exp $ */
 
 
 interfaces {
@@ -47,6 +47,8 @@ interfaces {
 	    }
 	}
     }
+
+    /* restore-original-config-on-shutdown: false */
 }
 
 fea {
