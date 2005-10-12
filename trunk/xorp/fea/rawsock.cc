@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.5 2005/09/21 20:17:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.6 2005/09/25 17:14:57 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -57,6 +57,7 @@
 
 #ifdef HOST_OS_WINDOWS
 #include <mswsock.h>
+#include "ip.h"
 #endif
 
 #include "libcomm/comm_api.h"
@@ -142,8 +143,12 @@ typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
 
 #endif // ! __MINGW32__
 
+#ifdef HAVE_IPV6
+
 static const GUID guidWSARecvMsg = WSAID_WSARECVMSG;
 static LPFN_WSARECVMSG lpWSARecvMsg = NULL;
+
+#endif // HAVE_IPV6
 
 #endif // HOST_OS_WINDOWS
 

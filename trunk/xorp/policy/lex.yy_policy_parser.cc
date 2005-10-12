@@ -2426,6 +2426,10 @@ char *yytext;
 #include "config.h"
 #endif
 #include "policy/common/policy_utils.hh"
+#ifdef HOST_OS_WINDOWS
+#define fileno(file)	_fileno(file)
+#define isatty(fd)	_isatty(fd)
+#endif
 #include <vector>
 #include <string>
 #include <sstream>

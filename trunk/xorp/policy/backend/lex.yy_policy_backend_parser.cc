@@ -468,6 +468,11 @@ char *yytext;
 
 #include "libxorp/xorp.h"
 
+#ifdef HOST_OS_WINDOWS
+#define fileno(file) _fileno(file)
+#define isatty(fd) _isatty(fd)
+#endif
+
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
 #include "yacc.yy_policy_backend_parser.cc.h"

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.42 2005/08/18 15:48:42 bms Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.43 2005/09/01 02:31:23 pavlin Exp $"
 
 
 //
@@ -48,8 +48,6 @@
 
 #ifdef HAVE_ARPA_TELNET_H
 #include <arpa/telnet.h>
-#else
-#include "telnet.h"
 #endif
 
 #ifdef HOST_OS_WINDOWS
@@ -452,7 +450,8 @@ CliClient::start_connection(string& error_msg)
 	return (XORP_ERROR);
     }
 #endif // ! HOST_OS_WINDOWS
-    
+   
+#ifndef HOST_OS_WINDOWS 
     //
     // Setup the telnet options
     //
@@ -471,6 +470,7 @@ CliClient::start_connection(string& error_msg)
 	send(input_fd(), do_transmit_binary_cmd, sizeof(do_transmit_binary_cmd), 0);
 	send(input_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd), 0);
     }
+#endif
     
 #ifdef HAVE_TERMIOS_H
     //
@@ -925,6 +925,10 @@ CliClient::preprocess_char(uint8_t val, bool& stop_processing,
 int
 CliClient::process_telnet_option(int val)
 {
+#ifdef HOST_OS_WINDOWS
+    return (1);
+    UNUSED(val);
+#else
     if (val == IAC) {
 	// Probably a telnet command
 	if (! telnet_iac()) {
@@ -1087,4 +1091,5 @@ CliClient::process_telnet_option(int val)
     }
     
     return (1);
+#endif // HOST_OS_WINDOWS
 }

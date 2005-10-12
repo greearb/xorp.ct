@@ -5,6 +5,8 @@
 #include "policy/test/compilepolicy.hh"
 #ifdef HOST_OS_WINDOWS		/* XXX: lame */
 #define strdup _strdup
+#define fileno(file)	_fileno(file)
+#define isatty(fd) _isatty(fd)
 #endif
 
 #include "yacc.yy_compile_policy.cc.h"

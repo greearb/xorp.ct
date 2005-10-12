@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.11 2005/10/11 03:47:58 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.12 2005/10/11 23:34:42 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -38,6 +38,11 @@
 #include "libxorp/asyncio.hh"
 #include "libxorp/popen.hh"
 #include "run_command.hh"
+
+// XXX: temporary: fix compilation
+#ifdef HOST_OS_WINDOWS
+#define _PATH_BSHELL "/bin/sh"
+#endif
 
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "/bin/sh"

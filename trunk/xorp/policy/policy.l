@@ -4,6 +4,11 @@
 #include "policy_module.h"
 #include "libxorp/xorp.h"
 
+#ifdef HOST_OS_WINDOWS
+#define fileno(file)	_fileno(file)
+#define isatty(fd)	_isatty(fd)
+#endif
+
 #include "policy/common/policy_utils.hh"
 #include <vector>
 #include <string>
