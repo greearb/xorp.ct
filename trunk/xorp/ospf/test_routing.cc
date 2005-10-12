@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.4 2005/10/11 07:10:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.5 2005/10/12 07:24:28 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -74,8 +74,31 @@ p2p(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
 }
 
 void
+transit(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
+	uint32_t link_data, uint32_t metric)
+{
+     RouterLink rl(version);
+
+     rl.set_type(RouterLink::transit);
+     rl.set_metric(metric);
+
+    switch(version) {
+    case OspfTypes::V2:
+	rl.set_link_id(id);
+	rl.set_link_data(link_data);
+	break;
+    case OspfTypes::V3:
+	rl.set_interface_id(id);
+	rl.set_neighbour_interface_id(0);
+	rl.set_neighbour_router_id(id);
+	break;
+    }
+    rlsa->get_router_links().push_back(rl);
+}
+
+void
 stub(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
-    uint32_t metric)
+     uint32_t link_data, uint32_t metric)
 {
      RouterLink rl(version);
 
@@ -90,12 +113,10 @@ stub(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
      rl.set_type(RouterLink::stub);
      rl.set_metric(metric);
 
-     id <<= 16;
-
      switch(version) {
      case OspfTypes::V2:
 	 rl.set_link_id(id);
-	 rl.set_link_data(0xffff0000);
+	 rl.set_link_data(link_data);
 	break;
      case OspfTypes::V3:
 	 rl.set_interface_id(id);
@@ -106,10 +127,9 @@ stub(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
      rlsa->get_router_links().push_back(rl);
 }
 
-// This is the origin.
-
 Lsa::LsaRef
-create_RT6(OspfTypes::Version version)
+create_router_lsa(OspfTypes::Version version, uint32_t link_state_id,
+		  uint32_t advertising_router)
 {
      RouterLsa *rlsa = new RouterLsa(version);
      Lsa_header& header = rlsa->get_header();
@@ -125,8 +145,60 @@ create_RT6(OspfTypes::Version version)
 	 rlsa->set_options(options);
 	 break;
      }
-     header.set_link_state_id(6);
-     header.set_advertising_router(6);
+
+     header.set_link_state_id(link_state_id);
+     header.set_advertising_router(advertising_router);
+
+     return Lsa::LsaRef(rlsa);
+}
+
+Lsa::LsaRef
+create_network_lsa(OspfTypes::Version version, uint32_t link_state_id,
+		   uint32_t advertising_router, uint32_t mask)
+{
+    NetworkLsa *nlsa = new NetworkLsa(version);
+    Lsa_header& header = nlsa->get_header();
+
+    uint32_t options = compute_options(version, OspfTypes::NORMAL);
+
+    // Set the header fields.
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(options);
+	nlsa->set_network_mask(mask);
+	break;
+    case OspfTypes::V3:
+	nlsa->set_options(options);
+	break;
+    }
+
+    header.set_link_state_id(link_state_id);
+    header.set_advertising_router(advertising_router);
+
+    return Lsa::LsaRef(nlsa);
+}
+
+template <typename A> 
+bool
+verify_routes(TestInfo& info, uint32_t lineno, DebugIO<A>& io, uint32_t routes)
+{
+    if (routes != io.routing_table_size()) {
+	DOUT(info) << "Line number: " << lineno << endl;
+	DOUT(info) << "Expecting " << routes << " routes " << "got " <<
+	    io.routing_table_size() << endl;
+	return false;
+    }
+    return true;
+}
+
+// This is the origin.
+
+Lsa::LsaRef
+create_RT6(OspfTypes::Version version)
+{
+     Lsa::LsaRef lsar = create_router_lsa(version, 6, 6);
+     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+     XLOG_ASSERT(rlsa);
 
      // Link to RT3
      p2p(version, rlsa, 3, 4, 6);
@@ -141,41 +213,28 @@ create_RT6(OspfTypes::Version version)
 
      rlsa->set_self_originating(true);
 
-     return Lsa::LsaRef(rlsa);
+     return lsar;
 }
 
 Lsa::LsaRef
 create_RT3(OspfTypes::Version version)
 {
-     RouterLsa *rlsa = new RouterLsa(version);
-     Lsa_header& header = rlsa->get_header();
-
-     uint32_t options = compute_options(version, OspfTypes::NORMAL);
-
-     // Set the header fields.
-     switch(version) {
-     case OspfTypes::V2:
-	 header.set_options(options);
-	 break;
-     case OspfTypes::V3:
-	 rlsa->set_options(options);
-	 break;
-     }
-     header.set_link_state_id(3);
-     header.set_advertising_router(3);
+     Lsa::LsaRef lsar = create_router_lsa(version, 3, 3);
+     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+     XLOG_ASSERT(rlsa);
 
      // Link to RT6
      p2p(version, rlsa, 6, 7, 8);
 
      // Network to N4
-     stub(version, rlsa, 4, 2);
+     stub(version, rlsa, (4 << 16), 0xffff0000, 2);
 
      // Network to N3
 //      network(version, rlsa, 3, 1);
 
      rlsa->encode();
 
-     return Lsa::LsaRef(rlsa);
+     return lsar;
 }
 
 // Some of the routers from Figure 2. in RFC 2328. Single area.
@@ -248,6 +307,8 @@ routing1(TestInfo& info, OspfTypes::Version version)
     if (OspfTypes::V2 == version) {
 	// At this point there should be a single route in the routing
 	// table.
+	if (!verify_routes(info, __LINE__, io, 1))
+	    return false;
 	const uint32_t routes = 1;
 	if (routes != io.routing_table_size()) {
 	    DOUT(info) << "Expecting " << routes << " routes " << "got " <<
@@ -297,31 +358,40 @@ routing1(TestInfo& info, OspfTypes::Version version)
 
 // Attempting to reproduce:
 // http://www.xorp.org/bugzilla/show_bug.cgi?id=226
-#if	0
 bool
 routing2(TestInfo& info)
 {
     DOUT(info) << "hello" << endl;
 
+    OspfTypes::Version version = OspfTypes::V2;
+
     EventLoop eventloop;
-    DebugIO<A> io(info, version, eventloop);
+    DebugIO<IPv4> io(info, version, eventloop);
     io.startup();
 
-    Ospf<A> ospf(version, eventloop, &io);
-    ospf.set_router_id(set_id("10.0.8.161"));
+    Ospf<IPv4> ospf(version, eventloop, &io);
+    OspfTypes::RouterID rid = set_id("10.0.8.161");
+    ospf.set_router_id(rid);
     
     OspfTypes::AreaID area = set_id("0.0.0.0");
     const uint16_t interface_prefix_length = 30;
     const uint16_t interface_mtu = 1500;
 
-    PeerManager<A>& pm = ospf.get_peer_manager();
+    PeerManager<IPv4>& pm = ospf.get_peer_manager();
 
     // Create an area
     pm.create_area_router(area, OspfTypes::NORMAL);
 
     // Create a peer associated with this area.
+    IPv4 src("172.16.1.1");
     const string interface = "eth0";
     const string vif = "vif0";
+
+    PeerID peerid = pm.
+	create_peer(interface, vif, src, interface_prefix_length,
+		    interface_mtu,
+		    OspfTypes::BROADCAST,
+		    area);
 
     // Bring the peering up
     if (!pm.set_state_peer(peerid, true)) {
@@ -329,10 +399,131 @@ routing2(TestInfo& info)
 	return false;
     }
 
-    AreaRouter<A> *ar = pm.get_area_router(area);
+    AreaRouter<IPv4> *ar = pm.get_area_router(area);
     XLOG_ASSERT(ar);
+
+    // Create this router's Router-LSA
+    Lsa::LsaRef lsar;
+    lsar = create_router_lsa(version, rid, rid);
+    RouterLsa *rlsa;
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, set_id("172.16.1.2"), set_id("172.16.1.1"), 1);
+    lsar->encode();
+    lsar->set_self_originating(true);
+    ar->testing_replace_router_lsa(lsar);
+    
+    // Create the peer's Router-LSA
+    OspfTypes::RouterID prid = set_id("172.16.1.2");
+    lsar = create_router_lsa(version, prid, prid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, set_id("172.16.1.2"), set_id("172.16.1.2"), 1);
+    stub(version, rlsa, set_id("172.16.2.1"), 0xffffffff, 1);
+    stub(version, rlsa, set_id("172.16.1.100"), 0xffffffff, 1);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Network-LSA that acts as the binding glue.
+    lsar = create_network_lsa(version, prid, prid, 0xfffffffc);
+    NetworkLsa *nlsa;
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(set_id("172.16.1.1"));
+    nlsa->get_attached_routers().push_back(set_id("172.16.1.2"));
+    lsar->encode();
+
+    /*********************************************************/
+    ar->testing_add_lsa(lsar);
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 2))
+	return false;
+
+    if (!io.routing_table_verify(IPNet<IPv4>("172.16.1.100/32"),
+				 IPv4("172.16.1.2"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+
+    if (!io.routing_table_verify(IPNet<IPv4>("172.16.2.1/32"),
+				 IPv4("172.16.1.2"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+
+    /*********************************************************/
+    ar->testing_delete_lsa(lsar);
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 0))
+	return false;
+
+    /*********************************************************/
+    // Create the Network-LSA again as the first one has been invalidated.
+    lsar = create_network_lsa(version, prid, prid, 0xfffffffc);
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(set_id("172.16.1.1"));
+    nlsa->get_attached_routers().push_back(set_id("172.16.1.2"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 2))
+	return false;
+
+    if (!io.routing_table_verify(IPNet<IPv4>("172.16.1.100/32"),
+				 IPv4("172.16.1.2"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+
+    if (!io.routing_table_verify(IPNet<IPv4>("172.16.2.1/32"),
+				 IPv4("172.16.1.2"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+    /*********************************************************/
+    ar->testing_delete_lsa(lsar);
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 0))
+	return false;
+
+    /*********************************************************/
+    // Take the peering down
+    if (!pm.set_state_peer(peerid, false)) {
+	DOUT(info) << "Failed to disable peer\n";
+	return false;
+    }
+
+    // Delete the peer.
+    if (!pm.delete_peer(peerid)) {
+	DOUT(info) << "Failed to delete peer\n";
+	return false;
+    }
+
+    // Delete the area
+    if (!pm.destroy_area_router(area)) {
+	DOUT(info) << "Failed to delete area\n";
+	return false;
+    }
+
+    // The routing table should be empty now.
+    if (!verify_routes(info, __LINE__, io, 0))
+	return false;
+
+    return true;
 }
-#endif
 
 int
 main(int argc, char **argv)
@@ -351,6 +542,7 @@ main(int argc, char **argv)
     } tests[] = {
 	{"r1V2", callback(routing1<IPv4>, OspfTypes::V2)},
 	{"r1V3", callback(routing1<IPv6>, OspfTypes::V3)},
+	{"r2", callback(routing2)},
     };
 
     try {
