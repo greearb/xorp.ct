@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.43 2005/03/25 05:41:55 pavlin Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.44 2005/08/18 15:45:46 bms Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -81,6 +81,27 @@ public:
 
     const IfTree& pulled_config()	{ return (_pulled_config); }
     IfTree& pushed_config()		{ return (_pushed_config); }
+
+    /**
+     * Test whether the original configuration should be restored on shutdown.
+     *
+     * @return true of the original configuration should be restored on
+     * shutdown, otherwise false.
+     */
+    bool restore_original_config_on_shutdown() const {
+	return (_restore_original_config_on_shutdown);
+    }
+
+    /**
+     * Set the flag whether the original configuration should be restored
+     * on shutdown.
+     *
+     * @param v if true the original configuration should be restored on
+     * shutdown.
+     */
+    void set_restore_original_config_on_shutdown(bool v) {
+	_restore_original_config_on_shutdown = v;
+    }
 
     int register_ifc_get_primary(IfConfigGet *ifc_get);
     int register_ifc_set_primary(IfConfigSet *ifc_set);
@@ -383,6 +404,9 @@ private:
     IfTree		_live_config;	// The IfTree with live config
     IfTree		_pulled_config;	// The IfTree when we pull the config
     IfTree		_pushed_config;	// The IfTree when we push the config
+    IfTree		_original_config; // The IfTree on startup
+    bool		_restore_original_config_on_shutdown; // If true, then
+				//  restore the original config on shutdown
 
     IfConfigGet*		_ifc_get_primary;
     IfConfigSet*		_ifc_set_primary;

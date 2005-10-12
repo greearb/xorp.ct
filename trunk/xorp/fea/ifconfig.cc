@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.46 2005/08/18 15:45:46 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.47 2005/09/28 21:16:25 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -61,6 +61,7 @@ IfConfig::IfConfig(EventLoop& eventloop,
 		   NexthopPortMapper& nexthop_port_mapper)
     : _eventloop(eventloop), _ur(ur), _er(er),
       _nexthop_port_mapper(nexthop_port_mapper),
+      _restore_original_config_on_shutdown(false),
       _ifc_get_primary(NULL),
       _ifc_set_primary(NULL),
       _ifc_observer_primary(NULL),
@@ -260,6 +261,9 @@ IfConfig::start(string& error_msg)
     _live_config = pull_config();
     _live_config.finalize_state();
 
+    _original_config = _live_config;
+    _original_config.finalize_state();
+
     debug_msg("Start configuration read: %s\n", _live_config.str().c_str());
     debug_msg("\nEnd configuration read.\n");
 
@@ -281,6 +285,20 @@ IfConfig::stop(string& error_msg)
 	return (XORP_OK);
 
     error_msg.erase();
+
+    //
+    // Restore the original config
+    //
+    if (restore_original_config_on_shutdown()) {
+	pull_config();
+	IfTree tmp_push_tree = _original_config;
+	tmp_push_tree.prepare_replacement_state(_pulled_config);
+	if (push_config(tmp_push_tree) != true) {
+	    error_msg2 = push_error();
+	    if (error_msg.empty())
+		error_msg = error_msg2;
+	}
+    }
 
     //
     // Stop the IfConfigObserver methods
