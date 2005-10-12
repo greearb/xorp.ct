@@ -1,8 +1,8 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.19 2005/10/10 18:37:03 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.20 2005/10/12 09:21:36 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
-    restore_original_config_on_shutdown:	bool = false;
+    restore-original-config-on-shutdown:	bool = false;
 
     interface @: txt {
 	disable:	toggle = false;
@@ -61,7 +61,7 @@ interfaces {
 	%create:;
     }
 
-    restore_original_config_on_shutdown {
+    restore-original-config-on-shutdown {
 	%help:		short "Restore original configuration on shutdown";
 	%create:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_restore_original_config_on_shutdown?enable:bool=$(@)";
 	%set:		xrl "$(interfaces.targetname)/ifmgr/0.1/set_restore_original_config_on_shutdown?enable:bool=$(@)";
