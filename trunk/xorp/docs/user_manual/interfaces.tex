@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.6 2005/04/07 03:09:12 pavlin Exp $
+% $XORP: xorp/docs/user_manual/interfaces.tex,v 1.7 2005/04/07 03:43:36 pavlin Exp $
 %
 
 \chapter{Network Interfaces}
@@ -69,6 +69,7 @@ addresses is as follows:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 interfaces \{\\
+\>restore-original-config-on-shutdown: {\it bool}\\
 \>interface {\it text} \{\\
 \>\>description: {\it text}\\
 \>\>mac: {\it macaddr}\\
@@ -97,7 +98,15 @@ interfaces \{\\
 }
 
 \begin{description}
-\item{\tt interfaces}: this delimits all the interface configuration information within the XORP configuration file.
+\item{\tt interfaces}: this delimits all the interface configuration
+  information within the XORP configuration file.
+
+\item{\tt restore-original-config-on-shutdown}: this flag enables the
+  restoring of the original network configuration when the FEA is
+  shutdown. If it is set to true, then the restoring is enabled,
+  otherwise is disabled. The default is {\stt false} (\ie don't restore
+  the original network configuration).
+
 \item{\tt interface}: this delimits the configuration for a particular
   interface.  The parameter is the name of the interface, which must
   correspond to an interface known to the router forwarding path.
