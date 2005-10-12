@@ -1,13 +1,7 @@
 %{
 
-#include "config.h"
 #include "policy_module.h"
 #include "libxorp/xorp.h"
-
-#ifdef HOST_OS_WINDOWS
-#define fileno(file)	_fileno(file)
-#define isatty(fd)	_isatty(fd)
-#endif
 
 #include "policy/common/policy_utils.hh"
 #include <vector>
@@ -41,6 +35,7 @@ namespace {
 %option outfile="lex.yy_policy_parser.cc"
 %option noyywrap
 %option nounput
+%option never-interactive
 %x STR
 
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?

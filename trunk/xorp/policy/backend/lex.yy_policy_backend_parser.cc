@@ -464,14 +464,7 @@ char *yytext;
 #define INITIAL 0
 #line 2 "backend.l"
 
-#include "config.h"
-
 #include "libxorp/xorp.h"
-
-#ifdef HOST_OS_WINDOWS
-#define fileno(file) _fileno(file)
-#define isatty(fd) _isatty(fd)
-#endif
 
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
@@ -501,9 +494,10 @@ namespace {
 }	
 
 #define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define STR 1
 
-#line 502 "lex.yy_policy_backend_parser.cc"
+#line 501 "lex.yy_policy_backend_parser.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -654,10 +648,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 40 "backend.l"
+#line 39 "backend.l"
 
 
-#line 656 "lex.yy_policy_backend_parser.cc"
+#line 655 "lex.yy_policy_backend_parser.cc"
 
 	if ( yy_init )
 		{
@@ -742,162 +736,162 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 42 "backend.l"
+#line 41 "backend.l"
 { return YY_POLICY_START; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 43 "backend.l"
+#line 42 "backend.l"
 { return YY_POLICY_END; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 45 "backend.l"
+#line 44 "backend.l"
 { return YY_TERM_START; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 46 "backend.l"
+#line 45 "backend.l"
 { return YY_TERM_END; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 48 "backend.l"
+#line 47 "backend.l"
 { return YY_SET; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 50 "backend.l"
+#line 49 "backend.l"
 { return YY_PUSH; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 51 "backend.l"
+#line 50 "backend.l"
 { return YY_PUSH_SET; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 53 "backend.l"
+#line 52 "backend.l"
 { return YY_REGEX; }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 55 "backend.l"
+#line 54 "backend.l"
 { return YY_LOAD; }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 56 "backend.l"
+#line 55 "backend.l"
 { return YY_STORE; }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 58 "backend.l"
+#line 57 "backend.l"
 { return YY_ACCEPT; }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 59 "backend.l"
+#line 58 "backend.l"
 { return YY_REJECT; }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 61 "backend.l"
+#line 60 "backend.l"
 { return YY_EQ; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 62 "backend.l"
+#line 61 "backend.l"
 { return YY_NE; }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 63 "backend.l"
+#line 62 "backend.l"
 { return YY_LT; }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 64 "backend.l"
+#line 63 "backend.l"
 { return YY_GT; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 65 "backend.l"
+#line 64 "backend.l"
 { return YY_LE; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 66 "backend.l"
+#line 65 "backend.l"
 { return YY_GE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 68 "backend.l"
+#line 67 "backend.l"
 { return YY_NOT; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 69 "backend.l"
+#line 68 "backend.l"
 { return YY_AND; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 70 "backend.l"
+#line 69 "backend.l"
 { return YY_XOR; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 71 "backend.l"
+#line 70 "backend.l"
 { return YY_OR; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 72 "backend.l"
+#line 71 "backend.l"
 { return YY_HEAD; }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 74 "backend.l"
+#line 73 "backend.l"
 { return YY_CTR; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 76 "backend.l"
+#line 75 "backend.l"
 { return YY_ADD; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 77 "backend.l"
+#line 76 "backend.l"
 { return YY_SUB; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 78 "backend.l"
+#line 77 "backend.l"
 { return YY_MUL; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 80 "backend.l"
+#line 79 "backend.l"
 { return YY_ONFALSE_EXIT; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 82 "backend.l"
+#line 81 "backend.l"
 { return YY_NE_INT; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 84 "backend.l"
+#line 83 "backend.l"
 { _parser_lineno++; return YY_NEWLINE; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 86 "backend.l"
+#line 85 "backend.l"
 /* eat blanks */
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 88 "backend.l"
+#line 87 "backend.l"
 {	
 			yylval.c_str = strdup(yytext);
 		  	return YY_ARG;
@@ -905,17 +899,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 93 "backend.l"
+#line 92 "backend.l"
 BEGIN(STR);
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 95 "backend.l"
+#line 94 "backend.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 97 "backend.l"
+#line 96 "backend.l"
 { yylval.c_str = strdup(yytext);
 	 	  _parser_lineno += count_nl(yytext);	
 		  return YY_ARG;
@@ -923,10 +917,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 102 "backend.l"
+#line 101 "backend.l"
 ECHO;
 	YY_BREAK
-#line 925 "lex.yy_policy_backend_parser.cc"
+#line 924 "lex.yy_policy_backend_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -1813,7 +1807,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 102 "backend.l"
+#line 101 "backend.l"
 
 
 void yyerror(const char *m)

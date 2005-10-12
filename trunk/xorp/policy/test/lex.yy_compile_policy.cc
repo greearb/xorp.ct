@@ -1522,14 +1522,10 @@ char *yytext;
 #line 2 "compilepolicy.l"
 // XXX: this whole parsing is becoming a mess... Once we finalize how to test
 // policy and what it should look like, it needs a re-write.
-#include "config.h"
-#include "policy/test/compilepolicy.hh"
-#ifdef HOST_OS_WINDOWS		/* XXX: lame */
-#define strdup _strdup
-#define fileno(file) _fileno(file)
-#define isatty(fd) _isatty(fd)
-#endif
 
+#include "libxorp/xorp.h"
+
+#include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
 #include <sstream>
@@ -1547,10 +1543,11 @@ namespace {
 }
 
 #define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define STR 1
 #define BLOCK 2
 
-#line 1552 "lex.yy_compile_policy.cc"
+#line 1551 "lex.yy_compile_policy.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -1701,10 +1698,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 55 "compilepolicy.l"
+#line 54 "compilepolicy.l"
 
 
-#line 1706 "lex.yy_compile_policy.cc"
+#line 1705 "lex.yy_compile_policy.cc"
 
 	if ( yy_init )
 		{
@@ -1789,42 +1786,42 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 57 "compilepolicy.l"
+#line 56 "compilepolicy.l"
 BEGIN(STR);
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 59 "compilepolicy.l"
+#line 58 "compilepolicy.l"
 return YY_LBRACE;
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 61 "compilepolicy.l"
+#line 60 "compilepolicy.l"
 return YY_RBRACE;
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 63 "compilepolicy.l"
+#line 62 "compilepolicy.l"
 BEGIN(BLOCK); return YY_SOURCE;
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 64 "compilepolicy.l"
+#line 63 "compilepolicy.l"
 BEGIN(BLOCK); return YY_DEST;
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 65 "compilepolicy.l"
+#line 64 "compilepolicy.l"
 BEGIN(BLOCK); return YY_ACTION;
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 67 "compilepolicy.l"
+#line 66 "compilepolicy.l"
 { return YY_SEMICOLON; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 68 "compilepolicy.l"
+#line 67 "compilepolicy.l"
 {  
 	 	  _yy_lineno += policy_utils::count_nl(yytext);
 	   	  return YY_LBRACE; 
@@ -1832,7 +1829,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 72 "compilepolicy.l"
+#line 71 "compilepolicy.l"
 {
 		  BEGIN(INITIAL);
 		  _yy_lineno += policy_utils::count_nl(yytext);
@@ -1841,7 +1838,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 78 "compilepolicy.l"
+#line 77 "compilepolicy.l"
 { yylval.c_str = strdup(yytext);
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STATEMENT;
@@ -1849,12 +1846,12 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 83 "compilepolicy.l"
+#line 82 "compilepolicy.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 84 "compilepolicy.l"
+#line 83 "compilepolicy.l"
 { yylval.c_str = strdup(yytext); 
 		  _yy_lineno += policy_utils::count_nl(yytext);
 		  return YY_STR;
@@ -1862,7 +1859,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 89 "compilepolicy.l"
+#line 88 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4;
@@ -1870,7 +1867,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 94 "compilepolicy.l"
+#line 93 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4NET;
@@ -1878,7 +1875,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 99 "compilepolicy.l"
+#line 98 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6;
@@ -1886,7 +1883,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 104 "compilepolicy.l"
+#line 103 "compilepolicy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6NET;
@@ -1894,62 +1891,62 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 109 "compilepolicy.l"
+#line 108 "compilepolicy.l"
 return YY_TERM;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 111 "compilepolicy.l"
+#line 110 "compilepolicy.l"
 return YY_POLICY_STATEMENT;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 113 "compilepolicy.l"
+#line 112 "compilepolicy.l"
 return YY_SET;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 115 "compilepolicy.l"
+#line 114 "compilepolicy.l"
 return YY_IMPORT;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 116 "compilepolicy.l"
+#line 115 "compilepolicy.l"
 return YY_EXPORT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 118 "compilepolicy.l"
+#line 117 "compilepolicy.l"
 { yylval.c_str = strdup(yytext);
 				  return YY_ID;
 				}  
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 122 "compilepolicy.l"
+#line 121 "compilepolicy.l"
 return YY_SEMICOLON;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 124 "compilepolicy.l"
+#line 123 "compilepolicy.l"
 _yy_lineno++;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 126 "compilepolicy.l"
+#line 125 "compilepolicy.l"
 /* eat blanks */
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 128 "compilepolicy.l"
+#line 127 "compilepolicy.l"
 { yyerror("Unknown character"); }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 130 "compilepolicy.l"
+#line 129 "compilepolicy.l"
 ECHO;
 	YY_BREAK
-#line 1951 "lex.yy_compile_policy.cc"
+#line 1950 "lex.yy_compile_policy.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 case YY_STATE_EOF(BLOCK):
@@ -2837,7 +2834,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 130 "compilepolicy.l"
+#line 129 "compilepolicy.l"
 
 
 void yyerror(const char *m) {

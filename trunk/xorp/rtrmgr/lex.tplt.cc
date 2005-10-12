@@ -23,18 +23,6 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "libxorp/xorp.h"
-
-#ifdef HAVE_SYS_CDEFS_H
-#include <sys/cdefs.h>
-#else
-#define __unused
-#endif
-
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
@@ -8502,6 +8490,7 @@ int tplt_linenum = 1;
 extern char* tpltlval;
 string tplt_parsebuf;
 #define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define comment 1
 
 #define string 2
@@ -8631,7 +8620,7 @@ string tplt_parsebuf;
  * sub-delims     = "!" / "$" / "&" / "'" / "(" / ")"
  *                / "*" / "+" / "," / ";" / "="
  */
-#line 8623 "lex.tplt.cc"
+#line 8624 "lex.tplt.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -8782,10 +8771,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 214 "template.ll"
+#line 215 "template.ll"
 
 
-#line 8777 "lex.tplt.cc"
+#line 8778 "lex.tplt.cc"
 
 	if ( yy_init )
 		{
@@ -8870,26 +8859,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 216 "template.ll"
+#line 217 "template.ll"
 {
 	return UPLEVEL;
 	}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 220 "template.ll"
+#line 221 "template.ll"
 {
 	return DOWNLEVEL;
 	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 224 "template.ll"
+#line 225 "template.ll"
 /* whitespace */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 226 "template.ll"
+#line 227 "template.ll"
 {
 	/* newline is not significant */
 	tplt_linenum++;
@@ -8897,35 +8886,35 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 231 "template.ll"
+#line 232 "template.ll"
 {
 	return END;
 	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 235 "template.ll"
+#line 236 "template.ll"
 {
 	return COLON;
 	}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 239 "template.ll"
+#line 240 "template.ll"
 {
 	return ASSIGN_DEFAULT;
 	}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 243 "template.ll"
+#line 244 "template.ll"
 {
 	return LISTNEXT;
 	}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 247 "template.ll"
+#line 248 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return RETURN;
@@ -8933,7 +8922,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 252 "template.ll"
+#line 253 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return TEXT_TYPE;
@@ -8941,7 +8930,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 257 "template.ll"
+#line 258 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return INT_TYPE;
@@ -8949,7 +8938,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 262 "template.ll"
+#line 263 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return UINTRANGE_TYPE;
@@ -8957,7 +8946,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 267 "template.ll"
+#line 268 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return UINT_TYPE;
@@ -8965,7 +8954,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 272 "template.ll"
+#line 273 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return BOOL_TYPE;
@@ -8973,7 +8962,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 277 "template.ll"
+#line 278 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return TOGGLE_TYPE;
@@ -8981,7 +8970,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 282 "template.ll"
+#line 283 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4RANGE_TYPE;
@@ -8989,7 +8978,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 287 "template.ll"
+#line 288 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4_TYPE;
@@ -8997,7 +8986,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 292 "template.ll"
+#line 293 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4NET_TYPE;
@@ -9005,7 +8994,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 297 "template.ll"
+#line 298 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6RANGE_TYPE;
@@ -9013,7 +9002,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 302 "template.ll"
+#line 303 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6_TYPE;
@@ -9021,7 +9010,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 307 "template.ll"
+#line 308 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6NET_TYPE;
@@ -9029,7 +9018,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 312 "template.ll"
+#line 313 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return MACADDR_TYPE;
@@ -9037,7 +9026,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 317 "template.ll"
+#line 318 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_FILE_TYPE;
@@ -9045,7 +9034,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 322 "template.ll"
+#line 323 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_FTP_TYPE;
@@ -9053,7 +9042,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 327 "template.ll"
+#line 328 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_HTTP_TYPE;
@@ -9061,7 +9050,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 332 "template.ll"
+#line 333 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_TFTP_TYPE;
@@ -9069,7 +9058,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 337 "template.ll"
+#line 338 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return BOOL_VALUE;
@@ -9077,7 +9066,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 342 "template.ll"
+#line 343 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return BOOL_VALUE;
@@ -9085,7 +9074,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 347 "template.ll"
+#line 348 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return UINTRANGE_VALUE;
@@ -9093,7 +9082,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 352 "template.ll"
+#line 353 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return INTEGER_VALUE;
@@ -9101,7 +9090,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 357 "template.ll"
+#line 358 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4RANGE_VALUE;
@@ -9109,7 +9098,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 362 "template.ll"
+#line 363 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4_VALUE;
@@ -9117,7 +9106,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 367 "template.ll"
+#line 368 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV4NET_VALUE;
@@ -9125,7 +9114,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 372 "template.ll"
+#line 373 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6RANGE_VALUE;
@@ -9133,7 +9122,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 377 "template.ll"
+#line 378 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6_VALUE;
@@ -9141,7 +9130,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 382 "template.ll"
+#line 383 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return IPV6NET_VALUE;
@@ -9149,7 +9138,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 387 "template.ll"
+#line 388 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return MACADDR_VALUE;
@@ -9157,7 +9146,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 392 "template.ll"
+#line 393 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_FILE_VALUE;
@@ -9165,7 +9154,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 397 "template.ll"
+#line 398 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_FTP_VALUE;
@@ -9173,7 +9162,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 402 "template.ll"
+#line 403 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_HTTP_VALUE;
@@ -9181,7 +9170,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 407 "template.ll"
+#line 408 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return URL_TFTP_VALUE;
@@ -9189,7 +9178,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 412 "template.ll"
+#line 413 "template.ll"
 {
 	tpltlval = strdup("@");
 	return VARDEF;
@@ -9197,7 +9186,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 417 "template.ll"
+#line 418 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return COMMAND;
@@ -9205,7 +9194,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 422 "template.ll"
+#line 423 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return VARIABLE;
@@ -9213,7 +9202,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 427 "template.ll"
+#line 428 "template.ll"
 {
 	tpltlval = strdup(tplttext);
 	return LITERAL;
@@ -9221,7 +9210,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 432 "template.ll"
+#line 433 "template.ll"
 {
 			BEGIN(string);
 			/* XXX: include the original quote */
@@ -9230,28 +9219,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 438 "template.ll"
+#line 439 "template.ll"
 /* normal text */ {
 			tplt_parsebuf += tplttext;
 			}
 	YY_BREAK
 case 48:
 YY_RULE_SETUP
-#line 442 "template.ll"
+#line 443 "template.ll"
 /* allow quoted quotes */ {
 			tplt_parsebuf += "\"";
 			}
 	YY_BREAK
 case 49:
 YY_RULE_SETUP
-#line 446 "template.ll"
+#line 447 "template.ll"
 /* allow quoted backslash */ {
 			tplt_parsebuf += "\\";
 			}
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 450 "template.ll"
+#line 451 "template.ll"
 /* allow unquoted newlines */ {
 			tplt_linenum++;
 			tplt_parsebuf += "\n";
@@ -9259,7 +9248,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 51:
 YY_RULE_SETUP
-#line 455 "template.ll"
+#line 456 "template.ll"
 /* allow C-style quoted newlines */ {
 			/* XXX: don't increment the line number */
 			tplt_parsebuf += "\n";
@@ -9267,7 +9256,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 52:
 YY_RULE_SETUP
-#line 460 "template.ll"
+#line 461 "template.ll"
 {
 			BEGIN(INITIAL);
 			/* XXX: include the original quote */
@@ -9278,32 +9267,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 468 "template.ll"
+#line 469 "template.ll"
 BEGIN(comment);
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 470 "template.ll"
+#line 471 "template.ll"
 /* eat up anything that's not a '*' */
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 472 "template.ll"
+#line 473 "template.ll"
 /* eat up '*'s not followed by "/"s */
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 474 "template.ll"
+#line 475 "template.ll"
 tplt_linenum++;
 	YY_BREAK
 case 57:
 YY_RULE_SETUP
-#line 476 "template.ll"
+#line 477 "template.ll"
 BEGIN(INITIAL);
 	YY_BREAK
 case 58:
 YY_RULE_SETUP
-#line 478 "template.ll"
+#line 479 "template.ll"
 {
 	/* everything else is a syntax error */
 	return SYNTAX_ERROR;
@@ -9311,10 +9300,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 484 "template.ll"
+#line 485 "template.ll"
 ECHO;
 	YY_BREAK
-#line 9306 "lex.tplt.cc"
+#line 9307 "lex.tplt.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(string):
@@ -9880,11 +9869,6 @@ YY_BUFFER_STATE b;
 	}
 
 
-#ifdef HOST_OS_WINDOWS
-#define isatty(x) _isatty(x)
-#define fileno(x) _fileno(x)
-#endif
-
 #ifndef YY_ALWAYS_INTERACTIVE
 #ifndef YY_NEVER_INTERACTIVE
 extern int isatty YY_PROTO(( int ));
@@ -9898,6 +9882,7 @@ void yy_init_buffer( b, file )
 YY_BUFFER_STATE b;
 FILE *file;
 #endif
+
 
 	{
 	yy_flush_buffer( b );
@@ -10206,5 +10191,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 484 "template.ll"
+#line 485 "template.ll"
 

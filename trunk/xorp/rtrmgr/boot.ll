@@ -9,6 +9,7 @@
 	bool arith_op_allowed;
 %option noyywrap
 %option nounput
+%option never-interactive
 %x comment
 %x string
 %x arith

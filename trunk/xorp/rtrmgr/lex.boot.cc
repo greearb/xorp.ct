@@ -9319,6 +9319,7 @@ string parsebuf;
 int arith_nesting;
 bool arith_op_allowed;
 #define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define comment 1
 
 #define string 2
@@ -9453,7 +9454,7 @@ bool arith_op_allowed;
 /*
  * operators for arithmetic expressions
  */
-#line 9457 "lex.boot.cc"
+#line 9458 "lex.boot.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -9604,10 +9605,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 225 "boot.ll"
+#line 226 "boot.ll"
 
 
-#line 9611 "lex.boot.cc"
+#line 9612 "lex.boot.cc"
 
 	if ( yy_init )
 		{
@@ -9692,26 +9693,26 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 227 "boot.ll"
+#line 228 "boot.ll"
 {
 	return UPLEVEL;
 	}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 231 "boot.ll"
+#line 232 "boot.ll"
 {
 	return DOWNLEVEL;
 	}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 235 "boot.ll"
+#line 236 "boot.ll"
 /* whitespace */
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 237 "boot.ll"
+#line 238 "boot.ll"
 {
 	boot_linenum++;
 	return END;
@@ -9719,14 +9720,14 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 242 "boot.ll"
+#line 243 "boot.ll"
 {
 	return END;
 	}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 246 "boot.ll"
+#line 247 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return BOOL_VALUE;
@@ -9734,7 +9735,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 251 "boot.ll"
+#line 252 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return BOOL_VALUE;
@@ -9742,7 +9743,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 256 "boot.ll"
+#line 257 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return UINTRANGE_VALUE;
@@ -9750,7 +9751,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 261 "boot.ll"
+#line 262 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return UINT_VALUE;
@@ -9758,7 +9759,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 266 "boot.ll"
+#line 267 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV4RANGE_VALUE;
@@ -9766,7 +9767,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 271 "boot.ll"
+#line 272 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV4_VALUE;
@@ -9774,7 +9775,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 276 "boot.ll"
+#line 277 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV4NET_VALUE;
@@ -9782,7 +9783,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 281 "boot.ll"
+#line 282 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV6RANGE_VALUE;
@@ -9790,7 +9791,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 286 "boot.ll"
+#line 287 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV6_VALUE;
@@ -9798,7 +9799,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 291 "boot.ll"
+#line 292 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return IPV6NET_VALUE;
@@ -9806,7 +9807,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 296 "boot.ll"
+#line 297 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return MACADDR_VALUE;
@@ -9814,7 +9815,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 301 "boot.ll"
+#line 302 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return URL_FILE_VALUE;
@@ -9822,7 +9823,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 306 "boot.ll"
+#line 307 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return URL_FTP_VALUE;
@@ -9830,7 +9831,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 311 "boot.ll"
+#line 312 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return URL_HTTP_VALUE;
@@ -9838,7 +9839,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 316 "boot.ll"
+#line 317 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return URL_TFTP_VALUE;
@@ -9846,7 +9847,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 321 "boot.ll"
+#line 322 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return INFIX_OPERATOR;
@@ -9854,7 +9855,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 326 "boot.ll"
+#line 327 "boot.ll"
 {
 	bootlval = strdup(boottext);
 	return LITERAL;
@@ -9862,7 +9863,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 331 "boot.ll"
+#line 332 "boot.ll"
 {
 	bootlval = strdup(boottext+1);
 	bootlval[strlen(bootlval)-1]=0;
@@ -9871,7 +9872,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 337 "boot.ll"
+#line 338 "boot.ll"
 {
 			BEGIN(string);
 			/* XXX: don't include the original quote */
@@ -9880,28 +9881,28 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 343 "boot.ll"
+#line 344 "boot.ll"
 /* normal text */ {
 			parsebuf += boottext;
 			}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 347 "boot.ll"
+#line 348 "boot.ll"
 /* allow quoted quotes */ {
 			parsebuf += "\"";
 			}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 351 "boot.ll"
+#line 352 "boot.ll"
 /* allow quoted backslash */ {
 			parsebuf += "\\";
 			}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 355 "boot.ll"
+#line 356 "boot.ll"
 /* allow unquoted newlines */ {
 			boot_linenum++;
 			parsebuf += "\n";
@@ -9909,7 +9910,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 360 "boot.ll"
+#line 361 "boot.ll"
 /* allow C-style quoted newlines */ {
 			/* XXX: don't increment the line number */
 			parsebuf += "\n";
@@ -9917,7 +9918,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 365 "boot.ll"
+#line 366 "boot.ll"
 {
 			BEGIN(INITIAL);
 			/* XXX: don't include the original quote */
@@ -9927,7 +9928,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 372 "boot.ll"
+#line 373 "boot.ll"
 {
 			BEGIN(arith);
 			parsebuf = "";
@@ -9937,7 +9938,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 379 "boot.ll"
+#line 380 "boot.ll"
 {
 			parsebuf += "(";
 			arith_nesting++;
@@ -9946,7 +9947,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 385 "boot.ll"
+#line 386 "boot.ll"
 {
 			parsebuf += boottext;
 			arith_op_allowed = true;
@@ -9954,7 +9955,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 390 "boot.ll"
+#line 391 "boot.ll"
 {
 			if (arith_op_allowed) {
 				parsebuf += boottext;	
@@ -9966,7 +9967,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 399 "boot.ll"
+#line 400 "boot.ll"
 {
 			if (arith_nesting == 0) {
 				BEGIN(INITIAL);
@@ -9981,7 +9982,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 411 "boot.ll"
+#line 412 "boot.ll"
 {
 			/* everything else is a syntax error */
 			return SYNTAX_ERROR;
@@ -9989,32 +9990,32 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 416 "boot.ll"
+#line 417 "boot.ll"
 BEGIN(comment);
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 418 "boot.ll"
+#line 419 "boot.ll"
 /* eat up anything that's not a '*' */
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 420 "boot.ll"
+#line 421 "boot.ll"
 /* eat up '*'s not followed by "/"s */
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 422 "boot.ll"
+#line 423 "boot.ll"
 boot_linenum++;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 424 "boot.ll"
+#line 425 "boot.ll"
 BEGIN(INITIAL);
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 426 "boot.ll"
+#line 427 "boot.ll"
 {
 	/* everything else is a syntax error */
 	return SYNTAX_ERROR;
@@ -10022,10 +10023,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 432 "boot.ll"
+#line 433 "boot.ll"
 ECHO;
 	YY_BREAK
-#line 10029 "lex.boot.cc"
+#line 10030 "lex.boot.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(comment):
 case YY_STATE_EOF(string):
@@ -10914,5 +10915,5 @@ int main()
 	return 0;
 	}
 #endif
-#line 432 "boot.ll"
+#line 433 "boot.ll"
 

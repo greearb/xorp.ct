@@ -23,9 +23,6 @@
  * $FreeBSD: src/usr.bin/lex/flex.skl,v 1.4 1999/10/27 07:56:44 obrien Exp $
  */
 
-#include "policy_module.h"
-#include "libxorp/xorp.h"
-
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
@@ -2422,14 +2419,10 @@ char *yytext;
 #define INITIAL 0
 #line 2 "policy.l"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "policy_module.h"
+#include "libxorp/xorp.h"
+
 #include "policy/common/policy_utils.hh"
-#ifdef HOST_OS_WINDOWS
-#define fileno(file)	_fileno(file)
-#define isatty(fd)	_isatty(fd)
-#endif
 #include <vector>
 #include <string>
 #include <sstream>
@@ -2456,9 +2449,10 @@ namespace {
 }
 
 #define YY_NO_UNPUT 1
+#define YY_NEVER_INTERACTIVE 1
 #define STR 1
 
-#line 2453 "lex.yy_policy_parser.cc"
+#line 2456 "lex.yy_policy_parser.cc"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -2609,10 +2603,10 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 59 "policy.l"
+#line 62 "policy.l"
 
 
-#line 2607 "lex.yy_policy_parser.cc"
+#line 2610 "lex.yy_policy_parser.cc"
 
 	if ( yy_init )
 		{
@@ -2697,38 +2691,38 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 61 "policy.l"
+#line 64 "policy.l"
 { yylval.c_str = strdup(yytext);
 		  return YY_UINTRANGE;
 		}  
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 65 "policy.l"
+#line 68 "policy.l"
 { yylval.c_str = strdup(yytext);
 		  return YY_UINT;
 		}  
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 69 "policy.l"
+#line 72 "policy.l"
 { yylval.c_str = strdup(yytext);
 		  return YY_INT;
 		}  
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 73 "policy.l"
+#line 76 "policy.l"
 BEGIN(STR);
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 75 "policy.l"
+#line 78 "policy.l"
 BEGIN(INITIAL);
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 77 "policy.l"
+#line 80 "policy.l"
 { yylval.c_str = strdup(yytext); 
 		  _parser_lineno += policy_utils::count_nl(yytext);
 		  /* XXX: a string can be started with " but terminated with '
@@ -2739,7 +2733,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 85 "policy.l"
+#line 88 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4RANGE;
@@ -2747,7 +2741,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 90 "policy.l"
+#line 93 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4;
@@ -2755,7 +2749,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 95 "policy.l"
+#line 98 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV4NET;
@@ -2763,7 +2757,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 101 "policy.l"
+#line 104 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6RANGE;
@@ -2771,7 +2765,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 106 "policy.l"
+#line 109 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6;
@@ -2779,7 +2773,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 111 "policy.l"
+#line 114 "policy.l"
 {
 		  yylval.c_str = strdup(yytext);
 		  return YY_IPV6NET;
@@ -2787,7 +2781,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 116 "policy.l"
+#line 119 "policy.l"
 {
 		  // the colon is an alias for asignment in action and equality
 		  // in the source / dest blocks.
@@ -2799,162 +2793,162 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 125 "policy.l"
+#line 128 "policy.l"
 return YY_LPAR;
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 126 "policy.l"
+#line 129 "policy.l"
 return YY_RPAR;
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 128 "policy.l"
+#line 131 "policy.l"
 return YY_EQ; 
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 129 "policy.l"
+#line 132 "policy.l"
 return YY_NE;
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 130 "policy.l"
+#line 133 "policy.l"
 return YY_LE;
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 131 "policy.l"
+#line 134 "policy.l"
 return YY_GE;
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 132 "policy.l"
+#line 135 "policy.l"
 return YY_LT;
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 133 "policy.l"
+#line 136 "policy.l"
 return YY_GT;
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 135 "policy.l"
+#line 138 "policy.l"
 return YY_AND;
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 136 "policy.l"
+#line 139 "policy.l"
 return YY_OR;
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 137 "policy.l"
+#line 140 "policy.l"
 return YY_XOR;
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 138 "policy.l"
+#line 141 "policy.l"
 return YY_NOT;
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 140 "policy.l"
+#line 143 "policy.l"
 return YY_ADD;
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 141 "policy.l"
+#line 144 "policy.l"
 return YY_ADD;
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 142 "policy.l"
+#line 145 "policy.l"
 return YY_SUB;
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 143 "policy.l"
+#line 146 "policy.l"
 return YY_MUL;
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 144 "policy.l"
+#line 147 "policy.l"
 return YY_ASSIGN;
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 146 "policy.l"
+#line 149 "policy.l"
 return YY_HEAD;
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 147 "policy.l"
+#line 150 "policy.l"
 return YY_CTR;
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 148 "policy.l"
+#line 151 "policy.l"
 return YY_NE_INT;
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 150 "policy.l"
+#line 153 "policy.l"
 return YY_ACCEPT;
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 151 "policy.l"
+#line 154 "policy.l"
 return YY_REJECT;
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 153 "policy.l"
+#line 156 "policy.l"
 return YY_SET;
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 154 "policy.l"
+#line 157 "policy.l"
 return YY_REGEX;
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 156 "policy.l"
+#line 159 "policy.l"
 return YY_PROTOCOL;
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 158 "policy.l"
+#line 161 "policy.l"
 { yylval.c_str = strdup(yytext);
 					  return YY_ID;
 					}  
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 162 "policy.l"
+#line 165 "policy.l"
 return YY_SEMICOLON;
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 164 "policy.l"
+#line 167 "policy.l"
 /* eat blanks */
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 166 "policy.l"
+#line 169 "policy.l"
 _parser_lineno++;
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 168 "policy.l"
+#line 171 "policy.l"
 { yyerror("Unknown character"); }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 170 "policy.l"
+#line 173 "policy.l"
 ECHO;
 	YY_BREAK
-#line 2949 "lex.yy_policy_parser.cc"
+#line 2952 "lex.yy_policy_parser.cc"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(STR):
 	yyterminate();
@@ -3546,13 +3540,7 @@ FILE *file;
 #if YY_NEVER_INTERACTIVE
 	b->yy_is_interactive = 0;
 #else
-
-#ifdef HOST_OS_WINDOWS
-	b->yy_is_interactive = file ? (_isatty(_fileno(file) ) > 0) : 0;
-#else
 	b->yy_is_interactive = file ? (isatty( fileno(file) ) > 0) : 0;
-#endif
-
 #endif
 #endif
 	}
@@ -3847,7 +3835,7 @@ int main()
 	return 0;
 	}
 #endif
-#line 170 "policy.l"
+#line 173 "policy.l"
 
 
 void yyerror(const char *m)

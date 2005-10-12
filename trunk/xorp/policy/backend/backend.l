@@ -1,13 +1,6 @@
 %{
 
-#include "config.h"
-
 #include "libxorp/xorp.h"
-
-#ifdef HOST_OS_WINDOWS
-#define fileno(file) _fileno(file)
-#define isatty(fd) _isatty(fd)
-#endif
 
 #include "policy/common/policy_utils.hh"
 #include "policy_backend_parser.hh"
@@ -41,6 +34,7 @@ namespace {
 %option nounput
 %option prefix="yy_policy_backend_parser"
 %option outfile="lex.yy_policy_backend_parser.cc"
+%option never-interactive
 %x STR
 %%
 

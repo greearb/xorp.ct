@@ -1,14 +1,10 @@
 %{
 // XXX: this whole parsing is becoming a mess... Once we finalize how to test
 // policy and what it should look like, it needs a re-write.
-#include "config.h"
-#include "policy/test/compilepolicy.hh"
-#ifdef HOST_OS_WINDOWS		/* XXX: lame */
-#define strdup _strdup
-#define fileno(file)	_fileno(file)
-#define isatty(fd) _isatty(fd)
-#endif
 
+#include "libxorp/xorp.h"
+
+#include "policy/test/compilepolicy.hh"
 #include "yacc.yy_compile_policy.cc.h"
 #include "policy/common/policy_utils.hh"
 #include <sstream>
@@ -31,6 +27,7 @@ namespace {
 %option outfile="lex.yy_compile_policy.cc"
 %option noyywrap
 %option nounput
+%option never-interactive
 %x STR BLOCK
 
 RE_IPV4_BYTE 25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?

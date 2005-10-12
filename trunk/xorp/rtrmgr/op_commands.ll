@@ -8,6 +8,7 @@
 	string opcmd_parsebuf;
 %option noyywrap
 %option nounput
+%option never-interactive
 %x comment
 %x string
 
