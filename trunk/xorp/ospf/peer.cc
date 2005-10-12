@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.167 2005/10/12 01:25:32 bms Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.168 2005/10/12 01:38:45 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1881,19 +1881,13 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 	router_link.set_link_id(ntohl(get_interface_address().addr()));
 	router_link.set_link_data(0xffffffff);
 	router_link.set_metric(0);
-	goto done;
+	router_links.push_back(router_link);
+	return;
 	break;
     case Waiting:
 	break;
     case Point2Point:
-	// Unconditional
-	// Option 1
-	router_link.set_type(RouterLink::stub);
-	router_link.set_link_id(ntohl(get_p2p_neighbour_address().addr()));
-	router_link.set_link_data(0xffffffff);
-	router_link.set_metric(_peerout.get_interface_cost());
-	// Option 2
-	// ...
+	// Dealt with below in PointToPoint case.
 	break;
     case DR_other:
 	break;
@@ -1904,11 +1898,60 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     }
     
     switch(get_linktype()) {
-    case OspfTypes::PointToPoint:
-	router_link.set_type(RouterLink::p2p);
-	router_link.set_link_id(ntohl(get_interface_address().addr()));
-	router_link.set_link_data(0xffffffff);
-	router_link.set_metric(0);
+    case OspfTypes::PointToPoint: {
+	// RFC 2328 Section 12.4.1.1. Describing point-to-point interfaces
+	// There should be a single neighbour configured
+	XLOG_ASSERT(1 == _neighbours.size());
+	list<Neighbour<IPv4> *>::const_iterator n = _neighbours.begin();
+	XLOG_ASSERT(n != _neighbours.end());
+
+	if (Neighbour<IPv4>::Full == (*n)->get_state()) {
+	    router_link.set_type(RouterLink::p2p);
+	    router_link.set_link_id((*n)->get_router_id());
+	    // We are not dealing with the unnumbered interface case.
+	    router_link.set_link_data(ntohl(get_interface_address().addr()));
+	    router_link.set_metric(_peerout.get_interface_cost());
+	    router_links.push_back(router_link);
+	}
+
+	switch(get_state()) {
+	case Down:
+	    break;
+	case Loopback:
+	    break;
+	case Waiting:
+	    break;
+	case Point2Point:
+	    // If a prefix length has been set to 32
+	    // (IPv4::ADDR_BITLEN) no network has been configured,
+	    // announce a host route, otherwise advertise the network.
+	    if (IPv4::ADDR_BITLEN == _peerout.get_interface_prefix_length()) {
+		// Option 1
+		router_link.set_type(RouterLink::stub);
+		router_link.
+		    set_link_id(ntohl((*n)->get_neighbour_address().addr()));
+		router_link.set_link_data(0xffffffff);
+		router_link.set_metric(_peerout.get_interface_cost());
+		router_links.push_back(router_link);
+	    } else {
+		// Option 2
+		router_link.set_type(RouterLink::stub);
+		IPNet<IPv4> net(get_interface_address(),
+				_peerout.get_interface_prefix_length());
+		router_link.set_link_id(ntohl(net.masked_addr().addr()));
+		router_link.set_link_data(ntohl(net.netmask().addr()));
+		router_link.set_metric(_peerout.get_interface_cost());
+		router_links.push_back(router_link);
+	    }
+	    break;
+	case DR_other:
+	    break;
+	case Backup:
+	    break;
+	case DR:
+	    break;
+	}
+    }
 	break;
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA: {
@@ -1926,6 +1969,7 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 	    router_link.set_link_id(ntohl(net.masked_addr().addr()));
 	    router_link.set_link_data(ntohl(net.netmask().addr()));
 	    router_link.set_metric(_peerout.get_interface_cost());
+	    router_links.push_back(router_link);
 	}
 	    break;
 	case Point2Point:
@@ -1968,6 +2012,7 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 
 	    }
 	    router_link.set_metric(_peerout.get_interface_cost());
+	    router_links.push_back(router_link);
 	}
 	    break;
 	}
@@ -1992,16 +2037,12 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
 		router_links.push_back(router_link);
 	    }
 	}
-	return;
     }
 	break;
     case OspfTypes::VirtualLink:
 	XLOG_UNFINISHED();
 	break;
     }
-
- done:
-    router_links.push_back(router_link);
 }
 
 template <>

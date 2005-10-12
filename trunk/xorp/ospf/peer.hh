@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.100 2005/09/17 03:55:15 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.101 2005/09/19 23:33:51 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -387,6 +387,7 @@ class Peer {
 	return _peerout.get_interface_prefix_length();
     }
 
+#if	0
     /**
      * Address of the p2p neighbour.
      *
@@ -403,6 +404,7 @@ class Peer {
 
 	return (*ni)->get_neighbour_address();
     }
+#endif
 
     /**
      * @return mtu of this interface.
