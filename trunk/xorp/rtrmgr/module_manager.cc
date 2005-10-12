@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.47 2005/09/01 19:44:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.48 2005/10/12 05:39:43 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -404,7 +404,7 @@ Module::set_execution_path(const string& path)
     XLOG_TRACE(_verbose, "New module: %s (%s)", _name.c_str(), _path.c_str());
 
     if (!is_absolute_path(_path, false)) {
-	fprintf(stderr, "calling glob\n");	// XXX
+	debug_msg("calling glob\n");
 
 	// we're going to call glob, but don't want to allow wildcard expansion
 	for (size_t i = 0; i < _path.length(); i++) {
