@@ -1,7 +1,8 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.30 2005/09/30 16:41:42 zec Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.31 2005/10/12 09:39:28 pavlin Exp $ */
 
 
 interfaces {
+    restore-original-config-on-shutdown: false
     interface dc0 {
 	description: "data interface"
 	disable: false
@@ -47,8 +48,6 @@ interfaces {
 	    }
 	}
     }
-
-    /* restore-original-config-on-shutdown: false */
 }
 
 fea {
