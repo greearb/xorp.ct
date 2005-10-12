@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.17 2005/10/10 05:12:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.18 2005/10/10 08:31:42 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -222,11 +222,11 @@ RoutingTable<A>::end()
 	}
     }
 
-    for (tic = _current->begin(); tic != _current->begin(); tic++) {
+    for (tic = _current->begin(); tic != _current->end(); tic++) {
 	tip = _previous->lookup_node(tic.key());
  	RouteEntry<A>& rt = tic.payload().get_entry();
 	if (_previous->end() == tip) {
-	    if (!add_route(rt.get_area(), tip.key(),
+	    if (!add_route(rt.get_area(), tic.key(),
 			   rt.get_nexthop(), rt.get_cost(), rt)) {
 		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
 	    }
@@ -403,6 +403,20 @@ InternalRouteEntry<A>::reset_winner()
     }
 
     return _winner != old_winner;
+}
+
+template <typename A>
+string
+InternalRouteEntry<A>::str()
+{
+    string output;
+
+    typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
+    for (i = _entries.begin(); i != _entries.end(); i++) {
+	output += i->second.str();
+    }
+
+    return output;
 }
 
 template class RoutingTable<IPv4>;
