@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.164 2005/10/11 07:43:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.165 2005/10/11 20:19:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,9 @@
 #endif
 #ifdef HAVE_NETINET_IP6_H
 #include <netinet/ip6.h>
+#endif
+#ifdef HOST_OS_WINDOWS
+#include "fea/ip.h"
 #endif
 
 #include "ospf.hh"
