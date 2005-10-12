@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.26 2005/09/27 18:37:30 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.27 2005/10/11 17:59:42 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -100,6 +100,8 @@ public:
 
     void retain_different_nodes(const ConfigTree& them,
 				bool retain_changed_values);
+    void retain_deletion_nodes(const ConfigTree& them,
+			       bool retain_value_changed);
     void retain_common_nodes(const ConfigTree& them);
     void add_default_children();
 

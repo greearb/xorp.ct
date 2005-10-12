@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.51 2005/10/11 17:59:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.52 2005/10/11 23:57:10 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -140,6 +140,8 @@ public:
     void clone_subtree(const ConfigTreeNode& orig_node);
     bool retain_different_nodes(const ConfigTreeNode& them, 
 				bool retain_changed_values);
+    bool retain_deletion_nodes(const ConfigTreeNode& them,
+			       bool retain_value_changed);
     void retain_common_nodes(const ConfigTreeNode& them);
     ConfigTreeNode* find_node(const list<string>& path);
     string subtree_str() const;

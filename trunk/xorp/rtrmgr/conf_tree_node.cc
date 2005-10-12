@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.90 2005/10/11 17:59:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.91 2005/10/11 23:57:10 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1185,6 +1185,80 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 	}
     }
     return retained_children;
+}
+
+bool
+ConfigTreeNode::retain_deletion_nodes(const ConfigTreeNode& them,
+				      bool retain_value_changed)
+{
+    list<ConfigTreeNode*>::iterator my_iter;
+    list<ConfigTreeNode*>::const_iterator their_iter;
+    bool found_deletion_children = false;
+
+    XLOG_ASSERT(_segname == them.segname());
+
+    for (my_iter = _children.begin(); my_iter != _children.end(); ) {
+	bool retain_child = true;
+	bool node_found = false;
+	bool found_deletion_child = false;
+	ConfigTreeNode *my_child = *my_iter;
+
+	// Be careful not to invalidate the iterator when we remove children
+	++my_iter;
+
+	for (their_iter = them.const_children().begin();
+	     their_iter != them.const_children().end();
+	     ++their_iter) {
+	    ConfigTreeNode* their_child = *their_iter;
+	    // Are the nodes the same?
+	    if (my_child->is_same(*their_child, true)) {
+		if (my_child->retain_deletion_nodes(*their_child,
+						    retain_value_changed)) {
+		    found_deletion_child = true;
+		}
+		node_found = true;
+		break;
+	    }
+	    // Are the nodes the same leaf node, but with a changed value
+	    if (!retain_value_changed
+		&& my_child->is_leaf_value() && their_child->is_leaf_value()
+		&& (my_child->segname() == their_child->segname())) {
+		// retain_child = false;
+		node_found = true;
+		break;
+	    }
+	}
+
+	//
+	// Remove the children of my_child
+	//
+	if (! node_found) {
+	    for (their_iter = my_child->children().begin();
+		 their_iter != my_child->children().end(); ) {
+		ConfigTreeNode* del_node = *their_iter;
+		++their_iter;
+		my_child->remove_child(del_node);
+		delete del_node;
+		found_deletion_child = true;
+	    }
+	}
+
+	if (retain_child == false) {
+	    remove_child(my_child);
+	    delete my_child;
+	    found_deletion_child = true;
+	}
+	if (! found_deletion_child) {
+	    // XXX: common child among both trees, hence just prune it
+	    remove_child(my_child);
+	    delete my_child;
+	}
+
+	if (found_deletion_child)
+	    found_deletion_children = true;
+    }
+
+    return (found_deletion_children);
 }
 
 void

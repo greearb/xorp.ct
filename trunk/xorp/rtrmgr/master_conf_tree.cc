@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.61 2005/09/27 18:37:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.62 2005/10/11 17:59:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1923,7 +1923,7 @@ MasterConfigTree::diff_configs(const MasterConfigTree& new_tree,
     deletion_tree = *((MasterConfigTree*)(this));
     delta_tree = new_tree;
 
-    deletion_tree.retain_different_nodes(new_tree, false);
+    deletion_tree.retain_deletion_nodes(new_tree, false);
     delta_tree.retain_different_nodes(*((ConfigTree*)(this)), true);
 
     debug_msg("=========================================================\n");
