@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.3 2005/09/13 18:47:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.4 2005/10/11 07:10:13 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,7 +52,7 @@
 
 void
 p2p(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
-    uint32_t metric)
+    uint32_t link_data, uint32_t metric)
 {
      RouterLink rl(version);
 
@@ -61,12 +61,8 @@ p2p(OspfTypes::Version version, RouterLsa *rlsa, OspfTypes::RouterID id,
 
     switch(version) {
     case OspfTypes::V2:
-	// The link id is the router id and the link data is the
-	// interface address. They may be the same, they are not
-	// interchangeable. Adding one to the link data should allow
-	// us the catch any misuse in the code.
 	rl.set_link_id(id);
-	rl.set_link_data(id + 1);
+	rl.set_link_data(link_data);
 	break;
     case OspfTypes::V3:
 	rl.set_interface_id(id);
@@ -133,13 +129,13 @@ create_RT6(OspfTypes::Version version)
      header.set_advertising_router(6);
 
      // Link to RT3
-     p2p(version, rlsa, 3, 6);
+     p2p(version, rlsa, 3, 4, 6);
 
      // Link to RT5
-     p2p(version, rlsa, 5, 6);
+     p2p(version, rlsa, 5, 6, 6);
 
      // Link to RT10 XXX need to look at this more carefully.
-     p2p(version, rlsa, 10, 7);
+     p2p(version, rlsa, 10, 11, 7);
 
      rlsa->encode();
 
@@ -169,7 +165,7 @@ create_RT3(OspfTypes::Version version)
      header.set_advertising_router(3);
 
      // Link to RT6
-     p2p(version, rlsa, 6, 8);
+     p2p(version, rlsa, 6, 7, 8);
 
      // Network to N4
      stub(version, rlsa, 4, 2);
@@ -189,8 +185,6 @@ template <typename A>
 bool
 routing1(TestInfo& info, OspfTypes::Version version)
 {
-    DOUT(info) << "hello" << endl;
-
     EventLoop eventloop;
     DebugIO<A> io(info, version, eventloop);
     io.startup();
@@ -300,6 +294,45 @@ routing1(TestInfo& info, OspfTypes::Version version)
 
     return true;
 }
+
+// Attempting to reproduce:
+// http://www.xorp.org/bugzilla/show_bug.cgi?id=226
+#if	0
+bool
+routing2(TestInfo& info)
+{
+    DOUT(info) << "hello" << endl;
+
+    EventLoop eventloop;
+    DebugIO<A> io(info, version, eventloop);
+    io.startup();
+
+    Ospf<A> ospf(version, eventloop, &io);
+    ospf.set_router_id(set_id("10.0.8.161"));
+    
+    OspfTypes::AreaID area = set_id("0.0.0.0");
+    const uint16_t interface_prefix_length = 30;
+    const uint16_t interface_mtu = 1500;
+
+    PeerManager<A>& pm = ospf.get_peer_manager();
+
+    // Create an area
+    pm.create_area_router(area, OspfTypes::NORMAL);
+
+    // Create a peer associated with this area.
+    const string interface = "eth0";
+    const string vif = "vif0";
+
+    // Bring the peering up
+    if (!pm.set_state_peer(peerid, true)) {
+	DOUT(info) << "Failed enable peer\n";
+	return false;
+    }
+
+    AreaRouter<A> *ar = pm.get_area_router(area);
+    XLOG_ASSERT(ar);
+}
+#endif
 
 int
 main(int argc, char **argv)
