@@ -101,10 +101,13 @@ statement:
 				}
 
 	| YY_LOAD YY_ARG	{
-				char* err = 0;
+				char* err = NULL;
+				bool is_error = false;
 				VarRW::Id id = strtoul($2, &err, 10);
+				if ((err != NULL) && (*err != '\0'))
+				    is_error = true;
 				free($2);
-				if (*err) {
+				if (is_error) {
 					yyerror("Need numeric var ID");
 					YYERROR;
 				}
@@ -112,10 +115,13 @@ statement:
 				}
 
 	| YY_STORE YY_ARG	{
-				char* err = 0;
+				char* err = NULL;
+				bool is_error = false;
 				VarRW::Id id = strtoul($2, &err, 10);
+				if ((err != NULL) && (*err != '\0'))
+				    is_error = true;
 				free($2);
-				if (*err) {
+				if (is_error) {
 					yyerror("Need numeric var ID");
 					YYERROR;
 				}

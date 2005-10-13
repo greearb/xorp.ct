@@ -1,9 +1,6 @@
 #ifndef lint
-#ifdef __unused
-__unused
-#endif
 static char const 
-yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $";
+yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $";
 #endif
 #include <stdlib.h>
 #define YYBYACC 1
@@ -77,7 +74,7 @@ static ElementFactory _ef;
 typedef union {
 	char* c_str;
 } YYSTYPE;
-#line 81 "yacc.yy_policy_backend_parser.cc"
+#line 78 "yacc.yy_policy_backend_parser.cc"
 #define YYERRCODE 256
 #define YY_ARG 257
 #define YY_NEWLINE 258
@@ -313,9 +310,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -497,10 +494,13 @@ break;
 case 13:
 #line 103 "backend.y"
 {
-				char* err = 0;
+				char* err = NULL;
+				bool is_error = false;
 				VarRW::Id id = strtoul(yyvsp[0].c_str, &err, 10);
+				if ((err != NULL) && (*err != '\0'))
+				    is_error = true;
 				free(yyvsp[0].c_str);
-				if (*err) {
+				if (is_error) {
 					yyerror("Need numeric var ID");
 					YYERROR;
 				}
@@ -508,12 +508,15 @@ case 13:
 				}
 break;
 case 14:
-#line 114 "backend.y"
+#line 117 "backend.y"
 {
-				char* err = 0;
+				char* err = NULL;
+				bool is_error = false;
 				VarRW::Id id = strtoul(yyvsp[0].c_str, &err, 10);
+				if ((err != NULL) && (*err != '\0'))
+				    is_error = true;
 				free(yyvsp[0].c_str);
-				if (*err) {
+				if (is_error) {
 					yyerror("Need numeric var ID");
 					YYERROR;
 				}
@@ -521,82 +524,82 @@ case 14:
 				}
 break;
 case 15:
-#line 125 "backend.y"
+#line 131 "backend.y"
 { _yy_instructions->push_back(new Accept()); }
 break;
 case 16:
-#line 126 "backend.y"
+#line 132 "backend.y"
 { _yy_instructions->push_back(new Reject()); }
 break;
 case 17:
-#line 128 "backend.y"
+#line 134 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpEq)); }
 break;
 case 18:
-#line 129 "backend.y"
+#line 135 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNe)); }
 break;
 case 19:
-#line 130 "backend.y"
+#line 136 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLt)); }
 break;
 case 20:
-#line 131 "backend.y"
+#line 137 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGt)); }
 break;
 case 21:
-#line 132 "backend.y"
+#line 138 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLe)); }
 break;
 case 22:
-#line 133 "backend.y"
+#line 139 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGe)); }
 break;
 case 23:
-#line 135 "backend.y"
+#line 141 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNot)); }
 break;
 case 24:
-#line 136 "backend.y"
+#line 142 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAnd)); }
 break;
 case 25:
-#line 137 "backend.y"
+#line 143 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpXor)); }
 break;
 case 26:
-#line 138 "backend.y"
+#line 144 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpOr)); }
 break;
 case 27:
-#line 140 "backend.y"
+#line 146 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 break;
 case 28:
-#line 141 "backend.y"
+#line 147 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 break;
 case 29:
-#line 142 "backend.y"
+#line 148 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpMul)); }
 break;
 case 30:
-#line 143 "backend.y"
+#line 149 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpHead));}
 break;
 case 31:
-#line 144 "backend.y"
+#line 150 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 break;
 case 32:
-#line 145 "backend.y"
+#line 151 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
 break;
 case 33:
-#line 146 "backend.y"
+#line 152 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 break;
-#line 600 "yacc.yy_policy_backend_parser.cc"
+#line 603 "yacc.yy_policy_backend_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;
