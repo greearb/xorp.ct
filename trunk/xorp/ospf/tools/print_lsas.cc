@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.1 2005/10/10 12:21:28 atanu Exp $"
 
 // Get LSAs from OSPF and print them.
 
@@ -55,7 +55,7 @@ class Fetch {
  public:
     Fetch(XrlStdRouter& xrl_router, OspfTypes::Version version, IPv4 area)
 	: _xrl_router(xrl_router), _lsa_decoder(version),
-	  _done(false), _area(area), _index(0)
+	  _done(false), _fail(false), _area(area), _index(0)
     {
 	initialise_lsa_decoder(version, _lsa_decoder);
     }
@@ -70,6 +70,10 @@ class Fetch {
 	return !_done;
     }
 
+    bool fail() {
+	return _fail;
+    }
+
     list<Lsa::LsaRef>& get_lsas() {
 	return _lsas;
     }
@@ -82,6 +86,7 @@ class Fetch {
 	if (XrlError::OKAY() != error) {
 	    XLOG_WARNING("Attempt to get lsa failed");
 	    _done = true;
+	    _fail = true;
 	    return;
 	}
 	if (*valid) {
@@ -101,6 +106,7 @@ class Fetch {
     XrlStdRouter &_xrl_router;
     LsaDecoder _lsa_decoder;
     bool _done;
+    bool _fail;
     const IPv4 _area;
     uint32_t _index;
 
@@ -110,7 +116,7 @@ class Fetch {
 int
 usage(const char *myname)
 {
-    fprintf(stderr, "usage: %s -a area\n",
+    fprintf(stderr, "usage: %s -a area [-b] -[-d]\n",
 	    myname);
     return -1;
 }
@@ -129,12 +135,20 @@ main(int argc, char **argv)
     xlog_start();
 
     string area;
+    bool brief = true;
+    bool detail = false;
 
     int c;
-    while ((c = getopt(argc, argv, "a:")) != -1) {
+    while ((c = getopt(argc, argv, "a:bd")) != -1) {
 	switch (c) {
 	case 'a':
 	    area = optarg;
+	    break;
+	case 'b':
+	    brief = true;
+	    break;
+	case 'd':
+	    detail = true;
 	    break;
 	default:
 	    return usage(argv[0]);
@@ -162,10 +176,35 @@ main(int argc, char **argv)
 	while(fetch.busy())
 	    eventloop.run();
 
-	const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
-	list<Lsa::LsaRef>::const_iterator i;
-	for (i = lsas.begin(); i != lsas.end(); i++)
-	    printf("%s\n", (*i)->str().c_str());
+	if (fetch.fail())
+	    brief = detail = false;
+
+	if (brief) {
+	    printf(" Type       ID               Adv "
+		   "Rtr           Seq      Age  Opt  Cksum  Len\n");
+	    const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
+	    list<Lsa::LsaRef>::const_iterator i;
+	    for (i = lsas.begin(); i != lsas.end(); i++) {
+		printf("%-9s", (*i)->name());
+		Lsa_header& header = (*i)->get_header();
+		printf("%-17s", pr_id(header.get_link_state_id()).c_str());
+		printf("%-17s",
+		       pr_id(header.get_advertising_router()).c_str());
+		printf("%-#12x", header.get_ls_sequence_number());
+		printf("%4d", header.get_ls_age());
+		printf("  %-#5x", header.get_options());
+		printf("%-#7x", header.get_ls_checksum());
+		printf("%3d", header.get_length());
+		printf("\n");
+	    }
+	}
+
+	if (detail) {
+	    const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
+	    list<Lsa::LsaRef>::const_iterator i;
+	    for (i = lsas.begin(); i != lsas.end(); i++)
+		printf("%s\n", (*i)->str().c_str());
+	}
 	       
     } catch (...) {
 	xorp_catch_standard_exceptions();
