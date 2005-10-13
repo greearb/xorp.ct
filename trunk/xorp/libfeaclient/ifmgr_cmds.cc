@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.12 2005/01/31 23:43:14 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.13 2005/03/25 02:53:22 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -130,9 +130,9 @@ IfMgrIfAdd::execute(IfMgrIfTree& t) const
     IfMgrIfTree::IfMap& ifs = t.ifs();
     const string& n = ifname();
 
-    if (ifs.find(n) != ifs.end()) {
+    if (ifs.find(n) != ifs.end())
 	return true;	// Not a failure to add something that already exists
-    }
+
     pair<IfMgrIfTree::IfMap::iterator, bool> r =
 	ifs.insert( make_pair(n, IfMgrIfAtom(n)) );
     return r.second;
@@ -164,11 +164,11 @@ IfMgrIfRemove::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	ifs.erase(i);
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return true;	// Not a failure if the interface doesn't exist anymore
+
+    ifs.erase(i);
+    return true;
 }
 
 bool
@@ -197,12 +197,12 @@ IfMgrIfSetEnabled::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	IfMgrIfAtom& interface = i->second;
-	interface.set_enabled(en());
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_enabled(en());
+    return true;
 }
 
 bool
@@ -232,12 +232,12 @@ IfMgrIfSetDiscard::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	IfMgrIfAtom& interface = i->second;
-	interface.set_discard(discard());
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_discard(discard());
+    return true;
 }
 
 bool
@@ -267,12 +267,12 @@ IfMgrIfSetMtu::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	IfMgrIfAtom& interface = i->second;
-	interface.set_mtu_bytes(mtu_bytes());
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_mtu_bytes(mtu_bytes());
+    return true;
 }
 
 bool
@@ -302,12 +302,12 @@ IfMgrIfSetMac::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	IfMgrIfAtom& interface = i->second;
-	interface.set_mac(mac());
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_mac(mac());
+    return true;
 }
 
 bool
@@ -336,12 +336,12 @@ IfMgrIfSetPifIndex::execute(IfMgrIfTree& t) const
     const string& n = ifname();
 
     IfMgrIfTree::IfMap::iterator i = ifs.find(n);
-    if (i != ifs.end()) {
-	IfMgrIfAtom& interface = i->second;
-	interface.set_pif_index(pif_index());
-	return true;
-    }
-    return false;
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_pif_index(pif_index());
+    return true;
 }
 
 bool
@@ -376,15 +376,15 @@ bool
 IfMgrVifAdd::execute(IfMgrIfTree& tree) const
 {
     IfMgrIfAtom* ifa = tree.find_if(ifname());
-    if (ifa == 0)
+    if (ifa == NULL)
 	return false;
 
     IfMgrIfAtom::VifMap& vifs = ifa->vifs();
     const string& n = vifname();
 
-    if (vifs.find(n) != vifs.end()) {
+    if (vifs.find(n) != vifs.end())
 	return true;	// Not a failure to add something that already exists
-    }
+
     pair<IfMgrIfAtom::VifMap::iterator, bool> r =
 	vifs.insert( make_pair(n, IfMgrVifAtom(n)) );
     return r.second;
@@ -413,18 +413,18 @@ bool
 IfMgrVifRemove::execute(IfMgrIfTree& tree) const
 {
     IfMgrIfAtom* ifa = tree.find_if(ifname());
-    if (ifa == 0)
-	return false;
+    if (ifa == NULL)
+	return true;	// Not a failure if the interface doesn't exist anymore
 
     IfMgrIfAtom::VifMap& vifs = ifa->vifs();
     const string& n = vifname();
 
     IfMgrIfAtom::VifMap::iterator i = vifs.find(n);
-    if (i != vifs.end()) {
-	vifs.erase(i);
-	return true;
-    }
-    return false;
+    if (i == vifs.end())
+	return true;	// Not a failure if the vif doesn't exist anymore
+
+    vifs.erase(i);
+    return true;
 }
 
 bool
@@ -450,7 +450,7 @@ bool
 IfMgrVifSetEnabled::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_enabled(en());
@@ -481,7 +481,7 @@ bool
 IfMgrVifSetMulticastCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_multicast_capable(capable());
@@ -514,7 +514,7 @@ bool
 IfMgrVifSetBroadcastCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_broadcast_capable(capable());
@@ -547,7 +547,7 @@ bool
 IfMgrVifSetP2PCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_p2p_capable(capable());
@@ -579,7 +579,7 @@ bool
 IfMgrVifSetLoopbackCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_loopback(capable());
@@ -611,7 +611,7 @@ bool
 IfMgrVifSetPifIndex::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     vifa->set_pif_index(pif_index());
@@ -648,13 +648,13 @@ bool
 IfMgrIPv4Add::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
-    if (addrs.find(addr()) != addrs.end()) {
+    if (addrs.find(addr()) != addrs.end())
 	return true;	// Not a failure to add something that already exists
-    }
+
     pair<IfMgrVifAtom::V4Map::iterator, bool> r =
 	addrs.insert( make_pair(addr(), IfMgrIPv4Atom(addr())) );
     return r.second;
@@ -683,16 +683,16 @@ bool
 IfMgrIPv4Remove::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
-	return false;
+    if (vifa == NULL)
+	return true;	// Not a failure if the vif doesn't exist anymore
 
     IfMgrVifAtom::V4Map& addrs = vifa->ipv4addrs();
     IfMgrVifAtom::V4Map::iterator i = addrs.find(addr());
-    if (i != addrs.end()) {
-	addrs.erase(i);
-	return true;
-    }
-    return false;
+    if (i == addrs.end())
+	return true;	// Not a failure if the address doesn't exist anymore
+
+    addrs.erase(i);
+    return true;
 }
 
 bool
@@ -718,7 +718,7 @@ bool
 IfMgrIPv4SetPrefix::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_prefix_len(prefix_len());
@@ -751,7 +751,7 @@ bool
 IfMgrIPv4SetEnabled::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_enabled(en());
@@ -782,7 +782,7 @@ bool
 IfMgrIPv4SetMulticastCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_multicast_capable(capable());
@@ -816,7 +816,7 @@ bool
 IfMgrIPv4SetLoopback::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_loopback(loopback());
@@ -850,7 +850,7 @@ bool
 IfMgrIPv4SetBroadcast::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_broadcast_addr(oaddr());
@@ -883,7 +883,7 @@ bool
 IfMgrIPv4SetEndpoint::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv4Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_endpoint_addr(oaddr());
@@ -919,13 +919,13 @@ bool
 IfMgrIPv6Add::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
+    if (vifa == NULL)
 	return false;
 
     IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
-    if (addrs.find(addr()) != addrs.end()) {
+    if (addrs.find(addr()) != addrs.end())
 	return true;	// Not a failure to add something that already exists
-    }
+
     pair<IfMgrVifAtom::V6Map::iterator, bool> r =
 	addrs.insert( make_pair(addr(), IfMgrIPv6Atom(addr())) );
     return r.second;
@@ -954,16 +954,16 @@ bool
 IfMgrIPv6Remove::execute(IfMgrIfTree& tree) const
 {
     IfMgrVifAtom* vifa = tree.find_vif(ifname(), vifname());
-    if (vifa == 0)
-	return false;
+    if (vifa == NULL)
+	return true;	// Not a failure if the vif doesn't exist anymore
 
     IfMgrVifAtom::V6Map& addrs = vifa->ipv6addrs();
     IfMgrVifAtom::V6Map::iterator i = addrs.find(addr());
-    if (i != addrs.end()) {
-	addrs.erase(i);
-	return true;
-    }
-    return false;
+    if (i == addrs.end())
+	return true;	// Not a failure if the address doesn't exist anymore
+
+    addrs.erase(i);
+    return true;
 }
 
 bool
@@ -989,7 +989,7 @@ bool
 IfMgrIPv6SetPrefix::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv6Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_prefix_len(prefix_len());
@@ -1022,7 +1022,7 @@ bool
 IfMgrIPv6SetEnabled::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv6Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_enabled(en());
@@ -1053,7 +1053,7 @@ bool
 IfMgrIPv6SetMulticastCapable::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv6Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_multicast_capable(capable());
@@ -1087,7 +1087,7 @@ bool
 IfMgrIPv6SetLoopback::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv6Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_loopback(loopback());
@@ -1120,7 +1120,7 @@ bool
 IfMgrIPv6SetEndpoint::execute(IfMgrIfTree& tree) const
 {
     IfMgrIPv6Atom* a = tree.find_addr(ifname(), vifname(), addr());
-    if (a == 0)
+    if (a == NULL)
 	return false;
 
     a->set_endpoint_addr(oaddr());
