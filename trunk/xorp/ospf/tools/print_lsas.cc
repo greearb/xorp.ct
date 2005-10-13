@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.2 2005/10/13 08:21:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.3 2005/10/13 16:39:05 atanu Exp $"
 
 // Get LSAs from OSPF and print them.
 
@@ -94,7 +94,7 @@ class Fetch {
 	    size_t len = lsa->size();
 	    Lsa::LsaRef lsar = _lsa_decoder.
 		decode(const_cast<uint8_t *>(&(*lsa)[0]), len);
-	    lsar->set_self_originating(self);
+	    lsar->set_self_originating(*self);
 	    _lsas.push_back(lsar);
 	}
 	if (*toohigh) {
