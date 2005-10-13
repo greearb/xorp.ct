@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.28 2005/09/09 16:48:54 bms Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.29 2005/10/03 05:05:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -443,6 +443,10 @@ SelectorList::get_max_fd() const
 }
 #endif // ! HOST_OS_WINDOWS
 
+//
+// Note that this method should be called only if there are bad file
+// descriptors.
+//
 void
 SelectorList::callback_bad_descriptors()
 {
@@ -452,20 +456,27 @@ SelectorList::callback_bad_descriptors()
     for (int fd = 0; fd <= _maxfd; fd++) {
 	if (_selector_entries[fd].is_empty() == true)
 	    continue;
-	/* Check fd is valid.  NB we call fstat without a stat struct to
-	 * avoid copy.  fstat will always fail as a result.
+	/*
+	 * Check whether fd is valid.
 	 */
-	if ((fstat(fd, 0) < 0) && (errno == EBADF)) {
-	    /* Force callbacks, should force read/writes that fail and
-	     * client should remove descriptor from list. */
+	struct stat sb;
+	if ((fstat(fd, &sb) < 0) && (errno == EBADF)) {
+	    //
+	    // Force callbacks, should force read/writes that fail and
+	    // client should remove descriptor from list.
+	    //
 	    XLOG_ERROR("SelectorList found file descriptor %d no longer "
 		       "valid.", fd);
 	    _selector_entries[fd].run_hooks(SEL_ALL, fd);
 	    bc++;
 	}
     }
-    /* Assert should only fail if OS checks stat struct before fd (??) */
-    assert(bc != 0);
+    //
+    // Assert should only fail if we called this method when there were
+    // no bad file descriptors, or if fstat() didn't return the appropriate
+    // error.
+    //
+    XLOG_ASSERT(bc != 0);
 #endif // ! HOST_OS_WINDOWS
 }
 
