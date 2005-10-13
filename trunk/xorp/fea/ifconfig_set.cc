@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.31 2005/09/20 03:17:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.32 2005/09/28 17:31:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -70,7 +70,7 @@ bool
 IfConfigSet::push_config(IfTree& it)
 {
     IfTree::IfMap::iterator ii;
-    IfTreeInterface::VifMap::const_iterator vi;
+    IfTreeInterface::VifMap::iterator vi;
 
     // Clear errors associated with error reporter
     ifc().er().reset();
@@ -79,7 +79,7 @@ IfConfigSet::push_config(IfTree& it)
     // Sanity check config - bail on bad interface and bad vif names
     //
     for (ii = it.ifs().begin(); ii != it.ifs().end(); ++ii) {
-	const IfTreeInterface& i = ii->second;
+	IfTreeInterface& i = ii->second;
 	//
 	// Skip the ifindex check if the interface has no mapping to
 	// an existing interface in the system.
@@ -99,8 +99,8 @@ IfConfigSet::push_config(IfTree& it)
 	//
 	// Check the interface and vif name
 	//
-	for (vi = i.vifs().begin(); i.vifs().end() != vi; ++vi) {
-	    const IfTreeVif& v= vi->second;
+	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
+	    IfTreeVif& v= vi->second;
 	    if (v.vifname() != i.ifname()) {
 		ifc().er().vif_error(i.ifname(), v.vifname(), "bad vif name");
 		XLOG_ERROR("%s", ifc().er().last_error().c_str());
@@ -130,21 +130,40 @@ IfConfigSet::push_config(IfTree& it)
 	push_interface_begin(i);
 
 	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
-	    const IfTreeVif& v = vi->second;
+	    IfTreeVif& v = vi->second;
+
+	    // XXX: disable the vif if the interface is disabled
+	    if (! i.enabled())
+		v.set_enabled(false);
+	    // XXX: delete the vif if the interface is deleted
+	    if (i.state() == IfTreeItem::DELETED)
+		v.mark(IfTreeItem::DELETED);
 
 	    push_vif_begin(i, v);
 
-	    IfTreeVif::V4Map::const_iterator a4i;
+	    IfTreeVif::V4Map::iterator a4i;
 	    for (a4i = v.v4addrs().begin(); a4i != v.v4addrs().end(); ++a4i) {
-		const IfTreeAddr4& a = a4i->second;
+		IfTreeAddr4& a = a4i->second;
+		// XXX: disable the address if the vif is disabled
+		if (! v.enabled())
+		    a.set_enabled(false);
+		// XXX: delete the address if the vif is deleted
+		if (v.state() == IfTreeItem::DELETED)
+		    a.mark(IfTreeItem::DELETED);
 		if (a.state() != IfTreeItem::NO_CHANGE)
 		    push_vif_address(i, v, a);
 	    }
 
 #ifdef HAVE_IPV6
-	    IfTreeVif::V6Map::const_iterator a6i;
+	    IfTreeVif::V6Map::iterator a6i;
 	    for (a6i = v.v6addrs().begin(); a6i != v.v6addrs().end(); ++a6i) {
-		const IfTreeAddr6& a = a6i->second;
+		IfTreeAddr6& a = a6i->second;
+		// XXX: disable the address if the vif is disabled
+		if (! v.enabled())
+		    a.set_enabled(false);
+		// XXX: delete the address if the vif is deleted
+		if (v.state() == IfTreeItem::DELETED)
+		    a.mark(IfTreeItem::DELETED);
 		if (a.state() != IfTreeItem::NO_CHANGE)
 		    push_vif_address(i, v, a);
 	    }
