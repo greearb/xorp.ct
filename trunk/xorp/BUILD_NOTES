@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.29 2005/05/25 01:37:28 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.30 2005/06/03 22:50:46 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -193,6 +193,9 @@ gmake check
 
   * Linux Fedora Core2 (kernel 2.6.5-1.358)
     - The code compiles, but some of the internal tests may fail.
+
+  * Linux Fedora Core4 (kernel 2.6.11-1.1369_FC4smp)
+    - The code compiles, and the internal tests appear to succeed.
 
 3.5. Mac OS X
 =============
