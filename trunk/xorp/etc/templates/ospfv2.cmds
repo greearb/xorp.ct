@@ -1,4 +1,4 @@
-/* $XORP$ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.1 2005/10/10 12:40:33 atanu Exp $ */
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
@@ -6,7 +6,19 @@ show ospf4 {
 }
 
 show ospf4 database $(protocols.ospf4.area.*) {
-    %command: "ospf/tools/print_lsas -a $4" %help: HELP;
+    %command: "ospf/tools/print_lsas -a $4 -b" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show LSA database";
+}
+
+show ospf4 database $(protocols.ospf4.area.*) brief {
+    %command: "ospf/tools/print_lsas -a $4 -b" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf4 database $(protocols.ospf4.area.*) detail {
+    %command: "ospf/tools/print_lsas -a $4 -d" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display detailed output";
 }
