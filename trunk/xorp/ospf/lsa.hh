@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.64 2005/09/11 11:03:33 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.65 2005/09/16 23:33:28 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -505,6 +505,11 @@ class Lsa {
     bool tracing() const { return _trace; }
 
     /**
+     * Printable name of this LSA.
+     */
+    virtual const char *name() const = 0;
+
+    /**
      * Generate a printable representation of the LSA.
      */
     virtual string str() const = 0;
@@ -917,6 +922,13 @@ class RouterLsa : public Lsa {
     }
 
     /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "Router";
+    }
+
+    /**
      * Generate a printable representation.
      */
     string str() const;
@@ -1014,6 +1026,13 @@ class NetworkLsa : public Lsa {
 
     list<OspfTypes::RouterID>& get_attached_routers() {
 	return _attached_routers;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "Network";
     }
 
     /**
@@ -1126,6 +1145,13 @@ class SummaryNetworkLsa : public Lsa {
     uint8_t get_prefix_options() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	return _prefix_options;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "SummaryN";
     }
 
     /**
@@ -1242,6 +1268,13 @@ class SummaryRouterLsa : public Lsa {
     OspfTypes::RouterID get_destination_id() const {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	return _destination_id;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "SummaryR";
     }
 
     /**
@@ -1449,6 +1482,13 @@ class ASExternalLsa : public Lsa {
 	XLOG_ASSERT(OspfTypes::V3 == get_version());
 	XLOG_ASSERT(0 != _referenced_ls_type);
 	return _referenced_link_state_id;
+    }
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return "ASExternal";
     }
 
     /**
