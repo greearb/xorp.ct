@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.22 2005/08/31 22:45:45 zec Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.23 2005/09/02 19:27:14 pavlin Exp $"
 
 #include <set>
 
@@ -302,6 +302,7 @@ public:
 	: _total_routes_seen(0), _test_peer_routes_seen(0),
 	  _tpn(tpn), _opn(opn)
     {}
+    virtual ~HorizonValidatorBase() {}
 
     /* Check an individual response packet is valid */
     virtual bool valid_response(const RipPacket<A>* p) = 0;
