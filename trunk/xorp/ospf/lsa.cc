@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.54 2005/09/12 17:55:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.55 2005/09/15 05:03:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -277,9 +277,9 @@ Lsa::update_age_and_seqno(TimeVal& now)
     if (get_transmitted()) {
 	set_transmitted(false);
 	increment_sequence_number();
-	get_header().set_ls_age(0);
-	record_creation_time(now);
     }
+    get_header().set_ls_age(0);
+    record_creation_time(now);
 
     encode();
 }
