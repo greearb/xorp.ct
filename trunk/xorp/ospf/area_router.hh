@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.70 2005/10/10 09:39:37 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.71 2005/10/10 12:21:28 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -92,7 +92,7 @@ class AreaRouter : Subsystem {
     /**
      * get lsa at index if it exists.
      */
-    bool get_lsa(const uint32_t index, bool& valid, bool& toohigh,
+    bool get_lsa(const uint32_t index, bool& valid, bool& toohigh, bool& self,
 		 vector<uint8_t>& lsa);
     
     /**

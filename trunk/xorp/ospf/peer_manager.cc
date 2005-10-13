@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.60 2005/10/10 06:03:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.61 2005/10/10 12:21:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -190,7 +190,8 @@ PeerManager<A>::area_range_change_state(OspfTypes::AreaID area, IPNet<A> net,
 template <typename A>
 bool
 PeerManager<A>::get_lsa(const OspfTypes::AreaID area, const uint32_t index,
-			bool& valid, bool& toohigh, vector<uint8_t>& lsa)
+			bool& valid, bool& toohigh, bool& self,
+			vector<uint8_t>& lsa)
 {
     debug_msg("Area %s index %u\n", pr_id(area).c_str(), index);
 
@@ -202,7 +203,7 @@ PeerManager<A>::get_lsa(const OspfTypes::AreaID area, const uint32_t index,
 	return false;
     }
 
-    return area_router->get_lsa(index, valid, toohigh, lsa);
+    return area_router->get_lsa(index, valid, toohigh, self, lsa);
 }
 
 template <typename A>

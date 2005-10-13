@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.6 2005/09/15 18:33:27 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.7 2005/10/03 20:24:06 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -266,6 +266,8 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *
      *  @param toohigh true if no more LSA exist after this index.
      *
+     *  @param self if true this LSA was originated by this router.
+     *
      *  @param lsa if valid is true the LSA at index.
      */
     XrlCmdError ospfv2_0_1_get_lsa(
@@ -275,6 +277,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	// Output values,
 	bool&	valid,
 	bool&	toohigh,
+	bool&	self,
 	vector<uint8_t>&	lsa);
 
  private:

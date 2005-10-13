@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.8 2005/10/03 20:24:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.9 2005/10/10 12:21:28 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -502,13 +502,14 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 						     const uint32_t& index,
 						     bool& valid,
 						     bool& toohigh,
+						     bool& self,
 						     vector<uint8_t>& lsa)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("area %s index %u valid %s toohigh %s\n", pr_id(area).c_str(),
-	      index, pb(valid), pb(toohigh));
+    debug_msg("area %s index %u valid %s toohigh %s self %s\n",
+	      pr_id(area).c_str(), index, pb(valid), pb(toohigh), pb(self));
 
-    if (!_ospf.get_lsa(area, index, valid, toohigh, lsa))
+    if (!_ospf.get_lsa(area, index, valid, toohigh, self, lsa))
 	return XrlCmdError::COMMAND_FAILED("Unable to get LSA");
 
     return XrlCmdError::OKAY();

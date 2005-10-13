@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.3 2005/09/15 18:33:28 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.4 2005/10/03 20:24:06 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -155,6 +155,7 @@ interface ospfv2/0.1 {
      * @param valid true if a LSA has been returned. Some index values
      *        do not contain LSAs. This should not be considered an error.
      * @param toohigh true if no more LSA exist after this index.
+     * @param self if true this LSA was originated by this router.
      * @param lsa if valid is true the LSA at index.
      */
     get_lsa ? area:ipv4 \
@@ -162,5 +163,6 @@ interface ospfv2/0.1 {
 	    -> \
 	    valid:bool \
 	    & toohigh:bool \
+	    & self:bool \
 	    & lsa:binary
 }

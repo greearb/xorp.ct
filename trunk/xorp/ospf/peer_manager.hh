@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.40 2005/10/10 06:03:25 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.41 2005/10/10 12:21:28 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -93,10 +93,11 @@ class PeerManager {
      *  @param valid true if a LSA has been returned. Some index values do not
      *  contain LSAs. This should not be considered an error.
      *  @param toohigh true if no more LSA exist after this index.
+     *  @param self if true this LSA was originated by this router.
      *  @param lsa if valid is true the LSA at index.
      */
     bool get_lsa(const OspfTypes::AreaID area, const uint32_t index,
-		 bool& valid, bool& toohigh, vector<uint8_t>& lsa);
+		 bool& valid, bool& toohigh, bool& self, vector<uint8_t>& lsa);
 
     /**
      * Convert an interface/vif to a PeerID.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.117 2005/10/12 16:54:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.118 2005/10/13 02:32:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,7 +268,7 @@ AreaRouter<A>::area_range_covered(IPNet<A> net, bool& advertise)
 template <typename A>
 bool
 AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
-		       vector<uint8_t>& lsa)
+		       bool& self, vector<uint8_t>& lsa)
 {
     debug_msg("Index %u\n", index);
 
@@ -291,6 +291,8 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
     _ospf.get_eventloop().current_time(now);
     if (!lsar->maxage())
 	lsar->update_age(now);
+
+    self = lsar->get_self_originating();
 
     size_t len;
     uint8_t *ptr = lsar->lsa(len);

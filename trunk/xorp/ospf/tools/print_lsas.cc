@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.1 2005/10/10 12:21:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.2 2005/10/13 08:21:25 atanu Exp $"
 
 // Get LSAs from OSPF and print them.
 
@@ -82,6 +82,7 @@ class Fetch {
     void response(const XrlError& error,
 		  const bool *valid,
 		  const bool *toohigh,
+		  const bool *self,
 		  const vector<uint8_t>* lsa) {
 	if (XrlError::OKAY() != error) {
 	    XLOG_WARNING("Attempt to get lsa failed");
@@ -93,6 +94,7 @@ class Fetch {
 	    size_t len = lsa->size();
 	    Lsa::LsaRef lsar = _lsa_decoder.
 		decode(const_cast<uint8_t *>(&(*lsa)[0]), len);
+	    lsar->set_self_originating(self);
 	    _lsas.push_back(lsar);
 	}
 	if (*toohigh) {
@@ -185,7 +187,8 @@ main(int argc, char **argv)
 	    const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
 	    list<Lsa::LsaRef>::const_iterator i;
 	    for (i = lsas.begin(); i != lsas.end(); i++) {
-		printf("%-9s", (*i)->name());
+		printf("%-8s", (*i)->name());
+		printf("%c", (*i)->get_self_originating() ? '*' : ' ');
 		Lsa_header& header = (*i)->get_header();
 		printf("%-17s", pr_id(header.get_link_state_id()).c_str());
 		printf("%-17s",
