@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.98 2005/10/05 06:00:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.99 2005/10/10 04:10:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -681,9 +681,6 @@ RouterCLI::display_config_mode_users() const
     else
 	cli_client().cli_print("Users ");
     list<uint32_t>::const_iterator iter, iter2;
-#ifndef HOST_OS_WINDOWS
-    struct passwd* pwent;
-#endif
     for (iter = _config_mode_users.begin();
 	 iter != _config_mode_users.end();
 	 ++iter) {
@@ -695,17 +692,12 @@ RouterCLI::display_config_mode_users() const
 	    else
 		cli_client().cli_print(", ");
 	}
-#ifdef HOST_OS_WINDOWS
-	else
-	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
-#else
-	else {
-	    pwent = getpwuid(*iter);
-	    if (pwent != NULL)
-		cli_client().cli_print(pwent->pw_name);
-	    cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
-	}
+#ifndef HOST_OS_WINDOWS
+	struct passwd* pwent = getpwuid(*iter);
+	if (pwent != NULL)
+	    cli_client().cli_print(c_format("%s ", pwent->pw_name));
 #endif
+	cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
     }
 #ifndef HOST_OS_WINDOWS
     endpwent();
