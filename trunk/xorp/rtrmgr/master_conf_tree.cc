@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.63 2005/10/12 03:12:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.64 2005/10/12 05:39:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -850,7 +850,7 @@ MasterConfigTree::save_to_file(const string& filename,
     // Write the file header
     string header = "/*XORP Configuration File, v1.0*/\n";
     size_t bytes;
-    bytes = fwrite(header.c_str(), 1, header.size(), file);
+    bytes = fwrite(header.c_str(), sizeof(char), header.size(), file);
     if (bytes < header.size()) {
 	fclose(file);
 	errmsg = "Error writing to file \"" + full_filename + "\"\n";
@@ -867,7 +867,7 @@ MasterConfigTree::save_to_file(const string& filename,
 
     // Write the config to the file
     string config = show_unannotated_tree(/*numbered*/ false);
-    bytes = fwrite(config.c_str(), 1, config.size(), file);
+    bytes = fwrite(config.c_str(), sizeof(char), config.size(), file);
     if (bytes < config.size()) {
 	fclose(file);
 	errmsg = "Error writing to file \"" + full_filename + "\"\n";
@@ -1207,7 +1207,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	// Save the current configuration
 	//
 	string config = show_unannotated_tree(/*numbered*/ false);
-	if (fwrite(config.c_str(), config.size(), sizeof(char), fp)
+	if (fwrite(config.c_str(), sizeof(char), config.size(), fp)
 	    != static_cast<size_t>(config.size())) {
 	    errmsg = c_format("Cannot save the configuration file: "
 			      "error writing to a temporary file: %s",
