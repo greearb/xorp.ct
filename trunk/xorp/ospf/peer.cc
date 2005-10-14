@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.168 2005/10/12 01:38:45 bms Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.169 2005/10/12 06:11:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3714,6 +3714,34 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 		   cstring(*lsar));
 	return true;
     }
+
+#ifndef	MAX_AGE_IN_DATABASE
+    // Look for the LSA by <Type,ID,ADV> tuple. In all but the case
+    // described below it is sufficient to compare LSA pointers as
+    // below to decide if two LSAs are equivalent. Principally because
+    // all LSAs are in the database and two LSAs cannot exist in the
+    // database with the same tuple. If an LSA reaches MaxAge and is
+    // being withdrawn it is removed from the database. There is a
+    // window where the old LSA exists only in the retransmission list
+    // and a new LSA is inserted into the database and an attempt is
+    // made to flood it. A common instance of this is that after a
+    // crash a neighbour may send the router its own LSA which it
+    // attempts to flush by setting the MaxAge and then moments later
+    // it puts the same LSA in the database.
+
+    // XXX
+    // Once we are happy with this fix then combine this with the loop
+    // below and do away with this define.
+
+    list<Lsa::LsaRef>::iterator i;
+    for (i = _lsa_rxmt.begin(); i != _lsa_rxmt.end(); i++) {
+	if (lsar != (*i) && (*i).get() == lsar.get()) {
+	    XLOG_ASSERT((*i)->maxage());
+	    XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*lsar));
+	    _lsa_rxmt.erase(i);
+	}
+    }
+#endif
 
     // (d) If this LSA isn't already on the retransmit queue add it.
     if (find(_lsa_rxmt.begin(), _lsa_rxmt.end(), lsar) == _lsa_rxmt.end())
