@@ -373,9 +373,10 @@ add_cmd_command(char *s)
 	}
 	if (arg[0] == '$') {
 	    string errmsg;
-	    string resolved_str = op_command.select_positional_argument(
+	    list<string> resolved_arguments;
+	    resolved_arguments = op_command.select_positional_argument(
 		op_command.command_parts(), arg, errmsg);
-	    if (resolved_str.empty()) {
+	    if (resolved_arguments.empty()) {
 		opcmderror(errmsg.c_str());
 	    }
 	}

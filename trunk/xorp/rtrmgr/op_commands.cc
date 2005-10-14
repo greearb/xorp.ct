@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.58 2005/10/10 04:50:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.59 2005/10/10 07:05:53 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -231,27 +231,29 @@ OpCommand::command_parts2command_name(const list<string>& command_parts)
     return res;
 }
 
-string
+list<string>
 OpCommand::select_positional_argument(const list<string>& argument_list,
 				      const string& position,
 				      string& error_msg)
 {
+    list<string> resolved_list;
+
     //
     // Check the positional argument
     //
     if (position.empty()) {
 	error_msg = c_format("Empty positional argument");
-	return string("");
+	return resolved_list;
     }
     if (position[0] != '$') {
 	error_msg = c_format("Invalid positional argument \"%s\": "
 			     "first symbol is not '$'", position.c_str());
-	return string("");
+	return resolved_list;
     }
     if (position.size() <= 1) {
 	error_msg = c_format("Invalid positional argument \"%s\": "
 			     "missing position value", position.c_str());
-	return string("");
+	return resolved_list;
     }
 
     //
@@ -265,20 +267,13 @@ OpCommand::select_positional_argument(const list<string>& argument_list,
 			     "[0, %u]",
 			     position.c_str(),
 			     XORP_UINT_CAST(argument_list.size()));
-	return string("");
+	return resolved_list;
     }
 
-    string resolved_str;
     list<string>::const_iterator iter;
     if (pos == 0) {
 	// Add all arguments
-	for (iter = argument_list.begin();
-	     iter != argument_list.end();
-	     ++iter) {
-	    if (! resolved_str.empty())
-		resolved_str += " ";
-	    resolved_str += *iter;
-	}
+	resolved_list = argument_list;
     } else {
 	// Select a single argument
 	int tmp_pos = 0;
@@ -287,14 +282,14 @@ OpCommand::select_positional_argument(const list<string>& argument_list,
 	     ++iter) {
 	    tmp_pos++;
 	    if (tmp_pos == pos) {
-		resolved_str += *iter;
+		resolved_list.push_back(*iter);
 		break;
 	    }
 	}
     }
-    XLOG_ASSERT(! resolved_str.empty());
+    XLOG_ASSERT(! resolved_list.empty());
 
-    return resolved_str;
+    return resolved_list;
 }
 
 OpInstance *
@@ -331,12 +326,16 @@ OpCommand::execute(EventLoop& eventloop, const list<string>& command_line,
 	// the command-line strings.
 	//
 	string error_msg;
-	string resolved_str = select_positional_argument(command_line, arg,
-							 error_msg);
-	if (resolved_str.empty()) {
+	list<string> resolved_list = select_positional_argument(command_line,
+								arg,
+								error_msg);
+	if (resolved_list.empty()) {
 	    XLOG_FATAL("Internal programming error: %s", error_msg.c_str());
 	}
-	resolved_command_argument_list.push_back(resolved_str);
+	resolved_command_argument_list.insert(
+	    resolved_command_argument_list.end(),
+	    resolved_list.begin(),
+	    resolved_list.end());
     }
 
     OpInstance *opinst = new OpInstance(eventloop, *this,

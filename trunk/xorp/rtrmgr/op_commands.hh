@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.33 2005/10/10 04:50:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.34 2005/10/10 07:05:53 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -87,6 +87,7 @@ public:
     bool has_opt_param(const string& opt_param) const;
     string str() const;
     static string command_parts2command_name(const list<string>& command_parts);
+
     /**
      * Select a positional argument.
      *
@@ -94,12 +95,16 @@ public:
      * @param position the positional argument (e.g., "$0" specifies all
      * arguments, "$1" is the first argument, "$2" the second argument, etc.)
      * @param error_msg the error message (if error).
-     * @return if @ref position is valid, then the string with the selected
-     * argument, or an empty string if an error.
+     * @return if @ref position is valid, then a list with the the strings
+     * with the selected arguments, or an empty string if an error.
+     * Note that only if the position argument is "$0", then the list
+     * will contain more than one elements.
      */
-    static string select_positional_argument(const list<string>& argument_list,
-					     const string& position,
-					     string& error_msg);
+    static list<string> select_positional_argument(
+	const list<string>& argument_list,
+	const string& position,
+	string& error_msg);
+
     /**
      * Execute an operational mode command.
      *

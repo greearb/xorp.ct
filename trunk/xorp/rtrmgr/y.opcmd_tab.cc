@@ -467,9 +467,10 @@ add_cmd_command(char *s)
 	}
 	if (arg[0] == '$') {
 	    string errmsg;
-	    string resolved_str = op_command.select_positional_argument(
+	    list<string> resolved_arguments;
+	    resolved_arguments = op_command.select_positional_argument(
 		op_command.command_parts(), arg, errmsg);
-	    if (resolved_str.empty()) {
+	    if (resolved_arguments.empty()) {
 		opcmderror(errmsg.c_str());
 	    }
 	}
@@ -607,7 +608,7 @@ parse_opcmd() throw (ParseError)
     if (opcmdparse() != 0)
 	opcmderror("unknown error");
 }
-#line 612 "y.opcmd_tab.c"
+#line 613 "y.opcmd_tab.c"
 /* allocate initial stack or double stack size, up to YYMAXDEPTH */
 static int yygrowstack()
 {
@@ -874,7 +875,7 @@ case 28:
 #line 112 "op_commands.yy"
 { opcmderror("syntax error"); }
 break;
-#line 879 "y.opcmd_tab.c"
+#line 880 "y.opcmd_tab.c"
     }
     yyssp -= yym;
     yystate = *yyssp;
