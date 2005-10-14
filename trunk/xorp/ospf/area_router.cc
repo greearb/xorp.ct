@@ -13,23 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.118 2005/10/13 02:32:59 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.119 2005/10/13 16:39:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-#define PARANOIA
-
-// The original design did not leave MaxAge LSAs in the database. When
-// an LSA reached MaxAge it was removed from the database and existed
-// only in retransmission lists. If an LSA was received which seemed
-// to be from a previous incarnation of OSPF it had its age set to
-// MaxAge and was fired out, also not being added to the database.
-// If while a MaxAge LSA is on the retransmission only, either a new
-// LSA such as a Network-LSA is generated or an updated LSA arrives a
-// second LSA can be created with the same <Type,ID,ADV> tuple. Two LSAs
-// can exist on the retransmission list. Leaving the a MaxAge LSA in
-// the database solves both problems.
-#define MAX_AGE_IN_DATABASE
 
 #include "config.h"
 #include <map>
