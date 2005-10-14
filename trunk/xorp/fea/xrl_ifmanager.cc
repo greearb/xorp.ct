@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.16 2005/03/25 02:53:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.17 2005/09/28 21:23:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -208,9 +208,11 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 	is_error = true;
 
 	// Reverse-back to the previously working configuration
-	local_config = old_local_config;
+	IfTree restore_config = old_local_config;
+	restore_config.prepare_replacement_state(local_config);
+	local_config = restore_config;
 	if (ifconfig().push_config(local_config) == true)
-	    break;		// Finalize the reverse-back
+	    break;		// Continue with finalizing the reverse-back
 
 	// Failed to reverse back
 	string errmsg2 = ifconfig().push_error();
