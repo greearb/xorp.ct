@@ -868,6 +868,8 @@ $(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/ospfv2.xif
 $(srcdir)/ospfv3_base.hh $(srcdir)/ospfv3_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\

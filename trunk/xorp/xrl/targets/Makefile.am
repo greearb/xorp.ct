@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.56 2005/03/03 07:43:27 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.57 2005/09/07 22:48:54 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -219,6 +219,8 @@ libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
+		$(INTERFACES_DIR)/policy_backend.xif			\
+		$(INTERFACES_DIR)/policy_redist4.xif			\
 		$(INTERFACES_DIR)/ospfv2.xif
 
 # OSPF V3
