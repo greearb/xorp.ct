@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.7 2005/08/18 15:54:27 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.8 2005/08/25 02:23:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -194,7 +194,7 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
 	 ++string_iter) {
 	const string& mandatory_config_node = *string_iter;
 	if (find_varname_node(mandatory_config_node) == NULL) {
-	    errmsg = c_format("Invalid mandatory variable %s",
+	    errmsg = c_format("Invalid template mandatory variable %s",
 			      mandatory_config_node.c_str());
 	    return false;
 	}
