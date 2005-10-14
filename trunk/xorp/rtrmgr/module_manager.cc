@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.48 2005/10/12 05:39:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.49 2005/10/12 09:25:40 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -52,7 +52,6 @@
 #include "conf_tree_node.hh"
 #include "master_conf_tree.hh"
 #include "template_commands.hh"
-//#include "xrl_rtrmgr_interface.hh"
 #include "main_rtrmgr.hh"
 #include "util.hh"
 
