@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.39 2005/08/18 15:58:08 bms Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.40 2005/10/02 22:21:48 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -239,7 +239,15 @@ XrlBgpTarget::bgp_0_2_delete_peer(
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port));
 
-    XLOG_WARNING("Not currently implemented\n");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.delete_peer(iptuple))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
