@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.30 2005/06/03 22:50:46 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.31 2005/10/13 20:02:42 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -108,6 +108,7 @@ gmake check
 
 3.3. OpenBSD
 ============
+
   * If the system would be used as a multicast router, then add the
     following lines to /etc/rc.conf.local and reboot:
 
@@ -200,12 +201,18 @@ gmake check
 3.5. Mac OS X
 =============
 
-  * OS X 10.3.8 (Darwin 7.8.0)
-    - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
-    - The code compiles, and the internal tests appear to succeed.
+  * All
     - Unicast routing appears to work.
     - Multicast routing doesn't work, because the kernel doesn't have
       the appropriate support.
+
+  * OS X 10.3.8 (Darwin 7.8.0)
+    - gcc version 3.3 20030304 (Apple Computer, Inc. build 1495)
+    - The code compiles, and the internal tests appear to succeed.
+
+  * OS X 10.4.2 (Darwin 8.2.0)
+    - gcc version 4.0.0 20041026 (Apple Computer, Inc. build 4061)
+    - The code compiles, and the internal tests appear to succeed.
 
 4. Known problems
 =================
