@@ -156,6 +156,9 @@
 /* Define to 1 if you have the <linux/rtnetlink.h> header file. */
 #undef HAVE_LINUX_RTNETLINK_H
 
+/* Define to 1 if you have the <linux/sockios.h> header file. */
+#undef HAVE_LINUX_SOCKIOS_H
+
 /* Define to 1 if you have the <linux/types.h> header file. */
 #undef HAVE_LINUX_TYPES_H
 
@@ -262,6 +265,9 @@
 
 /* Define to 1 if you have the <net/if.h> header file. */
 #undef HAVE_NET_IF_H
+
+/* Define to 1 if you have the <net/if_media.h> header file. */
+#undef HAVE_NET_IF_MEDIA_H
 
 /* Define to 1 if you have the <net/if_types.h> header file. */
 #undef HAVE_NET_IF_TYPES_H
