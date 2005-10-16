@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.119 2005/10/13 16:39:04 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.120 2005/10/14 19:17:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -623,6 +623,61 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     } else {
 	XLOG_WARNING("LSA not being announced \n%s", cstring(*lsar));
     }
+}
+
+template <typename A>
+void
+AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
+{
+    XLOG_ASSERT(lsar->external());
+    size_t index;
+    if (find_lsa(lsar, index)) {
+	XLOG_FATAL("LSA already in database: %s", cstring(*lsar));
+	return;
+    }
+    add_lsa(lsar);
+    bool multicast_on_peer;
+    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
+}
+
+template <typename A>
+void
+AreaRouter<A>::external_shove()
+{
+    push_lsas();
+}
+
+template <typename A>
+void
+AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->external());
+    size_t index;
+    if (!find_lsa(lsar, index)) {
+	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
+	return;
+    }
+    XLOG_ASSERT(lsar == _db[index]);
+    bool multicast_on_peer;
+    publish(ALLPEERS, OspfTypes::ALLNEIGHBOURS, lsar, multicast_on_peer);
+    push_lsas();
+}
+
+template <typename A>
+void
+AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->external());
+    size_t index;
+    if (!find_lsa(lsar, index)) {
+	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
+	return;
+    }
+    XLOG_ASSERT(lsar == _db[index]);
+    XLOG_ASSERT(lsar->maxage());
+    // XXX - Will cause a routing recomputation.
+    delete_lsa(lsar, index, false /* Don't invalidate */);
+    publish_all(lsar);
 }
 
 template <typename A>

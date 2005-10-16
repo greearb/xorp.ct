@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.71 2005/10/10 12:21:28 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.72 2005/10/13 16:39:04 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -120,6 +120,40 @@ class AreaRouter : Subsystem {
      */
     void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
+
+    /**
+     * An AS-External-LSA being announced either from another area or
+     * from the RIB as a redist.
+     *
+     * The LSAs should not be scheduled for transmission until the
+     * external_shove() is seen. In many cases a number of LSAs may
+     * arrive in a single packet, waiting for the external_shove()
+     * offers an opportunity for aggregation.
+     *
+     * @param lsar the AS-External-LSA
+     * @param push set to true if the push is a result of an external_push().
+     */
+    void external_announce(Lsa::LsaRef lsar, bool push);
+
+    /**
+     * Called to complete a series of calls to external_announce().
+     */
+    void external_shove();
+
+    /**
+     * Refresh this LSA either because a timer has expired or because
+     * a newer LSA has arrived from another area. In either cause the
+     * LSA should already be in this area's database.
+     */
+    void external_refresh(Lsa::LsaRef lsar);
+
+    /**
+     * An AS-External-LSA being withdrawn either from another area or
+     * from the RIB as a redist.
+     *
+     * @param lsar the AS-External-LSA
+     */
+    void external_withdraw(Lsa::LsaRef lsar);
 
     /**
      * Generate a Network-LSA for this peer.
@@ -369,7 +403,6 @@ class AreaRouter : Subsystem {
 #endif
 
     Lsa::LsaRef _invalid_lsa;		// An invalid LSA to overwrite slots
-
     Lsa::LsaRef _router_lsa;		// This routers router LSA.
     vector<Lsa::LsaRef> _db;		// Database of LSAs.
     deque<size_t> _empty_slots;		// Available slots in the Database.
