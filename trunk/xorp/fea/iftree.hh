@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.29 2005/08/18 15:45:48 bms Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.30 2005/10/12 08:50:24 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -268,6 +268,10 @@ public:
 
     inline void set_mac(const Mac& mac)	{ _mac = mac; mark(CHANGED); }
 
+    inline bool no_carrier() const	{ return _no_carrier; }
+
+    inline void set_no_carrier(bool v)	{ _no_carrier = v; mark(CHANGED); }
+
     inline bool discard() const		{ return _discard; }
 
     inline void set_discard(bool discard) {
@@ -323,6 +327,7 @@ public:
 	set_enabled(o.enabled());
 	set_mtu(o.mtu());
 	set_mac(o.mac());
+	set_no_carrier(o.no_carrier());
 	set_if_flags(o.if_flags());
     }
 
@@ -338,6 +343,7 @@ public:
 		&& (enabled() == o.enabled())
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac())
+		&& (no_carrier() == o.no_carrier())
 		&& (if_flags() == o.if_flags()));
     }
 
@@ -353,6 +359,7 @@ protected:
     bool	 _is_discard_emulated;
     uint32_t 	 _mtu;
     Mac 	 _mac;
+    bool	 _no_carrier;
     uint32_t	 _if_flags;	// The system-specific interface flags
     VifMap	 _vifs;
 };

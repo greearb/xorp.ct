@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.10 2005/03/25 02:53:22 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_cmds.hh,v 1.11 2005/08/18 15:34:24 bms Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_CMDS_HH__
 #define __LIBFEACLIENT_IFMGR_CMDS_HH__
@@ -183,6 +183,28 @@ public:
 
 protected:
     uint32_t _pif;
+};
+
+/**
+ * @short Command to set the no_carrier flag of interface.
+ */
+class IfMgrIfSetNoCarrier : public IfMgrIfCommandBase {
+public:
+    inline IfMgrIfSetNoCarrier(const string& ifname, bool no_carrier)
+	: IfMgrIfCommandBase(ifname), _no_carrier(no_carrier) {}
+
+    inline bool no_carrier() const			{ return _no_carrier; }
+
+    bool execute(IfMgrIfTree& tree) const;
+
+    bool forward(XrlSender&		sender,
+		 const string&		xrl_target,
+		 const IfMgrXrlSendCB&	xscb) const;
+
+    string str() const;
+
+protected:
+    bool _no_carrier;
 };
 
 

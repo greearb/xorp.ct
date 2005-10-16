@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.13 2005/03/25 02:53:22 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_cmds.cc,v 1.14 2005/10/13 03:19:00 pavlin Exp $"
 
 #include "libxorp/c_format.hh"
 
@@ -359,6 +359,41 @@ IfMgrIfSetPifIndex::str() const
 {
     return if_str_begin(this, "SetPifIndex") +
 	c_format(", %u", XORP_UINT_CAST(pif_index())) + if_str_end();
+}
+
+// ----------------------------------------------------------------------------
+// IfMgrIfSetNoCarrier
+
+bool
+IfMgrIfSetNoCarrier::execute(IfMgrIfTree& t) const
+{
+    IfMgrIfTree::IfMap& ifs = t.ifs();
+    const string& n = ifname();
+
+    IfMgrIfTree::IfMap::iterator i = ifs.find(n);
+    if (i == ifs.end())
+	return false;
+
+    IfMgrIfAtom& interface = i->second;
+    interface.set_no_carrier(no_carrier());
+    return true;
+}
+
+bool
+IfMgrIfSetNoCarrier::forward(XrlSender&		sender,
+			     const string&	xrl_target,
+			     const IfMgrXrlSendCB& xcb) const
+{
+    XrlFeaIfmgrMirrorV0p1Client c(&sender);
+    const char* xt = xrl_target.c_str();
+    return c.send_interface_set_no_carrier(xt, ifname(), no_carrier(), xcb);
+}
+
+string
+IfMgrIfSetNoCarrier::str() const
+{
+    return if_str_begin(this, "NoCarrier") + ", " +
+	c_format("%s", no_carrier()? "true" : "false") + if_str_end();
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.24 2005/08/18 15:45:47 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.25 2005/08/31 22:02:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -43,6 +43,7 @@
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
+#include "ifconfig_media.hh"
 #include "kernel_utils.hh"
 
 
@@ -250,6 +251,24 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    fi.set_enabled(flags & IFF_UP);
 	}
 	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+
+	//
+	// Get the link status
+	//
+	do {
+	    bool no_carrier = false;
+	    string error_msg;
+
+	    if (ifconfig_media_get_link_status(if_name, no_carrier, error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("%s", error_msg.c_str());
+		break;
+	    }
+	    if (is_newlink || (no_carrier != fi.no_carrier()))
+		fi.set_no_carrier(no_carrier);
+	    break;
+	} while (false);
+	debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
 	if (is_newlink)

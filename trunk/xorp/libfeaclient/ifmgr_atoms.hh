@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.18 2005/08/31 00:41:39 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.19 2005/08/31 00:47:59 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -217,6 +217,9 @@ public:
     inline uint32_t	pif_index() const		{ return _pif; }
     inline void		set_pif_index(uint32_t pif)	{ _pif = pif; }
 
+    inline bool		no_carrier() const		{ return _no_carrier; }
+    inline void		set_no_carrier(bool no_carrier)	{ _no_carrier = no_carrier; }
+
     inline const VifMap& vifs() const			{ return _vifs; }
     inline VifMap& vifs()				{ return _vifs; }
     const IfMgrVifAtom*	find_vif(const string& vifname) const;
@@ -235,6 +238,7 @@ protected:
     uint32_t	_mtu;		// mtu in bytes
     Mac		_mac;		// MAC address
     uint32_t	_pif;		// Physical interface index
+    bool	_no_carrier;	// True if no carrier
 
     VifMap	_vifs;		// map of vifname-vif
 };
@@ -449,7 +453,7 @@ IfMgrIfTree::clear()
 
 inline
 IfMgrIfAtom::IfMgrIfAtom(const string& name)
-    : _name(name), _en(false), _mtu(0), _pif(0)
+    : _name(name), _en(false), _mtu(0), _pif(0), _no_carrier(false)
 {}
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.75 2005/09/21 04:58:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.76 2005/10/12 09:21:36 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -849,6 +849,36 @@ XrlFeaTarget::ifmgr_0_1_get_configured_mtu(
 
     if (e == XrlCmdError::OKAY())
 	mtu = fi->mtu();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_system_no_carrier(
+				// Input values,
+				const string&	ifname,
+				bool&		no_carrier)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.pull_config_get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	no_carrier = fi->no_carrier();
+
+    return e;
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_get_configured_no_carrier(
+				// Input values,
+				const string&	ifname,
+				bool&		no_carrier)
+{
+    const IfTreeInterface* fi = 0;
+    XrlCmdError e = _xifmgr.get_if(ifname, fi);
+
+    if (e == XrlCmdError::OKAY())
+	no_carrier = fi->no_carrier();
 
     return e;
 }

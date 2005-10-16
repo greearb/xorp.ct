@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.23 2005/03/25 02:53:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.24 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -48,6 +48,7 @@
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
+#include "ifconfig_media.hh"
 #include "kernel_utils.hh"
 #include "routing_socket_utils.hh"
 
@@ -79,6 +80,43 @@ static void rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 static void rtm_announce_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm,
 				    IfTree& it);
 #endif
+
+//
+// Get the link status
+//
+static int
+ifm_get_link_status(const struct if_msghdr* ifm, const string& if_name,
+		    bool& no_carrier, string& error_msg)
+{
+#if defined(LINK_STATE_UP) && defined(LINK_STATE_DOWN)
+    switch (ifm->ifm_data.ifi_link_state) {
+    case LINK_STATE_UNKNOWN:
+	// XXX: link state unknown
+	break;
+    case LINK_STATE_DOWN:
+	no_carrier = true;
+	break;
+    case LINK_STATE_UP:
+	no_carrier = false;
+	break;
+    default:
+	break;
+    }
+
+    UNUSED(if_name);
+    UNUSED(error_msg);
+    return (XORP_OK);
+#else // ! LINK_STATE_UP && LINK_STATE_DOWN
+
+    if (ifconfig_media_get_link_status(if_name, no_carrier, error_msg)
+	!= XORP_OK) {
+	return (XORP_ERROR);
+    }
+
+    UNUSED(ifm);
+    return (XORP_OK);
+#endif // ! LINK_STATE_UP && LINK_STATE_DOWN
+}
 
 bool
 IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
@@ -220,6 +258,21 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	//
 	if (is_newlink || (if_index != fv->pif_index()))
 	    fv->set_pif_index(if_index);
+
+	//
+	// Get the link status
+	//
+	bool no_carrier = false;
+	string error_msg;
+
+	if (ifm_get_link_status(ifm, if_name, no_carrier, error_msg)
+	    != XORP_OK) {
+	    XLOG_ERROR("%s", error_msg.c_str());
+	} else {
+	    if (is_newlink || (no_carrier != fi->no_carrier()))
+		fi->set_no_carrier(no_carrier);
+	}
+	debug_msg("no_carrier: %s\n", fi->no_carrier() ? "true" : "false");
 	
 	//
 	// Set the vif flags
@@ -396,6 +449,20 @@ rtm_ifinfo_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 	fi.set_enabled(flags & IFF_UP);
     }
     debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+
+    //
+    // Get the link status
+    //
+    bool no_carrier = false;
+    string error_msg;
+
+    if (ifm_get_link_status(ifm, if_name, no_carrier, error_msg) != XORP_OK) {
+	XLOG_ERROR("%s", error_msg.c_str());
+    } else {
+	if (is_newlink || (no_carrier != fi.no_carrier()))
+	    fi.set_no_carrier(no_carrier);
+    }
+    debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
     
     // XXX: vifname == ifname on this platform
     if (is_newlink)

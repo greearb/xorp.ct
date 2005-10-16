@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.14 2004/11/05 03:37:15 bms Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.15 2005/10/12 09:21:37 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -51,6 +51,8 @@ interface ifmgr/0.1 {
 	get_configured_mac ? ifname:txt -> mac:mac
 
 	get_configured_mtu ? ifname:txt -> mtu:u32
+
+	get_configured_no_carrier ? ifname:txt -> no_carrier:bool
 
 	get_configured_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 
@@ -241,6 +243,8 @@ interface ifmgr/0.1 {
 	get_system_mac ? ifname:txt -> mac:mac
 
 	get_system_mtu ? ifname:txt -> mtu:u32
+
+	get_system_no_carrier ? ifname:txt -> no_carrier:bool
 
 	get_system_vif_enabled ? ifname:txt & vif:txt -> enabled:bool
 

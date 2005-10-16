@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.14 2005/03/25 02:53:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.15 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -154,6 +154,7 @@ LibFeaClientBridge::interface_update(const string& ifname,
     _rm->push(new IfMgrIfSetMtu(ifname, ii->second.mtu()));
     _rm->push(new IfMgrIfSetMac(ifname, ii->second.mac()));
     _rm->push(new IfMgrIfSetPifIndex(ifname, ii->second.pif_index()));
+    _rm->push(new IfMgrIfSetNoCarrier(ifname, ii->second.no_carrier()));
 
     //
     // XXX TODO / TBD if need doing...
@@ -900,6 +901,12 @@ public:
 				ifi.name().c_str(),
 				ifi.pif_index(),
 				imi.pif_index());
+	}
+	if (ifi.no_carrier() != imi.no_carrier()) {
+	    _errlog += c_format("+ Interface %s no_carrier %s != %s\n",
+				ifi.name().c_str(),
+				ifi.no_carrier()? "true" : "false",
+				imi.no_carrier()? "true" : "false");
 	}
 
 	if (ifi.vifs().size() != imi.vifs().size()) {

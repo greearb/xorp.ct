@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.21 2005/03/25 02:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.22 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -232,7 +232,7 @@ get_proc_linux_iface_name(char* name, char* p)
 // tunnel interfaces, and because /proc/net/dev doesn't return information
 // about IP address aliases (e.g., interface names like eth0:0).
 // Hence, we have to follow the model used by Linux's ifconfig
-// (as part of the net-tools) collection to merge the information from
+// (as part of the net-tools collection) to merge the information from
 // both mechanisms. Enjoy!
 //
 static bool
@@ -444,6 +444,17 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 	fi.set_if_flags(flags);
 	fi.set_enabled(flags & IFF_UP);
 	debug_msg("enabled: %s\n", fi.enabled() ? "true" : "false");
+
+	//
+	// Get the link status
+	//
+	bool no_carrier = false;
+	if ((flags & IFF_UP) && !(flags & IFF_RUNNING))
+	    no_carrier = true;
+	else
+	    no_carrier = false;
+	fi.set_no_carrier(no_carrier);
+	debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
 	
 	// XXX: vifname == ifname on this platform
 	fi.add_vif(alias_if_name);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.23 2005/03/25 02:53:07 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.24 2005/08/18 15:45:47 bms Exp $"
 
 #include "fea_module.h"
 
@@ -47,6 +47,7 @@
 
 #include "ifconfig.hh"
 #include "ifconfig_get.hh"
+#include "ifconfig_media.hh"
 #include "kernel_utils.hh"
 
 
@@ -257,7 +258,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 		memset(&ifridx, 0, sizeof(ifridx));
 		strncpy(ifridx.ifr_name, if_name.c_str(),
 			sizeof(ifridx.ifr_name) - 1);
-	    
+
 		s = socket(AF_INET, SOCK_DGRAM, 0);
 		if (s < 0) {
 		    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
@@ -279,6 +280,50 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
 	    break;
 	} while (false);
 	debug_msg("MTU: %d\n", fi.mtu());
+
+	//
+	// Get the link status
+	//
+	do {
+	    bool no_carrier = false;
+	    string error_msg;
+
+#if defined(AF_LINK) && defined(LINK_STATE_UP) && defined(LINK_STATE_DOWN)
+	    if ((ifa->ifa_addr != NULL)
+		&& (ifa->ifa_addr->sa_family == AF_LINK)) {
+		// Link-level address
+		if (ifa->ifa_data != NULL) {
+		    const struct if_data* if_data = reinterpret_cast<const struct if_data*>(ifa->ifa_data);
+		    switch (if_data->ifi_link_state) {
+		    case LINK_STATE_UNKNOWN:
+			// XXX: link state unknown
+			break;
+		    case LINK_STATE_DOWN:
+			no_carrier = true;
+			break;
+		    case LINK_STATE_UP:
+			no_carrier = false;
+			break;
+		    default:
+			break;
+		    }
+		    if (is_newlink || no_carrier != fi.no_carrier())
+			fi.set_no_carrier(no_carrier);
+		    break;
+		}
+	    }
+#endif // AF_LINK && LINK_STATE_UP && LINK_STATE_DOWN
+
+	    if (ifconfig_media_get_link_status(if_name, no_carrier, error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("%s", error_msg.c_str());
+		break;
+	    }
+	    if (is_newlink || (no_carrier != fi.no_carrier()))
+		fi.set_no_carrier(no_carrier);
+	    break;
+	} while (false);
+	debug_msg("no_carrier: %s\n", fi.no_carrier() ? "true" : "false");
 	
 	//
 	// Get the flags

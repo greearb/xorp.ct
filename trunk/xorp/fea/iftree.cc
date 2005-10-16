@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.28 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.29 2005/10/12 08:50:24 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -576,7 +576,7 @@ IfTree::prune_bogus_deleted_state(const IfTree& old_iftree)
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
       _enabled(false), _discard(false), _is_discard_emulated(false),
-      _mtu(0), _if_flags(0)
+      _mtu(0), _no_carrier(false), _if_flags(0)
 {}
 
 bool
@@ -626,10 +626,13 @@ string
 IfTreeInterface::str() const
 {
     return c_format("Interface %s { enabled := %s } "
-		    "{ mtu := %u } { mac := %s } { flags := %u }",
-		    _ifname.c_str(), true_false(_enabled),
+		    "{ mtu := %u } { mac := %s } {no_carrier = %s} "
+		    "{ flags := %u }",
+		    _ifname.c_str(),
+		    true_false(_enabled),
 		    XORP_UINT_CAST(_mtu),
 		    _mac.str().c_str(),
+		    true_false(_no_carrier),
 		    XORP_UINT_CAST(_if_flags))
 	+ string(" ")
 	+ IfTreeItem::str();

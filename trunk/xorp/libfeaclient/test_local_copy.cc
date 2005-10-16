@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.6 2005/03/25 02:53:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/test_local_copy.cc,v 1.8 2005/08/18 15:34:24 bms Exp $"
 
 #include "libfeaclient_module.h"
 
@@ -87,7 +87,11 @@ test_main()
 	return 1;
     }
     if (IfMgrIfSetPifIndex("if0", 3).execute(t) == false) {
-	verbose_log("Failed to set pif index\n");
+	verbose_log("Failed to set pif_index\n");
+	return 1;
+    }
+    if (IfMgrIfSetNoCarrier("if0", true).execute(t) == false) {
+	verbose_log("Failed to set no_carrier\n");
 	return 1;
     }
 

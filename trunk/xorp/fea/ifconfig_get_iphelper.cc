@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.2 2005/08/18 15:45:46 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_iphelper.cc,v 1.3 2005/08/23 22:29:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -237,6 +237,53 @@ IfConfigGetIPHelper::read_config(IfTree& it)
 	uint32_t mtu = pIfTable->table[i].dwMtu;
 	if (is_newlink || (mtu != fi.mtu()))
 	    fi.set_mtu(mtu);
+
+	// Link status
+	bool no_carrier = false;
+	switch (pIfTable->table[i].dwOperStatus) {
+	case MIB_IF_OPER_STATUS_NON_OPERATIONAL:
+	    //
+	    // LAN adapter has been disabled, for example because of an
+	    // address conflict.
+	    //
+	    no_carrier = true;
+	    break;
+	case MIB_IF_OPER_STATUS_UNREACHABLE:
+	    //
+	    // WAN adapter that is not connected.
+	    //
+	    no_carrier = true;
+	    break;
+	case MIB_IF_OPER_STATUS_DISCONNECTED:
+	    //
+	    // For LAN adapters: network cable disconnected.
+	    // For WAN adapters: no carrier.
+	    //
+	    no_carrier = true;
+	    break;
+	case MIB_IF_OPER_STATUS_CONNECTING:
+	    //
+	    // WAN adapter that is in the process of connecting.
+	    //
+	    no_carrier = true;
+	    break;
+	case MIB_IF_OPER_STATUS_CONNECTED:
+	    //
+	    // WAN adapter that is connected to a remote peer.
+	    //
+	    no_carrier = false;
+	    break;
+	case MIB_IF_OPER_STATUS_OPERATIONAL:
+	    //
+	    // Default status for LAN adapters.
+	    //
+	    no_carrier = false;
+	    break;
+	default:
+	    break;
+	}
+	if (is_newlink || no_carrier != fi.no_carrier())
+	    fi.set_no_carrier(no_carrier);
 
 	// XXX: Always set enclosing ifname as enabled.
 	fi.set_enabled(true);
