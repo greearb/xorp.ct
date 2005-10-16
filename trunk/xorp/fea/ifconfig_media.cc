@@ -52,7 +52,7 @@
 //
 // Get the link status
 //
-static int
+int
 ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 			       string& error_msg)
 {
