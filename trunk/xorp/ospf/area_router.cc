@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.120 2005/10/14 19:17:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.121 2005/10/16 22:22:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -626,9 +626,31 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 }
 
 template <typename A>
+bool
+AreaRouter<A>::external_area_type() const
+{
+    bool accept = true;
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	accept = true;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	accept = false;
+	break;
+    }
+    
+    return accept;
+}
+
+template <typename A>
 void
 AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
 {
+    if (!external_area_type())
+	return;
+
     XLOG_ASSERT(lsar->external());
     size_t index;
     if (find_lsa(lsar, index)) {
@@ -644,6 +666,9 @@ template <typename A>
 void
 AreaRouter<A>::external_shove()
 {
+    if (!external_area_type())
+	return;
+
     push_lsas();
 }
 
@@ -651,6 +676,9 @@ template <typename A>
 void
 AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 {
+    if (!external_area_type())
+	return;
+
     XLOG_ASSERT(lsar->external());
     size_t index;
     if (!find_lsa(lsar, index)) {
@@ -667,6 +695,9 @@ template <typename A>
 void
 AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
 {
+    if (!external_area_type())
+	return;
+
     XLOG_ASSERT(lsar->external());
     size_t index;
     if (!find_lsa(lsar, index)) {
