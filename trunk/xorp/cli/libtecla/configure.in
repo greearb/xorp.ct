@@ -118,6 +118,13 @@ AC_CHECK_LIB(curses, tigetstr, [
   AC_CHECK_HEADER(termcap.h, AC_DEFINE(HAVE_TERMCAP_H))
 ])])])
 
+dnl
+dnl Check for various headers
+dnl
+AC_CHECK_HEADER(sys/ioctl.h, AC_DEFINE(HAVE_SYS_IOCTL_H))
+AC_CHECK_HEADER(unistd.h, AC_DEFINE(HAVE_UNISTD_H))
+AC_CHECK_HEADER(termios.h, AC_DEFINE(HAVE_TERMIOS_H))
+
 dnl The following variable lists the targets that will be created if
 dnl the user runs make without any arguments. Initially we assume
 dnl that we can create both the normal and the reentrant versions
