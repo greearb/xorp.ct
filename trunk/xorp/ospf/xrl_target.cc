@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.12 2005/10/16 23:32:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.13 2005/10/17 07:25:36 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -237,24 +237,28 @@ XrlOspfV2Target::policy_backend_0_1_push_routes()
 }
 
 XrlCmdError
-XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& /*network*/,
+XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
 					       const bool& /*unicast*/,
 					       const bool& /*multicast*/,
-					       const IPv4& /*nexthop*/,
-					       const uint32_t& /*metric*/,
-					       const XrlAtomList& /*policytags*/)
+					       const IPv4& nexthop,
+					       const uint32_t& metric,
+					       const XrlAtomList& policytags)
 {
-    XLOG_WARNING("TBD - policy_redist4_0_1_add_route4");
+    if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
+	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& /*network*/,
+XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
 						  const bool& /*unicast*/,
 						  const bool& /*multicast*/)
 {
-    XLOG_WARNING("TBD - policy_redist4_0_1_delete_route4");
+    if (!_ospf.withdraw_route(network)) {
+	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
+    }
 
     return XrlCmdError::OKAY();
 }

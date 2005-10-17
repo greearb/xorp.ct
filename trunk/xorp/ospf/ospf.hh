@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.58 2005/10/17 07:06:02 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.59 2005/10/17 07:25:36 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -291,6 +291,7 @@ pb(bool val)
 #include "routing_table.hh"
 #include "trace.hh"
 #include "policy/backend/policy_filters.hh"
+#include "policy/backend/policytags.hh"
 
 template <typename A>
 class Ospf {
@@ -509,6 +510,29 @@ class Ospf {
      * Push routes through policy filters for re-filtering.
      */
     void push_routes();
+
+    /**
+     * Originate a route.
+     *
+     * @param net to announce
+     * @param nexthop to forward to
+     * @param metric 
+     * @param policytags policy-tags associated with route.
+     *
+     * @return true on success
+     */
+    bool originate_route(const IPNet<A>& net, const A& nexthop,
+			 const uint32_t& metric,
+			 const PolicyTags& policytags);
+
+    /**
+     * Withdraw a route.
+     *
+     * @param net to withdraw
+     *
+     * @return true on success
+     */
+    bool withdraw_route(const IPNet<A>&	net);
 
     /**
      * Get the current OSPF version.
