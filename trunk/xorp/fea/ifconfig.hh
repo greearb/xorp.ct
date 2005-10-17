@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig.hh,v 1.44 2005/08/18 15:45:46 bms Exp $
+// $XORP: xorp/fea/ifconfig.hh,v 1.45 2005/10/12 08:51:54 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_HH__
 #define __FEA_IFCONFIG_HH__
@@ -81,6 +81,9 @@ public:
 
     const IfTree& pulled_config()	{ return (_pulled_config); }
     IfTree& pushed_config()		{ return (_pushed_config); }
+
+    IfTree* local_config() { return (_local_config); }
+    void    hook_local_config(IfTree* v) { _local_config = v; }
 
     /**
      * Test whether the original configuration should be restored on shutdown.
@@ -407,6 +410,7 @@ private:
     IfTree		_original_config; // The IfTree on startup
     bool		_restore_original_config_on_shutdown; // If true, then
 				//  restore the original config on shutdown
+    IfTree*		_local_config;	// The IfTree with the local config
 
     IfConfigGet*		_ifc_get_primary;
     IfConfigSet*		_ifc_set_primary;

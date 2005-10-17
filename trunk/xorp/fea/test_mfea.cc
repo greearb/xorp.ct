@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_mfea.cc,v 1.23 2005/08/18 15:45:52 bms Exp $"
+#ident "$XORP: xorp/fea/test_mfea.cc,v 1.24 2005/09/07 20:15:44 pavlin Exp $"
 
 //
 // MFEA test program.
@@ -187,8 +187,14 @@ mfea_main(const string& finder_hostname, uint16_t finder_port,
     InterfaceManager ifm(ifconfig);
 
     //
+    // Hook IfTree of interface manager into ifconfig so it can
+    // be updated by the ifconfig observers as appropriate.
+    //
+    ifconfig.hook_local_config(&ifm.iftree());
+
+    //
     // Hook IfTree of interface manager into libfeaclient
-    // so it can read config to determine deltas
+    // so it can read config to determine deltas.
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);

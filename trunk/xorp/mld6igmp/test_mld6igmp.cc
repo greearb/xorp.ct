@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.45 2005/08/18 15:35:30 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.46 2005/09/07 20:15:46 pavlin Exp $"
 
 
 //
@@ -193,8 +193,14 @@ mld6igmp_main(const string& finder_hostname, uint16_t finder_port,
     InterfaceManager ifm(ifconfig);
 
     //
+    // Hook IfTree of interface manager into ifconfig so it can
+    // be updated by the ifconfig observers as appropriate.
+    //
+    ifconfig.hook_local_config(&ifm.iftree());
+
+    //
     // Hook IfTree of interface manager into libfeaclient
-    // so it can read config to determine deltas
+    // so it can read config to determine deltas.
     //
     const IfTree& iftree = ifm.iftree();
     lfc_bridge.set_iftree(&iftree);
