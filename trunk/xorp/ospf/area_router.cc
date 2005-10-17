@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.124 2005/10/17 00:44:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.125 2005/10/17 18:57:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -563,14 +563,13 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 	}
     }
 
-    if (!announce) {
 #ifdef PARANOIA
-	// Make sure its not being announced
-	size_t index;
-	if (find_lsa(lsar, index))
-	    XLOG_FATAL("LSA should not be announced \n%s",
-		       cstring(*_db[index]));
+    // Make sure its not being announced
+    size_t index;
+    if (find_lsa(lsar, index))
+	XLOG_FATAL("LSA should not be announced \n%s", cstring(*_db[index]));
 #endif
+    if (!announce) {
 	return;
     }
     add_lsa(lsar);
@@ -608,6 +607,9 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     Lsa::LsaRef lsar = summary_build(area, net, rt, announce);
     if (0 == lsar.get())
 	return;
+
+    // Set the advertising router otherwise the lookup will fail.
+    lsar->get_header().set_advertising_router(_ospf.get_router_id());
 
     if (!announce) {
 #ifdef PARANOIA
