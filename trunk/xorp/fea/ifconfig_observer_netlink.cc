@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.11 2005/03/05 01:41:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.12 2005/03/25 02:53:07 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -146,9 +146,18 @@ IfConfigObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
 {
     if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(),
 						 data, nbytes)
-	!= true)
+	!= true) {
 	return;
+    }
+
     ifc().report_updates(ifc().live_config(), true);
+    if (ifc().local_config() != NULL) {
+	// Propagate the changes from the live config to the local config
+	IfTree& local_config = *ifc().local_config();
+	local_config.track_live_config_state(ifc().live_config());
+	ifc().report_updates(local_config, false);
+	local_config.finalize_state();
+    }
     ifc().live_config().finalize_state();
 }
 
