@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.11 2005/10/14 17:53:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.12 2005/10/16 23:32:00 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -196,18 +196,32 @@ XrlOspfV3Target::raw_packet6_client_0_1_recv(
 }
 
 XrlCmdError
-XrlOspfV2Target::policy_backend_0_1_configure(const uint32_t& /*filter*/,
-					      const string& /*conf*/)
+XrlOspfV2Target::policy_backend_0_1_configure(const uint32_t& filter,
+					      const string& conf)
 {
-    XLOG_WARNING("TBD - policy_backend_0_1_configure");
+    debug_msg("policy filter: %u conf: %s\n", filter, conf.c_str());
+
+    try {
+	_ospf.configure_filter(filter,conf);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +
+					   e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& /*filter*/)
+XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& filter)
 {
-    XLOG_WARNING("TBD - policy_backend_0_1_reset");
+    debug_msg("policy filter reset: %u\n", filter);
+
+    try {
+	_ospf.reset_filter(filter);
+    } catch(const PolicyException& e){ 
+	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
+					   e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -215,7 +229,9 @@ XrlOspfV2Target::policy_backend_0_1_reset(const uint32_t& /*filter*/)
 XrlCmdError
 XrlOspfV2Target::policy_backend_0_1_push_routes()
 {
-    XLOG_WARNING("TBD - policy_backend_0_1_push_routes");
+    debug_msg("policy route push\n");
+
+    _ospf.push_routes();
 
     return XrlCmdError::OKAY();
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.41 2005/10/10 12:21:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.42 2005/10/13 16:39:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -373,6 +373,27 @@ Ospf<A>::delete_route(IPNet<A> net)
     debug_msg("Net %s\n", cstring(net));
 
     return _io->delete_route(net);
+}
+
+template <typename A>
+void
+Ospf<A>::configure_filter(const uint32_t& filter, const string& conf)
+{
+    _policy_filters.configure(filter,conf);
+}
+
+template <typename A>
+void
+Ospf<A>::reset_filter(const uint32_t& filter)
+{
+    _policy_filters.reset(filter);
+}
+
+template <typename A>
+void
+Ospf<A>::push_routes()
+{
+    XLOG_WARNING("TBD - policy route pushing");
 }
 
 template class Ospf<IPv4>;

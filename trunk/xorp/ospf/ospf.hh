@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.57 2005/10/17 01:02:04 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.58 2005/10/17 07:06:02 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -489,6 +489,26 @@ class Ospf {
      * Delete route
      */
     bool delete_route(IPNet<A> net);
+
+    /**
+     * Configure a policy filter
+     *
+     * @param filter Id of filter to configure.
+     * @param conf Configuration of filter.
+     */
+    void configure_filter(const uint32_t& filter, const string& conf);
+
+    /**
+     * Reset a policy filter.
+     *
+     * @param filter Id of filter to reset.
+     */
+    void reset_filter(const uint32_t& filter);
+
+    /**
+     * Push routes through policy filters for re-filtering.
+     */
+    void push_routes();
 
     /**
      * Get the current OSPF version.
