@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.3 2005/10/17 08:38:14 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.4 2005/10/17 10:01:12 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -88,11 +88,20 @@ class External {
      */
     bool withdraw(const IPNet<A>& net);
 
+    /**
+     * Is this an AS boundary router?
+     */
+    bool as_boundary_router_p() const {
+	return _originating != 0;
+    }
+    
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     map<OspfTypes::AreaID, AreaRouter<A> *>& _areas;	// All the areas
 
-    ASExternalDatabase _lsas;			// Stored AS-External-LSAs.
+    ASExternalDatabase _lsas;		// Stored AS-External-LSAs.
+    uint32_t _originating;		// Number of AS-External-LSAs
+					// that are currently being originated.
 
     /**
      * Find this LSA

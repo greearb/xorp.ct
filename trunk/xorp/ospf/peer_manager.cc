@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.65 2005/10/17 08:03:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.66 2005/10/17 08:38:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -664,9 +664,7 @@ template <typename A>
 bool
 PeerManager<A>::as_boundary_router_p() const
 {
-    // XXX - By definition, we don't yet have a way of redisting
-    // routes from another protocol.
-    return false;
+    return _external.as_boundary_router_p();
 }
 
 template <typename A>

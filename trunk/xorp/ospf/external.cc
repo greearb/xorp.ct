@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.4 2005/10/17 08:38:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.5 2005/10/17 10:01:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -45,7 +45,7 @@
 template <typename A>
 External<A>::External(Ospf<A>& ospf,
 		      map<OspfTypes::AreaID, AreaRouter<A> *>& areas)
-    : _ospf(ospf), _areas(areas)
+    : _ospf(ospf), _areas(areas), _originating(0)
 {
 }
 
@@ -124,6 +124,8 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 		      const uint32_t& metric,
 		      const PolicyTags& /*policytags*/)
 {
+    _originating++;
+
     OspfTypes::Version version = _ospf.version();
     ASExternalLsa *aselsa = new ASExternalLsa(version);
     Lsa_header& header = aselsa->get_header();
@@ -195,6 +197,8 @@ template <typename A>
 bool
 External<A>::withdraw(const IPNet<A>& net)
 {
+    _originating--;
+
     // Construct an LSA that will match the one in the database.
     OspfTypes::Version version = _ospf.version();
     ASExternalLsa *aselsa = new ASExternalLsa(version);
