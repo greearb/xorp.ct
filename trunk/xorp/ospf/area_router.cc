@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.123 2005/10/17 00:16:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.124 2005/10/17 00:44:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1800,7 +1800,8 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
 
     // This is a spurious LSA that was probably originated by us in
     // the past just get rid of it by setting it to MaxAge.
-    lsar->set_maxage();
+    if (!lsar->maxage())
+	lsar->set_maxage();
 #ifdef	MAX_AGE_IN_DATABASE
     debug_msg("Adding MaxAge lsa to database\n%s\n", cstring(*lsar));
     add_lsa(lsar);
