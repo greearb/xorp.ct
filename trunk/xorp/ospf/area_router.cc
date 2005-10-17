@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.122 2005/10/16 23:59:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.123 2005/10/17 00:16:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -49,6 +49,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  OspfTypes::AreaType area_type) 
     : _ospf(ospf), _area(area), _area_type(area_type),
       _summaries(true), _stub_default_cost(0),
+      _external_flooding(false),
       _last_entry(0), _allocated_entries(0), _readers(0),
       _queue(ospf.get_eventloop(),
 	     OspfTypes::MinLSInterval,
@@ -1012,7 +1013,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
 	    // If this is an AS-external-LSA send it to all areas.
 	    if ((*i)->external())
-		flood_all_areas((*i), true /* ADD */);
+		external_flood_all_areas((*i));
 
 	    // Set to true if the LSA was multicast out of this
 	    // interface. If it was, there is no requirement to send an
@@ -1089,6 +1090,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 
  out:
     push_lsas();
+    external_push_all_areas();
     routing_end();
 }
 
@@ -1119,6 +1121,8 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
 {
     size_t index;
 
+    XLOG_ASSERT(!lsar->external());
+
     if (!find_lsa(lsar, index))
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
 
@@ -1142,9 +1146,6 @@ AreaRouter<A>::maxage_reached(Lsa::LsaRef lsar, size_t i)
     delete_lsa(lsar, index, false /* Don't invalidate */);
 #endif
     publish_all(lsar);
-
-    if (lsar->external())
-	flood_all_areas(lsar, false /* DELETE */);
 
     // Clear the timer otherwise there is a circular dependency.
     // The LSA contains a XorpTimer that points back to the LSA.
@@ -1668,19 +1669,24 @@ AreaRouter<A>::push_lsas()
 
 template <typename A>
 void
-AreaRouter<A>::flood_all_areas(Lsa::LsaRef lsar, bool add)
+AreaRouter<A>::external_flood_all_areas(Lsa::LsaRef lsar)
 {
-    debug_msg("Flood all areas %s : %s\n", add ? "add" : "delete",
-	      cstring(*lsar));
+    debug_msg("Flood all areas %s\n", cstring(*lsar));
 
-    XLOG_WARNING("TBD send external-LSAs to other areas");
+    _external_flooding = true;
+    PeerManager<A>& pm = _ospf.get_peer_manager();
+    pm.external_announce(_area, lsar);
 }
 
 template <typename A>
 void
-AreaRouter<A>::push_all_areas()
+AreaRouter<A>::external_push_all_areas()
 {
-    XLOG_WARNING("TBD push all areas");
+    if (_external_flooding) {
+	PeerManager<A>& pm = _ospf.get_peer_manager();
+	pm.external_shove(_area);
+	_external_flooding = false;
+    }
 }
 
 template <typename A>

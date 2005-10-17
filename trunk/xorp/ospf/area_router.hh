@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.73 2005/10/16 22:22:32 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.74 2005/10/16 23:59:59 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -402,6 +402,8 @@ class AreaRouter : Subsystem {
     uint32_t _stub_default_cost;	// The cost of the default
 					// route that is injected into
 					// a stub area.
+    bool _external_flooding;		// True if AS-External-LSAs
+					// are being flooded.
 
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
     Spt<Vertex> _spt;			// SPT computation unit.
@@ -638,18 +640,16 @@ class AreaRouter : Subsystem {
     /**
      * Send this LSA to all area's.
      *
-     * This is an External-LSA being sent to other areas.
+     * This is an AS-External-LSA being sent to other areas.
      *
      * @param lsar The LSA to publish
-     * @param add if true add to the database as well as flooding, if
-     * false it is already in the database remove and flood.
      */
-    void flood_all_areas(Lsa::LsaRef lsar, bool add);
+    void external_flood_all_areas(Lsa::LsaRef lsar);
 
     /**
-     * Notify all areas this is the last of the all areas LSAs.
+     * Notify all areas this is the last of the AS-External-LSAs.
      */
-    void push_all_areas();
+    void external_push_all_areas();
 
     /**
      * @return true if any of the neigbours are in state Exchange or Loading.
