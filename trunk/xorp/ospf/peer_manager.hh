@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.43 2005/10/17 00:01:06 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.44 2005/10/17 01:02:04 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -49,8 +49,8 @@ template <typename A> class External;
 template <typename A>
 class PeerManager {
  public:
-    PeerManager(Ospf<A> &ospf)
-	: _ospf(ospf), _next_peerid(ALLPEERS + 1)
+    PeerManager(Ospf<A>& ospf)
+	: _ospf(ospf), _next_peerid(ALLPEERS + 1), _external(ospf, _areas)
     {}
 
     ~PeerManager();
@@ -424,7 +424,7 @@ class PeerManager {
 
     map<OspfTypes::AreaID, AreaRouter<A> *> _areas;	// All the areas
 
-    External<A> _external_lsa;		// Management of AS-External-LSAs.
+    External<A> _external;		// Management of AS-External-LSAs.
 
     /**
      * Generate PeerID.

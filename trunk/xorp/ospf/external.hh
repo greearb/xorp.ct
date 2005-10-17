@@ -13,10 +13,40 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/external.hh,v 1.1 2005/10/17 01:02:04 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
+
+/**
+ * Storage for AS-External-LSAs with efficient access.
+ */
+class ASExternalDatabase {
+ public:
+    struct compare {
+	bool operator ()(const Lsa::LsaRef a, const Lsa::LsaRef b) const {
+	    if (a->get_header().get_link_state_id() <
+		b->get_header().get_link_state_id())
+		return true;
+	    if (a->get_header().get_advertising_router() <
+		b->get_header().get_advertising_router())
+		return true;
+	    return false;
+	}
+    };
+
+    typedef set <Lsa::LsaRef, compare>::iterator iterator;
+
+    iterator begin() { return _lsas.begin(); }
+    iterator end() { return _lsas.end(); }
+    void erase(iterator i) { _lsas.erase(i); }
+    void insert(Lsa::LsaRef lsar) { _lsas.insert(lsar); }
+
+    iterator find(Lsa::LsaRef lsar);
+
+ private:
+    set <Lsa::LsaRef, compare> _lsas;		// Stored AS-External-LSAs.
+};
 
 /**
  * Handle AS-External-LSAs.
@@ -24,6 +54,56 @@
 template <typename A>
 class External {
  public:
+    External(Ospf<A>& ospf, map<OspfTypes::AreaID, AreaRouter<A> *>& areas);
+
+    /**
+     * Candidate for announcing to other areas. Store this LSA for
+     * future replay into other areas. Also arrange for the MaxAge
+     * timer to start running.
+     *
+     * @param area the AS-External-LSA came from.
+     *
+     * @return true if this LSA should be propogated to other areas.
+     */
+    bool announce(OspfTypes::AreaID area, Lsa::LsaRef lsar);
+
+    /**
+     * Called to complete a series of calls to announce().
+     */
+    bool shove(OspfTypes::AreaID area);
+
+    /**
+     * Provide this area with the stored AS-External-LSAs.
+     */
+    void push(AreaRouter<A> *area_router);
+
+ private:
+    Ospf<A>& _ospf;			// Reference to the controlling class.
+    map<OspfTypes::AreaID, AreaRouter<A> *>& _areas;	// All the areas
+
+    ASExternalDatabase _lsas;			// Stored AS-External-LSAs.
+
+    /**
+     * Find this LSA
+     */
+    ASExternalDatabase::iterator find_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * Add this LSA to the database if it already exists replace it
+     * with this entry.
+     */
+    void update_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * Delete this LSA from the database.
+     */
+    void delete_lsa(Lsa::LsaRef lsar);
+
+    /**
+     * This LSA has reached MaxAge get rid of it from the database and
+     * flood it out of all areas.
+     */
+    void maxage_reached(Lsa::LsaRef lsar);
 };
 
 #endif // __OSPF_EXTERNAL_HH__
