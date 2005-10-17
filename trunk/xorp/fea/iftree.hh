@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.30 2005/10/12 08:50:24 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.31 2005/10/16 07:10:35 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -223,6 +223,27 @@ public:
      * @return the modified configuration tree.
      */
     IfTree& prune_bogus_deleted_state(const IfTree& old_iftree);
+
+    /**
+     * Track modifications from the live config state as read from the kernel.
+     *
+     * All interface-related modifications as received by the observer
+     * mechanism are recorded in a local copy of the interface tree
+     * (the live configuration tree). Some of those modifications however
+     * should be propagated to the XORP local configuration tree.
+     * This method updates a local configuration tree with only the relevant
+     * modifications of the live configuration tree:
+     * - Only if an item is in the local configuration tree, its status
+     *   may be modified.
+     * - If the "no_carrier" flag of an interface is changed in the live
+     *   configuration tree, the corresponding flag in the local configuration
+     *   tree is updated.
+     * 
+     * @param other the live configuration tree whose modifications are
+     * tracked.
+     * @return modified configuration structure.
+     */
+    IfTree& track_live_config_state(const IfTree& other);
 
     /**
      * Delete interfaces labelled as ready for deletion, call finalize_state()
