@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.55 2005/10/14 19:17:42 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.56 2005/10/14 20:02:58 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -287,6 +287,7 @@ pb(bool val)
 #include "packet.hh"
 #include "transmit.hh"
 #include "peer_manager.hh"
+#include "external.hh"
 #include "routing_table.hh"
 #include "trace.hh"
 
