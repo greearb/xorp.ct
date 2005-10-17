@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.28 2005/08/31 22:02:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.29 2005/10/10 04:50:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -1056,7 +1056,7 @@ IfConfigSetClick::ClickConfigGenerator::execute(const string& xorp_config,
 	return (XORP_ERROR);
     }
 
-    if (fwrite(xorp_config.c_str(), xorp_config.size(), 1, fp) !=
+    if (fwrite(xorp_config.c_str(), sizeof(char), xorp_config.size(), fp) !=
 	static_cast<size_t>(xorp_config.size())) {
 	error_msg = c_format("Error writing to temporary file: %s",
 			     strerror(errno));
