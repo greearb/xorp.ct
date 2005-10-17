@@ -13,8 +13,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/external.cc,v 1.1 2005/10/17 01:02:04 atanu Exp $"
 
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
+
+#include "config.h"
+#include <list>
+#include <set>
+
+#include "ospf_module.h"
+
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
+
+#include "libxorp/status_codes.h"
+#include "libxorp/eventloop.hh"
+
+#include "ospf.hh"
+#include "external.hh"
 
 template class External<IPv4>;
 template class External<IPv6>;
