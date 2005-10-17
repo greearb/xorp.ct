@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.3 2005/10/17 06:52:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.4 2005/10/17 08:38:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,19 +98,136 @@ External<A>::push(AreaRouter<A> *area_router)
 	area_router->external_announce((*i), true /* push */);
 }
 
-template <typename A>
-bool
-External<A>::announce(const IPNet<A>& /*net*/, const A& /*nexthop*/,
-		      const uint32_t& /*metric*/,
-		      const PolicyTags& /*policytags*/)
+template <>
+void 
+External<IPv4>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv4> net,
+				IPv4 nexthop)
 {
-    return true;
+    Lsa_header& header = aselsa->get_header();
+    header.set_link_state_id(ntohl(net.masked_addr().addr()));
+    aselsa->set_network_mask(ntohl(net.netmask().addr()));
+    aselsa->set_forwarding_address_ipv4(nexthop);
+}
+
+template <>
+void 
+External<IPv6>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv6> net,
+				IPv6 nexthop)
+{
+    aselsa->set_network(net);
+    aselsa->set_forwarding_address_ipv6(nexthop);
 }
 
 template <typename A>
 bool
-External<A>::withdraw(const IPNet<A>& /*net*/)
+External<A>::announce(const IPNet<A>& net, const A& nexthop,
+		      const uint32_t& metric,
+		      const PolicyTags& /*policytags*/)
 {
+    OspfTypes::Version version = _ospf.version();
+    ASExternalLsa *aselsa = new ASExternalLsa(version);
+    Lsa_header& header = aselsa->get_header();
+    
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(_ospf.get_peer_manager().
+			   compute_options(OspfTypes::NORMAL));
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD - AS-External-LSA set field values");
+	break;
+    }
+
+    set_net_nexthop(aselsa, net, nexthop);
+    header.set_advertising_router(_ospf.get_router_id());
+    aselsa->set_metric(metric);
+    aselsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    aselsa->record_creation_time(now);
+    aselsa->encode();
+    Lsa::LsaRef lsar = aselsa;
+
+    // This would be a good place to manipulate the AS-External-LSA
+    // with the policy tags.
+
+    update_lsa(lsar);
+
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++) {
+	(*i).second->external_announce(lsar, false /* push */);
+	(*i).second->external_shove();
+    }
+
+    prime(lsar);
+
+    return true;
+}
+
+template <typename A>
+void
+External<A>::prime(Lsa::LsaRef lsar)
+{
+    lsar->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
+			 callback(this, &External<A>::refresh, lsar));
+}
+
+template <typename A>
+void
+External<A>::refresh(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->valid());
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    lsar->update_age_and_seqno(now);
+
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++) {
+	(*i).second->external_refresh(lsar);
+    }
+
+    prime(lsar);
+}
+
+template <typename A>
+bool
+External<A>::withdraw(const IPNet<A>& net)
+{
+    // Construct an LSA that will match the one in the database.
+    OspfTypes::Version version = _ospf.version();
+    ASExternalLsa *aselsa = new ASExternalLsa(version);
+    Lsa_header& header = aselsa->get_header();
+
+    switch(version) {
+    case OspfTypes::V2:
+	set_net_nexthop(aselsa, net, 0);
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD - Set link state id");
+	break;
+    }
+
+    header.set_advertising_router(_ospf.get_router_id());
+    
+    Lsa::LsaRef searchlsar = aselsa;
+
+    ASExternalDatabase::iterator i = find_lsa(searchlsar);
+    if (i == _lsas.end()) {
+	XLOG_ERROR("Lsa not found for net %s", cstring(net));
+	return false;
+    }
+
+    Lsa::LsaRef lsar = *i;
+
+    if (!lsar->get_self_originating()) {
+	XLOG_FATAL("Matching LSA is not self originated %s", cstring(*lsar));
+	return false;
+    }
+
+    lsar->set_maxage();
+    maxage_reached(lsar);
 
     return true;
 }
