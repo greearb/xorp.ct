@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.41 2005/10/10 12:21:28 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.42 2005/10/13 16:39:04 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -371,6 +371,48 @@ class PeerManager {
     bool area_range_covered(OspfTypes::AreaID area, IPNet<A> net,
 			    bool& advertise);
     
+    /**
+     * An AS-External-LSA has arrived from this area announce it to
+     * all others.
+     *
+     * The LSAs should not be scheduled for transmission until the
+     * external_shove() is seen. In many cases a number of LSAs may
+     * arrive in a single packet, waiting for the external_shove()
+     * offers an opportunity for aggregation.
+     *
+     */
+    bool external_announce(OspfTypes::AreaID area, Lsa::LsaRef lsar);
+
+    /**
+     * Create an AS-External-LSA and announce it to all appropriate
+     * areas.
+     */
+    bool external_announce(IPNet<A>& net, A nexthop, uint32_t metric);
+
+    /**
+     * An AS-External-LSA is being withdrawn from this area withdraw from
+     * all others.
+     */
+    bool external_withdraw(OspfTypes::AreaID area, Lsa::LsaRef lsar);
+
+    /**
+     * Withdraw a previously createed and announced AS-External-LSA
+     * from all areas.
+     */
+    bool external_withdraw(IPNet<A>& net);
+
+    /**
+     * Called to complete a series of calls to external_announce(area).
+     */
+    bool external_shove(OspfTypes::AreaID area);
+
+    /**
+     * When a new area is configured it can use this method to 
+     *
+     * @param area that all AS-External-LSAs should be sent to.
+     */
+    void external_push(OspfTypes::AreaID area);
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     

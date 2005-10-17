@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.61 2005/10/10 12:21:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.62 2005/10/13 16:39:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -796,6 +796,59 @@ PeerManager<A>::area_range_covered(OspfTypes::AreaID area, IPNet<A> net,
     }
 
     return area_router->area_range_covered(net, advertise);
+}
+
+template <typename A>
+bool
+PeerManager<A>::external_announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
+{
+    debug_msg("Area %s LSA %s\n", pr_id(area).c_str(), cstring(*lsar));
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::external_announce(IPNet<A>& net, A nexthop, uint32_t metric)
+{
+    debug_msg("Net %s nexthop %s metric %u\n", cstring(net), cstring(nexthop),
+	      metric);
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::external_withdraw(OspfTypes::AreaID area, Lsa::LsaRef lsar)
+{
+    debug_msg("Area %s LSA %s\n", pr_id(area).c_str(), cstring(*lsar));
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::external_withdraw(IPNet<A>& net)
+{
+    debug_msg("Net %s\n", cstring(net));
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::external_shove(OspfTypes::AreaID area)
+{
+    debug_msg("Area %s\n", pr_id(area).c_str());
+
+    return true;
+}
+
+template <typename A>
+void
+PeerManager<A>::external_push(OspfTypes::AreaID area)
+{
+    debug_msg("Area %s\n", pr_id(area).c_str());
 }
 
 template class PeerManager<IPv4>;
