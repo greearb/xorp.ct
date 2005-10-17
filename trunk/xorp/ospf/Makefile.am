@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.18 2005/10/10 12:59:37 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.19 2005/10/17 01:02:03 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -72,6 +72,7 @@ libospf_la_SOURCES  += ospf.hh
 libospf_la_SOURCES  += packet.hh
 libospf_la_SOURCES  += peer_manager.hh
 libospf_la_SOURCES  += peer.hh
+libospf_la_SOURCES  += policy_varrw.hh
 libospf_la_SOURCES  += routing_table.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
@@ -85,6 +86,7 @@ libospf_la_SOURCES  += ospf.cc
 libospf_la_SOURCES  += packet.cc
 libospf_la_SOURCES  += peer_manager.cc
 libospf_la_SOURCES  += peer.cc
+libospf_la_SOURCES  += policy_varrw.cc
 libospf_la_SOURCES  += routing_table.cc
 libospf_la_SOURCES  += xrl_io.cc
 libospf_la_SOURCES  += xrl_target.cc

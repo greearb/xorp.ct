@@ -122,7 +122,7 @@ test_peering_SOURCES = test_peering.cc
 test_routing_SOURCES = test_common.hh test_routing.cc
 
 # -- Library Sources
-libospf_la_SOURCES = area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc routing_table.cc xrl_io.cc xrl_target.cc
+libospf_la_SOURCES = area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
@@ -140,7 +140,7 @@ libospf_la_LDFLAGS =
 libospf_la_LIBADD =
 am_libospf_la_OBJECTS = area_router.lo external.lo fletcher_checksum.lo \
 	lsa.lo ospf.lo packet.lo peer_manager.lo peer.lo \
-	routing_table.lo xrl_io.lo xrl_target.lo
+	policy_varrw.lo routing_table.lo xrl_io.lo xrl_target.lo
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
@@ -284,6 +284,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/fletcher_checksum.Plo $(DEPDIR)/lsa.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/ospf.Plo $(DEPDIR)/packet.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/peer.Plo $(DEPDIR)/peer_manager.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/policy_varrw.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/routing_table.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_checksum.Po $(DEPDIR)/test_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/test_routing.Po \
@@ -404,6 +405,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_manager.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routing_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_checksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
