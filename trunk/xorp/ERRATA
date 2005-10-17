@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.20 2005/05/01 17:06:27 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.21 2005/05/01 17:09:27 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -95,6 +95,13 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       Linux kernel developers, but the problem is still unsolved:
 
       https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=121697
+
+    - The mechanism for tracking the network interface link status
+      may not work for FreeBSD-5.2 and earlier, and for MacOS X,
+      because the kernel for those systems does not provide a mechanism
+      for asynchronous notification of userland programs when the link
+      status changes. Though, for those systems the link status is read
+      properly on startup.
 
   RIB: 
     - In some rare cases, the RIB may fail to delete an existing route
