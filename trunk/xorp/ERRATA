@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.22 2005/10/17 22:09:34 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.23 2005/10/17 22:20:51 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -100,7 +100,8 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
       may not work for the following OS-es because the kernel for those
       systems does not provide a mechanism for asynchronous notification
       of userland programs when the link status changes:
-      FreeBSD-5.2 and earlier, MacOS X, and (probably) Windows.
+      FreeBSD-5.2 and earlier and MacOS X (note: if the Windows kernel
+      supports this feature, it is not used yet in XORP).
       Though, for those systems the link status should be read
       properly on startup.
 
