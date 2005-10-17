@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.121 2005/10/16 22:22:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.122 2005/10/16 23:59:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -99,11 +99,17 @@ template <typename A>
 void
 AreaRouter<A>::start()
 {
-    // If there are multiple areas request that the peer manager
-    // injects the routes that are candidates for summarisation now.
-    // Do this last as it will cause a callback into this class.
+    // Request the peer manager to send routes that are candidates
+    // from summarisation. Also request an AS-External-LSAs that
+    // should be announced. These requests are only relevant when
+    // there are multiple areas involved although the requests are
+    // made unconditionally.
+    // Perform these actions last as they will invoke a callback into
+    // this class.
     PeerManager<A>& pm = _ospf.get_peer_manager();
     pm.summary_push(_area);
+    if (external_area_type())
+	pm.external_push(_area);
 }
 
 template <typename A>
