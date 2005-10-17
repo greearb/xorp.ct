@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.56 2005/10/14 20:02:58 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.57 2005/10/17 01:02:04 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -290,6 +290,7 @@ pb(bool val)
 #include "external.hh"
 #include "routing_table.hh"
 #include "trace.hh"
+#include "policy/backend/policy_filters.hh"
 
 template <typename A>
 class Ospf {
@@ -541,6 +542,7 @@ class Ospf {
     LsaDecoder _lsa_decoder;		// LSA decoders.
     PeerManager<A> _peer_manager;
     RoutingTable<A> _routing_table;
+    PolicyFilters _policy_filters;	// The policy filters.
 
     OspfTypes::RouterID _router_id;	// Router ID.
 
