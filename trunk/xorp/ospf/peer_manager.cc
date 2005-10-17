@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.64 2005/10/17 06:52:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.65 2005/10/17 08:03:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -810,14 +810,13 @@ PeerManager<A>::external_announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
 template <typename A>
 bool
 PeerManager<A>::external_announce(const IPNet<A>& net, const A& nexthop,
-				  const uint32_t& metric)
+				  const uint32_t& metric,
+				  const PolicyTags& policytags)
 {
     debug_msg("Net %s nexthop %s metric %u\n", cstring(net), cstring(nexthop),
 	      metric);
 
-    XLOG_WARNING("TBD - route redistribution");
-
-    return true;
+    return _external.announce(net, nexthop, metric, policytags);
 }
 
 template <typename A>
@@ -837,9 +836,7 @@ PeerManager<A>::external_withdraw(const IPNet<A>& net)
 {
     debug_msg("Net %s\n", cstring(net));
 
-    XLOG_WARNING("TBD - route redistribution");
-
-    return true;
+    return _external.withdraw(net);
 }
 
 template <typename A>

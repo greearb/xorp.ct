@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.2 2005/10/17 03:37:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.3 2005/10/17 06:52:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,6 +96,23 @@ External<A>::push(AreaRouter<A> *area_router)
     ASExternalDatabase::iterator i;
     for(i = _lsas.begin(); i != _lsas.end(); i++)
 	area_router->external_announce((*i), true /* push */);
+}
+
+template <typename A>
+bool
+External<A>::announce(const IPNet<A>& /*net*/, const A& /*nexthop*/,
+		      const uint32_t& /*metric*/,
+		      const PolicyTags& /*policytags*/)
+{
+    return true;
+}
+
+template <typename A>
+bool
+External<A>::withdraw(const IPNet<A>& /*net*/)
+{
+
+    return true;
 }
 
 template <typename A>

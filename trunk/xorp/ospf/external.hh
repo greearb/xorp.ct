@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.1 2005/10/17 01:02:04 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.2 2005/10/17 06:52:48 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -76,6 +76,17 @@ class External {
      * Provide this area with the stored AS-External-LSAs.
      */
     void push(AreaRouter<A> *area_router);
+
+    /**
+     * A true external route redistributed from the RIB (announce).
+     */
+    bool announce(const IPNet<A>& net, const A& nexthop,
+		  const uint32_t& metric, const PolicyTags& policytags);
+
+    /**
+     * A true external route redistributed from the RIB (withdraw).
+     */
+    bool withdraw(const IPNet<A>& net);
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.

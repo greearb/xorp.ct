@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.45 2005/10/17 06:52:48 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.46 2005/10/17 08:03:58 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -389,7 +389,8 @@ class PeerManager {
      * areas.
      */
     bool external_announce(const IPNet<A>& net, const A& nexthop,
-			   const uint32_t& metric);
+			   const uint32_t& metric,
+			   const PolicyTags& policytags);
 
     /**
      * An AS-External-LSA is being withdrawn from this area withdraw from

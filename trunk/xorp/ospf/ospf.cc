@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.43 2005/10/17 07:25:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.44 2005/10/17 08:03:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -401,9 +401,9 @@ bool
 Ospf<A>::originate_route(const IPNet<A>& net,
 			 const A& nexthop,
 			 const uint32_t& metric,
-			 const PolicyTags& /*policytags*/)
+			 const PolicyTags& policytags)
 {
-    return _peer_manager.external_announce(net, nexthop, metric);
+    return _peer_manager.external_announce(net, nexthop, metric, policytags);
 }
 
 template <typename A>
