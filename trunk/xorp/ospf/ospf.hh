@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.60 2005/10/17 08:03:58 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.61 2005/10/17 08:38:14 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -558,6 +558,11 @@ class Ospf {
      * @return a reference to the LSA decoder.
      */
     LsaDecoder& get_lsa_decoder() { return _lsa_decoder; }
+
+    /**
+     * @return a reference to the policy filters
+     */
+    PolicyFilters& get_policy_filters() { return _policy_filters; }
 
     /**
      * Get the Router ID.
