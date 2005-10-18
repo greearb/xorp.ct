@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.13 2005/08/18 15:45:56 bms Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.14 2005/10/16 07:10:37 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -327,7 +327,7 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 		fprintf(stdout, "NO-CARRIER");
 		prev = true;
 	    }
-	    if (ifmgr_vif.enabled()) {
+	    if (ifmgr_iface.enabled() && ifmgr_vif.enabled()) {
 		if (prev)
 		    fprintf(stdout, ",");
 		fprintf(stdout, "ENABLED");

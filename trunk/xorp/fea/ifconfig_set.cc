@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.32 2005/09/28 17:31:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.33 2005/10/13 03:22:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -132,9 +132,6 @@ IfConfigSet::push_config(IfTree& it)
 	for (vi = i.vifs().begin(); vi != i.vifs().end(); ++vi) {
 	    IfTreeVif& v = vi->second;
 
-	    // XXX: disable the vif if the interface is disabled
-	    if (! i.enabled())
-		v.set_enabled(false);
 	    // XXX: delete the vif if the interface is deleted
 	    if (i.state() == IfTreeItem::DELETED)
 		v.mark(IfTreeItem::DELETED);
@@ -144,9 +141,6 @@ IfConfigSet::push_config(IfTree& it)
 	    IfTreeVif::V4Map::iterator a4i;
 	    for (a4i = v.v4addrs().begin(); a4i != v.v4addrs().end(); ++a4i) {
 		IfTreeAddr4& a = a4i->second;
-		// XXX: disable the address if the vif is disabled
-		if (! v.enabled())
-		    a.set_enabled(false);
 		// XXX: delete the address if the vif is deleted
 		if (v.state() == IfTreeItem::DELETED)
 		    a.mark(IfTreeItem::DELETED);
@@ -158,9 +152,6 @@ IfConfigSet::push_config(IfTree& it)
 	    IfTreeVif::V6Map::iterator a6i;
 	    for (a6i = v.v6addrs().begin(); a6i != v.v6addrs().end(); ++a6i) {
 		IfTreeAddr6& a = a6i->second;
-		// XXX: disable the address if the vif is disabled
-		if (! v.enabled())
-		    a.set_enabled(false);
 		// XXX: delete the address if the vif is deleted
 		if (v.state() == IfTreeItem::DELETED)
 		    a.mark(IfTreeItem::DELETED);
