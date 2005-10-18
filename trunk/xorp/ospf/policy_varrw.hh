@@ -13,10 +13,52 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.1 2005/10/17 22:53:37 atanu Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
 
+#include "policy/backend/single_varrw.hh"
+#include "policy/common/element_factory.hh"
+
+template <typename A>
+class OspfVarRW : public SingleVarRW {
+ public:
+    enum {
+	VAR_NETWORK = VAR_PROTOCOL,
+	VAR_NEXTHOP,
+	VAR_METRIC,
+	VAR_EBIT,
+	VAR_TAG
+    };
+
+    OspfVarRW(Lsa::LsaRef lsar, const PolicyTags& policytags);
+
+    void null();
+
+    // SingleVarRW inteface:
+    void start_read();
+    Element* single_read(const Id& id);
+    void single_write(const Id& id, const Element& e);
+
+ private:
+    Lsa::LsaRef _lsar;
+
+    // Take a copy of the policy tags, allowing us to reset them.
+    PolicyTags _policytags;
+//     const PolicyTags& _policytags;
+
+    ElementFactory _ef;
+
+//     map<Id, XorpCallback1<Element*, Id&>::RefPtr> _read_map;
+
+#if	0
+    Element* read_policytags();
+    Element* read_network();
+    Element* read_metric();
+    Element* read_e_bit();
+    Element* read_tag();
+#endif
+};
 
 #endif // __OSPF_POLICY_VARRRW_HH__
