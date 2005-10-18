@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.5 2005/10/17 10:22:40 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.6 2005/10/18 15:14:13 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -128,9 +128,9 @@ class External {
     void set_net_nexthop(ASExternalLsa *aselsa, IPNet<A> net, A nexthop);
 
     /**
-     * Prime the refresh timer.
+     * Start the refresh timer.
      */
-    void prime(Lsa::LsaRef lsar);
+    void start_refresh_timer(Lsa::LsaRef lsar);
 
     /**
      * Called every LSRefreshTime seconds to refresh this LSA.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.6 2005/10/17 10:22:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.7 2005/10/18 15:14:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -128,6 +128,8 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
     _originating++;
 
     OspfTypes::Version version = _ospf.version();
+    // Don't worry about the memory it will be freed when the LSA goes
+    // out of scope.
     ASExternalLsa *aselsa = new ASExternalLsa(version);
     Lsa_header& header = aselsa->get_header();
     
@@ -164,7 +166,7 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 	(*i).second->external_shove();
     }
 
-    prime(lsar);
+    start_refresh_timer(lsar);
 
     return true;
 }
@@ -194,7 +196,7 @@ External<A>::do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags)
 
 template <typename A>
 void
-External<A>::prime(Lsa::LsaRef lsar)
+External<A>::start_refresh_timer(Lsa::LsaRef lsar)
 {
     lsar->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
@@ -216,7 +218,7 @@ External<A>::refresh(Lsa::LsaRef lsar)
 	(*i).second->external_refresh(lsar);
     }
 
-    prime(lsar);
+    start_refresh_timer(lsar);
 }
 
 template <typename A>
