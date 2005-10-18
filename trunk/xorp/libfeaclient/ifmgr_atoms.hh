@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.19 2005/08/31 00:47:59 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.20 2005/10/16 07:10:37 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -453,7 +453,8 @@ IfMgrIfTree::clear()
 
 inline
 IfMgrIfAtom::IfMgrIfAtom(const string& name)
-    : _name(name), _en(false), _mtu(0), _pif(0), _no_carrier(false)
+    : _name(name), _en(false), _discard(false), _mtu(0), _pif(0),
+      _no_carrier(false)
 {}
 
 
@@ -463,7 +464,7 @@ IfMgrIfAtom::IfMgrIfAtom(const string& name)
 inline
 IfMgrVifAtom::IfMgrVifAtom(const string& name)
     : _name(name),
-      _en(false), _mcap(false), _bcap(false), _loopback(false),
+      _en(false), _mcap(false), _bcap(false), _p2pcap(false), _loopback(false),
       _pif(0)
 {}
 
