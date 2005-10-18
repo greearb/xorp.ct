@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.17 2005/09/28 21:23:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.18 2005/10/14 21:39:00 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -220,7 +220,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
 			   "config: %s]",
 			   errmsg2.c_str());
 	errmsg = errmsg + " " + errmsg2;
-	return XrlCmdError::COMMAND_FAILED(errmsg);
+	break;
     } while (false);
 
     //

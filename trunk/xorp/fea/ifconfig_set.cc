@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.33 2005/10/13 03:22:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.34 2005/10/18 01:03:19 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -91,6 +91,10 @@ IfConfigSet::push_config(IfTree& it)
 	// Check that the interface is recognized by the system
 	//
 	if (ifc().get_insert_ifindex(i.ifname()) == 0) {
+	    if (i.state() == IfTreeItem::DELETED) {
+		// XXX: ignore deleted interfaces that are not recognized
+		continue;
+	    }
 	    ifc().er().interface_error(i.ifname(), "interface not recognized");
 	    XLOG_ERROR("%s", ifc().er().last_error().c_str());
 	    return false;
@@ -126,6 +130,12 @@ IfConfigSet::push_config(IfTree& it)
 
 	if (i.discard() && is_discard_emulated(i))
 	    continue;
+
+	if ((ifc().get_insert_ifindex(i.ifname()) == 0)
+	    && (i.state() == IfTreeItem::DELETED)) {
+		// XXX: ignore deleted interfaces that are not recognized
+		continue;
+	}
 
 	push_interface_begin(i);
 
