@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.30 2005/10/16 07:10:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.31 2005/10/17 11:16:26 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -265,32 +265,50 @@ IfTree::str() const
     return r;
 }
 
-//
-// Walk interfaces, vifs, and addresses and align them with the other tree:
-//  - If the item in the local tree is "disabled", then the state is not
-//    modified. Otherwise, the rules below are applied.
-//  - If an item from the local tree is not in the other tree,
-//    it is marked as deleted in the local tree.
-//    However, if an interface from the local tree is marked as "soft"
-//    or "discard_emulated", and is not in the other tree, the interface
-//    is not marked as deleted in the local tree.
-//  - If an item from the local tree is in the other tree,
-//    its state is copied from the other tree to the local tree.
-//  - If an item from the other tree is not in the local tree, we do NOT
-//    copy it to the local tree.
-//
-// Return the aligned local tree.
-//
+/**
+ * Align user supplied configuration with the device configuration.
+ *
+ * Inside the FEA there may be multiple configuration representations,
+ * typically one the user modifies and one that mirrors the hardware.
+ * Errors may occur pushing the user config down onto the hardware and
+ * we need a method to update the user config from the h/w config that
+ * exists after the config push.  We can't just copy the h/w config since
+ * the user config is restricted to configuration set by the user.
+ * The alignment works as follows:
+ * - If the item in the local tree is "disabled", then the state is copied
+ *   but the item is still marked as "disabled". Otherwise, the rules
+ *   below are applied.
+ * - If an item from the local tree is not in the other tree,
+ *   it is marked as deleted in the local tree.
+ *   However, if an interface from the local tree is marked as "soft"
+ *   or "discard_emulated", and is not in the other tree, the interface
+ *   is not marked as deleted in the local tree.
+ * - If an item from the local tree is in the other tree,
+ *   its state is copied from the other tree to the local tree.
+ * - If an item from the other tree is not in the local tree, we do NOT
+ *   copy it to the local tree.
+ *
+ * @param other the configuration tree to align state with.
+ * @return modified configuration structure.
+ */
 IfTree&
-IfTree::align_with(const IfTree& o)
+IfTree::align_with(const IfTree& other)
 {
     IfTree::IfMap::iterator ii;
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
-	if (! ii->second.enabled())
-	    continue;		// XXX: don't do anything to disabled state
 	const string& ifname = ii->second.ifname();
-	IfTree::IfMap::const_iterator oi = o.get_if(ifname);
-	if (oi == o.ifs().end()) {
+	IfTree::IfMap::const_iterator oi = other.get_if(ifname);
+
+	if (! ii->second.enabled()) {
+	    if ((oi != other.ifs().end())
+		&& (! ii->second.is_same_state(oi->second))) {
+		ii->second.copy_state(oi->second);
+		ii->second.set_enabled(false);
+	    }
+	    continue;
+	}
+
+	if (oi == other.ifs().end()) {
 	    //
 	    // Mark local interface for deletion, not present in other,
 	    // unless the local interface is marked as "soft" or
@@ -307,11 +325,19 @@ IfTree::align_with(const IfTree& o)
 	IfTreeInterface::VifMap::iterator vi;
 	for (vi = ii->second.vifs().begin();
 	     vi != ii->second.vifs().end(); ++vi) {
-	    if (! vi->second.enabled())
-		continue;	// XXX: don't do anything to disabled state
 	    const string& vifname = vi->second.vifname();
 	    IfTreeInterface::VifMap::const_iterator ov =
 		oi->second.get_vif(vifname);
+
+	    if (! vi->second.enabled()) {
+		if ((ov != oi->second.vifs().end())
+		    && (! vi->second.is_same_state(ov->second))) {
+		    vi->second.copy_state(ov->second);
+		    vi->second.set_enabled(false);
+		}
+		continue;
+	    }
+
 	    if (ov == oi->second.vifs().end()) {
 		vi->second.mark(DELETED);
 		continue;
@@ -323,10 +349,18 @@ IfTree::align_with(const IfTree& o)
 	    IfTreeVif::V4Map::iterator ai4;
 	    for (ai4 = vi->second.v4addrs().begin();
 		 ai4 != vi->second.v4addrs().end(); ++ai4) {
-		if (! ai4->second.enabled())
-		    continue;	// XXX: don't do anything to disabled state
 		IfTreeVif::V4Map::const_iterator oa4 =
 		    ov->second.get_addr(ai4->second.addr());
+
+		if (! ai4->second.enabled()) {
+		    if ((oa4 != ov->second.v4addrs().end())
+			&& (! ai4->second.is_same_state(oa4->second))) {
+			ai4->second.copy_state(oa4->second);
+			ai4->second.set_enabled(false);
+		    }
+		    continue;
+		}
+
 		if (oa4 == ov->second.v4addrs().end()) {
 		    ai4->second.mark(DELETED);
 		} else {
@@ -338,10 +372,18 @@ IfTree::align_with(const IfTree& o)
 	    IfTreeVif::V6Map::iterator ai6;
 	    for (ai6 = vi->second.v6addrs().begin();
 		 ai6 != vi->second.v6addrs().end(); ++ai6) {
-		if (! ai6->second.enabled())
-		    continue;	// XXX: don't do anything to disabled state
 		IfTreeVif::V6Map::const_iterator oa6 =
 		    ov->second.get_addr(ai6->second.addr());
+
+		if (! ai6->second.enabled()) {
+		    if ((oa6 != ov->second.v6addrs().end())
+			&& (! ai6->second.is_same_state(oa6->second))) {
+			ai6->second.copy_state(oa6->second);
+			ai6->second.set_enabled(false);
+		    }
+		    continue;
+		}
+
 		if (oa6 == ov->second.v6addrs().end()) {
 		    ai6->second.mark(DELETED);
 		} else {
@@ -374,7 +416,7 @@ IfTree::align_with(const IfTree& o)
  * @return modified configuration structure.
  */
 IfTree&
-IfTree::prepare_replacement_state(const IfTree& o)
+IfTree::prepare_replacement_state(const IfTree& other)
 {
     IfTree::IfMap::iterator ii;
     IfTree::IfMap::const_iterator oi;
@@ -401,7 +443,7 @@ IfTree::prepare_replacement_state(const IfTree& o)
 	}
     }
 
-    for (oi = o.ifs().begin(); oi != o.ifs().end(); ++oi) {
+    for (oi = other.ifs().begin(); oi != other.ifs().end(); ++oi) {
 	if (! oi->second.enabled())
 	    continue;		// XXX: ignore disabled state
 	const string& ifname = oi->second.ifname();
