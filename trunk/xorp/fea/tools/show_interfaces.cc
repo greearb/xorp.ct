@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.14 2005/10/16 07:10:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/tools/show_interfaces.cc,v 1.15 2005/10/18 01:03:19 pavlin Exp $"
 
 #include "fea/fea_module.h"
 
@@ -307,6 +307,38 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    iface_found = true;
 	}
 
+	if (ifmgr_iface.vifs().empty()) {
+	    //
+	    // Print interface-related information when there are no vifs
+	    //
+	    bool prev = false;
+	    fprintf(stdout, "%s: Flags:<",
+		    ifmgr_iface_name.c_str());
+
+	    if (ifmgr_iface.no_carrier()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "NO-CARRIER");
+		prev = true;
+	    }
+	    if (ifmgr_iface.enabled()) {
+		if (prev)
+		    fprintf(stdout, ",");
+		fprintf(stdout, "ENABLED");
+		prev = true;
+	    }
+	    fprintf(stdout, "> mtu %d\n", ifmgr_iface.mtu_bytes());
+
+	    //
+	    // Print the physical interface index and MAC address
+	    //
+	    fprintf(stdout, "        physical index %d\n",
+		    ifmgr_iface.pif_index());
+	    if (!ifmgr_iface.mac().empty())
+		fprintf(stdout, "        ether %s\n",
+			ifmgr_iface.mac().str().c_str());
+	}
+
 	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
 	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
 	     ++ifmgr_vif_iter) {
@@ -318,8 +350,8 @@ InterfaceMonitor::print_interfaces(const string& print_iface_name) const
 	    //
 	    bool prev = false;
 	    fprintf(stdout, "%s/%s: Flags:<",
-		   ifmgr_iface_name.c_str(),
-		   ifmgr_vif_name.c_str());
+		    ifmgr_iface_name.c_str(),
+		    ifmgr_vif_name.c_str());
 
 	    if (ifmgr_iface.no_carrier()) {
 		if (prev)
