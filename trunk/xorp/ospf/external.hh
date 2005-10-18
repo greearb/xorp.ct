@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.4 2005/10/17 10:01:12 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.5 2005/10/17 10:22:40 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -136,6 +136,11 @@ class External {
      * Called every LSRefreshTime seconds to refresh this LSA.
      */
     void refresh(Lsa::LsaRef lsar);
+
+    /**
+     * Pass this outbound AS-External-LSA through the policy filter.
+     */
+    bool do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags);
 };
 
 #endif // __OSPF_EXTERNAL_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.5 2005/10/17 10:01:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.6 2005/10/17 10:22:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,6 +41,7 @@
 #include "vertex.hh"
 #include "area_router.hh"
 #include "external.hh"
+#include "policy_varrw.hh"
 
 template <typename A>
 External<A>::External(Ospf<A>& ospf,
@@ -122,7 +123,7 @@ template <typename A>
 bool
 External<A>::announce(const IPNet<A>& net, const A& nexthop,
 		      const uint32_t& metric,
-		      const PolicyTags& /*policytags*/)
+		      const PolicyTags& policytags)
 {
     _originating++;
 
@@ -152,6 +153,8 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 
     // This would be a good place to manipulate the AS-External-LSA
     // with the policy tags.
+    if (!do_filtering(lsar, policytags))
+	return true;
 
     update_lsa(lsar);
 
@@ -162,6 +165,29 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
     }
 
     prime(lsar);
+
+    return true;
+}
+
+template <typename A>
+bool
+External<A>::do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags)
+{
+    try {
+	OspfVarRW<A> varrw(lsar, policytags);
+	bool accepted = _ospf.get_policy_filters().
+	    run_filter(filter::EXPORT, varrw);
+	
+	if (!accepted)
+	    return accepted;
+
+	// XXX - Do I need to do any matching here.
+	
+
+    } catch(const PolicyException& e) {
+	XLOG_WARNING("PolicyException: %s", e.str().c_str());
+	return false;
+    }
 
     return true;
 }
