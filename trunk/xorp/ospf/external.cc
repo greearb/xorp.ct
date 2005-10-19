@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.7 2005/10/18 15:14:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.8 2005/10/18 15:28:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -125,6 +125,9 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 		      const uint32_t& metric,
 		      const PolicyTags& policytags)
 {
+    debug_msg("net %s nexthop %s metric %u\n", cstring(net), cstring(nexthop),
+	      metric);
+
     _originating++;
 
     OspfTypes::Version version = _ospf.version();
