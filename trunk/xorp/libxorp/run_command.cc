@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.12 2005/10/11 23:34:42 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.13 2005/10/12 01:25:31 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,7 +41,7 @@
 
 // XXX: temporary: fix compilation
 #ifdef HOST_OS_WINDOWS
-#define _PATH_BSHELL "/bin/sh"
+#define _PATH_BSHELL "D:\\MSYS\\bin\\sh.exe"
 #endif
 
 #ifndef _PATH_BSHELL
