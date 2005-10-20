@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.17 2005/09/21 00:29:27 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.18 2005/09/21 04:59:05 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -176,7 +176,7 @@ XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_FATAL("Cannot send a packet on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot send a packet on interface %s vif %s: %s",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }
