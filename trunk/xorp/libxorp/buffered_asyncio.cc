@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.7 2005/08/30 01:02:47 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.8 2005/10/03 05:05:46 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -117,6 +117,14 @@ BufferedAsyncReader::start()
 	false) {
 	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
     }
+#ifdef HOST_OS_WINDOWS
+    if (_eventloop.add_ioevent_cb(_fd, IOT_DISCONNECT,
+				  callback(this,
+					   &BufferedAsyncReader::io_event)) ==
+	false) {
+	XLOG_ERROR("BufferedAsyncReader: failed to add I/O event callback.");
+    }
+#endif
 
     if (_config.head_bytes >= _config.trigger_bytes) {
 	_ready_timer =
@@ -132,6 +140,9 @@ BufferedAsyncReader::stop()
 {
     debug_msg("%p stop\n", this);
 
+#ifdef HOST_OS_WINDOWS
+    _eventloop.remove_ioevent_cb(_fd, IOT_DISCONNECT);
+#endif
     _eventloop.remove_ioevent_cb(_fd, IOT_READ);
     _ready_timer.unschedule();
 }
@@ -140,7 +151,17 @@ void
 BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
 {
     assert(fd == _fd);
+#ifndef HOST_OS_WINDOWS
     assert(type == IOT_READ);
+#else
+    // Explicitly handle disconnection events
+    if (type == IOT_DISCONNECT) {
+	XLOG_ASSERT(fd.is_socket());
+	stop();
+	announce_event(END_OF_FILE);
+	return;
+    }
+#endif
 
     uint8_t* 	tail 	   = _config.head + _config.head_bytes;
     size_t 	tail_bytes = _buffer.size() - (tail - &_buffer[0]);
