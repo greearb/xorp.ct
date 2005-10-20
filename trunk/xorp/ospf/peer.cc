@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.169 2005/10/12 06:11:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.170 2005/10/14 20:02:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3757,7 +3757,7 @@ Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 	// (3) If this LSA arrived from the designated router or the
 	// backup designated router. Chances are high that our
 	// neighbours have received this LSA already.
-	if (_peer.is_neighbour_DR_or_BDR(nid)) {
+	if (_peer.do_dr_or_bdr() && _peer.is_neighbour_DR_or_BDR(nid)) {
 	    XLOG_TRACE(lsar->tracing(), "Peers neighbour is DR or BDR %s",
 		       cstring(*lsar));
 	    return true;
