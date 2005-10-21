@@ -57,7 +57,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.6 2005/10/10 04:50:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.7 2005/10/11 23:33:36 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -310,6 +310,9 @@ popen2(const string& command, const list<string>& arguments,
 	 */
 	(void)close(pdes_out[0]);
 	(void)close(pdes_err[0]);
+
+	setvbuf(stdout, NULL, _IONBF, 0);
+	setvbuf(stderr, NULL, _IONBF, 0);
 
 	if (redirect_stderr_to_stdout) {
 	    //
