@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.10 2005/10/11 20:41:29 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.11 2005/10/19 09:19:54 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -169,17 +169,16 @@ the router within an Autonomous System";
 	}
 
 	import {
-	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(ospf4.targetname)&policies:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(ospf4.targetname)&policies:txt=$(@)";
         }
         export {
-            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=(ospf4&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=$(@)";
+            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(ospf4.targetname)&policies:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(ospf4.targetname)&policies:txt=$(@)";
         }
     }
 }
 
 policy {
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=network&type:txt=ipv4net&access:txt=r&id:u32=10";
-
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=network&type:txt=ipv4net&access:txt=r&id:u32=10";
 }
