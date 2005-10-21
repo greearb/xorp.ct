@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.13 2005/10/12 01:25:31 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.14 2005/10/20 11:00:08 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -103,7 +103,9 @@ RunCommandBase::RunCommandBase(EventLoop&			eventloop,
       _command_exit_status(0),
       _command_term_sig(0),
       _command_is_coredump(false),
-      _command_stop_signal(0)
+      _command_stop_signal(0),
+      _stdout_eof_received(false),
+      _stderr_eof_received(false)
 {
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
@@ -296,68 +298,23 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 			    size_t			offset)
 {
     size_t* last_offset_ptr = NULL;
-    if (buffer == _stderr_buffer) {
-	if (_last_stderr_offset == 0) {
-	    // We hadn't previously seen any error output
-	    if (event == AsyncFileOperator::END_OF_FILE) {
-		// We just got EOF on stderr - ignore this and wait for
-		// EOF on stdout
-		return;
-	    }
-	}
-	last_offset_ptr = &_last_stderr_offset;
-    } else {
-	XLOG_ASSERT(buffer == _stdout_buffer);
+    bool is_stdout = false;
+
+    if (buffer == _stdout_buffer) {
+	is_stdout = true;
 	last_offset_ptr = &_last_stdout_offset;
+    } else {
+	XLOG_ASSERT(buffer == _stderr_buffer);
+	is_stdout = false;
+	last_offset_ptr = &_last_stderr_offset;
     }
 
-    if ((event == AsyncFileOperator::DATA)
-	|| (event == AsyncFileOperator::END_OF_FILE)) {
-	XLOG_ASSERT(offset >= *last_offset_ptr);
-	if (offset == *last_offset_ptr) {
-	    XLOG_ASSERT(event == AsyncFileOperator::END_OF_FILE);
-	    done(event);
-	    return;
-	}
-
-	if (offset != *last_offset_ptr) {
-	    const char* p   = (const char*)buffer + *last_offset_ptr;
-	    size_t      len = offset - *last_offset_ptr;
-	    debug_msg("len = %u\n", XORP_UINT_CAST(len));
-	    if (!_is_error) {
-		if (buffer == _stdout_buffer)
-		    stdout_cb_dispatch(string(p, len));
-		else
-		    stderr_cb_dispatch(string(p, len));
-	    } else {
-		_error_msg.append(p, p + len);
-	    }
-	    *last_offset_ptr = offset;
-	}
-
-	if (event == AsyncFileOperator::END_OF_FILE) {
-	    done(event);
-	    return;
-	}
-
-	if (offset == BUF_SIZE) {
-	    // The buffer is exhausted
-	    *last_offset_ptr = 0;
-	    if (buffer == _stdout_buffer) {
-		memset(_stdout_buffer, 0, BUF_SIZE);
-		_stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
-						callback(this, &RunCommandBase::append_data));
-		_stdout_file_reader->start();
-	    } else {
-		memset(_stderr_buffer, 0, BUF_SIZE);
-		_stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-						callback(this, &RunCommandBase::append_data));
-		_stderr_file_reader->start();
-	    }
-	}
-    } else {
-	// Something bad happened
-	// XXX ideally we'd figure out what.
+    if ((event != AsyncFileOperator::END_OF_FILE)
+	&& (event != AsyncFileOperator::DATA)) {
+	//
+	// Something bad happened.
+	// XXX: ideally we'd figure out what.
+	//
 	string prefix, suffix;
 	if (_error_msg.size()) {
 	    prefix = "[";
@@ -365,7 +322,7 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	}
 	_error_msg += prefix;
 	int error = 0;
-	if (buffer == _stdout_buffer)
+	if (is_stdout)
 	    error = _stdout_file_reader->error();
 	else
 	    error = _stderr_file_reader->error();
@@ -374,6 +331,56 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 			       event, error);
 	_error_msg += suffix;
 	done(event);
+	return;
+    }
+
+    //
+    // Either DATA or END_OF_FILE
+    //
+    XLOG_ASSERT(offset >= *last_offset_ptr);
+
+    if (offset != *last_offset_ptr) {
+	const char* p   = (const char*)buffer + *last_offset_ptr;
+	size_t      len = offset - *last_offset_ptr;
+	debug_msg("len = %u\n", XORP_UINT_CAST(len));
+	if (!_is_error) {
+	    if (is_stdout)
+		stdout_cb_dispatch(string(p, len));
+	    else
+		stderr_cb_dispatch(string(p, len));
+	} else {
+	    _error_msg.append(p, p + len);
+	}
+	*last_offset_ptr = offset;
+    }
+
+    if (offset == BUF_SIZE) {
+	// The buffer is exhausted
+	*last_offset_ptr = 0;
+	if (is_stdout) {
+	    memset(_stdout_buffer, 0, BUF_SIZE);
+	    _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
+					    callback(this, &RunCommandBase::append_data));
+	    _stdout_file_reader->start();
+	} else {
+	    memset(_stderr_buffer, 0, BUF_SIZE);
+	    _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
+					    callback(this, &RunCommandBase::append_data));
+	    _stderr_file_reader->start();
+	}
+    }
+
+    if (event == AsyncFileOperator::END_OF_FILE) {
+	if (is_stdout) {
+	    _stdout_eof_received = true;
+	} else {
+	    _stderr_eof_received = true;
+	}
+	if (_stdout_eof_received
+	    && (_stderr_eof_received || redirect_stderr_to_stdout())) {
+	    done(event);
+	}
+	return;
     }
 }
 

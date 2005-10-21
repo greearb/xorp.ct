@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.6 2005/08/18 15:28:40 bms Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.7 2005/10/10 04:50:49 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -301,6 +301,9 @@ private:
     int			_command_term_sig;
     bool		_command_is_coredump;
     int			_command_stop_signal;
+
+    bool		_stdout_eof_received;
+    bool		_stderr_eof_received;
 };
 
 /**
