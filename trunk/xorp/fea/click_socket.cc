@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.26 2005/09/02 20:42:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.27 2005/10/10 04:50:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -857,8 +857,15 @@ ClickSocket::user_click_command_done_cb(RunCommand* run_command, bool success,
 {
     XLOG_ASSERT(_user_click_run_command == run_command);
     if (! success) {
-	XLOG_ERROR("User-level Click command (%s) failed: %s",
-		   run_command->command().c_str(), error_msg.c_str());
+	//
+	// XXX: if error_msg is empty, the real error message has been
+	// printed already when it was received on stderr.
+	//
+	string msg = c_format("User-level Click command (%s) failed",
+			      run_command->command().c_str());
+	if (error_msg.size())
+	    msg += c_format(": %s", error_msg.c_str());
+	XLOG_ERROR("%s", msg.c_str());
     }
     delete _user_click_run_command;
     _user_click_run_command = NULL;
