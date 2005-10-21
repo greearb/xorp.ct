@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.74 2005/10/16 23:59:59 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.75 2005/10/17 00:44:17 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -99,6 +99,14 @@ class AreaRouter : Subsystem {
      * A new set of router links.
      */
     bool new_router_links(PeerID peer, const list<RouterLink>& router_link);
+
+    /**
+     * Refresh Router-LSA.
+     *
+     * Called if any of the flags carried by the LSA change state.
+     * Also used by the refresh timer.
+     */
+    void refresh_router_lsa();
 
     /**
      * A new route has been added to the routing table it is being
@@ -606,13 +614,6 @@ class AreaRouter : Subsystem {
      * @return true if something changed.
      */
     bool update_router_links();
-
-    /**
-     * Refresh Router-LSA.
-     *
-     * Called from the refresh timer.
-     */
-    void refresh_router_lsa();
 
     /*
      * Send this LSA to all our peers.
