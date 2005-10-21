@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.65 2005/09/16 23:33:28 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.66 2005/10/13 08:20:49 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1488,7 +1488,7 @@ class ASExternalLsa : public Lsa {
      * Printable name of this LSA.
      */
     const char *name() const {
-	return "ASExternal";
+	return "ASExt-" + get_e_bit() ? "2" : "1";
     }
 
     /**
