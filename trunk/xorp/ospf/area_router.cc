@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.125 2005/10/17 18:57:56 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.126 2005/10/17 19:47:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2014,7 +2014,14 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	route_entry.set_cost(ri->weight());
 	route_entry.set_type_2_cost(0);
 
-	route_entry.set_nexthop(IPv4(htonl(ri->nexthop().get_address())));
+	IPv4 nexthop = IPv4(htonl(ri->nexthop().get_address()));
+	// If nexthop falls into the net being advertised don't
+	// bother. This specifically catches the case of a host route
+	// with an equivalent nexthop. The stub network genarated by a
+	// Point-to-Multipoint interface for example.
+	if (net.contains(nexthop))
+	    continue;
+	route_entry.set_nexthop(nexthop);
 
 	route_entry.set_advertising_router(lsar->get_header().
 					   get_advertising_router());
