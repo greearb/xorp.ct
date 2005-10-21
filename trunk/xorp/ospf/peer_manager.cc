@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.66 2005/10/17 08:38:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.67 2005/10/17 10:22:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -491,6 +491,16 @@ PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
     }
 
     return _peers[peerid]->send_lsa(area, nid, lsar);
+}
+
+template <typename A>
+void
+PeerManager<A>::refresh_router_lsas() const
+{
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++) {
+	(*i).second->refresh_router_lsa();
+    }
 }
 
 template <typename A>

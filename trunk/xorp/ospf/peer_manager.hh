@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.46 2005/10/17 08:03:58 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.47 2005/10/17 08:38:14 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -246,6 +246,12 @@ class PeerManager {
 		  const OspfTypes::NeighbourID nid,
 		  Lsa::LsaRef lsar);
 
+    /**
+     * Send a new Router-LSA in all areas.
+     *
+     * Typically called when one of the Router-LSA flags changes state.
+     */
+    void refresh_router_lsas() const;
 
     /**
      * Are any of neighbours of this area a virtual link endpoint.
