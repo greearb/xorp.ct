@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.126 2005/10/17 19:47:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.127 2005/10/21 09:34:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1036,7 +1036,8 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    else
 		update_lsa((*i), index);
 	    // Start aging this LSA.
-	    age_lsa((*i));
+	    if (!(*i)->external())
+		age_lsa((*i));
 	    routing_add(*i, NOMATCH != search);
 	    
 	    // (e) Possibly acknowledge this LSA.
