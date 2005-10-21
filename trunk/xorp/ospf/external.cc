@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.8 2005/10/18 15:28:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.9 2005/10/19 09:17:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -129,6 +129,8 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 	      metric);
 
     _originating++;
+    if (1 == _originating)
+	_ospf.get_peer_manager().refresh_router_lsas();
 
     OspfTypes::Version version = _ospf.version();
     // Don't worry about the memory it will be freed when the LSA goes
@@ -229,6 +231,8 @@ bool
 External<A>::withdraw(const IPNet<A>& net)
 {
     _originating--;
+    if (0 == _originating)
+	_ospf.get_peer_manager().refresh_router_lsas();
 
     // Construct an LSA that will match the one in the database.
     OspfTypes::Version version = _ospf.version();
@@ -237,7 +241,7 @@ External<A>::withdraw(const IPNet<A>& net)
 
     switch(version) {
     case OspfTypes::V2:
-	set_net_nexthop(aselsa, net, 0);
+	set_net_nexthop(aselsa, net, A::ZERO());
 	break;
     case OspfTypes::V3:
 	XLOG_WARNING("TBD - Set link state id");
@@ -300,10 +304,10 @@ void
 External<A>::maxage_reached(Lsa::LsaRef lsar)
 {
     XLOG_ASSERT(lsar->external());
-    XLOG_ASSERT(!lsar->get_self_originating());
+//     XLOG_ASSERT(!lsar->get_self_originating());
 
     ASExternalDatabase::iterator i = find_lsa(lsar);
-    if (i != _lsas.end())
+    if (i == _lsas.end())
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
 
     if (!lsar->maxage()) {
