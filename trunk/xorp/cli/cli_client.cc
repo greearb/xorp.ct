@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.40 2005/08/23 01:18:59 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.41 2005/09/28 22:39:17 pavlin Exp $"
 
 
 //
@@ -1305,7 +1305,6 @@ CliClient::command_line_help(const string& line, int word_end)
     bool is_found = false;
     
     word_end--;			// XXX: exclude the '?' character
-    cli_print("\nPossible completions:\n");
 
     list<CliCommand *>::iterator iter;
     for (iter = curr_cli_command->child_command_list().begin();
@@ -1316,8 +1315,15 @@ CliClient::command_line_help(const string& line, int word_end)
 					       command_help_string))
 	    is_found = true;
     }
-    if (is_found)
+    if (is_found) {
+	cli_print("\nPossible completions:\n");
 	cli_print(command_help_string);
+    } else {
+	string token_line = string(line, 0, word_end);
+	token_line = strip_empty_spaces(token_line);
+	cli_print(c_format("\nsyntax error, command \"%s\" is not recognized.\n",
+			   token_line.c_str()));
+    }
     
     gl_redisplay_line(gl());
     // XXX: Move the cursor over the '?'
