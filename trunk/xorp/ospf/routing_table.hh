@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.18 2005/10/10 05:12:46 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.19 2005/10/12 11:27:59 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -47,7 +47,8 @@ class RouteEntry {
 		   _cost(0),
 		   _type_2_cost(0),
 		   _nexthop(A::ZERO()),
-		   _advertising_router(0)
+		   _advertising_router(0),
+		   _filtered(false)
     {}
 
     void set_destination_type(OspfTypes::VertexType destination_type) {
@@ -154,6 +155,14 @@ class RouteEntry {
 	return _advertising_router;
     }
 
+    void set_filtered(bool filtered) {
+	_filtered = filtered;
+    }
+
+    bool get_filtered() const {
+	return _filtered;
+    }
+
     string str() {
 	string output;
 
@@ -179,6 +188,9 @@ class RouteEntry {
 
     A _nexthop;
     uint32_t	_advertising_router;
+
+    bool _filtered;			// True if this route has been
+					// filtered by policy.
 };
 
 /**
