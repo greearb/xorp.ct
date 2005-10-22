@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.53 2005/10/05 03:16:21 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.54 2005/10/14 20:02:58 atanu Exp $
 #
 
 TODO
@@ -155,6 +155,13 @@ announced LSAs before shutting down. The peer manager currently calls
 shutdown on the an area then proceeds to delete the area. It might be
 cleaner to wait for the area to signal that shutdown is complete,
 either by polling running() or by waiting for the shutdown_complete().
+
+42) An entry point "PeerManager<A>::refresh_router_lsas()" exists that
+is used to cause all area to send out a new Router-LSA. This entry
+points exist so that flag transitions between area border, AS boundary
+and virtual link endpoint can be immediately distributed in the form a
+a new Router-LSA. When support for virtual links are added this hook
+should be called.
 
 Possible issues
 ~~~~~~~~~~~~~~~
