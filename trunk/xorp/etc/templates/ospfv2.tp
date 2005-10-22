@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.11 2005/10/19 09:19:54 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.12 2005/10/21 18:37:00 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -181,4 +181,8 @@ the router within an Autonomous System";
 
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=network&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=nexthop&type:txt=ipv4&access:txt=r&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=ebit&type:txt=bool&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
 }
