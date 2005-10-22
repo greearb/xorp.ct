@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.18 2005/10/10 08:31:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.19 2005/10/12 11:27:59 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -292,10 +292,13 @@ bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			   uint32_t metric, RouteEntry<A>& rt)
 {
-    bool result;
+    bool result = true;
     if (!rt.get_discard()) {
-	result = _ospf.add_route(net, nexthop, metric,
-				 false /* equal */, false /*  discard */);
+	bool accepted = do_filtering(net, nexthop, metric, rt);
+	rt.set_filtered(!accepted);
+	if (accepted)
+	    result = _ospf.add_route(net, nexthop, metric,
+				     false /* equal */, false /*  discard */);
     }  else {
 	XLOG_WARNING("TBD - installing discard routes");
 	result = false;
@@ -312,7 +315,7 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt)
 {
     bool result;
-    if (!rt.get_discard()) {
+    if (!rt.get_discard() && !rt.get_filtered()) {
 	result = _ospf.delete_route(net);
     } else {
 	XLOG_WARNING("TBD - removing discard routes");
@@ -336,6 +339,14 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
     _ospf.get_peer_manager().summary_announce(area, net, rt);
 
     return result;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::do_filtering(IPNet<A>& /*net*/, A& /*nexthop*/,
+			      uint32_t& /*metric*/, RouteEntry<A>& /*rt*/)
+{
+    return true;
 }
 
 template <typename A>
