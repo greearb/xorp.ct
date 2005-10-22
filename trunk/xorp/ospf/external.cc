@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.9 2005/10/19 09:17:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.10 2005/10/21 22:09:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -121,8 +121,7 @@ External<IPv6>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv6> net,
 
 template <typename A>
 bool
-External<A>::announce(const IPNet<A>& net, const A& nexthop,
-		      const uint32_t& metric,
+External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 		      const PolicyTags& policytags)
 {
     debug_msg("net %s nexthop %s metric %u\n", cstring(net), cstring(nexthop),
@@ -148,6 +147,12 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 	break;
     }
 
+    bool ebit = false;
+    uint32_t tag = 0;
+
+    if (!do_filtering(net, nexthop, metric, ebit, tag, policytags))
+	return true;
+
     set_net_nexthop(aselsa, net, nexthop);
     header.set_advertising_router(_ospf.get_router_id());
     aselsa->set_metric(metric);
@@ -157,11 +162,6 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
     aselsa->record_creation_time(now);
     aselsa->encode();
     Lsa::LsaRef lsar = aselsa;
-
-    // This would be a good place to manipulate the AS-External-LSA
-    // with the policy tags.
-    if (!do_filtering(lsar, policytags))
-	return true;
 
     update_lsa(lsar);
 
@@ -178,10 +178,12 @@ External<A>::announce(const IPNet<A>& net, const A& nexthop,
 
 template <typename A>
 bool
-External<A>::do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags)
+External<A>::do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
+			  bool& e_bit, uint32_t& tag,
+			  const PolicyTags& policytags)
 {
     try {
-	OspfVarRW<A> varrw(lsar, policytags);
+	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag, policytags);
 	bool accepted = _ospf.get_policy_filters().
 	    run_filter(filter::EXPORT, varrw);
 	
@@ -189,7 +191,6 @@ External<A>::do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags)
 	    return accepted;
 
 	// XXX - Do I need to do any matching here.
-	
 
     } catch(const PolicyException& e) {
 	XLOG_WARNING("PolicyException: %s", e.str().c_str());

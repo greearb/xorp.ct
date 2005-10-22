@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.6 2005/10/18 15:14:13 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.7 2005/10/18 15:28:52 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -80,8 +80,8 @@ class External {
     /**
      * A true external route redistributed from the RIB (announce).
      */
-    bool announce(const IPNet<A>& net, const A& nexthop,
-		  const uint32_t& metric, const PolicyTags& policytags);
+    bool announce(IPNet<A> net, A nexthop, uint32_t metric,
+		  const PolicyTags& policytags);
 
     /**
      * A true external route redistributed from the RIB (withdraw).
@@ -140,7 +140,9 @@ class External {
     /**
      * Pass this outbound AS-External-LSA through the policy filter.
      */
-    bool do_filtering(Lsa::LsaRef lsar, const PolicyTags& policytags);
+    bool do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
+		      bool& e_bit, uint32_t& tag,
+		      const PolicyTags& policytags);
 };
 
 #endif // __OSPF_EXTERNAL_HH__

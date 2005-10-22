@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.1 2005/10/17 22:53:37 atanu Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.2 2005/10/18 15:12:16 atanu Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
@@ -32,7 +32,8 @@ class OspfVarRW : public SingleVarRW {
 	VAR_TAG
     };
 
-    OspfVarRW(Lsa::LsaRef lsar, const PolicyTags& policytags);
+    OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric, bool& e_bit,
+	      uint32_t& tag, const PolicyTags& policytags);
 
     void null();
 
@@ -42,23 +43,16 @@ class OspfVarRW : public SingleVarRW {
     void single_write(const Id& id, const Element& e);
 
  private:
-    Lsa::LsaRef _lsar;
+    IPNet<A>& _network;
+    A& _nexthop;
+    uint32_t& _metric;
+    bool& _e_bit;
+    uint32_t& _tag;
 
     // Take a copy of the policy tags, allowing us to reset them.
     PolicyTags _policytags;
-//     const PolicyTags& _policytags;
 
     ElementFactory _ef;
-
-//     map<Id, XorpCallback1<Element*, Id&>::RefPtr> _read_map;
-
-#if	0
-    Element* read_policytags();
-    Element* read_network();
-    Element* read_metric();
-    Element* read_e_bit();
-    Element* read_tag();
-#endif
 };
 
 #endif // __OSPF_POLICY_VARRRW_HH__
