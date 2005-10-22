@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.8 2005/08/23 20:46:53 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.9 2005/10/10 04:10:50 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -120,6 +120,22 @@ is_absolute_path(const string& path, bool homeok = false)
  * @return list of tokens.
  */
 list<string> split(const string& s, char sep);
+
+/**
+ * Remove the heading and trailing empty spaces from string value.
+ *
+ * @param s string that may have heading and trailing empty spaces.
+ * @return copy of the string with heading and trailing empty spaces removed.
+ */
+string strip_empty_spaces(const string& s);
+
+/**
+ * Test if a string contains an empty space (i.e., <SPACE> or <TAB>).
+ * 
+ * @param s the string to test.
+ * @return true if the string contains an empty space, otherwise false.
+ */
+bool has_empty_space(const string& s);
 
 /**
  * Return basename of a path.

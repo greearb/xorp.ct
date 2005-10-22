@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.4 2005/08/04 10:32:47 bms Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.5 2005/10/10 04:10:50 pavlin Exp $"
 
 #include "xorp.h"
 #include "c_format.hh"
@@ -36,6 +36,43 @@ split(const string& s, char ch)
     if (!s2.empty())
 	parts.push_back(s2);
     return parts;
+}
+
+string
+strip_empty_spaces(const string& s)
+{
+    string res = s;
+
+    // Strip the heading and trailing empty spaces
+    while (!res.empty()) {
+	size_t len = res.length();
+	if ((res[0] == ' ') || (res[0] == '\t')) {
+	    res = res.substr(1, len - 1);
+	    continue;
+	}
+	if ((res[len - 1] == ' ') || (res[len - 1] == '\t')) {
+	    res = res.substr(0, res.length() - 1);
+	    continue;
+	}
+	break;
+    }
+
+    return res;
+}
+
+bool
+has_empty_space(const string& s)
+{
+    string::size_type space;
+
+    space = s.find(' ');
+    if (space == string::npos)
+	space = s.find('\t');
+
+    if (space != string::npos)
+	return (true);
+
+    return (false);
 }
 
 const char*

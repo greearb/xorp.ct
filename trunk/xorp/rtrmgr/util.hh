@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.11 2005/10/10 04:10:51 pavlin Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.12 2005/10/22 01:00:49 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -94,22 +94,6 @@ string& unquote(string& s);
  * @return copy of string with quotes removed.
  */
 string unquote(const string& s);
-
-/**
- * Remove the heading and trailing empty spaces from string value.
- *
- * @param s string that may have heading and trailing empty spaces.
- * @return copy of the string with heading and trailing empty spaces removed.
- */
-string strip_empty_spaces(const string& s);
-
-/**
- * Test if a string contains an empty space (i.e., <SPACE> or <TAB>).
- * 
- * @param s the string to test.
- * @return true if the string contains an empty space, otherwise false.
- */
-bool has_empty_space(const string& s);
 
 /**
  * Test if a string should be in quotes.

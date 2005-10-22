@@ -9,6 +9,7 @@
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+#include "libxorp/utils.hh"
 
 #include "op_commands.hh"
 #include "util.hh"

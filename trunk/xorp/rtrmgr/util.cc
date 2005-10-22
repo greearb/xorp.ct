@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.19 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.20 2005/10/22 01:00:49 pavlin Exp $"
 
 
 #include <list>
@@ -202,43 +202,6 @@ unquote(const string& s)
 	return s.substr(1, s.size() - 2);
     }
     return s;
-}
-
-string
-strip_empty_spaces(const string& s)
-{
-    string res = s;
-
-    // Strip the heading and trailing empty spaces
-    while (!res.empty()) {
-	size_t len = res.length();
-	if ((res[0] == ' ') || (res[0] == '\t')) {
-	    res = res.substr(1, len - 1);
-	    continue;
-	}
-	if ((res[len - 1] == ' ') || (res[len - 1] == '\t')) {
-	    res = res.substr(0, res.length() - 1);
-	    continue;
-	}
-	break;
-    }
-
-    return res;
-}
-
-bool
-has_empty_space(const string& s)
-{
-    string::size_type space;
-
-    space = s.find(' ');
-    if (space == string::npos)
-	space = s.find('\t');
-
-    if (space != string::npos)
-	return (true);
-
-    return (false);
 }
 
 bool
