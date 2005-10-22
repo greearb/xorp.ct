@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.127 2005/10/21 09:34:48 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.128 2005/10/21 20:51:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1031,11 +1031,20 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    // update LSA, therefore the neighbours will not try and
 	    // transmit it.
 	    // (d) Install the new LSA.
-	    if (NOMATCH == search)
+	    if (NOMATCH == search) {
 		add_lsa((*i));
-	    else
-		update_lsa((*i), index);
-	    // Start aging this LSA.
+	    } else {
+		if ((*i)->external()) {
+		    // The LSA that was matched should have been
+		    // invalidated by the external code. So the new
+		    // LSA just needs to added to the database.
+		    XLOG_ASSERT(!_db[index]->valid());
+		    add_lsa((*i));
+		} else {
+		    update_lsa((*i), index);
+		}
+	    }
+	    // Start aging this LSA if its not a AS-External-LSA
 	    if (!(*i)->external())
 		age_lsa((*i));
 	    routing_add(*i, NOMATCH != search);
