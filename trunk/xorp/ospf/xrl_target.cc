@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.15 2005/10/17 22:22:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.16 2005/10/22 18:44:51 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -586,7 +586,16 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 }
 
 XrlCmdError
-XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& /*areas*/)
+XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
 {
+    list<OspfTypes::AreaID> arealist;
+
+    if (!_ospf.get_area_list(arealist))
+	return XrlCmdError::COMMAND_FAILED("Unable to get area list");
+
+    list<OspfTypes::AreaID>::const_iterator i;
+    for (i = arealist.begin(); i != arealist.end(); i++)
+	areas.append(XrlAtom(*i));
+
     return XrlCmdError::OKAY();
 }

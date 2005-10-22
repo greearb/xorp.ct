@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.61 2005/10/17 08:38:14 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.62 2005/10/18 15:10:52 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -462,6 +462,11 @@ class Ospf {
      */
     bool get_lsa(const OspfTypes::AreaID area, const uint32_t index,
 		 bool& valid, bool& toohigh, bool& self, vector<uint8_t>& lsa);
+
+    /**
+     *  Get a list of all the configured areas.
+     */
+    bool get_area_list(list<OspfTypes::AreaID>& areas) const;
 
     /**
      * Add route

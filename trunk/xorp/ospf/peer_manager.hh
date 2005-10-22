@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.47 2005/10/17 08:38:14 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.48 2005/10/21 21:27:31 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -99,6 +99,11 @@ class PeerManager {
      */
     bool get_lsa(const OspfTypes::AreaID area, const uint32_t index,
 		 bool& valid, bool& toohigh, bool& self, vector<uint8_t>& lsa);
+
+    /**
+     *  Get a list of all the configured areas.
+     */
+    bool get_area_list(list<OspfTypes::AreaID>& areas) const;
 
     /**
      * Convert an interface/vif to a PeerID.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.9 2005/10/14 17:53:54 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.10 2005/10/22 18:44:51 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -346,11 +346,9 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	vector<uint8_t>&	lsa);
 
     /**
-     *  Get a list of all the configured areas.
+     * Get a list of all the configured areas.
      */
-    XrlCmdError ospfv2_0_1_get_area_list(
-					 // Output values,
-					 XrlAtomList& areas);
+    XrlCmdError ospfv2_0_1_get_area_list(XrlAtomList& areas);
 
  private:
     Ospf<IPv4>& _ospf;

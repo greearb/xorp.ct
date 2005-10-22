@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.44 2005/10/17 08:03:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.45 2005/10/17 08:38:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -341,7 +341,16 @@ Ospf<A>::get_lsa(const OspfTypes::AreaID area, const uint32_t index,
 
     return _peer_manager.get_lsa(area, index, valid, toohigh, self, lsa);
 }
-    
+
+template <typename A>
+bool
+Ospf<A>::get_area_list(list<OspfTypes::AreaID>& areas) const
+{
+    debug_msg("\n");
+
+    return _peer_manager.get_area_list(areas);
+}
+
 template <typename A>
 bool
 Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
