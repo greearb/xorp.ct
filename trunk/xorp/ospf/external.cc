@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.10 2005/10/21 22:09:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.11 2005/10/22 06:15:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -156,6 +156,8 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     set_net_nexthop(aselsa, net, nexthop);
     header.set_advertising_router(_ospf.get_router_id());
     aselsa->set_metric(metric);
+    aselsa->set_e_bit(ebit);
+    aselsa->set_external_route_tag(tag);
     aselsa->set_self_originating(true);
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
