@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.4 2005/10/03 20:24:06 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.5 2005/10/13 16:39:05 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -165,4 +165,11 @@ interface ospfv2/0.1 {
 	    & toohigh:bool \
 	    & self:bool \
 	    & lsa:binary
+
+    /**
+     * Get a list of all the configured areas.
+     *
+     * @return area_ids list of value area_ids.  Each id is a u32.
+     */
+    get_area_list -> areas:list
 }

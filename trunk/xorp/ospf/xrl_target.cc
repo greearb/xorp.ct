@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.14 2005/10/17 08:03:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.15 2005/10/17 22:22:16 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -582,5 +582,11 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
     debug_msg("area %s index %u valid %s toohigh %s self %s\n",
 	      pr_id(area).c_str(), index, pb(valid), pb(toohigh), pb(self));
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& /*areas*/)
+{
     return XrlCmdError::OKAY();
 }
