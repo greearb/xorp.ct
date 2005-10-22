@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.2 2005/10/18 15:12:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.3 2005/10/22 06:15:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -94,21 +94,41 @@ OspfVarRW<A>::single_read(const Id& /*id*/)
 
 template <>
 void
-OspfVarRW<IPv4>::single_write(const Id& id, const Element& /*e*/)
+OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
 {
     switch(id) {
     case VAR_POLICYTAGS:
+	_policytags = e;
 	break;
-    case VAR_NETWORK:
+    case VAR_NETWORK: {
+	const ElemIPv4Net* eip = dynamic_cast<const ElemIPv4Net*>(&e);
+	XLOG_ASSERT(eip != NULL);
+	_network = IPNet<IPv4>(eip->val());
+    }
 	break;
-    case VAR_NEXTHOP:
+    case VAR_NEXTHOP: {
+	const ElemIPv4* eip = dynamic_cast<const ElemIPv4*>(&e);
+	XLOG_ASSERT(eip != NULL);
+	_nexthop = IPv4(eip->val());
+    }
 	break;
-    case VAR_METRIC:
+    case VAR_METRIC: {
+	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+	_metric = u32.val();
+    }
 	break;
-    case VAR_EBIT:
+    case VAR_EBIT: {
+	const ElemBool& b = dynamic_cast<const ElemBool&>(e);
+	_tag = b.val();
+    }
 	break;
-    case VAR_TAG:
+    case VAR_TAG: {
+	const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+	_tag = u32.val();
+    }
 	break;
+    default:
+	XLOG_WARNING("Unexpected Id %d %s", id, cstring(e));
     }
 }
 
