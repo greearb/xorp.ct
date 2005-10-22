@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.91 2005/10/11 23:57:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.92 2005/10/12 03:12:27 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -898,7 +898,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	} else {
 	    // no need to show the node ID here
 	    XLOG_ASSERT(_parent->is_tag());
-	    if ((type() == NODE_TEXT) && has_empty_space(_segname)) {
+	    if ((type() == NODE_TEXT) && is_quotable_string(_segname)) {
 		s += quoted_value(_segname);
 	    } else {
 		s += _segname; 

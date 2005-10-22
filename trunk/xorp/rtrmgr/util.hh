@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/util.hh,v 1.10 2005/07/28 23:20:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/util.hh,v 1.11 2005/10/10 04:10:51 pavlin Exp $
 
 #ifndef __RTRMGR_UTIL_HH__
 #define __RTRMGR_UTIL_HH__
@@ -104,12 +104,22 @@ string unquote(const string& s);
 string strip_empty_spaces(const string& s);
 
 /**
- * Test if a string has an empty space (i.e., <SPACE> or <TAB>).
+ * Test if a string contains an empty space (i.e., <SPACE> or <TAB>).
  * 
  * @param s the string to test.
- * @return true if the string has an empty space, otherwise false.
+ * @return true if the string contains an empty space, otherwise false.
  */
 bool has_empty_space(const string& s);
+
+/**
+ * Test if a string should be in quotes.
+ * A string should be in quotes if it contains a character that is not
+ * a letter or a digit.
+ * 
+ * @param s the string to test.
+ * @return true if the string should be in quotes, otherwise false.
+ */
+bool is_quotable_string(const string& s);
 
 /**
  * Find the name (including the path) of an executable program.

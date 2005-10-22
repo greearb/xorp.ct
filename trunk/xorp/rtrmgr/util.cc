@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.18 2005/09/01 19:44:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.19 2005/10/10 04:10:51 pavlin Exp $"
 
 
 #include <list>
@@ -22,6 +22,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utility.h"
 #include "libxorp/utils.hh"
 
 #include "util.hh"
@@ -236,6 +237,19 @@ has_empty_space(const string& s)
 
     if (space != string::npos)
 	return (true);
+
+    return (false);
+}
+
+bool
+is_quotable_string(const string& s)
+{
+    size_t i;
+
+    for (i = 0; i < s.size(); i++) {
+	if (! xorp_isalnum(s[i]))
+	    return (true);
+    }
 
     return (false);
 }
