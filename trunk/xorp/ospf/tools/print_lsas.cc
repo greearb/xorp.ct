@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.4 2005/10/13 16:49:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.5 2005/10/23 03:51:43 atanu Exp $"
 
 // Get LSAs from OSPF and print them.
 
@@ -51,10 +51,26 @@
 
 #include "xrl/interfaces/ospfv2_xif.hh"
 
+const char *
+target(OspfTypes::Version version)
+{
+    switch (version) {
+    case OspfTypes::V2:
+	return TARGET_OSPFv2;
+	break;
+    case OspfTypes::V3:
+	return TARGET_OSPFv3;
+	break;
+    }
+
+    XLOG_UNREACHABLE();
+}
+
 class GetAreaList {
 public:
-    GetAreaList(XrlStdRouter& xrl_router)
-	: _xrl_router(xrl_router), _done(false), _fail(false)
+    GetAreaList(XrlStdRouter& xrl_router, OspfTypes::Version version)
+	: _xrl_router(xrl_router), _version(version),
+	  _done(false), _fail(false)
     {
     }
 
@@ -64,7 +80,7 @@ public:
 
     void start() {
 	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_area_list("ospfv2",
+	ospfv2.send_get_area_list(target(_version),
 				  callback(this, &GetAreaList::response));
     }
 
@@ -95,6 +111,7 @@ private:
     }
 private:
     XrlStdRouter &_xrl_router;
+    OspfTypes::Version _version;
     bool _done;
     bool _fail;
 
@@ -104,7 +121,7 @@ private:
 class FetchDB {
 public:
     FetchDB(XrlStdRouter& xrl_router, OspfTypes::Version version, IPv4 area)
-	: _xrl_router(xrl_router), _lsa_decoder(version),
+	: _xrl_router(xrl_router), _version(version), _lsa_decoder(version),
 	  _done(false), _fail(false), _area(area), _index(0)
     {
 	initialise_lsa_decoder(version, _lsa_decoder);
@@ -112,7 +129,7 @@ public:
 
     void start() {
 	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_lsa("ospfv2", _area, _index,
+	ospfv2.send_get_lsa(target(_version), _area, _index,
 			    callback(this, &FetchDB::response));
     }
 
@@ -156,6 +173,7 @@ private:
     }
 private:
     XrlStdRouter &_xrl_router;
+    OspfTypes::Version _version;
     LsaDecoder _lsa_decoder;
     bool _done;
     bool _fail;
@@ -206,29 +224,58 @@ print_detail(Lsa::LsaRef lsar)
     printf("%s\n", lsar->str().c_str());
 }
 
+uint32_t externals = 0;	// Number of AS-External-LSAs.
+
+void
+print_summary(OspfTypes::Version version, map<uint16_t, uint32_t>& summary)
+{
+    LsaDecoder lsa_decoder(version);
+    initialise_lsa_decoder(version, lsa_decoder);
+
+    map<uint16_t, uint32_t>::const_iterator i;
+    for (i = summary.begin(); i != summary.end(); i++) {
+	uint16_t type = (*i).first;
+	uint32_t count = (*i).second;
+	if (lsa_decoder.external(type)) {
+	    if (0 == externals)
+		externals = count;
+	} else {
+	    printf("%5d %s LSAs\n", count, lsa_decoder.name(type));
+	}
+    }
+}
+
 enum Pstyle {
     BRIEF,
-    DETAIL
+    DETAIL,
+    SUMMARY
 };
 
 void
-print_lsa_database(string area, list<Lsa::LsaRef>& lsas, Pstyle pstyle,
-		   FilterLSA& filter)
+print_lsa_database(OspfTypes::Version version, string area,
+		   list<Lsa::LsaRef>& lsas, Pstyle pstyle, FilterLSA& filter)
 {
-    printf("   OSPF link state database, Area %s\n", area.c_str());
-
     switch (pstyle) {
     case BRIEF:
+	printf("   OSPF link state database, Area %s\n", area.c_str());
 	printf(" Type       ID               Adv "
 	       "Rtr           Seq      Age  Opt  Cksum  Len\n");
 	break;
     case DETAIL:
+	printf("   OSPF link state database, Area %s\n", area.c_str());
+	break;
+    case SUMMARY:
+	printf("Area %s\n", area.c_str());
 	break;
     }
 
+    // LSA Type, count
+    map<uint16_t, uint32_t> summary;
+
     list<Lsa::LsaRef>::const_iterator i;
     for (i = lsas.begin(); i != lsas.end(); i++) {
-	if (!filter.accept((*i)->get_ls_type()))
+	uint16_t type = (*i)->get_ls_type();
+	if (!filter.accept(type))
 	    continue;
 	switch (pstyle) {
 	case BRIEF:
@@ -237,14 +284,31 @@ print_lsa_database(string area, list<Lsa::LsaRef>& lsas, Pstyle pstyle,
 	case DETAIL:
 	    print_detail(*i);
 	    break;
+	case SUMMARY:
+	    if (0 == summary.count(type)) {
+		summary[type] = 1;
+	    } else {
+		summary[type] = summary[type] + 1;
+	    }
+	    break;
 	}
+    }
+
+    switch (pstyle) {
+    case BRIEF:
+	break;
+    case DETAIL:
+	break;
+    case SUMMARY:
+	print_summary(version, summary);
+	break;
     }
 }
 
 int
 usage(const char *myname)
 {
-    fprintf(stderr, "usage: %s [-a area] [-f type] [-b] [-d]\n", myname);
+    fprintf(stderr, "usage: %s [-a area] [-f type] [-s] [-b] [-d]\n", myname);
     return -1;
 }
 
@@ -262,18 +326,28 @@ main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
+    OspfTypes::Version version = OspfTypes::V2;
     Pstyle pstyle = BRIEF;
     FilterLSA filter;
     string area;
 
     int c;
-    while ((c = getopt(argc, argv, "a:f:bd")) != -1) {
+    while ((c = getopt(argc, argv, "23a:f:sbd")) != -1) {
 	switch (c) {
+	case '2':
+	    version = OspfTypes::V2;
+	    break;
+	case '3':
+	    version = OspfTypes::V3;
+	    break;
 	case 'a':
 	    area = optarg;
 	    break;
 	case 'f':
 	    filter.add(atoi(optarg));
+	    break;
+	case 's':
+	    pstyle = SUMMARY;
 	    break;
 	case 'b':
 	    pstyle = BRIEF;
@@ -298,7 +372,7 @@ main(int argc, char **argv)
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 	debug_msg("\n");
 
-	GetAreaList get_area_list(xrl_router);
+	GetAreaList get_area_list(xrl_router, version);
 	if (area.empty()) {
 	    get_area_list.start();
 	    while(get_area_list.busy())
@@ -316,7 +390,7 @@ main(int argc, char **argv)
 	list<IPv4>::const_iterator i;
 	for (i = area_list.begin(); i != area_list.end(); i++) {
 
-	    FetchDB fetchdb(xrl_router, OspfTypes::V2, *i);
+	    FetchDB fetchdb(xrl_router, version, *i);
 
 	    fetchdb.start();
 	    while(fetchdb.busy())
@@ -326,9 +400,25 @@ main(int argc, char **argv)
 		fprintf(stderr, "Failed to fetch area %s\n", area.c_str());
 		return -1;
 	    }
-	    print_lsa_database(i->str(), fetchdb.get_lsas(), pstyle, filter);
+	    print_lsa_database(version, i->str(), fetchdb.get_lsas(), pstyle,
+			       filter);
 	}
 
+	switch (pstyle) {
+	case BRIEF:
+	    break;
+	case DETAIL:
+	    break;
+	case SUMMARY: {
+	    if (filter.accept(ASExternalLsa(version).get_ls_type())) {
+		printf("Externals:\n");
+		if (0 != externals)
+		    printf("%5d External LSAs\n", externals);
+	    }
+	}
+	    break;	    
+	}
+	
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
