@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.8 2005/09/27 18:50:42 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.9 2005/10/02 22:21:50 abittau Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,7 +28,7 @@ string PolicyTarget::policy_target_name = "policy";
 
 PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
     _running(true), _commit_delay(2000), 
-    _process_watch(rtr),
+    _process_watch(rtr, _pmap),
     _conf(_process_watch),
     _filter_manager(_conf.import_filters(),
 		    _conf.sourcematch_filters(),
@@ -36,7 +36,8 @@ PolicyTarget::PolicyTarget(XrlStdRouter& rtr) :
 		    _conf.sets(),
 		    _conf.tagmap(),
 		    rtr,
-		    _process_watch)
+		    _process_watch,
+		    _pmap)
 
 {
     _conf.set_filter_manager(_filter_manager);
@@ -169,4 +170,10 @@ void
 PolicyTarget::death(const string& tclass, const string& /* tinstance */)
 {
     _process_watch.death(tclass);
+}
+
+void
+PolicyTarget::set_proto_target(const string& protocol, const string& target)
+{
+    _pmap.set_xrl_target(protocol, target);
 }

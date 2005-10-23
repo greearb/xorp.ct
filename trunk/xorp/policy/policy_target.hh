@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.7 2005/09/27 18:50:42 pavlin Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.8 2005/10/02 22:21:50 abittau Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -211,10 +211,19 @@ public:
      */
     void death(const string& tclass, const string& tinstance);
 
+    /**
+     * Update the protocol -> XRL target map.
+     *
+     * @param protocol the protocol.
+     * @param target the XRL target.
+     */
+    void set_proto_target(const string& protocol, const string& target);
+
 private:
     bool _running;
     uint32_t _commit_delay;
 
+    ProtocolMap	    _pmap;
     ProcessWatch    _process_watch;
     Configuration   _conf;
     FilterManager   _filter_manager;

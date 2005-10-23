@@ -107,7 +107,7 @@ LDADD = $(noinst_LTLIBRARIES) ./common/libpolicycommon.la $(top_builddir)/xrl/ta
 xorp_policy_SOURCES = xorp_policy.cc policy_target.hh policy_target.cc
 
 # Policy library
-libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh code_list.hh configuration.hh dependancy.hh export_code_generator.hh filter_manager.hh filter_manager_base.hh node.hh node_base.hh parser.hh policy_list.hh policy_map.hh policy_parser.hh policy_statement.hh process_watch.hh process_watch_base.hh pw_notifier.hh semantic_varrw.hh set_map.hh source_match_code_generator.hh term.hh var_map.hh visitor.hh visitor_printer.hh visitor_semantic.hh visitor_setdep.hh xrl_target.hh code.cc code_generator.cc code_list.cc configuration.cc export_code_generator.cc filter_manager.cc parser.cc policy_list.cc policy_map.cc policy_statement.cc process_watch.cc semantic_varrw.cc set_map.cc source_match_code_generator.cc term.cc var_map.cc visitor_printer.cc visitor_semantic.cc visitor_setdep.cc xrl_target.cc yacc.yy_policy_parser.h yacc.yy_policy_parser.cc lex.yy_policy_parser.cc
+libpolicy_la_SOURCES = policy_module.h code.hh code_generator.hh code_list.hh configuration.hh dependancy.hh export_code_generator.hh filter_manager.hh filter_manager_base.hh node.hh node_base.hh parser.hh policy_list.hh policy_map.hh policy_parser.hh policy_statement.hh process_watch.hh process_watch_base.hh protocol_map.hh pw_notifier.hh semantic_varrw.hh set_map.hh source_match_code_generator.hh term.hh var_map.hh visitor.hh visitor_printer.hh visitor_semantic.hh visitor_setdep.hh xrl_target.hh code.cc code_generator.cc code_list.cc configuration.cc export_code_generator.cc filter_manager.cc parser.cc policy_list.cc policy_map.cc policy_statement.cc process_watch.cc protocol_map.cc semantic_varrw.cc set_map.cc source_match_code_generator.cc term.cc var_map.cc visitor_printer.cc visitor_semantic.cc visitor_setdep.cc xrl_target.cc yacc.yy_policy_parser.h yacc.yy_policy_parser.cc lex.yy_policy_parser.cc
 
 
 ################################################################
@@ -123,7 +123,7 @@ libpolicy_la_LIBADD =
 am_libpolicy_la_OBJECTS = code.lo code_generator.lo code_list.lo \
 	configuration.lo export_code_generator.lo filter_manager.lo \
 	parser.lo policy_list.lo policy_map.lo policy_statement.lo \
-	process_watch.lo semantic_varrw.lo set_map.lo \
+	process_watch.lo protocol_map.lo semantic_varrw.lo set_map.lo \
 	source_match_code_generator.lo term.lo var_map.lo \
 	visitor_printer.lo visitor_semantic.lo visitor_setdep.lo \
 	xrl_target.lo yacc.yy_policy_parser.lo lex.yy_policy_parser.lo
@@ -160,6 +160,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/policy_statement.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/policy_target.Po \
 @AMDEP_TRUE@	$(DEPDIR)/process_watch.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/protocol_map.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/semantic_varrw.Plo $(DEPDIR)/set_map.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/source_match_code_generator.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/term.Plo $(DEPDIR)/var_map.Plo \
@@ -267,6 +268,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_statement.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_target.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/process_watch.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/protocol_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/semantic_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/set_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/source_match_code_generator.Plo@am__quote@

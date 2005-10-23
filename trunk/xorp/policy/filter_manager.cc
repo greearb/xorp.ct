@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.4 2005/08/04 15:26:55 bms Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.5 2005/10/02 22:21:50 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,7 +31,8 @@ FilterManager::FilterManager(const CodeMap& imp,
 			     const SetMap& sets, 
 			     const TagMap& tagmap, 
 			     XrlStdRouter& rtr, 
-			     ProcessWatch& pw) :
+			     ProcessWatch& pw,
+			     ProtocolMap& pmap) :
 
 	_import(imp), _sourcematch(sm), _export(exp), 
 	_sets(sets), _tagmap(tagmap), 
@@ -40,14 +41,15 @@ FilterManager::FilterManager(const CodeMap& imp,
 	_process_watch(pw), 
 	_policy_backend(&rtr), 
 	_rib(&rtr),
-	_rib_name("rib") // FIXME: rib name hardcoded
+	_rib_name("rib"), // FIXME: rib name hardcoded
+	_pmap(pmap)
 {
 }
 
 void 
 FilterManager::update_filter(const Code::Target& t)
 {
-    switch(t.filter) {
+    switch (t.filter) {
 	case filter::IMPORT:
 	    update_import_filter(t.protocol);
 	    break;
@@ -111,8 +113,10 @@ FilterManager::update_tagmap(const string& protocol)
 void 
 FilterManager::policy_backend_cb(const XrlError& e)
 {
-    if(e != XrlError::OKAY())
+    if(e != XrlError::OKAY()) {
+	debug_msg("[POLICY] XRL exception: %s\n", e.str().c_str());
 	throw FMException(e.str()); // XXX: what else can we do ?
+    }	
 }
 
 void 
@@ -131,13 +135,16 @@ FilterManager::flush_export_queue()
 		  protocol.c_str(),conf.c_str());
 
 	// if configuration is empty, reset the filter
-        if(!conf.length())
-	   _policy_backend.send_reset(protocol.c_str(),filter::EXPORT,
-		callback(this,&FilterManager::policy_backend_cb));
+        if(!conf.length()) {
+	   _policy_backend.send_reset(_pmap.xrl_target(protocol).c_str(),
+	       filter::EXPORT,callback(this,&FilterManager::policy_backend_cb));
+	}
 	// else configure it	
-	else
-	    _policy_backend.send_configure(protocol.c_str(),filter::EXPORT,
-		conf,callback(this,&FilterManager::policy_backend_cb));
+	else {
+	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(), 
+	        filter::EXPORT, conf,
+	        callback(this, &FilterManager::policy_backend_cb));
+	}       
 
 	// export filters may change tagmap
 	update_tagmap(protocol);
@@ -164,14 +171,15 @@ FilterManager::flush_queue(ConfQueue& queue, filter::Filter f)
 		  protocol.c_str(),conf.c_str());
 
 	// if conf is empty, reset filter.
-	if(!conf.length())
-	    _policy_backend.send_reset(protocol.c_str(),f,
-		callback(this,&FilterManager::policy_backend_cb));
+	if(!conf.length()) {
+	    _policy_backend.send_reset(_pmap.xrl_target(protocol).c_str(),
+	        f, callback(this,&FilterManager::policy_backend_cb));
+	}	
 	// else configure filter normally.	
-	else
-	    _policy_backend.send_configure(protocol.c_str(),f, conf,
-		callback(this,&FilterManager::policy_backend_cb));
-
+	else {
+	    _policy_backend.send_configure(_pmap.xrl_target(protocol).c_str(), 
+	        f, conf, callback(this,&FilterManager::policy_backend_cb));
+	}
 	// need to push routes for protocol [filters changed].
 	_push_queue.insert(protocol);
 
@@ -193,8 +201,8 @@ FilterManager::push_routes_now()
 	debug_msg("[POLICY] Pushing routes for %s\n",
 		  proto.c_str());
 
-	_policy_backend.send_push_routes(proto.c_str(),
-		callback(this,&FilterManager::policy_backend_cb));
+	_policy_backend.send_push_routes(_pmap.xrl_target(proto).c_str(),
+	    callback(this,&FilterManager::policy_backend_cb));
     }
 
     _push_queue.clear();

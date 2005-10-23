@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/process_watch.cc,v 1.2 2005/03/25 02:54:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/process_watch.cc,v 1.3 2005/08/04 15:26:55 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,7 +26,8 @@
 #include "libxorp/debug.h"
 #include "process_watch.hh"
 
-ProcessWatch::ProcessWatch(XrlStdRouter& rtr) : 
+ProcessWatch::ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap) :
+		_pmap(pmap),
 		_finder(&rtr), 
 		_instance_name(rtr.instance_name()),
 		_notifier(NULL),
@@ -34,16 +36,18 @@ ProcessWatch::ProcessWatch(XrlStdRouter& rtr) :
 }
 
 void 
-ProcessWatch::register_cb(const XrlError& err) {
-    if(err != XrlError::OKAY()) {
+ProcessWatch::register_cb(const XrlError& err)
+{
+    if (err != XrlError::OKAY()) {
 	throw PWException(err.str());
     }
 }
 
 void 
-ProcessWatch::add_interest(const string& proc) {
+ProcessWatch::add_interest(const string& proc) 
+{
     // check if we already added interested, if so do nothing
-    if(_watching.find(proc) != _watching.end())
+    if (_watching.find(proc) != _watching.end())
 	return;
 
     _watching.insert(proc);
@@ -53,40 +57,44 @@ ProcessWatch::add_interest(const string& proc) {
 
     // add interested in process
     _finder.send_register_class_event_interest(_finder_name.c_str(),
-		_instance_name, proc,
+		_instance_name, _pmap.xrl_target(proc),
 		callback(this,&ProcessWatch::register_cb));
 }
 
-
 void 
-ProcessWatch::birth(const string& proto) {
-    _alive.insert(proto);
+ProcessWatch::birth(const string& proto) 
+{
+    const string& p = _pmap.protocol(proto);
+    _alive.insert(p);
 
     // inform any hooked notifier
-    if(_notifier)
-	_notifier->birth(proto);
+    if (_notifier)
+	_notifier->birth(p);
 
 }
 
 void 
-ProcessWatch::death(const string& proto) {
-    _alive.erase(proto);
+ProcessWatch::death(const string& proto) 
+{
+    const string& p = _pmap.protocol(proto);
+    _alive.erase(p);
 
-    if(_notifier)
-	_notifier->death(proto);
+    if (_notifier)
+	_notifier->death(p);
 }
 
 bool 
-ProcessWatch::alive(const string& proto) {
-    if(_watching.find(proto) == _watching.end())
+ProcessWatch::alive(const string& proto) 
+{
+    if (_watching.find(proto) == _watching.end())
 	throw PWException("Not watching protocol: " + proto);
 
     return _alive.find(proto) != _alive.end();
 }
 
 void
-ProcessWatch::set_notifier(PWNotifier& notifier) {
+ProcessWatch::set_notifier(PWNotifier& notifier) 
+{
     // old notifier is lost... it is a feature, not a bug.
-
     _notifier = &notifier;
 }

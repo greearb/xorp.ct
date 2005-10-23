@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.6 2005/07/15 02:27:11 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.7 2005/10/02 22:21:57 abittau Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -109,4 +109,12 @@ interface policy/0.1 {
 	 * @param id which aspect of the internal state to dump.
 	 */
 	dump_state ? id:u32 -> state:txt
+
+	/**
+	 * Update the mapping from protocols to their XRL target name.
+	 *
+	 * @param protocol protocol to update.
+	 * @param target XRL target for the protocol.
+	 */
+	set_proto_target ? protocol:txt & target:txt
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.8 2005/09/27 18:50:43 pavlin Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.9 2005/10/02 22:21:51 abittau Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -273,8 +273,7 @@ XrlPolicyTarget::policy_0_1_add_varmap(const string& protocol,
 }
 
 XrlCmdError 
-XrlPolicyTarget::policy_0_1_dump_state(const uint32_t& id,
-				       string& state)
+XrlPolicyTarget::policy_0_1_dump_state(const uint32_t& id, string& state)
 {
     try {
         state = _policy_target.dump_state(id);
@@ -284,6 +283,15 @@ XrlPolicyTarget::policy_0_1_dump_state(const uint32_t& id,
     }
     return XrlCmdError::OKAY();
 }	
+
+XrlCmdError
+XrlPolicyTarget::policy_0_1_set_proto_target(const string& protocol,
+					     const string& target)
+{
+    _policy_target.set_proto_target(protocol, target);
+    return XrlCmdError::OKAY();
+}
+
 
 XrlCmdError 
 XrlPolicyTarget::finder_event_observer_0_1_xrl_target_birth(

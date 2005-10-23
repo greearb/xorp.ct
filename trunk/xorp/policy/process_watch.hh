@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,23 +13,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/process_watch.hh,v 1.1 2004/09/17 13:48:50 abittau Exp $
+// $XORP: xorp/policy/process_watch.hh,v 1.2 2005/03/25 02:54:09 pavlin Exp $
 
 #ifndef __POLICY_PROCESS_WATCH_HH__
 #define __POLICY_PROCESS_WATCH_HH__
 
 #include "policy/common/policy_exception.hh"
-
 #include "libxipc/xrl_std_router.hh"
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
-
 #include "process_watch_base.hh"
 #include "pw_notifier.hh"
-
-
+#include "protocol_map.hh"
 #include <set>
 #include <string>
-
 
 /**
  * @short Keeps track of which XORP processes of interest are alive.
@@ -51,8 +48,9 @@ public:
 
     /**
      * @param rtr Xrl router to use.
+     * @param pmap protocol map.
      */
-    ProcessWatch(XrlStdRouter& rtr);
+    ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap);
 
     /**
      * Callback for all Xrl calls.
@@ -60,7 +58,6 @@ public:
      * @param err possible Xrl error.
      */
     void register_cb(const XrlError& err);
-
 
     /**
      * Add an interest in a protocol.
@@ -76,7 +73,6 @@ public:
      */
     void birth(const string& proto);
     
-
     /**
      * Announce death of a protocol.
      *
@@ -104,18 +100,16 @@ public:
     void set_notifier(PWNotifier& notifier);
 
 private:
-    set<string> _watching;
-    
-    set<string> _alive;
-
+    ProtocolMap&    _pmap;
+    set<string>	    _watching;
+    set<string>	    _alive;
     XrlFinderEventNotifierV0p1Client _finder;
-
-    string _instance_name;
+    string	    _instance_name;
 
     // do not delete, we do not own
-    PWNotifier* _notifier;
+    PWNotifier*	    _notifier;
 
-    string _finder_name;
+    string	    _finder_name;
 };
 
 #endif // __POLICY_PROCESS_WATCH_HH__

@@ -1,3 +1,4 @@
+// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
@@ -12,26 +13,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/filter_manager.hh,v 1.1 2004/09/17 13:48:48 abittau Exp $
+// $XORP: xorp/policy/filter_manager.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
 
 #ifndef __POLICY_FILTER_MANAGER_HH__
 #define __POLICY_FILTER_MANAGER_HH__
 
 #include "policy/common/policy_exception.hh"
 #include "policy/common/filter.hh"
-
 #include "xrl/interfaces/policy_backend_xif.hh"
 #include "xrl/interfaces/rib_xif.hh"
 #include "libxorp/eventloop.hh"
-
 #include "code.hh"
 #include "set_map.hh"
 #include "process_watch.hh"
 #include "filter_manager_base.hh"
 #include "pw_notifier.hh"
-
+#include "protocol_map.hh"
 #include <map>
-
 
 /**
  * @short Deals with sending code to policy filters.
@@ -46,12 +44,9 @@ class FilterManager : public FilterManagerBase, public PWNotifier {
 public:
     // XXX: pull this out ?
     typedef map<string,Code*> CodeMap;
-
     typedef map<string,string> ConfQueue;
-    
     typedef set<uint32_t> TagSet;
     typedef map<string,TagSet*> TagMap;
-
 
     /**
      * @short Exception thrown on error. Such as xrl failure.
@@ -73,11 +68,13 @@ public:
      * @param tagmap TagMap to use.
      * @param rtr the XRL router used by the policy process.
      * @param pw the process watcher.
+     * @param pmap the protocol map.
      */
     FilterManager(const CodeMap& imp, const CodeMap& sm, 
-		 const CodeMap& exp, const SetMap& sets, 
-		 const TagMap& tagmap, XrlStdRouter& rtr, 
-		 ProcessWatch& pw);
+		  const CodeMap& exp, const SetMap& sets, 
+		  const TagMap& tagmap, XrlStdRouter& rtr, 
+		  ProcessWatch& pw,
+		  ProtocolMap& pmap);
 
     /**
      * Update the filter for a specific target. This will normally queue a
@@ -113,7 +110,6 @@ public:
      * @param msec milliseconds after which all queues should be flushed.
      */
     void flush_updates(uint32_t msec);
-
 
     // PWNotifier interface:
     /**
@@ -174,12 +170,10 @@ private:
      */
     void flush_queue(ConfQueue& queue, filter::Filter f);
 
-
     void delete_queue_protocol(ConfQueue& queue, const string& protocol);
 
     void update_queue(const string& protocol, const CodeMap& cm, 
 		      ConfQueue& queue);
-
 
     const CodeMap& _import;
     const CodeMap& _sourcematch;
@@ -192,7 +186,6 @@ private:
     ConfQueue _export_queue;
     set<string> _push_queue;
 
-
     EventLoop& _eventloop;
 
     // we should have a timer per protocol.
@@ -200,13 +193,13 @@ private:
     XorpTimer _push_timer;
     unsigned _push_timeout;
     
-
     ProcessWatch& _process_watch;
 
     XrlPolicyBackendV0p1Client _policy_backend;
     XrlRibV0p1Client _rib;
 
     string _rib_name;
+    ProtocolMap& _pmap;
 };
 
 
