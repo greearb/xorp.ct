@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.68 2005/10/21 18:43:19 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.69 2005/10/22 04:43:42 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -606,6 +606,15 @@ class LsaDecoder {
 	XLOG_ASSERT(_lsa_decoders.end() != i);
 	return i->second->external();
     }
+
+    /**
+     * Return the name of this LSA.
+     */
+     const char *name(uint16_t type) const {
+	 map<uint16_t, Lsa *>::const_iterator i = _lsa_decoders.find(type);
+	 XLOG_ASSERT(_lsa_decoders.end() != i);
+	 return i->second->name();
+     }
 
     OspfTypes::Version get_version() const {
 	return _version;
