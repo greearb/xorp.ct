@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.62 2005/10/18 15:10:52 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.63 2005/10/22 22:45:42 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -167,6 +167,12 @@ struct OspfTypes {
      */
     static const int32_t MaxSequenceNumber = 0x7fffffff;
 };
+
+/**
+ * XRL target name.
+ */
+static const char TARGET_OSPFv2[] = "ospfv2";
+static const char TARGET_OSPFv3[] = "ospfv3";
 
 /**
  * Pretty print a router or area ID.
