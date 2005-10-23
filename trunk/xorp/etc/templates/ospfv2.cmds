@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.2 2005/10/13 08:22:13 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.3 2005/10/23 03:59:01 atanu Exp $ */
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
@@ -241,4 +241,78 @@ show ospf4 database area $(protocols.ospf4.area.*) external detail {
     %command: "ospf/tools/print_lsas -a $5 -d -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Display detailed output";
+}
+
+/* SUMMARY */
+
+show ospf4 database summary {
+    %command: "ospf/tools/print_lsas -s" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display summary output";
+}
+
+show ospf4 database summary router {
+    %command: "ospf/tools/print_lsas -s -f 1" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf4 database summary network {
+    %command: "ospf/tools/print_lsas -s -f 2" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf4 database summary netsummary {
+    %command: "ospf/tools/print_lsas -s -f 3" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf4 database summary asbrsummary {
+    %command: "ospf/tools/print_lsas -s -f 4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf4 database summary external {
+    %command: "ospf/tools/print_lsas -s -f 5" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show External-LSA database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) {
+    %command: "ospf/tools/print_lsas -a $6 -s" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display summary output";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) router {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 1" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Router-LSA database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) network {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 2" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Network-LSA database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) netsummary {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 3" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Summary-LSA (network) database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) asbrsummary {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Summary-LSA (AS boundary router) database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) external {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 5" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show External-LSA database";
 }
