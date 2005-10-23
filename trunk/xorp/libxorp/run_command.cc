@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.14 2005/10/20 11:00:08 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.15 2005/10/21 20:00:46 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -315,22 +315,12 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	// Something bad happened.
 	// XXX: ideally we'd figure out what.
 	//
-	string prefix, suffix;
-	if (_error_msg.size()) {
-	    prefix = "[";
-	    suffix = "]";
-	}
-	_error_msg += prefix;
-	int error = 0;
+	int error_code = 0;
 	if (is_stdout)
-	    error = _stdout_file_reader->error();
+	    error_code = _stdout_file_reader->error();
 	else
-	    error = _stderr_file_reader->error();
-	_error_msg += c_format("Something bad happened: event = 0x%x "
-			       "(error = %d)",
-			       event, error);
-	_error_msg += suffix;
-	done(event);
+	    error_code = _stderr_file_reader->error();
+	done(event, error_code);
 	return;
     }
 
@@ -378,27 +368,45 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	}
 	if (_stdout_eof_received
 	    && (_stderr_eof_received || redirect_stderr_to_stdout())) {
-	    done(event);
+	    done(event, 0);
 	}
 	return;
     }
 }
 
 void
-RunCommandBase::done(AsyncFileOperator::Event event)
+RunCommandBase::done(AsyncFileOperator::Event event, int error_code)
 {
+    string prefix, suffix;
+
+    if (_error_msg.size()) {
+	prefix = "[";
+	suffix = "]";
+    }
+    _error_msg += prefix;
+
     if (event != AsyncFileOperator::END_OF_FILE) {
 	_is_error = true;
+	_error_msg += c_format("Command \"%s\" terminated because of "
+			       "unexpected event (event = 0x%x error = %d).",
+			       _command.c_str(), event, error_code);
 	terminate();
     } else {
 	close_output();
     }
 
-    if (_command_is_exited && (_command_exit_status != 0))
+    if (_command_is_exited && (_command_exit_status != 0)) {
 	_is_error = true;
-    if (_command_is_coredump)
+	_error_msg += c_format("Command \"%s\" exited with exit status %d.",
+			       _command.c_str(), _command_exit_status);
+    }
+    if (_command_is_coredump) {
 	_is_error = true;
+	_error_msg += c_format("Command \"%s\" aborted with a core dump.",
+			       _command.c_str());
+    }
 
+    _error_msg += suffix;
     done_cb_dispatch(!_is_error, _error_msg);
 
     // XXX: the callback will delete us. Don't do anything more in this method.
@@ -542,6 +550,6 @@ RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
 {
     XLOG_ASSERT(type == IOT_READ);
     UNUSED(fd);
-    done(AsyncFileOperator::END_OF_FILE);
+    done(AsyncFileOperator::END_OF_FILE, 0);
 }
 #endif

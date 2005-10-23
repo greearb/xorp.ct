@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.7 2005/10/10 04:50:49 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.8 2005/10/21 20:00:46 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -263,10 +263,13 @@ private:
     /**
      * The command has completed.
      *
-     * @param Event the last event from the command
+     * @param event the last event from the command.
      * (@see AsyncFileOperator::Event).
+     * @param error_code the error code if the @ref event indicates an error
+     * (e.g., if it is not equal to AsyncFileOperator::END_OF_FILE), otherwise
+     * its value is ignored.
      */
-    void done(AsyncFileOperator::Event);
+    void done(AsyncFileOperator::Event event, int error_code);
 
 #ifdef HOST_OS_WINDOWS
     void win_proc_done_cb(XorpFd fd, IoEventType type);
