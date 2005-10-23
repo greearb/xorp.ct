@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.3 2005/10/13 16:39:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.4 2005/10/13 16:49:05 atanu Exp $"
 
 // Get LSAs from OSPF and print them.
 
@@ -51,9 +51,59 @@
 
 #include "xrl/interfaces/ospfv2_xif.hh"
 
-class Fetch {
- public:
-    Fetch(XrlStdRouter& xrl_router, OspfTypes::Version version, IPv4 area)
+class GetAreaList {
+public:
+    GetAreaList(XrlStdRouter& xrl_router)
+	: _xrl_router(xrl_router), _done(false), _fail(false)
+    {
+    }
+
+    void add(IPv4 area) {
+	_areas.push_back(area);
+    }
+
+    void start() {
+	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
+	ospfv2.send_get_area_list("ospfv2",
+				  callback(this, &GetAreaList::response));
+    }
+
+    bool busy() {
+	return !_done;
+    }
+
+    bool fail() {
+	return _fail;
+    }
+
+    list<IPv4>& get() {
+	return _areas;
+    }
+
+private:
+    void response(const XrlError& error, const XrlAtomList *atomlist) {
+	_done = true;
+	if (XrlError::OKAY() != error) {
+	    XLOG_WARNING("Attempt to get lsa failed");
+	    _fail = true;
+	    return;
+	}
+	const size_t size = atomlist->size();
+	for (size_t i = 0; i < size; i++)
+	    _areas.push_back(IPv4(htonl(atomlist->get(i).uint32())));
+	
+    }
+private:
+    XrlStdRouter &_xrl_router;
+    bool _done;
+    bool _fail;
+
+    list<IPv4> _areas;
+};
+
+class FetchDB {
+public:
+    FetchDB(XrlStdRouter& xrl_router, OspfTypes::Version version, IPv4 area)
 	: _xrl_router(xrl_router), _lsa_decoder(version),
 	  _done(false), _fail(false), _area(area), _index(0)
     {
@@ -63,7 +113,7 @@ class Fetch {
     void start() {
 	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
 	ospfv2.send_get_lsa("ospfv2", _area, _index,
-			    callback(this, &Fetch::response));
+			    callback(this, &FetchDB::response));
     }
 
     bool busy() {
@@ -78,7 +128,7 @@ class Fetch {
 	return _lsas;
     }
 
- private:
+private:
     void response(const XrlError& error,
 		  const bool *valid,
 		  const bool *toohigh,
@@ -104,7 +154,7 @@ class Fetch {
 	_index++;
 	start();
     }
- private:
+private:
     XrlStdRouter &_xrl_router;
     LsaDecoder _lsa_decoder;
     bool _done;
@@ -115,13 +165,89 @@ class Fetch {
     list<Lsa::LsaRef> _lsas;
 };
 
+class FilterLSA {
+public:
+    void add(uint16_t type) {
+	_filter.push_back(type);
+    }
+
+    bool accept(uint16_t type) {
+	if (_filter.empty())
+	    return true;
+
+	if (_filter.end() != find(_filter.begin(), _filter.end(), type))
+	    return true;
+	
+	return false;
+    }
+private:
+    list<uint16_t> _filter;
+};
+
+void
+print_brief(Lsa::LsaRef lsar)
+{
+    printf("%-8s", lsar->name());
+    printf("%c", lsar->get_self_originating() ? '*' : ' ');
+    Lsa_header& header = lsar->get_header();
+    printf("%-17s", pr_id(header.get_link_state_id()).c_str());
+    printf("%-17s", pr_id(header.get_advertising_router()).c_str());
+    printf("%-#12x", header.get_ls_sequence_number());
+    printf("%4d", header.get_ls_age());
+    printf("  %-#5x", header.get_options());
+    printf("%-#7x", header.get_ls_checksum());
+    printf("%3d", header.get_length());
+    printf("\n");
+}
+
+void
+print_detail(Lsa::LsaRef lsar)
+{
+    printf("%s\n", lsar->str().c_str());
+}
+
+enum Pstyle {
+    BRIEF,
+    DETAIL
+};
+
+void
+print_lsa_database(string area, list<Lsa::LsaRef>& lsas, Pstyle pstyle,
+		   FilterLSA& filter)
+{
+    printf("   OSPF link state database, Area %s\n", area.c_str());
+
+    switch (pstyle) {
+    case BRIEF:
+	printf(" Type       ID               Adv "
+	       "Rtr           Seq      Age  Opt  Cksum  Len\n");
+	break;
+    case DETAIL:
+	break;
+    }
+
+    list<Lsa::LsaRef>::const_iterator i;
+    for (i = lsas.begin(); i != lsas.end(); i++) {
+	if (!filter.accept((*i)->get_ls_type()))
+	    continue;
+	switch (pstyle) {
+	case BRIEF:
+	    print_brief(*i);
+	    break;
+	case DETAIL:
+	    print_detail(*i);
+	    break;
+	}
+    }
+}
+
 int
 usage(const char *myname)
 {
-    fprintf(stderr, "usage: %s -a area [-b] -[-d]\n",
-	    myname);
+    fprintf(stderr, "usage: %s [-a area] [-f type] [-b] [-d]\n", myname);
     return -1;
 }
+
 int 
 main(int argc, char **argv)
 {
@@ -136,29 +262,29 @@ main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
+    Pstyle pstyle = BRIEF;
+    FilterLSA filter;
     string area;
-    bool brief = true;
-    bool detail = false;
 
     int c;
-    while ((c = getopt(argc, argv, "a:bd")) != -1) {
+    while ((c = getopt(argc, argv, "a:f:bd")) != -1) {
 	switch (c) {
 	case 'a':
 	    area = optarg;
 	    break;
+	case 'f':
+	    filter.add(atoi(optarg));
+	    break;
 	case 'b':
-	    brief = true;
+	    pstyle = BRIEF;
 	    break;
 	case 'd':
-	    detail = true;
+	    pstyle = DETAIL;
 	    break;
 	default:
 	    return usage(argv[0]);
 	}
     }
-
-    if (area.empty())
-	return usage(argv[0]);
 
     try {
 	//
@@ -172,43 +298,37 @@ main(int argc, char **argv)
 	wait_until_xrl_router_is_ready(eventloop, xrl_router);
 	debug_msg("\n");
 
-	Fetch fetch(xrl_router, OspfTypes::V2, IPv4(area.c_str()));
+	GetAreaList get_area_list(xrl_router);
+	if (area.empty()) {
+	    get_area_list.start();
+	    while(get_area_list.busy())
+		eventloop.run();
 
-	fetch.start();
-	while(fetch.busy())
-	    eventloop.run();
-
-	if (fetch.fail())
-	    brief = detail = false;
-
-	if (brief) {
-	    printf(" Type       ID               Adv "
-		   "Rtr           Seq      Age  Opt  Cksum  Len\n");
-	    const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
-	    list<Lsa::LsaRef>::const_iterator i;
-	    for (i = lsas.begin(); i != lsas.end(); i++) {
-		printf("%-8s", (*i)->name());
-		printf("%c", (*i)->get_self_originating() ? '*' : ' ');
-		Lsa_header& header = (*i)->get_header();
-		printf("%-17s", pr_id(header.get_link_state_id()).c_str());
-		printf("%-17s",
-		       pr_id(header.get_advertising_router()).c_str());
-		printf("%-#12x", header.get_ls_sequence_number());
-		printf("%4d", header.get_ls_age());
-		printf("  %-#5x", header.get_options());
-		printf("%-#7x", header.get_ls_checksum());
-		printf("%3d", header.get_length());
-		printf("\n");
+	    if (get_area_list.fail()) {
+		fprintf(stderr, "Failed to get area list\n");
+		return -1;
 	    }
+	} else {
+	    get_area_list.add(IPv4(area.c_str()));
 	}
 
-	if (detail) {
-	    const list<Lsa::LsaRef>& lsas = fetch.get_lsas();
-	    list<Lsa::LsaRef>::const_iterator i;
-	    for (i = lsas.begin(); i != lsas.end(); i++)
-		printf("%s\n", (*i)->str().c_str());
+	list<IPv4>& area_list = get_area_list.get();
+	list<IPv4>::const_iterator i;
+	for (i = area_list.begin(); i != area_list.end(); i++) {
+
+	    FetchDB fetchdb(xrl_router, OspfTypes::V2, *i);
+
+	    fetchdb.start();
+	    while(fetchdb.busy())
+		eventloop.run();
+
+	    if (fetchdb.fail()) {
+		fprintf(stderr, "Failed to fetch area %s\n", area.c_str());
+		return -1;
+	    }
+	    print_lsa_database(i->str(), fetchdb.get_lsas(), pstyle, filter);
 	}
-	       
+
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
