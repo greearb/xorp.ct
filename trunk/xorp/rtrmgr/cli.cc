@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.99 2005/10/10 04:10:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.100 2005/10/13 22:24:41 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2652,9 +2652,12 @@ void
 RouterCLI::op_mode_cmd_done(bool success, const string& error_msg)
 {
     if (! success) {
-	cli_client().cli_print("ERROR:\n");
-	if (!error_msg.empty())
-	    cli_client().cli_print(error_msg + "\n");
+	string tmp_error_msg;
+	if (! error_msg.empty())
+	    tmp_error_msg = error_msg;
+	else
+	    tmp_error_msg = "<unknown error>";
+	cli_client().cli_print(c_format("ERROR: %s\n", tmp_error_msg.c_str()));
     }
     op_mode_cmd_tidy();
     reenable_ui();
