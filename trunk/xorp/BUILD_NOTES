@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.33 2005/10/14 03:06:41 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.34 2005/10/20 18:31:42 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -210,6 +210,41 @@ gmake check
   * OS X 10.4.2 (Darwin 8.2.0):
     - gcc version 4.0.0 20041026 (Apple Computer, Inc. build 4061)
     - The code compiles, and the internal tests appear to succeed.
+
+3.6 Windows Server 2003
+=======================
+
+  * All:
+    - Unicast routing appears to work.
+    - Multicast routing doesn't work, because the system doesn't have
+      the appropriate support.
+
+    - The code compiles using the MinGW port of gcc 3.4.2, using the
+      MSYS shell environment.
+    - Many internal tests currently fail. This is a known issue.
+
+    - Currently to achieve a working subset of XORP we recommend
+      that you do NOT configure XORP with the --with-windows-dispatcher
+      switch. Without this switch, XORP is limited to IPv4 unicast
+      routing only, with a limited router CLI. The WinDispatcher code
+      is experimental; please do not enable this switch unless you are
+      comfortable with debugging low-level Win32 application code.
+
+    - You must install the following GNU/Win32 ports in a path which
+      the MSYS environment is aware of:
+      - flex (required for rebuilding parsers)
+      - OpenSSL (required for MD5)
+      - pcre (required by the policy routing subsystem)
+
+    - The RunCommand class has a hard-coded path to the MSYS shell of
+      D:\MSYS\BIN\SH.EXE. This will eventually go away but for now
+      we recommend you use SUBST and/or NT junction points to symlink
+      this to the correct path for your installation.
+
+    - To take a full BGP route feed, a registry key must be updated:
+      HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
+      must be set to 0xFFFFFFFF. Be warned that this removes the upper
+      limit on use of nonpageable system memory for kernel FIB entries.
 
 4. Known problems
 =================
