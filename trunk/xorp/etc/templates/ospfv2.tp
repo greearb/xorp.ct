@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.12 2005/10/21 18:37:00 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.13 2005/10/22 17:35:04 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -114,12 +114,16 @@ the router within an Autonomous System";
 			priority {
 			    %help: short "Priority used in DR election";
 
+			    %allow-range: $(@) "0" "255";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
 			}
 
 			hello-interval {
 			    %help: short
 				"Hello packets sent every interval seconds";
+
+			    %allow-range: $(@) "1" "65535";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
@@ -128,17 +132,24 @@ the router within an Autonomous System";
 			    %help: short
 	"Seconds to wait before considering a neighbour dead";
 
+			    %allow-range: $(@) "1" "4294967295";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
 
 			interface-cost {
 			    %help: short "Cost of this address";
+			
+			    %allow-range: $(@) "1" "65535";
+
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
 			}
 
 			inftransdelay {
 			    %help: short
 				"Add to age field of all transmitted LSAs";
+
+			    %allow-range: $(@) "0" "3600";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
 			}
