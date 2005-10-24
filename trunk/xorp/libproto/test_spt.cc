@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.6 2005/08/04 20:38:16 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.7 2005/08/31 03:21:43 atanu Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -165,11 +165,11 @@ verify(TestInfo& info,
 bool
 test1(TestInfo& info)
 {
-    Node<string> a("A");
+    Node<string> a("A", info.verbose());
 
     DOUT(info) << "Nodename: " << a.nodename() << endl;
 
-    Node<string> *b = new Node<string>("B");
+    Node<string> *b = new Node<string>("B", info.verbose());
     Node<string>::NodeRef bref(b);
 
     if (!a.add_edge(bref, 10)) {
@@ -216,7 +216,7 @@ test1(TestInfo& info)
 bool
 test2(TestInfo& info)
 {
-    Spt<string> *spt = new Spt<string>();
+    Spt<string> *spt = new Spt<string>(info.verbose() /* enable tracing */);
 
     spt->add_node("A");
     spt->add_node("B");
@@ -260,9 +260,9 @@ test2(TestInfo& info)
 }
 
 bool
-test3(TestInfo& /*info*/)
+test3(TestInfo& info)
 {
-    Spt<string> *spt = new Spt<string>();
+    Spt<string> *spt = new Spt<string>(info.verbose() /* enable tracing */);
 
     spt->add_node("A");
     for(int i = 0; i < 1000000; i++)
@@ -279,9 +279,9 @@ test3(TestInfo& /*info*/)
 }
 
 bool
-test4(TestInfo& /*info*/)
+test4(TestInfo& info)
 {
-    Spt<string> spt;
+    Spt<string> spt(info.verbose() /* enable tracing */);
 
     list<RouteCmd<string> > routes;
 
@@ -295,7 +295,7 @@ test4(TestInfo& /*info*/)
 bool
 test5(TestInfo& info, string fname)
 {
-    Spt<string> spt;
+    Spt<string> spt(info.verbose() /* enable tracing */);
 
     if (!populate_graph(info, &spt, fname))
 	return false;
@@ -318,7 +318,7 @@ test5(TestInfo& info, string fname)
 bool
 test6(TestInfo& info)
 {
-    Spt<string> spt;
+    Spt<string> spt(info.verbose() /* enable tracing */);
 
     spt.add_node("s");
     spt.add_node("t");
@@ -498,9 +498,9 @@ test6(TestInfo& info)
  * Simple test used to look for memory leaks.
  */
 bool
-test7(TestInfo& /*info*/)
+test7(TestInfo& info)
 {
-    Spt<string> spt;
+    Spt<string> spt(info.verbose() /* enable tracing */);
 
     spt.add_node("s");
     spt.add_node("t");
@@ -534,7 +534,7 @@ test7(TestInfo& /*info*/)
 bool
 test8(TestInfo& info)
 {
-    Spt<string> spt;
+    Spt<string> spt(info.verbose() /* enable tracing */);
 
     spt.add_node("o");
     spt.set_origin("o");

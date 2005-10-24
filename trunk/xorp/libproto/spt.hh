@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.7 2005/08/31 03:21:43 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.8 2005/09/01 18:14:00 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -45,6 +45,9 @@ class Spt {
  public:
     //    typedef Node<A>::NodeRef NodeRef;
     typedef map<A, typename Node<A>::NodeRef> Nodes;
+
+    Spt(bool trace = true) : _trace(trace)
+    {}
 
     ~Spt();
 
@@ -133,6 +136,7 @@ class Spt {
      */
     string str() const;
  private:
+    bool _trace;		// True of tracing is enabled.
     /**
      * Dijkstra
      *
@@ -170,7 +174,7 @@ class Node {
 
     typedef ref_ptr<Node<A> > NodeRef;
 
-    Node(A a);
+    Node(A a, bool trace = false);
 
     /**
      * @return nodename
@@ -328,6 +332,7 @@ class Node {
     bool _valid;		// True if node is not marked for deletion.
     A _nodename;		// Node name, external name of this node.
     adjacency _adjacencies;	// Adjacency list
+    bool _trace;		// True of tracing is enabled.
 
     // private:
     //    friend class Spt<A>;
@@ -520,7 +525,7 @@ Spt<A>::add_node(const A& node)
 	}
     }
 
-    Node<A> *n = new Node<A>(node);
+    Node<A> *n = new Node<A>(node, _trace);
     _nodes[node] = typename Node<A>::NodeRef(n);
 
     return true;
@@ -775,8 +780,8 @@ Spt<A>::find_node(const A& node)
 }
 
 template <typename A>
-Node<A>::Node(A nodename)
-    :  _valid(true), _nodename(nodename)
+Node<A>::Node(A nodename, bool trace)
+    :  _valid(true), _nodename(nodename), _trace(trace)
 {
 }
 
@@ -962,7 +967,7 @@ Node<A>::delta(RouteCmd<A>& rcmd)
 
     // It is possible that this node is not reachable.
     if (!c._valid) {
-	XLOG_WARNING("Node: %s not reachable", str().c_str());
+	XLOG_TRACE(_trace, "Node: %s not reachable", str().c_str());
 	if (p._valid) {
 	    rcmd = RouteCmd<A>(RouteCmd<A>::DELETE, nodename(), nodename());
 	    return true;	    
