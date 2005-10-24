@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.25 2005/08/23 01:49:34 atanu Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.26 2005/08/28 20:02:57 atanu Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -270,6 +270,7 @@ TimerList::system_sleep(const TimeVal& tv)
 	FILETIME ft;
 	tv.copy_out(ft);
 	assert(instance->_hirestimer != NULL);
+	reinterpret_cast<LARGE_INTEGER *>(&ft)->QuadPart *= -1;
 	SetWaitableTimer(instance->_hirestimer, (LARGE_INTEGER *)&ft, 0,
 			 NULL, NULL, FALSE);
 	WaitForSingleObjectEx(instance->_hirestimer, 0, TRUE);
