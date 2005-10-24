@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.2 2005/08/04 10:26:33 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.3 2005/08/23 20:45:24 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,16 +37,6 @@
 #include "libxorp/win_dispatcher.hh"
 
 #include "libxorp/win_io.h"
-
-// Some definitions may be missing from MinGW. Provide them here.
-#ifdef __MINGW32__
-#define	HWND_MESSAGE		((HWND)(-3))
-#define	QS_ALLPOSTMESSAGE	256
-#define	MWMO_ALERTABLE		2
-#endif
-
-const char *WinDispatcher::WNDCLASS_STATIC = "STATIC";
-const char *WinDispatcher::WNDNAME_XORP = "XorpSocketWindow";
 
 #ifndef XORP_FD_CAST
 #define	XORP_FD_CAST(x)	((u_int)(x))
@@ -94,8 +84,10 @@ _map_wsaevent_to_ioevent(const long wsaevent)
     switch (wsaevent) {
     case FD_READ:
 	return IOT_READ;
-    //case FD_WRITE:
-//	return IOT_WRITE;
+#if 0	// We currently use select() to poll for level-triggered writability.
+    case FD_WRITE:
+	return IOT_WRITE;
+#endif
     case FD_OOB:
 	return IOT_EXCEPTION;
     case FD_ACCEPT:
@@ -139,7 +131,7 @@ WinDispatcher::WinDispatcher(ClockBase* clock)
     {
 	WSADATA wsadata;
 	WORD version = MAKEWORD(2, 2);
-	int retval = WSAStartup(version, &wsadata);
+	int retval = ::WSAStartup(version, &wsadata);
 	if (retval != 0) {
 	    XLOG_FATAL("WSAStartup() error: %lu", GetLastError());
 	}
@@ -150,12 +142,11 @@ WinDispatcher::WinDispatcher(ClockBase* clock)
     FD_ZERO(&_writefdset4);
     FD_ZERO(&_writefdset6);
 
-    _hwnd = ::CreateWindowExA(0, WNDCLASS_STATIC, WNDNAME_XORP,
-			      0, 0, 0, 0, 0, HWND_MESSAGE, 0,
-			      GetModuleHandle(NULL), 0);
-    if (_hwnd == NULL) {
-	XLOG_FATAL("CreateWindowExA error: %lu", GetLastError());
-    }
+    _hsockevent = ::WSACreateEvent();
+    if (_hsockevent == NULL)
+	XLOG_FATAL("WSACreateEvent() failed");
+
+    _handles.push_back(_hsockevent);
 }
 
 WinDispatcher::~WinDispatcher()
@@ -165,7 +156,7 @@ WinDispatcher::~WinDispatcher()
 	 ii != _socket_wsaevent_map.end(); ++ii) {
 	(void)::WSAEventSelect(ii->first, NULL, 0);
     }
-    (void)::DestroyWindow(_hwnd);
+    (void)::WSACloseEvent(_hsockevent);
     (void)::WSACleanup();
 }
 
@@ -181,7 +172,7 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 	    return false;
 	}
 
-	// Writability events are a special case. Whilst WSAAsyncSelect()
+	// Writability events are a special case. Whilst WSA*Select()
 	// supports an FD_WRITE event, it's edge triggered, not level
 	// triggered; you only get it when the socket *transitions* into
 	// an unblocked state, not whilst the socket is *in* such a state.
@@ -237,9 +228,9 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 
 	// Push the event mapping to Winsock. Wire up the callback.
 	newmask |= oldmask;
-	int retval = ::WSAAsyncSelect(fd, _hwnd, XM_SOCKET, newmask);
+	int retval = ::WSAEventSelect(fd, _hsockevent, newmask);
 	if (retval != 0) {
-	    debug_msg("WSAAsyncSelect(): %d\n", WSAGetLastError());
+	    debug_msg("WSAEventSelect(): %d\n", WSAGetLastError());
 	    return false;
 	}
 
@@ -250,6 +241,9 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 	}
 
 	_ioevent_map.insert(std::make_pair(IoEventTuple(fd, type), cb));
+
+	_eventsocks.push_back(fd);
+
 	return true;
 }
 
@@ -318,6 +312,15 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 {
     bool unregistered = false;
 
+    // remove from WSAEnumNetworkEvents() vector
+    for (vector<SOCKET>::iterator ii = _eventsocks.begin();
+	ii != _eventsocks.end(); ii++) {
+	if (*ii == fd) {
+	    ii = _eventsocks.erase(ii);
+	    break;
+	}
+    }
+
     // XXX: writability is a special case, so deal with it first.
     // XXX: We have a bit of a quandary here in that if the socket
     // has already been closed, we can't determine its family. This
@@ -385,12 +388,12 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 	    retval = ::WSAEventSelect(fd, NULL, 0);
 	    _socket_wsaevent_map.erase(ii);	    // invalidates iterator
 	} else {
-	    retval = ::WSAAsyncSelect(fd, _hwnd, XM_SOCKET, newmask);
+	    retval = ::WSAEventSelect(fd, _hsockevent, newmask);
 	    ii->second = newmask;
 	}
 
 	if (retval != 0)
-	    debug_msg("WSAAsyncSelect(): %d\n", WSAGetLastError());
+	    debug_msg("WSAEventSelect(): %d\n", WSAGetLastError());
 
 	IoEventMap::iterator jj = _ioevent_map.find(IoEventTuple(fd, type));
 	if (jj != _ioevent_map.end()) {
@@ -451,76 +454,6 @@ WinDispatcher::remove_ioevent_cb(XorpFd fd, IoEventType type)
     return false;
 }
 
-//
-// Handle Winsock events received by our invisible window.
-//
-// TODO: Do something with the Winsock error code, as retrieved by
-// the WSAGETSELECTERROR(lParam) macro.
-//
-int
-WinDispatcher::window_procedure(HWND hwnd, UINT uMsg,
-				WPARAM wParam, LPARAM lParam)
-{
-    XLOG_ASSERT(hwnd == _hwnd);
-
-    if (uMsg == XM_SOCKET) {
-	XorpFd fd((SOCKET)wParam);
-	long event = WSAGETSELECTEVENT(lParam);
-
-	debug_msg("Event %ld (%s) on socket %s\n", event,
-		  _get_event_string(event), fd.str().c_str());
-
-	// Sanity check: received event is for a socket we're aware of.
-	SocketWSAEventMap::iterator ii = _socket_wsaevent_map.find(fd);
-	if (ii == _socket_wsaevent_map.end()) {
-	    debug_msg("Socket isn't registered for events.\n");
-	    return -1;
-	}
-
-	// Sanity check: received event is in mask of expected events.
-	if ((ii->second & WSAGETSELECTEVENT(lParam)) == 0) {
-	    debug_msg("Event isn't registered for socket.\n");
-	    return -1;
-	}
-
-#if 0
-	// XXX: Temporarily block and restore FD_WRITE if enabled, to
-	// try to persuade Winsock to give us level-triggered events!
-	// XXX: This doesn't work. We need to do this the long way round;
-	// we need to know when a socket is blocked for further writes.
-	if (ii->second & FD_WRITE) {
-	    ::WSAEventSelect(fd, NULL, 0);
-	    ::WSAAsyncSelect(fd, hwnd, XM_SOCKET, ii->second);
-	}
-#endif
-	
-	// Sanity check: received event maps to a valid IoEventType.
-	int itype = _map_wsaevent_to_ioevent(event);
-	if (itype == -1) {
-	    debug_msg("Event doesn't map to a valid IoEventType.\n");
-	    return -1;
-	}
-	IoEventType type = static_cast<IoEventType>(itype);
-
-	// Look up the callback.
-	IoEventMap::iterator jj = _ioevent_map.find(IoEventTuple(fd, type));
-	if (jj == _ioevent_map.end()) {
-	    debug_msg("IoEvent %d on socket %s does not map to a callback.\n",
-			 itype, fd.str().c_str());
-	    return -1;
-	}
-
-	jj->second->dispatch(fd, type);
-	return 0;
-
-    } else {
-	debug_msg("Unknown message type %u\n", XORP_UINT_CAST(uMsg));
-	return -1;
-    }
-
-    return -1;
-}
-
 void
 WinDispatcher::wait_and_dispatch(int ms)
 {
@@ -530,10 +463,10 @@ WinDispatcher::wait_and_dispatch(int ms)
 	 !_polled_pipes.empty()) && (ms > POLLED_INTERVAL_MS))
 	ms = POLLED_INTERVAL_MS;
 
-    retval = ::MsgWaitForMultipleObjectsEx(
+    retval = ::WaitForMultipleObjectsEx(
 		_handles.empty() ? 0 : _handles.size(),
 		_handles.empty() ? NULL : &_handles[0],
-		ms, QS_POSTMESSAGE|QS_SENDMESSAGE, 0);
+		FALSE, ms, 0);
 
     _clock->advance_time();
 
@@ -558,41 +491,30 @@ WinDispatcher::wait_and_dispatch(int ms)
 		}
 	    }
 	} else {
-	    XLOG_FATAL("MsgWaitForMultipleObjectsEx() failed, code %lu."
+	    XLOG_FATAL("WaitForMultipleObjectsEx() failed, code %lu."
 		       "This should never happen.", lasterr);
 	}
     } else if (retval == WAIT_TIMEOUT) {
 	// The timeout period elapsed. This is normal.
     } else if (retval == WAIT_IO_COMPLETION) {
-	XLOG_ERROR("A User APC was called. This should never happen.");
+	XLOG_ERROR("A User APC was called. Should not happen.");
     } else if (retval == WAIT_OBJECT_0 + _handles.size()) {
-	//
-	// One or more window messages were received. Dispatch them.
-	// Use a filter to only look for XM_SOCKET messages.
-	//
-	MSG msg;
-	BOOL ret;
-	while (0 != (ret = PeekMessage(&msg, _hwnd, XM_SOCKET, XM_SOCKET,
-				       PM_REMOVE|PM_NOYIELD))) {
-	    if (ret == -1) {
-		XLOG_ERROR("PeekMessage() failed, code %lu. "
-			   "This should never happen.", GetLastError());
-		break;
-	    }
-	    (void)window_procedure(_hwnd, msg.message, msg.wParam, msg.lParam);
-	}
-    } else if ( //retval >= WAIT_OBJECT_0 && // always true for unsigned
-	       retval <= (WAIT_OBJECT_0 + _handles.size() - 1)) {
+	XLOG_ERROR("Unexpected window event. Should not happen.");
+    } else if (retval <= (WAIT_OBJECT_0 + _handles.size() - 1)) {
 	//
 	// An object in _handles was signalled. Dispatch its callback.
 	//
 	XorpFd fd(_handles[retval - WAIT_OBJECT_0]);
 
-	debug_msg("Dispatching IOT_READ on handle %s\n", fd.str().c_str());
-
-	IoEventMap::iterator jj = _ioevent_map.find(IoEventTuple(fd, IOT_READ));
-	XLOG_ASSERT(jj != _ioevent_map.end());
-	jj->second->dispatch(fd, IOT_READ);
+	if (_hsockevent == fd) {
+	    dispatch_sockevent();
+	} else {
+	    debug_msg("Dispatching IOT_READ on handle %s\n", fd.str().c_str());
+	    IoEventMap::iterator jj = _ioevent_map.find(IoEventTuple(fd,
+							IOT_READ));
+	    XLOG_ASSERT(jj != _ioevent_map.end());
+	    jj->second->dispatch(fd, IOT_READ);
+	}
 
     } else if (retval >= WAIT_ABANDONED_0 &&
 	       retval <= (WAIT_ABANDONED_0 + _handles.size() - 1)) {
@@ -664,6 +586,57 @@ WinDispatcher::dispatch_pipe_reads()
 _ioevent_map.find(IoEventTuple(*ii, IOT_READ));
 	    XLOG_ASSERT(jj != _ioevent_map.end());
 	    jj->second->dispatch(*ii, IOT_READ);
+	}
+    }
+}
+
+// Deal with WSAEventSelect() events.
+// XXX: TODO: deal with error codes from completed operation(s)
+void
+WinDispatcher::dispatch_sockevent(void)
+{
+    int err;
+    WSANETWORKEVENTS netevents;
+
+    // Poll all sockets for network events. This is ugly.
+    for (size_t i = 0; i < _eventsocks.size(); i++) {
+	XorpFd fd = _eventsocks[i];
+
+	err = ::WSAEnumNetworkEvents(fd, _hsockevent, &netevents);
+	if (err != 0) {
+	    if (::WSAGetLastError() == WSAENOTSOCK) {
+		XLOG_ERROR("WSAEnumNetworkEvents() returns WSAENOTSOCK for "
+			   "socket %s", fd.str().c_str());
+	    }
+	    continue;
+	}
+
+	debug_msg("event mask for socket %s is: %lx\n", fd.str().c_str(),
+		  netevents.lNetworkEvents);
+
+	for (int evbit = FD_MAX_EVENTS - 1; evbit >= 0 ; evbit--) {
+	    int evflag = 1 << evbit;
+	    if ((evflag & netevents.lNetworkEvents) == evflag) {
+		debug_msg("processing event %d\n", evflag);
+
+		int itype = _map_wsaevent_to_ioevent(evflag);
+		if (itype == -1) {
+		    debug_msg("Can't map event %d to an IoEvent", evflag);
+		    continue;
+		}
+		IoEventType type = static_cast<IoEventType>(itype);
+
+		// Look up the callback.
+		IoEventMap::iterator jj = _ioevent_map.find(IoEventTuple(fd,
+					  type));
+		if (jj == _ioevent_map.end()) {
+		    debug_msg("IoEvent %d on socket %s does not map to a "
+			      "callback.\n", itype, fd.str().c_str());
+		    continue;
+		}
+
+		jj->second->dispatch(fd, type);
+	    }
 	}
     }
 }
