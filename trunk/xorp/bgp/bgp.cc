@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.54 2005/08/18 15:58:04 bms Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.55 2005/09/23 17:02:55 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -271,6 +271,8 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
 
     _plumbing_unicast->set_my_as_number(local->as());
     _plumbing_multicast->set_my_as_number(local->as());
+
+    _peerlist->all_stop(true /* restart */);
 }
 
 /*
@@ -536,24 +538,6 @@ BGPMain::set_peer_state(const Iptuple& iptuple, bool state)
 }
 
 bool
-BGPMain::set_peer_md5_password(const Iptuple& iptuple, const string& password)
-{
-    BGPPeer *peer = find_peer(iptuple);
-
-    if (peer == NULL) {
-	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
-	return false;
-    }
-
-    // The md5-password property has to belong to BGPPeerData, because
-    // it is instantiated before BGPPeer and before SocketClient.
-    BGPPeerData* pd = const_cast<BGPPeerData*>(peer->peerdata());
-    pd->set_md5_password(password);
-
-    return true;
-}
-
-bool
 BGPMain::activate(const Iptuple& iptuple)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -573,6 +557,24 @@ BGPMain::activate(const Iptuple& iptuple)
     } else {
 	disable_peer(iptuple);
     }
+
+    return true;
+}
+
+bool
+BGPMain::set_peer_md5_password(const Iptuple& iptuple, const string& password)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == NULL) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    // The md5-password property has to belong to BGPPeerData, because
+    // it is instantiated before BGPPeer and before SocketClient.
+    BGPPeerData* pd = const_cast<BGPPeerData*>(peer->peerdata());
+    pd->set_md5_password(password);
 
     return true;
 }
@@ -641,7 +643,8 @@ BGPMain::get_peer_status(const Iptuple& iptuple,
     if (peer_state == STATESTOPPED)
 	peer_state = STATEIDLE;
 
-    admin_status = 2; //XXX start - do we hold a peer for admin stopped state?
+    admin_status = peer->get_current_peer_state() ? 2 : 1;
+
     return true;
 }
 

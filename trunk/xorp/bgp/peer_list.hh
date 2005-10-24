@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_list.hh,v 1.6 2004/12/05 22:23:53 atanu Exp $
+// $XORP: xorp/bgp/peer_list.hh,v 1.7 2005/03/25 02:52:44 pavlin Exp $
 
 #ifndef __BGP_PEER_LIST_HH__
 #define __BGP_PEER_LIST_HH__
@@ -28,7 +28,7 @@ class BGPPeerList
 public:
     BGPPeerList();
     ~BGPPeerList();
-    void all_stop();
+    void all_stop(bool restart = false);
     bool not_all_idle();
     void add_peer(BGPPeer *p);
     void remove_peer(BGPPeer *p);

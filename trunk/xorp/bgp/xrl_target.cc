@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.40 2005/10/02 22:21:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.41 2005/10/14 15:52:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -125,8 +125,8 @@ XrlBgpTarget::bgp_0_2_set_local_as(
     /*
     ** We may already be configured so don't allow a reconfiguration.
     */
-    if(!_awaiting_as)
-	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP AS");
+//     if(!_awaiting_as)
+// 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP AS");
 
     _as = as;
     _awaiting_as = false;
@@ -159,8 +159,8 @@ XrlBgpTarget::bgp_0_2_set_bgp_id(
     /*
     ** We may already be configured so don't allow a reconfiguration.
     */
-    if(!_awaiting_bgp_id)
-	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP ID");
+//     if(!_awaiting_bgp_id)
+// 	return XrlCmdError::COMMAND_FAILED("Attempt to reconfigure BGP ID");
 
     _id = id;
     _awaiting_bgp_id = false;

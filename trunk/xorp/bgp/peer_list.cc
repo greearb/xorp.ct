@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.17 2005/03/25 02:52:44 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.19 2005/08/18 15:58:06 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -43,12 +43,16 @@ BGPPeerList::~BGPPeerList()
 }
 
 void 
-BGPPeerList::all_stop() 
+BGPPeerList::all_stop(bool restart) 
 {
 
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
-	(*i)->event_stop();
+	(*i)->event_stop(restart);
+	if (restart) {
+	    if ((*i)->get_current_peer_state() && STATEIDLE == (*i)->state())
+		(*i)->event_start();
+	}
     }
     /* We now need to drop back to the EventLoop - the peers will only
        move to idle and cleanly tear down their state when the EventLoop
