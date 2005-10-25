@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.23 2005/10/25 18:11:26 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.24 2005/10/25 20:44:34 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -147,23 +147,6 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& new_local_port:u32
-
-	/**
-	 * Change the peer IP address
-	 *
-	 * @param local_ip current IP address.
-	 * @param local_port server port.
-	 * @param peer_ip IP address.
-	 * @param peer_port peer port.
-	 * @param new_peer_ip new peer IP address.
-	 */
-	change_peer_ip \
-		? \
-		local_ip:txt \
-	        & local_port:u32 \
-		& peer_ip:txt \
-		& peer_port:u32 \
-		& new_peer_ip:txt
 
 	/**
 	 * Change the peer port.

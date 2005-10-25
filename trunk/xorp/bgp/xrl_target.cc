@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.43 2005/10/25 18:11:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.44 2005/10/25 20:44:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -336,26 +336,6 @@ XrlBgpTarget::bgp_0_2_change_local_port(
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      new_local_port);
-
-    XLOG_WARNING("Unimplemented");
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError
-XrlBgpTarget::bgp_0_2_change_peer_ip(
-	// Input values,
-	const string&	local_ip,
-	const uint32_t&	local_port,
-	const string&	peer_ip,
-	const uint32_t&	peer_port,
-	const string&	new_peer_ip)
-{
-    debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "new peer ip %s\n",
-	      local_ip.c_str(), XORP_UINT_CAST(local_port),
-	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
-	      new_peer_ip.c_str());
 
     XLOG_WARNING("Unimplemented");
 

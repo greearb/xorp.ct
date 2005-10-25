@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.30 2005/10/25 18:11:26 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.31 2005/10/25 20:44:33 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -113,14 +113,6 @@ public:
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
 	const uint32_t&	new_local_port);
-
-    XrlCmdError bgp_0_2_change_peer_ip(
-	// Input values,
-	const string&	local_ip,
-	const uint32_t&	local_port,
-	const string&	peer_ip,
-	const uint32_t&	peer_port,
-	const string&	new_peer_ip);
 
     XrlCmdError bgp_0_2_change_peer_port(
 	// Input values,
