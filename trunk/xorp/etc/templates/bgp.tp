@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.55 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.56 2005/10/02 22:21:49 abittau Exp $ */
 
 protocols {
     bgp {
@@ -148,15 +148,15 @@ protocols {
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    peer-port {
-		%set:;
+		%set: xrl "$(bgp.targetname)/bgp/0.2/change_peer_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_peer_port:u32=$(@)";
 	    }
 
 	    local-port {
-		%set:;
+		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_port:u32=$(@)";
 	    }
 
 	    local-ip {
-		%set:;
+		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
 	    }
 
 	    md5-password {
@@ -165,15 +165,16 @@ protocols {
 
 	    as {
 	        %allow-range: $(@) "0" "65535";
-		%set:;
+
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_as?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&peer_as:u32=$(@)";
 	    }
 
 	    holdtime {
-		%set:;
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
 	    }
 
 	    next-hop {
-		%set:;
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_nexthop4?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv4=$(@)";
 	    }
 
 	    next-hop6 {
