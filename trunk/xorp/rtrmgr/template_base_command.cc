@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.6 2005/07/11 22:09:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.7 2005/07/13 17:44:07 mjh Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -107,15 +107,18 @@ AllowOptionsCommand::verify_variable(const ConfigTreeNode& ctn,
 
     list<string>::const_iterator iter;
     for (iter = _allowed_values.begin();
-	iter != _allowed_values.end();
-	++iter) {
+	 iter != _allowed_values.end();
+	 ++iter) {
 	if (value == *iter)
 	    return true;		// OK
     }
 
     // Error: variable value is not allowed
-    errmsg = c_format("Value \"%s\" is not a valid value for variable %s. ",
-		      value.c_str(), _varname.c_str());
+    string full_varname;
+    XLOG_ASSERT(ctn.expand_variable_to_full_varname(_varname, full_varname)
+		== true);
+    errmsg = c_format("Value \"%s\" is not a valid value for variable \"%s\". ",
+		      value.c_str(), full_varname.c_str());
     list<string> values = _allowed_values;
     if (values.size() == 1) {
 	errmsg += c_format("The only value allowed is %s.",
@@ -285,11 +288,14 @@ AllowRangeCommand::verify_variable(const ConfigTreeNode&	ctn,
 
     int32_t ival = atoi(value.c_str());
     if (ival < _lower || ival > _upper) {
-	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable %s.",
+	string full_varname;
+	XLOG_ASSERT(ctn.expand_variable_to_full_varname(_varname, full_varname)
+		    == true);
+	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable \"%s\".",
 			  value.c_str(),
 			  XORP_INT_CAST(_lower),
 			  XORP_INT_CAST(_upper),
-			  _varname.c_str());
+			  full_varname.c_str());
 	return false;
     }
 

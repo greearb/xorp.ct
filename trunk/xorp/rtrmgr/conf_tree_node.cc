@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.92 2005/10/12 03:12:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.93 2005/10/22 01:00:49 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1323,12 +1323,14 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
     case NODE_OPERATOR:
 	XLOG_ASSERT(varname_node != NULL);
 	value = varname_node->show_operator();
-	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
+	debug_msg("variable %s at %s, value is \"%s\"\n",
+		  varname.c_str(), _segname.c_str(), value.c_str());
 	return true;
     case NODE_ID:
 	XLOG_ASSERT(varname_node != NULL);
 	value = varname_node->node_id().str();
-	debug_msg("variable %s at %s, value is \"%s\"\n",  varname.c_str(), _segname.c_str(), value.c_str());
+	debug_msg("variable %s at %s, value is \"%s\"\n",
+		  varname.c_str(), _segname.c_str(), value.c_str());
 	return true;
     case NAMED:
     {
@@ -1348,6 +1350,51 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	XLOG_ASSERT(ttn != NULL);
 	XLOG_ASSERT(ttn->has_default());
 	value = ttn->default_str();
+	return true;
+    }
+    }
+    XLOG_UNREACHABLE();
+}
+
+bool
+ConfigTreeNode::expand_variable_to_full_varname(const string& varname,
+						string& full_varname) const
+{
+
+    VarType type = NONE;
+    const ConfigTreeNode *varname_node;
+
+    debug_msg("ConfigTreeNode::expand_variable_to_full_varname at %s: >%s<\n",
+	      _segname.c_str(), varname.c_str());
+
+    varname_node = find_const_varname_node(varname, type);
+
+    switch (type) {
+    case NONE:
+	return false;
+    case NODE_VALUE:
+    case NODE_OPERATOR:
+    case NODE_ID:
+	XLOG_ASSERT(varname_node != NULL);
+	full_varname = varname_node->path();
+	return true;
+    case NAMED:
+    {
+	list<string> var_parts;
+
+	XLOG_ASSERT(varname_node != NULL);
+	if (split_up_varname(varname, var_parts) == false) {
+	    return false;
+	}
+	full_varname = varname_node->path() + " " + var_parts.back();
+	return true;
+    }
+    case TEMPLATE_DEFAULT:
+    {
+	const TemplateTreeNode* ttn;
+	ttn = _template_tree_node->find_varname_node(varname);
+	XLOG_ASSERT(ttn != NULL);
+	full_varname = ttn->path();
 	return true;
     }
     }
