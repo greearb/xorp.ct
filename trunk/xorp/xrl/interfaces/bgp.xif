@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.22 2004/12/17 09:49:14 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.23 2005/10/25 18:11:26 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -56,7 +56,8 @@ interface bgp/0.2 {
 	 * @param peer port.
 	 * @param as the peer's AS number.
 	 * @param next_hop the local next hop.
-	 * @param holdtime expects traffic in this time interval.
+	 * @param holdtime if traffic is not received in holdtime seconds
+	 *        a peering is considered down.
 	 */
 	add_peer \
 		? \
@@ -180,6 +181,58 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& new_peer_port:u32
+
+	/**
+	 * Set the peer's AS number.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param peer_as the peer's AS number.
+	 */
+	set_peer_as \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& peer_as:u32
+
+	/**
+	 * Set the holdtime
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param holdtime if traffic is not received in holdtime seconds
+	 *        a peering is considered down.
+	 */
+	set_holdtime \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& holdtime:u32
+
+	/**
+	 * Set the peer's AS number.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param next_hop IPv4 nexthop.
+	 */
+	set_nexthop4 \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& next_hop:ipv4
 
 	/**
 	 * Set the IPv6 nexthop.
