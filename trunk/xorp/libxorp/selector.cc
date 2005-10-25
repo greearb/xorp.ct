@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.29 2005/10/03 05:05:46 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.30 2005/10/13 19:59:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -171,7 +171,8 @@ SelectorList::Node::clear(SelectorMask zap)
 inline bool
 SelectorList::Node::is_empty()
 {
-    return (_mask[SEL_RD_IDX] == _mask[SEL_WR_IDX] == _mask[SEL_EX_IDX] == 0);
+    return ((_mask[SEL_RD_IDX] == 0) && (_mask[SEL_WR_IDX] == 0) &&
+	    (_mask[SEL_EX_IDX] == 0));
 }
 
 // ----------------------------------------------------------------------------
