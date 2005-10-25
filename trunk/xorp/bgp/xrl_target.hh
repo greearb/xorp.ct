@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.28 2004/12/17 09:49:13 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.29 2005/03/25 02:52:51 pavlin Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -97,6 +97,38 @@ public:
 	const uint32_t&	local_port,
 	const string&	peer_ip,
 	const uint32_t&	peer_port);
+
+    XrlCmdError bgp_0_2_change_local_ip(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const string&	new_local_ip);
+
+    XrlCmdError bgp_0_2_change_local_port(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const uint32_t&	new_local_port);
+
+    XrlCmdError bgp_0_2_change_peer_ip(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const string&	new_peer_ip);
+
+    XrlCmdError bgp_0_2_change_peer_port(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const uint32_t&	new_peer_port);
 
     XrlCmdError bgp_0_2_set_nexthop6(
 	// Input values,
