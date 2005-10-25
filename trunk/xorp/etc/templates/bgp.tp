@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.56 2005/10/02 22:21:49 abittau Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.57 2005/10/25 21:22:30 atanu Exp $ */
 
 protocols {
     bgp {
@@ -22,7 +22,7 @@ protocols {
 	    ipv6-unicast: bool = false;
 	    ipv6-multicast: bool = false;
 
-	    md5-password: txt = "";
+/*	    md5-password: txt = "";*/
 	}
 
 	/*
@@ -159,9 +159,11 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
 	    }
 
+/*
 	    md5-password {
 		%set:;
 	    }
+*/
 
 	    as {
 	        %allow-range: $(@) "0" "65535";
@@ -314,9 +316,11 @@ protocols {
 		%help: short "Enable this peering.";
 	    }
 
+/*
 	    md5-password {
 		%help: short "Enable and set the password for TCP-MD5 authentication with this peer.";
 	    }
+*/
 
 	    set-parameter {
 	    }
