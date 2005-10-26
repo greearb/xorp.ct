@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.11 2005/08/18 15:45:48 bms Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.12 2005/08/31 22:02:11 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -229,6 +229,7 @@ public:
 		    uint32_t		mtu)
 	: InterfaceModifier(it, ifname), _mtu(mtu) {}
 
+    // Minimum and maximum MTU (as defined in RFC 791 and RFC 1191)
     static const uint32_t MIN_MTU = 68;
     static const uint32_t MAX_MTU = 65536;
     
