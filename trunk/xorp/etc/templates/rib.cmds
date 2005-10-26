@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.3 2004/11/02 14:17:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.4 2005/09/16 05:18:21 atanu Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -8,10 +8,52 @@
  *
  */
 
+show route {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show routes";
+}
+
 show route table {
      %command: "" %help: HELP;
      %module: rib;
-     %tag: HELP "Show route table";
+     %tag: HELP "Show routes from a RIB table";
+}
+
+show route table ipv4 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 routes";
+}
+
+show route table ipv6 {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 routes";
+}
+
+show route table ipv4 unicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 unicast routes";
+}
+
+show route table ipv6 unicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 unicast routes";
+}
+
+show route table ipv4 multicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB routes";
+}
+
+show route table ipv6 multicast {
+     %command: "" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB routes";
 }
 
 
