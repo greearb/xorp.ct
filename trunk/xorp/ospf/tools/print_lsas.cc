@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.6 2005/10/23 09:33:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.7 2005/10/26 07:41:21 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -373,105 +373,6 @@ enum Pstyle {
     SUMMARY
 };
 
-#if	0
-void
-print_brief(Lsa::LsaRef lsar)
-{
-    printf("%-8s", lsar->name());
-    printf("%c", lsar->get_self_originating() ? '*' : ' ');
-    Lsa_header& header = lsar->get_header();
-    printf("%-17s", pr_id(header.get_link_state_id()).c_str());
-    printf("%-17s", pr_id(header.get_advertising_router()).c_str());
-    printf("%-#12x", header.get_ls_sequence_number());
-    printf("%4d", header.get_ls_age());
-    printf("  %-#5x", header.get_options());
-    printf("%-#7x", header.get_ls_checksum());
-    printf("%3d", header.get_length());
-    printf("\n");
-}
-
-void
-print_detail(Lsa::LsaRef lsar)
-{
-    printf("%s\n", lsar->str().c_str());
-}
-
-uint32_t externals = 0;	// Number of AS-External-LSAs.
-
-void
-print_summary(OspfTypes::Version version, map<uint16_t, uint32_t>& summary)
-{
-    LsaDecoder lsa_decoder(version);
-    initialise_lsa_decoder(version, lsa_decoder);
-
-    map<uint16_t, uint32_t>::const_iterator i;
-    for (i = summary.begin(); i != summary.end(); i++) {
-	uint16_t type = (*i).first;
-	uint32_t count = (*i).second;
-	if (lsa_decoder.external(type)) {
-	    if (0 == externals)
-		externals = count;
-	} else {
-	    printf("%5d %s LSAs\n", count, lsa_decoder.name(type));
-	}
-    }
-}
-
-void
-print_lsa_database(OspfTypes::Version version, string area,
-		   list<Lsa::LsaRef>& lsas, Pstyle pstyle, FilterLSA& filter)
-{
-    switch (pstyle) {
-    case BRIEF:
-	printf("   OSPF link state database, Area %s\n", area.c_str());
-	printf(" Type       ID               Adv "
-	       "Rtr           Seq      Age  Opt  Cksum  Len\n");
-	break;
-    case DETAIL:
-	printf("   OSPF link state database, Area %s\n", area.c_str());
-	break;
-    case SUMMARY:
-	printf("Area %s\n", area.c_str());
-	break;
-    }
-
-    // LSA Type, count
-    map<uint16_t, uint32_t> summary;
-
-    list<Lsa::LsaRef>::const_iterator i;
-    for (i = lsas.begin(); i != lsas.end(); i++) {
-	uint16_t type = (*i)->get_ls_type();
-	if (!filter.accept(type))
-	    continue;
-	switch (pstyle) {
-	case BRIEF:
-	    print_brief(*i);
-	    break;
-	case DETAIL:
-	    print_detail(*i);
-	    break;
-	case SUMMARY:
-	    if (0 == summary.count(type)) {
-		summary[type] = 1;
-	    } else {
-		summary[type] = summary[type] + 1;
-	    }
-	    break;
-	}
-    }
-
-    switch (pstyle) {
-    case BRIEF:
-	break;
-    case DETAIL:
-	break;
-    case SUMMARY:
-	print_summary(version, summary);
-	break;
-    }
-}
-#endif
-
 int
 usage(const char *myname)
 {
@@ -541,9 +442,6 @@ main(int argc, char **argv)
     }
 
     try {
-	//
-	// Init stuff
-	//
 	EventLoop eventloop;
 	XrlStdRouter xrl_router(eventloop, "print_lsas");
 
@@ -559,7 +457,7 @@ main(int argc, char **argv)
 		eventloop.run();
 
 	    if (get_area_list.fail()) {
-		fprintf(stderr, "Failed to get area list\n");
+		XLOG_ERROR("Failed to get area list");
 		return -1;
 	    }
 	} else {
@@ -579,7 +477,7 @@ main(int argc, char **argv)
 		eventloop.run();
 
 	    if (fetchdb.fail()) {
-		fprintf(stderr, "Failed to fetch area %s\n", i->str().c_str());
+		XLOG_ERROR("Failed to fetch area %s", i->str().c_str());
 		return -1;
 	    }
 
@@ -600,50 +498,12 @@ main(int argc, char **argv)
 	if (!output->end())
 	    return -1;
 
-#if	0
-	list<IPv4>& area_list = get_area_list.get();
-	list<IPv4>::const_iterator i;
-	for (i = area_list.begin(); i != area_list.end(); i++) {
-
-	    FetchDB fetchdb(xrl_router, version, *i);
-
-	    fetchdb.start();
-	    while(fetchdb.busy())
-		eventloop.run();
-
-	    if (fetchdb.fail()) {
-		fprintf(stderr, "Failed to fetch area %s\n", area.c_str());
-		return -1;
-	    }
-	    print_lsa_database(version, i->str(), fetchdb.get_lsas(), pstyle,
-			       filter);
-	}
-
-	switch (pstyle) {
-	case BRIEF:
-	    break;
-	case DETAIL:
-	    break;
-	case SUMMARY: {
-	    if (filter.accept(ASExternalLsa(version).get_ls_type())) {
-		printf("Externals:\n");
-		if (0 != externals)
-		    printf("%5d External LSAs\n", externals);
-	    }
-	}
-	    break;	    
-	}
-#endif	
 	delete output;
 
     } catch (...) {
 	xorp_catch_standard_exceptions();
     }
 
-    // 
-    //
-    // Gracefully stop and exit xlog
-    //
     xlog_stop();
     xlog_exit();
 
