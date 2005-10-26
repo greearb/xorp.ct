@@ -14,3 +14,11 @@ XORP developers.
      This books compares OSPF and IS-IS, and includes examples for both
      Cisco IOS and Juniper JunOS.
      [Note: not published yet. Estimated publication date is November 2005.]
+
+ * Routing TCP/IP, Volume 1 (2nd Edition), Jeff Doyle and Jennifer Carroll,
+   Cisco Press, ISBN 1587052024.
+   Routing TCP/IP, Volume II (CCIE Professional Development), Jeff Doyle and
+   Jennifer DeHaven Carroll, Cisco Press, ISBN 1578700892.
+
+     From the configuration side they are Cisco specific but they
+     give a good view into most routing protocols.
