@@ -140,7 +140,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 	struct mii_data* mii;
 	
-	mii = (struct mii_data *)&ifreq.ifr_data;
+	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_data);
 	mii->reg_num = MII_BMSR;
 	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
 	    error_msg = c_format("ioctl(SIOCGMIIREG) for interface %s "

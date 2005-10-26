@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.36 2005/08/30 23:50:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.37 2005/08/31 22:39:30 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -2109,7 +2109,7 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 #else
 	struct igmpmsg *igmpmsg;
 	
-	igmpmsg = (struct igmpmsg *)_rcvbuf0;
+	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf0);
 	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
@@ -2140,7 +2140,7 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 	
 	struct mrt6msg *mrt6msg;
 	
-	mrt6msg = (struct mrt6msg *)_rcvbuf0;
+	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
 	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
@@ -2217,7 +2217,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	struct igmpmsg *igmpmsg = (struct igmpmsg *)databuf;
+	struct igmpmsg *igmpmsg = reinterpret_cast<struct igmpmsg *>(databuf);
 	
 	//
 	// Get the message type, the iif, and source and destination address
@@ -2307,7 +2307,7 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	return (XORP_ERROR);
 #else
 	
-	struct mrt6msg *mrt6msg = (struct mrt6msg *)databuf;
+	struct mrt6msg *mrt6msg = reinterpret_cast<struct mrt6msg *>(databuf);
 	
 	//
 	// Get the message type, the iif, and source and destination address

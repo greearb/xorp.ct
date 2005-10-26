@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.6 2005/09/25 17:14:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.7 2005/10/12 01:25:31 bms Exp $"
 
 //
 // Raw socket support.
@@ -1059,7 +1059,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	socklen_t from_len = sizeof(from);
 
 	nbytes = recvfrom(_proto_socket, XORP_BUF_CAST(_rcvbuf0), IO_BUF_SIZE,
-			  0, (struct sockaddr *)&from, &from_len);
+			  0, reinterpret_cast<struct sockaddr *>(&from),
+			  &from_len);
 	debug_msg("Read fd %s, %d bytes\n",
 		  _proto_socket.str().c_str(), XORP_INT_CAST(nbytes));
 	if (nbytes < 0) {
@@ -1115,7 +1116,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #else
 	struct igmpmsg *igmpmsg;
 	
-	igmpmsg = (struct igmpmsg *)_rcvbuf0;
+	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf0);
 	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
@@ -1150,7 +1151,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #else
 	struct mrt6msg *mrt6msg;
 	
-	mrt6msg = (struct mrt6msg *)_rcvbuf0;
+	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
 	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
 	    XLOG_WARNING("proto_socket_read() failed: "
@@ -1203,7 +1204,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	bool is_datalen_error = false;
 	
 	// Input check
-	ip = (struct ip *)_rcvbuf0;
+	ip = reinterpret_cast<struct ip *>(_rcvbuf0);
 	if (nbytes < (ssize_t)sizeof(*ip)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
@@ -1244,7 +1245,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    is_datalen_error = true;
 		    break;
 		}
-		pim = (struct pim *)((uint8_t *)ip + ip_hdr_len);
+		pim = reinterpret_cast<struct pim *>((uint8_t *)ip + ip_hdr_len);
 		if (PIM_VT_T(pim->pim_vt) != PIM_REGISTER) {
 		    is_datalen_error = true;
 		    break;
@@ -1272,9 +1273,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	}
 
 #ifndef HOST_OS_WINDOWS
-	for (struct cmsghdr *cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+	for (struct cmsghdr *cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&_rcvmh));
 	     cmsgp != NULL;
-	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
+	     cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&_rcvmh, cmsgp))) {
 	    if (cmsgp->cmsg_level != IPPROTO_IP)
 		continue;
 	    switch (cmsgp->cmsg_type) {
@@ -1284,7 +1285,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		struct sockaddr_dl *sdl = NULL;
 		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct sockaddr_dl)))
 		    continue;
-		sdl = (struct sockaddr_dl *)CMSG_DATA(cmsgp);
+		sdl = reinterpret_cast<struct sockaddr_dl *>(CMSG_DATA(cmsgp));
 		pif_index = sdl->sdl_index;
 	    }
 	    break;
@@ -1349,16 +1350,16 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	//
 	// Get pif_index, hop limit, Router Alert option, etc.
 	//
-	for (struct cmsghdr *cmsgp = (struct cmsghdr *)CMSG_FIRSTHDR(&_rcvmh);
+	for (struct cmsghdr *cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&_rcvmh));
 	     cmsgp != NULL;
-	     cmsgp = (struct cmsghdr *)CMSG_NXTHDR(&_rcvmh, cmsgp)) {
+	     cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&_rcvmh, cmsgp))) {
 	    if (cmsgp->cmsg_level != IPPROTO_IPV6)
 		continue;
 	    switch (cmsgp->cmsg_type) {
 	    case IPV6_PKTINFO:
 		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in6_pktinfo)))
 		    continue;
-		pi = (struct in6_pktinfo *)CMSG_DATA(cmsgp);
+		pi = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
 		pif_index = pi->ipi6_ifindex;
 		dst_address.copy_in(pi->ipi6_addr);
 		break;
@@ -1381,7 +1382,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 			size_t extlen, len;
 			void *databuf;
 			
-			ext = (struct ip6_hbh *)CMSG_DATA(cmsgp);
+			ext = reinterpret_cast<struct ip6_hbh *>(CMSG_DATA(cmsgp));
 			extlen = (ext->ip6h_len + 1) * 8;
 			currentlen = 0;
 			while (true) {
@@ -1635,7 +1636,7 @@ RawSocket::proto_socket_write(const string& if_name,
     //
     switch (family()) {
     case AF_INET:
-	ip = (struct ip *)_sndbuf0;
+	ip = reinterpret_cast<struct ip *>(_sndbuf0);
 	if (is_router_alert) {
 	    // Include the Router Alert option
 	    ip_option	= htonl((IPOPT_RA << 24) | (0x04 << 16));
@@ -1764,7 +1765,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in6_pktinfo));
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type  = IPV6_PKTINFO;
-	sndpktinfo = (struct in6_pktinfo *)CMSG_DATA(cmsgp);
+	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
 	memset(sndpktinfo, 0, sizeof(*sndpktinfo));
 	if ((iftree_if->pif_index() > 0)
 	    && !(dst_address.is_unicast()
