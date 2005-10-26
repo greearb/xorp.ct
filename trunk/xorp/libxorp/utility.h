@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.9 2004/12/14 18:10:10 atanu Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.10 2005/03/25 02:53:49 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -64,7 +64,7 @@
 #endif
 
 #define ADD_POINTER(pointer, size, type)				\
-	((type)(((uint8_t *)(pointer)) + (size)))
+	((type)(void *)(((uint8_t *)(pointer)) + (size)))
 
 /*
  * Micro-optimization: byte ordering fix for constants.  htonl uses

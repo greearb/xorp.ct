@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.30 2005/06/06 20:25:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.31 2005/08/18 15:45:45 bms Exp $"
 
 #include "fea_module.h"
 
@@ -240,7 +240,7 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     // Set the request
     //
     memset(buffer, 0, sizeof(buffer));
-    rtm = (struct rt_msghdr *)buffer;
+    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
     rtm->rtm_msglen = sizeof(*rtm);
     
     switch (family) {
@@ -414,7 +414,7 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     // Set the request
     //
     memset(buffer, 0, sizeof(buffer));
-    rtm = (struct rt_msghdr *)buffer;
+    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
     rtm->rtm_msglen = sizeof(*rtm);
     
     switch (family) {
