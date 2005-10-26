@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.94 2005/10/25 20:02:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.95 2005/10/26 07:06:29 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -882,7 +882,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
     bool is_a_tag = false;
     int new_indent;
 
-    if (suppress_default_values && is_default_value() && is_committed())
+    if (suppress_default_values && is_default_value())
 	return string("");
 
     if (_template_tree_node != NULL)
@@ -897,8 +897,7 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	    const ConfigTreeNode* child_ctn = *iter;
 
-	    if (suppress_default_values && child_ctn->is_default_value()
-		&& child_ctn->is_committed()) {
+	    if (suppress_default_values && child_ctn->is_default_value()) {
 		//
 		// Skip children with default values if we don't care about
 		// them.
