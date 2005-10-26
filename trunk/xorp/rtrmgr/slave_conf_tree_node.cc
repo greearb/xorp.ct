@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.25 2005/10/04 06:08:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.26 2005/10/05 05:48:58 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -342,35 +342,6 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
     }
     return deletions;
 }
-
-bool 
-SlaveConfigTreeNode::check_allowed_value(string& errmsg) const
-{
-    if (_template_tree_node == NULL)
-	return true;
-
-    const BaseCommand* c = _template_tree_node->const_command("%allow");
-    if (c == NULL) {
-	c = _template_tree_node->const_command("%allow-range");
-    }
-
-    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
-    if (cmd != NULL) {
-	string tmpmsg;
-	if (cmd->verify_variable(*this, tmpmsg) != true) {
-	    string errpath;
-	    if (_parent != NULL && _parent->is_tag())
-		errpath = _parent->path();
-	    else
-		errpath = path();
-	    errmsg = c_format("Bad value for \"%s\": %s; ",
-			      errpath.c_str(), errmsg.c_str());
-	    return false;
-	}
-    }
-    return true;
-}
-
 
 void 
 SlaveConfigTreeNode::finalize_commit()

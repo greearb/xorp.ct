@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.46 2005/10/11 17:59:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.47 2005/10/12 03:12:26 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -269,6 +269,8 @@ void
 ConfigTree::terminal_value(const string& value, int type, ConfigOperator op) 
     throw (ParseError)
 {
+    string error_msg;
+
     string path(current_path_as_string());
     string svalue = value;
     ConfigTreeNode *ctn = _current_node;
@@ -364,26 +366,34 @@ ConfigTree::terminal_value(const string& value, int type, ConfigOperator op)
 	    XLOG_FATAL("Unexpected type %d received", ctn->type());
 	}
     } else if (ctn->type() != type) {
-	string err = "\"" + path + "\" has type " + ctn->typestr() +
+	error_msg = "\"" + path + "\" has type " + ctn->typestr() +
 	    ", and value " + svalue + " is not a valid " + ctn->typestr();
-	booterror(err.c_str());
+	booterror(error_msg.c_str());
     }
 
     if (ctn->is_read_only()
 	&& ctn->is_leaf_value()
 	&& (! ctn->is_default_value(svalue))) {
-	string err = "\"" + path + "\" is read-only node";
-	booterror(err.c_str());
+	error_msg = "\"" + path + "\" is read-only node";
+	booterror(error_msg.c_str());
     }
 
-    ctn->set_value(svalue, /* userid */ 0);
-    ctn->set_operator(op, /* userid */ 0);
+    if (ctn->set_value(svalue, /* userid */ 0, error_msg) != true) {
+	error_msg = c_format("Cannot set the value of \"%s\": %s",
+			     path.c_str(), error_msg.c_str());
+	booterror(error_msg.c_str());
+    }
+    if (ctn->set_operator(op, /* userid */ 0, error_msg) != true) {
+	error_msg = c_format("Cannot set the operator for \"%s\": %s",
+			     path.c_str(), error_msg.c_str());
+	booterror(error_msg.c_str());
+    }
     return;
 
  parse_error:
-    string err = "\"" + path + "\" has type " + ctn->typestr() +
+    error_msg = "\"" + path + "\" has type " + ctn->typestr() +
 	", and value " + svalue + " is not a valid " + ctn->typestr();
-    booterror(err.c_str());
+    booterror(error_msg.c_str());
 }
 
 const ConfigTreeNode*

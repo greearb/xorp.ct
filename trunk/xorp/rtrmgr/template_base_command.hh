@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.2 2005/03/25 02:54:38 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.3 2005/07/08 20:51:16 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
@@ -48,7 +48,10 @@ public:
 
     virtual void add_action(const list<string>& action) throw (ParseError) = 0;
     virtual bool verify_variable(const ConfigTreeNode& ctn,
-				       string& errmsg) const = 0;
+				 string& errmsg) const = 0;
+    virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
+					  const string& value,
+					  string& errmsg) const = 0;
     virtual string str() const = 0;
 };
 
@@ -60,6 +63,9 @@ public:
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& 	ctn,
 				 string& errmsg) const;
+    virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
+					  const string& value,
+					  string& errmsg) const;
 
     virtual string str() const;
 
@@ -76,6 +82,9 @@ public:
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& 	ctn,
 				 string& errmsg) const;
+    virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
+					  const string& value,
+					  string& errmsg) const;
 
     virtual string str() const;
 
@@ -92,6 +101,9 @@ public:
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& ctn,
 				 string& errmsg) const;
+    virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
+					  const string& value,
+					  string& errmsg) const;
 
     virtual string str() const;
 

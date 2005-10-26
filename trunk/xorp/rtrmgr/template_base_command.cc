@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.7 2005/07/13 17:44:07 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.8 2005/10/25 20:02:44 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -95,17 +95,26 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
 
 bool
 AllowOptionsCommand::verify_variable(const ConfigTreeNode& ctn,
-					   string& errmsg) const
+				     string& errmsg) const
 {
     string value;
 
     if (ctn.expand_variable(_varname, value) == false) {
 	// Error: cannot expand the variable
-	errmsg = c_format("Variable %s is not defined.", _varname.c_str());
+	errmsg = c_format("Variable \"%s\" is not defined.", _varname.c_str());
 	return false;
     }
 
+    return (verify_variable_by_value(ctn, value, errmsg));
+}
+
+bool
+AllowOptionsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
+					      const string& value,
+					      string& errmsg) const
+{
     list<string>::const_iterator iter;
+
     for (iter = _allowed_values.begin();
 	 iter != _allowed_values.end();
 	 ++iter) {
@@ -115,8 +124,11 @@ AllowOptionsCommand::verify_variable(const ConfigTreeNode& ctn,
 
     // Error: variable value is not allowed
     string full_varname;
-    XLOG_ASSERT(ctn.expand_variable_to_full_varname(_varname, full_varname)
-		== true);
+    if (ctn.expand_variable_to_full_varname(_varname, full_varname) == false) {
+	// Error: cannot expand the variable
+	errmsg = c_format("Variable \"%s\" is not defined.", _varname.c_str());
+	return false;
+    }
     errmsg = c_format("Value \"%s\" is not a valid value for variable \"%s\". ",
 		      value.c_str(), full_varname.c_str());
     list<string> values = _allowed_values;
@@ -188,7 +200,19 @@ bool
 AllowOperatorsCommand::verify_variable(const ConfigTreeNode& ctn,
 				       string& errmsg) const
 {
-    ConfigOperator op = ctn.get_operator();
+    string opstr = ctn.show_operator();
+
+    return (verify_variable_by_value(ctn, opstr, errmsg));
+}
+
+bool
+AllowOperatorsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
+						const string& value,
+						string& errmsg) const
+{
+    ConfigOperator op;
+    op = lookup_operator(unquote(value));
+
     list<ConfigOperator>::const_iterator iter;
     for (iter = _allowed_operators.begin();
 	iter != _allowed_operators.end();
@@ -198,9 +222,8 @@ AllowOperatorsCommand::verify_variable(const ConfigTreeNode& ctn,
     }
 
     // Error: variable value is not allowed
-    string opstr = ctn.show_operator();
     errmsg = c_format("Operator \"%s\" is not a valid value for node %s. ",
-		      opstr.c_str(), ctn.segname().c_str());
+		      value.c_str(), ctn.segname().c_str());
     list<ConfigOperator> values = _allowed_operators;
     if (values.size() == 1) {
 	errmsg += c_format("The only value allowed is %s.",
@@ -254,7 +277,8 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     debug_msg("AllowRangeCommand::add_action\n");
 
     if (action.size() < 3) {
-	xorp_throw(ParseError, "Allow range command with less than three parameters");
+	xorp_throw(ParseError,
+		   "Allow range command with less than three parameters");
     }
 
     list<string>::const_iterator iter;
@@ -275,37 +299,50 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
 }
 
 bool
-AllowRangeCommand::verify_variable(const ConfigTreeNode&	ctn,
-					 string& errmsg) const
+AllowRangeCommand::verify_variable(const ConfigTreeNode& ctn,
+				   string& errmsg) const
 {
     string value;
 
     if (ctn.expand_variable(_varname, value) == false) {
 	// Error: cannot expand the variable
-	errmsg = c_format("Variable %s is not defined.", _varname.c_str());
+	errmsg = c_format("Variable \"%s\" is not defined.", _varname.c_str());
 	return false;
     }
 
+    return (verify_variable_by_value(ctn, value, errmsg));
+}
+
+bool
+AllowRangeCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
+					    const string& value,
+					    string& errmsg) const
+{
     int32_t ival = atoi(value.c_str());
-    if (ival < _lower || ival > _upper) {
-	string full_varname;
-	XLOG_ASSERT(ctn.expand_variable_to_full_varname(_varname, full_varname)
-		    == true);
-	errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable \"%s\".",
-			  value.c_str(),
-			  XORP_INT_CAST(_lower),
-			  XORP_INT_CAST(_upper),
-			  full_varname.c_str());
-	return false;
+
+    if ((ival >= _lower) && (ival <= _upper)) {
+	return true;
     }
 
-    return true;
+    // Error: variable value is not allowed
+    string full_varname;
+    if (ctn.expand_variable_to_full_varname(_varname, full_varname) == false) {
+	// Error: cannot expand the variable
+	errmsg = c_format("Variable \"%s\" is not defined.", _varname.c_str());
+	return false;
+    }
+    errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable \"%s\".",
+		      value.c_str(),
+		      XORP_INT_CAST(_lower),
+		      XORP_INT_CAST(_upper),
+		      full_varname.c_str());
+    return false;
 }
 
 string
 AllowRangeCommand::str() const
 {
-    return c_format("AllowRangeCommand: varname = %s\n       Allowed range: %d...%d",
+    return c_format("AllowRangeCommand: varname = \"%s\"\n       Allowed range: %d...%d",
 		    _varname.c_str(),
 		    XORP_INT_CAST(_lower),
 		    XORP_INT_CAST(_upper));

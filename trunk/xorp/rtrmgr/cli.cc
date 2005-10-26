@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.100 2005/10/13 22:24:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.101 2005/10/23 18:48:03 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1930,9 +1930,21 @@ RouterCLI::text_entry_func(const string& ,
 		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
 			       ctn->segname().c_str(),
 			       value.c_str());
-		    ctn->set_value(value, getuid());
+		    string errmsg;
+		    if (ctn->set_value(value, getuid(), errmsg) != true) {
+			errmsg = c_format("ERROR: invalid value \"%s\": %s\n",
+					  value.c_str(), errmsg.c_str());
+			cli_client().cli_print(errmsg);
+			goto cleanup;
+		    }
 		    // default operator
-		    ctn->set_operator(OP_ASSIGN, getuid());
+		    if (ctn->set_operator(OP_ASSIGN, getuid(), errmsg) != true) {
+			errmsg = c_format("ERROR: invalid operator value \"%s\": %s\n",
+					  operator_to_str(OP_ASSIGN).c_str(),
+					  errmsg.c_str());
+			cli_client().cli_print(errmsg);
+			goto cleanup;
+		    }
 		    _changes_made = true;
 		    value_expected = false;
 		} else {
@@ -2330,6 +2342,7 @@ RouterCLI::immediate_set_func(const string& ,
 string
 RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 {
+    string error_msg;
     list<string> path_parts;
     path_parts = split(path, ' ');
 
@@ -2392,12 +2405,31 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 					  clientid(),
 					  _verbose);
 	ctn = newnode;
-	ctn->set_value(argv[0], myuid);
-	ctn->set_operator(OP_ASSIGN, myuid);
+	if (ctn->set_value(argv[0], myuid, error_msg) != true) {
+	    string result = c_format("ERROR: invalid value \"%s\": %s\n",
+				     argv[0].c_str(), error_msg.c_str());
+	    return result;
+	}
+	if (ctn->set_operator(OP_ASSIGN, myuid, error_msg) != true) {
+	    string result = c_format("ERROR: invalid operator value \"%s\": %s\n",
+				     operator_to_str(OP_ASSIGN).c_str(),
+				     error_msg.c_str());
+	    return result;
+	}
     } else {
-	ctn->set_value(argv[0], myuid);
-	if (ctn->get_operator() == OP_NONE)
-	    ctn->set_operator(OP_ASSIGN, getuid());
+	if (ctn->set_value(argv[0], myuid, error_msg) != true) {
+	    string result = c_format("ERROR: invalid value \"%s\": %s\n",
+				     argv[0].c_str(), error_msg.c_str());
+	    return result;
+	}
+	if (ctn->get_operator() == OP_NONE) {
+	    if (ctn->set_operator(OP_ASSIGN, getuid(), error_msg) != true) {
+		string result = c_format("ERROR: invalid operator value \"%s\": %s\n",
+					 operator_to_str(OP_ASSIGN).c_str(),
+					 error_msg.c_str());
+		return result;
+	    }
+	}
     }
 
     //

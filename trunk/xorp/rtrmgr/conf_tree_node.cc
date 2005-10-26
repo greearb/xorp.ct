@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.93 2005/10/22 01:00:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.94 2005/10/25 20:02:44 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -305,6 +305,7 @@ ConfigTreeNode::add_default_children()
 	 ++tci) {
 	if ((*tci)->has_default()) {
 	    if (childrens_templates.find(*tci) == childrens_templates.end()) {
+		string error_msg;
 		string name = (*tci)->segname();
 		string path = _path + " " + name;
 		ConfigTreeNode *new_node = create_node(name, path, *tci,
@@ -313,8 +314,17 @@ ConfigTreeNode::add_default_children()
 						       _user_id,
 						       _clientid,
 						       _verbose);
-		new_node->set_value((*tci)->default_str(), _user_id);
-		new_node->set_operator(OP_ASSIGN, _user_id);
+		if (new_node->set_value((*tci)->default_str(), _user_id,
+					error_msg)
+		    != true) {
+		    XLOG_FATAL("Cannot set default value: %s",
+			       error_msg.c_str());
+		}
+		if (new_node->set_operator(OP_ASSIGN, _user_id, error_msg)
+		    != true) {
+		    XLOG_FATAL("Cannot set default operator: %s",
+			       error_msg.c_str());
+		}
 	    }
 	}
     }
@@ -331,25 +341,76 @@ ConfigTreeNode::recursive_add_default_children()
     add_default_children();
 }
 
-void
-ConfigTreeNode::set_value(const string &value, uid_t user_id)
+bool 
+ConfigTreeNode::check_allowed_value(const string& value,
+				    string& error_msg) const
 {
+    if (_template_tree_node == NULL)
+	return true;		// XXX: the root node has a NULL template
+
+    const BaseCommand* c = _template_tree_node->const_command("%allow");
+    if (c == NULL) {
+	c = _template_tree_node->const_command("%allow-range");
+    }
+
+    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
+    if (cmd == NULL)
+	return true;
+
+    return (cmd->verify_variable_by_value(*this, value, error_msg));
+}
+
+bool 
+ConfigTreeNode::check_allowed_operator(const string& value,
+				       string& error_msg) const
+{
+    if (_template_tree_node == NULL)
+	return true;		// XXX: the root node has a NULL template
+
+    const BaseCommand* c = _template_tree_node->const_command("%allow-operator");
+
+    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
+    if (cmd == NULL)
+	return true;
+
+    return (cmd->verify_variable_by_value(*this, value, error_msg));
+}
+
+bool
+ConfigTreeNode::set_value(const string &value, uid_t user_id,
+			  string& error_msg)
+{
+    if (check_allowed_value(value, error_msg) != true)
+	return false;
+
     _value = value;
     _has_value = true;
     _value_committed = false;
     _user_id = user_id;
     TimerList::system_gettimeofday(&_modification_time);
+
+    return true;
 }
 
-void
-ConfigTreeNode::set_operator(ConfigOperator op, uid_t user_id)
+bool
+ConfigTreeNode::set_operator(ConfigOperator op, uid_t user_id,
+			     string& error_msg)
 {
+    if (op != OP_NONE) {
+	string value = operator_to_str(op);
+
+	if (check_allowed_operator(value, error_msg) != true)
+	    return false;
+    }
+
     if (_operator != op) {
 	_operator = op;
 	_value_committed = false;
 	_user_id = user_id;
 	TimerList::system_gettimeofday(&_modification_time);
     }
+
+    return true;
 }
 
 bool
@@ -1787,7 +1848,12 @@ ConfigTreeNode::set_variable(const string& varname, const string& value)
 		XLOG_ERROR("%s", errmsg.c_str());
 		return false;
 	    }
-	    node->set_value(value, _user_id);
+	    if (node->set_value(value, _user_id, errmsg) != true) {
+		errmsg = c_format("Error setting the value of node \"%s\": %s",
+				  varname.c_str(), errmsg.c_str());
+		XLOG_ERROR("%s", errmsg.c_str());
+		return false;
+	    }
 	    return true;
 	case NODE_OPERATOR: 
 	    errmsg = c_format("Attempt to set variable operator \"%s\" "

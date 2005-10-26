@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.53 2005/10/12 03:12:27 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.54 2005/10/25 20:02:44 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -78,8 +78,10 @@ public:
     void remove_child(ConfigTreeNode* child);
     void add_default_children();
     void recursive_add_default_children();
-    void set_value(const string& value, uid_t user_id);
-    void set_operator(ConfigOperator op, uid_t user_id);
+    bool check_allowed_value(const string& value, string& error_msg) const;
+    bool check_allowed_operator(const string& value, string& error_msg) const;
+    bool set_value(const string& value, uid_t user_id, string& error_msg);
+    bool set_operator(ConfigOperator op, uid_t user_id, string& error_msg);
     void mark_subtree_as_committed();
     void mark_subtree_as_uncommitted();
 
