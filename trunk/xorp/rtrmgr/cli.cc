@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.101 2005/10/23 18:48:03 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.102 2005/10/26 07:06:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1729,7 +1729,7 @@ RouterCLI::text_entry_func(const string& ,
     string path = command_global_name;
     list<string> path_segments;
     XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
-    SlaveConfigTreeNode *ctn = NULL, *original_ctn = NULL, *brace_ctn;
+    SlaveConfigTreeNode *ctn = NULL, *first_new_ctn = NULL, *brace_ctn;
     const TemplateTreeNode* ttn = NULL;
     bool value_expected = false;
 
@@ -1906,6 +1906,8 @@ RouterCLI::text_entry_func(const string& ,
 					      getuid(),
 					      clientid(),
 					      _verbose);
+		if (first_new_ctn == NULL)
+		    first_new_ctn = ctn;
 		_changes_made = true;
 		value_expected = false;
 	    } else if (ctn->is_leaf_value()) {
@@ -1924,7 +1926,14 @@ RouterCLI::text_entry_func(const string& ,
 		    cli_client().cli_print(errmsg);
 		    goto cleanup;
 		}
-
+		if (new_path_segments.size() > 1) {
+		    // We cannot have more than one value per leaf node
+		    string errmsg = c_format("ERROR: extra values for leaf "
+					     "node \"%s\".\n",
+					     ctn->segname().c_str());
+		    cli_client().cli_print(errmsg);
+		    goto cleanup;
+		}
 		string errhelp;
 		if (ttn->type_match(value, errhelp)) {
 		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
@@ -2048,6 +2057,8 @@ RouterCLI::text_entry_func(const string& ,
 					  getuid(),
 					  clientid(),
 					  _verbose);
+	    if (first_new_ctn == NULL)
+		first_new_ctn = ctn;
 	    _changes_made = true;
 	    if (ttn->is_tag() || ctn->is_leaf_value()) {
 		XLOG_TRACE(_verbose, "value expected\n");
@@ -2058,13 +2069,6 @@ RouterCLI::text_entry_func(const string& ,
 	    }
 
 	}
-	//
-	// Keep track of where we started because if there's an error we'll
-	// need to clear out this node and all its children.
-	//
-	if (original_ctn == NULL)
-	    original_ctn = ctn;
-	    
 	new_path_segments.pop_front();
     }
 
@@ -2118,10 +2122,10 @@ RouterCLI::text_entry_func(const string& ,
 	_braces.pop_back();
     }
 
-    if (original_ctn != NULL) {
+    if (first_new_ctn != NULL) {
 	XLOG_TRACE(_verbose, "deleting node %s\n",
-		   original_ctn->segname().c_str());
-	original_ctn->delete_subtree_silently();
+		   first_new_ctn->segname().c_str());
+	first_new_ctn->delete_subtree_silently();
     }
 
     return (XORP_ERROR);
