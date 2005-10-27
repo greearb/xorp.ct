@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.7 2005/10/26 07:41:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.8 2005/10/26 07:53:44 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -46,8 +46,10 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
+#include "libxorp/tlv.hh"
 
 #include "ospf/ospf.hh"
+#include "ospf/test_common.hh"
 
 #include "xrl/interfaces/ospfv2_xif.hh"
 
@@ -68,6 +70,13 @@ target(OspfTypes::Version version)
     }
 
     XLOG_UNREACHABLE();
+}
+
+inline
+const char *
+host_os()
+{
+    return "unknown";
 }
 
 /**
@@ -367,16 +376,57 @@ private:
     map<uint16_t, uint32_t> _summary;
 };
 
+class Save : public Output {
+public:
+    Save(OspfTypes::Version version, FilterLSA& filter, string& fname)
+	: Output(version, filter), _fname(fname)
+    {}
+
+    bool begin() {
+	if(!_tlv.open(_fname, false /* write */)) {
+	    XLOG_ERROR("Unable to open %s", _fname.c_str());
+	    return false;
+	}
+
+	// 1) Version
+	vector<uint8_t> data;
+	data.resize(sizeof(uint32_t));
+	_tlv.put32(data, 0, TLV_VERSION);
+	_tlv.write(TLV_CURRENT_VERSION, data);
+
+	// 2) System info
+	const char *host = host_os();
+	uint32_t len = strlen(host);
+	data.resize(len);
+	memcpy(&data[0], host, len);
+	_tlv.write(TLV_SYSTEM_INFO, data);
+
+	return true;
+    }
+
+    bool end() {
+	return _tlv.close();
+    }
+
+private:
+    string _fname;
+    Tlv _tlv;
+};
+
 enum Pstyle {
     BRIEF,
     DETAIL,
-    SUMMARY
+    SUMMARY,
+    SAVE
 };
 
 int
 usage(const char *myname)
 {
-    fprintf(stderr, "usage: %s [-a area] [-f type] [-s] [-b] [-d]\n", myname);
+    fprintf(stderr,
+	    "usage: %s [-a area] [-f type] [-s] [-b] [-d] [-S fname]\n",
+	    myname);
+
     return -1;
 }
 
@@ -398,9 +448,10 @@ main(int argc, char **argv)
     Pstyle pstyle = BRIEF;
     FilterLSA filter;
     string area;
+    string fname;
 
     int c;
-    while ((c = getopt(argc, argv, "23a:f:sbd")) != -1) {
+    while ((c = getopt(argc, argv, "23a:f:sbdS:")) != -1) {
 	switch (c) {
 	case '2':
 	    version = OspfTypes::V2;
@@ -423,6 +474,10 @@ main(int argc, char **argv)
 	case 'd':
 	    pstyle = DETAIL;
 	    break;
+	case 'S':
+	    pstyle = SAVE;
+	    fname = optarg;
+	    break;
 	default:
 	    return usage(argv[0]);
 	}
@@ -438,6 +493,9 @@ main(int argc, char **argv)
 	break;
     case SUMMARY:
 	output = new Summary(version, filter);
+	break;
+    case SAVE:
+	output = new Save(version, filter, fname);
 	break;
     }
 
