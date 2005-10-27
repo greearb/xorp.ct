@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.19 2005/03/25 02:54:32 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.20 2005/06/06 20:27:39 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -285,10 +285,12 @@ public:
 				      const string&		vifname,
 				      const uint32_t&		metric,
 				      const uint32_t&		ad,
-				      const string&		cookie);
+				      const string&		cookie,
+				      const string&		protocol_origin);
 
     XrlCmdError redistx_0_1_delete_route(const IPNet<A>&	net,
-					 const string&		cookie);
+					 const string&		cookie,
+					 const string&		protocol_origin);
 
     XrlCmdError socketx_user_0_1_recv_event(const string&	sockid,
 					    const A&		src_host,
@@ -1198,7 +1200,8 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 					     const string&	/* vifname */,
 					     const uint32_t&	/* metric */,
 					     const uint32_t&	/* admin_d */,
-					     const string&	cookie)
+					     const string&	cookie,
+					     const string&	/* protocol_origin */)
 {
     // We use cookie of the protocol name to make find the relevant redist table simple.
     _xrm.add_route(cookie, net, nexthop, PolicyTags());
@@ -1208,7 +1211,8 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::redistx_0_1_delete_route(const IPNet<A>&	net,
-						const string&	cookie)
+						const string&	cookie,
+						const string&	/* protocol_origin */)
 {
     _xrm.delete_route(cookie, net);
     return XrlCmdError::OKAY();

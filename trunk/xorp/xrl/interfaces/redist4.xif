@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist4.xif,v 1.6 2004/07/28 05:08:50 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist4.xif,v 1.7 2004/08/03 03:01:09 pavlin Exp $ */
 
 /*
  * RIB routes redistribution XRL interface.
@@ -8,6 +8,8 @@
 interface redist4/0.1 {
 
 	/**
+	 * Add/delete a routing entry.
+	 *
 	 * @param dst destination network.
 	 * @param nexthop nexthop router address.
 	 * @param ifname interface name associated with nexthop.
@@ -18,6 +20,8 @@ interface redist4/0.1 {
 	 * @param cookie value set by the requestor to identify
 	 *        redistribution source.  Typical value is the originating
 	 *        protocol name.
+	 * @param protocol_origin the name of the protocol that originated
+	 *        this routing entry.
 	 */
 	add_route ? dst:ipv4net						\
 		  & nexthop:ipv4					\
@@ -25,10 +29,12 @@ interface redist4/0.1 {
 		  & vifname:txt						\
 		  & metric:u32						\
 		  & admin_distance:u32					\
-		  & cookie:txt
+		  & cookie:txt						\
+		  & protocol_origin:txt
 
 	delete_route ? network:ipv4net					\
-		     & cookie:txt
+		     & cookie:txt					\
+		     & protocol_origin:txt
 
 	/**
 	 * When route redistribution begins, the receiver is sent the existing

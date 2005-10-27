@@ -484,17 +484,19 @@ XrlRipngTarget::redist6_0_1_add_route(const IPv6Net&	net,
 				      const string&	vifname,
 				      const uint32_t&	metric,
 				      const uint32_t&	admin_distance,
-				      const string&	cookie)
+				      const string&	cookie,
+				      const string&	protocol_origin)
 {
     return _ct->redistx_0_1_add_route(net, nexthop, ifname, vifname, metric,
-				      admin_distance, cookie);
+				      admin_distance, cookie, protocol_origin);
 }
 
 XrlCmdError
 XrlRipngTarget::redist6_0_1_delete_route(const IPv6Net&	net,
-					 const string&	cookie)
+					 const string&	cookie,
+					 const string&	protocol_origin)
 {
-    return _ct->redistx_0_1_delete_route(net, cookie);
+    return _ct->redistx_0_1_delete_route(net, cookie, protocol_origin);
 }
 
 XrlCmdError

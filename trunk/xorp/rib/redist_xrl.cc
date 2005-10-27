@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.19 2005/03/05 01:31:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.20 2005/03/25 02:54:20 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -163,6 +163,7 @@ AddRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
     return cl.send_add_route(p->xrl_target_name().c_str(),
 			     _net, _nexthop, _ifname, _vifname, _metric,
 			     _admin_distance, p->cookie(),
+			     _protocol_origin,
 			     callback(this, &AddRoute<IPv4>::dispatch_complete)
 			     );
 }
@@ -181,6 +182,7 @@ AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
     return cl.send_add_route(p->xrl_target_name().c_str(),
 			     _net, _nexthop, _ifname, _vifname, _metric,
 			     _admin_distance, p->cookie(),
+			     _protocol_origin,
 			     callback(this, &AddRoute<IPv6>::dispatch_complete)
 			     );
 
@@ -234,6 +236,7 @@ DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
     return cl.send_delete_route(
 		p->xrl_target_name().c_str(),
 		_net, p->cookie(),
+		_protocol_origin,
 		callback(this, &DeleteRoute<IPv4>::dispatch_complete)
 		);
 }
@@ -252,6 +255,7 @@ DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
     return cl.send_delete_route(
 		p->xrl_target_name().c_str(),
 		_net, p->cookie(),
+		_protocol_origin,
 		callback(this, &DeleteRoute<IPv6>::dispatch_complete)
 		);
 }

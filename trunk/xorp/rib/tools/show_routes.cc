@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.12 2005/08/04 11:52:33 bms Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.13 2005/10/27 01:55:50 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -58,67 +58,37 @@ struct ShowRoutesOptions {
 // ----------------------------------------------------------------------------
 // Display functions and helpers
 
-struct AdEntry {
-    uint32_t	ad;
-    const char*	name;
-    inline bool operator<(const AdEntry& o) const { return ad < o.ad; }
-};
-
-static const char*
-ad2protocol(uint32_t admin_distance)
-{
-    // XXX These values are cut and paste from rib.cc.  At some point
-    // we'd like these values to be soft state in the rib and obviously
-    // this won't suffice.
-    static const struct AdEntry ads[] = {
-	{ 0, "connected"}, { 1, "static"}, { 5, "eigrp-summary" },
-	{ 20, "ebgp" },	{ 90, "eigrp-internal" }, { 100, "igrp" },
-	{ 110, "ospf" }, { 115, "is-is" }, { 120, "rip" },
-	{ 170, "eigrp-external"}, { 200, "ibgp" }, { 254, "fib2mrib"},
-	{ 255, "unknown" }
-    };
-    static const size_t n = sizeof(ads) / sizeof(ads[0]);
-
-    AdEntry s;
-    s.ad = admin_distance;
-    const AdEntry* e = lower_bound(ads, ads + n, s);
-    if (e == ads + n || e->ad != admin_distance) {
-	return NULL;
-    }
-    return e->name;
-}
-
 template <typename A>
 static void
 display_route(const IPNet<A>& 	net,
 	      const A& 		nexthop,
 	      const string& 	ifname,
 	      const string& 	vifname,
-	      const uint32_t 	metric,
-	      const uint32_t	admin_distance)
+	      uint32_t		metric,
+	      uint32_t		admin_distance,
+	      const string&	protocol_origin)
 {
+    string tmp_name;
+    string unknown_name = "UNKNOWN";
+
     cout << "Network " << net.str() << endl;
-    cout << "    Nexthop := " << nexthop.str() << endl;
-
-    cout << "    Metric := ";
-    cout.width(5);
-    cout << metric;
-
-    const char* protocol = ad2protocol(admin_distance);
-    if (protocol == 0) {
-	cout << "    AD := ";
-	cout.width(5);
-	cout << admin_distance;
-    } else {
-	cout << "    Protocol := " << protocol;
-    }
+    cout << "    Nexthop        := " << nexthop.str() << endl;
 
     if (ifname.empty() == false)
-	cout << "    Interface := " << ifname;
+	tmp_name = ifname;
+    else
+	tmp_name = unknown_name;
+    cout << "    Interface      := " << tmp_name << endl;
 
     if (vifname.empty() == false)
-	cout << "    Vif := " << vifname;
-    cout << endl;
+	tmp_name = vifname;
+    else
+	tmp_name = unknown_name;
+    cout << "    Vif            := " << tmp_name << endl;
+
+    cout << "    Metric         := " << metric << endl;
+    cout << "    Protocol       := " << protocol_origin << endl;
+    cout << "    Admin distance := " << admin_distance << endl;
 }
 
 template <typename A>
@@ -127,17 +97,13 @@ display_route_brief(const IPNet<A>& 	net,
 		    const A& 		nexthop,
 		    const string& 	ifname,
 		    const string& 	vifname,
-		    const uint32_t 	metric,
-		    const uint32_t	admin_distance)
+		    uint32_t		metric,
+		    uint32_t		admin_distance,
+		    const string&	protocol_origin)
 {
     cout << "" << net.str() << "\t";
     cout << "[";
-    const char* protocol = ad2protocol(admin_distance);
-    if (protocol == NULL) {
-	cout << admin_distance;
-    } else {
-	cout << protocol << "(" << admin_distance << ")";
-    }
+    cout << protocol_origin << "(" << admin_distance << ")";
     cout << "/" << metric << "]";
     //
     // XXX: At the end of the line we should print the age of the route,
@@ -190,9 +156,11 @@ public:
 				      const string&	vifname,
 				      const uint32_t&	metric,
 				      const uint32_t&	admin_distance,
-				      const string&	cookie);
+				      const string&	cookie,
+				      const string&	protocol_origin);
     XrlCmdError redist4_0_1_delete_route(const IPv4Net&	network,
-					 const string&	cookie);
+					 const string&	cookie,
+					 const string&	protocol_origin);
 
     XrlCmdError redist6_0_1_starting_route_dump(const string&	cookie);
     XrlCmdError redist6_0_1_finishing_route_dump(const string&	cookie);
@@ -202,9 +170,11 @@ public:
 				      const string&	vifname,
 				      const uint32_t&	metric,
 				      const uint32_t&	admin_distance,
-				      const string&	cookie);
+				      const string&	cookie,
+				      const string&	protocol_origin);
     XrlCmdError redist6_0_1_delete_route(const IPv6Net&	network,
-					 const string&	cookie);
+					 const string&	cookie,
+					 const string&	protocol_origin);
 
     bool poll_ready_failed();
 
@@ -530,7 +500,8 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 					   const string&	vifname,
 					   const uint32_t&	metric,
 					   const uint32_t&	admin_distance,
-					   const string&	cookie)
+					   const string&	cookie,
+					   const string&	protocol_origin)
 {
     if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
@@ -538,16 +509,18 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 
     if (this->_opts.brief == true) {
 	display_route_brief(dst, nexthop, ifname, vifname, metric,
-			    admin_distance);
+			    admin_distance, protocol_origin);
     } else {
-	display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+	display_route(dst, nexthop, ifname, vifname, metric, admin_distance,
+		      protocol_origin);
     }
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 ShowRoutesProcessor::redist4_0_1_delete_route(const IPv4Net&	/* network */,
-					      const string&	/* cookie  */)
+					      const string&	/* cookie  */,
+					      const string&	/* protocol_origin */)
 {
     // XXX For now we ignore deletions that occur during route dump
     return XrlCmdError::OKAY();
@@ -575,23 +548,26 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
 					   const string&	vifname,
 					   const uint32_t&	metric,
 					   const uint32_t&	admin_distance,
-					   const string&	cookie)
+					   const string&	cookie,
+					   const string&	protocol_origin)
 {
     if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
     if (this->_opts.brief == true) {
 	display_route_brief(dst, nexthop, ifname, vifname, metric,
-			    admin_distance);
+			    admin_distance, protocol_origin);
     } else {
-	display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+	display_route(dst, nexthop, ifname, vifname, metric, admin_distance,
+		      protocol_origin);
     }
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
 ShowRoutesProcessor::redist6_0_1_delete_route(const IPv6Net&	/* network */,
-					      const string&	/* cookie */)
+					      const string&	/* cookie */,
+					      const string&	/* protocol_origin*/)
 {
     // XXX For now we ignore deletions that occur during route dump
     return XrlCmdError::OKAY();
