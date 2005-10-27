@@ -13,11 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/ospf/test_common.hh,v 1.1 2005/09/12 17:52:22 atanu Exp $
 
 #ifndef __OSPF_TEST_COMMON_HH__
 #define __OSPF_TEST_COMMON_HH__
-
 
 /**
  * Compute legal values for the options fields.
@@ -49,5 +48,15 @@ compute_options(OspfTypes::Version version, OspfTypes::AreaType area_type)
     return options.get_options();
 }
 
+/**
+ * The type fields when saving an LSA database.
+ */
+enum TLV {
+    TLV_VERSION = 1,	// The first entry in a file 4 byte version number.
+    TLV_SYSTEM_INFO = 2,// A string defining the creation system. 
+    TLV_AREA = 3,	// AREA that the following LSAs belong to 4 bytes
+    TLV_LSA = 4		// Binary LSA.
+};
+const uint32_t TLV_CURRENT_VERSION = 1;	// Current version number
 
 #endif // __OSPF_TEST_COMMON_HH__
