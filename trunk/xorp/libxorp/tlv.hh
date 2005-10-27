@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/tlv.hh,v 1.1 2005/10/27 18:22:07 atanu Exp $
+// $XORP: xorp/libxorp/tlv.hh,v 1.2 2005/10/27 18:34:50 atanu Exp $
 
 #ifndef __LIBXORP_TLV_HH__
 #define __LIBXORP_TLV_HH__
@@ -109,7 +109,7 @@ class Tlv {
 	if (0 == _fp) {
 	    return false;
 	}
-	return fclose(_fp);
+	return 0 == fclose(_fp) ? true : false;
     }
 
     /*
