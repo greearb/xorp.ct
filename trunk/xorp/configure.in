@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.145 2005/10/12 01:37:40 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.146 2005/10/16 07:01:11 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.145 2005/10/12 01:37:40 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.146 2005/10/16 07:01:11 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -79,24 +79,31 @@ dnl ----------------------------
 case "${host_os}" in
     bsdi* )
 	AC_DEFINE(HOST_OS_BSDI, 1, [Define to 1 if the OS is BSDI])
+	AC_DEFINE(HOST_OS_NAME, "BSDI", [Define the OS name])
     ;;
     darwin* )
 	AC_DEFINE(HOST_OS_MACOSX, 1, [Define to 1 if the OS is MacOS X])
+	AC_DEFINE(HOST_OS_NAME, "MacOS X", [Define the OS name])
     ;;
     freebsd* )
 	AC_DEFINE(HOST_OS_FREEBSD, 1, [Define to 1 if the OS is FreeBSD])
+	AC_DEFINE(HOST_OS_NAME, "FreeBSD", [Define the OS name])
     ;;
     linux* )
 	AC_DEFINE(HOST_OS_LINUX, 1, [Define to 1 if the OS is Linux])
+	AC_DEFINE(HOST_OS_NAME, "Linux", [Define the OS name])
     ;;
     netbsd* )
 	AC_DEFINE(HOST_OS_NETBSD, 1, [Define to 1 if the OS is NetBSD])
+	AC_DEFINE(HOST_OS_NAME, "NetBSD", [Define the OS name])
     ;;
     openbsd* )
 	AC_DEFINE(HOST_OS_OPENBSD, 1, [Define to 1 if the OS is OpenBSD])
+	AC_DEFINE(HOST_OS_NAME, "OpenBSD", [Define the OS name])
     ;;
     solaris* )
 	AC_DEFINE(HOST_OS_SOLARIS, 1, [Define to 1 if the OS is Solaris])
+	AC_DEFINE(HOST_OS_NAME, "Solaris", [Define the OS name])
     ;;
     *cygwin )
 	AC_MSG_ERROR([Cygwin is not (and will not be) supported.])
@@ -104,6 +111,7 @@ case "${host_os}" in
     *mingw* )
 	AC_DEFINE(HOST_OS_WINDOWS, 1, [Define to 1 if the OS is Windows])
 	AC_DEFINE(HAVE_MINGW, 1, [Define to 1 if the build environment is MinGW])
+	AC_DEFINE(HOST_OS_NAME, "Windows", [Define the OS name])
 	_USING_WINDOWS="1"
 	_USING_MINGW="1"
 	dnl This has to be here to stop the ssize_t test from telling lies.
@@ -498,7 +506,7 @@ AC_CHECK_HEADERS([fcntl.h])
 dnl
 dnl Check for POSIX 1003.1 headers.
 dnl
-AC_CHECK_HEADERS([glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/mount.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/wait.h sys/uio.h sys/un.h])
+AC_CHECK_HEADERS([glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/mount.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/uio.h sys/un.h sys/utsname.h sys/wait.h])
 AC_HEADER_TIME
 AC_HEADER_STAT
 

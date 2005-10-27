@@ -1805,11 +1805,21 @@ cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_BSDI 1
 _ACEOF
 
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "BSDI"
+_ACEOF
+
     ;;
     darwin* )
 
 cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_MACOSX 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "MacOS X"
 _ACEOF
 
     ;;
@@ -1819,11 +1829,21 @@ cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_FREEBSD 1
 _ACEOF
 
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "FreeBSD"
+_ACEOF
+
     ;;
     linux* )
 
 cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_LINUX 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "Linux"
 _ACEOF
 
     ;;
@@ -1833,6 +1853,11 @@ cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_NETBSD 1
 _ACEOF
 
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "NetBSD"
+_ACEOF
+
     ;;
     openbsd* )
 
@@ -1840,11 +1865,21 @@ cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_OPENBSD 1
 _ACEOF
 
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "OpenBSD"
+_ACEOF
+
     ;;
     solaris* )
 
 cat >>confdefs.h <<\_ACEOF
 #define HOST_OS_SOLARIS 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "Solaris"
 _ACEOF
 
     ;;
@@ -1862,6 +1897,11 @@ _ACEOF
 
 cat >>confdefs.h <<\_ACEOF
 #define HAVE_MINGW 1
+_ACEOF
+
+
+cat >>confdefs.h <<\_ACEOF
+#define HOST_OS_NAME "Windows"
 _ACEOF
 
 	_USING_WINDOWS="1"
@@ -4175,7 +4215,7 @@ test x"$silent" = xyes && libtool_flags="$libtool_flags --silent"
 case "$lt_target" in
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 4178 "configure"' > conftest.$ac_ext
+  echo '#line 4218 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -6312,7 +6352,8 @@ done
 
 
 
-for ac_header in glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/mount.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/wait.h sys/uio.h sys/un.h
+
+for ac_header in glob.h grp.h pwd.h regex.h termios.h sys/cdefs.h sys/errno.h sys/ioctl.h sys/mount.h sys/resource.h sys/select.h sys/signal.h sys/socket.h sys/stat.h sys/syslog.h sys/time.h sys/types.h sys/uio.h sys/un.h sys/utsname.h sys/wait.h
 do
 as_ac_Header=`echo "ac_cv_header_$ac_header" | $as_tr_sh`
 if eval "test \"\${$as_ac_Header+set}\" = set"; then

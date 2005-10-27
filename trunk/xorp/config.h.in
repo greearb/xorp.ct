@@ -458,6 +458,9 @@
 /* Define to 1 if you have the <sys/un.h> header file. */
 #undef HAVE_SYS_UN_H
 
+/* Define to 1 if you have the <sys/utsname.h> header file. */
+#undef HAVE_SYS_UTSNAME_H
+
 /* Define to 1 if you have <sys/wait.h> that is POSIX.1 compatible. */
 #undef HAVE_SYS_WAIT_H
 
@@ -502,6 +505,9 @@
 
 /* Define to 1 if the OS is MacOS X */
 #undef HOST_OS_MACOSX
+
+/* Define the OS name */
+#undef HOST_OS_NAME
 
 /* Define to 1 if the OS is NetBSD */
 #undef HOST_OS_NETBSD
