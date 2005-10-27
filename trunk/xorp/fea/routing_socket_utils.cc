@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.28 2005/08/18 15:45:51 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.29 2005/10/27 19:49:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -290,18 +290,23 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     bool is_unresolved = false;
     bool lookup_ifindex = true;
     bool xorp_route = false;
+    bool is_recognized = false;
     
-    XLOG_ASSERT((rtm->rtm_type == RTM_ADD)
-		|| (rtm->rtm_type == RTM_DELETE)
-		|| (rtm->rtm_type == RTM_CHANGE)
-		|| (rtm->rtm_type == RTM_GET)
+    if ((rtm->rtm_type == RTM_ADD)
+	|| (rtm->rtm_type == RTM_DELETE)
+	|| (rtm->rtm_type == RTM_CHANGE)
+	|| (rtm->rtm_type == RTM_GET)
 #ifdef RTM_MISS
-		|| (rtm->rtm_type == RTM_MISS)
+	|| (rtm->rtm_type == RTM_MISS)
 #endif
 #ifdef RTM_RESOLVE
-		|| (rtm->rtm_type == RTM_RESOLVE)
+	|| (rtm->rtm_type == RTM_RESOLVE)
 #endif
-	);
+	) {
+	is_recognized = true;
+    }
+    XLOG_ASSERT(is_recognized);
+
     debug_msg("%p index %d type %s\n", rtm, if_index,
 	      rtm_msg_type(rtm->rtm_type).c_str());
 
