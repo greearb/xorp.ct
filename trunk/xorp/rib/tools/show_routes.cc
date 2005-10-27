@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.11 2005/03/25 02:54:26 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.12 2005/08/04 11:52:33 bms Exp $"
 
 #include "rib/rib_module.h"
 
@@ -43,13 +43,14 @@ struct ShowRoutesOptions {
     bool ribin;			// ribin (true), ribout (false)
     bool ipv4;			// IPv4 (true), IPv6(false)
     bool unicast;		// unicast (true), multicast (false)
+    bool brief;			// -b (true), (false)
     const char* protocol;
     string	xrl_target;
     string	finder_host;
     uint16_t	finder_port;
 
     inline ShowRoutesOptions()
-	: ribin(false), ipv4(true), unicast(true), protocol("all")
+	: ribin(false), ipv4(true), unicast(true), brief(false), protocol("all")
     {}
 };
 
@@ -117,6 +118,43 @@ display_route(const IPNet<A>& 	net,
 
     if (vifname.empty() == false)
 	cout << "    Vif := " << vifname;
+    cout << endl;
+}
+
+template <typename A>
+static void
+display_route_brief(const IPNet<A>& 	net,
+		    const A& 		nexthop,
+		    const string& 	ifname,
+		    const string& 	vifname,
+		    const uint32_t 	metric,
+		    const uint32_t	admin_distance)
+{
+    cout << "" << net.str() << "\t";
+    cout << "[";
+    const char* protocol = ad2protocol(admin_distance);
+    if (protocol == NULL) {
+	cout << admin_distance;
+    } else {
+	cout << protocol << "(" << admin_distance << ")";
+    }
+    cout << "/" << metric << "]";
+    //
+    // XXX: At the end of the line we should print the age of the route,
+    // but for now we don't have this information.
+    //
+    // cout << " 1w0d 01:58:27";
+    cout << endl;
+
+    cout << "\t\t> ";
+    if (admin_distance != 0)
+	cout << "to " << nexthop.str() << " ";
+
+    if (ifname.empty() == false)
+	cout << "via " << ifname;
+
+    if (vifname.empty() == false)
+	cout << "/" << vifname;
     cout << endl;
 }
 
@@ -498,7 +536,12 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 	return XrlCmdError::OKAY();
     }
 
-    display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+    if (this->_opts.brief == true) {
+	display_route_brief(dst, nexthop, ifname, vifname, metric,
+			    admin_distance);
+    } else {
+	display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+    }
     return XrlCmdError::OKAY();
 }
 
@@ -537,7 +580,12 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
     if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
-    display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+    if (this->_opts.brief == true) {
+	display_route_brief(dst, nexthop, ifname, vifname, metric,
+			    admin_distance);
+    } else {
+	display_route(dst, nexthop, ifname, vifname, metric, admin_distance);
+    }
     return XrlCmdError::OKAY();
 }
 
@@ -650,6 +698,7 @@ main(int argc, char* const argv[])
 	    switch (ch) {
 	    case 'b':
 		brief = true;
+		sr_opts.brief = true;
 		break;
 	    case 'F':
 		do_run = parse_finder_args(optarg,

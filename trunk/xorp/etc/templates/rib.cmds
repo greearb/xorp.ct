@@ -1,5 +1,5 @@
 
-/* $XORP: xorp/etc/templates/rib.cmds,v 1.4 2005/09/16 05:18:21 atanu Exp $ */
+/* $XORP: xorp/etc/templates/rib.cmds,v 1.5 2005/10/26 22:59:39 pavlin Exp $ */
 
 /*
  * At the time this file was written, route redistribution from the
@@ -234,10 +234,22 @@ show route table ipv4 unicast final {
      %tag: HELP "Show IPv4 winning routes";
 }
 
+show route table ipv4 unicast final brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 winning routes (brief format)";
+}
+
 show route table ipv6 unicast final {
      %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
      %module: rib;
      %tag: HELP "Show IPv6 winning routes";
+}
+
+show route table ipv6 unicast final brief {
+     %command: "rib/tools/show_routes -b ribout $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 winning routes (brief format)";
 }
 
 show route table ipv4 multicast final {
@@ -246,8 +258,20 @@ show route table ipv4 multicast final {
      %tag: HELP "Show IPv4 MRIB winning routes";
 }
 
+show route table ipv4 multicast final brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv4 MRIB winning routes (brief format)";
+}
+
 show route table ipv6 multicast final {
      %command: "rib/tools/show_routes ribin $4 $5 all" %help: HELP;
      %module: rib;
      %tag: HELP "Show IPv6 MRIB winning routes";
+}
+
+show route table ipv6 multicast final brief {
+     %command: "rib/tools/show_routes -b ribin $4 $5 all" %help: HELP;
+     %module: rib;
+     %tag: HELP "Show IPv6 MRIB winning routes (brief format)";
 }
