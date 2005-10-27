@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.146 2005/10/16 07:01:11 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.147 2005/10/27 03:31:02 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.146 2005/10/16 07:01:11 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.147 2005/10/27 03:31:02 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -734,6 +734,7 @@ AC_CHECK_FUNCS([strerror])
 AC_CHECK_FUNCS([getifaddrs])
 AC_CHECK_FUNCS([if_nametoindex])
 AC_CHECK_FUNCS([if_indextoname])
+AC_CHECK_FUNCS([uname])
 
 dnl ---------------------------------------------------------------------------
 dnl Check for system services
