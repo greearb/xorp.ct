@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.10 2005/10/27 20:31:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.11 2005/10/27 22:31:05 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -408,14 +408,24 @@ public:
 	vector<uint8_t> data;
 	data.resize(sizeof(uint32_t));
 	_tlv.put32(data, 0, TLV_VERSION);
-	_tlv.write(TLV_CURRENT_VERSION, data);
+	if (!_tlv.write(TLV_CURRENT_VERSION, data))
+	    return false;
 
 	// 2) System info
 	string host = host_os();
 	uint32_t len = host.size();
 	data.resize(len);
 	memcpy(&data[0], host.c_str(), len);
-	return _tlv.write(TLV_SYSTEM_INFO, data);
+	if (!_tlv.write(TLV_SYSTEM_INFO, data))
+	    return false;
+
+	// 3) OSPF Version
+	data.resize(sizeof(uint32_t));
+	_tlv.put32(data, 0, _version);
+	if (!_tlv.write(TLV_OSPF_VERSION, data))
+	    return false;
+
+	return true;
     }
 
     bool begin_area(string area) {
