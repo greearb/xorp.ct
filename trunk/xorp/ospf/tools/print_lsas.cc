@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.9 2005/10/27 18:42:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.10 2005/10/27 20:31:52 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -399,7 +399,7 @@ public:
     {}
 
     bool begin() {
-	if(!_tlv.open(_fname, false /* write */)) {
+	if (!_tlv.open(_fname, false /* write */)) {
 	    XLOG_ERROR("Unable to open %s", _fname.c_str());
 	    return false;
 	}
@@ -415,9 +415,23 @@ public:
 	uint32_t len = host.size();
 	data.resize(len);
 	memcpy(&data[0], host.c_str(), len);
-	_tlv.write(TLV_SYSTEM_INFO, data);
+	return _tlv.write(TLV_SYSTEM_INFO, data);
+    }
 
-	return true;
+    bool begin_area(string area) {
+	vector<uint8_t> data;
+	data.resize(sizeof(uint32_t));
+	_tlv.put32(data, 0, ntohl(IPv4(area.c_str()).addr()));
+	return _tlv.write(TLV_AREA, data);
+    }
+
+    bool print(Lsa::LsaRef lsar) {
+	size_t len;
+	uint8_t *ptr = lsar->lsa(len);
+	vector<uint8_t> data;
+	data.resize(len);
+	memcpy(&data[0], ptr, len);
+	return _tlv.write(TLV_LSA, data);
     }
 
     bool end() {
