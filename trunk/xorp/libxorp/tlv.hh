@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/libxorp/tlv.hh,v 1.1 2005/10/27 18:22:07 atanu Exp $
 
 #ifndef __LIBXORP_TLV_HH__
 #define __LIBXORP_TLV_HH__
@@ -27,6 +27,15 @@ class Tlv {
     Tlv() : _fp(0)
 	{}
 
+    /**
+     * Open file for reading or writing.
+     *
+     * @param fname filename or '-' for stdin/stdout.
+     * @param read true if the file is to be opened for reading, false
+     * if opened for writing.
+     *
+     * @return true on success
+     */
     bool open(string& fname, bool read) {
 	if ("-" == fname) {
 	    _fp = read ? stdin : stdout;
@@ -39,6 +48,14 @@ class Tlv {
 	return true;
     }
 
+    /**
+     * Read a TLV entry from the file.
+     *
+     * @return type of entry.
+     * @return data read.
+     *
+     * @return true on success
+     */
     bool read(uint32_t& type, vector<uint8_t>& data) {
 	uint32_t n;
 	if (1 != fread(&n, sizeof(n), 1, _fp))
@@ -58,6 +75,14 @@ class Tlv {
 	return true;
     }
 
+    /**
+     * Write a TLV entry to the file.
+     *
+     * @return type of entry.
+     * @return data to be written.
+     *
+     * @return true on success
+     */
     bool write(uint32_t type, vector<uint8_t>& data) {
 	uint32_t n = htonl(type);
 	if (1 != fwrite(&n, sizeof(n), 1, _fp))
@@ -75,6 +100,11 @@ class Tlv {
 	return true;
     }
 
+    /**
+     * Close the TLV file.
+     *
+     * @return true on success
+     */
     bool close() {
 	if (0 == _fp) {
 	    return false;
@@ -82,6 +112,15 @@ class Tlv {
 	return fclose(_fp);
     }
 
+    /*
+     * Get a 32 bit unsigned int from the data array.
+     *
+     * @param data array containing the value.
+     * @param offset in data to start reading.
+     * @param u32 value read from array.
+     *
+     * @return true on success
+     */
     bool get32(vector<uint8_t>& data, uint32_t offset, uint32_t& u32) {
 
 	if (data.size() < offset + sizeof(u32))
@@ -98,6 +137,15 @@ class Tlv {
 	return true;
     }
 
+    /*
+     * Put a 32 bit unsigned int into the data array.
+     *
+     * @param data array into which to place the value.
+     * @param offset in data to start writing.
+     * @param u32 value to put into the array.
+     *
+     * @return true on success
+     */
     bool put32(vector<uint8_t>& data, uint32_t offset, uint32_t u32) {
 
 	if (data.size() < offset + sizeof(u32))
