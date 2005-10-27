@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.8 2005/10/26 07:53:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.9 2005/10/27 18:42:31 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -33,6 +33,10 @@
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
+#endif
+
+#ifdef HAVE_SYS_UTSNAME_H
+#include <sys/utsname.h>
 #endif
 
 #include "ospf/ospf_module.h"
@@ -72,11 +76,23 @@ target(OspfTypes::Version version)
     XLOG_UNREACHABLE();
 }
 
-inline
-const char *
+/**
+ * return OS name.
+ */
+string
 host_os()
 {
-    return "unknown";
+#ifdef	HAVE_UNAME
+    struct utsname name;
+
+    if (0 != uname(&name)) {
+	return HOST_OS_NAME;
+    }
+
+    return name.sysname;
+#endif
+
+    return HOST_OS_NAME;
 }
 
 /**
@@ -395,10 +411,10 @@ public:
 	_tlv.write(TLV_CURRENT_VERSION, data);
 
 	// 2) System info
-	const char *host = host_os();
-	uint32_t len = strlen(host);
+	string host = host_os();
+	uint32_t len = host.size();
 	data.resize(len);
-	memcpy(&data[0], host, len);
+	memcpy(&data[0], host.c_str(), len);
 	_tlv.write(TLV_SYSTEM_INFO, data);
 
 	return true;
