@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.13 2005/03/25 02:53:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.14 2005/08/18 15:45:45 bms Exp $"
 
 #include "fea_module.h"
 
@@ -60,7 +60,6 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 
     for (const uint8_t* ptr = buf; ptr < last; ptr += rtm->rtm_msglen) {
 	bool filter_match = false;
-	bool mark_as_unresolved = false;
 
 	rtm = reinterpret_cast<const struct rt_msghdr *>(ptr);
 	if (RTM_VERSION != rtm->rtm_version) {
@@ -82,16 +81,12 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	// Upcalls may not be supported in some BSD derived implementations.
 	if (filter & FtiFibMsg::RESOLVES) {
 #ifdef RTM_MISS
-	    if (rtm->rtm_type == RTM_MISS) {
+	    if (rtm->rtm_type == RTM_MISS)
 		filter_match = true;
-		mark_as_unresolved = true;
-	    }
 #endif
 #ifdef RTM_RESOLVE
-	    if (rtm->rtm_type == RTM_RESOLVE) {
+	    if (rtm->rtm_type == RTM_RESOLVE)
 		filter_match = true;
-		mark_as_unresolved = true;
-	    }
 #endif
 	}
 
@@ -127,11 +122,8 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 #endif
 
 	FteX fte(family);
-	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true) {
-	    if (mark_as_unresolved)
-		fte.mark_unresolved();
+	if (RtmUtils::rtm_get_to_fte_cfg(fte, ftic().iftree(), rtm) == true)
 	    fte_list.push_back(fte);
-	}
     }
 
     return true;

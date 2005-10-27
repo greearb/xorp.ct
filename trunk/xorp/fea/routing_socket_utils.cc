@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.27 2005/06/20 22:44:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.28 2005/08/18 15:45:51 bms Exp $"
 
 #include "fea_module.h"
 
@@ -287,6 +287,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     int family = fte.nexthop().af();
     bool is_family_match = false;
     bool is_deleted = false;
+    bool is_unresolved = false;
     bool lookup_ifindex = true;
     bool xorp_route = false;
     
@@ -294,8 +295,13 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 		|| (rtm->rtm_type == RTM_DELETE)
 		|| (rtm->rtm_type == RTM_CHANGE)
 		|| (rtm->rtm_type == RTM_GET)
+#ifdef RTM_MISS
 		|| (rtm->rtm_type == RTM_MISS)
-		|| (rtm->rtm_type == RTM_RESOLVE));
+#endif
+#ifdef RTM_RESOLVE
+		|| (rtm->rtm_type == RTM_RESOLVE)
+#endif
+	);
     debug_msg("%p index %d type %s\n", rtm, if_index,
 	      rtm_msg_type(rtm->rtm_type).c_str());
 
@@ -328,9 +334,19 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	}
     }
 
+    //
     // Deal with BSD upcalls. These only ever have RTAX_DST, and
     // only contain host addresses.
-    if ((rtm->rtm_type == RTM_MISS) || (rtm->rtm_type == RTM_RESOLVE)) {
+    //
+#ifdef RTM_MISS
+    if (rtm->rtm_type == RTM_MISS)
+	is_unresolved = true;
+#endif
+#ifdef RTM_RESOLVE
+    if (rtm->rtm_type == RTM_RESOLVE)
+	is_unresolved = true;
+#endif
+    if (is_unresolved) {
 	nexthop_addr = IPvX::ZERO(family);
 	dst_mask_len = IPvX::addr_bitlen(family);
 	if_name = "";
@@ -454,6 +470,8 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	       0xffff, 0xffff, xorp_route);
     if (is_deleted)
 	fte.mark_deleted();
+    if (is_unresolved)
+	fte.mark_unresolved();
     
     return true;
 }
