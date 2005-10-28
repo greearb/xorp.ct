@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.17 2005/07/25 23:01:49 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.18 2005/07/27 01:04:13 zec Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -354,6 +354,9 @@ IPNet<A>::operator<(const IPNet& other) const
      *	x<y	         |-----y---------|
      *  x<y	                    |--y-|
      */
+    if (masked_addr().af() != other.masked_addr().af())
+	return (masked_addr().af() < other.masked_addr().af());
+
     if (this->contains(other))
 	return false;
     else if (other.contains(*this))
@@ -397,6 +400,9 @@ IPNet<A>::operator<(const IPNet& other) const
 template <class A> bool
 IPNet<A>::is_overlap(const IPNet<A>& other) const
 {
+    if (masked_addr().af() != other.masked_addr().af())
+	return (false);
+
     if (prefix_len() > other.prefix_len()) {
 	// I have smaller prefix size
 	IPNet other_masked(masked_addr(), other.prefix_len());
@@ -414,6 +420,9 @@ IPNet<A>::is_overlap(const IPNet<A>& other) const
 template <class A> bool
 IPNet<A>::contains(const IPNet<A>& other) const
 {
+    if (masked_addr().af() != other.masked_addr().af())
+	return (false);
+
     if (prefix_len() > other.prefix_len()) {
 	// I have smaller prefix size, hence I don't contain other.
 	return (false);
@@ -473,6 +482,9 @@ template <class A>
 inline uint32_t
 IPNet<A>::overlap(const IPNet<A>& other) const
 {
+    if (masked_addr().af() != other.masked_addr().af())
+	return 0;
+
     A addr = masked_addr() ^ other.masked_addr();
 
     uint32_t p = (prefix_len() < other.prefix_len()) ?
