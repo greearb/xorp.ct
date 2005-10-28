@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.30 2005/03/25 02:52:44 pavlin Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.31 2005/07/08 02:06:18 abittau Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -97,6 +97,12 @@ private:
      * A peering has just come up dump all the routes to it.
      */
     void dump_entire_table(FilterTable<A> *filter_out, string ribname);
+
+    void configure_inbound_filter(PeerHandler* peer_handler,
+				  FilterTable<A>* filter_in);
+    void configure_outbound_filter(PeerHandler* peer_handler,
+				   FilterTable<A>* filter_out);
+    void reconfigure_filters(PeerHandler* peer_handler);
 
     const A& get_local_nexthop(const PeerHandler *peer_handler) const;
     list <RibInTable<A>*> ribin_list() const;

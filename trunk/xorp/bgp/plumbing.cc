@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.71 2005/09/22 23:01:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.72 2005/09/23 18:19:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -428,6 +428,144 @@ BGPPlumbingAF<A>::~BGPPlumbingAF()
 }
 
 template <class A>
+void
+BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
+					   FilterTable<A>* filter_in)
+{
+    bool ibgp = peer_handler->ibgp();
+    const AsNum& my_AS_number = _master.my_AS_number();
+
+    
+    /* 1. configure the loop filters */
+    filter_in->add_simple_AS_filter(my_AS_number);
+
+    /* 2. Configure local preference filter.
+       Add LOCAL_PREF on receipt from EBGP peer.  */
+    if (ibgp == false) {
+	filter_in->add_localpref_insertion_filter(
+	  LocalPrefAttribute::default_value() );
+    }
+}
+
+template <class A>
+void
+BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
+					    FilterTable<A>* filter_out)
+{
+    bool ibgp = peer_handler->ibgp();
+    const AsNum& his_AS_number = peer_handler->AS_number();
+    const AsNum& my_AS_number = _master.my_AS_number();
+    A my_nexthop(get_local_nexthop(peer_handler));
+
+    /* 1. configure the loop filters */
+    filter_out->add_simple_AS_filter(his_AS_number);
+
+    /* 2. configure as_prepend filters for EBGP peers*/
+    if (ibgp == false) {
+	filter_out->add_AS_prepend_filter(my_AS_number);
+    }
+
+    /* 2.1 For routes that we originate add our AS if its not already
+       (EBGP peers) present. */
+    filter_out->add_originate_route_filter(my_AS_number, ibgp);
+
+    /* 3. Configure MED filter.
+	  Remove old MED and add new one on transmission to EBGP peers. */
+    /* Note: this MUST come before the nexthop rewriter */
+    if (ibgp == false) {
+	filter_out->add_med_removal_filter();
+	filter_out->add_med_insertion_filter();
+    }
+
+    /* 4. configure next_hop rewriter for EBGP peers*/
+    if (ibgp == false) {
+	filter_out->add_nexthop_rewrite_filter(my_nexthop);
+    }
+
+    /* 5. Configure local preference filter.
+	  Remove LOCAL_PREF on transmission to EBGP peers. */
+    if (ibgp == false) {
+	filter_out->add_localpref_removal_filter();
+    }
+
+    /* 6. configure loop filter for IBGP peers */
+    if (ibgp == true) {
+	filter_out->add_ibgp_loop_filter();
+    }
+
+    /* 7. Process unknown attributes */
+    filter_out->add_unknown_filter();
+}
+
+/**
+ * @short re-instantiate all the static filters.
+ *
+ * Re-instantiate all the static filters in case the config has
+ * changed, and the filter parameters are now different.  The
+ * FilterTable will handle consistency issues this might otherwise
+ * raise.
+ */
+
+template <class A>
+void
+BGPPlumbingAF<A>::reconfigure_filters(PeerHandler* peer_handler) 
+{
+
+    /* We need to find the outbound filter table */
+    BGPRouteTable<A> *rt; 
+    typename map <PeerHandler*, RibOutTable<A>*>::iterator iter;
+    iter = _out_map.find(peer_handler);
+    if (iter == _out_map.end()) 
+	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::reconfigure_filters: peer %p not found",
+		   XORP_UINT_CAST(A::ip_version()),
+		   pretty_string_safi(_master.safi()),
+		   peer_handler);
+    rt = iter->second;
+    while (1) {
+	XLOG_ASSERT(rt != _fanout_table);
+	if (rt->type() == FILTER_TABLE) {
+	    FilterTable<A> *filter_table = (FilterTable<A> *)rt;
+
+	    /* tell the filter table to checkpoint state, and be ready
+	       for reconfiguration */
+	    filter_table->reconfigure_filter();
+	    
+	    /* add new filters */
+	    configure_outbound_filter(peer_handler, filter_table);
+
+	    break;
+	}
+	rt = rt->parent();
+    }    
+
+
+    typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
+    iter2 = _in_map.find(peer_handler);
+    if (iter2 == _in_map.end())
+	XLOG_FATAL("BGPPlumbingAF<IPv%u,%s>::reconfigure_filters: peer %p not found",
+		   XORP_UINT_CAST(A::ip_version()),
+		   pretty_string_safi(_master.safi()),
+		   peer_handler);
+    rt = iter2->second;
+    while (1) {
+	XLOG_ASSERT(rt != _decision_table);
+	if (rt->type() == FILTER_TABLE) {
+	    FilterTable<A> *filter_table = (FilterTable<A> *)rt;
+
+	    /* tell the filter table to checkpoint state, and be ready
+	       for reconfiguration */
+	    filter_table->reconfigure_filter();
+	    
+	    /* add new filters */
+	    configure_inbound_filter(peer_handler, filter_table);
+
+	    break;
+	}
+	rt = rt->next_table();
+    }    
+}
+
+template <class A>
 int 
 BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler) 
 {
@@ -443,12 +581,9 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
      *   FanoutTable -> FilterTable -> CacheTable ->..
      *        ..-> RibOutTable -> PeerHandler.
      *
-     * XXX it's not clear how we configure the FilterTables yet.
      */
 
     string peername(peer_handler->peername());
-    bool ibgp = peer_handler->ibgp();
-    A my_nexthop(get_local_nexthop(peer_handler));
 
 
     /*
@@ -502,21 +637,10 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
      * Start things up on the input branch
      */
 
-    const AsNum& his_AS_number = peer_handler->AS_number();
-    const AsNum& my_AS_number = _master.my_AS_number();
+    /* 1. configure filters */
+    configure_inbound_filter(peer_handler, filter_in);
 
-    
-    /* 1. configure the loop filters */
-    filter_in->add_simple_AS_filter(my_AS_number);
-
-    /* 2. Configure local preference filter.
-       Add LOCAL_PREF on receipt from EBGP peer.  */
-    if (ibgp == false) {
-	filter_in->add_localpref_insertion_filter(
-	  LocalPrefAttribute::default_value() );
-    }
-
-    /* 3. cause all the other peerings to know about this one */
+    /* 2. cause all the other peerings to know about this one */
     rib_in->ribin_peering_came_up();
     
     
@@ -562,55 +686,16 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
      * Start things up on the output branch
      */
 
-    /* 1. configure the loop filters */
-    filter_out->add_simple_AS_filter(his_AS_number);
+    /* 1. configure filters */
+    configure_outbound_filter(peer_handler, filter_out);
 
-    /* 2. configure as_prepend filters for EBGP peers*/
-    if (ibgp == false) {
-	filter_out->add_AS_prepend_filter(my_AS_number);
-    }
-
-    /* 2.1 For routes that we originate add our AS if its not already
-       (EBGP peers) present. */
-    filter_out->add_originate_route_filter(my_AS_number, ibgp);
-
-    /* 3. Configure MED filter.
-	  Remove old MED and add new one on transmission to EBGP peers. */
-    /* Note: this MUST come before the nexthop rewriter */
-    if (ibgp == false) {
-	filter_out->add_med_removal_filter();
-	filter_out->add_med_insertion_filter();
-    }
-
-    /* 4. configure next_hop rewriter for EBGP peers*/
-    if (ibgp == false) {
-	filter_out->add_nexthop_rewrite_filter(my_nexthop);
-    }
-
-    /* 5. Configure local preference filter.
-	  Remove LOCAL_PREF on transmission to EBGP peers. */
-    if (ibgp == false) {
-	filter_out->add_localpref_removal_filter();
-    }
-
-    /* 6. configure loop filter for IBGP peers */
-    if (ibgp == true) {
-	filter_out->add_ibgp_loop_filter();
-    }
-
-    /* 7. Process unknown attributes */
-    filter_out->add_unknown_filter();
-
-    /* 8. load up any configured filters */
+    /* 2. load up damping filters */
     /* TBD */
 
-    /* 9. load up damping filters */
-    /* TBD */
-
-    /* 10. finally plumb in the output branch */
+    /* 3. finally plumb in the output branch */
     _fanout_table->add_next_table(filter_out, peer_handler, rib_in->genid());
 
-    /* 11. cause the routing table to be dumped to the new peer */
+    /* 4. cause the routing table to be dumped to the new peer */
     dump_entire_table(filter_out, _ribname);
     if (_awaits_push)
 	push(peer_handler);
@@ -702,6 +787,7 @@ template <class A>
 int 
 BGPPlumbingAF<A>::peering_came_up(PeerHandler* peer_handler) 
 {
+    reconfigure_filters(peer_handler);
 
     //bring the RibIn back up
     typename map <PeerHandler*, RibInTable<A>* >::iterator iter2;
