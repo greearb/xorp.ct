@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.5 2005/10/12 07:24:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.6 2005/10/12 11:32:49 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -30,6 +30,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
+#include "libxorp/tlv.hh"
 
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -361,8 +362,6 @@ routing1(TestInfo& info, OspfTypes::Version version)
 bool
 routing2(TestInfo& info)
 {
-    DOUT(info) << "hello" << endl;
-
     OspfTypes::Version version = OspfTypes::V2;
 
     EventLoop eventloop;
@@ -525,6 +524,155 @@ routing2(TestInfo& info)
     return true;
 }
 
+inline
+bool
+type_check(TestInfo& info, string message, uint32_t expected, uint32_t actual)
+{
+    if (expected != actual) {
+	DOUT(info) << message << " should be " << expected << " is " << 
+	    actual << endl;
+	return false;
+    }
+
+    return true;
+}
+
+/**
+ * Read in LSA database files written by print_lsas.cc and run the
+ * routing computation.
+ */
+template <typename A> 
+bool
+routing3(TestInfo& info, OspfTypes::Version version, string fname)
+{
+    if (0 == fname.size()) {
+	DOUT(info) << "No filename supplied\n";
+
+	return true;
+    }
+
+    EventLoop eventloop;
+    DebugIO<A> io(info, version, eventloop);
+    io.startup();
+    
+    Ospf<A> ospf(version, eventloop, &io);
+    Tlv tlv;
+
+    if (!tlv.open(fname, true /* read */)) {
+	DOUT(info) << "Failed to open " << fname << endl;
+	return false;
+    }
+
+    vector<uint8_t> data;
+    uint32_t type;
+
+    // Read the version field and check it.
+    if (!tlv.read(type, data)) {
+	DOUT(info) << "Failed to read " << fname << endl;
+	return false;
+    }
+
+    if (!type_check(info, "TLV Version", TLV_VERSION, type))
+	return false;
+
+    uint32_t tlv_version;
+    if (!tlv.get32(data, 0, tlv_version)) {
+	return false;
+    }
+
+    if (!type_check(info, "Version", TLV_CURRENT_VERSION, tlv_version))
+	return false;
+
+    // Read the system info
+    if (!tlv.read(type, data)) {
+	DOUT(info) << "Failed to read " << fname << endl;
+	return false;
+    }
+
+    if (!type_check(info, "TLV System info", TLV_SYSTEM_INFO, type))
+	return false;
+
+    data.resize(data.size() + 1);
+    data[data.size() - 1] = 0;
+    
+    DOUT(info) << "Built on " << &data[0] << endl;
+
+    // Get OSPF version
+    if (!tlv.read(type, data)) {
+	DOUT(info) << "Failed to read " << fname << endl;
+	return false;
+    }
+    
+    if (!type_check(info, "TLV OSPF Version", TLV_OSPF_VERSION, type))
+	return false;
+
+    uint32_t ospf_version;
+    if (!tlv.get32(data, 0, ospf_version)) {
+	return false;
+    }
+
+    if (!type_check(info, "OSPF Version", version, ospf_version))
+	return false;
+
+    // OSPF area
+    if (!tlv.read(type, data)) {
+	DOUT(info) << "Failed to read " << fname << endl;
+	return false;
+    }
+    
+    if (!type_check(info, "TLV OSPF Area", TLV_AREA, type))
+	return false;
+    
+    OspfTypes::AreaID area;
+    if (!tlv.get32(data, 0, area)) {
+	return false;
+    }
+
+    PeerManager<A>& pm = ospf.get_peer_manager();
+    pm.create_area_router(area, OspfTypes::NORMAL);
+    AreaRouter<A> *ar = pm.get_area_router(area);
+    XLOG_ASSERT(ar);
+
+    // The first LSA is this routers Router-LSA.
+    if (!tlv.read(type, data)) {
+	DOUT(info) << "Failed to read " << fname << endl;
+	return false;
+    }
+    
+    if (!type_check(info, "TLV LSA", TLV_LSA, type))
+	return false;
+
+    LsaDecoder lsa_decoder(version);
+    initialise_lsa_decoder(version, lsa_decoder);
+
+    size_t len = data.size();
+    Lsa::LsaRef lsar = lsa_decoder.decode(&data[0], len);
+
+    DOUT(info) << lsar->str() << endl;
+
+    ospf.set_router_id(lsar->get_header().get_link_state_id());
+
+    lsar->set_self_originating(true);
+    ar->testing_replace_router_lsa(lsar);
+
+    // Keep reading LSAs until we run out or hit a new area.
+    for(;;) {
+	if (!tlv.read(type, data))
+	    break;
+	if (TLV_LSA != type)
+	    break;
+	size_t len = data.size();
+	Lsa::LsaRef lsar = lsa_decoder.decode(&data[0], len);
+	ar->testing_add_lsa(lsar);
+    }
+
+    if (info.verbose())
+	ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -534,6 +682,7 @@ main(int argc, char **argv)
 
     string test =
 	t.get_optional_args("-t", "--test", "run only the specified test");
+    string fname =t.get_optional_args("-f", "--filename", "lsa database");
     t.complete_args_parsing();
 
     struct test {
@@ -543,6 +692,8 @@ main(int argc, char **argv)
 	{"r1V2", callback(routing1<IPv4>, OspfTypes::V2)},
 	{"r1V3", callback(routing1<IPv6>, OspfTypes::V3)},
 	{"r2", callback(routing2)},
+	{"r3V2", callback(routing3<IPv4>, OspfTypes::V2, fname)},
+	{"r3V3", callback(routing3<IPv6>, OspfTypes::V3, fname)},
     };
 
     try {
