@@ -121,23 +121,23 @@ rip_policy_redist4_delete_route4()
 
 rip_redist4_add_route()
 {
-    if [ $# -ne 7 ] ; then
-        echo "Usage: rip_redist4_add_route <dst:ipv4net> <nexthop:ipv4> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt>"
+    if [ $# -ne 8 ] ; then
+        echo "Usage: rip_redist4_add_route <dst:ipv4net> <nexthop:ipv4> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt> <protocol_origin:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/redist4/0.1/add_route?dst:ipv4net=$1&nexthop:ipv4=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7"
+    XRL="finder://rip/redist4/0.1/add_route?dst:ipv4net=$1&nexthop:ipv4=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7&protocol_origin:txt=$8"
     call_xrl_wrapper -p all "${XRL}"
 }
 
 rip_redist4_delete_route()
 {
-    if [ $# -ne 2 ] ; then
-        echo "Usage: rip_redist4_delete_route <network:ipv4net> <cookie:txt>"
+    if [ $# -ne 3 ] ; then
+        echo "Usage: rip_redist4_delete_route <network:ipv4net> <cookie:txt> <protocol_origin:txt>"
         exit 1
     fi
 
-    XRL="finder://rip/redist4/0.1/delete_route?network:ipv4net=$1&cookie:txt=$2"
+    XRL="finder://rip/redist4/0.1/delete_route?network:ipv4net=$1&cookie:txt=$2&protocol_origin:txt=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
