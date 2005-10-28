@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.32 2005/07/27 17:59:47 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.33 2005/08/22 22:50:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -519,6 +519,159 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
+FilterVersion<A>::FilterVersion(NextHopResolver<A>& next_hop_resolver)
+    : _ref_count(0), _next_hop_resolver(next_hop_resolver)
+{
+}
+
+template<class A>
+FilterVersion<A>::~FilterVersion() {
+    typename list <BGPRouteFilter<A> *>::iterator iter;
+    iter = _filters.begin();
+    while (iter != _filters.end()) {
+	delete (*iter);
+	++iter;
+    }    
+}
+
+template<class A>
+int
+FilterVersion<A>::add_simple_AS_filter(const AsNum& as_num)
+{
+    SimpleASFilter<A>* AS_filter;
+    AS_filter = new SimpleASFilter<A>(as_num);
+    _filters.push_back(AS_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_AS_prepend_filter(const AsNum& as_num)
+{
+    ASPrependFilter<A>* AS_prepender;
+    AS_prepender = new ASPrependFilter<A>(as_num);
+    _filters.push_back(AS_prepender);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_nexthop_rewrite_filter(const A& nexthop)
+{
+    NexthopRewriteFilter<A>* nh_rewriter;
+    nh_rewriter = new NexthopRewriteFilter<A>(nexthop);
+    _filters.push_back(nh_rewriter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_ibgp_loop_filter()
+{
+    IBGPLoopFilter<A>* ibgp_filter;
+    ibgp_filter = new IBGPLoopFilter<A>;
+    _filters.push_back(ibgp_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_localpref_insertion_filter(uint32_t default_local_pref)
+{
+    LocalPrefInsertionFilter<A> *localpref_filter;
+    localpref_filter = new LocalPrefInsertionFilter<A>(default_local_pref);
+    _filters.push_back(localpref_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_localpref_removal_filter()
+{
+    LocalPrefRemovalFilter<A> *localpref_filter;
+    localpref_filter = new LocalPrefRemovalFilter<A>();
+    _filters.push_back(localpref_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_med_insertion_filter()
+{
+    MEDInsertionFilter<A> *med_filter;
+    med_filter = new MEDInsertionFilter<A>(_next_hop_resolver);
+    _filters.push_back(med_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_med_removal_filter()
+{
+    MEDRemovalFilter<A> *med_filter;
+    med_filter = new MEDRemovalFilter<A>();
+    _filters.push_back(med_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_unknown_filter()
+{
+    UnknownFilter<A> *unknown_filter;
+    unknown_filter = new UnknownFilter<A>();
+    _filters.push_back(unknown_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_originate_route_filter(const AsNum &asn, const bool ibgp)
+{
+    OriginateRouteFilter<A> *originate_route_filter;
+    originate_route_filter = new OriginateRouteFilter<A>(asn, ibgp);
+    _filters.push_back(originate_route_filter);
+    return 0;
+}
+
+
+template<class A>
+const InternalMessage<A> *
+FilterVersion<A>::apply_filters(const InternalMessage<A> *rtmsg,
+				int ref_change)
+{
+    const InternalMessage<A> *filtered_msg = rtmsg;
+    bool modified_by_us = false;
+    typename list <BGPRouteFilter<A> *>::const_iterator iter;
+    iter = _filters.begin();
+    while (iter != _filters.end()) {
+	filtered_msg = (*iter)->filter(filtered_msg, modified_by_us);
+	if (filtered_msg == NULL)
+	    break;
+	debug_msg("filtered %p %d rtmsg %p %d %d\n", filtered_msg,
+		  filtered_msg->changed(),
+		  rtmsg,
+		  rtmsg->changed(),
+		  filtered_msg == rtmsg);
+	if (filtered_msg == rtmsg) {
+	    debug_msg("same\n");
+	    XLOG_ASSERT(!filtered_msg->changed());
+	} else {
+	    debug_msg("different\n");
+	    XLOG_ASSERT(filtered_msg->changed());
+	}
+	//Check the filters correctly preserved the parent route
+	XLOG_ASSERT(filtered_msg->route()->original_route() 
+		    == rtmsg->route()->original_route());
+	++iter;
+    }
+    _ref_count += ref_change;
+    return filtered_msg;
+}
+
+/*************************************************************************/
+
+template<class A>
 FilterTable<A>::FilterTable(string table_name,  
 			    Safi safi,
 			    BGPRouteTable<A> *parent_table,
@@ -527,16 +680,31 @@ FilterTable<A>::FilterTable(string table_name,
     _next_hop_resolver(next_hop_resolver)
 {
     this->_parent = parent_table;
+    _current_filter = new FilterVersion<A>(_next_hop_resolver);
 }
 
 template<class A>
 FilterTable<A>::~FilterTable() {
-    typename list <BGPRouteFilter<A> *>::iterator iter;
-    iter = _filters.begin();
-    while (iter != _filters.end()) {
-	delete (*iter);
-	++iter;
-    }    
+    set <FilterVersion<A>*> filters;
+    typename map <uint32_t, FilterVersion<A>* >::iterator i;
+    for (i = _filter_versions.begin(); i != _filter_versions.end(); i++) {
+	filters.insert(i->second);
+    }
+    typename set <FilterVersion<A>* >::iterator j;
+    for (j = filters.begin(); j != filters.end(); j++) {
+	delete (*j);
+    }
+}
+
+template<class A>
+void
+FilterTable<A>::reconfigure_filter()
+{
+    // if the current filter has never been used, we can delete it now
+    if (_current_filter->ref_count() == 0)
+	delete _current_filter;
+
+    _current_filter = new FilterVersion<A>(_next_hop_resolver);
 }
 
 template<class A>
@@ -555,7 +723,7 @@ FilterTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(this->_next_table != NULL);
 
     XLOG_ASSERT(!rtmsg.changed());
-    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
+    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg, 1);
     if (filtered_msg == NULL)
 	return ADD_FILTERED;
 
@@ -604,8 +772,9 @@ FilterTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
 
-    const InternalMessage<A> *filtered_old_msg = apply_filters(&old_rtmsg);
-    const InternalMessage<A> *filtered_new_msg = apply_filters(&new_rtmsg);
+    /* increment ref_count before decrementing it */
+    const InternalMessage<A> *filtered_new_msg = apply_filters(&new_rtmsg, 1);
+    const InternalMessage<A> *filtered_old_msg = apply_filters(&old_rtmsg, -1);
 
     int result;
     if (filtered_old_msg == NULL && filtered_new_msg == NULL) {
@@ -651,7 +820,7 @@ FilterTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
 
-    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
+    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg, 0);
     if (filtered_msg == NULL)
 	return ADD_FILTERED;
 
@@ -681,7 +850,7 @@ FilterTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
 
-    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg);
+    const InternalMessage<A> *filtered_msg = apply_filters(&rtmsg, -1);
     if (filtered_msg == NULL)
 	return 0;
 
@@ -764,9 +933,7 @@ template<class A>
 int
 FilterTable<A>::add_simple_AS_filter(const AsNum& as_num)
 {
-    SimpleASFilter<A>* AS_filter;
-    AS_filter = new SimpleASFilter<A>(as_num);
-    _filters.push_back(AS_filter);
+    _current_filter->add_simple_AS_filter(as_num);
     return 0;
 }
 
@@ -774,9 +941,7 @@ template<class A>
 int
 FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num)
 {
-    ASPrependFilter<A>* AS_prepender;
-    AS_prepender = new ASPrependFilter<A>(as_num);
-    _filters.push_back(AS_prepender);
+    _current_filter->add_AS_prepend_filter(as_num);
     return 0;
 }
 
@@ -784,9 +949,7 @@ template<class A>
 int
 FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop)
 {
-    NexthopRewriteFilter<A>* nh_rewriter;
-    nh_rewriter = new NexthopRewriteFilter<A>(nexthop);
-    _filters.push_back(nh_rewriter);
+    _current_filter->add_nexthop_rewrite_filter(nexthop);
     return 0;
 }
 
@@ -794,9 +957,7 @@ template<class A>
 int
 FilterTable<A>::add_ibgp_loop_filter()
 {
-    IBGPLoopFilter<A>* ibgp_filter;
-    ibgp_filter = new IBGPLoopFilter<A>;
-    _filters.push_back(ibgp_filter);
+    _current_filter->add_ibgp_loop_filter();
     return 0;
 }
 
@@ -804,9 +965,7 @@ template<class A>
 int
 FilterTable<A>::add_localpref_insertion_filter(uint32_t default_local_pref)
 {
-    LocalPrefInsertionFilter<A> *localpref_filter;
-    localpref_filter = new LocalPrefInsertionFilter<A>(default_local_pref);
-    _filters.push_back(localpref_filter);
+    _current_filter->add_localpref_insertion_filter(default_local_pref);
     return 0;
 }
 
@@ -814,9 +973,7 @@ template<class A>
 int
 FilterTable<A>::add_localpref_removal_filter()
 {
-    LocalPrefRemovalFilter<A> *localpref_filter;
-    localpref_filter = new LocalPrefRemovalFilter<A>();
-    _filters.push_back(localpref_filter);
+    _current_filter->add_localpref_removal_filter();
     return 0;
 }
 
@@ -824,9 +981,7 @@ template<class A>
 int
 FilterTable<A>::add_med_insertion_filter()
 {
-    MEDInsertionFilter<A> *med_filter;
-    med_filter = new MEDInsertionFilter<A>(_next_hop_resolver);
-    _filters.push_back(med_filter);
+    _current_filter->add_med_insertion_filter();
     return 0;
 }
 
@@ -834,9 +989,7 @@ template<class A>
 int
 FilterTable<A>::add_med_removal_filter()
 {
-    MEDRemovalFilter<A> *med_filter;
-    med_filter = new MEDRemovalFilter<A>();
-    _filters.push_back(med_filter);
+    _current_filter->add_med_removal_filter();
     return 0;
 }
 
@@ -844,9 +997,7 @@ template<class A>
 int
 FilterTable<A>::add_unknown_filter()
 {
-    UnknownFilter<A> *unknown_filter;
-    unknown_filter = new UnknownFilter<A>();
-    _filters.push_back(unknown_filter);
+    _current_filter->add_unknown_filter();
     return 0;
 }
 
@@ -854,42 +1005,45 @@ template<class A>
 int
 FilterTable<A>::add_originate_route_filter(const AsNum &asn, const bool ibgp)
 {
-    OriginateRouteFilter<A> *originate_route_filter;
-    originate_route_filter = new OriginateRouteFilter<A>(asn, ibgp);
-    _filters.push_back(originate_route_filter);
+    _current_filter->add_originate_route_filter(asn, ibgp);
     return 0;
 }
 
 template<class A>
 const InternalMessage<A> *
-FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const 
+FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg) const
 {
-    const InternalMessage<A> *filtered_msg = rtmsg;
-    bool modified_by_us = false;
-    typename list <BGPRouteFilter<A> *>::const_iterator iter;
-    iter = _filters.begin();
-    while (iter != _filters.end()) {
-	filtered_msg = (*iter)->filter(filtered_msg, modified_by_us);
-	if (filtered_msg == NULL)
-	    break;
-	debug_msg("filtered %p %d rtmsg %p %d %d\n", filtered_msg,
-		  filtered_msg->changed(),
-		  rtmsg,
-		  rtmsg->changed(),
-		  filtered_msg == rtmsg);
-	if (filtered_msg == rtmsg) {
-	    debug_msg("same\n");
-	    XLOG_ASSERT(!filtered_msg->changed());
-	} else {
-	    debug_msg("different\n");
-	    XLOG_ASSERT(filtered_msg->changed());
-	}
-	//Check the filters correctly preserved the parent route
-	XLOG_ASSERT(filtered_msg->route()->original_route() 
-		    == rtmsg->route()->original_route());
-	++iter;
+    // in this case, this is actually const, so this hack is safe
+    return const_cast<FilterTable<A>*>(this)->apply_filters(rtmsg, 0);
+}
+
+template<class A>
+const InternalMessage<A> *
+FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg,
+			      int ref_change)
+{
+    const InternalMessage<A>* msg;
+    FilterVersion<A> *filter;
+    typename map<uint32_t, FilterVersion<A>* >::iterator i;
+    uint32_t genid = rtmsg->genid();
+    i = _filter_versions.find(genid);
+    if (i == _filter_versions.end()) {
+	_filter_versions[genid] = _current_filter;
+	filter = _current_filter;
+    } else {
+	filter = i->second;
     }
-    return filtered_msg;
+    msg = filter->apply_filters(rtmsg, ref_change);
+
+    // if there are no more routes that used an old filter, delete it now
+    if (filter->ref_count() == 0) {
+	if (filter != _current_filter) {
+	    delete filter;
+	    _filter_versions.erase(i);
+	}
+    }
+
+    return msg;
 }
 
 

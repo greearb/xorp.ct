@@ -13,11 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.14 2005/03/25 02:52:47 pavlin Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.15 2005/04/28 02:35:48 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
 
+#include <set>
+#include <map>
 #include "route_table_base.hh"
 #include "next_hop_resolver.hh"
 
@@ -255,6 +257,39 @@ private:
     bool _ibgp;
 };
 
+/**
+ * @short specific version of a static route filter
+ *
+ * When a peering is reconfigured, we need to change the filter, but
+ * still maintain consistency for downstream tables.  We keep the old
+ * filter around until there are no more routes that need it, and only
+ * then delete it.  FilterVersion holds a specific version of a static
+ * route filter bank.
+ */
+
+template<class A>
+class FilterVersion {
+public:
+    FilterVersion(NextHopResolver<A>& next_hop_resolver);
+    ~FilterVersion();
+    int add_simple_AS_filter(const AsNum &asn);
+    int add_AS_prepend_filter(const AsNum &asn);
+    int add_nexthop_rewrite_filter(const A& nexthop);
+    int add_ibgp_loop_filter();
+    int add_localpref_insertion_filter(uint32_t default_local_pref);
+    int add_localpref_removal_filter();
+    int add_med_insertion_filter();
+    int add_med_removal_filter();
+    int add_unknown_filter();
+    int add_originate_route_filter(const AsNum &asn, const bool);
+    const InternalMessage<A> *
+        apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
+    int ref_count() const {return _ref_count;}
+private:
+    list <BGPRouteFilter<A> *> _filters;
+    int _ref_count;
+    NextHopResolver<A>& _next_hop_resolver;
+};
 
 /**
  * @short specialized BGPRouteTable implementing a filter bank to
@@ -291,6 +326,8 @@ public:
 		BGPRouteTable<A> *parent, 
 		NextHopResolver<A>& next_hop_resolver);
     ~FilterTable();
+    void reconfigure_filter();
+
     int add_route(const InternalMessage<A> &rtmsg,
 		  BGPRouteTable<A> *caller);
     int replace_route(const InternalMessage<A> &old_rtmsg,
@@ -322,10 +359,14 @@ public:
     int add_med_removal_filter();
     int add_unknown_filter();
     int add_originate_route_filter(const AsNum &asn, const bool);
+
 private:
     const InternalMessage<A> *
+        apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
+    const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg) const;
-    list <BGPRouteFilter<A> *> _filters;
+    map <uint32_t, FilterVersion<A>* > _filter_versions;
+    FilterVersion<A>* _current_filter;
     NextHopResolver<A>& _next_hop_resolver;
 };
 
