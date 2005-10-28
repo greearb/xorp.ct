@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.19 2005/08/18 15:21:57 bms Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.20 2005/08/29 21:49:56 pavlin Exp $
 dnl
 
 dnl
@@ -88,17 +88,25 @@ fi
 dnl ----------------------------
 dnl Check whether the system IPv6 stack supports IPv6 multicast routing.
 dnl ----------------------------
-dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on some OS,
+dnl XXX: Some of the header files may not be available on some OS,
 dnl hence we need to include them conditionally.
+dnl XXX: This test will have to be substantially rewritten for Windows.
+dnl XXX: test would be better named "have MRT style IPv6 multicast routing"
 
 ipv6_multicast_routing=no
 if test "${ipv6_multicast}" = "yes"; then
+  AC_CHECK_HEADER(net/if.h,
+    [test_net_if_h="#include <net/if.h>"],
+    [test_net_if_h=""])
   AC_CHECK_HEADER(net/if_var.h,
     [test_net_if_var_h="#include <net/if_var.h>"],
     [test_net_if_var_h=""])
   AC_CHECK_HEADER(netinet/in_var.h,
     [test_netinet_in_var_h="#include <netinet/in_var.h>"],
     [test_netinet_in_var_h=""])
+  AC_CHECK_HEADER(netinet6/ip6_mroute.h,
+    [test_netinet6_ip6_mroute_h="#include <netinet6/ip6_mroute.h>"],
+    [test_netinet6_ip6_mroute_h=""])
 
   if test "${ac_cv_header_windows_h}" = "yes"; then
 	test_multicast_routing_header_files=["
@@ -112,11 +120,11 @@ if test "${ipv6_multicast}" = "yes"; then
 		#include <sys/types.h>
 		#include <sys/param.h>
 		#include <sys/socket.h>
-		#include <net/if.h>
+		${test_net_if_h}
 		${test_net_if_var_h}
 		#include <netinet/in.h>
 		${test_netinet_in_var_h}
-		#include <netinet6/ip6_mroute.h>
+		${test_netinet6_ip6_mroute_h}
 	"]
   fi
 
