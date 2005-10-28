@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.17 2005/03/05 05:35:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.18 2005/03/25 02:53:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -473,32 +473,50 @@ XrlFtiTransactionManager::FibClient<F>::send_fib_client_route_change()
 {
     int success = XORP_ERROR;
 
-    if (_inform_fib_client_queue.empty())
-	return;		// No more route changes to send
+    do {
+	bool ignore_fte = true;
 
-    F& fte = _inform_fib_client_queue.front();
+	if (_inform_fib_client_queue.empty())
+	    return;		// No more route changes to send
 
-    //
-    // If FIB route misses and resolution requests were requested to be
-    // heard by the client, then send notifications of such events.
-    //
-    if (_send_resolves && fte.is_unresolved()) {
-	success = _xftm.send_fib_client_resolve_route(_target_name, fte);
-    }
+	F& fte = _inform_fib_client_queue.front();
 
-    //
-    // If FIB updates were requested by the client, then send notification
-    // of a route being added or deleted.
-    //
-    if (_send_updates && !fte.is_unresolved()) {
-	if (!fte.is_deleted()) {
-	    // Send notification of a route being added
-	    success = _xftm.send_fib_client_add_route(_target_name, fte);
-	} else {
-	    // Send notification of a route being deleted
-	    success = _xftm.send_fib_client_delete_route(_target_name, fte);
+	//
+	// If FIB route misses and resolution requests were requested to be
+	// heard by the client, then send notifications of such events.
+	//
+	if (_send_resolves && fte.is_unresolved()) {
+	    ignore_fte = false;
+	    success = _xftm.send_fib_client_resolve_route(_target_name, fte);
 	}
-    }
+
+	//
+	// If FIB updates were requested by the client, then send notification
+	// of a route being added or deleted.
+	//
+	if (_send_updates && !fte.is_unresolved()) {
+	    ignore_fte = false;
+	    if (!fte.is_deleted()) {
+		// Send notification of a route being added
+		success = _xftm.send_fib_client_add_route(_target_name, fte);
+	    } else {
+		// Send notification of a route being deleted
+		success = _xftm.send_fib_client_delete_route(_target_name,
+							     fte);
+	    }
+	}
+
+	if (ignore_fte) {
+	    //
+	    // This entry is not needed hence silently drop it and process the
+	    // next one.
+	    //
+	    _inform_fib_client_queue.pop_front();
+	    continue;
+	}
+
+	break;
+    } while (true);
 
     if (success != XORP_OK) {
 	//
