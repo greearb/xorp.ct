@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.95 2005/10/26 07:06:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.96 2005/10/26 20:17:20 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -120,7 +120,6 @@ CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
 
 ConfigTreeNode::ConfigTreeNode(bool verbose)
     : _template_tree_node(NULL),
-      _deleted(false),
       _has_value(false),
       _operator(OP_NONE),
       _committed_operator(OP_NONE),
@@ -130,9 +129,11 @@ ConfigTreeNode::ConfigTreeNode(bool verbose)
       _user_id(0),
       _committed_user_id(0),
       _clientid(0),
+      _modification_time(TimeVal::ZERO()),
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
+      _deleted(false),
       _on_parent_path(false),
       _verbose(verbose)
 {
@@ -147,7 +148,6 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 			       uint32_t clientid,
 			       bool verbose)
     : _template_tree_node(ttn),
-      _deleted(false),
       _has_value(false),
       _operator(OP_NONE),
       _committed_operator(OP_NONE),
@@ -159,9 +159,11 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
       _user_id(user_id),
       _committed_user_id(0),
       _clientid(clientid),
+      _modification_time(TimeVal::ZERO()),
       _committed_modification_time(TimeVal::ZERO()),
       _existence_committed(false),
       _value_committed(false),
+      _deleted(false),
       _on_parent_path(false),
       _verbose(verbose)
 {
@@ -175,7 +177,6 @@ ConfigTreeNode::ConfigTreeNode(const string& nodename,
 
 ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
     : _template_tree_node(ctn._template_tree_node),
-      _deleted(ctn._deleted),
       _has_value(ctn._has_value),
       _value(ctn._value),
       _committed_value(ctn._committed_value),
@@ -193,6 +194,7 @@ ConfigTreeNode::ConfigTreeNode(const ConfigTreeNode& ctn)
       _committed_modification_time(ctn._committed_modification_time),
       _existence_committed(ctn._existence_committed),
       _value_committed(ctn._value_committed),
+      _deleted(ctn._deleted),
       _on_parent_path(false),
       _verbose(ctn._verbose)
 {
@@ -709,11 +711,11 @@ ConfigTreeNode::discard_changes(int depth, int last_depth)
 	    debug_msg("discarding changes from node %s\n",
 		      _path.c_str());
 	    _value_committed = true;
-	    _user_id = _committed_user_id;
+	    _deleted = false;
 	    _value = _committed_value;
 	    _operator = _committed_operator;
+	    _user_id = _committed_user_id;
 	    _modification_time = _committed_modification_time;
-	    _deleted = false;
 	    result = node_str();
 	    if (is_leaf_value()) 
 		result += "\n";
@@ -1018,6 +1020,11 @@ ConfigTreeNode::mark_subtree_as_committed()
 {
     _existence_committed = true;
     _value_committed = true;
+    _deleted = false;
+    _committed_value = _value;
+    _committed_operator = _operator;
+    _committed_user_id = _user_id;
+    _committed_modification_time = _modification_time;
 
     list<ConfigTreeNode*>::iterator iter;
     iter = _children.begin();

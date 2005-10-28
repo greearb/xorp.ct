@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.54 2005/10/25 20:02:44 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.55 2005/10/26 07:06:29 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -183,8 +183,6 @@ protected:
 
 
     const TemplateTreeNode* _template_tree_node;
-    bool _deleted;	// Indicates node has been deleted, but commit has not 
-			// yet happened
     bool _has_value;
     string _value;
     string _committed_value;
@@ -207,6 +205,7 @@ protected:
     // Flags to keep track of what changes we've made since the last commit
     bool _existence_committed;	// Do we need to run %create commands
     bool _value_committed;	// Do we need to run %set commands
+    bool _deleted;	// The node is deleted, but commit has not yet happened
 
     // Variables contains the explicit variables set on this node
     map<string, string> _variables;

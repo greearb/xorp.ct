@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.26 2005/10/05 05:48:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.27 2005/10/26 07:06:29 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -369,7 +369,9 @@ SlaveConfigTreeNode::finalize_commit()
 
 	_existence_committed = true;
 	_value_committed = true;
+	_deleted = false;
 	_committed_value = _value;
+	_committed_operator = _operator;
 	_committed_user_id = _user_id;
 	_committed_modification_time = _modification_time;
     }
