@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.31 2005/10/12 09:39:28 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.32 2005/10/12 09:59:50 pavlin Exp $ */
 
 
 interfaces {
@@ -84,7 +84,7 @@ fea {
 	    /* XXX: On FreeBSD we need only module click.ko */
 	    /* kernel-click-modules: "/path/to/click.ko" */
 	    mount-directory: "/click"
-	    kernel-click-config-generator-file: "/user/local/xorp/fea/xorp_fea_click_config_generator"
+	    kernel-click-config-generator-file: "/usr/local/xorp/fea/xorp_fea_click_config_generator"
 	}
 
 	user-click {
@@ -99,7 +99,7 @@ fea {
 	    control-address: 127.0.0.1
 	    control-socket-port: 13000
 	    startup-config-file: "/dev/null"
-	    user-click-config-generator-file: "/user/local/xorp/fea/xorp_fea_click_config_generator"
+	    user-click-config-generator-file: "/usr/local/xorp/fea/xorp_fea_click_config_generator"
 	}
     }
 }
