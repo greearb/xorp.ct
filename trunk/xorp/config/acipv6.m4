@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.20 2005/08/29 21:49:56 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.21 2005/10/28 17:06:56 pavlin Exp $
 dnl
 
 dnl
@@ -107,6 +107,9 @@ if test "${ipv6_multicast}" = "yes"; then
   AC_CHECK_HEADER(netinet6/ip6_mroute.h,
     [test_netinet6_ip6_mroute_h="#include <netinet6/ip6_mroute.h>"],
     [test_netinet6_ip6_mroute_h=""])
+  AC_CHECK_HEADER(linux/mroute6.h,
+    [test_linux_mroute6_h="#include <linux/mroute6.h>"],
+    [test_linux_mroute6_h=""])
 
   if test "${ac_cv_header_windows_h}" = "yes"; then
 	test_multicast_routing_header_files=["
@@ -125,6 +128,7 @@ if test "${ipv6_multicast}" = "yes"; then
 		#include <netinet/in.h>
 		${test_netinet_in_var_h}
 		${test_netinet6_ip6_mroute_h}
+		${test_linux_mroute6_h}
 	"]
   fi
 
