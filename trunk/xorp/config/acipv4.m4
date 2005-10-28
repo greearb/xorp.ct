@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.2 2005/08/09 12:44:58 bms Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.3 2005/08/26 19:32:42 pavlin Exp $
 dnl
 
 dnl
@@ -58,7 +58,7 @@ AC_CHECK_TYPE([struct ip_mreq_source],
 dnl ----------------------------
 dnl Check whether the system IPv4 stack supports IPv4 multicast routing.
 dnl ----------------------------
-dnl XXX: <net/if_var.h> and <netinet/in_var.h> may not be available on some OS,
+dnl XXX: Some of the header files may not be available on some OS,
 dnl hence we need to include them conditionally.
 dnl XXX: This test will have to be substantially rewritten for Windows.
 dnl XXX: test would be better named "have MRT style IPv4 multicast routing"
