@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.41 2005/09/28 22:39:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.42 2005/10/22 01:44:34 pavlin Exp $"
 
 
 //
@@ -1454,12 +1454,29 @@ CliClient::process_command(const string& command_line)
 	{
 	    int ret_value;
 	    string final_string = "";
+	    bool is_error = false;
+	    string error_msg;
 	    
 	    list<CliPipe*>::iterator iter;
 	    for (iter = _pipe_list.begin(); iter != _pipe_list.end(); ++iter) {
 		CliPipe *cli_pipe = *iter;
-		cli_pipe->start_func(final_string);
+		if (cli_pipe->start_func(final_string, error_msg) != XORP_OK) {
+		    is_error = true;
+		    break;
+		}
 	    }
+	    if (is_error) {
+		// Stop the started pipes
+		string error_msg2;
+		while (iter != _pipe_list.begin()) {
+		    --iter;
+		    CliPipe *cli_pipe = *iter;
+		    cli_pipe->stop_func(error_msg2);
+		}
+		cli_print(c_format("ERROR: %s\n", error_msg.c_str()));
+		return (XORP_ERROR);
+	    }
+
 	    if (final_string.size()) {
 		bool old_pipe_mode = is_pipe_mode();
 		set_pipe_mode(false);

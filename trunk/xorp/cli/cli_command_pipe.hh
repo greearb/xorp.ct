@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command_pipe.hh,v 1.7 2005/04/30 21:58:29 pavlin Exp $
+// $XORP: xorp/cli/cli_command_pipe.hh,v 1.9 2005/08/18 15:48:42 bms Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_PIPE_HH__
@@ -82,7 +82,8 @@ private:
     void add_pipe_arg(const string& v) { _pipe_args_list.push_back(v); }
     void set_cli_client(CliClient *v) { _cli_client = v; }
     
-    int start_func(string& input_line) { return (this->*_start_func_ptr)(input_line); }
+    int start_func(string& input_line, string& error_msg) { return (this->*_start_func_ptr)(input_line, error_msg); }
+    int stop_func(string& error_msg) { return (this->*_stop_func_ptr)(error_msg); }
     int process_func(string& input_line) { return (this->*_process_func_ptr)(input_line); }
     int eof_func(string& input_line) { return (this->*_eof_func_ptr)(input_line); }
     
@@ -110,62 +111,82 @@ private:
     cli_pipe_t pipe_type() { return (_pipe_type); }
     
     // The line processing functions
+    typedef int (CliPipe::*StartPipe)(string& input_line, string& error_msg);
+    typedef int (CliPipe::*StopPipe)(string& error_msg);
     typedef int (CliPipe::*LineProcess)(string& input_line);
-    LineProcess _start_func_ptr;
-    LineProcess _process_func_ptr;
-    LineProcess _eof_func_ptr;
+    StartPipe	_start_func_ptr;
+    StopPipe	_stop_func_ptr;
+    LineProcess	_process_func_ptr;
+    LineProcess	_eof_func_ptr;
     
-    int pipe_compare_start(string& input_line);
+    int pipe_compare_start(string& input_line, string& error_msg);
+    int pipe_compare_stop(string& error_msg);
     int pipe_compare_process(string& input_line);
     int pipe_compare_eof(string& input_line);
-    int pipe_compare_rollback_start(string& input_line);
+    int pipe_compare_rollback_start(string& input_line, string& error_msg);
+    int pipe_compare_rollback_stop(string& error_msg);
     int pipe_compare_rollback_process(string& input_line);
     int pipe_compare_rollback_eof(string& input_line);
-    int pipe_count_start(string& input_line);
+    int pipe_count_start(string& input_line, string& error_msg);
+    int pipe_count_stop(string& error_msg);
     int pipe_count_process(string& input_line);
     int pipe_count_eof(string& input_line);
-    int pipe_display_start(string& input_line);
+    int pipe_display_start(string& input_line, string& error_msg);
+    int pipe_display_stop(string& error_msg);
     int pipe_display_process(string& input_line);
     int pipe_display_eof(string& input_line);
-    int pipe_display_detail_start(string& input_line);
+    int pipe_display_detail_start(string& input_line, string& error_msg);
+    int pipe_display_detail_stop(string& error_msg);
     int pipe_display_detail_process(string& input_line);
     int pipe_display_detail_eof(string& input_line);
-    int pipe_display_inheritance_start(string& input_line);
+    int pipe_display_inheritance_start(string& input_line, string& error_msg);
+    int pipe_display_inheritance_stop(string& error_msg);
     int pipe_display_inheritance_process(string& input_line);
     int pipe_display_inheritance_eof(string& input_line);
-    int pipe_display_xml_start(string& input_line);
+    int pipe_display_xml_start(string& input_line, string& error_msg);
+    int pipe_display_xml_stop(string& error_msg);
     int pipe_display_xml_process(string& input_line);
     int pipe_display_xml_eof(string& input_line);
-    int pipe_except_start(string& input_line);
+    int pipe_except_start(string& input_line, string& error_msg);
+    int pipe_except_stop(string& error_msg);
     int pipe_except_process(string& input_line);
     int pipe_except_eof(string& input_line);
-    int pipe_find_start(string& input_line);
+    int pipe_find_start(string& input_line, string& error_msg);
+    int pipe_find_stop(string& error_msg);
     int pipe_find_process(string& input_line);
     int pipe_find_eof(string& input_line);
-    int pipe_hold_start(string& input_line);
+    int pipe_hold_start(string& input_line, string& error_msg);
+    int pipe_hold_stop(string& error_msg);
     int pipe_hold_process(string& input_line);
     int pipe_hold_eof(string& input_line);
-    int pipe_match_start(string& input_line);
+    int pipe_match_start(string& input_line, string& error_msg);
+    int pipe_match_stop(string& error_msg);
     int pipe_match_process(string& input_line);
     int pipe_match_eof(string& input_line);
-    int pipe_nomore_start(string& input_line);
+    int pipe_nomore_start(string& input_line, string& error_msg);
+    int pipe_nomore_stop(string& error_msg);
     int pipe_nomore_process(string& input_line);
     int pipe_nomore_eof(string& input_line);
-    int pipe_resolve_start(string& input_line);
+    int pipe_resolve_start(string& input_line, string& error_msg);
+    int pipe_resolve_stop(string& error_msg);
     int pipe_resolve_process(string& input_line);
     int pipe_resolve_eof(string& input_line);
-    int pipe_save_start(string& input_line);
+    int pipe_save_start(string& input_line, string& error_msg);
+    int pipe_save_stop(string& error_msg);
     int pipe_save_process(string& input_line);
     int pipe_save_eof(string& input_line);
-    int pipe_trim_start(string& input_line);
+    int pipe_trim_start(string& input_line, string& error_msg);
+    int pipe_trim_stop(string& error_msg);
     int pipe_trim_process(string& input_line);
     int pipe_trim_eof(string& input_line);
-    int pipe_unknown_start(string& input_line);
+    int pipe_unknown_start(string& input_line, string& error_msg);
+    int pipe_unknown_stop(string& error_msg);
     int pipe_unknown_process(string& input_line);
     int pipe_unknown_eof(string& input_line);
     
     cli_pipe_t		_pipe_type;
     vector<string>	_pipe_args_list; // The arguments for the pipe command
+    bool		_is_running;	// True if pipe is running
     int			_counter;	// Internal counter to keep state
     regex_t		_preg;		// Regular expression (internal form)
     bool		_bool_flag;	// Internal bool flag to keep state

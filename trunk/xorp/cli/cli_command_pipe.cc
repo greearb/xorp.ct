@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.8 2005/07/15 09:34:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.9 2005/09/29 01:43:57 pavlin Exp $"
 
 
 //
@@ -60,12 +60,13 @@ static int cli_pipe_dummy_func(const string& server_name,
 
 
 CliPipe::CliPipe(const string& init_pipe_name)
-    : CliCommand(NULL, init_pipe_name, CliPipe::name2help(init_pipe_name))
+    : CliCommand(NULL, init_pipe_name, CliPipe::name2help(init_pipe_name)),
+      _is_running(false),
+      _counter(0),
+      _bool_flag(false),
+      _cli_client(NULL)
 {
     _pipe_type = name2pipe_type(init_pipe_name);
-    _counter = 0;
-    _bool_flag = false;
-    _cli_client = NULL;
     
     CLI_PROCESS_CALLBACK _cb = callback(cli_pipe_dummy_func);
     set_cli_process_callback(_cb);
@@ -74,82 +75,98 @@ CliPipe::CliPipe(const string& init_pipe_name)
     switch (pipe_type()) {
     case CLI_PIPE_COMPARE:
 	_start_func_ptr = &CliPipe::pipe_compare_start;
+	_stop_func_ptr = &CliPipe::pipe_compare_stop;
 	_process_func_ptr = &CliPipe::pipe_compare_process;
 	_eof_func_ptr = &CliPipe::pipe_compare_eof;
 	break;
     case CLI_PIPE_COMPARE_ROLLBACK:
 	_start_func_ptr = &CliPipe::pipe_compare_rollback_start;
+	_stop_func_ptr = &CliPipe::pipe_compare_rollback_stop;
 	_process_func_ptr = &CliPipe::pipe_compare_rollback_process;
 	_eof_func_ptr = &CliPipe::pipe_compare_rollback_eof;
 	break;
     case CLI_PIPE_COUNT:
 	_start_func_ptr = &CliPipe::pipe_count_start;
+	_stop_func_ptr = &CliPipe::pipe_count_stop;
 	_process_func_ptr = &CliPipe::pipe_count_process;
 	_eof_func_ptr = &CliPipe::pipe_count_eof;
 	break;
     case CLI_PIPE_DISPLAY:
 	_start_func_ptr = &CliPipe::pipe_display_start;
+	_stop_func_ptr = &CliPipe::pipe_display_stop;
 	_process_func_ptr = &CliPipe::pipe_display_process;
 	_eof_func_ptr = &CliPipe::pipe_display_eof;
 	break;
     case CLI_PIPE_DISPLAY_DETAIL:
 	_start_func_ptr = &CliPipe::pipe_display_detail_start;
+	_stop_func_ptr = &CliPipe::pipe_display_detail_stop;
 	_process_func_ptr = &CliPipe::pipe_display_detail_process;
 	_eof_func_ptr = &CliPipe::pipe_display_detail_eof;
 	break;
     case CLI_PIPE_DISPLAY_INHERITANCE:
 	_start_func_ptr = &CliPipe::pipe_display_inheritance_start;
+	_stop_func_ptr = &CliPipe::pipe_display_inheritance_stop;
 	_process_func_ptr = &CliPipe::pipe_display_inheritance_process;
 	_eof_func_ptr = &CliPipe::pipe_display_inheritance_eof;
 	break;
     case CLI_PIPE_DISPLAY_XML:
 	_start_func_ptr = &CliPipe::pipe_display_xml_start;
+	_stop_func_ptr = &CliPipe::pipe_display_xml_stop;
 	_process_func_ptr = &CliPipe::pipe_display_xml_process;
 	_eof_func_ptr = &CliPipe::pipe_display_xml_eof;
 	break;
     case CLI_PIPE_EXCEPT:
 	_start_func_ptr = &CliPipe::pipe_except_start;
+	_stop_func_ptr = &CliPipe::pipe_except_stop;
 	_process_func_ptr = &CliPipe::pipe_except_process;
 	_eof_func_ptr = &CliPipe::pipe_except_eof;
 	break;
     case CLI_PIPE_FIND:
 	_start_func_ptr = &CliPipe::pipe_find_start;
+	_stop_func_ptr = &CliPipe::pipe_find_stop;
 	_process_func_ptr = &CliPipe::pipe_find_process;
 	_eof_func_ptr = &CliPipe::pipe_find_eof;
 	break;
     case CLI_PIPE_HOLD:
 	_start_func_ptr = &CliPipe::pipe_hold_start;
+	_stop_func_ptr = &CliPipe::pipe_hold_stop;
 	_process_func_ptr = &CliPipe::pipe_hold_process;
 	_eof_func_ptr = &CliPipe::pipe_hold_eof;
 	break;
     case CLI_PIPE_MATCH:
 	_start_func_ptr = &CliPipe::pipe_match_start;
+	_stop_func_ptr = &CliPipe::pipe_match_stop;
 	_process_func_ptr = &CliPipe::pipe_match_process;
 	_eof_func_ptr = &CliPipe::pipe_match_eof;
 	break;
     case CLI_PIPE_NOMORE:
 	_start_func_ptr = &CliPipe::pipe_nomore_start;
+	_stop_func_ptr = &CliPipe::pipe_nomore_stop;
 	_process_func_ptr = &CliPipe::pipe_nomore_process;
 	_eof_func_ptr = &CliPipe::pipe_nomore_eof;
 	break;
     case CLI_PIPE_RESOLVE:
 	_start_func_ptr = &CliPipe::pipe_resolve_start;
+	_stop_func_ptr = &CliPipe::pipe_resolve_stop;
 	_process_func_ptr = &CliPipe::pipe_resolve_process;
 	_eof_func_ptr = &CliPipe::pipe_resolve_eof;
 	break;
     case CLI_PIPE_SAVE:
 	_start_func_ptr = &CliPipe::pipe_save_start;
+	_stop_func_ptr = &CliPipe::pipe_save_stop;
 	_process_func_ptr = &CliPipe::pipe_save_process;
 	_eof_func_ptr = &CliPipe::pipe_save_eof;
 	break;
     case CLI_PIPE_TRIM:
 	_start_func_ptr = &CliPipe::pipe_trim_start;
+	_stop_func_ptr = &CliPipe::pipe_trim_stop;
 	_process_func_ptr = &CliPipe::pipe_trim_process;
 	_eof_func_ptr = &CliPipe::pipe_trim_eof;
 	break;
     case CLI_PIPE_MAX:
     default:
 	_start_func_ptr = &CliPipe::pipe_unknown_start;
+	_stop_func_ptr = &CliPipe::pipe_unknown_stop;
 	_process_func_ptr = &CliPipe::pipe_unknown_process;
 	_eof_func_ptr = &CliPipe::pipe_unknown_eof;
 	break;
@@ -250,15 +267,30 @@ CliPipe::name2pipe_type(const string& pipe_name)
 }
 
 int
-CliPipe::pipe_compare_start(string& input_line)
+CliPipe::pipe_compare_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_compare_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_compare_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -268,20 +300,38 @@ CliPipe::pipe_compare_process(string& input_line)
 int
 CliPipe::pipe_compare_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_compare_rollback_start(string& input_line)
+CliPipe::pipe_compare_rollback_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_compare_rollback_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_compare_rollback_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -291,21 +341,39 @@ CliPipe::pipe_compare_rollback_process(string& input_line)
 int
 CliPipe::pipe_compare_rollback_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_count_start(string& input_line)
+CliPipe::pipe_count_start(string& input_line, string& error_msg)
 {
     _counter = 0;
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_count_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_count_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size()) {
 	input_line = "";
 	_counter++;
@@ -318,6 +386,9 @@ CliPipe::pipe_count_process(string& input_line)
 int
 CliPipe::pipe_count_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     pipe_count_process(input_line);
     input_line += c_format("Count: %d lines\n", _counter);
     
@@ -325,15 +396,30 @@ CliPipe::pipe_count_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_display_start(string& input_line)
+CliPipe::pipe_display_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_display_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_display_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -343,20 +429,38 @@ CliPipe::pipe_display_process(string& input_line)
 int
 CliPipe::pipe_display_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_display_detail_start(string& input_line)
+CliPipe::pipe_display_detail_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_display_detail_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_display_detail_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -366,20 +470,38 @@ CliPipe::pipe_display_detail_process(string& input_line)
 int
 CliPipe::pipe_display_detail_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_display_inheritance_start(string& input_line)
+CliPipe::pipe_display_inheritance_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_display_inheritance_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_display_inheritance_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -389,20 +511,38 @@ CliPipe::pipe_display_inheritance_process(string& input_line)
 int
 CliPipe::pipe_display_inheritance_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_display_xml_start(string& input_line)
+CliPipe::pipe_display_xml_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_display_xml_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_display_xml_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -412,25 +552,49 @@ CliPipe::pipe_display_xml_process(string& input_line)
 int
 CliPipe::pipe_display_xml_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_except_start(string& input_line)
+CliPipe::pipe_except_start(string& input_line, string& error_msg)
 {
+    int error_code;
     string arg1;
     
-    if (_pipe_args_list.empty())
-	return (XORP_ERROR);
-    arg1 = _pipe_args_list[0];
-    // TODO: check the flags
-    if (regcomp(&_preg, arg1.c_str(),
-		REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE) != 0) {
+    if (_pipe_args_list.empty()) {
+	error_msg = c_format("missing argument for \"except\" pipe command.");
 	return (XORP_ERROR);
     }
-    
+    arg1 = _pipe_args_list[0];
+    // TODO: check the flags
+    error_code = regcomp(&_preg, arg1.c_str(),
+			 REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE);
+    if (error_code != 0) {
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+	regerror(error_code, &_preg, buffer, sizeof(buffer));
+	error_msg = c_format("error initializing regular expression state: %s.",
+			     buffer);
+	return (XORP_ERROR);
+    }
+
+    _is_running = true;
+
     UNUSED(input_line);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_except_stop(string& error_msg)
+{
+    regfree(&_preg);
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
@@ -438,7 +602,10 @@ int
 CliPipe::pipe_except_process(string& input_line)
 {
     int ret_value;
-    
+
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (! input_line.size())
 	return (XORP_ERROR);
     
@@ -456,6 +623,9 @@ CliPipe::pipe_except_process(string& input_line)
 int
 CliPipe::pipe_except_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     regfree(&_preg);
     
     UNUSED(input_line);
@@ -463,20 +633,41 @@ CliPipe::pipe_except_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_find_start(string& input_line)
+CliPipe::pipe_find_start(string& input_line, string& error_msg)
 {
+    int error_code;
     string arg1;
     
-    if (_pipe_args_list.empty())
-	return (XORP_ERROR);
-    arg1 = _pipe_args_list[0];
-    // TODO: check the flags
-    if (regcomp(&_preg, arg1.c_str(),
-		REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE) != 0) {
+    if (_pipe_args_list.empty()) {
+	error_msg = c_format("missing argument for \"find\" pipe command.");
 	return (XORP_ERROR);
     }
-    
+    arg1 = _pipe_args_list[0];
+    // TODO: check the flags
+    error_code = regcomp(&_preg, arg1.c_str(),
+			 REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE);
+    if (error_code != 0) {
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+	regerror(error_code, &_preg, buffer, sizeof(buffer));
+	error_msg = c_format("error initializing regular expression state: %s.",
+			     buffer);
+	return (XORP_ERROR);
+    }
+
+    _is_running = true;
+
     UNUSED(input_line);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_find_stop(string& error_msg)
+{
+    regfree(&_preg);
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
@@ -484,7 +675,10 @@ int
 CliPipe::pipe_find_process(string& input_line)
 {
     int ret_value;
-    
+
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (! input_line.size())
 	return (XORP_ERROR);
     
@@ -507,6 +701,9 @@ CliPipe::pipe_find_process(string& input_line)
 int
 CliPipe::pipe_find_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     regfree(&_preg);
     
     UNUSED(input_line);
@@ -514,15 +711,30 @@ CliPipe::pipe_find_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_hold_start(string& input_line)
+CliPipe::pipe_hold_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_hold_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_hold_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -532,6 +744,9 @@ CliPipe::pipe_hold_process(string& input_line)
 int
 CliPipe::pipe_hold_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (_cli_client != NULL) {
 	_cli_client->set_hold_mode(true);
     }
@@ -541,20 +756,41 @@ CliPipe::pipe_hold_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_match_start(string& input_line)
+CliPipe::pipe_match_start(string& input_line, string& error_msg)
 {
+    int error_code;
     string arg1;
     
-    if (_pipe_args_list.empty())
-	return (XORP_ERROR);
-    arg1 = _pipe_args_list[0];
-    // TODO: check the flags
-    if (regcomp(&_preg, arg1.c_str(),
-		REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE) != 0) {
+    if (_pipe_args_list.empty()) {
+	error_msg = c_format("missing argument for \"match\" pipe command.");
 	return (XORP_ERROR);
     }
-    
+    arg1 = _pipe_args_list[0];
+    // TODO: check the flags
+    error_code = regcomp(&_preg, arg1.c_str(),
+			 REG_EXTENDED | REG_ICASE | REG_NOSUB | REG_NEWLINE);
+    if (error_code != 0) {
+	char buffer[1024];
+	memset(buffer, 0, sizeof(buffer));
+	regerror(error_code, &_preg, buffer, sizeof(buffer));
+	error_msg = c_format("error initializing regular expression state: %s.",
+			     buffer);
+	return (XORP_ERROR);
+    }
+
+    _is_running = true;
+
     UNUSED(input_line);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_match_stop(string& error_msg)
+{
+    regfree(&_preg);
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
@@ -562,7 +798,10 @@ int
 CliPipe::pipe_match_process(string& input_line)
 {
     int ret_value;
-    
+
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (! input_line.size())
 	return (XORP_ERROR);
     
@@ -580,6 +819,9 @@ CliPipe::pipe_match_process(string& input_line)
 int
 CliPipe::pipe_match_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     regfree(&_preg);
     
     UNUSED(input_line);
@@ -587,19 +829,38 @@ CliPipe::pipe_match_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_nomore_start(string& input_line)
+CliPipe::pipe_nomore_start(string& input_line, string& error_msg)
 {
     if (_cli_client != NULL) {
 	_cli_client->set_nomore_mode(true);
     }
-    
+
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_nomore_stop(string& error_msg)
+{
+    if (_cli_client != NULL) {
+	if (_cli_client->is_interactive())
+	    _cli_client->set_nomore_mode(false);
+    }
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_nomore_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -609,6 +870,9 @@ CliPipe::pipe_nomore_process(string& input_line)
 int
 CliPipe::pipe_nomore_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (_cli_client != NULL) {
 	if (_cli_client->is_interactive())
 	    _cli_client->set_nomore_mode(false);
@@ -619,15 +883,30 @@ CliPipe::pipe_nomore_eof(string& input_line)
 }
 
 int
-CliPipe::pipe_resolve_start(string& input_line)
+CliPipe::pipe_resolve_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_resolve_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_resolve_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     // TODO: implement it
     if (input_line.size())
 	return (XORP_OK);
@@ -638,20 +917,38 @@ CliPipe::pipe_resolve_process(string& input_line)
 int
 CliPipe::pipe_resolve_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_save_start(string& input_line)
+CliPipe::pipe_save_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_save_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_save_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     // TODO: implement it
     if (input_line.size())
 	return (XORP_OK);
@@ -662,20 +959,38 @@ CliPipe::pipe_save_process(string& input_line)
 int
 CliPipe::pipe_save_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_trim_start(string& input_line)
+CliPipe::pipe_trim_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_trim_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_trim_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     // TODO: implement it
     if (input_line.size())
 	return (XORP_OK);
@@ -686,20 +1001,38 @@ CliPipe::pipe_trim_process(string& input_line)
 int
 CliPipe::pipe_trim_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
 
 int
-CliPipe::pipe_unknown_start(string& input_line)
+CliPipe::pipe_unknown_start(string& input_line, string& error_msg)
 {
+    _is_running = true;
+
     UNUSED(input_line);
+    UNUSED(error_msg);
+    return (XORP_OK);
+}
+
+int
+CliPipe::pipe_unknown_stop(string& error_msg)
+{
+    _is_running = false;
+
+    UNUSED(error_msg);
     return (XORP_OK);
 }
 
 int
 CliPipe::pipe_unknown_process(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     if (input_line.size())
 	return (XORP_OK);
     else
@@ -709,6 +1042,9 @@ CliPipe::pipe_unknown_process(string& input_line)
 int
 CliPipe::pipe_unknown_eof(string& input_line)
 {
+    if (! _is_running)
+	return (XORP_ERROR);
+
     UNUSED(input_line);
     return (XORP_OK);
 }
