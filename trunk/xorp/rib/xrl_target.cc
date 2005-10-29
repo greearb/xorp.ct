@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.51 2005/03/25 02:54:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.52 2005/03/30 06:45:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,6 +103,50 @@ XrlCmdError
 XrlRibTarget::rib_0_1_make_errors_fatal()
 {
     _rib_manager->make_errors_fatal();
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRibTarget::rib_0_1_get_registered_protocols(
+    // Input values,
+    const bool&	ipv4,
+    const bool&	ipv6,
+    const bool&	unicast,
+    const bool&	multicast,
+    // Output values,
+    XrlAtomList&	ipv4_unicast_protocols,
+    XrlAtomList&	ipv6_unicast_protocols,
+    XrlAtomList&	ipv4_multicast_protocols,
+    XrlAtomList&	ipv6_multicast_protocols)
+{
+    list<string> names;
+    list<string>::iterator iter;
+
+    if (ipv4) {
+	if (unicast) {
+	    names = _urib4.registered_protocol_names();
+	    for (iter = names.begin(); iter != names.end(); ++iter)
+		ipv4_unicast_protocols.append(XrlAtom(*iter));
+	}
+	if (multicast) {
+	    names = _mrib4.registered_protocol_names();
+	    for (iter = names.begin(); iter != names.end(); ++iter)
+		ipv4_multicast_protocols.append(XrlAtom(*iter));
+	}
+    }
+    if (ipv6) {
+	if (unicast) {
+	    names = _urib6.registered_protocol_names();
+	    for (iter = names.begin(); iter != names.end(); ++iter)
+		ipv6_unicast_protocols.append(XrlAtom(*iter));
+	}
+	if (multicast) {
+	    names = _mrib6.registered_protocol_names();
+	    for (iter = names.begin(); iter != names.end(); ++iter)
+		ipv6_multicast_protocols.append(XrlAtom(*iter));
+	}
+    }
+
     return XrlCmdError::OKAY();
 }
 

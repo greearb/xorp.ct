@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.31 2005/03/04 08:43:38 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.32 2005/03/25 02:54:21 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -90,6 +90,13 @@ public:
      * Set test-mode: abort on some errors that we'd normally mask.
      */
     void set_errors_are_fatal() { _errors_are_fatal = true; }
+
+    /**
+     * Get the list with the registered protocol names.
+     * 
+     * @return the list with the registered protocol names.
+     */
+    list<string> registered_protocol_names() const;
 
     /**
      * Initialize the RIB.

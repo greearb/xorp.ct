@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.54 2005/03/05 01:31:46 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.55 2005/03/25 02:54:20 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -259,6 +259,20 @@ RIB<A>::~RIB()
 	delete _tables.front();
 	_tables.pop_front();
     }
+}
+
+template <typename A>
+list<string>
+RIB<A>::registered_protocol_names() const
+{
+    list<string> names;
+    map<string, Protocol* >::const_iterator iter;
+
+    for (iter = _protocols.begin(); iter != _protocols.end(); ++iter) {
+	names.push_back(iter->first);
+    }
+
+    return (names);
 }
 
 template <typename A>

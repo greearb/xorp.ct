@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.29 2004/09/28 03:52:33 atanu Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.30 2005/03/25 02:54:25 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -111,6 +111,43 @@ protected:
      *  Make errors fatal; used to detect errors we'd normally mask
      */
     XrlCmdError rib_0_1_make_errors_fatal();
+
+    /**
+     *  Get the list of registered protocols.
+     *
+     *  @param ipv4 if true, then include the IPv4 protocols.
+     *
+     *  @param ipv6 if true, then include the IPv6 protocols.
+     *
+     *  @param unicast if true, then include the protocols registered with the
+     *  unicast RIB.
+     *
+     *  @param multicast if true, then include the protocols registered with
+     *  the multicast RIB.
+     *
+     *  @param ipv4_unicast_protocols the list of IPv4 protocols registered
+     *  with the unicast RIB.
+     *
+     *  @param ipv6_unicast_protocols the list of IPv6 protocols registered
+     *  with the unicast RIB.
+     *
+     *  @param ipv4_multicast_protocols the list of IPv4 protocols registered
+     *  with the multicast RIB.
+     *
+     *  @param ipv6_multicast_protocols the list of IPv6 protocols registered
+     *  with the multicast RIB.
+     */
+    XrlCmdError rib_0_1_get_registered_protocols(
+	// Input values,
+	const bool&	ipv4,
+	const bool&	ipv6,
+	const bool&	unicast,
+	const bool&	multicast,
+	// Output values,
+	XrlAtomList&	ipv4_unicast_protocols,
+	XrlAtomList&	ipv6_unicast_protocols,
+	XrlAtomList&	ipv4_multicast_protocols,
+	XrlAtomList&	ipv6_multicast_protocols);
 
     /**
      *  Add/delete an IGP or EGP table.
