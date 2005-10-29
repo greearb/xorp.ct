@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.85 2005/10/05 06:14:41 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.86 2005/10/12 09:39:28 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -125,7 +125,8 @@ Release 1.2 (2005/??/??)
     - 
 
   RIB:
-    - 
+    - Addition of support for displaying the routing tables in brief,
+      detailed and terse format. The default format is "brief".
 
   RIP:
     - 
