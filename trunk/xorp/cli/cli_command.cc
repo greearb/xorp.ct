@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.18 2005/08/19 06:24:57 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.19 2005/08/23 01:18:59 pavlin Exp $"
 
 
 //
@@ -47,6 +47,9 @@
 //
 // Local variables
 //
+
+static string EXECUTE_THIS_COMMAND_STRING =
+    "<[Enter]>       Execute this command\r\n";
 
 //
 // Local functions prototypes
@@ -546,7 +549,8 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     if (cli_command->can_complete()
 	&& ! has_more_tokens(token_line)) {
 	// Add the appropriate completion info if the command can be run
-	string line_string1 = "  <[Enter]>       Execute this command";
+	string line_string1 = "  ";
+	type_suffix = EXECUTE_THIS_COMMAND_STRING.c_str();
 	cpl_add_completion(cpl, line_string1.c_str(), word_start,
 			   line_string1.size(),
 			   "",
