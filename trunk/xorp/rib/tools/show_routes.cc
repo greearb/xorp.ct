@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.13 2005/10/27 01:55:50 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.14 2005/10/27 05:05:39 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -36,6 +36,25 @@
 #include <getopt.h>
 #endif
 
+//
+// TODO:
+// - Beware of multiple routes to the same destination.
+//   Something in the upper code should be done?
+// - Print the time for each route.
+// - Show the route Status (active/last/both)
+// - Show the AS Path
+//
+
+//
+// Print style
+//
+enum PrintStyle {
+    PRINT_STYLE_BRIEF,
+    PRINT_STYLE_DETAIL,
+    PRINT_STYLE_TERSE,
+    PRINT_STYLE_DEFAULT = PRINT_STYLE_DETAIL	// XXX: default to DETAIL
+};
+
 // ----------------------------------------------------------------------------
 // Structure for holding command line options
 
@@ -43,53 +62,24 @@ struct ShowRoutesOptions {
     bool ribin;			// ribin (true), ribout (false)
     bool ipv4;			// IPv4 (true), IPv6(false)
     bool unicast;		// unicast (true), multicast (false)
-    bool brief;			// -b (true), (false)
+    PrintStyle print_style;	// -b (BRIEF), -d (DETAIL), -t (TERSE)
     const char* protocol;
     string	xrl_target;
     string	finder_host;
     uint16_t	finder_port;
 
     inline ShowRoutesOptions()
-	: ribin(false), ipv4(true), unicast(true), brief(false), protocol("all")
+	: ribin(false),
+	  ipv4(true),
+	  unicast(true),
+	  print_style(PRINT_STYLE_DEFAULT),
+	  protocol("all")
     {}
 };
 
 
 // ----------------------------------------------------------------------------
 // Display functions and helpers
-
-template <typename A>
-static void
-display_route(const IPNet<A>& 	net,
-	      const A& 		nexthop,
-	      const string& 	ifname,
-	      const string& 	vifname,
-	      uint32_t		metric,
-	      uint32_t		admin_distance,
-	      const string&	protocol_origin)
-{
-    string tmp_name;
-    string unknown_name = "UNKNOWN";
-
-    cout << "Network " << net.str() << endl;
-    cout << "    Nexthop        := " << nexthop.str() << endl;
-
-    if (ifname.empty() == false)
-	tmp_name = ifname;
-    else
-	tmp_name = unknown_name;
-    cout << "    Interface      := " << tmp_name << endl;
-
-    if (vifname.empty() == false)
-	tmp_name = vifname;
-    else
-	tmp_name = unknown_name;
-    cout << "    Vif            := " << tmp_name << endl;
-
-    cout << "    Metric         := " << metric << endl;
-    cout << "    Protocol       := " << protocol_origin << endl;
-    cout << "    Admin distance := " << admin_distance << endl;
-}
 
 template <typename A>
 static void
@@ -124,6 +114,76 @@ display_route_brief(const IPNet<A>& 	net,
     cout << endl;
 }
 
+template <typename A>
+static void
+display_route_detail(const IPNet<A>& 	net,
+		     const A& 		nexthop,
+		     const string& 	ifname,
+		     const string& 	vifname,
+		     uint32_t		metric,
+		     uint32_t		admin_distance,
+		     const string&	protocol_origin)
+{
+    string tmp_name;
+    string unknown_name = "UNKNOWN";
+
+    cout << "Network " << net.str() << endl;
+    cout << "    Nexthop        := " << nexthop.str() << endl;
+
+    if (ifname.empty() == false)
+	tmp_name = ifname;
+    else
+	tmp_name = unknown_name;
+    cout << "    Interface      := " << tmp_name << endl;
+
+    if (vifname.empty() == false)
+	tmp_name = vifname;
+    else
+	tmp_name = unknown_name;
+    cout << "    Vif            := " << tmp_name << endl;
+
+    cout << "    Metric         := " << metric << endl;
+    cout << "    Protocol       := " << protocol_origin << endl;
+    cout << "    Admin distance := " << admin_distance << endl;
+}
+
+template <typename A>
+static void
+display_route_terse(const IPNet<A>&	net,
+		    const A& 		nexthop,
+		    const string& 	ifname,
+		    const string& 	vifname,
+		    uint32_t		metric,
+		    uint32_t		admin_distance,
+		    const string&	protocol_origin)
+{
+    string protocol_short = protocol_origin.substr(0, 1);
+
+    //
+    // TODO: Show status of route:
+    //       + = Active Route,
+    //       - = Last Active,
+    //       * = Both
+
+    cout << "" << net.str() << "\t";
+    cout << protocol_short << " ";
+    cout.width(3);
+    cout << admin_distance << "   ";
+    cout.width(8);
+    cout << metric << "\t";
+    // XXX: We don't have second metric yet
+    if (admin_distance != 0)
+	cout << nexthop.str() << " ";
+
+    if ((ifname.empty() == false) && (admin_distance == 0))
+	cout << ifname;
+
+    if ((vifname.empty() == false) && (admin_distance == 0))
+	cout << "/" << vifname;
+    // XXX: We don't have the AS path yet
+    cout << endl;
+}
+		    
 // ----------------------------------------------------------------------------
 // Class for Querying RIB routes
 
@@ -507,13 +567,21 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 	return XrlCmdError::OKAY();
     }
 
-    if (this->_opts.brief == true) {
+    switch (this->_opts.print_style) {
+    case PRINT_STYLE_BRIEF:
 	display_route_brief(dst, nexthop, ifname, vifname, metric,
 			    admin_distance, protocol_origin);
-    } else {
-	display_route(dst, nexthop, ifname, vifname, metric, admin_distance,
-		      protocol_origin);
+	break;
+    case PRINT_STYLE_DETAIL:
+	display_route_detail(dst, nexthop, ifname, vifname, metric,
+			     admin_distance, protocol_origin);
+	break;
+    case PRINT_STYLE_TERSE:
+	display_route_terse(dst, nexthop, ifname, vifname, metric,
+			    admin_distance, protocol_origin);
+	break;
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -554,13 +622,22 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
     if (this->status() != SERVICE_RUNNING || check_cookie(cookie) == false) {
 	return XrlCmdError::OKAY();
     }
-    if (this->_opts.brief == true) {
+
+    switch (this->_opts.print_style) {
+    case PRINT_STYLE_BRIEF:
 	display_route_brief(dst, nexthop, ifname, vifname, metric,
 			    admin_distance, protocol_origin);
-    } else {
-	display_route(dst, nexthop, ifname, vifname, metric, admin_distance,
-		      protocol_origin);
+	break;
+    case PRINT_STYLE_DETAIL:
+	display_route_detail(dst, nexthop, ifname, vifname, metric,
+			     admin_distance, protocol_origin);
+	break;
+    case PRINT_STYLE_TERSE:
+	display_route_detail(dst, nexthop, ifname, vifname, metric,
+			     admin_distance, protocol_origin);
+	break;
     }
+
     return XrlCmdError::OKAY();
 }
 
@@ -590,6 +667,10 @@ usage()
 	    "Specify XrlTarget to query.\n\n");
     fprintf(stderr, "\t -b                             "
 	    "Brief output.\n");
+    fprintf(stderr, "\t -d                             "
+	    "Detailed output.\n");
+    fprintf(stderr, "\t -t                             "
+	    "Terse output.\n");
     exit(-1);
 }
 
@@ -661,7 +742,6 @@ main(int argc, char* const argv[])
 
     try {
 	bool		do_run 	    = true;
-	bool		brief 	    = false;
 
 	ShowRoutesOptions sr_opts;
 
@@ -670,11 +750,16 @@ main(int argc, char* const argv[])
 	sr_opts.xrl_target  = "rib";
 
 	int ch;
-	while ((ch = getopt(argc, argv, "bF:T:")) != -1) {
+	while ((ch = getopt(argc, argv, "bdtF:T:")) != -1) {
 	    switch (ch) {
 	    case 'b':
-		brief = true;
-		sr_opts.brief = true;
+		sr_opts.print_style = PRINT_STYLE_BRIEF;
+		break;
+	    case 'd':
+		sr_opts.print_style = PRINT_STYLE_DETAIL;
+		break;
+	    case 't':
+		sr_opts.print_style = PRINT_STYLE_TERSE;
 		break;
 	    case 'F':
 		do_run = parse_finder_args(optarg,
@@ -716,7 +801,32 @@ main(int argc, char* const argv[])
 	EventLoop e;
 	ShowRoutesProcessor srp(e, sr_opts);
 
+
 	srp.startup();
+
+	//
+	// Print the headers
+	//
+	switch (sr_opts.print_style) {
+	case PRINT_STYLE_BRIEF:
+	    // XXX: no header
+	    break;
+	case PRINT_STYLE_DETAIL:
+	    // XXX: no header
+	    break;
+	case PRINT_STYLE_TERSE:
+	    // cout << "A";
+	    cout << "Destination" << "\t";
+	    cout << "P" << " ";
+	    cout << "Prf" << "\t";
+	    cout << "Metric 1" << "\t";
+	    // cout << "Metric 2 << "\t";
+	    cout << "Next hop";
+	    // cout << "AS path";
+	    cout << endl;
+	    break;
+	}
+
 	while ((srp.status() != SERVICE_FAILED)
 	       && (srp.status() != SERVICE_SHUTDOWN)) {
 	    e.run();
