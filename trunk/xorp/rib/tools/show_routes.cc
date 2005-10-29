@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.14 2005/10/27 05:05:39 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.15 2005/10/29 05:26:38 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -52,7 +52,7 @@ enum PrintStyle {
     PRINT_STYLE_BRIEF,
     PRINT_STYLE_DETAIL,
     PRINT_STYLE_TERSE,
-    PRINT_STYLE_DEFAULT = PRINT_STYLE_DETAIL	// XXX: default to DETAIL
+    PRINT_STYLE_DEFAULT = PRINT_STYLE_BRIEF	// XXX: default to BRIEF
 };
 
 // ----------------------------------------------------------------------------
