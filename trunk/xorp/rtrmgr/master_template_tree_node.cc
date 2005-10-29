@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.8 2005/08/25 02:23:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.9 2005/10/14 04:33:05 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -193,8 +193,32 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
 	 string_iter != mandatory_config_nodes().end();
 	 ++string_iter) {
 	const string& mandatory_config_node = *string_iter;
-	if (find_varname_node(mandatory_config_node) == NULL) {
-	    errmsg = c_format("Invalid template mandatory variable %s",
+	const TemplateTreeNode* ttn = find_varname_node(mandatory_config_node);
+	if (ttn == NULL) {
+	    errmsg = c_format("Invalid template mandatory variable %s: "
+			      "not found",
+			      mandatory_config_node.c_str());
+	    return false;
+	}
+	bool is_multi_value = false;
+	do {
+	    //
+	    // Check if there is a multi-value node between the referred
+	    // template node and this node (or the root of the template tree).
+	    //
+	    if (ttn->is_tag()) {
+		is_multi_value = true;
+		break;
+	    }
+	    ttn = ttn->parent();
+	    if (ttn == this)
+		break;
+	    if (ttn == NULL)
+		break;
+	} while (true);
+	if (is_multi_value) {
+	    errmsg = c_format("Invalid template mandatory variable %s: "
+			      "cannot specify a multi-value node as mandatory",
 			      mandatory_config_node.c_str());
 	    return false;
 	}
