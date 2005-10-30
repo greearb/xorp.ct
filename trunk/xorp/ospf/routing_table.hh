@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.20 2005/10/22 08:01:56 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.21 2005/10/22 08:49:47 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -225,6 +225,16 @@ class InternalRouteEntry {
      * Get the winning entry.
      */
     RouteEntry<A>& get_entry() const;
+
+    /**
+     * Look from an entry for this specific area.
+     *
+     * @param area area ID.
+     * @param rt if a match is found this is filled in with the route.
+     *
+     * @return true if an entry for this area was found.
+     */
+    bool get_entry(OspfTypes::AreaID area, RouteEntry<A>& rt) const;
 
     /**
      * Are there any entries?

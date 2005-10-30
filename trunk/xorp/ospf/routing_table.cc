@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.19 2005/10/12 11:27:59 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.20 2005/10/22 08:49:47 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -391,11 +391,25 @@ InternalRouteEntry<A>::delete_entry(OspfTypes::AreaID area,
     return true;
 }
 
+
 template <typename A>
 RouteEntry<A>&
 InternalRouteEntry<A>::get_entry() const
 {
     return *_winner;
+}
+
+template <typename A>
+bool
+InternalRouteEntry<A>::get_entry(OspfTypes::AreaID area,
+				 RouteEntry<A>& rt) const
+{
+    if (0 == _entries.count(area))
+	return false;
+
+    rt = _entries[area];
+
+    return true;
 }
 
 template <typename A>
