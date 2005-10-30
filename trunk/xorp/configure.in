@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.147 2005/10/27 03:31:02 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.148 2005/10/27 05:09:17 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.147 2005/10/27 03:31:02 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.148 2005/10/27 05:09:17 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -539,7 +539,7 @@ AC_CHECK_HEADERS([sys/linker.h sys/sysctl.h])
 dnl
 dnl Check for Linux-specific header files.
 dnl
-AC_CHECK_HEADERS([linux/rtnetlink.h linux/types.h linux/sockios.h])
+AC_CHECK_HEADERS([linux/rtnetlink.h linux/types.h linux/sockios.h linux/mroute6.h])
 
 dnl
 dnl Check for Windows-specific header files.
