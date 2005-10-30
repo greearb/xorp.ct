@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_osdep.hh,v 1.6 2005/03/25 02:53:10 pavlin Exp $
+// $XORP: xorp/fea/mfea_osdep.hh,v 1.7 2005/08/18 15:45:49 bms Exp $
 
 #ifndef __FEA_MFEA_OSDEP_HH__
 #define __FEA_MFEA_OSDEP_HH__
@@ -86,39 +86,71 @@
 #endif
 
 //
-// Backward-compatibility definitions.
-// On newer systems, all MLD-related definitions use
+// MLD-related missing definitions
+//
+// Note that on newer systems all MLD-related definitions use
 // mld_xxx and MLD_XXX instead of mld6_xxx and MLD6_XXX.
 //
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
+
 #ifndef MLD_LISTENER_QUERY
-#define MLD_LISTENER_QUERY		MLD6_LISTENER_QUERY
+#  ifdef MLD6_LISTENER_QUERY
+#    define MLD_LISTENER_QUERY		MLD6_LISTENER_QUERY
+#  else
+#    define MLD_LISTENER_QUERY		130
+#  endif
 #endif
+
 #ifndef MLD_LISTENER_REPORT
-#define MLD_LISTENER_REPORT		MLD6_LISTENER_REPORT
+#  ifdef MLD6_LISTENER_REPORT
+#    define MLD_LISTENER_REPORT		MLD6_LISTENER_REPORT
+#  else
+#    define MLD_LISTENER_REPORT		131
+#  endif
 #endif
+
 #ifndef MLD_LISTENER_DONE
-#define MLD_LISTENER_DONE		MLD6_LISTENER_DONE
+#  ifdef MLD6_LISTENER_DONE
+#    define MLD_LISTENER_DONE		MLD6_LISTENER_DONE
+#  else
+#    define MLD_LISTENER_DONE		132
+#  endif
 #endif
+
 #ifndef MLD_MTRACE_RESP
-#define MLD_MTRACE_RESP			MLD6_MTRACE_RESP
+#  ifdef MLD6_MTRACE_RESP
+#    define MLD_MTRACE_RESP		MLD6_MTRACE_RESP
+#  else
+#    define MLD_MTRACE_RESP		200
+#  endif
 #endif
+
 #ifndef MLD_MTRACE
-#define MLD_MTRACE			MLD6_MTRACE
+#  ifdef MLD6_MTRACE
+#    define MLD_MTRACE			MLD6_MTRACE
+#  else
+#    define MLD_MTRACE			201
+#  endif
 #endif
+
 #ifndef MLDV2_LISTENER_REPORT
 #  ifdef MLD6V2_LISTENER_REPORT
 #    define MLDV2_LISTENER_REPORT	MLD6V2_LISTENER_REPORT
+#  else
+#    define MLDV2_LISTENER_REPORT	143
 #  endif
 #endif
+
 #ifndef MLD_MINLEN
 #  ifdef HAVE_MLD_HDR
-#    define MLD_MINLEN	(sizeof(struct mld_hdr))
+#    define MLD_MINLEN			(sizeof(struct mld_hdr))
 #  else
-#    define MLD_MINLEN	(sizeof(struct mld6_hdr))
+#    define MLD_MINLEN			24
 #  endif
-#endif // ! MLD_MINLEN
+#endif
+
 #endif // HAVE_IPV6_MULTICAST_ROUTING
+
 
 //
 // Test if the kernel multicast signal message types are consistent
