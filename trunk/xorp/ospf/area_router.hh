@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.75 2005/10/17 00:44:17 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.76 2005/10/21 21:24:55 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -823,6 +823,16 @@ class AreaRouter : Subsystem {
      * at it.
      */
     bool bidirectional(const RouterLink& rl, NetworkLsa *nlsa);
+
+    /**
+     * Does the Router-LSA point at the Network-LSA that points at it.
+     *
+     * @param interface_address (out argument) if the back pointer exists.
+     *
+     * @return true if Router-LSA points at the Network-LSA.
+     */
+    bool bidirectional(RouterLsa *rlsa, NetworkLsa *nlsa,
+		       uint32_t& interface_address);
 
     /**
      * Add this newly arrived or changed Router-LSA to the SPT.
