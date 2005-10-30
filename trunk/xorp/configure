@@ -13640,7 +13640,10 @@ echo "${ECHO_T}$ac_cv_header_linux_mroute6_h" >&6
 
 fi
 if test $ac_cv_header_linux_mroute6_h = yes; then
-  test_linux_mroute6_h="#include <linux/mroute6.h>"
+  test_linux_mroute6_h="
+#include <linux/types.h>
+#include <linux/mroute6.h>
+"
 else
   test_linux_mroute6_h=""
 fi
