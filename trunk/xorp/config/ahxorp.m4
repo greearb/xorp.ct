@@ -4,7 +4,7 @@ dnl Autoheader definitions
 dnl XXX: Currently this should not be referenced. Do not use until
 dnl      we bump all of the autotools.
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/ahxorp.m4,v 1.1 2005/05/05 19:38:32 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 
@@ -34,16 +34,9 @@ typedef int socklen_t;
 #endif /* HAVE_SOCKLEN_T */
 
 /* KAME code likes to use INET6 to ifdef IPv6 code */
-#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
+#if defined(HAVE_IPV6) && defined(IPV6_STACK_KAME)
 #ifndef INET6
 #define INET6
-#endif
-#endif /* HAVE_IPV6 && IPV6_STACK_KAME */
-
-/* KAME backward-compatibility definitions */
-#if defined(HAVE_IPV6) && defined (IPV6_STACK_KAME)
-#ifndef HAVE_MLD_HDR
-#define mld_hdr mld6_hdr
 #endif
 #endif /* HAVE_IPV6 && IPV6_STACK_KAME */
 
