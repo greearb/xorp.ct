@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.10 2005/08/18 15:36:59 bms Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.11 2005/08/27 05:18:16 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -24,7 +24,7 @@
 #include "config.h"
 
 #ifdef HAVE_NET_ROUTE_H
-# include <net/route.h>
+#include <net/route.h>
 #endif
 
 /*
@@ -44,7 +44,7 @@
  * an #ifdef _KERNEL conditional on these platforms.
  */
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-# define	_KERNEL
+#define	_KERNEL
 #endif
 
 /*
@@ -62,35 +62,40 @@
  * Epilogue.
  */
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
-# undef _KERNEL
+#undef _KERNEL
 #endif
 
 /*
  * Linux hacks because of broken Linux header files
  */
 #if defined(HOST_OS_LINUX)
-# include <linux/types.h>
-# ifndef _LINUX_IN_H
-#  define _LINUX_IN_H		/*  XXX: a hack to exclude <linux/in.h> */
-#  include <linux/mroute.h>
-#  undef _LINUX_IN_H
-# else
-#  include <linux/mroute.h>
-# endif
+#  include <linux/types.h>
+#  ifndef _LINUX_IN_H
+#    define _LINUX_IN_H		/*  XXX: a hack to exclude <linux/in.h> */
+#    include <linux/mroute.h>
+#    undef _LINUX_IN_H
+#  else
+#    include <linux/mroute.h>
+#  endif
 /*
  * XXX: Conditionally add missing definitions from the <linux/mroute.h>
  * header file.
  */
-# ifndef IGMPMSG_NOCACHE
-#  define IGMPMSG_NOCACHE 1
-# endif
-# ifndef IGMPMSG_WRONGVIF
-#  define IGMPMSG_WRONGVIF 2
-# endif
-# ifndef IGMPMSG_WHOLEPKT
-#  define IGMPMSG_WHOLEPKT 3
-# endif
+#  ifndef IGMPMSG_NOCACHE
+#    define IGMPMSG_NOCACHE 1
+#   endif
+#  ifndef IGMPMSG_WRONGVIF
+#    define IGMPMSG_WRONGVIF 2
+#  endif
+#  ifndef IGMPMSG_WHOLEPKT
+#    define IGMPMSG_WHOLEPKT 3
+#  endif
 #endif /* HOST_OS_LINUX */
+
+#ifdef HAVE_LINUX_MROUTE6_H
+#include <linux/mroute6.h>
+#endif
+
 
 /*
  * FreeBSD 4.3
@@ -102,20 +107,20 @@
 #ifdef HAVE_IPV6
 
 /* Save GET_TIME. */
-# ifdef GET_TIME
-#  define _SAVE_GET_TIME GET_TIME
-#  undef GET_TIME
-# endif
+#  ifdef GET_TIME
+#    define _SAVE_GET_TIME GET_TIME
+#    undef GET_TIME
+#  endif
 
-# ifdef HAVE_NETINET6_IP6_MROUTE_H
-#  include <netinet6/ip6_mroute.h>
-# endif
+#  ifdef HAVE_NETINET6_IP6_MROUTE_H
+#    include <netinet6/ip6_mroute.h>
+#  endif
 
 /* Restore GET_TIME. */
-# if defined(_SAVE_GET_TIME) && !defined(GET_TIME)
-#  define GET_TIME _SAVE_GET_TIME
-#  undef _SAVE_GET_TIME
-# endif
+#  if defined(_SAVE_GET_TIME) && !defined(GET_TIME)
+#    define GET_TIME _SAVE_GET_TIME
+#    undef _SAVE_GET_TIME
+#  endif
 
 #endif /* HAVE_IPV6 */
 
