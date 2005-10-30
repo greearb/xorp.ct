@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.37 2005/08/31 22:39:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.38 2005/10/26 20:13:37 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -2142,12 +2142,11 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 	
 	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
-	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
+	    && (nbytes < (ssize_t)MLD_MINLEN)) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
-					    sizeof(struct mld_hdr))));
+			 XORP_UINT_CAST(min(sizeof(*mrt6msg), MLD_MINLEN)));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {

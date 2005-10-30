@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.36 2005/09/06 23:56:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.37 2005/10/26 20:13:37 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1098,12 +1098,11 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	
 	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
-	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
+	    && (nbytes < (ssize_t)MLD_MINLEN)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal or packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
-					    sizeof(struct mld_hdr))));
+			 XORP_UINT_CAST(min(sizeof(*mrt6msg), MLD_MINLEN)));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {

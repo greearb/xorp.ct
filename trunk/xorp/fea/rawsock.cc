@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.7 2005/10/12 01:25:31 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.8 2005/10/26 20:13:37 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -91,6 +91,14 @@
 #endif
 #ifndef MAXTTL
 #define MAXTTL		255
+#endif
+
+#ifndef MLD_MINLEN
+#  ifdef HAVE_MLD_HDR
+#    define MLD_MINLEN			(sizeof(struct mld_hdr))
+#  else
+#    define MLD_MINLEN			24
+#  endif
 #endif
 
 //
@@ -1153,12 +1161,11 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	
 	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
-	    && (nbytes < (ssize_t)sizeof(struct mld_hdr))) {
+	    && (nbytes < (ssize_t)MLD_MINLEN)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal or packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
-					    sizeof(struct mld_hdr))));
+			 XORP_UINT_CAST(min(sizeof(*mrt6msg), MLD_MINLEN)));
 	    return;		// Error
 	}
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
