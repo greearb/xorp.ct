@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.5 2005/10/02 22:21:50 abittau Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.6 2005/10/23 20:41:38 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -106,7 +106,8 @@ FilterManager::update_tagmap(const string& protocol)
 	      protocol.c_str(),al.str().c_str());
 
     // send out update
-    _rib.send_insert_policy_redist_tags(_rib_name.c_str(),protocol,al,
+    _rib.send_insert_policy_redist_tags(_rib_name.c_str(),
+					_pmap.xrl_target(protocol),al,
 	        callback(this,&FilterManager::policy_backend_cb));
 }
 
