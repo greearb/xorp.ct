@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.22 2005/10/31 01:09:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.23 2005/10/31 07:58:40 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -314,7 +314,7 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
     bool result = true;
     if (!rt.get_discard()) {
 	PolicyTags policytags;
-	bool accepted = do_filtering(net, nexthop, metric, rt);
+	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
 	rt.set_filtered(!accepted);
 	if (accepted)
 	    result = _ospf.add_route(net, nexthop, metric,
@@ -371,7 +371,8 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 template <typename A>
 bool
 RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
-			      uint32_t& /*metric*/, RouteEntry<A>& /*rt*/)
+			      uint32_t& /*metric*/, RouteEntry<A>& /*rt*/,
+			      const PolicyTags& /*policytags*/)
 {
     // Host routes are required in the ospf routing table to satisfy
     // requirements for AS-External-LSAs and Summary-LSAs. Drop them

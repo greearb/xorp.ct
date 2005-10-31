@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.23 2005/10/31 01:09:26 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.24 2005/10/31 07:58:40 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -353,7 +353,7 @@ class RoutingTable {
      * @return true if the route should be accepted.
      */
     bool do_filtering(IPNet<A>& net, A& nexthop, uint32_t& metric,
-		      RouteEntry<A>& rt);
+		      RouteEntry<A>& rt, const PolicyTags& policytags);
 };
 
 #if	0
