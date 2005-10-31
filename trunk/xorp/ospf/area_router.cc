@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.131 2005/10/27 20:25:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.132 2005/10/30 09:25:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2280,16 +2280,13 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	// (3)
 	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
 	RouteEntry<IPv4> rt;
- 	if (!routing_table.lookup_entry(IPv4(htonl(adv)), rt))
+ 	if (!routing_table.lookup_entry(_area, IPv4(htonl(adv)), rt))
  	    continue;
 
 	if (!rt.get_as_boundary_router())
 	    return;
 
-	// XXX
-	// This will trip when we move to multiple areas. When that
-	// happens the code should be fixed to find the entry for this
-	// area if present.
+	// If a routing entry has been found it must be from this area.
 	XLOG_ASSERT(rt.get_area() == _area);
 
 	IPv4 forwarding = aselsa->get_forwarding_address_ipv4();

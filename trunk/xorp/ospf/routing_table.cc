@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.20 2005/10/22 08:49:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.21 2005/10/30 21:36:13 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -140,6 +140,25 @@ RoutingTable<A>::lookup_entry(A router, RouteEntry<A>& rt)
     rt = irentry.get_entry();
 
     return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, A router,
+			      RouteEntry<A>& rt)
+{
+    debug_msg("%s\n", cstring(router));
+
+    IPNet<A> net(router, A::ADDR_BITLEN);
+
+    typename Trie<A, InternalRouteEntry<A> >::iterator i;
+    i = _current->lookup_node(net);
+    if (_current->end() == i)
+	return false;
+
+    InternalRouteEntry<A>& irentry = i.payload();
+
+    return irentry.get_entry(area, rt);
 }
 
 template <typename A>
@@ -404,10 +423,12 @@ bool
 InternalRouteEntry<A>::get_entry(OspfTypes::AreaID area,
 				 RouteEntry<A>& rt) const
 {
-    if (0 == _entries.count(area))
+    typename map<OspfTypes::AreaID, RouteEntry<A> >::const_iterator i;
+
+    if (_entries.end() == (i = _entries.find(area)))
 	return false;
 
-    rt = _entries[area];
+    rt = i->second;
 
     return true;
 }
