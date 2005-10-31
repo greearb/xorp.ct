@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.14 2005/10/24 07:26:59 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.15 2005/10/31 01:16:54 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -30,6 +30,14 @@ protocols {
 			    router-id:  ipv4;
 			}
 		    }
+		}
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = true;
 		}
 	    }
 	}
@@ -175,6 +183,23 @@ the router within an Autonomous System";
 			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv4=$(@)&neighbour_id:ipv4=$(@.router-id)";
 			}
 		    }
+		}
+	    }
+	}
+
+	traceoptions {
+	    %help:	short "Configure the tracing options";
+	    flag {
+		%help:	short "Configure the tracing operation to perform";
+		all {
+		    %help:	short	"Configure all tracing operations";
+
+		    disable {
+			%help:	short	"Disable all tracing operations";
+			%set:	xrl "$(ospf4.targetname)/ospfv2/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
+			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/trace?tvar:txt=all&enable:bool=`~$(DEFAULT)`";
+		    }
+
 		}
 	    }
 	}

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.10 2005/10/22 18:44:51 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.11 2005/10/22 22:45:42 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -318,6 +318,18 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const bool&	advertise);
 
     /**
+     *  Enable/Disable tracing.
+     *
+     *  @param tvar trace variable.
+     *
+     *  @param enable set to true to enable false to disable.
+     */
+    XrlCmdError ospfv2_0_1_trace(
+	// Input values,
+	const string&	tvar,
+	const bool&	enable);
+
+    /**
      *  Get a single lsa from an area. A stateless mechanism to get LSAs. The
      *  client of this interface should start from zero and continue to request
      *  LSAs (incrementing index) until toohigh becomes true.
@@ -349,6 +361,59 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      * Get a list of all the configured areas.
      */
     XrlCmdError ospfv2_0_1_get_area_list(XrlAtomList& areas);
+
+    /**
+     *  Get the list of neighbours.
+     */
+    XrlCmdError ospfv2_0_1_get_neighbour_list(
+	// Output values,
+	XrlAtomList&	areas);
+
+    /**
+     *  Get information on a neighbour.
+     *
+     *  @param nid neighbour ID returned by the get_neighbour_list.
+     *
+     *  @param valid true if valid information has been returned.
+     *
+     *  @param address of neighbour in txt to allow IPv4 and IPv6.
+     *
+     *  @param interface with which the neighbour forms the adjacency.
+     *
+     *  @param state of the adjacency.
+     *
+     *  @param rid router ID of the neighbour.
+     *
+     *  @param priority of the neighbour (used for DR election).
+     *
+     *  @param area the neighbour is in.
+     *
+     *  @param opt value in the neighbours hello packet.
+     *
+     *  @param dr designated router.
+     *
+     *  @param bdr backup designated router.
+     *
+     *  @param up time in seconds that the neigbour has been up.
+     *
+     *  @param adjacent time in seconds that there has been an adjacency.
+     */
+    XrlCmdError ospfv2_0_1_get_neighbour_info(
+	// Input values,
+	const uint32_t&	nid,
+	// Output values,
+	bool&	valid,
+	string&	address,
+	string&	interface,
+	string&	state,
+	IPv4&	rid,
+	uint32_t&	priority,
+	IPv4&	area,
+	uint32_t&	opt,
+	IPv4&	dr,
+	IPv4&	bdr,
+	uint32_t&	up,
+	uint32_t&	adjacent);
 
  private:
     Ospf<IPv4>& _ospf;

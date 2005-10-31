@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.16 2005/10/22 18:44:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.17 2005/10/22 22:45:42 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -566,6 +566,21 @@ XrlOspfV2Target::ospfv2_0_1_area_range_change_state(const IPv4& a,
 }
 
 XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
+{
+    debug_msg("trace variable %s enable %s\n", tvar.c_str(), pb(enable));
+
+    if (tvar == "all") {
+	_ospf.trace().all(enable);
+    } else {
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
+    } 
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 						     const uint32_t& index,
 						     bool& valid,
@@ -597,5 +612,29 @@ XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
     for (i = arealist.begin(); i != arealist.end(); i++)
 	areas.append(XrlAtom(*i));
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& /*areas*/)
+{
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& /*nid*/,
+					       bool& /*valid*/,
+					       string& /*address*/,
+					       string& /*interface*/,
+					       string& /*state*/,
+					       IPv4& /*rid*/,
+					       uint32_t& /*priority*/,
+					       IPv4& /*area*/,
+					       uint32_t& /*opt*/,
+					       IPv4& /*dr*/,
+					       IPv4& /*bdr*/,
+					       uint32_t& /*up*/,
+					       uint32_t& /*adjacent*/)
+{
     return XrlCmdError::OKAY();
 }
