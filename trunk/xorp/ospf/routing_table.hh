@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.22 2005/10/30 21:36:13 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.23 2005/10/31 01:09:26 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -346,7 +346,8 @@ class RoutingTable {
 		   uint32_t metric, RouteEntry<A>& rt);
     bool delete_route(OspfTypes::AreaID area, IPNet<A> net, RouteEntry<A>& rt);
     bool replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
-		       uint32_t metric, RouteEntry<A>& rt);
+		       uint32_t metric, RouteEntry<A>& rt,
+		       RouteEntry<A>& previous_rt);
 
     /**
      * @return true if the route should be accepted.

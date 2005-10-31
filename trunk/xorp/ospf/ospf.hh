@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.63 2005/10/22 22:45:42 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.64 2005/10/23 09:29:48 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -287,13 +287,13 @@ pb(bool val)
     return val ? "true" : "false";
 }
 
+
+#include "policy_varrw.hh"
 #include "io.hh"
 #include "exceptions.hh"
 #include "lsa.hh"
 #include "packet.hh"
 #include "transmit.hh"
-#include "policy/backend/policy_filters.hh"
-#include "policy/backend/policytags.hh"
 #include "peer_manager.hh"
 #include "external.hh"
 #include "routing_table.hh"
@@ -482,9 +482,10 @@ class Ospf {
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard);
+		   bool discard, const PolicyTags& policytags);
     /**
      * Replace route
      *
@@ -493,9 +494,10 @@ class Ospf {
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		       bool discard);
+		       bool discard, const PolicyTags& policytags);
 
     /**
      * Delete route

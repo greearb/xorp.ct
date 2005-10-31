@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.9 2005/09/21 00:29:27 pavlin Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.10 2005/10/11 07:08:38 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -187,13 +187,14 @@ class DebugIO : public IO<A> {
      * Add route to RIB.
      */
     bool add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard)
+		   bool discard, const PolicyTags& policytags)
     {
 	DOUT(_info) << "Net: " << net.str() <<
 	    " nexthop: " << nexthop.str() <<
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
-	    " discard: " << pb(discard) << endl;
+	    " discard: " << pb(discard) << 
+	    " policy: " << policytags.str() << endl;
 
 	XLOG_ASSERT(0 == _routing_table.count(net));
 	DebugRouteEntry dre;
@@ -201,6 +202,7 @@ class DebugIO : public IO<A> {
 	dre._metric = metric;
 	dre._equal = equal;
 	dre._discard = discard;
+	dre._policytags = policytags;
 
 	_routing_table[net] = dre;
 
@@ -211,18 +213,19 @@ class DebugIO : public IO<A> {
      * Replace route in RIB.
      */
     bool replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard)
+		       bool discard, const PolicyTags& policytags)
     {
 	DOUT(_info) << "Net: " << net.str() <<
 	    " nexthop: " << nexthop.str() <<
 	    " metric: " << metric <<
 	    " equal: " << pb(equal) <<
-	    " discard: " << pb(discard) << endl;
+	    " discard: " << pb(discard) <<
+	    " policy: " << policytags.str() << endl;
 
 	if (!delete_route(net))
 	    return false;
 
-	return add_route(net, nexthop, metric, equal, discard);
+	return add_route(net, nexthop, metric, equal, discard, policytags);
     }
 
     /**
@@ -313,6 +316,7 @@ class DebugIO : public IO<A> {
 	uint32_t _metric;
 	bool _equal;
 	bool _discard;
+	PolicyTags _policytags;
     };
 
     map<IPNet<A>, DebugRouteEntry> _routing_table;

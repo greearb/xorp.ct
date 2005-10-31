@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.12 2005/09/09 15:32:35 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.13 2005/09/21 00:29:27 pavlin Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -138,12 +138,13 @@ class IO {
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     virtual bool add_route(IPNet<A> net,
 			   A nexthop,
 			   uint32_t metric,
 			   bool equal,
-			   bool discard) = 0;
+			   bool discard, const PolicyTags& policytags) = 0;
 
     /**
      * Replace route
@@ -153,12 +154,13 @@ class IO {
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     virtual bool replace_route(IPNet<A> net,
 			       A nexthop,
 			       uint32_t metric,
 			       bool equal,
-			       bool discard) = 0;
+			       bool discard, const PolicyTags& policytags) = 0;
 
     /**
      * Delete route

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.18 2005/09/21 04:59:05 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.19 2005/10/20 00:27:43 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -691,13 +691,13 @@ XrlIO<A>::rib_command_done(const XrlError& error, bool up,
 template <typename A>
 bool
 XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		    bool discard)
+		    bool discard, const PolicyTags& policytags)
 {
-    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false");
+	      discard ? "true" : "false", cstring(policytags));
 
-    _rib_queue.queue_add_route(_ribname, net, nexthop, metric);
+    _rib_queue.queue_add_route(_ribname, net, nexthop, metric, policytags);
 
     return true;
 }
@@ -705,15 +705,15 @@ XrlIO<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 template <typename A>
 bool
 XrlIO<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-			bool discard)
+			bool discard, const PolicyTags& policytags)
 {
-    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false");
+	      discard ? "true" : "false", cstring(policytags));
 
     // XXX - The queue should support replace see TODO 36.
     _rib_queue.queue_delete_route(_ribname, net);
-    _rib_queue.queue_add_route(_ribname, net, nexthop, metric);
+    _rib_queue.queue_add_route(_ribname, net, nexthop, metric, policytags);
 
     return true;
 }
@@ -745,8 +745,8 @@ XrlQueue<A>::eventloop() const
 template<class A>
 void
 XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
-			     const A& nexthop, uint32_t metric
-			     /*, const PolicyTags& policytags*/)
+			     const A& nexthop, uint32_t metric,
+			     const PolicyTags& policytags)
 {
     Queued q;
 
@@ -766,9 +766,7 @@ XrlQueue<A>::queue_add_route(string ribname, const IPNet<A>& net,
 		 ribname.c_str(),
 		 net.str().c_str(),
 		 nexthop.str().c_str());
-#if	0
     q.policytags = policytags;
-#endif
 
     _xrl_queue.push_back(q);
 

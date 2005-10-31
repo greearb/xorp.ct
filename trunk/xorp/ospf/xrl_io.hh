@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.12 2005/09/09 21:18:39 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.13 2005/09/21 00:29:27 pavlin Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -38,8 +38,8 @@ public:
     XrlQueue(EventLoop& eventloop, XrlRouter& xrl_router);
 
     void queue_add_route(string ribname, const IPNet<A>& net,
-			 const A& nexthop, uint32_t metric
-			 /*, const PolicyTags& policytags*/);
+			 const A& nexthop, uint32_t metric,
+			 const PolicyTags& policytags);
 
     void queue_delete_route(string ribname, const IPNet<A>& net);
 
@@ -259,12 +259,14 @@ class XrlIO : public IO<A>,
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     bool add_route(IPNet<A> net,
 		   A nexthop,
 		   uint32_t metric,
 		   bool equal,
-		   bool discard);
+		   bool discard,
+		   const PolicyTags& policytags);
 
     /**
      * Replace route in RIB.
@@ -274,12 +276,14 @@ class XrlIO : public IO<A>,
      * @param metric to network
      * @param equal true if this in another route to the same destination.
      * @param discard true if this is a discard route.
+     * @param policytags policy info to the RIB.
      */
     bool replace_route(IPNet<A> net,
 		       A nexthop,
 		       uint32_t metric,
 		       bool equal,
-		       bool discard);
+		       bool discard,
+		       const PolicyTags& policytags);
 
     /**
      * Delete route from RIB.

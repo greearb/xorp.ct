@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.21 2005/10/30 21:36:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.22 2005/10/31 01:09:26 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -255,7 +255,7 @@ RoutingTable<A>::end()
 		rt.get_cost() != rt_previous.get_cost()) {
 		if (!replace_route(rt.get_area(), tip.key(),
 				   rt.get_nexthop(), rt.get_cost(),
-				   rt)) {
+				   rt, rt_previous)) {
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
 	    }
@@ -313,11 +313,14 @@ RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 {
     bool result = true;
     if (!rt.get_discard()) {
+	PolicyTags policytags;
 	bool accepted = do_filtering(net, nexthop, metric, rt);
 	rt.set_filtered(!accepted);
 	if (accepted)
 	    result = _ospf.add_route(net, nexthop, metric,
-				     false /* equal */, false /*  discard */);
+				     false /* equal */,
+				     false /* discard */,
+				     policytags);
     }  else {
 	XLOG_WARNING("TBD - installing discard routes");
 	result = false;
@@ -346,25 +349,38 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
     return result;
 }
 
+
 template <typename A>
 bool
 RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
-			       uint32_t metric, RouteEntry<A>& rt)
+			       uint32_t metric, RouteEntry<A>& rt,
+			       RouteEntry<A>& previous_rt)
 {
-    bool result = _ospf.replace_route(net, nexthop, metric,
-				      false /* equal */, false /* discard */);
+    bool result = delete_route(area, net, previous_rt);
+    if (!result)
+	XLOG_WARNING("Failed to delete: %s", cstring(net));
+    result = add_route(area, net, nexthop, metric, rt);
 
-    _ospf.get_peer_manager().summary_withdraw(area, net, rt);
+    _ospf.get_peer_manager().summary_withdraw(area, net, previous_rt);
     _ospf.get_peer_manager().summary_announce(area, net, rt);
 
     return result;
 }
 
+
 template <typename A>
 bool
-RoutingTable<A>::do_filtering(IPNet<A>& /*net*/, A& /*nexthop*/,
+RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 			      uint32_t& /*metric*/, RouteEntry<A>& /*rt*/)
 {
+    // Host routes are required in the ospf routing table to satisfy
+    // requirements for AS-External-LSAs and Summary-LSAs. Drop them
+    // here so they don't make it the the RIB.
+    if (net.contains(nexthop))
+ 	return false;
+
+    // The import policy filter code goes here.
+
     return true;
 }
 

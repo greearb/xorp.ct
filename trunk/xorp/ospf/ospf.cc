@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.45 2005/10/17 08:38:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.46 2005/10/22 22:45:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -354,25 +354,26 @@ Ospf<A>::get_area_list(list<OspfTypes::AreaID>& areas) const
 template <typename A>
 bool
 Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-		   bool discard)
+		   bool discard, const PolicyTags& policytags)
 {
-    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false");
+	      discard ? "true" : "false", cstring(policytags));
 
-    return _io->add_route(net, nexthop, metric, equal, discard);
+    return _io->add_route(net, nexthop, metric, equal, discard, policytags);
 }
 
 template <typename A>
 bool
 Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
-			bool discard)
+			bool discard, const PolicyTags& policytags)
 {
-    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s\n",
+    debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
 	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false");
+	      discard ? "true" : "false", cstring(policytags));
 
-    return _io->replace_route(net, nexthop, metric, equal, discard);
+    return _io->replace_route(net, nexthop, metric, equal, discard,
+			      policytags);
 }
 
 template <typename A>

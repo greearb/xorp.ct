@@ -13,13 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.2 2005/10/18 15:12:16 atanu Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.3 2005/10/22 06:15:30 atanu Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
 
 #include "policy/backend/single_varrw.hh"
 #include "policy/common/element_factory.hh"
+#include "policy/backend/policy_filters.hh"
+#include "policy/backend/policytags.hh"
 
 template <typename A>
 class OspfVarRW : public SingleVarRW {
