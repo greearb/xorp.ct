@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.99 2005/11/01 01:38:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.100 2005/11/01 04:58:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -890,8 +890,8 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 	    set_state(STATEOPENCONFIRM);
 	} catch(CorruptMessage& mess) {
 	    NotificationPacket np(mess.error(), mess.subcode());
-	    send_notification(np);
-	    set_state(STATESTOPPED, true);
+	    send_notification(np, false);
+	    set_state(STATESTOPPED, false);
 	}
 	break;
 
@@ -1590,7 +1590,7 @@ BGPPeer::clear_all_timers()
 void
 BGPPeer::start_connect_retry_timer()
 {
-    debug_msg("Start Connect Retry timer after %u ms\n",
+    debug_msg("Start Connect Retry timer after %u s\n",
 	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
     _timer_connect_retry = _mainprocess->eventloop().
