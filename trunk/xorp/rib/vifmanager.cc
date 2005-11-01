@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.38 2005/05/16 19:08:08 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.39 2005/11/01 08:35:24 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -561,8 +561,6 @@ VifManager::updates_made()
 	    }
 	}
     }
-
-    _rib_manager->urib4().print_vifs();
 }
 
 void
