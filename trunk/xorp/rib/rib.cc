@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.55 2005/03/25 02:54:20 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.56 2005/10/29 20:33:34 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -590,24 +590,25 @@ RIB<A>::delete_vif_address(const string& vifname,
 		   vifname.c_str());
 	return XORP_ERROR;
     }
+    Vif& vif = vi->second;
+    
     list<VifAddr>::const_iterator vai;
-    for (vai = vi->second.addr_list().begin();
-	 vai != vi->second.addr_list().end();
-	 ++vai) {
-	IPvX addrvX = vai->addr();
+    for (vai = vif.addr_list().begin(); vai != vif.addr_list().end(); ++vai) {
+	IPvX ipvx = vai->addr();
 	try {
 	    A this_addr;
-	    addrvX.get(this_addr);
+	    ipvx.get(this_addr);
 	    if (addr == this_addr) {
-		IPvXNet subnetvX = vai->subnet_addr();
+		IPvXNet ipvxnet = vai->subnet_addr();
 		IPNet<A> subnet;
-		subnetvX.get(subnet);
+		ipvxnet.get(subnet);
+		vif.delete_address(ipvx);
 		delete_route("connected", subnet);
 		return XORP_OK;
 	    }
 	} catch (const InvalidCast&) {
 	    debug_msg("Invalid cast of %s in RIB<%s>\n",
-		      addrvX.str().c_str(), A::ip_version_str().c_str());
+		      ipvx.str().c_str(), A::ip_version_str().c_str());
 	}
     }
     return XORP_ERROR;
