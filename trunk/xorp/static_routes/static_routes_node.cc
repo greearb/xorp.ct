@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.27 2005/08/31 01:37:34 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.28 2005/11/01 04:31:01 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -303,10 +303,7 @@ StaticRoutesNode::updates_made()
 	 route_iter != _static_routes.end();
 	 ++route_iter) {
 	StaticRoute& static_route = *route_iter;
-	bool is_old_interface_up = false;
-	bool is_new_interface_up = false;
-	bool is_old_directly_connected = false;
-	bool is_new_directly_connected = false;
+	bool is_old_up = false;
 	bool is_new_up = false;
 	string old_ifname, old_vifname, new_ifname, new_vifname;
 
@@ -318,51 +315,79 @@ StaticRoutesNode::updates_made()
 	    vif_atom = _iftree.find_vif(static_route.ifname(),
 					static_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		is_old_interface_up = true;
+		is_old_up = true;
 	    vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
 					       static_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		is_new_interface_up = true;
-	}
-	//
-	// Calculate whether the next-hop router was directly connected
-	// before and now.
-	//
-	if (_iftree.is_directly_connected(static_route.nexthop(),
-					  old_ifname, old_vifname)) {
-	    is_old_directly_connected = true;
-	}
-	if (ifmgr_iftree().is_directly_connected(static_route.nexthop(),
-						 new_ifname, new_vifname)) {
-	    is_new_directly_connected = true;
+		is_new_up = true;
+	} else {
+	    //
+	    // Calculate whether the next-hop router was directly connected
+	    // before and now.
+	    //
+	    if (_iftree.is_directly_connected(static_route.nexthop(),
+					      old_ifname,
+					      old_vifname)) {
+		is_old_up = true;
+	    }
+	    if (ifmgr_iftree().is_directly_connected(static_route.nexthop(),
+						     new_ifname,
+						     new_vifname)) {
+		is_new_up = true;
+	    }
 	}
 
-	if ((is_old_interface_up == is_new_interface_up)
-	    && (is_old_directly_connected == is_new_directly_connected)) {
+	if ((is_old_up == is_new_up)
+	    && (old_ifname == new_ifname)
+	    && (old_vifname == new_vifname)) {
 	    continue;			// Nothing changed
 	}
 
-	if (is_old_interface_up == is_new_interface_up)
-	    is_new_up = is_new_directly_connected;
-	else
-	    is_new_up = is_new_interface_up;
+	do {
+	    if ((! is_old_up) && (! is_new_up)) {
+		//
+		// The interface s still down, so nothing to do
+		//
+		break;
+	    }
+	    if ((! is_old_up) && (is_new_up)) {
+		//
+		// The interface is now up, hence add the route
+		//
+		inform_rib_route_change(static_route);
+		break;
+	    }
+	    if ((is_old_up) && (! is_new_up)) {
+		//
+		// The interface went down, hence cancel all pending requests,
+		// and withdraw the route.
+		//
+		cancel_rib_route_change(static_route);
 
-	if (is_new_up) {
-	    //
-	    // The interface is now up, hence add the route
-	    //
-	    inform_rib_route_change(static_route);
-	} else {
-	    //
-	    // The interface went down, hence cancel all pending requests,
-	    // and withdraw the route.
-	    //
-	    cancel_rib_route_change(static_route);
+		StaticRoute tmp_route(static_route);
+		tmp_route.set_delete_route();	// XXX: mark as deleted route
+		inform_rib_route_change(tmp_route);
+		break;
+	    }
+	    if (is_old_up && is_new_up) {
+		//
+		// The interface remains up, hence probably the interface or
+		// the vif name has changed.
+		//
+		if ((old_ifname == new_ifname) && (old_vifname == new_vifname))
+		    break;
 
-	    StaticRoute tmp_route(static_route);
-	    tmp_route.set_delete_route();	// XXX: mark as deleted route
-	    inform_rib_route_change(tmp_route);
-	}
+		//
+		// Delete the route and then add it again so the information
+		// in the RIB will be updated.
+		//
+		StaticRoute tmp_route(static_route);
+		tmp_route.set_delete_route();	// XXX: mark as deleted route
+		inform_rib_route_change(tmp_route);	// Delete the route
+		inform_rib_route_change(static_route);	// Add the route
+	    }
+	    break;
+	} while (false);
     }
 
     //

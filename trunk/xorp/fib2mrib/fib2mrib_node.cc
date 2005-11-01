@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.24 2005/08/31 01:36:29 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.25 2005/11/01 04:31:00 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -303,10 +303,7 @@ Fib2mribNode::updates_made()
 	 route_iter != _fib2mrib_routes.end();
 	 ++route_iter) {
 	Fib2mribRoute& fib2mrib_route = route_iter->second;
-	bool is_old_interface_up = false;
-	bool is_new_interface_up = false;
-	bool is_old_directly_connected = false;
-	bool is_new_directly_connected = false;
+	bool is_old_up = false;
 	bool is_new_up = false;
 	string old_ifname, old_vifname, new_ifname, new_vifname;
 
@@ -320,51 +317,79 @@ Fib2mribNode::updates_made()
 	    vif_atom = _iftree.find_vif(fib2mrib_route.ifname(),
 					fib2mrib_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		is_old_interface_up = true;
+		is_old_up = true;
 	    vif_atom = ifmgr_iftree().find_vif(fib2mrib_route.ifname(),
 					       fib2mrib_route.vifname());
 	    if ((vif_atom != NULL) && (vif_atom->enabled()))
-		is_new_interface_up = true;
-	}
-	//
-	// Calculate whether the next-hop router was directly connected
-	// before and now.
-	//
-	if (_iftree.is_directly_connected(fib2mrib_route.nexthop(),
-					  old_ifname, old_vifname)) {
-	    is_old_directly_connected = true;
-	}
-	if (ifmgr_iftree().is_directly_connected(fib2mrib_route.nexthop(),
-						 new_ifname, new_vifname)) {
-	    is_new_directly_connected = true;
+		is_new_up = true;
+	} else {
+	    //
+	    // Calculate whether the next-hop router was directly connected
+	    // before and now.
+	    //
+	    if (_iftree.is_directly_connected(fib2mrib_route.nexthop(),
+					      old_ifname,
+					      old_vifname)) {
+		is_old_up = true;
+	    }
+	    if (ifmgr_iftree().is_directly_connected(fib2mrib_route.nexthop(),
+						     new_ifname,
+						     new_vifname)) {
+		is_new_up = true;
+	    }
 	}
 
-	if ((is_old_interface_up == is_new_interface_up)
-	    && (is_old_directly_connected == is_new_directly_connected)) {
+	if ((is_old_up == is_new_up)
+	    && (old_ifname == new_ifname)
+	    && (old_vifname == new_vifname)) {
 	    continue;			// Nothing changed
 	}
 
-	if (is_old_interface_up == is_new_interface_up)
-	    is_new_up = is_new_directly_connected;
-	else
-	    is_new_up = is_new_interface_up;
+	do {
+	    if ((! is_old_up) && (! is_new_up)) {
+		//
+		// The interface s still down, so nothing to do
+		//
+		break;
+	    }
+	    if ((! is_old_up) && (is_new_up)) {
+		//
+		// The interface is now up, hence add the route
+		//
+		inform_rib_route_change(fib2mrib_route);
+		break;
+	    }
+	    if ((is_old_up) && (! is_new_up)) {
+		//
+		// The interface went down, hence cancel all pending requests,
+		// and withdraw the route.
+		//
+		cancel_rib_route_change(fib2mrib_route);
 
-	if (is_new_up) {
-	    //
-	    // The interface is now up, hence add the route
-	    //
-	    inform_rib_route_change(fib2mrib_route);
-	} else {
-	    //
-	    // The interface went down, hence cancel all pending requests,
-	    // and withdraw the route.
-	    //
-	    cancel_rib_route_change(fib2mrib_route);
+		Fib2mribRoute tmp_route(fib2mrib_route);
+		tmp_route.set_delete_route();	// XXX: mark as deleted route
+		inform_rib_route_change(tmp_route);
+		break;
+	    }
+	    if (is_old_up && is_new_up) {
+		//
+		// The interface remains up, hence probably the interface or
+		// the vif name has changed.
+		//
+		if ((old_ifname == new_ifname) && (old_vifname == new_vifname))
+		    break;
 
-	    Fib2mribRoute tmp_route(fib2mrib_route);
-	    tmp_route.set_delete_route();	// XXX: mark as deleted route
-	    inform_rib_route_change(tmp_route);
-	}
+		//
+		// Delete the route and then add it again so the information
+		// in the RIB will be updated.
+		//
+		Fib2mribRoute tmp_route(fib2mrib_route);
+		tmp_route.set_delete_route();	// XXX: mark as deleted route
+		inform_rib_route_change(tmp_route);	 // Delete the route
+		inform_rib_route_change(fib2mrib_route); // Add the route
+	    }
+	    break;
+	} while (false);
     }
 
     //
