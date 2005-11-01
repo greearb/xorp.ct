@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.52 2005/03/30 06:45:42 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.53 2005/10/29 20:33:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -799,7 +799,7 @@ XrlRibTarget::rib_0_1_replace_interface_route6(const string&	    protocol,
 					       const uint32_t&	    metric,
 					       const XrlAtomList&   policytags)
 {
-    debug_msg("replace_interface_route4 protocol: %s unicast: %s multicast: %s "
+    debug_msg("replace_interface_route6 protocol: %s unicast: %s multicast: %s "
 	      "network %s nexthop %s ifname %s vifname %s metric %u\n",
 	      protocol.c_str(),
 	      unicast ? "true" : "false",
