@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.97 2005/10/03 18:34:33 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.98 2005/10/24 18:08:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,15 +54,7 @@ BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
     _handler = NULL;
     _peername = c_format("Peer-%s", peerdata()->iptuple().str().c_str());
 
-    _in_updates = 0;
-    _out_updates = 0;
-    _in_total_messages = 0;
-    _out_total_messages = 0;
-    _last_error[0] = 0;
-    _last_error[1] = 0;
-    _established_transitions = 0;
-    _mainprocess->eventloop().current_time(_established_time);
-    _mainprocess->eventloop().current_time(_in_update_time);
+    zero_stats();
 
     _current_state = _next_state = _activated = false;
 }
@@ -75,6 +67,20 @@ BGPPeer::~BGPPeer()
     for (i = _accept_attempt.begin(); i != _accept_attempt.end(); i++)
 	delete (*i);
     _accept_attempt.clear();
+}
+
+void
+BGPPeer::zero_stats()
+{
+    _in_updates = 0;
+    _out_updates = 0;
+    _in_total_messages = 0;
+    _out_total_messages = 0;
+    _last_error[0] = 0;
+    _last_error[1] = 0;
+    _established_transitions = 0;
+    _mainprocess->eventloop().current_time(_established_time);
+    _mainprocess->eventloop().current_time(_in_update_time);
 }
 
 /*
