@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.37 2005/03/25 02:52:45 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.38 2005/06/29 20:03:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,7 +63,8 @@ int
 DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
 			     PeerHandler *peer_handler,
 			     uint32_t genid) {
-    debug_msg("DecisionTable<A>::add_parent: %p\n", new_parent);
+    debug_msg("DecisionTable<A>::add_parent: %p ID %s\n", new_parent,
+	      cstring(peer_handler->id()));
     if (_parents.find(new_parent)!=_parents.end()) {
 	//the parent is already in the set
 	return -1;
