@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.44 2005/09/01 20:52:19 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.45 2005/10/24 18:40:53 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -72,6 +72,30 @@ public:
     void detach_peer(BGPPeer *p);
 
     /**
+     * attach peer to deleted peerlist
+     *
+     * @param p BGP peer.
+     */
+    void attach_deleted_peer(BGPPeer *p);
+
+    /**
+     * detach peer from the deleted peerlist.
+     *
+     * @param p BGP peer.
+     */
+    void detach_deleted_peer(BGPPeer *p);
+
+    /**
+     * Find peer with this iptuple from the list provided
+     *
+     * @param search iptuple.
+     * @param peers list to search.
+     *
+     * @return A pointer to a peer if one is found NULL otherwise.
+     */
+    BGPPeer *find_peer(const Iptuple& search, list<BGPPeer *>& peers);
+
+    /**
      * Find peer with this iptuple
      *
      * @param search iptuple.
@@ -79,6 +103,15 @@ public:
      * @return A pointer to a peer if one is found NULL otherwise.
      */
     BGPPeer *find_peer(const Iptuple& search);
+
+    /**
+     * Find peer with this iptuple on the deleted peer list.
+     *
+     * @param search iptuple.
+     *
+     * @return A pointer to a peer if one is found NULL otherwise.
+     */
+    BGPPeer *find_deleted_peer(const Iptuple& search);
 
     /**
      * create a new peer and attach it to the peerlist.
@@ -495,7 +528,8 @@ private:
 
 
     bool _exit_loop;
-    BGPPeerList *_peerlist;
+    BGPPeerList *_peerlist;		// List of current BGP peers.
+    BGPPeerList *_deleted_peerlist;	// List of deleted BGP peers.
 
     /**
     * Unicast Routing Table. SAFI = 1.

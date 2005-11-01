@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.55 2005/09/23 17:02:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.56 2005/10/24 18:40:53 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -59,6 +59,7 @@ BGPMain::BGPMain()
     ** we need to finely control the order of destruction.
     */
     _peerlist = new BGPPeerList();
+    _deleted_peerlist = new BGPPeerList();
     _xrl_router = new XrlStdRouter(eventloop(), "bgp");
     _xrl_target = new XrlBgpTarget(_xrl_router, *this);
 
@@ -375,20 +376,29 @@ void
 BGPMain::detach_peer(BGPPeer* peer)
 {
     debug_msg("Peer removed (fd %s)\n", peer->get_sock().str().c_str());
-    _peerlist->remove_peer(peer);
+    _peerlist->detach_peer(peer);
 }
 
-/*
-** Find this peer if it exists.
-*/
+void
+BGPMain::attach_deleted_peer(BGPPeer* peer)
+{
+    debug_msg("Peer added (fd %s)\n", peer->get_sock().str().c_str());
+    _deleted_peerlist->add_peer(peer);
+}
+
+void
+BGPMain::detach_deleted_peer(BGPPeer* peer)
+{
+    debug_msg("Peer removed (fd %s)\n", peer->get_sock().str().c_str());
+    _deleted_peerlist->detach_peer(peer);
+}
+
 BGPPeer *
-BGPMain::find_peer(const Iptuple& search)
+BGPMain::find_peer(const Iptuple& search, list<BGPPeer *>& peers)
 {
     debug_msg("Searching for: %s\n", search.str().c_str());
 
-    list<BGPPeer *>& peers = _peerlist->get_list();
     list<BGPPeer *>::iterator i;
-
     for (i = peers.begin(); i != peers.end(); i++) {
 	const Iptuple& iptuple = (*i)->peerdata()->iptuple();
 	debug_msg("Trying: %s ", iptuple.str().c_str());
@@ -405,6 +415,18 @@ BGPMain::find_peer(const Iptuple& search)
     return 0;
 }
 
+BGPPeer *
+BGPMain::find_peer(const Iptuple& search)
+{
+    return find_peer(search, _peerlist->get_list());
+}
+
+BGPPeer *
+BGPMain::find_deleted_peer(const Iptuple& search)
+{
+    return find_peer(search, _deleted_peerlist->get_list());
+}
+
 bool
 BGPMain::create_peer(BGPPeerData *pd)
 {
@@ -413,6 +435,16 @@ BGPMain::create_peer(BGPPeerData *pd)
     debug_msg("Using local address %s for our nexthop\n",
 	      pd->get_v4_local_addr().str().c_str());
     pd->dump_peer_data();
+
+    // It is possible that a peer that an attempt is being made to
+    // revive a previously dead peer.
+    BGPPeer *p = find_deleted_peer(pd->iptuple());
+    if (0 != p) {
+	p->zero_stats();
+	attach_peer(p);
+	detach_deleted_peer(p);
+	return true;
+    }
 
     /*
     ** Check that we don't already know about this peer.
@@ -428,7 +460,7 @@ BGPMain::create_peer(BGPPeerData *pd)
 
     SocketClient *sock = new SocketClient(pd->iptuple(), eventloop(), md5sig);
 
-    BGPPeer *p = new BGPPeer(&_local_data, pd, sock, this);
+    p = new BGPPeer(&_local_data, pd, sock, this);
     //    sock->set_eventloop(eventloop());
     sock->set_callback(callback(p, &BGPPeer::get_message));
 
@@ -441,20 +473,37 @@ BGPMain::create_peer(BGPPeerData *pd)
 bool
 BGPMain::delete_peer(const Iptuple& iptuple)
 {
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
     if (!disable_peer(iptuple))
 	return false;
 
     /* XXX - Atanu
     **
-    ** We would like to detach the peer from the peerlist at this
-    ** point. However the call to disable_peer is not synchronous,
-    ** it will cause a cease to be sent. We could set some state in
-    ** the peer so that the when the cease is sent the peer can remove
-    ** itself.
+    ** A request has been made to delete this peer unfortunately
+    ** disabling a peer is not synchronous. A cease notification needs
+    ** to be sent to the peer if the session is established. Free'ing
+    ** the memory for the peer will stop the notification message
+    ** being sent. Plus there may be issues in tear down all the plumbing.
     **
-    ** For the moment the peer is kept in the list.
+    ** Move the deleted peer onto the deleted peer list and revive the
+    ** peer if an attempt is made to create the peer again. Care
+    ** should also be taken if the iptuple parameters are changed to
+    ** check that a deleted peer is not matched.
     **
+    ** Currently the peers on the deleted peer list are not garbage
+    ** collected. A callback should be implemented from the peer that
+    ** notifies this class that the peer can be deleted once the
+    ** unplumbing concerns are addressed.
     */
+    attach_deleted_peer(peer);
+
+    detach_peer(peer);
 
     return true;
 }
