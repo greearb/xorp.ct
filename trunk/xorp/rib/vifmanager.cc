@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.37 2005/03/25 02:54:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.38 2005/05/16 19:08:08 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -315,7 +315,25 @@ VifManager::updates_made()
     _iftree = ifmgr_iftree();
 
     //
-    // Add new vifs, and update existing ones
+    // Remove vifs that don't exist anymore
+    //
+    for (ifmgr_iface_iter = _old_iftree.ifs().begin();
+	 ifmgr_iface_iter != _old_iftree.ifs().end();
+	 ++ifmgr_iface_iter) {
+	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+	const string& ifmgr_iface_name = ifmgr_iface.name();
+	if (_iftree.find_vif(ifmgr_iface_name, ifmgr_iface_name) == NULL) {
+	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("Cannot delete vif %s from the set of configured "
+			   "vifs: %s",
+			   ifmgr_iface_name.c_str(), error_msg.c_str());
+	    }
+	}
+    }
+
+    //
+    // Add new vifs, update existing ones and remove old addresses
     //
     for (ifmgr_iface_iter = _iftree.ifs().begin();
 	 ifmgr_iface_iter != _iftree.ifs().end();
@@ -369,127 +387,6 @@ VifManager::updates_made()
 	    }
 
 	    //
-	    // Add new vif addresses, and update existing ones
-	    //
-	    for (a4_iter = ifmgr_vif.ipv4addrs().begin();
-		 a4_iter != ifmgr_vif.ipv4addrs().end();
-		 ++a4_iter) {
-		const IfMgrIPv4Atom& a4 = a4_iter->second;
-		const IPv4& addr = a4.addr();
-
-		const IfMgrIPv4Atom* old_a4_ptr = NULL;
-		if (old_ifmgr_vif_ptr != NULL)
-		    old_a4_ptr = old_ifmgr_vif_ptr->find_addr(addr);
-		if ((old_a4_ptr != NULL) && (*old_a4_ptr == a4))
-		    continue;		// Nothing changed
-
-		IPv4Net subnet_addr(addr, a4.prefix_len());
-		IPv4 broadcast_addr(IPv4::ZERO());
-		IPv4 peer_addr(IPv4::ZERO());
-		if (a4.has_broadcast())
-		    broadcast_addr = a4.broadcast_addr();
-		if (a4.has_endpoint())
-		    peer_addr = a4.endpoint_addr();
-
-		if (old_a4_ptr != NULL) {
-		    // Delete the old address so it can be replaced
-		    if (_rib_manager->delete_vif_address(ifmgr_vif_name,
-							 addr,
-							 error_msg)
-			!= XORP_OK) {
-			XLOG_ERROR("Cannot delete address %s "
-				   "for vif %s: %s",
-				   addr.str().c_str(),
-				   ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-
-		if (old_ifmgr_vif_ptr != NULL) {
-		    if (_rib_manager->add_vif_address(ifmgr_vif_name,
-						      addr,
-						      subnet_addr,
-						      broadcast_addr,
-						      peer_addr,
-						      error_msg)
-			!= XORP_OK) {
-			XLOG_ERROR("Cannot add address %s to vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(addr), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		} else {
-		    vif.add_address(IPvX(addr),
-				    IPvXNet(subnet_addr),
-				    IPvX(broadcast_addr),
-				    IPvX(peer_addr));
-		}
-	    }
-
-	    for (a6_iter = ifmgr_vif.ipv6addrs().begin();
-		 a6_iter != ifmgr_vif.ipv6addrs().end();
-		 ++a6_iter) {
-		const IfMgrIPv6Atom& a6 = a6_iter->second;
-		const IPv6& addr = a6.addr();
-
-		const IfMgrIPv6Atom* old_a6_ptr = NULL;
-		if (old_ifmgr_vif_ptr != NULL)
-		    old_a6_ptr = old_ifmgr_vif_ptr->find_addr(addr);
-		if ((old_a6_ptr != NULL) && (*old_a6_ptr == a6))
-		    continue;		// Nothing changed
-
-		IPv6Net subnet_addr(addr, a6.prefix_len());
-		IPv6 peer_addr(IPv6::ZERO());
-		if (a6.has_endpoint())
-		    peer_addr = a6.endpoint_addr();
-
-		if (old_a6_ptr != NULL) {
-		    // Delete the old address so it can be replaced
-		    if (_rib_manager->delete_vif_address(ifmgr_vif_name,
-							 addr,
-							 error_msg)
-			!= XORP_OK) {
-			XLOG_ERROR("Cannot delete address %s "
-				   "for vif %s: %s",
-				   addr.str().c_str(),
-				   ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-
-		if (old_ifmgr_vif_ptr != NULL) {
-		    if (_rib_manager->add_vif_address(ifmgr_vif_name,
-						      addr,
-						      subnet_addr,
-						      peer_addr,
-						      error_msg)
-			!= XORP_OK) {
-			XLOG_ERROR("Cannot add address %s to vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(addr), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		} else {
-		    vif.add_address(IPvX(addr),
-				    IPvXNet(subnet_addr),
-				    IPvX(IPv6::ZERO()),
-				    IPvX(peer_addr));
-		}
-	    }
-
-	    //
-	    // Add a new vif
-	    //
-	    if (old_ifmgr_vif_ptr == NULL) {
-		if (_rib_manager->new_vif(ifmgr_vif_name, vif, error_msg)
-		    != XORP_OK) {
-		    XLOG_ERROR("Cannot add vif %s to the set of configured "
-			       "vifs: %s",
-			       ifmgr_vif_name.c_str(), error_msg.c_str());
-		}
-	    }
-
-	    //
 	    // Delete vif addresses that don't exist anymore
 	    //
 	    if (old_ifmgr_vif_ptr != NULL) {
@@ -537,26 +434,135 @@ VifManager::updates_made()
 		    }
 		}
 	    }
+
+	    //
+	    // Add a new vif
+	    //
+	    if (old_ifmgr_vif_ptr == NULL) {
+		if (_rib_manager->new_vif(ifmgr_vif_name, vif, error_msg)
+		    != XORP_OK) {
+		    XLOG_ERROR("Cannot add vif %s to the set of configured "
+			       "vifs: %s",
+			       ifmgr_vif_name.c_str(), error_msg.c_str());
+		}
+	    }
 	}
     }
 
     //
-    // Remove vifs that don't exist anymore
+    // Add new vif addresses, and update existing ones
     //
-    for (ifmgr_iface_iter = _old_iftree.ifs().begin();
-	 ifmgr_iface_iter != _old_iftree.ifs().end();
+    for (ifmgr_iface_iter = _iftree.ifs().begin();
+	 ifmgr_iface_iter != _iftree.ifs().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
 	const string& ifmgr_iface_name = ifmgr_iface.name();
-	if (_iftree.find_vif(ifmgr_iface_name, ifmgr_iface_name) == NULL) {
-	    if (_rib_manager->delete_vif(ifmgr_iface_name, error_msg)
-		!= XORP_OK) {
-		XLOG_ERROR("Cannot delete vif %s from the set of configured "
-			   "vifs: %s",
-			   ifmgr_iface_name.c_str(), error_msg.c_str());
+
+	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
+	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
+	     ++ifmgr_vif_iter) {
+	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
+	    const string& ifmgr_vif_name = ifmgr_vif.name();
+
+	    const IfMgrVifAtom* old_ifmgr_vif_ptr;
+	    old_ifmgr_vif_ptr = _old_iftree.find_vif(ifmgr_iface_name,
+						     ifmgr_vif_name);
+
+	    for (a4_iter = ifmgr_vif.ipv4addrs().begin();
+		 a4_iter != ifmgr_vif.ipv4addrs().end();
+		 ++a4_iter) {
+		const IfMgrIPv4Atom& a4 = a4_iter->second;
+		const IPv4& addr = a4.addr();
+
+		const IfMgrIPv4Atom* old_a4_ptr = NULL;
+		if (old_ifmgr_vif_ptr != NULL)
+		    old_a4_ptr = old_ifmgr_vif_ptr->find_addr(addr);
+		if ((old_a4_ptr != NULL) && (*old_a4_ptr == a4))
+		    continue;		// Nothing changed
+
+		IPv4Net subnet_addr(addr, a4.prefix_len());
+		IPv4 broadcast_addr(IPv4::ZERO());
+		IPv4 peer_addr(IPv4::ZERO());
+		if (a4.has_broadcast())
+		    broadcast_addr = a4.broadcast_addr();
+		if (a4.has_endpoint())
+		    peer_addr = a4.endpoint_addr();
+
+		if (old_a4_ptr != NULL) {
+		    // Delete the old address so it can be replaced
+		    if (_rib_manager->delete_vif_address(ifmgr_vif_name,
+							 addr,
+							 error_msg)
+			!= XORP_OK) {
+			XLOG_ERROR("Cannot delete address %s "
+				   "for vif %s: %s",
+				   addr.str().c_str(),
+				   ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+
+		if (_rib_manager->add_vif_address(ifmgr_vif_name,
+						  addr,
+						  subnet_addr,
+						  broadcast_addr,
+						  peer_addr,
+						  error_msg)
+		    != XORP_OK) {
+		    XLOG_ERROR("Cannot add address %s to vif %s from "
+			       "the set of configured vifs: %s",
+			       cstring(addr), ifmgr_vif_name.c_str(),
+			       error_msg.c_str());
+		}
+	    }
+
+	    for (a6_iter = ifmgr_vif.ipv6addrs().begin();
+		 a6_iter != ifmgr_vif.ipv6addrs().end();
+		 ++a6_iter) {
+		const IfMgrIPv6Atom& a6 = a6_iter->second;
+		const IPv6& addr = a6.addr();
+
+		const IfMgrIPv6Atom* old_a6_ptr = NULL;
+		if (old_ifmgr_vif_ptr != NULL)
+		    old_a6_ptr = old_ifmgr_vif_ptr->find_addr(addr);
+		if ((old_a6_ptr != NULL) && (*old_a6_ptr == a6))
+		    continue;		// Nothing changed
+
+		IPv6Net subnet_addr(addr, a6.prefix_len());
+		IPv6 peer_addr(IPv6::ZERO());
+		if (a6.has_endpoint())
+		    peer_addr = a6.endpoint_addr();
+
+		if (old_a6_ptr != NULL) {
+		    // Delete the old address so it can be replaced
+		    if (_rib_manager->delete_vif_address(ifmgr_vif_name,
+							 addr,
+							 error_msg)
+			!= XORP_OK) {
+			XLOG_ERROR("Cannot delete address %s "
+				   "for vif %s: %s",
+				   addr.str().c_str(),
+				   ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+
+		if (_rib_manager->add_vif_address(ifmgr_vif_name,
+						  addr,
+						  subnet_addr,
+						  peer_addr,
+						  error_msg)
+		    != XORP_OK) {
+		    XLOG_ERROR("Cannot add address %s to vif %s from "
+			       "the set of configured vifs: %s",
+			       cstring(addr), ifmgr_vif_name.c_str(),
+			       error_msg.c_str());
+		}
 	    }
 	}
     }
+
+    _rib_manager->urib4().print_vifs();
 }
 
 void
