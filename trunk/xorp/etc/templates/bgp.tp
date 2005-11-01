@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.58 2005/10/25 21:25:50 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.59 2005/11/01 08:31:07 atanu Exp $ */
 
 protocols {
     bgp {
@@ -147,14 +147,16 @@ protocols {
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
+/*
 	    peer-port {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/change_peer_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_peer_port:u32=$(@)";
 	    }
-
+*/
+/*
 	    local-port {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_port?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_port:u32=$(@)";
 	    }
-
+*/
 	    local-ip {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/change_local_ip?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&new_local_ip:txt=$(@)";
 	    }
