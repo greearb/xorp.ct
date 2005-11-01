@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.6 2005/09/04 18:35:50 abittau Exp $"
+#ident "$XORP: xorp/rip/rip_varrw.cc,v 1.7 2005/10/02 22:21:57 abittau Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xorp.h"
@@ -44,6 +44,8 @@ Element*
 RIPVarRW<A>::single_read(const Id& /* id */)
 {
     XLOG_UNREACHABLE();
+
+    return 0;
 }
 
 template <class A>
