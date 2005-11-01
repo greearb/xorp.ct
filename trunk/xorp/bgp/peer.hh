@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.24 2005/09/23 17:02:55 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.25 2005/11/01 01:38:15 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -77,6 +77,18 @@ public:
      * Zero all the stats counters.
      */
     void zero_stats();
+
+    /**
+     * Replace the old peerdata with a new copy. It is the
+     * responsiblity of the caller to free the memory.
+     */
+    BGPPeerData *swap_peerdata(BGPPeerData *pd) {
+	BGPPeerData *tmp = _peerdata;
+	_peerdata = pd;
+
+	return tmp;
+    }
+
     void connected(XorpFd s);
     void remove_accept_attempt(AcceptSession *conn);
     SocketClient *swap_sockets(SocketClient *new_sock);
