@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.57 2005/10/25 21:22:30 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.58 2005/10/25 21:25:50 atanu Exp $ */
 
 protocols {
     bgp {
@@ -13,7 +13,7 @@ protocols {
 	    as: u32;
 	    next-hop: ipv4;
 	    next-hop6: ipv6;
-	    holdtime: u32 = 120;
+	    holdtime: u32 = 90;
 	    disable: bool = false;
 	    enabled: bool;			/* %deprecated */
 
