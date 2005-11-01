@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.7 2004/06/10 22:41:03 hodson Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_replicator.hh,v 1.8 2005/03/25 02:53:23 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
 #define __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__
@@ -61,11 +61,38 @@ public:
     void push(const Cmd& cmd);
 
     /**
+     * Schedule the next Xrl dispatch.
+     */
+    void crank_replicator();
+
+    /**
      * Accessor for xrl target name.
      */
     inline const string& xrl_target_name() const	{ return _tgt; }
 
+    /**
+     * Test whether the queue with the commands is empty.
+     *
+     * @return trie if the queue with the commans is empty, otherwise false.
+     */
+    bool is_empty_queue() const { return (_queue.empty() == true); }
+
 protected:
+    /**
+     * Method invoked when it is time to schedule the next Xrl dispatch.
+     */
+    virtual void crank_manager();
+
+    /**
+     * Method invoked when the previous Xrl dispatch has completed.
+     */
+    virtual void crank_manager_cb();
+
+    /**
+     * Method invoked when a command should be added to the manager's queue.
+     */
+    virtual void push_manager_queue();
+
     /**
      * Method invoked when an Xrl dispatch fails.
      */
@@ -88,7 +115,6 @@ protected:
     IfMgrXrlReplicator& operator=(const IfMgrXrlReplicator&);
 
 private:
-    void crank();
     void xrl_cb(const XrlError& e);
 
 protected:
@@ -119,6 +145,21 @@ public:
 			      const string&		 target_name);
 
 protected:
+    /**
+     * Method invoked when it is time to schedule the next Xrl dispatch.
+     */
+    void crank_manager();
+
+    /**
+     * Method invoked when the previous Xrl dispatch has completed.
+     */
+    void crank_manager_cb();
+
+    /**
+     * Method invoked when a command should be added to the manager's queue.
+     */
+    void push_manager_queue();
+
     void xrl_error_event(const XrlError& e);
 
 private:
@@ -164,6 +205,21 @@ public:
      */
     void push(const Cmd& c);
 
+    /**
+     * Method invoked when it is time to schedule the next Xrl dispatch.
+     */
+    void crank_replicators_queue();
+
+    /**
+     * Method invoked when the previous Xrl dispatch has completed.
+     */
+    void crank_replicators_queue_cb();
+
+    /**
+     * Method invoked when a command should be added to the manager's queue.
+     */
+    void push_manager_queue(IfMgrManagedXrlReplicator* r);
+
     inline const IfMgrIfTree& iftree() const		{ return _iftree; }
 
 private:
@@ -172,6 +228,7 @@ private:
     IfMgrIfTree _iftree;
     XrlRouter&	_rtr;
     Outputs	_outputs;
+    Outputs	_replicators_queue;	// Cmd queue with ordered replicators
 };
 
 #endif // __LIBFEACLIENT_IFMGR_XRL_REPLICATOR_HH__

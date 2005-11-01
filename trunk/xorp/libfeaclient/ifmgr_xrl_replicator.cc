@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.9 2005/03/25 02:53:23 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.11 2005/08/18 15:34:24 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,15 +39,16 @@ IfMgrXrlReplicator::push(const Cmd& cmd)
     if (_queue.empty()) {
 	XLOG_ASSERT(_pending == false);
 	_queue.push(cmd);
-	crank();
+	push_manager_queue();
+	crank_manager();
     } else {
-	XLOG_ASSERT(_pending == true);
 	_queue.push(cmd);
+	push_manager_queue();
     }
 }
 
 void
-IfMgrXrlReplicator::crank()
+IfMgrXrlReplicator::crank_replicator()
 {
     if (_pending)
 	return;
@@ -75,7 +76,7 @@ IfMgrXrlReplicator::xrl_cb(const XrlError& err)
     _queue.pop_front();
 
     if (err == XrlError::OKAY()) {
-	crank();
+	crank_manager_cb();
 	return;
     }
 
@@ -87,6 +88,35 @@ IfMgrXrlReplicator::xrl_cb(const XrlError& err)
 	XLOG_FATAL("Remote and local trees out of sync.  Programming bug.");
     }
     xrl_error_event(err);
+}
+
+//
+// XXX: note that this method may be overwritten by
+// IfMgrManagedXrlReplicator::crank_manager()
+//
+void
+IfMgrXrlReplicator::crank_manager()
+{
+    crank_replicator();
+}
+
+//
+// XXX: note that this method may be overwritten by
+// IfMgrManagedXrlReplicator::crank_manager_cb()
+//
+void
+IfMgrXrlReplicator::crank_manager_cb()
+{
+    crank_replicator();
+}
+
+//
+// XXX: note that this method may be overwritten by
+// IfMgrManagedXrlReplicator::push_manager_queue()
+//
+void
+IfMgrXrlReplicator::push_manager_queue()
+{
 }
 
 void
@@ -103,8 +133,27 @@ IfMgrManagedXrlReplicator::IfMgrManagedXrlReplicator
  XrlSender&			s,
  const string&			n
  )
-    : IfMgrXrlReplicator(s,n), _mgr(m)
+    : IfMgrXrlReplicator(s, n), _mgr(m)
 {
+}
+
+void
+IfMgrManagedXrlReplicator::crank_manager()
+{
+    _mgr.crank_replicators_queue();
+}
+
+void
+IfMgrManagedXrlReplicator::crank_manager_cb()
+{
+    _mgr.crank_replicators_queue_cb();
+}
+
+
+void
+IfMgrManagedXrlReplicator::push_manager_queue()
+{
+    _mgr.push_manager_queue(this);
 }
 
 void
@@ -151,7 +200,19 @@ IfMgrXrlReplicationManager::add_mirror(const string& target_name)
 bool
 IfMgrXrlReplicationManager::remove_mirror(const string& target_name)
 {
-    for (Outputs::iterator i = _outputs.begin(); i != _outputs.end(); ++i) {
+    Outputs::iterator i;
+
+    // Remove all pending commands for this target
+    for (i = _replicators_queue.begin(); i != _replicators_queue.end(); ) {
+	IfMgrManagedXrlReplicator* r = *i;
+	Outputs::iterator i2 = i;
+	++i;
+	if (r->xrl_target_name() == target_name)
+	    _replicators_queue.erase(i2);
+    }
+
+    // Remove the target itself
+    for (i = _outputs.begin(); i != _outputs.end(); ++i) {
 	if ((*i)->xrl_target_name() == target_name) {
 	    delete *i;
 	    _outputs.erase(i);
@@ -172,4 +233,52 @@ IfMgrXrlReplicationManager::push(const Cmd& cmd)
     for (Outputs::iterator i = _outputs.begin(); _outputs.end() != i; ++i) {
 	(*i)->push(cmd);
     }
+}
+
+void
+IfMgrXrlReplicationManager::crank_replicators_queue()
+{
+    do {
+	if (_replicators_queue.empty())
+	    return;
+	IfMgrManagedXrlReplicator* r = _replicators_queue.front();
+
+	if (r->is_empty_queue()) {
+	    _replicators_queue.pop_front();
+	    continue;
+	}
+
+	//
+	// XXX: we ignore the check the replicator is pending, because
+	// this case should be considered by the crank_replicator() method.
+	//
+	r->crank_replicator();
+	return;
+    } while (true);
+}
+
+void
+IfMgrXrlReplicationManager::crank_replicators_queue_cb()
+{
+    XLOG_ASSERT(_replicators_queue.empty() == false);
+
+    _replicators_queue.pop_front();
+
+    crank_replicators_queue();
+}
+
+void
+IfMgrXrlReplicationManager::push_manager_queue(IfMgrManagedXrlReplicator* r)
+{
+    //
+    // This is a centralized queue with the ordered replicators.
+    // For each command that is to be send the replicator is listed
+    // in this queue.
+    // We need this centralized queue mechanish to ensure that the targets
+    // receive the commands in the order they were registered.
+    // Otherwise, there could be a race condition if some of the targets
+    // try to communicate with each other immediately after they receive
+    // the updates.
+    //
+    _replicators_queue.push_back(r);
 }
