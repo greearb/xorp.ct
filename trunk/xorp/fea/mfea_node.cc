@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.56 2005/08/18 15:45:49 bms Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.57 2005/09/28 17:31:42 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -415,7 +415,7 @@ MfeaNode::updates_made()
     }
     
     //
-    // Add new vifs, and update existing ones
+    // Add new vifs, update existing ones and remove old addresses
     //
     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
     for (ifmgr_iface_iter = _iftree.ifs().begin();
@@ -515,10 +515,30 @@ MfeaNode::updates_made()
 		    }
 		}
 	    }
+	}
+    }
 
-	    //
-	    // Add new vif addresses, and update existing ones
-	    //
+    //
+    // Add new vif addresses, and update existing ones
+    //
+    for (ifmgr_iface_iter = _iftree.ifs().begin();
+	 ifmgr_iface_iter != _iftree.ifs().end();
+	 ++ifmgr_iface_iter) {
+	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
+
+	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
+	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
+	     ++ifmgr_vif_iter) {
+	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
+	    const string& ifmgr_vif_name = ifmgr_vif.name();
+	    Vif* node_vif = NULL;
+	
+	    mfea_vif_iter = configured_vifs().find(ifmgr_vif_name);
+	    if (mfea_vif_iter != configured_vifs().end()) {
+		node_vif = &(mfea_vif_iter->second);
+	    }
+
 	    if (is_ipv4()) {
 		IfMgrVifAtom::V4Map::const_iterator a4_iter;
 
