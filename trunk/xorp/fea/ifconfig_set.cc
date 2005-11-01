@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.34 2005/10/18 01:03:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.35 2005/10/18 05:04:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -298,6 +298,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
     // Set the MTU
     //
     do {
+	bool was_disabled = false;
 	uint32_t new_mtu = i.mtu();
 	uint32_t pulled_mtu = 0;
 	IfTree::IfMap::const_iterator ii = ifc().pulled_config().get_if(i.ifname());
@@ -316,14 +317,36 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	if (is_primary() && (new_mtu == pulled_mtu))
 	    break;		// Ignore: the MTU hasn't changed
 
+	if (is_primary()
+	    && (ii != ifc().pulled_config().ifs().end())
+	    && new_up) {
+	    //
+	    // XXX: Set the interface DOWN otherwise we may not be able to
+	    // set the MTU (limitation imposed by the Linux kernel).
+	    //
+	    config_interface(i.ifname(), if_index, new_flags & ~IFF_UP, false,
+			     deleted, error_msg);
+	    was_disabled = true;
+	}
+
 	if (set_interface_mtu(i.ifname(), if_index, new_mtu, error_msg) < 0) {
 	    error_msg = c_format("Failed to set MTU to %u bytes: %s",
 				 XORP_UINT_CAST(new_mtu),
 				 error_msg.c_str());
 	    ifc().er().interface_error(i.name(), error_msg);
 	    XLOG_ERROR("%s", ifc().er().last_error().c_str());
+	    if (was_disabled) {
+		config_interface(i.ifname(), if_index, new_flags, true,
+				 deleted, error_msg);
+	    }
 	    return;
 	}
+
+	if (was_disabled) {
+	    config_interface(i.ifname(), if_index, new_flags, true,
+			     deleted, error_msg);
+	}
+
 	break;
     } while (false);
 
