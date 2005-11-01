@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.20 2005/10/16 07:10:37 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.21 2005/10/18 01:25:45 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -154,9 +154,16 @@ public:
      * considered as directly connected.
      * 
      * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
+     * @param vifname the return-by-reference name of the vif toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
      * @return true if the address is directly connected, otherwise false.
      */
-    bool is_directly_connected(const IPv4& addr) const;
+    bool is_directly_connected(const IPv4& addr, string& ifname,
+			       string& vifname) const;
 
     /**
      * Test if an IPv6 address is directly connected to an interface.
@@ -165,9 +172,16 @@ public:
      * considered as directly connected.
      * 
      * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
+     * @param vifname the return-by-reference name of the vif toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
      * @return true if the address is directly connected, otherwise false.
      */
-    bool is_directly_connected(const IPv6& addr) const;
+    bool is_directly_connected(const IPv6& addr, string& ifname,
+			       string& vifname) const;
 
     /**
      * Test if an IPvX address is directly connected to an interface.
@@ -176,9 +190,16 @@ public:
      * considered as directly connected.
      * 
      * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
+     * @param vifname the return-by-reference name of the vif toward
+     * the address if the address is directly connected otherwise an empty
+     * string.
      * @return true if the address is directly connected, otherwise false.
      */
-    bool is_directly_connected(const IPvX& addr) const;
+    bool is_directly_connected(const IPvX& addr, string& ifname,
+			       string& vifname) const;
 
 protected:
     IfMap _ifs;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.10 2005/08/31 00:41:39 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.11 2005/10/16 07:10:37 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -197,7 +197,8 @@ IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 }
 
 bool
-IfMgrIfTree::is_directly_connected(const IPv4& addr) const
+IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
+				   string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
@@ -230,29 +231,40 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr) const
 		    continue;
 
 		// Test if my own address
-		if (a4.addr() == addr)
+		if (a4.addr() == addr) {
+		    ifname = iface.name();
+		    vifname = vif.name();
 		    return (true);
+		}
 
 		// Test if p2p address
 		if (a4.has_endpoint()) {
-		    if (a4.endpoint_addr() == addr)
+		    if (a4.endpoint_addr() == addr) {
+			ifname = iface.name();
+			vifname = vif.name();
 			return (true);
+		    }
 		}
 
 		// Test if same subnet
 		if (IPv4Net(addr, a4.prefix_len())
 		    == IPv4Net(a4.addr(), a4.prefix_len())) {
+		    ifname = iface.name();
+		    vifname = vif.name();
 		    return (true);
 		}
 	    }
 	}
     }
 
+    ifname = "";
+    vifname = "";
     return (false);
 }
 
 bool
-IfMgrIfTree::is_directly_connected(const IPv6& addr) const
+IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
+				   string& vifname) const
 {
     IfMgrIfTree::IfMap::const_iterator if_iter;
 
@@ -285,38 +297,49 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr) const
 		    continue;
 
 		// Test if my own address
-		if (a6.addr() == addr)
+		if (a6.addr() == addr) {
+		    ifname = iface.name();
+		    vifname = vif.name();
 		    return (true);
+		}
 
 		// Test if p2p address
 		if (a6.has_endpoint()) {
-		    if (a6.endpoint_addr() == addr)
+		    if (a6.endpoint_addr() == addr) {
+			ifname = iface.name();
+			vifname = vif.name();
 			return (true);
+		    }
 		}
 
 		// Test if same subnet
 		if (IPv6Net(addr, a6.prefix_len())
 		    == IPv6Net(a6.addr(), a6.prefix_len())) {
+		    ifname = iface.name();
+		    vifname = vif.name();
 		    return (true);
 		}
 	    }
 	}
     }
 
+    ifname = "";
+    vifname = "";
     return (false);
 }
 
 bool
-IfMgrIfTree::is_directly_connected(const IPvX& addr) const
+IfMgrIfTree::is_directly_connected(const IPvX& addr, string& ifname,
+				   string& vifname) const
 {
     if (addr.is_ipv4()) {
 	IPv4 addr4 = addr.get_ipv4();
-	return (is_directly_connected(addr4));
+	return (is_directly_connected(addr4, ifname, vifname));
     }
 
     if (addr.is_ipv6()) {
 	IPv6 addr6 = addr.get_ipv6();
-	return (is_directly_connected(addr6));
+	return (is_directly_connected(addr6, ifname, vifname));
     }
 
     return (false);

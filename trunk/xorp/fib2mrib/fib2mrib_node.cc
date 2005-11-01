@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.23 2005/07/08 02:06:20 abittau Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.24 2005/08/31 01:36:29 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -308,6 +308,7 @@ Fib2mribNode::updates_made()
 	bool is_old_directly_connected = false;
 	bool is_new_directly_connected = false;
 	bool is_new_up = false;
+	string old_ifname, old_vifname, new_ifname, new_vifname;
 
 	update_route(ifmgr_iftree(), fib2mrib_route);
 
@@ -329,10 +330,14 @@ Fib2mribNode::updates_made()
 	// Calculate whether the next-hop router was directly connected
 	// before and now.
 	//
-	if (_iftree.is_directly_connected(fib2mrib_route.nexthop()))
+	if (_iftree.is_directly_connected(fib2mrib_route.nexthop(),
+					  old_ifname, old_vifname)) {
 	    is_old_directly_connected = true;
-	if (ifmgr_iftree().is_directly_connected(fib2mrib_route.nexthop()))
+	}
+	if (ifmgr_iftree().is_directly_connected(fib2mrib_route.nexthop(),
+						 new_ifname, new_vifname)) {
 	    is_new_directly_connected = true;
+	}
 
 	if ((is_old_interface_up == is_new_interface_up)
 	    && (is_old_directly_connected == is_new_directly_connected)) {
@@ -930,7 +935,8 @@ Fib2mribNode::inform_rib(const Fib2mribRoute& route)
 	if ((vif_atom != NULL) && (vif_atom->enabled()))
 	    inform_rib_route_change(route);
     } else {
-	if (_iftree.is_directly_connected(route.nexthop()))
+	string ifname, vifname;
+	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname))
 	    inform_rib_route_change(route);
     }
 }

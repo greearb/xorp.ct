@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.26 2005/07/08 02:06:25 abittau Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.27 2005/08/31 01:37:34 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -308,6 +308,7 @@ StaticRoutesNode::updates_made()
 	bool is_old_directly_connected = false;
 	bool is_new_directly_connected = false;
 	bool is_new_up = false;
+	string old_ifname, old_vifname, new_ifname, new_vifname;
 
 	if (static_route.is_interface_route()) {
 	    //
@@ -327,10 +328,14 @@ StaticRoutesNode::updates_made()
 	// Calculate whether the next-hop router was directly connected
 	// before and now.
 	//
-	if (_iftree.is_directly_connected(static_route.nexthop()))
+	if (_iftree.is_directly_connected(static_route.nexthop(),
+					  old_ifname, old_vifname)) {
 	    is_old_directly_connected = true;
-	if (ifmgr_iftree().is_directly_connected(static_route.nexthop()))
+	}
+	if (ifmgr_iftree().is_directly_connected(static_route.nexthop(),
+						 new_ifname, new_vifname)) {
 	    is_new_directly_connected = true;
+	}
 
 	if ((is_old_interface_up == is_new_interface_up)
 	    && (is_old_directly_connected == is_new_directly_connected)) {
@@ -860,7 +865,8 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 	if ((vif_atom != NULL) && (vif_atom->enabled()))
 	    inform_rib_route_change(route);
     } else {
-	if (_iftree.is_directly_connected(route.nexthop()))
+	string ifname, vifname;
+	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname))
 	    inform_rib_route_change(route);
     }
 }
