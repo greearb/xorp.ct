@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.96 2005/10/26 20:17:20 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.97 2005/10/28 02:08:23 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -305,18 +305,19 @@ ConfigTreeNode::add_default_children()
     for (tci = _template_tree_node->children().begin();
 	 tci != _template_tree_node->children().end();
 	 ++tci) {
-	if ((*tci)->has_default()) {
-	    if (childrens_templates.find(*tci) == childrens_templates.end()) {
+	TemplateTreeNode* ttn = *tci;
+	if (ttn->has_default()) {
+	    if (childrens_templates.find(ttn) == childrens_templates.end()) {
 		string error_msg;
-		string name = (*tci)->segname();
+		string name = ttn->segname();
 		string path = _path + " " + name;
-		ConfigTreeNode *new_node = create_node(name, path, *tci,
+		ConfigTreeNode *new_node = create_node(name, path, ttn,
 						       this, 
 						       ConfigNodeId::ZERO(),
 						       _user_id,
 						       _clientid,
 						       _verbose);
-		if (new_node->set_value((*tci)->default_str(), _user_id,
+		if (new_node->set_value(ttn->default_str(), _user_id,
 					error_msg)
 		    != true) {
 		    XLOG_FATAL("Cannot set default value: %s",
@@ -341,6 +342,12 @@ ConfigTreeNode::recursive_add_default_children()
     }
 
     add_default_children();
+}
+
+bool
+ConfigTreeNode::check_allowed_value(string& error_msg) const
+{
+    return (check_allowed_value(_value, error_msg));
 }
 
 bool 
@@ -379,19 +386,26 @@ ConfigTreeNode::check_allowed_operator(const string& value,
 }
 
 bool
-ConfigTreeNode::set_value(const string &value, uid_t user_id,
+ConfigTreeNode::set_value(const string& value, uid_t user_id,
 			  string& error_msg)
 {
     if (check_allowed_value(value, error_msg) != true)
 	return false;
 
+    set_value_without_verification(value, user_id);
+
+    return true;
+}
+
+void
+ConfigTreeNode::set_value_without_verification(const string& value,
+					       uid_t user_id)
+{
     _value = value;
     _has_value = true;
     _value_committed = false;
     _user_id = user_id;
     TimerList::system_gettimeofday(&_modification_time);
-
-    return true;
 }
 
 bool
