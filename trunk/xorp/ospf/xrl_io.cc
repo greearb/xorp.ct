@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.19 2005/10/20 00:27:43 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.20 2005/10/31 07:58:40 atanu Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -338,10 +338,36 @@ XrlIO<A>::disable_interface_vif_cb(const XrlError& xrl_error, string interface,
     }
 }
 
+template <typename A>
+bool
+XrlIO<A>::is_interface_enabled(const string& interface) const
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    if (fi == NULL)
+	return false;
+
+    return (fi->enabled());
+}
+
+template <typename A>
+bool
+XrlIO<A>::is_vif_enabled(const string& interface, const string& vif) const
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    return (fv->enabled());
+}
+
 template <>
 bool
-XrlIO<IPv4>::enabled(const string& interface, const string& vif,
-		     IPv4 address)
+XrlIO<IPv4>::is_address_enabled(const string& interface, const string& vif,
+				const IPv4& address) const
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
@@ -357,8 +383,8 @@ XrlIO<IPv4>::enabled(const string& interface, const string& vif,
 
 template <>
 bool
-XrlIO<IPv6>::enabled(const string& interface, const string& vif,
-		     IPv6 address)
+XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
+				const IPv6& address) const
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
@@ -1024,82 +1050,148 @@ XrlIO<IPv4>::updates_made()
     IfMgrIfAtom::VifMap::const_iterator vi;
     IfMgrVifAtom::V4Map::const_iterator ai;
     const IfMgrIfAtom* if_atom;
+    const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;
+    const IfMgrVifAtom* other_vif_atom;
     const IfMgrIPv4Atom* addr_atom;
     const IfMgrIPv4Atom* other_addr_atom;
 
-    if (_interface_status_cb.is_empty())
-	return;		// XXX: no callback to invoke
-
     //
-    // Check whether all old addresses are still there
+    // Check whether the old interfaces, vifs and addresses are still there
     //
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	bool is_old_interface_enabled = false;
+	bool is_new_interface_enabled = false;
+	bool is_old_vif_enabled = false;
+	bool is_new_vif_enabled = false;
+	bool is_old_address_enabled = false;
+	bool is_new_address_enabled = false;
+
 	if_atom = &ii->second;
+	is_old_interface_enabled = if_atom->enabled();
+
+	// Check the interface
+	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // The interface has disappeared
+	    is_new_interface_enabled = false;
+	} else {
+	    is_new_interface_enabled = other_if_atom->enabled();
+	}
+
+	if ((is_old_interface_enabled != is_new_interface_enabled)
+	    && (! _interface_status_cb.is_empty())) {
+	    // The interface's enabled flag has changed
+	    _interface_status_cb->dispatch(if_atom->name(),
+					   is_new_interface_enabled);
+	}
+
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
+	    is_old_vif_enabled = vif_atom->enabled();
+
+	    // Check the vif
+	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
+						     vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// The vif has disappeared
+		is_new_vif_enabled = false;
+	    } else {
+		is_new_vif_enabled = other_vif_atom->enabled();
+	    }
+	    is_new_vif_enabled &= is_new_interface_enabled;
+
+	    if ((is_old_vif_enabled != is_new_vif_enabled)
+		&& (! _vif_status_cb.is_empty())) {
+		// The vif's enabled flag has changed
+		_vif_status_cb->dispatch(if_atom->name(),
+					 vif_atom->name(),
+					 is_new_vif_enabled);
+	    }
+
 	    for (ai = vif_atom->ipv4addrs().begin();
 		 ai != vif_atom->ipv4addrs().end();
 		 ++ai) {
 		addr_atom = &ai->second;
+		is_old_address_enabled = addr_atom->enabled();
 
+		// Check the address
 		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
 							   vif_atom->name(),
 							   addr_atom->addr());
 		if (other_addr_atom == NULL) {
-		    // The new address has disappeared
-		    if (addr_atom->enabled()) {
-			_interface_status_cb->dispatch(if_atom->name(),
-						       vif_atom->name(),
-						       addr_atom->addr(),
-						       false);
-		    }
-		    continue;
+		    // The address has disappeared
+		    is_new_address_enabled = false;
+		} else {
+		    is_new_address_enabled = other_addr_atom->enabled();
 		}
-		if (addr_atom->enabled() != other_addr_atom->enabled()) {
-		    _interface_status_cb->dispatch(if_atom->name(),
-						   vif_atom->name(),
-						   addr_atom->addr(),
-						   other_addr_atom->enabled());
-		    continue;
+		is_new_address_enabled &= is_new_vif_enabled;
+
+		if ((is_old_address_enabled != is_new_address_enabled)
+		    && (! _address_status_cb.is_empty())) {
+		    // The address's enabled flag has changed
+		    _address_status_cb->dispatch(if_atom->name(),
+						 vif_atom->name(),
+						 addr_atom->addr(),
+						 is_new_address_enabled);
 		}
 	    }
 	}
     }
 
     //
-    // Check for new addresses
+    // Check for new interfaces, vifs and addresses
     //
     for (ii = ifmgr_iftree().ifs().begin();
 	 ii != ifmgr_iftree().ifs().end();
 	 ++ii) {
 	if_atom = &ii->second;
+
+	// Check the interface
+	other_if_atom = _iftree.find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // A new interface
+	    if (if_atom->enabled() && !_interface_status_cb.is_empty()) {
+		_interface_status_cb->dispatch(if_atom->name(), true);
+	    }
+	}
+
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
+
+	    // Check the vif
+	    other_vif_atom = _iftree.find_vif(if_atom->name(),
+					      vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// A new vif
+		if (if_atom->enabled()
+		    && vif_atom->enabled()
+		    && !_vif_status_cb.is_empty()) {
+		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
+					     true);
+		}
+	    }
+
 	    for (ai = vif_atom->ipv4addrs().begin();
 		 ai != vif_atom->ipv4addrs().end();
 		 ++ai) {
 		addr_atom = &ai->second;
 
+		// Check the address
 		other_addr_atom = _iftree.find_addr(if_atom->name(),
 						    vif_atom->name(),
 						    addr_atom->addr());
 		if (other_addr_atom == NULL) {
-		    // This is a new address
-		    if (addr_atom->enabled()) {
-			_interface_status_cb->dispatch(if_atom->name(),
-						       vif_atom->name(),
-						       addr_atom->addr(),
-						       true);
+		    // A new address
+		    if (if_atom->enabled()
+			&& vif_atom->enabled()
+			&& addr_atom->enabled()
+			&& !_address_status_cb.is_empty()) {
+			_address_status_cb->dispatch(if_atom->name(),
+						     vif_atom->name(),
+						     addr_atom->addr(),
+						     true);
 		    }
-		    continue;
-		}
-		if (addr_atom->enabled() != other_addr_atom->enabled()) {
-		    _interface_status_cb->dispatch(if_atom->name(),
-						   vif_atom->name(),
-						   addr_atom->addr(),
-						   addr_atom->enabled());
-		    continue;
 		}
 	    }
 	}
@@ -1119,82 +1211,148 @@ XrlIO<IPv6>::updates_made()
     IfMgrIfAtom::VifMap::const_iterator vi;
     IfMgrVifAtom::V6Map::const_iterator ai;
     const IfMgrIfAtom* if_atom;
+    const IfMgrIfAtom* other_if_atom;
     const IfMgrVifAtom* vif_atom;
+    const IfMgrVifAtom* other_vif_atom;
     const IfMgrIPv6Atom* addr_atom;
     const IfMgrIPv6Atom* other_addr_atom;
 
-    if (_interface_status_cb.is_empty())
-	return;		// XXX: no callback to invoke
-
     //
-    // Check whether all old addresses are still there
+    // Check whether the old interfaces, vifs and addresses are still there
     //
     for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	bool is_old_interface_enabled = false;
+	bool is_new_interface_enabled = false;
+	bool is_old_vif_enabled = false;
+	bool is_new_vif_enabled = false;
+	bool is_old_address_enabled = false;
+	bool is_new_address_enabled = false;
+
 	if_atom = &ii->second;
+	is_old_interface_enabled = if_atom->enabled();
+
+	// Check the interface
+	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // The interface has disappeared
+	    is_new_interface_enabled = false;
+	} else {
+	    is_new_interface_enabled = other_if_atom->enabled();
+	}
+
+	if ((is_old_interface_enabled != is_new_interface_enabled)
+	    && (! _interface_status_cb.is_empty())) {
+	    // The interface's enabled flag has changed
+	    _interface_status_cb->dispatch(if_atom->name(),
+					   is_new_interface_enabled);
+	}
+
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
+	    is_old_vif_enabled = vif_atom->enabled();
+
+	    // Check the vif
+	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
+						     vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// The vif has disappeared
+		is_new_vif_enabled = false;
+	    } else {
+		is_new_vif_enabled = other_vif_atom->enabled();
+	    }
+	    is_new_vif_enabled &= is_new_interface_enabled;
+
+	    if ((is_old_vif_enabled != is_new_vif_enabled)
+		&& (! _vif_status_cb.is_empty())) {
+		// The vif's enabled flag has changed
+		_vif_status_cb->dispatch(if_atom->name(),
+					 vif_atom->name(),
+					 is_new_vif_enabled);
+	    }
+
 	    for (ai = vif_atom->ipv6addrs().begin();
 		 ai != vif_atom->ipv6addrs().end();
 		 ++ai) {
 		addr_atom = &ai->second;
+		is_old_address_enabled = addr_atom->enabled();
 
+		// Check the address
 		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
 							   vif_atom->name(),
 							   addr_atom->addr());
 		if (other_addr_atom == NULL) {
-		    // The new address has disappeared
-		    if (addr_atom->enabled()) {
-			_interface_status_cb->dispatch(if_atom->name(),
-						       vif_atom->name(),
-						       addr_atom->addr(),
-						       false);
-		    }
-		    continue;
+		    // The address has disappeared
+		    is_new_address_enabled = false;
+		} else {
+		    is_new_address_enabled = other_addr_atom->enabled();
 		}
-		if (addr_atom->enabled() != other_addr_atom->enabled()) {
-		    _interface_status_cb->dispatch(if_atom->name(),
-						   vif_atom->name(),
-						   addr_atom->addr(),
-						   other_addr_atom->enabled());
-		    continue;
+		is_new_address_enabled &= is_new_vif_enabled;
+
+		if ((is_old_address_enabled != is_new_address_enabled)
+		    && (! _address_status_cb.is_empty())) {
+		    // The address's enabled flag has changed
+		    _address_status_cb->dispatch(if_atom->name(),
+						 vif_atom->name(),
+						 addr_atom->addr(),
+						 is_new_address_enabled);
 		}
 	    }
 	}
     }
 
     //
-    // Check for new addresses
+    // Check for new interfaces, vifs and addresses
     //
     for (ii = ifmgr_iftree().ifs().begin();
 	 ii != ifmgr_iftree().ifs().end();
 	 ++ii) {
 	if_atom = &ii->second;
+
+	// Check the interface
+	other_if_atom = _iftree.find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // A new interface
+	    if (if_atom->enabled() && !_interface_status_cb.is_empty()) {
+		_interface_status_cb->dispatch(if_atom->name(), true);
+	    }
+	}
+
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
+
+	    // Check the vif
+	    other_vif_atom = _iftree.find_vif(if_atom->name(),
+					      vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// A new vif
+		if (if_atom->enabled()
+		    && vif_atom->enabled()
+		    && !_vif_status_cb.is_empty()) {
+		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
+					     true);
+		}
+	    }
+
 	    for (ai = vif_atom->ipv6addrs().begin();
 		 ai != vif_atom->ipv6addrs().end();
 		 ++ai) {
 		addr_atom = &ai->second;
 
+		// Check the address
 		other_addr_atom = _iftree.find_addr(if_atom->name(),
 						    vif_atom->name(),
 						    addr_atom->addr());
 		if (other_addr_atom == NULL) {
-		    // This is a new address
-		    if (addr_atom->enabled()) {
-			_interface_status_cb->dispatch(if_atom->name(),
-						       vif_atom->name(),
-						       addr_atom->addr(),
-						       true);
+		    // A new address
+		    if (if_atom->enabled()
+			&& vif_atom->enabled()
+			&& addr_atom->enabled()
+			&& !_address_status_cb.is_empty()) {
+			_address_status_cb->dispatch(if_atom->name(),
+						     vif_atom->name(),
+						     addr_atom->addr(),
+						     true);
 		    }
-		    continue;
-		}
-		if (addr_atom->enabled() != other_addr_atom->enabled()) {
-		    _interface_status_cb->dispatch(if_atom->name(),
-						   vif_atom->name(),
-						   addr_atom->addr(),
-						   addr_atom->enabled());
-		    continue;
 		}
 	    }
 	}
@@ -1205,6 +1363,7 @@ XrlIO<IPv6>::updates_made()
     //
     _iftree = ifmgr_iftree();
 }
+
 
 template class XrlIO<IPv4>;
 template class XrlIO<IPv6>;

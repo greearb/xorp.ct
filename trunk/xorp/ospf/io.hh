@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.13 2005/09/21 00:29:27 pavlin Exp $
+// $XORP: xorp/ospf/io.hh,v 1.14 2005/10/31 07:58:40 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -80,17 +80,59 @@ class IO {
     virtual bool disable_interface_vif(const string& interface,
 				       const string& vif) = 0;
 
+    /**
+     * Test whether this interface is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    virtual bool is_interface_enabled(const string& interface) const = 0;
 
     /**
-     * Is this interface/vif/address enabled?
+     * Test whether this interface/vif is enabled.
      *
-     * @return true if it is.
+     * @return true if it exists and is enabled, otherwise false.
      */
-    virtual bool enabled(const string& interface, const string& vif,
-			 A address) = 0;
+    virtual bool is_vif_enabled(const string& interface,
+				const string& vif) const = 0;
 
-    typedef typename XorpCallback4<void, const string&, const string&, A,
+    /**
+     * Test whether this interface/vif/address is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    virtual bool is_address_enabled(const string& interface, const string& vif,
+				    const A& address) const = 0;
+
+    typedef typename XorpCallback2<void, const string&,
 				   bool>::RefPtr InterfaceStatusCb;
+    typedef typename XorpCallback3<void, const string&, const string&,
+				   bool>::RefPtr VifStatusCb;
+    typedef typename XorpCallback4<void, const string&, const string&, A,
+				   bool>::RefPtr AddressStatusCb;
+
+    /**
+     * Add a callback for tracking the interface status.
+     *
+     * The callback will be invoked whenever the status of the interface
+     * is changed from disabled to enabled or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_interface_status(InterfaceStatusCb cb) {
+	_interface_status_cb = cb;
+    }
+
+    /**
+     * Add a callback for tracking the interface/vif status.
+     *
+     * The callback will be invoked whenever the status of the interface/vif
+     * is changed from disabled to enabled or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_vif_status(VifStatusCb cb) {
+	_vif_status_cb = cb;
+    }
 
     /**
      * Add a callback for tracking the interface/vif/address status.
@@ -101,8 +143,8 @@ class IO {
      *
      * @param cb the callback to register.
      */
-    void register_interface_status(InterfaceStatusCb cb) {
-	_interface_status_cb = cb;
+    void register_address_status(AddressStatusCb cb) {
+	_address_status_cb = cb;
     }
 
     /**
@@ -170,5 +212,7 @@ class IO {
  protected:
     ReceiveCallback	_receive_cb;
     InterfaceStatusCb	_interface_status_cb;
+    VifStatusCb		_vif_status_cb;
+    AddressStatusCb	_address_status_cb;
 };
 #endif // __OSPF_IO_HH__

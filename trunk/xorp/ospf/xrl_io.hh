@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.13 2005/09/21 00:29:27 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.14 2005/10/31 07:58:40 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -210,11 +210,26 @@ class XrlIO : public IO<A>,
     bool disable_interface_vif(const string& interface, const string& vif);
 
     /**
-     * Is this interface/vif/address enabled?
+     * Test whether this interface is enabled.
      *
-     * @return true if it is.
+     * @return true if it exists and is enabled, otherwise false.
      */
-    bool enabled(const string& interface, const string& vif, A address);
+    bool is_interface_enabled(const string& interface) const;
+
+    /**
+     * Test whether this interface/vif is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_vif_enabled(const string& interface, const string& vif) const;
+
+    /**
+     * Test whether this interface/vif/address is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_address_enabled(const string& interface, const string& vif,
+			    const A& address) const;
 
     /**
      * @return prefix length for this address.

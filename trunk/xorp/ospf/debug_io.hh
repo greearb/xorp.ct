@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.10 2005/10/11 07:08:38 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.11 2005/10/31 07:58:39 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -135,7 +135,37 @@ class DebugIO : public IO<A> {
 	return true;
     }
 
-    bool enabled(const string& interface, const string& vif, A address)
+    /**
+     * Test whether this interface is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_interface_enabled(const string& interface) const
+    {
+	DOUT(_info) << "enabled(" << interface << ")\n";
+
+	return true;
+    }
+
+    /**
+     * Test whether this interface/vif is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_vif_enabled(const string& interface, const string& vif) const
+    {
+	DOUT(_info) << "enabled(" << interface << "," << vif << ")\n";
+
+	return true;
+    }
+
+    /**
+     * Test whether this interface/vif/address is enabled.
+     *
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_address_enabled(const string& interface, const string& vif,
+				    const A& address) const
     {
 	DOUT(_info) << "enabled(" << interface << "," << vif << ","
 		    << cstring(address) << ")\n";
