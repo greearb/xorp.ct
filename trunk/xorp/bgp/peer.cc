@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.98 2005/10/24 18:08:20 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.99 2005/11/01 01:38:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1048,7 +1048,12 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
+	// While attempting an open something went wrong probably
+	// mismatched parameters. Drive through the idle state to
+	// release all the state and restart the connect retry timer.
 	set_state(STATEIDLE, false);
+	restart_connect_retry_timer();
+	set_state(STATEACTIVE);
 	break;
 
     case STATEESTABLISHED:
