@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_list.hh,v 1.7 2005/03/25 02:52:44 pavlin Exp $
+// $XORP: xorp/bgp/peer_list.hh,v 1.8 2005/10/24 18:40:53 atanu Exp $
 
 #ifndef __BGP_PEER_LIST_HH__
 #define __BGP_PEER_LIST_HH__
@@ -28,13 +28,57 @@ class BGPPeerList
 public:
     BGPPeerList();
     ~BGPPeerList();
+
+    /**
+     * Stop all the peerings.
+     *
+     * @param restart if true will bounce the peerings, if false the
+     * peerings will be taken down and kept down.
+     *
+     */
     void all_stop(bool restart = false);
+    
+    /**
+     * Are the peers idle? Used to poll the peers when BGP is being
+     * gracefully taken down.
+     *
+     * @return true while peers are still active.
+     */
     bool not_all_idle();
+
+    /**
+     * Add this peer to the peer list.
+     */
     void add_peer(BGPPeer *p);
+
+    /**
+     * Remove the peer from the peer list and delete it.
+     */
     void remove_peer(BGPPeer *p);
+
+    /**
+     * Detach this peer from the peer list (DO NOT DELETE IT).
+     */
+    void detach_peer(BGPPeer *p);
+
+    /**
+     * Get the list of attached peers.
+     */
     list<BGPPeer *>& get_list() {return _peers;} 
+
+    /**
+     * Debugging entry point that prints all the peers.
+     */
     void dump_list();
+
+    /**
+     * Aquire a token that can be used to scan through the peers.
+     */
     bool get_peer_list_start(uint32_t& token);
+
+    /**
+     * Using the token get information about the peers.
+     */
     bool get_peer_list_next(const uint32_t& token, 
 			    string& local_ip, 
 			    uint32_t& local_port, 

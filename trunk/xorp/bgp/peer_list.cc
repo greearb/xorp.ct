@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.19 2005/08/18 15:58:06 bms Exp $"
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.20 2005/10/24 18:40:53 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -93,6 +93,13 @@ BGPPeerList::add_peer(BGPPeer *p)
 void
 BGPPeerList::remove_peer(BGPPeer *p)
 {
+    detach_peer(p);
+    delete p;
+}
+
+void
+BGPPeerList::detach_peer(BGPPeer *p)
+{
     //Before we remove a peer from the peer list, we need to check
     //whether there are any readers that point to this peer.  As the
     //number of readers is unlikely to be large, and this is not a
@@ -111,13 +118,11 @@ BGPPeerList::remove_peer(BGPPeer *p)
     list<BGPPeer *>::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++)
 	if(p == *i) {
-	    delete p;
 	    _peers.erase(i);
 	    return;
 	}
     XLOG_FATAL("Peer %s not found in peerlist", p->str().c_str());
 }
-
 
 void 
 BGPPeerList::dump_list()
