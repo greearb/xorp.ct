@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.28 2005/11/01 04:31:01 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.29 2005/11/01 07:31:54 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -311,15 +311,26 @@ StaticRoutesNode::updates_made()
 	    //
 	    // Calculate whether the interface was UP before and now.
 	    //
+	    const IfMgrIfAtom* if_atom;
 	    const IfMgrVifAtom* vif_atom;
+
+	    if_atom = _iftree.find_if(static_route.ifname());
 	    vif_atom = _iftree.find_vif(static_route.ifname(),
 					static_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    if ((if_atom != NULL) && (if_atom->enabled())
+		&& (! if_atom->no_carrier())
+		&& (vif_atom != NULL) && (vif_atom->enabled())) {
 		is_old_up = true;
+	    }
+
+	    if_atom = ifmgr_iftree().find_if(static_route.ifname());
 	    vif_atom = ifmgr_iftree().find_vif(static_route.ifname(),
 					       static_route.vifname());
-	    if ((vif_atom != NULL) && (vif_atom->enabled()))
+	    if ((if_atom != NULL) && (if_atom->enabled())
+		&& (! if_atom->no_carrier())
+		&& (vif_atom != NULL) && (vif_atom->enabled())) {
 		is_new_up = true;
+	    }
 	} else {
 	    //
 	    // Calculate whether the next-hop router was directly connected
@@ -885,14 +896,25 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
     // Inform the RIB about the change
     //
     if (route.is_interface_route()) {
+	const IfMgrIfAtom* if_atom;
 	const IfMgrVifAtom* vif_atom;
+	bool is_up = false;
+
+	if_atom = _iftree.find_if(route.ifname());
 	vif_atom = _iftree.find_vif(route.ifname(), route.vifname());
-	if ((vif_atom != NULL) && (vif_atom->enabled()))
+	if ((if_atom != NULL) && (if_atom->enabled())
+	    && (! if_atom->no_carrier())
+	    && (vif_atom != NULL) && (vif_atom->enabled())) {
+	    is_up = true;
+	}
+	if (is_up) {
 	    inform_rib_route_change(route);
+	}
     } else {
 	string ifname, vifname;
-	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname))
+	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname)) {
 	    inform_rib_route_change(route);
+	}
     }
 }
 

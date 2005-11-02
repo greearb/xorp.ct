@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.19 2005/03/25 02:54:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.20 2005/08/30 01:02:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -47,7 +47,7 @@ address_enabled(const IfMgrIfTree&	iftree,
 	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
 
     const IfMgrIfAtom* ia = iftree.find_if(ifname);
-    if (ia == 0 || ia->enabled() == false) {
+    if (ia == 0 || ia->enabled() == false || ia->no_carrier()) {
 	debug_msg("if %s exists ? %d ?\n", ifname.c_str(), (ia ? 1 : 0));
 	return false;
     }

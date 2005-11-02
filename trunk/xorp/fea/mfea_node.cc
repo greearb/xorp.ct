@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.57 2005/09/28 17:31:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.58 2005/11/01 09:16:16 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -465,13 +465,16 @@ MfeaNode::updates_made()
 	    //
 	    // Update the vif flags
 	    //
+	    bool is_up = ifmgr_iface.enabled();
+	    is_up &= (! ifmgr_iface.no_carrier());
+	    is_up &= ifmgr_vif.enabled();
 	    set_config_vif_flags(ifmgr_vif_name,
 				 false,	// is_pim_register
 				 ifmgr_vif.p2p_capable(),
 				 ifmgr_vif.loopback(),
 				 ifmgr_vif.multicast_capable(),
 				 ifmgr_vif.broadcast_capable(),
-				 ifmgr_vif.enabled(),
+				 is_up,
 				 error_msg);
 	
 	    //

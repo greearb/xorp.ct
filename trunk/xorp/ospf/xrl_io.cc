@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.20 2005/10/31 07:58:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.21 2005/11/01 11:03:29 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -348,7 +348,7 @@ XrlIO<A>::is_interface_enabled(const string& interface) const
     if (fi == NULL)
 	return false;
 
-    return (fi->enabled());
+    return (fi->enabled() && (! fi->no_carrier()));
 }
 
 template <typename A>
@@ -356,6 +356,9 @@ bool
 XrlIO<A>::is_vif_enabled(const string& interface, const string& vif) const
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    if (! is_interface_enabled(interface))
+	return false;
 
     const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
     if (fv == NULL)
@@ -371,6 +374,9 @@ XrlIO<IPv4>::is_address_enabled(const string& interface, const string& vif,
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
 
     const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
 						       vif,
@@ -388,6 +394,9 @@ XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
 
     const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
 						       vif,
@@ -1069,6 +1078,7 @@ XrlIO<IPv4>::updates_made()
 
 	if_atom = &ii->second;
 	is_old_interface_enabled = if_atom->enabled();
+	is_old_interface_enabled &= (! if_atom->no_carrier());
 
 	// Check the interface
 	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
@@ -1077,6 +1087,7 @@ XrlIO<IPv4>::updates_made()
 	    is_new_interface_enabled = false;
 	} else {
 	    is_new_interface_enabled = other_if_atom->enabled();
+	    is_new_interface_enabled &= (! other_if_atom->no_carrier());
 	}
 
 	if ((is_old_interface_enabled != is_new_interface_enabled)
@@ -1089,6 +1100,7 @@ XrlIO<IPv4>::updates_made()
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
 	    is_old_vif_enabled = vif_atom->enabled();
+	    is_old_vif_enabled &= is_old_interface_enabled;
 
 	    // Check the vif
 	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
@@ -1114,6 +1126,7 @@ XrlIO<IPv4>::updates_made()
 		 ++ai) {
 		addr_atom = &ai->second;
 		is_old_address_enabled = addr_atom->enabled();
+		is_old_address_enabled &= is_old_vif_enabled;
 
 		// Check the address
 		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
@@ -1151,7 +1164,9 @@ XrlIO<IPv4>::updates_made()
 	other_if_atom = _iftree.find_if(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // A new interface
-	    if (if_atom->enabled() && !_interface_status_cb.is_empty()) {
+	    if (if_atom->enabled()
+		&& (! if_atom->no_carrier())
+		&& (! _interface_status_cb.is_empty())) {
 		_interface_status_cb->dispatch(if_atom->name(), true);
 	    }
 	}
@@ -1165,8 +1180,9 @@ XrlIO<IPv4>::updates_made()
 	    if (other_vif_atom == NULL) {
 		// A new vif
 		if (if_atom->enabled()
-		    && vif_atom->enabled()
-		    && !_vif_status_cb.is_empty()) {
+		    && (! if_atom->no_carrier())
+		    && (vif_atom->enabled())
+		    && (! _vif_status_cb.is_empty())) {
 		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
 					     true);
 		}
@@ -1184,9 +1200,10 @@ XrlIO<IPv4>::updates_made()
 		if (other_addr_atom == NULL) {
 		    // A new address
 		    if (if_atom->enabled()
-			&& vif_atom->enabled()
-			&& addr_atom->enabled()
-			&& !_address_status_cb.is_empty()) {
+			&& (! if_atom->no_carrier())
+			&& (vif_atom->enabled())
+			&& (addr_atom->enabled())
+			&& (! _address_status_cb.is_empty())) {
 			_address_status_cb->dispatch(if_atom->name(),
 						     vif_atom->name(),
 						     addr_atom->addr(),
@@ -1230,6 +1247,7 @@ XrlIO<IPv6>::updates_made()
 
 	if_atom = &ii->second;
 	is_old_interface_enabled = if_atom->enabled();
+	is_old_interface_enabled &= (! if_atom->no_carrier());
 
 	// Check the interface
 	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
@@ -1238,6 +1256,7 @@ XrlIO<IPv6>::updates_made()
 	    is_new_interface_enabled = false;
 	} else {
 	    is_new_interface_enabled = other_if_atom->enabled();
+	    is_new_interface_enabled &= (! other_if_atom->no_carrier());
 	}
 
 	if ((is_old_interface_enabled != is_new_interface_enabled)
@@ -1250,6 +1269,7 @@ XrlIO<IPv6>::updates_made()
 	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
 	    vif_atom = &vi->second;
 	    is_old_vif_enabled = vif_atom->enabled();
+	    is_old_vif_enabled &= is_old_interface_enabled;
 
 	    // Check the vif
 	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
@@ -1275,6 +1295,7 @@ XrlIO<IPv6>::updates_made()
 		 ++ai) {
 		addr_atom = &ai->second;
 		is_old_address_enabled = addr_atom->enabled();
+		is_old_address_enabled &= is_old_vif_enabled;
 
 		// Check the address
 		other_addr_atom = ifmgr_iftree().find_addr(if_atom->name(),
@@ -1312,7 +1333,9 @@ XrlIO<IPv6>::updates_made()
 	other_if_atom = _iftree.find_if(if_atom->name());
 	if (other_if_atom == NULL) {
 	    // A new interface
-	    if (if_atom->enabled() && !_interface_status_cb.is_empty()) {
+	    if (if_atom->enabled()
+		&& (! if_atom->no_carrier())
+		&& (! _interface_status_cb.is_empty())) {
 		_interface_status_cb->dispatch(if_atom->name(), true);
 	    }
 	}
@@ -1326,8 +1349,9 @@ XrlIO<IPv6>::updates_made()
 	    if (other_vif_atom == NULL) {
 		// A new vif
 		if (if_atom->enabled()
-		    && vif_atom->enabled()
-		    && !_vif_status_cb.is_empty()) {
+		    && (! if_atom->no_carrier())
+		    && (vif_atom->enabled())
+		    && (! _vif_status_cb.is_empty())) {
 		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
 					     true);
 		}
@@ -1345,9 +1369,10 @@ XrlIO<IPv6>::updates_made()
 		if (other_addr_atom == NULL) {
 		    // A new address
 		    if (if_atom->enabled()
-			&& vif_atom->enabled()
-			&& addr_atom->enabled()
-			&& !_address_status_cb.is_empty()) {
+			&& (! if_atom->no_carrier())
+			&& (vif_atom->enabled())
+			&& (addr_atom->enabled())
+			&& (! _address_status_cb.is_empty())) {
 			_address_status_cb->dispatch(if_atom->name(),
 						     vif_atom->name(),
 						     addr_atom->addr(),

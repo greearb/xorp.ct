@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.11 2005/10/16 07:10:37 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.12 2005/11/01 04:31:01 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -205,8 +205,8 @@ IfMgrIfTree::is_directly_connected(const IPv4& addr, string& ifname,
     for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
-	// Test if interface is enabled
-	if (! iface.enabled())
+	// Test if interface is enabled and the link state is up
+	if ((! iface.enabled()) || iface.no_carrier())
 	    continue;
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
@@ -271,8 +271,8 @@ IfMgrIfTree::is_directly_connected(const IPv6& addr, string& ifname,
     for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
 	const IfMgrIfAtom& iface = if_iter->second;
 
-	// Test if interface is enabled
-	if (! iface.enabled())
+	// Test if interface is enabled and the link state is up
+	if ((! iface.enabled()) || iface.no_carrier())
 	    continue;
 
 	IfMgrIfAtom::VifMap::const_iterator vif_iter;
