@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.44 2005/08/16 21:04:33 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.45 2005/09/21 19:52:47 atanu Exp $
 #
 
 #
@@ -633,7 +633,6 @@ test12()
     sleep 1
 
     coord peer1 assert established
-    coord peer2 assert established
 
     reset
 }
