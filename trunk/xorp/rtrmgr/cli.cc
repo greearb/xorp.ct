@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.102 2005/10/26 07:06:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.103 2005/10/26 22:33:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -657,7 +657,7 @@ RouterCLI::configure_mode()
     _mode = CLI_MODE_CONFIGURE;
     clear_command_set();
 
-    set_prompt("", "XORP> ");
+    set_prompt("", "XORP# ");
 
     // Add all the menus
     apply_path_change();
@@ -961,7 +961,7 @@ RouterCLI::config_mode_prompt()
     } else {
 	prompt = "[edit " + pathstr() + "]";
     }
-    set_prompt(prompt, "XORP> ");
+    set_prompt(prompt, "XORP# ");
 }
 
 void
@@ -2472,7 +2472,7 @@ RouterCLI::commit_func(const string& ,
 	cli_client().cli_print(response);
 	cli_client().cli_print("The configuration has not been changed.\n");
 	cli_client().cli_print("Fix this error, and run \"commit\" again.\n");
-	//	set_prompt("", "XORP> ");
+	//	set_prompt("", "XORP# ");
 	//	apply_path_change();
 	silent_reenable_ui();
 
