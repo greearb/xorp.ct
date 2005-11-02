@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.66 2005/06/28 09:30:14 mjh Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.67 2005/09/23 10:16:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,7 @@ RibIpcHandler::RibIpcHandler(XrlStdRouter& xrl_router, BGPMain& bgp)
       _xrl_router(xrl_router),
       _v4_queue(*this, xrl_router, bgp),
       _v6_queue(*this, xrl_router, bgp),
+      _fake_unique_id(RIB_IPC_HANDLER_UNIQUE_ID),
       _fake_id(IPv4::ZERO())
 {
 }

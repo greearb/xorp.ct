@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.38 2005/06/29 20:03:08 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.39 2005/11/01 21:52:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,9 +71,9 @@ DecisionTable<A>::add_parent(BGPRouteTable<A> *new_parent,
     }
     PeerTableInfo<A> *pti = new PeerTableInfo<A>(new_parent, peer_handler, genid);
     _parents[new_parent] = pti;
-    XLOG_ASSERT(_sorted_parents.find(peer_handler->id()) 
+    XLOG_ASSERT(_sorted_parents.find(peer_handler->get_unique_id()) 
 		== _sorted_parents.end());
-    _sorted_parents[peer_handler->id()] = pti;
+    _sorted_parents[peer_handler->get_unique_id()] = pti;
     return 0;
 }
 
@@ -86,7 +86,7 @@ DecisionTable<A>::remove_parent(BGPRouteTable<A> *ex_parent) {
     PeerTableInfo<A> *pti = i->second;
     const PeerHandler* peer = pti->peer_handler();
     _parents.erase(i);
-    _sorted_parents.erase(_sorted_parents.find(peer->id()));
+    _sorted_parents.erase(_sorted_parents.find(peer->get_unique_id()));
     delete pti;
     return 0;
 }
@@ -833,8 +833,8 @@ template<class A>
 bool
 DecisionTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
     const PeerHandler* peer = dump_iter.current_peer();
-    typename map<IPv4, PeerTableInfo<A>* >::const_iterator i;
-    i = _sorted_parents.find(peer->id());
+    typename map<uint32_t, PeerTableInfo<A>* >::const_iterator i;
+    i = _sorted_parents.find(peer->get_unique_id());
     XLOG_ASSERT(i != _sorted_parents.end());
     return i->second->route_table()->dump_next_route(dump_iter);
 }
@@ -852,7 +852,7 @@ template<class A>
 void
 DecisionTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 {
-    typename map<IPv4, PeerTableInfo<A>* >::const_iterator i;
+    typename map<uint32_t, PeerTableInfo<A>* >::const_iterator i;
     for (i = _sorted_parents.begin(); i != _sorted_parents.end(); i++) {
 	i->second->route_table()->igp_nexthop_changed(bgp_nexthop);
     }

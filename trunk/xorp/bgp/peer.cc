@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.100 2005/11/01 04:58:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.101 2005/11/01 08:16:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -38,10 +38,11 @@
 
 #define DEBUG_BGPPeer
 
+uint32_t BGPPeer::_unique_id_allocator = UNIQUE_ID_START;
 inline void trap_callback(const XrlError& error, const char *comment);
 
 BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
-		 BGPMain *m)
+		 BGPMain *m) : _unique_id(_unique_id_allocator++)
 {
     debug_msg("BGPPeer constructor called (1)\n");
 

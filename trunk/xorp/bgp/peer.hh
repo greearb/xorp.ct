@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.25 2005/11/01 01:38:15 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.26 2005/11/01 20:21:37 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -64,6 +64,9 @@ enum PeerOutputState {
 #define OPENMSGOK 0
 #define UPDATEMSGOK 0
 
+const uint32_t RIB_IPC_HANDLER_UNIQUE_ID = 0;
+const uint32_t UNIQUE_ID_START = RIB_IPC_HANDLER_UNIQUE_ID + 1;
+
 class BGPMain;
 class PeerHandler;
 class AcceptSession;
@@ -72,6 +75,13 @@ class BGPPeer {
 public:
     BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock, BGPMain *m);
     virtual ~BGPPeer();
+
+    /**
+     * Get this peers unique ID.
+     */
+    const uint32_t get_unique_id() const {
+	return _unique_id;
+    }
 
     /**
      * Zero all the stats counters.
@@ -167,6 +177,11 @@ public:
 		       uint32_t& in_update_elapsed) const;
 protected:
 private:
+    /**
+     * For the processing in decision every peer requires a unique ID.
+     */
+    static uint32_t _unique_id_allocator;
+    const uint32_t _unique_id;
 
     friend class BGPPeerList;
 
