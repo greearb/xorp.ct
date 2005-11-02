@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_register.cc,v 1.19 2005/03/05 01:31:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_register.cc,v 1.20 2005/03/25 02:54:24 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -156,6 +156,9 @@ main (int /* argc */, char* argv[])
     Vif vif0("vif0");
     Vif vif1("vif1");
     Vif vif2("vif2");
+    vif0.set_underlying_vif_up(true);
+    vif1.set_underlying_vif_up(true);
+    vif2.set_underlying_vif_up(true);
 
     DummyRegisterServer register_server;
     rib.initialize(register_server);

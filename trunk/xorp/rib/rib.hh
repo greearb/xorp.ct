@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.32 2005/03/25 02:54:21 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.33 2005/10/29 20:33:34 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -229,6 +229,34 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int delete_vif_address(const string& vifname, const A& addr);
+
+    /**
+     * Add a route to the "connected" OriginTable.
+     *
+     * @param vif the vif with the connected route.
+     * @param net the subnet (address and prefix length) of the route.
+     * @param nexthop_addr the nexthop address of the route to add.
+     * @param peer_addr the peer address for the route to add
+     * (if a point-to-point interface).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int add_connected_route(const Vif&		vif,
+			    const IPNet<A>&	net,
+			    const A&		nexthop_addr,
+			    const A&		peer_addr);
+
+    /**
+     * Delete a route from the "connected" OriginTable.
+     *
+     * @param vif the vif with the connected route.
+     * @param net the subnet (address and prefix length) of the route.
+     * @param peer_addr the peer address for the route to delete
+     * (if a point-to-point interface).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int delete_connected_route(const Vif&	vif,
+			       const IPNet<A>&	net,
+			       const A&		peer_addr);
 
     /**
      * Add a route via the OriginTable called tablename.

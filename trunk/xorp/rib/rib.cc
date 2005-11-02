@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.56 2005/10/29 20:33:34 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.57 2005/11/01 03:57:09 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -422,78 +422,80 @@ RIB<A>::new_origin_table(const string&	tablename,
     return XORP_OK;
 }
 
-template<>
+template <typename A>
 int
-RIB<IPv4>::new_vif(const string& vifname, const Vif& vif)
+RIB<A>::add_connected_route(const Vif& vif,
+			    const IPNet<A>& net,
+			    const A& nexthop_addr,
+			    const A& peer_addr)
 {
-    debug_msg("RIB::new_vif: %s\n", vifname.c_str());
-    if (_vifs.find(vifname) == _vifs.end()) {
-	// Can't use _vifs[vifname] = vif because no Vif() constructor
-	map<string, Vif>::value_type v(vifname, vif);
-	_vifs.insert(_vifs.end(), v);
+    //
+    // XXX: the connected routes are added with the
+    // best possible metric (0).
+    //
+    add_route("connected", net, nexthop_addr, "", "", 0, PolicyTags());
 
-	// We need to add the routes from the VIF to the connected table
-	map<string, Vif>::iterator iter = _vifs.find(vifname);
-	XLOG_ASSERT(iter != _vifs.end());
-	Vif* new_vif = &(iter->second);
-	XLOG_ASSERT(new_vif != NULL);
-	list<VifAddr>::const_iterator ai;
-	for (ai = new_vif->addr_list().begin();
-	     ai != new_vif->addr_list().end();
-	     ai++) {
-	    if (ai->addr().is_ipv4()) {
-		add_route("connected", ai->subnet_addr().get_ipv4net(),
-			  ai->addr().get_ipv4(), "", "", 0, PolicyTags());
-		if (new_vif->is_p2p() && (ai->peer_addr() != IPv4::ZERO())) {
-		    add_route("connected",
-			      IPv4Net(ai->peer_addr().get_ipv4(),
-				      IPv4::addr_bitlen()),
-			      ai->peer_addr().get_ipv4(), "", "", 0,
-			      PolicyTags());
-		}
-	    }
-	}
-
-	return XORP_OK;
+    if (vif.is_p2p() && (peer_addr != A::ZERO())) {
+	add_route("connected", IPNet<A>(peer_addr, A::addr_bitlen()),
+		  peer_addr, "", "", 0, PolicyTags());
     }
-    return XORP_ERROR;
+
+    return XORP_OK;
 }
 
-template<>
+template <typename A>
 int
-RIB<IPv6>::new_vif(const string& vifname, const Vif& vif)
+RIB<A>::delete_connected_route(const Vif& vif, const IPNet<A>& net,
+			       const A& peer_addr)
+{
+    delete_route("connected", net);
+
+    if (vif.is_p2p() && (peer_addr != A::ZERO())) {
+	delete_route("connected", IPNet<A>(peer_addr, A::addr_bitlen()));
+    }
+
+    return XORP_OK;
+}
+
+template <typename A>
+int
+RIB<A>::new_vif(const string& vifname, const Vif& vif)
 {
     debug_msg("RIB::new_vif: %s\n", vifname.c_str());
-    if (_vifs.find(vifname) == _vifs.end()) {
-	// Can't use _vifs[vifname] = vif because no Vif() constructor
-	map<string, Vif>::value_type v(vifname, vif);
-	_vifs.insert(_vifs.end(), v);
+    if (_vifs.find(vifname) != _vifs.end())
+	return XORP_ERROR;
 
-	// We need to add the routes from the VIF to the connected table
-	map<string, Vif>::iterator iter = _vifs.find(vifname);
-	XLOG_ASSERT(iter != _vifs.end());
-	Vif* new_vif = &(iter->second);
-	XLOG_ASSERT(new_vif != NULL);
+    // Can't use _vifs[vifname] = vif because no Vif() constructor
+    map<string, Vif>::value_type v(vifname, vif);
+    _vifs.insert(_vifs.end(), v);
+
+    // We need to add the routes from the VIF to the connected table
+    map<string, Vif>::iterator iter = _vifs.find(vifname);
+    XLOG_ASSERT(iter != _vifs.end());
+    Vif* new_vif = &(iter->second);
+    XLOG_ASSERT(new_vif != NULL);
+
+    if (vif.is_underlying_vif_up()) {
+	//
+	// Add the directly connected routes associated with this vif
+	//
 	list<VifAddr>::const_iterator ai;
 	for (ai = new_vif->addr_list().begin();
 	     ai != new_vif->addr_list().end();
-	     ai++) {
-	    if (ai->addr().is_ipv6()) {
-		add_route("connected", ai->subnet_addr().get_ipv6net(),
-			  ai->addr().get_ipv6(), "", "", 0, PolicyTags());
-		if (new_vif->is_p2p() && (ai->peer_addr() != IPv6::ZERO())) {
-		    add_route("connected",
-			      IPv6Net(ai->peer_addr().get_ipv6(),
-				      IPv6::addr_bitlen()),
-			      ai->peer_addr().get_ipv6(), "", "", 0,
-			      PolicyTags());
-		}
-	    }
-	}
+	     ++ai) {
+	    if (ai->addr().af() != A::af())
+		continue;
 
-	return XORP_OK;
+	    IPNet<A> subnet_addr;
+	    A addr, peer_addr;
+	    ai->subnet_addr().get(subnet_addr);
+	    ai->addr().get(addr);
+	    ai->peer_addr().get(peer_addr);
+	    add_connected_route(*new_vif, subnet_addr, addr, peer_addr);
+	}
     }
-    return XORP_ERROR;
+
+    return XORP_OK;
 }
 
 template <typename A>
@@ -501,29 +503,30 @@ int
 RIB<A>::delete_vif(const string& vifname)
 {
     debug_msg("RIB::delete_vif: %s\n", vifname.c_str());
-    map<string, Vif>::iterator iter;
-    iter = _vifs.find(vifname);
-    if (iter == _vifs.end()) {
+    map<string, Vif>::iterator vi = _vifs.find(vifname);
+    if (vi == _vifs.end()) {
 	return XORP_ERROR;
     }
-    list<VifAddr>::const_iterator vai;
-    for (vai = iter->second.addr_list().begin();
-	 vai != iter->second.addr_list().end();
-	 ++vai) {
-	try {
-	    // Delete the directly connected routes associated with this VIF
-	    IPvXNet subnetvX = vai->subnet_addr();
-	    IPNet<A> subnet;
-	    subnetvX.get(subnet);
-	    delete_route("connected", subnet);
-	} catch (const InvalidCast&) {
-	    debug_msg("Invalid cast of %s in RIB<%s>",
-		      vai->subnet_addr().str().c_str(),
-		      A::ip_version_str().c_str());
+    Vif& vif = vi->second;
+
+    if (vif.is_underlying_vif_up()) {
+	//
+	// Delete the directly connected routes associated with this vif
+	//
+	list<VifAddr>::const_iterator ai;
+	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	    if (ai->addr().af() != A::af())
+		continue;
+
+	    IPNet<A> subnet_addr;
+	    A peer_addr;
+	    ai->subnet_addr().get(subnet_addr);
+	    ai->peer_addr().get(peer_addr);
+	    delete_connected_route(vif, subnet_addr, peer_addr);
 	}
     }
 
-    _vifs.erase(iter);
+    _vifs.erase(vi);
     return XORP_OK;
 }
 
@@ -542,13 +545,54 @@ RIB<A>::set_vif_flags(const string& vifname,
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-
     Vif& vif = vi->second;
+
+    bool old_is_up = vif.is_underlying_vif_up();
+
     vif.set_p2p(is_p2p);
     vif.set_loopback(is_loopback);
     vif.set_multicast_capable(is_multicast);
     vif.set_broadcast_capable(is_broadcast);
     vif.set_underlying_vif_up(is_up);
+
+    if (old_is_up == is_up)
+	return XORP_OK;
+
+    list<VifAddr>::const_iterator ai;
+
+    if (is_up) {
+	//
+	// Add all connected routes
+	//
+	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	    if (ai->addr().af() != A::af())
+		continue;
+
+	    IPNet<A> subnet_addr;
+	    A addr, peer_addr;
+	    ai->subnet_addr().get(subnet_addr);
+	    ai->addr().get(addr);
+	    ai->peer_addr().get(peer_addr);
+	    add_connected_route(vif, subnet_addr, addr, peer_addr);
+	}
+    }
+
+
+    if (! is_up) {
+	//
+	// Delete all connected routes
+	//
+	for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	    if (ai->addr().af() != A::af())
+		continue;
+
+	    IPNet<A> subnet_addr;
+	    A peer_addr;
+	    ai->subnet_addr().get(subnet_addr);
+	    ai->peer_addr().get(peer_addr);
+	    delete_connected_route(vif, subnet_addr, peer_addr);
+	}
+    }
 
     return XORP_OK;
 }
@@ -567,15 +611,13 @@ RIB<A>::add_vif_address(const string&	vifname,
 		   vifname.c_str());
 	return XORP_ERROR;
     }
-    vi->second.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
-    // Add a route for this subnet
-    add_route("connected", subnet, addr, "", "", /* best possible metric */ 0,
-	      PolicyTags());
-    if (vi->second.is_p2p() && (peer_addr != A::ZERO())) {
-	add_route("connected",
-		  IPNet<A>(peer_addr, A::addr_bitlen()),
-		  peer_addr, "", "", 0, PolicyTags());
-    }
+    Vif& vif = vi->second;
+
+    vif.add_address(VifAddr(addr, subnet, broadcast_addr, peer_addr));
+
+    if (vif.is_underlying_vif_up())
+	add_connected_route(vif, subnet, addr, peer_addr);
+
     return XORP_OK;
 }
 
@@ -592,24 +634,25 @@ RIB<A>::delete_vif_address(const string& vifname,
     }
     Vif& vif = vi->second;
     
-    list<VifAddr>::const_iterator vai;
-    for (vai = vif.addr_list().begin(); vai != vif.addr_list().end(); ++vai) {
-	IPvX ipvx = vai->addr();
-	try {
-	    A this_addr;
-	    ipvx.get(this_addr);
-	    if (addr == this_addr) {
-		IPvXNet ipvxnet = vai->subnet_addr();
-		IPNet<A> subnet;
-		ipvxnet.get(subnet);
-		vif.delete_address(ipvx);
-		delete_route("connected", subnet);
-		return XORP_OK;
-	    }
-	} catch (const InvalidCast&) {
-	    debug_msg("Invalid cast of %s in RIB<%s>\n",
-		      ipvx.str().c_str(), A::ip_version_str().c_str());
-	}
+    list<VifAddr>::const_iterator ai;
+    for (ai = vif.addr_list().begin(); ai != vif.addr_list().end(); ++ai) {
+	const IPvX& ipvx = ai->addr();
+	if (ipvx.af() != A::af())
+	    continue;
+	if (ipvx != IPvX(addr))
+	    continue;
+
+	IPNet<A> subnet_addr;
+	A peer_addr;
+	ai->subnet_addr().get(subnet_addr);
+	ai->peer_addr().get(peer_addr);
+
+	vif.delete_address(ipvx);
+
+	if (vif.is_underlying_vif_up())
+	    delete_connected_route(vif, subnet_addr, peer_addr);
+
+	return XORP_OK;
     }
     return XORP_ERROR;
 }

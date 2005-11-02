@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.39 2005/11/01 08:35:24 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.40 2005/11/01 08:49:38 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -365,13 +365,16 @@ VifManager::updates_made()
 	    // XXX: discard property needs to be inherited from
 	    // the parent interface, once it has been marshaled.
 	    //
+	    bool is_up = ifmgr_iface.enabled() && ifmgr_vif.enabled();
+	    is_up &= (! ifmgr_iface.no_carrier());	// XXX: the link state
+
 	    if (old_ifmgr_vif_ptr != NULL) {
 		if (_rib_manager->set_vif_flags(ifmgr_vif_name,
 						ifmgr_vif.p2p_capable(),
 						ifmgr_vif.loopback(),
 						ifmgr_vif.multicast_capable(),
 						ifmgr_vif.broadcast_capable(),
-						ifmgr_vif.enabled(),
+						is_up,
 						error_msg)
 		    != XORP_OK) {
 		    XLOG_ERROR("Cannot update the flags for vif %s: %s",
@@ -383,7 +386,7 @@ VifManager::updates_made()
 		vif.set_loopback(ifmgr_vif.loopback());
 		vif.set_multicast_capable(ifmgr_vif.multicast_capable());
 		vif.set_broadcast_capable(ifmgr_vif.broadcast_capable());
-		vif.set_underlying_vif_up(ifmgr_vif.enabled());
+		vif.set_underlying_vif_up(is_up);
 	    }
 
 	    //
