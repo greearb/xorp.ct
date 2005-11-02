@@ -12,13 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.15 2005/10/29 05:26:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.16 2005/10/29 18:09:36 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
+
+#include <iomanip>
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
@@ -31,10 +37,6 @@
 #include "xrl/interfaces/rib_xif.hh"
 #include "xrl/interfaces/finder_event_notifier_xif.hh"
 #include "xrl/targets/show_routes_base.hh"
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 //
 // TODO:
@@ -165,12 +167,14 @@ display_route_terse(const IPNet<A>&	net,
     //       - = Last Active,
     //       * = Both
 
-    cout << "" << net.str() << "\t";
-    cout << protocol_short << " ";
-    cout.width(3);
-    cout << admin_distance << "   ";
-    cout.width(8);
-    cout << metric << "\t";
+    if (net.str().size() > 18) {
+	cout << net.str() << endl << setw(19) << " ";
+    } else {
+	cout << setiosflags(ios::left) << setw(19) << net.str();
+    }
+    cout << resetiosflags(ios::left) << protocol_short << " ";
+    cout << setw(3) << admin_distance;
+    cout << setw(10) << metric << "  ";
     // XXX: We don't have second metric yet
     if (admin_distance != 0)
 	cout << nexthop.str() << " ";
@@ -633,8 +637,8 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
 			     admin_distance, protocol_origin);
 	break;
     case PRINT_STYLE_TERSE:
-	display_route_detail(dst, nexthop, ifname, vifname, metric,
-			     admin_distance, protocol_origin);
+	display_route_terse(dst, nexthop, ifname, vifname, metric,
+			    admin_distance, protocol_origin);
 	break;
     }
 
@@ -815,14 +819,10 @@ main(int argc, char* const argv[])
 	    // XXX: no header
 	    break;
 	case PRINT_STYLE_TERSE:
-	    // cout << "A";
-	    cout << "Destination" << "\t";
-	    cout << "P" << " ";
-	    cout << "Prf" << "\t";
-	    cout << "Metric 1" << "\t";
-	    // cout << "Metric 2 << "\t";
-	    cout << "Next hop";
-	    // cout << "AS path";
+	    cout << "Destination        P Prf  Metric 1  Next hop          ";
+	    // XXX: Will we have all this info in the RIB - Metric2, AS path?
+	    // cout << "A Destination        P Prf  Metric 1  Metric 2  "
+	    // "Next hop          AS path";
 	    cout << endl;
 	    break;
 	}
