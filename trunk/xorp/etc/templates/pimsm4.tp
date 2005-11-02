@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.25 2005/07/22 02:12:21 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.26 2005/08/25 02:23:44 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -343,7 +343,7 @@ protocols {
 		    disable {
 			%help:	short	"Disable all tracing operations";
 			%set:	xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(@)`";
-			%delete: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
+			%delete: xrl "$(pimsm4.targetname)/pim/0.1/log_trace_all?enable:bool=$(DEFAULT)";
 		    }
 
 		    enabled {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea6.tp,v 1.10 2005/03/20 00:07:29 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea6.tp,v 1.11 2005/08/25 02:23:44 pavlin Exp $ */
 
 plumbing {
     mfea6 {
@@ -95,7 +95,7 @@ plumbing {
 		    disable {
 			%help:	short "Disable all tracing operations";
 			%set:	xrl "$(mfea6.targetname)/mfea/0.1/log_trace_all?enable:bool=`~$(@)`";
-			%delete: xrl "$(mfea6.targetname)/mfea/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
+			%delete: xrl "$(mfea6.targetname)/mfea/0.1/log_trace_all?enable:bool=$(DEFAULT)";
 		    }
 
 		    enabled {

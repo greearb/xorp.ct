@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.13 2005/06/01 09:33:59 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.14 2005/08/25 02:23:44 pavlin Exp $ */
 
 protocols {
     mld {
@@ -142,7 +142,7 @@ protocols {
 		    disable {
 			%help:	short "Enable all tracing operations";
 			%set:	xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=`~$(@)`";
-			%delete: xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=`~$(DEFAULT)`";
+			%delete: xrl "$(mld.targetname)/mld6igmp/0.1/log_trace_all?enable:bool=$(DEFAULT)";
 		    }
 
 		    enabled {
