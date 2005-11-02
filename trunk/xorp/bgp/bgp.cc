@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.56 2005/10/24 18:40:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.57 2005/11/01 02:13:45 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -440,7 +440,9 @@ BGPMain::create_peer(BGPPeerData *pd)
     // revive a previously dead peer.
     BGPPeer *p = find_deleted_peer(pd->iptuple());
     if (0 != p) {
+	debug_msg("Reviving deleted peer %s\n", cstring(*p));
 	p->zero_stats();
+	delete p->swap_peerdata(pd);
 	attach_peer(p);
 	detach_deleted_peer(p);
 	return true;
@@ -480,8 +482,11 @@ BGPMain::delete_peer(const Iptuple& iptuple)
 	return false;
     }
 
-    if (!disable_peer(iptuple))
-	return false;
+    if (peer->get_current_peer_state()) {
+	if (!disable_peer(iptuple)) {
+	    XLOG_WARNING("Disable peer failed: %s", iptuple.str().c_str());
+	}
+    }
 
     /* XXX - Atanu
     **
@@ -541,6 +546,187 @@ BGPMain::disable_peer(const Iptuple& iptuple)
 }
 
 bool
+BGPMain::bounce_peer(const Iptuple& iptuple)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (peer->get_current_peer_state() && STATEIDLE == peer->state())
+	peer->event_start();
+    else
+	peer->event_stop(true /* restart */);
+
+    return true;
+}
+
+bool
+BGPMain::change_tuple(const Iptuple& iptuple, const Iptuple& nptuple)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (iptuple == nptuple &&
+	iptuple.get_peer_port() == nptuple.get_peer_port())
+	return true;
+
+    BGPPeerData *pd = new 
+	BGPPeerData(nptuple,
+		    peer->peerdata()->as(),
+		    peer->peerdata()->get_v4_local_addr(),
+		    peer->peerdata()->get_configured_hold_time());
+
+    if (!create_peer(pd)) {
+	delete pd;
+	return false;
+    }
+
+    bool state = peer->get_current_peer_state();
+
+    delete_peer(iptuple);
+
+    if (state) {
+	enable_peer(nptuple);
+    }
+
+    return true;
+}
+
+bool
+BGPMain::find_tuple_179(string peer_addr, Iptuple& otuple)
+{
+    list<BGPPeer *>& peers = _peerlist->get_list();
+    list<BGPPeer *>::iterator i;
+    for (i = peers.begin(); i != peers.end(); i++) {
+	const Iptuple& iptuple = (*i)->peerdata()->iptuple();
+	debug_msg("Trying: %s ", iptuple.str().c_str());
+
+	if (iptuple.get_local_port() == 179 &&
+	    iptuple.get_peer_port() == 179 &&
+	    iptuple.get_peer_addr() == peer_addr) {
+
+	    otuple = iptuple;
+	    return true;
+	}
+	debug_msg(" Failed\n");
+    }
+
+    debug_msg("No match\n");
+
+    return false;
+}
+
+bool
+BGPMain::change_local_ip(const Iptuple& iptuple, const string& local_ip)
+{
+    Iptuple nptuple(local_ip.c_str(), iptuple.get_local_port(),
+		    iptuple.get_peer_addr().c_str(), iptuple.get_peer_port());
+
+    // XXX
+    // The change routines were designed to take the original tuple
+    // values that define a peering and then a new value within the
+    // tuple. Unfortunately the router manager cannot at this time
+    // send the old and new values of a variable.
+    // If the old and new setting match then search looking only at
+    // the peer address, assuming both port numbers are 179. The
+    // changing of ports has been disabled in the template file.
+    // 
+    if (iptuple.get_local_addr() == local_ip) {
+	Iptuple otuple;
+	if (!find_tuple_179(iptuple.get_peer_addr(), otuple)) {
+	    return false;
+	}
+	return change_tuple(otuple, nptuple);
+    }
+
+    return change_tuple(iptuple, nptuple);
+}
+
+bool
+BGPMain::change_local_port(const Iptuple& iptuple, uint32_t local_port)
+{
+    Iptuple nptuple(iptuple.get_local_addr().c_str(), local_port,
+		    iptuple.get_peer_addr().c_str(), iptuple.get_peer_port());
+
+    return change_tuple(iptuple, nptuple);
+}
+
+bool
+BGPMain::change_peer_port(const Iptuple& iptuple, uint32_t peer_port)
+{
+    Iptuple nptuple(iptuple.get_local_addr().c_str(), iptuple.get_local_port(),
+		    iptuple.get_peer_addr().c_str(), peer_port);
+
+    return change_tuple(iptuple, nptuple);
+}
+
+bool
+BGPMain::set_peer_as(const Iptuple& iptuple, uint32_t peer_as)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    AsNum as(peer_as);
+
+    if ((peer->peerdata())->as() == as)
+	return true;
+
+    const_cast<BGPPeerData*>(peer->peerdata())->set_as(as);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_holdtime(const Iptuple& iptuple, uint32_t holdtime)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (peer->peerdata()->get_configured_hold_time() == holdtime)
+	return true;
+
+    const_cast<BGPPeerData*>(peer->peerdata())->
+	set_configured_hold_time(holdtime);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_nexthop4(const Iptuple& iptuple, const IPv4& next_hop)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+    const_cast<BGPPeerData*>(peer->peerdata())->set_v4_local_addr(next_hop);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
 BGPMain::set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop)
 {
     BGPPeer *peer = find_peer(iptuple);
@@ -550,6 +736,8 @@ BGPMain::set_nexthop6(const Iptuple& iptuple, const IPv6& next_hop)
 	return false;
     }
     const_cast<BGPPeerData*>(peer->peerdata())->set_v6_local_addr(next_hop);
+
+    bounce_peer(iptuple);
 
     return true;
 }
@@ -869,6 +1057,9 @@ BGPMain::start_server(const Iptuple& iptuple)
     }
 
     XorpFd sfd = create_listener(iptuple);
+    if (!sfd.is_valid()) {
+	return;
+    }
     if (!eventloop().
 	add_ioevent_cb(sfd,
 		     IOT_ACCEPT,
@@ -1107,4 +1298,3 @@ BGPMain::push_routes() {
     _plumbing_unicast->push_routes();
     _plumbing_multicast->push_routes();
 }
-

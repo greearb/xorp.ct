@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.44 2005/10/25 20:44:33 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.45 2005/10/25 22:28:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -312,12 +312,20 @@ XrlBgpTarget::bgp_0_2_change_local_ip(
 	const string&	new_local_ip)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "new local ip %s\n",
+	      " new local ip %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      new_local_ip.c_str());
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.change_local_ip(iptuple, new_local_ip))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -332,12 +340,20 @@ XrlBgpTarget::bgp_0_2_change_local_port(
 	const uint32_t&	new_local_port)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "new local port %u\n",
+	      " new local port %u\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      new_local_port);
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.change_local_port(iptuple, new_local_port))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -352,12 +368,20 @@ XrlBgpTarget::bgp_0_2_change_peer_port(
 	const uint32_t&	new_peer_port)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "new peer port %u\n",
+	      " new peer port %u\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      new_peer_port);
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.change_peer_port(iptuple, new_peer_port))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -372,12 +396,20 @@ XrlBgpTarget::bgp_0_2_set_peer_as(
 				  const uint32_t& peer_as)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "peer as %u\n",
+	      " peer as %u\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      peer_as);
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_peer_as(iptuple, peer_as))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -392,12 +424,20 @@ XrlBgpTarget::bgp_0_2_set_holdtime(
 				   const uint32_t& holdtime)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "new peer port %u\n",
+	      " new holdtime %u\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      holdtime);
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_holdtime(iptuple, holdtime))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -412,12 +452,20 @@ XrlBgpTarget::bgp_0_2_set_nexthop4(
 				   const IPv4& next_hop)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u"
-	      "nexthop %s\n",
+	      " nexthop %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      cstring(next_hop));
 
-    XLOG_WARNING("Unimplemented");
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_nexthop4(iptuple, next_hop))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
 
     return XrlCmdError::OKAY();
 }
@@ -432,7 +480,7 @@ XrlBgpTarget::bgp_0_2_set_nexthop6(
 	const IPv6&	next_hop)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u "
-	      "next-hop %s\n",
+	      " next-hop %s\n",
 	      local_ip.c_str(), XORP_UINT_CAST(local_port),
 	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
 	      cstring(next_hop));

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.45 2005/10/24 18:40:53 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.46 2005/11/01 02:13:45 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -150,6 +150,98 @@ public:
      * @return true on success
      */
     bool disable_peer(const Iptuple& iptuple);
+
+    /**
+     * Drop this peering and if it was configured up allow it attempt
+     * a new peering.
+     *
+     * @param iptuple iptuple.
+     *
+     * @return true on success
+     */
+    bool bounce_peer(const Iptuple& iptuple);
+
+    /**
+     * Change one of the tuple settings of this peering.
+     *
+     * @param iptuple original tuple.
+     * @param iptuple new tuple.
+     *
+     * @return true on success
+     */
+    bool change_tuple(const Iptuple& iptuple, const Iptuple& nptuple);
+
+    /**
+     * Find the tuple that has this peer address and both ports are
+     * 179. This is a hack as at the moment of writing the rtrmgr
+     * can't send both the old and new state of a variable.
+     *
+     * @param peer_addr of tuple.
+     * @param otuple the tuple if one is found.
+     *
+     * @return true if a tuple is matched.
+     */
+    bool find_tuple_179(string peer_addr, Iptuple& otuple);
+
+    /**
+     * Change the local IP address of this peering.
+     *
+     * @param iptuple iptuple.
+     * @param local_ip new value.
+     *
+     * @return true on success
+     */
+    bool change_local_ip(const Iptuple& iptuple, const string& local_ip);
+
+    /**
+     * Change the local IP port of this peering.
+     *
+     * @param iptuple iptuple.
+     * @param local_port new value.
+     *
+     * @return true on success
+     */
+    bool change_local_port(const Iptuple& iptuple, uint32_t local_port);
+
+    /**
+     * Change the peer IP port of this peering.
+     *
+     * @param iptuple iptuple.
+     * @param peer_port new value.
+     *
+     * @return true on success
+     */
+    bool change_peer_port(const Iptuple& iptuple, uint32_t peer_port);
+
+    /**
+     * set peer as
+     *
+     * @param iptuple iptuple.
+     * @param peer_as new value.
+     *
+     * @return true on success
+     */
+    bool set_peer_as(const Iptuple& iptuple, uint32_t peer_as);
+
+    /**
+     * set holdtime
+     *
+     * @param iptuple iptuple.
+     * @param holdtime new value.
+     *
+     * @return true on success
+     */
+    bool set_holdtime(const Iptuple& iptuple, uint32_t holdtime);
+
+    /**
+     * set IPv4 next-hop.
+     *
+     * @param iptuple iptuple.
+     * @param next-hop
+     *
+     * @return true on success
+     */
+    bool set_nexthop4(const Iptuple& iptuple, const IPv4& next_hop);
 
     /**
      * set IPv6 next-hop.
