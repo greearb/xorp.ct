@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.16 2005/10/31 03:07:21 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.17 2005/10/31 07:33:59 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -37,7 +37,7 @@ protocols {
 	traceoptions {
 	    flag {
 		all {
-		    disable:		toggle = true;
+		    disable:		toggle = false;
 		}
 	    }
 	}
@@ -197,7 +197,7 @@ the router within an Autonomous System";
 		    disable {
 			%help:	short	"Disable all tracing operations";
 			%set:	xrl "$(ospf4.targetname)/ospfv2/0.1/trace?tvar:txt=all&enable:bool=`~$(@)`";
-			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/trace?tvar:txt=all&enable:bool=`~$(DEFAULT)`";
+			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/trace?tvar:txt=all&enable:bool=$(DEFAULT)";
 		    }
 
 		}
