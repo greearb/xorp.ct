@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.16 2005/06/21 00:22:39 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.17 2005/06/29 20:03:08 atanu Exp $
 #
 
 #
@@ -826,7 +826,30 @@ test11()
     coord peer3 assert established
 }
 
-TESTS_NOT_FIXED=''
+# http://www.xorp.org/bugzilla/show_bug.cgi?id=296
+test12()
+{
+    echo "TEST12 - match a BGP route with a static route"
+
+    config_peers
+
+    PACKET="packet update
+	origin 2
+	aspath 1
+	nexthop $GW1
+	nlri 10.10.10.0/24"
+
+    coord peer1 send $PACKET
+
+    add_igp_table4 static bgp bgp true false
+    add_route4 static true false 10.10.10.0/24 $GW2 1
+    
+    sleep 5
+
+    coord peer1 assert established
+}
+
+TESTS_NOT_FIXED='test12'
 TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9 test10
     test11'
 
