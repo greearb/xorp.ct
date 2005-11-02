@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.45 2005/09/21 19:52:47 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.46 2005/11/02 07:32:47 atanu Exp $
 #
 
 #
@@ -998,9 +998,9 @@ test_work_in_progress()
     rm -f $SENT $RECV $XRLS
 }
 
-TESTS_NOT_FIXED='test10 test11 test12'
-TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test13 test14
-    test15 test16 test17'
+TESTS_NOT_FIXED=''
+TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
+    test12 test13 test14 test15 test16 test17'
 
 # Include command line
 . ${srcdir}/args.sh
