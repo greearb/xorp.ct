@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.53 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.54 2005/10/11 17:59:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -665,8 +665,10 @@ XorpShell::module_status_change(const string& modname,
 	      modname.c_str(), (int)status);
     GenericModule *module = _mmgr.find_module(modname);
     if (module == NULL) {
-	module = _mmgr.new_module(modname);
+	string error_msg;
+	module = _mmgr.new_module(modname, error_msg);
     }
+    XLOG_ASSERT(module != NULL);
     module->new_status(status);
 }
 

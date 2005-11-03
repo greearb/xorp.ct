@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.54 2005/10/10 04:50:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.55 2005/10/12 05:39:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2067,7 +2067,7 @@ TaskManager::reset()
 }
 
 int
-TaskManager::add_module(const ModuleCommand& module_command)
+TaskManager::add_module(const ModuleCommand& module_command, string& error_msg)
 {
     string module_name = module_command.module_name();
     string module_exec_path = module_command.module_exec_path();
@@ -2083,8 +2083,12 @@ TaskManager::add_module(const ModuleCommand& module_command)
 	    return XORP_OK;
 	}
     } else {
-	if (! _module_manager.new_module(module_name, module_exec_path)) {
-	    fail_tasklist_initialization("Can't create module");
+	if (_module_manager.new_module(module_name, module_exec_path,
+				       error_msg)
+	    != true) {
+	    error_msg = c_format("Cannot create module %s: %s",
+				 module_name.c_str(), error_msg.c_str());
+	    fail_tasklist_initialization(error_msg);
 	    return XORP_ERROR;
 	}
     }
@@ -2298,10 +2302,10 @@ TaskManager::null_callback()
 
 }
 
-int 
+int
 TaskManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			   TaskManager::CallBack cb)
+			   TaskManager::CallBack cb, string& error_msg)
 {
     return _module_manager.shell_execute(userid, argv, cb, do_exec(),
-					 is_verification());
+					 is_verification(), error_msg);
 }

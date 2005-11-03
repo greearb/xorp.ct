@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.19 2004/12/21 16:16:50 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_module_manager.cc,v 1.20 2005/03/25 02:54:38 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -28,11 +28,14 @@ SlaveModuleManager::SlaveModuleManager(EventLoop& eventloop)
 }
 
 GenericModule*
-SlaveModuleManager::new_module(const string& module_name)
+SlaveModuleManager::new_module(const string& module_name, string& error_msg)
 {
     debug_msg("SlaveModuleManager::new_module %s\n", module_name.c_str());
     GenericModule* module = new GenericModule(module_name);
-    store_new_module(module);
+    if (store_new_module(module, error_msg) != true) {
+	delete module;
+	return NULL;
+    }
     return module;
 }
 

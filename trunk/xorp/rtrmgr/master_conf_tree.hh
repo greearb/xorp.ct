@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.32 2005/09/20 15:03:46 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.33 2005/09/27 18:37:31 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -161,8 +161,8 @@ private:
     list<string> find_inactive_modules() const;
     void order_module_list(const set<string>& module_set,
 			   list<string>& ordered_modules) const;
-    bool module_config_start(const string& module_name, string& errmsg);
-    bool module_shutdown(const string& module_name, string& errmsg);
+    bool module_config_start(const string& module_name, string& error_msg);
+    bool module_shutdown(const string& module_name, string& error_msg);
 
     bool do_exec() const { return _task_manager->do_exec(); }
     bool verbose() const { return _task_manager->verbose(); }
@@ -178,8 +178,8 @@ private:
      * from a LiveCD, but wishing to preserve saved config files onto
      * a floppy disk. 
      */
-    void run_save_hook(uid_t userid, 
-		       const string& save_hook, const string& filename);
+    void run_save_hook(uid_t userid, const string& save_hook,
+		       const string& filename, string& error_msg);
 
     /**
      * @short callback when save hook completes.

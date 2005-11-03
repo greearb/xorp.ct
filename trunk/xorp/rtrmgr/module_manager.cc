@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.49 2005/10/12 09:25:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.50 2005/10/14 17:56:23 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -374,7 +374,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 }
 
 int
-Module::set_execution_path(const string& path)
+Module::set_execution_path(const string& path, string& error_msg)
 {
     if (path.empty()) {
 	// Empty path: no program should be executed
@@ -409,16 +409,14 @@ Module::set_execution_path(const string& path)
 	for (size_t i = 0; i < _path.length(); i++) {
 	    char c = _path[i];
 	    if ((c == '*') || (c == '?') || (c == '[')) {
-		string err = _path + ": bad filename";
-		XLOG_ERROR("%s", err.c_str());
+		error_msg = c_format("%s: bad filename", _path.c_str());
 		return XORP_ERROR;
 	    }
 	}
 	glob_t pglob;
 	glob(_path.c_str(), GLOB_TILDE, NULL, &pglob);
 	if (pglob.gl_pathc != 1) {
-	    string err(_path + ": File does not exist.");
-	    XLOG_ERROR("%s", err.c_str());
+	    error_msg = c_format("%s: file does not exist", _path.c_str());
 	    return XORP_ERROR;
 	}
 	_expath = pglob.gl_pathv[0];
@@ -432,38 +430,39 @@ Module::set_execution_path(const string& path)
 
     struct stat sb;
     if (stat(_expath.c_str(), &sb) < 0) {
-	string err = _expath + ": ";
 	switch (errno) {
 	case ENOTDIR:
-	    err += "A component of the path prefix is not a directory.";
+	    error_msg = "a component of the path prefix is not a directory";
 	    break;
 	case ENOENT:
-	    err += "File does not exist.";
+	    error_msg = "file does not exist";
 	    break;
 	case EACCES:
-	    err += "Permission denied.";
+	    error_msg = "permission denied";
 	    break;
 #ifdef ELOOP
 	case ELOOP:
-	    err += "Too many symbolic links.";
+	    error_msg = "too many symbolic links";
 	    break;
 #endif
 	default:
-	    err += "Unknown error accessing file.";
+	    error_msg = "unknown error accessing file";
 	}
-	XLOG_ERROR("%s", err.c_str());
+	error_msg = c_format("%s: %s", _expath.c_str(), error_msg.c_str());
 	return XORP_ERROR;
     }
     return XORP_OK;
 }
 
 void 
-Module::set_argv(const vector<string>& argv) {
+Module::set_argv(const vector<string>& argv)
+{
     _argv = argv;
 }
 
 void
-Module::set_userid(uid_t userid) {
+Module::set_userid(uid_t userid)
+{
 #ifdef HOST_OS_WINDOWS
     UNUSED(userid);
 #else
@@ -712,13 +711,20 @@ ModuleManager::~ModuleManager()
 }
 
 bool
-ModuleManager::new_module(const string& module_name, const string& path)
+ModuleManager::new_module(const string& module_name, const string& path,
+			  string& error_msg)
 {
     debug_msg("ModuleManager::new_module %s\n", module_name.c_str());
     Module* module = new Module(*this, module_name, _verbose);
-    store_new_module(module);
-    if (module->set_execution_path(path) != XORP_OK)
+    if (module->set_execution_path(path, error_msg) != XORP_OK) {
+	delete module;
 	return false;
+    }
+
+    if (store_new_module(module, error_msg) != true) {
+	delete module;
+	return false;
+    }
     return true;
 }
 
@@ -824,9 +830,9 @@ ModuleManager::shutdown_complete()
 int 
 ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
 			     ModuleManager::CallBack cb, bool do_exec,
-			     bool is_verification)
+			     bool is_verification, string& error_msg)
 {
-    if (!new_module(argv[0], argv[0])) {
+    if (!new_module(argv[0], argv[0], error_msg)) {
 	return XORP_ERROR;
     }
     Module *module = (Module*)find_module(argv[0]);

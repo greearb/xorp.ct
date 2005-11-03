@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.4 2004/12/21 16:16:50 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.5 2005/03/25 02:54:35 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -68,7 +68,8 @@ GenericModuleManager::GenericModuleManager(EventLoop& eventloop, bool verbose)
 }
 
 bool
-GenericModuleManager::store_new_module(GenericModule *module)
+GenericModuleManager::store_new_module(GenericModule *module,
+				       string& error_msg)
 {
     map<string, GenericModule*>::iterator found_mod;
     found_mod = _modules.find(module->name());
@@ -76,9 +77,9 @@ GenericModuleManager::store_new_module(GenericModule *module)
 	_modules[module->name()] = module;
 	return true;
     } else {
-	XLOG_TRACE(_verbose, "Module %s already exists",
-		   module->name().c_str());
-	delete module;
+	error_msg = c_format("Module %s already exists",
+			     module->name().c_str());
+	XLOG_TRACE(_verbose, "%s", error_msg.c_str());
 	return false;
     }
 }

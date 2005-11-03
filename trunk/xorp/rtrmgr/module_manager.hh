@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.33 2005/09/01 19:44:20 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.34 2005/10/12 05:39:43 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -44,7 +44,7 @@ public:
     Module(ModuleManager& mmgr, const string& name, bool verbose);
     ~Module();
 
-    int set_execution_path(const string& path);
+    int set_execution_path(const string& path, string& error_msg);
     void set_argv(const vector<string>& argv);
     void set_userid(uid_t userid);
     int run(bool do_exec, bool is_verification,
@@ -88,7 +88,8 @@ public:
 		  const string& xorp_root_dir);
     ~ModuleManager();
 
-    bool new_module(const string& module_name, const string& path);
+    bool new_module(const string& module_name, const string& path,
+		    string& error_msg);
     int start_module(const string& module_name, bool do_exec,
 		     bool is_verification,
 		     XorpCallback1<void, bool>::RefPtr cb);
@@ -122,10 +123,12 @@ public:
      * @param do_exec if true then do execute the external processes.
      * @param is_verification if true then this execution is for verification
      * purpose only.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int shell_execute(uid_t userid, const vector<string>& argv, 
 		      ModuleManager::CallBack cb, bool do_exec,
-		      bool is_verification);
+		      bool is_verification, string& error_msg);
     MasterConfigTree* master_config_tree() const { return _master_config_tree; }
     void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
 #if 0

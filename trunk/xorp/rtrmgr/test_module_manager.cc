@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.15 2005/03/25 02:54:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.16 2005/10/12 09:15:36 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -65,6 +65,8 @@ Rtrmgr::Rtrmgr()
 int
 Rtrmgr::run()
 {
+    string finder_str = "finder";
+
     // Initialize the event loop
     EventLoop eventloop; 
 
@@ -73,9 +75,15 @@ Rtrmgr::run()
 		       false,	/* do_restart */
 		       true,	/* verbose = */ 
 		       ".");
-    mmgr.new_module("finder", "../libxipc/xorp_finder");
+    string error_msg;
+    if (mmgr.new_module(finder_str, "../libxipc/xorp_finder", error_msg)
+	!= true) {
+	fprintf(stderr, "Cannot add module %s: %s\n", finder_str.c_str(),
+		error_msg.c_str());
+	return -1;
+    }
 
-    if (mmgr.module_has_started("finder") == true) {
+    if (mmgr.module_has_started(finder_str) == true) {
 	fprintf(stderr, "Incorrect initialization state for new module\n");
 	mmgr.shutdown();
 	return -1;
@@ -84,10 +92,10 @@ Rtrmgr::run()
     XorpCallback1<void, bool>::RefPtr cb;
     cb = callback(&module_run_done);
     waiting = true;
-    mmgr.start_module("finder", true, false, cb);
+    mmgr.start_module(finder_str, true, false, cb);
 
     printf("Verifying finder starting\n");
-    if (mmgr.module_has_started("finder") != true) {
+    if (mmgr.module_has_started(finder_str) != true) {
 	mmgr.shutdown();
 	return -1;
     }
@@ -98,7 +106,7 @@ Rtrmgr::run()
     }
     
     printf("finder should now be running\n");
-    // XLOG_ASSERT(mmgr.module_running("finder") == true);
+    // XLOG_ASSERT(mmgr.module_running(finder_str) == true);
     TimerList::system_sleep(TimeVal(2, 0));
 
     printf("shutting down\n");

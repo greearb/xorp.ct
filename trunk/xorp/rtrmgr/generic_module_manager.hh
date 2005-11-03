@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.6 2004/12/21 16:16:50 mjh Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.7 2005/03/25 02:54:35 pavlin Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
@@ -83,7 +83,7 @@ public:
     const GenericModule* const_find_module(const string& module_name) const;
 
 protected:
-    bool store_new_module(GenericModule *module);
+    bool store_new_module(GenericModule *module, string& error_msg);
     EventLoop&	_eventloop;
     map<string, GenericModule *> _modules;
     bool	_verbose;	// Set to true if output is verbose

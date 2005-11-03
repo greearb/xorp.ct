@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.34 2005/10/10 04:50:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.35 2005/10/12 05:39:44 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -512,7 +512,7 @@ public:
 
     void set_do_exec(bool do_exec, bool is_verification);
     void reset();
-    int add_module(const ModuleCommand& mod_cmd);
+    int add_module(const ModuleCommand& mod_cmd, string& error_msg);
     void add_xrl(const string& module_name, const UnexpandedXrl& xrl, 
 		 XrlRouter::XrlCallback& cb);
     void add_program(const string&			module_name,
@@ -552,7 +552,7 @@ public:
      * @param callback callback to call when the child process terminates
      */
     int shell_execute(uid_t userid, const vector<string>& argv, 
-		      TaskManager::CallBack cb);
+		      TaskManager::CallBack cb, string& error_msg);
 
     /**
      * Get a reference to the ExecId object.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.64 2005/10/12 05:39:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.65 2005/10/13 03:41:49 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -100,7 +100,7 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
       _config_tree_copy(NULL)
 {
     string configuration;
-    string errmsg;
+    string error_msg;
 
     _current_node = &_root_node;
     _task_manager = new TaskManager(*this, mmgr, xclient, 
@@ -118,12 +118,12 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     _is_xorp_gid_set = true;
 #endif
 
-    if (read_file(configuration, config_file, errmsg) != true) {
-	xorp_throw(InitError, errmsg);
+    if (read_file(configuration, config_file, error_msg) != true) {
+	xorp_throw(InitError, error_msg);
     }
 
-    if (parse(configuration, config_file, errmsg) != true) {
-	xorp_throw(InitError, errmsg);
+    if (parse(configuration, config_file, error_msg) != true) {
+	xorp_throw(InitError, error_msg);
     }
 
     //
@@ -132,8 +132,8 @@ MasterConfigTree::MasterConfigTree(const string& config_file,
     //
     add_default_children();
 
-    if (root_node().check_config_tree(errmsg) != true) {
-	xorp_throw(InitError, errmsg);
+    if (root_node().check_config_tree(error_msg) != true) {
+	xorp_throw(InitError, error_msg);
     }
 
     //
@@ -182,13 +182,13 @@ MasterConfigTree::create_tree(TemplateTree *tt, bool verbose)
 bool
 MasterConfigTree::read_file(string& configuration,
 			    const string& config_file,
-			    string& errmsg)
+			    string& error_msg)
 {
     FILE* file = fopen(config_file.c_str(), "r");
 
     if (file == NULL) {
-	errmsg = c_format("Failed to open config file: %s\n",
-			  config_file.c_str());
+	error_msg = c_format("Failed to open config file: %s\n",
+			     config_file.c_str());
 	return false;
     }
     static const uint32_t MCT_READBUF = 8192;
@@ -209,9 +209,9 @@ MasterConfigTree::read_file(string& configuration,
 bool
 MasterConfigTree::parse(const string& configuration,
 			const string& config_file,
-			string& errmsg)
+			string& error_msg)
 {
-    if (ConfigTree::parse(configuration, config_file, errmsg) != true)
+    if (ConfigTree::parse(configuration, config_file, error_msg) != true)
 	return false;
 
     string s = show_tree(/*numbered*/ true);
@@ -244,26 +244,26 @@ MasterConfigTree::execute()
 }
 
 void
-MasterConfigTree::config_done(bool success, string errmsg)
+MasterConfigTree::config_done(bool success, string error_msg)
 {
     if (success)
 	debug_msg("Configuration done: success\n");
     else
-	XLOG_ERROR("Configuration failed: %s", errmsg.c_str());
+	XLOG_ERROR("Configuration failed: %s", error_msg.c_str());
 
     _config_failed = !success;
 
     if (! success) {
 	_config_failed = true;
-	_config_failed_msg = errmsg;
+	_config_failed_msg = error_msg;
 	return;
     }
 
-    string errmsg2;
-    if (check_commit_status(errmsg2) == false) {
-	XLOG_ERROR("%s", errmsg2.c_str());
+    string error_msg2;
+    if (check_commit_status(error_msg2) == false) {
+	XLOG_ERROR("%s", error_msg2.c_str());
 	_config_failed = true;
-	_config_failed_msg = errmsg2;
+	_config_failed_msg = error_msg2;
 	return;
     }
     debug_msg("MasterConfigTree::config_done returning\n");
@@ -500,7 +500,7 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 void
 MasterConfigTree::commit_changes_pass1(CallBack cb)
 {
-    string result;
+    string error_msg;
 
     debug_msg("##############################################################\n");
     debug_msg("MasterConfigTree::commit_changes_pass1\n");
@@ -534,10 +534,10 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 
     master_root_node().initialize_commit();
 
-    if (root_node().check_config_tree(result) == false) {
+    if (root_node().check_config_tree(error_msg) == false) {
 	// Something went wrong - return the error message.
 	_commit_in_progress = false;
-	cb->dispatch(false, result);
+	cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -545,9 +545,9 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
-	if (!module_config_start(*iter, result)) {
+	if (!module_config_start(*iter, error_msg)) {
 	    _commit_in_progress = false;
-	    cb->dispatch(false, result);
+	    cb->dispatch(false, error_msg);
 	    return;
 	}
     }
@@ -556,12 +556,12 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
     if (master_root_node().commit_changes(*_task_manager,
 					  /* do_commit = */ false,
 					  0, 0,
-					  result,
+					  error_msg,
 					  needs_update)
 	== false) {
 	// Something went wrong - return the error message.
 	_commit_in_progress = false;
-	cb->dispatch(false, result);
+	cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -580,7 +580,7 @@ MasterConfigTree::commit_changes_pass1(CallBack cb)
 }
 
 void
-MasterConfigTree::commit_pass1_done(bool success, string result)
+MasterConfigTree::commit_pass1_done(bool success, string error_msg)
 {
     debug_msg("##############################################################\n");
     debug_msg("## commit_pass1_done\n");
@@ -588,27 +588,27 @@ MasterConfigTree::commit_pass1_done(bool success, string result)
     if (success) {
 	commit_changes_pass2();
     } else {
-	string msg = "Commit pass 1 failed: " + result;
+	string msg = "Commit pass 1 failed: " + error_msg;
 	XLOG_ERROR("%s", msg.c_str());
 	_commit_in_progress = false;
-	_commit_cb->dispatch(false, result);
+	_commit_cb->dispatch(false, error_msg);
     }
 }
 
 void
 MasterConfigTree::commit_changes_pass2()
 {
-    string result;
+    string error_msg;
 
     debug_msg("##############################################################\n");
     debug_msg("## commit_changes_pass2\n");
 
     _commit_in_progress = true;
 
-    if (root_node().check_config_tree(result) == false) {
-	XLOG_ERROR("Configuration tree error: %s", result.c_str());
+    if (root_node().check_config_tree(error_msg) == false) {
+	XLOG_ERROR("Configuration tree error: %s", error_msg.c_str());
 	_commit_in_progress = false;
-	_commit_cb->dispatch(false, result);
+	_commit_cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -629,10 +629,10 @@ MasterConfigTree::commit_changes_pass2()
     for (iter = changed_modules.begin();
 	 iter != changed_modules.end();
 	 ++iter) {
-	if (!module_config_start(*iter, result)) {
+	if (!module_config_start(*iter, error_msg)) {
 	    XLOG_ERROR("Commit failed in deciding startups");
 	    _commit_in_progress = false;
-	    _commit_cb->dispatch(false, result);
+	    _commit_cb->dispatch(false, error_msg);
 	    return;
 	}
     }
@@ -641,12 +641,12 @@ MasterConfigTree::commit_changes_pass2()
     if (!master_root_node().commit_changes(*_task_manager,
 					   /* do_commit = */ true,
 					   0, 0,
-					   result,
+					   error_msg,
 					   needs_update)) {
 	// Abort the commit
 	XLOG_ERROR("Commit failed in config tree");
 	_commit_in_progress = false;
-	_commit_cb->dispatch(false, result);
+	_commit_cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -660,7 +660,7 @@ MasterConfigTree::commit_changes_pass2()
 }
 
 void
-MasterConfigTree::commit_pass2_done(bool success, string result)
+MasterConfigTree::commit_pass2_done(bool success, string error_msg)
 {
     debug_msg("##############################################################\n");
     debug_msg("## commit_pass2_done\n");
@@ -668,17 +668,17 @@ MasterConfigTree::commit_pass2_done(bool success, string result)
     if (success)
 	debug_msg("## commit seems successful\n");
     else
-	XLOG_ERROR("Commit failed: %s", result.c_str());
+	XLOG_ERROR("Commit failed: %s", error_msg.c_str());
 
-    _commit_cb->dispatch(success, result);
+    _commit_cb->dispatch(success, error_msg);
     _commit_in_progress = false;
 }
 
 bool
-MasterConfigTree::check_commit_status(string& result)
+MasterConfigTree::check_commit_status(string& error_msg)
 {
     debug_msg("check_commit_status\n");
-    bool success = master_root_node().check_commit_status(result);
+    bool success = master_root_node().check_commit_status(error_msg);
 
     if (success) {
 	// If the commit was successful, clear all the temporary state.
@@ -749,12 +749,12 @@ bool
 MasterConfigTree::save_to_file(const string& filename,
 			       uid_t user_id,
 			       const string& save_hook,
-			       string& errmsg)
+			       string& error_msg)
 {
-    string dummy_errmsg;
+    string dummy_error_msg;
     string full_filename = config_full_filename(filename);
 
-    errmsg = "";
+    error_msg = "";
 
     //
     // TODO: there are lots of hard-coded values below. Fix this!
@@ -765,14 +765,14 @@ MasterConfigTree::save_to_file(const string& filename,
     // uid of the user that sent the request.
     //
     if (! _is_xorp_gid_set) {
-	errmsg = "Group \"xorp\" does not exist on this system";
+	error_msg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
     _exec_id.set_uid(user_id);
     _exec_id.set_gid(_xorp_gid);
     _exec_id.save_current_exec_id();
-    if (_exec_id.set_effective_exec_id(errmsg) != XORP_OK) {
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+    if (_exec_id.set_effective_exec_id(error_msg) != XORP_OK) {
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	return false;
     }
 
@@ -790,16 +790,16 @@ MasterConfigTree::save_to_file(const string& filename,
 	if (sb.st_mode & S_IFREG == 0) {
 	    if (((sb.st_mode & S_IFMT) == S_IFCHR) ||
 		((sb.st_mode & S_IFMT) == S_IFBLK)) {
-		errmsg = c_format("File %s is a special device.\n",
-				  full_filename.c_str());
+		error_msg = c_format("File %s is a special device.\n",
+				     full_filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFIFO) {
-		errmsg = c_format("File %s is a named pipe.\n",
-				  full_filename.c_str());
+		error_msg = c_format("File %s is a named pipe.\n",
+				     full_filename.c_str());
 	    } else if ((sb.st_mode & S_IFMT) == S_IFDIR) {
-		errmsg = c_format("File %s is a directory.\n",
-				  full_filename.c_str());
+		error_msg = c_format("File %s is a directory.\n",
+				     full_filename.c_str());
 	    }
-	    _exec_id.restore_saved_exec_id(dummy_errmsg);
+	    _exec_id.restore_saved_exec_id(dummy_error_msg);
 	    umask(orig_mask);
 	    return false;
 	}
@@ -810,18 +810,23 @@ MasterConfigTree::save_to_file(const string& filename,
 	    // We've been asked to overwrite a file
 	    char line[80];
 	    if (fgets(line, sizeof(line) - 1, file) == NULL) {
-		errmsg = "File " + full_filename + " exists, but an error occured when trying to check that it was OK to overwrite it\n";
-		errmsg += "File was NOT overwritten\n";
+		error_msg = c_format("File %s exists, but an error occured "
+				     "when trying to check that it was OK to "
+				     "overwrite it\n",
+				     full_filename.c_str());
+		error_msg += "File was NOT overwritten\n";
 		fclose(file);
-		_exec_id.restore_saved_exec_id(dummy_errmsg);
+		_exec_id.restore_saved_exec_id(dummy_error_msg);
 		umask(orig_mask);
 		return false;
 	    }
 	    if (strncmp(line, "/*XORP", 6) != 0) {
-		errmsg = "File " + full_filename + " exists, but it is not an existing XORP config file.\n";
-		errmsg += "File was NOT overwritten\n";
+		error_msg = c_format("File %s exists, but it is not an "
+				     "existing XORP config file.\n",
+				     full_filename.c_str());
+		error_msg += "File was NOT overwritten\n";
 		fclose(file);
-		_exec_id.restore_saved_exec_id(dummy_errmsg);
+		_exec_id.restore_saved_exec_id(dummy_error_msg);
 		umask(orig_mask);
 		return false;
 	    }
@@ -829,10 +834,12 @@ MasterConfigTree::save_to_file(const string& filename,
 	}
 	// It seems OK to overwrite this file
 	if (unlink(full_filename.c_str()) < 0) {
-	    errmsg = "File " + full_filename + " exists, and can not be overwritten.\n";
-	    errmsg += strerror(errno);
+	    error_msg = c_format("File %s exists, and can not be "
+				 "overwritten.\n",
+				 full_filename.c_str());
+	    error_msg += strerror(errno);
 	    fclose(file);
-	    _exec_id.restore_saved_exec_id(dummy_errmsg);
+	    _exec_id.restore_saved_exec_id(dummy_error_msg);
 	    umask(orig_mask);
 	    return false;
 	}
@@ -840,9 +847,10 @@ MasterConfigTree::save_to_file(const string& filename,
 
     file = fopen(full_filename.c_str(), "w");
     if (file == NULL) {
-	errmsg = "Could not create file \"" + full_filename + "\"";
-	errmsg += strerror(errno);
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+	error_msg = c_format("Could not create file \"%s\"",
+			     full_filename.c_str());
+	error_msg += strerror(errno);
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	umask(orig_mask);
 	return false;
     }
@@ -853,14 +861,15 @@ MasterConfigTree::save_to_file(const string& filename,
     bytes = fwrite(header.c_str(), sizeof(char), header.size(), file);
     if (bytes < header.size()) {
 	fclose(file);
-	errmsg = "Error writing to file \"" + full_filename + "\"\n";
+	error_msg = c_format("Error writing to file \"%s\"\n",
+			     full_filename.c_str());
 	// We couldn't even write the header - clean up if we can
 	if (unlink(full_filename.c_str()) == 0) {
-	    errmsg += "Save aborted; truncated file has been removed\n";
+	    error_msg += "Save aborted; truncated file has been removed\n";
 	} else {
-	    errmsg += "Save aborted; truncated file may exist\n";
+	    error_msg += "Save aborted; truncated file may exist\n";
 	}
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	umask(orig_mask);
 	return false;
     }
@@ -870,16 +879,19 @@ MasterConfigTree::save_to_file(const string& filename,
     bytes = fwrite(config.c_str(), sizeof(char), config.size(), file);
     if (bytes < config.size()) {
 	fclose(file);
-	errmsg = "Error writing to file \"" + full_filename + "\"\n";
-	errmsg += strerror(errno);
-	errmsg += "\n";
-	//we couldn't write the config - clean up if we can
+	error_msg = c_format("Error writing to file \"%s\"\n",
+			     full_filename.c_str());
+	error_msg += strerror(errno);
+	error_msg += "\n";
+	//
+	// We couldn't write the config - clean up if we can
+	//
 	if (unlink(full_filename.c_str()) == 0) {
-	    errmsg += "Save aborted; truncated file has been removed\n";
+	    error_msg += "Save aborted; truncated file has been removed\n";
 	} else {
-	    errmsg += "Save aborted; truncated file may exist\n";
+	    error_msg += "Save aborted; truncated file may exist\n";
 	}
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	umask(orig_mask);
 	return false;
     }
@@ -888,29 +900,30 @@ MasterConfigTree::save_to_file(const string& filename,
     if (fchown(fileno(file), user_id, _xorp_gid) < 0) {
 	// This shouldn't be able to happen, but if it does, it
 	// shouldn't be fatal.
-	errmsg = "WARNING: failed to set saved file to be group \"xorp\"\n";
+	error_msg = "WARNING: failed to set saved file to be group \"xorp\"\n";
     }
 
     // Close properly and clean up
     if (fclose(file) != 0) {
-	errmsg = "Error closing file \"" + full_filename + "\"\n";
-	errmsg += strerror(errno);
-	errmsg += "\nFile may not have been written correctly\n";
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+	error_msg = c_format("Error closing file \"%s\"\n",
+			     full_filename.c_str());
+	error_msg += strerror(errno) + string("\n");
+	error_msg += "File may not have been written correctly\n";
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	return false;
     }
 
-    run_save_hook(user_id, save_hook, full_filename);
+    run_save_hook(user_id, save_hook, full_filename, error_msg);
 
-    errmsg += "Save complete\n";
-    _exec_id.restore_saved_exec_id(dummy_errmsg);
+    error_msg += "Save complete\n";
+    _exec_id.restore_saved_exec_id(dummy_error_msg);
     umask(orig_mask);
     return true;
 }
 
 void
 MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
-				const string& filename)
+				const string& filename, string& error_msg)
 {
     if (save_hook.empty())
 	return;
@@ -919,17 +932,21 @@ MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
     argv.reserve(2);
     argv.push_back(save_hook);
     argv.push_back(filename);
-    _task_manager->shell_execute(userid, argv, 
-           callback(this, &MasterConfigTree::save_hook_complete));
+    _task_manager->shell_execute(
+	userid,
+	argv,
+	callback(this, &MasterConfigTree::save_hook_complete),
+	error_msg);
 }
 
 void
-MasterConfigTree::save_hook_complete(bool success, const string errmsg) const
+MasterConfigTree::save_hook_complete(bool success,
+				     const string error_msg) const
 {
     if (success)
 	debug_msg("save hook completed successfully\n");
     else
-	XLOG_ERROR("save hook completed with error %s", errmsg.c_str());
+	XLOG_ERROR("save hook completed with error %s", error_msg.c_str());
 }
 
 string
@@ -995,12 +1012,12 @@ MasterConfigTree::remove_tmp_config_file()
 
 bool
 MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
-					      string& errmsg)
+					      string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
     UNUSED(fp);
     UNUSED(user_id);
-    UNUSED(errmsg);
+    UNUSED(error_msg);
     return true;
 #else // ! HOST_OS_WINDOWS
     //
@@ -1009,21 +1026,22 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
     //
     struct group *grp = getgrnam("xorp");
     if (grp == NULL) {
-	errmsg = c_format("group \"xorp\" does not exist on this system");
+	error_msg = c_format("group \"xorp\" does not exist on this system");
 	return false;
     }
     gid_t group_id = grp->gr_gid;
 
     if (fchown(fileno(fp), user_id, group_id) != 0) {
-	errmsg = c_format("error changing the owner and group of the file: %s",
-			  strerror(errno));
+	error_msg = c_format("error changing the owner and group of the "
+			     "file: %s",
+			     strerror(errno));
 	return false;
     }
 
     if (fchmod(fileno(fp), S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH)
 	!= 0) {
-	errmsg = c_format("error changing the mode of the file: %s",
-			  strerror(errno));
+	error_msg = c_format("error changing the mode of the file: %s",
+			     strerror(errno));
 	return false;
     }
 
@@ -1032,9 +1050,9 @@ MasterConfigTree::set_config_file_permissions(FILE* fp, uid_t user_id,
 }
 
 bool
-MasterConfigTree::change_config(uid_t user_id, CallBack cb, string& errmsg)
+MasterConfigTree::change_config(uid_t user_id, CallBack cb, string& error_msg)
 {
-    string dummy_errmsg;
+    string dummy_error_msg;
 
     // Initialize the execution ID
     if (_enable_program_exec_id) {
@@ -1046,7 +1064,7 @@ MasterConfigTree::change_config(uid_t user_id, CallBack cb, string& errmsg)
     commit_changes_pass1(cb);
 
     if (config_failed()) {
-	errmsg = config_failed_msg();
+	error_msg = config_failed_msg();
 	return false;
     }
 
@@ -1054,7 +1072,7 @@ MasterConfigTree::change_config(uid_t user_id, CallBack cb, string& errmsg)
 }
 
 bool
-MasterConfigTree::apply_config_change(uid_t user_id, string& errmsg,
+MasterConfigTree::apply_config_change(uid_t user_id, string& error_msg,
 				      const string& deltas,
 				      const string& deletions,
 				      ConfigChangeCallBack cb)
@@ -1074,12 +1092,12 @@ MasterConfigTree::apply_config_change(uid_t user_id, string& errmsg,
     if (apply_deltas(user_id, deltas,
 		     true /* provisional_change */,
 		     true /* preserve_node_id */,
-		     errmsg)
+		     error_msg)
 	== false) {
 	return (false);
     }
     if (apply_deletions(user_id, deletions, /* provisional_change */ true,
-			errmsg)
+			error_msg)
 	== false) {
 	return (false);
     }
@@ -1094,12 +1112,12 @@ MasterConfigTree::apply_config_change(uid_t user_id, string& errmsg,
 			    &MasterConfigTree::apply_config_commit_changes_cb,
 			    cb);
 
-    return (change_config(user_id, cb2, errmsg));
+    return (change_config(user_id, cb2, error_msg));
 }
 
 void
 MasterConfigTree::apply_config_commit_changes_cb(bool success,
-						 string errmsg,
+						 string error_msg,
 						 ConfigChangeCallBack cb)
 {
     string deltas, deletions;
@@ -1114,13 +1132,13 @@ MasterConfigTree::apply_config_commit_changes_cb(bool success,
     deltas = delta_tree.show_unannotated_tree(/*numbered*/ true);
     deletions = deletion_tree.show_unannotated_tree(/*numbered*/ true);
     
-    cb->dispatch(success, errmsg, deltas, deletions);
+    cb->dispatch(success, error_msg, deltas, deletions);
 }
 
 
 bool
 MasterConfigTree::save_config(const string& filename, uid_t user_id,
-			      const string& save_hook, string& errmsg,
+			      const string& save_hook, string& error_msg,
 			      ConfigSaveCallBack cb)
 {
     string save_file_config;
@@ -1142,7 +1160,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     //
     do {
 	MasterConfigTree new_tree(_template_tree, _verbose);
-	if (new_tree.parse(save_file_config, "", errmsg) == true) {
+	if (new_tree.parse(save_file_config, "", error_msg) == true) {
 	    //
 	    // The file name is recognizable by the parser, hence
 	    // invoke the corresponding external methods for processing.
@@ -1153,9 +1171,9 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	//
 	// Assume that the user tries to save to a local file
 	//
-	if (save_to_file(filename, user_id, save_hook, errmsg) != true) {
+	if (save_to_file(filename, user_id, save_hook, error_msg) != true) {
 	    XLOG_TRACE(_verbose, "Failed to save file %s: %s",
-		       filename.c_str(), errmsg.c_str());
+		       filename.c_str(), error_msg.c_str());
 	    return false;
 	}
 
@@ -1170,7 +1188,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	    callback(this,
 		     &MasterConfigTree::save_config_done_cb,
 		     true,		// success
-		     string(""),	// errmsg
+		     string(""),	// error_msg
 		     cb));
 	return true;
     } while (false);
@@ -1184,19 +1202,19 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 
 	// Create the file
 	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				      _tmp_config_filename, errmsg);
+				      _tmp_config_filename, error_msg);
 	if (fp == NULL) {
-	    errmsg = c_format("Cannot save the configuration file: "
-			      "cannot create a temporary filename: %s",
-			      errmsg.c_str());
+	    error_msg = c_format("Cannot save the configuration file: "
+				 "cannot create a temporary filename: %s",
+				 error_msg.c_str());
 	    _tmp_config_filename = "";
 	    return false;
 	}
 
 	// Set the file permissions
-	if (set_config_file_permissions(fp, user_id, errmsg) != true) {
-	    errmsg = c_format("Cannot save the configuration file: %s",
-			      errmsg.c_str());
+	if (set_config_file_permissions(fp, user_id, error_msg) != true) {
+	    error_msg = c_format("Cannot save the configuration file: %s",
+				 error_msg.c_str());
 	    // Close and remove the file
 	    fclose(fp);
 	    remove_tmp_config_file();
@@ -1209,9 +1227,9 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	string config = show_unannotated_tree(/*numbered*/ false);
 	if (fwrite(config.c_str(), sizeof(char), config.size(), fp)
 	    != static_cast<size_t>(config.size())) {
-	    errmsg = c_format("Cannot save the configuration file: "
-			      "error writing to a temporary file: %s",
-			      strerror(errno));
+	    error_msg = c_format("Cannot save the configuration file: "
+				 "error writing to a temporary file: %s",
+				 strerror(errno));
 	    // Close and remove the file
 	    fclose(fp);
 	    remove_tmp_config_file();
@@ -1245,10 +1263,10 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     if (apply_deltas(user_id, save_file_config,
 		     true /* provisional_change */,
 		     false /* preserve_node_id */,
-		     errmsg)
+		     error_msg)
 	!= true) {
-	errmsg = c_format("Cannot save the configuration file: %s",
-			  errmsg.c_str());
+	error_msg = c_format("Cannot save the configuration file: %s",
+			     error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1264,10 +1282,11 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
 				 _tmp_config_filename.c_str())
 	!= true) {
-	errmsg = c_format("Cannot save the configuration file: cannot store "
-			  "temporary filename %s in internal variable %s",
-			  _tmp_config_filename.c_str(),
-			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	error_msg = c_format("Cannot save the configuration file: "
+			     "cannot store temporary filename %s in internal "
+			     "variable %s",
+			     _tmp_config_filename.c_str(),
+			     RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
 	remove_tmp_config_file();
 	return false;
     }
@@ -1279,7 +1298,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
     CallBack save_cb;
     save_cb = callback(this, &MasterConfigTree::save_config_file_sent_cb,
 		       filename, user_id, cb);
-    if (change_config(user_id, save_cb, errmsg) != true) {
+    if (change_config(user_id, save_cb, error_msg) != true) {
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1290,12 +1309,12 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 
 void
 MasterConfigTree::save_config_file_sent_cb(bool success,
-					   string errmsg,
+					   string error_msg,
 					   string filename,
 					   uid_t user_id,
 					   ConfigSaveCallBack cb)
 {
-    string dummy_errmsg;
+    string dummy_error_msg;
 
     //
     // Remove the temporary file with the configuration
@@ -1304,9 +1323,9 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
 
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
-		   filename.c_str(), errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
 	discard_changes();
-	cb->dispatch(success, errmsg);
+	cb->dispatch(success, error_msg);
 	return;
     }
 
@@ -1314,11 +1333,11 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
     // Check everything really worked, and finalize the commit when
     // the file was saved.
     //
-    if (check_commit_status(errmsg) == false) {
+    if (check_commit_status(error_msg) == false) {
 	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
-		   errmsg.c_str());
+		   error_msg.c_str());
 	discard_changes();
-	cb->dispatch(false, errmsg);
+	cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -1336,12 +1355,12 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
 	delete_save_file_config = RTRMGR_CONFIG;
     }
     if (apply_deletions(user_id, delete_save_file_config,
-			/* provisional_change */ true, errmsg)
+			/* provisional_change */ true, error_msg)
 	!= true) {
-	errmsg = c_format("Cannot save the configuration file because of "
-			  "internal error: %s", errmsg.c_str());
+	error_msg = c_format("Cannot save the configuration file because of "
+			     "internal error: %s", error_msg.c_str());
 	discard_changes();
-	cb->dispatch(false, errmsg);
+	cb->dispatch(false, error_msg);
 	return;
     }
 
@@ -1356,39 +1375,39 @@ MasterConfigTree::save_config_file_sent_cb(bool success,
     // so we can continue from there.
     //
     bool orig_success = success;
-    string orig_errmsg = errmsg;
+    string orig_error_msg = error_msg;
     CallBack cleanup_cb;
     cleanup_cb = callback(this, &MasterConfigTree::save_config_file_cleanup_cb,
-			  orig_success, orig_errmsg, filename, user_id, cb);
-    if (change_config(user_id, cleanup_cb, errmsg) != true) {
+			  orig_success, orig_error_msg, filename, user_id, cb);
+    if (change_config(user_id, cleanup_cb, error_msg) != true) {
 	discard_changes();
-	cb->dispatch(false, errmsg);
+	cb->dispatch(false, error_msg);
 	return;
     }
 }
 
 void
 MasterConfigTree::save_config_file_cleanup_cb(bool success,
-					      string errmsg,
+					      string error_msg,
 					      bool orig_success,
-					      string orig_errmsg,
+					      string orig_error_msg,
 					      string filename,
 					      uid_t user_id,
 					      ConfigSaveCallBack cb)
 {
     if (! orig_success) {
 	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
-		   filename.c_str(), orig_errmsg.c_str());
+		   filename.c_str(), orig_error_msg.c_str());
 	discard_changes();
-	cb->dispatch(orig_success, orig_errmsg);
+	cb->dispatch(orig_success, orig_error_msg);
 	return;
     }
 
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to save file %s: %s",
-		   filename.c_str(), errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
 	discard_changes();
-	cb->dispatch(success, errmsg);
+	cb->dispatch(success, error_msg);
 	return;
     }
 
@@ -1396,32 +1415,32 @@ MasterConfigTree::save_config_file_cleanup_cb(bool success,
     // Check everything really worked, and finalize the commit when
     // we cleaned up the file that was temporarily added.
     //
-    if (check_commit_status(errmsg) == false) {
+    if (check_commit_status(error_msg) == false) {
 	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
-		   errmsg.c_str());
+		   error_msg.c_str());
 	discard_changes();
-	cb->dispatch(false, errmsg);
+	cb->dispatch(false, error_msg);
 	return;
     }
 
     XLOG_TRACE(_verbose, "Cleanup completed after saving file %s",
 	       filename.c_str());
 
-    save_config_done_cb(success, errmsg, cb);
+    save_config_done_cb(success, error_msg, cb);
 
     UNUSED(user_id);
 }
 
 void
-MasterConfigTree::save_config_done_cb(bool success, string errmsg,
+MasterConfigTree::save_config_done_cb(bool success, string error_msg,
 				      ConfigSaveCallBack cb)
 {
-    cb->dispatch(success, errmsg);
+    cb->dispatch(success, error_msg);
 }
 
 bool
 MasterConfigTree::load_config(const string& filename, uid_t user_id,
-			      string& errmsg, ConfigLoadCallBack cb)
+			      string& error_msg, ConfigLoadCallBack cb)
 {
     XLOG_TRACE(_verbose, "Loading file %s", filename.c_str());
 
@@ -1440,7 +1459,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     //
     do {
 	MasterConfigTree new_tree(_template_tree, _verbose);
-	if (new_tree.parse(load_file_config, "", errmsg) == true) {
+	if (new_tree.parse(load_file_config, "", error_msg) == true) {
 	    //
 	    // The file name is recognizable by the parser, hence
 	    // invoke the corresponding external methods for processing.
@@ -1452,10 +1471,10 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	// Assume that the user tries to load from a local file
 	//
 	string deltas, deletions;
-	if (load_from_file(filename, user_id, errmsg, deltas, deletions)
+	if (load_from_file(filename, user_id, error_msg, deltas, deletions)
 	    != true) {
 	    XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		       filename.c_str(), errmsg.c_str());
+		       filename.c_str(), error_msg.c_str());
 	    return false;
 	}
 
@@ -1467,7 +1486,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 	CallBack cb2 = callback(this,
 				&MasterConfigTree::load_config_commit_changes_cb,
 				deltas, deletions, cb);
-	if (change_config(user_id, cb2, errmsg) != true) {
+	if (change_config(user_id, cb2, error_msg) != true) {
 	    discard_changes();
 	    return false;
 	}
@@ -1484,19 +1503,19 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 
 	// Create the file
 	fp = xorp_make_temporary_file("", "xorp_rtrmgr_tmp_config_file",
-				      _tmp_config_filename, errmsg);
+				      _tmp_config_filename, error_msg);
 	if (fp == NULL) {
-	    errmsg = c_format("Cannot load the configuration file: "
-			      "cannot create a temporary filename: %s",
-			      errmsg.c_str());
+	    error_msg = c_format("Cannot load the configuration file: "
+				 "cannot create a temporary filename: %s",
+				 error_msg.c_str());
 	    _tmp_config_filename = "";
 	    return false;
 	}
 
 	// Set the file permissions
-	if (set_config_file_permissions(fp, user_id, errmsg) != true) {
-	    errmsg = c_format("Cannot load the configuration file: %s",
-			      errmsg.c_str());
+	if (set_config_file_permissions(fp, user_id, error_msg) != true) {
+	    error_msg = c_format("Cannot load the configuration file: %s",
+				 error_msg.c_str());
 	    // Close and remove the file
 	    fclose(fp);
 	    remove_tmp_config_file();
@@ -1530,10 +1549,10 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     if (apply_deltas(user_id, load_file_config,
 		     true /* provisional_change */,
 		     false /* preserve_node_id */,
-		     errmsg)
+		     error_msg)
 	!= true) {
-	errmsg = c_format("Cannot load the configuration file: %s",
-			  errmsg.c_str());
+	error_msg = c_format("Cannot load the configuration file: %s",
+			     error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1549,10 +1568,11 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     if (root_node().set_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
 				 _tmp_config_filename.c_str())
 	!= true) {
-	errmsg = c_format("Cannot load the configuration file: cannot store "
-			  "temporary filename %s in internal variable %s",
-			  _tmp_config_filename.c_str(),
-			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	error_msg = c_format("Cannot load the configuration file: "
+			     "cannot store temporary filename %s in internal "
+			     "variable %s",
+			     _tmp_config_filename.c_str(),
+			     RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
 	remove_tmp_config_file();
 	return false;
     }
@@ -1564,7 +1584,7 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
     CallBack load_cb;
     load_cb = callback(this, &MasterConfigTree::load_config_file_received_cb,
 		       filename, user_id, cb);
-    if (change_config(user_id, load_cb, errmsg) != true) {
+    if (change_config(user_id, load_cb, error_msg) != true) {
 	remove_tmp_config_file();
 	discard_changes();
 	return false;
@@ -1575,19 +1595,19 @@ MasterConfigTree::load_config(const string& filename, uid_t user_id,
 
 void
 MasterConfigTree::load_config_file_received_cb(bool success,
-					       string errmsg,
+					       string error_msg,
 					       string filename,
 					       uid_t user_id,
 					       ConfigLoadCallBack cb)
 {
-    string dummy_errmsg, dummy_deltas, dummy_deletions;
+    string dummy_error_msg, dummy_deltas, dummy_deletions;
 
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		   filename.c_str(), errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
-	cb->dispatch(success, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(success, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1595,12 +1615,12 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     // Check everything really worked, and finalize the commit when
     // the file was loaded.
     //
-    if (check_commit_status(errmsg) == false) {
+    if (check_commit_status(error_msg) == false) {
 	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
-		   errmsg.c_str());
+		   error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1615,16 +1635,16 @@ MasterConfigTree::load_config_file_received_cb(bool success,
 				    rtrmgr_config_filename)
 	!= true) {
 	success = false;
-	errmsg = c_format("internal variable %s not found",
-			  RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
+	error_msg = c_format("internal variable %s not found",
+			     RTRMGR_CONFIG_FILENAME_VARNAME.c_str());
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		   filename.c_str(), errmsg.c_str());
-	errmsg = c_format("Cannot load configuration file %s because of "
-			  "internal error: %s",
-			  filename.c_str(), errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
+	error_msg = c_format("Cannot load configuration file %s because of "
+			     "internal error: %s",
+			     filename.c_str(), error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1632,18 +1652,19 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     // Read the configuration from the temporary file
     //
     string rtrmgr_config_value;
-    if (read_file(rtrmgr_config_value, rtrmgr_config_filename, errmsg)
+    if (read_file(rtrmgr_config_value, rtrmgr_config_filename, error_msg)
 	!= true) {
 	success = false;
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		   filename.c_str(), errmsg.c_str());
-	errmsg = c_format("Cannot load configuration file %s because cannot "
-			  "read temporary file %s with the configuration: %s",
-			  filename.c_str(), rtrmgr_config_filename.c_str(),
-			  errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
+	error_msg = c_format("Cannot load configuration file %s because "
+			     "cannot read temporary file %s with the "
+			     "configuration: %s",
+			     filename.c_str(), rtrmgr_config_filename.c_str(),
+			     error_msg.c_str());
 	remove_tmp_config_file();
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1664,12 +1685,12 @@ MasterConfigTree::load_config_file_received_cb(bool success,
 	delete_load_file_config = RTRMGR_CONFIG;
     }
     if (apply_deletions(user_id, delete_load_file_config,
-			/* provisional_change */ true, errmsg)
+			/* provisional_change */ true, error_msg)
 	!= true) {
-	errmsg = c_format("Cannot load the configuration file because of "
-			  "internal error: %s", errmsg.c_str());
+	error_msg = c_format("Cannot load the configuration file because of "
+			     "internal error: %s", error_msg.c_str());
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1684,23 +1705,23 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     // so we can continue from there.
     //
     bool orig_success = success;
-    string orig_errmsg = errmsg;
+    string orig_error_msg = error_msg;
     CallBack cleanup_cb;
     cleanup_cb = callback(this, &MasterConfigTree::load_config_file_cleanup_cb,
-			  orig_success, orig_errmsg, rtrmgr_config_value,
+			  orig_success, orig_error_msg, rtrmgr_config_value,
 			  filename, user_id, cb);
-    if (change_config(user_id, cleanup_cb, errmsg) != true) {
+    if (change_config(user_id, cleanup_cb, error_msg) != true) {
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 }
 
 void
 MasterConfigTree::load_config_file_cleanup_cb(bool success,
-					      string errmsg,
+					      string error_msg,
 					      bool orig_success,
-					      string orig_errmsg,
+					      string orig_error_msg,
 					      string rtrmgr_config_value,
 					      string filename,
 					      uid_t user_id,
@@ -1711,17 +1732,18 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
 
     if (! orig_success) {
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		   filename.c_str(), orig_errmsg.c_str());
+		   filename.c_str(), orig_error_msg.c_str());
 	discard_changes();
-	cb->dispatch(orig_success, orig_errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(orig_success, orig_error_msg, dummy_deltas,
+		     dummy_deletions);
 	return;
     }
 
     if (! success) {
 	XLOG_TRACE(_verbose, "Failed to load file %s: %s",
-		   filename.c_str(), errmsg.c_str());
+		   filename.c_str(), error_msg.c_str());
 	discard_changes();
-	cb->dispatch(success, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(success, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1729,11 +1751,11 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     // Check everything really worked, and finalize the commit when
     // we cleaned up the file that was temporarily added.
     //
-    if (check_commit_status(errmsg) == false) {
+    if (check_commit_status(error_msg) == false) {
 	XLOG_TRACE(_verbose, "Check commit status indicates failure: %s",
-		   errmsg.c_str());
+		   error_msg.c_str());
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1745,8 +1767,8 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     // parse errors before we reconfigure ourselves with the new config.
     //
     MasterConfigTree new_tree(_template_tree, _verbose);
-    if (new_tree.parse(rtrmgr_config_value, filename, errmsg) != true) {
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+    if (new_tree.parse(rtrmgr_config_value, filename, error_msg) != true) {
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1765,22 +1787,19 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     MasterConfigTree deletion_tree(_template_tree, _verbose);
     diff_configs(new_tree, delta_tree, deletion_tree);
 
-    string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
 				   true /* provisional_change */,
 				   false /* preserve_node_id */,
-				   response)) {
-	errmsg = response;
+				   error_msg)) {
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
 				      true /* provisional_change */,
-				      response)) {
-	errmsg = response;
+				      error_msg)) {
 	discard_changes();
-	cb->dispatch(false, errmsg, dummy_deltas, dummy_deletions);
+	cb->dispatch(false, error_msg, dummy_deltas, dummy_deletions);
 	return;
     }
 
@@ -1794,29 +1813,29 @@ MasterConfigTree::load_config_file_cleanup_cb(bool success,
     CallBack cb2 = callback(this,
 			    &MasterConfigTree::load_config_commit_changes_cb,
 			    deltas, deletions, cb);
-    if (change_config(user_id, cb2, errmsg) != true) {
+    if (change_config(user_id, cb2, error_msg) != true) {
 	discard_changes();
-	cb->dispatch(false, errmsg, deltas, deletions);
+	cb->dispatch(false, error_msg, deltas, deletions);
 	return;
     }
 }
 
 void
 MasterConfigTree::load_config_commit_changes_cb(bool success,
-						string errmsg,
+						string error_msg,
 						string deltas,
 						string deletions,
 						ConfigLoadCallBack cb)
 {
-    cb->dispatch(success, errmsg, deltas, deletions);
+    cb->dispatch(success, error_msg, deltas, deletions);
 }
 
 bool
 MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
-				 string& errmsg, string& deltas,
+				 string& error_msg, string& deltas,
 				 string& deletions)
 {
-    string dummy_errmsg;
+    string dummy_error_msg;
     string full_filename = config_full_filename(filename);
 
     //
@@ -1833,32 +1852,32 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     // uid of the user that sent the request.
     //
     if (! _is_xorp_gid_set) {
-	errmsg = "Group \"xorp\" does not exist on this system";
+	error_msg = "Group \"xorp\" does not exist on this system";
 	return false;
     }
     _exec_id.set_uid(user_id);
     _exec_id.set_gid(_xorp_gid);
     _exec_id.save_current_exec_id();
-    if (_exec_id.set_effective_exec_id(errmsg) != XORP_OK) {
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+    if (_exec_id.set_effective_exec_id(error_msg) != XORP_OK) {
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	return false;
     }
 
     string configuration;
-    if (! read_file(configuration, full_filename, errmsg)) {
-	_exec_id.restore_saved_exec_id(dummy_errmsg);
+    if (! read_file(configuration, full_filename, error_msg)) {
+	_exec_id.restore_saved_exec_id(dummy_error_msg);
 	return false;
     }
 
     // Revert UID and GID now we've done reading the file
-    _exec_id.restore_saved_exec_id(dummy_errmsg);
+    _exec_id.restore_saved_exec_id(dummy_error_msg);
 
     //
     // Test out parsing the config on a new config tree to detect any
     // parse errors before we reconfigure ourselves with the new config.
     //
     MasterConfigTree new_tree(_template_tree, _verbose);
-    if (new_tree.parse(configuration, full_filename, errmsg) != true) {
+    if (new_tree.parse(configuration, full_filename, error_msg) != true) {
 	return false;
     }
 
@@ -1877,19 +1896,16 @@ MasterConfigTree::load_from_file(const string& filename, uid_t user_id,
     MasterConfigTree deletion_tree(_template_tree, _verbose);
     diff_configs(new_tree, delta_tree, deletion_tree);
 
-    string response;
     if (! root_node().merge_deltas(user_id, delta_tree.const_root_node(),
 				   true /* provisional_change */,
 				   false /* preserve_node_id */,
-				   response)) {
-	errmsg = response;
+				   error_msg)) {
 	discard_changes();
 	return false;
     }
     if (! root_node().merge_deletions(user_id, deletion_tree.const_root_node(),
 				      true /* provisional_change */,
-				      response)) {
-	errmsg = response;
+				      error_msg)) {
 	discard_changes();
 	return false;
     }
@@ -1945,29 +1961,39 @@ MasterConfigTree::diff_configs(const MasterConfigTree& new_tree,
 
 bool
 MasterConfigTree::module_config_start(const string& module_name,
-				      string& result)
+				      string& error_msg)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
 
     if (cmd == NULL) {
-	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
+	error_msg = c_format("Module %s is not registered with the "
+			     "TemplateTree, but is needed to satisfy a "
+			     "dependency\n",
+			     module_name.c_str());
 	return false;
     }
-    _task_manager->add_module(*cmd);
+
+    if (_task_manager->add_module(*cmd, error_msg) != XORP_OK) {
+	return false;
+    }
     return true;
 }
 
 #if 0	// TODO
 bool
 MasterConfigTree::module_shutdown(const string& module_name,
-				  string& result)
+				  string& error_msg)
 {
     ModuleCommand *cmd = _template_tree->find_module(module_name);
 
     if (cmd == NULL) {
-	result = "Module " + module_name + " is not registered with the TemplateTree, but is needed to satisfy a dependency\n";
+	error_msg = c_format("Module %s is not registered with the "
+			     "TemplateTree, but is needed to satisfy a "
+			     "dependency\n",
+			     module_name.c_str());
 	return false;
     }
+
     _task_manager->shutdown_module(*cmd);
     return true;
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.18 2004/12/21 16:16:50 mjh Exp $
+// $XORP: xorp/rtrmgr/slave_module_manager.hh,v 1.19 2005/03/25 02:54:38 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_MODULE_MANAGER_HH__
 #define __RTRMGR_SLAVE_MODULE_MANAGER_HH__
@@ -24,7 +24,7 @@
 class SlaveModuleManager : public GenericModuleManager {
 public:
     SlaveModuleManager(EventLoop& eventloop);
-    GenericModule* new_module(const string& module_name);
+    GenericModule* new_module(const string& module_name, string& error_msg);
     bool module_is_active(const string& module_name) const;
 private:
 };
