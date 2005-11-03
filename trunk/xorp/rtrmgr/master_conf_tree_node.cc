@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.17 2005/10/28 02:08:23 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.18 2005/11/03 17:18:56 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -486,7 +486,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		    XLOG_ASSERT(allow_cmd != NULL);
 		    if (allow_cmd->verify_variable(*this, error_msg)
 			!= true) {
-			errro_msg = c_format("Bad operator for \"%s\": %s; ",
+			error_msg = c_format("Bad operator for \"%s\": %s; ",
 					     path().c_str(),
 					     error_msg.c_str());
 			error_msg += "No changes have been committed. ";
@@ -542,9 +542,9 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*prev_iter);
 	success = child->commit_changes(task_manager, do_commit,
 					depth + 1, last_depth, 
-					child_response,
+					child_error_msg,
 					needs_update);
-	error_msg += child_response;
+	error_msg += child_error_msg;
 	if (success == false) {
 	    return false;
 	}
@@ -636,7 +636,7 @@ MasterConfigTreeNode::sort_by_template(list <ConfigTreeNode*>& children) const
 } 
 
 bool 
-MasterConfigTreeNode::check_commit_status(string& response) const
+MasterConfigTreeNode::check_commit_status(string& error_msg) const
 {
     debug_msg("ConfigTreeNode::check_commit_status %s\n",
 	      _segname.c_str());
@@ -644,10 +644,12 @@ MasterConfigTreeNode::check_commit_status(string& response) const
     if ((_existence_committed == false) || (_value_committed == false)) {
 	XLOG_ASSERT(_actions_pending == 0);
 	if (_actions_succeeded == false) {
-	    response = "WARNING: Commit Failed\n";
-	    response += "  Error in " + _cmd_that_failed->str() + 
-		" command for " + _path + "\n";
-	    response += "  State may be partially committed - suggest reverting to previous state\n";
+	    error_msg = "WARNING: Commit Failed\n";
+	    error_msg += c_format("  Error in %s command for %s\n",
+				  _cmd_that_failed->str().c_str(),
+				  _path.c_str());
+	    error_msg += c_format("  State may be partially committed - "
+				  "suggest reverting to previous state\n");
 	    return false;
 	}
 	if (_deleted) {
@@ -668,7 +670,7 @@ MasterConfigTreeNode::check_commit_status(string& response) const
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*iter);
 	debug_msg("  child: %s\n", child->path().c_str());
-	result = child->check_commit_status(response);
+	result = child->check_commit_status(error_msg);
 	if (result == false)
 	    return false;
     }
