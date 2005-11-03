@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.53 2005/10/29 20:33:34 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.54 2005/11/01 11:46:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -891,6 +891,18 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
     //
 
     Vif v(name);
+    //
+    // XXX: this is an XRL interface only for testing purpose, and
+    // eventually this interface should go away in the future.
+    // Hence, for simplicity so we automatically assign the vif flags
+    // here with some values that should be appropriate for the
+    // limited testing purpose.
+    //
+    v.set_p2p(false);
+    v.set_loopback(false);
+    v.set_multicast_capable(true);
+    v.set_broadcast_capable(true);
+    v.set_underlying_vif_up(true);
 
     // XXX probably want something more selective (eg rib selector)
     if (_urib4.new_vif(name, v) != XORP_OK) {
