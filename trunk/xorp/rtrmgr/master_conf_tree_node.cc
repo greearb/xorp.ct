@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.16 2005/09/27 18:37:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.17 2005/10/28 02:08:23 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -346,7 +346,7 @@ bool
 MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 				     bool do_commit,
 				     int depth, int last_depth,
-				     string& result,
+				     string& error_msg,
 				     bool& needs_update)
 {
     bool success = true;
@@ -388,8 +388,9 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	    = dynamic_cast<const ModuleCommand*>(base_cmd);
 	if (modcmd != NULL) {
 	    if (modcmd->start_transaction(*this, task_manager) != XORP_OK) {
-		result = "Start Transaction failed for module "
-		    + modcmd->module_name() + "\n";
+		error_msg = c_format("Start Transaction failed for "
+				     "module %s\n",
+				     modcmd->module_name().c_str());
 		return false;
 	    }
 	}
@@ -417,10 +418,11 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			if (actions < 0) {
 			    // Bad stuff happenned
 			    // XXX now what?
-			    result = "Something went wrong.\n";
-			    result += "The problem was with \"" + path() + "\"\n";
-			    result += "WARNING: Partially commited changes exist\n";
-			    XLOG_WARNING("%s\n", result.c_str());
+			    error_msg = "Something went wrong.\n";
+			    error_msg += c_format("The problem was with \"%s\"\n",
+						  path().c_str());
+			    error_msg += "WARNING: Partially commited changes exist\n";
+			    XLOG_WARNING("%s\n", error_msg.c_str());
 			    return false;
 			}
 			_actions_pending += actions;
@@ -443,8 +445,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
-		    string errmsg;
-		    if (allow_cmd->verify_variable(*this, errmsg)
+		    if (allow_cmd->verify_variable(*this, error_msg)
 			!= true) {
 			//
 			// Commit_changes should always be run first
@@ -452,11 +453,12 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			// Allow command errors.
 			//
 			// XLOG_ASSERT(do_commit == false);
-			result = c_format("Bad value for \"%s\": %s; ",
-					  path().c_str(), errmsg.c_str());
-			result += "No changes have been committed. ";
-			result += "Correct this error and try again.";
-			XLOG_WARNING("%s\n", result.c_str());
+			error_msg = c_format("Bad value for \"%s\": %s; ",
+					     path().c_str(),
+					     error_msg.c_str());
+			error_msg += "No changes have been committed. ";
+			error_msg += "Correct this error and try again.";
+			XLOG_WARNING("%s\n", error_msg.c_str());
 			return false;
 		    }
 		}
@@ -466,12 +468,14 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		if (base_cmd == NULL) {
 		    /* no explicit command, so only ":" is allowed */
 		    if (_operator != OP_NONE && _operator != OP_ASSIGN) {
-			result = c_format("Bad operator for \"%s\": operator %s was specified, only ':' is allowed\n",
-					  path().c_str(), 
-					  operator_to_str(_operator).c_str());
-			result += "No changes have been committed. ";
-			result += "Correct this error and try again.";
-			XLOG_WARNING("%s\n", result.c_str());
+			error_msg = c_format("Bad operator for \"%s\": "
+					     "operator %s was specified, "
+					     "only ':' is allowed\n",
+					     path().c_str(), 
+					     operator_to_str(_operator).c_str());
+			error_msg += "No changes have been committed. ";
+			error_msg += "Correct this error and try again.";
+			XLOG_WARNING("%s\n", error_msg.c_str());
 			return false;
 		    }
 		} else {
@@ -480,14 +484,14 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
-		    string errmsg;
-		    if (allow_cmd->verify_variable(*this, errmsg)
+		    if (allow_cmd->verify_variable(*this, error_msg)
 			!= true) {
-			result = c_format("Bad operator for \"%s\": %s; ",
-					  path().c_str(), errmsg.c_str());
-			result += "No changes have been committed. ";
-			result += "Correct this error and try again.";
-			XLOG_WARNING("%s\n", result.c_str());
+			errro_msg = c_format("Bad operator for \"%s\": %s; ",
+					     path().c_str(),
+					     error_msg.c_str());
+			error_msg += "No changes have been committed. ";
+			error_msg += "Correct this error and try again.";
+			XLOG_WARNING("%s\n", error_msg.c_str());
 			return false;
 		    }
 		}
@@ -510,10 +514,11 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			      cmd->str().c_str());
 		    int actions = cmd->execute(*this, task_manager);
 		    if (actions < 0) {
-			result = "Parameter error for \"" + path() + "\"\n";
-			result += "No changes have been committed.\n";
-			result += "Correct this error and try again.\n";
-			XLOG_WARNING("%s\n", result.c_str());
+			error_msg = c_format("Parameter error for \"%s\"\n",
+					     path().c_str());
+			error_msg += "No changes have been committed.\n";
+			error_msg += "Correct this error and try again.\n";
+			XLOG_WARNING("%s\n", error_msg.c_str());
 			return false;
 		    }
 		    _actions_pending += actions;
@@ -533,13 +538,13 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 	prev_iter = iter;
 	++iter;
 	debug_msg("  child: %s\n", (*prev_iter)->path().c_str());
-	string child_response;
+	string child_error_msg;
 	MasterConfigTreeNode *child = (MasterConfigTreeNode*)(*prev_iter);
 	success = child->commit_changes(task_manager, do_commit,
-					       depth + 1, last_depth, 
-					       child_response,
-					       needs_update);
-	result += child_response;
+					depth + 1, last_depth, 
+					child_response,
+					needs_update);
+	error_msg += child_response;
 	if (success == false) {
 	    return false;
 	}
@@ -562,10 +567,11 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		debug_msg("found commands: %s\n", cmd->str().c_str());
 		int actions = cmd->execute(*this, task_manager);
 		if (actions < 0) {
-		    result = "Parameter error for \"" + path() + "\"\n";
-		    result += "No changes have been committed.\n";
-		    result += "Correct this error and try again.\n";
-		    XLOG_WARNING("%s\n", result.c_str());
+		    error_msg = c_format("Parameter error for \"%s\"\n",
+					 path().c_str());
+		    error_msg += "No changes have been committed.\n";
+		    error_msg += "Correct this error and try again.\n";
+		    XLOG_WARNING("%s\n", error_msg.c_str());
 		    return false;
 		}
 		_actions_pending += actions;
@@ -585,10 +591,11 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		needs_update = false;
 		int actions = cmd->execute(*this, task_manager);
 		if (actions < 0) {
-		    result = "Parameter error for \"" + path() + "\"\n";
-		    result += "No changes have been committed.\n";
-		    result += "Correct this error and try again.\n";
-		    XLOG_WARNING("%s\n", result.c_str());
+		    error_msg = c_format("Parameter error for \"%s\"\n",
+					 path().c_str());
+		    error_msg += "No changes have been committed.\n";
+		    error_msg += "Correct this error and try again.\n";
+		    XLOG_WARNING("%s\n", error_msg.c_str());
 		    return false;
 		}
 		_actions_pending += actions;
@@ -606,15 +613,15 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 		= dynamic_cast<const ModuleCommand*>(base_cmd);
 	    if (modcmd != NULL) {
 		if (modcmd->end_transaction(*this, task_manager) != XORP_OK) {
-		    result = "End Transaction failed for module "
-			+ modcmd->module_name() + "\n";
+		    error_msg = c_format("End Transaction failed for module %s\n",
+					 modcmd->module_name().c_str());
 		    return false;
 		}
 	    }
 	}
     }
 
-    debug_msg("Result: %s\n", result.c_str());
+    debug_msg("Result: %s\n", error_msg.c_str());
     debug_msg("COMMIT, leaving node >%s<\n", _path.c_str());
     debug_msg("final node %s actions_pending = %d\n",
 	      _segname.c_str(), _actions_pending);

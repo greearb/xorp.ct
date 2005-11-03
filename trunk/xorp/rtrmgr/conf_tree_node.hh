@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.56 2005/10/28 02:08:23 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.57 2005/11/01 18:55:57 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -91,13 +91,13 @@ public:
 		      const ConfigTreeNode& delta_node,
 		      bool provisional_change,
 		      bool preserve_node_id,
-		      string& response);
+		      string& error_msg);
 
     bool merge_deletions(uid_t user_id, const ConfigTreeNode& deletion_node, 
-			 bool provisional_change, string& response);
+			 bool provisional_change, string& error_msg);
     ConfigTreeNode* find_config_module(const string& module_name);
 
-    bool check_config_tree(string& result) const;
+    bool check_config_tree(string& error_msg) const;
 
     string discard_changes(int depth, int last_depth);
     int type() const;

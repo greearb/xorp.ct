@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.27 2005/10/11 17:59:42 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.28 2005/10/12 03:12:26 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -58,7 +58,7 @@ public:
     ConfigTree& operator=(const ConfigTree& orig_tree);
 #endif
     bool parse(const string& configuration, const string& config_file,
-	       string& errmsg);
+	       string& error_msg);
     void push_path();
     void extend_path(const string& segment, int type,
 		     const ConfigNodeId& node_id);

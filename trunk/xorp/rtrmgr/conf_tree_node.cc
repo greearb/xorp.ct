@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.97 2005/10/28 02:08:23 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.98 2005/11/01 18:55:57 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -434,7 +434,7 @@ ConfigTreeNode::merge_deltas(uid_t user_id,
 			     const ConfigTreeNode& delta_node, 
 			     bool provisional_change,
 			     bool preserve_node_id,
-			     string& response)
+			     string& error_msg)
 {
     XLOG_ASSERT(_segname == delta_node.segname());
 
@@ -504,7 +504,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 		bool success = my_child->merge_deltas(user_id, *delta_child,
 						      provisional_change,
 						      preserve_node_id,
-						      response);
+						      error_msg);
 		if (success == false) {
 		    // If something failed, abort the merge
 		    return false;
@@ -528,7 +528,7 @@ XXXXXXX to be copied to MasterConfigTreeNode
 	    if (!provisional_change)
 		new_node->set_existence_committed(true);
 	    new_node->merge_deltas(user_id, *delta_child, provisional_change,
-				   preserve_node_id, response);
+				   preserve_node_id, error_msg);
 	}
     }
     return true;
@@ -538,7 +538,7 @@ bool
 ConfigTreeNode::merge_deletions(uid_t user_id,
 				const ConfigTreeNode& deletion_node, 
 				bool provisional_change,
-				string& response)
+				string& error_msg)
 {
     XLOG_ASSERT(_segname == deletion_node.segname());
 
@@ -576,7 +576,7 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 		bool success = my_child->merge_deletions(user_id, 
 							 *deletion_child,
 							 provisional_change,
-							 response);
+							 error_msg);
 		if (success == false) {
 		    // If something failed, abort the merge
 		    return false;
@@ -585,8 +585,10 @@ ConfigTreeNode::merge_deletions(uid_t user_id,
 	    }
 	}
 	if (deletion_child_done == false) {
-	    response = "Failed to delete node:\n   " + deletion_node.path()
-		+ "\nNode does not exist.\n";
+	    error_msg = c_format("Failed to delete node:\n"
+				 "   %s\n"
+				 "Node does not exist.\n",
+				 deletion_node.path().c_str());
 	    return false;
 	}
     }
@@ -618,7 +620,7 @@ ConfigTreeNode::find_config_module(const string& module_name)
 }
 
 bool
-ConfigTreeNode::check_config_tree(string& result) const
+ConfigTreeNode::check_config_tree(string& error_msg) const
 {
     list<ConfigTreeNode *>::const_iterator iter;
 
@@ -627,19 +629,19 @@ ConfigTreeNode::check_config_tree(string& result) const
     //
     if (_template_tree_node != NULL) {
 	if (_template_tree_node->is_deprecated()) {
-	    result = c_format("Node \"%s\" is deprecated: %s\n",
-			      _path.c_str(),
-			      _template_tree_node->deprecated_reason().c_str());
+	    error_msg = c_format("Node \"%s\" is deprecated: %s\n",
+				 _path.c_str(),
+				 _template_tree_node->deprecated_reason().c_str());
 	    return false;
 	}
 	if (_template_tree_node->is_read_only()
 	    && (is_leaf_value())
 	    && (! is_default_value())) {
 	    string reason = read_only_reason();
-	    result = c_format("Node \"%s\" is read-only", _path.c_str());
+	    error_msg = c_format("Node \"%s\" is read-only", _path.c_str());
 	    if (! reason.empty())
-		result += c_format(": %s", reason.c_str());
-	    result += "\n";
+		error_msg += c_format(": %s", reason.c_str());
+	    error_msg += "\n";
 	    return false;
 	}
     }
@@ -655,19 +657,19 @@ ConfigTreeNode::check_config_tree(string& result) const
 	if (ttn == NULL)
 	    continue;
 	if (ttn->is_deprecated()) {
-	    result = c_format("Node \"%s\" is deprecated: %s\n",
-			      (*iter)->path().c_str(),
-			      ttn->deprecated_reason().c_str());
+	    error_msg = c_format("Node \"%s\" is deprecated: %s\n",
+				 (*iter)->path().c_str(),
+				 ttn->deprecated_reason().c_str());
 	    return false;
 	}
 	if (ttn->is_read_only()
 	    && (is_leaf_value())
 	    && (! is_default_value())) {
 	    string reason = ttn->read_only_reason();
-	    result = c_format("Node \"%s\" is read-only", _path.c_str());
+	    error_msg = c_format("Node \"%s\" is read-only", _path.c_str());
 	    if (! reason.empty())
-		result += c_format(": %s", reason.c_str());
-	    result += "\n";
+		error_msg += c_format(": %s", reason.c_str());
+	    error_msg += "\n";
 	    return false;
 	}
     }
@@ -683,10 +685,10 @@ ConfigTreeNode::check_config_tree(string& result) const
 	    const string& mandatory_config_node = *li;
 	    string value;
 	    if (expand_variable(mandatory_config_node, value) != true) {
-		result = c_format("Missing mandatory configuration node "
-				  "\"%s\" required by node \"%s\"\n",
-				  mandatory_config_node.c_str(),
-				  _path.c_str());
+		error_msg = c_format("Missing mandatory configuration node "
+				     "\"%s\" required by node \"%s\"\n",
+				     mandatory_config_node.c_str(),
+				     _path.c_str());
 		return false;
 	    }
 	}
@@ -697,7 +699,7 @@ ConfigTreeNode::check_config_tree(string& result) const
     //
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
 	ConfigTreeNode* ctn = *iter;
-	if (ctn->check_config_tree(result) != true)
+	if (ctn->check_config_tree(error_msg) != true)
 	    return false;
     }
 

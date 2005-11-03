@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.47 2005/10/12 03:12:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree.cc,v 1.48 2005/10/26 07:06:29 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -60,14 +60,14 @@ ConfigTree::operator=(const ConfigTree& orig_tree)
 
 bool
 ConfigTree::parse(const string& configuration, const string& config_file,
-		  string& errmsg)
+		  string& error_msg)
 {
     try {
 	init_bootfile_parser(configuration.c_str(), config_file.c_str(), this);
 	parse_bootfile();
 	return true;
     } catch (const ParseError& pe) {
-	errmsg = pe.why();
+	error_msg = pe.why();
     }
 
     return false;

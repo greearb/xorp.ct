@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.14 2005/08/18 15:54:27 bms Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree_node.hh,v 1.15 2005/09/27 18:37:31 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_NODE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_NODE_HH__
@@ -62,9 +62,9 @@ public:
     void initialize_commit();
     bool children_changed();
     bool commit_changes(TaskManager& task_manager, bool do_commit,
-			int depth, int last_depth, string& result,
+			int depth, int last_depth, string& error_msg,
 			bool& needs_update);
-    bool check_commit_status(string& response) const;
+    bool check_commit_status(string& error_msg) const;
     void finalize_commit();
 
 
