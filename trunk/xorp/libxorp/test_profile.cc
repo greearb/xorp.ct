@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_profile.cc,v 1.2 2005/03/25 02:53:46 pavlin Exp $"
-
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/libxorp/test_profile.cc,v 1.4 2005/08/18 15:28:41 bms Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -27,6 +24,13 @@
 #include "clock.hh"
 #include "timeval.hh"
 #include "timer.hh"
+
+#ifndef	DEBUG_LOGGING
+#define DEBUG_LOGGING
+#endif /* DEBUG_LOGGING */
+#ifndef	DEBUG_PRINT_FUNCTION_NAME
+#define DEBUG_PRINT_FUNCTION_NAME
+#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 bool
 test1(TestInfo& info)

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_spt.cc,v 1.7 2005/08/31 03:21:43 atanu Exp $"
+#ident "$XORP: xorp/libproto/test_spt.cc,v 1.8 2005/10/24 17:39:29 atanu Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -27,8 +27,12 @@
 
 #include "spt.hh"
 
+#ifndef	DEBUG_LOGGING
 #define DEBUG_LOGGING
+#endif /* DEBUG_LOGGING */
+#ifndef	DEBUG_PRINT_FUNCTION_NAME
 #define DEBUG_PRINT_FUNCTION_NAME
+#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 template <>
 string

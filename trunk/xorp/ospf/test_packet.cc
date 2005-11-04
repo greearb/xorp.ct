@@ -13,10 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.31 2005/09/12 17:52:22 atanu Exp $"
-
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.32 2005/09/17 01:28:07 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -39,6 +36,13 @@
 #include "ospf.hh"
 #include "packet.hh"
 #include "test_common.hh"
+
+#ifndef	DEBUG_LOGGING
+#define DEBUG_LOGGING
+#endif /* DEBUG_LOGGING */
+#ifndef	DEBUG_PRINT_FUNCTION_NAME
+#define DEBUG_PRINT_FUNCTION_NAME
+#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.

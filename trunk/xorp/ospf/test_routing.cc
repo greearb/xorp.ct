@@ -13,10 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.8 2005/10/30 09:25:46 atanu Exp $"
-
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.9 2005/10/31 07:58:40 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -47,6 +44,13 @@
 #include "vertex.hh"
 #include "area_router.hh"
 #include "test_common.hh"
+
+#ifndef	DEBUG_LOGGING
+#define DEBUG_LOGGING
+#endif /* DEBUG_LOGGING */
+#ifndef	DEBUG_PRINT_FUNCTION_NAME
+#define DEBUG_PRINT_FUNCTION_NAME
+#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
