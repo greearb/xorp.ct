@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.6 2005/10/22 18:44:51 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.7 2005/10/31 03:07:22 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -194,12 +194,12 @@ interface ospfv2/0.1 {
      * Get information on a neighbour.
      *
      * @param nid neighbour ID returned by the get_neighbour_list.
-     * @param valid true if valid information has been returned.
      * @param address of neighbour in txt to allow IPv4 and IPv6.
      * @param interface with which the neighbour forms the adjacency.
      * @param state of the adjacency.
      * @param rid router ID of the neighbour.
      * @param priority of the neighbour (used for DR election).
+     * @param deadtime time until neighbour is considered dead.
      * @param dead time in second before the adjacency will be considered down.
      * @param area the neighbour is in.
      * @param opt value in the neighbours hello packet.
@@ -210,16 +210,16 @@ interface ospfv2/0.1 {
      */
     get_neighbour_info ? nid:u32 \
 	-> \
-	valid:bool \
-	& address:txt \
+	address:txt \
 	& interface:txt \
 	& state:txt \
 	& rid:ipv4 \
 	& priority:u32 \
+	& deadtime:u32 \
 	& area:ipv4 \
 	& opt:u32 \
 	& dr:ipv4 \
 	& bdr:ipv4 \
 	& up:u32 \
-	& adjacent:u32    
+	& adjacent:u32
 }

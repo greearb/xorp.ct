@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.18 2005/10/31 03:07:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.19 2005/11/04 01:02:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -616,25 +616,54 @@ XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
 }
 
 XrlCmdError
-XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& /*areas*/)
+XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& neighbours)
 {
+    list<OspfTypes::NeighbourID> neighbourlist;
+
+    if (!_ospf.get_neighbour_list(neighbourlist))
+	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour list");
+
+    list<OspfTypes::NeighbourID>::const_iterator i;
+    for (i = neighbourlist.begin(); i != neighbourlist.end(); i++)
+	neighbours.append(XrlAtom(*i));
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& /*nid*/,
-					       bool& /*valid*/,
-					       string& /*address*/,
-					       string& /*interface*/,
-					       string& /*state*/,
-					       IPv4& /*rid*/,
-					       uint32_t& /*priority*/,
-					       IPv4& /*area*/,
-					       uint32_t& /*opt*/,
-					       IPv4& /*dr*/,
-					       IPv4& /*bdr*/,
-					       uint32_t& /*up*/,
-					       uint32_t& /*adjacent*/)
+XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& nid,
+					       string& address,
+					       string& interface,
+					       string& state,
+					       IPv4& rid,
+					       uint32_t& priority,
+					       uint32_t& deadtime,
+					       IPv4& area,
+					       uint32_t& opt,
+					       IPv4& dr,
+					       IPv4& bdr,
+					       uint32_t& up,
+					       uint32_t& adjacent)
 {
+    NeighbourInfo ninfo;
+
+    if (!_ospf.get_neighbour_info(nid, ninfo))
+	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour info");
+
+#define copy_ninfo(var) 	var = ninfo._ ## var
+    copy_ninfo(address);
+    copy_ninfo(interface);
+    copy_ninfo(state);
+    copy_ninfo(rid);
+    copy_ninfo(priority);
+    copy_ninfo(deadtime);
+    copy_ninfo(area);
+    copy_ninfo(opt);
+    copy_ninfo(dr);
+    copy_ninfo(bdr);
+    copy_ninfo(up);
+    copy_ninfo(adjacent);
+#undef copy_ninfo
+
     return XrlCmdError::OKAY();
 }

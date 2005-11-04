@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.101 2005/09/19 23:33:51 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.102 2005/10/12 06:11:06 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -278,6 +278,21 @@ class PeerOut {
 	_inftransdelay = inftransdelay;
 	return true;
     }
+
+    /**
+     *  Get a list of all the neighbours.
+     */
+    bool get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const;
+
+    /**
+     * Get state information about this neighbour.
+     *
+     * @param nid neighbour information is being request about.
+     * @param ninfo if neighbour is found its information.
+     *
+     */
+    bool get_neighbour_info(OspfTypes::NeighbourID nid,
+			    NeighbourInfo& ninfo) const;
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
@@ -813,6 +828,21 @@ class Peer {
      */
     void adjacency_change(bool up);
 
+    /**
+     *  Get a list of all the neighbours.
+     */
+    bool get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const;
+
+    /**
+     * Get state information about this neighbour.
+     *
+     * @param nid neighbour information is being request about.
+     * @param ninfo if neighbour is found its information.
+     *
+     */
+    bool get_neighbour_info(OspfTypes::NeighbourID nid,
+			    NeighbourInfo& ninfo) const;
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
@@ -1110,6 +1140,14 @@ class Neighbour {
      */
     static string pp_state(State is);
 
+    /**
+     * Get state information about this neighbour.
+     *
+     * @param ninfo if neighbour is found its information.
+     *
+     */
+    bool get_neighbour_info(NeighbourInfo& ninfo) const;
+
     string str() {
 	return "Address: " + _neighbour_address.str() +
 	    "RouterID: " + pr_id(_router_id);
@@ -1280,5 +1318,6 @@ class Neighbour {
      */
     void event_SequenceNumberMismatch_or_BadLSReq(const char *event_name);
 };
+
 
 #endif // __OSPF_PEER_HH__

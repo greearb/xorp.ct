@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.11 2005/10/22 22:45:42 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.12 2005/10/31 03:07:21 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -402,12 +402,12 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	// Input values,
 	const uint32_t&	nid,
 	// Output values,
-	bool&	valid,
 	string&	address,
 	string&	interface,
 	string&	state,
 	IPv4&	rid,
-	uint32_t&	priority,
+	uint32_t& priority,
+	uint32_t& deadtime,
 	IPv4&	area,
 	uint32_t&	opt,
 	IPv4&	dr,

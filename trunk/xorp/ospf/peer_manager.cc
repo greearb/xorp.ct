@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.69 2005/10/22 03:53:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.70 2005/10/22 22:45:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -228,6 +228,41 @@ PeerManager<A>::get_area_list(list<OspfTypes::AreaID>& areas) const
 	areas.push_back((*i).first);
 
     return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours)
+    const
+{
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++)
+	(*i).second->get_neighbour_list(neighbours);
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerManager<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
+				   NeighbourInfo& ninfo) const
+{
+    list<OspfTypes::NeighbourID> neighbours;
+
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	(*i).second->get_neighbour_list(neighbours);
+	list<OspfTypes::NeighbourID>::const_iterator j;
+	for (j = neighbours.begin(); j != neighbours.end(); j++) {
+	    if (*j == nid) {
+		(*i).second->get_neighbour_info(nid, ninfo);
+		return true;
+	    }
+	}
+	neighbours.clear();
+    }
+
+    return false;
 }
 
 template <typename A>

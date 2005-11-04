@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.48 2005/10/21 21:27:31 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.49 2005/10/22 22:45:42 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -104,6 +104,21 @@ class PeerManager {
      *  Get a list of all the configured areas.
      */
     bool get_area_list(list<OspfTypes::AreaID>& areas) const;
+
+    /**
+     *  Get a list of all the neighbours.
+     */
+    bool get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const;
+
+    /**
+     * Get state information about this neighbour.
+     *
+     * @param nid neighbour information is being request about.
+     * @param ninfo if neighbour is found its information.
+     *
+     */
+    bool get_neighbour_info(OspfTypes::NeighbourID nid,
+			    NeighbourInfo& ninfo) const;
 
     /**
      * Convert an interface/vif to a PeerID.

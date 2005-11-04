@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.64 2005/10/23 09:29:48 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.65 2005/10/31 07:58:40 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -287,6 +287,24 @@ pb(bool val)
     return val ? "true" : "false";
 }
 
+/**
+ * Neighbour information that is returned by XRLs.
+ */
+struct NeighbourInfo {
+    string _address;		// Address of neighbour.
+    string _interface;		// Interface name.
+    string _state;		// The current state.
+    IPv4 _rid;			// The neighbours router id.
+    uint32_t _priority;		// The priority in the hello packet.
+    uint32_t _deadtime;		// Number of seconds before the
+				// peering is considered down.
+    IPv4 _area;			// The area this neighbour belongs to.
+    uint32_t _opt;		// The options on the hello packet.
+    IPv4 _dr;			// The designated router.
+    IPv4 _bdr;			// The backup designated router.
+    uint32_t _up;		// Time there has been neighbour awareness.
+    uint32_t _adjacent;		// Time peering has been adjacent.
+};
 
 #include "policy_varrw.hh"
 #include "io.hh"
@@ -473,6 +491,21 @@ class Ospf {
      *  Get a list of all the configured areas.
      */
     bool get_area_list(list<OspfTypes::AreaID>& areas) const;
+
+    /**
+     *  Get a list of all the neighbours.
+     */
+    bool get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const;
+
+    /**
+     * Get state information about this neighbour.
+     *
+     * @param nid neighbour information is being request about.
+     * @param ninfo if neighbour is found its information.
+     *
+     */
+    bool get_neighbour_info(OspfTypes::NeighbourID nid,
+			    NeighbourInfo& ninfo) const;
 
     /**
      * Add route
