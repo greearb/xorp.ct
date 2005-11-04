@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.23 2005/10/31 07:58:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.24 2005/10/31 08:14:21 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -371,8 +371,8 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 template <typename A>
 bool
 RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
-			      uint32_t& /*metric*/, RouteEntry<A>& /*rt*/,
-			      const PolicyTags& /*policytags*/)
+			      uint32_t& metric, RouteEntry<A>& /*rt*/,
+			      const PolicyTags& policytags)
 {
     // Host routes are required in the ospf routing table to satisfy
     // requirements for AS-External-LSAs and Summary-LSAs. Drop them
@@ -380,7 +380,47 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
     if (net.contains(nexthop))
  	return false;
 
-    // The import policy filter code goes here.
+    // The import policy filter.
+    try {
+	bool e_bit;
+	uint32_t tag;
+	OspfVarRW<A> varrw(net, nexthop, metric, e_bit, tag, policytags);
+
+	// Import filtering
+	bool accepted;
+
+	debug_msg("[OSPF] Running filter: %s on route: %s\n",
+		  filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+	XLOG_TRACE(_ospf.trace()._import_policy,
+		   "[OSPF] Running filter: %s on route: %s\n",
+		   filter::filter2str(filter::IMPORT).c_str(), cstring(net));
+		   
+	accepted = _ospf.get_policy_filters().
+	    run_filter(filter::IMPORT, varrw);
+
+	// Route Rejected 
+	if (!accepted) 
+	    return accepted;
+
+	OspfVarRW<A> varrw2(net, nexthop, metric, e_bit, tag, policytags);
+
+	// Export source-match filtering
+	debug_msg("[OSPF] Running filter: %s on route: %s\n",
+		  filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		  cstring(net));
+	XLOG_TRACE(_ospf.trace()._import_policy,
+		   "[OSPF] Running filter: %s on route: %s\n",
+		   filter::filter2str(filter::EXPORT_SOURCEMATCH).c_str(),
+		   cstring(net));
+
+	_ospf.get_policy_filters().
+	    run_filter(filter::EXPORT_SOURCEMATCH, varrw2);
+
+	return accepted;
+    } catch(const PolicyException& e) {
+	XLOG_WARNING("PolicyException: %s", e.str().c_str());
+	return false;
+    }
 
     return true;
 }

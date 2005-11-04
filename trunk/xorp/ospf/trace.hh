@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/trace.hh,v 1.6 2005/10/30 07:33:54 atanu Exp $
+// $XORP: xorp/ospf/trace.hh,v 1.7 2005/10/31 03:07:21 atanu Exp $
 
 #ifndef __OSPF_TRACE_HH__
 #define __OSPF_TRACE_HH__
@@ -25,20 +25,25 @@ struct Trace {
     Trace() : _input_errors(false),
 	      _interface_events(false),
 	      _neighbour_events(false),
-	      _spt(false)
+	      _spt(false),
+	      _import_policy(false),
+	      _export_policy(false)
 	{}
 
     /*
      * Set all flags
      */
     void all(bool val) {
-	_input_errors = _interface_events = _neighbour_events = _spt = val;
+	_input_errors = _interface_events = _neighbour_events = _spt = 
+	    _import_policy = _export_policy = val;
     }
 
     bool _input_errors;
     bool _interface_events;
     bool _neighbour_events;
     bool _spt;	/* Shortest Path Tree */
+    bool _import_policy;
+    bool _export_policy;
 };
 
 #endif // __OSPF_TRACE_HH__
