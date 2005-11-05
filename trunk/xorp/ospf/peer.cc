@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.171 2005/10/20 22:10:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.172 2005/11/04 18:56:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4280,18 +4280,29 @@ template <typename A>
 bool
 Neighbour<A>::get_neighbour_info(NeighbourInfo& ninfo) const
 {
+    uint32_t priority = 0;
+    uint32_t options = 0;
+    uint32_t dr = 0;
+    uint32_t bdr = 0;
+    if (_hello_packet) {
+	priority = _hello_packet->get_router_priority();
+	options = _hello_packet->get_options();
+	dr = _hello_packet->get_designated_router();
+	bdr = _hello_packet->get_backup_designated_router();
+    }
+    TimeVal remain;
+    if (!_inactivity_timer.time_remaining(remain))
+	remain = TimeVal(0,0);
     ninfo._address = get_neighbour_address().str();
     ninfo._interface = _peer.get_if_name();
     ninfo._state = pp_state(get_state());
     ninfo._rid = IPv4(htonl(get_router_id()));
-    ninfo._priority = _hello_packet ? _hello_packet->get_router_priority() : 0;
-    ninfo._deadtime = 0;	// XXX
+    ninfo._priority = priority;
+    ninfo._deadtime = remain.sec();
     ninfo._area = IPv4(htonl(_peer.get_area_id()));
-    ninfo._opt = _hello_packet ? _hello_packet->get_options() : 0;
-    ninfo._dr = _hello_packet ?
-	IPv4(htonl(_hello_packet->get_designated_router())) : IPv4::ZERO();
-    ninfo._bdr = _hello_packet ? 
-	IPv4(_hello_packet->get_backup_designated_router()) : IPv4::ZERO();
+    ninfo._opt = options;
+    ninfo._dr = IPv4(htonl(dr));
+    ninfo._bdr = IPv4(htonl(bdr));
     ninfo._up = 0;		// XXX
     ninfo._adjacent = 0;	// XXX
 
