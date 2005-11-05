@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.70 2005/10/22 22:45:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.71 2005/11/04 18:56:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -255,8 +255,7 @@ PeerManager<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
 	list<OspfTypes::NeighbourID>::const_iterator j;
 	for (j = neighbours.begin(); j != neighbours.end(); j++) {
 	    if (*j == nid) {
-		(*i).second->get_neighbour_info(nid, ninfo);
-		return true;
+		return (*i).second->get_neighbour_info(nid, ninfo);
 	    }
 	}
 	neighbours.clear();
