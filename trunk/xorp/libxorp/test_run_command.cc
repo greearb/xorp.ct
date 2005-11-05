@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.8 2005/10/10 04:50:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.9 2005/10/11 03:49:13 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,15 +29,16 @@
 #endif
 
 #ifdef HOST_OS_WINDOWS
-#ifndef MSYS_ROOT
-#define MSYS_ROOT	"D:\\MSYS"
-#endif
-#define SLEEP_PATH	MSYS_ROOT "\\bin\\sleep.exe"
-#define AWK_PATH	MSYS_ROOT "\\bin\\gawk.exe"
+#define MSYS_DEFAULT_ROOT	"C:\\MinGW"
+#define SLEEP_PATH	"\\bin\\sleep.exe"
+#define AWK_PATH	"\\bin\\gawk.exe"
+#define AWK_UNIX_PATH	"/bin/gawk"
 #else
 #define SLEEP_PATH	"/bin/sleep"
 #define AWK_PATH	"/usr/bin/awk"
 #endif
+
+static string cmdroot = "";
 
 #define SLEEP_ARGUMENT	"10000"
 
@@ -323,7 +324,7 @@ test_execute_invalid_arguments()
     argument_list.push_back("-no-such-flags");
     argument_list.push_back("-more-bogus-flags");
     RunCommand run_command(eventloop,
-			   SLEEP_PATH,
+			   cmdroot + SLEEP_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -378,7 +379,7 @@ test_execute_terminate_command()
     list<string> argument_list;
     argument_list.push_back(SLEEP_ARGUMENT);
     RunCommand run_command(eventloop,
-			   SLEEP_PATH,
+			   cmdroot + SLEEP_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -460,7 +461,7 @@ test_command_stdout_reading()
     list<string> argument_list;
     argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
-			   AWK_PATH,
+			   cmdroot + AWK_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -533,7 +534,12 @@ test_shell_command_stdout_reading()
 				 "exit 0;}'",
 				 stdout_msg_in.c_str());
     RunShellCommand run_command(eventloop,
+#ifdef HOST_OS_WINDOWS
+				// Invocation via shell needs UNIX style path
+				AWK_UNIX_PATH,
+#else
 				AWK_PATH,
+#endif
 				awk_script,
 				callback(test_run_command,
 					 &TestRunCommand::shell_command_stdout_cb),
@@ -610,7 +616,7 @@ test_command_stderr_reading()
     list<string> argument_list;
     argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
-			   AWK_PATH,
+			   cmdroot + AWK_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -685,7 +691,7 @@ test_command_redirect_stderr_to_stdout_reading()
     list<string> argument_list;
     argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
-			   AWK_PATH,
+			   cmdroot + AWK_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -760,7 +766,7 @@ test_command_termination_failure()
     list<string> argument_list;
     argument_list.push_back(awk_script);
     RunCommand run_command(eventloop,
-			   AWK_PATH,
+			   cmdroot + AWK_PATH,
 			   argument_list,
 			   callback(test_run_command,
 				    &TestRunCommand::command_stdout_cb),
@@ -827,6 +833,15 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+#ifdef HOST_OS_WINDOWS
+    if (cmdroot == "") {
+	char *_cmdroot = getenv("MSYSROOT");
+	if (_cmdroot == NULL)
+	    _cmdroot = const_cast<char *>(MSYS_DEFAULT_ROOT);
+	cmdroot = string(_cmdroot);
+    }
+#endif
 
     int ch;
     while ((ch = getopt(argc, argv, "hv")) != -1) {
