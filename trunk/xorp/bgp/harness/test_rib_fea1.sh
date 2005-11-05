@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.12 2004/12/17 01:31:02 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.13 2005/07/20 01:33:15 atanu Exp $
 #
 
 #
@@ -170,6 +170,12 @@ configure_fea()
 
     $FEA_FUNCS create_interface $tid $VIF0_IPV6
     $FEA_FUNCS create_interface $tid $VIF1_IPV6
+
+    $FEA_FUNCS enable_interface $tid $VIF0
+    $FEA_FUNCS enable_interface $tid $VIF1
+
+    $FEA_FUNCS enable_interface $tid $VIF0_IPV6
+    $FEA_FUNCS enable_interface $tid $VIF1_IPV6
 
     $FEA_FUNCS create_vif $tid $VIF0 $VIF0
     $FEA_FUNCS create_vif $tid $VIF1 $VIF1
