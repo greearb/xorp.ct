@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.24 2005/10/31 08:14:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.25 2005/11/04 07:50:22 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -255,7 +255,7 @@ RoutingTable<A>::end()
 		rt.get_cost() != rt_previous.get_cost()) {
 		if (!replace_route(rt.get_area(), tip.key(),
 				   rt.get_nexthop(), rt.get_cost(),
-				   rt, rt_previous)) {
+				   rt, rt_previous, rt_previous.get_area())) {
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
 	    }
@@ -354,9 +354,10 @@ template <typename A>
 bool
 RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			       uint32_t metric, RouteEntry<A>& rt,
-			       RouteEntry<A>& previous_rt)
+			       RouteEntry<A>& previous_rt,
+			       OspfTypes::AreaID previous_area)
 {
-    bool result = delete_route(area, net, previous_rt);
+    bool result = delete_route(previous_area, net, previous_rt);
     if (!result)
 	XLOG_WARNING("Failed to delete: %s", cstring(net));
     result = add_route(area, net, nexthop, metric, rt);
