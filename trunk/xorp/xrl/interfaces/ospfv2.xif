@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.7 2005/10/31 03:07:22 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.8 2005/11/04 18:56:27 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -10,6 +10,11 @@ interface ospfv2/0.1 {
      * Set router id 
      */
     set_router_id ? id:ipv4
+
+    /**
+     * Set the router alert in the IP options.
+     */
+    set_ip_router_alert ? ip_router_alert:bool
 
     /**
      * Create an area.

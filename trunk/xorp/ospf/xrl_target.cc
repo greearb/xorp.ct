@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.19 2005/11/04 01:02:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.20 2005/11/04 18:56:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -269,6 +269,15 @@ XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
     OspfTypes::RouterID rid = ntohl(id.addr());
 
     _ospf.set_router_id(rid);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_ip_router_alert(const bool& ip_router_alert)
+{
+    if (!_ospf.set_ip_router_alert(ip_router_alert))
+	return XrlCmdError::COMMAND_FAILED("Failed to set IP router alert");
 
     return XrlCmdError::OKAY();
 }

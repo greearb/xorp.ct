@@ -1,9 +1,10 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.17 2005/10/31 07:33:59 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.18 2005/11/02 03:28:56 pavlin Exp $ */
 
 protocols {
     ospf4 {
 	targetname: txt = "ospfv2";
 	router-id: ipv4;
+	ip-router-alert: bool = true;
 	
 	area @: ipv4 {
 	    area-type:		txt = "normal";
@@ -67,6 +68,15 @@ the OSPF protocol. This number uniquely identifies
 the router within an Autonomous System";
 
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_id?id:ipv4=$(@)";
+	}
+
+	ip-router-alert {
+	    %help: short "Send the IP router alert option in packets";
+	    %help: long
+"If this option is true the IP router alert option will be set in all
+transmitted packets";
+
+	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_ip_router_alert?ip_router_alert:bool=$(@)";
 	}
 	
 	area @: ipv4 {
