@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.26 2005/09/08 00:01:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.27 2005/09/17 01:28:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -551,7 +551,7 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
 #endif
 
-    size_t bias;
+    size_t bias = 0;
 
     switch(version) {
     case OspfTypes::V2:
@@ -616,7 +616,7 @@ DataDescriptionPacket::encode(vector<uint8_t>& pkt)
     /**************************************/
     OspfTypes::Version version = get_version();
 
-    size_t bias;
+    size_t bias = 0;
 
     switch(version) {
     case OspfTypes::V2:

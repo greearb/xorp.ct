@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.55 2005/09/15 05:03:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.56 2005/10/13 20:41:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -663,7 +663,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
-    RouterLsa *lsa;
+    RouterLsa *lsa = 0;
     try {
 	lsa = new RouterLsa(version, buf, len);
 	size_t nlinks = 0;	// Number of Links OSPFv2 Only
@@ -849,13 +849,13 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
-    NetworkLsa *lsa;
+    NetworkLsa *lsa = 0;
     try {
 	lsa = new NetworkLsa(version, buf, len);
 
 	// Decode the LSA Header.
 	lsa->_header.decode_inline(buf);
-	uint8_t *start;
+	uint8_t *start = 0;
 	switch(version) {
 	case OspfTypes::V2:
 	    lsa->set_network_mask(extract_32(&buf[header_length]));
@@ -888,7 +888,7 @@ NetworkLsa::encode()
 {
     OspfTypes::Version version = get_version();
 
-    size_t len;
+    size_t len = 0;
 
     switch(version) {
     case OspfTypes::V2:
@@ -910,7 +910,7 @@ NetworkLsa::encode()
     size_t header_length = _header.copy_out(ptr);
     XLOG_ASSERT(len > header_length);
 
-    size_t index;
+    size_t index = 0;
     switch(version) {
     case OspfTypes::V2:
 	embed_32(&ptr[header_length], get_network_mask());
@@ -1004,7 +1004,7 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
-    SummaryNetworkLsa *lsa;
+    SummaryNetworkLsa *lsa = 0;
     try {
 	lsa = new SummaryNetworkLsa(version, buf, len);
 
@@ -1040,7 +1040,7 @@ SummaryNetworkLsa::encode()
 {
     OspfTypes::Version version = get_version();
 
-    size_t len;
+    size_t len = 0;
 
     switch(version) {
     case OspfTypes::V2:
@@ -1063,7 +1063,7 @@ SummaryNetworkLsa::encode()
     size_t header_length = _header.copy_out(ptr);
     XLOG_ASSERT(len > header_length);
 
-    size_t index;
+    size_t index = 0;
     switch(version) {
     case OspfTypes::V2:
 	embed_32(&ptr[header_length], get_network_mask());
@@ -1143,7 +1143,7 @@ SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
-    SummaryRouterLsa *lsa;
+    SummaryRouterLsa *lsa = 0;
     try {
 	lsa = new SummaryRouterLsa(version, buf, len);
 
@@ -1174,7 +1174,7 @@ SummaryRouterLsa::encode()
 {
     OspfTypes::Version version = get_version();
 
-    size_t len;
+    size_t len = 0;
 
     switch(version) {
     case OspfTypes::V2:
@@ -1196,7 +1196,7 @@ SummaryRouterLsa::encode()
     size_t header_length = _header.copy_out(ptr);
     XLOG_ASSERT(len > header_length);
 
-    size_t index;
+    size_t index = 0;
     switch(version) {
     case OspfTypes::V2:
 	embed_32(&ptr[header_length], get_network_mask());
@@ -1276,7 +1276,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
 	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
 
-    ASExternalLsa *lsa;
+    ASExternalLsa *lsa = 0;
     try {
 	lsa = new ASExternalLsa(version, buf, len);
 
@@ -1339,7 +1339,7 @@ ASExternalLsa::encode()
 {
     OspfTypes::Version version = get_version();
 
-    size_t len;
+    size_t len = 0;
 
     switch(version) {
     case OspfTypes::V2:
@@ -1365,7 +1365,7 @@ ASExternalLsa::encode()
     size_t header_length = _header.copy_out(ptr);
     XLOG_ASSERT(len > header_length);
 
-    size_t index;
+    size_t index = 0;
     uint8_t flag = 0;
     switch(version) {
     case OspfTypes::V2: {

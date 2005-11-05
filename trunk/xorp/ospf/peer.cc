@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.173 2005/11/05 04:41:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.174 2005/11/05 06:20:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1505,7 +1505,7 @@ Peer<A>::send_hello_packet()
 
     _hello_packet.encode(pkt);
 
-    SimpleTransmit<A> *transmit;
+    SimpleTransmit<A> *transmit = 0;
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
@@ -2850,7 +2850,7 @@ Neighbour<A>::send_data_description_packet()
     vector<uint8_t> pkt;
     _data_description_packet.encode(pkt);
 
-    SimpleTransmit<A> *transmit;
+    SimpleTransmit<A> *transmit = 0;
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
@@ -2910,7 +2910,7 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
     vector<uint8_t> pkt;
     lsrp.encode(pkt);
 
-    SimpleTransmit<A> *transmit;
+    SimpleTransmit<A> *transmit = 0;
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
@@ -2950,7 +2950,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
     vector<uint8_t> pkt;
     lsup.encode(pkt, _peer.get_inftransdelay());
 
-    SimpleTransmit<A> *transmit;
+    SimpleTransmit<A> *transmit = 0;
 
     switch(get_linktype()) {
     case OspfTypes::PointToPoint:
@@ -2997,7 +2997,7 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
     vector<uint8_t> pkt;
     lsap.encode(pkt);
 
-    SimpleTransmit<A> *transmit;
+    SimpleTransmit<A> *transmit = 0;
 
     multicast_on_peer = false;
     if (direct) {
@@ -3103,9 +3103,9 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     }
 
     bool first = 0 ==_hello_packet;
-    uint8_t previous_router_priority;
-    OspfTypes::RouterID previous_dr;
-    OspfTypes::RouterID previous_bdr;
+    uint8_t previous_router_priority = 0;
+    OspfTypes::RouterID previous_dr = 0;
+    OspfTypes::RouterID previous_bdr = 0;
     if (first) {
 	XLOG_ASSERT(!_inactivity_timer.scheduled());
     } else {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.132 2005/10/30 09:25:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.133 2005/10/31 01:09:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2162,7 +2162,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 
 	SummaryNetworkLsa *snlsa;	// Type 3
 	SummaryRouterLsa *srlsa;	// Type 4
-	uint32_t metric;
+	uint32_t metric = 0;
 	IPv4 mask;
 
 	if (0 != (snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get()))) {
