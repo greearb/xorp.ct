@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.15 2005/11/01 11:03:29 pavlin Exp $
+// $XORP: xorp/ospf/io.hh,v 1.16 2005/11/05 19:25:54 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -26,6 +26,9 @@
 template <typename A>
 class IO {
  public:
+    IO() : _ip_router_alert(true)
+    {}
+
     virtual ~IO() {}
 
     /**
@@ -56,9 +59,22 @@ class IO {
      * Send Raw frames.
      */
     virtual bool send(const string& interface, const string& vif,
-		      bool router_alert,
 		      A dst, A src,
 		      uint8_t* data, uint32_t len) = 0;
+
+    /**
+     * Send router alerts in IP packets?
+     */
+    bool set_ip_router_alert(bool alert) {
+	_ip_router_alert = alert;
+
+	return true;
+    }
+
+    /**
+     * Get router alert state.
+     */
+    bool get_ip_router_alert() const { return _ip_router_alert; }
 
     typedef typename XorpCallback6<void, const string&, const string&,
 				   A, A,
@@ -215,5 +231,6 @@ class IO {
     InterfaceStatusCb	_interface_status_cb;
     VifStatusCb		_vif_status_cb;
     AddressStatusCb	_address_status_cb;
+    bool _ip_router_alert;
 };
 #endif // __OSPF_IO_HH__
