@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.9 2005/10/11 03:49:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.10 2005/11/05 17:58:54 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -30,12 +30,14 @@
 
 #ifdef HOST_OS_WINDOWS
 #define MSYS_DEFAULT_ROOT	"C:\\MinGW"
-#define SLEEP_PATH	"\\bin\\sleep.exe"
-#define AWK_PATH	"\\bin\\gawk.exe"
-#define AWK_UNIX_PATH	"/bin/gawk"
+#define SLEEP_PATH		"\\bin\\sleep.exe"
+#define AWK_PATH		"\\bin\\gawk.exe"
+// Invocation via shell needs UNIX style path
+#define AWK_VIA_SHELL_PATH	"/bin/gawk"
 #else
-#define SLEEP_PATH	"/bin/sleep"
-#define AWK_PATH	"/usr/bin/awk"
+#define SLEEP_PATH		"/bin/sleep"
+#define AWK_PATH		"/usr/bin/awk"
+#define AWK_VIA_SHELL_PATH	AWK_PATH
 #endif
 
 static string cmdroot = "";
@@ -534,12 +536,7 @@ test_shell_command_stdout_reading()
 				 "exit 0;}'",
 				 stdout_msg_in.c_str());
     RunShellCommand run_command(eventloop,
-#ifdef HOST_OS_WINDOWS
-				// Invocation via shell needs UNIX style path
-				AWK_UNIX_PATH,
-#else
-				AWK_PATH,
-#endif
+				AWK_VIA_SHELL_PATH,
 				awk_script,
 				callback(test_run_command,
 					 &TestRunCommand::shell_command_stdout_cb),
