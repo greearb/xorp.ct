@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.11 2005/10/27 22:31:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.12 2005/10/27 23:07:38 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -58,25 +58,6 @@
 #include "xrl/interfaces/ospfv2_xif.hh"
 
 /**
- * Get the XRL target name.
- */
-inline
-const char *
-target(OspfTypes::Version version)
-{
-    switch (version) {
-    case OspfTypes::V2:
-	return TARGET_OSPFv2;
-	break;
-    case OspfTypes::V3:
-	return TARGET_OSPFv3;
-	break;
-    }
-
-    XLOG_UNREACHABLE();
-}
-
-/**
  * return OS name.
  */
 string
@@ -112,7 +93,7 @@ public:
 
     void start() {
 	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_area_list(target(_version),
+	ospfv2.send_get_area_list(xrl_target(_version),
 				  callback(this, &GetAreaList::response));
     }
 
@@ -164,7 +145,7 @@ public:
 
     void start() {
 	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_lsa(target(_version), _area, _index,
+	ospfv2.send_get_lsa(xrl_target(_version), _area, _index,
 			    callback(this, &FetchDB::response));
     }
 
