@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.17 2005/03/04 08:43:38 pavlin Exp $
+// $XORP: xorp/rib/parser_direct_cmds.hh,v 1.18 2005/03/25 02:54:19 pavlin Exp $
 
 #ifndef __RIB_PARSER_DIRECT_CMDS_HH__
 #define __RIB_PARSER_DIRECT_CMDS_HH__
@@ -141,6 +141,7 @@ public:
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
 	vif.set_discard(true);
+	vif.set_underlying_vif_up(true);
 	cout << "**** Vif: " << vif.str() << endl;
 
 	return _rib.new_vif(_ifname, vif);
@@ -161,6 +162,7 @@ public:
 	IPv4Net subnet(_addr, _prefix_len);
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
+	vif.set_underlying_vif_up(true);
 	cout << "**** Vif: " << vif.str() << endl;
 
 	return _rib.new_vif(_ifname, vif);
@@ -182,6 +184,7 @@ public:
 	VifAddr vifaddr(_addr, subnet, IPv4::ZERO(), IPv4::ZERO());
 	vif.add_address(vifaddr);
 	vif.set_loopback(true);
+	vif.set_underlying_vif_up(true);
 	cout << "**** Vif: " << vif.str() << endl;
 
 	return _rib.new_vif(_ifname, vif);
