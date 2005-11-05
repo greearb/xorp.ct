@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/dependancy.hh,v 1.2 2005/03/25 02:54:06 pavlin Exp $
+// $XORP: xorp/policy/dependancy.hh,v 1.3 2005/07/08 07:17:07 pavlin Exp $
 
 #ifndef __POLICY_DEPENDANCY_HH__
 #define __POLICY_DEPENDANCY_HH__
@@ -22,6 +22,7 @@
 #include <list>
 #include <map>
 #include <string>
+#include <sstream>
 
 /**
  * @short A class which relates objects and handles dependancies between them.
@@ -135,9 +136,16 @@ public:
 
 	// check if object is in use
 	if(!s.empty()) {
-	    // XXX: insert "by who" in message
-	    throw DependancyError("Dependancy remove: Object " + objectname + 
-				  " in use");
+	    ostringstream oss;
+
+	    oss << "Dependency remove: Object " << objectname
+	        << " in use by: ";
+
+	    // XXX I need to learn how to spell...
+	    for (DependancyList::iterator j = s.begin(); j != s.end(); ++j)
+		oss << *j << " ";
+		
+	    throw DependancyError(oss.str());
 	}
 
 	// delete object
@@ -178,7 +186,7 @@ public:
 
 	DependancyList& s = (*p).second;
 
-	s.push_back(dep);
+	s.remove(dep);
     }
 
     /**

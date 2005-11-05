@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.3 2005/07/01 22:54:33 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.4 2005/08/04 15:26:55 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,7 +61,7 @@ PolicyMap::add_dependancy(const string& policyname, const string& protocol)
 void 
 PolicyMap::del_dependancy(const string& policyname, const string& protocol)
 {
-    _deps.add_dependancy(policyname,protocol);
+    _deps.del_dependancy(policyname,protocol);
 }
 
 string
