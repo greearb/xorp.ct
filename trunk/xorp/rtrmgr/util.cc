@@ -12,8 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.20 2005/10/22 01:00:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.21 2005/10/22 01:41:45 pavlin Exp $"
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
 
 #include <list>
 
@@ -28,6 +31,7 @@
 #include "util.hh"
 
 #ifdef	HOST_OS_WINDOWS
+#include <io.h>
 #define	access(x,y)	_access(x,y)
 #define	stat		_stat
 #define	S_ISREG		_S_ISREG

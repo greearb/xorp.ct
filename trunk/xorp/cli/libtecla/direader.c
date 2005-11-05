@@ -40,7 +40,9 @@
 /*
  * Operating system includes.
  */
+#ifndef __MINGW32__
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>

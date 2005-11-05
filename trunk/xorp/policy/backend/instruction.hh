@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/instruction.hh,v 1.4 2005/08/04 15:26:57 bms Exp $
+// $XORP: xorp/policy/backend/instruction.hh,v 1.5 2005/10/02 22:21:52 abittau Exp $
 
 #ifndef __POLICY_BACKEND_INSTRUCTION_HH__
 #define __POLICY_BACKEND_INSTRUCTION_HH__
@@ -35,6 +35,7 @@
 #if defined(HAVE_REGEX_H)
 #include <regex.h>
 #elif defined(HAVE_PCREPOSIX_H)
+#include <pcre.h>
 #include <pcreposix.h>
 #endif
 

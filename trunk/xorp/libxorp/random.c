@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.2 2005/08/01 15:07:32 bms Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.3 2005/08/29 22:36:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,7 +64,9 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef HAVE_UNISTD_H
 #include <unistd.h>            /* for srandomdev() */
+#endif
 
 #include "random.h"
 

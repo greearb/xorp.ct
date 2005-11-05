@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.6 2005/07/15 17:03:40 abittau Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.7 2005/08/04 15:26:59 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,6 +31,7 @@
 #if defined(HAVE_REGEX_H)
 #include <regex.h>
 #elif defined(HAVE_PCREPOSIX_H)
+#include <pcre.h>
 #include <pcreposix.h>
 #else
 #error "No header defining regex_t is present."

@@ -36,7 +36,9 @@
 #include <string.h>
 #include <ctype.h>
 
+#ifndef __MINGW32__
 #include <unistd.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 
