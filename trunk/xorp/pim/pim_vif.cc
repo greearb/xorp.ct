@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.56 2005/06/03 19:06:12 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.57 2005/08/18 15:38:49 bms Exp $"
 
 
 //
@@ -842,27 +842,6 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     PimNbr *pim_nbr;
     int ret_value = XORP_ERROR;
     
-    //
-    // Some of the messages should never be received via the PIM Register vif
-    //
-    if (is_pim_register()) {
-	switch (message_type) {
-	case PIM_HELLO:
-	case PIM_JOIN_PRUNE:
-	case PIM_BOOTSTRAP:
-	case PIM_ASSERT:
-	case PIM_GRAFT:
-	case PIM_GRAFT_ACK:
-	    return (XORP_ERROR);	// Those messages are not allowed
-	case PIM_REGISTER:
-	case PIM_REGISTER_STOP:
-	case PIM_CAND_RP_ADV:
-	    break;			// Those messages are probably OK
-	default:
-	    break;
-	}
-    }
-    
     // Ignore my own PIM messages
     if (pim_node().is_my_addr(src))
 	return (XORP_ERROR);
@@ -888,6 +867,27 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     BUFFER_GET_SKIP_REVERSE(1, buffer);		// Rewind back
     message_type = PIM_VT_T(pim_vt);
     proto_version = PIM_VT_V(pim_vt);
+
+    //
+    // Some of the messages should never be received via the PIM Register vif
+    //
+    if (is_pim_register()) {
+	switch (message_type) {
+	case PIM_HELLO:
+	case PIM_JOIN_PRUNE:
+	case PIM_BOOTSTRAP:
+	case PIM_ASSERT:
+	case PIM_GRAFT:
+	case PIM_GRAFT_ACK:
+	    return (XORP_ERROR);	// Those messages are not allowed
+	case PIM_REGISTER:
+	case PIM_REGISTER_STOP:
+	case PIM_CAND_RP_ADV:
+	    break;			// Those messages are probably OK
+	default:
+	    break;
+	}
+    }
     
     //
     // Checksum verification.
