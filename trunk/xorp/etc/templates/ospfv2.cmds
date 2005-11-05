@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.3 2005/10/23 03:59:01 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.4 2005/10/23 09:52:29 atanu Exp $ */
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
@@ -315,4 +315,42 @@ show ospf4 database summary area $(protocols.ospf4.area.*) external {
     %command: "ospf/tools/print_lsas -a $6 -s -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
+}
+
+/* Neighbour commands */
+
+show ospf4 neighbour {
+    %command: "ospf/tools/print_neighbours" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
+}
+
+show ospf4 neighbour brief {
+    %command: "ospf/tools/print_neighbours -b" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
+}
+
+show ospf4 neighbour detail {
+    %command: "ospf/tools/print_neighbours -d" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
+}
+
+show ospf4 neighbour <neighbour> {
+    %command: "ospf/tools/print_neighbours -f $4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
+}
+
+show ospf4 neighbour <neighbour> brief {
+    %command: "ospf/tools/print_neighbours -b -f $4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
+}
+
+show ospf4 neighbour <neighbour> detail {
+    %command: "ospf/tools/print_neighbours -d -f $4" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show Neighbours";
 }
