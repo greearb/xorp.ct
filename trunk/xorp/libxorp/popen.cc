@@ -57,7 +57,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.7 2005/10/11 23:33:36 bms Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.8 2005/10/21 19:58:45 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -145,44 +145,57 @@ popen2(const string& command, const list<string>& arguments,
 	return (0);
     }
 
-#if 0
-    DWORD pipemode = PIPE_TYPE_BYTE|PIPE_READMODE_BYTE|PIPE_WAIT;
-    SetNamedPipeHandleState(hout[0], &pipemode, NULL, NULL);
-    SetNamedPipeHandleState(hout[1], &pipemode, NULL, NULL);
-    SetNamedPipeHandleState(herr[0], &pipemode, NULL, NULL);
-    SetNamedPipeHandleState(herr[1], &pipemode, NULL, NULL);
-#endif
-
-    //
-    // XXX: Windows has no notion of non-blocking file handles;
-    // there is overlapped I/O which is broadly similar to POSIX aio.
-    // XXX: We're using ASCII, not Unicode, APIs here, because all the
-    // strings we pass in are 8-bit.
-    //
     GetStartupInfoA(&si);
     si.dwFlags = STARTF_USESTDHANDLES;
-    //si.hStdInput = NULL;		// XXX: is this OK?
     si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     si.hStdOutput = hout[1];
-    si.hStdError = herr[1];
 
-    string final_command = command;
+    if (redirect_stderr_to_stdout)
+    	si.hStdError = hout[1];
+    else
+    	si.hStdError = herr[1];
+
+    // Because CreateProcess() accepts an single
+    // string for the command line (vs UNIX's exec*() accepting an argv
+    // array), we have to look for whitespace characters and escape them.
+    //
+    // XXX: We currently force the program name to be escaped with quotes.
+    //
+    string escaped_args = "\"" + command + "\"";
+
     list<string>::const_iterator iter;
     for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
-	final_command += " ";
-	final_command += *iter;
+	escaped_args += " ";
+	if ((iter->length() == 0 ||
+	     string::npos != iter->find_first_of("\n\t \"") ||
+	     string::npos != iter->find("\\\\"))) {
+	    string thisarg(*iter);
+	    string::size_type len = thisarg.length();
+	    string::size_type pos = 0;
+	    while (pos < len && string::npos != pos) {
+		pos = thisarg.find_first_of("\\\"", pos);
+	        if (thisarg[pos] == '\\') {
+		    if (thisarg[pos+1] == '\\') {
+			pos++;
+		    } else if (pos+1 == len || thisarg[pos+1] == '\"') {
+		        thisarg.insert(pos, "\\");
+			pos += 2;
+		    }
+		} else if (thisarg[pos] == '\"') {
+		    thisarg.insert(pos, "\\");
+		    pos += 2;
+		}
+	    }
+	    escaped_args += "\"" + thisarg + "\"";
+	} else {
+	    escaped_args += *iter;
+	}
     }
 
-    if (redirect_stderr_to_stdout) {
-	//
-	// Redirect stderr to stdout
-	//
-	// TODO: implement it!
-    }
+    debug_msg("Trying to execute: '%s'\n", escaped_args.c_str());
 
-    debug_msg("Trying to execute: '%s'\n", final_command.c_str());
-
-    if (CreateProcessA(NULL, const_cast<char *>(final_command.c_str()),
+    if (CreateProcessA(NULL,
+		       const_cast<char *>(escaped_args.c_str()),
 		       NULL, NULL, TRUE,
 		       CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
 		       &si, &pi) == 0) {
@@ -200,10 +213,6 @@ popen2(const string& command, const list<string>& arguments,
     iop_err = _fdopen(_open_osfhandle((long)herr[0], _O_RDONLY|_O_TEXT), "r");
     setvbuf(iop_out, NULL, _IONBF, 0);
     setvbuf(iop_err, NULL, _IONBF, 0);
-#if 0
-    CloseHandle(hout[1]);
-    CloseHandle(herr[1]);
-#endif
 
     /* Link into list of file descriptors. */
     cur->fp_out = iop_out;
