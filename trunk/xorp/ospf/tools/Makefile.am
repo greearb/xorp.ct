@@ -1,13 +1,13 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP$
+## $XORP: xorp/ospf/tools/Makefile.am,v 1.1 2005/10/10 12:21:28 atanu Exp $
 ##
 
 # Redefine the bin installation directory
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS	 = print_lsas
+bin_PROGRAMS	 = print_lsas print_neighbours
 
 # -- Test Programs
 TESTS		 =
@@ -30,6 +30,10 @@ LDADD		+= $(top_builddir)/xrl/interfaces/libospfv3xif.la
 print_lsas_SOURCES  = print_lsas.cc
 print_lsas_LDADD = $(LDADD)
 print_lsas_LDADD += $(top_builddir)/ospf/libospf.la
+
+print_neighbours_SOURCES  = print_neighbours.cc
+print_neighbours_LDADD = $(LDADD)
+print_neighbours_LDADD += $(top_builddir)/ospf/libospf.la
 
 ################################################################
 ##

@@ -91,7 +91,7 @@ install_sh = @install_sh@
 bindir = $(prefix)/$(subdir)
 
 # -- Real Programs
-bin_PROGRAMS = print_lsas
+bin_PROGRAMS = print_lsas print_neighbours
 
 # -- Test Programs
 TESTS = 
@@ -109,6 +109,9 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxipc/libxipc.la $(top_builddir)
 print_lsas_SOURCES = print_lsas.cc
 print_lsas_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
 
+print_neighbours_SOURCES = print_neighbours.cc
+print_neighbours_LDADD = $(LDADD) $(top_builddir)/ospf/libospf.la
+
 
 ################################################################
 INCLUDES = -I$(top_srcdir)
@@ -118,7 +121,7 @@ CONFIG_HEADER = $(top_builddir)/config.h
 CONFIG_CLEAN_FILES =
 LTLIBRARIES = $(noinst_LTLIBRARIES)
 
-bin_PROGRAMS = print_lsas$(EXEEXT)
+bin_PROGRAMS = print_lsas$(EXEEXT) print_neighbours$(EXEEXT)
 noinst_PROGRAMS =
 PROGRAMS = $(bin_PROGRAMS) $(noinst_PROGRAMS)
 
@@ -131,6 +134,15 @@ print_lsas_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/xrl/interfaces/libospfv3xif.la \
 	$(top_builddir)/ospf/libospf.la
 print_lsas_LDFLAGS =
+am_print_neighbours_OBJECTS = print_neighbours.$(OBJEXT)
+print_neighbours_OBJECTS = $(am_print_neighbours_OBJECTS)
+print_neighbours_DEPENDENCIES = $(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/xrl/interfaces/libospfv2xif.la \
+	$(top_builddir)/xrl/interfaces/libospfv3xif.la \
+	$(top_builddir)/ospf/libospf.la
+print_neighbours_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -138,7 +150,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/print_lsas.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/print_lsas.Po \
+@AMDEP_TRUE@	$(DEPDIR)/print_neighbours.Po
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -148,9 +161,9 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-DIST_SOURCES = $(print_lsas_SOURCES)
+DIST_SOURCES = $(print_lsas_SOURCES) $(print_neighbours_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(print_lsas_SOURCES)
+SOURCES = $(print_lsas_SOURCES) $(print_neighbours_SOURCES)
 
 all: all-am
 
@@ -205,6 +218,9 @@ clean-noinstPROGRAMS:
 print_lsas$(EXEEXT): $(print_lsas_OBJECTS) $(print_lsas_DEPENDENCIES) 
 	@rm -f print_lsas$(EXEEXT)
 	$(CXXLINK) $(print_lsas_LDFLAGS) $(print_lsas_OBJECTS) $(print_lsas_LDADD) $(LIBS)
+print_neighbours$(EXEEXT): $(print_neighbours_OBJECTS) $(print_neighbours_DEPENDENCIES) 
+	@rm -f print_neighbours$(EXEEXT)
+	$(CXXLINK) $(print_neighbours_LDFLAGS) $(print_neighbours_OBJECTS) $(print_neighbours_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -213,6 +229,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/print_lsas.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/print_neighbours.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
