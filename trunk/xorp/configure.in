@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.148 2005/10/27 05:09:17 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.149 2005/10/30 21:21:40 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.148 2005/10/27 05:09:17 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.149 2005/10/30 21:21:40 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -478,7 +478,7 @@ AC_CHECK_LIB(curses, tigetstr, [CLI_CURSES_LIB="-lcurses"], [
 ])
 dnl XXX: This is a hack.
 if test "${_USING_WINDOWS}" = "1"; then
-	CLI_CURSES_LIB="-lpdcurses -ltermcap"
+	CLI_CURSES_LIB=""
 fi
 AC_SUBST(CLI_CURSES_LIB)
 
