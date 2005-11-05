@@ -1,10 +1,10 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.18 2005/11/02 03:28:56 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.19 2005/11/05 21:08:15 atanu Exp $ */
 
 protocols {
     ospf4 {
 	targetname: txt = "ospfv2";
 	router-id: ipv4;
-	ip-router-alert: bool = true;
+	ip-router-alert: bool = false;
 	
 	area @: ipv4 {
 	    area-type:		txt = "normal";

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.16 2005/11/05 19:25:54 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.17 2005/11/05 20:43:49 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -26,7 +26,7 @@
 template <typename A>
 class IO {
  public:
-    IO() : _ip_router_alert(true)
+    IO() : _ip_router_alert(false)
     {}
 
     virtual ~IO() {}
