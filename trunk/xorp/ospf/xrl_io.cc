@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.22 2005/11/02 02:27:22 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.23 2005/11/04 01:02:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,14 +80,16 @@ XrlIO<A>::recv(const string& interface,
 template <>
 bool
 XrlIO<IPv4>::send(const string& interface, const string& vif,
+		  bool router_alert,
 		  IPv4 dst, IPv4 src,
 		  uint8_t* data, uint32_t len)
 {
     bool success;
 
-    debug_msg("send(interface = %s, vif = %s, src = %s, dst = %s, "
+    debug_msg("send(interface = %s, vif = %s, ra = %s, src = %s, dst = %s, "
 	      "payload_size = %u\n",
 	      interface.c_str(), vif.c_str(),
+	      pb(router_alert),
 	      src.str().c_str(), dst.str().c_str(),
 	      XORP_UINT_CAST(len));
 
@@ -105,7 +107,7 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
 	get_ip_protocol_number(),
 	-1,		// XXX: let the FEA set it
 	-1,		// XXX: let the FEA set it
-	true,
+	router_alert,
 	payload,
 	callback(this, &XrlIO::send_cb, interface, vif));
 
@@ -115,13 +117,15 @@ XrlIO<IPv4>::send(const string& interface, const string& vif,
 template <>
 bool
 XrlIO<IPv6>::send(const string& interface, const string& vif,
+		  bool router_alert,
 		  IPv6 dst, IPv6 src,
 		  uint8_t* data, uint32_t len)
 {
     bool success;
 
-    debug_msg("send(%s,%s,%s,%s,%p,%d\n",
+    debug_msg("send(%s,%s,%s,%s,%s,%p,%d\n",
 	      interface.c_str(), vif.c_str(),
+	      pb(router_alert),
 	      dst.str().c_str(), src.str().c_str(),
 	      data, len);
 
@@ -139,7 +143,7 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	get_ip_protocol_number(),
 	-1,		// XXX: let the FEA set it
 	-1,		// XXX: let the FEA set it
-	true,
+	router_alert,
 	payload,
 	callback(this, &XrlIO::send_cb, interface, vif));
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.48 2005/11/01 11:03:29 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.49 2005/11/04 18:56:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,7 +42,8 @@ template <typename A>
 Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     : _version(version), _eventloop(eventloop),
       _io(io), _reason("Ready"), _process_status(PROC_READY),
-      _lsa_decoder(version), _peer_manager(*this), _routing_table(*this)
+      _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
+      _router_alert(false)
 {
     // Register the LSAs and packets with the associated decoder.
     initialise_lsa_decoder(version, _lsa_decoder);
@@ -175,7 +176,7 @@ Ospf<A>::transmit(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s data %p len %u",
 	      interface.c_str(), vif.c_str(), data, len);
 
-    return _io->send(interface, vif, dst, src, data, len);
+    return _io->send(interface, vif, get_router_alert(), dst, src, data, len);
 }
 
 template <typename A>

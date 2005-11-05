@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.66 2005/11/04 18:56:26 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.67 2005/11/05 04:36:45 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -475,6 +475,20 @@ class Ospf {
 			   uint16_t inftransdelay);
 
     /**
+     * Send router alerts in IP packets?
+     */
+    void set_router_alert(bool alert) {
+	_router_alert = alert;
+    }
+
+    /**
+     * Get router alert state.
+     */
+    bool get_router_alert() {
+	return _router_alert;
+    }
+
+    /**
      * Add area range.
      */
     bool area_range_add(OspfTypes::AreaID area, IPNet<A> net, bool advertise);
@@ -659,6 +673,7 @@ class Ospf {
     PolicyFilters _policy_filters;	// The policy filters.
 
     OspfTypes::RouterID _router_id;	// Router ID.
+    bool _router_alert;			// Send router alerts or not?
 
     Trace _trace;		// Trace variables.
 };

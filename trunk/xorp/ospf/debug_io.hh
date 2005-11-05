@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.11 2005/10/31 07:58:39 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.12 2005/11/01 11:03:29 pavlin Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -77,6 +77,7 @@ class DebugIO : public IO<A> {
      * Send Raw frames.
      */
     bool send(const string& interface, const string& vif, 
+	      bool /*router_alert*/,
 	      A dst, A src,
 	      uint8_t* data, uint32_t len)
     {
