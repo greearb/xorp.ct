@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.1 2005/11/05 05:12:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.2 2005/11/05 05:40:44 atanu Exp $"
 
 // Print information about OSPF neighbours
 
@@ -273,7 +273,7 @@ public:
 	       
 	printf("  Up %s", uptime(ninfo._up).c_str());
 	if (0 != ninfo._adjacent)
-	    printf("  , adjacent %s", uptime(ninfo._adjacent).c_str());
+	    printf(", adjacent %s", uptime(ninfo._adjacent).c_str());
 	printf("\n");
 
 	return true;
@@ -398,4 +398,3 @@ main(int argc, char **argv)
 
     return 0;
 }
-
