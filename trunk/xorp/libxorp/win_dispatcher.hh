@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.3 2005/08/18 18:44:19 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.4 2005/08/29 22:08:43 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -178,15 +178,7 @@ public:
     void wait_and_dispatch(int ms);
 
 protected:
-    /**
-     * Window procedure for dispatching Windows messages.
-     * Currently this is a member of the class itself. Should it become
-     * necessary to use TranslateMessage()/DispatchMessage() in future,
-     * you will need to invoke this through a C callback and pass the
-     * instance pointer to Windows using SetWindowLongEx(). You will
-     * also need to fix the calling convention and prototype.
-     */
-    int window_procedure(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+    void dispatch_sockevent();
 
 private:
     bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
@@ -208,9 +200,12 @@ private:
     ClockBase*		_clock;
     IoEventMap		_ioevent_map;
 
-    // Window handle and message map for WSAAsyncSelect() dispatch.
-    HWND		_hwnd;
+    // Message map for WSA*Select() dispatch.
     SocketWSAEventMap	_socket_wsaevent_map;
+
+    // WSAEventSelect() support.
+    HANDLE		_hsockevent;
+    vector<SOCKET>	_eventsocks;
 
     // Win32 object handles which are set to the 'signalled' state on events.
     vector<HANDLE>	_handles;

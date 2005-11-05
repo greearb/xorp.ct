@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.3 2005/08/23 20:45:24 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.4 2005/10/24 12:57:05 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -234,6 +234,7 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 	    return false;
 	}
 
+	// If it's already in the map, update the mask, otherwise, add it.
 	if (jj != _socket_wsaevent_map.end()) {
 	    jj->second = newmask;
 	} else {
@@ -242,7 +243,17 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 
 	_ioevent_map.insert(std::make_pair(IoEventTuple(fd, type), cb));
 
-	_eventsocks.push_back(fd);
+	// Add it to the WSAEnumNetworkEvents vector if necessary.
+	bool in_eventsocks = false;
+	for (vector<SOCKET>::iterator kk = _eventsocks.begin();
+	    kk != _eventsocks.end(); kk++) {
+	    if (*kk == fd) {
+		in_eventsocks = true;
+		break;
+	    }
+	}
+	if (!in_eventsocks)
+	    _eventsocks.push_back(fd);
 
 	return true;
 }
@@ -312,15 +323,6 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 {
     bool unregistered = false;
 
-    // remove from WSAEnumNetworkEvents() vector
-    for (vector<SOCKET>::iterator ii = _eventsocks.begin();
-	ii != _eventsocks.end(); ii++) {
-	if (*ii == fd) {
-	    ii = _eventsocks.erase(ii);
-	    break;
-	}
-    }
-
     // XXX: writability is a special case, so deal with it first.
     // XXX: We have a bit of a quandary here in that if the socket
     // has already been closed, we can't determine its family. This
@@ -387,6 +389,14 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 	if (newmask == 0) {
 	    retval = ::WSAEventSelect(fd, NULL, 0);
 	    _socket_wsaevent_map.erase(ii);	    // invalidates iterator
+	    // Remove from WSAEnumNetworkEvents() vector.
+	    for (vector<SOCKET>::iterator kk = _eventsocks.begin();
+		kk != _eventsocks.end(); kk++) {
+		if (*kk == fd) {
+		    kk = _eventsocks.erase(kk);
+		    break;
+		}
+	    }
 	} else {
 	    retval = ::WSAEventSelect(fd, _hsockevent, newmask);
 	    ii->second = newmask;
@@ -460,7 +470,7 @@ WinDispatcher::wait_and_dispatch(int ms)
     DWORD retval;
 
     if ((!_writesockets4.empty() || !_writesockets6.empty() ||
-	 !_polled_pipes.empty()) && (ms > POLLED_INTERVAL_MS))
+	 !_polled_pipes.empty()) && (ms > POLLED_INTERVAL_MS || ms < 0))
 	ms = POLLED_INTERVAL_MS;
 
     retval = ::WaitForMultipleObjectsEx(
@@ -611,10 +621,11 @@ WinDispatcher::dispatch_sockevent(void)
 	    continue;
 	}
 
-	debug_msg("event mask for socket %s is: %lx\n", fd.str().c_str(),
-		  netevents.lNetworkEvents);
+	// Short circuit mask check if no events occured.
+	if (netevents.lNetworkEvents == 0)
+	    continue;
 
-	for (int evbit = FD_MAX_EVENTS - 1; evbit >= 0 ; evbit--) {
+	for (int evbit = 0; evbit < FD_MAX_EVENTS ; evbit++) {
 	    int evflag = 1 << evbit;
 	    if ((evflag & netevents.lNetworkEvents) == evflag) {
 		debug_msg("processing event %d\n", evflag);
