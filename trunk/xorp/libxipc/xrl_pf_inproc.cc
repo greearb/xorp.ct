@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.23 2005/03/25 02:53:33 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.26 2005/08/18 15:32:41 bms Exp $"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -75,7 +75,13 @@ this_host()
 #ifdef HOST_OS_WINDOWS
     char buffer[MAX_COMPUTERNAME_LENGTH + 1];
     DWORD bufsiz;
-    GetComputerNameExA(ComputerNamePhysicalDnsFullyQualified, buffer, &bufsiz);
+
+    bufsiz = sizeof(buffer);
+    if (0 == GetComputerNameExA(ComputerNamePhysicalDnsFullyQualified,
+				buffer, &bufsiz)) {
+	debug_msg("Could not obtain local computer name.");
+    	abort();
+    }
     return string(buffer);
 #else
     char buffer[MAXHOSTNAMELEN + 1];
