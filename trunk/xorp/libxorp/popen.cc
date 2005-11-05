@@ -57,7 +57,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.8 2005/10/21 19:58:45 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.9 2005/11/05 18:08:17 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -155,7 +155,7 @@ popen2(const string& command, const list<string>& arguments,
     else
     	si.hStdError = herr[1];
 
-    // Because CreateProcess() accepts an single
+    // Because CreateProcess() accepts a single
     // string for the command line (vs UNIX's exec*() accepting an argv
     // array), we have to look for whitespace characters and escape them.
     //
