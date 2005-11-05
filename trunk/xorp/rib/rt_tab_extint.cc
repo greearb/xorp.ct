@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.25 2005/03/25 02:54:22 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.26 2005/10/02 05:33:31 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -49,7 +49,8 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     if (caller == _int_table) {
 	// The new route comes from the IGP table
 	debug_msg("route comes from IGP\n");
-	const IPRouteEntry<A>* found;
+	const IPRouteEntry<A>* found_egp;
+	const IPRouteEntry<A>* found_resolved;
 
 	if (route.nexthop()->type() == EXTERNAL_NEXTHOP) {
 	    // An IGP route must have a local nexthop.
@@ -59,24 +60,55 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    return XORP_ERROR;
 	}
 
-	found = lookup_route_in_egp_parent(route.net());
-	if (found != NULL) {
-	    if (found->admin_distance() < route.admin_distance()) {
+	found_egp = lookup_route_in_egp_parent(route.net());
+	if (found_egp != NULL) {
+	    if (found_egp->admin_distance() < route.admin_distance()) {
 		// The admin distance of the existing EGP route is better
 		return XORP_ERROR;
 	    }
 	}
 
-	found = lookup_in_resolved_table(route.net());
-	if (found != NULL) {
-	    if (found->admin_distance() < route.admin_distance()) {
+	found_resolved = lookup_in_resolved_table(route.net());
+	if (found_resolved != NULL) {
+	    if (found_resolved->admin_distance() < route.admin_distance()) {
 		// The admin distance of the existing route is better
 		return XORP_ERROR;
-	    } else {
-		bool is_delete_propagated = false;
-		this->delete_ext_route(found, is_delete_propagated);
 	    }
 	}
+
+	//
+	// If necessary, from delete the route that came from the Ext table
+	//
+	do {
+	    if (found_resolved != NULL) {
+		bool is_delete_propagated = false;
+		this->delete_ext_route(found_resolved, is_delete_propagated);
+		break;
+	    }
+
+	    if (found_egp == NULL)
+		break;
+	    //
+	    // If the nexthop of the route from the Ext table was directly
+	    // connected, then it was propagated when the route was added,
+	    // so delete it first.
+	    //
+	    IPNextHop<A>* rt_nexthop;
+	    rt_nexthop = reinterpret_cast<IPNextHop<A>* >(found_egp->nexthop());
+	    const A& nexthop_addr = rt_nexthop->addr();
+	    const IPRouteEntry<A>* nexthop_route;
+	    nexthop_route = lookup_route_in_igp_parent(nexthop_addr);
+	    if (nexthop_route != NULL) {
+		Vif* vif = nexthop_route->vif();
+		if ((vif != NULL)
+		    && (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
+			|| vif->is_same_p2p(IPvX(nexthop_addr)))) {
+		    if (this->next_table() != NULL)
+			this->next_table()->delete_route(found_egp, this);
+		}
+	    }
+	    break;
+	} while (false);
 
 	if (this->next_table() != NULL)
 	    this->next_table()->add_route(route, this);
