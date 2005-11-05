@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.57 2005/11/01 03:57:09 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.58 2005/11/02 01:33:14 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -141,14 +141,16 @@ template <typename A>
 inline Vif*
 RIB<A>::find_vif(const A& addr)
 {
-    map<string, Vif>::iterator mi;
+    map<string, Vif>::iterator iter;
 
-    for (mi = _vifs.begin(); mi != _vifs.end(); ++mi) {
-	Vif& v = mi->second;
-	if (v.is_my_addr(addr))
-	    return &v;
-	if (v.is_p2p() && v.is_same_p2p(addr))
-	    return &v;
+    for (iter = _vifs.begin(); iter != _vifs.end(); ++iter) {
+	Vif& vif = iter->second;
+	if (! vif.is_underlying_vif_up())
+	    continue;		// XXX: ignore vifs that are not up
+	if (vif.is_my_addr(addr))
+	    return &vif;
+	if (vif.is_p2p() && vif.is_same_p2p(addr))
+	    return &vif;
     }
     return NULL;
 }
@@ -739,6 +741,7 @@ RIB<A>::add_route(const string&		tablename,
 	    // We found a route for the nexthop
 	    vif = re->vif();
 	    if ((vif != NULL)
+		&& (vif->is_underlying_vif_up())
 		&& (vif->is_same_subnet(IPvXNet(re->net()))
 		    || vif->is_same_p2p(IPvX(nexthop_addr)))) {
 		debug_msg("**directly connected route found for nexthop\n");
