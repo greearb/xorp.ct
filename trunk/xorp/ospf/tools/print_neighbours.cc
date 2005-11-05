@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.12 2005/10/27 23:07:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.1 2005/11/05 05:12:38 atanu Exp $"
 
 // Print information about OSPF neighbours
 
@@ -321,7 +321,9 @@ main(int argc, char **argv)
 	    version = OspfTypes::V3;
 	    break;
 	case 'f':
-	    filter.add(optarg);
+	    try {
+		filter.add(optarg);
+	    } catch(...) {}
 	    break;
 	case 'b':
 	    pstyle = BRIEF;
