@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.174 2005/11/05 06:20:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.175 2005/11/05 08:49:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3973,7 +3973,6 @@ Neighbour<A>::change_state(State state)
     State previous_state = get_state();
     set_state(state);
 
-    TimeVal now;
     if (Full == state)
 	_ospf.get_eventloop().current_time(_adjacency_time);
 
