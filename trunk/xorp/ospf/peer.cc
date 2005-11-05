@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.172 2005/11/04 18:56:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.173 2005/11/05 04:41:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3973,6 +3973,10 @@ Neighbour<A>::change_state(State state)
     State previous_state = get_state();
     set_state(state);
 
+    TimeVal now;
+    if (Full == state)
+	_ospf.get_eventloop().current_time(_adjacency_time);
+
     // If we are dropping down states tear down any higher level state.
     if (previous_state > state)
 	tear_down_state(previous_state);
@@ -4303,10 +4307,19 @@ Neighbour<A>::get_neighbour_info(NeighbourInfo& ninfo) const
     ninfo._opt = options;
     ninfo._dr = IPv4(htonl(dr));
     ninfo._bdr = IPv4(htonl(bdr));
-    ninfo._up = 0;		// XXX
-    ninfo._adjacent = 0;	// XXX
 
-    return false;
+    TimeVal now, diff;
+    _ospf.get_eventloop().current_time(now);
+    diff = now - _creation_time;
+    ninfo._up = diff.sec();
+    if (Full == get_state()) {
+	diff = now - _adjacency_time;
+	ninfo._adjacent = diff.sec();
+    } else {
+	ninfo._adjacent = 0;
+    }
+
+    return true;
 }
 
 template class PeerOut<IPv4>;

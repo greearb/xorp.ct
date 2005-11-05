@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.102 2005/10/12 06:11:06 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.103 2005/11/04 18:56:26 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1005,6 +1005,7 @@ class Neighbour {
 #else
 	_data_description_packet.set_dd_seqno(t.sec());
 #endif
+	_creation_time = t;
     }
 
     ~Neighbour() {
@@ -1180,6 +1181,9 @@ class Neighbour {
     list<Lsa::LsaRef> _lsa_rxmt;	// Unacknowledged LSAs
 					// awaiting retransmission.
     XorpTimer _inactivity_timer;	// Inactivity timer.
+
+    TimeVal _creation_time;		// Creation time.
+    TimeVal _adjacency_time;		// Adjacency time.
 
     /**
      * Get the area router.
