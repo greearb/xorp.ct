@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.175 2005/11/05 08:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.176 2005/11/05 09:32:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3363,8 +3363,10 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    negotiation_done = true;
 	}
 
-	if (negotiation_done)
+	if (negotiation_done) {
 	    event_negotiation_done();
+	    extract_lsa_headers(dd);
+	}
     }
 	break;
     case TwoWay:
@@ -3419,43 +3421,8 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    break;
 	}
 
-	list<Lsa_header> li = dd->get_lsa_headers();
-	list<Lsa_header>::const_iterator i;
-	for (i = li.begin(); i != li.end(); i++) {
-	    uint16_t ls_type = i->get_ls_type();
-
-	    // Do we recognise this LS type?
-	    // If the LSA decoder knows about about the LSA then we
-	    // must be good.
-	    if (!_ospf.get_lsa_decoder().validate(ls_type)) {
-		XLOG_TRACE(_ospf.trace()._input_errors,
-			   "Unknown LS type %u %s", ls_type, cstring(*dd));
-		event_sequence_number_mismatch();
-		return;
-		break;
-	    }
-
-	    // Deal with AS-external-LSA's (LS type = 5, 0x4005).
-	    switch(_peer.get_area_type()) {
-	    case OspfTypes::NORMAL:
-		break;
-	    case OspfTypes::STUB:
-	    case OspfTypes::NSSA:
-		if (_ospf.get_lsa_decoder().external(ls_type)) {
-		    XLOG_TRACE(_ospf.trace()._input_errors,
-			       "AS-external-LSA not allowed in %s area %s",
-			       pp_area_type(_peer.get_area_type()).c_str(),
-			       cstring(*dd));
-		    event_sequence_number_mismatch();
-		    return;
-		}
-		break;
-	    }
-	    
-	    // Check to see if this is a newer LSA.
-	    if (get_area_router()->newer_lsa(*i))
-		_ls_request_list.push_back((*i));
-	}
+	if (!extract_lsa_headers(dd))
+	    return;
 
 	if (_last_dd.get_ms_bit()) { // Router is slave
 	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
@@ -3495,6 +3462,51 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	}
 	break;
     }
+}
+
+template <typename A>
+bool 
+Neighbour<A>::extract_lsa_headers(DataDescriptionPacket *dd)
+{
+    list<Lsa_header> li = dd->get_lsa_headers();
+    list<Lsa_header>::const_iterator i;
+    for (i = li.begin(); i != li.end(); i++) {
+	uint16_t ls_type = i->get_ls_type();
+
+	// Do we recognise this LS type?
+	// If the LSA decoder knows about about the LSA then we
+	// must be good.
+	if (!_ospf.get_lsa_decoder().validate(ls_type)) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "Unknown LS type %u %s", ls_type, cstring(*dd));
+	    event_sequence_number_mismatch();
+	    return false;
+	    break;
+	}
+
+	// Deal with AS-external-LSA's (LS type = 5, 0x4005).
+	switch(_peer.get_area_type()) {
+	case OspfTypes::NORMAL:
+	    break;
+	case OspfTypes::STUB:
+	case OspfTypes::NSSA:
+	    if (_ospf.get_lsa_decoder().external(ls_type)) {
+		XLOG_TRACE(_ospf.trace()._input_errors,
+			   "AS-external-LSA not allowed in %s area %s",
+			   pp_area_type(_peer.get_area_type()).c_str(),
+			   cstring(*dd));
+		event_sequence_number_mismatch();
+		return false;
+	    }
+	    break;
+	}
+	    
+	// Check to see if this is a newer LSA.
+	if (get_area_router()->newer_lsa(*i))
+	    _ls_request_list.push_back((*i));
+    }
+
+    return true;
 }
 
 /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.103 2005/11/04 18:56:26 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.104 2005/11/05 06:20:38 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1279,6 +1279,15 @@ class Neighbour {
      * Should only be called in state ExStart.
      */
     void start_sending_data_description_packets(const char *event_name);
+
+    /**
+     * Extract the list of LSA headers for future requests from the
+     * neighbour.
+     *
+     * @return false if an unknown LS type is encountered or if an
+     * AS-External-LSA appears in a non-normal area, otherwise true.
+     */
+    bool extract_lsa_headers(DataDescriptionPacket *dd);
 
     /**
      * Send link state request packet.
