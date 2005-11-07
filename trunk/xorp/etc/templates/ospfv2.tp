@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.19 2005/11/05 21:08:15 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.20 2005/11/05 21:12:56 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -84,7 +84,6 @@ transmitted packets";
 
 	    %mandatory: $(@.area-type);
 
-/* XXX Enable this when we support anything but normal.
 	    area-type {
 		%help: short "Type of area";
 		
@@ -92,7 +91,6 @@ transmitted packets";
 
 		%set:;
 	    }
-*/
 
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
