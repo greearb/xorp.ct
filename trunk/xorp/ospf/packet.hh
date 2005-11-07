@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.22 2005/09/16 23:33:28 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.23 2005/09/17 01:28:07 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -644,6 +644,7 @@ class Options {
      static const uint32_t E_bit = 0x2;
      static const uint32_t MC_bit = 0x4;
      static const uint32_t N_bit = 0x8;
+     static const uint32_t P_bit = N_bit;
      static const uint32_t R_bit = 0x10;
      static const uint32_t EA_bit = 0x10;
      static const uint32_t DC_bit = 0x20;
@@ -679,6 +680,9 @@ class Options {
 
      void set_n_bit(bool set) { set_bit(set, N_bit); }
      bool get_n_bit() const { return get_bit(N_bit); }
+
+     void set_p_bit(bool set) { set_n_bit(set); }
+     bool get_p_bit() const { return get_n_bit(); }
 
      void set_r_bit(bool set) {
 	 XLOG_ASSERT(OspfTypes::V3 == _version);
