@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.71 2005/11/04 18:56:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.72 2005/11/05 06:17:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -624,10 +624,15 @@ PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
     switch(area_type) {
     case OspfTypes::NORMAL:
 	options.set_e_bit(true);
+	options.set_n_bit(false);
 	break;
     case OspfTypes::STUB:
+	options.set_e_bit(false);
+	options.set_n_bit(false);
+	break;
     case OspfTypes::NSSA:
 	options.set_e_bit(false);
+	options.set_n_bit(true);
 	break;
     }
 
