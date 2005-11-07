@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.32 2005/09/17 01:28:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.33 2005/11/04 20:54:35 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -22,7 +22,6 @@
 
 #include "ospf_module.h"
 #include "libxorp/xorp.h"
-
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
@@ -37,12 +36,6 @@
 #include "packet.hh"
 #include "test_common.hh"
 
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.
@@ -1000,6 +993,26 @@ as_external_lsa_print(TestInfo& info)
 }
 
 bool
+type7_lsa_print(TestInfo& info)
+{
+    Type7Lsa *type7 = new Type7Lsa(OspfTypes::V2);
+    populate_as_external_lsa(type7, OspfTypes::V2);
+
+    DOUT(info) << type7->str() << endl;
+
+    delete type7;
+
+    type7 = new Type7Lsa(OspfTypes::V3);
+    populate_as_external_lsa(type7, OspfTypes::V3);
+
+    DOUT(info) << type7->str() << endl;
+
+    delete type7;
+
+    return true;
+}
+
+bool
 router_lsa_compare(TestInfo& info, OspfTypes::Version version)
 {
     RouterLsa *rlsa1= new RouterLsa(version);
@@ -1215,6 +1228,49 @@ as_external_lsa_compare(TestInfo& info, OspfTypes::Version version)
 }
 
 bool
+type7_lsa_compare(TestInfo& info, OspfTypes::Version version)
+{
+    Type7Lsa *type71= new Type7Lsa(version);
+    populate_as_external_lsa(type71, version);
+
+    DOUT(info) << type71->str() << endl;
+
+    // Encode the Type7-LSA.
+    type71->encode();
+    size_t len1;
+    uint8_t *ptr1 = type71->lsa(len1);
+
+    // Now decode the packet.
+    // Create a new packet to provide the decoder.
+    Type7Lsa *type72= new Type7Lsa(version);
+
+    Lsa::LsaRef type73 = type72->decode(ptr1, len1);
+
+    DOUT(info) << type73->str() << endl;
+
+    // Encode the second packet and compare.
+    type73->encode();
+
+    DOUT(info) << type73->str() << endl;
+
+    size_t len2;
+    uint8_t *ptr2 = type73->lsa(len2);
+    
+    vector<uint8_t> pkt1;
+    fill_vector(pkt1, ptr1, len1);
+    vector<uint8_t> pkt2;
+    fill_vector(pkt2, ptr2, len2);
+
+    if (!compare_packets(info, pkt1, pkt2))
+	return false;
+
+    delete type71;
+    delete type72;
+
+    return true;
+}
+
+bool
 lsa_decoder1(TestInfo& info, OspfTypes::Version version)
 {
     LsaDecoder dec(version);
@@ -1285,6 +1341,7 @@ main(int argc, char **argv)
 	{"summary_network_lsa_print", callback(summary_network_lsa_print)},
 	{"summary_router_lsa_print", callback(summary_router_lsa_print)},
 	{"as_external_lsa_print", callback(as_external_lsa_print)},
+	{"type7_lsa_print", callback(type7_lsa_print)},
 
 	{"hello_compareV2", callback(hello_packet_compare, OspfTypes::V2)},
 	{"hello_compareV3", callback(hello_packet_compare, OspfTypes::V3)},
@@ -1348,6 +1405,8 @@ main(int argc, char **argv)
 	 callback(as_external_lsa_compare, OspfTypes::V2)},
 	{"as_external_lsa_compareV3",
 	 callback(as_external_lsa_compare, OspfTypes::V3)},
+	{"type7_lsa_compareV2",	 callback(type7_lsa_compare, OspfTypes::V2)},
+	{"type7_lsa_compareV3",	 callback(type7_lsa_compare, OspfTypes::V3)},
 
 	{"lsa_decoder1V2", callback(lsa_decoder1, OspfTypes::V2)},
 	{"lsa_decoder1V3", callback(lsa_decoder1, OspfTypes::V3)},

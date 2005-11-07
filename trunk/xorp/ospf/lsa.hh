@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.70 2005/10/23 09:27:37 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.71 2005/11/07 07:12:49 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1357,7 +1357,7 @@ class ASExternalLsa : public Lsa {
     }
 
     /**
-     * @return False this is not an AS-external-LSA.
+     * @return True this is an AS-external-LSA.
      */
     bool external() const {return true; };
 
@@ -1506,6 +1506,13 @@ class ASExternalLsa : public Lsa {
     }
 
     /**
+     * Name used in the str() method.
+     */
+    virtual string str_name() const {
+	return "As-External-LSA";
+    } 
+
+    /**
      * Printable name of this LSA.
      */
     const char *name() const {
@@ -1533,6 +1540,53 @@ class ASExternalLsa : public Lsa {
     IPv6 _forwarding_address_ipv6;	// OSPFv3 only.
     uint32_t _external_route_tag;
     uint32_t _referenced_link_state_id;	// OSPFv3 only.
+};
+
+/**
+ * Type-7 LSA used to convey external routing information in NSSAs.
+ */
+class Type7Lsa : public ASExternalLsa {
+ public:
+    Type7Lsa(OspfTypes::Version version) : ASExternalLsa(version)
+    {
+	_header.set_ls_type(get_ls_type());
+    }
+
+    Type7Lsa(OspfTypes::Version version, uint8_t *buf, size_t len)
+	: ASExternalLsa(version, buf, len)
+    {}
+
+    uint16_t get_ls_type() const {
+	switch(get_version()) {
+	case OspfTypes::V2:
+	    return 7;
+	    break;
+	case OspfTypes::V3:
+	    return 0x2007;
+	    break;
+	}
+	XLOG_UNREACHABLE();
+	return 0;
+    }
+
+    /**
+     * @return False this is not an AS-external-LSA.
+     */
+    bool external() const {return false; };
+
+    /**
+     * Name used in the str() method.
+     */
+    virtual string str_name() const {
+	return "Type-7-LSA";
+    } 
+
+    /**
+     * Printable name of this LSA.
+     */
+    const char *name() const {
+	return get_e_bit() ? "Type7-2" : "Type7-1";
+    }
 };
 
 #if	0
@@ -1671,6 +1725,7 @@ initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
     lsa_decoder.register_decoder(new SummaryNetworkLsa(version));
     lsa_decoder.register_decoder(new SummaryRouterLsa(version));
     lsa_decoder.register_decoder(new ASExternalLsa(version));
+    lsa_decoder.register_decoder(new Type7Lsa(version));
 }
 
 #endif // __OSPF_LSA_HH__

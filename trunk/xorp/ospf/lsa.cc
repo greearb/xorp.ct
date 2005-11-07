@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.57 2005/11/05 08:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.58 2005/11/07 07:12:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1434,7 +1434,7 @@ ASExternalLsa::str() const
 
     string output;
 
-    output = "As-External-LSA:\n";
+    output = str_name() + ":\n";
 
     output += _header.str();
 
