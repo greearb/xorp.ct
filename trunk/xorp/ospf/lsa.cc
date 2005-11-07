@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.56 2005/10/13 20:41:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.57 2005/11/05 08:49:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -674,12 +674,14 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	uint8_t flag = buf[header_length];
 	switch(version) {
 	case OspfTypes::V2:
+	    lsa->set_nt_bit(flag & 0x16);
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
 	    lsa->set_b_bit(flag & 0x1);
 	    nlinks = extract_16(&buf[header_length + 2]);
 	    break;
 	case OspfTypes::V3:
+	    lsa->set_nt_bit(flag & 0x16);
 	    lsa->set_w_bit(flag & 0x8);
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
@@ -744,6 +746,8 @@ RouterLsa::encode()
     uint8_t flag = 0;
     switch(version) {
     case OspfTypes::V2:
+	if (get_nt_bit())
+	    flag |= 0x16;
 	if (get_v_bit())
 	    flag |= 0x4;
 	if (get_e_bit())
@@ -753,6 +757,8 @@ RouterLsa::encode()
 	embed_16(&ptr[header_length + 2], _router_links.size());
 	break;
     case OspfTypes::V3:
+	if (get_nt_bit())
+	    flag |= 0x16;
 	if (get_w_bit())
 	    flag |= 0x8;
 	if (get_v_bit())
@@ -796,17 +802,19 @@ RouterLsa::str() const
 
     output += "\n";
 
+    output += c_format("\tNt-bit %s\n", pb(get_nt_bit()));
+
     switch(version) {
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	output += c_format("\tW-bit %s\n", get_w_bit() ? "true" : "false");
+	output += c_format("\tW-bit %s\n", pb(get_w_bit()));
 	break;
     }
 
-    output += c_format("\tV-bit %s\n", get_v_bit() ? "true" : "false");
-    output += c_format("\tE-bit %s\n", get_e_bit() ? "true" : "false");
-    output += c_format("\tB-bit %s", get_b_bit() ? "true" : "false");
+    output += c_format("\tV-bit %s\n", pb(get_v_bit()));
+    output += c_format("\tE-bit %s\n", pb(get_e_bit()));
+    output += c_format("\tB-bit %s", pb(get_b_bit()));
 
     switch(version) {
     case OspfTypes::V2:

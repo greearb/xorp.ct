@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.69 2005/10/22 04:43:42 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.70 2005/10/23 09:27:37 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -820,8 +820,8 @@ class RouterLink {
 class RouterLsa : public Lsa {
  public:
     RouterLsa(OspfTypes::Version version)
-	: Lsa(version), _w_bit(false), _v_bit(false), _e_bit(false),
-	  _b_bit(false), _options(0)
+	: Lsa(version), _nt_bit(false), _w_bit(false), _v_bit(false),
+	  _e_bit(false), _b_bit(false), _options(0)
     {
 	_header.set_ls_type(get_ls_type());
     }
@@ -875,6 +875,15 @@ class RouterLsa : public Lsa {
     LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
 
     bool encode();
+
+    // NSSA translation
+    void set_nt_bit(bool bit) {
+	_nt_bit = bit;
+    }
+
+    bool get_nt_bit() const {
+	return _nt_bit;
+    }
 
     // Wildcard multicast receiver! OSPFv3 Only
     void set_w_bit(bool bit) {
@@ -943,6 +952,7 @@ class RouterLsa : public Lsa {
     string str() const;
 
  private:
+    bool _nt_bit;	// NSSA Translation.
     bool _w_bit;	// Wildcard multicast receiver! OSPFv3 Only
     bool _v_bit;	// Virtual link endpoint
     bool _e_bit;	// AS boundary router (E for external)
