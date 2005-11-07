@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.58 2005/11/07 07:12:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.59 2005/11/07 08:21:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -674,14 +674,14 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	uint8_t flag = buf[header_length];
 	switch(version) {
 	case OspfTypes::V2:
-	    lsa->set_nt_bit(flag & 0x16);
+	    lsa->set_nt_bit(flag & 0x10);
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
 	    lsa->set_b_bit(flag & 0x1);
 	    nlinks = extract_16(&buf[header_length + 2]);
 	    break;
 	case OspfTypes::V3:
-	    lsa->set_nt_bit(flag & 0x16);
+	    lsa->set_nt_bit(flag & 0x10);
 	    lsa->set_w_bit(flag & 0x8);
 	    lsa->set_v_bit(flag & 0x4);
 	    lsa->set_e_bit(flag & 0x2);
@@ -747,7 +747,7 @@ RouterLsa::encode()
     switch(version) {
     case OspfTypes::V2:
 	if (get_nt_bit())
-	    flag |= 0x16;
+	    flag |= 0x10;
 	if (get_v_bit())
 	    flag |= 0x4;
 	if (get_e_bit())
@@ -758,7 +758,7 @@ RouterLsa::encode()
 	break;
     case OspfTypes::V3:
 	if (get_nt_bit())
-	    flag |= 0x16;
+	    flag |= 0x10;
 	if (get_w_bit())
 	    flag |= 0x8;
 	if (get_v_bit())
