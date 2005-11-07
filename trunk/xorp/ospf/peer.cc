@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.176 2005/11/05 09:32:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.177 2005/11/06 02:40:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1002,6 +1002,15 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	(hello->get_options() & Options::E_bit)) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
 		       "E-bit does not match %s",
+		       hello->str().c_str());
+	    return false;
+    }
+
+    // Compare our and the received N-Bit they must match.
+    if ((_hello_packet.get_options() & Options::N_bit) !=
+	(hello->get_options() & Options::N_bit)) {
+	    XLOG_TRACE(_ospf.trace()._input_errors,
+		       "N-bit does not match %s",
 		       hello->str().c_str());
 	    return false;
     }
