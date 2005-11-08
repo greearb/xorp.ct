@@ -1,4 +1,4 @@
-# $XORP: other/testbed/config/config10.xt,v 1.5 2004/09/01 00:19:09 pavlin Exp $
+# $XORP: other/testbed/config/config11.xt,v 1.1 2005/05/05 02:53:48 pavlin Exp $
 #
 # Shared testbed configuration:
 #
@@ -13,7 +13,7 @@
 #                        |
 #                        |
 #                        t0
-#   |-------------- t3.xorp12.t1 ----------|
+#   |-------------- t1.xorp12.t3 ----------|
 #   |   |--------------- t2                |
 #   |   |                                  |
 #   |   |                                  |
