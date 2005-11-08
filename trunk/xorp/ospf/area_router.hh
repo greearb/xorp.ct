@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.76 2005/10/21 21:24:55 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.77 2005/10/30 07:37:12 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -475,6 +475,9 @@ class AreaRouter : Subsystem {
 					// before recompting.
     XorpTimer _routing_recompute_timer;	// Timer to cause recompute.
     
+    // How to handle Type-7 LSAs at the border.
+    OspfTypes::NSSATranslatorRole _translator_role;
+
     /**
      * Range to be summarised or suppressed from other areas.
      */

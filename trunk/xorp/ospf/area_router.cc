@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.133 2005/10/31 01:09:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.134 2005/11/05 08:49:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -59,7 +59,8 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 #else
       _TransitCapability(false),
 #endif
-      _routing_recompute_delay(5)	// In seconds.
+      _routing_recompute_delay(5),	// In seconds.
+      _translator_role(OspfTypes::CANDIDATE)
 {
     // Never need to delete this as the ref_ptr will tidy up.
     // An entry to be placed in invalid slots.
