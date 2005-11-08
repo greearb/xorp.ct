@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.49 2005/10/22 22:45:42 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.50 2005/11/04 18:56:26 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -281,6 +281,11 @@ class PeerManager {
     bool virtual_link_endpoint(OspfTypes::AreaID area) const;
 
     /**
+     * Return the number of areas of the specified type.
+     */
+    uint32_t area_count(OspfTypes::AreaType area_type) const;
+
+    /**
      * Is this an internal router?
      */
     bool internal_router_p() const;
@@ -454,6 +459,10 @@ class PeerManager {
 
     External<A> _external;		// Management of AS-External-LSAs.
 
+    uint32_t	_normal_cnt;		// Number of normal areas.
+    uint32_t	_stub_cnt;		// Number of stub areas.
+    uint32_t	_nssa_cnt;		// Number of nssa areas.
+
     /**
      * Generate PeerID.
      * Internally we want to deal with peers as simple IDs not
@@ -468,7 +477,6 @@ class PeerManager {
      */
     void destroy_peerid(const string& interface, const string& vif)
 	throw(BadPeer);
-
 
     /**
      * @return true if this route is a candidate for summarisation.
@@ -491,6 +499,15 @@ class PeerManager {
     };
 
     map<IPNet<A>, Summary> _summaries;
+
+    /**
+     * Track the number of areas of each type.
+     *
+     * @param area_type being tracked.
+     * @param up true if the area is being created, false if it is
+     * being deleted.
+     */
+    void track_area_count(OspfTypes::AreaType area_type, bool up);
 };
 
 #endif // __OSPF_PEER_MANAGER_HH__

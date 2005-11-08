@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.72 2005/11/05 06:17:57 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.73 2005/11/07 05:08:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -79,6 +79,8 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 	return false;
     }
 
+    track_area_count(area_type, true /* increment */);
+
     bool old_border_router_state = area_border_router_p();
 
     _areas[area] = new AreaRouter<A>(_ospf, area, area_type);
@@ -118,6 +120,8 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
 	XLOG_ERROR("Area %s doesn't exist\n", pr_id(area).c_str());
 	return false;
     }
+
+    track_area_count(_areas[area]->get_area_type(), false /* decrement */);
 
     _areas[area]->shutdown();
 
@@ -702,6 +706,46 @@ PeerManager<A>::set_inftransdelay(const PeerID peerid,
     }
 
     return _peers[peerid]->set_inftransdelay(inftransdelay);
+}
+
+template <typename A>
+void
+PeerManager<A>::track_area_count(OspfTypes::AreaType area_type, bool up)
+{
+    int delta = up ? 1 : -1;
+
+    switch(area_type) {
+    case OspfTypes::NORMAL:
+	_normal_cnt += delta;
+	break;
+    case OspfTypes::STUB:
+	_stub_cnt += delta;
+	break;
+    case OspfTypes::NSSA:
+	_nssa_cnt += delta;
+	break;
+    }
+}
+
+template <typename A>
+uint32_t
+PeerManager<A>::area_count(OspfTypes::AreaType area_type) const
+{
+    switch(area_type) {
+    case OspfTypes::NORMAL:
+	return _normal_cnt;
+	break;
+    case OspfTypes::STUB:
+	return _stub_cnt;
+	break;
+    case OspfTypes::NSSA:
+	return _nssa_cnt;
+	break;
+    }
+
+    XLOG_UNREACHABLE();
+
+    return 0;
 }
 
 template <typename A>
