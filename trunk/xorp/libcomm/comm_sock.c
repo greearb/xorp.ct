@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.27 2005/09/05 20:28:22 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.28 2005/09/09 16:48:54 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -147,10 +147,11 @@ comm_sock_open(int domain, int type, int protocol, int is_blocking)
  * Create a pair of connected sockets. The sockets will be created in
  * the blocking state by default, and with no additional socket options set.
  *
- * Currently a domain of AF_UNIX and a type of SOCK_STREAM must be
- * specified. On Windows platforms, the sockets created will actually
- * be in the AF_INET domain. On UNIX, this function simply wraps the
- * socketpair() system call.
+ * On Windows platforms, a domain of AF_UNIX, AF_INET, or AF_INET6 must
+ * be specified. For the AF_UNIX case, the sockets created will actually
+ * be in the AF_INET domain. The protocol field is ignored.
+ *
+ * On UNIX, this function simply wraps the socketpair() system call.
  *
  * XXX: There may be UNIX platforms lacking socketpair() where we
  * have to emulate it.
@@ -174,35 +175,69 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     }
     return (XORP_OK);
 #else
+    struct sockaddr_storage ss;
+    struct sockaddr_in	*psin;
+    socklen_t		sslen;
     SOCKET		st[3];
-    struct sockaddr_in	sin;
-    int			numtries, error;
     long		optval;
-    static const int	MY_IN_LOWPORT = 40000;
-    static const int	MY_IN_HIGHPORT = 65536;
+    int			numtries, error, intdomain;
+    unsigned short	port;
+    static const int	CSP_LOWPORT = 40000;
+    static const int	CSP_HIGHPORT = 65536;
+#ifdef HAVE_IPV6
+    struct sockaddr_in6 *psin6;
+    static const struct in6_addr in6addr_loopback = {
+	{ IN6ADDR_LOOPBACK_INIT }
+    };
+#endif
 
     UNUSED(protocol);
 
-    if (domain != AF_UNIX || type != SOCK_STREAM) {
-	_comm_serrno = WSAEAFNOSUPPORT;	/* XXX */
+    if (domain != AF_UNIX && domain != AF_INET
+#ifdef HAVE_IPV6
+	&& domain != AF_INET6
+#endif
+	) {
+	_comm_serrno = WSAEAFNOSUPPORT;
 	return (XORP_ERROR);
     }
 
+    intdomain = domain;
+    if (intdomain == AF_UNIX)
+	intdomain = AF_INET;
+
     st[0] = st[1] = st[2] = INVALID_SOCKET;
 
-    st[2] = socket(AF_INET, SOCK_STREAM, 0);
+    st[2] = socket(intdomain, type, 0);
     if (st[2] == INVALID_SOCKET)
 	goto error;
 
-    memset(&sin, 0, sizeof(sin));
-    sin.sin_family = AF_INET;
-    sin.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    memset(&ss, 0, sizeof(ss));
+    psin = (struct sockaddr_in *)&ss;
+#ifdef HAVE_IPV6
+    psin6 = (struct sockaddr_in6 *)&ss;
+    if (intdomain == AF_INET6) {
+	sslen = sizeof(struct sockaddr_in6);
+	ss.ss_family = AF_INET6;
+	psin6->sin6_addr = in6addr_loopback;
+    } else
+#endif
+    {
+	sslen = sizeof(struct sockaddr_in);
+	ss.ss_family = AF_INET;
+	psin->sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    }
 
     numtries = 3;
     do {
-	sin.sin_port = htons((rand() % (MY_IN_LOWPORT - MY_IN_HIGHPORT)) +
-			     MY_IN_LOWPORT);
-	error = bind(st[2], (struct sockaddr *)&sin, sizeof(sin));
+	port = htons((rand() % (CSP_LOWPORT - CSP_HIGHPORT)) + CSP_LOWPORT);
+#ifdef HAVE_IPV6
+	if (intdomain == AF_INET6)
+	    psin6->sin6_port = port;
+	else
+#endif
+	    psin->sin_port = port;
+	error = bind(st[2], (struct sockaddr *)&ss, sslen);
 	if (error == 0)
 	    break;
 	if ((error != 0) &&
@@ -218,7 +253,7 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     if (error != 0)
 	goto error;
 
-    st[0] = socket(AF_INET, SOCK_STREAM, 0);
+    st[0] = socket(intdomain, type, 0);
     if (st[0] == INVALID_SOCKET)
 	goto error;
 
@@ -227,7 +262,7 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     if (error != 0)
 	goto error;
 
-    error = connect(st[0], (struct sockaddr *)&sin, sizeof(sin));
+    error = connect(st[0], (struct sockaddr *)&ss, sslen);
     if (error != 0 && WSAGetLastError() != WSAEWOULDBLOCK)
 	goto error;
 
