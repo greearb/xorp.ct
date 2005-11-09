@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.12 2005/10/22 17:40:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.13 2005/11/04 07:50:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -131,6 +131,12 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     if (1 == _originating)
 	_ospf.get_peer_manager().refresh_router_lsas();
 
+    bool ebit = false;
+    uint32_t tag = 0;
+
+    if (!do_filtering(net, nexthop, metric, ebit, tag, policytags))
+	return true;
+
     OspfTypes::Version version = _ospf.version();
     // Don't worry about the memory it will be freed when the LSA goes
     // out of scope.
@@ -146,12 +152,6 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 	XLOG_WARNING("TBD - AS-External-LSA set field values");
 	break;
     }
-
-    bool ebit = false;
-    uint32_t tag = 0;
-
-    if (!do_filtering(net, nexthop, metric, ebit, tag, policytags))
-	return true;
 
     set_net_nexthop(aselsa, net, nexthop);
     header.set_advertising_router(_ospf.get_router_id());
