@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.19 2005/09/04 18:35:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.20 2005/10/02 22:21:48 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -239,6 +239,17 @@ BGPVarRW<A>::read_med()
 
 template <class A>
 Element*
+BGPVarRW<A>::read_med_remove()
+{
+    const MEDAttribute* med = _orig_rtmsg->route()->attributes()->med_att();
+    if (med)
+	return new ElemBool(false);	// XXX: default is don't remove the MED
+    else
+	return NULL;
+}
+
+template <class A>
+Element*
 BGPVarRW<A>::single_read(const Id& id)
 {
     ReadCallback cb = _callbacks._read_map[id];
@@ -407,6 +418,23 @@ BGPVarRW<A>::write_med(const Element& e)
     const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);	
     MEDAttribute med(u32.val());
     _palist->add_path_attribute(med);
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_med_remove(const Element& e)
+{
+    const ElemBool& med_remove = dynamic_cast<const ElemBool&>(e);
+
+    if (! med_remove.val())
+	return;			// Don't remove the MED
+
+    if (!_palist)
+	clone_palist();
+    if (_palist->med_att())
+	_palist->remove_attribute_by_type(MED);
+
+    _route_modify = true;
 }
 
 template <class A>
@@ -599,6 +627,9 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 
     init_rw(BGPVarRW<A>::VAR_MED, 
 	    &BGPVarRW<A>::read_med, &BGPVarRW<A>::write_med);
+
+    init_rw(BGPVarRW<A>::VAR_MED_REMOVE, 
+	    &BGPVarRW<A>::read_med_remove, &BGPVarRW<A>::write_med_remove);
 }
 
 template <class A>

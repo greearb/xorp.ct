@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.12 2005/09/04 20:15:21 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.13 2005/10/02 22:21:48 abittau Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -45,6 +45,7 @@ public:
         VAR_LOCALPREF,
         VAR_COMMUNITY,
         VAR_MED,
+        VAR_MED_REMOVE,
 
 	VAR_BGPMAX // must be last
     };
@@ -122,6 +123,7 @@ public:
     Element* read_localpref();
     Element* read_community();
     Element* read_med();
+    Element* read_med_remove();
 
     void write_filter_im(const Element& e);
     void write_filter_sm(const Element& e);
@@ -136,6 +138,7 @@ public:
     void write_localpref(const Element& e);
     void write_community(const Element& e);
     void write_med(const Element& e);
+    void write_med_remove(const Element& e);
 
 protected:
     ElementFactory		_ef;

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.59 2005/11/01 08:31:07 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.60 2005/11/01 20:18:45 atanu Exp $ */
 
 protocols {
     bgp {
@@ -93,6 +93,7 @@ policy {
 
 		origin: u32;
 		med: u32;
+		med-remove: bool = false;
 		localpref: u32;
 	    }
         }
@@ -356,6 +357,7 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=neighbor&type:txt=ipv4&access:txt=r&id:u32=16";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=origin&type:txt=u32&access:txt=rw&id:u32=15";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
 
     policy-statement @: txt {
@@ -487,6 +489,10 @@ policy {
 		}
 		med {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=med $(<>) $(@);";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		med-remove {
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=med_remove $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		localpref {
