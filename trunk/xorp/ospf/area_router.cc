@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.134 2005/11/05 08:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.135 2005/11/08 00:17:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2616,7 +2616,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     // direct edge to a neighbour, then don't put an edge pointing to
     // the Network-LSA and put a marker into the vertex itself
     // stopping any nodes with the marker being installed in the
-    // routing table. The comparitor in the vertex is biased towards
+    // routing table. The comparator in the vertex is biased towards
     // router vertexs over network vertexs, so there should not be a
     // problem
 
