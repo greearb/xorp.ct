@@ -73,6 +73,14 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 		  return YY_INT;
 		}  
 
+"true"		{ yylval.c_str = strdup(yytext);
+		  return YY_BOOL;
+		}  
+
+"false"		{ yylval.c_str = strdup(yytext);
+		  return YY_BOOL;
+		}  
+
 \"|\'		BEGIN(STR);
 
 <STR>\"|\'	BEGIN(INITIAL);
