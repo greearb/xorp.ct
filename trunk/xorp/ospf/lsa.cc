@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.59 2005/11/07 08:21:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.60 2005/11/07 09:15:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1286,7 +1286,8 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     ASExternalLsa *lsa = 0;
     try {
-	lsa = new ASExternalLsa(version, buf, len);
+	// lsa = new this(version, buf, len);
+	lsa = donew(version, buf, len);
 
 	// Decode the LSA Header.
 	lsa->_header.decode_inline(buf);

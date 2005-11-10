@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.71 2005/11/07 07:12:49 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.72 2005/11/07 08:21:49 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1506,6 +1506,15 @@ class ASExternalLsa : public Lsa {
     }
 
     /**
+     * Create a new instance of this LSA, allows the decode routine to
+     * call either this or the Type7 donew.
+     */
+    virtual ASExternalLsa *donew(OspfTypes::Version version, uint8_t *buf,
+				 size_t len) const {
+	return new ASExternalLsa(version, buf, len);
+    }
+
+    /**
      * Name used in the str() method.
      */
     virtual string str_name() const {
@@ -1574,10 +1583,15 @@ class Type7Lsa : public ASExternalLsa {
      */
     bool external() const {return false; };
 
+    virtual ASExternalLsa *donew(OspfTypes::Version version, uint8_t *buf,
+				 size_t len) const {
+	return new Type7Lsa(version, buf, len);
+    }
+
     /**
      * Name used in the str() method.
      */
-    virtual string str_name() const {
+    string str_name() const {
 	return "Type-7-LSA";
     } 
 
