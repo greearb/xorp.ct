@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.72 2005/11/07 08:21:49 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.73 2005/11/10 09:03:21 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -300,12 +300,14 @@ class Lsa {
     virtual uint16_t get_ls_type() const = 0;
 
     /**
-     * It is the responsibilty of the derived type to return this
-     * information.
-     *
      * @return True if this is an AS-external-LSA.
      */
-    virtual bool external() const = 0;
+    virtual bool external() const { return false; };
+
+    /**
+     * @return True if this LSA is a Type-7-LSA.
+     */
+    virtual bool type7() const { return false; }
 
     /**
      * It is the responsibilty of the derived type to return this
@@ -860,11 +862,6 @@ class RouterLsa : public Lsa {
     }
 
     /**
-     * @return False this is not an AS-external-LSA.
-     */
-    bool external() const {return false; };
-
-    /**
      * Decode an LSA.
      * @param buf pointer to buffer.
      * @param len length of the buffer on input set to the number of
@@ -1005,11 +1002,6 @@ class NetworkLsa : public Lsa {
     }
 
     /**
-     * @return False this is not an AS-external-LSA.
-     */
-    bool external() const {return false; };
-
-    /**
      * Decode an LSA.
      * @param buf pointer to buffer.
      * @param len length of the buffer on input set to the number of
@@ -1110,11 +1102,6 @@ class SummaryNetworkLsa : public Lsa {
 	XLOG_UNREACHABLE();
 	return 0;
     }
-
-    /**
-     * @return False this is not an AS-external-LSA.
-     */
-    bool external() const {return false; };
 
     /**
      * Decode an LSA.
@@ -1231,11 +1218,6 @@ class SummaryRouterLsa : public Lsa {
 	XLOG_UNREACHABLE();
 	return 0;
     }
-
-    /**
-     * @return False this is not an AS-external-LSA.
-     */
-    bool external() const {return false; };
 
     /**
      * Decode an LSA.
@@ -1579,9 +1561,14 @@ class Type7Lsa : public ASExternalLsa {
     }
 
     /**
-     * @return False this is not an AS-external-LSA.
+     * @return True this is an AS-external-LSA.
      */
     bool external() const {return false; };
+
+    /**
+     * @return True if this LSA is a Type-7-LSA.
+     */
+    bool type7() const { return true; }
 
     virtual ASExternalLsa *donew(OspfTypes::Version version, uint8_t *buf,
 				 size_t len) const {
