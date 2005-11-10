@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.137 2005/11/10 09:40:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.138 2005/11/10 11:42:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -821,6 +821,7 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 {
     XLOG_ASSERT(lsar->external());
 
+    TimeVal now;
     switch(_area_type) {
     case OspfTypes::NORMAL:
 	break;
@@ -829,6 +830,8 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 	break;
     case OspfTypes::NSSA:
 	lsar = external_generate_type7(lsar);
+	_ospf.get_eventloop().current_time(now);
+	lsar->update_age_and_seqno(now);
 	break;
     }
 
