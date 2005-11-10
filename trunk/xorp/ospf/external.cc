@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.13 2005/11/04 07:50:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.14 2005/11/09 20:26:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -141,6 +141,8 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     // Don't worry about the memory it will be freed when the LSA goes
     // out of scope.
     ASExternalLsa *aselsa = new ASExternalLsa(version);
+    Lsa::LsaRef lsar(aselsa);
+    
     Lsa_header& header = aselsa->get_header();
     
     switch(version) {
@@ -163,7 +165,6 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     _ospf.get_eventloop().current_time(now);
     aselsa->record_creation_time(now);
     aselsa->encode();
-    Lsa::LsaRef lsar = aselsa;
 
     update_lsa(lsar);
 
