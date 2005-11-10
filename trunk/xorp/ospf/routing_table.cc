@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.26 2005/11/05 06:38:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.27 2005/11/05 23:26:22 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -496,10 +496,20 @@ InternalRouteEntry<A>::reset_winner()
     _winner = 0;
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
     for (i = _entries.begin(); i != _entries.end(); i++) {
+	if (i == _entries.begin()) {
+	    _winner = &(i->second);
+	    continue;
+	}
 	RouteEntry<A>& comp = i->second;
 	if (comp.get_path_type() <= _winner->get_path_type())
 	    if (comp.get_cost() < _winner->get_cost()) {
 		_winner = &comp;
+		continue;
+	    }
+	    if (comp.get_cost() == _winner->get_cost()) {
+		if (comp.get_area() > _winner->get_area())
+		    _winner = &comp;
+		continue;
 	    }
     }
 
