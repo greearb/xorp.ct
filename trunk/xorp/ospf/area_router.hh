@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.78 2005/11/08 00:17:55 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.79 2005/11/10 09:40:22 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -136,18 +136,25 @@ class AreaRouter : Subsystem {
     bool external_area_type() const;
  
     /**
-     * Copy the net and nexthop information from a AS-External-LSA to
-     * a Type-7 LSA.
+     * Copy the net and nexthop information from one AS-External-LSA to
+     * another.
      *
      * The first dummy argument A is to allow template specialisation
      * by address family.
      */
-    void external_copy_net_nexthop(A, Type7Lsa *type7, ASExternalLsa *aselsa);
+    void external_copy_net_nexthop(A,
+				   ASExternalLsa *dst,
+				   ASExternalLsa *src);
 
     /**
      * Given an AS-External-LSA generate a Type-7 LSA.
      */
     Lsa::LsaRef external_generate_type7(Lsa::LsaRef lsar);
+
+    /**
+     * Given a Type-7 LSA generate an AS-External-LSA.
+     */
+    Lsa::LsaRef external_generate_external(Lsa::LsaRef lsar);
 
     /**
      * An AS-External-LSA being announced either from another area or
@@ -492,6 +499,7 @@ class AreaRouter : Subsystem {
     
     // How to handle Type-7 LSAs at the border.
     OspfTypes::NSSATranslatorRole _translator_role;
+    OspfTypes::NSSATranslatorState _translator_state;
     bool _type7_propagate;		// How to set the propagate bit.
 
     /**
@@ -656,6 +664,12 @@ class AreaRouter : Subsystem {
      * Send (push) any queued LSAs.
      */
     void push_lsas();
+
+    /**
+     * Take a Type-7-LSA that has arrived on the wire and translate if
+     * required.
+     */
+    void external_type7_translate(Lsa::LsaRef lsar);
 
     /**
      * Send this LSA to all area's.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.136 2005/11/09 02:18:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.137 2005/11/10 09:40:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,6 +61,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 #endif
       _routing_recompute_delay(5),	// In seconds.
       _translator_role(OspfTypes::CANDIDATE),
+      _translator_state(OspfTypes::DISABLED),
       _type7_propagate(false)	// Default from RFC 3210 Appendix A
 {
     // Never need to delete this as the ref_ptr will tidy up.
@@ -664,23 +665,24 @@ AreaRouter<A>::external_area_type() const
 
 template <>
 void
-AreaRouter<IPv4>::external_copy_net_nexthop(IPv4, Type7Lsa *type7,
-					    ASExternalLsa *aselsa)
+AreaRouter<IPv4>::external_copy_net_nexthop(IPv4,
+					    ASExternalLsa *dst,
+					    ASExternalLsa *src)
 {
-    type7->get_header().
-	set_link_state_id(aselsa->get_header().get_link_state_id());
-    type7->set_network_mask(aselsa->get_network_mask());
-    type7->set_forwarding_address_ipv4(aselsa->get_forwarding_address_ipv4());
+    dst->get_header().set_link_state_id(src->get_header().get_link_state_id());
+    dst->set_network_mask(src->get_network_mask());
+    dst->set_forwarding_address_ipv4(src->get_forwarding_address_ipv4());
 }
 
 template <>
 void
-AreaRouter<IPv6>::external_copy_net_nexthop(IPv6, Type7Lsa *type7,
-					    ASExternalLsa *aselsa)
+AreaRouter<IPv6>::external_copy_net_nexthop(IPv6,
+					    ASExternalLsa *dst,
+					    ASExternalLsa *src)
 {
-    IPNet<IPv6> addr = aselsa->get_network();
-    type7->set_network(addr);
-    type7->set_forwarding_address_ipv6(aselsa->get_forwarding_address_ipv6());
+    IPNet<IPv6> addr = src->get_network();
+    dst->set_network(addr);
+    dst->set_forwarding_address_ipv6(src->get_forwarding_address_ipv6());
 }
 
 template <typename A>
@@ -731,6 +733,49 @@ AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar)
     }
 
     return t7;
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
+{
+    Type7Lsa *type7 = dynamic_cast<Type7Lsa *>(lsar.get());
+    XLOG_ASSERT(type7);
+
+    OspfTypes::Version version = _ospf.get_version();
+    ASExternalLsa *aselsa= new ASExternalLsa(version);
+    Lsa::LsaRef a(aselsa);
+    Lsa_header& header = aselsa->get_header();
+
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(get_options());
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD - AS-External-LSA set field values");
+	break;
+    }
+
+    external_copy_net_nexthop(A::ZERO(), aselsa, type7);
+    header.
+	set_advertising_router(type7->get_header().get_advertising_router());
+    aselsa->set_metric(type7->get_metric());
+    aselsa->set_e_bit(type7->get_e_bit());
+    aselsa->set_external_route_tag(type7->get_external_route_tag());
+    aselsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    aselsa->record_creation_time(now);
+
+    aselsa->encode();
+
+    // If this LSA already exists in the database just return it.
+    size_t index;
+    if (find_lsa(a, index)) {
+	return _db[index];
+    }
+
+    return a;
 }
 
 template <typename A>
@@ -1124,6 +1169,9 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    // If this is an AS-external-LSA send it to all areas.
 	    if ((*i)->external())
 		external_flood_all_areas((*i));
+
+	    if ((*i)->type7())
+		external_type7_translate((*i));
 
 	    // Set to true if the LSA was multicast out of this
 	    // interface. If it was, there is no requirement to send an
@@ -1785,6 +1833,33 @@ AreaRouter<A>::push_lsas()
 		XLOG_FATAL("Unable to push LSAs");
 	}
     }
+}
+
+template <typename A>
+void
+AreaRouter<A>::external_type7_translate(Lsa::LsaRef lsar)
+{
+    Type7Lsa *t7 = dynamic_cast<Type7Lsa *>(lsar.get());
+    XLOG_ASSERT(t7);
+
+    // If the propogate bit isn't set there is nothing todo.
+    if(!Options(_ospf.get_version(),
+		t7->get_header().get_options()).get_p_bit())
+	return;
+
+    switch(_translator_state) {
+    case OspfTypes::ENABLED:
+    case OspfTypes::ELECTED:
+	break;
+    case OspfTypes::DISABLED:
+	return;
+	break;
+    }
+
+    _external_flooding = true;
+
+    // Convert this Type-7-LSA into an AS-External-LSA and flood.
+    external_flood_all_areas(external_generate_external(lsar));
 }
 
 template <typename A>
