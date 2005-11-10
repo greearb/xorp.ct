@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.138 2005/11/10 11:42:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.139 2005/11/10 17:57:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1094,8 +1094,13 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	// (3) In stub areas discard AS-external-LSA's (LS type = 5, 0x4005).
 	switch(_area_type) {
 	case OspfTypes::NORMAL:
+ 	    if ((*i)->type7())
+ 		continue;
 	    break;
 	case OspfTypes::STUB:
+ 	    if ((*i)->type7())
+ 		continue;
+	    /* FALLTHROUGH */
 	case OspfTypes::NSSA:
  	    if ((*i)->external())
  		continue;
@@ -2440,11 +2445,14 @@ void
 AreaRouter<IPv4>::routing_as_externalV2()
 {
     // RFC 2328 Section 16.4.  Calculating AS external routes
+    // RFC 3101 Section 2.5.   Calculating Type-7 AS external routes
     for (size_t index = 0 ; index < _last_entry; index++) {
 	Lsa::LsaRef lsar = _db[index];
 	if (!lsar->valid() || lsar->maxage() || lsar->get_self_originating())
 	    continue;
 
+	// Note that Type7Lsa is derived from ASExternalLsa so will
+	// pass this test.
 	ASExternalLsa *aselsa;
 	if (0 == (aselsa = dynamic_cast<ASExternalLsa *>(lsar.get()))) {
 	    continue;
