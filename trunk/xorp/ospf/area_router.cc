@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.135 2005/11/08 00:17:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.136 2005/11/09 02:18:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -60,7 +60,8 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
       _TransitCapability(false),
 #endif
       _routing_recompute_delay(5),	// In seconds.
-      _translator_role(OspfTypes::CANDIDATE)
+      _translator_role(OspfTypes::CANDIDATE),
+      _type7_propagate(false)	// Default from RFC 3210 Appendix A
 {
     // Never need to delete this as the ref_ptr will tidy up.
     // An entry to be placed in invalid slots.
@@ -651,22 +652,104 @@ AreaRouter<A>::external_area_type() const
 	accept = true;
 	break;
     case OspfTypes::STUB:
-    case OspfTypes::NSSA:
 	accept = false;
+	break;
+    case OspfTypes::NSSA:
+	accept = true;
 	break;
     }
     
     return accept;
 }
 
+template <>
+void
+AreaRouter<IPv4>::external_copy_net_nexthop(IPv4, Type7Lsa *type7,
+					    ASExternalLsa *aselsa)
+{
+    type7->get_header().
+	set_link_state_id(aselsa->get_header().get_link_state_id());
+    type7->set_network_mask(aselsa->get_network_mask());
+    type7->set_forwarding_address_ipv4(aselsa->get_forwarding_address_ipv4());
+}
+
+template <>
+void
+AreaRouter<IPv6>::external_copy_net_nexthop(IPv6, Type7Lsa *type7,
+					    ASExternalLsa *aselsa)
+{
+    IPNet<IPv6> addr = aselsa->get_network();
+    type7->set_network(addr);
+    type7->set_forwarding_address_ipv6(aselsa->get_forwarding_address_ipv6());
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar)
+{
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+
+    OspfTypes::Version version = _ospf.get_version();
+    Type7Lsa *type7= new Type7Lsa(version);
+    Lsa::LsaRef t7(type7);    
+    Lsa_header& header = type7->get_header();
+
+    switch(version) {
+    case OspfTypes::V2: {
+	Options options(version, aselsa->get_header().get_options());
+	bool pbit = false;
+	if (_type7_propagate && 
+	    !_ospf.get_peer_manager().area_border_router_p())
+	    pbit = true;
+	options.set_p_bit(pbit);
+	header.set_options(options.get_options());
+    }
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD - AS-External-LSA set field values");
+	break;
+    }
+
+    external_copy_net_nexthop(A::ZERO(), type7, aselsa);
+    header.
+	set_advertising_router(aselsa->get_header().get_advertising_router());
+    type7->set_metric(aselsa->get_metric());
+    type7->set_e_bit(aselsa->get_e_bit());
+    type7->set_external_route_tag(aselsa->get_external_route_tag());
+    type7->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    type7->record_creation_time(now);
+
+    type7->encode();
+
+    // If this LSA already exists in the database just return it.
+    size_t index;
+    if (find_lsa(t7, index)) {
+	return _db[index];
+    }
+
+    return t7;
+}
+
 template <typename A>
 void
 AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
 {
-    if (!external_area_type())
-	return;
-
     XLOG_ASSERT(lsar->external());
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+	return;
+	break;
+    case OspfTypes::NSSA:
+	lsar = external_generate_type7(lsar);
+	break;
+    }
+
     size_t index;
     if (find_lsa(lsar, index)) {
 	XLOG_FATAL("LSA already in database: %s", cstring(*lsar));
@@ -691,10 +774,19 @@ template <typename A>
 void
 AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 {
-    if (!external_area_type())
-	return;
-
     XLOG_ASSERT(lsar->external());
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+	return;
+	break;
+    case OspfTypes::NSSA:
+	lsar = external_generate_type7(lsar);
+	break;
+    }
+
     size_t index;
     if (!find_lsa(lsar, index)) {
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
@@ -710,10 +802,20 @@ template <typename A>
 void
 AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
 {
-    if (!external_area_type())
-	return;
-
     XLOG_ASSERT(lsar->external());
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+	return;
+	break;
+    case OspfTypes::NSSA:
+	lsar = external_generate_type7(lsar);
+	lsar->set_maxage();
+	break;
+    }
+
     size_t index;
     if (!find_lsa(lsar, index)) {
 	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));

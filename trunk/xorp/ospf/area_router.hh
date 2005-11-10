@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.77 2005/10/30 07:37:12 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.78 2005/11/08 00:17:55 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -129,10 +129,25 @@ class AreaRouter : Subsystem {
     void summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 			  RouteEntry<A>& rt);
 
-    /**
-     * @return true if this area should accept an AS-External-LSA
-     */
+     /**
+      * @return true if this area should accept an AS-External-LSA or
+      * a Type-7-LSA.
+      */
     bool external_area_type() const;
+ 
+    /**
+     * Copy the net and nexthop information from a AS-External-LSA to
+     * a Type-7 LSA.
+     *
+     * The first dummy argument A is to allow template specialisation
+     * by address family.
+     */
+    void external_copy_net_nexthop(A, Type7Lsa *type7, ASExternalLsa *aselsa);
+
+    /**
+     * Given an AS-External-LSA generate a Type-7 LSA.
+     */
+    Lsa::LsaRef external_generate_type7(Lsa::LsaRef lsar);
 
     /**
      * An AS-External-LSA being announced either from another area or
@@ -477,6 +492,7 @@ class AreaRouter : Subsystem {
     
     // How to handle Type-7 LSAs at the border.
     OspfTypes::NSSATranslatorRole _translator_role;
+    bool _type7_propagate;		// How to set the propagate bit.
 
     /**
      * Range to be summarised or suppressed from other areas.
