@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.37 2005/10/04 06:08:19 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.38 2005/10/05 05:48:58 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -26,6 +26,7 @@
 #include "libxorp/mac.hh"
 
 #include "module_manager.hh"
+#include "config_operators.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
 #include "xrldb.hh"
@@ -97,6 +98,8 @@ public:
     string path() const;
     bool is_module_root_node() const;
     bool is_leaf_value() const;
+
+    list<ConfigOperator> allowed_operators() const;
 
 #if 0
     bool check_template_tree(string& errmsg) const;

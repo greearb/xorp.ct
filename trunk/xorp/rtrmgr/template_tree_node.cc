@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.62 2005/10/05 05:48:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.63 2005/10/10 04:10:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -384,6 +384,24 @@ TemplateTreeNode::is_leaf_value() const
 	return true;
 
     return false;
+}
+
+list<ConfigOperator>
+TemplateTreeNode::allowed_operators() const
+{
+    list<ConfigOperator> result;
+
+    const BaseCommand* c = const_command("%allow-operator");
+    if (c == NULL)
+	return result;
+
+    const AllowOperatorsCommand* cmd;
+    cmd = dynamic_cast<const AllowOperatorsCommand *>(c);
+    if (cmd == NULL)
+	return result;
+
+    result = cmd->allowed_operators();
+    return result;
 }
 
 string
@@ -1054,7 +1072,7 @@ UIntTemplate::type_match(const string& orig, string& errmsg) const
 	if (s[i] < '0' || s[i] > '9') {
 	    if (s[i]=='-') {
 		errmsg = "Value cannot be negative.";
-	    } if (s[i]=='.') {
+	    } else if (s[i]=='.') {
 		errmsg = "Value must be an integer.";
 	    } else {
 		errmsg = "Value must be numeric.";
@@ -1462,7 +1480,7 @@ IPv6Template::type_match(const string& s, string& errmsg) const
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be an IPv4 address.";
+	errmsg = "Value must be an IPv6 address.";
 	return false;
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.8 2005/10/25 20:02:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.9 2005/10/26 07:06:29 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -245,6 +245,22 @@ AllowOperatorsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
     return false;
 }
 
+list<ConfigOperator>
+AllowOperatorsCommand::allowed_operators() const
+{
+    list<ConfigOperator> result;
+
+    list<ConfigOperator>::const_iterator iter;
+    for (iter = _allowed_operators.begin();
+	 iter != _allowed_operators.end();
+	 ++iter) {
+	const ConfigOperator& config_operator = *iter;
+	result.push_back(config_operator);
+    }
+
+    return result;
+}
+
 string
 AllowOperatorsCommand::str() const
 {
@@ -331,7 +347,7 @@ AllowRangeCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
 	errmsg = c_format("Variable \"%s\" is not defined.", _varname.c_str());
 	return false;
     }
-    errmsg = c_format("Value %s is outside valid range, %d...%d,  for variable \"%s\".",
+    errmsg = c_format("Value %s is outside valid range, %d...%d, for variable \"%s\".",
 		      value.c_str(),
 		      XORP_INT_CAST(_lower),
 		      XORP_INT_CAST(_upper),

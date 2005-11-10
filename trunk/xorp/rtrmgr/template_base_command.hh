@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.3 2005/07/08 20:51:16 mjh Exp $
+// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.4 2005/10/26 07:06:29 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
@@ -85,6 +85,7 @@ public:
     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
 					  const string& value,
 					  string& errmsg) const;
+    virtual list<ConfigOperator> allowed_operators() const;
 
     virtual string str() const;
 
