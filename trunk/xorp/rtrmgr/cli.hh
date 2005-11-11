@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.36 2005/07/27 04:37:28 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.37 2005/08/18 15:54:27 bms Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -26,6 +26,7 @@
 #include "cli/cli_node.hh"
 #include "cli/cli_client.hh"
 
+#include "config_operators.hh"
 #include "rtrmgr_error.hh"
 
 
@@ -38,6 +39,7 @@ class OpInstance;
 class SlaveConfigTree;
 class SlaveConfigTreeNode;
 class TemplateTree;
+class TemplateTreeNode;
 
 class XorpShellBase;
 
@@ -96,6 +98,11 @@ public:
 		  uint32_t ,
 		  const string& command_global_name,
 		  const vector<string>& argv);
+    int extract_leaf_node_operator_and_value(const TemplateTreeNode& ttn,
+					     const vector<string>& argv,
+					     ConfigOperator& node_operator,
+					     string& value,
+					     string& error_msg);
     map<string, CliCommandMatch> text_entry_children_func(
 	const string& path) const;
     int text_entry_func(const string& ,
@@ -123,7 +130,7 @@ public:
 		    uint32_t ,
 		    const string& command_global_name,
 		    const vector<string>& argv);
-    void commit_done(bool success, string errmsg);
+    void commit_done(bool success, string error_msg);
 
     int show_func(const string& ,
 		  const string& ,
@@ -141,7 +148,7 @@ public:
 		  const string& command_global_name,
 		  const vector<string>& argv);
     void save_communicated(const XrlError& e);
-    void save_done(bool success, string errmsg);
+    void save_done(bool success, string error_msg);
 
     int load_func(const string& ,
 		  const string& ,
@@ -149,7 +156,7 @@ public:
 		  const string& command_global_name,
 		  const vector<string>& argv);
     void load_communicated(const XrlError& e);
-    void load_done(bool success, string errmsg);
+    void load_done(bool success, string error_msg);
 
     map<string, CliCommandMatch> op_mode_help(const string& path) const;
     map<string, CliCommandMatch> configure_mode_help(const string& path) const;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.103 2005/10/26 22:33:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.104 2005/11/02 02:40:39 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -52,14 +52,14 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
       _changes_made(false),
       _op_mode_cmd(NULL)
 {
-    string errmsg;
+    string error_msg;
 
     _cli_client_ptr = _cli_node.add_client(cli_client_input_fd,
 					   cli_client_output_fd,
-					   false, errmsg);
+					   false, error_msg);
     if (_cli_client_ptr == NULL) {
-	errmsg = c_format("Cannot add CliClient: %s", errmsg.c_str());
-	xorp_throw(InitError, errmsg);
+	error_msg = c_format("Cannot add CliClient: %s", error_msg.c_str());
+	xorp_throw(InitError, error_msg);
     }
 
     //
@@ -1353,6 +1353,7 @@ RouterCLI::configure_func(const string& ,
 void
 RouterCLI::enter_config_done(const XrlError& e)
 {
+    string error_msg;
     if (e == XrlError::OKAY()) {
 	_xorpsh.get_config_users(callback(this, &RouterCLI::got_config_users));
 	return;
@@ -1367,8 +1368,8 @@ RouterCLI::enter_config_done(const XrlError& e)
     // Either something really bad happened, or a user that didn't
     // have permission attempted to enter config mode.
     //
-    string errmsg = c_format("ERROR: %s.\n", e.note().c_str());
-    cli_client().cli_print(errmsg);
+    error_msg = c_format("ERROR: %s.\n", e.note().c_str());
+    cli_client().cli_print(error_msg);
     reenable_ui();
 }
 
@@ -1555,19 +1556,20 @@ RouterCLI::logout_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
-    string errmsg;
+    string error_msg;
 
     if (! argv.empty()) {
-	errmsg = c_format("ERROR: \"%s\" does not take "
-			  "any additional parameters.\n",
-			  command_global_name.c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: \"%s\" does not take any additional "
+			     "parameters.\n",
+			     command_global_name.c_str());
+	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
 
     idle_ui();
-    if (_cli_node.delete_client(_cli_client_ptr, errmsg) != XORP_OK) {
-	XLOG_FATAL("internal error deleting CLI client: %s", errmsg.c_str());
+    if (_cli_node.delete_client(_cli_client_ptr, error_msg) != XORP_OK) {
+	XLOG_FATAL("internal error deleting CLI client: %s",
+		   error_msg.c_str());
 	return (XORP_ERROR);
     }
     _cli_client_ptr = NULL;
@@ -1582,12 +1584,14 @@ RouterCLI::exit_func(const string& ,
 		     const string& command_global_name,
 		     const vector<string>& argv)
 {
+    string error_msg;
+
     if (command_global_name == "exit configuration-mode") {
 	if (! argv.empty()) {
-	    string errmsg = c_format("ERROR: \"%s\" does not take "
-				     "any additional parameters.\n",
-				     command_global_name.c_str());
-	    cli_client().cli_print(errmsg);
+	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
+				 "parameters.\n",
+				 command_global_name.c_str());
+	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
 	if (_changes_made) {
@@ -1603,10 +1607,10 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "exit discard") {
 	if (! argv.empty()) {
-	    string errmsg = c_format("ERROR: \"%s\" does not take "
-				     "any additional parameters.\n",
-				     command_global_name.c_str());
-	    cli_client().cli_print(errmsg);
+	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
+				 "parameters.\n",
+				 command_global_name.c_str());
+	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
 	config_tree()->discard_changes();
@@ -1618,10 +1622,10 @@ RouterCLI::exit_func(const string& ,
     }
     if (command_global_name == "top") {
 	if (! argv.empty()) {
-	    string errmsg = c_format("ERROR: \"%s\" does not take "
-				     "any additional parameters.\n",
-				     command_global_name.c_str());
-	    cli_client().cli_print(errmsg);
+	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
+				 "parameters.\n",
+				 command_global_name.c_str());
+	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
 	reset_path();
@@ -1635,10 +1639,10 @@ RouterCLI::exit_func(const string& ,
     //
     if (command_global_name == "up") {
 	if (! argv.empty()) {
-	    string errmsg = c_format("ERROR: \"%s\" does not take "
-				     "any additional parameters.\n",
-				     command_global_name.c_str());
-	    cli_client().cli_print(errmsg);
+	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
+				 "parameters.\n",
+				 command_global_name.c_str());
+	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
 	if (! _path.empty())
@@ -1716,6 +1720,103 @@ RouterCLI::edit_func(const string& ,
 }
 
 int
+RouterCLI::extract_leaf_node_operator_and_value(const TemplateTreeNode& ttn,
+						const vector<string>& argv,
+						ConfigOperator& node_operator,
+						string& value,
+						string& error_msg)
+{
+    string operator_str;
+
+    //
+    // Test if the assign operator is allowed
+    //
+    bool is_assign_operator_allowed = false;
+    list<ConfigOperator> allowed_operators = ttn.allowed_operators();
+    list<ConfigOperator>::iterator operator_iter;
+    if (allowed_operators.empty()) {
+	is_assign_operator_allowed = true;
+	allowed_operators.push_back(OP_ASSIGN);
+    } else {
+	for (operator_iter = allowed_operators.begin();
+	     operator_iter != allowed_operators.end();
+	     ++operator_iter) {
+	    if (*operator_iter == OP_ASSIGN) {
+		is_assign_operator_allowed = true;
+		break;
+	    }
+	}
+    }
+
+    //
+    // The arguments must be a value, or an operator and a value
+    //
+    value = "";
+    node_operator = OP_NONE;
+    bool is_error = false;
+    switch (argv.size()) {
+    case 0:
+	// Missing value
+	is_error = true;
+	break;
+    case 1:
+	// A single argument, hence this implies the assign operator
+	if (! is_assign_operator_allowed)
+	    is_error = true;
+	node_operator = OP_ASSIGN;
+	value = argv[0];
+	break;
+    case 2:
+	// An operator followed by a value
+	operator_str = argv[0];
+	value = argv[1];
+	try {
+	    node_operator = lookup_operator(operator_str);
+	} catch (const ParseError& e) {
+	    is_error = true;
+	    break;
+	}
+	// Test if the operator is allowed
+	if (find(allowed_operators.begin(), allowed_operators.end(),
+		 node_operator)
+	    == allowed_operators.end()) {
+	    is_error = true;
+	}
+	break;
+    default:
+	// Too many arguments
+	is_error = true;
+	break;
+    }
+
+    if (is_error) {
+	string operators_str;
+	for (operator_iter = allowed_operators.begin();
+	     operator_iter != allowed_operators.end();
+	     ++operator_iter) {
+	    if (! operators_str.empty())
+		operators_str += " ";
+	    operators_str += operator_to_str(*operator_iter);
+	}
+	error_msg = c_format("should take one %soperator [%s] followed by "
+			     "one argument of type \"%s\"",
+			     (is_assign_operator_allowed)? "optional " : "",
+			     operators_str.c_str(),
+			     ttn.typestr().c_str());
+	return (XORP_ERROR);
+    }
+
+    if (ttn.type_match(value, error_msg) == false) {
+	error_msg = c_format("argument \"%s\" is not a valid \"%s\": %s",
+			     value.c_str(), ttn.typestr().c_str(),
+			     error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    return (XORP_OK);
+}
+
+int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
 			   uint32_t ,		// cli_session_id
@@ -1732,6 +1833,7 @@ RouterCLI::text_entry_func(const string& ,
     SlaveConfigTreeNode *ctn = NULL, *first_new_ctn = NULL, *brace_ctn;
     const TemplateTreeNode* ttn = NULL;
     bool value_expected = false;
+    string error_msg;
 
     // Restore the indent position from last time we were called
     size_t original_braces_length = _braces.size();
@@ -1764,7 +1866,7 @@ RouterCLI::text_entry_func(const string& ,
     // The path_segments probably contain part of the path that already
     // exists and part that does not yet exist.  Find which is which.
     //
-    list <string> new_path_segments;
+    list<string> new_path_segments;
     while (!path_segments.empty()) {
 	ctn = config_tree()->find_node(path_segments);
 	if (ctn != NULL) {
@@ -1790,10 +1892,9 @@ RouterCLI::text_entry_func(const string& ,
     // Test if the node was already created.
     //
     if (new_path_segments.empty() && (! ctn->deleted())) {
-	string errmsg = c_format("ERROR: node \"%s\" "
-				 "already exists.\n",
-				 ctn->segname().c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: node \"%s\" already exists.\n",
+			     ctn->segname().c_str());
+	cli_client().cli_print(error_msg);
 	goto cleanup;
     }
 
@@ -1848,10 +1949,10 @@ RouterCLI::text_entry_func(const string& ,
 	    // We're expecting a value here
 	    if (new_path_segments.front() == "{" 
 		|| new_path_segments.front() == "}" ) {
-		string errmsg = c_format("ERROR: a value for \"%s\" "
-					 "is required.\n",
-					 ctn->segname().c_str());
-		cli_client().cli_print(errmsg);
+		error_msg = c_format("ERROR: a value for \"%s\" "
+				     "is required.\n",
+				     ctn->segname().c_str());
+		cli_client().cli_print(error_msg);
 		goto cleanup;
 	    }
 	    string value = new_path_segments.front();
@@ -1887,14 +1988,14 @@ RouterCLI::text_entry_func(const string& ,
 			cand_types = c_format("\"%s\"",
 					      ttn->typestr().c_str());
 		    }
-		    string errmsg = c_format("ERROR: argument \"%s\" "
-					     "is not a valid %s.\n",
-					     value.c_str(),
-					     cand_types.c_str());
-		    if (!errhelp.empty()) {
-			errmsg += errhelp + "\n"; 
-		    }
-		    cli_client().cli_print(errmsg);
+		    error_msg = c_format("ERROR: argument \"%s\" "
+					 "is not a valid %s",
+					 value.c_str(),
+					 cand_types.c_str());
+		    if (!errhelp.empty())
+			error_msg += ": " + errhelp;
+		    error_msg += ".\n"; 
+		    cli_client().cli_print(error_msg);
 		    goto cleanup;
 		}
 		path_segments.push_back(value);
@@ -1911,62 +2012,71 @@ RouterCLI::text_entry_func(const string& ,
 		_changes_made = true;
 		value_expected = false;
 	    } else if (ctn->is_leaf_value()) {
-		// It must be a leaf, and we're expecting a value
+		//
+		// It must be a leaf, and we're expecting a value,
+		// or an operator and a value.
+		//
 
 		// We cannot modify a read-only node
 		if (ctn->is_read_only() && (! ctn->is_default_value(value))) {
 		    string reason = ctn->read_only_reason();
-		    string errmsg = c_format("ERROR: node \"%s\" "
-					     "is read-only",
-					     ctn->segname().c_str());
+		    error_msg = c_format("ERROR: node \"%s\" is read-only",
+					 ctn->segname().c_str());
 		    if (! reason.empty())
-			errmsg += c_format(": %s", reason.c_str());
-		    errmsg += ".\n";
+			error_msg += c_format(": %s", reason.c_str());
+		    error_msg += ".\n";
 
-		    cli_client().cli_print(errmsg);
+		    cli_client().cli_print(error_msg);
 		    goto cleanup;
 		}
-		if (new_path_segments.size() > 1) {
-		    // We cannot have more than one value per leaf node
-		    string errmsg = c_format("ERROR: extra values for leaf "
-					     "node \"%s\".\n",
-					     ctn->segname().c_str());
-		    cli_client().cli_print(errmsg);
+
+		vector<string> argv;
+		list<string>::iterator list_iter;
+		for (list_iter = new_path_segments.begin();
+		     list_iter != new_path_segments.end();
+		     ++list_iter) {
+		    argv.push_back(*list_iter);
+		}
+		if (new_path_segments.size() == 2) {
+		    // XXX: pop-up the operator
+		    new_path_segments.pop_front();
+		}
+
+		ConfigOperator node_operator = OP_NONE;
+		if (extract_leaf_node_operator_and_value(*ttn, argv,
+							 node_operator,
+							 value, error_msg)
+		    != XORP_OK) {
+		    error_msg = c_format("ERROR: node \"%s\": %s.\n",
+					 ctn->segname().c_str(),
+					 error_msg.c_str());
+		    cli_client().cli_print(error_msg);
 		    goto cleanup;
 		}
-		string errhelp;
-		if (ttn->type_match(value, errhelp)) {
-		    XLOG_TRACE(_verbose, "setting node %s to %s\n", 
-			       ctn->segname().c_str(),
-			       value.c_str());
-		    string errmsg;
-		    if (ctn->set_value(value, getuid(), errmsg) != true) {
-			errmsg = c_format("ERROR: invalid value \"%s\": %s\n",
-					  value.c_str(), errmsg.c_str());
-			cli_client().cli_print(errmsg);
-			goto cleanup;
-		    }
-		    // default operator
-		    if (ctn->set_operator(OP_ASSIGN, getuid(), errmsg) != true) {
-			errmsg = c_format("ERROR: invalid operator value \"%s\": %s\n",
-					  operator_to_str(OP_ASSIGN).c_str(),
-					  errmsg.c_str());
-			cli_client().cli_print(errmsg);
-			goto cleanup;
-		    }
-		    _changes_made = true;
-		    value_expected = false;
-		} else {
-		    string errmsg = c_format("ERROR: argument \"%s\" "
-					     "is not a valid \"%s\".\n",
-					     value.c_str(),
-					     ttn->typestr().c_str());
-		    if (!errhelp.empty()) {
-			errmsg += errhelp + "\n"; 
-		    }
-		    cli_client().cli_print(errmsg);
+		XLOG_ASSERT(ttn->type_match(value, error_msg) == true);
+		XLOG_TRACE(_verbose, "Setting node \"%s\": operator %s "
+			   "and value %s\n",
+			   ctn->segname().c_str(),
+			   operator_to_str(node_operator).c_str(),
+			   value.c_str());
+		// Set the value
+		if (ctn->set_value(value, getuid(), error_msg) != true) {
+		    error_msg = c_format("ERROR: invalid value \"%s\": %s\n",
+					 value.c_str(), error_msg.c_str());
+		    cli_client().cli_print(error_msg);
 		    goto cleanup;
 		}
+		// Set the operator
+		if (ctn->set_operator(node_operator, getuid(), error_msg)
+		    != true) {
+		    error_msg = c_format("ERROR: invalid operator value \"%s\": %s\n",
+					 operator_to_str(node_operator).c_str(),
+					 error_msg.c_str());
+		    cli_client().cli_print(error_msg);
+		    goto cleanup;
+		}
+		_changes_made = true;
+		value_expected = false;
 	    } else {
 		XLOG_UNREACHABLE();
 	    }
@@ -2029,10 +2139,9 @@ RouterCLI::text_entry_func(const string& ,
 	    path_segments.push_back(new_path_segments.front());
 	    ttn = config_tree()->find_template(path_segments);
 	    if (ttn == NULL) {
-		string errmsg = c_format("ERROR: path \"%s\" "
-					 "is not valid.\n",
-					 makepath(path_segments).c_str());
-		cli_client().cli_print(errmsg);
+		error_msg = c_format("ERROR: path \"%s\" is not valid.\n",
+				     makepath(path_segments).c_str());
+		cli_client().cli_print(error_msg);
 		goto cleanup;
 	    }
 	    //
@@ -2041,11 +2150,10 @@ RouterCLI::text_entry_func(const string& ,
 	    const TemplateTreeNode* deprecated_ttn;
 	    deprecated_ttn = ttn->find_first_deprecated_ancestor();
 	    if (deprecated_ttn != NULL) {
-		string errmsg = c_format("ERROR: path \"%s\" "
-					 "is not valid: %s.\n",
-					 makepath(path_segments).c_str(),
-					 deprecated_ttn->deprecated_reason().c_str());
-		cli_client().cli_print(errmsg);
+		error_msg = c_format("ERROR: path \"%s\" is not valid: %s.\n",
+				     makepath(path_segments).c_str(),
+				     deprecated_ttn->deprecated_reason().c_str());
+		cli_client().cli_print(error_msg);
 		goto cleanup;
 	    }
 
@@ -2077,9 +2185,9 @@ RouterCLI::text_entry_func(const string& ,
     // input was erroneous.
     //
     if (value_expected) {
-	string errmsg = c_format("ERROR: node \"%s\" requires a value.\n",
-				 ctn->segname().c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: node \"%s\" requires a value.\n",
+			     ctn->segname().c_str());
+	cli_client().cli_print(error_msg);
 	goto cleanup;
     }
 
@@ -2217,7 +2325,7 @@ RouterCLI::delete_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
-    string errmsg;
+    string error_msg;
     string cmd_name, path;
     list<string> path_segments;
 
@@ -2254,15 +2362,15 @@ RouterCLI::delete_func(const string& ,
 	}
 	SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
 	if ((ctn != NULL) && ctn->is_permanent()) {
-	    errmsg = c_format("ERROR: cannot delete \"%s\" because it is "
+	    error_msg = c_format("ERROR: cannot delete \"%s\" because it is "
 			      "a permanent node.\n",
 			      makepath(argv).c_str());
 	} else {
-	    errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
-			      "exist.\n",
-			      makepath(argv).c_str());
+	    error_msg = c_format("ERROR: cannot delete \"%s\" because it "
+				 "doesn't exist.\n",
+				 makepath(argv).c_str());
 	}
-	cli_client().cli_print(errmsg);
+	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -2271,10 +2379,10 @@ RouterCLI::delete_func(const string& ,
     //
     SlaveConfigTreeNode* ctn = config_tree()->find_node(path_segments);
     if (ctn == NULL) {
-	errmsg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
-			  "exist.\n",
-			  makepath(path_segments).c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: cannot delete \"%s\" because it doesn't "
+			     "exist.\n",
+			     makepath(path_segments).c_str());
+	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -2346,7 +2454,7 @@ RouterCLI::immediate_set_func(const string& ,
 string
 RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 {
-    string error_msg;
+    string result, error_msg;
     list<string> path_parts;
     path_parts = split(path, ' ');
 
@@ -2368,22 +2476,14 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 
     XLOG_ASSERT(ctn != NULL && ttn != NULL && (! ctn->is_read_only()));
 
-    if (argv.size() != 1) {
-	string result = c_format("ERROR: \"set %s\" should take "
-				 "one argument of type \"%s\".",
-				 path.c_str(), ttn->typestr().c_str());
-	return result;
-    }
+    string value;
+    ConfigOperator node_operator = OP_NONE;
 
-    string errhelp;
-    if (ttn->type_match(argv[0], errhelp) == false) {
-	string result = c_format("ERROR: argument \"%s\" "
-				 "is not a valid \"%s\".",
-				 argv[0].c_str(),
-				 ttn->typestr().c_str());
-	if (!errhelp.empty()) {
-	    result += "\n" + errhelp; 
-	}
+    if (extract_leaf_node_operator_and_value(*ttn, argv, node_operator,
+					     value, error_msg)
+	!= XORP_OK) {
+	result = c_format("ERROR : \"set %s\": %s.",
+			  path.c_str(), error_msg.c_str());
 	return result;
     }
 
@@ -2409,31 +2509,18 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 					  clientid(),
 					  _verbose);
 	ctn = newnode;
-	if (ctn->set_value(argv[0], myuid, error_msg) != true) {
-	    string result = c_format("ERROR: invalid value \"%s\": %s\n",
-				     argv[0].c_str(), error_msg.c_str());
-	    return result;
-	}
-	if (ctn->set_operator(OP_ASSIGN, myuid, error_msg) != true) {
-	    string result = c_format("ERROR: invalid operator value \"%s\": %s\n",
-				     operator_to_str(OP_ASSIGN).c_str(),
-				     error_msg.c_str());
-	    return result;
-	}
-    } else {
-	if (ctn->set_value(argv[0], myuid, error_msg) != true) {
-	    string result = c_format("ERROR: invalid value \"%s\": %s\n",
-				     argv[0].c_str(), error_msg.c_str());
-	    return result;
-	}
-	if (ctn->get_operator() == OP_NONE) {
-	    if (ctn->set_operator(OP_ASSIGN, getuid(), error_msg) != true) {
-		string result = c_format("ERROR: invalid operator value \"%s\": %s\n",
-					 operator_to_str(OP_ASSIGN).c_str(),
-					 error_msg.c_str());
-		return result;
-	    }
-	}
+    }
+
+    if (ctn->set_value(value, myuid, error_msg) != true) {
+	result = c_format("ERROR: invalid value \"%s\": %s\n",
+			  value.c_str(), error_msg.c_str());
+	return result;
+    }
+    if (ctn->set_operator(node_operator, myuid, error_msg) != true) {
+	result = c_format("ERROR: invalid operator value \"%s\": %s\n",
+			  operator_to_str(node_operator).c_str(),
+			  error_msg.c_str());
+	return result;
     }
 
     //
@@ -2441,7 +2528,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     //
     _changes_made = true;
 
-    string result = "OK";
+    result = "OK";
     return result;
 }
 
@@ -2452,11 +2539,13 @@ RouterCLI::commit_func(const string& ,
 		       const string& command_global_name,
 		       const vector<string>& argv)
 {
+    string error_msg;
+
     if (! argv.empty()) {
-	string errmsg = c_format("ERROR: \"%s\" does not take "
-				 "any additional parameters.\n",
-				 command_global_name.c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: \"%s\" does not take any additional "
+			     "parameters.\n",
+			     command_global_name.c_str());
+	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -2505,7 +2594,7 @@ RouterCLI::reenable_ui()
 }
 
 void
-RouterCLI::commit_done(bool success, string errmsg)
+RouterCLI::commit_done(bool success, string error_msg)
 {
     //
     // If we get a failure back here, report it.  Otherwise expect an
@@ -2514,11 +2603,11 @@ RouterCLI::commit_done(bool success, string errmsg)
     //
     if (! success) {
 	cli_client().cli_print("Commit Failed\n");
-	cli_client().cli_print(errmsg);
+	cli_client().cli_print(error_msg);
     } else {
 	_changes_made = false;
 	cli_client().cli_print("OK\n");
-	cli_client().cli_print(errmsg);
+	cli_client().cli_print(error_msg);
     }
     _xorpsh.set_mode(XorpShellBase::MODE_IDLE);
     apply_path_change();
@@ -2537,7 +2626,7 @@ RouterCLI::show_func(const string& ,
     bool show_top = false;
     const string show_command_name = "show";
     const string show_all_command_name = "show -all";
-    string errmsg;
+    string error_msg;
 
     if (! argv.empty()) {
 	//
@@ -2547,10 +2636,10 @@ RouterCLI::show_func(const string& ,
 	// Hence, "argv" should always be empty. If "argv" is not empty,
 	// then it is an error.
 	//
-	errmsg = c_format("ERROR: cannot show \"%s\" because it doesn't "
-			  "exist.\n",
-			  makepath(argv).c_str());
-	cli_client().cli_print(errmsg);
+	error_msg = c_format("ERROR: cannot show \"%s\" because it doesn't "
+			     "exist.\n",
+			     makepath(argv).c_str());
+	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
 
@@ -2786,11 +2875,11 @@ RouterCLI::save_communicated(const XrlError& e)
 // or when something goes wrong during this process.
 //
 void
-RouterCLI::save_done(bool success, string errmsg)
+RouterCLI::save_done(bool success, string error_msg)
 {
     if (! success) {
 	cli_client().cli_print("ERROR: Save failed.\n");
-	cli_client().cli_print(errmsg);
+	cli_client().cli_print(error_msg);
     } else {
 	cli_client().cli_print("Save done.\n");
     }
@@ -2856,11 +2945,11 @@ RouterCLI::load_communicated(const XrlError& e)
 // all the router modules, or when something goes wrong during this process.
 //
 void
-RouterCLI::load_done(bool success, string errmsg)
+RouterCLI::load_done(bool success, string error_msg)
 {
     if (! success) {
 	cli_client().cli_print("ERROR: Load failed.\n");
-	cli_client().cli_print(errmsg);
+	cli_client().cli_print(error_msg);
     } else {
 	cli_client().cli_print("Load done.\n");
     }
