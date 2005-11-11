@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.11 2005/04/11 19:13:21 atanu Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.12 2005/04/11 21:21:13 pavlin Exp $
 %
 
 \chapter{BGP}
@@ -370,7 +370,7 @@ available sub-commands and parameters:
 \begin{alltt}
 \begin{tabbing}
 xx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show bgp ?}\\
+user@hostname> \textbf{show bgp ?}\\
 Possible completions:\\
 \><[Enter]>\>Execute this command\\
 \>peers\>Show BGP peers info\\
@@ -391,7 +391,7 @@ parameter {\stt detail} to give a lot more information:
 \begin{alltt}
 \begin{tabbing}
 xx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show bgp peers ?}\\
+user@hostname> \textbf{show bgp peers ?}\\
 Possible completions:\\
 \><[Enter]>\>Execute this command\\
 \>detail\>Show detailed BGP peers info\\
@@ -411,7 +411,7 @@ in established state or not:
 \begin{alltt}
 \begin{tabbing}
 xx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show bgp peers} \\
+user@hostname> \textbf{show bgp peers} \\
 Peer 1: local 192.150.187.112/179 remote 69.110.224.158/179\\
 Peer 2: local 192.150.187.112/179 remote 192.150.187.2/179\\
 Peer 3: local 192.150.187.112/179 remote 192.150.187.78/179\\
@@ -432,7 +432,7 @@ information about all the peerings:
 \begin{alltt}
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
-Xorp> \textbf{show bgp peers detail}\\
+user@hostname> \textbf{show bgp peers detail}\\
 Peer 1: local 192.150.187.112/179 remote 69.110.224.158/179\\
 \>Peer ID: none\\
 \>Peer State: ACTIVE\\
@@ -492,7 +492,7 @@ output:
 \begin{alltt}
 \begin{tabbing}
 xxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xx\=\kill
-Xorp> \textbf{show bgp routes}\\
+user@hostname> \textbf{show bgp routes}\\
 Status Codes: * valid route, > best route\\
 Origin Codes: i IGP, e EGP, ? incomplete\\
 \\

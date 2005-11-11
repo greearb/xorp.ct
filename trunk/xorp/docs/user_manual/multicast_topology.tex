@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/multicast_topology.tex,v 1.3 2005/04/07 03:09:12 pavlin Exp $
+% $XORP: xorp/docs/user_manual/multicast_topology.tex,v 1.4 2005/04/09 03:17:11 pavlin Exp $
 %
 
 \chapter{Multicast Topology Discovery}
@@ -145,7 +145,7 @@ routes:
 \begin{alltt}
 \begin{tabbing}
 xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show route table ipv4 multicast fib2mrib}\\
+user@hostname> \textbf{show route table ipv4 multicast fib2mrib}\\
 Network 10.2.0.0/24\\
     \>Nexthop := 0.0.0.0\\
     \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2\\
@@ -176,7 +176,7 @@ routes:
 \begin{alltt}
 \begin{tabbing}
 xxxx\=xxxxxxxxxxxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show route table ipv4 multicast final}\\
+user@hostname> \textbf{show route table ipv4 multicast final}\\
 Network 10.2.0.0/24\\
     \>Nexthop := 10.2.0.2\\
     \>Metric :=     \>0    \>Protocol := connected    \>Interface := dc2    \>Vif := dc2\\

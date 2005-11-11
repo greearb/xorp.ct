@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.7 2005/07/24 17:19:50 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.8 2005/09/29 01:46:33 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -56,7 +56,7 @@ On starting \xorpsh, you will be presented with a command line prompt:
 \noindent\framebox[\textwidth][l]{
 \begin{minipage}{\textwidth}
 \begin{alltt}
-Xorp>
+user@hostname>
 \end{alltt}
 \end{minipage}
 }
@@ -74,7 +74,7 @@ you:
 \begin{minipage}[l]{\textwidth}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{?}\\
+user@hostname> \textbf{?}\\
 Po\=ssible compl\=etions:\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
@@ -100,10 +100,10 @@ example:
 \begin{minipage}{\textwidth}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{config?}\\
+user@hostname> \textbf{config?}\\
 Po\=ssible compl\=etions:\\
 \>configure\>Switch to configuration mode\\
-Xorp> \textbf{config}
+user@hostname> \textbf{config}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -119,11 +119,11 @@ parameters for the command:
 \begin{minipage}{4in}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{configure ?}\\
+user@hostname> \textbf{configure ?}\\
 Po\=ssible compl\=etions:\\
 \><[Enter]>       \>Execute this command\\
 \>exclusive       \>Switch to configuration mode, locking out other users\\
-Xorp> \textbf{configure}
+user@hostname> \textbf{configure}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -220,7 +220,7 @@ UNIX-like pipe command '$\mid$' as one of the options:
 \begin{minipage}[l]{\textwidth}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{show | ?}\\
+user@hostname> \textbf{show | ?}\\
 Po\=ssible compl\=etions:\\
 \>count           \>Count occurrences\\
 \>except          \>Show only text that does not match a pattern\\
@@ -272,7 +272,7 @@ Unix group.
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{?}\\
+user@hostname> \textbf{?}\\
 Po\=ssible compl\=etions:\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
@@ -300,7 +300,7 @@ router.
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{show ?}\\
+user@hostname> \textbf{show ?}\\
 Po\=ssible compl\=etions:\\
 \>  <[Enter]>       \>Execute this command\\
 \>  bgp             \>Display information about BGP\\
@@ -314,7 +314,7 @@ Po\=ssible compl\=etions:\\
 \>  pim6            \>Display information about IPv6 PIM\\
 \>  rip             \>Display information about RIP\\
 \>  route           \>Show route table\\
-Xorp> \textbf{show}
+user@hostname> \textbf{show}
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -334,7 +334,7 @@ As an example, we show the peers of a BGP router:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{show bgp peers detail}\\
+user@hostname> \textbf{show bgp peers detail}\\
 OK\\
 Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 \>  Peer ID: 192.150.187.109\\
@@ -364,11 +364,11 @@ Pe\=er 1: local 192.150.187.108/179 remote 192.150.187.109/179\\
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-Xorp> \textbf{configure}\\
+user@hostname> \textbf{configure}\\
 Entering configuration mode.\\
 There are no other users in configuration mode.\\
 \noindent[edit]\\
-XORP>
+user@hostname\#
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -376,8 +376,8 @@ XORP>
 \vspace{0.1in}
 
 \noindent
-When in configuration mode, the command prompt changes to be all
-capitals.
+When in configuration mode, the command prompt changes from
+\verb=user@hostname>= to \verb=user@hostname#=.
 The command prompt is also usually preceded by a line indicating which
 part of the configuration tree is currently being edited.
 \vspace{0.1in}
@@ -387,7 +387,7 @@ part of the configuration tree is currently being edited.
 \begin{alltt}
 \begin{tabbing}
 [edit]\\
-XORP> \textbf{?}\\
+user@hostname\# \textbf{?}\\
 Po\=ssible completi\=ons:\\
 \>  create          \>Create a sub-element\\
 \>  delete          \>Delete a configuration element\\
@@ -402,7 +402,7 @@ Po\=ssible completi\=ons:\\
 \>  show            \>Show the configuration (default values may be suppressed)\\
 \>  top             \>Exit to top level of configuration\\
 \>  up              \>Exit one level of configuration\\
-XORP> 
+user@hostname\# 
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -423,7 +423,7 @@ shown with the \emph{show} command:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 [edit]\\
-XORP> \textbf{show interfaces}\\
+user@hostname\# \textbf{show interfaces}\\
 \>interface rl0 \{\\
 \>\>description: "control interface"\\
 \>\>vif rl0 \{\\
@@ -450,7 +450,7 @@ parameters with default values:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 [edit]\\
-XORP> \textbf{show -all interfaces}\\
+user@hostname\# \textbf{show -all interfaces}\\
 \>interface rl0 \{\\
 \>\>description: "control interface"\\
 \>\>vif rl0 \{\\
@@ -495,20 +495,20 @@ For example:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 [edit]\\
-XORP> \textbf{edit interfaces interface rl0 vif rl0}\\
+user@hostname\# \textbf{edit interfaces interface rl0 vif rl0}\\
 \noindent[edit interfaces interface rl0 vif rl0]\\
-XORP> \textbf{show}\\
+user@hostname\# \textbf{show}\\
 \>address 192.150.187.108 \{\\
 \>\>prefix-length: 25\\
 \>\>broadcast: 192.150.187.255\\
 \>\}\\
 \\
 \noindent[edit interfaces interface rl0 vif rl0]\\
-XORP> \textbf{up}\\
+user@hostname\# \textbf{up}\\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{top}\\
+user@hostname\# \textbf{top}\\
 \noindent[edit]\\
-XORP>
+user@hostname\#
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -556,7 +556,7 @@ or modified but not yet been committed.
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{show}\\
+user@hostname\# \textbf{show}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -566,11 +566,11 @@ XORP> \textbf{show}\\
 \>\}\\
 \\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
+user@hostname\# \textbf{set vif rl0 address 192.150.187.108 prefix-length 24}\\
 OK\\
 \\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{show}\\
+user@hostname\# \textbf{show}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -616,7 +616,7 @@ For example, to configure a second vif on interface rl0:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{show}\\
+user@hostname\# \textbf{show}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -626,7 +626,7 @@ XORP> \textbf{show}\\
 \>\}\\
 \\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{create vif rl0b \{}\\
+user@hostname\# \textbf{create vif rl0b \{}\\
 \>\>>\> \textbf{address 10.0.0.1 \{}\\
 \>\>>\>\> \textbf{prefix-length 16}\\
 \>\>>\>\> \textbf{broadcast 10.0.255.255}\\
@@ -635,7 +635,7 @@ XORP> \textbf{create vif rl0b \{}\\
 \>\>>\> \textbf{disable false}\\
 \>\>>\> \textbf{\}}\\
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{show}\\
+user@hostname\# \textbf{show}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -671,7 +671,7 @@ been deleted but not yet been committed.
 \begin{alltt}
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
-XORP> \textbf{show interfaces interface rl0}\\
+user@hostname\# \textbf{show interfaces interface rl0}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -687,7 +687,7 @@ XORP> \textbf{show interfaces interface rl0}\\
 \>\}\\
 \\
 \noindent[edit]\\
-XORP> \textbf{delete interfaces interface rl0 vif rl0b}\\
+user@hostname\# \textbf{delete interfaces interface rl0 vif rl0b}\\
 Deleting:\\
 \>address 10.0.0.1 \{\\
 \>\>prefix-length: 16\\
@@ -696,7 +696,7 @@ Deleting:\\
 \\
 OK\\
 \noindent[edit]\\
-XORP> \textbf{show interfaces interface rl0}\\
+user@hostname\# \textbf{show interfaces interface rl0}\\
 \>description: "control interface"\\
 \>vif rl0 \{\\
 \>\>address 192.150.187.108 \{\\
@@ -725,7 +725,7 @@ XORP> \textbf{show interfaces interface rl0}\\
 \begin{alltt}
 \begin{tabbing}
 \noindent[edit interfaces interface rl0]\\
-XORP> \textbf{commit}\\
+user@hostname\# \textbf{commit}\\
 OK
 \end{tabbing}
 \end{alltt}
@@ -748,9 +748,9 @@ of them changes the configuration, the others will receive a warning:
 \begin{alltt}
 \begin{tabbing}
 \noindent[edit]\\
-XORP>\\
+user@hostname\# \\
 The configuration had been changed by user mjh\\
-XORP>
+user@hostname\#
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -770,17 +770,44 @@ configuration mode:
 \begin{alltt}
 \begin{tabbing}
 \noindent[edit]\\
-XORP> \textbf{exit}\\
+user@hostname\# \textbf{exit}\\
 ERROR: There are uncommitted changes\\
 Use "commit" to commit the changes, or "exit discard" to discard them\\
-XORP> \textbf{exit discard}\\
-Xorp>
+user@hostname\# \textbf{exit discard}\\
+user@hostname>
 \end{tabbing}
 \end{alltt}
 \end{minipage}
 }
 \vspace{0.1in}
 
+\section{Configuring xorpsh Behavior}
+\label{xorpsh:configuring-xorpsh-behavior}
+
+Currently there is very limited support for configuring the \xorpsh
+behavior. In the future there will be a more advanced configuration
+mechanism with a richer set of configuration options.
+
+\subsection{Configuring the xorpsh Prompt}
+
+The default operational and configuration mode prompts are
+\verb=user@hostname>= and \verb=user@hostname#= respectively.
+
+The operational and configuration mode prompts can be modified by the
+following environmental variables respectively:
+{\textbf XORP\_OPERATIONAL\_MODE\_PROMPT} and
+{\textbf XORP\_CONFIGURATION\_MODE\_PROMPT}.
+
+\begin{verbatim}
+user@hostname[10] env XORP_OPERATIONAL_MODE_PROMPT="foo " 
+                      XORP_CONFIGURATION_MODE_PROMPT="bar " ./xorpsh
+Welcome to XORP on hostname
+foo configure
+Entering configuration mode.
+There are no other users in configuration mode.
+[edit]
+bar 
+\end{verbatim}
 
 \section{Running xorpsh in Non-Interactive Mode}
 \label{xorpsh:non-interactive-mode}
@@ -829,7 +856,7 @@ import sys
 import pexpect
 
 child=pexpect.spawn ('xorpsh')
-child.expect('Xorp> ')
+child.expect('user@hostname> ')
 child.sendline('show host os | no-more')
 child.sendeof()
 while 1:

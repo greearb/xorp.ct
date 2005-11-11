@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.20 2005/06/01 00:58:04 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.21 2005/06/02 18:59:14 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -1060,7 +1060,7 @@ information about PIM bootstrap routers:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxxxxxxxx\=xx\=xx\=xxxxxxxxxxxx\=xxxxx\=xxx\=xxxxxxx\=\kill
-Xorp> \textbf{show pim bootstrap}\\
+user@hostname> \textbf{show pim bootstrap}\\
 Active zones:\\
 BSR             \>Pri\>\>LocalAddress    \>Pri\>\>State           \>Timeout\>\>SZTimeout\\
 10.4.0.1        \>\>1\>10.2.0.2          \>\>1\>Candidate          \>\>75
@@ -1128,7 +1128,7 @@ mechanism:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxx\=xxxx\=xxxx\=x\=xxx\=xxxxxxxxxxxx\=xxxxxxxxxxx\=xxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show pim bootstrap rps}\\
+user@hostname> \textbf{show pim bootstrap rps}\\
 Active RPs:\\
 RP              \>Pri \>Timeout \>\>\>GroupPrefix        \>BSR             \>CandRpAdvTimeout\\
 10.4.0.1        \>192     \>\>148 \>\>224.0.0.0/4        \>10.4.0.1
@@ -1193,7 +1193,7 @@ information about PIM network interfaces:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxx\=xxxxxxx\=xx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=\kill
-Xorp> \textbf{show pim interface}\\
+user@hostname> \textbf{show pim interface}\\
 Interface    \>State    \>Mode   \>V \>PIMstate \>Priority \>\>DRaddr          \>Neighbors\\
 dc1          \>UP       \>Sparse \>2 \>NotDR           \>\>1 \>10.3.0.2                \>\>1\\
 dc2          \>UP       \>Sparse \>2 \>DR              \>\>1 \>10.2.0.2                \>\>0\\
@@ -1239,7 +1239,7 @@ address information about PIM network interfaces:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show pim interface address}\\
+user@hostname> \textbf{show pim interface address}\\
 Interface    \>PrimaryAddr     \>DomainWideAddr  \>SecondaryAddr  \\
 dc1          \>10.3.0.1        \>10.3.0.1                       \\
 dc2          \>10.2.0.2        \>10.2.0.2                       \\
@@ -1276,7 +1276,7 @@ information about PIM multicast routing state:
 \begin{alltt}
 \begin{tabbing}
 xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show pim join}\\
+user@hostname> \textbf{show pim join}\\
 Group           \>\>Source          \>\>RP              \>Flags\\
 224.0.1.20      \>\>0.0.0.0         \>\>10.2.0.2        \>WC   \\
     \>Upstream interface (RP):   \>\>register\_vif\\
@@ -1439,7 +1439,7 @@ in the multicast forwarding engine:
 \begin{alltt}
 \begin{tabbing}
 xxxx\=xxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=x\=xxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show pim mfc}\\
+user@hostname> \textbf{show pim mfc}\\
 Group           \>\>Source          \>\>RP\\
 224.0.1.20      \>\>10.4.0.2        \>\>10.2.0.2\\
     \>Incoming interface :   \>\>register\_vif\\
@@ -1487,7 +1487,7 @@ by PIM:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxx\=xxxxxxxx\=xxxxxxxxx\=xxxxxxx\=xx\=xx\=x\=xxxx\=\kill
-Xorp> \textbf{show pim mrib}\\
+user@hostname> \textbf{show pim mrib}\\
 DestPrefix         \>NextHopRouter   \>VifName \>VifIndex \>MetricPref \>\>\>Metric\\
 10.2.0.0/24        \>10.2.0.2        \>dc2     \>1                 \>\>\>0      \>\>\>0\\
 10.3.0.0/24        \>10.3.0.1        \>dc1     \>0                 \>\>\>0      \>\>\>0\\
@@ -1532,7 +1532,7 @@ information about the PIM neighbor routers:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxx\=xx\=xxxxxxxxxxxxxxxx\=xx\=xxxxxxx\=xxxxx\=xxxx\=xxxxx\=\kill
-Xorp> \textbf{show pim neighbors}\\
+user@hostname> \textbf{show pim neighbors}\\
 Interface    \>DRpriority \>\>NeighborAddr    \>V \>Mode   \>Holdtime \>\>Timeout\\
 dc1                   \>\>1 \>10.3.0.2        \>2 \>Sparse      \>\>105      \>\>97
 \end{tabbing}
@@ -1574,7 +1574,7 @@ information about the Candidate RP Set:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxx\=xxxxxxxxxx\=xxxx\=xxxxx\=xxxx\=xxxx\=xxxx\=xxxxxxxxxxx\=xx\=\kill
-Xorp> \textbf{show pim rps}\\
+user@hostname> \textbf{show pim rps}\\
 RP              \>Type      \>Pri \>Holdtime \>\>Timeout \>\>ActiveGroups \>\>GroupPrefix\\
 10.4.0.1        \>bootstrap \>192      \>\>150     \>\>134            \>\>0 \>224.0.0.0/4\\
 10.2.0.2        \>bootstrap \>192      \>\>150     \>\>134            \>\>1 \>224.0.0.0/4
@@ -1618,7 +1618,7 @@ information about the PIM scope zones:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show pim scope}\\
+user@hostname> \textbf{show pim scope}\\
 GroupPrefix                                 \>Interface\\
 225.1.2.0/24                                \>dc1
 \end{tabbing}

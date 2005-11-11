@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.6 2005/04/07 03:51:22 pavlin Exp $
+% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.7 2005/04/11 21:21:13 pavlin Exp $
 %
 
 \chapter{Forwarding Engine}
@@ -261,7 +261,7 @@ information about MFEA IPv4 dataflow filters:
 \begin{alltt}
 \begin{tabbing}
 xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xxxxx\=xx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=xx\=\kill
-Xorp> \textbf{show mfea dataflow}\\
+user@hostname> \textbf{show mfea dataflow}\\
 Group                              \>\>\>\>Source\\
 224.0.1.20                         \>\>\>\>10.2.0.1\\
 \>Measured(Start|Packets|Bytes)\>Type\>Thresh(Interval|Packets|Bytes)\>\>Remain\\
@@ -288,7 +288,7 @@ information about MFEA IPv4 interfaces:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxx\=\kill
-Xorp> \textbf{show mfea interface}\\
+user@hostname> \textbf{show mfea interface}\\
 Interface \>State  \>Vif/PifIndex \>Addr       \>Flags\\
 dc0       \>UP     \>0/6          \>10.4.0.1   \>MULTICAST BROADCAST KERN\_UP\\
 dc2       \>UP     \>1/8          \>10.3.0.2   \>MULTICAST BROADCAST KERN\_UP\\
@@ -308,7 +308,7 @@ information about MFEA IPv4 interface addresses:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxx\kill
-Xorp> \textbf{show mfea interface address}\\
+user@hostname> \textbf{show mfea interface address}\\
 Interface  \>Addr          \>Subnet           \>Broadcast     \>P2Paddr\\
 dc0        \>10.4.0.1      \>10.4.0.0/24      \>10.4.0.255    \>0.0.0.0\\
 dc2        \>10.3.0.2      \>10.3.0.0/24      \>10.3.0.255    \>0.0.0.0\\

@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/igmp.tex,v 1.17 2005/06/01 09:45:50 pavlin Exp $
+% $XORP: xorp/docs/user_manual/igmp.tex,v 1.18 2005/06/02 18:59:14 pavlin Exp $
 %
 
 \chapter{IGMP and MLD}
@@ -314,7 +314,7 @@ information about IGMP group membership:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=xxxx\=xxxx\=\kill
-Xorp> \textbf{show igmp group}\\
+user@hostname> \textbf{show igmp group}\\
 Interface  \>Group         \>Source        \>LastReported\>Timeout\\
 dc0        \>224.0.0.2     \>0.0.0.0       \>10.4.0.1     \>\>161\\
 dc0        \>224.0.0.13    \>0.0.0.0       \>10.4.0.1     \>\>159\\
@@ -345,7 +345,7 @@ information about IGMP interfaces:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxx\=x\=xxxx\=xxxxxx\=xx\=xxxxx\=x\=\kill
-Xorp> \textbf{show igmp interface}\\
+user@hostname> \textbf{show igmp interface}\\
 Interface  \>State  \>Querier       \>Timeout\>\>\>Version\>\>Groups\\
 dc0        \>UP     \>10.4.0.1       \>\>None \>\>\>2          \>\>3\\
 dc2        \>UP     \>10.3.0.1      \>\>\>136   \>\>2          \>\>2\\
@@ -376,7 +376,7 @@ information about addresses of IGMP interfaces:
 \begin{alltt}
 \begin{tabbing}
 xxxxxxxxxxxxx\=xxxxxxxxxxxxxxxx\=xxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show igmp interface address}\\
+user@hostname> \textbf{show igmp interface address}\\
 Interface  \>PrimaryAddr   \>SecondaryAddr\\
 dc0        \>10.4.0.1\\
 dc2        \>10.3.0.2\\

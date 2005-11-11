@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.8 2005/04/07 03:09:12 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.9 2005/04/07 04:49:25 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -266,15 +266,15 @@ table ipv4 unicast static}:
 \begin{alltt}
 \begin{tabbing}
 xxxx\=xxxxxxxxxxxxxxxx\=\kill
-Xorp> \textbf{show route table ipv4 unicast static}\\
-Xorp> {\bf show route table ipv4 unicast static}\\
+user@hostname> \textbf{show route table ipv4 unicast static}\\
+user@hostname> {\bf show route table ipv4 unicast static}\\
 Network 192.168.0.0/24\\
 \>Nexthop := 192.150.187.1\\
 \>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0\\
 Network 192.168.1.0/24\\
 \>Nexthop := 192.150.187.2\\
 \>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0\\
-Xorp>
+user@hostname> 
 \end{tabbing}
 \end{alltt}
 \end{minipage}
