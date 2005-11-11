@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.178 2005/11/07 05:17:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.179 2005/11/11 11:06:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -492,6 +492,20 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 
 template <typename A>
 bool
+PeerOut<A>::set_authentication(OspfTypes::AreaID area, string method,
+			       string password)
+			       
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->set_authentication(method, password);
+}
+
+template <typename A>
+bool
 PeerOut<A>::get_neighbour_list(list<OspfTypes::NeighbourID>& neighbours) const
 {
     typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
@@ -549,6 +563,9 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, rid, neighbour_address,
 			     Neighbour<A>::_ticket++, get_linktype());
+	Auth& auth = n->get_auth_inbound();
+	auth.set_method(_auth_method);
+	auth.set_password(_auth_password);
 	_neighbours.push_back(n);
     } else {
 	XLOG_ERROR("Neighbour exists %s", cstring(*n));
@@ -659,7 +676,23 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	}
     }
 
-    // XXX - Authenticate packet here.
+    // Authenticate packet.
+    Neighbour<A> *n = find_neighbour(src, packet->get_router_id());
+    Auth *authptr;
+    Auth a;
+    if (0 == n) {
+	a.set_method(_auth_method);
+	a.set_password(_auth_password);
+	authptr = &a;
+    } else {
+	Auth& ref = n->get_auth_inbound();
+	authptr = &ref;
+    }
+    if (!authptr->verify(packet->get())) {
+	XLOG_TRACE(_ospf.trace()._input_errors, "Authentication failed: %s",
+		   authptr->get_verify_error().c_str());
+	return false;
+    }
 
     HelloPacket *hello;
     DataDescriptionPacket *dd;
@@ -1514,7 +1547,8 @@ Peer<A>::send_hello_packet()
     }
 
     _hello_packet.encode(pkt);
-
+    get_auth_outbound().generate(pkt);
+    
     SimpleTransmit<A> *transmit = 0;
 
     switch(get_linktype()) {
@@ -2427,6 +2461,21 @@ Peer<A>::get_router_dead_interval() const
 
 template <typename A>
 bool
+Peer<A>::set_authentication(string method, string password)
+{
+    get_auth_outbound().set_method(method);
+    get_auth_outbound().set_password(password);
+    get_auth_outbound().reset();
+
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	(*n)->set_authentication(method, password);
+
+    return true;
+}
+
+template <typename A>
+bool
 Peer<A>::set_rxmt_interval(uint32_t rxmt_interval)
 {
     _rxmt_interval = rxmt_interval;
@@ -2609,6 +2658,17 @@ Neighbour<A>::is_neighbour_DR_or_BDR()
 	return true;
 
     return false;
+}
+
+template <typename A>
+bool
+Neighbour<A>::set_authentication(string method, string password)
+{
+    get_auth_inbound().set_method(method);
+    get_auth_inbound().set_password(password);
+    get_auth_inbound().reset();
+
+    return true;
 }
 
 template <typename A>
@@ -2836,6 +2896,7 @@ Neighbour<A>::build_data_description_packet()
 	// compare against the constant LSA header length each time.
 	vector<uint8_t> pkt;
 	_data_description_packet.encode(pkt);
+	get_auth_outbound().generate(pkt);
 	if (pkt.size() + Lsa_header::length() >= _peer.get_frame_size())
 	    return;
     } while(last == false);
@@ -2859,6 +2920,7 @@ Neighbour<A>::send_data_description_packet()
     
     vector<uint8_t> pkt;
     _data_description_packet.encode(pkt);
+    get_auth_outbound().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -2919,6 +2981,7 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
     
     vector<uint8_t> pkt;
     lsrp.encode(pkt);
+    get_auth_outbound().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -2959,6 +3022,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
     
     vector<uint8_t> pkt;
     lsup.encode(pkt, _peer.get_inftransdelay());
+    get_auth_outbound().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -3006,6 +3070,7 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
     
     vector<uint8_t> pkt;
     lsap.encode(pkt);
+    get_auth_outbound().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -3947,6 +4012,7 @@ Neighbour<A>::send_lsa(Lsa::LsaRef lsar)
     
     vector<uint8_t> pkt;
     lsup.encode(pkt, _peer.get_inftransdelay());
+    get_auth_outbound().generate(pkt);
     
     SimpleTransmit<A> *transmit;
 
@@ -4001,6 +4067,9 @@ Neighbour<A>::change_state(State state)
     // If we are dropping down states tear down any higher level state.
     if (previous_state > state)
 	tear_down_state(previous_state);
+
+    if (Down == state)
+	get_auth_inbound().reset();
 }
 
 template <typename A>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.1 2005/11/11 11:06:12 atanu Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
@@ -44,12 +44,28 @@ class AuthBase {
     }
 
     /**
+     * Additional bytes that will be added to the payload.
+     */
+    virtual uint32_t additional_payload() const {
+	return 0;
+    }
+
+    void set_verify_error(string& error) {
+	_verify_error = error;
+    }
+
+    string get_verify_error() {
+	return _verify_error;
+    }
+
+    /**
      * Called to notify authentication system to reset.
      */
     virtual void reset() {}
 
 private:
     string _password;
+    string _verify_error;
 };
 
 class AuthNone : public AuthBase {
@@ -90,9 +106,15 @@ class Auth {
 	    return true;;
 	}
 
+	// Never allow _auth to be zero.
 	set_method("none");
 	
 	return false;
+    }
+
+    void set_password(string& password) {
+	XLOG_ASSERT(_auth);
+	_auth->set_password(password);
     }
 
     /**
@@ -109,6 +131,19 @@ class Auth {
     bool verify(vector<uint8_t>& pkt) {
 	XLOG_ASSERT(_auth);
 	return _auth->verify(pkt);
+    }
+
+    /**
+     * Additional bytes that will be added to the payload.
+     */
+    uint32_t additional_payload() const {
+	XLOG_ASSERT(_auth);
+	return _auth->additional_payload();
+    }
+
+    string get_verify_error() {
+	XLOG_ASSERT(_auth);
+	return _auth->get_verify_error();
     }
 
     /**

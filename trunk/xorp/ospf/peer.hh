@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.105 2005/11/06 02:40:22 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.106 2005/11/11 11:06:13 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -264,6 +264,12 @@ class PeerOut {
 				  uint32_t router_dead_interval);
 
     /**
+     * Set authentication parameters.
+     */
+    bool set_authentication(OspfTypes::AreaID area, string method,
+			    string password);
+
+    /**
      * Set the interface cost.
      */
     bool set_interface_cost(uint16_t interface_cost) {
@@ -367,6 +373,7 @@ class Peer {
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 	_rxmt_interval = 5;
+	_auth_method = "none";
     }
 
     ~Peer() {
@@ -430,12 +437,14 @@ class Peer {
     }
 
     /**
-     * The maximum size of an OSPF frame, the MTU minus the IP header.
+     * The maximum size of an OSPF frame, the MTU minus the IP
+     * header. Also include any bytes that the authentication scheme
+     * may use.
      *
      * @return maximum frame size.
      */
     uint16_t get_frame_size() const {
-	return _peerout.get_frame_size();
+	return _peerout.get_frame_size() - _auth_outbound.additional_payload();
     }
 
     /**
@@ -708,6 +717,11 @@ class Peer {
 	return _peerout.get_linktype();
     }
 
+    /**
+     * Return the authentication component.
+     */
+    Auth& get_auth_outbound() { return _auth_outbound; }
+
 #if	0
     /**
      * @return the options field that is placed in some of outgoing
@@ -787,6 +801,11 @@ class Peer {
     uint32_t get_router_dead_interval() const;
 
     /**
+     * Set authentication parameters.
+     */
+    bool set_authentication(string method, string password);
+
+    /**
      * Set RxmtInterval.
      */
     bool set_rxmt_interval(uint32_t rxmt_interval);
@@ -850,7 +869,9 @@ class Peer {
     const OspfTypes::AreaID _area_id;	// Area that is being represented.
     const OspfTypes::AreaType _area_type;// NORMAL or STUB or NSSA.
 
-    Auth _auth;				// Manage authentication.
+    Auth _auth_outbound;		// Authentication generation (outbound)
+    string _auth_method;		// Authentication method to use.
+    string _auth_password;		// Authentication password.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.
@@ -1048,6 +1069,21 @@ class Neighbour {
     State get_state() const { return _state; }
 
     /**
+     * Return the authentication component.
+     */
+    Auth& get_auth_inbound() { return _auth_inbound; }
+
+    /**
+     * Return the authentication component.
+     */
+    Auth& get_auth_outbound() { return _peer.get_auth_outbound(); }
+
+    /**
+     * Set authentication parameters.
+     */
+    bool set_authentication(string method, string password);
+
+    /**
      * @return true if this routers neighbour is the DR or BDR.
      */
     bool is_neighbour_DR_or_BDR() const;
@@ -1165,6 +1201,8 @@ class Neighbour {
     const A _neighbour_address;		// Neighbour's address.
     const OspfTypes::NeighbourID _neighbourid;	// The neighbours ID.
     const OspfTypes::LinkType _linktype;	// Type of this link.
+
+    Auth _auth_inbound;			// Authentication verification.
 
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received
