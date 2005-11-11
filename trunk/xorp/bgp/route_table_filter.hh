@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.15 2005/04/28 02:35:48 pavlin Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.16 2005/10/28 09:13:33 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -56,6 +56,23 @@ protected:
     virtual void drop_message(const InternalMessage<A> *rtmsg, 
 			      bool &modified) const ;
 private:
+};
+
+
+/**
+ * @short filters out aggregate routes depending whether on IBGP or EBGP
+ * outbound branch.
+ */
+
+template<class A>
+class AggregationFilter : public BGPRouteFilter<A> {
+public:
+    AggregationFilter(bool is_ibgp);
+    const InternalMessage<A>* 
+       filter(const InternalMessage<A> *rtmsg, 
+	      bool &modified) const ;
+private:
+    bool _is_ibgp;
 };
 
 
@@ -272,6 +289,7 @@ class FilterVersion {
 public:
     FilterVersion(NextHopResolver<A>& next_hop_resolver);
     ~FilterVersion();
+    int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
     int add_AS_prepend_filter(const AsNum &asn);
     int add_nexthop_rewrite_filter(const A& nexthop);
@@ -349,6 +367,7 @@ public:
     /* mechanisms to implement flow control in the output plumbing */
     bool get_next_message(BGPRouteTable<A> *next_table);
 
+    int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
     int add_AS_prepend_filter(const AsNum &asn);
     int add_nexthop_rewrite_filter(const A& nexthop);

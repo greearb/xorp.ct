@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.33 2005/08/22 22:50:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.34 2005/10/28 09:13:33 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,6 +67,49 @@ BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
 	new_route.set_is_winner(route.igp_metric());
     new_route.set_nexthop_resolved(route.nexthop_resolved());
 }				   
+
+/*************************************************************************/
+
+template<class A>
+AggregationFilter<A>::AggregationFilter(bool is_ibgp) 
+    : _is_ibgp(is_ibgp)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+AggregationFilter<A>::filter(const InternalMessage<A> *rtmsg, 
+			  bool &modified) const 
+{
+    uint8_t aggr_tag = rtmsg->route()->aggr_prefix_len();
+
+    if (aggr_tag == SR_AGGR_IGNORE) {
+	// Route was not even marked for aggregation
+	return rtmsg;
+    }
+
+    // Has our AggregationTable properly marked the route?
+    XLOG_ASSERT(aggr_tag >= SR_AGGR_EBGP_AGGREGATE);
+
+    if (_is_ibgp) {
+	// Peering is IBGP
+	if (aggr_tag == SR_AGGR_IBGP_ONLY) {
+	    return rtmsg;
+	} else {
+	    drop_message(rtmsg, modified);
+	    return NULL;
+	}
+    } else {
+	// Peering is EBGP
+	if (aggr_tag != SR_AGGR_IBGP_ONLY) {
+	    // EBGP_AGGREGATE | EBGP_NOT_AGGREGATED | EBGP_WAS_AGGREGATED
+	    return rtmsg;
+	} else {
+	    drop_message(rtmsg, modified);
+	    return NULL;
+	}
+    }
+}
 
 /*************************************************************************/
 
@@ -536,6 +579,16 @@ FilterVersion<A>::~FilterVersion() {
 
 template<class A>
 int
+FilterVersion<A>::add_aggregation_filter(bool is_ibgp)
+{
+    AggregationFilter<A>* aggregation_filter;
+    aggregation_filter = new AggregationFilter<A>(is_ibgp);
+    _filters.push_back(aggregation_filter);
+    return 0;
+}
+
+template<class A>
+int
 FilterVersion<A>::add_simple_AS_filter(const AsNum& as_num)
 {
     SimpleASFilter<A>* AS_filter;
@@ -928,6 +981,14 @@ FilterTable<A>::str() const
     return s;
 }
 
+
+template<class A>
+int
+FilterTable<A>::add_aggregation_filter(bool is_ibgp)
+{
+    _current_filter->add_aggregation_filter(is_ibgp);
+    return 0;
+}
 
 template<class A>
 int

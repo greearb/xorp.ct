@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.17 2005/03/25 02:52:48 pavlin Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.18 2005/07/20 01:29:22 abittau Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -27,12 +27,22 @@
 #include "policy/backend/policytags.hh"
 #include "policy/backend/policy_filter.hh"
 
-#define SRF_IN_USE 0x0001
-#define SRF_WINNER 0x0002
-#define SRF_FILTERED 0x0004
-#define SRF_DELETED 0x0008
-#define SRF_NH_RESOLVED 0x0010
-#define SRF_REFCOUNT 0xffff0000
+#define SRF_IN_USE		0x00000001
+#define SRF_WINNER		0x00000002
+#define SRF_FILTERED		0x00000004
+#define SRF_DELETED		0x00000008
+#define SRF_NH_RESOLVED		0x00000010
+#define SRF_AGGR_BRIEF_MODE	0x00000080
+#define SRF_AGGR_PREFLEN_MASK	0x0000ff00
+#define SRF_REFCOUNT		0xffff0000
+
+// Aggregation flags
+// XXX Marko any better ideas where to put those?
+#define SR_AGGR_IGNORE			0xff
+#define SR_AGGR_IBGP_ONLY		0xe0
+#define SR_AGGR_EBGP_AGGREGATE		0xd0
+#define SR_AGGR_EBGP_NOT_AGGREGATED	0xd1
+#define SR_AGGR_EBGP_WAS_AGGREGATED	0xd2
 
 //Defining paranoid emables some additional checks to ensure we don't
 //try to reuse deleted data, or follow an obsolete parent_route
@@ -299,6 +309,46 @@ public:
     const RefPf& policyfilter(uint32_t i) const;
     void set_policyfilter(uint32_t i, const RefPf& pf) const;
     
+    /**
+     * Set the "brief" mode flag on an candidate for aggregation.
+     */
+    void set_aggr_brief_mode() {
+	_flags |= SRF_AGGR_BRIEF_MODE;
+    }
+
+    /**
+     * Clear the "brief" mode flag on an candidate for aggregation.
+     */
+    void clear_aggr_brief_mode() {
+	_flags &= ~SRF_AGGR_BRIEF_MODE;
+    }
+
+    /**
+     * Read the "brief" aggregation mode flag.
+     */
+    const bool aggr_brief_mode() const {
+	return (_flags & SRF_AGGR_BRIEF_MODE);
+    }
+
+    /**
+     * Set the target prefix length on an candidate for aggregation.
+     * The field is also used for storing aggregation markers. 
+     *
+     * @param preflen prefix length of the requested aggregate route.
+     */
+    void set_aggr_prefix_len(uint32_t preflen) {
+	_flags = (_flags & ~SRF_AGGR_PREFLEN_MASK) | 
+		 ((preflen << 8) & SRF_AGGR_PREFLEN_MASK);
+    }
+
+    /**
+     * Read the aggregation prefix length marker.
+     * The field is also used for storing aggregation markers.
+     */
+    const uint32_t aggr_prefix_len() const {
+	return (_flags & SRF_AGGR_PREFLEN_MASK) >> 8;
+    }
+
 protected:
     /**
      * @short protected SubnetRoute destructor.

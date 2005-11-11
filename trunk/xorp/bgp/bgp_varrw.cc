@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.20 2005/10/02 22:21:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.21 2005/11/09 02:46:35 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -85,6 +85,9 @@ BGPVarRW<A>::attach_route(const InternalMessage<A>& rtmsg, bool no_modify)
     _no_modify = no_modify;
     _modified = false;
     _route_modify = false;
+
+    _aggr_brief_mode = rtmsg.route()->aggr_brief_mode();
+    _aggr_prefix_len = rtmsg.route()->aggr_prefix_len();
 
     for (int i = 0; i < 3; i++) {
         if (_wrote_pfilter[i])
@@ -246,6 +249,15 @@ BGPVarRW<A>::read_med_remove()
 	return new ElemBool(false);	// XXX: default is don't remove the MED
     else
 	return NULL;
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_aggr_pref_len()
+{
+    printf("XXX this should never happen: read aggregate_prefix_len: %d\n",
+	   _aggr_prefix_len);
+    return new ElemU32(_aggr_prefix_len);
 }
 
 template <class A>
@@ -439,6 +451,24 @@ BGPVarRW<A>::write_med_remove(const Element& e)
 
 template <class A>
 void
+BGPVarRW<A>::write_aggr_pref_len(const Element& e)
+{
+printf("XXX MARKO BGPVarRW<A>::write_aggr_pref_len\n");
+    // We should not set the aggr_pref_len if already set by someone else!
+    if (_aggr_prefix_len != SR_AGGR_IGNORE)
+	return;
+
+    const ElemU32& u32 = dynamic_cast<const ElemU32&>(e);
+    if (u32.val() <= 128) {
+	// Only accept valid prefix_len values, since out of range values
+	// might get interpreted later as special markers
+	_aggr_prefix_len = u32.val();
+	_route_modify = true;
+    }
+}
+
+template <class A>
+void
 BGPVarRW<A>::write_localpref(const Element& e)
 {
     _route_modify = true;
@@ -542,6 +572,11 @@ BGPVarRW<A>::end_write()
 	new_route->set_is_winner(old_route->igp_metric());
     new_route->set_in_use(old_route->in_use());
     new_route->set_nexthop_resolved(old_route->nexthop_resolved());
+    new_route->set_aggr_prefix_len(_aggr_prefix_len);
+    if (_aggr_brief_mode)
+	new_route->set_aggr_brief_mode();
+    else
+	new_route->clear_aggr_brief_mode();
 
     _filtered_rtmsg = new InternalMessage<A>(new_route,
 					     _orig_rtmsg->origin_peer(),
@@ -630,6 +665,10 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 
     init_rw(BGPVarRW<A>::VAR_MED_REMOVE, 
 	    &BGPVarRW<A>::read_med_remove, &BGPVarRW<A>::write_med_remove);
+
+    init_rw(BGPVarRW<A>::VAR_AGGREGATE_PREFIX_LEN, 
+	    &BGPVarRW<A>::read_aggr_pref_len,
+	    &BGPVarRW<A>::write_aggr_pref_len);
 }
 
 template <class A>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.17 2005/07/20 01:29:22 abittau Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.18 2005/07/22 01:20:11 abittau Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -71,6 +71,12 @@ SubnetRoute<A>::SubnetRoute(const IPNet<A> &n,
     //not used as this is always safe, if somewhat inefficient.
     _flags |= SRF_IN_USE;
 
+    // we must set the aggregate_prefix_len to SR_AGGRLEN_IGNORE to
+    // indicate that the route has not been (yet) marked for aggregation
+    // the statement bellow is equivalent to
+    // this->set_aggr_prefix_len(SR_AGGRLEN_IGNORE)
+    _flags |= SRF_AGGR_PREFLEN_MASK;
+
     if (_parent_route) {
 	_parent_route->bump_refcount(1);
     }
@@ -95,6 +101,12 @@ SubnetRoute<A>::SubnetRoute(const IPNet<A> &n,
     //should default to true if we don't know for sure that a route is
     //not used as this is always safe, if somewhat inefficient.
     _flags |= SRF_IN_USE;
+
+    // we must set the aggregate_prefix_len to SR_AGGRLEN_IGNORE to
+    // indicate that the route has not been (yet) marked for aggregation
+    // the statement bellow is equivalent to
+    // this->set_aggr_prefix_len(SR_AGGRLEN_IGNORE)
+    _flags |= SRF_AGGR_PREFLEN_MASK;
 
     if (parent_route) {
 	_parent_route->bump_refcount(1);

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.13 2005/10/02 22:21:48 abittau Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.14 2005/11/09 02:46:35 pavlin Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -46,6 +46,7 @@ public:
         VAR_COMMUNITY,
         VAR_MED,
         VAR_MED_REMOVE,
+        VAR_AGGREGATE_PREFIX_LEN,
 
 	VAR_BGPMAX // must be last
     };
@@ -125,6 +126,8 @@ public:
     Element* read_med();
     Element* read_med_remove();
 
+    Element* read_aggr_pref_len();
+
     void write_filter_im(const Element& e);
     void write_filter_sm(const Element& e);
     void write_filter_ex(const Element& e);
@@ -134,6 +137,8 @@ public:
     void write_nexthop6(const Element& e);
     void write_aspath(const Element& e);
     void write_origin(const Element& e);
+
+    void write_aggr_pref_len(const Element& e);
 
     void write_localpref(const Element& e);
     void write_community(const Element& e);
@@ -159,6 +164,11 @@ private:
     RefPf			_pfilter[3];
     bool			_wrote_pfilter[3];
     bool			_route_modify;
+
+    // Aggregation -> we cannot write those directly into the subnet
+    // route so must provide local volatile copies to be operated on
+    uint32_t			_aggr_prefix_len;
+    bool			_aggr_brief_mode;
 
     // not impl
     BGPVarRW(const BGPVarRW&);
