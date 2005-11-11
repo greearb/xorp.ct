@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.80 2005/11/10 11:42:47 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.81 2005/11/11 01:29:19 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -148,8 +148,10 @@ class AreaRouter : Subsystem {
 
     /**
      * Given an AS-External-LSA generate a Type-7 LSA.
+     *
+     * @param indb if true the Type-7-LSA is already in the database.
      */
-    Lsa::LsaRef external_generate_type7(Lsa::LsaRef lsar);
+    Lsa::LsaRef external_generate_type7(Lsa::LsaRef lsar, bool& indb);
 
     /**
      * Given a Type-7 LSA generate an AS-External-LSA.

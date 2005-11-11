@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.142 2005/11/11 07:52:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.143 2005/11/11 16:33:11 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -685,7 +685,7 @@ AreaRouter<IPv6>::external_copy_net_nexthop(IPv6,
 
 template <typename A>
 Lsa::LsaRef
-AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar)
+AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar, bool& indb)
 {
     ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
     XLOG_ASSERT(aselsa);
@@ -724,11 +724,15 @@ AreaRouter<A>::external_generate_type7(Lsa::LsaRef lsar)
 
     type7->encode();
 
+    indb = true;
+
     // If this LSA already exists in the database just return it.
     size_t index;
     if (find_lsa(t7, index)) {
 	return _db[index];
     }
+
+    indb = false;
 
     return t7;
 }
@@ -788,8 +792,12 @@ AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
     case OspfTypes::STUB:
 	return;
 	break;
-    case OspfTypes::NSSA:
-	lsar = external_generate_type7(lsar);
+    case OspfTypes::NSSA: {
+	bool indb;
+	lsar = external_generate_type7(lsar, indb);
+	if (indb)
+	    return;
+    }
 	break;
     }
 
@@ -826,10 +834,13 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
     case OspfTypes::STUB:
 	return;
 	break;
-    case OspfTypes::NSSA:
-	lsar = external_generate_type7(lsar);
+    case OspfTypes::NSSA: {
+	bool indb;
+	lsar = external_generate_type7(lsar, indb);
+	XLOG_ASSERT(indb);
 	_ospf.get_eventloop().current_time(now);
 	lsar->update_age_and_seqno(now);
+    }
 	break;
     }
 
@@ -856,9 +867,12 @@ AreaRouter<A>::external_withdraw(Lsa::LsaRef lsar)
     case OspfTypes::STUB:
 	return;
 	break;
-    case OspfTypes::NSSA:
-	lsar = external_generate_type7(lsar);
+    case OspfTypes::NSSA: {
+	bool indb;
+	lsar = external_generate_type7(lsar, indb);
+	XLOG_ASSERT(indb);
 	lsar->set_maxage();
+    }
 	break;
     }
 
