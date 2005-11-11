@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.20 2005/07/15 07:05:29 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.22 2005/08/18 15:48:42 bms Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -339,12 +339,13 @@ public:
      * data to.
      * @param is_network if true, this client is associated with a
      * network connection.
+     * @param startup_cli_prompt the startup CLI prompt.
      * @param error_msg the error message (if error).
      * @return a pointer to the CLI client (@ref CliClient) with enabled
      * CLI access on success, otherwise NULL.
      */
     CliClient *add_client(XorpFd input_fd, XorpFd output_fd, bool is_network,
-			  string& error_msg);
+			  const string& startup_cli_prompt, string& error_msg);
 
     /**
      * Delete a CLI client (@ref CliClient) from the CLI.
@@ -437,7 +438,9 @@ private:
     XorpFd	sock_serv_open();
     int		sock_serv_close();
     CliClient	*add_connection(XorpFd input_fd, XorpFd output_fd,
-				bool is_network, string& error_msg);
+				bool is_network,
+				const string& startup_cli_prompt,
+				string& error_msg);
     int		delete_connection(CliClient *cli_client, string& error_msg);
     void	accept_connection(XorpFd fd, IoEventType type);
     
@@ -448,6 +451,7 @@ private:
 					//   listen on for new connections.
     list<CliClient *>	_client_list;	// The list with the CLI clients
     uint32_t		_next_session_id; // Used to assign unique session IDs.
+    string		_startup_cli_prompt; // The CLI prompt on startup
     
     CliCommand		_cli_command_root; // The root of the CLI commands
     

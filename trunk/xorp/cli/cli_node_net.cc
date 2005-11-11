@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.43 2005/09/01 02:31:23 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.44 2005/10/12 01:25:31 bms Exp $"
 
 
 //
@@ -148,7 +148,8 @@ CliNode::accept_connection(XorpFd fd, IoEventType type)
     XorpFd client_socket = comm_sock_accept(fd);
     
     if (client_socket.is_valid()) {
-	if (add_connection(client_socket, client_socket, true, error_msg)
+	if (add_connection(client_socket, client_socket, true,
+			   _startup_cli_prompt, error_msg)
 	    == NULL) {
 	    XLOG_ERROR("Cannot accept CLI connection: %s", error_msg.c_str());
 	}
@@ -157,7 +158,7 @@ CliNode::accept_connection(XorpFd fd, IoEventType type)
 
 CliClient *
 CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
-			string& error_msg)
+			const string& startup_cli_prompt, string& error_msg)
 {
     string dummy_error_msg;
     CliClient *cli_client = NULL;
@@ -166,7 +167,7 @@ CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
 	      "family = %d\n",
 	      input_fd.str().c_str(), output_fd.str().c_str(), family());
     
-    cli_client = new CliClient(*this, input_fd, output_fd);
+    cli_client = new CliClient(*this, input_fd, output_fd, startup_cli_prompt);
     cli_client->set_network_client(is_network);
     _client_list.push_back(cli_client);
 

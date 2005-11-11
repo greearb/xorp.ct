@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.42 2005/10/22 01:44:34 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.43 2005/10/29 17:42:19 pavlin Exp $"
 
 
 //
@@ -62,7 +62,8 @@
 
 
 // TODO: use a parameter to define the buffer size
-CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd)
+CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd,
+		     const string& startup_cli_prompt)
     : _cli_node(init_cli_node),
       _input_fd(input_fd),
       _output_fd(output_fd),
@@ -96,7 +97,7 @@ CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd)
     _executed_cli_command = NULL;
 
     set_current_cli_command(_cli_node.cli_command_root());
-    set_current_cli_prompt(current_cli_command()->cd_prompt());
+    set_current_cli_prompt(startup_cli_prompt);
     _buff_curpos = 0;
     
     _is_pipe_mode = false;

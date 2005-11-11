@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.21 2005/07/27 23:32:52 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.23 2005/08/18 15:48:42 bms Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -66,8 +66,10 @@ public:
      * data from.
      * @param output_fd the file descriptor for the CLI client to write
      * data to.
+     * @param startup_cli_prompt the startup CLI prompt.
      */
-    CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd);
+    CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd,
+	      const string& startup_cli_prompt);
 
     /**
      * Destructor
