@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.21 2005/11/09 02:46:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.22 2005/11/11 15:23:28 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -453,7 +453,6 @@ template <class A>
 void
 BGPVarRW<A>::write_aggr_pref_len(const Element& e)
 {
-printf("XXX MARKO BGPVarRW<A>::write_aggr_pref_len\n");
     // We should not set the aggr_pref_len if already set by someone else!
     if (_aggr_prefix_len != SR_AGGR_IGNORE)
 	return;
