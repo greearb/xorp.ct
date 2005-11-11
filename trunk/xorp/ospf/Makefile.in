@@ -124,7 +124,7 @@ test_routing_SOURCES = test_common.hh test_routing.cc
 test_routing_table_SOURCES = test_routing_table.cc
 
 # -- Library Sources
-libospf_la_SOURCES = area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc
+libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
@@ -140,9 +140,10 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libospf_la_LDFLAGS =
 libospf_la_LIBADD =
-am_libospf_la_OBJECTS = area_router.lo external.lo fletcher_checksum.lo \
-	lsa.lo ospf.lo packet.lo peer_manager.lo peer.lo \
-	policy_varrw.lo routing_table.lo xrl_io.lo xrl_target.lo
+am_libospf_la_OBJECTS = auth.lo area_router.lo external.lo \
+	fletcher_checksum.lo lsa.lo ospf.lo packet.lo peer_manager.lo \
+	peer.lo policy_varrw.lo routing_table.lo xrl_io.lo \
+	xrl_target.lo
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
@@ -304,7 +305,8 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/area_router.Plo $(DEPDIR)/external.Plo \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/area_router.Plo $(DEPDIR)/auth.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/external.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/fletcher_checksum.Plo $(DEPDIR)/lsa.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/ospf.Plo $(DEPDIR)/packet.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/peer.Plo $(DEPDIR)/peer_manager.Plo \
@@ -426,6 +428,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/area_router.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/auth.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/external.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/fletcher_checksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/lsa.Plo@am__quote@

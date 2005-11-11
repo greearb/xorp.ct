@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.20 2005/10/17 22:53:37 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.21 2005/11/10 21:09:09 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -65,7 +65,8 @@ test_routing_SOURCES		+= test_routing.cc
 test_routing_table_SOURCES	 = test_routing_table.cc
 
 # -- Library Sources
-libospf_la_SOURCES  = area_router.hh
+libospf_la_SOURCES  = auth.hh
+libospf_la_SOURCES  += area_router.hh
 libospf_la_SOURCES  += exceptions.hh
 libospf_la_SOURCES  += debug_io.hh
 libospf_la_SOURCES  += delay_queue.hh
@@ -82,6 +83,7 @@ libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 libospf_la_SOURCES  += vertex.hh
 
+libospf_la_SOURCES  += auth.cc
 libospf_la_SOURCES  += area_router.cc
 libospf_la_SOURCES  += external.cc
 libospf_la_SOURCES  += fletcher_checksum.cc
