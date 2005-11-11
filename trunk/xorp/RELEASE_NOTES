@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.86 2005/10/12 09:39:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.87 2005/10/29 20:42:04 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -117,6 +117,14 @@ Release 1.2 (2005/??/??)
 
     - Modification to the "show" command output: in configuration mode
       all deleted (and uncommitted) entries are prefixed with "-".
+
+    - Modification of the default operational and configuration mode
+      prompts to "user@hostname> " and "user@hostname# " respectively.
+
+    - Addition of support to modify the operational and configuration
+      mode prompts by environmental variables
+      XORP_OPERATIONAL_MODE_PROMPT and XORP_CONFIGURATION_MODE_PROMPT
+      respectively.
 
   POLICY:
     - 
