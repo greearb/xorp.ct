@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_private.hh,v 1.5 2005/02/27 20:46:55 pavlin Exp $
+// $XORP: xorp/cli/cli_private.hh,v 1.6 2005/03/25 02:52:56 pavlin Exp $
 
 
 #ifndef __CLI_CLI_PRIVATE_HH__
@@ -31,7 +31,7 @@
 
 #define XORP_CLI_WELCOME "Welcome to XORP on "
 #define XORP_CLI_PROMPT  "Xorp> "
-#define XORP_CLI_PROMPT_ENABLE  "XORP> "
+#define XORP_CLI_PROMPT_ENABLE  "XORP# "
 
 #ifndef CHAR_TO_CTRL
 #define CHAR_TO_CTRL(c) ((c) & 0x1f)
