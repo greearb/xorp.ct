@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.63 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.64 2005/11/10 23:55:40 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -95,7 +95,7 @@ void
 TemplateTreeNode::add_cmd(const string& cmd)
     throw (ParseError)
 {
-    string errmsg;
+    string error_msg;
     BaseCommand* command;
 
     if (cmd == "%modinfo") {
@@ -130,10 +130,10 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else if (cmd == "%read-only") {
 	// XXX: only leaf nodes should have %read-only command
 	if (! is_leaf_value()) {
-	    errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
-	    errmsg += "This command only applies to leaf nodes that have ";
-	    errmsg += "values.\n";
-	    xorp_throw(ParseError, errmsg);
+	    error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+	    error_msg += "This command only applies to leaf nodes that have ";
+	    error_msg += "values.\n";
+	    xorp_throw(ParseError, error_msg);
 	}
 	_is_read_only = true;
 	_is_permanent = true;	// XXX: read-only also implies permanent node
@@ -156,11 +156,11 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	if (cmd == "%set") {
 	    // XXX: only leaf nodes should have %set command
 	    if (! is_leaf_value()) {
-		errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
-		errmsg += "This command only applies to leaf nodes that have ";
-		errmsg += "values and only if the value is allowed to be ";
-		errmsg += "changed.\n";
-		xorp_throw(ParseError, errmsg);
+		error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+		error_msg += "This command only applies to leaf nodes that ";
+		error_msg += "have values and only if the value is allowed ";
+		error_msg += "to be changed.\n";
+		xorp_throw(ParseError, error_msg);
 	    }
 	}
 
@@ -177,12 +177,12 @@ TemplateTreeNode::add_cmd(const string& cmd)
     } else if (cmd == "%mandatory") {
 	// Nothing to do
     } else {
-	errmsg = c_format("Invalid command \"%s\".\n", cmd.c_str());
-	errmsg += "Valid commands are %create, %delete, %set, %unset, %get, ";
-	errmsg += "%default, %modinfo, %activate, %update, %allow, ";
-	errmsg += "%allow-range, %mandatory, %deprecated, %read-only, ";
-	errmsg += "%permanent, %order\n";
-	xorp_throw(ParseError, errmsg);
+	error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
+	error_msg += "Valid commands are %create, %delete, %set, %unset, ";
+	error_msg += "%get, %default, %modinfo, %activate, %update, %allow, ";
+	error_msg += "%allow-range, %mandatory, %deprecated, %read-only, ";
+	error_msg += "%permanent, %order\n";
+	xorp_throw(ParseError, error_msg);
     }
 }
 
@@ -792,7 +792,7 @@ TemplateTreeNode::find_first_deprecated_ancestor() const
 
 #if 0
 bool
-TemplateTreeNode::check_template_tree(string& errmsg) const
+TemplateTreeNode::check_template_tree(string& error_msg) const
 {
     //
     // First check this node, then check recursively all children nodes
@@ -806,7 +806,7 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
 	const Command* command;
 	command = dynamic_cast<Command*>(iter1->second);
 	if (command) {
-	    if (! command->check_referred_variables(errmsg))
+	    if (! command->check_referred_variables(error_msg))
 		return false;
 	}
     }
@@ -817,7 +817,7 @@ TemplateTreeNode::check_template_tree(string& errmsg) const
     list<TemplateTreeNode*>::const_iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
 	const TemplateTreeNode* ttn = *iter2;
-	if (ttn->check_template_tree(errmsg) != true)
+	if (ttn->check_template_tree(error_msg) != true)
 	    return false;
     }
 
@@ -967,17 +967,15 @@ TextTemplate::TextTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad Text type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad Text type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);
@@ -1007,17 +1005,15 @@ ArithTemplate::ArithTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad arith type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad arith type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);
@@ -1046,36 +1042,34 @@ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
 			   const string& initializer) throw (ParseError)
     : TemplateTreeNode(template_tree, parent, path, varname)
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
     string s = strip_quotes(initializer);
-    string errmsg;
-    if (! type_match(s, errmsg)) {
-	string err = "Bad UInt type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(s, error_msg)) {
+	error_msg = c_format("Bad UInt type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
     _default = atoi(s.c_str());
     set_has_default();
 }
 
 bool
-UIntTemplate::type_match(const string& orig, string& errmsg) const
+UIntTemplate::type_match(const string& orig, string& error_msg) const
 {
     string s = strip_quotes(orig);
 
     for (size_t i = 0; i < s.length(); i++)
 	if (s[i] < '0' || s[i] > '9') {
 	    if (s[i]=='-') {
-		errmsg = "Value cannot be negative.";
+		error_msg = "value cannot be negative";
 	    } else if (s[i]=='.') {
-		errmsg = "Value must be an integer.";
+		error_msg = "value must be an integer";
 	    } else {
-		errmsg = "Value must be numeric.";
+		error_msg = "value must be numeric";
 	    }
 	    return false;
 	}
@@ -1100,15 +1094,19 @@ UIntRangeTemplate::UIntRangeTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new U32Range(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad U32Range type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new U32Range(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad U32Range type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 UIntRangeTemplate::~UIntRangeTemplate()
@@ -1127,12 +1125,12 @@ UIntRangeTemplate::default_str() const
 }
 
 bool
-UIntRangeTemplate::type_match(const string& s, string& errmsg) const
+UIntRangeTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be a valid U32 range.";
+	error_msg = "value must be a valid range of unsigned 32-bit integers";
 	return false;
     }
 
@@ -1140,7 +1138,7 @@ UIntRangeTemplate::type_match(const string& s, string& errmsg) const
 	U32Range* u32range = new U32Range(tmp.c_str());
 	delete u32range;
     } catch (InvalidString) {
-	errmsg = "Value must be a valid U32 range.";
+	error_msg = "value must be a valid range of unsigned 32-bit integers";
 	return false;
     }
     return true;
@@ -1157,31 +1155,29 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
 			 const string& initializer) throw (ParseError)
     : TemplateTreeNode(template_tree, parent, path, varname)
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
     string s = strip_quotes(initializer);
-    string errmsg;
-    if (! type_match(s, errmsg)) {
-	string err = "Bad Int type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(s, error_msg)) {
+	error_msg = c_format("Bad Int type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
     _default = atoi(s.c_str());
     set_has_default();
 }
 
 bool
-IntTemplate::type_match(const string& orig, string& errmsg) const
+IntTemplate::type_match(const string& orig, string& error_msg) const
 {
     string s = strip_quotes(orig);
     size_t start = 0;
     if (s[0] == '-') {
 	if (s.length() == 1) {
-	    errmsg = "Value must be an integer.";
+	    error_msg = "value must be an integer";
 	    return false;
 	}
 	start = 1;
@@ -1189,9 +1185,9 @@ IntTemplate::type_match(const string& orig, string& errmsg) const
     for (size_t i = start; i < s.length(); i++)
 	if (s[i] < '0' || s[i] > '9') {
 	    if (s[i]=='.') {
-		errmsg = "Value must be an integer.";
+		error_msg = "value must be an integer";
 	    } else {
-		errmsg = "Value must be numeric.";
+		error_msg = "value must be numeric";
 	    }	    
 	    return false;
 	}
@@ -1215,17 +1211,15 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 			   const string& initializer) throw (ParseError)
     : TemplateTreeNode(template_tree, parent, path, varname)
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
     
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad Bool type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad Bool type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
     if (initializer == string("false"))
 	_default = false;
@@ -1235,13 +1229,13 @@ BoolTemplate::BoolTemplate(TemplateTree& template_tree,
 }
 
 bool
-BoolTemplate::type_match(const string& s, string& errmsg) const
+BoolTemplate::type_match(const string& s, string& error_msg) const
 {
     if (s == "true")
 	return true;
     else if (s == "false")
 	return true;
-    errmsg = "Value must be \"true\" or \"false\".";
+    error_msg = "value must be \"true\" or \"false\"";
     return false;
 }
 
@@ -1266,15 +1260,19 @@ IPv4Template::IPv4Template(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv4(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv4 type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv4(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv4 type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv4Template::~IPv4Template()
@@ -1293,12 +1291,12 @@ IPv4Template::default_str() const
 }
 
 bool
-IPv4Template::type_match(const string& s, string& errmsg) const
+IPv4Template::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be an IP address in dotted decimal form.";
+	error_msg = "value must be an IP address in dotted decimal form";
 	return false;
     }
 
@@ -1306,7 +1304,7 @@ IPv4Template::type_match(const string& s, string& errmsg) const
 	IPv4* ipv4 = new IPv4(tmp.c_str());
 	delete ipv4;
     } catch (InvalidString) {
-	errmsg = "Value must be an IP address in dotted decimal form.";
+	error_msg = "value must be an IP address in dotted decimal form";
 	return false;
     }
     return true;
@@ -1324,19 +1322,23 @@ IPv4NetTemplate::IPv4NetTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv4Net(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv4Net type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	} catch (InvalidNetmaskLength) {
-	    string err = "Illegal IPv4 prefix length in subnet: " 
-		+ initializer; 
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv4Net(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv4Net type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
+    } catch (InvalidNetmaskLength) {
+	error_msg = c_format("Illegal IPv4 prefix length in subnet \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv4NetTemplate::~IPv4NetTemplate()
@@ -1355,12 +1357,12 @@ IPv4NetTemplate::default_str() const
 }
 
 bool
-IPv4NetTemplate::type_match(const string& s, string& errmsg) const
+IPv4NetTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be a subnet in address/prefix-length form.";
+	error_msg = "value must be a subnet in address/prefix-length form";
 	return false;
     }
 
@@ -1368,11 +1370,12 @@ IPv4NetTemplate::type_match(const string& s, string& errmsg) const
 	IPv4Net* ipv4net = new IPv4Net(tmp.c_str());
 	delete ipv4net;
     } catch (InvalidString) {
-	errmsg = "Value must be a subnet in address/prefix-length form.";
+	error_msg = "value must be a subnet in address/prefix-length form";
 	return false;
     } catch (InvalidNetmaskLength) {
-	errmsg = c_format("Prefix length must be an integer between 0 and %u.",
-			  IPv4::addr_bitlen());
+	error_msg = c_format("prefix length must be an integer between "
+			     "0 and %u",
+			     IPv4::addr_bitlen());
 	return false;
     }
     return true;
@@ -1390,15 +1393,19 @@ IPv4RangeTemplate::IPv4RangeTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv4Range(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv4Range type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv4Range(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv4Range type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv4RangeTemplate::~IPv4RangeTemplate()
@@ -1417,12 +1424,12 @@ IPv4RangeTemplate::default_str() const
 }
 
 bool
-IPv4RangeTemplate::type_match(const string& s, string& errmsg) const
+IPv4RangeTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Invalid format.";
+	error_msg = "invalid format";
 	return false;
     }
 
@@ -1430,7 +1437,7 @@ IPv4RangeTemplate::type_match(const string& s, string& errmsg) const
 	IPv4Range* ipv4range = new IPv4Range(tmp.c_str());
 	delete ipv4range;
     } catch (InvalidString) {
-	errmsg = "Invalid format.";
+	error_msg = "invalid format";
 	return false;
     }
     return true;
@@ -1448,15 +1455,19 @@ IPv6Template::IPv6Template(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv6(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv6 type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv6(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv6 type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv6Template::~IPv6Template()
@@ -1475,12 +1486,12 @@ IPv6Template::default_str() const
 }
 
 bool
-IPv6Template::type_match(const string& s, string& errmsg) const
+IPv6Template::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be an IPv6 address.";
+	error_msg = "value must be an IPv6 address";
 	return false;
     }
 
@@ -1488,7 +1499,7 @@ IPv6Template::type_match(const string& s, string& errmsg) const
 	IPv6* ipv6 = new IPv6(tmp.c_str());
 	delete ipv6;
     } catch (InvalidString) {
-	errmsg = "Value must be an IPv6 address.";
+	error_msg = "value must be an IPv6 address";
 	return false;
     }
     return true;
@@ -1506,19 +1517,23 @@ IPv6NetTemplate::IPv6NetTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv6Net(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv6Net type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	} catch (InvalidNetmaskLength) {
-	    string err = "Illegal IPv6 prefix length in subnet: " 
-		+ initializer; 
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv6Net(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv6Net type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
+    } catch (InvalidNetmaskLength) {
+	error_msg = c_format("Illegal IPv6 prefix length in subnet \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv6NetTemplate::~IPv6NetTemplate()
@@ -1537,12 +1552,13 @@ IPv6NetTemplate::default_str() const
 }
 
 bool
-IPv6NetTemplate::type_match(const string& s, string& errmsg) const
+IPv6NetTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be an IPv6 subnet in address/prefix-length form.";
+	error_msg = "value must be an IPv6 subnet in address/prefix-length "
+	    "form";
 	return false;
     }
 
@@ -1550,11 +1566,13 @@ IPv6NetTemplate::type_match(const string& s, string& errmsg) const
 	IPv6Net* ipv6net = new IPv6Net(tmp.c_str());
 	delete ipv6net;
     } catch (InvalidString) {
-	errmsg = "Value must be an IPv6 subnet in address/prefix-length form.";
+	error_msg = "value must be an IPv6 subnet in address/prefix-length "
+	    "form";
 	return false;
     } catch (InvalidNetmaskLength) {
-	errmsg = c_format("Prefix length must be an integer between 0 and %u.",
-			  IPv6::addr_bitlen());
+	error_msg = c_format("prefix length must be an integer between "
+			     "0 and %u",
+			     IPv6::addr_bitlen());
 	return false;
     }
     return true;
@@ -1572,15 +1590,19 @@ IPv6RangeTemplate::IPv6RangeTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new IPv6Range(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad IPv6Range type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new IPv6Range(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad IPv6Range type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 IPv6RangeTemplate::~IPv6RangeTemplate()
@@ -1599,12 +1621,12 @@ IPv6RangeTemplate::default_str() const
 }
 
 bool
-IPv6RangeTemplate::type_match(const string& s, string& errmsg) const
+IPv6RangeTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Invalid format.";
+	error_msg = "invalid format";
 	return false;
     }
 
@@ -1612,7 +1634,7 @@ IPv6RangeTemplate::type_match(const string& s, string& errmsg) const
 	IPv6Range* ipv6range = new IPv6Range(tmp.c_str());
 	delete ipv6range;
     } catch (InvalidString) {
-	errmsg = "Invalid format.";
+	error_msg = "invalid format";
 	return false;
     }
     return true;
@@ -1630,15 +1652,19 @@ MacaddrTemplate::MacaddrTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default(NULL)
 {
-    if (! initializer.empty()) {
-	try {
-	    _default = new EtherMac(initializer.c_str());
-	} catch (InvalidString) {
-	    string err = "Bad MacAddr type value: " + initializer;
-	    xorp_throw(ParseError, err);
-	}
-	set_has_default();
+    string error_msg;
+
+    if (initializer.empty())
+	return;
+
+    try {
+	_default = new EtherMac(initializer.c_str());
+    } catch (InvalidString) {
+	error_msg = c_format("Bad MacAddr type value \"%s\".",
+			     initializer.c_str());
+	xorp_throw(ParseError, error_msg);
     }
+    set_has_default();
 }
 
 MacaddrTemplate::~MacaddrTemplate()
@@ -1657,12 +1683,13 @@ MacaddrTemplate::default_str() const
 }
 
 bool
-MacaddrTemplate::type_match(const string& s, string& errmsg) const
+MacaddrTemplate::type_match(const string& s, string& error_msg) const
 {
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	errmsg = "Value must be an MAC address (six hex digits separated by colons)";
+	error_msg = "value must be an MAC address (six hex digits separated "
+	    "by colons)";
 	return false;
     }
 
@@ -1670,7 +1697,8 @@ MacaddrTemplate::type_match(const string& s, string& errmsg) const
 	EtherMac* mac = new EtherMac(tmp.c_str());
 	delete mac;
     } catch (InvalidString) {
-	errmsg = "Value must be an MAC address (six hex digits separated by colons)";
+	error_msg = "value must be an MAC address (six hex digits separated "
+	    "by colons)";
 	return false;
     }
     return true;
@@ -1688,17 +1716,15 @@ UrlFileTemplate::UrlFileTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad UrlFile type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad UrlFile type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);
@@ -1728,17 +1754,15 @@ UrlFtpTemplate::UrlFtpTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad UrlFtp type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad UrlFtp type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);
@@ -1768,17 +1792,15 @@ UrlHttpTemplate::UrlHttpTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad UrlHttp type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad UrlHttp type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);
@@ -1808,17 +1830,15 @@ UrlTftpTemplate::UrlTftpTemplate(TemplateTree& template_tree,
     : TemplateTreeNode(template_tree, parent, path, varname),
       _default("")
 {
-    if (initializer == "")
+    string error_msg;
+
+    if (initializer.empty())
 	return;
 
-    string errmsg;
-    if (! type_match(initializer, errmsg)) {
-	string err = "Bad UrlTftp type value: " + initializer;
-	if (!errmsg.empty()) {
-	    err += "\n";
-	    err += errmsg;
-	}
-	xorp_throw(ParseError, err);
+    if (! type_match(initializer, error_msg)) {
+	error_msg = c_format("Bad UrlTftp type value \"%s\": %s.",
+			     initializer.c_str(), error_msg.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     string s = strip_quotes(initializer);

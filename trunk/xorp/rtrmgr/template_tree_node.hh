@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.38 2005/10/05 05:48:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.39 2005/11/10 23:55:40 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -80,7 +80,7 @@ public:
     virtual string typestr() const { return string("void"); }
     virtual string default_str() const { return string(""); }
     virtual string encoded_typestr() const;
-    virtual bool type_match(const string& s, string& errmsg) const;
+    virtual bool type_match(const string& s, string& error_msg) const;
     BaseCommand* command(const string& cmd_name);
     const BaseCommand* const_command(const string& cmd_name) const;
     set<string> commands() const;
@@ -102,7 +102,7 @@ public:
     list<ConfigOperator> allowed_operators() const;
 
 #if 0
-    bool check_template_tree(string& errmsg) const;
+    bool check_template_tree(string& error_msg) const;
 #endif
     bool check_command_tree(const list<string>& commands, 
 			    bool include_intermediate_nodes,
@@ -216,7 +216,7 @@ public:
     TTNodeType type() const { return NODE_UINT; }
     unsigned int default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     unsigned int _default;
@@ -233,7 +233,7 @@ public:
     TTNodeType type() const { return NODE_UINTRANGE; }
     U32Range* default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     U32Range* _default;
@@ -248,7 +248,7 @@ public:
     TTNodeType type() const { return NODE_INT; }
     int default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     int _default;
@@ -263,7 +263,7 @@ public:
     TTNodeType type() const { return NODE_ARITH; }
     string default_value() const { return _default; }
     string default_str() const { return _default; };
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
@@ -279,7 +279,7 @@ public:
     TTNodeType type() const { return NODE_TEXT; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
@@ -295,7 +295,7 @@ public:
     TTNodeType type() const { return NODE_BOOL; }
     bool default_value() const { return _default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     bool _default;
@@ -312,7 +312,7 @@ public:
     TTNodeType type() const { return NODE_IPV4; }
     IPv4 default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv4* _default;
@@ -329,7 +329,7 @@ public:
     TTNodeType type() const { return NODE_IPV4NET; }
     IPv4Net default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv4Net* _default;
@@ -346,7 +346,7 @@ public:
     TTNodeType type() const { return NODE_IPV4RANGE; }
     IPv4Range default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv4Range* _default;
@@ -363,7 +363,7 @@ public:
     TTNodeType type() const { return NODE_IPV6; }
     IPv6 default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv6* _default;
@@ -380,7 +380,7 @@ public:
     TTNodeType type() const { return NODE_IPV6NET; }
     IPv6Net default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv6Net* _default;
@@ -397,7 +397,7 @@ public:
     TTNodeType type() const { return NODE_IPV6RANGE; }
     IPv6Range default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     IPv6Range* _default;
@@ -414,7 +414,7 @@ public:
     TTNodeType type() const { return NODE_MACADDR; }
     Mac default_value() const { return *_default; }
     string default_str() const;
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     // XXX: really should be a MAC not an EtherMAC, but we'll fix this later
@@ -431,7 +431,7 @@ public:
     TTNodeType type() const { return NODE_URL_FILE; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
@@ -447,7 +447,7 @@ public:
     TTNodeType type() const { return NODE_URL_FTP; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
@@ -463,7 +463,7 @@ public:
     TTNodeType type() const { return NODE_URL_HTTP; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
@@ -479,7 +479,7 @@ public:
     TTNodeType type() const { return NODE_URL_TFTP; }
     string default_value() const { return _default; }
     string default_str() const { return _default; }
-    bool type_match(const string& s, string& errmsg) const;
+    bool type_match(const string& s, string& error_msg) const;
 
 private:
     string _default;
