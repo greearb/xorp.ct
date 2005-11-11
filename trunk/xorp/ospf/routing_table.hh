@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.25 2005/10/31 08:14:21 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.26 2005/11/05 06:38:15 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -155,6 +155,14 @@ class RouteEntry {
 	return _advertising_router;
     }
 
+    void set_lsa(Lsa::LsaRef lsar) {
+	_lsar = lsar;
+    }
+
+    Lsa::LsaRef get_lsa() const {
+	return _lsar;
+    }
+
     void set_filtered(bool filtered) {
 	_filtered = filtered;
     }
@@ -188,6 +196,8 @@ class RouteEntry {
 
     A _nexthop;
     uint32_t	_advertising_router;
+
+    Lsa::LsaRef _lsar;			// LSA that contibuted to this route.
 
     bool _filtered;			// True if this route has been
 					// filtered by policy.
