@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.139 2005/11/10 17:57:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.140 2005/11/10 19:15:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1851,8 +1851,7 @@ AreaRouter<A>::external_type7_translate(Lsa::LsaRef lsar)
     XLOG_ASSERT(t7);
 
     // If the propogate bit isn't set there is nothing todo.
-    if(!Options(_ospf.get_version(),
-		t7->get_header().get_options()).get_p_bit())
+    if (!external_propagate_bit(lsar))
 	return;
 
     switch(_translator_state) {
@@ -2478,6 +2477,15 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	// If a routing entry has been found it must be from this area.
 	XLOG_ASSERT(rt.get_area() == _area);
 
+	if (aselsa->type7() && 0 == n.prefix_len()) {
+	    if (_ospf.get_peer_manager().area_border_router_p()) {
+		if (!external_propagate_bit(lsar))
+		    continue;
+		if (!_summaries)
+		    continue;
+	    }
+	}
+
 	IPv4 forwarding = aselsa->get_forwarding_address_ipv4();
 	if (IPv4(static_cast<uint32_t>(0)) == forwarding) {
 	    forwarding = rt.get_nexthop();
@@ -2486,13 +2494,21 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	RouteEntry<IPv4> rtf;
 	if (!routing_table.lookup_entry(forwarding, rtf))
 	    continue;
-	if (RouteEntry<IPv4>::intra_area != rtf.get_path_type() &&
-	    RouteEntry<IPv4>::inter_area != rtf.get_path_type())
-	    continue;
+	if (aselsa->external()) {
+	    if (RouteEntry<IPv4>::intra_area != rtf.get_path_type() &&
+		RouteEntry<IPv4>::inter_area != rtf.get_path_type())
+		continue;
+	}
+	if (aselsa->type7()) {
+	    if (RouteEntry<IPv4>::intra_area != rtf.get_path_type())
+		continue;
+	}
+	// (4)
 	uint32_t x = rtf.get_cost();	// Cost specified by
 					// ASBR/forwarding address
 	uint32_t y = aselsa->get_metric();
 
+	// (5)
 	RouteEntry<IPv4> rtentry;
 	if (!aselsa->get_e_bit()) {	// Type 1
 	    rtentry.set_path_type(RouteEntry<IPv4>::type1);
@@ -2503,9 +2519,10 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	    rtentry.set_type_2_cost(y);
 	}
 
-	// (5)
+	// (6)
 	bool add_entry = false;
 	bool replace_entry = false;
+	bool identical = false;
 	RouteEntry<IPv4> rtnet;
 	if (routing_table.lookup_entry(n, rtnet)) {
 	    switch(rtnet.get_path_type()) {
@@ -2517,17 +2534,30 @@ AreaRouter<IPv4>::routing_as_externalV2()
 		if (RouteEntry<IPv4>::type2 == rtentry.get_path_type()) {
 		    break;
 		}
-		if (rtentry.get_cost() < rtnet.get_cost())
+		if (rtentry.get_cost() < rtnet.get_cost()) {
 		    replace_entry = true;
+		    break;
+		}
+		if (rtentry.get_cost() == rtnet.get_cost())
+		    identical = true;
 		break;
 	    case RouteEntry<IPv4>::type2:
 		if (RouteEntry<IPv4>::type1 == rtentry.get_path_type()) {
 		    replace_entry = true;
 		    break;
 		}
-		if (rtentry.get_type_2_cost() < rtnet.get_type_2_cost())
+		if (rtentry.get_type_2_cost() < rtnet.get_type_2_cost()) {
 		    replace_entry = true;
+		    break;
+		}
+		if (rtentry.get_type_2_cost() == rtnet.get_type_2_cost())
+		    identical = true;
 		break;
+	    }
+	    // (e)
+	    if (identical) {
+		replace_entry = routing_compare_externals(rtnet.get_lsa(),
+							  lsar);
 	    }
 	} else {
 	    add_entry = true;
@@ -2535,6 +2565,7 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	if (!add_entry && !replace_entry)
 	    continue;
 
+	rtentry.set_lsa(lsar);
 	rtentry.set_destination_type(OspfTypes::Network);
 	rtentry.set_address(lsid);
 	rtentry.set_area(_area);
@@ -2548,6 +2579,33 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	    routing_table.replace_entry(_area, n, rtentry);
 	
     }
+}
+
+template <typename A>
+bool
+AreaRouter<A>::routing_compare_externals(Lsa::LsaRef current,
+					 Lsa::LsaRef candidate) const
+{
+    // RFC 3101 Section 2.5. (6) (e) Calculating Type-7 AS external routes.
+
+    bool current_type7 = current->type7();
+    bool candidate_type7 = candidate->type7();
+
+    if (current_type7)
+	current_type7 = external_propagate_bit(current);
+
+    if (candidate_type7)
+	candidate_type7 = external_propagate_bit(candidate);
+
+    if (current_type7 == candidate_type7) {
+	return candidate->get_header().get_advertising_router() >
+	    current->get_header().get_advertising_router();
+    }
+
+    if (candidate_type7)
+	return true;
+
+    return false;
 }
 
 template <typename A>

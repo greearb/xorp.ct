@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.79 2005/11/10 09:40:22 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.80 2005/11/10 11:42:47 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -666,6 +666,15 @@ class AreaRouter : Subsystem {
     void push_lsas();
 
     /**
+     * Return the setting of the propagate bit in a Type-7-LSA.
+     */
+    bool external_propagate_bit(Lsa::LsaRef lsar) const {
+	XLOG_ASSERT(lsar->type7());
+	return Options(_ospf.get_version(),lsar->get_header().get_options())
+	    .get_p_bit();
+    }
+
+    /**
      * Take a Type-7-LSA that has arrived on the wire and translate if
      * required.
      */
@@ -827,6 +836,16 @@ class AreaRouter : Subsystem {
     void routing_as_external();
     void routing_as_externalV2();
     void routing_as_externalV3();
+
+
+    /**
+     * RFC 3101 Section 2.5. (6) (e) Calculating Type-7 AS external routes.
+     *
+     * Return true if the current LSA should be replaced by the
+     * candidate LSA.
+     */
+    bool routing_compare_externals(Lsa::LsaRef current,
+				   Lsa::LsaRef candidate) const;
 
     /**
      * Does this Router-LSA point back to the router link that points
