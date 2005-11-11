@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.27 2005/09/17 01:28:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.28 2005/11/05 08:49:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,6 +103,10 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 #ifdef	DEBUG_RAW_PACKETS
     debug_msg("\n%s", dump_packet(ptr, len).c_str());
 #endif
+
+    // Store a copy of the raw packet data for possible later use for
+    // authentication.
+    store(ptr, len);
 
     // Make sure that at least two bytes have been extracted:
     // Version and Type fields.

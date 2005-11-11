@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.23 2005/09/17 01:28:07 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.24 2005/11/07 06:45:30 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -77,6 +77,22 @@ class Packet {
      * @return true if the encoding suceeded.
      */
     virtual bool encode(vector<uint8_t>& pkt) = 0;
+
+    /**
+     * Store the original packet, required for authentication.
+     */
+    void store(uint8_t *ptr, size_t len) {
+	_pkt.resize(len);
+	memcpy(&_pkt[0], ptr, len);
+    }
+
+    /**
+     * Get a reference to the original packet data, required for
+     * authentication.
+     */
+    vector<uint8_t>& get() {
+	return _pkt;
+    }
 
     /**
      * @return The version this packet represents.
@@ -171,6 +187,7 @@ class Packet {
 
  private:
     const OspfTypes::Version 	_version;
+    vector<uint8_t> _pkt;	// Raw packet
 
     /**
      * Set to true when the standard header fields are set.
