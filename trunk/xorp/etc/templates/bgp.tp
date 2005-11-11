@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.60 2005/11/01 20:18:45 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.61 2005/11/09 02:46:35 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -95,6 +95,8 @@ policy {
 		med: u32;
 		med-remove: bool = false;
 		localpref: u32;
+
+		aggregate-prefix-len: u32;
 	    }
         }
     }
@@ -359,6 +361,7 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=rw&id:u32=21";
 
     policy-statement @: txt {
         term @: txt {
@@ -497,6 +500,10 @@ policy {
 		}
 		localpref {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		aggregate-prefix-len {
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aggregate_prefix_len $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 	    } /* then */
