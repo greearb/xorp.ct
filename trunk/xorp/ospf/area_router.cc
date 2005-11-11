@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.140 2005/11/10 19:15:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.141 2005/11/11 01:29:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -434,6 +434,7 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
     case OspfTypes::NORMAL:
 	break;
     case OspfTypes::STUB:
+    case OspfTypes::NSSA:
 	if (!_summaries)
 	    return summary_lsa;
 	// RFC 2328 Section 12.4.3.1 Originating summary-LSAs into stub areas
@@ -441,9 +442,6 @@ AreaRouter<A>::summary_build(OspfTypes::AreaID area, IPNet<A> net,
 	//  originated into stub areas.
 	if (rt.get_destination_type() && rt.get_as_boundary_router())
 	    return summary_lsa;
-	break;
-    case OspfTypes::NSSA:
-	XLOG_UNFINISHED();
 	break;
     }
     
