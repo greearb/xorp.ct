@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.37 2005/08/18 15:54:27 bms Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.38 2005/11/11 02:08:33 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -205,6 +205,9 @@ public:
     void op_mode_cmd_tidy();
 
 private:
+    static const string DEFAULT_OPERATIONAL_MODE_PROMPT;
+    static const string DEFAULT_CONFIGURATION_MODE_PROMPT;
+
     CliClient& cli_client() const { return (*_cli_client_ptr); }
     void reset_path();
     void set_path(string path);
@@ -260,6 +263,8 @@ private:
     CliNode&		_cli_node;
     CliClient*		_cli_client_ptr;
     bool		_verbose;	// Set to true if output is verbose
+    string		_operational_mode_prompt;
+    string		_configuration_mode_prompt;
     CliModeType		_mode;
     CliCommand*		_set_node;
     CliCommand*		_show_node;

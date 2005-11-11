@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.104 2005/11/02 02:40:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.105 2005/11/11 02:08:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,6 +41,34 @@
 inline uid_t getuid() { return 0; }
 #endif
 
+static string
+get_user_name(uid_t uid)
+{
+    string result;
+
+#ifdef HOST_OS_WINDOWS
+    // TODO: implenent it for Windows
+    UNUSED(uid);
+    return (result);
+#else // ! HOST_OS_WINDOWS
+    struct passwd* pw = getpwuid(uid);
+    if (pw != NULL)
+	result = pw->pw_name;
+    endpwent();
+    return (result);
+#endif // ! HOST_OS_WINDOWS
+}
+
+static string
+get_my_user_name()
+{
+    return (get_user_name(getuid()));
+}
+
+
+const string RouterCLI::DEFAULT_OPERATIONAL_MODE_PROMPT = "Xorp> ";
+const string RouterCLI::DEFAULT_CONFIGURATION_MODE_PROMPT = "XORP# ";
+
 RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 		     XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
 		     bool verbose) throw (InitError)
@@ -48,15 +76,72 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
       _cli_node(cli_node),
       _cli_client_ptr(NULL),
       _verbose(verbose),
+      _operational_mode_prompt(DEFAULT_OPERATIONAL_MODE_PROMPT),
+      _configuration_mode_prompt(DEFAULT_CONFIGURATION_MODE_PROMPT),
       _mode(CLI_MODE_NONE),
       _changes_made(false),
       _op_mode_cmd(NULL)
 {
     string error_msg;
 
+    //
+    // Set the operational and configuration mode prompts to be
+    // "user@hostname> " and "user@hostname# " respectively.
+    //
+    string user_name = get_my_user_name();
+    string host_name;
+    do {
+	char buf[MAXHOSTNAMELEN];
+	memset(buf, 0, sizeof(buf));
+	if (gethostname(buf, sizeof(buf)) < 0) {
+#ifdef HOST_OS_WINDOWS
+	    XLOG_FATAL("gethostname() failed: %d", WSAGetLastError());
+#else
+	    XLOG_FATAL("gethostname() failed: %s", strerror(errno));
+#endif
+	}
+	buf[sizeof(buf) - 1] = '\0';
+	host_name = buf;
+    } while (false);
+    _operational_mode_prompt = c_format("%s@%s> ",
+					user_name.c_str(),
+					host_name.c_str());
+    _configuration_mode_prompt = c_format("%s@%s# ",
+					  user_name.c_str(),
+					  host_name.c_str());
+#if 0
+    //
+    // XXX: if we want to change the promps to be
+    // "user@hostname> " and "USER@HOSTNAME# "
+    // then uncomment this code.
+    //
+    string::size_type iter;
+    for (iter = 0; iter < _operational_mode_prompt.size(); ++iter) {
+	char& c = _operational_mode_prompt[iter];
+	if (xorp_isalpha(c))
+	    c = xorp_tolower(c);
+    }
+    for (iter = 0; iter < _configuration_mode_prompt.size(); ++iter) {
+	char& c = _configuration_mode_prompt[iter];
+	if (xorp_isalpha(c))
+	    c = xorp_toupper(c);
+    }
+#endif
+
+    // Check for environmental variables that may overwrite the prompts
+    char* value = NULL;
+    value = getenv("XORP_OPERATIONAL_MODE_PROMPT");
+    if (value != NULL)
+	_operational_mode_prompt = value;
+    value = getenv("XORP_CONFIGURATION_MODE_PROMPT");
+    if (value != NULL)
+	_configuration_mode_prompt = value;
+
     _cli_client_ptr = _cli_node.add_client(cli_client_input_fd,
 					   cli_client_output_fd,
-					   false, error_msg);
+					   false,
+					   _operational_mode_prompt,
+					   error_msg);
     if (_cli_client_ptr == NULL) {
 	error_msg = c_format("Cannot add CliClient: %s", error_msg.c_str());
 	xorp_throw(InitError, error_msg);
@@ -431,8 +516,6 @@ See also \"exit\", \"quit\", \"top\".";
 
     //    _current_config_node = &(config_tree()->root_node());
     operational_mode();
-
-    
 }
 
 RouterCLI::~RouterCLI()
@@ -501,7 +584,7 @@ RouterCLI::operational_mode()
     _mode = CLI_MODE_OPERATIONAL;
     clear_command_set();
     reset_path();
-    set_prompt("", "Xorp> ");
+    set_prompt("", _operational_mode_prompt);
     add_op_mode_commands(NULL);
 }
 
@@ -657,7 +740,7 @@ RouterCLI::configure_mode()
     _mode = CLI_MODE_CONFIGURE;
     clear_command_set();
 
-    set_prompt("", "XORP# ");
+    set_prompt("", _configuration_mode_prompt);
 
     // Add all the menus
     apply_path_change();
@@ -692,16 +775,11 @@ RouterCLI::display_config_mode_users() const
 	    else
 		cli_client().cli_print(", ");
 	}
-#ifndef HOST_OS_WINDOWS
-	struct passwd* pwent = getpwuid(*iter);
-	if (pwent != NULL)
-	    cli_client().cli_print(c_format("%s ", pwent->pw_name));
-#endif
-	cli_client().cli_print(c_format("UID:%d", XORP_UINT_CAST(*iter)));
+	string user_name = get_user_name(*iter);
+	if (user_name.empty())
+	    user_name = c_format("UID:%u", XORP_UINT_CAST(*iter));
+	cli_client().cli_print(c_format("%s ", user_name.c_str()));
     }
-#ifndef HOST_OS_WINDOWS
-    endpwent();
-#endif
     if (_config_mode_users.size() == 1)
 	cli_client().cli_print(" is also in configuration mode.\n");
     else
@@ -961,7 +1039,7 @@ RouterCLI::config_mode_prompt()
     } else {
 	prompt = "[edit " + pathstr() + "]";
     }
-    set_prompt(prompt, "XORP# ");
+    set_prompt(prompt, _configuration_mode_prompt);
 }
 
 void
@@ -1417,17 +1495,12 @@ RouterCLI::new_config_user(uid_t user_id)
 	return;
 
     _config_mode_users.push_back(user_id);
-    string username;
-#ifndef HOST_OS_WINDOWS
-    struct passwd* pwent = getpwuid(user_id);
-    if (pwent != NULL)
-	username = pwent->pw_name;
-    else
-#endif
-	username = c_format("UID:%u", XORP_UINT_CAST(user_id));
-
+    string user_name = get_user_name(user_id);
+    if (user_name.empty())
+	user_name = c_format("UID:%u", XORP_UINT_CAST(user_id));
+    
     string alert = c_format("User %s entered configuration mode\n",
-			    username.c_str());
+			    user_name.c_str());
     notify_user(alert, false /* not urgent */);
 }
 
@@ -2561,7 +2634,7 @@ RouterCLI::commit_func(const string& ,
 	cli_client().cli_print(response);
 	cli_client().cli_print("The configuration has not been changed.\n");
 	cli_client().cli_print("Fix this error, and run \"commit\" again.\n");
-	//	set_prompt("", "XORP# ");
+	//	set_prompt("", _configuration_mode_prompt);
 	//	apply_path_change();
 	silent_reenable_ui();
 
