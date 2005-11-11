@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.73 2005/11/10 09:03:21 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.74 2005/11/10 10:36:18 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1451,6 +1451,19 @@ class ASExternalLsa : public Lsa {
     IPv4 get_forwarding_address_ipv4() const {
 	XLOG_ASSERT(OspfTypes::V2 == get_version());
 	return _forwarding_address_ipv4;
+    }
+
+    template <typename A>
+    A get_forwarding_address(A) const;
+
+    template <typename A>
+    IPv4 get_forwarding_address(IPv4) const {
+	return get_forwarding_address_ipv4();
+    }
+	
+    template <typename A>
+    IPv6 get_forwarding_address(IPv6) const {
+	return get_forwarding_address_ipv6();
     }
 
     void set_external_route_tag(uint32_t external_route_tag) {
