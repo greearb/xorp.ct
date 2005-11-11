@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.141 2005/11/11 01:29:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.142 2005/11/11 07:52:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1847,6 +1847,17 @@ AreaRouter<A>::external_type7_translate(Lsa::LsaRef lsar)
 {
     Type7Lsa *t7 = dynamic_cast<Type7Lsa *>(lsar.get());
     XLOG_ASSERT(t7);
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	if (t7->get_forwarding_address_ipv4() == IPv4::ZERO())
+	    return;
+	break;
+    case OspfTypes::V3:
+	if (!t7->get_f_bit())
+	    return;
+	break;
+    }
 
     // If the propogate bit isn't set there is nothing todo.
     if (!external_propagate_bit(lsar))
