@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.54 2005/10/14 20:02:58 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.55 2005/10/22 03:53:46 atanu Exp $
 #
 
 TODO
@@ -162,6 +162,9 @@ points exist so that flag transitions between area border, AS boundary
 and virtual link endpoint can be immediately distributed in the form a
 a new Router-LSA. When support for virtual links are added this hook
 should be called.
+
+43) Changing the type of an area currently has no effect. The only way
+to change an area type is to save and reload the config.
 
 Possible issues
 ~~~~~~~~~~~~~~~
