@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.180 2005/11/11 22:16:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.181 2005/11/12 23:09:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -496,6 +496,14 @@ PeerOut<A>::set_authentication(OspfTypes::AreaID area, string method,
 			       string password)
 			       
 {
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	XLOG_FATAL("OSPFv3 does not support authentication");
+	break;
+    }
+
     if (0 == _areas.count(area)) {
 	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
