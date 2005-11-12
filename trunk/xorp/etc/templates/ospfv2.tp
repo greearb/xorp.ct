@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.20 2005/11/05 21:12:56 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.21 2005/11/07 08:29:05 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -45,6 +45,31 @@ protocols {
 
 	import: txt;
 	export: txt;
+    }
+}
+
+policy {
+    policy-statement @: txt {
+        term @: txt {
+            from {
+		nexthop4: ipv4range;
+		metric: u32range;
+		ebit: bool;
+		tag: u32range;
+            }
+	    to {
+		nexthop4: ipv4range;
+		metric: u32range;
+		ebit: bool;
+		tag: u32range;
+	    }
+	    then {
+		nexthop4: ipv4;
+		metric: u32;
+		ebit: bool;
+		tag: u32;
+	    }
+        }
     }
 }
 
@@ -213,21 +238,88 @@ transmitted packets";
 	}
 
 	import {
-	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(ospf4.targetname)&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(ospf4.targetname)&policies:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=$(@)";
         }
         export {
-            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(ospf4.targetname)&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(ospf4.targetname)&policies:txt=$(@)";
+            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=";
+            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=$(@)";
         }
     }
 }
 
 policy {
-/*    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf4&target:txt=ospfv2";*/
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=network&type:txt=ipv4net&access:txt=r&id:u32=10";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=nexthop&type:txt=ipv4&access:txt=r&id:u32=11";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=ebit&type:txt=bool&access:txt=rw&id:u32=13";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospfv2&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
+    %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf4&target:txt=ospfv2";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=12";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=ebit&type:txt=bool&access:txt=rw&id:u32=13";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
+
+    policy-statement @: txt {
+        term @: txt {
+            from {
+		nexthop4 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
+		}
+            }
+	    to {
+		nexthop4 {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %allow-operator: ":" "==" "!=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+	    }
+	    then {
+		nexthop4 {
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		metric {
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		ebit {
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		tag {
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+	    }
+        }
+    }
 }
