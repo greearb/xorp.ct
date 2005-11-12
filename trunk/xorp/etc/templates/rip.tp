@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.24 2005/09/30 15:09:57 zec Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.25 2005/10/02 22:21:49 abittau Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -224,12 +224,6 @@ protocols {
 }
 
 policy {
-/*
- * A temporary hack to allow import of directly connected (aka "rib") routes.
- * This MUST be fixed at some other place (where?).
- */
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rib&variable:txt=DUMMY_DIRTY_HACK&type:txt=u32&access:txt=r&id:u32=9";
-
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=network4&type:txt=ipv4net&access:txt=rw&id:u32=10";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=nexthop4&type:txt=ipv4&access:txt=rw&id:u32=11";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=rip&variable:txt=metric&type:txt=u32&access:txt=rw&id:u32=14";
