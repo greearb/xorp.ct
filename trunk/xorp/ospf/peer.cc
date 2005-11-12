@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.179 2005/11/11 11:06:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.180 2005/11/11 22:16:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3220,8 +3220,7 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
     // allowed in state Waiting.
     if (Peer<A>::Waiting == _peer.get_state()) {
 	if ((get_candidate_id() == hello->get_designated_router() &&
-	    OspfTypes::RouterID("0.0.0.0") == 
-	     hello->get_backup_designated_router()) ||
+	    set_id("0.0.0.0") == hello->get_backup_designated_router()) ||
 	    get_candidate_id() == hello->get_backup_designated_router()) {
 	    _peer.schedule_event("BackupSeen");
 	}
