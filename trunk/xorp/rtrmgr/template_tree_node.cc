@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.64 2005/11/10 23:55:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.65 2005/11/11 01:55:27 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -294,7 +294,7 @@ TemplateTreeNode::add_action(const string& cmd,
     } else if (cmd == "%order") {
 	if (action_list.size() == 1) {
 	    list<string>::const_iterator li = action_list.begin();
-	    TTSortOrder order;
+	    TTSortOrder order = ORDER_UNSORTED;
 	    if (*li == "unsorted") {
 		order = ORDER_UNSORTED;
 	    } else if (*li == "sorted-numeric") {
