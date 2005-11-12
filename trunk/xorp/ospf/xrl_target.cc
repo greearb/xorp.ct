@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.20 2005/11/04 18:56:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.21 2005/11/05 21:08:15 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -515,6 +515,25 @@ XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
     if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "inftransdelay delay");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_authentication(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const string& type,
+					       const string& password)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s type %s password %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
+	      type.c_str(), password.c_str());
+
+    if (!_ospf.set_authentication(ifname, vifname, area, type, password))
+	return XrlCmdError::COMMAND_FAILED("Failed to configure "
+					   "authentication");
 
     return XrlCmdError::OKAY();
 }

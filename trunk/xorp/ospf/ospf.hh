@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.70 2005/11/08 00:17:55 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.71 2005/11/10 11:42:47 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -490,6 +490,13 @@ class Ospf {
     bool set_inftransdelay(const string& interface, const string& vif,
 			   OspfTypes::AreaID area,
 			   uint16_t inftransdelay);
+
+    /**
+     *  Configure authentication.
+     */
+    bool set_authentication(const string& ifname, const string& vif,
+			    OspfTypes::AreaID area,
+			    string type, string password);
 
     /**
      * Send router alerts in IP packets or not.

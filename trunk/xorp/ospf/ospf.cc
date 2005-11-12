@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.50 2005/11/05 19:25:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.51 2005/11/05 20:43:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -295,6 +295,24 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
 	_peer_manager.set_inftransdelay(_peer_manager.
 					get_peerid(interface,vif),
 					area, inftransdelay);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::set_authentication(const string& interface, const string& vif,
+			    OspfTypes::AreaID area,
+			    string type, string password)
+{
+    try {
+	_peer_manager.set_authentication(_peer_manager.
+					 get_peerid(interface,vif),
+					 area,
+					 type, password);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return false;

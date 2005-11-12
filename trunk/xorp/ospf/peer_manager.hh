@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.50 2005/11/04 18:56:26 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.51 2005/11/08 00:16:21 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -356,6 +356,12 @@ class PeerManager {
      */
     bool set_inftransdelay(const PeerID, OspfTypes::AreaID area,
 			   uint16_t inftransdelay);
+
+    /**
+     *  Configure authentication.
+     */
+    bool set_authentication(const PeerID, OspfTypes::AreaID area,
+			    string& type, string& password);
 
     /**
      * Number of areas this router serves.

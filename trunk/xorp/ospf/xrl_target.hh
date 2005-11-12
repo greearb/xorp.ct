@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.13 2005/11/04 18:56:26 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.14 2005/11/05 21:08:16 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -297,6 +297,17 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	vifname,
 	const IPv4&	area,
 	const uint32_t&	delay);
+
+    /**
+     *  Configure authentication.
+     */
+    XrlCmdError ospfv2_0_1_set_authentication(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const string&	type,
+	const string&	password);
 
     /**
      *  Add area range.

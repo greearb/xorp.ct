@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.8 2005/11/04 18:56:27 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.9 2005/11/05 21:08:16 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -126,6 +126,15 @@ interface ospfv2/0.1 {
 		       & vifname:txt \
 		       & area:ipv4 \
 		       & delay:u32
+
+    /**
+     * Configure authentication.
+     */
+    set_authentication ? ifname:txt \
+		       & vifname:txt \
+		       & area:ipv4 \
+		       & type:txt \
+		       & password:txt
 
     /**
      * Add area range.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.74 2005/11/08 00:16:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.75 2005/11/11 11:06:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -707,6 +707,19 @@ PeerManager<A>::set_inftransdelay(const PeerID peerid,
     }
 
     return _peers[peerid]->set_inftransdelay(inftransdelay);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_authentication(const PeerID peerid, OspfTypes::AreaID area,
+				   string& type, string& password)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_authentication(area, type, password);
 }
 
 template <typename A>
