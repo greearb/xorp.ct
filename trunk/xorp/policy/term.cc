@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.13 2005/09/27 18:50:43 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.14 2005/10/02 18:19:15 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -144,18 +144,21 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
     Nodes& conf_block = *_block_nodes[block];
 
     Nodes::iterator i = conf_block.find(order);
-    if (i == conf_block.end()) {
-	// Try to delete from the list of out-of-order nodes
-	list<pair<ConfigNodeId, Node*> >::iterator iter;
-	iter = find_out_of_order_node(block, order);
-	if (iter != _out_of_order_nodes[block].end()) {
-	    _out_of_order_nodes[block].erase(iter);
-	}
-
-	throw term_syntax_error("Want to delete an empty position: " 
-				+ order.str());
+    if (i != conf_block.end()) {
+	conf_block.erase(i);
+	return;
     }
-    conf_block.erase(i);
+
+    // Try to delete from the list of out-of-order nodes
+    list<pair<ConfigNodeId, Node*> >::iterator iter;
+    iter = find_out_of_order_node(block, order);
+    if (iter != _out_of_order_nodes[block].end()) {
+	_out_of_order_nodes[block].erase(iter);
+	return;
+    }
+
+    throw term_syntax_error("Want to delete an empty position: " 
+			    + order.str());
 }
 
 list<pair<ConfigNodeId, Node*> >::iterator
