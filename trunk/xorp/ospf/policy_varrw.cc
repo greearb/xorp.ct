@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.3 2005/10/22 06:15:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.4 2005/10/22 06:53:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -119,7 +119,7 @@ OspfVarRW<IPv4>::single_write(const Id& id, const Element& e)
 	break;
     case VAR_EBIT: {
 	const ElemBool& b = dynamic_cast<const ElemBool&>(e);
-	_tag = b.val();
+	_e_bit = b.val();
     }
 	break;
     case VAR_TAG: {
@@ -141,5 +141,3 @@ OspfVarRW<IPv6>::single_write(const Id& /*id*/, const Element& /*e*/)
 
 template class OspfVarRW<IPv4>;
 template class OspfVarRW<IPv6>;
-
-
