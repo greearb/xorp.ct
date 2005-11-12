@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.55 2005/10/22 03:53:46 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.56 2005/11/11 07:58:17 atanu Exp $
 #
 
 TODO
@@ -165,6 +165,9 @@ should be called.
 
 43) Changing the type of an area currently has no effect. The only way
 to change an area type is to save and reload the config.
+
+44) The packet header encode and decode routines should use AUTH_* consts
+not hard coded numbers.
 
 Possible issues
 ~~~~~~~~~~~~~~~

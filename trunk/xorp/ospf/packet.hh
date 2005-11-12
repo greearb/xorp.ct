@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.24 2005/11/07 06:45:30 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.25 2005/11/11 11:03:52 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -26,6 +26,11 @@ class Packet {
  public:
     static const size_t STANDARD_HEADER_V2 = 24;
     static const size_t STANDARD_HEADER_V3 = 16;
+
+    // OSPFv2 only.
+    static const size_t AUTH_TYPE_OFFSET = 14;
+    static const size_t AUTH_PAYLOAD_OFFSET = 16;
+    static const size_t AUTH_PAYLOAD_SIZE = 8;
 
     Packet(OspfTypes::Version version)
 	: _version(version), _auth_type(0), _instance_id(0)
@@ -200,9 +205,9 @@ class Packet {
      */
     OspfTypes::RouterID	_router_id;
     OspfTypes::AreaID	_area_id;
-    OspfTypes::AuType	_auth_type;	// OSPFv2 Only
-    uint8_t 		_auth[8];	// OSPFv2 Only
-    uint8_t		_instance_id;	// OSPFv3 Only
+    OspfTypes::AuType	_auth_type;			// OSPFv2 Only
+    uint8_t 		_auth[AUTH_PAYLOAD_SIZE];	// OSPFv2 Only
+    uint8_t		_instance_id;			// OSPFv3 Only
 };
 
 /**
