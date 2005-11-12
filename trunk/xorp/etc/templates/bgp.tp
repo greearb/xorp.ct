@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.61 2005/11/09 02:46:35 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.62 2005/11/11 15:26:27 zec Exp $ */
 
 protocols {
     bgp {
@@ -93,7 +93,7 @@ policy {
 
 		origin: u32;
 		med: u32;
-		med-remove: bool = false;
+		med-remove: bool;
 		localpref: u32;
 
 		aggregate-prefix-len: u32;
