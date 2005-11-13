@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.181 2005/11/12 23:09:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.182 2005/11/12 23:42:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -571,9 +571,7 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, rid, neighbour_address,
 			     Neighbour<A>::_ticket++, get_linktype());
-	Auth& auth = n->get_auth_inbound();
-	auth.set_method(_auth_method);
-	auth.set_password(_auth_password);
+	n->set_authentication(_auth_method, _auth_password);
 	_neighbours.push_back(n);
     } else {
 	XLOG_ERROR("Neighbour exists %s", cstring(*n));
@@ -1065,6 +1063,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	    return false;
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
 			     Neighbour<A>::_ticket++, get_linktype());
+	n->set_authentication(_auth_method, _auth_password);
 	_neighbours.push_back(n);
     }
 
@@ -2471,6 +2470,8 @@ template <typename A>
 bool
 Peer<A>::set_authentication(string method, string password)
 {
+    _auth_method = method;
+    _auth_password = password;
     get_auth_outbound().set_method(method);
     get_auth_outbound().set_password(password);
     get_auth_outbound().reset();
