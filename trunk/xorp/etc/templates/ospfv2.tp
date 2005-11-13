@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.22 2005/11/12 05:56:05 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.23 2005/11/12 23:38:15 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -26,6 +26,10 @@ protocols {
 			router-dead-interval:   u32 = 40;
 			interface-cost:		u32 = 1;
 			inftransdelay:		u32 = 1;
+		        authentication {
+			    type:		txt	= "none" ;
+			    password:		txt	= "" ;
+		        }
 
 			neighbour @: ipv4 {
 			    router-id:  ipv4;
@@ -194,6 +198,13 @@ transmitted packets";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
 			}
+
+         		authentication {
+			    %allow: $(@.type) "none" "plaintext" "md5" ;
+			    %activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
+			    %update:   xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
+			    %help: short "Set the authentication type and password used for packets sent from address." ;
+		        }
 
 			disable {
 			    %help: short "disable OSPF on address";
