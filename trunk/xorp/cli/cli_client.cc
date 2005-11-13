@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.43 2005/10/29 17:42:19 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.44 2005/11/11 04:22:16 pavlin Exp $"
 
 
 //
@@ -1241,7 +1241,7 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing,
 	// Command-line help
 	//set_page_buffer_mode(true);
 	// TODO: add "page" support
-	command_line_help(line, gl_buff_curpos);
+	command_line_help(line, gl_buff_curpos, true);
 	//set_page_buffer_mode(false);
 	//if (is_page_mode()) {
 	//if (page_buffer_last_line_n() < page_buffer_lines_n())
@@ -1295,17 +1295,20 @@ CliClient::process_char(const string& line, uint8_t val, bool& stop_processing,
  * CliClient::command_line_help:
  * @line: The current command line.
  * @word_end: The cursor position.
+ * @remove_last_input_char: If true, then remove the last input character.
  * 
  * Print the help for the same-line command.
  **/
 void
-CliClient::command_line_help(const string& line, int word_end)
+CliClient::command_line_help(const string& line, int word_end,
+			     bool remove_last_input_char)
 {
     CliCommand *curr_cli_command = _current_cli_command;
     string command_help_string = "";
     bool is_found = false;
     
-    word_end--;			// XXX: exclude the '?' character
+    if (remove_last_input_char)
+	word_end--;			// XXX: exclude the '?' character
 
     list<CliCommand *>::iterator iter;
     for (iter = curr_cli_command->child_command_list().begin();
@@ -1327,9 +1330,11 @@ CliClient::command_line_help(const string& line, int word_end)
     }
     
     gl_redisplay_line(gl());
-    // XXX: Move the cursor over the '?'
-    gl_place_cursor(gl(), gl_get_buff_curpos(gl()) - 1);
-    cli_print(" \b");	// XXX: A hack to delete the '?'
+    if (remove_last_input_char) {
+	// XXX: Move the cursor over the '?'
+	gl_place_cursor(gl(), gl_get_buff_curpos(gl()) - 1);
+	cli_print(" \b");	// XXX: A hack to delete the '?'
+    }
 }
 
 bool
@@ -1633,7 +1638,7 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
     int ret_value = 1;
     CliClient *cli_client = reinterpret_cast<CliClient*>(data);
     CliCommand *curr_cli_command = cli_client->_current_cli_command;
-    list<CliCommand *> cli_command_match_list;
+    list<CliCommand *> cli_command_match_list, type_list, no_type_list;
     
     if (cpl == NULL)
 	return (1);
@@ -1661,8 +1666,21 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	    ret_value = 0;
 	}
     }
-    
-    if (cli_command_match_list.size() > 1) {
+
+    //
+    // Separate the type-match commands from the rest
+    //
+    for (iter = cli_command_match_list.begin();
+	 iter != cli_command_match_list.end();
+	 ++iter) {
+	CliCommand *tmp_cli_command = *iter;
+	if (tmp_cli_command->has_type_match_cb())
+	    type_list.push_back(tmp_cli_command);
+	else
+	    no_type_list.push_back(tmp_cli_command);
+    }
+
+    if (no_type_list.size() > 1) {
 	// Prepare and print the initial message(s)
 	string token_line = string(line, word_end);
 	string token;
@@ -1677,6 +1695,10 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	
 	cli_client->cli_print(c_format("\n`%s' is ambiguous.", token.c_str()));
 	cli_client->cli_print("\nPossible completions:");
+    } else {
+	if (type_list.size() > 0) {
+	    cli_client->command_line_help(line, word_end, false);
+	}
     }
     
     if (ret_value != 0) {

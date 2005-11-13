@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.19 2005/08/23 01:18:59 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.20 2005/10/29 08:06:47 pavlin Exp $"
 
 
 //
@@ -509,12 +509,17 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
 	string name_complete;
 
 	if (cli_command->has_type_match_cb()) {
-	    name_complete = "";
-	} else {
-	    name_complete = name_string.substr(token.length());
-	    if (cli_command->help_completion().size() > 0)
-		type_suffix = cli_command->help_completion().c_str();
+	    //
+	    // XXX: Nothing to complete, we just need to print
+	    // the help with the command type.
+	    //
+	    cli_command_match_list.push_back(cli_command);
+	    return (true);
 	}
+
+	name_complete = name_string.substr(token.length());
+	if (cli_command->help_completion().size() > 0)
+	    type_suffix = cli_command->help_completion().c_str();
 	
 	// Add two empty spaces in front
 	string line_string = "  ";

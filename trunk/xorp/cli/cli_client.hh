@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.23 2005/08/18 15:48:42 bms Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.24 2005/11/11 04:22:16 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -432,7 +432,8 @@ private:
     int		process_char_page_mode(uint8_t val);
     int		preprocess_char(uint8_t val, bool& stop_processing,
 				bool& ignore_current_character);
-    void	command_line_help(const string& line, int word_end);
+    void	command_line_help(const string& line, int word_end,
+				  bool remove_last_input_char);
     bool	is_multi_command_prefix(const string& command_line);
     
     void	process_line_through_pipes(string& pipe_line);
