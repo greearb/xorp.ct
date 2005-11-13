@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.56 2005/11/11 07:58:17 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.57 2005/11/12 21:14:47 atanu Exp $
 #
 
 TODO
@@ -168,6 +168,10 @@ to change an area type is to save and reload the config.
 
 44) The packet header encode and decode routines should use AUTH_* consts
 not hard coded numbers.
+
+45) The cryptographic authentication does not support configuring the
+Key ID (currently defaults to 1) or timer values for smooth key
+transitions.
 
 Possible issues
 ~~~~~~~~~~~~~~~

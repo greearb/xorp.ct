@@ -13,13 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/auth.hh,v 1.3 2005/11/13 05:34:20 atanu Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.4 2005/11/13 08:02:54 atanu Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
 
 #include <openssl/md5.h>
 
+/**
+ * Base class the needs to be implemented by each authentication type.
+ */
 class AuthBase {
  public:
 
@@ -52,6 +55,10 @@ class AuthBase {
 	return 0;
     }
 
+    /**
+     * If the verification fails this method should be called to set
+     * the error string.
+     */
     void set_verify_error(string& error) {
 	_verify_error = error;
     }
@@ -61,7 +68,8 @@ class AuthBase {
     }
 
     /**
-     * Called to notify authentication system to reset.
+     * Called every time the password is modified or state needs to be
+     * reset; such as the sequence number in MD5.
      */
     virtual void reset() {}
 
@@ -70,10 +78,15 @@ private:
     string _verify_error;
 };
 
+/**
+ * Null authentication
+ */
 class AuthNone : public AuthBase {
-    
 };
 
+/**
+ * Simple password
+ */
 class AuthPlainText : public AuthBase {
  public:
     static const OspfTypes::AuType AUTH_TYPE = OspfTypes::SIMPLE_PASSWORD;
@@ -86,6 +99,9 @@ class AuthPlainText : public AuthBase {
     uint8_t _auth[Packet::AUTH_PAYLOAD_SIZE];
 };
 
+/**
+ * Cryptographic authentication
+ */
 class AuthMD5 : public AuthBase {
     static const OspfTypes::AuType AUTH_TYPE =
 	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION;
@@ -101,6 +117,10 @@ class AuthMD5 : public AuthBase {
     uint8_t _key[MD5_DIGEST_LENGTH];
 };
 
+/**
+ * This is the class that should be instantiated to access
+ * authentication.
+ */
 class Auth {
  public:
     Auth() : _auth(0)

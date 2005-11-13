@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.3 2005/11/13 08:02:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.4 2005/11/13 16:55:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,7 +35,7 @@
 #include "ospf.hh"
 #include "auth.hh"
 
-/*
+/**
  * RFC 1141 Incremental Updating of the Internet Checksum
  */
 inline
