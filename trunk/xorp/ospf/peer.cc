@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.184 2005/11/13 17:01:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.185 2005/11/13 21:56:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2906,7 +2906,6 @@ Neighbour<A>::build_data_description_packet()
 	// compare against the constant LSA header length each time.
 	vector<uint8_t> pkt;
 	_data_description_packet.encode(pkt);
-	get_auth_outbound().generate(pkt);
 	if (pkt.size() + Lsa_header::length() >= _peer.get_frame_size())
 	    return;
     } while(last == false);
@@ -3440,7 +3439,7 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	}
 
 	if (!dd->get_i_bit() && !dd->get_ms_bit() &&
-	    _last_dd.get_dd_seqno() == dd->get_dd_seqno() && 
+	    _data_description_packet.get_dd_seqno() == dd->get_dd_seqno() && 
 	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
 	    // Bump the sequence number of the master.
 	    _last_dd.set_dd_seqno(dd->get_dd_seqno() + 1);
@@ -4112,9 +4111,9 @@ Neighbour<A>::event_negotiation_done()
 	change_state(Exchange);
 	// Inferred from the specification.
 	_data_description_packet.set_i_bit(false);
+	build_data_description_packet();
 	// If we are the master start sending description packets.
 	if (!_last_dd.get_ms_bit()) {
-	    build_data_description_packet();
 	    stop_rxmt_timer("NegotiationDone (master)");
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
