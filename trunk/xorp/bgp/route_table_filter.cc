@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.34 2005/10/28 09:13:33 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.35 2005/11/11 15:23:28 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -61,6 +61,7 @@ BGPRouteFilter<A>::propagate_flags(const SubnetRoute<A>& route,
 				   SubnetRoute<A>& new_route) const {
     new_route.set_filtered(route.is_filtered());
     new_route.set_policytags(route.policytags());
+    new_route.set_aggr_prefix_len(route.aggr_prefix_len());
     for (int i = 0; i < 3; i++)
 	new_route.set_policyfilter(i, route.policyfilter(i));
     if(route.is_winner())
@@ -196,7 +197,9 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 				bool &modified) const
 {
     // If we originated this route don't rewrite the nexthop
-    if (rtmsg->origin_peer()->originate_route_handler())
+    // Locally originated aggregates are exception, they need NH rewrite
+    if (rtmsg->origin_peer()->originate_route_handler() &&
+	rtmsg->route()->aggr_prefix_len() != SR_AGGR_EBGP_AGGREGATE)
 	return rtmsg;
 
     //Form a new path attribute list containing the new nexthop
