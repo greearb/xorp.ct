@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.22 2005/11/11 15:23:28 zec Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.23 2005/11/11 17:52:37 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -253,11 +253,20 @@ BGPVarRW<A>::read_med_remove()
 
 template <class A>
 Element*
-BGPVarRW<A>::read_aggr_pref_len()
+BGPVarRW<A>::read_aggregate_prefix_len()
 {
-    printf("XXX this should never happen: read aggregate_prefix_len: %d\n",
-	   _aggr_prefix_len);
+    // No-op. Should never be called.
     return new ElemU32(_aggr_prefix_len);
+}
+
+template <class A>
+Element*
+BGPVarRW<A>::read_was_aggregated()
+{
+    if (_aggr_prefix_len == SR_AGGR_EBGP_WAS_AGGREGATED)
+	return new ElemBool(true);
+    else
+	return new ElemBool(false);
 }
 
 template <class A>
@@ -451,7 +460,7 @@ BGPVarRW<A>::write_med_remove(const Element& e)
 
 template <class A>
 void
-BGPVarRW<A>::write_aggr_pref_len(const Element& e)
+BGPVarRW<A>::write_aggregate_prefix_len(const Element& e)
 {
     // We should not set the aggr_pref_len if already set by someone else!
     if (_aggr_prefix_len != SR_AGGR_IGNORE)
@@ -464,6 +473,14 @@ BGPVarRW<A>::write_aggr_pref_len(const Element& e)
 	_aggr_prefix_len = u32.val();
 	_route_modify = true;
     }
+}
+
+template <class A>
+void
+BGPVarRW<A>::write_was_aggregated(const Element& e)
+{
+    // No-op. Should never be called.
+    UNUSED(e);
 }
 
 template <class A>
@@ -666,8 +683,12 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
 	    &BGPVarRW<A>::read_med_remove, &BGPVarRW<A>::write_med_remove);
 
     init_rw(BGPVarRW<A>::VAR_AGGREGATE_PREFIX_LEN, 
-	    &BGPVarRW<A>::read_aggr_pref_len,
-	    &BGPVarRW<A>::write_aggr_pref_len);
+	    &BGPVarRW<A>::read_aggregate_prefix_len,
+	    &BGPVarRW<A>::write_aggregate_prefix_len);
+
+    init_rw(BGPVarRW<A>::VAR_WAS_AGGREGATED, 
+	    &BGPVarRW<A>::read_was_aggregated,
+	    &BGPVarRW<A>::write_was_aggregated);
 }
 
 template <class A>
