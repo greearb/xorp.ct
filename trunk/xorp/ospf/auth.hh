@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/auth.hh,v 1.1 2005/11/11 11:06:12 atanu Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.2 2005/11/11 22:16:07 atanu Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
@@ -73,7 +73,15 @@ class AuthNone : public AuthBase {
 };
 
 class AuthPlainText : public AuthBase {
-    
+ public:
+    static const OspfTypes::AuType AUTH_TYPE = 1;
+
+    void generate(vector<uint8_t>& pkt);
+    bool verify(vector<uint8_t>& pkt);
+    void reset();
+
+ private:
+    uint8_t _auth[Packet::AUTH_PAYLOAD_SIZE];
 };
 
 class AuthMD5 : public AuthBase {
