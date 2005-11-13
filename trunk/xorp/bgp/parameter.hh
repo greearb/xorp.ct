@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.17 2004/12/18 03:21:48 atanu Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.18 2005/03/25 02:52:42 pavlin Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -107,6 +107,7 @@ enum CapType {
     CAPABILITYREFRESH = 2,
     CAPABILITYREFRESHOLD = 128, // here for backwards compatibility now 2.
     CAPABILITYMULTIROUTE = 4,
+    CAPABILITY4BYTEAS = 65,
     CAPABILITYUNKNOWN = -1, // used to store unknown cababilities
 };
 
@@ -320,6 +321,21 @@ protected:
 private:
     // uint16_t _address_family;
     // uint8_t _subsequent_address_family;
+};
+
+class BGP4ByteASCapability : public BGPCapParameter {
+public:
+    BGP4ByteASCapability();
+    BGP4ByteASCapability(uint8_t l, const uint8_t* d);
+    BGP4ByteASCapability(const BGP4ByteASCapability& cap);
+    void decode();
+    void encode() const;
+    uint32_t as() const { return _as4; }
+    void set_as(uint32_t as4) { _as4 = as4; }
+    string str() const;
+protected:
+private:
+    uint32_t _as4;
 };
 
 class BGPUnknownCapability : public BGPCapParameter {

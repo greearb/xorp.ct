@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.19 2005/06/29 18:04:43 atanu Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.20 2005/06/29 18:29:57 atanu Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -159,6 +159,20 @@ public:
     const AsNum& first_asnum() const;
 
     /**
+     * find the n'th AS number in the segment 
+     */
+    const AsNum& as_num(int n) const {
+	list <AsNum>::const_iterator iter;
+	iter = _aslist.begin();
+	while (n > 0) {
+	    iter++;
+	    n--;
+	    XLOG_ASSERT(iter != _aslist.end());
+	}
+	return *iter;
+    }
+
+    /**
      * Convert the external representation into the internal one.
      * _type is d[0], _entries is d[1], entries follow.
      */
@@ -203,10 +217,45 @@ public:
 
     size_t encode_for_mib(uint8_t* buf, size_t buf_size) const;
 
-private:
+    /**
+     * returns true if the AS segment does not lose information when
+     * represented entirely as two-byte AS numbers 
+     */
+    bool two_byte_compatible() const;
+
+protected:
     ASPathSegType	_type;
     size_t		_entries;	// # of AS numbers in the as path
     list <AsNum>	_aslist;
+};
+
+
+/* subsclass of AsSegment to handle encoding and decoding of 4-byte AS
+   numbers from a NEW_AS_PATH attribute */
+class NewAsSegment : public AsSegment {
+public:
+    NewAsSegment(const uint8_t* d)			{ decode(d); }
+    /**
+     * Convert the external representation into the internal one.
+     * _type is d[0], _entries is d[1], entries follow.
+     */
+    void decode(const uint8_t *d);
+
+    /**
+     * Convert from internal to external representation.
+     * If we do not pass a buffer (buf = 0), then the routine will
+     * allocate a new one; otherwise, len indicates the size of the
+     * input buffer, which must be large enough to store the encoding.
+     * @return the pointer to the buffer, len is the actual size.
+     */
+    const uint8_t *encode(size_t &len, uint8_t *buf) const;
+
+    /**
+     * @return the size of the list on the wire.
+     */
+    size_t wire_size() const			{ return 2 + 4*_entries; }
+private:
+    /* no storage, as this is handled by the underlying AsSegment */
 };
 
 /**
@@ -240,6 +289,7 @@ public:
     ~AsPath()						{}
 
     void add_segment(const AsSegment& s);
+    void prepend_segment(const AsSegment& s);
 
     size_t path_length() const				{ return _path_len; }
 
@@ -273,7 +323,11 @@ public:
     size_t num_segments() const			{ return _num_segments; }
 
     /**
-     * Convert from internal to external representation.
+     * Convert from internal to external representation, with the
+     * correct representation for the original AS_PATH attribute.  If
+     * there are any 4-byte AS numbers, they will be encoded as
+     * AS_TRAN.
+     *
      * If we do not pass a buffer (buf = 0), then the routine will
      * allocate a new one; otherwise, len indicates the size of the
      * input buffer, which must be large enough to store the encoding.
@@ -300,18 +354,57 @@ public:
 
     void encode_for_mib(vector<uint8_t>& aspath) const;
 
-private:
     /**
-     * populate an AsPath from received data. Only used in the constructor.
-     */
-    void decode(const uint8_t *d, size_t len);
+     * returns true if the AS path does not lose information when
+     * represented entirely as two-byte AS numbers */
+    bool two_byte_compatible() const;
 
+protected:
     /**
      * internal representation
      */
     list <AsSegment>	_segments;
     size_t		_num_segments;
     size_t		_path_len;
+
+private:
+    /**
+     * populate an AsPath from received data. Only used in the constructor.
+     */
+    void decode(const uint8_t *d, size_t len);
+};
+
+/* subclass to handle 4-byte AS encoding and decoding */
+class NewAsPath : public AsPath {
+public:
+    /**
+     * construct from received data.  This needs to take the regular
+     * AsPath in addition to the NEW_AS_PATH data, because it needs to
+     * cross-validate the two.
+     */
+    NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path);
+
+    /**
+     * Convert from internal to external representation, with the
+     * correct representation for the original NEW_AS_PATH attribute.
+     *
+     * If we do not pass a buffer (buf = 0), then the routine will
+     * allocate a new one; otherwise, len indicates the size of the
+     * input buffer, which must be large enough to store the encoding.
+     * @return the pointer to the buffer, len is the actual size.
+     */
+    const uint8_t *encode(size_t &len, uint8_t *buf) const;
+
+    size_t wire_size() const;
+
+private:
+    /**
+     * populate an AsPath from received data. Only used in the constructor.
+     */
+    void decode(const uint8_t *d, size_t len);
+    void cross_validate(const AsPath& as_path);
+    void pad_segment(const AsSegment& old_seg, AsSegment& new_seg);
+    void do_patchup(const AsPath& as_path);
 };
 
 #endif // __BGP_ASPATH_HH__

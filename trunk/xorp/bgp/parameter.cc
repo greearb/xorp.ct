@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.26 2005/03/25 02:52:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.28 2005/08/18 15:58:05 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -452,6 +452,76 @@ BGPMultiRouteCapability::encode() const
     // _data[7] = _subsequent_address_family ; // SAFI
 }
 
+/* ************** BGP4ByteASCapability - ****************** */
+BGP4ByteASCapability::
+BGP4ByteASCapability()
+{
+    _cap_code = CAPABILITY4BYTEAS;
+    _length = 8;
+    _data = new uint8_t[_length];
+}
+
+BGP4ByteASCapability::
+BGP4ByteASCapability(uint8_t l, const uint8_t* d)
+    : BGPCapParameter(l, d)
+{
+    debug_msg("BGP4ByteASCapability(uint8_t, uint8_t*)\n");
+    decode();
+    debug_msg("_type %d _length %d (total length %d) \n", 
+	      _type, _length, _length+2);
+}
+
+BGP4ByteASCapability::
+BGP4ByteASCapability(const BGP4ByteASCapability& param)
+    : BGPCapParameter(param)
+{
+    _as4 = param._as4;
+
+    if (param._data != NULL) {
+        _length = param._length;
+        uint8_t *p = new uint8_t[_length];
+        memcpy(p, param._data, _length);
+        _data = p;
+    } else {
+        _length = 0;
+        _data = NULL;
+    }
+}
+
+void
+BGP4ByteASCapability::decode()
+{
+    _type = static_cast<ParamType>(*_data);
+    XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
+					// BGPRefreshCapability::decode()
+
+    _length = *(_data+1) + 2; // includes 2 byte header
+
+    _cap_code = static_cast<CapType>(*(_data+2));
+    XLOG_ASSERT(_cap_code == CAPABILITY4BYTEAS);
+
+    _cap_length = *(_data+3);
+    _as4 = ntohl((uint32_t &)*(_data+4));
+}
+
+void
+BGP4ByteASCapability::encode() const
+{
+    debug_msg("Encoding a BGP 4 byte AS capability parameter\n");
+    _data[0] = PARAMTYPECAP;
+    _data[1] = 6;
+    _data[2] = CAPABILITY4BYTEAS;
+    _data[3] = 4;
+    uint32_t as = htonl(_as4);
+    memcpy(&_data[4], &as, 4);
+}
+
+string
+BGP4ByteASCapability::str() const
+{
+    return c_format("BGP 4 Byte AS Capability AS = %u", _as4);
+}
+
 /************** BGPUnknownCapability - ****************** */
 // This is used when we don't understand / support a capability
 // we are sent.
@@ -572,6 +642,10 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
 
 	case CAPABILITYMULTIROUTE:
 	    p = new BGPMultiRouteCapability(len, d);
+	    break;
+
+	case CAPABILITY4BYTEAS:
+	    p = new BGP4ByteASCapability(len, d);
 	    break;
 
 	default:
