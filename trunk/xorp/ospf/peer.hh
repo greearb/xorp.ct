@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.106 2005/11/11 11:06:13 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.107 2005/11/11 22:16:07 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1318,8 +1318,13 @@ class Neighbour {
     /**
      * Start sending data description packets.
      * Should only be called in state ExStart.
+     *
+     * @param event_name for debugging.
+     * @param immediate if true send the packet immediately, if false
+     * wait the retransmit interval.
      */
-    void start_sending_data_description_packets(const char *event_name);
+    void start_sending_data_description_packets(const char *event_name,
+						bool immediate = true);
 
     /**
      * Extract the list of LSA headers for future requests from the

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.183 2005/11/13 05:32:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.184 2005/11/13 17:01:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2962,7 +2962,8 @@ Neighbour<A>::send_data_description_packet()
  */
 template <typename A>
 void
-Neighbour<A>::start_sending_data_description_packets(const char *event_name)
+Neighbour<A>::start_sending_data_description_packets(const char *event_name,
+						     bool immediate)
 {
     XLOG_ASSERT(ExStart == get_state());
 
@@ -2978,7 +2979,7 @@ Neighbour<A>::start_sending_data_description_packets(const char *event_name)
 
     start_rxmt_timer(callback(this,
 			      &Neighbour<A>::send_data_description_packet),
-		     true,
+		     immediate,
 		     c_format("send_data_description from %s",
 			      event_name).c_str());
 }
@@ -4374,7 +4375,8 @@ Neighbour<A>::event_SequenceNumberMismatch_or_BadLSReq(const char *event_name)
     case Loading:
     case Full:
 	change_state(ExStart);
-	start_sending_data_description_packets(event_name);
+	// Don't send this packet immediately wait for the retransmit interval.
+	start_sending_data_description_packets(event_name, false);
 	break;
     }
 }
