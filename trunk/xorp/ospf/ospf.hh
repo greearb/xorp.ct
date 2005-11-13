@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.71 2005/11/10 11:42:47 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.72 2005/11/12 23:43:22 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -58,6 +58,9 @@ struct OspfTypes {
      * Authentication type: OSPFv2 standard header.
      */
     typedef uint16_t AuType;
+    static const AuType NULL_AUTHENTICATION = 0;
+    static const AuType SIMPLE_PASSWORD = 1;
+    static const AuType CRYPTOGRAPHIC_AUTHENTICATION = 2;
 
     /**
      * Area Type
