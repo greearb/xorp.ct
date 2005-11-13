@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.2 2005/11/13 05:34:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.3 2005/11/13 08:02:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -62,6 +62,24 @@ AuthPlainText::generate(vector<uint8_t>& pkt)
     memcpy(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_auth[0], sizeof(_auth));
 }
 
+inline
+string
+printable(uint8_t *p)
+{
+    string output;
+
+    for(size_t i = 0; i < Packet::AUTH_PAYLOAD_SIZE; i++, p++) {
+	if ('\0' == *p)
+	    break;
+	if (xorp_isprint(*p))
+	    output += *p;
+	else
+	    output += c_format("[%#x]", *p);
+    }
+    
+    return output;
+}
+
 bool
 AuthPlainText::verify(vector<uint8_t>& pkt) 
 {
@@ -80,6 +98,10 @@ AuthPlainText::verify(vector<uint8_t>& pkt)
     if (0 != memcmp(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_auth[0], 
 		    sizeof(_auth))) {
 	string error = c_format("Authentication failure password mismatch");
+	error += c_format(" Expected <%s> ", printable(&_auth[0]).c_str());
+	error += c_format(" Received <%s> ",
+			  printable(&ptr[Packet::AUTH_PAYLOAD_OFFSET]).
+			  c_str());
 	set_verify_error(error);
 	return false;
     }
