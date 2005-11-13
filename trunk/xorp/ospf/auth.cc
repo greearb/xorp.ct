@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.1 2005/11/11 11:06:12 atanu Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.2 2005/11/13 05:34:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -35,6 +35,19 @@
 #include "ospf.hh"
 #include "auth.hh"
 
+/*
+ * RFC 1141 Incremental Updating of the Internet Checksum
+ */
+inline
+uint16_t
+incremental_checksum(uint32_t orig, uint32_t add)
+{
+    // Assumes that the original value of the modified field was zero.
+    uint32_t sum = orig + (~add & 0xffff);
+    sum = (sum & 0xffff) + (sum >> 16);
+    return sum;
+}
+
 void
 AuthPlainText::generate(vector<uint8_t>& pkt) 
 {
@@ -42,6 +55,10 @@ AuthPlainText::generate(vector<uint8_t>& pkt)
 
     uint8_t *ptr = &pkt[0];
     embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], AUTH_TYPE);
+    embed_16(&ptr[Packet::CHECKSUM_OFFSET], // RFC 1141
+	     incremental_checksum(extract_16(&ptr[Packet::CHECKSUM_OFFSET]),
+				  AUTH_TYPE));
+
     memcpy(&ptr[Packet::AUTH_PAYLOAD_OFFSET], &_auth[0], sizeof(_auth));
 }
 
@@ -74,6 +91,86 @@ void
 AuthPlainText::reset()
 {
     size_t len = get_password().size();
+    memset(&_auth[0], 0, sizeof(_auth));
     memcpy(&_auth[0], get_password().c_str(),
 	   len > sizeof(_auth) ? sizeof(_auth) : len);
+}
+
+void
+AuthMD5::generate(vector<uint8_t>& pkt) 
+{
+    XLOG_ASSERT(pkt.size() >= Packet::STANDARD_HEADER_V2);
+
+    uint8_t *ptr = &pkt[0];
+
+    // Set the authentication type and zero out the checksum.
+    embed_16(&ptr[Packet::AUTH_TYPE_OFFSET], AUTH_TYPE);
+    embed_16(&ptr[Packet::CHECKSUM_OFFSET], 0);
+
+    // Set config in the authentication block.
+    embed_16(&ptr[Packet::AUTH_PAYLOAD_OFFSET], 0);
+    ptr[Packet::AUTH_PAYLOAD_OFFSET + 2] = KEY_ID;
+    ptr[Packet::AUTH_PAYLOAD_OFFSET + 3] = MD5_DIGEST_LENGTH;
+    embed_32(&ptr[Packet::AUTH_PAYLOAD_OFFSET + 4], _outbound_seqno++);
+
+    // Add the space for the digest at the end of the packet.
+    size_t pend = pkt.size();
+    pkt.resize(pend + MD5_DIGEST_LENGTH);
+    ptr = &pkt[0];
+
+    memcpy(&ptr[pend], &_key[0], MD5_DIGEST_LENGTH);
+    
+    MD5_CTX ctx;
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, &ptr[0], pkt.size());
+    MD5_Final(&ptr[pend], &ctx);
+}
+
+bool
+AuthMD5::verify(vector<uint8_t>& pkt) 
+{
+    XLOG_ASSERT(pkt.size() >= Packet::STANDARD_HEADER_V2);
+
+    uint8_t *ptr = &pkt[0];
+
+    uint32_t seqno = extract_32(&ptr[Packet::AUTH_PAYLOAD_OFFSET + 4]);
+
+    if (seqno < _inbound_seqno) {
+	string error =
+	    c_format("Authentication failure: seqno %u < expected %u", seqno,
+		     _inbound_seqno);
+	set_verify_error(error);
+	return false;
+    }
+    
+    MD5_CTX ctx;
+    uint8_t digest[MD5_DIGEST_LENGTH];
+
+    MD5_Init(&ctx);
+    MD5_Update(&ctx, &ptr[0], pkt.size() - MD5_DIGEST_LENGTH);
+    MD5_Update(&ctx, &_key[0], MD5_DIGEST_LENGTH);
+    MD5_Final(&digest[0], &ctx);
+
+    if (0 != memcmp(&digest[0], &ptr[pkt.size() - MD5_DIGEST_LENGTH],
+		    MD5_DIGEST_LENGTH)) {
+	string error = c_format("Authentication failure: digest mismatch");
+	set_verify_error(error);
+	return false;
+    }
+
+    _inbound_seqno = seqno;
+
+    return true;
+}
+
+void
+AuthMD5::reset()
+{
+    _inbound_seqno = 0;
+    _outbound_seqno = 0;
+
+    size_t len = get_password().size();
+    memset(&_key[0], 0, sizeof(_key));
+    memcpy(&_key[0], get_password().c_str(),
+	   len >  MD5_DIGEST_LENGTH ? MD5_DIGEST_LENGTH : len);
 }

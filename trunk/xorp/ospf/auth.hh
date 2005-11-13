@@ -13,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/auth.hh,v 1.2 2005/11/11 22:16:07 atanu Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.3 2005/11/13 05:34:20 atanu Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
+
+#include <openssl/md5.h>
 
 class AuthBase {
  public:
@@ -74,7 +76,7 @@ class AuthNone : public AuthBase {
 
 class AuthPlainText : public AuthBase {
  public:
-    static const OspfTypes::AuType AUTH_TYPE = 1;
+    static const OspfTypes::AuType AUTH_TYPE = OspfTypes::SIMPLE_PASSWORD;
 
     void generate(vector<uint8_t>& pkt);
     bool verify(vector<uint8_t>& pkt);
@@ -85,7 +87,18 @@ class AuthPlainText : public AuthBase {
 };
 
 class AuthMD5 : public AuthBase {
-    
+    static const OspfTypes::AuType AUTH_TYPE =
+	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION;
+    static const uint16_t KEY_ID = 1;
+
+    void generate(vector<uint8_t>& pkt);
+    bool verify(vector<uint8_t>& pkt);
+    void reset();
+
+ private:
+    uint32_t _inbound_seqno;
+    uint32_t _outbound_seqno;
+    uint8_t _key[MD5_DIGEST_LENGTH];
 };
 
 class Auth {
