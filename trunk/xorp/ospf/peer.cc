@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.182 2005/11/12 23:42:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.183 2005/11/13 05:32:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -689,6 +689,7 @@ Peer<A>::receive(A dst, A src, Packet *packet)
     if (0 == n) {
 	a.set_method(_auth_method);
 	a.set_password(_auth_password);
+	a.reset();
 	authptr = &a;
     } else {
 	Auth& ref = n->get_auth_inbound();
