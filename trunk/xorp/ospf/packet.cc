@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.28 2005/11/05 08:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.29 2005/11/11 11:03:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -188,7 +188,6 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 	break;
     }
 
-
     // Extract the checksum and check the packet.
     uint16_t checksum_inpacket = extract_16(&ptr[12]);
     // Zero the checksum location.
@@ -204,6 +203,10 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 	break;
     }
     embed_16(&ptr[12], checksum_inpacket);
+
+    if (0 == checksum_inpacket &&
+	OspfTypes::CRYPTOGRAPHIC_AUTHENTICATION == get_auth_type())
+	return get_standard_header_length();
     
     if (checksum_inpacket != checksum_actual)
 	xorp_throw(BadPacket,
