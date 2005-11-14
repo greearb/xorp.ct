@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.185 2005/11/13 21:56:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.186 2005/11/13 23:48:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3442,14 +3442,15 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    _data_description_packet.get_dd_seqno() == dd->get_dd_seqno() && 
 	    dd->get_router_id() < _ospf.get_router_id()) {  // Router is master
 	    // Bump the sequence number of the master.
-	    _last_dd.set_dd_seqno(dd->get_dd_seqno() + 1);
-	    _data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
+	    _data_description_packet.
+		set_dd_seqno(_data_description_packet.get_dd_seqno() + 1);
+	    if (!extract_lsa_headers(dd))
+		return;
 	    negotiation_done = true;
 	}
 
 	if (negotiation_done) {
 	    event_negotiation_done();
-	    extract_lsa_headers(dd);
 	}
     }
 	break;
@@ -3470,37 +3471,44 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	// Make sure the saved value is the same as the incoming.
 	if (_last_dd.get_ms_bit() != dd->get_ms_bit()) {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
-		       "sequence mismatch: MS");
+		       "Neighbour(%s) sequence mismatch: "
+		       "MS expected %s got %s",
+		       pr_id(get_candidate_id()).c_str(),
+		       pb(_last_dd.get_ms_bit()), pb(dd->get_ms_bit()));
 	    event_sequence_number_mismatch();
 	    break;
 	}
 	
 	if (dd->get_i_bit())  {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
-		       "sequence mismatch: I-Bit set");
+		       "Neighbour(%s) sequence mismatch: I-Bit set",
+		       pr_id(get_candidate_id()).c_str());
 	    event_sequence_number_mismatch();
 	    break;
 	}
 
 	if (dd->get_options() != _last_dd.get_options())  {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
-		       "sequence mismatch: (options)");
+		       "Neighbour(%s) sequence mismatch: (options)",
+		       pr_id(get_candidate_id()).c_str());
 	    event_sequence_number_mismatch();
 	    break;
 	}
 	
 	bool in_sequence = false;
-	if (_last_dd.get_ms_bit()) { // Router is slave
-	    if (_last_dd.get_dd_seqno() + 1 == dd->get_dd_seqno())
+	if (!_data_description_packet.get_ms_bit()) { // Router is slave
+	    if (_data_description_packet.get_dd_seqno() + 1 == 
+		dd->get_dd_seqno())
 		in_sequence = true;
 	} else {		     // Router is master
-	    if (_last_dd.get_dd_seqno() == dd->get_dd_seqno())
+	    if (_data_description_packet.get_dd_seqno() == dd->get_dd_seqno())
 		in_sequence = true;
 	}
 
 	if (!in_sequence)  {
 	    XLOG_TRACE(_ospf.trace()._neighbour_events,
-		       "sequence mismatch: Out of sequence");
+		       "Neighbour(%s) sequence mismatch: Out of sequence",
+		       pr_id(get_candidate_id()).c_str());
 	    event_sequence_number_mismatch();
 	    break;
 	}
@@ -3508,9 +3516,8 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	if (!extract_lsa_headers(dd))
 	    return;
 
-	if (_last_dd.get_ms_bit()) { // Router is slave
-	    _last_dd.set_dd_seqno(dd->get_dd_seqno());
-	    _data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
+	if (!_data_description_packet.get_ms_bit()) { // Router is slave
+	    _data_description_packet.set_dd_seqno(dd->get_dd_seqno());
 	    build_data_description_packet();
 	    if (!_data_description_packet.get_m_bit() &&
 		!dd->get_m_bit()) {
@@ -3521,8 +3528,8 @@ Neighbour<A>::data_description_received(DataDescriptionPacket *dd)
 	    if (_all_headers_sent && !dd->get_m_bit()) {
 		event_exchange_done();
 	    } else {
-		_last_dd.set_dd_seqno(_last_dd.get_dd_seqno() + 1);
-		_data_description_packet.set_dd_seqno(_last_dd.get_dd_seqno());
+		_data_description_packet.
+		    set_dd_seqno(_data_description_packet.get_dd_seqno() + 1);
 		build_data_description_packet();
 		send_data_description_packet();
 	    }
