@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.18 2005/03/25 02:52:42 pavlin Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.19 2005/11/13 21:59:08 mjh Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -175,47 +175,6 @@ protected:
     uint8_t _length;
     ParamType _type;
 private:
-};
-
-/* _Data Parameter here includes the first byte which is the type */
-class BGPAuthParameter: public BGPParameter {
-public:
-    BGPAuthParameter();
-    BGPAuthParameter(uint8_t l, const uint8_t* d);
-    BGPAuthParameter(uint8_t type, uint8_t length, const uint8_t* data);
-    BGPAuthParameter(const BGPAuthParameter& param);
-    void encode() const;
-    void decode();
-
-//     bool operator==(const BGPParameter& rhs) const {
-    bool compare(const BGPParameter& rhs) const {
-	const BGPAuthParameter *ptr = 
-	    dynamic_cast<const BGPAuthParameter *>(&rhs);
-	if(!ptr)
-	    return false;
-
-	XLOG_UNFINISHED();
-	return false;
-    }
-
-    void set_authcode(uint8_t a) {
-	debug_msg("_auth_code set %d\n", a);
-	_auth_code = a;
-	_data[0] = a;
-    }
-
-    uint8_t get_authcode() {
-	debug_msg("_auth_code retrieved %d\n", _auth_code);
-	return _auth_code;
-    }
-
-    void set_authdata(const uint8_t* d);
-    uint8_t* get_authdata();
-    string str() const;
-protected:
-private:
-    uint8_t _auth_code;
-    uint8_t* _auth_data;
 };
 
 

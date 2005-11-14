@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.28 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.29 2005/11/13 21:59:08 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -68,78 +68,6 @@ BGPParameter::set_length(int l)
     _data[1] = _length-2;
 }
 
-/* **************** BGPAuthParameter *********************** */
-
-BGPAuthParameter::BGPAuthParameter()
-{
-    _type = PARAMTYPEAUTH;
-    _length = 255; /* no idea really*/
-    _data = new uint8_t[_length];
-    XLOG_UNFINISHED();
-}
-
-BGPAuthParameter::BGPAuthParameter(uint8_t l, const uint8_t* d)
-    : BGPParameter(l, d)
-{
-    debug_msg("BGPAuthParameter() constructor called\n");
-    _type = PARAMTYPEAUTH;
-    decode();
-    debug_msg("_type %d _length %d (total length %d)\n",
-	      _type, _length, _length+2);
-}
-
-BGPAuthParameter::BGPAuthParameter(const BGPAuthParameter& param)
-    : BGPParameter(param)
-{
-    _auth_code = param._auth_code;
-
-    if (param._data != NULL) {
-        _length = param._length;
-        uint8_t *p = new uint8_t[_length];
-        memcpy(p, param._data, _length);
-        _data = p;
-    } else {
-        _length = 0;
-        _data = NULL;
-    }
-}
-
-void
-BGPAuthParameter::set_authdata(const uint8_t* d)
-{
-    memcpy(_data+2, d, _length-2);
-}
-
-uint8_t*
-BGPAuthParameter::get_authdata()
-{
-    return (_data + 2);
-}
-
-void
-BGPAuthParameter::decode()
-{
-    debug_msg("decode in BGPAuthParameter called\n");
-    _type = PARAMTYPEAUTH;
-    // Plus any authentication related decoding.
-    // XXX TBD
-    XLOG_UNFINISHED();
-}
-
-void
-BGPAuthParameter::encode() const
-{
-    // stuff
-}
-
-
-string
-BGPAuthParameter::str() const
-{
-    string s;
-    s = "BGP Authentication Parameter\n";
-    return s;
-}
 /* **************** BGPCapParameter *********************** */
 
 BGPCapParameter::BGPCapParameter()
@@ -625,8 +553,9 @@ BGPParameter::create(const uint8_t* d, uint16_t max_len, size_t& len)
     BGPParameter *p = NULL;
     switch (param_type) {
     case PARAMTYPEAUTH:
-	p = new BGPAuthParameter(len, d);
-	break;
+	xorp_throw(CorruptMessage,
+	       "Deprecated BGP Authentication Parameter received",
+	       OPENMSGERROR, UNSUPOPTPAR);
 
     case PARAMTYPECAP: {
 	CapType cap_type = static_cast<CapType>(d[2]);
