@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.21 2005/11/05 21:08:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.22 2005/11/12 23:43:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -433,6 +433,51 @@ XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
 						   rid))
 	return XrlCmdError::COMMAND_FAILED("Failed to remove neighbour" +
 					   neighbour_address.str());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_create_virtual_link(const IPv4& neighbour_id,
+						const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("Neighbour's router ID %s configuration area %s\n",
+	      pr_id(rid).c_str(), pr_id(area).c_str());
+
+    if (OspfTypes::BACKBONE != area) {
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Virtual link must be in area %s",
+				    pr_id(OspfTypes::BACKBONE).c_str()));
+    }
+
+    if (!_ospf.create_virtual_link(rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to create virtual link");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_delete_virtual_link(const IPv4& neighbour_id)
+{
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+
+    if (!_ospf.delete_virtual_link(rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to delete virtual link");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
+						      const IPv4& transit_area)
+{
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    OspfTypes::AreaID area = ntohl(transit_area.addr());
+
+    if (!_ospf.transit_area_virtual_link(rid, area))
+	return XrlCmdError::COMMAND_FAILED("Failed to configure transit area");
 
     return XrlCmdError::OKAY();
 }

@@ -124,7 +124,7 @@ test_routing_SOURCES = test_common.hh test_routing.cc
 test_routing_table_SOURCES = test_routing_table.cc
 
 # -- Library Sources
-libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc
+libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh vlink.hh auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc vlink.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = 
@@ -143,7 +143,7 @@ libospf_la_LIBADD =
 am_libospf_la_OBJECTS = auth.lo area_router.lo external.lo \
 	fletcher_checksum.lo lsa.lo ospf.lo packet.lo peer_manager.lo \
 	peer.lo policy_varrw.lo routing_table.lo xrl_io.lo \
-	xrl_target.lo
+	xrl_target.lo vlink.lo
 libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
@@ -314,7 +314,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/routing_table.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_checksum.Po $(DEPDIR)/test_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/test_routing.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_routing_table.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_routing_table.Po $(DEPDIR)/vlink.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_ospfv2.Po $(DEPDIR)/xorp_ospfv3.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_io.Plo $(DEPDIR)/xrl_target.Plo
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -443,6 +443,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peering.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing_table.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vlink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ospfv2.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ospfv3.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xrl_io.Plo@am__quote@

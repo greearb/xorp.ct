@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.51 2005/11/05 20:43:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.52 2005/11/12 23:43:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -229,6 +229,46 @@ Ospf<A>::set_options(const string& interface, const string& vif,
 }
 #endif
 
+template <typename A>
+bool
+Ospf<A>::create_virtual_link(OspfTypes::RouterID rid)
+{
+    try {
+	_peer_manager.create_virtual_link(rid);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::delete_virtual_link(OspfTypes::RouterID rid)
+{
+    try {
+	_peer_manager.delete_virtual_link(rid);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
+				   OspfTypes::AreaID transit_area)
+{
+    try {
+	_peer_manager.transit_area_virtual_link(rid, transit_area);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+    
 template <typename A>
 bool
 Ospf<A>::set_router_priority(const string& interface, const string& vif,

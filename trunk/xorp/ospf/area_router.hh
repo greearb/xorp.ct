@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.81 2005/11/11 01:29:19 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.82 2005/11/11 22:58:22 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -67,6 +67,16 @@ class AreaRouter : Subsystem {
      * Peer went down
      */
     bool peer_down(PeerID peer);
+
+    /**
+     * Add a virtual link endpoint.
+     */
+    bool add_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Remove a virtual link endpoint.
+     */
+    bool remove_virtual_link(OspfTypes::RouterID rid);
 
     /**
      * Add area range.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.9 2005/11/05 21:08:16 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.10 2005/11/12 23:43:23 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -81,6 +81,33 @@ interface ospfv2/0.1 {
 		  & area:ipv4 \
 		  & neighbour_address:ipv4 \
 		  & neighbour_id:ipv4
+
+    /**
+     * Create a virtual link.
+     *
+     * @param neighbour_id the router ID of the other end of the link.
+     * @param area in which an attempt has been made to configure a virtual
+     *	link it has to be the backbone. Its just being passed in so it can
+     * be checked by the protocol.
+     */
+    create_virtual_link ? neighbour_id:ipv4 \
+			& area:ipv4
+
+    /**
+     * Delete virtual link
+     *
+     * @param neighbour_id the router ID of the other end of the link.
+     */
+    delete_virtual_link ? neighbour_id:ipv4
+     
+    /**
+     * The area through which the virtual link transits.
+     *
+     * @param neighbour_id the router ID of the other end of the link.
+     * @param transit_area that the virtual link transits.
+     */
+    transit_area_virtual_link ? neighbour_id:ipv4 \
+			& transit_area:ipv4
 
     /**
      * Used in the designated router election.

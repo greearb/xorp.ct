@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.14 2005/11/05 21:08:16 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.15 2005/11/12 23:43:22 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -245,6 +245,41 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const IPv4&	area,
 	const IPv4&	neighbour_address,
 	const IPv4&	neighbour_id);
+
+    /**
+     *  Create a virtual link.
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     *
+     *  @param area in which an attempt has been made to configure a virtual
+     *  link it has to be the backbone. Its just being passed in so it can be
+     *  checked by the protocol.
+     */
+    XrlCmdError ospfv2_0_1_create_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id,
+	const IPv4&	area);
+
+    /**
+     *  Delete virtual link
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     */
+    XrlCmdError ospfv2_0_1_delete_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id);
+
+    /**
+     *  The area through which the virtual link transits.
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     *
+     *  @param transit_area that the virtual link transits.
+     */
+    XrlCmdError ospfv2_0_1_transit_area_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id,
+	const IPv4&	transit_area);
 
     /**
      *  Used in the designated router election.

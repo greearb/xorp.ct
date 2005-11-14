@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.51 2005/11/08 00:16:21 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.52 2005/11/12 23:43:22 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -33,6 +33,7 @@ template <typename A> class PeerOut;
 template <typename A> class AreaRouter;
 template <typename A> class RouteEntry;
 template <typename A> class External;
+template <typename A> class Vlink;
 
 /**
  * Peer Manager:
@@ -334,6 +335,26 @@ class PeerManager {
     uint32_t compute_options(OspfTypes::AreaType area_type);
 
     /**
+     * Create a virtual link
+     *
+     * @param rid neighbours router ID.
+     */
+    bool create_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Delete a virtual link
+     *
+     * @param rid neighbours router ID.
+     */
+    bool delete_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Attach this transit area to the neighbours router ID.
+     */
+    bool transit_area_virtual_link(OspfTypes::RouterID rid,
+				   OspfTypes::AreaID transit_area);
+    
+    /**
      * Set router priority.
      */
     bool set_router_priority(const PeerID, OspfTypes::AreaID area,
@@ -464,6 +485,7 @@ class PeerManager {
     map<OspfTypes::AreaID, AreaRouter<A> *> _areas;	// All the areas
 
     External<A> _external;		// Management of AS-External-LSAs.
+    Vlink<A> _vlink;			// Management of virtual links
 
     uint32_t	_normal_cnt;		// Number of normal areas.
     uint32_t	_stub_cnt;		// Number of stub areas.

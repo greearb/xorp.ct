@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.21 2005/11/10 21:09:09 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.22 2005/11/11 11:06:12 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -82,6 +82,7 @@ libospf_la_SOURCES  += routing_table.hh
 libospf_la_SOURCES  += xrl_io.hh
 libospf_la_SOURCES  += xrl_target.hh
 libospf_la_SOURCES  += vertex.hh
+libospf_la_SOURCES  += vlink.hh
 
 libospf_la_SOURCES  += auth.cc
 libospf_la_SOURCES  += area_router.cc
@@ -96,6 +97,7 @@ libospf_la_SOURCES  += policy_varrw.cc
 libospf_la_SOURCES  += routing_table.cc
 libospf_la_SOURCES  += xrl_io.cc
 libospf_la_SOURCES  += xrl_target.cc
+libospf_la_SOURCES  += vlink.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST	 =

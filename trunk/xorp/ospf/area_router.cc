@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.143 2005/11/11 16:33:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.144 2005/11/11 22:58:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -192,6 +192,28 @@ AreaRouter<A>::peer_down(PeerID peerid)
     psr->_up = false;
 
     refresh_router_lsa();
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::add_virtual_link(OspfTypes::RouterID rid)
+{
+    debug_msg("Router ID %s\n", pr_id(rid).c_str());
+
+    XLOG_WARNING("TBD");
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
+{
+    debug_msg("Router ID %s\n", pr_id(rid).c_str());
+
+    XLOG_WARNING("TBD");
 
     return true;
 }

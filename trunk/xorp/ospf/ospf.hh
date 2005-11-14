@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.72 2005/11/12 23:43:22 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.73 2005/11/13 06:55:10 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -353,6 +353,7 @@ struct NeighbourInfo {
 #include "transmit.hh"
 #include "peer_manager.hh"
 #include "external.hh"
+#include "vlink.hh"
 #include "routing_table.hh"
 #include "trace.hh"
 
@@ -465,6 +466,27 @@ class Ospf {
 		     OspfTypes::AreaID area,
 		     uint32_t options);
 #endif
+
+    /**
+     * Create a virtual link
+     *
+     * @param rid neighbours router ID.
+     */
+    bool create_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Delete a virtual link
+     *
+     * @param rid neighbours router ID.
+     */
+    bool delete_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Attach this transit area to the neighbours router ID.
+     */
+    bool transit_area_virtual_link(OspfTypes::RouterID rid,
+				   OspfTypes::AreaID transit_area);
+    
 
     /**
      * Set router priority.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.75 2005/11/11 11:06:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.76 2005/11/12 23:43:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -650,6 +650,48 @@ PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
     }
 
     return options.get_options();
+}
+
+template <typename A> 
+bool
+PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
+{
+    return _vlink.create_vlink(rid);
+}
+
+template <typename A> 
+bool 
+PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
+{
+    return _vlink.delete_vlink(rid);
+}
+
+template <typename A> 
+bool 
+PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
+					  OspfTypes::AreaID transit_area)
+{
+    AreaRouter<A> *area = get_area_router(transit_area);
+
+    if (0 == area)
+	return false;
+
+    OspfTypes::AreaID oarea;
+    if (!_vlink.get_transit_area(rid, oarea))
+	return false;
+
+    if (oarea == transit_area)
+	return true;
+
+    if (!_vlink.set_transit_area(rid, oarea))
+	return false;
+
+    if (OspfTypes::BACKBONE != oarea)
+ 	area->remove_virtual_link(rid);
+
+    area->add_virtual_link(rid);
+
+    return true;
 }
 
 template <typename A> 
