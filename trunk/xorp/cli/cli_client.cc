@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.44 2005/11/11 04:22:16 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.45 2005/11/13 09:21:30 pavlin Exp $"
 
 
 //
@@ -1156,7 +1156,7 @@ CliClient::post_process_command()
     set_buff_curpos(0);
     if (! is_prompt_flushed())
 	cli_print(current_cli_prompt());
-    set_prompt_flushed(false);
+    set_prompt_flushed(true);
     cli_flush();
 
     //
