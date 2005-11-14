@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.16 2005/10/28 09:13:33 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.17 2005/11/11 15:23:28 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -234,6 +234,23 @@ private:
 };
 
 /**
+ * @short BGPRouteFilter that processes well-known communities.
+ *
+ * KnownCommunityFilter is a BGPRouteFilter that drops routes with
+ * certain well-known communities.  See RFC 1997 and the IANA registry.
+ */
+
+template<class A>
+class KnownCommunityFilter : public BGPRouteFilter<A> {
+public:
+    KnownCommunityFilter(bool is_ibgp);
+    const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
+				     bool &modified) const ;
+private:
+    bool _is_ibgp;
+};
+
+/**
  * @short BGPRouteFilter that processes unknown attributes.
  *
  * UnknownFilter is a BGPRouteFilter that processes unknown attributes
@@ -298,6 +315,7 @@ public:
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
     int add_med_removal_filter();
+    int add_known_community_filter(bool is_ibgp);
     int add_unknown_filter();
     int add_originate_route_filter(const AsNum &asn, const bool);
     const InternalMessage<A> *
@@ -376,6 +394,7 @@ public:
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
     int add_med_removal_filter();
+    int add_known_community_filter(bool is_ibgp);
     int add_unknown_filter();
     int add_originate_route_filter(const AsNum &asn, const bool);
 

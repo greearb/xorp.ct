@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.72 2005/09/23 18:19:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.73 2005/10/28 22:09:29 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -493,7 +493,10 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 	filter_out->add_ibgp_loop_filter();
     }
 
-    /* 7. Process unknown attributes */
+    /* 7. configure filter for well-known communities */
+    filter_out->add_known_community_filter(ibgp);
+
+    /* 8. Process unknown attributes */
     filter_out->add_unknown_filter();
 }
 

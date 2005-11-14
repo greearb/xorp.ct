@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.35 2005/11/11 15:23:28 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.36 2005/11/13 22:54:43 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -458,6 +458,50 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
+KnownCommunityFilter<A>::KnownCommunityFilter(bool is_ibgp) 
+    : _is_ibgp(is_ibgp)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+KnownCommunityFilter<A>::filter(const InternalMessage<A> *rtmsg,
+				bool &modified) const 
+{
+    const CommunityAttribute* ca = rtmsg->route()->attributes()
+	->community_att();
+    if (ca == NULL)
+	return rtmsg;
+
+    // Routes with NO_ADVERTISE don't get sent to anyone else 
+    if (ca->contains(CommunityAttribute::NO_ADVERTISE)) {
+	drop_message(rtmsg, modified);
+	return NULL;
+    }
+
+    if (!_is_ibgp) {
+	// Routes with NO_EXPORT don't get sent to EBGP peers
+	if (ca->contains(CommunityAttribute::NO_EXPORT)) {
+	    drop_message(rtmsg, modified);
+	    return NULL;
+	}
+
+	// Routes with NO_EXPORT_SUBCONFED don't get sent to EBGP
+	// peers or to other members ASes inside a confed 
+	//
+	// XXXX need to change the condition when we check this when
+	// confederations are supported.
+	if (ca->contains(CommunityAttribute::NO_EXPORT_SUBCONFED)) {
+	    drop_message(rtmsg, modified);
+	    return NULL;
+	}
+    }
+    return rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
 UnknownFilter<A>::UnknownFilter() 
 {
 }
@@ -667,6 +711,16 @@ FilterVersion<A>::add_med_removal_filter()
     MEDRemovalFilter<A> *med_filter;
     med_filter = new MEDRemovalFilter<A>();
     _filters.push_back(med_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_known_community_filter(bool is_ibgp)
+{
+    KnownCommunityFilter<A> *wkc_filter;
+    wkc_filter = new KnownCommunityFilter<A>(is_ibgp);
+    _filters.push_back(wkc_filter);
     return 0;
 }
 
@@ -1046,6 +1100,14 @@ int
 FilterTable<A>::add_med_insertion_filter()
 {
     _current_filter->add_med_insertion_filter();
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_known_community_filter(bool is_ibgp)
+{
+    _current_filter->add_known_community_filter(is_ibgp);
     return 0;
 }
 

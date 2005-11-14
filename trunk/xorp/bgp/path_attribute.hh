@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.34 2005/07/13 21:58:37 abittau Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.36 2005/08/18 15:58:06 bms Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -398,6 +398,10 @@ private:
 class CommunityAttribute : public PathAttribute
 {
 public:
+    static const uint32_t NO_EXPORT = 0xFFFFFF01;  // RFC 1997
+    static const uint32_t NO_ADVERTISE = 0xFFFFFF02;  // RFC 1997
+    static const uint32_t NO_EXPORT_SUBCONFED = 0xFFFFFF03;  // RFC 1997
+
     typedef set <uint32_t>::const_iterator const_iterator;
     CommunityAttribute();
     CommunityAttribute(const uint8_t* d) throw(CorruptMessage);
@@ -407,6 +411,7 @@ public:
 
     const set <uint32_t>& community_set() const { return _communities; }
     void add_community(uint32_t community);
+    bool contains(uint32_t community) const;
 protected:
 private:
     void encode();

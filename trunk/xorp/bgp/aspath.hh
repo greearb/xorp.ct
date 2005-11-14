@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.20 2005/06/29 18:29:57 atanu Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.21 2005/11/13 21:59:08 mjh Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -60,7 +60,9 @@
 enum ASPathSegType {
     AS_NONE = 0,	// not initialized
     AS_SET = 1,
-    AS_SEQUENCE = 2
+    AS_SEQUENCE = 2,
+    AS_CONFED_SEQUENCE = 3,
+    AS_CONFED_SET = 4
 };
 
 /**
@@ -84,7 +86,7 @@ public:
      *
      * _type is d[0], l is d[1], entries follow.
      */
-    AsSegment(const uint8_t* d)				{ decode(d); }
+    AsSegment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
 
     /**
      * Copy constructor
@@ -176,7 +178,7 @@ public:
      * Convert the external representation into the internal one.
      * _type is d[0], _entries is d[1], entries follow.
      */
-    void decode(const uint8_t *d);
+    void decode(const uint8_t *d) throw(CorruptMessage);
 
     /**
      * Convert from internal to external representation.
@@ -234,12 +236,12 @@ protected:
    numbers from a NEW_AS_PATH attribute */
 class NewAsSegment : public AsSegment {
 public:
-    NewAsSegment(const uint8_t* d)			{ decode(d); }
+    NewAsSegment(const uint8_t* d) throw(CorruptMessage) { decode(d); }
     /**
      * Convert the external representation into the internal one.
      * _type is d[0], _entries is d[1], entries follow.
      */
-    void decode(const uint8_t *d);
+    void decode(const uint8_t *d) throw(CorruptMessage);
 
     /**
      * Convert from internal to external representation.
@@ -278,7 +280,9 @@ public:
     /**
      * construct from received data
      */
-    AsPath(const uint8_t* d, size_t len)		{ decode(d, len); }
+    AsPath(const uint8_t* d, size_t len) throw(CorruptMessage) {
+	decode(d, len); 
+    }
 
     /**
      * Copy constructor
@@ -371,7 +375,7 @@ private:
     /**
      * populate an AsPath from received data. Only used in the constructor.
      */
-    void decode(const uint8_t *d, size_t len);
+    void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
 };
 
 /* subclass to handle 4-byte AS encoding and decoding */
@@ -382,7 +386,8 @@ public:
      * AsPath in addition to the NEW_AS_PATH data, because it needs to
      * cross-validate the two.
      */
-    NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path);
+    NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
+	throw(CorruptMessage);
 
     /**
      * Convert from internal to external representation, with the
@@ -401,7 +406,7 @@ private:
     /**
      * populate an AsPath from received data. Only used in the constructor.
      */
-    void decode(const uint8_t *d, size_t len);
+    void decode(const uint8_t *d, size_t len) throw(CorruptMessage);
     void cross_validate(const AsPath& as_path);
     void pad_segment(const AsSegment& old_seg, AsSegment& new_seg);
     void do_patchup(const AsPath& as_path);

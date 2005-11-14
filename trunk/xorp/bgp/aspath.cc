@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.26 2005/08/18 15:58:04 bms Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.27 2005/11/13 21:59:08 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,6 +43,7 @@
 
 #include "aspath.hh"
 #include "path_attribute.hh"
+#include "packet.hh"
 
 extern void dump_bytes(const uint8_t *d, uint8_t l);
 
@@ -53,13 +54,24 @@ extern void dump_bytes(const uint8_t *d, uint8_t l);
  * _type is d[0], _entries is d[1], entries follow.
  */
 void
-AsSegment::decode(const uint8_t *d)
+AsSegment::decode(const uint8_t *d) throw(CorruptMessage)
 {
     size_t n = d[1];
     clear();
     _type = (ASPathSegType)d[0];
-    XLOG_ASSERT(_type == AS_NONE || _type == AS_SET || _type == AS_SEQUENCE);
-    // XXX more error checking ?
+    switch(_type) {
+    case AS_NONE:
+    case AS_SET:
+    case AS_SEQUENCE:
+	break;
+    case AS_CONFED_SET:
+    case AS_CONFED_SEQUENCE:
+	/* break; */ /* XXX uncomment this when confederations are supported */
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Bad AS Segment type: %u\n", _type),
+		   UPDATEMSGERR, MALASPATH);
+    }
 
     d += 2;	// skip header, d points to the raw data now.
     for (size_t i = 0; i < n; d += 2, i++)
@@ -225,13 +237,25 @@ AsSegment::two_byte_compatible() const
  * _type is d[0], _entries is d[1], entries follow.
  */
 void
-NewAsSegment::decode(const uint8_t *d)
+NewAsSegment::decode(const uint8_t *d) throw(CorruptMessage)
 {
     size_t n = d[1];
     clear();
     _type = (ASPathSegType)d[0];
-    XLOG_ASSERT(_type == AS_NONE || _type == AS_SET || _type == AS_SEQUENCE);
-    // XXX more error checking ?
+
+    switch(_type) {
+    case AS_NONE:
+    case AS_SET:
+    case AS_SEQUENCE:
+	break;
+    case AS_CONFED_SET:
+    case AS_CONFED_SEQUENCE:
+	/* break; */ /* XXX uncomment this when confederations are supported */
+    default:
+	xorp_throw(CorruptMessage,
+		   c_format("Bad AS Segment type: %u\n", _type),
+		   UPDATEMSGERR, MALASPATH);
+    }
 
     d += 2;	// skip header, d points to the raw data now.
     for (size_t i = 0; i < n; d += 4, i++) {
@@ -353,7 +377,7 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
  * populate an AsPath from the received data representation
  */
 void
-AsPath::decode(const uint8_t *d, size_t l)
+AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 {
     _num_segments = 0;
     _path_len = 0;
@@ -539,6 +563,7 @@ AsPath::two_byte_compatible() const
 
 
 NewAsPath::NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
+     throw(CorruptMessage)
 {
     decode(d, len);
     cross_validate(as_path);
@@ -549,7 +574,7 @@ NewAsPath::NewAsPath(const uint8_t* d, size_t len, const AsPath& as_path)
  * NEW_AS_PATH attribute.
  */
 void
-NewAsPath::decode(const uint8_t *d, size_t l)
+NewAsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 {
     _num_segments = 0;
     _path_len = 0;
