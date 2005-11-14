@@ -12488,7 +12488,16 @@ echo "${ECHO_T}$ac_cv_header_netinet_ip_mroute_h" >&6
 
 fi
 if test $ac_cv_header_netinet_ip_mroute_h = yes; then
-  test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"
+  test_netinet_ip_mroute_h="
+/*
+ * XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
+ * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+ * to define _KERNEL before including <netinet/ip_mroute.h>.
+ */
+#define _KERNEL
+#include <netinet/ip_mroute.h>
+#undef _KERNEL
+"
 else
   test_netinet_ip_mroute_h=""
 fi

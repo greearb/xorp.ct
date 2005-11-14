@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.3 2005/08/26 19:32:42 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.4 2005/10/28 17:05:15 pavlin Exp $
 dnl
 
 dnl
@@ -77,7 +77,16 @@ AC_CHECK_HEADER(netinet/in_var.h,
   [test_netinet_in_var_h="#include <netinet/in_var.h>"],
   [test_netinet_in_var_h=""])
 AC_CHECK_HEADER(netinet/ip_mroute.h,
-  [test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"],
+  [test_netinet_ip_mroute_h="
+/*
+ * XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
+ * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+ * to define _KERNEL before including <netinet/ip_mroute.h>.
+ */
+#define _KERNEL
+#include <netinet/ip_mroute.h>
+#undef _KERNEL
+"],
   [test_netinet_ip_mroute_h=""])
 AC_CHECK_HEADER(linux/mroute.h,
   [test_linux_mroute_h=["
