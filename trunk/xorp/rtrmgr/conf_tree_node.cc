@@ -1387,6 +1387,7 @@ ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
 bool
 ConfigTreeNode::expand_variable(const string& varname, string& value) const
 {
+
     VarType type = NONE;
     const ConfigTreeNode *varname_node;
 
@@ -1546,34 +1547,22 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 
     if (varname == "$(@)" || (varname == "$(" + _segname + ")") ) {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
-	if (deleted()) {
-	    type = NONE;
-	    return NULL;
-	}
-	debug_msg("varname node is >%s<\n", _segname.c_str());
 	type = NODE_VALUE;
+	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
 
     if (varname == "$(<>)") {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
-	if (deleted()) {
-	    type = NONE;
-	    return NULL;
-	}
-	debug_msg("varname node is >%s<\n", _segname.c_str());
 	type = NODE_OPERATOR;
+	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
 
     if (varname == "$(#)") {
 	XLOG_ASSERT(!_template_tree_node->is_tag());
-	if (deleted()) {
-	    type = NONE;
-	    return NULL;
-	}
-	debug_msg("varname node is >%s<\n", _segname.c_str());
 	type = NODE_ID;
+	debug_msg("varname node is >%s<\n", _segname.c_str());
 	return this;
     }
 
@@ -1669,8 +1658,8 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     // heading towards the parent.
     //
     if ((var_parts.front() == "@") && _on_parent_path == false) {
-	debug_msg("no on parent path\n");
 	type = NONE;
+	debug_msg("no on parent path\n");
 	return NULL;
     }
 
@@ -1695,20 +1684,16 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
 	&& (var_parts.front() != "#") 
 	&& ((!_has_value) || (var_parts.front() != _value))) {
 	// varname doesn't match us.
-	debug_msg("varname doesn't match\n");
 	type = NONE;
+	debug_msg("varname doesn't match\n");
 	return NULL;
     }
 
     // The name might refer to this node
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "@") || (var_parts.front() == _segname)) {
-	    if (deleted()) {
-		type = NONE;
-		return NULL;
-	    }
-	    debug_msg("varname V node is >%s<\n", _segname.c_str());
 	    type = NODE_VALUE;
+	    debug_msg("varname V node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1716,12 +1701,8 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     // The name might refer to this node for an operator
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "<>")) {
-	    if (deleted()) {
-		type = NONE;
-		return NULL;
-	    }
-	    debug_msg("varname O node is >%s<\n", _segname.c_str());
 	    type = NODE_OPERATOR;
+	    debug_msg("varname O node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1729,12 +1710,8 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     // The name might refer to this node for a node ID
     if (var_parts.size() == 1) {
 	if ((var_parts.front() == "#")) {
-	    if (deleted()) {
-		type = NONE;
-		return NULL;
-	    }
-	    debug_msg("varname # node is >%s<\n", _segname.c_str());
 	    type = NODE_ID;
+	    debug_msg("varname # node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
@@ -1742,12 +1719,8 @@ ConfigTreeNode::find_child_varname_node(const list<string>& var_parts,
     if (var_parts.size() == 2) {
 	// The name might refer to a named variable on this node
 	if (_variables.find(var_parts.back()) != _variables.end()) {
-	    if (deleted()) {
-		type = NONE;
-		return NULL;
-	    }
-	    debug_msg("varname N node is >%s<\n", _segname.c_str());
 	    type = NAMED;
+	    debug_msg("varname N node is >%s<\n", _segname.c_str());
 	    return this;
 	}
     }
