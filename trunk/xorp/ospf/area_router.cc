@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.144 2005/11/11 22:58:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.145 2005/11/14 19:33:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -202,7 +202,19 @@ AreaRouter<A>::add_virtual_link(OspfTypes::RouterID rid)
 {
     debug_msg("Router ID %s\n", pr_id(rid).c_str());
 
-    XLOG_WARNING("TBD");
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	XLOG_WARNING("Can't configure a virtual link through a %s area",
+		     pp_area_type(_area_type).c_str());
+	return false;
+	break;
+    }
+
+    XLOG_ASSERT(0 == _vlinks.count(rid));
+    _vlinks.insert(rid);
 
     return true;
 }
@@ -213,7 +225,19 @@ AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
 {
     debug_msg("Router ID %s\n", pr_id(rid).c_str());
 
-    XLOG_WARNING("TBD");
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	XLOG_WARNING("Can't configure a virtual link through a %s area",
+		     pp_area_type(_area_type).c_str());
+	return false;
+	break;
+    }
+
+    XLOG_ASSERT(0 != _vlinks.count(rid));
+    _vlinks.erase(_vlinks.find(rid));
 
     return true;
 }

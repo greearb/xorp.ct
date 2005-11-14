@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.76 2005/11/12 23:43:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.77 2005/11/14 19:33:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -683,13 +683,18 @@ PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
     if (oarea == transit_area)
 	return true;
 
-    if (!_vlink.set_transit_area(rid, oarea))
+    if (!_vlink.set_transit_area(rid, transit_area))
 	return false;
 
     if (OspfTypes::BACKBONE != oarea)
  	area->remove_virtual_link(rid);
 
-    area->add_virtual_link(rid);
+    // It may not be possible to add a link to this area because it
+    // may be a stub area. If the add link fails backout the change.
+    if (!area->add_virtual_link(rid)) {
+	_vlink.set_transit_area(rid, oarea);
+	return false;
+    }
 
     return true;
 }
