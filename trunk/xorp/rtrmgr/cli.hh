@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.38 2005/11/11 02:08:33 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.39 2005/11/11 04:38:30 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -205,8 +205,8 @@ public:
     void op_mode_cmd_tidy();
 
 private:
-    static const string DEFAULT_OPERATIONAL_MODE_PROMPT;
-    static const string DEFAULT_CONFIGURATION_MODE_PROMPT;
+    static const string DEFAULT_XORP_PROMPT_OPERATIONAL;
+    static const string DEFAULT_XORP_PROMPT_CONFIGURATION;
 
     CliClient& cli_client() const { return (*_cli_client_ptr); }
     void reset_path();

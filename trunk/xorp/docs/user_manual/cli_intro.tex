@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.8 2005/09/29 01:46:33 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.9 2005/11/11 06:24:02 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -795,12 +795,12 @@ The default operational and configuration mode prompts are
 
 The operational and configuration mode prompts can be modified by the
 following environmental variables respectively:
-{\textbf XORP\_OPERATIONAL\_MODE\_PROMPT} and
-{\textbf XORP\_CONFIGURATION\_MODE\_PROMPT}.
+{\textbf XORP\_PROMPT\_OPERATIONAL} and
+{\textbf XORP\_PROMPT\_CONFIGURATION}.
 
 \begin{verbatim}
-user@hostname[10] env XORP_OPERATIONAL_MODE_PROMPT="foo " 
-                      XORP_CONFIGURATION_MODE_PROMPT="bar " ./xorpsh
+user@hostname[10] env XORP_PROMPT_OPERATIONAL="foo " 
+                      XORP_PROMPT_CONFIGURATION="bar " ./xorpsh
 Welcome to XORP on hostname
 foo configure
 Entering configuration mode.

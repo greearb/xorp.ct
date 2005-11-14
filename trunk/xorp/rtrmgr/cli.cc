@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.105 2005/11/11 02:08:33 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.106 2005/11/11 04:38:30 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -66,8 +66,8 @@ get_my_user_name()
 }
 
 
-const string RouterCLI::DEFAULT_OPERATIONAL_MODE_PROMPT = "Xorp> ";
-const string RouterCLI::DEFAULT_CONFIGURATION_MODE_PROMPT = "XORP# ";
+const string RouterCLI::DEFAULT_XORP_PROMPT_OPERATIONAL = "Xorp> ";
+const string RouterCLI::DEFAULT_XORP_PROMPT_CONFIGURATION = "XORP# ";
 
 RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 		     XorpFd cli_client_input_fd, XorpFd cli_client_output_fd,
@@ -76,8 +76,8 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
       _cli_node(cli_node),
       _cli_client_ptr(NULL),
       _verbose(verbose),
-      _operational_mode_prompt(DEFAULT_OPERATIONAL_MODE_PROMPT),
-      _configuration_mode_prompt(DEFAULT_CONFIGURATION_MODE_PROMPT),
+      _operational_mode_prompt(DEFAULT_XORP_PROMPT_OPERATIONAL),
+      _configuration_mode_prompt(DEFAULT_XORP_PROMPT_CONFIGURATION),
       _mode(CLI_MODE_NONE),
       _changes_made(false),
       _op_mode_cmd(NULL)
@@ -130,10 +130,10 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 
     // Check for environmental variables that may overwrite the prompts
     char* value = NULL;
-    value = getenv("XORP_OPERATIONAL_MODE_PROMPT");
+    value = getenv("XORP_PROMPT_OPERATIONAL");
     if (value != NULL)
 	_operational_mode_prompt = value;
-    value = getenv("XORP_CONFIGURATION_MODE_PROMPT");
+    value = getenv("XORP_PROMPT_CONFIGURATION");
     if (value != NULL)
 	_configuration_mode_prompt = value;
 
