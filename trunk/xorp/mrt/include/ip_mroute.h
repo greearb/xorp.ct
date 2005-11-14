@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.11 2005/08/27 05:18:16 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.12 2005/10/30 21:23:38 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -40,8 +40,9 @@
  *
  * Prologue.
  *
- * The definition of 'struct igmpmsg' is wrapped under
- * an #ifdef _KERNEL conditional on these platforms.
+ * XXX: On these platforms the definition of 'struct igmpmsg'
+ * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+ * to define _KERNEL before including <netinet/ip_mroute.h>.
  */
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 #define	_KERNEL
