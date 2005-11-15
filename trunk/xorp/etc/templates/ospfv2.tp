@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.23 2005/11/12 23:38:15 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.24 2005/11/13 05:35:56 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -11,6 +11,10 @@ protocols {
 
 	    area-range @: ipv4net {
 		advertise:	bool = true;
+	    }
+
+	    virtual-link @: ipv4 {
+		transit-area: ipv4;
 	    }
 
 	    interface @: txt {
@@ -136,6 +140,19 @@ transmitted packets";
 		    %help: short "Advertise or DoNotAdvertise";
 
 		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.@)&advertise:bool=$(@)";
+		}
+	    }
+
+	    virtual-link @: ipv4 {
+		%help: short "virtual link";
+
+		%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&area:ipv4=$(area.@)";
+		%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_virtual_link?neighbour_id:ipv4=$(virtual-link.@)";
+
+		transit-area {
+		    %help: short "Area through which to transit";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/transit_area_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&transit_area:ipv4=$(@)";
 		}
 	    }
 
