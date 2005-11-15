@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.1 2005/11/15 18:04:29 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -168,4 +168,4 @@ private:
 };
 
 
-#endif __BGP_ROUTE_TABLE_AGGREGATION_HH__
+#endif // __BGP_ROUTE_TABLE_AGGREGATION_HH__
