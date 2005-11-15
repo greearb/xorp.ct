@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.1 2005/11/15 18:04:29 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -31,7 +31,7 @@ AggregationTable<A>::AggregationTable(string table_name,
     : BGPRouteTable<A>("AggregationTable-" + table_name, master.safi()),
       _master_plumbing(master)
 {
-    _parent = parent_table;
+    this->_parent = parent_table;
 }
 
 
@@ -50,15 +50,15 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 			     BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
     const SubnetRoute<A> *orig_route = rtmsg.route();
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
     bool must_push = false;
 
@@ -69,7 +69,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     uint32_t aggr_prefix_len = rtmsg.route()->aggr_prefix_len();
     debug_msg("\naggr_prefix_len=%d\n", aggr_prefix_len);
     if (aggr_prefix_len == SR_AGGR_IGNORE)
-	return _next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
+	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 
     /*
      * If route has less specific prefix length then the requested
@@ -104,7 +104,8 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	if (must_push)
 	    ibgp_msg.set_push();
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
-	int res = _next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
+	int res = this->_next_table->
+	    add_route(ibgp_msg, (BGPRouteTable<A>*)this);
 	ibgp_r->unref();
 	return res;
     }
@@ -155,7 +156,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
-	_next_table->add_route(ebgp_msg, (BGPRouteTable<A>*)this);
+	this->_next_table->add_route(ebgp_msg, (BGPRouteTable<A>*)this);
 	ebgp_r->unref();
     }
 
@@ -172,10 +173,10 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      * route only to IBGP peering and localRIB.
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
-    int res = _next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
+    int res = this->_next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
     ibgp_r->unref();
     if (must_push)
-	_next_table->push(this);
+	this->_next_table->push(this);
     return res;
 }
 
@@ -186,15 +187,15 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 				  BGPRouteTable<A> *caller)
 {
     debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller ? caller->tablename().c_str() : "NULL",
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
     const SubnetRoute<A> *orig_route = rtmsg.route();
-    XLOG_ASSERT(caller == _parent);
-    XLOG_ASSERT(_next_table != NULL);
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
     bool must_push = false;
 
@@ -205,7 +206,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     uint32_t aggr_prefix_len = orig_route->aggr_prefix_len();
     debug_msg("\naggr_prefix_len=%d\n", aggr_prefix_len);
     if (aggr_prefix_len == SR_AGGR_IGNORE)
-	return _next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
+	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 
     /*
      * If route has less specific prefix length then the requested
@@ -240,7 +241,8 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	if (must_push)
 	    ibgp_msg.set_push();
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
-	int res = _next_table->delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
+	int res = this->_next_table->
+	    delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
 	ibgp_r->unref();
 	return res;
     }
@@ -282,7 +284,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
-	_next_table->delete_route(ebgp_msg, (BGPRouteTable<A>*)this);
+	this->_next_table->delete_route(ebgp_msg, (BGPRouteTable<A>*)this);
 	ebgp_r->unref();
     }
 
@@ -306,10 +308,11 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
      * route only to IBGP peering and localRIB.
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
-    int res = _next_table->delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
+    int res = this->_next_table->
+	delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
     ibgp_r->unref();
     if (must_push)
-	_next_table->push(this);
+	this->_next_table->push(this);
     return res;
 }
 
@@ -318,15 +321,16 @@ template<class A>
 void
 AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 {
-    RefTrie<A, const ComponentRoute<A> >::PostOrderIterator comp_iter;
+    typename RefTrie<A, const ComponentRoute<A> >::PostOrderIterator comp_iter;
     uint32_t med = 0;
     bool must_set_atomic_aggr = false;
     bool old_was_suppressed = _is_suppressed;
     _is_suppressed = false;
     const PathAttributeList<A> *old_pa_list = _pa_list;
-    _pa_list = new PathAttributeList<A>(NextHopAttribute<A>(A::ZERO()),
-					AsPath(),
-					OriginAttribute(IGP));
+	    NextHopAttribute<A> nhatt(A::ZERO());
+	    AsPath aspath;
+	    OriginAttribute igp_origin_att(IGP);
+	    _pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
     /*
      * PHASE 1:
      *
@@ -471,7 +475,7 @@ AggregationTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      "old route: %p"
 	      "new route: %p"
 	      "old: %s\n new: %s\n",
-	      tablename().c_str(),
+	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &old_rtmsg,
 	      &new_rtmsg,
@@ -480,12 +484,12 @@ AggregationTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	      old_rtmsg.str().c_str(),
 	      new_rtmsg.str().c_str());
 
-    XLOG_ASSERT(caller == _parent);
+    XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(old_rtmsg.route()->nexthop_resolved());
     XLOG_ASSERT(new_rtmsg.route()->nexthop_resolved());
 
-    _next_table->delete_route(old_rtmsg, (BGPRouteTable<A>*)this);
-    return _next_table->add_route(old_rtmsg, (BGPRouteTable<A>*)this);
+    this->_next_table->delete_route(old_rtmsg, (BGPRouteTable<A>*)this);
+    return this->_next_table->add_route(old_rtmsg, (BGPRouteTable<A>*)this);
 }
 
 
@@ -494,8 +498,8 @@ int
 AggregationTable<A>::push(BGPRouteTable<A> *caller)
 {
     debug_msg("Push\n");
-    XLOG_ASSERT(caller == _parent);
-    return _next_table->push((BGPRouteTable<A>*)this);
+    XLOG_ASSERT(caller == this->_parent);
+    return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
 // XXX keep those in place to trap calls to methods bellow
@@ -510,7 +514,7 @@ AggregationTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
 {
     debug_msg("Lookup_route\n");
     // XXX Can this ever be called?  REVISIT!!!
-    return _parent->lookup_route(net, genid);
+    return this->_parent->lookup_route(net, genid);
 }
 
 template<class A>
@@ -519,14 +523,14 @@ AggregationTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
 {
     debug_msg("route_used\n");
     // XXX Can this ever be called?  REVISIT!!!
-    _parent->route_used(rt, in_use);
+    this->_parent->route_used(rt, in_use);
 }
 
 template<class A>
 string
 AggregationTable<A>::str() const
 {
-    string s = "AggregationTable<A>" + tablename();
+    string s = "AggregationTable<A>" + this->tablename();
     return s;
 }
 
@@ -538,7 +542,6 @@ AggregationTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     // XXX Can this ever be called?  REVISIT!!!
     return 0; // XXX
 }
-
 
 template class AggregationTable<IPv4>;
 template class AggregationTable<IPv6>;
