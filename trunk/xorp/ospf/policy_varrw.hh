@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.3 2005/10/22 06:15:30 atanu Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.4 2005/10/31 07:58:40 atanu Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
@@ -51,8 +51,7 @@ class OspfVarRW : public SingleVarRW {
     bool& _e_bit;
     uint32_t& _tag;
 
-    // Take a copy of the policy tags, allowing us to reset them.
-    PolicyTags _policytags;
+    PolicyTags& _policytags;
 
     ElementFactory _ef;
 };
