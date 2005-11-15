@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.31 2005/07/08 02:06:18 abittau Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.32 2005/10/28 22:09:29 mjh Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -23,6 +23,7 @@
 #include "route_table_deletion.hh"
 #include "route_table_ribout.hh"
 #include "route_table_decision.hh"
+#include "route_table_aggregation.hh"
 #include "route_table_fanout.hh"
 #include "route_table_dump.hh"
 #include "route_table_filter.hh"
@@ -112,6 +113,7 @@ private:
     map <PeerHandler*, RibOutTable<A>*> _out_map;
     DecisionTable<A> *_decision_table;
     PolicyTableSourceMatch<A>* _policy_sourcematch_table;
+    AggregationTable<A> *_aggregation_table;
     FanoutTable<A> *_fanout_table;
     RibInTable<A> *_ipc_rib_in_table;
     RibOutTable<A> *_ipc_rib_out_table;

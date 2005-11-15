@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.74 2005/11/14 20:01:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.75 2005/11/15 11:43:59 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -315,12 +315,18 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				      _master.main().eventloop());
     _decision_table->set_next_table(_policy_sourcematch_table);
 
+    _aggregation_table =
+	new AggregationTable<A>(ribname + "AggregationTable",
+				_master,
+				_policy_sourcematch_table);
+    _policy_sourcematch_table->set_next_table(_aggregation_table);
 
-    _fanout_table = 
-	new FanoutTable<A>(ribname + "FanoutTable", 
+    _fanout_table =
+	new FanoutTable<A>(ribname + "FanoutTable",
 			   _master.safi(),
-			   _policy_sourcematch_table);
-    _policy_sourcematch_table->set_next_table(_fanout_table);
+			   _aggregation_table);
+    _aggregation_table->set_next_table(_fanout_table);
+
 
     /*
      * Plumb the input branch
@@ -331,8 +337,6 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			  _master.safi(),
 			  _master.rib_handler());
     _in_map[_master.rib_handler()] = _ipc_rib_in_table;
-
-    
 
     FilterTable<A>* filter_in =
 	new FilterTable<A>(_ribname + "IpcChannelInputFilter",
@@ -392,6 +396,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     filter_out->set_next_table(policy_filter_out);
     _tables.insert(policy_filter_out);
 
+    // Drop in an aggregation filter - beheave like an IBGP peering
+    filter_out->add_aggregation_filter(true);
 
     CacheTable<A> *cache_out =
 	new CacheTable<A>(ribname + "IpcChannelOutputCache",
@@ -435,7 +441,6 @@ BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
     PeerType peer_type = peer_handler->get_peer_type();
     const AsNum& my_AS_number = _master.my_AS_number();
 
-    
     /* 1. configure the loop filters */
     filter_in->add_simple_AS_filter(my_AS_number);
 
@@ -459,7 +464,10 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
     PeerType peer_type = peer_handler->get_peer_type();
     A my_nexthop(get_local_nexthop(peer_handler));
 
-    /* 1. configure the loop filters */
+    /* 1. configure aggregation filters */
+    filter_out->add_aggregation_filter(peer_handler->ibgp());
+
+    /* 1.1 configure the loop filters */
     filter_out->add_simple_AS_filter(his_AS_number);
 
     /* 2. configure as_prepend filters for EBGP peers*/
