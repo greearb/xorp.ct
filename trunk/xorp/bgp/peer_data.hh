@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.15 2005/03/25 02:52:43 pavlin Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.16 2005/09/23 17:02:55 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -30,12 +30,25 @@
 const size_t BGPVERSION = 4;
 
 /**
+ * Types of BGP Peering Sessions 
+ */
+enum PeerType {
+    PEER_TYPE_EBGP = 0,	
+    PEER_TYPE_IBGP = 1,
+    PEER_TYPE_EBGP_CONFED = 2,
+    PEER_TYPE_IBGP_CLIENT = 3,
+    PEER_TYPE_INTERNAL = 255 // connects to RIB
+} ;
+
+
+/**
  * Data that applies to a specific peering.
  */
 class BGPPeerData {
 public:
     BGPPeerData(const Iptuple& iptuple,	AsNum as,
-		const IPv4& next_hop, const uint16_t holdtime);
+		const IPv4& next_hop, const uint16_t holdtime, 
+		const PeerType peer_type);
     ~BGPPeerData();
 
     const Iptuple& iptuple() const		{ return _iptuple; }
@@ -55,8 +68,35 @@ public:
     const IPv4& id() const			{ return _id; }
     void set_id(const IPv4& i)			{ _id = i; }
 
-    bool get_internal_peer() const;
-    void set_internal_peer(bool p);
+
+    string get_peer_type_str() const;
+    PeerType get_peer_type() const;
+    void set_peer_type(PeerType t);
+
+    /**
+     * true if peer type is either PEER_TYPE_IBGP or PEER_TYPE_IBGP_CLIENT
+     */
+    bool ibgp() const;		 	
+
+    /**
+     * true if peer type is PEER_TYPE_IEBGP 
+     */
+    bool ibgp_vanilla() const;		
+
+    /**
+     * true if peer type is PEER_TYPE_IBGP_CLIENT
+     */
+    bool ibgp_client() const;		
+    
+    /**
+     * true if peer type is PEER_TYPE_EBGP
+     */
+    bool ebgp_vanilla() const;		
+
+    /**
+     * true if peer type is PEER_TYPE_EBGP_CONFED
+     */
+    bool ebgp_confed() const;		
 
     void add_recv_parameter(const ParameterNode& p) {
 	add_parameter(_recv_parameters, p);
@@ -247,6 +287,9 @@ private:
      * IPv6 nexthop
      */
     IPv6 _nexthop_ipv6;
+
+
+    PeerType _peer_type;  // the type of this peering session 
     
     /**
      * Parameters received by our peer.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.36 2005/08/18 15:58:06 bms Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.37 2005/11/14 20:01:39 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -74,6 +74,8 @@ enum PathAttType {
     ATOMIC_AGGREGATE = 6,
     AGGREGATOR = 7,
     COMMUNITY = 8,
+    ORIGINATOR_ID = 9,
+    CLUSTER_LIST = 10,
     MP_REACH_NLRI = 14,
     MP_UNREACH_NLRI = 15,
 };
@@ -417,6 +419,44 @@ private:
     void encode();
     set <uint32_t> _communities;
 };
+
+/**
+ * ORIGINATOR_IDAttribute is an optional non-transitive uint32
+ */
+class ORIGINATOR_IDAttribute : public PathAttribute
+{
+public:
+    ORIGINATOR_IDAttribute(const uint32_t originator_id);
+    ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMessage);
+    PathAttribute *clone() const;
+
+    string str() const;
+
+    uint32_t originator_id() const     { return _originator_id; }
+protected:
+private:
+    void encode();
+    uint32_t _originator_id;	
+};
+
+class CLUSTER_LISTAttribute : public PathAttribute
+{
+public:
+    typedef list <uint32_t>::const_iterator const_iterator;
+    CLUSTER_LISTAttribute();
+    CLUSTER_LISTAttribute(const uint8_t* d) throw(CorruptMessage);
+    PathAttribute *clone() const;
+
+    string str() const;
+
+    const list <uint32_t>& cluster_list() const { return _cluster_list; }
+    void prepend_cluster_id(uint32_t cluster_id);
+protected:
+private:
+    void encode();
+    list <uint32_t> _cluster_list;
+};
+
 
 template <class A>
 class MPReachNLRIAttribute : public PathAttribute

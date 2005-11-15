@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.57 2005/11/01 02:13:45 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.58 2005/11/02 01:09:27 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -581,7 +581,8 @@ BGPMain::change_tuple(const Iptuple& iptuple, const Iptuple& nptuple)
 	BGPPeerData(nptuple,
 		    peer->peerdata()->as(),
 		    peer->peerdata()->get_v4_local_addr(),
-		    peer->peerdata()->get_configured_hold_time());
+		    peer->peerdata()->get_configured_hold_time(),
+		    peer->peerdata()->get_peer_type());
 
     if (!create_peer(pd)) {
 	delete pd;

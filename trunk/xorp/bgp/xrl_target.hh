@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.31 2005/10/25 20:44:33 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.32 2005/10/25 22:28:19 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -75,6 +75,7 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	as,
 	const IPv4&	next_hop,
+	const bool&     is_client,  
 	const uint32_t&	holdtime);
 
     XrlCmdError bgp_0_2_delete_peer(

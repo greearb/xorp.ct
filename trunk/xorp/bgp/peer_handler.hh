@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.17 2005/06/28 09:30:14 mjh Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.18 2005/11/02 07:36:12 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -100,13 +100,18 @@ public:
     virtual void output_no_longer_busy();
 
     AsNum AS_number() const		{ return _peer->peerdata()->as(); }
+
+    virtual PeerType get_peer_type() const { 
+	return _peer->peerdata()->get_peer_type(); 
+    }
+
     const string& peername() const	{ return _peername; }
     bool ibgp() const			{
 	if (0 == _peer)	{
 	    XLOG_ASSERT(originate_route_handler());
 	    return false;
 	}
-	return _peer->peerdata()->get_internal_peer();
+	return _peer->peerdata()->ibgp();
     }
 
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.36 2005/11/13 22:54:43 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.37 2005/11/14 20:01:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -139,8 +139,9 @@ SimpleASFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-ASPrependFilter<A>::ASPrependFilter(const AsNum &as_num) 
-    : _as_num(as_num)
+ASPrependFilter<A>::ASPrependFilter(const AsNum &as_num, 
+				    bool is_confederation_peer) 
+    : _as_num(as_num), _is_confederation_peer(is_confederation_peer)
 {
 }
 
@@ -151,7 +152,12 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 {
     //Create a new AS path with our AS number prepended to it.
     AsPath new_as_path(rtmsg->route()->attributes()->aspath());
-    new_as_path.prepend_as(_as_num);
+
+    if (_is_confederation_peer) { 
+	new_as_path.prepend_confed_as(_as_num);
+    } else {
+	new_as_path.prepend_as(_as_num);
+    } 
 
     //Form a new path attribute list containing the new AS path
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
@@ -247,10 +253,11 @@ IBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
 			  bool &modified) const 
 {
 
-    //If the route originated from an IBGP peer, this filter will drop
-    //the route.
+    //If the route originated from a vanilla IBGP, then this filter
+    //will drop the route.  This filter should only be plumbed on the
+    //output branch to a vanilla IBGP peer.
 
-    if (rtmsg->origin_peer()->ibgp() == true) {
+    if (rtmsg->origin_peer()->get_peer_type() == PEER_TYPE_IBGP) {
 	drop_message(rtmsg, modified);
 	return NULL;
     }
@@ -458,8 +465,8 @@ MEDRemovalFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-KnownCommunityFilter<A>::KnownCommunityFilter(bool is_ibgp) 
-    : _is_ibgp(is_ibgp)
+KnownCommunityFilter<A>::KnownCommunityFilter(PeerType peer_type) 
+    : _peer_type(peer_type)
 {
 }
 
@@ -479,18 +486,17 @@ KnownCommunityFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	return NULL;
     }
 
-    if (!_is_ibgp) {
+    if (_peer_type == PEER_TYPE_EBGP) {
 	// Routes with NO_EXPORT don't get sent to EBGP peers
 	if (ca->contains(CommunityAttribute::NO_EXPORT)) {
 	    drop_message(rtmsg, modified);
 	    return NULL;
 	}
-
+    }
+    
+    if (_peer_type == PEER_TYPE_EBGP || _peer_type == PEER_TYPE_EBGP_CONFED) {
 	// Routes with NO_EXPORT_SUBCONFED don't get sent to EBGP
 	// peers or to other members ASes inside a confed 
-	//
-	// XXXX need to change the condition when we check this when
-	// confederations are supported.
 	if (ca->contains(CommunityAttribute::NO_EXPORT_SUBCONFED)) {
 	    drop_message(rtmsg, modified);
 	    return NULL;
@@ -547,8 +553,8 @@ UnknownFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
 template<class A>
 OriginateRouteFilter<A>::OriginateRouteFilter(const AsNum &as_num,
-					      const bool ibgp)
-    :  _as_num(as_num), _ibgp(ibgp)
+					      PeerType peer_type)
+    :  _as_num(as_num), _peer_type(peer_type)
 {
 }
 
@@ -567,7 +573,7 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 #if	0
     // If this is an EBGP peering then assume the AS is already
     // present. Perhaps we should check.
-    if (false == _ibgp)
+    if (peer_type == PEER_TYPE_EBGP || peer_type == PEER_TYPE_EBGP_CONFED)
 	return rtmsg;
 
     //Create a new AS path with our AS number prepended to it.
@@ -646,10 +652,11 @@ FilterVersion<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
-FilterVersion<A>::add_AS_prepend_filter(const AsNum& as_num)
+FilterVersion<A>::add_AS_prepend_filter(const AsNum& as_num,
+					bool is_confederation_peer)
 {
     ASPrependFilter<A>* AS_prepender;
-    AS_prepender = new ASPrependFilter<A>(as_num);
+    AS_prepender = new ASPrependFilter<A>(as_num, is_confederation_peer);
     _filters.push_back(AS_prepender);
     return 0;
 }
@@ -716,10 +723,10 @@ FilterVersion<A>::add_med_removal_filter()
 
 template<class A>
 int
-FilterVersion<A>::add_known_community_filter(bool is_ibgp)
+FilterVersion<A>::add_known_community_filter(PeerType peer_type)
 {
     KnownCommunityFilter<A> *wkc_filter;
-    wkc_filter = new KnownCommunityFilter<A>(is_ibgp);
+    wkc_filter = new KnownCommunityFilter<A>(peer_type);
     _filters.push_back(wkc_filter);
     return 0;
 }
@@ -736,10 +743,11 @@ FilterVersion<A>::add_unknown_filter()
 
 template<class A>
 int
-FilterVersion<A>::add_originate_route_filter(const AsNum &asn, const bool ibgp)
+FilterVersion<A>::add_originate_route_filter(const AsNum &asn, 
+					     PeerType peer_type)
 {
     OriginateRouteFilter<A> *originate_route_filter;
-    originate_route_filter = new OriginateRouteFilter<A>(asn, ibgp);
+    originate_route_filter = new OriginateRouteFilter<A>(asn, peer_type);
     _filters.push_back(originate_route_filter);
     return 0;
 }
@@ -1057,9 +1065,10 @@ FilterTable<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
-FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num)
+FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num, 
+				      bool is_confederation_peer)
 {
-    _current_filter->add_AS_prepend_filter(as_num);
+    _current_filter->add_AS_prepend_filter(as_num, is_confederation_peer);
     return 0;
 }
 
@@ -1105,9 +1114,9 @@ FilterTable<A>::add_med_insertion_filter()
 
 template<class A>
 int
-FilterTable<A>::add_known_community_filter(bool is_ibgp)
+FilterTable<A>::add_known_community_filter(PeerType peer_type)
 {
-    _current_filter->add_known_community_filter(is_ibgp);
+    _current_filter->add_known_community_filter(peer_type);
     return 0;
 }
 
@@ -1129,9 +1138,10 @@ FilterTable<A>::add_unknown_filter()
 
 template<class A>
 int
-FilterTable<A>::add_originate_route_filter(const AsNum &asn, const bool ibgp)
+FilterTable<A>::add_originate_route_filter(const AsNum &asn, 
+					   PeerType peer_type)
 {
-    _current_filter->add_originate_route_filter(asn, ibgp);
+    _current_filter->add_originate_route_filter(asn, peer_type);
     return 0;
 }
 

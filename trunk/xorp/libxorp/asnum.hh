@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.10 2005/03/25 02:53:37 pavlin Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.11 2005/07/29 20:06:30 bms Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
@@ -65,7 +65,7 @@ public:
      */
     explicit AsNum(const uint32_t value) : _as(value)	{
 	// XXX remove when we support 32-bit AS
-	assert(value <= 0xffff);
+	//assert(value <= 0xffff);
     }
  
     explicit AsNum(const uint16_t value) : _as(value)	{}

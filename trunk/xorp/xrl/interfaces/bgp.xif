@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.24 2005/10/25 20:44:34 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.25 2005/10/25 22:28:19 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -56,6 +56,7 @@ interface bgp/0.2 {
 	 * @param peer port.
 	 * @param as the peer's AS number.
 	 * @param next_hop the local next hop.
+	 * @param is_client is true if peer is a route reflector client
 	 * @param holdtime if traffic is not received in holdtime seconds
 	 *        a peering is considered down.
 	 */
@@ -67,6 +68,7 @@ interface bgp/0.2 {
 		& peer_port:u32 \
 		& as:u32 \
 		& next_hop:ipv4 \
+		& is_client:bool \
 	        & holdtime:u32
 
 	/**

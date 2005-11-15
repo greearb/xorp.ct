@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.21 2005/11/13 21:59:08 mjh Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.22 2005/11/14 20:01:39 mjh Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -54,6 +54,16 @@
  *
  * Note that the external representation (provided by encode()) returns
  * a malloc'ed chunk of memory which must be freed by the caller.
+ *
+ * RFC 3065 (Autonomous System Confederations for BGP) introduced two
+ * additional segment types:
+ *
+ * AS_CONFED_SEQUENCE: ordered set of Member AS Numbers
+ * in the local confederation that the UPDATE message has traversed
+ *
+ * AS_CONFED_SET: unordered set of Member AS Numbers in
+ * the local confederation that the UPDATE message has traversed
+ *  
  */
 
 // AS Path Values
@@ -114,9 +124,9 @@ public:
      * and the length of the sequence for an AS_SEQUENCE
      */
     size_t path_length() const				{
-	if (_type == AS_SET)
+	if (_type == AS_SET || _type == AS_CONFED_SET)
 	    return 1;
-	else if (_type == AS_SEQUENCE)
+	else if (_type == AS_SEQUENCE || _type == AS_CONFED_SEQUENCE)
 	    return _entries;
 	else
 	    return 0; // XXX should not be called!
@@ -261,8 +271,8 @@ private:
 };
 
 /**
- * An AsPath is a list of AsSegments, each of which can be an AS_SET
- * or an AS_SEQUENCE.
+ * An AsPath is a list of AsSegments, each of which can be an AS_SET,
+ * AS_CONFED_SET, AS_SEQUENCE, or an AS_CONFED_SEQUENCE.
  */
 class AsPath {
 public:
@@ -351,6 +361,19 @@ public:
      * new AS_SEQUENCE with the new AsNum to the start of the AsPath
      */
     void prepend_as(const AsNum &asn);
+
+    /**
+     * Add the As number to the begining of the AS_CONFED_SEQUENCE
+     * that starts the As path, or if the AsPath does not start with
+     * an AS_CONFED_SEQUENCE, then add a new AS_CONFED_SEQUENCE with
+     * the new AsNum to the start of the AsPath
+     */
+    void prepend_confed_as(const AsNum &asn);
+
+    /**
+     * remove all confederation segments from aspath 
+     */
+    void remove_confed_segments();
 
     bool operator==(const AsPath& him) const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.8 2005/03/25 02:52:40 pavlin Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.10 2005/08/18 15:58:05 bms Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -20,6 +20,8 @@
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include <list>
 
 #include "bgp_module.h"
 #include "libxorp/debug.h"
@@ -67,8 +69,41 @@ public:
 	_id = i;
     }
 
+    /**
+     * Get confederation members
+     */
+    inline const list<AsNum>& get_confed_member_list() {
+	return _confed_member_list; 
+    }
+
+    /**
+     * Set confederation members
+     */
+     void set_confed_member_list(const list<AsNum> l) {
+	 _confed_member_list = l;
+    }
+
+    /**
+     * Test conderderation status
+     */
+    bool is_confederation() {
+	return !_confed_member_list.empty();  
+    }
+
+    /**
+     * Test conderderation membership 
+     */
+    bool in_confederation(AsNum asn) {
+	list <AsNum>::const_iterator iter;
+	for (iter = _confed_member_list.begin(); iter != _confed_member_list.end(); ++iter)
+	    if (*iter == asn)
+		return true;
+	return false;
+    }
+
 private:
-    AsNum	_as;	// This routers AS number.
-    IPv4	_id;	// This routers ID.
+    AsNum	_as;	                // This routers AS number.
+    IPv4	_id;	                // This routers ID.
+    list<AsNum>	_confed_member_list;	// List of confederation members
 };
 #endif // __BGP_LOCAL_DATA_HH__

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.24 2005/06/28 09:30:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.26 2005/08/18 15:58:08 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,14 +59,14 @@ test_ribout(TestInfo& /*info*/)
     LocalData localdata;
     Iptuple iptuple;
     BGPPeerData *peer_data1
-	= new BGPPeerData(iptuple, AsNum(1), IPv4("2.0.0.1"), 30);
-    peer_data1->set_internal_peer(true);
+	= new BGPPeerData(iptuple, AsNum(1), IPv4("2.0.0.1"), 30,
+			  PEER_TYPE_IBGP);
     BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     DebugPeerHandler handler(&peer1);
 
     BGPPeerData *peer_data2
-	= new BGPPeerData(iptuple, AsNum(2), IPv4("2.0.0.2"), 30);
-    peer_data2->set_internal_peer(false);
+	= new BGPPeerData(iptuple, AsNum(2), IPv4("2.0.0.2"), 30,
+			  PEER_TYPE_EBGP);
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     DebugPeerHandler ebgp_handler(&peer2);
 

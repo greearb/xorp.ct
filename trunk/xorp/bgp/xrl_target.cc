@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.45 2005/10/25 22:28:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.46 2005/11/02 01:09:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -192,6 +192,7 @@ XrlBgpTarget::bgp_0_2_add_peer(
 	const uint32_t&	peer_port, 
 	const uint32_t&	as, 
 	const IPv4&	next_hop,
+	const bool&     is_client,  
 	const uint32_t&	holdtime)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u as %u"
@@ -212,8 +213,21 @@ XrlBgpTarget::bgp_0_2_add_peer(
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
-	pd = new BGPPeerData(iptuple, AsNum(static_cast<uint16_t>(as)),
-			     next_hop, holdtime);
+
+	// Calculate PeerType
+        AsNum asn(static_cast<uint16_t>(as)); 
+	PeerType peer_type = PEER_TYPE_EBGP; 
+        if (_bgp.get_local_data()->as() == asn) { 
+             if (is_client) 
+                  peer_type = PEER_TYPE_IBGP_CLIENT; 
+             else 
+                  peer_type = PEER_TYPE_IBGP; 
+        } else if (_bgp.get_local_data()->in_confederation(asn)) { 
+	       peer_type = PEER_TYPE_EBGP_CONFED;		  
+        } 
+
+	pd = new BGPPeerData(iptuple, asn, next_hop, holdtime, peer_type);
+
     } catch(XorpException& e) {
 	delete pd;
 	return XrlCmdError::COMMAND_FAILED(e.str());

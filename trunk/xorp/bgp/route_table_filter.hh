@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.17 2005/11/11 15:23:28 zec Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.18 2005/11/14 20:01:40 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -22,6 +22,7 @@
 #include <map>
 #include "route_table_base.hh"
 #include "next_hop_resolver.hh"
+#include "peer_data.hh"
 
 /**
  * @short Base class for a single filter within FilterTable's filter bank.
@@ -84,6 +85,8 @@ private:
  * particular AS in their AS path.  This is typically used in loop
  * prevention, where an inbound filter from an EBGP peer drops routes
  * that contain our own AS number
+ * 
+ * This works on both regular EBGP and CONFEDERATION EBGP sessions 
  */
 
 template<class A>
@@ -104,17 +107,20 @@ private:
  * ASPrependFilter is a BGPRouteFilter that prepends an AS to the AS
  * path.  This is typically used when sending a route to an EBGP peer
  * to add our own AS number to the path.
+ * 
+ * This works on both regular EBGP and CONFEDERATION EBGP sessions 
  */
 
 template<class A>
 class ASPrependFilter : public BGPRouteFilter<A> {
 public:
-    ASPrependFilter(const AsNum &as_num);
+    ASPrependFilter(const AsNum &as_num, bool is_confederation_peer);
     const InternalMessage<A>* 
        filter(const InternalMessage<A> *rtmsg, 
 	      bool &modified) const;
 private:
     AsNum _as_num;
+    bool _is_confederation_peer; 
 };
 
 
@@ -243,11 +249,11 @@ private:
 template<class A>
 class KnownCommunityFilter : public BGPRouteFilter<A> {
 public:
-    KnownCommunityFilter(bool is_ibgp);
+    KnownCommunityFilter(PeerType peer_type);
     const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
 				     bool &modified) const ;
 private:
-    bool _is_ibgp;
+    PeerType _peer_type;
 };
 
 /**
@@ -283,12 +289,12 @@ private:
 template<class A>
 class OriginateRouteFilter : public BGPRouteFilter<A> {
 public:
-    OriginateRouteFilter(const AsNum &as_num, const bool ibgp);
+    OriginateRouteFilter(const AsNum &as_num, PeerType peer_type);
     const InternalMessage<A>* filter(const InternalMessage<A> *rtmsg, 
 				     bool &modified) const ;
 private:
     AsNum _as_num;
-    bool _ibgp;
+    PeerType _peer_type;
 };
 
 /**
@@ -308,16 +314,16 @@ public:
     ~FilterVersion();
     int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
-    int add_AS_prepend_filter(const AsNum &asn);
+    int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
     int add_nexthop_rewrite_filter(const A& nexthop);
     int add_ibgp_loop_filter();
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
     int add_med_removal_filter();
-    int add_known_community_filter(bool is_ibgp);
+    int add_known_community_filter(PeerType peer_type);
     int add_unknown_filter();
-    int add_originate_route_filter(const AsNum &asn, const bool);
+    int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
     int ref_count() const {return _ref_count;}
@@ -387,16 +393,16 @@ public:
 
     int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
-    int add_AS_prepend_filter(const AsNum &asn);
+    int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
     int add_nexthop_rewrite_filter(const A& nexthop);
     int add_ibgp_loop_filter();
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
     int add_med_removal_filter();
-    int add_known_community_filter(bool is_ibgp);
+    int add_known_community_filter(PeerType peer_type);
     int add_unknown_filter();
-    int add_originate_route_filter(const AsNum &asn, const bool);
+    int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
 
 private:
     const InternalMessage<A> *

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.60 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.61 2005/11/14 20:01:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -489,6 +489,126 @@ CommunityAttribute::contains(uint32_t community) const
 	return false;
     return true;
 }
+
+
+/**
+ * ORIGINATOR_IDAttribute
+ */
+
+ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint32_t originator_id)
+	: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
+{
+    encode();
+}
+
+PathAttribute *
+ORIGINATOR_IDAttribute::clone() const
+{
+    return new ORIGINATOR_IDAttribute(originator_id());
+}
+
+ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMessage)
+    : PathAttribute(d)
+{
+    if (!optional() || transitive())
+	xorp_throw(CorruptMessage, "Bad Flags in ORIGINATOR_IDAttribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+    if (length(d) != 4)
+	xorp_throw(CorruptMessage, "Bad size in ORIGINATOR_IDAttribute",
+		   UPDATEMSGERR, INVALNHATTR);
+    memcpy(&_originator_id, payload(d), 4);
+    _originator_id = ntohl(_originator_id);
+    encode();
+}
+
+void
+ORIGINATOR_IDAttribute::encode()
+{
+    uint8_t *d = set_header(4);
+    uint32_t x = htonl(_originator_id);
+    memcpy(d, &x, 4);
+}
+
+string
+ORIGINATOR_IDAttribute::str() const
+{
+    return c_format("ORIGINATOR ID Attribute: ORIGINATOR_ID=%u",
+		    XORP_UINT_CAST(originator_id()));
+}
+
+
+
+/**
+ * CLUSTER_LISTAttribute
+ */
+
+CLUSTER_LISTAttribute::CLUSTER_LISTAttribute()
+	: PathAttribute(Optional, CLUSTER_LIST)
+{
+    encode();
+
+}
+
+CLUSTER_LISTAttribute::CLUSTER_LISTAttribute(const uint8_t* d)
+	throw(CorruptMessage)
+	: PathAttribute(d)
+{
+    if (!optional() || transitive())
+	xorp_throw(CorruptMessage,
+		   "Bad Flags in CLUSTER_LIST attribute",
+		   UPDATEMSGERR, ATTRFLAGS);
+    d = payload(d);
+    for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
+	uint32_t value;
+	memcpy(&value, d, 4);
+	_cluster_list.push_front(ntohl(value));
+    }
+    encode();
+}
+
+PathAttribute *
+CLUSTER_LISTAttribute::clone() const
+{
+    CLUSTER_LISTAttribute *ca = new CLUSTER_LISTAttribute();
+    for(const_iterator i = cluster_list().end(); i != cluster_list().begin(); i--)
+	ca->prepend_cluster_id(*i);
+    return ca;
+}
+
+void
+CLUSTER_LISTAttribute::encode()
+{
+    assert(_size == (4 * _cluster_list.size()) );
+    assert(_size < 256);
+
+    delete[] _data;
+    uint8_t *d = set_header(_size);
+    const_iterator i = _cluster_list.begin();
+    for (; i != _cluster_list.end(); d += 4, i++) {
+	uint32_t value = htonl(*i);
+	memcpy(d, &value, 4);
+    }
+}
+
+string
+CLUSTER_LISTAttribute::str() const
+{
+    string s = "Cluster List Attribute ";
+    const_iterator i = _cluster_list.begin();
+    for ( ; i != _cluster_list.end();  ++i)
+	s += c_format("%u ", XORP_UINT_CAST(*i));
+    return s;
+}
+
+void
+CLUSTER_LISTAttribute::prepend_cluster_id(uint32_t cluster_id)
+{
+    _cluster_list.push_front(cluster_id);
+    _size += 4;
+    encode();
+}
+
+
 
 /**
  * Multiprotocol Reachable NLRI - MP_REACH_NLRI (Type Code 14):
@@ -1265,7 +1385,15 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
     case COMMUNITY:
 	pa = new CommunityAttribute(d);
 	break;
-         
+
+    case ORIGINATOR_ID:
+	pa = new ORIGINATOR_IDAttribute(d);
+	break;
+
+    case CLUSTER_LIST:
+	pa = new CLUSTER_LISTAttribute(d);
+	break;
+
     case MP_REACH_NLRI:
 	try {
 	    pa = new MPReachNLRIAttribute<IPv6>(d);
@@ -1324,6 +1452,14 @@ PathAttribute::str() const
 
     case COMMUNITY:
 	s += "COMMUNITY";
+	break;
+
+    case ORIGINATOR_ID:
+	s += "ORIGINATOR_ID";
+	break;
+
+    case CLUSTER_LIST:
+	s += "CLUSTER_LIST";
 	break;
 
     case MP_REACH_NLRI:

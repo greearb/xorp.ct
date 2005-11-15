@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.62 2005/11/11 15:26:27 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.63 2005/11/12 06:18:00 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -16,6 +16,7 @@ protocols {
 	    holdtime: u32 = 90;
 	    disable: bool = false;
 	    enabled: bool;			/* %deprecated */
+	    client: bool = false;
 
 	    ipv4-unicast: bool = true;
 	    ipv4-multicast: bool = false;
@@ -147,7 +148,7 @@ protocols {
 	    %mandatory: $(@.peer-port);
 	    %mandatory: $(@.local-ip);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&is_client:bool=$(@.client)&holdtime:u32=$(@.holdtime)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 /*
@@ -319,6 +320,10 @@ protocols {
 
 	    enabled {
 		%help: short "Enable this peering.";
+	    }
+
+	    client {
+		%help: short "Treat peer as a route reflector client.";
 	    }
 
 /*

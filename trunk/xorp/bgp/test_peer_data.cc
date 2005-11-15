@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.8 2005/03/25 02:52:50 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.10 2005/08/18 15:58:08 bms Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ test2(TestInfo& info)
     ** Create a PeerData structure.
     */
     Iptuple iptuple;
-    BGPPeerData pd(iptuple, AsNum(12), IPv4("10.10.10.10"), 0);
+    BGPPeerData pd(iptuple, AsNum(12), IPv4("10.10.10.10"), 0, PEER_TYPE_EBGP);
 
     if(!pd.multiprotocol<IPv4>(SAFI_UNICAST)) {
 	DOUT(info) << "We should offer unicast IPv4 by default\n";

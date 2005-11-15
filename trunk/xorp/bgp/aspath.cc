@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.27 2005/11/13 21:59:08 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.28 2005/11/14 20:01:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -63,10 +63,9 @@ AsSegment::decode(const uint8_t *d) throw(CorruptMessage)
     case AS_NONE:
     case AS_SET:
     case AS_SEQUENCE:
-	break;
     case AS_CONFED_SET:
     case AS_CONFED_SEQUENCE:
-	/* break; */ /* XXX uncomment this when confederations are supported */
+	break;
     default:
 	xorp_throw(CorruptMessage,
 		   c_format("Bad AS Segment type: %u\n", _type),
@@ -111,7 +110,7 @@ AsSegment::encode(size_t &len, uint8_t *data) const
 const AsNum&
 AsSegment::first_asnum() const
 {
-    if (_type == AS_SET) {
+    if (_type == AS_SET || _type == AS_CONFED_SET) {
 	// This shouldn't be possible.  The spec doesn't explicitly
 	// prohibit passing someone an AS_PATH starting with an AS_SET,
 	// but it doesn't make sense, and doesn't seem to be allowed by
@@ -124,11 +123,35 @@ AsSegment::first_asnum() const
     return _aslist.front();
 }
 
+/**
+ * prints AsSegments as 
+ *
+ *  AS_SEQUENCE:         [comma-separated-asn-list]  
+ *  AS_SET:              {comma-separated-asn-list}
+ *  AS_CONFED_SEQUENCE:  (comma-separated-asn-list)
+ *  AS_CONFED_SET:       <comma-separated-asn-list> 
+ */
 string
 AsSegment::str() const
 {
     string s;
-    string sep = (_type == AS_SET) ? "{": "[";	// separator
+    string sep; 
+    switch(_type) {
+    case AS_NONE: 
+	break; 
+    case AS_SET: 
+	sep = "{"; 
+	break; 
+    case AS_SEQUENCE: 
+	sep = "[";  
+	break; 
+    case AS_CONFED_SEQUENCE: 
+	sep = "(";  
+	break; 
+    case AS_CONFED_SET: 
+	sep = "<";  
+	break; 
+    }
     const_iterator iter = _aslist.begin();
 
     for (u_int i = 0; i<_entries; i++, ++iter) {
@@ -136,15 +159,55 @@ AsSegment::str() const
 	s += iter->str();
 	sep = ", ";
     }
-    s += (_type == AS_SET) ? "}": "]";
+    switch(_type) {
+    case AS_NONE: 
+	break; 
+    case AS_SET: 
+	sep = "}"; 
+	break; 
+    case AS_SEQUENCE: 
+	sep = "]";  
+	break; 
+    case AS_CONFED_SEQUENCE: 
+	sep = ")";  
+	break; 
+    case AS_CONFED_SET: 
+	sep = ">";  
+	break; 
+    }
+    s += sep; 
     return s;
 }
 
+/**
+ * prints AsSegments as 
+ *
+ *  AS_SEQUENCE:         comma-separated-asn-list
+ *  AS_SET:              {comma-separated-asn-list}
+ *  AS_CONFED_SEQUENCE:  (comma-separated-asn-list)
+ *  AS_CONFED_SET:       <comma-separated-asn-list> 
+ */
 string
 AsSegment::short_str() const
 {
     string s;
-    string sep = (_type == AS_SET) ? "{": "";	// separator
+    string sep; 
+    switch(_type) {
+    case AS_NONE: 
+	break; 
+    case AS_SET: 
+	sep = "{"; 
+	break; 
+    case AS_SEQUENCE: 
+	sep = "";  
+	break; 
+    case AS_CONFED_SEQUENCE: 
+	sep = "(";  
+	break; 
+    case AS_CONFED_SET: 
+	sep = "<";  
+	break; 
+    }
     const_iterator iter = _aslist.begin();
 
     for (u_int i = 0; i<_entries; i++, ++iter) {
@@ -152,7 +215,24 @@ AsSegment::short_str() const
 	s += iter->short_str();
 	sep = " ";
     }
-    s += (_type == AS_SET) ? "}": "";
+    switch(_type) {
+    case AS_NONE: 
+	break; 
+    case AS_SET: 
+	sep = "}"; 
+	break; 
+    case AS_SEQUENCE: 
+	sep = "";  
+	break; 
+    case AS_CONFED_SEQUENCE: 
+	sep = ")";  
+	break; 
+    case AS_CONFED_SET: 
+	sep = ">";  
+	break; 
+    }
+    s += sep; 
+
     return s;
 }
 
@@ -247,10 +327,9 @@ NewAsSegment::decode(const uint8_t *d) throw(CorruptMessage)
     case AS_NONE:
     case AS_SET:
     case AS_SEQUENCE:
-	break;
     case AS_CONFED_SET:
     case AS_CONFED_SEQUENCE:
-	/* break; */ /* XXX uncomment this when confederations are supported */
+	break;
     default:
 	xorp_throw(CorruptMessage,
 		   c_format("Bad AS Segment type: %u\n", _type),
@@ -303,10 +382,21 @@ NewAsSegment::encode(size_t &len, uint8_t *data) const
 /* *************** AsPath *********************** */
 
 /**
- * constructor (parsing strings of the form below)
+ * AsPath constructor by parsing strings.  Input strings 
+ * should have the form 
+ * 
+ *         "segment, segment, segment, ... ,segment"  
+ * 
+ * where segments are parsed as 
  *
- * "1, 2,(3, 4, 5), 6,(7, 8), 9"
+ *  AS_SEQUENCE:         [comma-separated-asn-list]  or comma-separated-asn-list
+ *  AS_SET:              {comma-separated-asn-list}
+ *  AS_CONFED_SEQUENCE:  (comma-separated-asn-list)
+ *  AS_CONFED_SET:       <comma-separated-asn-list> 
+ * 
+ *  blank spaces " " can appear at any point in the string. 
  */
+
 AsPath::AsPath(const char *as_path) throw(InvalidString)
 {
     debug_msg("AsPath(%s) constructor called\n", as_path);
@@ -339,18 +429,75 @@ AsPath::AsPath(const char *as_path) throw(InvalidString)
 	    i--; // back to last valid character
 	    debug_msg("asnum = %d\n", num);
 	    seg.add_as(AsNum(num));
+	} else if (c == '[') {
+	    if (seg.type() == AS_SEQUENCE) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else if (seg.type() != AS_NONE) // nested, invalid
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
+	    seg.set_type(AS_SEQUENCE);
+	} else if (c == ']') {
+	    if (seg.type() == AS_SEQUENCE) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
+	} else if (c == '{') {
+	    if (seg.type() == AS_SEQUENCE) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else if (seg.type() != AS_NONE) // nested, invalid
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
+	    seg.set_type(AS_SET);
+	} else if (c == '}') {
+	    if (seg.type() == AS_SET) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
 	} else if (c == '(') {
 	    if (seg.type() == AS_SEQUENCE) {
 		// push previous thing and start a new one
 		add_segment(seg);
 		seg.clear();
-	    } else if (seg.type() == AS_SET) // nested, invalid
+	    } else if (seg.type() != AS_NONE) // nested, invalid
 		xorp_throw(InvalidString,
 		       c_format("Illegal character: <%c> %s",
 				c, path.c_str()));
-	    seg.set_type(AS_SET);
+	    seg.set_type(AS_CONFED_SEQUENCE);
 	} else if (c == ')') {
-	    if (seg.type() == AS_SET) {
+	    if (seg.type() == AS_CONFED_SEQUENCE) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
+	} else if (c == '<') {
+	    if (seg.type() == AS_SEQUENCE) {
+		// push previous thing and start a new one
+		add_segment(seg);
+		seg.clear();
+	    } else if (seg.type() != AS_NONE) // nested, invalid
+		xorp_throw(InvalidString,
+		       c_format("Illegal character: <%c> %s",
+				c, path.c_str()));
+	    seg.set_type(AS_CONFED_SET);
+	} else if (c == '>') {
+	    if (seg.type() == AS_CONFED_SET) {
 		// push previous thing and start a new one
 		add_segment(seg);
 		seg.clear();
@@ -493,6 +640,40 @@ AsPath::prepend_as(const AsNum &asn)
     }
     _path_len++;	// in both cases the length increases by one.
 }
+
+void
+AsPath::prepend_confed_as(const AsNum &asn)
+{
+    if (_segments.empty() || _segments.front().type() == AS_SET 
+	|| _segments.front().type() == AS_SEQUENCE) {
+	AsSegment seg = AsSegment(AS_CONFED_SEQUENCE);
+
+	seg.add_as(asn);
+	_segments.push_front(seg);
+	_num_segments++;
+    } else {
+	XLOG_ASSERT(_segments.front().type() == AS_CONFED_SEQUENCE);
+	_segments.front().prepend_as(asn);
+    }
+    _path_len++;	// in both cases the length increases by one.
+}
+
+void
+AsPath::remove_confed_segments()
+{
+        debug_msg("Deleting all CONFED Segments\n");
+	const_iterator iter = _segments.begin();
+	while(iter != _segments.end()) {
+	    if ((*iter).type() == AS_CONFED_SEQUENCE 
+		|| (*iter).type() == AS_CONFED_SET) {
+		_path_len--;
+		_num_segments--;
+		_segments.remove((*iter)); 
+	    } 
+	    ++iter;
+	}
+}
+
 
 bool
 AsPath::operator==(const AsPath& him) const

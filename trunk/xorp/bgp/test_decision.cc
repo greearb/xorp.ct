@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_decision.cc,v 1.31 2005/03/25 02:52:48 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_decision.cc,v 1.33 2005/08/18 15:58:07 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,27 +62,27 @@ test_decision(TestInfo& /*info*/)
 
     Iptuple iptuple1("3.0.0.127", 179, "2.0.0.1", 179);
     BGPPeerData *peer_data1 =
-	new BGPPeerData(iptuple1, AsNum(1), IPv4("2.0.0.1"), 30);
+	new BGPPeerData(iptuple1, AsNum(1), IPv4("2.0.0.1"), 30,
+			PEER_TYPE_IBGP);
     // start off with both being IBGP
-    peer_data1->set_internal_peer(true);
     peer_data1->set_id("2.0.0.0");
     BGPPeer peer1(&localdata, peer_data1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
 
     Iptuple iptuple2("3.0.0.127", 179, "2.0.0.2", 179);
     BGPPeerData *peer_data2 =
-	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.2"), 30);
+	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.2"), 30,
+			PEER_TYPE_IBGP);
     // start off with both being IBGP
-    peer_data2->set_internal_peer(true);
     peer_data2->set_id("2.0.0.1");
     BGPPeer peer2(&localdata, peer_data2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     Iptuple iptuple3("3.0.0.127", 179, "2.0.0.3", 179);
     BGPPeerData *peer_data3 =
-	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.3"), 30);
+	new BGPPeerData(iptuple2, AsNum(1), IPv4("2.0.0.3"), 30,
+			PEER_TYPE_IBGP);
     // start off with both being IBGP
-    peer_data3->set_internal_peer(true);
     peer_data3->set_id("2.0.0.3");
     BGPPeer peer3(&localdata, peer_data3, NULL, &bgpmain);
     PeerHandler handler3("test3", &peer3, NULL, NULL);
@@ -2549,7 +2549,7 @@ test_decision(TestInfo& /*info*/)
     next_hop_resolver.unset_nexthop_metric(nexthop3);
     next_hop_resolver.set_nexthop_metric(nexthop1, 200);
     next_hop_resolver.set_nexthop_metric(nexthop3, 100);
-    peer_data2->set_internal_peer(false);
+    peer_data2->set_peer_type(PEER_TYPE_EBGP);
     peer_data2->set_as(AsNum(9));
     debug_table->write_comment("******************************************");
     debug_table->write_comment("TEST 13");

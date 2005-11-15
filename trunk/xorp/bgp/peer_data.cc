@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.23 2005/09/23 17:02:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.24 2005/09/29 00:10:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -29,9 +29,11 @@
 #include "peer_data.hh"
 
 BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
-			 const IPv4& next_hop, const uint16_t holdtime)
+			 const IPv4& next_hop, const uint16_t holdtime,
+                         const PeerType peer_type)
     : _iptuple(iptuple), _as(as),
-      _hold_duration(0), _retry_duration(0), _keepalive_duration(0)
+      _hold_duration(0), _retry_duration(0), _keepalive_duration(0),
+      _peer_type(peer_type)
 {
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
@@ -57,20 +59,85 @@ BGPPeerData::~BGPPeerData()
 {
 }
 
-// Set whether a peer is internal or external
-void
-BGPPeerData::set_internal_peer(bool i)
+string
+BGPPeerData::get_peer_type_str() const
 {
-    debug_msg("Internal peer set as %i\n", i);
-    _internal = i;
+    string s; 
+    switch (get_peer_type()) {
+    case PEER_TYPE_EBGP:
+	s += "EBGP";
+	break;
+
+    case PEER_TYPE_IBGP:
+	s += "IBGP";
+	break;
+
+    case PEER_TYPE_EBGP_CONFED:
+	s += "Confederation EBGP";
+	break;
+
+    case PEER_TYPE_IBGP_CLIENT:
+	s += "IBGP CLIENT";
+	break;
+
+    case PEER_TYPE_INTERNAL:
+	XLOG_UNREACHABLE();  // this should never happen
+	break;
+
+    default:
+	s += c_format("UNKNOWN(%d)", get_peer_type());
+    }
+    return s;
+}
+
+PeerType
+BGPPeerData::get_peer_type() const
+{
+    debug_msg("Peer type retrieved as %s\n", get_peer_type_str().c_str());
+    return _peer_type;
+}
+
+
+// Set type of peering session
+void
+BGPPeerData::set_peer_type(PeerType t)
+{
+    _peer_type = t;
+    debug_msg("Peer type set as %s\n", get_peer_type_str().c_str());
+}
+
+
+
+bool
+BGPPeerData::ibgp() const
+{
+    return _peer_type == PEER_TYPE_IBGP || _peer_type == PEER_TYPE_IBGP_CLIENT;
 }
 
 bool
-BGPPeerData::get_internal_peer() const
+BGPPeerData::ibgp_vanilla() const
 {
-    debug_msg("Internal Peer retrieved as %i\n", _internal);
-    return _internal;
+    return _peer_type == PEER_TYPE_IBGP;
 }
+
+bool
+BGPPeerData::ibgp_client() const
+{
+    return _peer_type == PEER_TYPE_IBGP_CLIENT;
+}
+
+bool
+BGPPeerData::ebgp_vanilla() const
+{
+    return _peer_type == PEER_TYPE_EBGP;
+}
+
+bool
+BGPPeerData::ebgp_confed() const
+{
+    return _peer_type == PEER_TYPE_EBGP_CONFED;
+}
+
 
 uint32_t
 BGPPeerData::get_hold_duration() const

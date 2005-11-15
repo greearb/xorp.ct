@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.73 2005/10/28 22:09:29 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.74 2005/11/14 20:01:39 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -432,7 +432,7 @@ void
 BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
 					   FilterTable<A>* filter_in)
 {
-    bool ibgp = peer_handler->ibgp();
+    PeerType peer_type = peer_handler->get_peer_type();
     const AsNum& my_AS_number = _master.my_AS_number();
 
     
@@ -440,8 +440,10 @@ BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
     filter_in->add_simple_AS_filter(my_AS_number);
 
     /* 2. Configure local preference filter.
-       Add LOCAL_PREF on receipt from EBGP peer.  */
-    if (ibgp == false) {
+       Add LOCAL_PREF on receipt from EBGP peer, or when originating.  */
+    if (   peer_type == PEER_TYPE_EBGP 
+	|| peer_type == PEER_TYPE_EBGP_CONFED 
+	|| peer_type == PEER_TYPE_INTERNAL ) {
 	filter_in->add_localpref_insertion_filter(
 	  LocalPrefAttribute::default_value() );
     }
@@ -452,49 +454,51 @@ void
 BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 					    FilterTable<A>* filter_out)
 {
-    bool ibgp = peer_handler->ibgp();
     const AsNum& his_AS_number = peer_handler->AS_number();
     const AsNum& my_AS_number = _master.my_AS_number();
+    PeerType peer_type = peer_handler->get_peer_type();
     A my_nexthop(get_local_nexthop(peer_handler));
 
     /* 1. configure the loop filters */
     filter_out->add_simple_AS_filter(his_AS_number);
 
     /* 2. configure as_prepend filters for EBGP peers*/
-    if (ibgp == false) {
-	filter_out->add_AS_prepend_filter(my_AS_number);
+    if (peer_type == PEER_TYPE_EBGP) {
+	filter_out->add_AS_prepend_filter(my_AS_number, false);
     }
-
+    if (peer_type == PEER_TYPE_EBGP_CONFED) {
+	filter_out->add_AS_prepend_filter(my_AS_number, true);
+    }
     /* 2.1 For routes that we originate add our AS if its not already
        (EBGP peers) present. */
-    filter_out->add_originate_route_filter(my_AS_number, ibgp);
+    filter_out->add_originate_route_filter(my_AS_number, peer_type);
 
     /* 3. Configure MED filter.
 	  Remove old MED and add new one on transmission to EBGP peers. */
     /* Note: this MUST come before the nexthop rewriter */
-    if (ibgp == false) {
+    if (peer_type == PEER_TYPE_EBGP) {
 	filter_out->add_med_removal_filter();
 	filter_out->add_med_insertion_filter();
     }
 
     /* 4. configure next_hop rewriter for EBGP peers*/
-    if (ibgp == false) {
+    if (peer_type == PEER_TYPE_EBGP) {
 	filter_out->add_nexthop_rewrite_filter(my_nexthop);
     }
 
     /* 5. Configure local preference filter.
 	  Remove LOCAL_PREF on transmission to EBGP peers. */
-    if (ibgp == false) {
+    if (peer_type == PEER_TYPE_EBGP) {
 	filter_out->add_localpref_removal_filter();
     }
 
     /* 6. configure loop filter for IBGP peers */
-    if (ibgp == true) {
+    if (peer_type == PEER_TYPE_IBGP) {
 	filter_out->add_ibgp_loop_filter();
     }
 
     /* 7. configure filter for well-known communities */
-    filter_out->add_known_community_filter(ibgp);
+    filter_out->add_known_community_filter(peer_type);
 
     /* 8. Process unknown attributes */
     filter_out->add_unknown_filter();
