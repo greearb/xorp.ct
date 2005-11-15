@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.99 2005/11/03 17:18:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.101 2005/11/14 09:49:30 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1243,6 +1243,10 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 	     their_iter != them.const_children().end();
 	     ++their_iter) {
 	    ConfigTreeNode* their_child = *their_iter;
+
+	    if (their_child->deleted())
+		continue;	// XXX: ignore deleted nodes
+
 	    // Are the nodes the same?
 	    if (my_child->is_same(*their_child, true)) {
 		if (!my_child->retain_different_nodes(*their_child,
@@ -1293,6 +1297,10 @@ ConfigTreeNode::retain_deletion_nodes(const ConfigTreeNode& them,
 	     their_iter != them.const_children().end();
 	     ++their_iter) {
 	    ConfigTreeNode* their_child = *their_iter;
+
+	    if (their_child->deleted())
+		continue;	// XXX: ignore deleted nodes
+
 	    // Are the nodes the same?
 	    if (my_child->is_same(*their_child, true)) {
 		if (my_child->retain_deletion_nodes(*their_child,
