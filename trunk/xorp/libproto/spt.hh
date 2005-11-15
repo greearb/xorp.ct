@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.8 2005/09/01 18:14:00 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.9 2005/10/24 17:39:29 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -426,16 +426,18 @@ class RouteCmd {
 
     RouteCmd() {}
 
-    RouteCmd(Cmd cmd, A node, A nexthop, int weight = 0,
+    RouteCmd(Cmd cmd, A node, A nexthop, A prevhop, int weight = 0,
 	     bool next_hop_changed = false, bool weight_changed = false) :
-	_cmd(cmd), _node(node), _nexthop(nexthop), _weight(weight),
-	_next_hop_changed(next_hop_changed), _weight_changed(weight_changed)
+	_cmd(cmd), _node(node), _nexthop(nexthop), _prevhop(prevhop), 
+	_weight(weight),_next_hop_changed(next_hop_changed),
+	_weight_changed(weight_changed)
 	
     {}
 
     Cmd cmd() const { return _cmd; }
     A node() const { return _node; }
     A nexthop() const { return _nexthop; }
+    A prevhop() const { return _prevhop; }
     int weight() const { return _weight; }
     bool next_hop_changed() const { return _next_hop_changed; }
     bool weight_changed() const { return _weight_changed; }
@@ -444,6 +446,7 @@ class RouteCmd {
 	return _cmd == lhs._cmd &&
 	    _node == lhs._node &&
 	    _nexthop == lhs._nexthop &&
+	    _prevhop == lhs._prevhop &&
 	    _weight == lhs._weight &&
 	    _next_hop_changed == lhs._next_hop_changed &&
 	    _weight_changed == lhs._weight_changed;
@@ -469,6 +472,7 @@ class RouteCmd {
     string str() const {
 	return c() + " node: " + _node.str() +
 	    " nexthop: " + _nexthop.str() +
+	    " prevhop: " + _prevhop.str() +
 	    " weight: " + c_format("%d", _weight) +
 	    " next hop changed: " + (_next_hop_changed ? "true" : "false") +
 	    " weight changed: " + (_weight_changed ? "true" : "false");
@@ -478,6 +482,7 @@ class RouteCmd {
     Cmd _cmd;
     A _node;
     A _nexthop;
+    A _prevhop;
     int _weight;
     bool _next_hop_changed;
     bool _weight_changed;
@@ -956,7 +961,8 @@ Node<A>::delta(RouteCmd<A>& rcmd)
 {
     // Has this node been deleted?
     if (!valid()) {
-	rcmd = RouteCmd<A>(RouteCmd<A>::DELETE, nodename(), nodename());
+	rcmd = RouteCmd<A>(RouteCmd<A>::DELETE,
+			   nodename(), nodename(), nodename());
 	return true;
     }
 
@@ -969,7 +975,8 @@ Node<A>::delta(RouteCmd<A>& rcmd)
     if (!c._valid) {
 	XLOG_TRACE(_trace, "Node: %s not reachable", str().c_str());
 	if (p._valid) {
-	    rcmd = RouteCmd<A>(RouteCmd<A>::DELETE, nodename(), nodename());
+	    rcmd = RouteCmd<A>(RouteCmd<A>::DELETE,
+			       nodename(), nodename(), nodename());
 	    return true;	    
 	}
 	return false;
@@ -980,6 +987,7 @@ Node<A>::delta(RouteCmd<A>& rcmd)
 	XLOG_ASSERT(_current._valid);
 	rcmd = RouteCmd<A>(RouteCmd<A>::ADD, nodename(),
 			   _current._first_hop->nodename(),
+			   _current._last_hop->nodename(),
 			   _current._path_length);
 	return true;
     }
@@ -993,6 +1001,7 @@ Node<A>::delta(RouteCmd<A>& rcmd)
 
     rcmd = RouteCmd<A>(RouteCmd<A>::REPLACE, nodename(),
 		       _current._first_hop->nodename(),
+		       _current._last_hop->nodename(),
 		       _current._path_length,
 		       c._first_hop != p._first_hop,
 		       c._path_length != p._path_length);
