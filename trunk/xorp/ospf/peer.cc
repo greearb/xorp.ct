@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.186 2005/11/13 23:48:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.187 2005/11/14 03:43:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -104,7 +104,6 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _inftransdelay(1),  // Must be greater than 0.
       _linktype(linktype), _running(false)
 {
-    XLOG_ASSERT(OspfTypes::VirtualLink != linktype);
     Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);
     set_mask(peer);
 }
