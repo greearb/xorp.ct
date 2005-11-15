@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.77 2005/11/14 19:33:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.78 2005/11/14 20:22:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -661,13 +661,6 @@ PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
 
 template <typename A> 
 bool 
-PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
-{
-    return _vlink.delete_vlink(rid);
-}
-
-template <typename A> 
-bool 
 PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
 					  OspfTypes::AreaID transit_area)
 {
@@ -697,6 +690,56 @@ PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
     }
 
     return true;
+}
+
+template <typename A> 
+bool 
+PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
+{
+    return _vlink.delete_vlink(rid);
+}
+
+template <typename A> 
+void
+PeerManager<A>::up_virtual_link(OspfTypes::RouterID rid, A source,
+				uint16_t interface_cost, A destination)
+{
+    string ifname = "vlink";
+    string vifname = pr_id(rid);
+    uint16_t prefix_length = 0;
+    uint16_t mtu = 0;
+
+    PeerID peerid;
+    try {
+	peerid = create_peer(ifname, vifname, source, prefix_length, mtu,
+			     OspfTypes::VirtualLink, OspfTypes::BACKBONE);
+    } catch(XorpException& e) {
+	return;
+    }
+
+    if (!set_interface_cost(peerid, OspfTypes::BACKBONE, interface_cost))
+	return;
+
+    if (!add_neighbour(peerid, OspfTypes::BACKBONE, destination, rid))
+	return;
+    
+    if (!set_state_peer(peerid, true))
+	return;
+}
+
+template <typename A> 
+void
+PeerManager<A>::down_virtual_link(OspfTypes::RouterID rid)
+
+{
+    string ifname = "vlink";
+    string vifname = pr_id(rid);
+
+    try {
+	delete_peer(get_peerid(ifname, vifname));
+    } catch(XorpException& e) {
+	return;
+    }
 }
 
 template <typename A> 

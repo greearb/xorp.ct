@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.52 2005/11/12 23:43:22 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.53 2005/11/14 19:33:29 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -335,24 +335,40 @@ class PeerManager {
     uint32_t compute_options(OspfTypes::AreaType area_type);
 
     /**
-     * Create a virtual link
+     * Create a virtual link (Configuration).
      *
      * @param rid neighbours router ID.
      */
     bool create_virtual_link(OspfTypes::RouterID rid);
 
     /**
-     * Delete a virtual link
+     * Attach this transit area to the neighbours router ID  (Configuration).
+     */
+    bool transit_area_virtual_link(OspfTypes::RouterID rid,
+				   OspfTypes::AreaID transit_area);
+
+    /**
+     * Delete a virtual link (Configuration).
      *
      * @param rid neighbours router ID.
      */
     bool delete_virtual_link(OspfTypes::RouterID rid);
 
     /**
-     * Attach this transit area to the neighbours router ID.
+     * Bring virtual link up (Upcall from area router).
+     *
+     * @param rid neighbours router ID.
+     * @param source address of packets sent to this neighbour.
+     * @param interface_cost
+     * @param destination address of the neighbour router.
      */
-    bool transit_area_virtual_link(OspfTypes::RouterID rid,
-				   OspfTypes::AreaID transit_area);
+    void up_virtual_link(OspfTypes::RouterID rid, A source,
+			 uint16_t interface_cost, A destination);
+
+    /**
+     * Take this virtual link down (Upcall from area router).
+     */
+    void down_virtual_link(OspfTypes::RouterID rid);
     
     /**
      * Set router priority.
