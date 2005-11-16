@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.83 2005/11/14 19:33:29 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.84 2005/11/14 20:22:49 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -77,6 +77,32 @@ class AreaRouter : Subsystem {
      * Remove a virtual link endpoint.
      */
     bool remove_virtual_link(OspfTypes::RouterID rid);
+
+    /**
+     * Start looking through the list of routers for a virtual link endpoint.
+     */
+    void start_virtual_link();
+
+    /**
+     * Check this node to see if its a virtual link endpoint.
+     *
+     * @param rc node under consideration.
+     * @param router this router's Router-LSA.
+     */
+    void check_for_virtual_link(const RouteCmd<Vertex>& rc, Lsa::LsaRef lsar);
+
+    /**
+     * Given two LSAs find the interface address of the destination
+     * LSA. The source LSA can be a Router-LSA or a Network-LSA the
+     * destination LSA must be a Router-LSA.
+     */
+    bool find_interface_address_virtual_link(Lsa::LsaRef src, Lsa::LsaRef dst,
+					     A& interface)const;
+
+    /**
+     * End looking through the list of routers for a virtual link endpoint.
+     */
+    void end_virtual_link();
 
     /**
      * Add area range.
@@ -439,7 +465,9 @@ class AreaRouter : Subsystem {
 
     OspfTypes::AreaID _area;		// Area: That is represented.
     OspfTypes::AreaType _area_type;	// Type of this area.
-    set<OspfTypes::RouterID> _vlinks;	// Virtual link endpoints.
+    map<OspfTypes::RouterID,bool> _vlinks;	// Virtual link endpoints.
+    set<OspfTypes::RouterID> _tmp;	// temporary storage for
+					// virtual links.
     bool _summaries;			// True if summaries should be
 					// generated into a stub area.
     uint32_t _stub_default_cost;	// The cost of the default

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.145 2005/11/14 19:33:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.146 2005/11/14 20:22:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,7 +214,7 @@ AreaRouter<A>::add_virtual_link(OspfTypes::RouterID rid)
     }
 
     XLOG_ASSERT(0 == _vlinks.count(rid));
-    _vlinks.insert(rid);
+    _vlinks[rid] = false;
 
     return true;
 }
@@ -237,9 +237,136 @@ AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
     }
 
     XLOG_ASSERT(0 != _vlinks.count(rid));
+    if (_vlinks[rid])
+	_ospf.get_peer_manager().down_virtual_link(rid);
+
     _vlinks.erase(_vlinks.find(rid));
 
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::start_virtual_link()
+{
+    // Create a set of virtual links that were up. At the end of this
+    // process all entries that are currently on the list should be
+    // taken down as they are no longer up or they would have been
+    // removed from the set.
+    _tmp.clear();
+    map<OspfTypes::RouterID,bool>::iterator i;
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++)
+	if (i->second)
+	    _tmp.insert(i->first);
+}
+
+template <typename A>
+void
+AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
+				      Lsa::LsaRef r)
+{
+    Vertex node = rc.node();
+    Lsa::LsaRef lsar = node.get_lsa();
+    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    OspfTypes::RouterID rid = rlsa->get_header().get_link_state_id();
+
+    // If this router ID is in the tmp set then it is already up, just
+    // remove it from the set and return;
+    set<OspfTypes::RouterID>::iterator i = _tmp.find(rid);
+    if (i != _tmp.end()) {
+	_tmp.erase(i);
+	return;
+    }
+
+    if (0 == _vlinks.count(rid))
+	return;	// Not a candidate endpoint.
+
+    // Find the interface address of the neighbour that should be used.
+    A neighbour_interface_address;
+    if (!find_interface_address_virtual_link(rc.prevhop().get_lsa(),
+					     lsar,
+					     neighbour_interface_address))
+	return;
+
+    // Find this routers own interface address.
+    A routers_interface_address;
+    if (!find_interface_address_virtual_link(rc.nexthop().get_lsa(),
+					     r,
+					     routers_interface_address))
+	return;
+    
+    // Now that everything has succeeded mark the virtual link as up.
+    XLOG_ASSERT(0 != _vlinks.count(rid));
+    _vlinks[rid] = true;
+
+    _ospf.get_peer_manager().up_virtual_link(rid, routers_interface_address,
+					     rc.weight(),
+					     neighbour_interface_address);
+}
+
+template <>
+bool
+AreaRouter<IPv4>::find_interface_address_virtual_link(Lsa::LsaRef src,
+						      Lsa::LsaRef dst,
+						      IPv4& interface) const
+{
+    RouterLsa *rlsa = dynamic_cast<RouterLsa *>(src.get());
+    NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(src.get());
+
+    if(0 == rlsa && 0 == nlsa) {
+	XLOG_WARNING(
+		     "Expecting the source to be a "
+		     "Router-Lsa or a Network-LSA not %s", cstring(*src));
+	return false;
+    }
+    
+    RouterLsa *dst_rlsa = dynamic_cast<RouterLsa *>(dst.get());
+    if(0 == dst_rlsa) {
+	XLOG_WARNING("Expecting the source to be a Router-Lsa not %s",
+		     cstring(*src));
+	return false;
+    }
+    
+    OspfTypes::RouterID srid = src->get_header().get_link_state_id();
+    RouterLink::Type type = rlsa ? RouterLink::p2p : RouterLink::transit;
+
+    // Look for the corresponding link. It is not necessary to check
+    // for bidirectional connectivity as this check has already been made.
+    const list<RouterLink> &rlinks = dst_rlsa->get_router_links();
+    list<RouterLink>::const_iterator l = rlinks.begin();
+    for(; l != rlinks.end(); l++) {
+	if (l->get_link_id() == srid && l->get_type() == type) {
+	    interface = IPv4(htonl(l->get_link_data()));
+	    return true;
+	}
+    }
+
+    return true;
+}
+
+template <>
+bool
+AreaRouter<IPv6>::find_interface_address_virtual_link(Lsa::LsaRef src,
+						      Lsa::LsaRef dst,
+						      IPv6& interface) const
+{
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(interface);
+
+    XLOG_UNFINISHED();
+
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::end_virtual_link()
+{
+    set<OspfTypes::RouterID>::iterator i;
+    for(i = _tmp.begin(); i != _tmp.end(); i++)
+	_ospf.get_peer_manager().down_virtual_link(*i);
 }
 
 template <typename A>
@@ -2240,6 +2367,8 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
     // Compute the area range summaries.
     routing_area_rangesV2(r);
 
+    start_virtual_link();
+
     list<RouteCmd<Vertex> >::const_iterator ri;
     for(ri = r.begin(); ri != r.end(); ri++) {
 	debug_msg("Add route: Node: %s -> Nexthop %s\n",
@@ -2265,6 +2394,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	if (OspfTypes::Router == node.get_type()) {
 	    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
 	    XLOG_ASSERT(rlsa);
+	    check_for_virtual_link((*ri), _router_lsa);
 	    if (!(rlsa->get_e_bit() || rlsa->get_b_bit()))
 		continue;
 	    // Originating routers Router ID.
@@ -2303,6 +2433,8 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 
 	routing_table.add_entry(_area, net, route_entry);
     }
+
+    end_virtual_link();
 
     // RFC 2328 Section 16.2.  Calculating the inter-area routes
     if (_ospf.get_peer_manager().internal_router_p() ||
