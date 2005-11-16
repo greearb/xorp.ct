@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.188 2005/11/15 04:17:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.189 2005/11/16 05:20:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -258,8 +258,9 @@ PeerOut<A>::transmit(typename Transmit<A>::TransmitRef tr)
 	    return true;
 	size_t len;
 	uint8_t *ptr = tr->generate(len);
-	_ospf.transmit(_interface, _vif, tr->destination(), tr->source(), 
-		       ptr, len);
+	_ospf.get_peer_manager().transmit(_interface, _vif,
+					  tr->destination(), tr->source(), 
+					  ptr, len);
     } while(tr->multiple());
 
     return true;
@@ -564,7 +565,6 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 	// Allow multiple neighbours to be added.
 	break;
     case OspfTypes::VirtualLink:
-	XLOG_UNFINISHED();
 	break;
     }
 
@@ -1230,7 +1230,7 @@ Peer<A>::event_interface_up()
 	break;
     case OspfTypes::VirtualLink:
 	change_state(Point2Point);
-	XLOG_UNFINISHED();
+	start_hello_timer();
 	break;
     }
 
@@ -1571,6 +1571,8 @@ Peer<A>::send_hello_packet()
 	XLOG_UNFINISHED();
 	break;
     case OspfTypes::PointToMultiPoint:
+	// At the time of writing virtual links had only one neighbour.
+    case OspfTypes::VirtualLink: 
 	for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
 	    transmit = new SimpleTransmit<A>(pkt,
 					     (*n)->get_neighbour_address(), 
@@ -1579,9 +1581,6 @@ Peer<A>::send_hello_packet()
 	    _peerout.transmit(tr);
 	}
 	return true;
-	break;
-    case OspfTypes::VirtualLink:
-	XLOG_UNFINISHED();
 	break;
     }
 
@@ -2121,7 +2120,18 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     }
 	break;
     case OspfTypes::VirtualLink:
-	XLOG_UNFINISHED();
+	// At the time of writing virtual links had only one neighbour.
+	list<Neighbour<IPv4> *>::iterator n;
+	for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	    if (Neighbour<IPv4>::Full == (*n)->get_state()) {
+		router_link.set_type(RouterLink::vlink);
+		router_link.set_link_id((*n)->get_router_id());
+		router_link.
+		    set_link_data(ntohl(get_interface_address().addr()));
+		router_link.set_metric(_peerout.get_interface_cost());
+		router_links.push_back(router_link);
+	    }
+	}
 	break;
     }
 }

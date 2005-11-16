@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.107 2005/11/11 22:16:07 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.108 2005/11/13 21:56:14 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -51,6 +51,19 @@ class PeerOut {
      * For debugging only printable rendition of this interface/vif.
      */
     string get_if_name() const { return _interface + "/" + _vif; }
+
+    /**
+     * If the source address matches the interface address return the
+     * interface and vif.
+     */
+    bool match(A source, string& interface, string& vif) {
+	if (get_interface_address() == source) {
+	    interface = _interface;
+	    vif = _vif;
+	    return true;
+	}
+	return false;
+    }
 
     /**
      * Get Peer ID.
