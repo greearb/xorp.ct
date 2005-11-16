@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.1 2005/11/14 19:33:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,5 +100,100 @@ Vlink<A>::get_transit_area(OspfTypes::RouterID rid,
     return true;
 }
 
+template <typename A>
+bool
+Vlink<A>::add_address(OspfTypes::RouterID rid, A source, A destination)
+{
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return false;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::iterator i = _vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    i->second._source = source;
+    i->second._destination = destination;
+
+    return true;
+}
+
+template <typename A>
+bool
+Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
+			    string& vif)
+{
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return false;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::iterator i = _vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    XLOG_ASSERT(A::ZERO() != i->second._source);
+    XLOG_ASSERT(A::ZERO() != i->second._destination);
+
+    interface = VLINK;
+    vif = i->second._source.str();
+
+    return true;
+}
+
+template <typename A>
+bool
+Vlink<A>::add_peerid(OspfTypes::RouterID rid, PeerID peerid)
+{
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return false;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::iterator i = _vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    i->second._peerid = peerid;
+
+    return true;
+}
+
+template <typename A>
+bool
+Vlink<A>::set_physical_interface_vif(OspfTypes::RouterID rid,
+				     string& interface,
+				     string& vif)
+{
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return false;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::iterator i = _vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    i->second._physical_interface = interface;
+    i->second._physical_vif = vif;
+
+    return true;
+}
+
+template <typename A>
+bool
+Vlink<A>::get_physical_interface_vif(A source, A destination,
+				     string& interface,
+				     string& vif)
+{
+    typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
+	if (i->second._source == source &&
+	    i->second._destination == destination) {
+	    interface = i->second._physical_interface; 
+	    vif = i->second._physical_vif;
+	    return true;
+	}
+    }
+
+    return false;
+}
 template class Vlink<IPv4>;
 template class Vlink<IPv6>;

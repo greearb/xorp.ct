@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/ospf/vlink.hh,v 1.1 2005/11/14 19:33:30 atanu Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -24,12 +24,58 @@
 template <typename A>
 class Vlink {
  public:
+    /**
+     * Add a virtual link router ID to the database.
+     */
     bool create_vlink(OspfTypes::RouterID rid);
+
+    /**
+     * Remove this router ID from the database.
+     */
     bool delete_vlink(OspfTypes::RouterID rid);
+
+    /**
+     * Set the transmit area through which the virtual link is formed.
+     */
     bool set_transit_area(OspfTypes::RouterID rid,
 			  OspfTypes::AreaID transit_area);
+
+    /**
+     * Get the transmit area information.
+     */
     bool get_transit_area(OspfTypes::RouterID rid,
 			  OspfTypes::AreaID& transit_area);
+
+    /**
+     * Associate the endpoint addresses with this virtual link.
+     */
+    bool add_address(OspfTypes::RouterID rid, A source, A destination);
+
+    /**
+     * Provide an interface and vif for this router ID. Must not be
+     * called before the address information has been provided.
+     */
+    bool get_interface_vif(OspfTypes::RouterID rid, string& interface,
+			   string& vif);
+
+    /**
+     * Save the peerid that has been allocted to this virtual link.
+     */
+    bool add_peerid(OspfTypes::RouterID rid, PeerID peerid);
+
+    /**
+     * The phyical interface and vif that should be used for transmission.
+     */
+    bool set_physical_interface_vif(OspfTypes::RouterID rid, string& interface,
+				    string& vif);
+
+    /**
+     * Given the source and destination addresses return the interface
+     * and vif.
+     */
+    bool get_physical_interface_vif(A source, A destination, string& interface,
+				    string& vif);
+
  private:
     /**
      * State about each virtual link.
@@ -42,6 +88,11 @@ class Vlink {
 
 	PeerID _peerid;				// PeerID of virtual link
 	OspfTypes::AreaID _transit_area;	// Transit area for the link
+	A _source;				// Source address
+	A _destination;				// Destination address
+	// Required for transmission.
+	string _physical_interface;		// Actual interface
+	string _physical_vif;			// Actual vif
     };
 
     map <OspfTypes::RouterID, Vstate> _vlinks;
