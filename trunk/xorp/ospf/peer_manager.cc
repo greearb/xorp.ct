@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.78 2005/11/14 20:22:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.79 2005/11/15 04:29:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -740,6 +740,17 @@ PeerManager<A>::down_virtual_link(OspfTypes::RouterID rid)
     } catch(XorpException& e) {
 	return;
     }
+}
+
+template <typename A> 
+bool
+PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
+{
+    UNUSED(dst);
+    UNUSED(src);
+    UNUSED(packet);
+
+    return false;
 }
 
 template <typename A> 

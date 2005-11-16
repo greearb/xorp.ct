@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.187 2005/11/14 03:43:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.188 2005/11/15 04:17:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -282,10 +282,13 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
     OspfTypes::AreaID area = packet->get_area_id();
     // Does the area ID in the packet match any that are expecting.
     if (0 == _areas.count(area)) {
-	    xorp_throw(BadPeer,
-		       c_format("Area %s not handled by %s/%s",
-				pr_id(packet->get_area_id()).c_str(),
-				_interface.c_str(), _vif.c_str()));
+	if (OspfTypes::BACKBONE == area) {
+	    return _ospf.get_peer_manager().
+		receive_virtual_link(dst, src, packet);
+	}
+	xorp_throw(BadPeer, c_format("Area %s not handled by %s/%s",
+				     pr_id(packet->get_area_id()).c_str(),
+				     _interface.c_str(), _vif.c_str()));
     }
 
     return _areas[area]->receive(dst, src, packet);

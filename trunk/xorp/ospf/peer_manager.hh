@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.53 2005/11/14 19:33:29 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.54 2005/11/15 04:29:49 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -370,6 +370,12 @@ class PeerManager {
      */
     void down_virtual_link(OspfTypes::RouterID rid);
     
+    /**
+     * A packet was sent to a peer that rejected it so this may be a
+     * virtual link candidate.
+     */
+    bool receive_virtual_link(A dst, A src, Packet *packet);
+
     /**
      * Set router priority.
      */
