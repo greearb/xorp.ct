@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.86 2005/11/16 20:22:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.87 2005/11/16 20:43:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -92,6 +92,13 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
     if (area_border_router_p() != old_border_router_state)
 	refresh_router_lsas();
 
+    // Inform this area if any virtual links are configured.
+    list<OspfTypes::RouterID> rids;
+    _vlink.get_router_ids(area, rids);
+    list<OspfTypes::RouterID>::const_iterator i;
+    for (i = rids.begin(); i != rids.end(); i++)
+	transit_area_virtual_link(*i, area);
+
     return true;
 }
 
@@ -146,6 +153,9 @@ PeerManager<A>::destroy_area_router(OspfTypes::AreaID area)
     // in the existing area.
     if (area_border_router_p() != old_border_router_state)
 	refresh_router_lsas();
+
+    // Flag to the virtual link code that this area is going away.
+    _vlink.area_removed(area);
 
     return true;
 }
@@ -692,30 +702,48 @@ PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
 	       pr_id(rid).c_str(),
 	       pr_id(transit_area).c_str());
 
-    AreaRouter<A> *area = get_area_router(transit_area);
-
-    if (0 == area)
-	return false;
-
     OspfTypes::AreaID oarea;
     if (!_vlink.get_transit_area(rid, oarea))
 	return false;
 
-    if (oarea == transit_area)
+    // Has the current transit area been told about this router ID.
+    bool notified = _vlink.get_transit_area_notified(rid);
+
+    if (oarea == transit_area) {
+	if (notified)
+	    return true;
+	AreaRouter<A> *area = get_area_router(transit_area);
+	if (0 == area)
+	    return false;
+	// Might be a stub area turning us down.
+	if (!area->add_virtual_link(rid))
+	    return false;
+	_vlink.set_transit_area_notified(rid, true);
 	return true;
+    }
+
+    // We are now dealing with two separate areas.
 
     if (!_vlink.set_transit_area(rid, transit_area))
 	return false;
 
-    if (OspfTypes::BACKBONE != oarea)
- 	area->remove_virtual_link(rid);
+    if (notified) {
+	if (OspfTypes::BACKBONE != oarea) {
+	    AreaRouter<A> *parea = get_area_router(oarea);
+	    if (parea)
+		parea->remove_virtual_link(rid);
+	}
+    }
 
-    // It may not be possible to add a link to this area because it
-    // may be a stub area. If the add link fails backout the change.
-    if (!area->add_virtual_link(rid)) {
-	_vlink.set_transit_area(rid, oarea);
+    AreaRouter<A> *area = get_area_router(transit_area);
+    _vlink.set_transit_area_notified(rid, false);
+    if (0 == area) {
 	return false;
     }
+    if (!area->add_virtual_link(rid)) {
+	return false;
+    }
+    _vlink.set_transit_area_notified(rid, true);
 
     return true;
 }
