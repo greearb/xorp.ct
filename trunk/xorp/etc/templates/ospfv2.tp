@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.24 2005/11/13 05:35:56 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.25 2005/11/15 04:14:57 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -171,7 +171,7 @@ transmitted packets";
 
 		    address @ {
 			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=0&mtu:u32=0&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
-			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=interface.@&vifname:txt=vif.@";
+			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
 
 			priority {
 			    %help: short "Priority used in DR election";
