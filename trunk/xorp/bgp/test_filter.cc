@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.30 2005/08/18 15:58:07 bms Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.31 2005/11/15 11:44:00 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -373,6 +373,57 @@ test_filter(TestInfo& /*info*/)
     debug_table->write_comment("TEST 6");
     debug_table->write_comment("ADD AND DELETE");
     sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    filter_table->add_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+
+    // delete the route
+    filter_table->delete_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+    sr1->unref();
+    delete msg;
+
+    // ================================================================
+    // Test 7a: add and delete with a well known attributes filter
+    // This should be passed through, as it has no well-known attributes
+    // ================================================================
+    filter_table->add_known_community_filter(PEER_TYPE_EBGP);
+    // add a route
+    debug_table->write_comment("TEST 7");
+    debug_table->write_comment("ADD AND DELETE");
+    debug_table->write_comment("EXPECT CHANGE TO PROPAGATE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    filter_table->add_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+
+    // delete the route
+    filter_table->delete_route(*msg, ribin_table);
+
+    debug_table->write_separator();
+    sr1->unref();
+    delete msg;
+
+    // ================================================================
+    // Test 7b: add and delete with a well known attributes filter
+    // This should not be passed through, as it has NO_EXPORT
+    // ================================================================
+    // add a route
+    debug_table->write_comment("TEST 7b");
+    debug_table->write_comment("ADD AND DELETE");
+    debug_table->write_comment("EXPECT CHANGE NOT TO PROPAGATE");
+
+    PathAttributeList<IPv4>* palist4 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+    CommunityAttribute comm_att;
+    comm_att.add_community(CommunityAttribute::NO_EXPORT);
+    assert(comm_att.contains(CommunityAttribute::NO_EXPORT));
+    palist4->add_path_attribute(comm_att);
+
+    sr1 = new SubnetRoute<IPv4>(net1, palist4, NULL);
     msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
     filter_table->add_route(*msg, ribin_table);
 
