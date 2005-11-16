@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.83 2005/11/16 11:58:37 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.84 2005/11/16 18:56:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -733,6 +733,22 @@ PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
 	    delete_peer(peerid);
 	} catch(XorpException& e) {
 	    XLOG_ERROR("%s", cstring(e));
+	}
+    }
+
+    // If a transit area is configured then remove this virtual link
+    // from that area.
+    OspfTypes::AreaID transit_area;
+    if (!_vlink.get_transit_area(rid, transit_area)) {
+	XLOG_WARNING("Couldn't find rid %s", pr_id(rid).c_str());
+	return false;
+    }
+
+    if (OspfTypes::BACKBONE != transit_area) {
+	AreaRouter<A> *area = get_area_router(transit_area);
+	// Having no associated area is perfectly legal.
+	if (0 != area) {
+	    area->remove_virtual_link(rid);
 	}
     }
 
