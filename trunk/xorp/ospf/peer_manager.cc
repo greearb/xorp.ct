@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.80 2005/11/16 05:20:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.81 2005/11/16 05:29:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -921,6 +921,9 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
 	candidate = true;
 	break;
     }
+
+    if (!candidate)
+	return false;
 
     switch (rt.get_path_type()) {
     case RouteEntry<A>::intra_area:
