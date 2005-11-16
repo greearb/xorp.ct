@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.18 2005/11/14 20:01:40 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.19 2005/11/15 11:43:59 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -312,6 +312,7 @@ class FilterVersion {
 public:
     FilterVersion(NextHopResolver<A>& next_hop_resolver);
     ~FilterVersion();
+    void set_genid(uint32_t genid) {_genid = genid;}
     int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
     int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
@@ -327,7 +328,11 @@ public:
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg, int ref_change);
     int ref_count() const {return _ref_count;}
+    uint32_t genid() const {return _genid;}
+    bool used() const {return _used;}
 private:
+    uint32_t _genid;
+    bool _used;
     list <BGPRouteFilter<A> *> _filters;
     int _ref_count;
     NextHopResolver<A>& _next_hop_resolver;
@@ -410,6 +415,7 @@ private:
     const InternalMessage<A> *
         apply_filters(const InternalMessage<A> *rtmsg) const;
     map <uint32_t, FilterVersion<A>* > _filter_versions;
+    set <uint32_t> _deleted_filters;  /* kept as a sanity check */
     FilterVersion<A>* _current_filter;
     NextHopResolver<A>& _next_hop_resolver;
 };

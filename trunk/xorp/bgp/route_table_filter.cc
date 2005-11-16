@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.37 2005/11/14 20:01:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.38 2005/11/15 11:43:59 mjh Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+//#define DEBUG_LOGGING
+//#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -616,7 +616,8 @@ OriginateRouteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 
 template<class A>
 FilterVersion<A>::FilterVersion(NextHopResolver<A>& next_hop_resolver)
-    : _ref_count(0), _next_hop_resolver(next_hop_resolver)
+    : _genid(0), _used(false), _ref_count(0), 
+      _next_hop_resolver(next_hop_resolver)
 {
 }
 
@@ -760,6 +761,7 @@ FilterVersion<A>::apply_filters(const InternalMessage<A> *rtmsg,
 {
     const InternalMessage<A> *filtered_msg = rtmsg;
     bool modified_by_us = false;
+    _used = true;
     typename list <BGPRouteFilter<A> *>::const_iterator iter;
     iter = _filters.begin();
     while (iter != _filters.end()) {
@@ -819,8 +821,13 @@ void
 FilterTable<A>::reconfigure_filter()
 {
     // if the current filter has never been used, we can delete it now
-    if (_current_filter->ref_count() == 0)
+    if (_current_filter->ref_count() == 0) {
+	if (_current_filter->used()) {
+	    _deleted_filters.insert(_current_filter->genid());
+	    _filter_versions.erase(_current_filter->genid());
+	}
 	delete _current_filter;
+    }
 
     _current_filter = new FilterVersion<A>(_next_hop_resolver);
 }
@@ -830,10 +837,11 @@ int
 FilterTable<A>::add_route(const InternalMessage<A> &rtmsg, 
 			  BGPRouteTable<A> *caller)
 {
-    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p genid: %d route: %p\n%s\n",
 	      this->tablename().c_str(),
 	      caller->tablename().c_str(),
 	      &rtmsg,
+	      rtmsg.genid(),
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
 
@@ -1164,16 +1172,23 @@ FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg,
     uint32_t genid = rtmsg->genid();
     i = _filter_versions.find(genid);
     if (i == _filter_versions.end()) {
+	// check we're not trying to use a GenID that has been retired.
+	XLOG_ASSERT(_deleted_filters.find(genid) == _deleted_filters.end());
+
 	_filter_versions[genid] = _current_filter;
+	_current_filter->set_genid(genid);
 	filter = _current_filter;
     } else {
 	filter = i->second;
+	XLOG_ASSERT(filter->genid() == genid);
     }
     msg = filter->apply_filters(rtmsg, ref_change);
 
     // if there are no more routes that used an old filter, delete it now
     if (filter->ref_count() == 0) {
 	if (filter != _current_filter) {
+	    if (filter->used())
+		_deleted_filters.insert(filter->genid());
 	    delete filter;
 	    _filter_versions.erase(i);
 	}

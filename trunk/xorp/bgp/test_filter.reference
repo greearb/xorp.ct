@@ -176,4 +176,50 @@ SubnetRoute:
 [comment] EXPECT CHANGE NOT TO PROPAGATE
 [separator]-------------------------------------
 [separator]-------------------------------------
+[comment] TEST 8a
+[comment] ADD
+[comment] EXPECT AS TEST 6
+[ADD]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
+[comment] RECONFIGURE FILTER
+[comment] TEST 8b
+[comment] ADD AND DELETE
+[comment] EXPECT ROUTE UNMODIFIED
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[DELETE]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+[separator]-------------------------------------
+[comment] TEST 8c
+[comment] DELETE
+[comment] EXPECT AS TEST 6
+[DELETE]
+CHANGED flag is set
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 128.16.64.4
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
+	Local Preference Attribute - 100
+[separator]-------------------------------------
 [comment] SHUTDOWN AND CLEAN UP
