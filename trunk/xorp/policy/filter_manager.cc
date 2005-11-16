@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.6 2005/10/23 20:41:38 abittau Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.7 2005/10/31 07:48:38 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -249,34 +249,37 @@ FilterManager::birth(const string& protocol)
     // This is a HACK [as this problem was discovered quite late]. So it looks
     // ugly on purpose.
     CodeMap::const_iterator cmi = _export.find(protocol);
-    if(cmi == _export.end())
-	return;
+    if(cmi != _export.end()) {
 
-    const Code* export_code = (*cmi).second;
+	const Code* export_code = (*cmi).second;
 
-    for(set<string>::iterator i = export_code->_source_protos.begin();
-	i != export_code->_source_protos.end(); ++i) {
+	for(set<string>::iterator i = export_code->_source_protos.begin();
+	    i != export_code->_source_protos.end(); ++i) {
 
-	const string& push_proto = *i;
+	    const string& push_proto = *i;
 	
-	if(push_proto == protocol)
-	    continue;
+	    if(push_proto == protocol)
+		continue;
 	
-	if(!_process_watch.alive(push_proto))
-	    continue;
+	    if(!_process_watch.alive(push_proto))
+		continue;
 
-	// LUCKY!!!!
-	if(_push_queue.find(protocol) != _push_queue.end())
-	    continue;
+	    // LUCKY!!!!
+	    if(_push_queue.find(protocol) != _push_queue.end())
+		continue;
 
-	XLOG_WARNING("XXX HACK: PUSHING ROUTES OF %s FOR %s",
-		     push_proto.c_str(),protocol.c_str());
+	    XLOG_WARNING("XXX HACK: PUSHING ROUTES OF %s FOR %s",
+			 push_proto.c_str(),protocol.c_str());
 	
-	_push_queue.insert(push_proto);
+	    _push_queue.insert(push_proto);
+	}
     }
-
     // EOH [end of hack]
-   
+  
+    // perhaps we can delay the flush.  Consider boot-time.  A lot of processes
+    // are coming up, so we will always be flushing.  At boot, the commit is
+    // delayed by ~2 seconds I think, so if we delay the flush ~2 seconds here
+    // it might be better...
     flush_updates_now();
 
     // XXX: protocol was just born, so no need to push routes for itself... we
