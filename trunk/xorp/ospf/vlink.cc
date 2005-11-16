@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/vlink.cc,v 1.3 2005/11/16 19:34:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.4 2005/11/16 22:35:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -171,7 +171,7 @@ Vlink<A>::get_interface_vif(OspfTypes::RouterID rid, string& interface,
     XLOG_ASSERT(A::ZERO() != i->second._destination);
 
     interface = VLINK;
-    vif = i->second._source.str();
+    vif = pr_id(rid);
 
     return true;
 }
