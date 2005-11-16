@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/rtrmgr/xorpsh_base.hh,v 1.1 2005/07/22 10:47:35 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_BASE_HH__
 #define __RTRMGR_XORPSH_BASE_HH__
@@ -68,28 +68,28 @@ public:
 
     virtual uint32_t rtrmgr_pid() const = 0;
 
-    virtual void commit_changes(const string& deltas, const string& deletions,
+    virtual bool commit_changes(const string& deltas, const string& deletions,
 				GENERIC_CALLBACK cb, CallBack final_cb) = 0;
     
-    virtual void enter_config_mode(bool exclusive, GENERIC_CALLBACK cb) = 0;
+    virtual bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb) = 0;
 
-    virtual void get_config_users(GET_USERS_CALLBACK cb) = 0;
+    virtual bool get_config_users(GET_USERS_CALLBACK cb) = 0;
 
-    virtual void get_rtrmgr_pid(PID_CALLBACK cb) = 0;
+    virtual bool get_rtrmgr_pid(PID_CALLBACK cb) = 0;
 
-    virtual void leave_config_mode(GENERIC_CALLBACK cb) = 0;
+    virtual bool leave_config_mode(GENERIC_CALLBACK cb) = 0;
 
-    virtual void load_from_file(const string& filename, GENERIC_CALLBACK cb,
+    virtual bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
 				CallBack final_cb) = 0;
 
-    virtual void lock_config(LOCK_CALLBACK cb) = 0;
+    virtual bool lock_config(LOCK_CALLBACK cb) = 0;
 
-    virtual void save_to_file(const string& filename, GENERIC_CALLBACK cb,
+    virtual bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
 			      CallBack final_cb) = 0;
 
     virtual void set_mode(Mode mode) = 0;
 
-    virtual void unlock_config(GENERIC_CALLBACK cb) = 0;
+    virtual bool unlock_config(GENERIC_CALLBACK cb) = 0;
 };
 
 #endif // __RTRMGR_XORPSH_BASE_HH__

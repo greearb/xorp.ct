@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.29 2005/11/16 03:05:42 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.30 2005/11/16 03:46:35 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -56,37 +56,39 @@ public:
     void register_done(const XrlError& e, const string* token,
 		       const uint32_t* pid, const uint32_t* clientid);
     void generic_done(const XrlError& e);
-    void request_config();
+#if 0
+    bool request_config();
     void receive_config(const XrlError& e, const bool* ready,
 			const string* config);
+#endif
 
-    void enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
+    bool enter_config_mode(bool exclusive, GENERIC_CALLBACK cb);
 
-    void leave_config_mode(GENERIC_CALLBACK cb);
+    bool leave_config_mode(GENERIC_CALLBACK cb);
 
-    void lock_config(LOCK_CALLBACK cb);
+    bool lock_config(LOCK_CALLBACK cb);
 
     void config_saved_done(bool success, const string& error_msg);
-    void commit_changes(const string& deltas, const string& deletions,
+    bool commit_changes(const string& deltas, const string& deletions,
 			GENERIC_CALLBACK cb,
 			CallBack final_cb);
     void commit_done(bool success, const string& error_msg);
 
-    void unlock_config(GENERIC_CALLBACK cb);
+    bool unlock_config(GENERIC_CALLBACK cb);
 
-    void get_config_users(GET_USERS_CALLBACK cb);
+    bool get_config_users(GET_USERS_CALLBACK cb);
 
     void new_config_user(uid_t user_id);
 
-    void save_to_file(const string& filename, GENERIC_CALLBACK cb,
-			CallBack final_cb);
+    bool save_to_file(const string& filename, GENERIC_CALLBACK cb,
+		      CallBack final_cb);
 
     void save_lock_achieved(const XrlError& e, const bool* locked,
 			    const uint32_t* lock_holder,
 			    const string filename,
 			    GENERIC_CALLBACK cb);
 
-    void load_from_file(const string& filename, GENERIC_CALLBACK cb,
+    bool load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			CallBack final_cb);
 
     void load_lock_achieved(const XrlError& e, const bool* locked,
@@ -100,7 +102,7 @@ public:
     void module_status_change(const string& module_name, 
 			      GenericModule::ModuleStatus status);
 
-    void get_rtrmgr_pid(PID_CALLBACK cb);
+    bool get_rtrmgr_pid(PID_CALLBACK cb);
 
     EventLoop& eventloop()		{ return _eventloop; }
     OpCommandList* op_cmd_list()	{ return _ocl; }
@@ -132,6 +134,7 @@ private:
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;
     SlaveModuleManager	_mmgr;
+    bool		_is_connected_to_finder;
 
     TemplateTree*	_tt;
     SlaveConfigTree*	_ct;

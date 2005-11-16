@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.56 2005/11/16 03:05:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.57 2005/11/16 03:46:35 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -125,6 +125,7 @@ XorpShell::XorpShell(EventLoop& eventloop,
       _xclient(_eventloop, _xrl_router),
       _rtrmgr_client(&_xrl_router),
       _mmgr(_eventloop),
+      _is_connected_to_finder(false),
       _tt(NULL),
       _ct(NULL),
       _ocl(NULL),
@@ -234,11 +235,13 @@ XorpShell::run(const string& commands)
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
 
+    _is_connected_to_finder = false;
     if (wait_for_xrl_router_ready(_eventloop, _xrl_router) == false) {
 	// RtrMgr contains finder
 	error_msg = c_format("Failed to connect to the router manager");
 	xorp_throw(InitError, error_msg);
     }
+    _is_connected_to_finder = true;
 
 #ifdef HOST_OS_WINDOWS
     const uint32_t uid = 0;
@@ -436,11 +439,12 @@ XorpShell::generic_done(const XrlError& e)
 }
 
 #if 0
-void 
+bool
 XorpShell::request_config()
 {
-    _rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
-                             callback(this, &XorpShell::receive_config));
+    return (_rtrmgr_client.send_get_running_config("rtrmgr", _authtoken,
+						   callback(this, &XorpShell::receive_config))
+	    == true);
 }
 
 void
@@ -470,22 +474,28 @@ XorpShell::receive_config(const XrlError& e, const bool* ready,
     }
     exit(1);
 }
-#endif
+#endif // 0
 
-void
+bool
 XorpShell::lock_config(LOCK_CALLBACK cb)
 {
     // Lock for 60 seconds - this should be sufficient
-    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, cb);
+    return (_rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, cb)
+	    == true);
 }
 
-void
+bool
 XorpShell::commit_changes(const string& deltas, const string& deletions,
 			  GENERIC_CALLBACK cb, CallBack final_cb)
 {
     _commit_callback = final_cb;
-    _rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken, _ipc_name,
-					    deltas, deletions, cb);
+    if (_rtrmgr_client.send_apply_config_change("rtrmgr", _authtoken,
+						_ipc_name, deltas, deletions,
+						cb)
+	!= true) {
+	return (false);
+    }
+    return (true);
 }
 
 void
@@ -504,28 +514,33 @@ XorpShell::commit_done(bool success, const string& error_msg)
     _ct->commit_phase4(success, error_msg, _commit_callback, this);
 }
 
-void
+bool
 XorpShell::unlock_config(GENERIC_CALLBACK cb)
 {
-    _rtrmgr_client.send_unlock_config("rtrmgr", _authtoken, cb);
+    return (_rtrmgr_client.send_unlock_config("rtrmgr", _authtoken, cb)
+	    == true);
 }
 
-void
+bool
 XorpShell::enter_config_mode(bool exclusive, GENERIC_CALLBACK cb)
 {
-    _rtrmgr_client.send_enter_config_mode("rtrmgr", _authtoken, exclusive, cb);
+    return (_rtrmgr_client.send_enter_config_mode("rtrmgr", _authtoken,
+						  exclusive, cb)
+	    == true);
 }
 
-void
+bool
 XorpShell::leave_config_mode(GENERIC_CALLBACK cb)
 {
-    _rtrmgr_client.send_leave_config_mode("rtrmgr", _authtoken, cb);
+    return (_rtrmgr_client.send_leave_config_mode("rtrmgr", _authtoken, cb)
+	    == true);
 }
 
-void
+bool
 XorpShell::get_config_users(GET_USERS_CALLBACK cb)
 {
-    _rtrmgr_client.send_get_config_users("rtrmgr", _authtoken, cb);
+    return (_rtrmgr_client.send_get_config_users("rtrmgr", _authtoken, cb)
+	    == true);
 }
 
 void
@@ -534,7 +549,7 @@ XorpShell::new_config_user(uid_t user_id)
     _router_cli->new_config_user(user_id);
 }
 
-void
+bool
 XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb,
 			CallBack final_cb)
 {
@@ -543,7 +558,12 @@ XorpShell::save_to_file(const string& filename, GENERIC_CALLBACK cb,
 				       &XorpShell::save_lock_achieved,
 				       filename,
 				       cb);
-    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb);
+    if (_rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb)
+	!= true) {
+	return (false);
+    }
+
+    return (true);
 }
 
 void
@@ -552,17 +572,24 @@ XorpShell::save_lock_achieved(const XrlError& e, const bool* locked,
 			      const string filename,
 			      GENERIC_CALLBACK cb)
 {
+    string error_msg;
+
     if (!locked || (e != XrlError::OKAY())) {
-	_config_save_callback->dispatch(false,
-					"Failed to get configuration lock");
+	error_msg = c_format("Failed to get configuration lock");
+	_config_save_callback->dispatch(false, error_msg);
 	return;
     }
 
-    _rtrmgr_client.send_save_config("rtrmgr", _authtoken, _ipc_name,
-				    filename, cb);
+    if (_rtrmgr_client.send_save_config("rtrmgr", _authtoken, _ipc_name,
+					filename, cb)
+	!= true) {
+	error_msg = c_format("Failed to send configuration. No Finder?");
+	_config_save_callback->dispatch(false, error_msg);
+	return;
+    }
 }
 
-void
+bool
 XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 			  CallBack final_cb)
 {
@@ -571,7 +598,12 @@ XorpShell::load_from_file(const string& filename, GENERIC_CALLBACK cb,
 				       &XorpShell::load_lock_achieved,
 				       filename,
 				       cb);
-    _rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb);
+    if (_rtrmgr_client.send_lock_config("rtrmgr", _authtoken, 60000, locked_cb)
+	!= true) {
+	return (false);
+    }
+
+    return (true);
 }
 
 void
@@ -580,13 +612,21 @@ XorpShell::load_lock_achieved(const XrlError& e, const bool* locked,
 			      const string filename,
 			      GENERIC_CALLBACK cb)
 {
+    string error_msg;
+
     if (!locked || (e != XrlError::OKAY())) {
-	_commit_callback->dispatch(false, "Failed to get configuration lock");
+	error_msg = c_format("Failed to get configuration lock");
+	_commit_callback->dispatch(false, error_msg);
 	return;
     }
 
-    _rtrmgr_client.send_load_config("rtrmgr", _authtoken, _ipc_name,
-				    filename, cb);
+    if (_rtrmgr_client.send_load_config("rtrmgr", _authtoken, _ipc_name,
+					filename, cb)
+	!= true) {
+	error_msg = c_format("Failed to load the configuration. No Finder?");
+	_commit_callback->dispatch(false, error_msg);
+	return;
+    }
 }
 
 void
@@ -686,10 +726,10 @@ XorpShell::module_status_change(const string& module_name,
     module->new_status(status);
 }
 
-void
+bool
 XorpShell::get_rtrmgr_pid(PID_CALLBACK cb)
 {
-    _rtrmgr_client.send_get_pid("rtrmgr", cb);
+    return (_rtrmgr_client.send_get_pid("rtrmgr", cb) == true);
 }
 
 /**
@@ -714,7 +754,9 @@ XorpShell::finder_connect_event()
 void
 XorpShell::finder_disconnect_event()
 {
-    fprintf(stderr, "Finder disconnected. No Finder?\n");
+    if (_is_connected_to_finder)
+	fprintf(stderr, "Finder disconnected. No Finder?\n");
+    _is_connected_to_finder = false;
 }
 
 // ----------------------------------------------------------------------------

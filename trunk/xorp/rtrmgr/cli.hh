@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.39 2005/11/11 04:38:30 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.40 2005/11/14 03:44:58 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -242,7 +242,7 @@ private:
 
     string run_set_command(const string& path, const vector<string>& argv);
 
-    void check_for_rtrmgr_restart();
+    bool check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);
 
     string get_help_o(const string& s) const;

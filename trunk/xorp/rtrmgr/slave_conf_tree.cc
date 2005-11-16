@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.31 2005/08/29 18:18:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree.cc,v 1.32 2005/09/27 18:37:31 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -150,7 +150,12 @@ SlaveConfigTree::commit_changes(string& result, XorpShellBase& xorpsh,
     _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_1);
 
     _stage2_cb = callback(this, &SlaveConfigTree::commit_phase2, cb, &xorpsh);
-    xorpsh.lock_config(_stage2_cb);
+    if (xorpsh.lock_config(_stage2_cb) != true) {
+	result = c_format("ERROR: failed to lock the configuration. "
+			  "No Finder?\n");
+	_commit_status.set_error(result);
+	return false;
+    }
 
     return success;
 }
@@ -160,11 +165,14 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 			       const uint32_t* /* lock_holder */,
 			       CallBack cb, XorpShellBase* xorpsh)
 {
+    string error_msg;
+
     _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_2);
 
     if (!locked || (e != XrlError::OKAY())) {
-	cb->dispatch(false, "Failed to get lock");
-        _commit_status.set_error("Failed to get lock");
+	error_msg = c_format("Failed to get lock");
+	cb->dispatch(false, error_msg);
+        _commit_status.set_error(error_msg);
 	return;
     }
 
@@ -179,17 +187,26 @@ SlaveConfigTree::commit_phase2(const XrlError& e, const bool* locked,
 
     XLOG_TRACE(_verbose, "deletions = >>>\n%s<<<\n", deletions.c_str());
 
-    xorpsh->commit_changes(deltas,
-			   deletions,
-			   callback(this, &SlaveConfigTree::commit_phase3, cb,
-				    xorpsh),
-			   cb);
+    if (xorpsh->commit_changes(deltas,
+			       deletions,
+			       callback(this, &SlaveConfigTree::commit_phase3,
+					cb, xorpsh),
+			       cb)
+	!= true) {
+	error_msg = c_format("Cannot commit the configuration changes. "
+			     "No Finder?");
+	cb->dispatch(false, error_msg);
+        _commit_status.set_error(error_msg);
+	return;
+    }
 }
 
 void
 SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
 			       XorpShellBase* xorpsh)
 {
+    bool success = true;
+    bool should_dispatch_phase5 = false;
     XLOG_TRACE(_verbose, "commit_phase3\n");
     _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_3);
 
@@ -200,18 +217,30 @@ SlaveConfigTree::commit_phase3(const XrlError& e, CallBack cb,
     // until we get called back with the final results of the commit.
     //
     if (e != XrlError::OKAY()) {
+	success = false;
 	_commit_errmsg = e.note();
-	xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
-				       false, cb, xorpsh));
+	if (xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
+					   false, cb, xorpsh))
+	    != true) {
+	    XLOG_WARNING("Cannot unlock the config tree. No Finder?");
+	    // XXX: need to dispatch the callback to move to phase5
+	    should_dispatch_phase5 = true;
+	}
 	_commit_status.set_error(_commit_errmsg);
     }
     xorpsh->set_mode(XorpShellBase::MODE_COMMITTING);
+
+    if (should_dispatch_phase5)
+	commit_phase5(e, success, cb, xorpsh);
 }
 
 void
 SlaveConfigTree::commit_phase4(bool success, const string& errmsg, CallBack cb,
 			       XorpShellBase* xorpsh)
 {
+    bool should_dispatch_phase5 = false;
+    string error_msg;
+
     XLOG_TRACE(_verbose, "commit_phase4\n");
     _commit_status.set_commit_phase(CommitStatus::COMMIT_PHASE_4);
 
@@ -220,8 +249,21 @@ SlaveConfigTree::commit_phase4(bool success, const string& errmsg, CallBack cb,
     // results of our commit.
     //
     _commit_errmsg = errmsg;
-    xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
-				   success, cb, xorpsh));
+    if (xorpsh->unlock_config(callback(this, &SlaveConfigTree::commit_phase5,
+				       success, cb, xorpsh))
+	!= true) {
+	XLOG_WARNING("Cannot unlock the config tree. No Finder?");
+	// XXX: need to dispatch the callback to move to phase5
+	should_dispatch_phase5 = true;
+    }
+
+    if (should_dispatch_phase5) {
+	//
+	// XXX: here we ignore the fact that the unlock may have failed,
+	// because the commit itself has succeeded.
+	// 
+	commit_phase5(XrlError::OKAY(), success, cb, xorpsh);
+    }
 }
 
 void
@@ -247,6 +289,7 @@ void
 SlaveConfigTree::save_phase4(bool success, const string& errmsg, CallBack cb,
 			     XorpShell *xorpsh)
 {
+    bool should_dispatch_phase5 = false;
     XLOG_TRACE(_verbose, "save_phase4\n");
 
     //
@@ -254,8 +297,20 @@ SlaveConfigTree::save_phase4(bool success, const string& errmsg, CallBack cb,
     // results of our save.
     //
     _save_errmsg = errmsg;
-    xorpsh->unlock_config(callback(this, &SlaveConfigTree::save_phase5,
-				   success, cb, xorpsh));
+    if (xorpsh->unlock_config(callback(this, &SlaveConfigTree::save_phase5,
+				   success, cb, xorpsh))
+	!= true) {
+	// XXX: need to dispatch the callback to move to phase5
+	should_dispatch_phase5 = true;
+    }
+
+    if (should_dispatch_phase5) {
+	//
+	// XXX: here we ignore the fact that the unlock may have failed,
+	// because the save itself has succeeded.
+	// 
+	save_phase5(XrlError::OKAY(), success, cb, xorpsh);
+    }
 }
 
 void
