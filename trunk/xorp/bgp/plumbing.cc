@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.75 2005/11/15 11:43:59 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.76 2005/11/15 18:07:30 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -315,6 +315,12 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 				      _master.main().eventloop());
     _decision_table->set_next_table(_policy_sourcematch_table);
 
+/*
+ * Tinderbox test_routing1.sh -l -t test5 is failing due to a bug
+ * in the aggregation path.  Temporarily disable aggregation until
+ * this issue is resolved.
+ */
+#if 0
     _aggregation_table =
 	new AggregationTable<A>(ribname + "AggregationTable",
 				_master,
@@ -326,6 +332,13 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
 			   _master.safi(),
 			   _aggregation_table);
     _aggregation_table->set_next_table(_fanout_table);
+#else
+    _fanout_table =
+	new FanoutTable<A>(ribname + "FanoutTable",
+			   _master.safi(),
+			   _policy_sourcematch_table);
+    _policy_sourcematch_table->set_next_table(_fanout_table);
+#endif
 
 
     /*
