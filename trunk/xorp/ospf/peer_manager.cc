@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.81 2005/11/16 05:29:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.82 2005/11/16 07:43:05 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -446,6 +446,26 @@ PeerManager<A>::remove_neighbour(const PeerID peerid, OspfTypes::AreaID area,
 
 template <typename A>
 bool
+PeerManager<A>::transmit(const string& interface, const string& vif,
+			 A dst, A src,
+			 uint8_t* data, uint32_t len)
+{
+    debug_msg("Interface %s Vif %s data %p len %u",
+	      interface.c_str(), vif.c_str(), data, len);
+
+    if (string(VLINK) == interface) {
+	string interface;
+	string vif;
+	if (_vlink.get_physical_interface_vif(src, dst, interface, vif))
+	    return _ospf.transmit(interface, vif, dst, src, data, len);
+	// We didn't find a match fall through.
+    }
+
+    return _ospf.transmit(interface, vif, dst, src, data, len);
+}
+
+template <typename A>
+bool
 PeerManager<A>::receive(const string& interface, const string& vif,
 			A dst, A src, Packet *packet)
     throw(BadPeer)
@@ -704,17 +724,45 @@ void
 PeerManager<A>::up_virtual_link(OspfTypes::RouterID rid, A source,
 				uint16_t interface_cost, A destination)
 {
-    string ifname = "vlink";
-    string vifname = pr_id(rid);
+
+    if (!_vlink.add_address(rid, source, destination)) {
+	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+	return;
+    }
+
+    string ifname;
+    string vifname;
     uint16_t prefix_length = 0;
     uint16_t mtu = 0;
+
+    if (!_vlink.get_interface_vif(rid, ifname, vifname)) {
+	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+	return;
+    }
 
     PeerID peerid;
     try {
 	peerid = create_peer(ifname, vifname, source, prefix_length, mtu,
 			     OspfTypes::VirtualLink, OspfTypes::BACKBONE);
     } catch(XorpException& e) {
+	XLOG_ERROR("%s", cstring(e));
 	return;
+    }
+
+    if (!_vlink.add_peerid(rid, peerid)) {
+	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+	return;
+    }
+
+    // Scan through the peers and find the interface and vif that
+    // match the source address.
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	if ((*i).second->match(source, ifname, vifname)) {
+	    if (!_vlink.set_physical_interface_vif(rid, ifname, vifname))
+		XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+	    break;
+	}
     }
 
     if (!set_interface_cost(peerid, OspfTypes::BACKBONE, interface_cost))
@@ -732,8 +780,13 @@ void
 PeerManager<A>::down_virtual_link(OspfTypes::RouterID rid)
 
 {
-    string ifname = "vlink";
-    string vifname = pr_id(rid);
+    string ifname;
+    string vifname;
+
+    if (!_vlink.get_interface_vif(rid, ifname, vifname)) {
+	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+	return;
+    }
 
     try {
 	delete_peer(get_peerid(ifname, vifname));

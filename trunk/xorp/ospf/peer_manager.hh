@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.54 2005/11/15 04:29:49 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.55 2005/11/16 05:20:16 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -169,6 +169,13 @@ class PeerManager {
 			  OspfTypes::AreaID area, A neighbour_address,
 			  OspfTypes::RouterID rid);
 
+
+    /**
+     * Transmit packets
+     */
+    bool transmit(const string& interface, const string& vif,
+		  A dst, A src,
+		  uint8_t* data, uint32_t len);
 
     /**
      * Demultiplex incoming packets to the associated peer. If the
