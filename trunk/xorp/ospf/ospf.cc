@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.53 2005/11/14 19:33:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.54 2005/11/16 11:49:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -125,17 +125,20 @@ Ospf<A>::enabled(const string& interface, const string& vif, A address)
 }
 
 template <typename A>
-uint32_t
+bool
 Ospf<A>::get_prefix_length(const string& interface, const string& vif,
-			    A address)
+			   A address, uint16_t& prefix_length)
 {
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
-    if (string(VLINK) == interface)
-	return 1;
+    if (string(VLINK) == interface) {
+	prefix_length = 0;
+	return true;;
+    }
 
-    return _io->get_prefix_length(interface, vif, address);
+    prefix_length = _io->get_prefix_length(interface, vif, address);
+    return 0 == prefix_length ? false : true;
 }
 
 template <typename A>
@@ -145,7 +148,7 @@ Ospf<A>::get_mtu(const string& interface)
     debug_msg("Interface %s\n", interface.c_str());
 
     if (string(VLINK) == interface)
-	return 576;
+	return VLINK_MTU;
 
     return _io->get_mtu(interface);
 }

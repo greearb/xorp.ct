@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.85 2005/11/16 20:07:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.86 2005/11/16 20:22:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -342,8 +342,8 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     PeerID peerid = create_peerid(interface, vif);
 
     // Get the prefix length.
-    interface_prefix_length = _ospf.get_prefix_length(interface, vif, source);
-    if (0 == interface_prefix_length)
+    if (!_ospf.get_prefix_length(interface, vif, source,
+				 interface_prefix_length))
 	xorp_throw(BadPeer, 
 		   c_format("Unable to get prefix length for %s/%s/%s",
 			    interface.c_str(), vif.c_str(), cstring(source)));

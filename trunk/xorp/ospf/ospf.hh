@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.74 2005/11/14 19:33:29 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.75 2005/11/16 11:47:01 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -192,6 +192,11 @@ struct OspfTypes {
  * Interface name of a virtual link endpoint.
  */
 static const char VLINK[] = "vlink";
+
+/**
+ * MTU of a virtual link.
+ */
+static const uint32_t VLINK_MTU = 576;
 
 /**
  * XRL target name.
@@ -429,8 +434,8 @@ class Ospf {
     /**
      * @return prefix length for this address.
      */
-    uint32_t get_prefix_length(const string& interface, const string& vif,
-			       A address);
+    bool get_prefix_length(const string& interface, const string& vif,
+			   A address, uint16_t& prefix_length);
 
     /**
      * @return the mtu for this interface.
