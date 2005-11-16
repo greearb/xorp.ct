@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.88 2005/11/16 22:35:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.89 2005/11/16 23:40:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -460,7 +460,7 @@ PeerManager<A>::transmit(const string& interface, const string& vif,
 			 A dst, A src,
 			 uint8_t* data, uint32_t len)
 {
-    debug_msg("Interface %s Vif %s data %p len %u",
+    debug_msg("Interface %s Vif %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(), data, len);
 
     if (string(VLINK) == interface) {
