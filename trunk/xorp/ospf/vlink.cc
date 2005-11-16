@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/vlink.cc,v 1.1 2005/11/14 19:33:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/vlink.cc,v 1.2 2005/11/16 11:52:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -158,6 +158,21 @@ Vlink<A>::add_peerid(OspfTypes::RouterID rid, PeerID peerid)
 }
 
 template <typename A>
+PeerID
+Vlink<A>::get_peerid(OspfTypes::RouterID rid)
+{
+    if (0 == _vlinks.count(rid)) {
+	XLOG_WARNING("Virtual link to %s doesn't exist", pr_id(rid).c_str());
+	return ALLPEERS;
+    }
+
+    typename map <OspfTypes::RouterID, Vstate>::iterator i = _vlinks.find(rid);
+    XLOG_ASSERT(_vlinks.end() != i);
+
+    return i->second._peerid;
+}
+
+template <typename A>
 bool
 Vlink<A>::set_physical_interface_vif(OspfTypes::RouterID rid,
 				     string& interface,
@@ -195,5 +210,21 @@ Vlink<A>::get_physical_interface_vif(A source, A destination,
 
     return false;
 }
+
+template <typename A>
+PeerID
+Vlink<A>::get_peerid(A source, A destination)
+{
+    typename map<OspfTypes::RouterID, Vstate>::const_iterator i;
+    for(i = _vlinks.begin(); i != _vlinks.end(); i++) {
+	if (i->second._source == source &&
+	    i->second._destination == destination) {
+	    return i->second._peerid; 
+	}
+    }
+
+    return ALLPEERS;
+}
+
 template class Vlink<IPv4>;
 template class Vlink<IPv6>;

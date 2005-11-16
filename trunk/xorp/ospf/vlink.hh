@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vlink.hh,v 1.1 2005/11/14 19:33:30 atanu Exp $
+// $XORP: xorp/ospf/vlink.hh,v 1.2 2005/11/16 11:52:54 atanu Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -64,6 +64,11 @@ class Vlink {
     bool add_peerid(OspfTypes::RouterID rid, PeerID peerid);
 
     /**
+     * Get the associated peerid.
+     */
+    PeerID get_peerid(OspfTypes::RouterID rid);
+
+    /**
      * The phyical interface and vif that should be used for transmission.
      */
     bool set_physical_interface_vif(OspfTypes::RouterID rid, string& interface,
@@ -75,6 +80,12 @@ class Vlink {
      */
     bool get_physical_interface_vif(A source, A destination, string& interface,
 				    string& vif);
+
+    /**
+     * Given the source and destination address find the PeerID of the
+     * relevant virtual link.
+     */
+    PeerID get_peerid(A source, A destination);
 
  private:
     /**
