@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.27 2005/08/18 15:54:28 bms Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.28 2005/08/29 17:25:49 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -65,11 +65,11 @@ public:
 
     void lock_config(LOCK_CALLBACK cb);
 
-    void config_saved_done(bool success, const string& errmsg);
+    void config_saved_done(bool success, const string& error_msg);
     void commit_changes(const string& deltas, const string& deletions,
 			GENERIC_CALLBACK cb,
 			CallBack final_cb);
-    void commit_done(bool success, const string& errmsg);
+    void commit_done(bool success, const string& error_msg);
 
     void unlock_config(GENERIC_CALLBACK cb);
 
@@ -96,7 +96,7 @@ public:
     void config_changed(uid_t user_id, const string& deltas, 
 			const string& deletions);
 
-    void module_status_change(const string& modname, 
+    void module_status_change(const string& module_name, 
 			      GenericModule::ModuleStatus status);
 
     void get_rtrmgr_pid(PID_CALLBACK cb);

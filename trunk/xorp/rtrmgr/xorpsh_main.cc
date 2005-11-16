@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.54 2005/10/11 17:59:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.55 2005/11/03 17:27:52 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -136,6 +136,8 @@ XorpShell::XorpShell(const string& IPCname,
       _mode(MODE_INITIALIZING),
       _xorpsh_interface(&_xrlrouter, *this)
 {
+    string error_msg;
+
     //
     // Print various information
     //
@@ -149,10 +151,9 @@ XorpShell::XorpShell(const string& IPCname,
 	       _verbose ? "true" : "false");
 
     // Read the router config template files
-    string errmsg;
     _tt = new TemplateTree(xorp_root_dir, _verbose);
-    if (!_tt->load_template_tree(config_template_dir, errmsg)) {
-	xorp_throw(InitError, errmsg);
+    if (!_tt->load_template_tree(config_template_dir, error_msg)) {
+	xorp_throw(InitError, error_msg);
     }
 
     debug_msg("%s", _tt->tree_str().c_str());
@@ -191,7 +192,8 @@ XorpShell::~XorpShell()
 void
 XorpShell::run(const string& commands)
 {
-    string errmsg;
+    bool success;
+    string error_msg;
     XorpFd xorpsh_input_fd;
     XorpFd xorpsh_output_fd;
     XorpFd xorpsh_write_commands_fd;
@@ -209,9 +211,9 @@ XorpShell::run(const string& commands)
 	int pipedesc[2];
 
 	if (pipe(pipedesc) != 0) {
-	    errmsg = c_format("Cannot create an internal pipe: %s",
-			      strerror(errno));
-	    xorp_throw(InitError, errmsg);
+	    error_msg = c_format("Cannot create an internal pipe: %s",
+				 strerror(errno));
+	    xorp_throw(InitError, error_msg);
 	}
 	// xorpsh_write_commands_fd = pipedesc[1];
 	_fddesc[0] = xorpsh_input_fd = pipedesc[0];
@@ -232,8 +234,8 @@ XorpShell::run(const string& commands)
 
     if (wait_for_xrlrouter_ready(_eventloop, _xrlrouter) == false) {
 	// RtrMgr contains finder
-	errmsg = c_format("Failed to connect to xorp_rtrmgr.");
-	xorp_throw(InitError, errmsg);
+	error_msg = c_format("Failed to connect to the router manager");
+	xorp_throw(InitError, error_msg);
     }
 
 #ifdef HOST_OS_WINDOWS
@@ -241,9 +243,14 @@ XorpShell::run(const string& commands)
 #else
     const uint32_t uid = getuid();
 #endif
-    _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
-					callback(this,
-						 &XorpShell::register_done));
+    success = _rtrmgr_client.send_register_client("rtrmgr", uid, _ipc_name,
+						  callback(this,
+							   &XorpShell::register_done));
+    if (! success) {
+	error_msg = c_format("Failed to send a registration request to the "
+			     "router manager");
+	xorp_throw(InitError, error_msg);
+    }
     _mode = MODE_AUTHENTICATING;
     while (_authfile.empty()) {
 	_eventloop.run();
@@ -282,10 +289,16 @@ XorpShell::run(const string& commands)
     XLOG_TRACE(_verbose, "authtoken = >%s<\n", _authtoken.c_str());
 
     _xrl_generic_done = false;
-    _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name,
-					    _authtoken,
-					    callback(this,
-						     &XorpShell::generic_done));
+    success = _rtrmgr_client.send_authenticate_client("rtrmgr", uid, _ipc_name,
+						      _authtoken,
+						      callback(this,
+							       &XorpShell::generic_done));
+    if (! success) {
+	error_msg = c_format("Failed to send an authentication request to the "
+			     "router manager");
+	xorp_throw(InitError, error_msg);
+    }
+
     while (!_xrl_generic_done) {
 	_eventloop.run();
     }
@@ -322,20 +335,20 @@ XorpShell::run(const string& commands)
 	_router_cli = new RouterCLI(*this, _cli_node, xorpsh_input_fd,
 				    xorpsh_output_fd, _verbose);
     } catch (const InitError& e) {
-	errmsg = c_format("Shutting down due to a parse error: %s",
-			  e.why().c_str());
+	error_msg = c_format("Shutting down due to a parse error: %s",
+			     e.why().c_str());
 
 	_xrl_generic_done = false;
-	_rtrmgr_client.send_unregister_client(
+	success = _rtrmgr_client.send_unregister_client(
 	    "rtrmgr",
 	    _authtoken,
 	    callback(this, &XorpShell::generic_done));
 	_mode = MODE_SHUTDOWN;
 	// Run the event loop to cause the unregister to be sent
-	while (! _xrl_generic_done) {
+	while (success && ! _xrl_generic_done) {
 	    _eventloop.run();
 	}
-	xorp_throw(InitError, errmsg);
+	xorp_throw(InitError, error_msg);
     }
 
     //
@@ -369,13 +382,13 @@ XorpShell::run(const string& commands)
     }
 
     _xrl_generic_done = false;
-    _rtrmgr_client.send_unregister_client(
+    success = _rtrmgr_client.send_unregister_client(
 	"rtrmgr",
 	_authtoken,
 	callback(this, &XorpShell::generic_done));
     _mode = MODE_SHUTDOWN;
     // Run the event loop to cause the unregister to be sent
-    while (! _xrl_generic_done) {
+    while (success && ! _xrl_generic_done) {
 	_eventloop.run();
     }
 }
@@ -474,19 +487,19 @@ XorpShell::commit_changes(const string& deltas, const string& deletions,
 }
 
 void
-XorpShell::config_saved_done(bool success, const string& errmsg)
+XorpShell::config_saved_done(bool success, const string& error_msg)
 {
     // Call unlock_config. The callback from unlock will finally clear
     // things up.
-    _ct->save_phase4(success, errmsg, _config_save_callback, this);
+    _ct->save_phase4(success, error_msg, _config_save_callback, this);
 }
 
 void
-XorpShell::commit_done(bool success, const string& errmsg)
+XorpShell::commit_done(bool success, const string& error_msg)
 {
     // Call unlock_config. The callback from unlock will finally clear
     // things up.
-    _ct->commit_phase4(success, errmsg, _commit_callback, this);
+    _ct->commit_phase4(success, error_msg, _commit_callback, this);
 }
 
 void
@@ -656,17 +669,16 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 }
 
 void 
-XorpShell::module_status_change(const string& modname, 
+XorpShell::module_status_change(const string& module_name, 
 				GenericModule::ModuleStatus status)
 {
-    UNUSED(modname);
-    UNUSED(status);
+    string error_msg;
+
     debug_msg("Module status change: %s status %d\n",
-	      modname.c_str(), (int)status);
-    GenericModule *module = _mmgr.find_module(modname);
+	      module_name.c_str(), XORP_INT_CAST(status));
+    GenericModule *module = _mmgr.find_module(module_name);
     if (module == NULL) {
-	string error_msg;
-	module = _mmgr.new_module(modname, error_msg);
+	module = _mmgr.new_module(module_name, error_msg);
     }
     XLOG_ASSERT(module != NULL);
     module->new_status(status);
