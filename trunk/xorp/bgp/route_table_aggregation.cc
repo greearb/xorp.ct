@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.1 2005/11/15 18:04:29 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.2 2005/11/15 22:00:16 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -67,29 +67,21 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      * unmodified downstream.  DONE.
      */
     uint32_t aggr_prefix_len = rtmsg.route()->aggr_prefix_len();
-    debug_msg("\naggr_prefix_len=%d\n", aggr_prefix_len);
+    debug_msg("aggr_prefix_len=%d\n", aggr_prefix_len);
     if (aggr_prefix_len == SR_AGGR_IGNORE)
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 
     /*
-     * If route has less specific prefix length then the requested
-     * aggregate, pass the request downstream.  Since we have to modify
-     * the aggr_prefix_len field of the route, we must operate on a
-     * copy, not on the original route.
+     * If the route has less a specific prefix length then the requested
+     * aggregate, pass the request downstream without considering
+     * to create an aggregate.  Since we have to modify the
+     * aggr_prefix_len field of the route, we must operate on a copy
+     * of the original route.
      */
     const IPNet<A> orig_net = rtmsg.net();
     const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
 				       aggr_prefix_len);
-    SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(orig_net,
-						orig_route->attributes(),
-						orig_route->original_route(),
-						orig_route->igp_metric());
-    // propagate route flags
-    ibgp_r->set_filtered(orig_route->is_filtered());
-    ibgp_r->set_is_winner(orig_route->igp_metric());
-    ibgp_r->set_in_use(orig_route->in_use());
-    ibgp_r->set_nexthop_resolved(orig_route->nexthop_resolved());
-
+    SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
     InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
     ibgp_msg.set_changed();
 
@@ -101,6 +93,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     if (orig_net.prefix_len() < aggr_prefix_len) {
 	// Send the "original" version downstream, and we are DONE.
+        debug_msg("Bogus marking\n");
 	if (must_push)
 	    ibgp_msg.set_push();
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
@@ -117,7 +110,8 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     ai = _aggregates_table.lookup_node(aggr_net);
     if (ai == _aggregates_table.end()) {
         const AggregateRoute<A> *new_aggr_route =
-	    new AggregateRoute<A>(aggr_net, orig_route->aggr_brief_mode(),
+	    new AggregateRoute<A>(aggr_net,
+				  orig_route->aggr_brief_mode(),
 				  _master_plumbing.main().get_local_data());
 	ai = _aggregates_table.insert(aggr_net, *new_aggr_route);
     }
@@ -134,17 +128,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      * aggregate, announce it to EBGP peering branches.
      */
     if (aggr_route->net() != orig_net) {
-	SubnetRoute<A> *ebgp_r =
-	    new SubnetRoute<A>(orig_net,
-			       orig_route->attributes(),
-			       orig_route->original_route(),
-			       orig_route->igp_metric());
-	// propagate route flags
-	ebgp_r->set_filtered(orig_route->is_filtered());
-	ebgp_r->set_is_winner(orig_route->igp_metric());
-	ebgp_r->set_in_use(orig_route->in_use());
-	ebgp_r->set_nexthop_resolved(orig_route->nexthop_resolved());
-
+	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
 	ebgp_msg.set_changed();
 
@@ -170,7 +154,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     /*
      * Send the "original" version downstream.  SR_AGGR_IBGP_ONLY marker
      * will instruct the post-fanout static filters to propagate this
-     * route only to IBGP peering and localRIB.
+     * route only to IBGP peerings and localRIB.
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
     int res = this->_next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
@@ -204,29 +188,21 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
      * unmodified downstream.  DONE.
      */
     uint32_t aggr_prefix_len = orig_route->aggr_prefix_len();
-    debug_msg("\naggr_prefix_len=%d\n", aggr_prefix_len);
+    debug_msg("aggr_prefix_len=%d\n", aggr_prefix_len);
     if (aggr_prefix_len == SR_AGGR_IGNORE)
 	return this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 
     /*
-     * If route has less specific prefix length then the requested
-     * aggregate, pass the request downstream.  Since we have to modify
-     * the aggr_prefix_len field of the route, we must operate on a
-     * copy, not on the original route.
+     * If the route has less a specific prefix length then the requested
+     * aggregate, pass the request downstream without considering
+     * to create an aggregate.  Since we have to modify the
+     * aggr_prefix_len field of the route, we must operate on a copy
+     * of the original route.
      */
     const IPNet<A> orig_net = rtmsg.net();
     const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
 				       aggr_prefix_len);
-    SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(orig_net,
-						orig_route->attributes(),
-						orig_route->original_route(),
-						orig_route->igp_metric());
-    // propagate route flags
-    ibgp_r->set_filtered(orig_route->is_filtered());
-    ibgp_r->set_is_winner(orig_route->igp_metric());
-    ibgp_r->set_in_use(orig_route->in_use());
-    ibgp_r->set_nexthop_resolved(orig_route->nexthop_resolved());
-
+    SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
     InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
     ibgp_msg.set_changed();
 
@@ -238,12 +214,12 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     if (orig_net.prefix_len() < aggr_prefix_len) {
 	// Send the "original" version downstream, and we are DONE.
+        debug_msg("Bogus marking\n");
 	if (must_push)
 	    ibgp_msg.set_push();
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
 	int res = this->_next_table->
 	    delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
-	ibgp_r->unref();
 	return res;
     }
 
@@ -259,20 +235,10 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     /*
      * If our component route holds a more specific prefix than the
-     * aggregate, announce it to EBGP peering branches.
+     * aggregate, send a delete rquest for it to EBGP branches.
      */
     if (aggr_route->net() != orig_net) {
-	SubnetRoute<A> *ebgp_r =
-	    new SubnetRoute<A>(orig_net,
-			       orig_route->attributes(),
-			       orig_route->original_route(),
-			       orig_route->igp_metric());
-	// propagate route flags
-	ebgp_r->set_filtered(orig_route->is_filtered());
-	ebgp_r->set_is_winner(orig_route->igp_metric());
-	ebgp_r->set_in_use(orig_route->in_use());
-	ebgp_r->set_nexthop_resolved(orig_route->nexthop_resolved());
-
+	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
 	ebgp_msg.set_changed();
 
@@ -285,32 +251,28 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
 	this->_next_table->delete_route(ebgp_msg, (BGPRouteTable<A>*)this);
-	ebgp_r->unref();
     }
 
-    // XXX Be EXTRA carefull no to leak memory here!  REVISIT!!!
     aggr_route->components_table()->erase(orig_net);
 
     /*
      * Recompute the aggregate.  If pa_list different from the old one,
-     * check whether we have to withdraw the old and /or announce the
+     * check whether we have to withdraw the old and / or announce the
      * new aggregate.
      */
     aggr_route->reevaluate(this);
 
-    // XXX Again, be EXTRA carefull no to leak memory!  REVISIT!!!
     if (aggr_route->components_table()->route_count() == 0)
 	_aggregates_table.erase(aggr_net);
 
     /*
      * Send the "original" version downstream.  SR_AGGR_IBGP_ONLY marker
      * will instruct the post-fanout static filters to propagate this
-     * route only to IBGP peering and localRIB.
+     * route only to IBGP peerings and localRIB.
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
     int res = this->_next_table->
 	delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
-    ibgp_r->unref();
     if (must_push)
 	this->_next_table->push(this);
     return res;
@@ -327,14 +289,15 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     bool old_was_suppressed = _is_suppressed;
     _is_suppressed = false;
     const PathAttributeList<A> *old_pa_list = _pa_list;
-	    NextHopAttribute<A> nhatt(A::ZERO());
-	    AsPath aspath;
-	    OriginAttribute igp_origin_att(IGP);
-	    _pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
+    NextHopAttribute<A> nhatt(A::ZERO());
+    AsPath aspath;
+    OriginAttribute igp_origin_att(IGP);
+    _pa_list = new PathAttributeList<A>(nhatt, aspath, igp_origin_att);
+
     /*
      * PHASE 1:
      *
-     * Iterate through all component routes in order to compute new
+     * Iterate through all component routes in order to compute the new
      * path attributes and determine whether we are allowed to announce
      * the aggregate or not.
      */
@@ -380,6 +343,8 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	    must_set_atomic_aggr = true;
     }
 
+    // XXX Don't forget to add a MED attr here if needed!  REVISIT!!!
+
     if (must_set_atomic_aggr) {
 	AtomicAggAttribute aa_attr;
 	_pa_list->add_path_attribute(aa_attr);
@@ -395,18 +360,22 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
      * Phase 2:
      *
      * If the new aggregate must be suppressed, but was active before,
-     * we should reannounce all the component routes with proper marking, i.e.
+     * we must reannounce all the component routes with proper marking, i.e.
      * SR_AGGR_EBGP_NOT_AGGREGATED instead of SR_AGGR_EBGP_WAS_AGGREGATED.
      * Similarly, if previously the aggregate was suppressed, but now it
-     * must not be, we should reannounce all the component routes marked as
-     * SR_AGGR_EBGP_WAS_AGGREGATED.
+     * should not be any more, we must reannounce all the component routes
+     * and mark them as SR_AGGR_EBGP_WAS_AGGREGATED.
      *
      * Observe the true meaning of the word SHOULD.  We _should_ do the
      * described action, but currently we do nothing.  This means we
      * are violating the BGP RFC draft, section 9.2.2.2, paragraph 3:
      * "Routes that have different MED attribute SHALL NOT be aggregated."
      */
-    UNUSED(old_was_suppressed)
+    if (old_was_suppressed != _is_suppressed) {
+	for (comp_iter = _components_table.begin();
+	     comp_iter != _components_table.end(); comp_iter++) {
+	}
+    }
 
     /*
      * Phase 3:
