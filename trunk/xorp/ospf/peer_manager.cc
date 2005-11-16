@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.79 2005/11/15 04:29:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.80 2005/11/16 05:20:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -910,28 +910,30 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
     // RFC 2328 Section 12.4.3. Sumamry-LSAs
     // Select routes that are candidate for summarisation.
 
+    bool candidate = false;
+
     switch (rt.get_destination_type()) {
     case OspfTypes::Router:
 	if (rt.get_as_boundary_router())
-	    return true;
+	    candidate = true;
 	break;
     case OspfTypes::Network:
-	return true;
+	candidate = true;
 	break;
     }
 
     switch (rt.get_path_type()) {
     case RouteEntry<A>::intra_area:
     case RouteEntry<A>::inter_area:
-	return true;
+	candidate = true;
 	break;
     case RouteEntry<A>::type1:
     case RouteEntry<A>::type2:
-	return false;
+	candidate = false;
 	break;
     }
 
-    return false;
+    return candidate;
 }
 
 template <typename A>
