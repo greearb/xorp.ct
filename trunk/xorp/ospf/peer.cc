@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.189 2005/11/16 05:20:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.190 2005/11/16 11:55:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -657,10 +657,6 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 	}
 	break;
     case OspfTypes::VirtualLink:
-	// A peer can never be configured as a virtual link.
-	// The virtual link checks will be performed later in the
-	// neighbour code..
-	XLOG_UNREACHABLE();
 	break;
     case OspfTypes::PointToPoint:
 	break;
