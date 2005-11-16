@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.52 2005/11/12 23:43:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.53 2005/11/14 19:33:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -132,6 +132,9 @@ Ospf<A>::get_prefix_length(const string& interface, const string& vif,
     debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
 	      vif.c_str(), cstring(address));
 
+    if (string(VLINK) == interface)
+	return 1;
+
     return _io->get_prefix_length(interface, vif, address);
 }
 
@@ -140,6 +143,9 @@ uint32_t
 Ospf<A>::get_mtu(const string& interface)
 {
     debug_msg("Interface %s\n", interface.c_str());
+
+    if (string(VLINK) == interface)
+	return 576;
 
     return _io->get_mtu(interface);
 }
