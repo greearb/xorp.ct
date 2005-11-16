@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.2 2005/11/15 20:16:18 pavlin Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.3 2005/11/15 22:00:16 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -78,12 +78,23 @@ class AggregationTable;
 template<class A>
 class ComponentRoute {
 public:
-    ComponentRoute(const SubnetRoute<A>* route) :
-	_route(route) {
-    };
-    inline const SubnetRoute<A>* route() const { return _route.route(); }
+    ComponentRoute(const SubnetRoute<A>* route,
+		   const PeerHandler *origin,
+		   uint32_t genid,
+		   bool from_previous_peering) : _route(route) {
+	_origin_peer = origin;
+	_genid = genid;
+	_from_previous_peering = from_previous_peering;
+    }
+    const SubnetRoute<A>* route() const { return _route.route(); }
+    const PeerHandler* origin_peer() const { return _origin_peer; }
+    uint32_t genid() const { return _genid; }
+    bool from_previous_peering() const { return _from_previous_peering; }
 private:
     SubnetRouteConstRef<A> _route;
+    const PeerHandler *_origin_peer;
+    uint32_t _genid;
+    bool _from_previous_peering;
 };
 
 

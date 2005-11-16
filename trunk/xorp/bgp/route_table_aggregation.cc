@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.3 2005/11/16 00:39:43 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.4 2005/11/16 10:13:48 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -120,7 +120,11 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     // Check we don't already have the original route stored
     XLOG_ASSERT(aggr_route->components_table()->lookup_node(orig_net) == aggr_route->components_table()->end());
-    ComponentRoute<A> *comp_route = new ComponentRoute<A>(rtmsg.route());
+    ComponentRoute<A> *comp_route =
+	new ComponentRoute<A>(rtmsg.route(),
+			      rtmsg.origin_peer(),
+			      rtmsg.genid(),
+			      rtmsg.from_previous_peering());
     aggr_route->components_table()->insert(orig_net, *comp_route);
 
     /*
@@ -287,6 +291,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     uint32_t med = 0;
     bool must_set_atomic_aggr = false;
     bool old_was_suppressed = _is_suppressed;
+    bool old_was_announced = _was_announced;
     _is_suppressed = false;
     const PathAttributeList<A> *old_pa_list = _pa_list;
     NextHopAttribute<A> nhatt(A::ZERO());
@@ -301,6 +306,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
      * path attributes and determine whether we are allowed to announce
      * the aggregate or not.
      */
+    debug_msg("PHASE 1\n");
     for (comp_iter = _components_table.begin();
          comp_iter != _components_table.end(); comp_iter++) {
 	const PathAttributeList<A>
@@ -359,73 +365,111 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     /*
      * Phase 2:
      *
-     * If the new aggregate must be suppressed, but was active before,
+     * If the aggregate was announced, and either it should be suppressed
+     * from now on, or its path attributes have changed, delete the old
+     * version.
+     */
+    debug_msg("PHASE 2\n");
+    if (_was_announced && (_is_suppressed || *old_pa_list != *_pa_list)) {
+	/*
+	 * We need to send a delete request for the old aggregate
+	 * before proceeding any further.  Construct a temporary
+	 * subnet route / message and send downstream.
+	 */
+	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(_net,
+						       old_pa_list,
+						       NULL,
+						       0);
+	tmp_route->set_nexthop_resolved(true);	// Cheating
+	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
+	InternalMessage<A> tmp_rtmsg(tmp_route,
+				     parent->_master_plumbing.rib_handler(),
+				     GENID_UNKNOWN);
+	parent->_next_table->delete_route(tmp_rtmsg, parent);
+	tmp_route->unref(); // XXX Is this necessary / OK?
+	_was_announced = false;
+    }
+
+    /*
+     * Phase 3:
+     *
+     * If the aggregate must be suppressed now, but was active before, so
      * we must reannounce all the component routes with proper marking, i.e.
      * SR_AGGR_EBGP_NOT_AGGREGATED instead of SR_AGGR_EBGP_WAS_AGGREGATED.
      * Similarly, if previously the aggregate was suppressed, but now it
      * should not be any more, we must reannounce all the component routes
      * and mark them as SR_AGGR_EBGP_WAS_AGGREGATED.
      *
-     * Observe the true meaning of the word SHOULD.  We _should_ do the
-     * described action, but currently we do nothing.  This means we
-     * are violating the BGP RFC draft, section 9.2.2.2, paragraph 3:
-     * "Routes that have different MED attribute SHALL NOT be aggregated."
+     * NOTE: If the aggregate contains a large number of component routes,
+     * this naive approach of atomic replacing of all the component routes
+     * until completion can lead to severe lockouts.  We might be much
+     * better off with a timer-based replacement routine, but this would
+     * significantly complicate the implementation.
      */
+    debug_msg("PHASE 3\n");
     if (old_was_suppressed != _is_suppressed) {
 	for (comp_iter = _components_table.begin();
 	     comp_iter != _components_table.end(); comp_iter++) {
+	    const SubnetRoute<A> *comp_route = comp_iter.payload().route();
+	    debug_msg("%s\n", comp_route->str().c_str());
+	    SubnetRoute<A> *old_r = new SubnetRoute<A>(*comp_route);
+	    SubnetRoute<A> *new_r = new SubnetRoute<A>(*comp_route);
+	    InternalMessage<A> old_msg(old_r,
+				       comp_iter.payload().origin_peer(),
+				       comp_iter.payload().genid());
+	    InternalMessage<A> new_msg(new_r,
+				       comp_iter.payload().origin_peer(),
+				       comp_iter.payload().genid());
+	    new_msg.set_changed();
+	    old_msg.set_changed();
+
+	    if (old_was_suppressed) {
+		old_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
+		new_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
+	    } else {
+		old_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
+		new_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
+	    }
+	    /*
+	     * Do not add / remove component routes if they would
+	     * conflict with the aggregate.
+	     */
+	    if (!(old_was_announced && comp_route->net() == _net)) {
+		debug_msg("deleting\n");
+		parent->_next_table->delete_route(old_msg, parent);
+	    }
+	    if (!(!_is_suppressed && comp_route->net() == _net)) {
+		debug_msg("announcing\n");
+		parent->_next_table->add_route(new_msg, parent);
+	    }
+	    // XXX deallocate memory - REVISIT this!
 	}
     }
 
     /*
-     * Phase 3:
+     * Phase 4:
      *
      * If the new path attributes are different from the old ones, delete
      * the old version of the aggregate route and announce a fresh one,
      * unless _is_suppressed flag was set.
      */
-    if (*old_pa_list != *_pa_list) {
-	/*
-	 * The new aggregate is different from the old one.
-	 */
-	if (_was_announced) {
-	    /*
-	     * We need to send a delete request for the old aggregate
-	     * before proceeding any further.  Construct a temporary
-	     * subnet route / message and send downstream.
-	     */
-	     SubnetRoute<A>* tmp_route =
-			new SubnetRoute<A>(_net,
-					   old_pa_list,
-					   NULL,
-					   0);
-	     tmp_route->set_nexthop_resolved(true);	// Cheating
-	     tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
-	     InternalMessage<A>
-		tmp_rtmsg(tmp_route,
-			  parent->_master_plumbing.rib_handler(),
-			  GENID_UNKNOWN);
-	     parent->_next_table->delete_route(tmp_rtmsg, parent);
-	     tmp_route->unref();
-	}
-
-	if (!_is_suppressed && _components_table.route_count() != 0) {
-	     SubnetRoute<A>* tmp_route =
-			new SubnetRoute<A>(_net,
-					   _pa_list,
-					   NULL,
-					   0);
-	     tmp_route->set_nexthop_resolved(true);	// Cheating
-	     tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
-	     InternalMessage<A>
-		tmp_rtmsg(tmp_route,
-			  parent->_master_plumbing.rib_handler(),
-			  GENID_UNKNOWN);
-	     parent->_next_table->add_route(tmp_rtmsg, parent);
-	     tmp_route->unref();
-	     _was_announced = true;
-	} else
-	     _was_announced = false;
+    debug_msg("PHASE 4\n");
+    if (!_was_announced &&
+	!_is_suppressed &&
+	_components_table.route_count() != 0 &&
+	(old_was_suppressed || *old_pa_list != *_pa_list)) {
+	SubnetRoute<A>* tmp_route = new SubnetRoute<A>(_net,
+						       _pa_list,
+						       NULL,
+						       0);
+	tmp_route->set_nexthop_resolved(true);	// Cheating
+	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
+	InternalMessage<A> tmp_rtmsg(tmp_route,
+				     parent->_master_plumbing.rib_handler(),
+				     GENID_UNKNOWN);
+	parent->_next_table->add_route(tmp_rtmsg, parent);
+	tmp_route->unref();
+	_was_announced = true;
     }
 
     delete old_pa_list;
