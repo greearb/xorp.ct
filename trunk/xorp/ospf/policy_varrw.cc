@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.4 2005/10/22 06:53:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.5 2005/11/12 05:50:06 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,7 +42,7 @@
 template <typename A>
 OspfVarRW<A>::OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric,
 			bool& e_bit, uint32_t& tag,
-			const PolicyTags& policytags)
+			PolicyTags& policytags)
     : _network(network), _nexthop(nexthop), _metric(metric), _e_bit(e_bit),
       _tag(tag), _policytags(policytags)
 {

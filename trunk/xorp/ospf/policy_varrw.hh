@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/policy_varrw.hh,v 1.5 2005/11/15 09:03:05 atanu Exp $
+// $XORP: xorp/ospf/policy_varrw.hh,v 1.6 2005/11/15 09:12:26 atanu Exp $
 
 #ifndef __OSPF_POLICY_VARRRW_HH__
 #define __OSPF_POLICY_VARRRW_HH__
@@ -35,7 +35,7 @@ class OspfVarRW : public SingleVarRW {
     };
 
     OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric, bool& e_bit,
-	      uint32_t& tag, const PolicyTags& policytags);
+	      uint32_t& tag, PolicyTags& policytags);
 
     void null();
 
@@ -51,7 +51,7 @@ class OspfVarRW : public SingleVarRW {
     bool& _e_bit;
     uint32_t& _tag;
 
-    PolicyTags _policytags;
+    PolicyTags& _policytags;
 
     ElementFactory _ef;
 };

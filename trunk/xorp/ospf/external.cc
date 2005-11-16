@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.14 2005/11/09 20:26:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.15 2005/11/10 09:30:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -186,7 +186,8 @@ External<A>::do_filtering(IPNet<A>& network, A& nexthop, uint32_t& metric,
 			  const PolicyTags& policytags)
 {
     try {
-	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag, policytags);
+	PolicyTags ptags = policytags;
+	OspfVarRW<A> varrw(network, nexthop, metric, e_bit, tag, ptags);
 	XLOG_TRACE(_ospf.trace()._export_policy,
 		   "[OSPF] Running filter: %s on route: %s\n",
 		   filter::filter2str(filter::EXPORT).c_str(),

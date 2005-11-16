@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.27 2005/11/05 23:26:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.28 2005/11/10 21:27:15 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -370,7 +370,7 @@ template <typename A>
 bool
 RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 			      uint32_t& metric, RouteEntry<A>& /*rt*/,
-			      const PolicyTags& policytags)
+			      PolicyTags& policytags)
 {
     // Host routes are required in the ospf routing table to satisfy
     // requirements for AS-External-LSAs and Summary-LSAs. Drop them
