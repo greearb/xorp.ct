@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.74 2005/11/10 10:36:18 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.75 2005/11/11 16:30:01 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1740,6 +1740,20 @@ initialise_lsa_decoder(OspfTypes::Version version, LsaDecoder& lsa_decoder)
     lsa_decoder.register_decoder(new SummaryRouterLsa(version));
     lsa_decoder.register_decoder(new ASExternalLsa(version));
     lsa_decoder.register_decoder(new Type7Lsa(version));
+}
+
+/**
+ * Given an address and a mask generate an IPNet both of the values
+ * are in host order.
+ */
+inline
+IPNet<IPv4>
+lsa_to_net(uint32_t lsid, uint32_t mask)
+{
+    IPv4 prefix = IPv4(htonl(mask));
+    IPNet<IPv4> net = IPNet<IPv4>(IPv4(htonl(lsid)), prefix.mask_len());
+
+    return net;
 }
 
 #endif // __OSPF_LSA_HH__
