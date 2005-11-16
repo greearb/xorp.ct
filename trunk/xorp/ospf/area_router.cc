@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.147 2005/11/16 01:14:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.148 2005/11/16 11:45:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -201,6 +201,8 @@ bool
 AreaRouter<A>::add_virtual_link(OspfTypes::RouterID rid)
 {
     debug_msg("Router ID %s\n", pr_id(rid).c_str());
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Add virtual link rid %s\n", pr_id(rid).c_str());
 
     switch(_area_type) {
     case OspfTypes::NORMAL:
@@ -216,6 +218,8 @@ AreaRouter<A>::add_virtual_link(OspfTypes::RouterID rid)
     XLOG_ASSERT(0 == _vlinks.count(rid));
     _vlinks[rid] = false;
 
+    routing_schedule_total_recompute();
+
     return true;
 }
 
@@ -224,6 +228,8 @@ bool
 AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
 {
     debug_msg("Router ID %s\n", pr_id(rid).c_str());
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Remove virtual link rid %s\n", pr_id(rid).c_str());
 
     switch(_area_type) {
     case OspfTypes::NORMAL:
@@ -237,10 +243,12 @@ AreaRouter<A>::remove_virtual_link(OspfTypes::RouterID rid)
     }
 
     XLOG_ASSERT(0 != _vlinks.count(rid));
-    if (_vlinks[rid])
-	_ospf.get_peer_manager().down_virtual_link(rid);
 
     _vlinks.erase(_vlinks.find(rid));
+
+    // Note this call is async if it was sync it would cause a delete
+    // link upcall to the peer_manager, possibly surprsing it.
+    routing_schedule_total_recompute();
 
     return true;
 }
@@ -279,12 +287,14 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
 	return;
     }
 
-    debug_msg("Checking for virtual links %s\n", cstring(*rlsa));
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Checking for virtual links %s\n", cstring(*rlsa));
 
     if (0 == _vlinks.count(rid))
 	return;	// Not a candidate endpoint.
 
-    debug_msg("Found %s\n", pr_id(rid).c_str());
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Found virtual link endpoint %s\n", pr_id(rid).c_str());
 
     // Find the interface address of the neighbour that should be used.
     A neighbour_interface_address;
@@ -304,7 +314,6 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
     XLOG_ASSERT(0 != _vlinks.count(rid));
     _vlinks[rid] = true;
 
-    debug_msg("Up virtual link\n");
     _ospf.get_peer_manager().up_virtual_link(rid, routers_interface_address,
 					     rc.weight(),
 					     neighbour_interface_address);
@@ -316,7 +325,9 @@ AreaRouter<IPv4>::find_interface_address_virtual_link(Lsa::LsaRef src,
 						      Lsa::LsaRef dst,
 						      IPv4& interface) const
 {
-    debug_msg("src:\n%s\ndst:\n%s\n", cstring(*src), cstring(*dst));
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Virtual link find interface address src:\n%s\ndst:\n%s\n",
+	       cstring(*src), cstring(*dst));
 
     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(src.get());
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(src.get());
@@ -344,8 +355,8 @@ AreaRouter<IPv4>::find_interface_address_virtual_link(Lsa::LsaRef src,
     list<RouterLink>::const_iterator l = rlinks.begin();
     for(; l != rlinks.end(); l++) {
 	debug_msg("Does %s == %s\n",
-	       pr_id(l->get_link_id()).c_str(),
-	       pr_id(srid).c_str());
+		  pr_id(l->get_link_id()).c_str(),
+		  pr_id(srid).c_str());
 	if (l->get_link_id() == srid && l->get_type() == type) {
 	    interface = IPv4(htonl(l->get_link_data()));
 	    return true;
