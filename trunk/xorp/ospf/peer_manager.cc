@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.84 2005/11/16 18:56:00 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.85 2005/11/16 20:07:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -734,6 +734,12 @@ PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
 	} catch(XorpException& e) {
 	    XLOG_ERROR("%s", cstring(e));
 	}
+	// This PeerID has now been deleted so remove it from the record.
+	// This is not strictly necessary as we are about to delete
+	// this virtual link, but is is possible that in the future
+	// removing the virtual link from the area router may cause an
+	// upcall.
+	_vlink.add_peerid(rid, ALLPEERS);
     }
 
     // If a transit area is configured then remove this virtual link
