@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.73 2005/11/13 06:55:10 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.74 2005/11/14 19:33:29 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -187,6 +187,11 @@ struct OspfTypes {
      */
     static const int32_t MaxSequenceNumber = 0x7fffffff;
 };
+
+/**
+ * Interface name of a virtual link endpoint.
+ */
+static const char VLINK[] = "vlink";
 
 /**
  * XRL target name.
