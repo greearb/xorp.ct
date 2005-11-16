@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.87 2005/11/16 20:43:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.88 2005/11/16 22:35:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -881,6 +881,12 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
     XLOG_TRACE(_ospf.trace()._virtual_link,
 	       "Virtual link receive dest %s src %s packet %s\n",
 	       cstring(dst), cstring(src), cstring(*packet));
+
+    PeerID peerid = _vlink.get_peerid(dst, src);
+    if (ALLPEERS == peerid)
+	return false;
+    XLOG_ASSERT(0 != _peers.count(peerid));
+    return _peers[peerid]->receive(dst, src, packet);
 
     return false;
 }
