@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.16 2004/06/10 22:41:56 hodson Exp $
+// $XORP: xorp/rtrmgr/xorp_client.hh,v 1.17 2005/03/25 02:54:40 pavlin Exp $
 
 
 #ifndef __RTRMGR_XORP_CLIENT_HH__
@@ -28,7 +28,7 @@ class XrlRouter;
 
 class XorpClient  {
 public:
-    XorpClient(EventLoop& eventloop, XrlRouter& xrlrouter);
+    XorpClient(EventLoop& eventloop, XrlRouter& xrl_router);
     ~XorpClient() {};
 
 #if 0
@@ -43,7 +43,7 @@ public:
 
 private:
     EventLoop&	_eventloop;
-    XrlRouter&	_xrlrouter;
+    XrlRouter&	_xrl_router;
     XorpTimer	_delay_timer;
 };
 

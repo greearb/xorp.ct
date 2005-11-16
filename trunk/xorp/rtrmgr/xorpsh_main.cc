@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.55 2005/11/03 17:27:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.56 2005/11/16 03:05:42 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -79,7 +79,7 @@ announce_waiting()
 }
 
 static bool
-wait_for_xrlrouter_ready(EventLoop& eventloop, XrlRouter& xrl_router)
+wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 {
     XorpTimer announcer = eventloop.new_oneoff_after_ms(
 				3 * 1000, callback(&announce_waiting)
@@ -113,15 +113,17 @@ void add_cmd_action_adaptor(const string& cmd,
 // ----------------------------------------------------------------------------
 // XorpShell implementation
 
-XorpShell::XorpShell(const string& IPCname,
+XorpShell::XorpShell(EventLoop& eventloop,
+		     const string& IPCname,
 		     const string& xorp_root_dir,
 		     const string& config_template_dir,
 		     const string& xrl_targets_dir,
 		     bool verbose) throw (InitError)
-    : _eventloop(),
-      _xrlrouter(_eventloop, IPCname.c_str()),
-      _xclient(_eventloop, _xrlrouter),
-      _rtrmgr_client(&_xrlrouter),
+    : XrlStdRouter(eventloop, IPCname.c_str()),
+      _eventloop(eventloop),
+      _xrl_router(*this),
+      _xclient(_eventloop, _xrl_router),
+      _rtrmgr_client(&_xrl_router),
       _mmgr(_eventloop),
       _tt(NULL),
       _ct(NULL),
@@ -134,7 +136,7 @@ XorpShell::XorpShell(const string& IPCname,
       _got_config(false),
       _got_modules(false),
       _mode(MODE_INITIALIZING),
-      _xorpsh_interface(&_xrlrouter, *this)
+      _xorpsh_interface(&_xrl_router, *this)
 {
     string error_msg;
 
@@ -232,7 +234,7 @@ XorpShell::run(const string& commands)
     // Set the callback when the CLI exits (e.g., after Ctrl-D)
     _cli_node.set_cli_client_delete_callback(callback(exit_handler));
 
-    if (wait_for_xrlrouter_ready(_eventloop, _xrlrouter) == false) {
+    if (wait_for_xrl_router_ready(_eventloop, _xrl_router) == false) {
 	// RtrMgr contains finder
 	error_msg = c_format("Failed to connect to the router manager");
 	xorp_throw(InitError, error_msg);
@@ -684,12 +686,35 @@ XorpShell::module_status_change(const string& module_name,
     module->new_status(status);
 }
 
-
-
 void
 XorpShell::get_rtrmgr_pid(PID_CALLBACK cb)
 {
     _rtrmgr_client.send_get_pid("rtrmgr", cb);
+}
+
+/**
+ * Called when Finder connection is established.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XorpShell::finder_connect_event()
+{
+    //
+    // XXX: nothing to do, because on startup we wait until the finder
+    // is ready.
+    //
+}
+
+/**
+ * Called when Finder disconnect occurs.
+ *
+ * Note that this method overwrites an XrlRouter virtual method.
+ */
+void
+XorpShell::finder_disconnect_event()
+{
+    fprintf(stderr, "Finder disconnected. No Finder?\n");
 }
 
 // ----------------------------------------------------------------------------
@@ -804,7 +829,7 @@ main(int argc, char *argv[])
     //
     // Initialize the IPC mechanism.
     // As there can be multiple xorpsh instances, we need to generate a
-    // unique name for our xrlrouter.
+    // unique name for our xrl_router.
     //
     char hostname[MAXHOSTNAMELEN];
     if (gethostname(hostname, sizeof(hostname)) < 0) {
@@ -817,9 +842,10 @@ main(int argc, char *argv[])
     hostname[sizeof(hostname) - 1] = '\0';
 
     try {
+	EventLoop eventloop;
 	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
-	XorpShell xorpsh(xname, xorp_binary_root_dir(), template_dir,
-			 xrl_targets_dir, verbose);
+	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
+			 template_dir, xrl_targets_dir, verbose);
 	xorpsh.run(commands);
     } catch (const InitError& e) {
 	XLOG_ERROR("xorpsh exiting due to an init error: %s", e.why().c_str());

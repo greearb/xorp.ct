@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.28 2005/08/29 17:25:49 pavlin Exp $
+// $XORP: xorp/rtrmgr/xorpsh_main.hh,v 1.29 2005/11/16 03:05:42 pavlin Exp $
 
 #ifndef __RTRMGR_XORPSH_MAIN_HH__
 #define __RTRMGR_XORPSH_MAIN_HH__
@@ -37,9 +37,10 @@ class RouterCLI;
 class SlaveConfigTree;
 class TemplateTree;
 
-class XorpShell : public XorpShellBase {
+class XorpShell : public XorpShellBase, XrlStdRouter {
 public:
-    XorpShell(const string& IPCname, 
+    XorpShell(EventLoop& eventloop,
+	      const string& IPCname, 
 	      const string& xorp_root_dir,
 	      const string& config_template_dir, 
 	      const string& xrl_targets_dir,
@@ -112,8 +113,22 @@ public:
     bool verbose() const		{ return _verbose; }
 
 private:
-    EventLoop		_eventloop; 
-    XrlStdRouter	_xrlrouter;
+    /**
+     * Called when Finder connection is established.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_connect_event();
+
+    /**
+     * Called when Finder disconnect occurs.
+     *
+     * Note that this method overwrites an XrlRouter virtual method.
+     */
+    virtual void finder_disconnect_event();
+
+    EventLoop&		_eventloop; 
+    XrlStdRouter&	_xrl_router;
     XorpClient		_xclient;
     XrlRtrmgrV0p1Client	_rtrmgr_client;
     SlaveModuleManager	_mmgr;
