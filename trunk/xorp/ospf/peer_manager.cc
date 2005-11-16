@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.82 2005/11/16 07:43:05 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.83 2005/11/16 11:58:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -382,14 +382,14 @@ PeerManager<A>::delete_peer(const PeerID peerid)
 	return false;
     }
 
+    delete _peers[peerid];
+    _peers.erase(_peers.find(peerid));
+
     // Tell *all* area routers that this peer is being deleted.
     // It is simpler to do this than hold the reverse mappings.
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
     for(i = _areas.begin(); i != _areas.end(); i++)
 	(*i).second->delete_peer(peerid);
-
-    delete _peers[peerid];
-    _peers.erase(_peers.find(peerid));
 
     // Remove the interface/vif to PeerID mapping
     typename map<string, PeerID>::iterator pi;
@@ -676,6 +676,9 @@ template <typename A>
 bool
 PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
 {
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Create virtual link rid %s\n", pr_id(rid).c_str());
+
     return _vlink.create_vlink(rid);
 }
 
@@ -684,6 +687,11 @@ bool
 PeerManager<A>::transit_area_virtual_link(OspfTypes::RouterID rid,
 					  OspfTypes::AreaID transit_area)
 {
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Add transit area to virtual link rid %s transit area %s\n",
+	       pr_id(rid).c_str(),
+	       pr_id(transit_area).c_str());
+
     AreaRouter<A> *area = get_area_router(transit_area);
 
     if (0 == area)
@@ -716,6 +724,18 @@ template <typename A>
 bool 
 PeerManager<A>::delete_virtual_link(OspfTypes::RouterID rid)
 {
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Delete virtual link rid %s\n", pr_id(rid).c_str());
+
+    PeerID peerid = _vlink.get_peerid(rid);
+    if (ALLPEERS != peerid) {
+	try {
+	    delete_peer(peerid);
+	} catch(XorpException& e) {
+	    XLOG_ERROR("%s", cstring(e));
+	}
+    }
+
     return _vlink.delete_vlink(rid);
 }
 
@@ -724,6 +744,10 @@ void
 PeerManager<A>::up_virtual_link(OspfTypes::RouterID rid, A source,
 				uint16_t interface_cost, A destination)
 {
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Virtual link up rid %s source %s cost %d destination %s\n",
+	       pr_id(rid).c_str(),
+	       cstring(source), interface_cost, cstring(destination));
 
     if (!_vlink.add_address(rid, source, destination)) {
 	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
@@ -780,28 +804,33 @@ void
 PeerManager<A>::down_virtual_link(OspfTypes::RouterID rid)
 
 {
-    string ifname;
-    string vifname;
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Virtual link down rid %s\n", pr_id(rid).c_str());
 
-    if (!_vlink.get_interface_vif(rid, ifname, vifname)) {
-	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
+    PeerID peerid = _vlink.get_peerid(rid);
+    if (ALLPEERS == peerid) {
+	XLOG_WARNING("No peer found when dropping virtual link %s",
+		     pr_id(rid).c_str());
 	return;
     }
 
     try {
-	delete_peer(get_peerid(ifname, vifname));
+	delete_peer(peerid);
     } catch(XorpException& e) {
-	return;
+	XLOG_ERROR("%s", cstring(e));
     }
+
+    // This PeerID has now been deleted so remove it from the record.
+    _vlink.add_peerid(rid, ALLPEERS);
 }
 
 template <typename A> 
 bool
 PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
 {
-    UNUSED(dst);
-    UNUSED(src);
-    UNUSED(packet);
+    XLOG_TRACE(_ospf.trace()._virtual_link,
+	       "Virtual link receive dest %s src %s packet %s\n",
+	       cstring(dst), cstring(src), cstring(*packet));
 
     return false;
 }
