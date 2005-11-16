@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/trace.hh,v 1.7 2005/10/31 03:07:21 atanu Exp $
+// $XORP: xorp/ospf/trace.hh,v 1.8 2005/11/04 07:50:22 atanu Exp $
 
 #ifndef __OSPF_TRACE_HH__
 #define __OSPF_TRACE_HH__
@@ -27,7 +27,9 @@ struct Trace {
 	      _neighbour_events(false),
 	      _spt(false),
 	      _import_policy(false),
-	      _export_policy(false)
+	      _export_policy(false),
+	      _virtual_link(false)
+	      // Don't forget to add new variables to the all() method.
 	{}
 
     /*
@@ -35,7 +37,7 @@ struct Trace {
      */
     void all(bool val) {
 	_input_errors = _interface_events = _neighbour_events = _spt = 
-	    _import_policy = _export_policy = val;
+	    _import_policy = _export_policy = _virtual_link = val;
     }
 
     bool _input_errors;
@@ -44,6 +46,7 @@ struct Trace {
     bool _spt;	/* Shortest Path Tree */
     bool _import_policy;
     bool _export_policy;
+    bool _virtual_link;
 };
 
 #endif // __OSPF_TRACE_HH__
