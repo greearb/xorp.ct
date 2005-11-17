@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.4 2005/10/26 07:06:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.5 2005/11/10 23:55:40 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
@@ -48,10 +48,10 @@ public:
 
     virtual void add_action(const list<string>& action) throw (ParseError) = 0;
     virtual bool verify_variable(const ConfigTreeNode& ctn,
-				 string& errmsg) const = 0;
+				 string& error_msg) const = 0;
     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
 					  const string& value,
-					  string& errmsg) const = 0;
+					  string& error_msg) const = 0;
     virtual string str() const = 0;
 };
 
@@ -62,16 +62,16 @@ public:
 
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& 	ctn,
-				 string& errmsg) const;
+				 string& error_msg) const;
     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
 					  const string& value,
-					  string& errmsg) const;
+					  string& error_msg) const;
 
     virtual string str() const;
 
 private:
     string		_varname;
-    list<string>	_allowed_values;
+    map<string, string>	_allowed_values;    // Values and help string
 };
 
 class AllowOperatorsCommand : public AllowCommand {
@@ -81,10 +81,10 @@ public:
 
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& 	ctn,
-				 string& errmsg) const;
+				 string& error_msg) const;
     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
 					  const string& value,
-					  string& errmsg) const;
+					  string& error_msg) const;
     virtual list<ConfigOperator> allowed_operators() const;
 
     virtual string str() const;
@@ -101,10 +101,10 @@ public:
 
     virtual void add_action(const list<string>& action) throw (ParseError);
     virtual bool verify_variable(const ConfigTreeNode& ctn,
-				 string& errmsg) const;
+				 string& error_msg) const;
     virtual bool verify_variable_by_value(const ConfigTreeNode& ctn,
 					  const string& value,
-					  string& errmsg) const;
+					  string& error_msg) const;
 
     virtual string str() const;
 

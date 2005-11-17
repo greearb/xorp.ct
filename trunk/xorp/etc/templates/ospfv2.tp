@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.25 2005/11/15 04:14:57 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.26 2005/11/16 19:00:52 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -119,8 +119,9 @@ transmitted packets";
 
 	    area-type {
 		%help: short "Type of area";
-		
-		%allow: $(@) "normal" "stub" "nssa";
+		%allow: $(@) "normal" %help: "OSPF normal area";
+		%allow: $(@) "stub" %help: "OSPF stubby area";
+		%allow: $(@) "nssa" %help: "OSPF not-so-stubby area";
 
 		%set:;
 	    }
@@ -161,8 +162,9 @@ transmitted packets";
 
 		link-type {
 		    %help: short "broadcast or p2p or p2m";
-
-		    %allow: $(@) "broadcast" "p2p" "p2m";
+		    %allow: $(@) "broadcast" %help: "Broadcast link";
+		    %allow: $(@) "p2p" %help: "Point-to-point link";
+		    %allow: $(@) "p2m" %help: "Point-to-multipoint link";
 
 		    %set:;
 		}
@@ -217,7 +219,10 @@ transmitted packets";
 			}
 
          		authentication {
-			    %allow: $(@.type) "none" "plaintext" "md5" ;
+			    %allow: $(@.type) "none" %help: "No authentication";
+			    %allow: $(@.type) "plaintext" %help: "Plain text authentication";
+			    %allow: $(@.type) "md5" %help: "MD5 authentication";
+
 			    %activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
 			    %update:   xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
 			    %help: short "Set the authentication type and password used for packets sent from address." ;

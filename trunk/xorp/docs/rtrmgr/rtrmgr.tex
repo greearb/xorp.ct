@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.42 2005/10/05 06:12:03 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.43 2005/10/05 06:29:42 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -749,9 +749,15 @@ certain nodes to specific values.
 
   \item The first parameter gives the name of the variable to be restricted.
 
-  \item The remaining parameters are a list of possible allowed values for
-this variable.
+  \item The second parameter is a possible allowed value for this variable.
+
+  \item The third parameter must be the ``%help:'' keyword.
+
+  \item The fourth parameter is the help string for this value.
 \end{itemize}
+
+If there is more than one possible values, each of them should be
+specified by a separate {\tt \%allow} command.
 
 For example, a node might specify an address family, which is intended
 to be one of ``inet'' or ``inet6''.  The type of the node is {\tt
@@ -766,14 +772,15 @@ For example:
 
 \begin{verbatim}
       family @: txt {
-        %allow: $(@) "inet" "inet6";
-        address @: ipv4 {
-          %allow: $(family.@) "inet";
-          broadcast: ipv4;
-        }
-        address @: ipv6 {
-          %allow: $(family.@) "inet6";
-        }
+          %allow: $(@) "inet" %help: "IPv4 address family";
+          %allow: $(@) "inet6" %help: "IPv6 address family";
+          address @: ipv4 {
+              %allow: $(family.@) "inet" %help: "IPv4 address family";
+              broadcast: ipv4;
+          }
+          address @: ipv6 {
+              %allow: $(family.@) "inet6" %help: "IPv6 address family";
+          }
       }
 \end{verbatim}
 

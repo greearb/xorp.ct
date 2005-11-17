@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.25 2005/10/02 22:21:49 abittau Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.26 2005/11/12 08:59:50 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -108,7 +108,9 @@ protocols {
 		    }
 
 		    horizon {
-			%allow: $(@) "none" "split-horizon" "split-horizon-poison-reverse" ;
+			%allow: $(@) "none" %help: "No horizon type";
+			%allow: $(@) "split-horizon" %help: "Split horizon";
+			%allow: $(@) "split-horizon-poison-reverse" %help: "Split horizon with poisoned reverse";
 			%set: xrl "$(rip.targetname)/rip/0.1/set_horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&horizon:txt=$(@)" ;
 			%get: xrl "$(rip.targetname)/rip/0.1/horizon?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)->horizon:txt" ;
 			%help: short "Set the horizon type applied to routes announced on address." ;
@@ -191,7 +193,9 @@ protocols {
 		    }
 
 		    authentication {
-			%allow: $(@.type) "none" "plaintext" "md5" ;
+			%allow: $(@.type) "none" %help: "No authentication";
+			%allow: $(@.type) "plaintext" %help: "Plain text authentication";
+			%allow: $(@.type) "md5" %help: "MD5 authentication";
 			%activate: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
 			%update: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
 			%help: short "Set the authentication type and password used for packets sent from address." ;
