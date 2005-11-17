@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.190 2005/11/16 11:55:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.191 2005/11/16 23:29:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2950,7 +2950,12 @@ Neighbour<A>::send_data_description_packet()
     case OspfTypes::BROADCAST:
     case OspfTypes::NBMA:
     case OspfTypes::PointToMultiPoint:
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_interface_address());
+	break;
     case OspfTypes::VirtualLink:
+	_data_description_packet.set_interface_mtu(0);
 	transmit = new SimpleTransmit<A>(pkt,
 					 get_neighbour_address(),
 					 _peer.get_interface_address());
