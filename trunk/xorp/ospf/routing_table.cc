@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.28 2005/11/10 21:27:15 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.29 2005/11/16 01:26:08 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -47,7 +47,7 @@ template <typename A>
 void
 RoutingTable<A>::begin(OspfTypes::AreaID area)
 {
-    debug_msg("\n");
+    debug_msg("area %s\n", pr_id(area).c_str());
     XLOG_ASSERT(!_in_transaction);
     _in_transaction = true;
 
@@ -66,15 +66,20 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	// This should be a copy not a reference.
  	InternalRouteEntry<A> ire = tip.payload();
+	debug_msg("ire %s", cstring(ire));
 
 	// If this entry contains a route from this area delete it.
 	bool winner_changed;
 	ire.delete_entry(area, winner_changed);
 	
 	// If there are no other routes don't put a copy in current.
-	if (ire.empty())
+	if (ire.empty()) {
+	    debug_msg(" empty ire %s only this area was present\n",
+		      cstring(ire));
 	    continue;
+	}
 
+	debug_msg(" kept as other areas are present\n");
 	_current->insert(tip.key(), ire);
     }
 }
@@ -84,7 +89,7 @@ bool
 RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 			   RouteEntry<A>& rt)
 {
-    debug_msg("%s\n", cstring(net));
+    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
 
@@ -107,7 +112,7 @@ bool
 RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
 			       RouteEntry<A>& rt)
 {
-    debug_msg("%s\n", cstring(net));
+    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
@@ -147,7 +152,7 @@ bool
 RoutingTable<A>::lookup_entry(OspfTypes::AreaID area, A router,
 			      RouteEntry<A>& rt)
 {
-    debug_msg("%s\n", cstring(router));
+    debug_msg("area %s %s\n",  pr_id(area).c_str(), cstring(router));
 
     IPNet<A> net(router, A::ADDR_BITLEN);
 
