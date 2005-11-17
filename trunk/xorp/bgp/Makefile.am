@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.39 2005/08/18 15:58:04 bms Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.40 2005/11/15 18:07:30 zec Exp $
 ##
 
 # -- Subdirectories
@@ -155,6 +155,7 @@ libbgp_la_SOURCES += process_watch.cc
 libbgp_la_SOURCES += profile_vars.cc
 libbgp_la_SOURCES += rib_ipc_handler.cc
 libbgp_la_SOURCES += route_queue.cc
+libbgp_la_SOURCES += route_table_aggregation.cc
 libbgp_la_SOURCES += route_table_base.cc
 libbgp_la_SOURCES += route_table_cache.cc
 libbgp_la_SOURCES += route_table_decision.cc

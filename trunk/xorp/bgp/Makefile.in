@@ -151,9 +151,10 @@ am_libbgp_la_OBJECTS = aspath.lo attribute_manager.lo bgp_trie.lo \
 	packet.lo parameter.lo path_attribute.lo peer.lo peer_data.lo \
 	peer_handler.lo peer_list.lo plumbing.lo process_watch.lo \
 	profile_vars.lo rib_ipc_handler.lo route_queue.lo \
-	route_table_aggregation.lo route_table_base.lo route_table_cache.lo \
-	route_table_decision.lo route_table_deletion.lo \
-	route_table_dump.lo route_table_fanout.lo route_table_filter.lo \
+	route_table_aggregation.lo route_table_base.lo \
+	route_table_cache.lo route_table_decision.lo \
+	route_table_deletion.lo route_table_dump.lo \
+	route_table_fanout.lo route_table_filter.lo \
 	route_table_nhlookup.lo route_table_policy.lo \
 	route_table_policy_ex.lo route_table_policy_im.lo \
 	route_table_policy_sm.lo route_table_ribin.lo \
