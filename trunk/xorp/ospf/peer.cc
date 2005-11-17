@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.191 2005/11/16 23:29:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.192 2005/11/17 17:13:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -296,6 +296,19 @@ PeerOut<A>::receive(A dst, A src, Packet *packet)
 }
 
 template <typename A>
+bool 
+PeerOut<A>::send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
+		     Lsa::LsaRef lsar)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->send_lsa(nid, lsar);
+}
+
+template <typename A>
 bool
 PeerOut<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 		      Lsa::LsaRef lsar, bool &multicast_on_peer) const
@@ -361,19 +374,6 @@ PeerOut<A>::event_bad_link_state_request(OspfTypes::AreaID area,
     }
 
     return _areas[area]->event_bad_link_state_request(nid);
-}
-
-template <typename A>
-bool 
-PeerOut<A>::send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
-		     Lsa::LsaRef lsar)
-{
-    if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
-	return false;
-    }
-
-    return _areas[area]->send_lsa(nid, lsar);
 }
 
 template <typename A>
@@ -727,11 +727,49 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 }
 
 template <typename A>
+bool 
+Peer<A>::accept_lsa(Lsa::LsaRef lsar) const
+{
+    switch(get_linktype()) {
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::PointToPoint:
+	break;
+    case OspfTypes::VirtualLink:
+	if (lsar->external())
+	    return false;
+    }
+
+    return true;;
+}
+
+template <typename A>
+bool 
+Peer<A>::send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const
+{
+    if (!accept_lsa(lsar))
+	return true;
+
+    typename list<Neighbour<A> *>::const_iterator n;
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
+	if ((*n)->get_neighbour_id() == nid)
+	    return (*n)->send_lsa(lsar);
+
+    XLOG_UNREACHABLE();
+
+    return false;
+}
+
+template <typename A>
 bool
 Peer<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 		   Lsa::LsaRef lsar, bool &multicast_on_peer) const
 {
     debug_msg("lsa %s nid %d \n", cstring(*lsar), nid);
+
+    if (!accept_lsa(lsar))
+	return true;
 
     multicast_on_peer = false;
     typename list<Neighbour<A> *>::const_iterator n;
@@ -858,20 +896,6 @@ Peer<A>::event_bad_link_state_request(const OspfTypes::NeighbourID nid) const
 	    (*n)->event_bad_link_state_request();
 	    return true;
 	}
-
-    XLOG_UNREACHABLE();
-
-    return false;
-}
-
-template <typename A>
-bool 
-Peer<A>::send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const
-{
-    typename list<Neighbour<A> *>::const_iterator n;
-    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if ((*n)->get_neighbour_id() == nid)
-	    return (*n)->send_lsa(lsar);
 
     XLOG_UNREACHABLE();
 
@@ -3823,6 +3847,32 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 
 template <typename A>
 bool
+Neighbour<A>::send_lsa(Lsa::LsaRef lsar)
+{
+    LinkStateUpdatePacket lsup(_ospf.get_version(), _ospf.get_lsa_decoder());
+    lsup.get_lsas().push_back(lsar);
+
+    _peer.populate_common_header(lsup);
+    
+    vector<uint8_t> pkt;
+    lsup.encode(pkt, _peer.get_inftransdelay());
+    get_auth_outbound().generate(pkt);
+    
+    SimpleTransmit<A> *transmit;
+
+    transmit = new SimpleTransmit<A>(pkt,
+				     get_neighbour_address(),
+				     _peer.get_interface_address());
+
+    typename Transmit<A>::TransmitRef tr(transmit);
+
+    _peer.transmit(tr);
+
+    return true;
+}
+
+template <typename A>
+bool
 Neighbour<A>::queue_lsa(PeerID peerid, OspfTypes::NeighbourID nid,
 			Lsa::LsaRef lsar, bool& multicast_on_peer)
 {
@@ -4028,32 +4078,6 @@ Neighbour<A>::on_link_state_request_list(Lsa::LsaRef lsar) const
 	return true;
 				       
     return false;
-}
-
-template <typename A>
-bool
-Neighbour<A>::send_lsa(Lsa::LsaRef lsar)
-{
-    LinkStateUpdatePacket lsup(_ospf.get_version(), _ospf.get_lsa_decoder());
-    lsup.get_lsas().push_back(lsar);
-
-    _peer.populate_common_header(lsup);
-    
-    vector<uint8_t> pkt;
-    lsup.encode(pkt, _peer.get_inftransdelay());
-    get_auth_outbound().generate(pkt);
-    
-    SimpleTransmit<A> *transmit;
-
-    transmit = new SimpleTransmit<A>(pkt,
-				     get_neighbour_address(),
-				     _peer.get_interface_address());
-
-    typename Transmit<A>::TransmitRef tr(transmit);
-
-    _peer.transmit(tr);
-
-    return true;
 }
 
 template <typename A>

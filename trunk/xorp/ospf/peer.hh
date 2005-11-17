@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.108 2005/11/13 21:56:14 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.109 2005/11/16 11:55:21 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -176,6 +176,19 @@ class PeerOut {
     bool receive(A dst, A src, Packet *packet) throw(BadPeer);
 
     /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param area
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
+		  Lsa::LsaRef lsar);
+
+    /**
      * Queue an LSA for transmission.
      *
      * @param peer the LSA arrived on.
@@ -222,19 +235,6 @@ class PeerOut {
      */
     bool event_bad_link_state_request(OspfTypes::AreaID area,
 				      const OspfTypes::NeighbourID nid);
-
-    /**
-     * Send this LSA directly to the neighbour. Do not place on
-     * retransmission list.
-     *
-     * @param area
-     * @param nid
-     * @param lsar
-     *
-     * @return true on success
-     */
-    bool send_lsa(OspfTypes::AreaID area, const OspfTypes::NeighbourID nid,
-		  Lsa::LsaRef lsar);
 
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
@@ -490,6 +490,24 @@ class Peer {
     bool receive(A dst, A src, Packet *packet);
 
     /**
+     * Used to test if an lsa should be accepted for this
+     * peer/neighbour. Specifically to deal with the case that
+     * AS-External-LSAs should not be sent on virtual links.
+     */
+    bool accept_lsa(Lsa::LsaRef lsar) const;
+
+    /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param nid
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const;
+
+    /**
      * Queue an LSA for transmission.
      *
      * @param peer the LSA arrived on.
@@ -552,17 +570,6 @@ class Peer {
      *
      */
     bool event_bad_link_state_request(const OspfTypes::NeighbourID nid) const;
-
-    /**
-     * Send this LSA directly to the neighbour. Do not place on
-     * retransmission list.
-     *
-     * @param nid
-     * @param lsar
-     *
-     * @return true on success
-     */
-    bool send_lsa(const OspfTypes::NeighbourID nid, Lsa::LsaRef lsar) const;
 
     /**
      * Are any of neighbours of this peer a virtual link endpoint.
@@ -1132,6 +1139,16 @@ class Neighbour {
 					     *lsap);
 
     /**
+     * Send this LSA directly to the neighbour. Do not place on
+     * retransmission list.
+     *
+     * @param lsar
+     *
+     * @return true on success
+     */
+    bool send_lsa(Lsa::LsaRef lsar);
+
+    /**
      * Queue an LSA for transmission.
      *
      * @param peer the LSA arrived on.
@@ -1155,16 +1172,6 @@ class Neighbour {
      * @return true if it is.
      */
     bool on_link_state_request_list(Lsa::LsaRef lsar) const;
-
-    /**
-     * Send this LSA directly to the neighbour. Do not place on
-     * retransmission list.
-     *
-     * @param lsar
-     *
-     * @return true on success
-     */
-    bool send_lsa(Lsa::LsaRef lsar);
 
     /**
      * @return the link type.
