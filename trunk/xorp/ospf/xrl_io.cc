@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.24 2005/11/05 19:25:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.25 2005/11/05 20:43:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,13 +23,6 @@
 #include <set>
 
 #include "ospf_module.h"
-
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
