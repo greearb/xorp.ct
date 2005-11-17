@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xorp_ospfv2.cc,v 1.8 2005/09/09 15:32:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/xorp_ospfv2.cc,v 1.9 2005/10/23 09:29:48 atanu Exp $"
 
 #include "config.h"
 #include <set>
@@ -48,6 +48,7 @@ main(int /*argc*/, char **argv)
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
+//     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
