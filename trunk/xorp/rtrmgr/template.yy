@@ -271,7 +271,13 @@ list_of_cmd_strings:
 		STRING {
 			append_cmd($1);
 		}
+		| COMMAND COLON {
+			append_cmd($1);
+		}
 		| list_of_cmd_strings STRING {
+			append_cmd($2);
+		}
+		| list_of_cmd_strings COMMAND COLON {
 			append_cmd($2);
 		}
 		;
