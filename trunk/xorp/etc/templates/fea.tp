@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.31 2005/03/09 22:50:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.32 2005/08/25 02:23:44 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -184,7 +184,7 @@ fea {
 
 	    control-socket-port {
 		%help:	short "Specify the socket port to use for control access to the user-level Click";
-		%allow-range: $(@) "1" "65535";
+		%allow-range: $(@) "1" "65535" %help: "The control socket port";
 		%set:	xrl "$(fea.targetname)/fea_click/0.1/set_user_click_control_socket_port?user_click_control_socket_port:u32=$(@)";
 	    }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.10 2005/11/10 23:55:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.11 2005/11/17 08:31:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -327,25 +327,58 @@ AllowRangeCommand::AllowRangeCommand(TemplateTreeNode& 	ttn,
 void
 AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
 {
-    debug_msg("AllowRangeCommand::add_action\n");
+    string error_msg;
+    string new_varname, new_lower, new_upper;
+    string new_help_keyword, new_help_string;
+    size_t expected_parameters_n = 5;
+    list<string> unparsed_action = action;
 
-    if (action.size() < 3) {
-	xorp_throw(ParseError,
-		   "Allow range command with less than three parameters");
+    //
+    // Check the number of parameters
+    //
+    if (action.size() != expected_parameters_n) {
+	error_msg = c_format("%%allow-range command with invalid number of "
+			     "parameters: %u (expected %u)",
+			     XORP_UINT_CAST(action.size()),
+			     XORP_UINT_CAST(expected_parameters_n));
+	xorp_throw(ParseError, error_msg);
     }
 
-    list<string>::const_iterator iter;
-    iter = action.begin();
-    if ((_varname.size() != 0) && (_varname != *iter)) {
-	xorp_throw(ParseError,
-		   "Currently only one variable per node can be specified "
-		   "using \"allow range\" commands");
+    //
+    // Extract each parameter
+    //
+    new_varname = unparsed_action.front();
+    unparsed_action.pop_front();
+    new_lower = unquote(unparsed_action.front());
+    unparsed_action.pop_front();
+    new_upper = unquote(unparsed_action.front());
+    unparsed_action.pop_front();
+    new_help_keyword = unparsed_action.front();
+    unparsed_action.pop_front();
+    new_help_string = unquote(unparsed_action.front());
+    unparsed_action.pop_front();
+
+    //
+    // Verify all parameters
+    //
+    if ((_varname.size() != 0) && (_varname != new_varname)) {
+	error_msg = c_format("Currently only one variable per node can be "
+			     "specified using \"%%allow-range\" commands");
+	xorp_throw(ParseError, error_msg);
     }
-    _varname = *iter;
-    ++iter;
-    _lower = atoi(unquote(*iter).c_str());
-    ++iter;
-    _upper = atoi(unquote(*iter).c_str());
+    if (new_help_keyword != "%help") {
+	error_msg = c_format("Invalid %%allow-range argument: %s "
+			     "(expected \"%%help:\")",
+			     new_help_keyword.c_str());
+	xorp_throw(ParseError, error_msg);
+    }
+
+    //
+    // Insert the new entry
+    //
+    _varname = new_varname;
+    _lower = atoi(new_lower.c_str());
+    _upper = atoi(new_upper.c_str());
 
     if (_lower > _upper)
 	swap(_lower, _upper);

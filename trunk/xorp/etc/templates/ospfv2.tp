@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.26 2005/11/16 19:00:52 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.27 2005/11/17 08:31:56 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -178,7 +178,7 @@ transmitted packets";
 			priority {
 			    %help: short "Priority used in DR election";
 
-			    %allow-range: $(@) "0" "255";
+			    %allow-range: $(@) "0" "255" %help: "The priority used in DR election";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_priority?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&priority:u32=$(@)";
 			}
@@ -187,7 +187,7 @@ transmitted packets";
 			    %help: short
 				"Hello packets sent every interval seconds";
 
-			    %allow-range: $(@) "1" "65535";
+			    %allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_hello_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
@@ -196,7 +196,7 @@ transmitted packets";
 			    %help: short
 	"Seconds to wait before considering a neighbour dead";
 
-			    %allow-range: $(@) "1" "4294967295";
+			    %allow-range: $(@) "1" "4294967295" %help: "The neighbour router dead interval (in seconds)";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
@@ -204,7 +204,7 @@ transmitted packets";
 			interface-cost {
 			    %help: short "Cost of this address";
 			
-			    %allow-range: $(@) "1" "65535";
+			    %allow-range: $(@) "1" "65535" %help: "The cost of this address";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
 			}
@@ -213,7 +213,7 @@ transmitted packets";
 			    %help: short
 				"Add to age field of all transmitted LSAs";
 
-			    %allow-range: $(@) "0" "3600";
+			    %allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
 			}

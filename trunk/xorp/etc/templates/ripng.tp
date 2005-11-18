@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.25 2005/10/02 22:21:49 abittau Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.26 2005/11/17 08:31:56 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -97,7 +97,7 @@ protocols {
 		    }
 
 		    metric {
-			%allow-range: $(@) "0" "16" ;
+			%allow-range: $(@) "0" "16" %help: "The cost metric added to routes received on address.";
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&cost:u32=$(@)" ;
 			%get: xrl "$(ripng.targetname)/ripng/0.1/cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)->cost:u32" ;
 			%help: short "Set the cost metric added to routes received on address." ;

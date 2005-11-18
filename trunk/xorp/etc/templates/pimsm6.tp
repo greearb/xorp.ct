@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.26 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.27 2005/11/02 02:49:33 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -144,7 +144,7 @@ protocols {
 
 		hello-period {
 		    %help:	short "Set the Hello messages period (in seconds)";
-		    %allow-range: $(@) "1" "18724";
+		    %allow-range: $(@) "1" "18724" %help: "The Hello messages period (in seconds)";
 		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
 		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(@)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_period?vif_name:txt=$(vif.@)&hello_period:u32=$(DEFAULT)";
@@ -152,7 +152,7 @@ protocols {
 
 		hello-triggered-delay {
 		    %help:	short "Set the randomized triggered delay of the Hello messages (in seconds)";
-		    %allow-range: $(@) "1" "255";
+		    %allow-range: $(@) "1" "255" %help: "The randomized triggered delay of the Hello messages (in seconds)";
 		    %create:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(@)";
 		    %set:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(@)";
 		    %delete:	xrl "$(pimsm6.targetname)/pim/0.1/set_vif_hello_triggered_delay?vif_name:txt=$(vif.@)&hello_triggered_delay:u32=$(DEFAULT)";
@@ -185,7 +185,7 @@ protocols {
 
 		    rp-priority {
 			%help:	short "Configure the RP priority";
-			%allow-range: $(@) "0" "255";
+			%allow-range: $(@) "0" "255" %help: "The RP priority";
 			%create:;
 			%set:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
 			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(DEFAULT)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
@@ -193,8 +193,8 @@ protocols {
 		    }
 
 		    hash-mask-len {
-			%help:	short "Configure the hash mask length for the has function";
-			%allow-range: $(@) "8" "128";
+			%help:	short "Configure the hash mask length for the hash function";
+			%allow-range: $(@) "8" "128" %help: "The hash mask length for the hash function";
 			%create:;
 			%set:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(group-prefix.@.hash-mask-len)";
 			%delete:	xrl "$(pimsm6.targetname)/pim/0.1/add_config_static_rp6?group_prefix:ipv6net=$(group-prefix.@)&rp_addr:ipv6=$(rp.@)&rp_priority:u32=$(group-prefix.@.rp-priority)&hash_mask_len:u32=$(DEFAULT)";
@@ -253,13 +253,13 @@ protocols {
 
 		    bsr-priority {
 			%help:	short "Configure the Candidate-BSR priority";
-			%allow-range: $(@) "0" "255";
+			%allow-range: $(@) "0" "255" %help: "The Candidate-BSR priority";
 			%set:;
 		    }
 
 		    hash-mask-len {
-			%help:	short "Configure the hash mask length for the has function";
-			%allow-range: $(@) "8" "128";
+			%help:	short "Configure the hash mask length for the hash function";
+			%allow-range: $(@) "8" "128" %help: "The hash mask length for the hash function";
 			%set:;
 		    }
 		}
@@ -292,13 +292,13 @@ protocols {
 
 		    rp-priority {
 			%help:	short "Configure the Candidate-RP priority";
-			%allow-range: $(@) "0" "255";
+			%allow-range: $(@) "0" "255" %help: "The Candidate-RP priority";
 			%set:;
 		    }
 
 		    rp-holdtime {
 			%help:	short "Configure the Candidate-RP holdtime";
-			%allow-range: $(@) "0" "65535";
+			%allow-range: $(@) "0" "65535" %help: "The Candidate-RP holdtime (in seconds)";
 			%set:;
 		    }
 		}
@@ -324,7 +324,7 @@ protocols {
 
 	    interval-sec {
 		%help:	short "Configure the frequency of measuring the bandwidth threshold (in seconds)";
-		%allow-range: $(@) "3" "2147483647" ;
+		%allow-range: $(@) "3" "2147483647" %help: "The frequency of measuring the bandwidth threshold (in seconds)";
 		%set:;
 	    }
 

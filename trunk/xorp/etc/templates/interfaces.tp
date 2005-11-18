@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.21 2005/10/12 09:35:46 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.22 2005/10/26 07:02:45 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -111,7 +111,7 @@ interfaces {
 	mtu {
 	    %help:	short "Set the MTU";
 	    /* Minimum and maximum MTU as defined in RFC 791 and RFC 1191 */
-	    %allow-range: $(@) "68" "65535";
+	    %allow-range: $(@) "68" "65535" %help: "The MTU (in octets)";
 	    %set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mtu?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mtu:u32=$(@)";
 	    %get:	xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mtu?ifname:txt=$(interface.@)->mtu:u32=$(@)";
 	}
@@ -158,7 +158,7 @@ interfaces {
 
 		prefix-length {
 		    %help:	short "Assign the network prefix length";
-		    %allow-range: $(@) "1" "32";
+		    %allow-range: $(@) "1" "32" %help: "The network prefix length";
 		    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
 		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
 		}
@@ -214,7 +214,7 @@ interfaces {
 
 		prefix-length {
 		    %help:	short "Assign the network prefix length";
-		    %allow-range: $(@) "1" "128";
+		    %allow-range: $(@) "1" "128" %help: "The network prefix length";
 		    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)";
 		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
 		}

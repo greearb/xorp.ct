@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.63 2005/11/12 06:18:00 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.64 2005/11/15 11:44:02 mjh Exp $ */
 
 protocols {
     bgp {
@@ -136,7 +136,7 @@ protocols {
 	}
 
 	local-as {
-	    %allow-range: $(@) "0" "65535";
+	    %allow-range: $(@) "0" "65535" %help: "Local AS number";
 	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
 	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
 	}
@@ -172,7 +172,7 @@ protocols {
 */
 
 	    as {
-	        %allow-range: $(@) "0" "65535";
+	        %allow-range: $(@) "0" "65535" %help: "The peer AS number";
 
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_as?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&peer_as:u32=$(@)";
 	    }

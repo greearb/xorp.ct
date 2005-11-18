@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.14 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.15 2005/11/02 02:49:33 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -85,7 +85,7 @@ protocols {
 
 		version {
 		    %help:	short "Set the IGMP protocol version";
-		    %allow-range: $(@) "1" "2";
+		    %allow-range: $(@) "1" "2" %help: "The IGMP protocol version";
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
@@ -100,7 +100,7 @@ protocols {
 
 		query-interval {
 		    %help:	short "Set the query interval (in seconds)";
-		    %allow-range: $(@) "1" "1024";
+		    %allow-range: $(@) "1" "1024" %help: "The query interval (in seconds)";
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
@@ -108,7 +108,7 @@ protocols {
 
 		query-last-member-interval {
 		    %help:	short "Set the last member query interval (in seconds)";
-		    %allow-range: $(@) "1" "1024";
+		    %allow-range: $(@) "1" "1024" %help: "The last member query interval (in seconds)";
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_last_member_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
@@ -116,7 +116,7 @@ protocols {
 
 		query-response-interval {
 		    %help:	short "Set the query response interval (in seconds)";
-		    %allow-range: $(@) "1" "1024";
+		    %allow-range: $(@) "1" "1024" %help: "The query response interval (in seconds)";
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(@)&interval_usec:u32=0";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_query_response_interval?vif_name:txt=$(vif.@)&interval_sec:u32=$(DEFAULT)&interval_usec:u32=0";
@@ -124,7 +124,7 @@ protocols {
 
 		robust-count {
 		    %help:	short "Set the robustness variable count";
-		    %allow-range: $(@) "2" "10";
+		    %allow-range: $(@) "2" "10" %help: "The robustness variable count";
 		    %create:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(@)";
 		    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(@)";
 		    %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/set_vif_robust_count?vif_name:txt=$(vif.@)&robust_count:u32=$(DEFAULT)";
