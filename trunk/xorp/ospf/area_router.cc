@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.148 2005/11/16 11:45:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.149 2005/11/16 20:16:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -386,8 +386,12 @@ void
 AreaRouter<A>::end_virtual_link()
 {
     set<OspfTypes::RouterID>::iterator i;
-    for(i = _tmp.begin(); i != _tmp.end(); i++)
+    for(i = _tmp.begin(); i != _tmp.end(); i++) {
+	map<OspfTypes::RouterID,bool>::iterator j = _vlinks.find(*i);
+	XLOG_ASSERT(_vlinks.end() != j);
+	j->second = false;
 	_ospf.get_peer_manager().down_virtual_link(*i);
+    }
 }
 
 template <typename A>
