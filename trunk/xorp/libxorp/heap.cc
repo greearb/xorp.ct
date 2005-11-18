@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-#ident "$XORP: xorp/libxorp/heap.cc,v 1.13 2005/06/06 20:26:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/heap.cc,v 1.15 2005/08/04 10:52:14 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -290,7 +290,7 @@ Heap::print_all(int base)
 {
     int depth = 1;
     int l = 1 ; // nodes to print on this level
-    char *blanks="" ;
+    const char *blanks="" ;
 
     for (int i=base ; i < _elements ; i = i*2 + 1)
 	depth *= 2 ;
