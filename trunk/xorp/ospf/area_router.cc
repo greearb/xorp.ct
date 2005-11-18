@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.150 2005/11/18 03:42:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.151 2005/11/18 06:16:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -344,7 +344,6 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     }
     
     OspfTypes::RouterID srid = src->get_header().get_link_state_id();
-    RouterLink::Type type = rlsa ? RouterLink::p2p : RouterLink::transit;
 
     // Look for the corresponding link. It is not necessary to check
     // for bidirectional connectivity as this check has already been made.
@@ -354,9 +353,20 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 	debug_msg("Does %s == %s\n",
 		  pr_id(l->get_link_id()).c_str(),
 		  pr_id(srid).c_str());
-	if (l->get_link_id() == srid && l->get_type() == type) {
-	    interface = IPv4(htonl(l->get_link_data()));
-	    return true;
+	if (l->get_link_id() == srid) {
+	    if (rlsa) {
+		if (RouterLink::p2p == l->get_type() ||
+		    RouterLink::vlink == l->get_type()) {
+		    interface = IPv4(htonl(l->get_link_data()));
+		    return true;
+		}
+	    }
+	    if (nlsa) {
+		if (RouterLink::transit == l->get_type()) {
+		    interface = IPv4(htonl(l->get_link_data()));
+		    return true;
+		}
+	    }
 	}
     }
 
