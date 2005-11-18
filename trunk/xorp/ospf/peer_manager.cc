@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.89 2005/11/16 23:40:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.90 2005/11/16 23:55:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -610,80 +610,6 @@ PeerManager<A>::virtual_link_endpoint(OspfTypes::AreaID area) const
 
 template <typename A> 
 bool
-PeerManager<A>::set_interface_id(const PeerID peerid, OspfTypes::AreaID area,
-		 uint32_t interface_id)
-{
-    if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
-	return false;
-    }
-
-    return _peers[peerid]->set_interface_id(area, interface_id);
-}
-
-template <typename A>
-bool
-PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
-				   uint16_t hello_interval)
-{
-    if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
-	return false;
-    }
-
-    return _peers[peerid]->set_hello_interval(area, hello_interval);
-}
-
-#if	0
-template <typename A> 
-bool
-PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
-			    uint32_t options)
-{
-    if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
-	return false;
-    }
-
-    return _peers[peerid]->set_options(area, options);
-}
-#endif
-
-template <typename A> 
-uint32_t
-PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
-
-{
-    // Set/UnSet E-Bit.
-    Options options(_ospf.get_version(), 0);
-    switch(area_type) {
-    case OspfTypes::NORMAL:
-	options.set_e_bit(true);
-	options.set_n_bit(false);
-	break;
-    case OspfTypes::STUB:
-	options.set_e_bit(false);
-	options.set_n_bit(false);
-	break;
-    case OspfTypes::NSSA:
-	options.set_e_bit(false);
-	options.set_n_bit(true);
-	break;
-    }
-
-    switch (_ospf.get_version()) {
-    case OspfTypes::V2:
-	break;
-    case OspfTypes::V3:
-	options.set_v6_bit(true);
-	break;
-    }
-
-    return options.get_options();
-}
-
-template <typename A> 
-bool
 PeerManager<A>::create_virtual_link(OspfTypes::RouterID rid)
 {
     XLOG_TRACE(_ospf.trace()._virtual_link,
@@ -890,6 +816,81 @@ PeerManager<A>::receive_virtual_link(A dst, A src, Packet *packet)
 
     return false;
 }
+
+template <typename A> 
+uint32_t
+PeerManager<A>::compute_options(OspfTypes::AreaType area_type)
+
+{
+    // Set/UnSet E-Bit.
+    Options options(_ospf.get_version(), 0);
+    switch(area_type) {
+    case OspfTypes::NORMAL:
+	options.set_e_bit(true);
+	options.set_n_bit(false);
+	break;
+    case OspfTypes::STUB:
+	options.set_e_bit(false);
+	options.set_n_bit(false);
+	break;
+    case OspfTypes::NSSA:
+	options.set_e_bit(false);
+	options.set_n_bit(true);
+	break;
+    }
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	options.set_v6_bit(true);
+	break;
+    }
+
+    return options.get_options();
+}
+
+#if	0
+template <typename A> 
+bool
+PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
+			    uint32_t options)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_options(area, options);
+}
+#endif
+
+template <typename A> 
+bool
+PeerManager<A>::set_interface_id(const PeerID peerid, OspfTypes::AreaID area,
+		 uint32_t interface_id)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_interface_id(area, interface_id);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
+				   uint16_t hello_interval)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_hello_interval(area, hello_interval);
+}
+
 
 template <typename A> 
 bool
