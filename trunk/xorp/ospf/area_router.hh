@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.84 2005/11/14 20:22:49 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.85 2005/11/16 01:14:18 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -96,8 +96,8 @@ class AreaRouter : Subsystem {
      * LSA. The source LSA can be a Router-LSA or a Network-LSA the
      * destination LSA must be a Router-LSA.
      */
-    bool find_interface_address_virtual_link(Lsa::LsaRef src, Lsa::LsaRef dst,
-					     A& interface)const;
+    bool find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
+				A& interface)const;
 
     /**
      * End looking through the list of routers for a virtual link endpoint.

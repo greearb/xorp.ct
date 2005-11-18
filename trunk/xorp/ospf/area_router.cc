@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.149 2005/11/16 20:16:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.150 2005/11/18 03:42:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -298,15 +298,13 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
 
     // Find the interface address of the neighbour that should be used.
     A neighbour_interface_address;
-    if (!find_interface_address_virtual_link(rc.prevhop().get_lsa(),
-					     lsar,
-					     neighbour_interface_address))
+    if (!find_interface_address(rc.prevhop().get_lsa(),	lsar,
+				neighbour_interface_address))
 	return;
 
     // Find this routers own interface address.
     A routers_interface_address;
-    if (!find_interface_address_virtual_link(rc.nexthop().get_lsa(),
-					     r,
+    if (!find_interface_address(rc.nexthop().get_lsa(), r,
 					     routers_interface_address))
 	return;
     
@@ -321,9 +319,8 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
 
 template <>
 bool
-AreaRouter<IPv4>::find_interface_address_virtual_link(Lsa::LsaRef src,
-						      Lsa::LsaRef dst,
-						      IPv4& interface) const
+AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
+					 IPv4& interface) const
 {
     XLOG_TRACE(_ospf.trace()._virtual_link,
 	       "Virtual link find interface address src:\n%s\ndst:\n%s\n",
@@ -368,9 +365,8 @@ AreaRouter<IPv4>::find_interface_address_virtual_link(Lsa::LsaRef src,
 
 template <>
 bool
-AreaRouter<IPv6>::find_interface_address_virtual_link(Lsa::LsaRef src,
-						      Lsa::LsaRef dst,
-						      IPv6& interface) const
+AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
+					 IPv6& interface) const
 {
     UNUSED(src);
     UNUSED(dst);
@@ -2424,7 +2420,9 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 		continue;
 	    // Originating routers Router ID.
 	    route_entry.set_router_id(rlsa->get_header().get_link_state_id());
-	    IPv4 addr = IPv4(htonl(route_entry.get_router_id()));
+	    IPv4 addr;
+	    XLOG_ASSERT(find_interface_address(ri->prevhop().get_lsa(), lsar,
+					       addr));
 	    net = IPNet<IPv4>(addr, IPv4::ADDR_BITLEN);
 	    route_entry.set_area_border_router(rlsa->get_b_bit());
 	    route_entry.set_as_boundary_router(rlsa->get_e_bit());
