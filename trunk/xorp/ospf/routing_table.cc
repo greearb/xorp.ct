@@ -13,9 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.30 2005/11/17 17:45:52 atanu Exp $"
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.31 2005/11/18 04:23:46 atanu Exp $"
+// #define DEBUG_LOGGING
+// #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "config.h"
 #include <map>
