@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.32 2005/11/18 06:11:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.33 2005/11/18 19:38:23 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -342,8 +342,10 @@ RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt)
 {
     bool result;
-    if (!rt.get_discard() && !rt.get_filtered()) {
-	result = _ospf.delete_route(net);
+    if (!rt.get_discard()) {
+	if (!rt.get_filtered())
+	    result = _ospf.delete_route(net);
+	return true;
     } else {
 	XLOG_WARNING("TBD - removing discard routes");
 	result = false;
