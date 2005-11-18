@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.31 2005/11/18 04:23:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.32 2005/11/18 06:11:29 atanu Exp $"
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
@@ -380,7 +380,7 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
     // Host routes are required in the ospf routing table to satisfy
     // requirements for AS-External-LSAs and Summary-LSAs. Drop them
     // here so they don't make it the the RIB.
-    if (net.contains(nexthop))
+    if (net.contains(nexthop) || net.prefix_len() == A::ADDR_BITLEN)
  	return false;
 
     // The import policy filter.
