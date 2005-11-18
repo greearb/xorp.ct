@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.55 2005/11/16 05:20:16 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.56 2005/11/16 11:58:37 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -289,59 +289,6 @@ class PeerManager {
     bool virtual_link_endpoint(OspfTypes::AreaID area) const;
 
     /**
-     * Return the number of areas of the specified type.
-     */
-    uint32_t area_count(OspfTypes::AreaType area_type) const;
-
-    /**
-     * Is this an internal router?
-     */
-    bool internal_router_p() const;
-
-    /**
-     * Is this an area border router?
-     */
-    bool area_border_router_p() const;
-
-    /**
-     * Is this a backbone router?
-     */
-    bool backbone_router_p() const;
-
-    /**
-     * Is this an AS boundary router?
-     */
-    bool as_boundary_router_p() const;
-
-    // Configure the peering.
-
-    /**
-     * Set the interface ID OSPFv3 only.
-     */
-    bool set_interface_id(const PeerID, OspfTypes::AreaID area,
-			  uint32_t interface_id);
-
-    /**
-     * Set the hello interval in seconds.
-     */
-    bool set_hello_interval(const PeerID, OspfTypes::AreaID area,
-			    uint16_t hello_interval);
-#if	0
-    /**
-     * Set options.
-     */
-    bool set_options(const PeerID, OspfTypes::AreaID area,
-		     uint32_t options);
-#endif
-    /**
-     * Compute the options that are sent in hello packets, data
-     * description packets, LSA headers (OSPFv2),  Router-LSAs
-     * (OSPFv3) and Network-LSAs (OSPFv3).
-     *
-     */
-    uint32_t compute_options(OspfTypes::AreaType area_type);
-
-    /**
      * Create a virtual link (Configuration).
      *
      * @param rid neighbours router ID.
@@ -384,6 +331,61 @@ class PeerManager {
     bool receive_virtual_link(A dst, A src, Packet *packet);
 
     /**
+     * Return the number of areas of the specified type.
+     */
+    uint32_t area_count(OspfTypes::AreaType area_type) const;
+
+    /**
+     * Is this an internal router?
+     */
+    bool internal_router_p() const;
+
+    /**
+     * Is this an area border router?
+     */
+    bool area_border_router_p() const;
+
+    /**
+     * Is this a backbone router?
+     */
+    bool backbone_router_p() const;
+
+    /**
+     * Is this an AS boundary router?
+     */
+    bool as_boundary_router_p() const;
+
+    /**
+     * Compute the options that are sent in hello packets, data
+     * description packets, LSA headers (OSPFv2),  Router-LSAs
+     * (OSPFv3) and Network-LSAs (OSPFv3).
+     *
+     */
+    uint32_t compute_options(OspfTypes::AreaType area_type);
+
+    // Config (begin)
+
+#if	0
+    /**
+     * Set options.
+     */
+    bool set_options(const PeerID, OspfTypes::AreaID area,
+		     uint32_t options);
+#endif
+
+    /**
+     * Set the interface ID OSPFv3 only.
+     */
+    bool set_interface_id(const PeerID, OspfTypes::AreaID area,
+			  uint32_t interface_id);
+
+    /**
+     * Set the hello interval in seconds.
+     */
+    bool set_hello_interval(const PeerID, OspfTypes::AreaID area,
+			    uint16_t hello_interval);
+
+    /**
      * Set router priority.
      */
     bool set_router_priority(const PeerID, OspfTypes::AreaID area,
@@ -412,6 +414,8 @@ class PeerManager {
      */
     bool set_authentication(const PeerID, OspfTypes::AreaID area,
 			    string& type, string& password);
+
+    // Config (end)
 
     /**
      * Number of areas this router serves.
