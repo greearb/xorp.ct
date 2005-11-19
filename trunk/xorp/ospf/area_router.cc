@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.151 2005/11/18 06:16:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.152 2005/11/18 19:59:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -322,8 +322,8 @@ bool
 AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 					 IPv4& interface) const
 {
-    XLOG_TRACE(_ospf.trace()._virtual_link,
-	       "Virtual link find interface address src:\n%s\ndst:\n%s\n",
+    XLOG_TRACE(_ospf.trace()._find_interface_address,
+	       "Find interface address \nsrc:\n%s\ndst:\n%s\n",
 	       cstring(*src), cstring(*dst));
 
     RouterLsa *rlsa = dynamic_cast<RouterLsa *>(src.get());
