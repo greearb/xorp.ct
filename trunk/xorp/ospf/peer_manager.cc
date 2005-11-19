@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.90 2005/11/16 23:55:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.91 2005/11/18 06:09:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1046,7 +1046,7 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
     debug_msg("Area %s net %s rentry %s\n", pr_id(area).c_str(),
 	      cstring(net), cstring(rt));
 
-    // RFC 2328 Section 12.4.3. Sumamry-LSAs
+    // RFC 2328 Section 12.4.3. Summary-LSAs
     // Select routes that are candidate for summarisation.
 
     bool candidate = false;
@@ -1061,8 +1061,10 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
 	break;
     }
 
-    if (!candidate)
+    if (!candidate) {
+	debug_msg("Rejected not an AS boundary or Network\n");
 	return false;
+    }
 
     switch (rt.get_path_type()) {
     case RouteEntry<A>::intra_area:
@@ -1074,6 +1076,9 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
 	candidate = false;
 	break;
     }
+
+    debug_msg("%s\n", candidate ? "Accepted\n" :
+	      "Rejected not an intra/inter area route\n");
 
     return candidate;
 }
