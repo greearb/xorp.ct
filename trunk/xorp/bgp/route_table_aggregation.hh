@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.4 2005/11/16 11:37:34 zec Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.5 2005/11/18 01:56:43 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -102,10 +102,9 @@ template<class A>
 class AggregateRoute {
 public:
     AggregateRoute(IPNet<A> net,
-		   uint32_t genid,
 		   bool brief_mode,
 		   LocalData *local_data)
-        : _net(net), _genid(genid), _brief_mode(brief_mode),
+        : _net(net), _brief_mode(brief_mode),
 	  _was_announced(0), _is_suppressed(0) {
 	    NextHopAttribute<A> nhatt(A::ZERO());
 	    AsPath aspath;
@@ -136,7 +135,6 @@ public:
 
 private:
     const IPNet<A> _net;
-    uint32_t _genid;
     bool _brief_mode;
     AggregatorAttribute *_aggregator_attribute;
 

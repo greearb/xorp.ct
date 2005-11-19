@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.5 2005/11/16 11:37:33 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.6 2005/11/18 01:56:43 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -111,7 +111,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     if (ai == _aggregates_table.end()) {
         const AggregateRoute<A> *new_aggr_route =
 	    new AggregateRoute<A>(aggr_net,
-				  rtmsg.genid(),
 				  orig_route->aggr_brief_mode(),
 				  _master_plumbing.main().get_local_data());
 	ai = _aggregates_table.insert(aggr_net, *new_aggr_route);
@@ -385,7 +384,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
 	InternalMessage<A> tmp_rtmsg(tmp_route,
 				     parent->_master_plumbing.rib_handler(),
-				     _genid);
+				     GENID_UNKNOWN);
 	parent->_next_table->delete_route(tmp_rtmsg, parent);
 	tmp_route->unref(); // XXX Is this necessary / OK?
 	_was_announced = false;
@@ -467,7 +466,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
 	InternalMessage<A> tmp_rtmsg(tmp_route,
 				     parent->_master_plumbing.rib_handler(),
-				     _genid);
+				     GENID_UNKNOWN);
 	parent->_next_table->add_route(tmp_rtmsg, parent);
 	//tmp_route->unref();
 	_was_announced = true;
