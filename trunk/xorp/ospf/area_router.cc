@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.153 2005/11/19 03:48:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.154 2005/11/19 04:06:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2905,7 +2905,9 @@ AreaRouter<A>::bidirectional(RouterLink::Type rl_type,
 
 template <typename A>
 bool 
-AreaRouter<A>::bidirectional(const RouterLink& rl, NetworkLsa *nlsa)
+AreaRouter<A>::bidirectional(const uint32_t link_state_id, 
+			     const RouterLink& rl, NetworkLsa *nlsa)
+    const
 {
     XLOG_ASSERT(0 != nlsa);
     XLOG_ASSERT(rl.get_type() == RouterLink::transit);
@@ -2917,7 +2919,7 @@ AreaRouter<A>::bidirectional(const RouterLink& rl, NetworkLsa *nlsa)
     list<OspfTypes::RouterID>& routers = nlsa->get_attached_routers();
     list<OspfTypes::RouterID>::const_iterator i;
     for (i = routers.begin(); i != routers.end(); i++)
-	if (rl.get_link_id() == *i)
+	if (link_state_id == *i)
 	    return true;
 
     return false;
@@ -3073,7 +3075,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     // bi-directional connectivity.
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsan.get());
     XLOG_ASSERT(nlsa);
-    if (!bidirectional(rl, nlsa)) {
+    if (!bidirectional(rlsa->get_header().get_link_state_id(), rl, nlsa)) {
 	return;
     }
 
@@ -3099,7 +3101,7 @@ AreaRouter<A>::routing_router_link_transitV2(Spt<Vertex>& spt,
     }
 
     uint32_t rlsid = rlsa->get_header().get_link_state_id();
-    bool dr = rlsid == nlsid;
+    bool dr = rlsid == nlsa->get_header().get_advertising_router();
 
     update_edge(spt, src, rl.get_metric(), dst);
     // Reverse edge
