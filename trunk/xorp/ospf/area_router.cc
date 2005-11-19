@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.152 2005/11/18 19:59:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.153 2005/11/19 03:48:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -364,6 +364,36 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
 	    if (nlsa) {
 		if (RouterLink::transit == l->get_type()) {
 		    interface = IPv4(htonl(l->get_link_data()));
+		    return true;
+		}
+	    }
+	}
+    }
+
+    if (nlsa)
+	return false;
+    
+    // There is a special case to deal with which in not part of the
+    // normal adjacency check. Under normal circumstances two
+    // Router-LSAs can be checked for adjacency by checking for p2p or
+    // vlink. If the router link type is transit then the adjacency
+    // should be Network-LSA to Router-LSA. However when introducing
+    // Router-LSAs into the SPT the Router-LSA <-> Router-LSA wins
+    // over Network-LSA <-> Router-LSA. If both of the LSAs are
+    // Router-LSAs then check the transit links to find a common
+    // router interface address.
+
+    const list<RouterLink> &src_links = rlsa->get_router_links();
+    const list<RouterLink> &dst_links = dst_rlsa->get_router_links();
+    list<RouterLink>::const_iterator si = src_links.begin();
+    list<RouterLink>::const_iterator di = dst_links.begin();
+
+    for (; si != src_links.end(); si++) {
+	for (; di != dst_links.end(); di++) {
+	    if (si->get_type() == RouterLink::transit &&
+		di->get_type() == RouterLink::transit) {
+		if (si->get_link_id() == di->get_link_id()) {
+		    interface = IPv4(htonl(di->get_link_data()));
 		    return true;
 		}
 	    }
