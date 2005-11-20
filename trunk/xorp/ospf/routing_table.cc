@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.34 2005/11/18 20:19:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.35 2005/11/20 21:11:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -52,6 +52,8 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
     XLOG_ASSERT(!_in_transaction);
     _in_transaction = true;
 
+    _adv.clear_area(area);
+
     delete _previous;
     _previous = _current;
     _current = new Trie<A, InternalRouteEntry<A> >;
@@ -88,11 +90,13 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
 template <typename A>
 bool
 RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
-			   RouteEntry<A>& rt)
+			   const RouteEntry<A>& rt)
 {
     debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
+
+    _adv.add_entry(area, rt.get_advertising_router(), rt);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -111,7 +115,7 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 template <typename A>
 bool
 RoutingTable<A>::replace_entry(OspfTypes::AreaID area, IPNet<A> net,
-			       RouteEntry<A>& rt)
+			       const RouteEntry<A>& rt)
 {
     debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
     XLOG_ASSERT(_in_transaction);
@@ -183,6 +187,17 @@ RoutingTable<A>::lookup_entry(IPNet<A> net, RouteEntry<A>& rt)
     rt = irentry.get_entry();
 
     return true;
+}
+
+template <typename A>
+bool
+RoutingTable<A>::lookup_entry_by_advertising_router(OspfTypes::AreaID area,
+						    uint32_t adv,
+						    RouteEntry<A>& rt)
+{
+    debug_msg("area %s %s\n",  pr_id(area).c_str(), pr_id(adv).c_str());
+
+    return _adv.lookup_entry(area, adv, rt);
 }
 
 template <typename A>
@@ -439,7 +454,8 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 
 template <typename A>
 bool
-InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area, RouteEntry<A>& rt)
+InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area,
+				 const RouteEntry<A>& rt)
 {
     // An entry for this *area* should not already exist.
     XLOG_ASSERT(0 == _entries.count(area));
@@ -457,7 +473,8 @@ InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area, RouteEntry<A>& rt)
 
 template <typename A>
 bool
-InternalRouteEntry<A>::replace_entry(OspfTypes::AreaID area, RouteEntry<A>& rt)
+InternalRouteEntry<A>::replace_entry(OspfTypes::AreaID area,
+				     const RouteEntry<A>& rt)
 {
     bool winner_changed;
     delete_entry(area, winner_changed);
@@ -542,6 +559,68 @@ InternalRouteEntry<A>::str()
     }
 
     return output;
+}
+
+template <typename A>
+void
+Adv<A>::clear_area(OspfTypes::AreaID area)
+{
+    printf("Clearing area %s\n", pr_id(area).c_str());
+
+    if (0 == _adv.count(area))
+	return;
+
+    typename ADV::iterator i = _adv.find(area);
+    XLOG_ASSERT(_adv.end() != i);
+    i->second.clear();
+}
+
+template <typename A>
+void
+Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
+		  const RouteEntry<A>& rt)
+{
+    printf("Add entry area %s adv %s\n", pr_id(area).c_str(),
+	   pr_id(adv).c_str());
+
+    if (0 == _adv.count(area)) {
+	AREA a;
+	a[adv] = rt;
+	_adv[area] = a;
+	return;
+    }
+
+    typename ADV::iterator i = _adv.find(area);
+    XLOG_ASSERT(_adv.end() != i);
+    typename AREA::iterator j = i->second.find(adv);
+    // A router can contribute to many routes
+    if(i->second.end() != j)
+	return;
+
+    AREA& aref = _adv[area];
+    aref[adv] = rt;
+}
+
+template <typename A>
+bool
+Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
+		     RouteEntry<A>& rt) const
+{
+    printf("Lookup entry area %s adv %s\n", pr_id(area).c_str(),
+	   pr_id(adv).c_str());
+
+    if (0 == _adv.count(area)) {
+	return false;
+    }
+
+    typename ADV::const_iterator i = _adv.find(area);
+    XLOG_ASSERT(_adv.end() != i);
+    typename AREA::const_iterator j = i->second.find(adv);
+    if (i->second.end() == j)
+	return false;
+    rt = j->second;
+
+    return true;
 }
 
 template class RoutingTable<IPv4>;

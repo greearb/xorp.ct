@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.27 2005/11/11 00:43:08 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.28 2005/11/16 01:26:08 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -147,8 +147,8 @@ class RouteEntry {
 	return _nexthop;
     }
 
-    void set_advertising_router(uint32_t _advertising_router) {
-	_advertising_router = _advertising_router;
+    void set_advertising_router(uint32_t advertising_router) {
+	_advertising_router = advertising_router;
     }
 
     uint32_t get_advertising_router() const {
@@ -216,9 +216,9 @@ class InternalRouteEntry {
      * Add entry indexed by area.
      * @return true on sucess.
      */
-    bool add_entry(OspfTypes::AreaID area, RouteEntry<A>& rt);
+    bool add_entry(OspfTypes::AreaID area, const RouteEntry<A>& rt);
     
-    bool replace_entry(OspfTypes::AreaID area, RouteEntry<A>& rt);
+    bool replace_entry(OspfTypes::AreaID area, const RouteEntry<A>& rt);
     
     /**
      * Delete entry. Perfectly safe to attempt to delete an entry for
@@ -261,6 +261,45 @@ class InternalRouteEntry {
     bool reset_winner();
 };
 
+/**
+ * Storage for routing table entries indexed by advertising router.
+ */
+template <typename A>
+class Adv {
+ public:
+    /**
+     * Clear all entries for this area.
+     */
+    void clear_area(OspfTypes::AreaID area);
+
+    /**
+     * Add an entry for this routing entry.
+     *
+     * @param area to add entry.
+     * @param adv advertising router.
+     * @param rt associated routing entry.
+     */
+    void add_entry(OspfTypes::AreaID area, uint32_t adv,
+		   const RouteEntry<A>& rt);
+
+    /**
+     * Lookup an entry by advertising router.
+     *
+     * @param area to look in.
+     * @param adv router to look for.
+     * @param rt routing entry returned if enty is found.
+     *
+     * @return true if entry is found
+     */
+    bool lookup_entry(OspfTypes::AreaID area, uint32_t adv,
+		      RouteEntry<A>& rt) const;
+
+ private:
+    typedef map<OspfTypes::RouterID, RouteEntry<A> > AREA;
+    typedef map<OspfTypes::AreaID, AREA> ADV;
+    ADV _adv;
+};
+
 template <typename A>
 class RoutingTable {
  public:
@@ -274,10 +313,11 @@ class RoutingTable {
      */
     void begin(OspfTypes::AreaID area);
 
-    bool add_entry(OspfTypes::AreaID area, IPNet<A> net, RouteEntry<A>& rt);
+    bool add_entry(OspfTypes::AreaID area, IPNet<A> net,
+		   const RouteEntry<A>& rt);
 
     bool replace_entry(OspfTypes::AreaID area, IPNet<A> net,
-		       RouteEntry<A>& rt);
+		       const RouteEntry<A>& rt);
 
     /**
      * Delete an entry from the current table.
@@ -311,6 +351,7 @@ class RoutingTable {
      */
     bool lookup_entry(OspfTypes::AreaID area, A router, RouteEntry<A>& rt);
 
+
     /**
      * Lookup network in the routing table exact match.
      *
@@ -321,6 +362,18 @@ class RoutingTable {
      */
     bool lookup_entry(IPNet<A> net, RouteEntry<A>& rt);
 
+    /**
+     * Lookup advertising router in specific area.
+     *
+     * @param area area ID.
+     * @param adv advertsing router
+     * @param rt if a match is found fill this in.
+     * 
+     * @return true if an entry is found.
+     */
+    bool lookup_entry_by_advertising_router(OspfTypes::AreaID area,
+					    uint32_t adv,
+					    RouteEntry<A>& rt);
     /**
      * Lookup address A in the routing table longest match.
      *
@@ -345,6 +398,9 @@ class RoutingTable {
     bool _in_transaction;		// Flag to verify that the
 					// routing table is only
 					// manipulated during a transaction.
+
+    Adv<A> _adv;			// Routing entries indexed by
+					// advertising router.
 
     Trie<A, InternalRouteEntry<A> > *_current;
     Trie<A, InternalRouteEntry<A> > *_previous;
