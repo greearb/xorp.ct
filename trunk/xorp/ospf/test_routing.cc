@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.10 2005/11/04 20:54:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.11 2005/11/20 19:16:30 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -458,8 +458,8 @@ routing2(TestInfo& info)
     NetworkLsa *nlsa;
     nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
     XLOG_ASSERT(nlsa);
-    nlsa->get_attached_routers().push_back(set_id("172.16.1.1"));
-    nlsa->get_attached_routers().push_back(set_id("172.16.1.2"));
+    nlsa->get_attached_routers().push_back(prid);
+    nlsa->get_attached_routers().push_back(rid);
     lsar->encode();
     ar->testing_add_lsa(lsar);
 
@@ -497,8 +497,8 @@ routing2(TestInfo& info)
     lsar = create_network_lsa(version, prid, prid, 0xfffffffc);
     nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
     XLOG_ASSERT(nlsa);
-    nlsa->get_attached_routers().push_back(set_id("172.16.1.1"));
-    nlsa->get_attached_routers().push_back(set_id("172.16.1.2"));
+    nlsa->get_attached_routers().push_back(prid);
+    nlsa->get_attached_routers().push_back(rid);
     lsar->encode();
     ar->testing_add_lsa(lsar);
     if (info.verbose())
@@ -822,7 +822,7 @@ main(int argc, char **argv)
     } tests[] = {
 	{"r1V2", callback(routing1<IPv4>, OspfTypes::V2)},
 	{"r1V3", callback(routing1<IPv6>, OspfTypes::V3)},
-	/*	{"r2", callback(routing2)},*/
+	{"r2", callback(routing2)},
 	{"r3V2", callback(routing3<IPv4>, OspfTypes::V2, fname)},
 	{"r3V3", callback(routing3<IPv6>, OspfTypes::V3, fname)},
 	{"r4", callback(routing4)},
