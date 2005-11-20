@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.36 2005/11/20 22:58:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.37 2005/11/20 23:09:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,7 +96,8 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
 
-    _adv.add_entry(area, rt.get_advertising_router(), rt);
+    if (rt.get_destination_type() == OspfTypes::Router)
+	_adv.add_entry(area, rt.get_advertising_router(), rt);
 
     typename Trie<A, InternalRouteEntry<A> >::iterator i;
     i = _current->lookup_node(net);
@@ -583,6 +584,8 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
+    XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get()));
+
     if (0 == _adv.count(area)) {
 	AREA a;
 	a[adv] = rt;
@@ -593,9 +596,7 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     typename ADV::iterator i = _adv.find(area);
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
-    // A router can contribute to many routes
-    if(i->second.end() != j)
-	return;
+    XLOG_ASSERT(i->second.end() == j);
 
     AREA& aref = _adv[area];
     aref[adv] = rt;
