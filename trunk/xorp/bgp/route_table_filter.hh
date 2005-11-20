@@ -1,3 +1,4 @@
+
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
@@ -13,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.19 2005/11/15 11:43:59 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.20 2005/11/16 11:50:46 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -408,6 +409,7 @@ public:
     int add_known_community_filter(PeerType peer_type);
     int add_unknown_filter();
     int add_originate_route_filter(const AsNum &asn, PeerType peer_type);
+    void do_versioning() {_do_versioning = true;}
 
 private:
     const InternalMessage<A> *
@@ -418,6 +420,7 @@ private:
     set <uint32_t> _deleted_filters;  /* kept as a sanity check */
     FilterVersion<A>* _current_filter;
     NextHopResolver<A>& _next_hop_resolver;
+    bool _do_versioning;
 };
 
 #endif // __BGP_ROUTE_TABLE_FILTER_HH__

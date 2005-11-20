@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.32 2005/11/16 00:10:06 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.33 2005/11/16 11:50:46 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -74,6 +74,7 @@ test_filter(TestInfo& /*info*/)
     FilterTable<IPv4> *filter_table
 	= new FilterTable<IPv4>("FILTER", SAFI_UNICAST, ribin_table,
 				next_hop_resolver);
+    filter_table->do_versioning();
     ribin_table->set_next_table(filter_table);
     DebugTable<IPv4>* debug_table
 	 = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)filter_table);

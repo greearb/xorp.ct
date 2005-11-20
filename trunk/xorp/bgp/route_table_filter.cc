@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.39 2005/11/16 11:50:46 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.40 2005/11/19 09:33:39 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -797,7 +797,7 @@ FilterTable<A>::FilterTable(string table_name,
 			    BGPRouteTable<A> *parent_table,
 			    NextHopResolver<A>& next_hop_resolver)
     : BGPRouteTable<A>("FilterTable-" + table_name, safi),
-    _next_hop_resolver(next_hop_resolver)
+      _next_hop_resolver(next_hop_resolver), _do_versioning(false)
 {
     this->_parent = parent_table;
     _current_filter = new FilterVersion<A>(_next_hop_resolver);
@@ -1168,32 +1168,35 @@ FilterTable<A>::apply_filters(const InternalMessage<A> *rtmsg,
 {
     const InternalMessage<A>* msg;
     FilterVersion<A> *filter;
-    typename map<uint32_t, FilterVersion<A>* >::iterator i;
-    uint32_t genid = rtmsg->genid();
-    i = _filter_versions.find(genid);
-    if (i == _filter_versions.end()) {
-	// check we're not trying to use a GenID that has been retired.
-	XLOG_ASSERT(_deleted_filters.find(genid) == _deleted_filters.end());
+    if (_do_versioning) {
+	typename map<uint32_t, FilterVersion<A>* >::iterator i;
+	uint32_t genid = rtmsg->genid();
+	i = _filter_versions.find(genid);
+	if (i == _filter_versions.end()) {
+	    // check we're not trying to use a GenID that has been retired.
+	    XLOG_ASSERT(_deleted_filters.find(genid) == _deleted_filters.end());
 
-	_filter_versions[genid] = _current_filter;
-	_current_filter->set_genid(genid);
-	filter = _current_filter;
-    } else {
-	filter = i->second;
-#if 0	// Was breaking gmake check test_peering2.sh -l -t test17
-	XLOG_ASSERT(filter->genid() == genid);
-#endif
-    }
-    msg = filter->apply_filters(rtmsg, ref_change);
-
-    // if there are no more routes that used an old filter, delete it now
-    if (filter->ref_count() == 0) {
-	if (filter != _current_filter) {
-	    if (filter->used())
-		_deleted_filters.insert(filter->genid());
-	    delete filter;
-	    _filter_versions.erase(i);
+	    _filter_versions[genid] = _current_filter;
+	    _current_filter->set_genid(genid);
+	    filter = _current_filter;
+	} else {
+	    filter = i->second;
+	    XLOG_ASSERT(filter->genid() == genid);
 	}
+
+	msg = filter->apply_filters(rtmsg, ref_change);
+
+	// if there are no more routes that used an old filter, delete it now
+	if (filter->ref_count() == 0) {
+	    if (filter != _current_filter) {
+		if (filter->used())
+		    _deleted_filters.insert(filter->genid());
+		delete filter;
+		_filter_versions.erase(i);
+	    }
+	}
+    } else {
+	msg = _current_filter->apply_filters(rtmsg, ref_change);
     }
 
     return msg;
