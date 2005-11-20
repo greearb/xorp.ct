@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.37 2005/11/20 23:09:36 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.38 2005/11/20 23:28:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -596,7 +596,16 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     typename ADV::iterator i = _adv.find(area);
     XLOG_ASSERT(_adv.end() != i);
     typename AREA::iterator j = i->second.find(adv);
-    XLOG_ASSERT(i->second.end() == j);
+    // In OSPFv2 each router should generate only one Router-LSA in
+    // OSPFv3 each router is allowed to generate more than one
+    // Router-LSA, in which case it may become necessary to store all
+    // the Router-LSAs. Another option may be to add all router links to a
+    // single Router-LSA (its never going to be transmitted).
+    if (i->second.end() != j) {
+	XLOG_WARNING("More than one Router-LSA seen with same adv %s",
+		     cstring(*rt.get_lsa()));
+	return;
+    }
 
     AREA& aref = _adv[area];
     aref[adv] = rt;
