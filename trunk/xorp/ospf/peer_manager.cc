@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.91 2005/11/18 06:09:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.92 2005/11/19 05:59:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1077,8 +1077,8 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
 	break;
     }
 
-    debug_msg("%s\n", candidate ? "Accepted\n" :
-	      "Rejected not an intra/inter area route\n");
+    debug_msg("%s\n", candidate ? "Accepted" :
+	      "Rejected not an intra/inter area route");
 
     return candidate;
 }
