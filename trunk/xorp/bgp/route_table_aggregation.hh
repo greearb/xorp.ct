@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.5 2005/11/18 01:56:43 zec Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.6 2005/11/19 09:36:02 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -160,6 +160,11 @@ public:
     int delete_route(const InternalMessage<A> &rtmsg,
                      BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
+
+    //bool dump_next_route(DumpIterator<A>& dump_iter);
+    int route_dump(const InternalMessage<A> &rtmsg,
+		   BGPRouteTable<A> *caller,
+		   const PeerHandler *dump_peer);
 
     const SubnetRoute<A> *lookup_route(const IPNet<A> &net,
                                        uint32_t& genid) const;

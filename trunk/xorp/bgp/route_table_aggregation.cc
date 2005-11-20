@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.6 2005/11/18 01:56:43 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.7 2005/11/19 09:36:02 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -515,11 +515,95 @@ AggregationTable<A>::push(BGPRouteTable<A> *caller)
     return this->_next_table->push((BGPRouteTable<A>*)this);
 }
 
-// XXX keep those in place to trap calls to methods bellow
-#ifndef DEBUG_LOGGING
-#define DEBUG_LOGGING
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif
+
+template<class A>
+int
+AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
+				BGPRouteTable<A> *caller,
+				const PeerHandler *dump_peer)
+{
+    debug_msg("\n         %s\n caller: %s\n rtmsg: %p route: %p\n%s\n",
+	      this->tablename().c_str(),
+	      caller ? caller->tablename().c_str() : "NULL",
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+
+    const SubnetRoute<A> *orig_route = rtmsg.route();
+    XLOG_ASSERT(caller == this->_parent);
+    XLOG_ASSERT(this->_next_table != NULL);
+    XLOG_ASSERT(orig_route->nexthop_resolved());
+
+    /*
+     * If not marked as aggregation candidate, pass the request
+     * unmodified downstream.  DONE.
+     */
+    uint32_t aggr_prefix_len = rtmsg.route()->aggr_prefix_len();
+    debug_msg("aggr_prefix_len=%d\n", aggr_prefix_len);
+    if (aggr_prefix_len == SR_AGGR_IGNORE)
+	return this->_next_table->route_dump(rtmsg, (BGPRouteTable<A>*)this,
+					     dump_peer);
+
+    /*
+     * If the route has less a specific prefix length then the requested
+     * aggregate, pass the request downstream without considering
+     * to create an aggregate.  Since we have to modify the
+     * aggr_prefix_len field of the route, we must operate on a copy
+     * of the original route.
+     */
+    const IPNet<A> orig_net = rtmsg.net();
+    const IPNet<A> aggr_net = IPNet<A>(orig_net.masked_addr(),
+				       aggr_prefix_len);
+    SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
+    InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
+
+    // propagate internal message flags
+    if (rtmsg.from_previous_peering())
+        ibgp_msg.set_from_previous_peering();
+
+    if (orig_net.prefix_len() < aggr_prefix_len || dump_peer->ibgp()) {
+	// Send the "original" version downstream, and we are DONE.
+	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
+	return this->_next_table->route_dump(ibgp_msg,
+					     (BGPRouteTable<A>*)this,
+					     dump_peer);
+    }
+
+    debug_msg("\nXXX *** XXX\nMARKO route_dump orig=%s aggr=%s\n",
+		orig_net.str().c_str(), aggr_net.str().c_str());
+    // Find the appropriate aggregate route
+    typename RefTrie<A, const AggregateRoute<A> >::iterator ai;
+    ai = _aggregates_table.lookup_node(aggr_net);
+    // Check that the aggregate exists, otherwise something's gone wrong.
+    XLOG_ASSERT(ai != _aggregates_table.end());
+    AggregateRoute<A> *aggr_route =
+	const_cast<AggregateRoute<A> *> (&ai.payload());
+
+    /*
+     * If our component route holds a more specific prefix than the
+     * aggregate, send it downstream.
+     */
+    if (aggr_route->net() != orig_net) {
+	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
+	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
+
+	// propagate internal message flags
+	if (rtmsg.from_previous_peering())
+	    ebgp_msg.set_from_previous_peering();
+
+	if (aggr_route->is_suppressed())
+	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
+	else
+	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
+	return this->_next_table->route_dump(ebgp_msg,
+					     (BGPRouteTable<A>*)this,
+					     dump_peer);
+    }
+
+    debug_msg("XXX Shouldn't get here unless EBGP & aggregate == component\n");
+    return 0; // XXX REVISIT!
+}
+
 
 template<class A>
 const SubnetRoute<A>*
@@ -530,6 +614,7 @@ AggregationTable<A>::lookup_route(const IPNet<A> &net, uint32_t& genid) const
     return this->_parent->lookup_route(net, genid);
 }
 
+
 template<class A>
 void
 AggregationTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
@@ -539,6 +624,7 @@ AggregationTable<A>::route_used(const SubnetRoute<A>* rt, bool in_use)
     this->_parent->route_used(rt, in_use);
 }
 
+
 template<class A>
 string
 AggregationTable<A>::str() const
@@ -546,6 +632,7 @@ AggregationTable<A>::str() const
     string s = "AggregationTable<A>" + this->tablename();
     return s;
 }
+
 
 template<class A>
 bool
@@ -555,6 +642,7 @@ AggregationTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     // XXX Can this ever be called?  REVISIT!!!
     return 0; // XXX
 }
+
 
 template class AggregationTable<IPv4>;
 template class AggregationTable<IPv6>;
