@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.35 2005/11/20 21:11:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.36 2005/11/20 22:58:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -565,7 +565,7 @@ template <typename A>
 void
 Adv<A>::clear_area(OspfTypes::AreaID area)
 {
-    printf("Clearing area %s\n", pr_id(area).c_str());
+    debug_msg("Clearing area %s\n", pr_id(area).c_str());
 
     if (0 == _adv.count(area))
 	return;
@@ -580,7 +580,7 @@ void
 Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
 		  const RouteEntry<A>& rt)
 {
-    printf("Add entry area %s adv %s\n", pr_id(area).c_str(),
+    debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
     if (0 == _adv.count(area)) {
@@ -606,7 +606,7 @@ bool
 Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
 		     RouteEntry<A>& rt) const
 {
-    printf("Lookup entry area %s adv %s\n", pr_id(area).c_str(),
+    debug_msg("Lookup entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
     if (0 == _adv.count(area)) {
