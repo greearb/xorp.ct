@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.11 2005/11/20 19:16:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.12 2005/11/20 21:13:23 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -804,6 +804,113 @@ routing4(TestInfo& info)
     return true;
 }
 
+/**
+ * http://www.xorp.org/bugzilla/show_bug.cgi?id=359
+ * Used to demonstrate that routes would be introduced from dead LSAs.
+ */
+bool
+routing5(TestInfo& info)
+{
+    OspfTypes::Version version = OspfTypes::V2;
+
+    EventLoop eventloop;
+    DebugIO<IPv4> io(info, version, eventloop);
+    io.startup();
+
+    Ospf<IPv4> ospf(version, eventloop, &io);
+    ospf.trace().all(info.verbose());
+    OspfTypes::AreaID area = set_id("0.0.0.0");
+
+    PeerManager<IPv4>& pm = ospf.get_peer_manager();
+    pm.create_area_router(area, OspfTypes::NORMAL);
+    AreaRouter<IPv4> *ar = pm.get_area_router(area);
+    XLOG_ASSERT(ar);
+
+    OspfTypes::RouterID rid = set_id("10.0.1.1");
+    ospf.set_router_id(rid);
+
+    // Create this router's Router-LSA
+    Lsa::LsaRef lsar;
+    lsar = create_router_lsa(version, rid, rid);
+    RouterLsa *rlsa;
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, rid, 1 /* metric */);
+    lsar->encode();
+    lsar->set_self_originating(true);
+    ar->testing_replace_router_lsa(lsar);
+
+    // Create the peer's Router-LSA
+    OspfTypes::RouterID prid = set_id("10.0.1.6");
+    lsar = create_router_lsa(version, prid, prid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, prid, 1);
+    rlsa->set_e_bit(true);
+    rlsa->set_b_bit(true);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the second peer's Router-LSA
+    OspfTypes::RouterID pprid = set_id("10.0.1.8");
+    lsar = create_router_lsa(version, pprid, pprid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, pprid, 1);
+    rlsa->set_e_bit(true);
+    rlsa->set_b_bit(true);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Network-LSA that acts as the binding glue.
+    lsar = create_network_lsa(version, rid, rid, 0xffff0000);
+    NetworkLsa *nlsa;
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(rid);
+    nlsa->get_attached_routers().push_back(prid);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the AS-External-LSA from the peer.
+    lsar = create_external_lsa(version, set_id("10.20.0.0"), prid);
+    ASExternalLsa *aselsa;
+    aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    aselsa->set_network_mask(0xffff0000);
+    aselsa->set_metric(1);
+    aselsa->set_forwarding_address_ipv4(IPv4("10.0.1.6"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the AS-External-LSA from the second peer.
+    lsar = create_external_lsa(version, set_id("10.21.0.0"), pprid);
+    aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    aselsa->set_network_mask(0xffff0000);
+    aselsa->set_metric(1);
+    aselsa->set_forwarding_address_ipv4(IPv4("10.0.1.8"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    /*********************************************************/
+
+    if (info.verbose())
+        ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 1))
+        return false;
+
+    if (!io.routing_table_verify(IPNet<IPv4>("10.20.0.0/16"),
+                                 IPv4("10.0.1.6"), 2, false, false)) {
+        DOUT(info) << "Mismatch in routing table\n";
+        return false;
+    }
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -826,6 +933,7 @@ main(int argc, char **argv)
 	{"r3V2", callback(routing3<IPv4>, OspfTypes::V2, fname)},
 	{"r3V3", callback(routing3<IPv6>, OspfTypes::V3, fname)},
 	{"r4", callback(routing4)},
+	{"r5", callback(routing5)},
     };
 
     try {
