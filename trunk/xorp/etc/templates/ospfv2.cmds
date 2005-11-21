@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.4 2005/10/23 09:52:29 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.5 2005/11/05 05:41:19 atanu Exp $ */
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
@@ -123,6 +123,26 @@ show ospf4 database external detail {
     %tag: HELP "Display detailed output";
 }
 
+/* NSSA-LSA */
+
+show ospf4 database nssa {
+    %command: "ospf/tools/print_lsas -b -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf4 database nssa brief {
+    %command: "ospf/tools/print_lsas -b -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf4 database nssa detail {
+    %command: "ospf/tools/print_lsas -d -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display detailed output";
+}
+
 /* AREA */
 
 show ospf4 database area $(protocols.ospf4.area.*) {
@@ -243,6 +263,26 @@ show ospf4 database area $(protocols.ospf4.area.*) external detail {
     %tag: HELP "Display detailed output";
 }
 
+/* NSSA-LSA */
+
+show ospf4 database area $(protocols.ospf4.area.*) nssa {
+    %command: "ospf/tools/print_lsas -a $5 -b -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
+show ospf4 database area $(protocols.ospf4.area.*) nssa brief {
+    %command: "ospf/tools/print_lsas -a $5 -b -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display brief output (default)";
+}
+
+show ospf4 database area $(protocols.ospf4.area.*) nssa detail {
+    %command: "ospf/tools/print_lsas -a $5 -d -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Display detailed output";
+}
+
 /* SUMMARY */
 
 show ospf4 database summary {
@@ -281,6 +321,12 @@ show ospf4 database summary external {
     %tag: HELP "Show External-LSA database";
 }
 
+show ospf4 database summary nssa {
+    %command: "ospf/tools/print_lsas -s -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show NSSA-LSA database";
+}
+
 show ospf4 database summary area $(protocols.ospf4.area.*) {
     %command: "ospf/tools/print_lsas -a $6 -s" %help: HELP;
     %module: ospf4;
@@ -315,6 +361,12 @@ show ospf4 database summary area $(protocols.ospf4.area.*) external {
     %command: "ospf/tools/print_lsas -a $6 -s -f 5" %help: HELP;
     %module: ospf4;
     %tag: HELP "Show External-LSA database";
+}
+
+show ospf4 database summary area $(protocols.ospf4.area.*) nssa {
+    %command: "ospf/tools/print_lsas -a $6 -s -f 7" %help: HELP;
+    %module: ospf4;
+    %tag: HELP "Show NSSA-LSA database";
 }
 
 /* Neighbour commands */
