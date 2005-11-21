@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.64 2005/11/15 11:44:02 mjh Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.65 2005/11/18 00:22:57 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -80,6 +80,8 @@ policy {
 		origin: u32;
 		med: u32range;
 		localpref: u32range;
+
+		was-aggregated: u32;
 	    }
 	    then {
 		nexthop4: ipv4;
@@ -458,6 +460,11 @@ policy {
 		localpref {
 			%allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=localpref $(<>) $(@);";
+			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
+		}
+		was-aggregated {
+			%allow-operator: ":" "==" "!=";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aggregate_prefix_len $(<>) 210;";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 	    } /* to */
