@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.54 2005/11/16 11:49:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.55 2005/11/16 20:43:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -442,15 +442,20 @@ Ospf<A>::get_neighbour_info(OspfTypes::NeighbourID nid,
     return _peer_manager.get_neighbour_info(nid, ninfo);
 }
 
-
 template <typename A>
 bool
 Ospf<A>::add_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 		   bool discard, const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false", cstring(policytags));
+	      cstring(net), cstring(nexthop), metric, pb(equal),
+	      pb(discard), cstring(policytags));
+
+    XLOG_TRACE(trace()._routes,
+	       "Add route "
+	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
+	      cstring(net), cstring(nexthop), metric, pb(equal),
+	      pb(discard), cstring(policytags));
 
     return _io->add_route(net, nexthop, metric, equal, discard, policytags);
 }
@@ -461,8 +466,14 @@ Ospf<A>::replace_route(IPNet<A> net, A nexthop, uint32_t metric, bool equal,
 			bool discard, const PolicyTags& policytags)
 {
     debug_msg("Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
-	      cstring(net), cstring(nexthop), metric, equal ? "true" : "false",
-	      discard ? "true" : "false", cstring(policytags));
+	      cstring(net), cstring(nexthop), metric, pb(equal),
+	      pb(discard), cstring(policytags));
+
+    XLOG_TRACE(trace()._routes,
+	       "Replace route "
+	       "Net %s Nexthop %s metric %d equal %s discard %s policy %s\n",
+	      cstring(net), cstring(nexthop), metric, pb(equal),
+	      pb(discard), cstring(policytags));
 
     return _io->replace_route(net, nexthop, metric, equal, discard,
 			      policytags);
@@ -473,6 +484,8 @@ bool
 Ospf<A>::delete_route(IPNet<A> net)
 {
     debug_msg("Net %s\n", cstring(net));
+
+    XLOG_TRACE(trace()._routes, "Delete route Net %s\n", cstring(net));
 
     return _io->delete_route(net);
 }
