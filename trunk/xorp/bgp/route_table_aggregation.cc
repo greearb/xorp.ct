@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.7 2005/11/19 09:36:02 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.8 2005/11/20 16:24:25 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -83,7 +83,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 				       aggr_prefix_len);
     SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
     InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
-    ibgp_msg.set_changed();
 
     // propagate internal message flags
     if (rtmsg.push())
@@ -134,7 +133,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     if (aggr_route->net() != orig_net) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
-	ebgp_msg.set_changed();
 
 	// propagate internal message flags
 	if (rtmsg.from_previous_peering())
@@ -208,7 +206,6 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 				       aggr_prefix_len);
     SubnetRoute<A> *ibgp_r = new SubnetRoute<A>(*orig_route);
     InternalMessage<A> ibgp_msg(ibgp_r, rtmsg.origin_peer(), rtmsg.genid());
-    ibgp_msg.set_changed();
 
     // propagate internal message flags
     if (rtmsg.push())
@@ -244,7 +241,6 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     if (aggr_route->net() != orig_net) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
-	ebgp_msg.set_changed();
 
 	// propagate internal message flags
 	if (rtmsg.from_previous_peering())
@@ -386,7 +382,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->delete_route(tmp_rtmsg, parent);
-	tmp_route->unref(); // XXX Is this necessary / OK?
+	tmp_route->unref(); // XXX Is this necessary / OK? I GUESS NOT!
 	_was_announced = false;
     }
 
@@ -420,8 +416,6 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	    InternalMessage<A> new_msg(new_r,
 				       comp_iter.payload().origin_peer(),
 				       comp_iter.payload().genid());
-	    new_msg.set_changed();
-	    old_msg.set_changed();
 
 	    if (old_was_suppressed) {
 		old_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
