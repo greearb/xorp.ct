@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.155 2005/11/19 05:50:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.156 2005/11/20 23:30:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1208,7 +1208,7 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
     list<OspfTypes::RouterID>& attached_routers = nlsa->get_attached_routers();
     if (&routers != &attached_routers) {
 	attached_routers.clear();
-	attached_routers.push_back(link_state_id); // Add this router.
+	attached_routers.push_back(_ospf.get_router_id()); // Add this router.
 	attached_routers.insert(attached_routers.begin(),
 				routers.begin(), routers.end());
     }
