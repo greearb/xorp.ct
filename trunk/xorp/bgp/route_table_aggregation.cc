@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.8 2005/11/20 16:24:25 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.9 2005/11/21 17:36:35 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -98,7 +98,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
 	int res = this->_next_table->
 	    add_route(ibgp_msg, (BGPRouteTable<A>*)this);
-	ibgp_r->unref();
 	return res;
     }
 
@@ -143,7 +142,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
 	this->_next_table->add_route(ebgp_msg, (BGPRouteTable<A>*)this);
-	ebgp_r->unref();
     }
 
     /*
@@ -160,7 +158,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
     int res = this->_next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
-    ibgp_r->unref();
     if (must_push)
 	this->_next_table->push(this);
     return res;
@@ -382,7 +379,6 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->delete_route(tmp_rtmsg, parent);
-	tmp_route->unref(); // XXX Is this necessary / OK? I GUESS NOT!
 	_was_announced = false;
     }
 
@@ -462,7 +458,6 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->add_route(tmp_rtmsg, parent);
-	//tmp_route->unref();
 	_was_announced = true;
     }
 
