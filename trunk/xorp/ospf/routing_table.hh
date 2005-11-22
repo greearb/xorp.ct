@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.28 2005/11/16 01:26:08 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.29 2005/11/20 22:58:02 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -211,6 +211,23 @@ class InternalRouteEntry {
  public:
     InternalRouteEntry() : _winner(0)
     {}
+
+    InternalRouteEntry(const InternalRouteEntry& rhs) {
+	copy(rhs);
+    }
+
+    InternalRouteEntry& operator=(const InternalRouteEntry& rhs) {
+        if(&rhs == this)
+            return *this;
+        copy(rhs);
+
+        return *this;
+    }
+
+    void copy(const InternalRouteEntry& rhs) {
+	_entries = rhs._entries;
+ 	reset_winner();
+    }
 
     /**
      * Add entry indexed by area.
