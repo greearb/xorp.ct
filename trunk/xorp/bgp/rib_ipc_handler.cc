@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.67 2005/09/23 10:16:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.68 2005/11/02 07:36:12 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -632,9 +632,9 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
-	if (!sent)
-	    XLOG_WARNING("scheduling add route %s failed",
-			 q.net.str().c_str());
+// 	if (!sent)
+// 	    XLOG_WARNING("scheduling add route %s failed",
+// 			 q.net.str().c_str());
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	if (_bgp.profile().enabled(profile_route_rpc_out))
@@ -647,9 +647,9 @@ XrlQueue<IPv4>::sendit_spec(Queued& q, const char *bgp)
 				      ::callback(this,
 						 &XrlQueue::route_command_done,
 						 q.comment));
-	if (!sent)
-	    XLOG_WARNING("scheduling delete route %s failed",
-			 q.net.str().c_str());
+// 	if (!sent)
+// 	    XLOG_WARNING("scheduling delete route %s failed",
+// 			 q.net.str().c_str());
     }
 
     return sent;
@@ -685,9 +685,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 			    q.policytags.xrl_atomlist(),
 			    callback(this, &XrlQueue::route_command_done,
 				     q.comment));
-	if (!sent)
-	    XLOG_WARNING("scheduling add route %s failed",
-			 q.net.str().c_str());
+// 	if (!sent)
+// 	    XLOG_WARNING("scheduling add route %s failed",
+// 			 q.net.str().c_str());
     } else {
 	debug_msg("deleting route from %s peer to rib\n", bgp);
 	if (_bgp.profile().enabled(profile_route_rpc_out))
@@ -699,9 +699,9 @@ XrlQueue<IPv6>::sendit_spec(Queued& q, const char *bgp)
 			       q.net,
 			       callback(this, &XrlQueue::route_command_done,
 					q.comment));
-	if (!sent)
-	    XLOG_WARNING("scheduling delete route %s failed",
-			 q.net.str().c_str());
+// 	if (!sent)
+// 	    XLOG_WARNING("scheduling delete route %s failed",
+// 			 q.net.str().c_str());
     }
 
     return sent;
