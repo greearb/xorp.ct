@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.5 2005/11/12 05:50:06 pavlin Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.6 2005/11/16 01:26:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -67,11 +67,11 @@ OspfVarRW<IPv4>::start_read()
     initialize(VAR_NETWORK, _ef.create(ElemIPv4Net::id,
 				       _network.str().c_str()));
     initialize(VAR_NEXTHOP, _ef.create(ElemIPv4::id, _nexthop.str().c_str()));
-    initialize(VAR_METRIC, _ef.create(ElemInt32::id,
-				      c_format("%d", _metric).c_str()));
+    initialize(VAR_METRIC, _ef.create(ElemU32::id,
+				      c_format("%u", _metric).c_str()));
     initialize(VAR_EBIT, _ef.create(ElemBool::id, pb(_e_bit)));
-    initialize(VAR_TAG, _ef.create(ElemInt32::id,
-				   c_format("%d", _tag).c_str()));
+    initialize(VAR_TAG, _ef.create(ElemU32::id,
+				   c_format("%u", _tag).c_str()));
 }
 
 template <>
