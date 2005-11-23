@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.156 2005/11/20 23:30:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.157 2005/11/21 01:17:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -317,6 +317,19 @@ AreaRouter<A>::check_for_virtual_link(const RouteCmd<Vertex>& rc,
 					     neighbour_interface_address);
 }
 
+template <typename A>
+void
+AreaRouter<A>::end_virtual_link()
+{
+    set<OspfTypes::RouterID>::iterator i;
+    for(i = _tmp.begin(); i != _tmp.end(); i++) {
+	OspfTypes::RouterID rid = *i;
+	XLOG_ASSERT(0 != _vlinks.count(rid));
+	_vlinks[rid] = false;
+	_ospf.get_peer_manager().down_virtual_link(rid);
+    }
+}
+
 template <>
 bool
 AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
@@ -415,19 +428,6 @@ AreaRouter<IPv6>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     XLOG_UNFINISHED();
 
     return true;
-}
-
-template <typename A>
-void
-AreaRouter<A>::end_virtual_link()
-{
-    set<OspfTypes::RouterID>::iterator i;
-    for(i = _tmp.begin(); i != _tmp.end(); i++) {
-	map<OspfTypes::RouterID,bool>::iterator j = _vlinks.find(*i);
-	XLOG_ASSERT(_vlinks.end() != j);
-	j->second = false;
-	_ospf.get_peer_manager().down_virtual_link(*i);
-    }
 }
 
 template <typename A>
