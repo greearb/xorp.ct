@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.6 2005/07/25 07:37:19 zec Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.7 2005/10/02 22:21:54 abittau Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -217,6 +217,8 @@ public:
 
     bool val() const { return _val; }
     const char* type() const { return id; }
+
+    bool operator==(const ElemBool& rhs) const { return _val == rhs._val; }
 
 private:
     bool _val;
