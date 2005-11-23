@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.56 2005/11/16 11:58:37 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.57 2005/11/18 04:23:46 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -282,6 +282,16 @@ class PeerManager {
     void refresh_router_lsas() const;
 
     /**
+     * Create a virtual link peer.
+     */
+    bool create_virtual_peer(OspfTypes::RouterID rid);
+
+    /**
+     * Delete a virtual link peer.
+     */
+    bool delete_virtual_peer(OspfTypes::RouterID rid);
+
+    /**
      * Are any of neighbours of this area a virtual link endpoint.
      *
      * @return true if any are.
@@ -372,6 +382,11 @@ class PeerManager {
     bool set_options(const PeerID, OspfTypes::AreaID area,
 		     uint32_t options);
 #endif
+
+    /**
+     * Set the interface address of this peer.
+     */
+    bool set_interface_address(const PeerID, A address);
 
     /**
      * Set the interface ID OSPFv3 only.
