@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/vlink.hh,v 1.3 2005/11/16 19:34:32 atanu Exp $
+// $XORP: xorp/ospf/vlink.hh,v 1.4 2005/11/16 22:35:39 atanu Exp $
 
 #ifndef __OSPF_VLINK_HH__
 #define __OSPF_VLINK_HH__
@@ -61,6 +61,11 @@ class Vlink {
      * Associate the endpoint addresses with this virtual link.
      */
     bool add_address(OspfTypes::RouterID rid, A source, A destination);
+
+    /**
+     * Get the endpoint addresses of this virtual link.
+     */
+    bool get_address(OspfTypes::RouterID rid, A& source, A& destination);
 
     /**
      * Provide an interface and vif for this router ID. Must not be
