@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.27 2005/11/17 08:31:56 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.28 2005/11/18 00:22:57 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -14,7 +14,14 @@ protocols {
 	    }
 
 	    virtual-link @: ipv4 {
-		transit-area: ipv4;
+		transit-area: 		ipv4;
+		hello-interval:		u32 = 10;
+		router-dead-interval:   u32 = 40;
+		transit-delay:		u32 = 1;
+	        authentication {
+		    type:		txt	= "none" ;
+		    password:		txt	= "" ;
+	        }
 	    }
 
 	    interface @: txt {
@@ -29,7 +36,7 @@ protocols {
 			hello-interval:		u32 = 10;
 			router-dead-interval:   u32 = 40;
 			interface-cost:		u32 = 1;
-			inftransdelay:		u32 = 1;
+			transit-delay:		u32 = 1;
 		        authentication {
 			    type:		txt	= "none" ;
 			    password:		txt	= "" ;
@@ -155,6 +162,41 @@ transmitted packets";
 
 		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/transit_area_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&transit_area:ipv4=$(@)";
 		}
+
+		hello-interval {
+		    %help: short
+			"Hello packets sent every interval seconds";
+
+		    %allow-range: $(@) "1" "65535" %help: "The Hello packets interval (in seconds)";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_hello_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		}
+
+		router-dead-interval {
+		    %help: short "Seconds to wait before considering a neighbour dead";
+
+		    %allow-range: $(@) "1" "4294967295" %help: "The neighbour router dead interval (in seconds)";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		}
+
+		transit-delay {
+		    %help: short "Add to age field of all transmitted LSAs";
+
+		    %allow-range: $(@) "0" "3600" %help: "The extra addition to age field of all transmitted LSAs";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_inftransdelay?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
+		}
+
+       		authentication {
+		    %allow: $(@.type) "none" %help: "No authentication";
+		    %allow: $(@.type) "plaintext" %help: "Plain text authentication";
+		    %allow: $(@.type) "md5" %help: "MD5 authentication";
+
+		    %activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
+		    %update:   xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
+		    %help: short "Set the authentication type and password used for packets sent from address." ;
+	        }
 	    }
 
 	    interface @: txt {
@@ -209,7 +251,7 @@ transmitted packets";
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
 			}
 
-			inftransdelay {
+			transit-delay {
 			    %help: short
 				"Add to age field of all transmitted LSAs";
 
