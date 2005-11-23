@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.109 2005/11/16 11:55:21 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.110 2005/11/17 17:41:22 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -70,6 +70,14 @@ class PeerOut {
      *
      */
     PeerID get_peerid() const { return _peerid; }
+
+    /**
+     * Set the address of this interface/vif
+     */
+    bool set_interface_address(A interface_address) {
+	_interface_address = interface_address;
+	return true;
+    }
 
     /**
      * Address of this interface/vif.
@@ -319,7 +327,7 @@ class PeerOut {
     const string _interface;	   	// The interface and vif this peer is
     const string _vif;			// responsible for.
     const PeerID _peerid;		// The peers ID.
-    const A _interface_address;		// Interface address.
+    A _interface_address;		// Interface address.
     const uint16_t _interface_prefix_length;	// Interface prefix length
     const uint16_t _interface_mtu;	// MTU of this interface.
     uint16_t _interface_cost;		// Cost of this interface.
