@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.13 2005/08/04 15:26:59 bms Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.14 2005/10/02 22:21:55 abittau Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -268,18 +268,10 @@ RegisterOperations::RegisterOperations()
 {
     Dispatcher disp;
 
-    disp.add<ElemBool,&operations::op_not>(OpNot());
-    disp.add<ElemStr, &operations::op_head>(OpHead());
-
 #define ADD_BINOP(result,left,right,funct,oper)				\
 do {									\
 	disp.add<left,right,&funct<result,left,right> >(Op##oper());	\
 } while (0)
-
-    // boolean logic
-    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_and,And);
-    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_or,Or);
-    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_xor,Xor);
 
 // EQUAL AND NOT EQUAL
 #define ADD_EQOP(arg)							\
@@ -318,6 +310,15 @@ do {									\
     ADD_BINOP(arg,arg,arg,op_sub,Sub);					\
     ADD_BINOP(arg,arg,arg,op_mul,Mul);					\
 } while (0)
+
+    disp.add<ElemBool,&operations::op_not>(OpNot());
+    disp.add<ElemStr, &operations::op_head>(OpHead());
+
+    // boolean logic
+    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_and,And);
+    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_or,Or);
+    ADD_BINOP(ElemBool,ElemBool,ElemBool,op_xor,Xor);
+    ADD_EQOP(ElemBool);
 
     // SET ADDITION [used for policy tags] -- insert an element in the set.
     disp.add<ElemSetU32, ElemU32, operations::set_add>(OpAdd());
