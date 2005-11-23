@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/trace.hh,v 1.11 2005/11/21 01:16:58 atanu Exp $
+// $XORP: xorp/ospf/trace.hh,v 1.12 2005/11/21 18:19:16 atanu Exp $
 
 #ifndef __OSPF_TRACE_HH__
 #define __OSPF_TRACE_HH__
@@ -22,7 +22,7 @@
  * All the trace variables in one place.
  */
 struct Trace {
-    Trace() : _input_errors(false),
+    Trace() : _input_errors(true),
 	      _interface_events(false),
 	      _neighbour_events(false),
 	      _spt(false),
