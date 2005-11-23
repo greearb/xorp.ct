@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.38 2005/11/20 23:28:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.39 2005/11/20 23:42:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -69,7 +69,7 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
     for (tip = _previous->begin(); tip != _previous->end(); tip++) {
 	// This should be a copy not a reference.
  	InternalRouteEntry<A> ire = tip.payload();
-	debug_msg("ire %s", cstring(ire));
+	debug_msg("ire %s\n", cstring(ire));
 
 	// If this entry contains a route from this area delete it.
 	bool winner_changed;
@@ -77,12 +77,12 @@ RoutingTable<A>::begin(OspfTypes::AreaID area)
 	
 	// If there are no other routes don't put a copy in current.
 	if (ire.empty()) {
-	    debug_msg(" empty ire %s only this area was present\n",
+	    debug_msg("empty ire %s only this area was present\n",
 		      cstring(ire));
 	    continue;
 	}
 
-	debug_msg(" kept as other areas are present\n");
+	debug_msg("kept ire %s as other areas are present\n", cstring(ire));
 	_current->insert(tip.key(), ire);
     }
 }
@@ -103,8 +103,8 @@ RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
     i = _current->lookup_node(net);
     if (_current->end() == i) {
 	InternalRouteEntry<A> ire;
-	_current->insert(net, ire);
-	i = _current->lookup_node(net);
+	i = _current->insert(net, ire);
+// 	i = _current->lookup_node(net);
     }
 
     InternalRouteEntry<A>& irentry = i.payload();
@@ -280,6 +280,8 @@ RoutingTable<A>::end()
 				   rt, rt_previous, rt_previous.get_area())) {
 		    XLOG_WARNING("Replace of %s failed", cstring(tip.key()));
 		}
+	    } else {
+ 		rt.set_filtered(rt_previous.get_filtered());
 	    }
 	}
     }
@@ -333,7 +335,7 @@ bool
 RoutingTable<A>::add_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			   uint32_t metric, RouteEntry<A>& rt)
 {
-    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
+    debug_msg("ADD ROUTE area %s %s\n", pr_id(area).c_str(), cstring(net));
 
     bool result = true;
     if (!rt.get_discard()) {
@@ -360,7 +362,8 @@ bool
 RoutingTable<A>::delete_route(OspfTypes::AreaID area, IPNet<A> net,
 			      RouteEntry<A>& rt)
 {
-    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
+    debug_msg("DELETE ROUTE area %s %s filtered %s\n", pr_id(area).c_str(), 
+	      cstring(net), pb(rt.get_filtered()));
 
     bool result;
     if (!rt.get_discard()) {
@@ -385,7 +388,7 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
 			       RouteEntry<A>& previous_rt,
 			       OspfTypes::AreaID previous_area)
 {
-    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
+    debug_msg("REPLACE ROUTE area %s %s\n", pr_id(area).c_str(), cstring(net));
 
     bool result = delete_route(previous_area, net, previous_rt);
     if (!result)
@@ -462,7 +465,7 @@ InternalRouteEntry<A>::add_entry(OspfTypes::AreaID area,
     XLOG_ASSERT(0 == _entries.count(area));
     if (0 == _entries.size()) {
 	_entries[area] = rt;
-	_winner = &_entries[area];
+	reset_winner();
 	return true;
     }
     // Add the entry and compute the winner.
@@ -502,6 +505,8 @@ template <typename A>
 RouteEntry<A>&
 InternalRouteEntry<A>::get_entry() const
 {
+    XLOG_ASSERT(0 != _winner);
+
     return *_winner;
 }
 
@@ -556,7 +561,9 @@ InternalRouteEntry<A>::str()
 
     typename map<OspfTypes::AreaID, RouteEntry<A> >::iterator i;
     for (i = _entries.begin(); i != _entries.end(); i++) {
-	output += i->second.str();
+	output += "Area: " + pr_id(i->first) + " " + i->second.str() + " ";
+	if (&(i->second) == _winner)
+	    output += "winner ";
     }
 
     return output;
