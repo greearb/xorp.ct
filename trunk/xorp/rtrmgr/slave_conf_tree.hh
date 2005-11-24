@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.22 2005/08/30 17:17:03 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree.hh,v 1.23 2005/09/27 18:37:31 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_FILE_HH__
 #define __RTRMGR_SLAVE_CONF_FILE_HH__
@@ -169,7 +169,7 @@ public:
 	return reinterpret_cast<SlaveConfigTreeNode*>(ConfigTree::find_node(path));
     }
 
-    inline const CommitStatus& commit_status() { return _commit_status; }
+    inline const CommitStatus& commit_status() const { return _commit_status; }
 
     inline void reset_commit_status() { _commit_status.reset(); }
 
