@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.32 2005/06/17 21:15:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.33 2005/07/11 21:49:29 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -36,19 +36,20 @@
 static string
 strip_quotes(const string& command, const string& value) throw (ParseError)
 {
+    string error_msg;
     size_t old_size = value.size();
     string tmp_value = unquote(value);
 
     if (tmp_value.size() != old_size && tmp_value.size() != old_size - 2) {
-	string errmsg = c_format("subcommand %s has invalid argument: %s",
-				 command.c_str(), value.c_str());
-	xorp_throw(ParseError, errmsg);
+	error_msg = c_format("subcommand %s has invalid argument: %s",
+			     command.c_str(), value.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     if (unquote(tmp_value).empty()) {
-	string errmsg = c_format("subcommand %s has empty argument",
-				 command.c_str());
-	xorp_throw(ParseError, errmsg);
+	error_msg = c_format("subcommand %s has empty argument",
+			     command.c_str());
+	xorp_throw(ParseError, error_msg);
     }
 
     return tmp_value;
@@ -242,29 +243,29 @@ ModuleCommand::add_action(const list<string>& action, const XRLdb& xrldb)
 }
 
 bool
-ModuleCommand::expand_actions(string& errmsg)
+ModuleCommand::expand_actions(string& error_msg)
 {
     //
     // Expand all module-specific methods
     //
     if (_start_commit != NULL) {
-	if (_start_commit->expand_action(errmsg) != true)
+	if (_start_commit->expand_action(error_msg) != true)
 	    return (false);
     }
     if (_end_commit != NULL) {
-	if (_end_commit->expand_action(errmsg) != true)
+	if (_end_commit->expand_action(error_msg) != true)
 	    return (false);
     }
     if (_status_method != NULL) {
-	if (_status_method->expand_action(errmsg) != true)
+	if (_status_method->expand_action(error_msg) != true)
 	    return (false);
     }
     if (_startup_method != NULL) {
-	if (_startup_method->expand_action(errmsg) != true)
+	if (_startup_method->expand_action(error_msg) != true)
 	    return (false);
     }
     if (_shutdown_method != NULL) {
-	if (_shutdown_method->expand_action(errmsg) != true)
+	if (_shutdown_method->expand_action(error_msg) != true)
 	    return (false);
     }
 
@@ -272,29 +273,29 @@ ModuleCommand::expand_actions(string& errmsg)
 }
 
 bool
-ModuleCommand::check_referred_variables(string& errmsg) const
+ModuleCommand::check_referred_variables(string& error_msg) const
 {
     //
     // Check all module-specific methods
     //
     if (_start_commit != NULL) {
-	if (_start_commit->check_referred_variables(errmsg) != true)
+	if (_start_commit->check_referred_variables(error_msg) != true)
 	    return (false);
     }
     if (_end_commit != NULL) {
-	if (_end_commit->check_referred_variables(errmsg) != true)
+	if (_end_commit->check_referred_variables(error_msg) != true)
 	    return (false);
     }
     if (_status_method != NULL) {
-	if (_status_method->check_referred_variables(errmsg) != true)
+	if (_status_method->check_referred_variables(error_msg) != true)
 	    return (false);
     }
     if (_startup_method != NULL) {
-	if (_startup_method->check_referred_variables(errmsg) != true)
+	if (_startup_method->check_referred_variables(error_msg) != true)
 	    return (false);
     }
     if (_shutdown_method != NULL) {
-	if (_shutdown_method->check_referred_variables(errmsg) != true)
+	if (_shutdown_method->check_referred_variables(error_msg) != true)
 	    return (false);
     }
 
