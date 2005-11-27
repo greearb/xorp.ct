@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.13 2005/11/27 05:43:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.14 2005/11/27 06:45:12 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -605,11 +605,11 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 			     value.c_str(), full_varname.c_str());
 	if (filter.size() == 1) {
 	    const pair<int32_t, int32_t>& range = filter.begin()->first;
-	    error_msg = c_format("The only range allowed is %d...%d.",
+	    error_msg += c_format("The only range allowed is %d...%d.",
 				 XORP_INT_CAST(range.first),
 				 XORP_INT_CAST(range.second));
 	} else {
-	    error_msg = "Allowed ranges are: ";
+	    error_msg += "Allowed ranges are: ";
 	    bool is_first = true;
 	    while (! filter.empty()) {
 		if (is_first) {
