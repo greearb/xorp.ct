@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.29 2005/08/18 15:58:08 bms Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.30 2005/11/15 11:44:00 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,11 +59,9 @@ test_ribin_dump(TestInfo& /*info*/)
     BGPMain bgpmain;
     LocalData localdata;
     Iptuple iptuple;
-    BGPPeerData *pd1 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0, 
-					PEER_TYPE_EBGP);
+    BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
     BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
-    BGPPeerData *pd2 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0,
-					PEER_TYPE_EBGP);
+    BGPPeerData *pd2 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
     BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
     PeerHandler handler2("test1", &peer2, NULL, NULL);
@@ -206,12 +204,10 @@ test_ribin(TestInfo& /*info*/)
     BGPMain bgpmain;
     LocalData localdata;
     Iptuple iptuple;
-    BGPPeerData *pd1 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0,
-					PEER_TYPE_EBGP);
+    BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
     BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
     PeerHandler handler1("test1", &peer1, NULL, NULL);
-    BGPPeerData *pd2 = new  BGPPeerData(iptuple, AsNum(0), IPv4(), 0,
-					PEER_TYPE_EBGP);
+    BGPPeerData *pd2 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
     BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 

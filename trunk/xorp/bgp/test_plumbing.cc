@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.16 2005/08/18 15:58:08 bms Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.17 2005/11/15 11:44:00 mjh Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -52,10 +52,10 @@ PlumbingTest::test1()
     IPv4 nh;
 
     LocalData local_data;
-    local_data.set_as(my_AS_number());
+    local_data.set_as(AsNum(1));
 
-    BGPPeerData *peer_data1 = new BGPPeerData(iptuple1, AsNum(666), nh, 0, 
-					      PEER_TYPE_IBGP);
+    BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),
+					      nh, 0);
 //     peer_data1->set_as(AsNum(666));
     peer_data1->set_id("1.0.0.1");
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
@@ -66,8 +66,8 @@ PlumbingTest::test1()
     //add_peering(&dummy_peerhandler1);
     printf("Peering Added.\n");
 
-    BGPPeerData *peer_data2 = new BGPPeerData(iptuple2, AsNum(667), nh, 0, 
-					      PEER_TYPE_IBGP);
+    BGPPeerData *peer_data2 = new BGPPeerData(local_data, iptuple2, AsNum(667),
+					      nh, 0);
 //     peer_data2->set_as(AsNum(667));
     peer_data2->set_id("1.0.0.2");
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);
@@ -262,10 +262,10 @@ PlumbingTest::test2()
     IPv4 nh;
 
     LocalData local_data;
-    local_data.set_as(my_AS_number());
+    local_data.set_as(AsNum(1));
 
-    BGPPeerData *peer_data1 = new BGPPeerData(iptuple1, AsNum(666), nh, 0, 
-					      PEER_TYPE_EBGP);
+    BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),
+					      nh, 0);
 //     peer_data1->set_as(AsNum(666));
     peer_data1->set_id("1.0.0.1");
     DummyPeer dummy_peer1(&local_data, peer_data1, 0, (BGPMain *)NULL);
@@ -315,8 +315,8 @@ PlumbingTest::test2()
     /*
     ** 3. Add another peer (peer2).
     */
-    BGPPeerData *peer_data2 = new BGPPeerData(iptuple2, AsNum(667), nh, 0, 
-					      PEER_TYPE_EBGP);
+    BGPPeerData *peer_data2 = new BGPPeerData(local_data, iptuple2, AsNum(667),
+					      nh, 0);
     peer_data2->set_id("1.0.0.2");
 //     peer_data2->set_as(AsNum(667));
     DummyPeer dummy_peer2(&local_data, peer_data2, 0, (BGPMain *)NULL);

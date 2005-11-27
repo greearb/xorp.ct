@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.48 2005/11/13 23:00:03 zec Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.49 2005/11/18 01:59:20 zec Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -56,6 +56,11 @@ public:
      * @param id router id.
      */
     void local_config(const uint32_t& as, const IPv4& id);
+
+    /**
+     * Set or disable the confederation identifier.
+     */
+    void set_confederation_identifier(const uint32_t& as, bool disable);
 
     /**
      * attach peer to peerlist
@@ -232,6 +237,26 @@ public:
      * @return true on success
      */
     bool set_holdtime(const Iptuple& iptuple, uint32_t holdtime);
+
+    /**
+     * set route reflector client
+     *
+     * @param iptuple iptuple.
+     * @param rr true if this peer is a route reflector client.
+     *
+     * @return true on success
+     */
+    bool set_route_reflector_client(const Iptuple& iptuple, bool rr);
+
+    /**
+     * set route confederation member
+     *
+     * @param iptuple iptuple.
+     * @param conf true if this peer is a confederation member.
+     *
+     * @return true on success
+     */
+    bool set_confederation_member(const Iptuple& iptuple, bool conf);
 
     /**
      * set IPv4 next-hop.

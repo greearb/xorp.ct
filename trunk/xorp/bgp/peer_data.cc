@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.24 2005/09/29 00:10:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.25 2005/11/15 11:43:58 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,12 +28,13 @@
 #include "libxorp/debug.h"
 #include "peer_data.hh"
 
-BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
-			 const IPv4& next_hop, const uint16_t holdtime,
-                         const PeerType peer_type)
-    : _iptuple(iptuple), _as(as),
+BGPPeerData::BGPPeerData(const LocalData& local_data, const Iptuple& iptuple,
+			 AsNum as,
+			 const IPv4& next_hop, const uint16_t holdtime)
+    : _local_data(local_data), _iptuple(iptuple), _as(as),
+      _route_reflector(false), _confederation(false),
       _hold_duration(0), _retry_duration(0), _keepalive_duration(0),
-      _peer_type(peer_type)
+      _peer_type(PEER_TYPE_UNCONFIGURED)
 {
     set_v4_local_addr(next_hop);
     set_configured_hold_time(holdtime);
@@ -57,6 +58,39 @@ BGPPeerData::BGPPeerData(const Iptuple& iptuple, AsNum as,
 
 BGPPeerData::~BGPPeerData()
 {
+}
+
+const AsNum
+BGPPeerData::my_AS_number() const
+{
+    AsNum confid = _local_data.get_confed_id();
+
+    if (confid.as() == AsNum::AS_INVALID) {
+	return _local_data.get_as();
+    } else {
+	if (confederation()) {
+	    return _local_data.get_as();
+	} else {
+	    return confid;
+	}
+    }
+
+    XLOG_UNREACHABLE();
+
+    return AsNum(AsNum::AS_INVALID);
+}
+
+void
+BGPPeerData::compute_peer_type()
+{
+    if (_local_data.get_as() == as()) {
+	_peer_type = route_reflector() ?
+	    PEER_TYPE_IBGP_CLIENT : PEER_TYPE_IBGP;
+    } else {
+	_peer_type = _local_data.get_confed_id().as() != AsNum::AS_INVALID &&
+	    confederation() ?
+	    PEER_TYPE_EBGP_CONFED : PEER_TYPE_EBGP;
+    }
 }
 
 string
@@ -97,47 +131,40 @@ BGPPeerData::get_peer_type() const
     return _peer_type;
 }
 
-
-// Set type of peering session
-void
-BGPPeerData::set_peer_type(PeerType t)
-{
-    _peer_type = t;
-    debug_msg("Peer type set as %s\n", get_peer_type_str().c_str());
-}
-
-
-
 bool
 BGPPeerData::ibgp() const
 {
+    XLOG_ASSERT(PEER_TYPE_UNCONFIGURED != _peer_type);
     return _peer_type == PEER_TYPE_IBGP || _peer_type == PEER_TYPE_IBGP_CLIENT;
 }
 
 bool
 BGPPeerData::ibgp_vanilla() const
 {
+    XLOG_ASSERT(PEER_TYPE_UNCONFIGURED != _peer_type);
     return _peer_type == PEER_TYPE_IBGP;
 }
 
 bool
 BGPPeerData::ibgp_client() const
 {
+    XLOG_ASSERT(PEER_TYPE_UNCONFIGURED != _peer_type);
     return _peer_type == PEER_TYPE_IBGP_CLIENT;
 }
 
 bool
 BGPPeerData::ebgp_vanilla() const
 {
+    XLOG_ASSERT(PEER_TYPE_UNCONFIGURED != _peer_type);
     return _peer_type == PEER_TYPE_EBGP;
 }
 
 bool
 BGPPeerData::ebgp_confed() const
 {
+    XLOG_ASSERT(PEER_TYPE_UNCONFIGURED != _peer_type);
     return _peer_type == PEER_TYPE_EBGP_CONFED;
 }
-
 
 uint32_t
 BGPPeerData::get_hold_duration() const

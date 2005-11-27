@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.18 2005/11/02 07:36:12 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.19 2005/11/15 11:43:59 mjh Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -99,6 +99,16 @@ public:
     virtual PeerOutputState push_packet();
     virtual void output_no_longer_busy();
 
+    /**
+     * The AS number of this router.
+     */
+    AsNum my_AS_number() const 		{
+	return _peer->peerdata()->my_AS_number();
+    }
+
+    /**
+     * The AS number of the peer router.
+     */
     AsNum AS_number() const		{ return _peer->peerdata()->as(); }
 
     virtual PeerType get_peer_type() const { 

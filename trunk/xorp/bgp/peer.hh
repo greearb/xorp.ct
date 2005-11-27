@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.27 2005/11/02 07:36:12 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.28 2005/11/15 11:43:58 mjh Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -151,7 +151,7 @@ public:
     bool is_connected() const		{ return _SocketClient->is_connected(); }
     bool still_reading() const		{ return _SocketClient->still_reading(); }
     LocalData* _localdata;
-    IPv4 id() const		        { return _localdata->id(); }
+    IPv4 id() const		        { return _localdata->get_id(); }
     BGPMain* main()			{ return _mainprocess; }
     const BGPPeerData* peerdata() const	{ return _peerdata; }
     bool ibgp() const			{ return peerdata()->ibgp(); }

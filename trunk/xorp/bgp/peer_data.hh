@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.16 2005/09/23 17:02:55 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.17 2005/11/15 11:43:58 mjh Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -26,6 +26,7 @@
 #include "libxorp/asnum.hh"
 #include "iptuple.hh"
 #include "parameter.hh"
+#include "local_data.hh"
 
 const size_t BGPVERSION = 4;
 
@@ -33,22 +34,21 @@ const size_t BGPVERSION = 4;
  * Types of BGP Peering Sessions 
  */
 enum PeerType {
-    PEER_TYPE_EBGP = 0,	
-    PEER_TYPE_IBGP = 1,
-    PEER_TYPE_EBGP_CONFED = 2,
-    PEER_TYPE_IBGP_CLIENT = 3,
-    PEER_TYPE_INTERNAL = 255 // connects to RIB
+    PEER_TYPE_EBGP = 0,		// Standard E-BGP peering
+    PEER_TYPE_IBGP = 1,		// Standard I-BGP peering
+    PEER_TYPE_EBGP_CONFED = 2,	// Confederation E-BGP peering
+    PEER_TYPE_IBGP_CLIENT = 3,	// Route reflection client I-BGP.
+    PEER_TYPE_UNCONFIGURED = 4,	// The peer type has not yet been configured.
+    PEER_TYPE_INTERNAL = 255 	// connects to RIB
 } ;
-
 
 /**
  * Data that applies to a specific peering.
  */
 class BGPPeerData {
 public:
-    BGPPeerData(const Iptuple& iptuple,	AsNum as,
-		const IPv4& next_hop, const uint16_t holdtime, 
-		const PeerType peer_type);
+    BGPPeerData(const LocalData& local_data, const Iptuple& iptuple, AsNum as,
+		const IPv4& next_hop, const uint16_t holdtime);
     ~BGPPeerData();
 
     const Iptuple& iptuple() const		{ return _iptuple; }
@@ -65,13 +65,32 @@ public:
     uint32_t get_keepalive_duration() const;
     void set_keepalive_duration(uint32_t d);
 
+    /**
+     * The peers BGP ID.
+     */
     const IPv4& id() const			{ return _id; }
     void set_id(const IPv4& i)			{ _id = i; }
 
+    bool route_reflector() const 		{ return _route_reflector; }
+    void set_route_reflector(bool rr) 		{ _route_reflector = rr; }
+
+    bool confederation() const 			{ return _confederation; }
+    void set_confederation(bool conf) 		{ _confederation = conf; }
+
+    /**
+     * Return this routers AS number. Normally this is simple, but if
+     * this router is in a confederation then the AS number depends on
+     * the the type of the peering.
+     */
+    const AsNum my_AS_number() const;
+
+    /**
+     * Compute the type of this peering.
+     */
+    void compute_peer_type();
 
     string get_peer_type_str() const;
     PeerType get_peer_type() const;
-    void set_peer_type(PeerType t);
 
     /**
      * true if peer type is either PEER_TYPE_IBGP or PEER_TYPE_IBGP_CLIENT
@@ -249,6 +268,8 @@ public:
     void dump_peer_data() const;
 protected:
 private:
+    const LocalData& _local_data;
+
     void add_parameter(ParameterList& p_list, const ParameterNode& p);
     void remove_parameter(ParameterList& p_list, const ParameterNode& p);
 
@@ -258,8 +279,9 @@ private:
      */
     const Iptuple _iptuple;
 
-    bool	_internal;	// set if our peer has the same _as
-    AsNum	_as;
+    AsNum _as;			// Peer's AS number.
+    bool _route_reflector;	// True if this is a route reflector client.
+    bool _confederation;	// True if this is a confederation peer.
 
     /**
      * Holdtime in seconds. Value sent in open negotiation.

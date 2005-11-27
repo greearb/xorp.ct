@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.10 2005/08/18 15:58:05 bms Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.11 2005/11/15 11:43:58 mjh Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -34,17 +34,17 @@
  */
 class LocalData {
 public:
-    LocalData() : _as(AsNum::AS_INVALID)
+    LocalData() : _as(AsNum::AS_INVALID), _confed_id(AsNum::AS_INVALID)
     {}
 
     LocalData(const AsNum& as, const IPv4& id)
-	: _as(as), _id(id)
+	: _as(as), _id(id), _confed_id(AsNum::AS_INVALID)
     {}
 
     /**
      * @return This routers AS number.
      */
-    inline const AsNum& as() const {
+    inline const AsNum& get_as() const {
 	return _as;
     }
 
@@ -58,7 +58,7 @@ public:
     /**
      * @return This routers ID.
      */
-    inline const IPv4& id() const {
+    inline const IPv4& get_id() const {
 	return _id;
     }
 
@@ -70,40 +70,22 @@ public:
     }
 
     /**
-     * Get confederation members
+     * @return the confederation ID of this router if set.
      */
-    inline const list<AsNum>& get_confed_member_list() {
-	return _confed_member_list; 
+    inline const AsNum& get_confed_id() const {
+	return _confed_id;
     }
 
     /**
-     * Set confederation members
+     * Set this routers confederation ID.
      */
-     void set_confed_member_list(const list<AsNum> l) {
-	 _confed_member_list = l;
-    }
-
-    /**
-     * Test conderderation status
-     */
-    bool is_confederation() {
-	return !_confed_member_list.empty();  
-    }
-
-    /**
-     * Test conderderation membership 
-     */
-    bool in_confederation(AsNum asn) {
-	list <AsNum>::const_iterator iter;
-	for (iter = _confed_member_list.begin(); iter != _confed_member_list.end(); ++iter)
-	    if (*iter == asn)
-		return true;
-	return false;
+    inline void set_confed_id(const AsNum& confed_id) {
+	_confed_id = confed_id;
     }
 
 private:
     AsNum	_as;	                // This routers AS number.
     IPv4	_id;	                // This routers ID.
-    list<AsNum>	_confed_member_list;	// List of confederation members
+    AsNum	_confed_id;		// Confederation identifier.
 };
 #endif // __BGP_LOCAL_DATA_HH__

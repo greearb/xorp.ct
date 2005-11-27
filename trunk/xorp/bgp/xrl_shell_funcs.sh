@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.11 2005/04/15 03:38:44 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.12 2005/11/15 11:44:00 mjh Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -17,7 +17,7 @@ add_peer()
 {
     echo "add_peer" $*
 #    $CALLXRL "finder://bgp/bgp/0.1/add_peer?peer:txt=$1&as:i32=$2&port:i32=$3&next_hop:ipv4=$4"	
-    $CALLXRL "finder://bgp/bgp/0.2/add_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&as:u32=$5&next_hop:ipv4=$6&is_client:bool=false&holdtime:u32=$7"
+    $CALLXRL "finder://bgp/bgp/0.2/add_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4&as:u32=$5&next_hop:ipv4=$6&holdtime:u32=$7"
 }
 
 delete_peer()

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.102 2005/11/02 07:36:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.103 2005/11/15 11:43:58 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -524,6 +524,9 @@ BGPPeer::event_start()			// EVENTBGPSTART
 { 
     TIMESPENT();
 
+    // Compute the type of this peering.
+    const_cast<BGPPeerData*>(peerdata())->compute_peer_type();
+
     switch(_state) {
 
     case STATESTOPPED:
@@ -609,8 +612,8 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
 
     case STATECONNECT:
     case STATEACTIVE: {
-	OpenPacket open_packet(_localdata->as(),
-			       _localdata->id(),
+	OpenPacket open_packet(_peerdata->my_AS_number(),
+			       _localdata->get_id(),
 			       _peerdata->get_configured_hold_time());
 
 	ParameterList::const_iterator

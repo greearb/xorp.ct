@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.32 2005/10/25 22:28:19 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.33 2005/11/15 11:44:00 mjh Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -67,6 +67,11 @@ public:
 				   // Output values,
 				   IPv4& id);
 
+    XrlCmdError bgp_0_2_set_confederation_identifier(
+        // Input values,
+	const uint32_t&	as,
+	const bool& disable);
+
     XrlCmdError bgp_0_2_add_peer(
 	// Input values,
 	const string&	local_ip,
@@ -75,7 +80,6 @@ public:
 	const uint32_t&	peer_port,
 	const uint32_t&	as,
 	const IPv4&	next_hop,
-	const bool&     is_client,  
 	const uint32_t&	holdtime);
 
     XrlCmdError bgp_0_2_delete_peer(
@@ -138,6 +142,22 @@ public:
 	const string&	peer_ip,
 	const uint32_t&	peer_port,
 	const uint32_t&	holdtime);
+
+    XrlCmdError bgp_0_2_set_route_reflector_client(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const bool&	state);
+
+    XrlCmdError bgp_0_2_set_confederation_member(
+	// Input values,
+	const string&	local_ip,
+	const uint32_t&	local_port,
+	const string&	peer_ip,
+	const uint32_t&	peer_port,
+	const bool&	state);
 
     XrlCmdError bgp_0_2_set_nexthop4(
 	// Input values,

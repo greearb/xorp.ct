@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.78 2005/11/16 10:13:48 zec Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.79 2005/11/20 23:55:15 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -50,15 +50,8 @@ BGPPlumbing::BGPPlumbing(const Safi safi,
 		     _next_hop_resolver_ipv4),
       _plumbing_ipv6("[IPv6:" + string(pretty_string_safi(safi)) + "]", *this, 
 		     _next_hop_resolver_ipv6),
-      _my_AS_number(AsNum::AS_INVALID),
       _bgp(bgp)
 {
-}
-
-void
-BGPPlumbing::set_my_as_number(const AsNum &as_num) 
-{
-    _my_AS_number = as_num;
 }
 
 int
@@ -440,7 +433,7 @@ BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
 					   FilterTable<A>* filter_in)
 {
     PeerType peer_type = peer_handler->get_peer_type();
-    const AsNum& my_AS_number = _master.my_AS_number();
+    AsNum my_AS_number = peer_handler->my_AS_number();
 
     /* 1. configure the loop filters */
     filter_in->add_simple_AS_filter(my_AS_number);
@@ -461,7 +454,7 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 					    FilterTable<A>* filter_out)
 {
     const AsNum& his_AS_number = peer_handler->AS_number();
-    const AsNum& my_AS_number = _master.my_AS_number();
+    const AsNum& my_AS_number = peer_handler->my_AS_number();
     PeerType peer_type = peer_handler->get_peer_type();
     A my_nexthop(get_local_nexthop(peer_handler));
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.27 2005/08/18 15:58:07 bms Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.28 2005/11/15 11:44:00 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -61,16 +61,13 @@ test_fanout(TestInfo& /*info*/)
     Iptuple tuple3("127.0.0.1", 179, "10.0.0.3", 179);
 
     BGPPeerData* pd1 
-	= new BGPPeerData(tuple1, AsNum(1), IPv4("10.0.0.1"), 30,
-			  PEER_TYPE_EBGP);
+	= new BGPPeerData(localdata, tuple1, AsNum(1), IPv4("10.0.0.1"), 30);
     pd1->set_id(IPv4("10.0.0.1"));
     BGPPeerData* pd2
-	= new BGPPeerData(tuple2, AsNum(1), IPv4("10.0.0.2"), 30,
-			  PEER_TYPE_EBGP);
+	= new BGPPeerData(localdata, tuple2, AsNum(1), IPv4("10.0.0.2"), 30);
     pd2->set_id(IPv4("10.0.0.2"));
     BGPPeerData* pd3
-	= new BGPPeerData(tuple3, AsNum(1), IPv4("10.0.0.3"), 30,
-			  PEER_TYPE_EBGP);
+	= new BGPPeerData(localdata, tuple3, AsNum(1), IPv4("10.0.0.3"), 30);
     pd3->set_id(IPv4("10.0.0.3"));
 
     BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);

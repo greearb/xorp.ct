@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.58 2005/11/02 01:09:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.59 2005/11/15 11:43:58 mjh Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -270,8 +270,22 @@ BGPMain::local_config(const uint32_t& as, const IPv4& id)
     local->set_as(AsNum(as));
     local->set_id(id);
 
-    _plumbing_unicast->set_my_as_number(local->as());
-    _plumbing_multicast->set_my_as_number(local->as());
+//     _plumbing_unicast->set_my_as_number(local->as());
+//     _plumbing_multicast->set_my_as_number(local->as());
+
+    _peerlist->all_stop(true /* restart */);
+}
+
+void
+BGPMain::set_confederation_identifier(const uint32_t& as, bool disable)
+{
+    LocalData *local = get_local_data();
+
+    if (disable) {
+	local->set_confed_id(AsNum(AsNum::AS_INVALID));
+    } else {
+	local->set_confed_id(AsNum(as));
+    }
 
     _peerlist->all_stop(true /* restart */);
 }
@@ -578,11 +592,10 @@ BGPMain::change_tuple(const Iptuple& iptuple, const Iptuple& nptuple)
 	return true;
 
     BGPPeerData *pd = new 
-	BGPPeerData(nptuple,
+	BGPPeerData(_local_data, nptuple,
 		    peer->peerdata()->as(),
 		    peer->peerdata()->get_v4_local_addr(),
-		    peer->peerdata()->get_configured_hold_time(),
-		    peer->peerdata()->get_peer_type());
+		    peer->peerdata()->get_configured_hold_time());
 
     if (!create_peer(pd)) {
 	delete pd;
@@ -705,6 +718,46 @@ BGPMain::set_holdtime(const Iptuple& iptuple, uint32_t holdtime)
 
     const_cast<BGPPeerData*>(peer->peerdata())->
 	set_configured_hold_time(holdtime);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_route_reflector_client(const Iptuple& iptuple, bool rr)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (peer->peerdata()->route_reflector() == rr)
+	return true;
+
+    const_cast<BGPPeerData*>(peer->peerdata())->set_route_reflector(rr);
+
+    bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_confederation_member(const Iptuple& iptuple, bool conf)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (peer->peerdata()->confederation() == conf)
+	return true;
+
+    const_cast<BGPPeerData*>(peer->peerdata())->set_confederation(conf);
 
     bounce_peer(iptuple);
 

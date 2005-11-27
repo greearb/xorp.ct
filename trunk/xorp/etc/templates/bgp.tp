@@ -1,10 +1,15 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.65 2005/11/18 00:22:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.66 2005/11/21 23:55:07 zec Exp $ */
 
 protocols {
     bgp {
 	targetname: txt = "bgp";
 	bgp-id: ipv4;
 	local-as: u32;
+
+	confederation {
+	    identifier: u32;
+	    disable: bool;
+	}
 
 	peer @: txt {
 	    peer-port: u32 = 179;
@@ -14,9 +19,11 @@ protocols {
 	    next-hop: ipv4;
 	    next-hop6: ipv6;
 	    holdtime: u32 = 90;
+	    client: bool = false;
+	    confederation-member: bool = false;
+
 	    disable: bool = false;
 	    enabled: bool;			/* %deprecated */
-	    client: bool = false;
 
 	    ipv4-unicast: bool = true;
 	    ipv4-multicast: bool = false;
@@ -143,6 +150,23 @@ protocols {
 	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
 	}
 
+	confederation {
+	    %mandatory: $(@.identifier);
+	    %mandatory: $(@.disable);
+
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=true";
+
+	    identifier {
+		%set:;
+	    }
+
+	    disable {
+		%set:;
+	    }
+	}
+
 	peer @ {
 	    %mandatory: $(@.as);
 	    %mandatory: $(@.next-hop);
@@ -150,7 +174,7 @@ protocols {
 	    %mandatory: $(@.peer-port);
 	    %mandatory: $(@.local-ip);
 
-	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&is_client:bool=$(@.client)&holdtime:u32=$(@.holdtime)";
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/add_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)&as:u32=$(@.as)&next_hop:ipv4=$(@.next-hop)&holdtime:u32=$(@.holdtime)";
 	    %delete: xrl "$(bgp.targetname)/bgp/0.2/delete_peer?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/activate?local_ip:txt=$(@.local-ip)&local_port:u32=$(@.local-port)&peer_ip:txt=$(@)&peer_port:u32=$(@.peer-port)";
 /*
@@ -183,6 +207,14 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
 	    }
 
+	    client {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_route_reflector_client?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
+	    }
+
+	    confederation-member {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_member?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
+	    }
+	    
 	    next-hop {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_nexthop4?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv4=$(@)";
 	    }
@@ -285,6 +317,18 @@ protocols {
 	    %help: short "Set the Autonomous System (AS) number for this domain";
 	}
 
+	confederation {
+	    %help: short "Make this router part of a confederation";
+
+	    identifier {
+		%help: short "AS number used to non confederation peers";
+	    }
+
+	    disable {
+		%help: short "disable confederations";
+	    }
+        }
+
 	peer @ {
 	    %help: short "Configure a peering session with another router.";
 
@@ -306,6 +350,16 @@ protocols {
 
 	    holdtime {
 		%help: short "Set the length of time before idle timeout.";
+	    }
+
+	    client {
+		%help: short
+			"Set to true if the peer is a route reflector client.";
+	    }
+
+	    confederation-member {
+		%help: short
+			"Set to true if the peer is a confederation member";
 	    }
 
 	    next-hop {

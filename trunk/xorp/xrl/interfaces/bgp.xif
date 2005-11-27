@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.25 2005/10/25 22:28:19 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.26 2005/11/15 11:44:03 mjh Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -47,6 +47,17 @@ interface bgp/0.2 {
 	 */
 	get_bgp_id -> id:ipv4
 
+	/**
+	 * Confederation identifier.
+	 *
+	 * @param as externally visible AS number.
+	 * @param disable true if confederations are disabled.
+	 */
+	set_confederation_identifier \
+		? \
+		as:u32 \
+		& disable:bool
+
 	/** 
 	 * Add peer.
 	 *
@@ -56,7 +67,6 @@ interface bgp/0.2 {
 	 * @param peer port.
 	 * @param as the peer's AS number.
 	 * @param next_hop the local next hop.
-	 * @param is_client is true if peer is a route reflector client
 	 * @param holdtime if traffic is not received in holdtime seconds
 	 *        a peering is considered down.
 	 */
@@ -68,7 +78,6 @@ interface bgp/0.2 {
 		& peer_port:u32 \
 		& as:u32 \
 		& next_hop:ipv4 \
-		& is_client:bool \
 	        & holdtime:u32
 
 	/**
@@ -201,6 +210,41 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& holdtime:u32
+
+	/**
+	 * Set the route reflection client state. Is this peer a route
+	 * reflector client.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param state true if peer is a route reflector client.
+	 */
+	set_route_reflector_client \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& state:bool
+		
+	/**
+	 * Is this peer a confederation member.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param state true if peer is a confederation member.
+	 */
+	set_confederation_member \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& state:bool
 
 	/**
 	 * Set the peer's AS number.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.32 2005/10/28 22:09:29 mjh Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.33 2005/11/15 18:07:30 zec Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -147,8 +147,6 @@ public:
 		PolicyFilters&,
 		BGPMain& bgp);
 
-    void set_my_as_number(const AsNum& my_AS_number);
-
     int add_peering(PeerHandler* peer_handler);
     int stop_peering(PeerHandler* peer_handler);
     int peering_went_down(PeerHandler* peer_handler);
@@ -174,7 +172,6 @@ public:
       lookup_route(const IPNet<IPv4> &net) const;
     const SubnetRoute<IPv6>* 
       lookup_route(const IPNet<IPv6> &net) const;
-    const AsNum& my_AS_number() const {return _my_AS_number;}
     RibIpcHandler *rib_handler() const {return _rib_handler;}
     BGPPlumbingAF<IPv4>& plumbing_ipv4() {
 	return _plumbing_ipv4;
@@ -231,8 +228,6 @@ private:
 
     BGPPlumbingAF<IPv4> _plumbing_ipv4;
     BGPPlumbingAF<IPv6> _plumbing_ipv6;
-
-    AsNum _my_AS_number;
 
     BGPMain &_bgp;
 };

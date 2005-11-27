@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.46 2005/11/02 01:09:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.47 2005/11/15 11:44:00 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -184,6 +184,17 @@ XrlBgpTarget::bgp_0_2_get_bgp_id(
 }
 
 XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_confederation_identifier(const uint32_t& as,
+						   const bool& disable)
+{
+    debug_msg("as %u disable %s", as, disable ? "true" : "false");
+
+    _bgp.set_confederation_identifier(as, disable);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlBgpTarget::bgp_0_2_add_peer(
 	// Input values, 
 	const string&	local_ip, 
@@ -192,7 +203,6 @@ XrlBgpTarget::bgp_0_2_add_peer(
 	const uint32_t&	peer_port, 
 	const uint32_t&	as, 
 	const IPv4&	next_hop,
-	const bool&     is_client,  
 	const uint32_t&	holdtime)
 {
     debug_msg("local ip %s local port %u peer ip %s peer port %u as %u"
@@ -208,25 +218,14 @@ XrlBgpTarget::bgp_0_2_add_peer(
     if(!_bgp.processes_ready())
 	return XrlCmdError::COMMAND_FAILED("FEA or RIB not running");
 
-    
     BGPPeerData *pd = 0;
     try {
 	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
 			peer_port);
 
-	// Calculate PeerType
         AsNum asn(static_cast<uint16_t>(as)); 
-	PeerType peer_type = PEER_TYPE_EBGP; 
-        if (_bgp.get_local_data()->as() == asn) { 
-             if (is_client) 
-                  peer_type = PEER_TYPE_IBGP_CLIENT; 
-             else 
-                  peer_type = PEER_TYPE_IBGP; 
-        } else if (_bgp.get_local_data()->in_confederation(asn)) { 
-	       peer_type = PEER_TYPE_EBGP_CONFED;		  
-        } 
-
-	pd = new BGPPeerData(iptuple, asn, next_hop, holdtime, peer_type);
+	pd = new BGPPeerData(*_bgp.get_local_data(), iptuple, asn, next_hop,
+			     holdtime);
 
     } catch(XorpException& e) {
 	delete pd;
@@ -448,6 +447,62 @@ XrlBgpTarget::bgp_0_2_set_holdtime(
 			peer_port);
 
 	if(!_bgp.set_holdtime(iptuple, holdtime))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_route_reflector_client(
+						 // Input values,
+						 const string&	local_ip,
+						 const uint32_t& local_port,
+						 const string& peer_ip,
+						 const uint32_t& peer_port,
+						 const bool& state)
+{
+    debug_msg("local ip %s local port %u peer ip %s peer port %u"
+	      " state %s\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      state ? "true" : "false");
+
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_route_reflector_client(iptuple, state))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_confederation_member(
+					       // Input values,
+					       const string& local_ip,
+					       const uint32_t& local_port,
+					       const string& peer_ip,
+					       const uint32_t& peer_port,
+					       const bool& state)
+{
+    debug_msg("local ip %s local port %u peer ip %s peer port %u"
+	      " state %s\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      state ? "true" : "false");
+
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_confederation_member(iptuple, state))
 	    return XrlCmdError::COMMAND_FAILED();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
