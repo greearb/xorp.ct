@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.61 2005/11/14 20:01:39 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.62 2005/11/15 11:43:58 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1904,6 +1904,26 @@ PathAttributeList<A>::community_att() const
 
     return dynamic_cast<const CommunityAttribute*>(
 	find_attribute_by_type(COMMUNITY));
+}
+
+template<class A>
+const ORIGINATOR_IDAttribute*
+PathAttributeList<A>::originator_id() const 
+{
+    debug_msg("%p\n", this);
+
+    return dynamic_cast<const ORIGINATOR_IDAttribute*>(
+	find_attribute_by_type(ORIGINATOR_ID));
+}
+
+template<class A>
+const CLUSTER_LISTAttribute*
+PathAttributeList<A>::cluster_list() const 
+{
+    debug_msg("%p\n", this);
+
+    return dynamic_cast<const CLUSTER_LISTAttribute*>(
+	find_attribute_by_type(CLUSTER_LIST));
 }
 
 /*

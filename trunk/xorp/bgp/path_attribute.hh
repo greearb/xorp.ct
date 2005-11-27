@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.37 2005/11/14 20:01:39 mjh Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.38 2005/11/15 11:43:58 mjh Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -581,6 +581,8 @@ public:
     const AtomicAggAttribute* atomic_aggregate_att() const;
     const AggregatorAttribute* aggregator_att() const;
     const CommunityAttribute* community_att() const;
+    const ORIGINATOR_IDAttribute* originator_id() const;
+    const CLUSTER_LISTAttribute* cluster_list() const;
 
     void rehash();
     const uint8_t* hash() const			{
