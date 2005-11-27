@@ -13,14 +13,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/config_operators.cc,v 1.1 2005/07/08 20:54:20 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/config_operators.cc,v 1.2 2005/07/13 17:44:06 mjh Exp $"
 
 #include "rtrmgr_module.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+
 #include "rtrmgr_error.hh"
 #include "config_operators.hh"
 
 
-string operator_to_str(ConfigOperator op)
+string
+operator_to_str(ConfigOperator op)
 {
     switch (op) {
     case OP_NONE:
@@ -49,7 +53,8 @@ string operator_to_str(ConfigOperator op)
     XLOG_UNREACHABLE();
 }
 
-ConfigOperator lookup_operator(const string& s)
+ConfigOperator
+lookup_operator(const string& s) throw (ParseError)
 {
     if (s == "==") {
 	return OP_EQ;
@@ -79,8 +84,9 @@ ConfigOperator lookup_operator(const string& s)
 	return OP_DEL;
     }
 
-    /*something's wrong*/
-    string errmsg;
-    errmsg = "Bad operator " + s;
-    xorp_throw(ParseError, errmsg);
+    //
+    // Invalid operator string
+    //
+    string error_msg = c_format("Bad operator: %s", s.c_str());
+    xorp_throw(ParseError, error_msg);
 }

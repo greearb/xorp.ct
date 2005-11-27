@@ -12,32 +12,36 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/config_operators.hh,v 1.2 2005/07/08 23:17:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/config_operators.hh,v 1.3 2005/07/13 17:44:06 mjh Exp $
 
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__
 
 #include <string>
-#include "libxorp/xlog.h"
 
-/* Configuration file operators.  Comparators must be less than modifiers */
+#include "rtrmgr_error.hh"
+
+//
+// Configuration file operators.
+// XXX: Comparators must be less than modifiers.
+//
 enum ConfigOperator {
-    OP_NONE = 0,
-    OP_EQ = 1,
-    OP_NE = 2,
-    OP_LT = 3,
-    OP_LTE = 4,
-    OP_GT = 5,
-    OP_GTE = 6,
-    OP_ASSIGN = 101,
-    OP_ADD = 102,
-    OP_SUB = 103,
-    OP_DEL = 104
+    OP_NONE		= 0,
+    OP_EQ		= 1,
+    OP_NE		= 2,
+    OP_LT		= 3,
+    OP_LTE		= 4,
+    OP_GT		= 5,
+    OP_GTE		= 6,
+    MAX_COMPARATOR	= OP_GTE,
+    OP_ASSIGN		= 101,
+    OP_ADD		= 102,
+    OP_SUB		= 103,
+    OP_DEL		= 104,
+    MAX_MODIFIER	= OP_DEL
 };
-#define MAX_COMPARATOR OP_GTE
-#define MAX_MODIFIER OP_DEL
 
 extern string operator_to_str(ConfigOperator op);
-extern "C" ConfigOperator lookup_operator(const string& s);
+extern ConfigOperator lookup_operator(const string& s) throw (ParseError);
 
 #endif // __RTRMGR_CONFIG_OPERATORS_HH__
