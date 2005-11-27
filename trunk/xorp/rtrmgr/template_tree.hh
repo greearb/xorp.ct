@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.18 2005/06/28 07:01:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.19 2005/07/03 21:06:00 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -39,9 +39,9 @@ public:
     virtual ~TemplateTree();
     
     bool load_template_tree(const string& config_template_dir,
-			    string& errmsg);
+			    string& error_msg);
     bool parse_file(const string& filename, 
-		    const string& config_template_dir, string& errmsg);
+		    const string& config_template_dir, string& error_msg);
     
     void extend_path(const string& segment, bool is_tag);
     void pop_path() throw (ParseError);
@@ -68,6 +68,10 @@ protected:
 			       const string& varname,
 			       int type,
 			       const string& initializer);
+
+    bool expand_template_tree(string& error_msg);
+    bool check_template_tree(string& error_msg);
+
 
     TemplateTreeNode*	_root_node;
     TemplateTreeNode*	_current_node;

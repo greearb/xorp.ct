@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.29 2005/07/11 23:11:45 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.30 2005/07/14 00:08:30 mjh Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -43,8 +43,8 @@ public:
     string str() const;
     TemplateTreeNode& template_tree_node() { return _template_tree_node; }
     const TemplateTreeNode& template_tree_node() const { return _template_tree_node; }
-    virtual bool expand_action(string& errmsg);
-    bool check_referred_variables(string& errmsg) const;
+    virtual bool expand_action(string& error_msg);
+    virtual bool check_referred_variables(string& error_msg) const;
 
 protected:
     list<string> _action;
@@ -58,16 +58,16 @@ public:
     XrlAction(TemplateTreeNode& template_tree_node, const list<string>& action,
 	      const XRLdb& xrldb) throw (ParseError);
 
-    bool expand_action(string& errmsg);
+    virtual bool expand_action(string& error_msg);
     int execute(const MasterConfigTreeNode& ctn, TaskManager& task_manager,
 		XrlRouter::XrlCallback cb) const;
 #if 0    
     template<class TreeNode> int expand_xrl_variables(const TreeNode& tn,
 						      string& result,
-						      string& errmsg) const;
+						      string& error_msg) const;
 #endif
     template<class TreeNode> Xrl* expand_xrl_variables(const TreeNode& tn,
-						       string& errmsg) const;
+						       string& error_msg) const;
     inline const string& request() const { return _request; }
     const string& xrl_return_spec() const { return _response; }
     string related_module() const;
@@ -75,7 +75,7 @@ public:
 
 private:
     bool check_xrl_is_valid(const list<string>& action,
-			    const XRLdb& xrldb, string& errmsg);
+			    const XRLdb& xrldb, string& error_msg);
     template<class TreeNode> bool expand_vars(const TreeNode& tn,
 					      const string& s, 
 					      string& result) const;
@@ -93,13 +93,13 @@ public:
     ProgramAction(TemplateTreeNode& template_tree_node,
 		  const list<string>& action) throw (ParseError);
 
-    bool expand_action(string& errmsg);
+    virtual bool expand_action(string& error_msg);
     int execute(const MasterConfigTreeNode&	ctn,
 		TaskManager&			task_manager,
 		TaskProgramItem::ProgramCallback program_cb) const;
     template<class TreeNode> int expand_program_variables(const TreeNode& tn,
 							  string& result,
-							  string& errmsg) const;
+							  string& error_msg) const;
     string related_module() const;
     string affected_module() const;
     inline const string& request() const { return _request; }
@@ -107,7 +107,7 @@ public:
     const string& stderr_variable_name() const { return _stderr_variable_name; }
 
 private:
-    bool check_program_is_valid(const list<string>& action, string& errmsg);
+    bool check_program_is_valid(const list<string>& action, string& error_msg);
     void parse_program_response(const string& part) throw (ParseError);
 
     string		_module_name;
@@ -139,8 +139,8 @@ public:
     set<string> affected_modules() const;
     bool affects_module(const string& module) const;
     virtual string str() const;
-    bool expand_actions(string& errmsg);
-    bool check_referred_variables(string& errmsg) const;
+    virtual bool expand_actions(string& error_msg);
+    virtual bool check_referred_variables(string& error_msg) const;
 
 protected:
     list<Action*>	_actions;

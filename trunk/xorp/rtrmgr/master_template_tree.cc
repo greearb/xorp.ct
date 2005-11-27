@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.4 2005/07/11 23:14:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.6 2005/08/18 15:54:27 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,38 +39,39 @@ MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
     : TemplateTree(xorp_root_dir, verbose),
       _xrldb(xrldb)
 {
-    string errmsg;
 
 }
 
 bool 
 MasterTemplateTree::load_template_tree(const string& config_template_dir,
-				       string& errmsg)
+					string& error_msg)
 {
-    if (TemplateTree::load_template_tree(config_template_dir, errmsg) != true)
+    if (TemplateTree::load_template_tree(config_template_dir, error_msg)
+	!= true) {
+	return (false);
+    }
+
+    if (expand_master_template_tree(error_msg) != true)
 	return (false);
 
-    if (expand_template_tree(errmsg) != true)
-	return (false);
-
-    if (check_template_tree(errmsg) != true)
+    if (check_master_template_tree(error_msg) != true)
 	return (false);
 
     return (true);
 }
 
 bool
-MasterTemplateTree::expand_template_tree(string& errmsg)
+MasterTemplateTree::expand_master_template_tree(string& error_msg)
 {
     // Expand the template tree
-    return root_node()->expand_template_tree(errmsg);
+    return root_node()->expand_master_template_tree(error_msg);
 }
 
 bool
-MasterTemplateTree::check_template_tree(string& errmsg)
+MasterTemplateTree::check_master_template_tree(string& error_msg)
 {
     // Verify the template tree
-    return root_node()->check_template_tree(errmsg);
+    return root_node()->check_master_template_tree(error_msg);
 }
 
 void

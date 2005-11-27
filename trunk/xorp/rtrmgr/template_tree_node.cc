@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.65 2005/11/11 01:55:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.66 2005/11/12 21:42:14 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -83,6 +83,139 @@ TemplateTreeNode::~TemplateTreeNode()
 	delete iter2->second;
 	_cmd_map.erase(iter2);
     }
+}
+
+bool
+TemplateTreeNode::expand_template_tree(string& error_msg)
+{
+    map<string, BaseCommand*>::iterator cmd_iter;
+
+    //
+    // Expand all %allow, %allow-operator and %allow-range filters.
+    // XXX: currently the %allow-operator expanding is no-op.
+    //
+    cmd_iter = _cmd_map.find("%allow");
+    if (cmd_iter != _cmd_map.end()) {
+	BaseCommand* command = cmd_iter->second;
+	AllowOptionsCommand* allow_options_command;
+	allow_options_command = dynamic_cast<AllowOptionsCommand*>(command);
+	XLOG_ASSERT(allow_options_command != NULL);
+	if (allow_options_command->expand_actions(error_msg) != true)
+	    return (false);
+    }
+    cmd_iter = _cmd_map.find("%allow-operator");
+    if (cmd_iter != _cmd_map.end()) {
+	BaseCommand* command = cmd_iter->second;
+	AllowOperatorsCommand* allow_operators_command;
+	allow_operators_command = dynamic_cast<AllowOperatorsCommand*>(command);
+	XLOG_ASSERT(allow_operators_command != NULL);
+	if (allow_operators_command->expand_actions(error_msg) != true)
+	    return (false);
+    }
+    cmd_iter = _cmd_map.find("%allow-range");
+    if (cmd_iter != _cmd_map.end()) {
+	BaseCommand* command = cmd_iter->second;
+	AllowRangeCommand* allow_range_command;
+	allow_range_command = dynamic_cast<AllowRangeCommand*>(command);
+	XLOG_ASSERT(allow_range_command != NULL);
+	if (allow_range_command->expand_actions(error_msg) != true)
+	    return (false);
+    }
+
+    //
+    // Recursively expand all children nodes
+    //
+    list<TemplateTreeNode*>::iterator iter2;
+    for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
+	TemplateTreeNode* ttn = *iter2;
+	if (ttn->expand_template_tree(error_msg) != true)
+	    return false;
+    }
+
+    return true;
+}
+
+bool
+TemplateTreeNode::check_template_tree(string& error_msg) const
+{
+    const BaseCommand *base_cmd = NULL;
+    map<string, BaseCommand*>::const_iterator cmd_iter;
+
+    //
+    // Check all refered variables for this node
+    //
+    for (cmd_iter = _cmd_map.begin(); cmd_iter != _cmd_map.end(); ++cmd_iter) {
+	const BaseCommand* command = cmd_iter->second;
+	if (! command->check_referred_variables(error_msg))
+	    return false;
+    }
+
+    //
+    // Check all referred mandatory variables
+    //
+    list<string>::const_iterator string_iter;
+    for (string_iter = mandatory_config_nodes().begin();
+	 string_iter != mandatory_config_nodes().end();
+	 ++string_iter) {
+	const string& mandatory_config_node = *string_iter;
+	const TemplateTreeNode* ttn;
+	ttn = find_const_varname_node(mandatory_config_node);
+	if (ttn == NULL) {
+	    error_msg = c_format("Invalid template mandatory variable %s: "
+				 "not found",
+				 mandatory_config_node.c_str());
+	    return false;
+	}
+	bool is_multi_value = false;
+	do {
+	    //
+	    // Check if there is a multi-value node between the referred
+	    // template node and this node (or the root of the template tree).
+	    //
+	    if (ttn->is_tag()) {
+		is_multi_value = true;
+		break;
+	    }
+	    ttn = ttn->parent();
+	    if (ttn == this)
+		break;
+	    if (ttn == NULL)
+		break;
+	} while (true);
+	if (is_multi_value) {
+	    error_msg = c_format("Invalid template mandatory variable %s: "
+				 "cannot specify a multi-value node as "
+				 "mandatory",
+				 mandatory_config_node.c_str());
+	    return false;
+	}
+    }
+
+    //
+    // Check specific commands for this node
+    //
+    // XXX: only leaf nodes should have %set command
+    base_cmd = const_command("%set");
+    if (base_cmd != NULL) {
+	if (! is_leaf_value()) {
+	    error_msg = c_format("Found %%set command in node \"%s\" that "
+				 "doesn't expect value",
+			      path().c_str());
+	    return false;
+	}
+    }
+
+    //
+    // Recursively check all children nodes
+    //
+    list<TemplateTreeNode*>::const_iterator iter2;
+    for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
+	const TemplateTreeNode* ttn = *iter2;
+	if (ttn->check_template_tree(error_msg) != true)
+	    return false;
+    }
+
+    return true;
 }
 
 void
@@ -165,13 +298,11 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	}
 
 	//
-	// If the command already exists, no need to create it again.
-	// The command action will simply be added to the existing command.
+	// XXX: We just create a placeholder here - if we were a master
+	// template tree node we'd create a real command.
 	//
 	if (_cmd_map.find(cmd) == _cmd_map.end()) {
-	    // we just create a placeholder here - if we were a master
-	    // template tree node we'd create a real command.
-	    command = new BaseCommand(*this, cmd);
+	    command = new DummyBaseCommand(*this, cmd);
 	    _cmd_map[cmd] = command;
 	}
     } else if (cmd == "%mandatory") {
@@ -500,8 +631,8 @@ bool
 TemplateTreeNode::expand_variable(const string& varname, string& value) const
 {
     const TemplateTreeNode* varname_node;
-    varname_node = find_varname_node(varname);
 
+    varname_node = find_const_varname_node(varname);
     if (varname_node == NULL)
 	return false;
 
@@ -594,7 +725,7 @@ TemplateTreeNode::get_module_name_by_variable(const string& varname) const
 {
     const TemplateTreeNode* ttn;
 
-    ttn = find_varname_node(varname);
+    ttn = find_const_varname_node(varname);
     //
     // Search all template tree nodes toward the root
     // to find the module name.
@@ -614,7 +745,7 @@ TemplateTreeNode::get_default_target_name_by_variable(const string& varname) con
 {
     const TemplateTreeNode* ttn;
 
-    ttn = find_varname_node(varname);
+    ttn = find_const_varname_node(varname);
     if (ttn != NULL) {
 	//
 	// Search all template tree nodes toward the root
@@ -650,7 +781,17 @@ TemplateTreeNode::split_up_varname(const string& varname,
 }
 
 const TemplateTreeNode*
-TemplateTreeNode::find_varname_node(const string& varname) const
+TemplateTreeNode::find_const_varname_node(const string& varname) const
+{
+    //
+    // We need both const and non-const versions of find_varname_node,
+    // but don't want to write it all twice.
+    //
+    return (const_cast<TemplateTreeNode*>(this))->find_varname_node(varname);
+}
+
+TemplateTreeNode*
+TemplateTreeNode::find_varname_node(const string& varname)
 {
     if (varname == "$(@)" /* current value of a node */
 	|| (varname == "$(DEFAULT)") /* default value of a node */
@@ -687,17 +828,17 @@ TemplateTreeNode::find_varname_node(const string& varname) const
     return NULL;
 }
 
-const TemplateTreeNode*
-TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts) const
+TemplateTreeNode*
+TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts)
 {
     if (_parent == NULL) {
 	//
 	// We have reached the root node.
 	// Search among the children.
 	//
-	list<TemplateTreeNode* >::const_iterator iter;
+	list<TemplateTreeNode* >::iterator iter;
 	for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	    const TemplateTreeNode* found_child;
+	    TemplateTreeNode* found_child;
 	    found_child = (*iter)->find_child_varname_node(var_parts);
 	    if (found_child != NULL)
 		return found_child;
@@ -715,8 +856,8 @@ TemplateTreeNode::find_parent_varname_node(const list<string>& var_parts) const
     return _parent->find_parent_varname_node(var_parts);
 }
 
-const TemplateTreeNode*
-TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
+TemplateTreeNode*
+TemplateTreeNode::find_child_varname_node(const list<string>& var_parts)
 {
     if ((var_parts.front() != "@") && (var_parts.front() != _segname)) {
 	// varname doesn't match us
@@ -761,9 +902,9 @@ TemplateTreeNode::find_child_varname_node(const list<string>& var_parts) const
     list<string> child_var_parts = var_parts;
     child_var_parts.pop_front();
 
-    list<TemplateTreeNode* >::const_iterator iter;
+    list<TemplateTreeNode* >::iterator iter;
     for (iter = _children.begin(); iter != _children.end(); ++iter) {
-	const TemplateTreeNode* found_child;
+	TemplateTreeNode* found_child;
 	found_child = (*iter)->find_child_varname_node(child_var_parts);
 	if (found_child != NULL)
 	    return found_child;
@@ -788,6 +929,131 @@ TemplateTreeNode::find_first_deprecated_ancestor() const
     }
 
     return (deprecated_ttn);
+}
+
+void
+TemplateTreeNode::add_allowed_value(const string& value, const string& help)
+{
+    // XXX: insert the new pair even if we overwrite an existing one
+    _allowed_values.insert(make_pair(value, help));
+}
+
+void
+TemplateTreeNode::add_allowed_range(int32_t lower_value, int upper_value,
+				    const string& help)
+{
+    pair<int32_t, int32_t> range(lower_value, upper_value);
+
+    // XXX: insert the new pair even if we overwrite an existing one
+    _allowed_ranges.insert(make_pair(range, help));
+}
+
+bool
+TemplateTreeNode::check_allowed_value(const string& value,
+				      string& error_msg) const
+{
+    //
+    // Check the allowed values
+    //
+    if ((! _allowed_values.empty())
+	&& (_allowed_values.find(value) == _allowed_values.end())) {
+	map<string, string> values = _allowed_values;
+
+	if (values.size() == 1) {
+	    error_msg = c_format("The only value allowed is %s.",
+				 values.begin()->first.c_str());
+	} else {
+	    error_msg = "Allowed values are: ";
+	    bool is_first = true;
+	    while (! values.empty()) {
+		if (is_first) {
+		    is_first = false;
+		} else {
+		    if (values.size() == 1)
+			error_msg += " and ";
+		    else
+			error_msg += ", ";
+		}
+		map<string, string>::iterator iter = values.begin();
+		error_msg += iter->first;
+		values.erase(iter);
+	    }
+	    error_msg += ".";
+	}
+	return (false);
+    }
+
+    //
+    // Check the allowed ranges
+    //
+    bool is_accepted = true;
+    int32_t lower_value = 0;
+    int32_t upper_value = 0;
+    if (! _allowed_ranges.empty()) {
+	map<pair<int32_t, int32_t>, string>::const_iterator iter;
+	int32_t ival = atoi(value.c_str());
+	for (iter = _allowed_ranges.begin();
+	     iter != _allowed_ranges.end();
+	     ++iter) {
+	    const pair<int32_t, int32_t>& range = iter->first;
+	    lower_value = range.first;
+	    upper_value = range.second;
+	    if ((ival >= lower_value) && (ival <= upper_value)) {
+		continue;
+	    }
+	    is_accepted = false;
+	    break;
+	}
+    }
+
+    if (! is_accepted) {
+	// Error: variable value is not allowed
+	error_msg = c_format("Value %s is outside valid range, %d...%d.",
+			     value.c_str(),
+			     XORP_INT_CAST(lower_value),
+			     XORP_INT_CAST(upper_value));
+	return (false);
+    }
+
+    return (true);
+}
+
+bool
+TemplateTreeNode::verify_variables(const ConfigTreeNode& ctn,
+				   string& error_msg) const
+{
+    map<string, BaseCommand *>::const_iterator iter;
+
+    for (iter = _cmd_map.begin(); iter != _cmd_map.end(); ++iter) {
+	const BaseCommand* command = iter->second;
+	const AllowCommand* allow_command;
+	allow_command = dynamic_cast<const AllowCommand *>(command);
+	if (allow_command == NULL)
+	    continue;
+	if (allow_command->verify_variables(ctn, error_msg) != true)
+	    return (false);
+    }
+
+    return (true);
+}
+
+const string&
+TemplateTreeNode::help() const
+{
+    // If the node is a tag, the help is held on the child
+    if (is_tag())
+	return children().front()->help();
+    return _help;
+}
+
+const string&
+TemplateTreeNode::help_long() const
+{
+    if (is_tag())
+	return children().front()->help_long();
+    if (_help_long == "")
+	return help();
+    return _help_long;
 }
 
 #if 0

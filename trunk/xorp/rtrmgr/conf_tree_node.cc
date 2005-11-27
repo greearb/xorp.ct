@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.101 2005/11/14 09:49:30 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.102 2005/11/15 02:09:48 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -357,16 +357,7 @@ ConfigTreeNode::check_allowed_value(const string& value,
     if (_template_tree_node == NULL)
 	return true;		// XXX: the root node has a NULL template
 
-    const BaseCommand* c = _template_tree_node->const_command("%allow");
-    if (c == NULL) {
-	c = _template_tree_node->const_command("%allow-range");
-    }
-
-    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
-    if (cmd == NULL)
-	return true;
-
-    return (cmd->verify_variable_by_value(*this, value, error_msg));
+    return (_template_tree_node->check_allowed_value(value, error_msg));
 }
 
 bool 
@@ -376,9 +367,10 @@ ConfigTreeNode::check_allowed_operator(const string& value,
     if (_template_tree_node == NULL)
 	return true;		// XXX: the root node has a NULL template
 
-    const BaseCommand* c = _template_tree_node->const_command("%allow-operator");
-
-    const AllowCommand* cmd = dynamic_cast<const AllowCommand *>(c);
+    const BaseCommand* base_cmd;
+    const AllowOperatorsCommand* cmd;
+    base_cmd = _template_tree_node->const_command("%allow-operator");
+    cmd = dynamic_cast<const AllowOperatorsCommand *>(base_cmd);
     if (cmd == NULL)
 	return true;
 
@@ -692,6 +684,20 @@ ConfigTreeNode::check_config_tree(string& error_msg) const
 		return false;
 	    }
 	}
+    }
+
+    //
+    // Verify the allowed configuration values
+    //
+    if (_template_tree_node != NULL) {
+	if (has_value()) {
+	    if (_template_tree_node->check_allowed_value(value(), error_msg)
+		!= true) {
+		return false;
+	    }
+	}
+	if (_template_tree_node->verify_variables(*this, error_msg) != true)
+	    return false;
     }
 
     //
@@ -1437,7 +1443,7 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
     case TEMPLATE_DEFAULT:
     {
 	const TemplateTreeNode* ttn;
-	ttn = _template_tree_node->find_varname_node(varname);
+	ttn = _template_tree_node->find_const_varname_node(varname);
 	XLOG_ASSERT(ttn != NULL);
 	XLOG_ASSERT(ttn->has_default());
 	value = ttn->default_str();
@@ -1483,7 +1489,7 @@ ConfigTreeNode::expand_variable_to_full_varname(const string& varname,
     case TEMPLATE_DEFAULT:
     {
 	const TemplateTreeNode* ttn;
-	ttn = _template_tree_node->find_varname_node(varname);
+	ttn = _template_tree_node->find_const_varname_node(varname);
 	XLOG_ASSERT(ttn != NULL);
 	full_varname = ttn->path();
 	return true;
@@ -1604,7 +1610,7 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
     // Test if we can match a template node
     if (_template_tree_node != NULL) {
 	const TemplateTreeNode* ttn;
-	ttn = _template_tree_node->find_varname_node(varname);
+	ttn = _template_tree_node->find_const_varname_node(varname);
 	if ((ttn != NULL) && ttn->has_default()) {
 	    type = TEMPLATE_DEFAULT;
 	    return NULL;

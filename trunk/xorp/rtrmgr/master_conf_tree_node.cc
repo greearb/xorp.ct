@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.18 2005/11/03 17:18:56 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.19 2005/11/03 17:35:44 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -445,7 +445,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
-		    if (allow_cmd->verify_variable(*this, error_msg)
+		    if (allow_cmd->verify_variables(*this, error_msg)
 			!= true) {
 			//
 			// Commit_changes should always be run first
@@ -462,7 +462,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			return false;
 		    }
 		}
-		/* check that the operator is OK */
+		// Check that the operator is OK
 		base_cmd = 
 		    _template_tree_node->const_command("%allow-operator");
 		if (base_cmd == NULL) {
@@ -484,7 +484,7 @@ MasterConfigTreeNode::commit_changes(TaskManager& task_manager,
 			      cmd->str().c_str());
 		    allow_cmd = dynamic_cast<const AllowCommand*>(base_cmd);
 		    XLOG_ASSERT(allow_cmd != NULL);
-		    if (allow_cmd->verify_variable(*this, error_msg)
+		    if (allow_cmd->verify_variables(*this, error_msg)
 			!= true) {
 			error_msg = c_format("Bad operator for \"%s\": %s; ",
 					     path().c_str(),

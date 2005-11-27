@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.60 2005/07/14 23:21:56 mjh Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.61 2005/10/10 04:10:51 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -126,15 +126,15 @@ Action::str() const
 }
 
 bool
-Action::expand_action(string& errmsg)
+Action::expand_action(string& error_msg)
 {
     // XXX: nothing to do in the default case
-    UNUSED(errmsg);
+    UNUSED(error_msg);
     return (true);
 }
 
 bool
-Action::check_referred_variables(string& errmsg) const
+Action::check_referred_variables(string& error_msg) const
 {
     list<string>::const_iterator iter;
 
@@ -143,9 +143,9 @@ Action::check_referred_variables(string& errmsg) const
 	 ++iter) {
 	const string& varname = *iter;
 	if (_template_tree_node.find_varname_node(varname) == NULL) {
-	    errmsg = c_format("Syntax error in action %s: "
-			      "invalid variable name %s",
-			      str().c_str(), varname.c_str());
+	    error_msg = c_format("Syntax error in action %s: "
+				 "invalid variable name %s",
+				 str().c_str(), varname.c_str());
 	    return false;
 	}
     }
@@ -161,7 +161,6 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
     : Action(template_tree_node, action),
       _xrldb(xrldb)
 {
-    string errmsg;
     list<string> xrl_parts = _split_cmd;
 
     debug_msg("XrlAction constructor\n");
@@ -255,19 +254,19 @@ XrlAction::XrlAction(TemplateTreeNode& template_tree_node,
 }
 
 bool
-XrlAction::expand_action(string& errmsg)
+XrlAction::expand_action(string& error_msg)
 {
     debug_msg("XrlAction::expand_action()\n");
     XLOG_ASSERT(_action.front() == "xrl");
 
     _module_name = _template_tree_node.module_name();
     if (_module_name.empty()) {
-	errmsg = c_format("Empty module name for action in template %s",
-			  _template_tree_node.path().c_str());
+	error_msg = c_format("Empty module name for action in template %s",
+			     _template_tree_node.path().c_str());
 	return false;
     }
 
-    if (check_xrl_is_valid(_action, _xrldb, errmsg) != true)
+    if (check_xrl_is_valid(_action, _xrldb, error_msg) != true)
 	return false;
 
     return true;
@@ -275,7 +274,7 @@ XrlAction::expand_action(string& errmsg)
 
 bool
 XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
-			      string& errmsg)
+			      string& error_msg)
 {
     const string module_name = template_tree_node().module_name();
 
@@ -283,8 +282,8 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 
     list<string>::const_iterator xrl_pos = ++action.begin();
     if (xrl_pos == action.end()) {
-	errmsg = c_format("Expected XRL in module %s but none supplied",
-			  module_name.c_str());
+	error_msg = c_format("Expected XRL in module %s but none supplied",
+			     module_name.c_str());
 	return false;
     }
 
@@ -314,16 +313,16 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	// Find the target name variable
 	string::size_type target_name_end = xrl_str.find("/", start);
 	if (target_name_end == string::npos) {
-	    errmsg = c_format("Syntax error in module %s XRL %s: "
-			      "no target name",
-			      module_name.c_str(), xrl_str.c_str());
+	    error_msg = c_format("Syntax error in module %s XRL %s: "
+				 "no target name",
+				 module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 	string target_name_var = xrl_str.substr(start, target_name_end - 1);
 	if (target_name_var.empty()) {
-	    errmsg = c_format("Syntax error in module %s XRL %s: "
-			      "empty XRL target",
-			      module_name.c_str(), xrl_str.c_str());
+	    error_msg = c_format("Syntax error in module %s XRL %s: "
+				 "empty XRL target",
+				 module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 
@@ -331,9 +330,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	string default_target_name;
 	default_target_name = template_tree_node().get_default_target_name_by_variable(target_name_var);
 	if (default_target_name.empty()) {
-	    errmsg = c_format("Syntax error in module %s XRL %s: "
-			      "the module has no default target name",
-			      module_name.c_str(), xrl_str.c_str());
+	    error_msg = c_format("Syntax error in module %s XRL %s: "
+				 "the module has no default target name",
+				 module_name.c_str(), xrl_str.c_str());
 	    return false;
 	}
 
@@ -359,9 +358,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	switch (mode_stack.front()) {
 	case VAR:
 	    if (xrl_str[i] == '$' || xrl_str[i] == '`') {
-		errmsg = c_format("Syntax error in module %s XRL %s: "
-				  "bad variable definition",
-				  module_name.c_str(), xrl_str.c_str());
+		error_msg = c_format("Syntax error in module %s XRL %s: "
+				     "bad variable definition",
+				     module_name.c_str(), xrl_str.c_str());
 		return false;
 	    }
 	    if (xrl_str[i] == ')') {
@@ -397,10 +396,10 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 			}
 		    }
 		    if (! varname_end_found) {
-			errmsg = c_format("Syntax error in module %s XRL %s: "
-					  "bad variable syntax",
-					  module_name.c_str(),
-					  xrl_str.c_str());
+			error_msg = c_format("Syntax error in module %s XRL %s: "
+					     "bad variable syntax",
+					     module_name.c_str(),
+					     xrl_str.c_str());
 			return false;
 		    }
 		    list<string>::const_iterator iter;
@@ -421,9 +420,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 	    if (xrl_str[i] == '&') {
 		mode_stack.pop_front();
 		if (mode_stack.front() != NON_VAR) {
-		    errmsg = c_format("Syntax error in module %s XRL %s: "
-				      "invalid XRL syntax",
-				      module_name.c_str(), xrl_str.c_str());
+		    error_msg = c_format("Syntax error in module %s XRL %s: "
+					 "invalid XRL syntax",
+					 module_name.c_str(), xrl_str.c_str());
 		    return false;
 		}
 		cleaned_xrl += xrl_str[i];
@@ -435,9 +434,9 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
 		cleaned_xrl += xrl_str[i];
 		mode_stack.pop_front();
 		if (mode_stack.front() != NON_VAR) {
-		    errmsg = c_format("Syntax error in module %s XRL %s: "
-				      "invalid XRL syntax",
-				      module_name.c_str(), xrl_str.c_str());
+		    error_msg = c_format("Syntax error in module %s XRL %s: "
+					 "invalid XRL syntax",
+					 module_name.c_str(), xrl_str.c_str());
 		    return false;
 		}
 	    }
@@ -447,26 +446,26 @@ XrlAction::check_xrl_is_valid(const list<string>& action, const XRLdb& xrldb,
     debug_msg("XrlAction after cleaning:\n%s\n", cleaned_xrl.c_str());
 
     if (xrldb.check_xrl_syntax(cleaned_xrl) == false) {
-	errmsg = c_format("Syntax error in module %s XRL %s: "
-			  "invalid XRL syntax",
-			  module_name.c_str(), cleaned_xrl.c_str());
+	error_msg = c_format("Syntax error in module %s XRL %s: "
+			     "invalid XRL syntax",
+			     module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     XRLMatchType match = xrldb.check_xrl_exists(cleaned_xrl);
     switch (match) {
     case MATCH_FAIL:
     case MATCH_RSPEC: {
-	errmsg = c_format("Error in module %s XRL %s: "
-			  "the XRL is not specified in the XRL targets "
-			  "directory",
-			  module_name.c_str(), cleaned_xrl.c_str());
+	error_msg = c_format("Error in module %s XRL %s: "
+			     "the XRL is not specified in the XRL targets "
+			     "directory",
+			     module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     case MATCH_XRL: {
-	errmsg = c_format("Error in module %s XRL %s: "
-			  "the XRL has different return specification from "
-			  "that in the XRL targets directory",
-			  module_name.c_str(), cleaned_xrl.c_str());
+	error_msg = c_format("Error in module %s XRL %s: "
+			     "the XRL has different return specification from "
+			     "that in the XRL targets directory",
+			     module_name.c_str(), cleaned_xrl.c_str());
 	return false;
     }
     case MATCH_ALL:
@@ -545,7 +544,7 @@ XrlAction::execute(const MasterConfigTreeNode& ctn,
 template<class TreeNode>
 Xrl*
 XrlAction::expand_xrl_variables(const TreeNode& tn,
-				string& errmsg) const
+				string& error_msg) const
 {
     string word;
     string expanded_var;
@@ -568,9 +567,9 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 		    command = word;
 		    word = "";
 		} else {
-		    errmsg = c_format("unescaped '?' in XRL args \"%s\" "
-				      "associated with node \"%s\"",
-				      _request.c_str(), tn.path().c_str());
+		    error_msg = c_format("unescaped '?' in XRL args \"%s\" "
+					 "associated with node \"%s\"",
+					 _request.c_str(), tn.path().c_str());
 		    return NULL;
 		}
 	    } else if (_request[i] == '&') {
@@ -599,7 +598,7 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 
     string expanded_command;
     if (!expand_vars(tn, command, expanded_command)) {
-	    errmsg = expanded_command;
+	    error_msg = expanded_command;
 	    return NULL;
 	}
 
@@ -608,9 +607,9 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
     // find the command name
     list <string> cmd_parts = split(expanded_command, '/');
     if (cmd_parts.size() < 2) {
-	    errmsg = c_format("bad XRL \"%s\" "
-			      "associated with node \"%s\"",
-			      _request.c_str(), tn.path().c_str());
+	    error_msg = c_format("bad XRL \"%s\" "
+				 "associated with node \"%s\"",
+				 _request.c_str(), tn.path().c_str());
 	    return NULL;
     }
     command = cmd_parts.back();
@@ -656,15 +655,15 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 	// earlier checks
 	XrlAtomType arg_type = XrlAtom::lookup_type(type.c_str());
 	if (arg_type == xrlatom_no_type) {
-	    errmsg = c_format("bad XRL syntax \"%s\" "
-				  "associated with node \"%s\"",
-				  _request.c_str(), tn.path().c_str());
+	    error_msg = c_format("bad XRL syntax \"%s\" "
+				 "associated with node \"%s\"",
+				 _request.c_str(), tn.path().c_str());
 	    return NULL;
 	}
 	
 	string expanded_value;
 	if (!expand_vars(tn, value, expanded_value)) {
-	    errmsg = expanded_value;
+	    error_msg = expanded_value;
 	    return NULL;
 	}
 
@@ -677,9 +676,9 @@ XrlAction::expand_xrl_variables(const TreeNode& tn,
 					      expanded_value.size()));
 	    xrl_args.add(atom);
 	} catch (InvalidString) {
-	    errmsg = c_format("Bad xrl arg \"%s\" "
-			      "associated with node \"%s\"",
-			      name.c_str(), tn.path().c_str());
+	    error_msg = c_format("Bad xrl arg \"%s\" "
+				 "associated with node \"%s\"",
+				 name.c_str(), tn.path().c_str());
 	    return NULL;
 	}
     }
@@ -804,7 +803,6 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
 			     const list<string>& action) throw (ParseError)
     : Action(template_tree_node, action)
 {
-    string errmsg;
     list<string> program_parts = _split_cmd;
 
     debug_msg("ProgramAction constructor\n");
@@ -918,19 +916,19 @@ ProgramAction::ProgramAction(TemplateTreeNode& template_tree_node,
 }
 
 bool
-ProgramAction::expand_action(string& errmsg)
+ProgramAction::expand_action(string& error_msg)
 {
     debug_msg("ProgramAction::expand_action()\n");
     XLOG_ASSERT(_action.front() == "program");
 
     _module_name = _template_tree_node.module_name();
     if (_module_name.empty()) {
-	errmsg = c_format("Empty module name for action in template %s",
-			  _template_tree_node.path().c_str());
+	error_msg = c_format("Empty module name for action in template %s",
+			     _template_tree_node.path().c_str());
 	return false;
     }
 
-    if (check_program_is_valid(_action, errmsg) != true)
+    if (check_program_is_valid(_action, error_msg) != true)
 	return false;
 
     return true;
@@ -980,13 +978,13 @@ ProgramAction::parse_program_response(const string& part) throw (ParseError)
 
 bool
 ProgramAction::check_program_is_valid(const list<string>& action,
-				      string& errmsg)
+				      string& error_msg)
 {
     XLOG_ASSERT(action.front() == "program");
 
     list<string>::const_iterator program_pos = ++action.begin();
     if (program_pos == action.end()) {
-	errmsg = "Expected program but none supplied";
+	error_msg = "Expected program but none supplied";
 	return false;
     }
 
@@ -1022,9 +1020,9 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 	switch (mode_stack.front()) {
 	case VAR:
 	    if (program_str[i] == '$' || program_str[i] == '`') {
-		errmsg = c_format("Syntax error in program %s: "
-				  "bad variable definition",
-				  program_str.c_str());
+		error_msg = c_format("Syntax error in program %s: "
+				     "bad variable definition",
+				     program_str.c_str());
 		return false;
 	    }
 	    if (program_str[i] == ')') {
@@ -1048,9 +1046,9 @@ ProgramAction::check_program_is_valid(const list<string>& action,
 			}
 		    }
 		    if (! varname_end_found) {
-			errmsg = c_format("Syntax error in program %s: "
-					  "bad variable syntax",
-					  program_str.c_str());
+			error_msg = c_format("Syntax error in program %s: "
+					     "bad variable syntax",
+					     program_str.c_str());
 			return false;
 		    }
 		    list<string>::const_iterator iter;
@@ -1084,9 +1082,9 @@ ProgramAction::check_program_is_valid(const list<string>& action,
     debug_msg("ProgramAction after cleaning:\n%s\n", cleaned_program.c_str());
 
     if (cleaned_program.empty()) {
-	errmsg = c_format("Syntax error in program specification %s: "
-			  "empty program",
-			  program_str.c_str());
+	error_msg = c_format("Syntax error in program specification %s: "
+			     "empty program",
+			     program_str.c_str());
 	return false;
     }
 
@@ -1163,7 +1161,7 @@ template<class TreeNode>
 int
 ProgramAction::expand_program_variables(const TreeNode& tn,
 					string& result,
-					string& errmsg) const
+					string& error_msg) const
 {
     string word;
     string expanded_var;
@@ -1202,9 +1200,9 @@ ProgramAction::expand_program_variables(const TreeNode& tn,
 		word += unquote(expanded_var);
 	    } else {
 		// Error
-		errmsg = c_format("failed to expand expression \"%s\" "
-				  "associated with node \"%s\"",
-				  segment.c_str(), tn.path().c_str());
+		error_msg = c_format("failed to expand expression \"%s\" "
+				     "associated with node \"%s\"",
+				     segment.c_str(), tn.path().c_str());
 		return (XORP_ERROR);
 	    }
 	} else if (segment[0] == '$') {
@@ -1213,9 +1211,9 @@ ProgramAction::expand_program_variables(const TreeNode& tn,
 		word += unquote(expanded_var);
 	    } else {
 		// Error
-		errmsg = c_format("failed to expand variable \"%s\" "
-				  "associated with node \"%s\"",
-				  segment.c_str(), tn.segname().c_str());
+		error_msg = c_format("failed to expand variable \"%s\" "
+				     "associated with node \"%s\"",
+				     segment.c_str(), tn.segname().c_str());
 		return (XORP_ERROR);
 	    }
 	} else {
@@ -1418,12 +1416,12 @@ Command::str() const
 }
 
 bool
-Command::expand_actions(string& errmsg)
+Command::expand_actions(string& error_msg)
 {
     list<Action *>::iterator iter;
     for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
 	Action* action = *iter;
-	if (action->expand_action(errmsg) != true)
+	if (action->expand_action(error_msg) != true)
 	    return false;
     }
 
@@ -1431,12 +1429,12 @@ Command::expand_actions(string& errmsg)
 }
 
 bool
-Command::check_referred_variables(string& errmsg) const
+Command::check_referred_variables(string& error_msg) const
 {
     list<Action *>::const_iterator iter;
     for (iter = _actions.begin(); iter != _actions.end(); ++iter) {
 	const Action* action = *iter;
-	if (action->check_referred_variables(errmsg) != true)
+	if (action->check_referred_variables(error_msg) != true)
 	    return false;
     }
 
@@ -1450,10 +1448,10 @@ Command::check_referred_variables(string& errmsg) const
 //
 template Xrl* XrlAction::expand_xrl_variables<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
-    string& errmsg) const;
+    string& error_msg) const;
 template Xrl* XrlAction::expand_xrl_variables<class TemplateTreeNode>(
     const TemplateTreeNode& ttn,
-    string& errmsg) const;
+    string& error_msg) const;
 template bool XrlAction::expand_vars<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
     const string& value, string& result) const;
@@ -1465,8 +1463,8 @@ template bool XrlAction::expand_vars<class TemplateTreeNode>(
 template int ProgramAction::expand_program_variables<class MasterConfigTreeNode>(
     const MasterConfigTreeNode& ctn,
     string& result,
-    string& errmsg) const;
+    string& error_msg) const;
 template int ProgramAction::expand_program_variables<class TemplateTreeNode>(
     const TemplateTreeNode& ttn,
     string& result,
-    string& errmsg) const;
+    string& error_msg) const;

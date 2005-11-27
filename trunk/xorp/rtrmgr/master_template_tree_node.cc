@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.9 2005/10/14 04:33:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_template_tree_node.cc,v 1.10 2005/10/29 02:05:05 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -107,18 +107,19 @@ MasterTemplateTreeNode::add_action(const string& cmd,
 }
 
 bool
-MasterTemplateTreeNode::expand_template_tree(string& errmsg)
+MasterTemplateTreeNode::expand_master_template_tree(string& error_msg)
 {
+    map<string, BaseCommand*>::iterator cmd_iter;
+
     //
     // Expand all module-specific methods
     //
-    map<string, BaseCommand*>::iterator iter;
-    iter = _cmd_map.find("%modinfo");
-    if (iter != _cmd_map.end()) {
-	BaseCommand* command = iter->second;
+    cmd_iter = _cmd_map.find("%modinfo");
+    if (cmd_iter != _cmd_map.end()) {
+	BaseCommand* command = cmd_iter->second;
 	ModuleCommand* module_command = dynamic_cast<ModuleCommand*>(command);
 	XLOG_ASSERT(module_command != NULL);
-	if (module_command->expand_actions(errmsg) != true)
+	if (module_command->expand_actions(error_msg) != true)
 	    return (false);
     }
 
@@ -129,7 +130,7 @@ MasterTemplateTreeNode::expand_template_tree(string& errmsg)
     for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
 	Command* command = dynamic_cast<Command*>(iter1->second);
 	if (command != NULL) {
-	    if (command->expand_actions(errmsg) != true)
+	    if (command->expand_actions(error_msg) != true)
 		return false;
 	}
     }
@@ -139,8 +140,9 @@ MasterTemplateTreeNode::expand_template_tree(string& errmsg)
     //
     list<TemplateTreeNode*>::iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
-	MasterTemplateTreeNode* ttn = (MasterTemplateTreeNode*)(*iter2);
-	if (ttn->expand_template_tree(errmsg) != true)
+	MasterTemplateTreeNode* mttn;
+	mttn = static_cast<MasterTemplateTreeNode*>(*iter2);
+	if (mttn->expand_master_template_tree(error_msg) != true)
 	    return false;
     }
 
@@ -148,94 +150,21 @@ MasterTemplateTreeNode::expand_template_tree(string& errmsg)
 }
 
 bool
-MasterTemplateTreeNode::check_template_tree(string& errmsg) const
+MasterTemplateTreeNode::check_master_template_tree(string& error_msg) const
 {
-    const BaseCommand *base_cmd = NULL;
-
-    //
-    // Check whether all referred variable names are valid.
-    // First check the module-specific methods, then all commands
-    // for this node.
-    //
+    map<string, BaseCommand*>::const_iterator cmd_iter;
 
     //
     // Check all module-specific methods
     //
-    map<string, BaseCommand*>::const_iterator iter;
-    iter = _cmd_map.find("%modinfo");
-    if (iter != _cmd_map.end()) {
-	const BaseCommand* command = iter->second;
+    cmd_iter = _cmd_map.find("%modinfo");
+    if (cmd_iter != _cmd_map.end()) {
+	const BaseCommand* command = cmd_iter->second;
 	const ModuleCommand* module_command;
 	module_command = dynamic_cast<const ModuleCommand*>(command);
 	XLOG_ASSERT(module_command != NULL);
-	if (module_command->check_referred_variables(errmsg) != true)
+	if (module_command->check_referred_variables(error_msg) != true)
 	    return (false);
-    }
-
-    //
-    // Check all refered variables for this node
-    //
-    map<string, BaseCommand *>::const_iterator iter1;
-    for (iter1 = _cmd_map.begin(); iter1 != _cmd_map.end(); ++iter1) {
-	const Command* command;
-	command = dynamic_cast<Command*>(iter1->second);
-	if (command != NULL) {
-	    if (! command->check_referred_variables(errmsg))
-		return false;
-	}
-    }
-
-    //
-    // Check all referred mandatory variables
-    //
-    list<string>::const_iterator string_iter;
-    for (string_iter = mandatory_config_nodes().begin();
-	 string_iter != mandatory_config_nodes().end();
-	 ++string_iter) {
-	const string& mandatory_config_node = *string_iter;
-	const TemplateTreeNode* ttn = find_varname_node(mandatory_config_node);
-	if (ttn == NULL) {
-	    errmsg = c_format("Invalid template mandatory variable %s: "
-			      "not found",
-			      mandatory_config_node.c_str());
-	    return false;
-	}
-	bool is_multi_value = false;
-	do {
-	    //
-	    // Check if there is a multi-value node between the referred
-	    // template node and this node (or the root of the template tree).
-	    //
-	    if (ttn->is_tag()) {
-		is_multi_value = true;
-		break;
-	    }
-	    ttn = ttn->parent();
-	    if (ttn == this)
-		break;
-	    if (ttn == NULL)
-		break;
-	} while (true);
-	if (is_multi_value) {
-	    errmsg = c_format("Invalid template mandatory variable %s: "
-			      "cannot specify a multi-value node as mandatory",
-			      mandatory_config_node.c_str());
-	    return false;
-	}
-    }
-
-    //
-    // Check specific commands for this node
-    //
-    // XXX: only leaf nodes should have %set command
-    base_cmd = const_command("%set");
-    if (base_cmd != NULL) {
-	if (! is_leaf_value()) {
-	    errmsg = c_format("Found %%set command in node \"%s\" that "
-			      "doesn't expect value",
-			      path().c_str());
-	    return false;
-	}
     }
 
     //
@@ -243,9 +172,9 @@ MasterTemplateTreeNode::check_template_tree(string& errmsg) const
     //
     list<TemplateTreeNode*>::const_iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
-	const MasterTemplateTreeNode* ttn = 
-	    (const MasterTemplateTreeNode*)(*iter2);
-	if (ttn->check_template_tree(errmsg) != true)
+	const MasterTemplateTreeNode* mttn;
+	mttn = static_cast<const MasterTemplateTreeNode*>(*iter2);
+	if (mttn->check_master_template_tree(error_msg) != true)
 	    return false;
     }
 

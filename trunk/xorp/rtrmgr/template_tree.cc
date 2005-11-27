@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.38 2005/08/23 00:58:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.39 2005/10/10 04:10:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -62,7 +62,7 @@ TemplateTree::~TemplateTree()
 
 bool 
 TemplateTree::load_template_tree(const string& config_template_dir,
-				 string& errmsg)
+				 string& error_msg)
 {
     list<string> files;
 
@@ -71,13 +71,14 @@ TemplateTree::load_template_tree(const string& config_template_dir,
 
     struct stat dirdata;
     if (stat(config_template_dir.c_str(), &dirdata) < 0) {
-	errmsg = c_format("Error reading config directory %s: %s",
-			  config_template_dir.c_str(), strerror(errno));
+	error_msg = c_format("Error reading config directory %s: %s",
+			     config_template_dir.c_str(), strerror(errno));
 	return false;
     }
     if ((dirdata.st_mode & S_IFDIR) == 0) {
-	errmsg = c_format("Error reading config directory %s: not a directory",
-			  config_template_dir.c_str());
+	error_msg = c_format("Error reading config directory %s: "
+			     "not a directory",
+			     config_template_dir.c_str());
 	return false;
     }
 
@@ -86,22 +87,22 @@ TemplateTree::load_template_tree(const string& config_template_dir,
     glob_t pglob;
     if (glob(globname.c_str(), 0, 0, &pglob) != 0) {
 	globfree(&pglob);
-	errmsg = c_format("Failed to find config files in %s",
-			  config_template_dir.c_str());
+	error_msg = c_format("Failed to find config files in %s",
+			     config_template_dir.c_str());
 	return false;
     }
 
     if (pglob.gl_pathc == 0) {
 	globfree(&pglob);
-	errmsg = c_format("Failed to find any template files in %s",
-			  config_template_dir.c_str());
+	error_msg = c_format("Failed to find any template files in %s",
+			     config_template_dir.c_str());
 	return false;
     }
 
     for (size_t i = 0; i < (size_t)pglob.gl_pathc; i++) {
 	debug_msg("Loading template file %s\n", pglob.gl_pathv[i]);
-	if (!parse_file(string(pglob.gl_pathv[i]), 
-			config_template_dir, errmsg)) {
+	if (! parse_file(string(pglob.gl_pathv[i]),
+			 config_template_dir, error_msg)) {
 	    globfree(&pglob);
 	    return false;
 	}
@@ -109,40 +110,54 @@ TemplateTree::load_template_tree(const string& config_template_dir,
 
     globfree(&pglob);
 
-#if 0
-    // Verify the template tree
-    if (_root_node->check_template_tree(errmsg) != true) {
-	xorp_throw(InitError, errmsg.c_str());
-    }
-#endif
+    // Expand and verify the template tree
+    if (expand_template_tree(error_msg) != true)
+	return (false);
+    if (check_template_tree(error_msg) != true)
+	return (false);
+
     return true;
 }
 
 bool 
-TemplateTree::parse_file(const string& filename, 
-			 const string& config_template_dir, string& errmsg) 
+TemplateTree::parse_file(const string& filename,
+			 const string& config_template_dir, string& error_msg) 
 {
     if (init_template_parser(filename.c_str(), this) < 0) {
 	complete_template_parser();
-	errmsg = c_format("Failed to open template file: %s",
-			      config_template_dir.c_str());
+	error_msg = c_format("Failed to open template file: %s",
+			     config_template_dir.c_str());
 	return false;
     }
     try {
 	parse_template();
     } catch (const ParseError& pe) {
 	complete_template_parser();
-	errmsg = pe.why();
+	error_msg = pe.why();
 	return false;
     }
     if (_path_segments.size() != 0) {
 	complete_template_parser();
-	errmsg = c_format("File %s is not terminated properly", 
-			  filename.c_str());
+	error_msg = c_format("File %s is not terminated properly", 
+			     filename.c_str());
 	return false;
     }
     complete_template_parser();
     return true;
+}
+
+bool
+TemplateTree::expand_template_tree(string& error_msg)
+{
+    // Expand the template tree
+    return root_node()->expand_template_tree(error_msg);
+}
+
+bool
+TemplateTree::check_template_tree(string& error_msg)
+{
+    // Verify the template tree
+    return root_node()->check_template_tree(error_msg);
 }
 
 string

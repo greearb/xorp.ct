@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.11 2005/11/17 08:31:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.12 2005/11/18 00:22:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -29,8 +29,6 @@
 #include "template_tree_node.hh"
 #include "util.hh"
 #include "config_operators.hh"
-extern "C" ConfigOperator lookup_comparator(const string& s);
-extern "C" ConfigOperator lookup_modifier(const string& s);
 
 BaseCommand::BaseCommand(TemplateTreeNode& template_tree_node, 
 			 const string& cmd_name)
@@ -71,11 +69,61 @@ AllowOptionsCommand::AllowOptionsCommand(TemplateTreeNode& 	ttn,
 {
 }
 
+bool
+AllowOptionsCommand::expand_actions(string& error_msg)
+{
+    map<string, Filter>::const_iterator iter;
+
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+
+	TemplateTreeNode* ttn;
+	ttn = template_tree_node().find_varname_node(varname);
+	if (ttn == NULL) {
+	    // Error: invalid variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+
+	const Filter& filter = iter->second;
+	Filter::const_iterator iter2;
+	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
+	    const string& value = iter2->first;
+	    const string& help = iter2->second;
+	    ttn->add_allowed_value(value, help);
+	}
+    }
+
+    return (true);
+}
+
+bool
+AllowOptionsCommand::check_referred_variables(string& error_msg) const
+{
+    map<string, Filter>::const_iterator iter;
+
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+
+	const TemplateTreeNode* ttn;
+	ttn = template_tree_node().find_const_varname_node(varname);
+	if (ttn == NULL) {
+	    // Error: invalid variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+    }
+
+    return (true);
+}
+
 void
 AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
 {
     string error_msg;
-    string new_varname, new_value, new_help_keyword, new_help_string;
+    string new_varname, new_value, new_help_keyword, new_help_str;
     size_t expected_parameters_n = 4;
     list<string> unparsed_action = action;
 
@@ -99,17 +147,12 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
     unparsed_action.pop_front();
     new_help_keyword = unparsed_action.front();
     unparsed_action.pop_front();
-    new_help_string = unquote(unparsed_action.front());
+    new_help_str = unquote(unparsed_action.front());
     unparsed_action.pop_front();
 
     //
     // Verify all parameters
     //
-    if ((_varname.size() != 0) && (_varname != new_varname)) {
-	error_msg = c_format("Currently only one variable per node can be "
-			     "specified using \"%%allow\" commands");
-	xorp_throw(ParseError, error_msg);
-    }
     if (new_help_keyword != "%help") {
 	error_msg = c_format("Invalid %%allow argument: %s "
 			     "(expected \"%%help:\")",
@@ -120,70 +163,79 @@ AllowOptionsCommand::add_action(const list<string>& action) throw (ParseError)
     //
     // Insert the new entry
     //
-    if (_allowed_values.find(new_value) == _allowed_values.end()) {
-	_varname = new_varname;
-	_allowed_values.insert(make_pair(new_value, new_help_string));
+    map<string, Filter>::iterator iter;
+    iter = _filters.find(new_varname);
+    if (iter == _filters.end()) {
+	// Insert a new map
+	Filter new_filter;
+	_filters.insert(make_pair(new_varname, new_filter));
+	iter = _filters.find(new_varname);
     }
+    XLOG_ASSERT(iter != _filters.end());
+    Filter& filter = iter->second;
+
+    // XXX: insert the new pair even if we overwrite an existing one
+    filter.insert(make_pair(new_value, new_help_str));
 }
 
 bool
-AllowOptionsCommand::verify_variable(const ConfigTreeNode& ctn,
-				     string& error_msg) const
+AllowOptionsCommand::verify_variables(const ConfigTreeNode& ctn,
+				      string& error_msg) const
 {
     string value;
+    map<string, Filter>::const_iterator iter;
 
-    if (ctn.expand_variable(_varname, value) == false) {
-	// Error: cannot expand the variable
-	error_msg = c_format("Variable \"%s\" is not defined.",
-			     _varname.c_str());
-	return false;
-    }
-
-    return (verify_variable_by_value(ctn, value, error_msg));
-}
-
-bool
-AllowOptionsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
-					      const string& value,
-					      string& error_msg) const
-{
-    map<string, string>::iterator iter;
-
-    if (_allowed_values.find(value) != _allowed_values.end())
-	return true;			// OK
-
-    // Error: variable value is not allowed
-    string full_varname;
-    if (ctn.expand_variable_to_full_varname(_varname, full_varname) == false) {
-	// Error: cannot expand the variable
-	error_msg = c_format("Variable \"%s\" is not defined.",
-			     _varname.c_str());
-	return false;
-    }
-    error_msg = c_format("Value \"%s\" is not a valid value for "
-			 "variable \"%s\". ",
-			 value.c_str(), full_varname.c_str());
-    map<string, string> values = _allowed_values;
-    if (values.size() == 1) {
-	error_msg += c_format("The only value allowed is %s.",
-			      values.begin()->first.c_str());
-    } else {
-	error_msg += "Allowed values are: ";
-	iter = values.begin();
-	error_msg += iter->first;
-	values.erase(iter);
-	while (! values.empty()) {
-	    if (values.size() == 1)
-		error_msg += " and ";
-	    else
-		error_msg += ", ";
-	    iter = values.begin();
-	    error_msg += iter->first;
-	    values.erase(iter);
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+	if (ctn.expand_variable(varname, value) != true) {
+	    // Error: cannot expand the variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
 	}
-	error_msg += ".";
+
+	Filter filter = iter->second;	// XXX: create a copy we can manipulate
+	if (filter.find(value) != filter.end())
+	    continue;		// This variable is OK
+
+	// Error: variable value is not allowed
+	string full_varname;
+	if (ctn.expand_variable_to_full_varname(varname, full_varname)
+	    != true) {
+	    // Error: cannot expand the variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+	error_msg = c_format("Value \"%s\" is not a valid value for "
+			     "variable \"%s\". ",
+			     value.c_str(), full_varname.c_str());
+	if (filter.size() == 1) {
+	    error_msg += c_format("The only value allowed is %s.",
+				  filter.begin()->first.c_str());
+	} else {
+	    error_msg += "Allowed values are: ";
+	    bool is_first = true;
+	    Filter::iterator iter2;
+	    while (! filter.empty()) {
+		if (is_first) {
+		    is_first = false;
+		} else {
+		    if (filter.size() == 1)
+			error_msg += " and ";
+		    else
+			error_msg += ", ";
+		}
+		iter2 = filter.begin();
+		error_msg += iter2->first;
+		filter.erase(iter2);
+	    }
+	    error_msg += ".";
+	}
+	return (false);
     }
-    return false;
+
+    return (true);
 }
 
 string
@@ -191,16 +243,20 @@ AllowOptionsCommand::str() const
 {
     string tmp;
 
-    tmp = c_format("AllowOptionsCommand: varname = %s\n"
-		   "\tAllowed values:\n",
-		   _varname.c_str());
+    tmp = c_format("AllowOptionsCommand:\n");
 
-    map<string, string>::const_iterator iter;
-    for (iter = _allowed_values.begin();
-	 iter != _allowed_values.end();
-	 ++iter) {
-	tmp += c_format("\tvalue: \"%s\"\thelp: \"%s\"\n",
-			iter->first.c_str(), iter->second.c_str());
+    map<string, Filter>::const_iterator iter;
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+	const Filter& filter = iter->second;
+	tmp += c_format("\tVarname: %s Allowed values:\n",
+			varname.c_str());
+
+	Filter::const_iterator iter2;
+	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
+	    tmp += c_format("\t\tvalue: \"%s\"\thelp: \"%s\"\n",
+			    iter2->first.c_str(), iter2->second.c_str());
+	}
     }
     return tmp;
 }
@@ -215,31 +271,66 @@ AllowOperatorsCommand::AllowOperatorsCommand(TemplateTreeNode& 	ttn,
 {
 }
 
+bool
+AllowOperatorsCommand::expand_actions(string& error_msg)
+{
+    UNUSED(error_msg);
+    return (true);	// XXX: nothing to do
+}
+
+bool
+AllowOperatorsCommand::check_referred_variables(string& error_msg) const
+{
+    UNUSED(error_msg);
+    return (true);	// XXX: nothing to do
+}
+
 void
 AllowOperatorsCommand::add_action(const list<string>& action) throw (ParseError)
 {
-    debug_msg("AllowOperatorsCommand::add_action\n");
+    string error_msg;
+    string new_value;
+    size_t min_expected_parameters_n = 1;
 
-    if (action.size() < 1) {
-	xorp_throw(ParseError, "Allow command with less than one parameter");
+    //
+    // Check the number of parameters
+    //
+    if (action.size() < min_expected_parameters_n) {
+	error_msg = c_format("%%allow-operator command with invalid number of "
+			     "parameters: %u (expected at least %u)",
+			     XORP_UINT_CAST(action.size()),
+			     XORP_UINT_CAST(min_expected_parameters_n));
+	xorp_throw(ParseError, error_msg);
     }
 
+    //
+    // Extract the parameters and add them
+    //
     list<string>::const_iterator iter;
-    
-    for (iter = action.begin(); iter != action.end(); iter++) {
+    for (iter = action.begin(); iter != action.end(); ++iter) {
 	ConfigOperator op;
-	op = lookup_operator(unquote(*iter));
-	_allowed_operators.push_back(op);
+	string op_str = unquote(*iter);
+	try {
+	    op = lookup_operator(op_str);
+	} catch (const ParseError& e) {
+	    error_msg = c_format("%%allow-operator command with invalid "
+				 "operator: %s", op_str.c_str());
+	    xorp_throw(ParseError, error_msg);		 
+	}
+	if (find(_allowed_operators.begin(), _allowed_operators.end(), op)
+	    == _allowed_operators.end()) {
+	    _allowed_operators.push_back(op);
+	}
     }
 }
 
 bool
-AllowOperatorsCommand::verify_variable(const ConfigTreeNode& ctn,
-				       string& error_msg) const
+AllowOperatorsCommand::verify_variables(const ConfigTreeNode& ctn,
+					string& error_msg) const
 {
-    string opstr = ctn.show_operator();
+    string op_str = ctn.show_operator();
 
-    return (verify_variable_by_value(ctn, opstr, error_msg));
+    return (verify_variable_by_value(ctn, op_str, error_msg));
 }
 
 bool
@@ -248,14 +339,21 @@ AllowOperatorsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
 						string& error_msg) const
 {
     ConfigOperator op;
-    op = lookup_operator(unquote(value));
+    string op_str = unquote(value);
+
+    try {
+	op = lookup_operator(op_str);
+    } catch (const ParseError& e) {
+	error_msg = c_format("Invalid operator: %s", op_str.c_str());
+	return (false);
+    }
 
     list<ConfigOperator>::const_iterator iter;
     for (iter = _allowed_operators.begin();
 	iter != _allowed_operators.end();
 	++iter) {
 	if (op == *iter)
-	    return true;		// OK
+	    return (true);		// OK
     }
 
     // Error: variable value is not allowed
@@ -269,17 +367,22 @@ AllowOperatorsCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
 	error_msg += "Allowed values are: ";
 	error_msg += operator_to_str(values.front()).c_str();
 	values.pop_front();
+	bool is_first = true;
 	while (! values.empty()) {
-	    if (values.size() == 1)
-		error_msg += " and ";
-	    else
-		error_msg += ", ";
+	    if (is_first) {
+		is_first = false;
+	    } else {
+		if (values.size() == 1)
+		    error_msg += " and ";
+		else
+		    error_msg += ", ";
+	    }
 	    error_msg += operator_to_str(values.front()).c_str();
 	    values.pop_front();
 	}
 	error_msg += ".";
     }
-    return false;
+    return (false);
 }
 
 list<ConfigOperator>
@@ -324,14 +427,67 @@ AllowRangeCommand::AllowRangeCommand(TemplateTreeNode& 	ttn,
 {
 }
 
+bool
+AllowRangeCommand::expand_actions(string& error_msg)
+{
+    map<string, Filter>::const_iterator iter;
+
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+
+	TemplateTreeNode* ttn;
+	ttn = template_tree_node().find_varname_node(varname);
+	if (ttn == NULL) {
+	    // Error: invalid variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+
+	const Filter& filter = iter->second;
+	Filter::const_iterator iter2;
+	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
+	    const pair<int32_t, int32_t>& pair = iter2->first;
+	    int32_t lower_value = pair.first;
+	    int32_t upper_value = pair.second;
+	    const string& help = iter2->second;
+	    ttn->add_allowed_range(lower_value, upper_value, help);
+	}
+    }
+
+    return (true);
+}
+
+bool
+AllowRangeCommand::check_referred_variables(string& error_msg) const
+{
+    map<string, Filter>::const_iterator iter;
+
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+
+	const TemplateTreeNode* ttn;
+	ttn = template_tree_node().find_const_varname_node(varname);
+	if (ttn == NULL) {
+	    // Error: invalid variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+    }
+
+    return (true);
+}
+
 void
 AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
 {
     string error_msg;
-    string new_varname, new_lower, new_upper;
-    string new_help_keyword, new_help_string;
+    string new_varname, new_lower_str, new_upper_str;
+    string new_help_keyword, new_help_str;
     size_t expected_parameters_n = 5;
     list<string> unparsed_action = action;
+    int32_t new_lower_value, new_upper_value;
 
     //
     // Check the number of parameters
@@ -349,23 +505,18 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     //
     new_varname = unparsed_action.front();
     unparsed_action.pop_front();
-    new_lower = unquote(unparsed_action.front());
+    new_lower_str = unquote(unparsed_action.front());
     unparsed_action.pop_front();
-    new_upper = unquote(unparsed_action.front());
+    new_upper_str = unquote(unparsed_action.front());
     unparsed_action.pop_front();
     new_help_keyword = unparsed_action.front();
     unparsed_action.pop_front();
-    new_help_string = unquote(unparsed_action.front());
+    new_help_str = unquote(unparsed_action.front());
     unparsed_action.pop_front();
 
     //
     // Verify all parameters
     //
-    if ((_varname.size() != 0) && (_varname != new_varname)) {
-	error_msg = c_format("Currently only one variable per node can be "
-			     "specified using \"%%allow-range\" commands");
-	xorp_throw(ParseError, error_msg);
-    }
     if (new_help_keyword != "%help") {
 	error_msg = c_format("Invalid %%allow-range argument: %s "
 			     "(expected \"%%help:\")",
@@ -376,64 +527,109 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     //
     // Insert the new entry
     //
-    _varname = new_varname;
-    _lower = atoi(new_lower.c_str());
-    _upper = atoi(new_upper.c_str());
+    map<string, Filter>::iterator iter;
+    iter = _filters.find(new_varname);
+    if (iter == _filters.end()) {
+	// Insert a new map
+	Filter new_filter;
+	_filters.insert(make_pair(new_varname, new_filter));
+	iter = _filters.find(new_varname);
+    }
+    XLOG_ASSERT(iter != _filters.end());
+    Filter& filter = iter->second;
 
-    if (_lower > _upper)
-	swap(_lower, _upper);
+    new_lower_value = atoi(new_lower_str.c_str());
+    new_upper_value = atoi(new_upper_str.c_str());
+    if (new_lower_value > new_upper_value)
+	swap(new_lower_value, new_upper_value);
+
+    pair<int32_t, int32_t> new_range(new_lower_value, new_upper_value);
+
+    // XXX: insert the new pair even if we overwrite an existing one
+    filter.insert(make_pair(new_range, new_help_str));
 }
 
 bool
-AllowRangeCommand::verify_variable(const ConfigTreeNode& ctn,
-				   string& error_msg) const
+AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
+				    string& error_msg) const
 {
     string value;
+    map<string, Filter>::const_iterator iter;
 
-    if (ctn.expand_variable(_varname, value) == false) {
-	// Error: cannot expand the variable
-	error_msg = c_format("Variable \"%s\" is not defined.",
-			     _varname.c_str());
-	return false;
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+	if (ctn.expand_variable(varname, value) != true) {
+	    // Error: cannot expand the variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+
+	Filter filter = iter->second;	// XXX: create a copy we can manipulate
+
+	bool is_accepted = true;
+	Filter::iterator iter2;
+	int32_t ival = atoi(value.c_str());
+	int32_t lower_value = 0;
+	int32_t upper_value = 0;
+	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
+	    const pair<int32_t, int32_t>& range = iter2->first;
+	    lower_value = range.first;
+	    upper_value = range.second;
+	    if ((ival >= lower_value) && (ival <= upper_value)) {
+		continue;
+	    }
+	    is_accepted = false;
+	    break;
+	}
+
+	if (is_accepted)
+	    continue;		// This variable is OK
+
+	// Error: variable value is not allowed
+	string full_varname;
+	if (ctn.expand_variable_to_full_varname(varname, full_varname)
+	    != true) {
+	    // Error: cannot expand the variable
+	    error_msg = c_format("Variable \"%s\" is not defined.",
+				 varname.c_str());
+	    return (false);
+	}
+	error_msg = c_format("Value %s is outside valid range, %d...%d, "
+			     "for variable \"%s\".",
+			     value.c_str(),
+			     XORP_INT_CAST(lower_value),
+			     XORP_INT_CAST(upper_value),
+			     full_varname.c_str());
+	return (false);
     }
 
-    return (verify_variable_by_value(ctn, value, error_msg));
-}
-
-bool
-AllowRangeCommand::verify_variable_by_value(const ConfigTreeNode& ctn,
-					    const string& value,
-					    string& error_msg) const
-{
-    int32_t ival = atoi(value.c_str());
-
-    if ((ival >= _lower) && (ival <= _upper)) {
-	return true;
-    }
-
-    // Error: variable value is not allowed
-    string full_varname;
-    if (ctn.expand_variable_to_full_varname(_varname, full_varname) == false) {
-	// Error: cannot expand the variable
-	error_msg = c_format("Variable \"%s\" is not defined.",
-			     _varname.c_str());
-	return false;
-    }
-    error_msg = c_format("Value %s is outside valid range, %d...%d, "
-			 "for variable \"%s\".",
-			 value.c_str(),
-			 XORP_INT_CAST(_lower),
-			 XORP_INT_CAST(_upper),
-			 full_varname.c_str());
-    return false;
+    return (true);
 }
 
 string
 AllowRangeCommand::str() const
 {
-    return c_format("AllowRangeCommand: varname = \"%s\"\n       Allowed range: %d...%d",
-		    _varname.c_str(),
-		    XORP_INT_CAST(_lower),
-		    XORP_INT_CAST(_upper));
-}
+    string tmp;
 
+    tmp = c_format("AllowRangeCommand:\n");
+
+    map<string, Filter>::const_iterator iter;
+    for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
+	const string& varname = iter->first;
+	const Filter& filter = iter->second;
+	tmp += c_format("\tVarname: %s Allowed ranges:\n",
+			varname.c_str());
+
+	Filter::const_iterator iter2;
+	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
+	    const pair<int32_t, int32_t>& range = iter2->first;
+	    tmp += c_format("\t\trange: %d...%d\thelp: \"%s\"\n",
+			    XORP_INT_CAST(range.first),
+			    XORP_INT_CAST(range.second),
+			    iter2->second.c_str());
+	}
+    }
+
+    return (tmp);
+}

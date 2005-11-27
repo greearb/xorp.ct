@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.39 2005/11/10 23:55:40 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.40 2005/11/11 01:55:27 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -62,6 +62,7 @@ enum TTSortOrder {
 
 class BaseCommand;
 class CommandTree;
+class ConfigTreeNode;
 class TemplateTree;
 
 class TemplateTreeNode {
@@ -69,6 +70,9 @@ public:
     TemplateTreeNode(TemplateTree& template_tree, TemplateTreeNode* parent, 
 		     const string& path, const string& varname);
     virtual ~TemplateTreeNode();
+
+    bool expand_template_tree(string& error_msg);
+    bool check_template_tree(string& error_msg) const;
 
     virtual TTNodeType type() const { return NODE_VOID; }
     void add_cmd(const string& cmd) throw (ParseError);
@@ -115,22 +119,15 @@ public:
     string get_default_target_name_by_variable(const string& varname) const;
     bool expand_variable(const string& varname, string& value) const;
     bool expand_expression(const string& expression, string& value) const;
-    const TemplateTreeNode* find_varname_node(const string& varname) const;
+    TemplateTreeNode* find_varname_node(const string& varname);
+    const TemplateTreeNode* find_const_varname_node(const string& varname) const;
+
+    bool check_allowed_value(const string& value, string& error_msg) const;
+    bool verify_variables(const ConfigTreeNode& ctn, string& error_msg) const;
 
     const list<string>& mandatory_config_nodes() const { return _mandatory_config_nodes; }
-    const string& help() const {
-	//if the node is a tag, the help is held on the child.
-	if (is_tag()) 
-	    return children().front()->help();
-	return _help;
-    }
-    const string& help_long() const {
-	if (is_tag()) 
-	    return children().front()->help_long();
-	if (_help_long == "") 
-	    return help();
-	return _help_long;
-    }
+    const string& help() const;
+    const string& help_long() const;
 
     int child_number() const { return _child_number;}
 
@@ -153,6 +150,10 @@ public:
      */
     const TemplateTreeNode* find_first_deprecated_ancestor() const;
 
+    void add_allowed_value(const string& value, const string& help);
+    void add_allowed_range(int32_t lower_value, int upper_value,
+			   const string& help);
+
 protected:
     void add_child(TemplateTreeNode* child);
 
@@ -167,8 +168,8 @@ protected:
 private:
     bool split_up_varname(const string& varname,
 			  list<string>& var_parts) const;
-    const TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts) const;
-    const TemplateTreeNode* find_child_varname_node(const list<string>& var_parts) const;
+    TemplateTreeNode* find_parent_varname_node(const list<string>& var_parts);
+    TemplateTreeNode* find_child_varname_node(const list<string>& var_parts);
 
     TemplateTree&	_template_tree;
 
@@ -179,6 +180,8 @@ private:
     // If this node has a variable name associated with it, _varname is
     // where its stored. Otherwise it is an empty string.
     string _varname;
+    map<string, string>	_allowed_values; // Allowed values for this template
+    map<pair<int32_t, int32_t>, string> _allowed_ranges; // Allowed int ranges
 
     // Does the node have a default value?
     bool _has_default;

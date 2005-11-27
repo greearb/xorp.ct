@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_template_tree.hh,v 1.3 2005/07/11 21:49:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_template_tree.hh,v 1.4 2005/07/11 23:14:52 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_TEMPLATE_TREE_HH__
 #define __RTRMGR_MASTER_TEMPLATE_TREE_HH__
@@ -28,7 +28,8 @@ public:
 		       XRLdb& xrldb,
 		       bool verbose)  throw (InitError);
 
-    bool load_template_tree(const string& config_template_dir, string& errmsg);
+    bool load_template_tree(const string& config_template_dir,
+			    string& error_msg);
 
     void add_cmd(char* cmd);
     void add_cmd_action(const string& cmd, const list<string>& action);
@@ -45,8 +46,8 @@ public:
 	return (MasterTemplateTreeNode*)_root_node; 
     }
 private:
-    bool expand_template_tree(string& errmsg);
-    bool check_template_tree(string& errmsg);
+    bool expand_master_template_tree(string& error_msg);
+    bool check_master_template_tree(string& error_msg);
 
     XRLdb		_xrldb;
 };
