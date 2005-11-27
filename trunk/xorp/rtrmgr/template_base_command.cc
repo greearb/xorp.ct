@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.12 2005/11/18 00:22:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.13 2005/11/27 05:43:36 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -572,15 +572,20 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 	int32_t ival = atoi(value.c_str());
 	int32_t lower_value = 0;
 	int32_t upper_value = 0;
+	if (! filter.empty())
+	    is_accepted = false;
+	//
+	// XXX: it is sufficient for the variable's value to belong to any
+	// of the allowed ranges.
+	//
 	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
 	    const pair<int32_t, int32_t>& range = iter2->first;
 	    lower_value = range.first;
 	    upper_value = range.second;
 	    if ((ival >= lower_value) && (ival <= upper_value)) {
-		continue;
+		is_accepted = true;
+		break;
 	    }
-	    is_accepted = false;
-	    break;
 	}
 
 	if (is_accepted)
@@ -595,12 +600,36 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 				 varname.c_str());
 	    return (false);
 	}
-	error_msg = c_format("Value %s is outside valid range, %d...%d, "
-			     "for variable \"%s\".",
-			     value.c_str(),
-			     XORP_INT_CAST(lower_value),
-			     XORP_INT_CAST(upper_value),
-			     full_varname.c_str());
+	error_msg = c_format("Value \"%s\" is not a valid value for "
+			     "variable \"%s\". ",
+			     value.c_str(), full_varname.c_str());
+	if (filter.size() == 1) {
+	    const pair<int32_t, int32_t>& range = filter.begin()->first;
+	    error_msg = c_format("The only range allowed is %d...%d.",
+				 XORP_INT_CAST(range.first),
+				 XORP_INT_CAST(range.second));
+	} else {
+	    error_msg = "Allowed ranges are: ";
+	    bool is_first = true;
+	    while (! filter.empty()) {
+		if (is_first) {
+		    is_first = false;
+		} else {
+		    if (filter.size() == 1)
+			error_msg += " and ";
+		    else
+			error_msg += ", ";
+		}
+		map<pair<int32_t, int32_t>, string>::iterator iter2;
+		iter2 = filter.begin();
+		const pair<int32_t, int32_t>& range = iter2->first;
+		error_msg += c_format("%d...%d",
+				      XORP_INT_CAST(range.first),
+				      XORP_INT_CAST(range.second));
+		filter.erase(iter2);
+	    }
+	    error_msg += ".";
+	}
 	return (false);
     }
 
