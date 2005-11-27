@@ -14,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.20 2005/11/16 11:50:46 mjh Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.21 2005/11/20 23:55:15 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -150,7 +150,7 @@ private:
 /**
  * @short BGPRouteFilter that drops routes that came to us from an IBGP peer.
  *
- * NexthopRewriteFilter is a BGPRouteFilter that drops routes that
+ * IBGPLoopFilter is a BGPRouteFilter that drops routes that
  * came to us from an IBGP peer.  Typically it is used in a outgoing
  * filter on a branch to another IBGP peer, and prevents routes coming
  * from one IBGP peer from being forwarded to another IBGP peer.
