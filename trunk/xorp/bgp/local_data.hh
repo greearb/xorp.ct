@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.12 2005/11/27 06:10:00 atanu Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.13 2005/11/28 04:45:04 atanu Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -109,7 +109,7 @@ public:
     /**
      * Set the route reflection status.
      */
-    void set_route_reflector(const bool& route_reflector) {
+    void set_route_reflector(const bool route_reflector) {
 	_route_reflector = route_reflector;
     }
 
