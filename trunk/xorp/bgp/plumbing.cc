@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.79 2005/11/20 23:55:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.80 2005/11/27 06:10:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -446,6 +446,18 @@ BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
 	filter_in->add_localpref_insertion_filter(
 	  LocalPrefAttribute::default_value() );
     }
+
+    /* 3. If this router is a route reflector configure the in bound
+       filters */
+    LocalData *local_data = _master.main().get_local_data();
+    if (local_data->get_route_reflector()) {
+	if (peer_type == PEER_TYPE_IBGP ||
+	    peer_type == PEER_TYPE_IBGP_CLIENT) {
+	    uint32_t bgp_id = ntohl(local_data->get_id().addr());
+	    uint32_t cluster_id = ntohl(local_data->get_cluster_id().addr());
+	    filter_in->add_route_reflector_input_filter(bgp_id,	cluster_id);
+	}
+    }
 }
 
 template <class A>
@@ -494,9 +506,23 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 	filter_out->add_localpref_removal_filter();
     }
 
-    /* 6. configure loop filter for IBGP peers */
-    if (peer_type == PEER_TYPE_IBGP) {
-	filter_out->add_ibgp_loop_filter();
+    /* 6. configure loop filter for IBGP peers, unless this router is
+       a route reflector */
+    LocalData *local_data = _master.main().get_local_data();
+    if (local_data->get_route_reflector()) {
+	if (peer_type == PEER_TYPE_IBGP ||
+	    peer_type == PEER_TYPE_IBGP_CLIENT) {
+	    bool client = peer_type == PEER_TYPE_IBGP_CLIENT;
+	    uint32_t bgp_id = ntohl(local_data->get_id().addr());
+	    uint32_t cluster_id = ntohl(local_data->get_cluster_id().addr());
+	    filter_out->add_route_reflector_ibgp_loop_filter(client,
+							     bgp_id,
+							     cluster_id);
+	}
+    } else {
+	if (peer_type == PEER_TYPE_IBGP) {
+	    filter_out->add_ibgp_loop_filter();
+	}
     }
 
     /* 7. configure filter for well-known communities */
