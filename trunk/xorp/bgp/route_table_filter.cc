@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.40 2005/11/19 09:33:39 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.41 2005/11/20 23:55:15 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -133,6 +133,34 @@ SimpleASFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	drop_message(rtmsg, modified);
 	return NULL;
     }
+    return rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
+RRInputFilter<A>::RRInputFilter(uint32_t bgp_id, uint32_t cluster_id)
+    : _bgp_id(bgp_id), _cluster_id(cluster_id)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+RRInputFilter<A>::filter(const InternalMessage<A> *rtmsg, 
+			 bool &modified) const 
+{
+    const PathAttributeList<A> *attributes = rtmsg->route()->attributes();
+    const ORIGINATOR_IDAttribute *oid = attributes->originator_id();
+    if (0 != oid && oid->originator_id() == _bgp_id) {
+	drop_message(rtmsg, modified);
+	return NULL;
+    }
+    const CLUSTER_LISTAttribute *cl = attributes->cluster_list();
+    if (0 != cl && cl->contains(_cluster_id)) {
+	drop_message(rtmsg, modified);
+	return NULL;
+    }
+
     return rtmsg;
 }
 
@@ -262,6 +290,81 @@ IBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	return NULL;
     }
     return rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
+RRIBGPLoopFilter<A>::RRIBGPLoopFilter(bool rr_client, uint32_t bgp_id,
+				      uint32_t cluster_id) 
+    : _rr_client(rr_client), _bgp_id(bgp_id), _cluster_id(cluster_id)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+RRIBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
+			  bool &modified) const 
+{
+    // Only if this is *not* a route reflector client should the
+    // packet be filtered. Note PEER_TYPE_IBGP_CLIENT is just passed
+    // through.
+    if (rtmsg->origin_peer()->get_peer_type() == PEER_TYPE_IBGP && 
+	!_rr_client) {
+	drop_message(rtmsg, modified);
+	return NULL;
+    }
+
+    // If as ORIGINATOR_ID is not present add one.
+    //Form a new path attribute list containing the new AS path
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    if (0 == palist.originator_id()) {
+	ORIGINATOR_IDAttribute originator_id_att(_bgp_id);
+	palist.add_path_attribute(originator_id_att);
+    }
+
+    // Prepend the CLUSTER_ID to the CLUSTER_LIST, if the CLUSTER_LIST
+    // does not exist add one.
+    const CLUSTER_LISTAttribute *cla = palist.cluster_list();
+    CLUSTER_LISTAttribute *ncla = 0;
+    if (0 == cla) {
+	ncla = new CLUSTER_LISTAttribute;
+    } else {
+	ncla = dynamic_cast<CLUSTER_LISTAttribute *>(cla->clone());
+	palist.remove_attribute_by_type(CLUSTER_LIST);
+    }
+    ncla->prepend_cluster_id(_cluster_id);
+    palist.add_path_attribute(ncla);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
+			     rtmsg->route()->igp_metric());
+
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    XLOG_ASSERT(new_rtmsg->changed());
+
+    debug_msg("Route with originator id and cluster list %s\n",
+	      new_rtmsg->str().c_str());
+
+    return new_rtmsg;
 }
 
 /*************************************************************************/
@@ -653,6 +756,17 @@ FilterVersion<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
+FilterVersion<A>::add_route_reflector_input_filter(uint32_t bgp_id,
+						   uint32_t cluster_id)
+{
+    RRInputFilter<A>* RR_input_filter;
+    RR_input_filter = new RRInputFilter<A>(bgp_id, cluster_id);
+    _filters.push_back(RR_input_filter);
+    return 0;
+}
+
+template<class A>
+int
 FilterVersion<A>::add_AS_prepend_filter(const AsNum& as_num,
 					bool is_confederation_peer)
 {
@@ -679,6 +793,18 @@ FilterVersion<A>::add_ibgp_loop_filter()
     IBGPLoopFilter<A>* ibgp_filter;
     ibgp_filter = new IBGPLoopFilter<A>;
     _filters.push_back(ibgp_filter);
+    return 0;
+}
+
+template<class A>
+int
+FilterVersion<A>::add_route_reflector_ibgp_loop_filter(bool client,
+						       uint32_t bgp_id,
+						       uint32_t cluster_id)
+{
+    RRIBGPLoopFilter<A>* rr_ibgp_filter;
+    rr_ibgp_filter = new RRIBGPLoopFilter<A>(client, bgp_id, cluster_id);
+    _filters.push_back(rr_ibgp_filter);
     return 0;
 }
 
@@ -1073,6 +1199,15 @@ FilterTable<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
+FilterTable<A>::add_route_reflector_input_filter(uint32_t bgp_id,
+						 uint32_t cluster_id)
+{
+    _current_filter->add_route_reflector_input_filter(bgp_id, cluster_id);
+    return 0;
+}
+
+template<class A>
+int
 FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num, 
 				      bool is_confederation_peer)
 {
@@ -1093,6 +1228,18 @@ int
 FilterTable<A>::add_ibgp_loop_filter()
 {
     _current_filter->add_ibgp_loop_filter();
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_route_reflector_ibgp_loop_filter(bool client,
+						     uint32_t bgp_id,
+						     uint32_t cluster_id)
+{
+    _current_filter->add_route_reflector_ibgp_loop_filter(client,
+							  bgp_id,
+							  cluster_id);
     return 0;
 }
 
