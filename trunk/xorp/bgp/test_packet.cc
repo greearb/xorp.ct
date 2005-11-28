@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet.cc,v 1.9 2005/03/25 02:52:49 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet.cc,v 1.11 2005/08/18 15:58:08 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -302,9 +302,14 @@ UpdatePacket* BGPTestPacket::create_update()
     // nlr_1.dump();
     // wdr.dump();
     ASPathAttribute path_att(p);
+    ORIGINATOR_IDAttribute originator_id(IPv4("1.2.3.4"));
+    CLUSTER_LISTAttribute cluster_list;
+    cluster_list.prepend_cluster_id(IPv4("4.3.2.1"));
+    cluster_list.prepend_cluster_id(IPv4("5.6.7.8"));
     UpdatePacket *bup = new UpdatePacket();
     bup->add_withdrawn(wdr);
     bup->add_pathatt(path_att);
+    bup->add_pathatt(originator_id);
     bup->add_nlri(nlr_0);
     bup->add_nlri(nlr_1);
     return bup;
