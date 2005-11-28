@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.38 2005/03/25 02:52:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.39 2005/06/28 09:30:14 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -396,14 +396,14 @@ PeerHandler::start_packet()
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool /*ibgp*/, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv4) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
     // if a route came from IBGP, it shouldn't go to IBGP (unless
     // we're a route reflector)
-    if (ibgp)
-	XLOG_ASSERT(!_peer->ibgp());
+//     if (ibgp)
+// 	XLOG_ASSERT(!_peer->ibgp());
 
     // Check this peer wants this NLRI
     if (!multiprotocol<IPv4>(safi, BGPPeerData::NEGOTIATED))
@@ -458,14 +458,14 @@ PeerHandler::add_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi)
 }
 
 int
-PeerHandler::add_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi)
+PeerHandler::add_route(const SubnetRoute<IPv6> &rt, bool /*ibgp*/, Safi safi)
 {
     debug_msg("PeerHandler::add_route(IPv6) %p\n", &rt);
     XLOG_ASSERT(_packet != NULL);
     // if a route came from IBGP, it shouldn't go to IBGP (unless
     // we're a route reflector)
-    if (ibgp)
-	XLOG_ASSERT(!_peer->ibgp());
+//     if (ibgp)
+// 	XLOG_ASSERT(!_peer->ibgp());
 
     // Check this peer wants this NLRI
     if (!multiprotocol<IPv6>(safi, BGPPeerData::NEGOTIATED))
