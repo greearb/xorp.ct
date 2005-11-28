@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.64 2005/11/28 04:51:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.65 2005/11/28 08:34:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -558,7 +558,7 @@ CLUSTER_LISTAttribute::CLUSTER_LISTAttribute(const uint8_t* d)
     for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
 	IPv4 i;
 	i.copy_in(d);
-	_cluster_list.push_front(i);
+	_cluster_list.push_back(i);
     }
     encode();
 }
