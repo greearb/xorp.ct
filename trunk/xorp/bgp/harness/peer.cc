@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.65 2005/08/18 15:58:10 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.66 2005/09/23 17:38:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1620,6 +1620,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	UpdatePacket *bgpupdate = new UpdatePacket();
 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
+	CLUSTER_LISTAttribute cl;
 
 	for(size_t i = index + 1; i < size; i += 2) {
 	    debug_msg("name: %s value: <%s>\n",
@@ -1662,6 +1663,13 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	    } else if("med" == words[i]) {
 		MEDAttribute ma(atoi(words[i+1].c_str()));
 		bgpupdate->add_pathatt(ma);
+	    } else if("originatorid" == words[i]) {
+		ORIGINATOR_IDAttribute oid(IPv4((const char *)
+						(words[i+1].c_str())));
+		bgpupdate->add_pathatt(oid);
+	    } else if("clusterlist" == words[i]) {
+ 		cl.prepend_cluster_id(IPv4((const char *)
+ 					   (words[i+1].c_str())));
 	    } else if("pathattr" == words[i]) {
 		AnyAttribute aa(words[i+1].c_str());
 		bgpupdate->add_pathatt(aa);
@@ -1677,6 +1685,9 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	if(!mpipv6_withdraw.wr_list().empty()) {
 	    mpipv6_withdraw.encode();
 	    bgpupdate->add_pathatt(mpipv6_withdraw);
+	}
+	if(!cl.cluster_list().empty()) {
+	    bgpupdate->add_pathatt(cl);
 	}
 
 	pac = bgpupdate;
