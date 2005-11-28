@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.11 2005/11/15 11:43:58 mjh Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.12 2005/11/27 06:10:00 atanu Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -34,7 +34,8 @@
  */
 class LocalData {
 public:
-    LocalData() : _as(AsNum::AS_INVALID), _confed_id(AsNum::AS_INVALID)
+    LocalData() : _as(AsNum::AS_INVALID), _confed_id(AsNum::AS_INVALID),
+		  _route_reflector(false)
     {}
 
     LocalData(const AsNum& as, const IPv4& id)
@@ -83,9 +84,41 @@ public:
 	_confed_id = confed_id;
     }
 
+    /**
+     * @return the cluster ID of this router.
+     */
+    inline const IPv4& get_cluster_id() const {
+	XLOG_ASSERT(_route_reflector);
+	return _cluster_id;
+    }
+
+    /**
+     * Set this routers cluster ID.
+     */
+    inline void set_cluster_id(const IPv4& cluster_id) {
+	_cluster_id = cluster_id;
+    }
+
+    /**
+     * Get the route reflection status.
+     */
+    inline const bool& get_route_reflector() const {
+	return _route_reflector;
+    }
+
+    /**
+     * Set the route reflection status.
+     */
+    void set_route_reflector(const bool& route_reflector) {
+	_route_reflector = route_reflector;
+    }
+
 private:
     AsNum	_as;	                // This routers AS number.
     IPv4	_id;	                // This routers ID.
     AsNum	_confed_id;		// Confederation identifier.
+    IPv4	_cluster_id;		// Router reflector cluster ID
+    bool	_route_reflector;	// True if this router is a
+					// route reflector
 };
 #endif // __BGP_LOCAL_DATA_HH__
