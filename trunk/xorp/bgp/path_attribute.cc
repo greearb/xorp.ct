@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.62 2005/11/15 11:43:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.63 2005/11/27 19:45:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -608,7 +608,15 @@ CLUSTER_LISTAttribute::prepend_cluster_id(uint32_t cluster_id)
     encode();
 }
 
-
+bool
+CLUSTER_LISTAttribute::contains(uint32_t cluster_id) const
+{
+    const_iterator i = find(_cluster_list.begin(), _cluster_list.end(),
+			    cluster_id);
+    if (i == _cluster_list.end())
+	return false;
+    return true;
+}
 
 /**
  * Multiprotocol Reachable NLRI - MP_REACH_NLRI (Type Code 14):

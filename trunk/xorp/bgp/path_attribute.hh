@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.38 2005/11/15 11:43:58 mjh Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.39 2005/11/27 19:45:42 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -451,6 +451,7 @@ public:
 
     const list <uint32_t>& cluster_list() const { return _cluster_list; }
     void prepend_cluster_id(uint32_t cluster_id);
+    bool contains(uint32_t cluster_id) const;
 protected:
 private:
     void encode();
