@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.39 2005/11/27 19:45:42 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.40 2005/11/28 04:51:51 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -426,36 +426,36 @@ private:
 class ORIGINATOR_IDAttribute : public PathAttribute
 {
 public:
-    ORIGINATOR_IDAttribute(const uint32_t originator_id);
+    ORIGINATOR_IDAttribute(const IPv4 originator_id);
     ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const;
 
-    uint32_t originator_id() const     { return _originator_id; }
+    IPv4 originator_id() const     { return _originator_id; }
 protected:
 private:
     void encode();
-    uint32_t _originator_id;	
+    IPv4 _originator_id;	
 };
 
 class CLUSTER_LISTAttribute : public PathAttribute
 {
 public:
-    typedef list <uint32_t>::const_iterator const_iterator;
+    typedef list <IPv4>::const_iterator const_iterator;
     CLUSTER_LISTAttribute();
     CLUSTER_LISTAttribute(const uint8_t* d) throw(CorruptMessage);
     PathAttribute *clone() const;
 
     string str() const;
 
-    const list <uint32_t>& cluster_list() const { return _cluster_list; }
-    void prepend_cluster_id(uint32_t cluster_id);
-    bool contains(uint32_t cluster_id) const;
+    const list <IPv4>& cluster_list() const { return _cluster_list; }
+    void prepend_cluster_id(IPv4 cluster_id);
+    bool contains(IPv4 cluster_id) const;
 protected:
 private:
     void encode();
-    list <uint32_t> _cluster_list;
+    list <IPv4> _cluster_list;
 };
 
 

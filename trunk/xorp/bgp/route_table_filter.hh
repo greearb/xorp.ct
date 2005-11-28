@@ -14,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.22 2005/11/27 17:44:31 atanu Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.23 2005/11/28 04:55:01 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -115,13 +115,13 @@ private:
 template<class A>
 class RRInputFilter : public BGPRouteFilter<A> {
 public:
-    RRInputFilter(uint32_t bgp_id, uint32_t cluster_id);
+    RRInputFilter(IPv4 bgp_id, IPv4 cluster_id);
     const InternalMessage<A>* 
        filter(const InternalMessage<A> *rtmsg, 
 	      bool &modified) const ;
 private:
-    uint32_t _bgp_id;
-    uint32_t _cluster_id;
+    IPv4 _bgp_id;
+    IPv4 _cluster_id;
 };
 
 
@@ -205,14 +205,14 @@ private:
 template<class A>
 class RRIBGPLoopFilter : public BGPRouteFilter<A> {
 public:
-    RRIBGPLoopFilter(bool rr_client, uint32_t bgp_id, uint32_t cluster_id);
+    RRIBGPLoopFilter(bool rr_client, IPv4 bgp_id, IPv4 cluster_id);
     const InternalMessage<A>* 
        filter(const InternalMessage<A> *rtmsg, 
 	      bool &modified) const ;
 private:
     bool _rr_client;
-    uint32_t _bgp_id;
-    uint32_t _cluster_id;
+    IPv4 _bgp_id;
+    IPv4 _cluster_id;
 };
 
 
@@ -365,13 +365,13 @@ public:
     void set_genid(uint32_t genid) {_genid = genid;}
     int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
-    int add_route_reflector_input_filter(uint32_t bgp_id, uint32_t cluster_id);
+    int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
     int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
     int add_nexthop_rewrite_filter(const A& nexthop);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
-					     uint32_t bgp_id,
-					     uint32_t cluster_id);
+					     IPv4 bgp_id,
+					     IPv4 cluster_id);
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
@@ -452,13 +452,13 @@ public:
 
     int add_aggregation_filter(bool is_ibgp);
     int add_simple_AS_filter(const AsNum &asn);
-    int add_route_reflector_input_filter(uint32_t bgp_id, uint32_t cluster_id);
+    int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
     int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
     int add_nexthop_rewrite_filter(const A& nexthop);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
-					     uint32_t bgp_id,
-					     uint32_t cluster_id);
+					     IPv4 bgp_id,
+					     IPv4 cluster_id);
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();

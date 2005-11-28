@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.63 2005/11/27 19:45:42 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.64 2005/11/28 04:51:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -495,7 +495,7 @@ CommunityAttribute::contains(uint32_t community) const
  * ORIGINATOR_IDAttribute
  */
 
-ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint32_t originator_id)
+ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const IPv4 originator_id)
 	: PathAttribute(Optional, ORIGINATOR_ID), _originator_id(originator_id)
 {
     encode();
@@ -507,7 +507,8 @@ ORIGINATOR_IDAttribute::clone() const
     return new ORIGINATOR_IDAttribute(originator_id());
 }
 
-ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMessage)
+ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint8_t* d)
+    throw(CorruptMessage)
     : PathAttribute(d)
 {
     if (!optional() || transitive())
@@ -516,8 +517,8 @@ ORIGINATOR_IDAttribute::ORIGINATOR_IDAttribute(const uint8_t* d) throw(CorruptMe
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in ORIGINATOR_IDAttribute",
 		   UPDATEMSGERR, INVALNHATTR);
-    memcpy(&_originator_id, payload(d), 4);
-    _originator_id = ntohl(_originator_id);
+
+    _originator_id.copy_in(payload(d));
     encode();
 }
 
@@ -525,18 +526,14 @@ void
 ORIGINATOR_IDAttribute::encode()
 {
     uint8_t *d = set_header(4);
-    uint32_t x = htonl(_originator_id);
-    memcpy(d, &x, 4);
+    _originator_id.copy_out(d);
 }
 
 string
 ORIGINATOR_IDAttribute::str() const
 {
-    return c_format("ORIGINATOR ID Attribute: ORIGINATOR_ID=%u",
-		    XORP_UINT_CAST(originator_id()));
+    return c_format("ORIGINATOR ID Attribute: %s", cstring(originator_id()));
 }
-
-
 
 /**
  * CLUSTER_LISTAttribute
@@ -559,9 +556,9 @@ CLUSTER_LISTAttribute::CLUSTER_LISTAttribute(const uint8_t* d)
 		   UPDATEMSGERR, ATTRFLAGS);
     d = payload(d);
     for (size_t l = _size; l >= 4;  d += 4, l -= 4) {
-	uint32_t value;
-	memcpy(&value, d, 4);
-	_cluster_list.push_front(ntohl(value));
+	IPv4 i;
+	i.copy_in(d);
+	_cluster_list.push_front(i);
     }
     encode();
 }
@@ -570,7 +567,8 @@ PathAttribute *
 CLUSTER_LISTAttribute::clone() const
 {
     CLUSTER_LISTAttribute *ca = new CLUSTER_LISTAttribute();
-    for(const_iterator i = cluster_list().end(); i != cluster_list().begin(); i--)
+    list<IPv4>::const_reverse_iterator i = cluster_list().rbegin();
+    for(; i != cluster_list().rend(); i++)
 	ca->prepend_cluster_id(*i);
     return ca;
 }
@@ -585,8 +583,7 @@ CLUSTER_LISTAttribute::encode()
     uint8_t *d = set_header(_size);
     const_iterator i = _cluster_list.begin();
     for (; i != _cluster_list.end(); d += 4, i++) {
-	uint32_t value = htonl(*i);
-	memcpy(d, &value, 4);
+	i->copy_out(d);
     }
 }
 
@@ -596,12 +593,12 @@ CLUSTER_LISTAttribute::str() const
     string s = "Cluster List Attribute ";
     const_iterator i = _cluster_list.begin();
     for ( ; i != _cluster_list.end();  ++i)
-	s += c_format("%u ", XORP_UINT_CAST(*i));
+	s += c_format("%s ", cstring(*i));
     return s;
 }
 
 void
-CLUSTER_LISTAttribute::prepend_cluster_id(uint32_t cluster_id)
+CLUSTER_LISTAttribute::prepend_cluster_id(IPv4 cluster_id)
 {
     _cluster_list.push_front(cluster_id);
     _size += 4;
@@ -609,7 +606,7 @@ CLUSTER_LISTAttribute::prepend_cluster_id(uint32_t cluster_id)
 }
 
 bool
-CLUSTER_LISTAttribute::contains(uint32_t cluster_id) const
+CLUSTER_LISTAttribute::contains(IPv4 cluster_id) const
 {
     const_iterator i = find(_cluster_list.begin(), _cluster_list.end(),
 			    cluster_id);

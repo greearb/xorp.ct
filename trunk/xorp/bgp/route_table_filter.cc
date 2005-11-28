@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.41 2005/11/20 23:55:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.42 2005/11/28 04:55:01 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -139,7 +139,7 @@ SimpleASFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-RRInputFilter<A>::RRInputFilter(uint32_t bgp_id, uint32_t cluster_id)
+RRInputFilter<A>::RRInputFilter(IPv4 bgp_id, IPv4 cluster_id)
     : _bgp_id(bgp_id), _cluster_id(cluster_id)
 {
 }
@@ -295,8 +295,8 @@ IBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-RRIBGPLoopFilter<A>::RRIBGPLoopFilter(bool rr_client, uint32_t bgp_id,
-				      uint32_t cluster_id) 
+RRIBGPLoopFilter<A>::RRIBGPLoopFilter(bool rr_client, IPv4 bgp_id,
+				      IPv4 cluster_id) 
     : _rr_client(rr_client), _bgp_id(bgp_id), _cluster_id(cluster_id)
 {
 }
@@ -756,8 +756,8 @@ FilterVersion<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
-FilterVersion<A>::add_route_reflector_input_filter(uint32_t bgp_id,
-						   uint32_t cluster_id)
+FilterVersion<A>::add_route_reflector_input_filter(IPv4 bgp_id,
+						   IPv4 cluster_id)
 {
     RRInputFilter<A>* RR_input_filter;
     RR_input_filter = new RRInputFilter<A>(bgp_id, cluster_id);
@@ -799,8 +799,8 @@ FilterVersion<A>::add_ibgp_loop_filter()
 template<class A>
 int
 FilterVersion<A>::add_route_reflector_ibgp_loop_filter(bool client,
-						       uint32_t bgp_id,
-						       uint32_t cluster_id)
+						       IPv4 bgp_id,
+						       IPv4 cluster_id)
 {
     RRIBGPLoopFilter<A>* rr_ibgp_filter;
     rr_ibgp_filter = new RRIBGPLoopFilter<A>(client, bgp_id, cluster_id);
@@ -1199,8 +1199,7 @@ FilterTable<A>::add_simple_AS_filter(const AsNum& as_num)
 
 template<class A>
 int
-FilterTable<A>::add_route_reflector_input_filter(uint32_t bgp_id,
-						 uint32_t cluster_id)
+FilterTable<A>::add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id)
 {
     _current_filter->add_route_reflector_input_filter(bgp_id, cluster_id);
     return 0;
@@ -1234,8 +1233,8 @@ FilterTable<A>::add_ibgp_loop_filter()
 template<class A>
 int
 FilterTable<A>::add_route_reflector_ibgp_loop_filter(bool client,
-						     uint32_t bgp_id,
-						     uint32_t cluster_id)
+						     IPv4 bgp_id,
+						     IPv4 cluster_id)
 {
     _current_filter->add_route_reflector_ibgp_loop_filter(client,
 							  bgp_id,

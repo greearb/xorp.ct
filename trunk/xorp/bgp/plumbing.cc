@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.80 2005/11/27 06:10:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.81 2005/11/28 04:56:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -453,8 +453,8 @@ BGPPlumbingAF<A>::configure_inbound_filter(PeerHandler* peer_handler,
     if (local_data->get_route_reflector()) {
 	if (peer_type == PEER_TYPE_IBGP ||
 	    peer_type == PEER_TYPE_IBGP_CLIENT) {
-	    uint32_t bgp_id = ntohl(local_data->get_id().addr());
-	    uint32_t cluster_id = ntohl(local_data->get_cluster_id().addr());
+	    IPv4 bgp_id = local_data->get_id();
+	    IPv4 cluster_id = local_data->get_cluster_id();
 	    filter_in->add_route_reflector_input_filter(bgp_id,	cluster_id);
 	}
     }
@@ -513,8 +513,8 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 	if (peer_type == PEER_TYPE_IBGP ||
 	    peer_type == PEER_TYPE_IBGP_CLIENT) {
 	    bool client = peer_type == PEER_TYPE_IBGP_CLIENT;
-	    uint32_t bgp_id = ntohl(local_data->get_id().addr());
-	    uint32_t cluster_id = ntohl(local_data->get_cluster_id().addr());
+	    IPv4 bgp_id = local_data->get_id();
+	    IPv4 cluster_id = local_data->get_cluster_id();
 	    filter_out->add_route_reflector_ibgp_loop_filter(client,
 							     bgp_id,
 							     cluster_id);
