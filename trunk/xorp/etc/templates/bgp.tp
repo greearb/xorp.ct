@@ -1,10 +1,15 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.66 2005/11/21 23:55:07 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.67 2005/11/27 06:10:03 atanu Exp $ */
 
 protocols {
     bgp {
 	targetname: txt = "bgp";
 	bgp-id: ipv4;
 	local-as: u32;
+
+	route-reflector {
+	    cluster-id: ipv4;
+	    disable: bool;
+	}
 
 	confederation {
 	    identifier: u32;
@@ -148,6 +153,23 @@ protocols {
 	    %allow-range: $(@) "0" "65535" %help: "Local AS number";
 	    %set: xrl "$(bgp.targetname)/bgp/0.2/set_local_as?as:u32=$(@)";
 	    %get: xrl "$(bgp.targetname)/bgp/0.2/get_local_as->as:u32";
+	}
+
+	route-reflector {
+	    %mandatory: $(@.cluster-id);
+	    %mandatory: $(@.disable);
+
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=true";
+
+	    cluster-id {
+		%set:;
+	    }
+
+	    disable {
+		%set:;
+	    }
 	}
 
 	confederation {
@@ -315,6 +337,18 @@ protocols {
 
 	local-as {
 	    %help: short "Set the Autonomous System (AS) number for this domain";
+	}
+
+	route-reflector {
+	    %help: short "Make this router a route reflector";
+
+	    cluster-id {
+		%help: short "CLUSTER_ID for this route reflector";
+	    }
+
+	    disable {
+		%help: short "disable this router reflector";
+	    }
 	}
 
 	confederation {
