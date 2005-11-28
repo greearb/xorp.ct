@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.25 2005/11/15 11:43:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.26 2005/11/27 06:10:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -84,7 +84,7 @@ void
 BGPPeerData::compute_peer_type()
 {
     if (_local_data.get_as() == as()) {
-	_peer_type = route_reflector() ?
+	_peer_type = _local_data.get_route_reflector() && route_reflector() ?
 	    PEER_TYPE_IBGP_CLIENT : PEER_TYPE_IBGP;
     } else {
 	_peer_type = _local_data.get_confed_id().as() != AsNum::AS_INVALID &&
