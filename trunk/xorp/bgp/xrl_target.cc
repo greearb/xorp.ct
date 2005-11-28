@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.47 2005/11/15 11:44:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.48 2005/11/27 06:10:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -190,6 +190,18 @@ XrlBgpTarget::bgp_0_2_set_confederation_identifier(const uint32_t& as,
     debug_msg("as %u disable %s", as, disable ? "true" : "false");
 
     _bgp.set_confederation_identifier(as, disable);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_cluster_id(const IPv4& cluster_id,
+				     const bool& disable)
+{
+    debug_msg("Cluster ID %s disable %s", cstring(cluster_id),
+	      disable ? "true" : "false");
+
+    _bgp.set_cluster_id(cluster_id, disable);
 
     return XrlCmdError::OKAY();
 }

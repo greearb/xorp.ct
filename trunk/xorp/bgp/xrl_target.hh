@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.33 2005/11/15 11:44:00 mjh Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.34 2005/11/27 06:10:03 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -71,6 +71,11 @@ public:
         // Input values,
 	const uint32_t&	as,
 	const bool& disable);
+
+    XrlCmdError bgp_0_2_set_cluster_id(
+	// Input values,
+	const IPv4&	cluster_id,
+	const bool&	disable);
 
     XrlCmdError bgp_0_2_add_peer(
 	// Input values,

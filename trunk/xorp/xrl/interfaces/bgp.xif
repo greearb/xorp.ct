@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.26 2005/11/15 11:44:03 mjh Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.27 2005/11/27 06:10:04 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -56,6 +56,17 @@ interface bgp/0.2 {
 	set_confederation_identifier \
 		? \
 		as:u32 \
+		& disable:bool
+
+	/**
+	 * Route reflection.
+	 *
+	 * @param cluster_id the route reflection cluster ID.
+	 * @param disable if true this router is a router reflector.
+	 */
+	set_cluster_id \
+		? \
+		cluster_id:ipv4 \
 		& disable:bool
 
 	/** 

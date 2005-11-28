@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.59 2005/11/15 11:43:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.60 2005/11/27 06:10:00 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -286,6 +286,17 @@ BGPMain::set_confederation_identifier(const uint32_t& as, bool disable)
     } else {
 	local->set_confed_id(AsNum(as));
     }
+
+    _peerlist->all_stop(true /* restart */);
+}
+
+void
+BGPMain::set_cluster_id(const IPv4& cluster_id, bool disable)
+{
+    LocalData *local = get_local_data();
+
+    local->set_cluster_id(cluster_id);
+    local->set_route_reflector(!disable);
 
     _peerlist->all_stop(true /* restart */);
 }
