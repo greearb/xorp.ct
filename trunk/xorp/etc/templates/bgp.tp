@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.67 2005/11/27 06:10:03 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.68 2005/11/28 05:00:04 atanu Exp $ */
 
 protocols {
     bgp {
@@ -93,7 +93,7 @@ policy {
 		med: u32range;
 		localpref: u32range;
 
-		was-aggregated: u32;
+		was-aggregated: bool;
 	    }
 	    then {
 		nexthop4: ipv4;
@@ -456,7 +456,8 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med&type:txt=u32&access:txt=rw&id:u32=19";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=rw&id:u32=21";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=w&id:u32=21";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=22";
 
     policy-statement @: txt {
         term @: txt {
@@ -552,7 +553,7 @@ policy {
 		}
 		was-aggregated {
 			%allow-operator: ":" "==" "!=";
-			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=aggregate_prefix_len $(<>) 210;";
+			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=was_aggregated $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 	    } /* to */
