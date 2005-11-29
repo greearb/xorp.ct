@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.40 2005/11/11 01:55:27 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.41 2005/11/27 05:43:37 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -153,6 +153,10 @@ public:
     void add_allowed_value(const string& value, const string& help);
     void add_allowed_range(int32_t lower_value, int upper_value,
 			   const string& help);
+    const map<string, string>& allowed_values() const { return _allowed_values; }
+    const map<pair<int32_t, int32_t>, string>& allowed_ranges() const {
+	return _allowed_ranges;
+    }
 
 protected:
     void add_child(TemplateTreeNode* child);
