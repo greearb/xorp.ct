@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/command_tree.hh,v 1.10 2004/06/10 22:41:51 hodson Exp $
+// $XORP: xorp/rtrmgr/command_tree.hh,v 1.11 2005/03/25 02:54:34 pavlin Exp $
 
 #ifndef __RTRMGR_COMMAND_TREE_HH__
 #define __RTRMGR_COMMAND_TREE_HH__
@@ -40,8 +40,8 @@ public:
     string subtree_str() const;
     void set_has_command() { _has_command = true; }
     bool has_command() const { return _has_command; }
-    const ConfigTreeNode* config_tree_node() { return _config_tree_node; }
-    const TemplateTreeNode* template_tree_node() { return _template_tree_node;}
+    const ConfigTreeNode* config_tree_node() const { return _config_tree_node; }
+    const TemplateTreeNode* template_tree_node() const { return _template_tree_node;}
     const CommandTreeNode* subroot(list<string> path) const;
     const string& help() const;
 
