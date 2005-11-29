@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.10 2005/11/22 13:25:55 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.11 2005/11/27 06:10:01 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -60,6 +60,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.changed());
     bool must_push = false;
 
     /*
@@ -130,7 +131,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      * If our component route holds a more specific prefix than the
      * aggregate, announce it to EBGP peering branches.
      */
-    if (aggr_route->net() != orig_net) {
+    if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
 
@@ -181,6 +182,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.changed());
     bool must_push = false;
 
     /*
@@ -236,7 +238,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
      * If our component route holds a more specific prefix than the
      * aggregate, send a delete rquest for it to EBGP branches.
      */
-    if (aggr_route->net() != orig_net) {
+    if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
 
@@ -523,6 +525,7 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
+    XLOG_ASSERT(!rtmsg.changed());
 
     /*
      * If not marked as aggregation candidate, pass the request
@@ -573,7 +576,7 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
      * If our component route holds a more specific prefix than the
      * aggregate, send it downstream.
      */
-    if (aggr_route->net() != orig_net) {
+    if (aggr_route->net() != orig_net || aggr_route->is_suppressed()) {
 	SubnetRoute<A> *ebgp_r = new SubnetRoute<A>(*orig_route);
 	InternalMessage<A> ebgp_msg(ebgp_r, rtmsg.origin_peer(), rtmsg.genid());
 
