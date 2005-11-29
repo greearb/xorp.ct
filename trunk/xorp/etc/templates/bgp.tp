@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.68 2005/11/28 05:00:04 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.69 2005/11/28 17:48:57 zec Exp $ */
 
 protocols {
     bgp {
@@ -8,12 +8,12 @@ protocols {
 
 	route-reflector {
 	    cluster-id: ipv4;
-	    disable: bool;
+	    disable: bool = false;
 	}
 
 	confederation {
 	    identifier: u32;
-	    disable: bool;
+	    disable: bool = false;
 	}
 
 	peer @: txt {
@@ -157,11 +157,10 @@ protocols {
 
 	route-reflector {
 	    %mandatory: $(@.cluster-id);
-	    %mandatory: $(@.disable);
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=true";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=`~$(DEFAULT)`";
 
 	    cluster-id {
 		%set:;
@@ -174,11 +173,10 @@ protocols {
 
 	confederation {
 	    %mandatory: $(@.identifier);
-	    %mandatory: $(@.disable);
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=true";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=`~$(DEFAULT)`";
 
 	    identifier {
 		%set:;
