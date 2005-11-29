@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.12 2005/11/15 11:44:00 mjh Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.13 2005/11/27 06:10:02 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -11,6 +11,12 @@ local_config()
     echo "local_config" $*
 #    $CALLXRL  "finder://bgp/bgp/0.1/local_config?localhost:txt=$1&port:i32=$2&as_num:i32=$3&id:ipv4=$4&version:i32=$5&holdtime:i32=$6"
     $CALLXRL  "finder://bgp/bgp/0.2/local_config?as:u32=$1&id:ipv4=$2"
+}
+
+route_reflector()
+{
+    echo "route_reflector" $*
+    $CALLXRL "finder://bgp/bgp/0.2/set_cluster_id?cluster_id:ipv4=$1&disable:bool=$2"
 }
 
 add_peer()
@@ -47,6 +53,12 @@ disable_peer()
     echo "disable_peer" $*
 #    $CALLXRL "finder://bgp/bgp/0.1/disable_peer?peer:txt=$1&as:i32=$2"
     $CALLXRL "finder://bgp/bgp/0.2/disable_peer?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$4"
+}
+
+route_reflector_client()
+{
+    echo "route_reflector_client" $*
+    $CALLXRL "finder://bgp/bgp/0.2/set_route_reflector_client?local_ip:txt=$1&local_port:u32=$2&peer_ip:txt=$3&peer_port:u32=$3&state:bool=$5"
 }
 
 set_peer_md5_password()
