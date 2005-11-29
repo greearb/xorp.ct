@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.28 2005/11/15 11:43:58 mjh Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.29 2005/11/27 06:10:00 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -71,6 +71,49 @@ class BGPMain;
 class PeerHandler;
 class AcceptSession;
 
+/**
+ * Manage the damping of peer oscillations.
+ */
+class DampPeerOscillations {
+ public:
+    DampPeerOscillations(EventLoop& eventloop, uint32_t restart_threshold,
+			 uint32_t time_period, uint32_t idle_holdtime);
+
+    /**
+     * The session has been restarted.
+     */
+    void restart();
+
+    /**
+     * @return the idle holdtime. 
+     */
+    uint32_t idle_holdtime() const;
+
+    /**
+     * Reset the state, possibly due to a manual restart. 
+     */
+    void reset();
+ private:
+    EventLoop& _eventloop;		// Reference to the eventloop.
+    const uint32_t _restart_threshold;	// Number of restart after
+					// which the idle holdtime
+					// will increase.
+    const uint32_t _time_period;	// Period in seconds over
+					// which to sample errors.
+    const uint32_t _idle_holdtime;	// Holdtime in seconds to use once the
+					// error threshold is passed.
+
+    uint32_t _restart_counter;		// Count number of restarts in
+					// last time quantum.
+
+    XorpTimer _zero_restart;		// Zero the restart counter.
+
+    /**
+     * Used by the timer to zero the error count.
+     */
+    void zero_restart_count();
+};
+
 class BGPPeer {
 public:
     BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock, BGPMain *m);
@@ -108,7 +151,7 @@ public:
      * state machine handlers for the various BGP events
      */
     void event_start();			// EVENTBGPSTART
-    void event_stop(bool restart=false);// EVENTBGPSTOP
+    void event_stop(bool restart=false, bool automatic = false);// EVENTBGPSTOP
     void event_open();			// EVENTBGPTRANOPEN
     void event_open(const XorpFd sock);	// EVENTBGPTRANOPEN
     void event_closed();		// EVENTBGPTRANCLOSED
@@ -141,6 +184,10 @@ public:
 
     void start_stopped_timer();
     void clear_stopped_timer();
+
+    void start_idle_hold_timer();
+    void clear_idle_hold_timer();
+    void hook_idle_hold_timer();
 
     bool get_message(BGPPacket::Status status, const uint8_t *buf, size_t len,
 		     SocketClient *socket_client);
@@ -195,9 +242,10 @@ private:
 	    event_openfail();		// Event = EVENTBGPCONNOPENFAIL
     }
 
-    void send_notification(const NotificationPacket& p, bool restart = true);
+    void send_notification(const NotificationPacket& p, bool restart = true,
+			   bool automatic = true);
     void send_notification_complete(SocketClient::Event, const uint8_t *buf,
-				    bool restart);
+				    bool restart, bool automatic);
     void flush_transmit_queue()		{ _SocketClient->flush_transmit_queue(); }
     void stop_reader()			{ _SocketClient->stop_reader(); }
 
@@ -214,6 +262,7 @@ private:
     XorpTimer _timer_connect_retry;
     XorpTimer _timer_hold_time;
     XorpTimer _timer_keep_alive;
+    XorpTimer _idle_hold;
 
     // counters needed for the BGP MIB
     uint32_t _in_updates;
@@ -245,9 +294,25 @@ private:
      * move to the desired state, plus does some additional
      * work to clean up existing state and possibly retrying to
      * open/connect if restart = true
+     *
+     * @param restart if true and this is a transition to idle restart
+     * the connection.
+     * @param automatic if the transition is to idle and automatic restart has
+     * been request. This is not a manual restart.
      */
-    void set_state(FSMState s, bool restart = false);
+    void set_state(FSMState s, bool restart = false, bool automatic = true);
     bool remote_ip_ge_than(const BGPPeer& peer);
+
+    bool _damping_peer_oscillations;	// True if Damp Peer
+					// Oscillations is enabled.
+    DampPeerOscillations _damp_peer_oscillations;
+    
+    /**
+     * Called every time there is an automatic restart. Used for
+     * tracking peer damp oscillations.
+     */
+    void automatic_restart();
+    
 private:
     friend class BGPMain;
 

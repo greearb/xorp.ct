@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.103 2005/11/15 11:43:58 mjh Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.104 2005/11/27 06:10:00 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -42,7 +42,13 @@ uint32_t BGPPeer::_unique_id_allocator = UNIQUE_ID_START;
 inline void trap_callback(const XrlError& error, const char *comment);
 
 BGPPeer::BGPPeer(LocalData *ld, BGPPeerData *pd, SocketClient *sock,
-		 BGPMain *m) : _unique_id(_unique_id_allocator++)
+		 BGPMain *m) 
+    : _unique_id(_unique_id_allocator++),
+      _damping_peer_oscillations(true),
+      _damp_peer_oscillations(m->eventloop(),
+			      10,	/* restart threshold */
+			      5 * 60,	/* time period */
+			      2 * 60 	/* idle holdtime */)
 {
     debug_msg("BGPPeer constructor called (1)\n");
 
@@ -412,7 +418,8 @@ BGPPeer::send_message_complete(SocketClient::Event ev, const uint8_t *buf)
 }
 
 void
-BGPPeer::send_notification(const NotificationPacket& p, bool restart)
+BGPPeer::send_notification(const NotificationPacket& p, bool restart,
+			   bool automatic)
 {
     debug_msg(p.str().c_str());
 
@@ -446,7 +453,8 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart)
     ** This write is async. So we can't free the data now,
     ** we will deal with it in the complete routine.  */
     bool ret =_SocketClient->send_message(buf, ccnt,
-	       callback(this, &BGPPeer::send_notification_complete, restart));
+	       callback(this, &BGPPeer::send_notification_complete,
+			restart, automatic));
 
     if (!ret) {
 	delete[] buf;
@@ -457,7 +465,8 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart)
 
 void
 BGPPeer::send_notification_complete(SocketClient::Event ev,
-				    const uint8_t* buf, bool restart)
+				    const uint8_t* buf, bool restart,
+				    bool automatic)
 {
     TIMESPENT();
 
@@ -474,7 +483,7 @@ BGPPeer::send_notification_complete(SocketClient::Event ev,
     case SocketClient::ERROR:
 	debug_msg("Notification not sent\n");
 	XLOG_ASSERT(STATESTOPPED == _state);
-	set_state(STATEIDLE, restart);
+	set_state(STATEIDLE, restart, automatic);
 	/* Don't free the message here we'll get it in the flush */
 	break;
     }
@@ -554,7 +563,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
  * stop event. No data associated with the event.
  */
 void
-BGPPeer::event_stop(bool restart)	// EVENTBGPSTOP
+BGPPeer::event_stop(bool restart, bool automatic)	// EVENTBGPSTOP
 { 
     TIMESPENT();
 
@@ -568,7 +577,7 @@ BGPPeer::event_stop(bool restart)	// EVENTBGPSTOP
 	/*FALLTHROUGH*/
 
     case STATEACTIVE:
-	set_state(STATEIDLE, restart);
+	set_state(STATEIDLE, restart, automatic);
 	break;
 
     case STATEOPENSENT:
@@ -576,14 +585,14 @@ BGPPeer::event_stop(bool restart)	// EVENTBGPSTOP
     case STATEESTABLISHED: {
 	// Send Notification Message with error code of CEASE.
 	NotificationPacket np(CEASE);
-	send_notification(np, restart);
-	set_state(STATESTOPPED, restart);
+	send_notification(np, restart, automatic);
+	set_state(STATESTOPPED, restart, automatic);
 	break;
     }
     case STATESTOPPED:
 	// a second stop will cause us to give up on sending the CEASE
 	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE, restart);
+	set_state(STATEIDLE, restart, automatic);
 	break;
     }
 }
@@ -1582,6 +1591,7 @@ BGPPeer::clear_all_timers()
     clear_hold_timer();
     clear_keepalive_timer();
     clear_stopped_timer();
+    clear_idle_hold_timer();
 }
 
 void
@@ -1751,7 +1761,7 @@ BGPPeer::pretty_print_state(FSMState s)
 }
 
 void
-BGPPeer::set_state(FSMState s, bool restart)
+BGPPeer::set_state(FSMState s, bool restart, bool automatic)
 {
     TIMESPENT();
 
@@ -1773,14 +1783,17 @@ BGPPeer::set_state(FSMState s, bool restart)
 	    // Release resources - which includes a disconnect
 	    release_resources();
 	    if (restart) {
-		// re-start timer = 60;
-		// or exp growth see section 8
-
-		/* XXX
-		** Connection has been blown away try to
-		** reconnect.
-		*/
-		event_start(); // XXX ouch, recursive call into state machine
+		if (automatic) {
+		    automatic_restart();
+		    start_idle_hold_timer();
+		} else {
+		    /* XXX
+		    ** Connection has been blown away try to
+		    ** reconnect.
+		    */
+		    event_start(); // XXX ouch, recursive call into
+				   // state machine 
+		}
 	    }
 	}
 	break;
@@ -1893,6 +1906,43 @@ BGPPeer::remote_ip_ge_than(const BGPPeer& peer)
     string this_remote_ip = peerdata()->iptuple().get_peer_addr();
     string other_remote_ip = peer.peerdata()->iptuple().get_peer_addr();
     return (this_remote_ip >= other_remote_ip);     
+}
+
+void
+BGPPeer::automatic_restart()
+{
+    if (!_damping_peer_oscillations)
+	return;
+
+    _damp_peer_oscillations.restart();
+}
+
+void 
+BGPPeer::start_idle_hold_timer()
+{
+    if (!_damping_peer_oscillations)
+	return;
+
+    _idle_hold = _mainprocess->eventloop().
+	new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
+			 callback(this, &BGPPeer::hook_idle_hold_timer));
+    
+}
+
+void 
+BGPPeer::clear_idle_hold_timer()
+{
+    if (!_damping_peer_oscillations)
+	return;
+
+    _idle_hold.unschedule();
+}
+
+void 
+BGPPeer::hook_idle_hold_timer()
+{
+    XLOG_ASSERT(state() == STATEIDLE);
+    event_start();
 }
 
 // Second FSM.
@@ -2388,4 +2438,48 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
     }
 
     return true;
+}
+
+DampPeerOscillations::DampPeerOscillations(EventLoop& eventloop,
+					   uint32_t restart_threshold,
+					   uint32_t time_period,
+					   uint32_t idle_holdtime) 
+    : _eventloop(eventloop),
+      _restart_threshold(restart_threshold),
+      _time_period(time_period),
+      _idle_holdtime(idle_holdtime),
+      _restart_counter(0)
+{
+}
+
+void
+DampPeerOscillations::restart()
+{
+    if (0 == _restart_counter++) {
+	_zero_restart = _eventloop.
+	    new_oneoff_after(TimeVal(_time_period, 0),
+			     callback(this,
+				      &DampPeerOscillations::
+				      zero_restart_count));
+	
+    }
+}
+
+void
+DampPeerOscillations::reset()
+{
+    _zero_restart.unschedule();
+    zero_restart_count();
+}
+
+void
+DampPeerOscillations::zero_restart_count()
+{
+    _restart_counter = 0;
+}
+
+uint32_t
+DampPeerOscillations::idle_holdtime() const
+{
+    return _restart_counter < _restart_threshold ? 0 : _idle_holdtime;
 }
