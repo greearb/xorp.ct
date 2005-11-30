@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.67 2005/11/27 05:43:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.68 2005/11/27 06:45:12 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -55,6 +55,7 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
       _is_deprecated(false),
+      _is_mandatory(false),
       _is_read_only(false),
       _is_permanent(false)
 {
@@ -123,16 +124,59 @@ TemplateTreeNode::expand_template_tree(string& error_msg)
     }
 
     //
+    // Mark all referred mandatory variables
+    //
+    list<string>::const_iterator string_iter;
+    for (string_iter = mandatory_config_nodes().begin();
+	 string_iter != mandatory_config_nodes().end();
+	 ++string_iter) {
+	const string& mandatory_config_node = *string_iter;
+	TemplateTreeNode* ttn;
+	ttn = find_varname_node(mandatory_config_node);
+	if (ttn == NULL) {
+	    error_msg = c_format("Invalid template mandatory variable %s: "
+				 "not found",
+				 mandatory_config_node.c_str());
+	    return (false);
+	}
+	bool is_multi_value = false;
+	do {
+	    //
+	    // Check if there is a multi-value node between the referred
+	    // template node and this node (or the root of the template tree).
+	    //
+	    if (ttn->is_tag()) {
+		is_multi_value = true;
+		break;
+	    }
+	    ttn = ttn->parent();
+	    if (ttn == this)
+		break;
+	    if (ttn == NULL)
+		break;
+	} while (true);
+	if (is_multi_value) {
+	    error_msg = c_format("Invalid template mandatory variable %s: "
+				 "cannot specify a multi-value node as "
+				 "mandatory",
+				 mandatory_config_node.c_str());
+	    return (false);
+	}
+
+	ttn->set_mandatory(true);
+    }
+
+    //
     // Recursively expand all children nodes
     //
     list<TemplateTreeNode*>::iterator iter2;
     for (iter2 = _children.begin(); iter2 != _children.end(); ++iter2) {
 	TemplateTreeNode* ttn = *iter2;
 	if (ttn->expand_template_tree(error_msg) != true)
-	    return false;
+	    return (false);
     }
 
-    return true;
+    return (true);
 }
 
 bool

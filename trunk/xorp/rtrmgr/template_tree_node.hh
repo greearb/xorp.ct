@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.41 2005/11/27 05:43:37 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.42 2005/11/29 02:34:09 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -138,7 +138,8 @@ public:
     void set_deprecated(bool v) { _is_deprecated = v; }
     const string& deprecated_reason() const { return _deprecated_reason; }
     void set_deprecated_reason(const string& v) { _deprecated_reason = v; }
-
+    bool is_mandatory() const { return _is_mandatory; }
+    void set_mandatory(bool v) { _is_mandatory = v; }
     bool is_read_only() const { return _is_read_only; }
     const string& read_only_reason() const { return _read_only_reason; }
     bool is_permanent() const { return _is_permanent; }
@@ -207,6 +208,7 @@ private:
     bool		_verbose;	 // Set to true if output is verbose
     bool		_is_deprecated;	// True if node's usage is deprecated
     string		_deprecated_reason; // The reason for deprecation
+    bool		_is_mandatory;	// True if this node is mandatory
     bool		_is_read_only;	// True if a read-only node
     string		_read_only_reason; // The reason for read-only
     bool		_is_permanent;	// True if a permanent node
