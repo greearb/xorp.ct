@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.107 2005/11/14 03:44:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.108 2005/11/16 23:32:10 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1097,7 +1097,8 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 			       const CLI_PROCESS_CALLBACK& cb,
 			       string path,
 			       size_t depth,
-			       bool can_pipe)
+			       bool can_pipe,
+			       bool include_allowed_values)
 {
     const list<CommandTreeNode*>& children = current_ctn.children();
     if (depth > 0) {
@@ -1109,14 +1110,16 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 
     list<CommandTreeNode*>::const_iterator cmd_iter;
     for (cmd_iter = children.begin(); cmd_iter != children.end(); ++cmd_iter) {
-	string cmd_name = (*cmd_iter)->name();
-	CliCommand* com;
+	const CommandTreeNode& ctn = *(*cmd_iter);
+	const string& cmd_name = ctn.name();
 	string subpath = path + " " + cmd_name;
-	string help = (*cmd_iter)->help();
+	string help = ctn.help();
 	if (help == "") {
 	    help = "-- no help available --";
 	}
-	if ((*cmd_iter)->has_command()) {
+
+	CliCommand* com;
+	if (ctn.has_command()) {
 	    com = current_cli_node.add_command(cmd_name, help, false, cb);
 	} else {
 	    com = current_cli_node.add_command(cmd_name, help, false);
@@ -1127,7 +1130,70 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 
 	com->set_can_pipe(can_pipe);
 	com->set_global_name(subpath);
-	add_command_subtree(*com, *(*cmd_iter), cb, path, depth + 1, can_pipe);
+	add_command_subtree(*com, ctn, cb, path, depth + 1, can_pipe,
+			    include_allowed_values);
+    }
+
+    const TemplateTreeNode* ttn = current_ctn.template_tree_node();
+    if (include_allowed_values && (ttn != NULL)) {
+	//
+	// Add the command-line completion for the allowed values
+	//
+	map<string, string>::const_iterator values_iter;
+	for (values_iter = ttn->allowed_values().begin();
+	     values_iter != ttn->allowed_values().end();
+	     ++values_iter) {
+	    const string& cmd_name = values_iter->first;
+	    string subpath = path + " " + cmd_name;
+	    string help = values_iter->second;
+	    if (help == "") {
+		help = "-- no help available --";
+	    }
+
+	    CliCommand* com;
+	    if (current_ctn.has_command()) {
+		com = current_cli_node.add_command(cmd_name, help, false, cb);
+	    } else {
+		com = current_cli_node.add_command(cmd_name, help, false);
+	    }
+	    if (com == NULL) {
+		XLOG_FATAL("add_command %s failed", cmd_name.c_str());
+	    }
+	    com->set_can_pipe(can_pipe);
+	    com->set_global_name(subpath);
+	}
+
+	//
+	// Add the command-line completion for the allowed ranges
+	//
+	map<pair<int32_t, int32_t>, string>::const_iterator ranges_iter;
+	for (ranges_iter = ttn->allowed_ranges().begin();
+	     ranges_iter != ttn->allowed_ranges().end();
+	     ++ranges_iter) {
+	    const pair<int32_t, int32_t>& range = ranges_iter->first;
+	    string cmd_name = c_format("[%d..%d]", XORP_INT_CAST(range.first),
+				       XORP_INT_CAST(range.second));
+	    string subpath = path + " " + cmd_name;
+	    string help = ranges_iter->second;
+	    if (help == "") {
+		help = "-- no help available --";
+	    }
+
+	    CliCommand* com;
+	    if (current_ctn.has_command()) {
+		com = current_cli_node.add_command(cmd_name, help, false, cb);
+	    } else {
+		com = current_cli_node.add_command(cmd_name, help, false);
+	    }
+	    if (com == NULL) {
+		XLOG_FATAL("add_command %s failed", cmd_name.c_str());
+	    }
+	    com->set_can_pipe(can_pipe);
+	    com->set_global_name(subpath);
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(ttn, &TemplateTreeNode::type_match);
+	    com->set_type_match_cb(cb);
+	}
     }
 }
 
@@ -1219,7 +1285,8 @@ RouterCLI::add_edit_subtree()
 	add_command_subtree(*_edit_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::edit_func),
 			    cmdpath, 0,
-			    false /* can_pipe */);
+			    false, /* can_pipe */
+			    false /* include_allowed_values */);
     }
 }
 
@@ -1265,7 +1332,8 @@ RouterCLI::add_delete_subtree()
     add_command_subtree(*_delete_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::delete_func),
 			cmdpath, 0,
-			false /* can_pipe */);
+			false, /* can_pipe */
+			false /* include_allowed_values */);
 }
 
 void
@@ -1301,7 +1369,8 @@ RouterCLI::add_set_subtree()
 	add_command_subtree(*_set_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::set_func),
 			    cmdpath, 0,
-			    false /* can_pipe */);
+			    false, /* can_pipe */
+			    true /* include_allowed_values */);
     }
 }
 
@@ -1340,7 +1409,8 @@ RouterCLI::add_show_subtree()
     add_command_subtree(*_show_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::show_func),
 			cmdpath, 0,
-			true /* can_pipe */);
+			true, /* can_pipe */
+			false /* include_allowed_values */);
 
     com1 = _show_node->add_command("-all", get_help_c("show -all"), false,
 				   callback(this, &RouterCLI::show_func));
@@ -1350,7 +1420,8 @@ RouterCLI::add_show_subtree()
     add_command_subtree(*com1, cmd_tree.root_node(),
 			callback(this, &RouterCLI::show_func),
 			cmdpath_all, 0,
-			true /* can_pipe */);
+			true, /* can_pipe */
+			false /* include_allowed_values */);
 }
 
 void
@@ -2395,7 +2466,6 @@ RouterCLI::text_entry_children_func(const string& path) const
 	    if (ttn_child->is_deprecated())
 		continue;
 	    help_string = ttn_child->help();
-	    string subpath;
 	    if (help_string == "") {
 		help_string = "-- no help available --";
 	    }
@@ -2433,6 +2503,45 @@ RouterCLI::text_entry_children_func(const string& path) const
 	    CliCommandMatch ccm(command_name, help_string, is_executable,
 				can_pipe);
 	    children.insert(make_pair(command_name, ccm));
+	}
+
+	//
+	// Add the command-line completion for the allowed values
+	//
+	map<string, string>::const_iterator values_iter;
+	for (values_iter = ttn->allowed_values().begin();
+	     values_iter != ttn->allowed_values().end();
+	     ++values_iter) {
+	    const string& cmd_name = values_iter->first;
+	    string help_string = values_iter->second;
+	    if (help_string == "") {
+		help_string = "-- no help available --";
+	    }
+	    CliCommandMatch ccm(cmd_name, help_string,
+				is_executable, can_pipe);
+	    children.insert(make_pair(cmd_name, ccm));
+	}
+
+	//
+	// Add the command-line completion for the allowed ranges
+	//
+	map<pair<int32_t, int32_t>, string>::const_iterator ranges_iter;
+	for (ranges_iter = ttn->allowed_ranges().begin();
+	     ranges_iter != ttn->allowed_ranges().end();
+	     ++ranges_iter) {
+	    const pair<int32_t, int32_t>& range = ranges_iter->first;
+	    string cmd_name = c_format("[%d..%d]", XORP_INT_CAST(range.first),
+				       XORP_INT_CAST(range.second));
+	    string help_string = ranges_iter->second;
+	    if (help_string == "") {
+		help_string = "-- no help available --";
+	    }
+	    CliCommandMatch ccm(cmd_name, help_string,
+				is_executable, can_pipe);
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(ttn, &TemplateTreeNode::type_match);
+	    ccm.set_type_match_cb(cb);
+	    children.insert(make_pair(cmd_name, ccm));
 	}
     }
 
@@ -2578,18 +2687,34 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     string result, error_msg;
     list<string> path_parts;
     path_parts = split(path, ' ');
-
-    SlaveConfigTreeNode* ctn = config_tree()->find_node(path_parts);
+    SlaveConfigTreeNode* ctn;
     const TemplateTreeNode* ttn;
     bool create_needed = false;
-    string nodename;
+    vector<string> argv_copy = argv;
 
+    ctn = config_tree()->find_node(path_parts);
     if (ctn == NULL) {
-	create_needed = true;
+	//
+	// XXX: Either the path contains a leaf node that should be created
+	// or the path itself includes the value of the leaf node.
+	//
+	list<string> parent_path_parts = path_parts;
+	parent_path_parts.pop_back();
+	ctn = config_tree()->find_node(parent_path_parts);
 	ttn = config_tree()->find_template(path_parts);
-	nodename = path_parts.back();
-	path_parts.pop_back();
-	ctn = config_tree()->find_node(path_parts);
+	if (ttn != NULL) {
+	    // XXX: the path contains a leaf node that should be created
+	    create_needed = true;
+	} else {
+	    // XXX: the path itself includes the value of the leaf node
+	    ttn = config_tree()->find_template(parent_path_parts);
+	    string value = path_parts.back();
+	    // Move the value as the first argument
+	    argv_copy.clear();
+	    argv_copy.reserve(argv.size() + 1);
+	    argv_copy.push_back(value);
+	    argv_copy.insert(argv_copy.end(), argv.begin(), argv.end());
+	}
     } else {
 	XLOG_ASSERT(ctn->is_leaf_value());
 	ttn = ctn->template_tree_node();
@@ -2600,7 +2725,7 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     string value;
     ConfigOperator node_operator = OP_NONE;
 
-    if (extract_leaf_node_operator_and_value(*ttn, argv, node_operator,
+    if (extract_leaf_node_operator_and_value(*ttn, argv_copy, node_operator,
 					     value, error_msg)
 	!= XORP_OK) {
 	result = c_format("ERROR : \"set %s\": %s.",
@@ -2612,7 +2737,6 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 
     if (create_needed) {
 	string newpath;
-	path_parts.push_back(nodename);
 	list<string>::const_iterator iter;
 
 	for (iter = path_parts.begin(); iter != path_parts.end(); ++iter) {

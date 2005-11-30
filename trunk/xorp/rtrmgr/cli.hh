@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.40 2005/11/14 03:44:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.41 2005/11/16 23:32:10 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -229,7 +229,8 @@ private:
     void add_command_subtree(CliCommand& current_cli_node,
 			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
-			     string path, size_t depth, bool can_pipe);
+			     string path, size_t depth, bool can_pipe,
+			     bool include_allowed_values);
     void add_text_entry_commands(CliCommand* com0);
     void add_edit_subtree();
     void add_create_subtree();
