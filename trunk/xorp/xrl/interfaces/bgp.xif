@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.27 2005/11/27 06:10:04 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.28 2005/11/28 04:58:24 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -221,6 +221,24 @@ interface bgp/0.2 {
 		& peer_ip:txt \
 		& peer_port:u32 \
 		& holdtime:u32
+
+	/**
+	 * Set the delay open time
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param delay_open_time to wait is seconds before sending an open.
+	 *       
+	 */
+	set_delay_open_time \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& delay_open_time:u32
 
 	/**
 	 * Set the route reflection client state. Is this peer a route

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.49 2005/11/28 04:58:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.50 2005/11/28 06:41:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -459,6 +459,34 @@ XrlBgpTarget::bgp_0_2_set_holdtime(
 			peer_port);
 
 	if(!_bgp.set_holdtime(iptuple, holdtime))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_set_delay_open_time(
+				   // Input values,
+				   const string&  local_ip,
+				   const uint32_t& local_port,
+				   const string& peer_ip,
+				   const uint32_t& peer_port,
+				   const uint32_t& delay_open_time)
+{
+    debug_msg("local ip %s local port %u peer ip %s peer port %u"
+	      " new delay open time %u\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      delay_open_time);
+
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_delay_open_time(iptuple, delay_open_time))
 	    return XrlCmdError::COMMAND_FAILED();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.60 2005/11/27 06:10:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.61 2005/11/28 04:57:32 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -731,6 +731,28 @@ BGPMain::set_holdtime(const Iptuple& iptuple, uint32_t holdtime)
 	set_configured_hold_time(holdtime);
 
     bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_delay_open_time(const Iptuple& iptuple, uint32_t delay_open_time)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    if (peer->peerdata()->get_delay_open_time() == delay_open_time)
+	return true;
+
+    const_cast<BGPPeerData*>(peer->peerdata())->
+	set_delay_open_time(delay_open_time);
+
+    // No need to bounce the peer.
+//     bounce_peer(iptuple);
 
     return true;
 }

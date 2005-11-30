@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.26 2005/11/27 06:10:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.27 2005/11/28 04:49:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,7 @@ BGPPeerData::BGPPeerData(const LocalData& local_data, const Iptuple& iptuple,
 			 const IPv4& next_hop, const uint16_t holdtime)
     : _local_data(local_data), _iptuple(iptuple), _as(as),
       _route_reflector(false), _confederation(false),
+      _delay_open_time(0),
       _hold_duration(0), _retry_duration(0), _keepalive_duration(0),
       _peer_type(PEER_TYPE_UNCONFIGURED)
 {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.17 2005/11/15 11:43:58 mjh Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.18 2005/11/27 06:10:00 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -251,6 +251,14 @@ public:
 	return _configured_hold_time;
     }
 
+    void set_delay_open_time(uint32_t delay_open_time) {
+	_delay_open_time = delay_open_time;
+    }
+
+    uint32_t get_delay_open_time() const {
+	return _delay_open_time;
+    }
+
     void set_next_hop_rewrite(const IPv4& next_hop) { 
 	_next_hop_rewrite = next_hop;
     }
@@ -287,6 +295,11 @@ private:
      * Holdtime in seconds. Value sent in open negotiation.
      */
     uint16_t _configured_hold_time;
+
+    /**
+     * The number of seconds to wait before sending an open message.
+     */
+    uint32_t _delay_open_time;
 
     /**
      * Peer's BGP ID.

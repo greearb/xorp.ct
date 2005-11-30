@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.50 2005/11/27 06:10:00 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.51 2005/11/28 04:57:32 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -242,6 +242,16 @@ public:
      * @return true on success
      */
     bool set_holdtime(const Iptuple& iptuple, uint32_t holdtime);
+
+    /**
+     * set delay open time
+     *
+     * @param iptuple iptuple.
+     * @param delay_open_time new value.
+     *
+     * @return true on success
+     */
+    bool set_delay_open_time(const Iptuple& iptuple, uint32_t delay_open_time);
 
     /**
      * set route reflector client
