@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.104 2005/11/27 06:10:00 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.105 2005/11/29 22:04:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -507,7 +507,7 @@ BGPPeer::hook_stopped()
     ** CEASE. If we arrived here due to a timeout, something has gone
     ** wrong so unconditionally set the restart to true.
     */
-    set_state(STATEIDLE, true);
+    set_state(STATEIDLE);
 }
 
 /*
@@ -540,7 +540,7 @@ BGPPeer::event_start()			// EVENTBGPSTART
 
     case STATESTOPPED:
 	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE);	// go through STATEIDLE to clear resources
+	set_state(STATEIDLE, false);// go through STATEIDLE to clear resources
 	// fallthrough now to process the start event
     case STATEIDLE:
 	// Initalise resources
@@ -658,35 +658,32 @@ BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 
     switch(_state) {
     case STATEIDLE:
+	return;
 	break;
 
     case STATECONNECT:
 	_SocketClient->connect_break();
 	clear_connect_retry_timer();
-	/*FALLTHROUGH*/
+	break;
 
     case STATEACTIVE:
-	set_state(STATEIDLE);
 	break;
 
     case STATEOPENSENT:
 	// Close Connection
 	_SocketClient->disconnect();
-	// Restart ConnectRetry Timer
-	restart_connect_retry_timer();
-	set_state(STATEACTIVE);
 	break;
 
     case STATEOPENCONFIRM:
     case STATEESTABLISHED:
-	set_state(STATEIDLE, true);
 	break;
 
     case STATESTOPPED:
 	flush_transmit_queue();		// ensure callback can't happen
-	set_state(STATEIDLE);
 	break;
     }
+
+    set_state(STATEIDLE);
 }
 
 /*
@@ -737,7 +734,7 @@ BGPPeer::event_tranfatal()			// EVENTBGPTRANFATALERR
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
     case STATEESTABLISHED:
-	set_state(STATEIDLE, true);	// retry later...
+	set_state(STATEIDLE);
 	break;
 
     case STATESTOPPED:
@@ -820,7 +817,7 @@ BGPPeer::event_holdexp()			// EVENTHOLDTIMEEXP
 	// Send Notification Message with error code of Hold Timer expired.
 	NotificationPacket np(HOLDTIMEEXP);
 	send_notification(np);
-	set_state(STATESTOPPED, true);
+	set_state(STATESTOPPED);
 	break;
     }
     }
@@ -896,8 +893,8 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 	    set_state(STATEOPENCONFIRM);
 	} catch(CorruptMessage& mess) {
 	    NotificationPacket np(mess.error(), mess.subcode());
-	    send_notification(np, false);
-	    set_state(STATESTOPPED, false);
+	    send_notification(np);
+	    set_state(STATESTOPPED);
 	}
 	break;
 
@@ -909,7 +906,7 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
-	set_state(STATESTOPPED, true);
+	set_state(STATESTOPPED);
 	break;
     }
     case STATESTOPPED:
@@ -945,7 +942,7 @@ BGPPeer::event_keepmess()			// EVENTRECKEEPALIVEMESS
 		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
-	set_state(STATESTOPPED, true);
+	set_state(STATESTOPPED);
 	break;
     }
     case STATEOPENCONFIRM:	// this is what we were waiting for.
@@ -985,7 +982,7 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 		     pretty_print_state(_state));
 	NotificationPacket np(FSMERROR);
 	send_notification(np);
-	set_state(STATESTOPPED, true);
+	set_state(STATESTOPPED);
 	break;
     }
     case STATEESTABLISHED: {
@@ -994,7 +991,7 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	    // Send Notification Message
 	    send_notification(*notification);
 	    delete notification;
-	    set_state(STATESTOPPED, true);
+	    set_state(STATESTOPPED);
 	    break;
 	}
 	// ok the packet is correct.
@@ -1054,16 +1051,11 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
-	// While attempting an open something went wrong probably
-	// mismatched parameters. Drive through the idle state to
-	// release all the state and restart the connect retry timer.
-	set_state(STATEIDLE, false);
-	restart_connect_retry_timer();
-	set_state(STATEACTIVE);
+	set_state(STATEIDLE);
 	break;
 
     case STATEESTABLISHED:
-	set_state(STATEIDLE, true);
+	set_state(STATEIDLE);
 	break;
 
     case STATESTOPPED:
@@ -1091,7 +1083,7 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
     if (is_connected()) {
 	NotificationPacket np(error, subcode, data, len);
 	send_notification(np);
-	set_state(STATESTOPPED, true);
+	set_state(STATESTOPPED);
 	return;
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.29 2005/11/27 06:10:00 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.30 2005/11/29 22:04:36 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -300,7 +300,7 @@ private:
      * @param automatic if the transition is to idle and automatic restart has
      * been request. This is not a manual restart.
      */
-    void set_state(FSMState s, bool restart = false, bool automatic = true);
+    void set_state(FSMState s, bool restart = true, bool automatic = true);
     bool remote_ip_ge_than(const BGPPeer& peer);
 
     bool _damping_peer_oscillations;	// True if Damp Peer
