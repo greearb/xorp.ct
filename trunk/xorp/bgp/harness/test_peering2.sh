@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.46 2005/11/02 07:32:47 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.47 2005/11/02 07:38:13 atanu Exp $
 #
 
 #
@@ -250,6 +250,8 @@ test2()
 	do
 	    sleep 2
 	done
+
+	sleep 2
 
 	coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.101
 	coord peer1 assert established
