@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.50 2005/10/14 17:56:23 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.51 2005/11/03 17:27:51 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -297,7 +297,8 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     //
     // We need to kill the process
     //
-    XLOG_INFO("Killing module: %s (pid = %p)", _name.c_str(), (void *)_pid);
+    XLOG_INFO("Killing module: %s (pid = %u)", _name.c_str(),
+	      XORP_UINT_CAST(_pid));
     new_status(MODULE_SHUTTING_DOWN);
 #ifdef HOST_OS_WINDOWS
     GenerateConsoleCtrlEvent(CTRL_C_EVENT, _pid);
@@ -590,7 +591,7 @@ Module::run(bool do_exec, bool is_verification,
 	    }
 	}
 #endif // ! HOST_OS_WINDOWS
-	debug_msg("New module has PID %p\n", (void *)_pid);
+	debug_msg("New module has PID %u\n", XORP_UINT_CAST(_pid));
 
 	// Insert the new process in the map of processes
 	XLOG_ASSERT(module_pids.find(_pid) == module_pids.end());
@@ -687,7 +688,7 @@ Module::str() const
     string s = "Module " + _name + ", path " + _path + "\n";
 
     if (_status != MODULE_NOT_STARTED && _status != MODULE_FAILED)
-	s += c_format("Module is running, pid=%p\n", (void *)_pid);
+	s += c_format("Module is running, pid=%u\n", XORP_UINT_CAST(_pid));
     else
 	s += "Module is not running\n";
     return s;
