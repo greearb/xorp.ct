@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.105 2005/11/29 22:04:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.106 2005/11/30 07:34:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -621,10 +621,17 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
 
     case STATECONNECT:
     case STATEACTIVE: {
+	if (0 != _peerdata->get_delay_open_time()) {
+	    start_delay_open_timer();
+	    clear_connect_retry_timer();
+	    return;
+	}
+
 	OpenPacket open_packet(_peerdata->my_AS_number(),
 			       _localdata->get_id(),
 			       _peerdata->get_configured_hold_time());
 
+#if	0
 	ParameterList::const_iterator
 	    pi = _peerdata->parameter_sent_list().begin();
 	while(pi != _peerdata->parameter_sent_list().end()) {
@@ -632,7 +639,8 @@ BGPPeer::event_open()	// EVENTBGPTRANOPEN
 		open_packet.add_parameter(*pi);
 	    pi++;
 	}
-
+#endif
+	generate_open_message(open_packet);
 	send_message(open_packet);
 
 	clear_connect_retry_timer();
@@ -662,7 +670,8 @@ BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 	break;
 
     case STATECONNECT:
-	_SocketClient->connect_break();
+	if (_SocketClient->is_connected())
+	    _SocketClient->connect_break();
 	clear_connect_retry_timer();
 	break;
 
@@ -852,6 +861,54 @@ BGPPeer::event_keepexp()			// EVENTKEEPALIVEEXP
     }
 }
 
+void
+BGPPeer::event_delay_open_exp()
+{ 
+    TIMESPENT();
+    
+    switch(_state) {
+    case STATEIDLE:
+    case STATESTOPPED:
+    case STATEOPENSENT:
+    case STATEESTABLISHED: {
+	XLOG_WARNING("%s FSM received EVENTRECOPENMESS in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
+	set_state(STATESTOPPED);
+    }
+	break;
+    case STATECONNECT:
+    case STATEACTIVE:
+    case STATEOPENCONFIRM: {
+	OpenPacket open_packet(_peerdata->my_AS_number(),
+			       _localdata->get_id(),
+			       _peerdata->get_configured_hold_time());
+	generate_open_message(open_packet);
+	send_message(open_packet);
+
+	if (_state == STATEACTIVE) {
+	    // Start Holdtimer - four minutes recommended in spec.
+	    _peerdata->set_hold_duration(4 * 60);
+	    start_hold_timer();
+	}
+	// Change state to OpenSent
+	set_state(STATEOPENSENT);
+    }
+	break;
+    }
+}
+
+void
+BGPPeer::event_idle_hold_exp()
+{ 
+    TIMESPENT();
+
+    XLOG_ASSERT(state() == STATEIDLE);
+    event_start();
+}
+
 /*
  * EVENTRECOPENMESS event.
  * We receive an open packet.
@@ -862,14 +919,18 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
     TIMESPENT();
 
     switch(_state) {
-    case STATEIDLE:
     case STATECONNECT:
-    case STATEACTIVE:
-	XLOG_FATAL("%s FSM received EVENTRECOPENMESS in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
-	break;
-
+    case STATEACTIVE: {
+	// The only way to get here is due to a delayed open.
+	// Kill the delay open timer and send the open packet.
+	clear_delay_open_timer();
+	OpenPacket open_packet(_peerdata->my_AS_number(),
+			       _localdata->get_id(),
+			       _peerdata->get_configured_hold_time());
+	generate_open_message(open_packet);
+	send_message(open_packet);
+    }
+	/* FALLTHROUGH */
     case STATEOPENSENT:
 	// Process OPEN MESSAGE
 	try {
@@ -898,6 +959,7 @@ BGPPeer::event_openmess(const OpenPacket& p)		// EVENTRECOPENMESS
 	}
 	break;
 
+    case STATEIDLE:
     case STATEOPENCONFIRM:
     case STATEESTABLISHED: {
 	// Send Notification - FSM error
@@ -968,10 +1030,14 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
     switch(_state) {
     case STATEIDLE:
     case STATECONNECT:
-    case STATEACTIVE:
-	XLOG_FATAL("%s FSM received EVENTRECUPDATEMESS in state %s",
-		   this->str().c_str(),
-		   pretty_print_state(_state));
+    case STATEACTIVE: {
+	XLOG_WARNING("%s FSM received EVENTRECUPDATEMESS in state %s",
+		     this->str().c_str(),
+		     pretty_print_state(_state));
+	NotificationPacket np(FSMERROR);
+	send_notification(np);
+	set_state(STATESTOPPED);
+    }
 	break;
 
     case STATEOPENSENT:
@@ -1060,6 +1126,18 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 
     case STATESTOPPED:
 	break;
+    }
+}
+
+void
+BGPPeer::generate_open_message(OpenPacket& open)
+{
+    ParameterList::const_iterator
+	pi = _peerdata->parameter_sent_list().begin();
+    while(pi != _peerdata->parameter_sent_list().end()) {
+	if ((*pi)->send())
+	    open.add_parameter(*pi);
+	pi++;
     }
 }
 
@@ -1583,6 +1661,7 @@ BGPPeer::clear_all_timers()
     clear_hold_timer();
     clear_keepalive_timer();
     clear_stopped_timer();
+    clear_delay_open_timer();
     clear_idle_hold_timer();
 }
 
@@ -1690,6 +1769,42 @@ BGPPeer::clear_stopped_timer()
     debug_msg("Stopped timer cleared\n");
 
     _timer_stopped.unschedule();
+}
+
+void 
+BGPPeer::start_idle_hold_timer()
+{
+    if (!_damping_peer_oscillations)
+	return;
+
+    _idle_hold = _mainprocess->eventloop().
+	new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
+			 callback(this, &BGPPeer::event_idle_hold_exp));
+    
+}
+
+void 
+BGPPeer::clear_idle_hold_timer()
+{
+    if (!_damping_peer_oscillations)
+	return;
+
+    _idle_hold.unschedule();
+}
+
+void 
+BGPPeer::start_delay_open_timer()
+{
+    _idle_hold = _mainprocess->eventloop().
+	new_oneoff_after(TimeVal(_peerdata->get_delay_open_time(), 0),
+			 callback(this, &BGPPeer::event_delay_open_exp));
+    
+}
+
+void 
+BGPPeer::clear_delay_open_timer()
+{
+    _delay_open.unschedule();
 }
 
 bool
@@ -1907,34 +2022,6 @@ BGPPeer::automatic_restart()
 	return;
 
     _damp_peer_oscillations.restart();
-}
-
-void 
-BGPPeer::start_idle_hold_timer()
-{
-    if (!_damping_peer_oscillations)
-	return;
-
-    _idle_hold = _mainprocess->eventloop().
-	new_oneoff_after(TimeVal(_damp_peer_oscillations.idle_holdtime(), 0),
-			 callback(this, &BGPPeer::hook_idle_hold_timer));
-    
-}
-
-void 
-BGPPeer::clear_idle_hold_timer()
-{
-    if (!_damping_peer_oscillations)
-	return;
-
-    _idle_hold.unschedule();
-}
-
-void 
-BGPPeer::hook_idle_hold_timer()
-{
-    XLOG_ASSERT(state() == STATEIDLE);
-    event_start();
 }
 
 // Second FSM.

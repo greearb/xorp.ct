@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.30 2005/11/29 22:04:36 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.31 2005/11/30 07:34:25 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -160,11 +160,14 @@ public:
     void event_connexp();		// EVENTCONNTIMEEXP
     void event_holdexp();		// EVENTHOLDTIMEEXP
     void event_keepexp();		// EVENTKEEPALIVEEXP
+    void event_delay_open_exp();	// Event 12: DelayOpenTimer_Expires
+    void event_idle_hold_exp();		// Event 13: IdleHoldTimer_Expires
     void event_openmess(const OpenPacket& p);	// EVENTRECOPENMESS
     void event_keepmess();			// EVENTRECKEEPALIVEMESS
     void event_recvupdate(const UpdatePacket& p); 	// EVENTRECUPDATEMESS
     void event_recvnotify(const NotificationPacket& p); // EVENTRECNOTMESS
 
+    void generate_open_message(OpenPacket& open);
     void notify_peer_of_error(const int error, const int subcode,
 		const uint8_t*data = 0, const size_t len = 0);
 
@@ -187,7 +190,9 @@ public:
 
     void start_idle_hold_timer();
     void clear_idle_hold_timer();
-    void hook_idle_hold_timer();
+
+    void start_delay_open_timer();
+    void clear_delay_open_timer();
 
     bool get_message(BGPPacket::Status status, const uint8_t *buf, size_t len,
 		     SocketClient *socket_client);
@@ -263,6 +268,7 @@ private:
     XorpTimer _timer_hold_time;
     XorpTimer _timer_keep_alive;
     XorpTimer _idle_hold;
+    XorpTimer _delay_open;
 
     // counters needed for the BGP MIB
     uint32_t _in_updates;
