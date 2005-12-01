@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/config_node_id.hh,v 1.3 2005/09/27 17:49:56 pavlin Exp $
+// $XORP: xorp/libproto/config_node_id.hh,v 1.4 2005/09/27 22:41:13 atanu Exp $
 
 
 #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
@@ -23,6 +23,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 
+#include <sstream>
 #include <list>
 #include <map>
 
@@ -139,7 +140,17 @@ public:
      * of the node ID.
      */
     string str() const {
-	return (c_format("%llu %llu", _unique_node_id, _position));
+	ostringstream ost;
+	//
+	// XXX: We use ostringstream instead of the c_format() facility
+	// because the c_format() facility doesn't work well for uint64_t
+	// integers: on 32-bit architectures the coversion specifier
+	// has to be %llu, while on 64-bit architectures it should be %lu.
+	// Note that this is c_format() specific problem and it doesn't
+	// exist for the system printf().
+	//
+	ost << _unique_node_id << " " << _position;
+	return ost.str();
     }
 
     /**
