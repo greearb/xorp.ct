@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.12 2005/09/29 19:00:49 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.13 2005/12/01 14:01:38 bms Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -24,7 +24,6 @@
 
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
 #include "libxorp/eventloop.hh"
 
 #include "rawsock.hh"
