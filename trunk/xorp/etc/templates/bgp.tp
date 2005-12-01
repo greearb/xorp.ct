@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.69 2005/11/28 17:48:57 zec Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.70 2005/11/29 19:19:08 atanu Exp $ */
 
 protocols {
     bgp {
@@ -24,6 +24,7 @@ protocols {
 	    next-hop: ipv4;
 	    next-hop6: ipv6;
 	    holdtime: u32 = 90;
+	    delay-open-time: u32 = 0;
 	    client: bool = false;
 	    confederation-member: bool = false;
 
@@ -227,6 +228,10 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
 	    }
 
+	    delay-open-time {
+		%set: xrl "$(bgp.targetname)/bgp/0.2/set_delay_open_time?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&delay_open_time:u32=$(@)";
+	    }
+
 	    client {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_route_reflector_client?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
 	    }
@@ -382,6 +387,10 @@ protocols {
 
 	    holdtime {
 		%help: short "Set the length of time before idle timeout.";
+	    }
+
+	    delay-open-time {
+		%help: short "Set the delay open time.";
 	    }
 
 	    client {
