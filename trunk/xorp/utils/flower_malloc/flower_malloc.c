@@ -238,12 +238,14 @@ within_limits (uint32_t trk_idx)
 static uint32_t
 hash (void ** addr_array, size_t depth)
 {
-    uint32_t i;
-    uint32_t hash_value = 0;
-    for (i=0; i<depth; i++)
-	hash_value ^= ((uint32_t) addr_array[i] << (i+1));
+    size_t i;
+    size_t hash_value = 0;
+    for (i=0; i<depth; i++) {
+	size_t v = (size_t)addr_array[i];
+	hash_value ^= (v << (i+1));
+    }
     hash_value %= HASH_TABLE_SIZE;
-    return hash_value;
+    return (uint32_t)hash_value;
 }
 
 /***************************************************************************
