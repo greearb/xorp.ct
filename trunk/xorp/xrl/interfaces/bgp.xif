@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.28 2005/11/28 04:58:24 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.29 2005/11/30 08:08:44 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -68,6 +68,23 @@ interface bgp/0.2 {
 		? \
 		cluster_id:ipv4 \
 		& disable:bool
+
+	/**
+	 * Route Flap Damping. RFC 2439
+	 *
+	 * @param half_life decay half life in minutes.
+	 * @param max_suppress maximum time in minutes a route can be held 
+	 *         down.
+	 * @param supress cutoff threshold, once passed route is damped.
+	 * @param reuse threshold, point at which a route can be reused.
+	 */
+	set_damping \
+		? \
+		half_life:u32 \
+		& max_suppress:u32 \
+		& reuse:u32 \
+		& suppress:u32 \
+	 	& disable:bool
 
 	/** 
 	 * Add peer.

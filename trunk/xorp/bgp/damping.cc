@@ -51,6 +51,34 @@ Damping::get_damping() const
 }
 
 void
+Damping::set_half_life(uint32_t half_life)
+{
+    _half_life = half_life;
+    init();
+}
+
+void
+Damping::set_max_hold_down(uint32_t max_hold_down)
+{
+    _max_hold_down = max_hold_down;
+    init();
+}
+
+void
+Damping::set_reuse(uint32_t reuse)
+{
+    _reuse = reuse;
+    init();
+}
+
+void
+Damping::set_cutoff(uint32_t cutoff)
+{
+    _cutoff = cutoff;
+    init();
+}
+
+void
 Damping::init()
 {
     debug_msg("init\n");

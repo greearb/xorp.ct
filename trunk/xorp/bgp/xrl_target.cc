@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.50 2005/11/28 06:41:41 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.51 2005/11/30 08:08:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -202,6 +202,39 @@ XrlBgpTarget::bgp_0_2_set_cluster_id(const IPv4& cluster_id,
 	      disable ? "true" : "false");
 
     _bgp.set_cluster_id(cluster_id, disable);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlBgpTarget::bgp_0_2_set_damping(const uint32_t& half_life,
+				  const uint32_t& max_suppress,
+				  const uint32_t& reuse,
+				  const uint32_t& suppress,
+				  const bool& disable)
+{
+    debug_msg("Damping half-life %u max-supress %u reuse %u suppress %u"
+	      " disable %s\n", half_life, max_suppress, reuse, suppress,
+	      disable ? "true" : "false");
+    
+    if (half_life < 1 || half_life > 45)
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("half-life %u not 1..45", half_life));
+
+    if (max_suppress < 1 || max_suppress > 720)
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("max-suppress %u not 1..720",
+				    max_suppress));
+
+    if (reuse < 1 || reuse > 20000)
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("reuse %u not 1..20000", reuse));
+
+    if (suppress < 1 || suppress > 20000)
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("suppress %u not 1..20000", suppress));
+
+    _bgp.set_damping(half_life, max_suppress, reuse, suppress, disable);
 
     return XrlCmdError::OKAY();
 }

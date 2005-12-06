@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/bgp/damping.hh,v 1.1 2005/12/06 06:26:36 atanu Exp $
 
 #ifndef __BGP_DAMPING_HH__
 #define __BGP_DAMPING_HH__
@@ -34,6 +34,14 @@ class Damping {
     void set_damping(bool damping);
 
     bool get_damping() const;
+
+    void set_half_life(uint32_t half_life);
+
+    void set_max_hold_down(uint32_t max_hold_down);
+
+    void set_reuse(uint32_t reuse);
+
+    void set_cutoff(uint32_t cutoff);
 
     /**
      * Get the current clock tick.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.51 2005/11/28 04:57:32 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.52 2005/11/30 08:08:44 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -66,6 +66,12 @@ public:
      * Set the cluster ID and enable or disable route reflection.
      */
     void set_cluster_id(const IPv4& cluster_id, bool disable);
+
+    /**
+     * Set the route flap damping parameters.
+     */
+    void set_damping(uint32_t half_life,uint32_t max_suppress,uint32_t reuse,
+		     uint32_t suppress, bool disable);
 
     /**
      * attach peer to peerlist

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.62 2005/11/30 08:08:43 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.63 2005/12/06 06:26:36 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -299,6 +299,18 @@ BGPMain::set_cluster_id(const IPv4& cluster_id, bool disable)
     local->set_route_reflector(!disable);
 
     _peerlist->all_stop(true /* restart */);
+}
+
+void
+BGPMain::set_damping(uint32_t half_life, uint32_t max_suppress,uint32_t reuse,
+		     uint32_t suppress, bool disable)
+{
+    Damping& damping = get_local_data()->get_damping();
+    damping.set_half_life(half_life);
+    damping.set_max_hold_down(max_suppress);
+    damping.set_reuse(reuse);
+    damping.set_cutoff(suppress);
+    damping.set_damping(!disable);
 }
 
 /*
