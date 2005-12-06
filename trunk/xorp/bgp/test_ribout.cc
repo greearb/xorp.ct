@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.27 2005/11/15 11:44:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.28 2005/11/27 06:10:02 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -56,7 +56,7 @@ test_ribout(TestInfo& /*info*/)
 
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.eventloop();
-    LocalData localdata;
+    LocalData localdata(bgpmain.eventloop());
     localdata.set_as(AsNum(1));
     Iptuple iptuple;
     BGPPeerData *peer_data1

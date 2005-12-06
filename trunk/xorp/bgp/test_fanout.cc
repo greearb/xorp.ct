@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.28 2005/11/15 11:44:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.29 2005/11/27 06:10:02 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -55,7 +55,7 @@ test_fanout(TestInfo& /*info*/)
 
     BGPMain bgpmain;
     //    EventLoop* eventloop = bgpmain.eventloop();
-    LocalData localdata;
+    LocalData localdata(bgpmain.eventloop());
     Iptuple tuple1("127.0.0.1", 179, "10.0.0.1", 179);
     Iptuple tuple2("127.0.0.1", 179, "10.0.0.2", 179);
     Iptuple tuple3("127.0.0.1", 179, "10.0.0.3", 179);

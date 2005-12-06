@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.12 2005/03/25 02:52:45 pavlin Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.13 2005/11/11 15:23:28 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -37,10 +37,11 @@ enum RouteTableType {
     NHLOOKUP_TABLE = 9,
     DEBUG_TABLE = 10,
     POLICY_TABLE = 11,
-    AGGREGATION_TABLE = 12
+    AGGREGATION_TABLE = 12,
+    DAMPING_TABLE = 13
 };
 
-#define MAX_TABLE_TYPE 12
+#define MAX_TABLE_TYPE 13
 
 #define ADD_USED 1
 #define ADD_UNUSED 2

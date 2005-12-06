@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.61 2005/11/28 04:57:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.62 2005/11/30 08:08:43 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -51,7 +51,7 @@ EventLoop BGPMain::_eventloop;
 // BGPMain implementation
 
 BGPMain::BGPMain()
-    : _exit_loop(false)
+    : _exit_loop(false), _local_data(_eventloop)
 {
     debug_msg("BGPMain object created\n");
     /*

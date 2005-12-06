@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.81 2005/11/28 04:56:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.82 2005/11/28 08:34:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -610,8 +610,8 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
      * to the peer.
      *
      * New plumbing:
-     *   RibInTable -> FilterTable -> CacheTable -> NhLookupTable ->
-     *      DecisionTable.
+     *   RibInTable -> DampingTable -> FilterTable -> CacheTable ->..
+     *       ..-> NhLookupTable -> DecisionTable.
      *
      *   FanoutTable -> FilterTable -> CacheTable ->..
      *        ..-> RibOutTable -> PeerHandler.
@@ -631,13 +631,21 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			  peer_handler);
     _in_map[peer_handler] = rib_in;
 
+    DampingTable<A>* damping_in =
+	new DampingTable<A>(_ribname + "Damping" + peername,
+			    _master.safi(),
+			    rib_in,
+			    peer_handler,
+			    _master.main().get_local_data()->get_damping());
+    rib_in->set_next_table(damping_in);
+
     FilterTable<A>* filter_in =
 	new FilterTable<A>(_ribname + "PeerInputFilter" + peername,
 			   _master.safi(),
-			   rib_in,
+			   damping_in,
 			   _next_hop_resolver);
     filter_in->do_versioning();
-    rib_in->set_next_table(filter_in);
+    damping_in->set_next_table(filter_in);
     
     PolicyTableImport<A>* policy_filter_in =
 	new PolicyTableImport<A>(_ribname + "PeerInputPolicyFilter" + peername,

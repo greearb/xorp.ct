@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.17 2005/11/15 11:44:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.18 2005/11/27 06:10:02 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -51,7 +51,8 @@ PlumbingTest::test1()
     Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
-    LocalData local_data;
+    EventLoop eventloop;
+    LocalData local_data(eventloop);
     local_data.set_as(AsNum(1));
 
     BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),
@@ -261,7 +262,8 @@ PlumbingTest::test2()
     Iptuple iptuple2("127.0.0.1", 179, "1.0.0.2", 179);
     IPv4 nh;
 
-    LocalData local_data;
+    EventLoop eventloop;
+    LocalData local_data(eventloop);
     local_data.set_as(AsNum(1));
 
     BGPPeerData *peer_data1 = new BGPPeerData(local_data, iptuple1, AsNum(666),

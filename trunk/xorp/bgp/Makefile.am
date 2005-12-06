@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.40 2005/11/15 18:07:30 zec Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.41 2005/11/17 16:53:45 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -91,6 +91,7 @@ libbgp_la_SOURCES += attribute_manager.hh
 libbgp_la_SOURCES += bgp_trie.hh
 libbgp_la_SOURCES += bgp_varrw.hh
 libbgp_la_SOURCES += bgp_varrw_export.hh
+libbgp_la_SOURCES += damping.hh
 libbgp_la_SOURCES += dump_iterators.hh
 libbgp_la_SOURCES += exceptions.hh
 libbgp_la_SOURCES += internal_message.hh
@@ -112,6 +113,7 @@ libbgp_la_SOURCES += route_queue.hh
 libbgp_la_SOURCES += route_table_aggregation.hh
 libbgp_la_SOURCES += route_table_base.hh
 libbgp_la_SOURCES += route_table_cache.hh
+libbgp_la_SOURCES += route_table_damping.hh
 libbgp_la_SOURCES += route_table_decision.hh
 libbgp_la_SOURCES += route_table_deletion.hh
 libbgp_la_SOURCES += route_table_dump.hh
@@ -136,6 +138,7 @@ libbgp_la_SOURCES += attribute_manager.cc
 libbgp_la_SOURCES += bgp_trie.cc
 libbgp_la_SOURCES += bgp_varrw.cc
 libbgp_la_SOURCES += bgp_varrw_export.cc
+libbgp_la_SOURCES += damping.cc
 libbgp_la_SOURCES += dump_iterators.cc
 libbgp_la_SOURCES += internal_message.cc
 libbgp_la_SOURCES += iptuple.cc
@@ -158,6 +161,7 @@ libbgp_la_SOURCES += route_queue.cc
 libbgp_la_SOURCES += route_table_aggregation.cc
 libbgp_la_SOURCES += route_table_base.cc
 libbgp_la_SOURCES += route_table_cache.cc
+libbgp_la_SOURCES += route_table_damping.cc
 libbgp_la_SOURCES += route_table_decision.cc
 libbgp_la_SOURCES += route_table_deletion.cc
 libbgp_la_SOURCES += route_table_dump.cc

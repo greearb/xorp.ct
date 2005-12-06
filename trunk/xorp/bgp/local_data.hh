@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.13 2005/11/28 04:45:04 atanu Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.14 2005/11/28 06:45:14 atanu Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -27,6 +27,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/asnum.hh"
+#include "damping.hh"
 
 /**
  * Data that applies to all BGP peerings.
@@ -34,13 +35,15 @@
  */
 class LocalData {
 public:
-    LocalData() : _as(AsNum::AS_INVALID), _confed_id(AsNum::AS_INVALID),
-		  _route_reflector(false)
+    LocalData(EventLoop& eventloop) : _as(AsNum::AS_INVALID), 
+				      _confed_id(AsNum::AS_INVALID),
+				      _route_reflector(false),
+				      _damping(eventloop)
     {}
 
-    LocalData(const AsNum& as, const IPv4& id)
-	: _as(as), _id(id), _confed_id(AsNum::AS_INVALID)
-    {}
+//     LocalData(const AsNum& as, const IPv4& id)
+// 	: _as(as), _id(id), _confed_id(AsNum::AS_INVALID)
+//     {}
 
     /**
      * @return This routers AS number.
@@ -113,6 +116,13 @@ public:
 	_route_reflector = route_reflector;
     }
 
+    /**
+     * Return all the route flap damping state.
+     */
+    Damping& get_damping() {
+	return _damping;
+    }
+
 private:
     AsNum	_as;	                // This routers AS number.
     IPv4	_id;	                // This routers ID.
@@ -120,5 +130,6 @@ private:
     IPv4	_cluster_id;		// Router reflector cluster ID
     bool	_route_reflector;	// True if this router is a
 					// route reflector
+    Damping 	_damping;		// Route Flap Damping parameters
 };
 #endif // __BGP_LOCAL_DATA_HH__

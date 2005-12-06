@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.11 2005/11/15 11:44:00 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.12 2005/11/27 06:10:02 atanu Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -70,7 +70,8 @@ test2(TestInfo& info)
     /*
     ** Create a PeerData structure.
     */
-    LocalData localdata;
+    EventLoop eventloop;
+    LocalData localdata(eventloop);
     Iptuple iptuple;
     BGPPeerData pd(localdata, iptuple, AsNum(12), IPv4("10.10.10.10"), 0);
 
