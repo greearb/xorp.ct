@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.70 2005/11/29 19:19:08 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.71 2005/12/01 02:55:42 atanu Exp $ */
 
 protocols {
     bgp {
@@ -13,6 +13,14 @@ protocols {
 
 	confederation {
 	    identifier: u32;
+	    disable: bool = false;
+	}
+
+	damping {
+	    half-life: u32 = 15;
+	    max-suppress: u32 = 60;
+	    reuse: u32 = 750;
+	    suppress: u32 = 3000;
 	    disable: bool = false;
 	}
 
@@ -184,6 +192,29 @@ protocols {
 	    }
 
 	    disable {
+		%set:;
+	    }
+	}
+
+	damping {
+
+	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
+	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=`~$(DEFAULT)`";
+
+	    half-life {
+		%set:;
+	    }
+
+	    max-suppress {
+		%set:;
+	    }
+
+	    reuse {
+		%set:;
+	    }
+
+	    suppress {
 		%set:;
 	    }
 	}
@@ -363,6 +394,30 @@ protocols {
 
 	    disable {
 		%help: short "disable confederations";
+	    }
+        }
+
+	damping {
+	    %help: short "Route Flap Damping";
+
+	    half-life {
+		%help: short "Decay half-life in minutes";
+	    }
+
+	    max-suppress {
+		%help: short "Maximum hold-down time in minutes";
+	    }
+
+	    reuse {
+		%help: short "Reuse threshold";
+	    }
+
+	    suppress {
+		%help: short "Cutoff (suppression) threshold";
+	    }
+
+	    disable {
+		%help: short "disable damping";
 	    }
         }
 
