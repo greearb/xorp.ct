@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.31 2005/03/25 02:52:42 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.33 2005/08/18 15:58:05 bms Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -332,7 +332,7 @@ public:
 	    xorp_throw(CorruptMessage,
 		c_format("KeepAlivePacket length %d instead of %u",
 			 l, XORP_UINT_CAST(MINKEEPALIVEPACKET)),
-		       MSGHEADERERR, UNSPECIFIED);
+		       MSGHEADERERR, BADMESSLEN);
 
 	_Type = MESSAGETYPEKEEPALIVE;
     }
