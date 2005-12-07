@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.36 2005/11/29 22:04:37 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.37 2005/12/05 06:11:54 atanu Exp $
 #
 
 #
@@ -106,6 +106,9 @@ configure_bgp()
     enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
 }
 
+MSGHEADERERR=1		# Message Header Error
+    CONNNOTSYNC=1	# Connection Not Synchronized
+    BADMESSLEN=2	# Bad Message Length
 HOLD_TIMER=4
 FSM_ERROR=5
 OPEN_ERROR=2
@@ -1151,12 +1154,93 @@ test33()
     coord peer1 assert idle
 }
 
+test34()
+{
+    echo "TEST34 - Illicit a Message Header Error Connection Not Synchronized."
+    echo "	1) Establish a connection"
+    echo "	2) Send a keepalive with a corrupted marker field"
+    echo "	3) Should return a notify Connection Not Synchronized."
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $MSGHEADERERR $CONNNOTSYNC
+
+    coord peer1 send packet corrupt 0 0 keepalive
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test35()
+{
+    echo "TEST35 - Illicit a Message Header Error Bad Message Length. 0"
+    echo "	1) Establish a connection"
+    echo "	2) Send a keepalive with a short message length"
+    echo "	3) Should return a notify Bad Message Length.."
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN
+
+    coord peer1 send packet corrupt 17 0 keepalive
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test36()
+{
+    echo "TEST36 - Illicit a Message Header Error Bad Message Length. 20"
+    echo "	1) Establish a connection"
+    echo "	2) Send a keepalive with a short message length"
+    echo "	3) Should return a notify Bad Message Length.."
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN
+
+    coord peer1 send packet corrupt 17 20 keepalive
+
+    # send a second message to force the previous one to be delivered.
+    coord peer1 send packet keepalive
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
-    test32 test33'
+    test32 test33 test34 test35 test36'
 
 # Include command line
 . ${srcdir}/args.sh
