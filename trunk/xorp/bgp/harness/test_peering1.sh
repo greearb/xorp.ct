@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.37 2005/12/05 06:11:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.38 2005/12/07 09:35:05 atanu Exp $
 #
 
 #
@@ -109,6 +109,7 @@ configure_bgp()
 MSGHEADERERR=1		# Message Header Error
     CONNNOTSYNC=1	# Connection Not Synchronized
     BADMESSLEN=2	# Bad Message Length
+    BADMESSTYPE=3	# Bad Message Type
 HOLD_TIMER=4
 FSM_ERROR=5
 OPEN_ERROR=2
@@ -1210,7 +1211,7 @@ test36()
 {
     echo "TEST36 - Illicit a Message Header Error Bad Message Length. 20"
     echo "	1) Establish a connection"
-    echo "	2) Send a keepalive with a short message length"
+    echo "	2) Send a keepalive with a long message length"
     echo "	3) Should return a notify Bad Message Length.."
 
     coord reset
@@ -1225,6 +1226,32 @@ test36()
 
     # send a second message to force the previous one to be delivered.
     coord peer1 send packet keepalive
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test37()
+{
+    echo "TEST37 - Illicit a Message Header Error Bad Message Type."
+    echo "	1) Establish a connection"
+    echo "	2) Send a keepalive with a zero message type"
+    echo "	3) Should return a notify Bad Message Type.."
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSTYPE
+
+    coord peer1 send packet corrupt 18 0 keepalive
 
     sleep 2
 
