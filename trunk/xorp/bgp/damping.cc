@@ -96,7 +96,7 @@ Damping::init()
     for (size_t i = 0; i < array_size; i++) {
 	_decay[i] = static_cast<uint32_t>(decay_i * FIXED);
 // 	printf("%d %d %f\n",i, _decay[i], decay_i);
-	decay_i = pow(decay_1, i + 2);
+	decay_i = pow(decay_1, static_cast<int>(i + 2));
     }
 
     // Start the timer to incement the tick
