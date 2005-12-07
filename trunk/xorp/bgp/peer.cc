@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.106 2005/11/30 07:34:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.107 2005/12/01 02:15:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -117,7 +117,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
 	notify_peer_of_error(MSGHEADERERR, BADMESSLEN);
-	event_tranfatal();
+// 	event_tranfatal();
 	TIMESPENT_CHECK();
 	return false;
 
@@ -217,10 +217,18 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     const fixed_header *header =
 	reinterpret_cast<const struct fixed_header *>(buf);
 
-    /* XXX
-    ** Put the marker authentication code here.
-    */
+
     try {
+
+	/*
+	** Check the Marker, total waste of time as it never contains
+	** anything of interest.
+	*/
+	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+			&header->marker[0], MARKER_SIZE)) {
+	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+	}
+	
 	switch (header->type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
@@ -297,18 +305,18 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    XLOG_ERROR("%s Unknown packet type %d",
 		       this->str().c_str(), header->type);
 	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE);
-	    event_tranfatal();
+// 	    event_tranfatal();
 	    TIMESPENT_CHECK();
 	    return false;
 	}
-    } catch(CorruptMessage c) {
+    } catch(CorruptMessage& c) {
 	/*
 	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
 	XLOG_WARNING("%s %s", this->str().c_str(),c.why().c_str());
 	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
-	event_tranfatal();
+// 	event_tranfatal();
 	TIMESPENT_CHECK();
 	return false;
     }
@@ -1164,6 +1172,9 @@ BGPPeer::notify_peer_of_error(const int error, const int subcode,
 	set_state(STATESTOPPED);
 	return;
     }
+
+    // The peer is no longer connected make sure we get to idle.
+    event_tranfatal();
 }
 
 /*
@@ -2386,7 +2397,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
 	notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN);
-	event_tranfatal_accept();
+// 	event_tranfatal_accept();
 	TIMESPENT_CHECK();
 	debug_msg("Returning false\n");
 	return false;
@@ -2484,19 +2495,19 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    XLOG_ERROR("%s Unknown packet type %d",
 		       this->str().c_str(), header->type);
 	    notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE);
-	    event_tranfatal_accept();
+// 	    event_tranfatal_accept();
 	    TIMESPENT_CHECK();
 	    debug_msg("Returning false\n");
 	    return false;
 	}
-    } catch(CorruptMessage c) {
+    } catch(CorruptMessage& c) {
 	/*
 	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
 	XLOG_WARNING("%s %s", this->str().c_str(),c.why().c_str());
 	notify_peer_of_error_accept(c.error(), c.subcode(), c.data(), c.len());
-	event_tranfatal_accept();
+// 	event_tranfatal_accept();
 	TIMESPENT_CHECK();
 	debug_msg("Returning false\n");
 	return false;
