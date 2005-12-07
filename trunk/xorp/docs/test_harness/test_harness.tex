@@ -32,9 +32,6 @@ A single BGP process is placed in the harness and tests
 are performed on it. The tests can range from testing the decision
 process to verifying that a session is dropped when the hold timer expires.
 
-Not all of the features mentioned below have been implemented yet.
-Section \ref{NYI} has a list of these features.
-
 \section{Requirements}
 
 A major requirement was to allow the testing of any BGP process, not
@@ -320,6 +317,25 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
 
   Send an open packet.  All fields apart from afi and safi are mandatory.
 
+\item {\sf send packet corrupt $<$offset$>$ $<$value$>$ ... }
+
+Any of the packets listed above can be corrupted by preceeding with
+the corrupt keyword followed by an offset and value. The offset must
+fall within the packet, the offset starts from zero. Multiple offset
+value pairs may be used. An example of corrupting a keepalive can be
+seen in Figure \ref{prog:corrupt}.
+
+\begin{figure}[htb]
+\small
+\begin{verbatim}
+...
+peer1 send packet corrupt 0 0 keepalive
+...
+\end{verbatim}
+\vspace{-0.1in}
+\caption{\label{prog:corrupt}Corrupt a keepalive}
+\end{figure}
+
 \item {\sf send dump mrtd update filename $<$packet count$>$}
   
   Given a file in mrtd dump format send the update packets in this
@@ -507,12 +523,6 @@ the test peer.
 \item At the time of writing the harness has only been used against
   the XORP BGP process. There is no reason to believe that it could
   not be used against implementations.
-\end{itemize}
-
-\section{\label{NYI} Not yet implemented or TODO list}
-
-\begin{itemize}
-\item Constructing corrupted packets.
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

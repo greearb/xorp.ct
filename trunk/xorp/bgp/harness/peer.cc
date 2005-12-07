@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.66 2005/09/23 17:38:54 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.67 2005/11/28 09:21:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -379,9 +379,28 @@ Peer::send(const string& line, const vector<string>& words)
 	xorp_throw(InvalidString,
 		   c_format(
 		   "Second argument should be %s or %s not <%s>\n[%s]",
-			    PACKET, DUMP, words[2].c_str(), line.c_str()));
+		   PACKET, DUMP, words[2].c_str(), line.c_str()));
     }
 }
+
+/**
+ * A corruption entry.
+ *
+ * The offset at which to corrupt a packet and the value with which to corrupt.
+ */
+class Corrupt  {
+ public:
+    Corrupt(uint32_t offset, uint8_t val) : _offset(offset), _val(val)
+    {}
+
+    uint32_t offset() const { return _offset; }
+
+    uint32_t val() const { return _val; }
+
+ private:
+    uint32_t _offset;
+    uint8_t  _val;
+};
 
 /*
 ** Form of command:
@@ -389,6 +408,10 @@ Peer::send(const string& line, const vector<string>& words)
 ** peer1 send packet notify ...
 ** peer1 send packet open ...
 ** peer1 send packet keepalive
+** peer1 send packet corrupt offset byte offset byte ... update
+**							 notify
+**							 open
+**							 keepalive
 **
 ** See the packet method for the rest of the commands
 */
@@ -396,11 +419,49 @@ void
 Peer::send_packet(const string& line, const vector<string>& words)
     throw(InvalidString)
 {
-    const BGPPacket *pkt = Peer::packet(line, words, 3);
+    size_t size = words.size();
+    uint32_t word = 3;
+    list<Corrupt> _corrupt;
+    if ("corrupt" == words[3]) {
+	word += 1;
+	// Pairs of offset byte should be in the stream until we reach
+	// packet.
+	while (word + 2 < size) {
+	    if (!xorp_isdigit(words[word][0])) {
+		xorp_throw(InvalidString,
+			   c_format("Should be an offset not %s\n[%s]",
+				    words[word].c_str(), line.c_str()));
+	    }
+	    if (!xorp_isdigit(words[word + 1][0])) {
+		xorp_throw(InvalidString,
+			   c_format("Should be a value not %s\n[%s]",
+				    words[word + 1].c_str(), line.c_str()));
+	    }
+
+	    _corrupt.push_back(Corrupt(atoi(words[word].c_str()),
+				       atoi(words[word+1].c_str())));
+	    word += 2;
+	    if (!xorp_isdigit(words[word][0]))
+		break;
+	}
+    }
+
+    const BGPPacket *pkt = Peer::packet(line, words, word);
 
     size_t len;
-    const uint8_t *buf = pkt->encode(len);
+    uint8_t *buf = const_cast<uint8_t *>(pkt->encode(len));
     delete pkt;
+
+    if (!_corrupt.empty()) {
+	list<Corrupt>::const_iterator i;
+	for (i = _corrupt.begin(); i != _corrupt.end(); i++) {
+	    if (i->offset() >= len)
+		xorp_throw(InvalidString,
+			   c_format("Offset %u larger than packet %u\n[%s]",
+				    i->offset(), len, line.c_str()));
+	    buf[i->offset()] = i->val();
+	}
+    }
 
     /*
     ** If this is an update message, save it in the sent trie.
