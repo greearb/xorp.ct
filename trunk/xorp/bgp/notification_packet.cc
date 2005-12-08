@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.20 2005/03/25 02:52:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.22 2005/08/18 15:58:05 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -167,108 +167,114 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 
     switch (error) {
     case MSGHEADERERR:
-	s += "Message Header Error: ";
+	s += c_format("Message Header Error(%d): ", MSGHEADERERR);
 	switch (subcode) {
 	case CONNNOTSYNC:
-	    s += "Connection Not Synchronized";
+	    s += c_format("Connection Not Synchronized(%d)", CONNNOTSYNC);
 	    break;
 	case BADMESSLEN:
 	    if (error_data != NULL)
-		s += c_format("Bad Message Length - field: %d",
-			      ntohs((uint16_t &)*error_data));
+		s += c_format("Bad Message Length(%d) - field: %d",
+			      BADMESSLEN, ntohs((uint16_t &)*error_data));
 	    else
-		s += "Bad Message Length: ";
+		s += c_format("Bad Message Length(%d) - "
+			      "NO ERROR DATA SUPPLIED", BADMESSLEN);
 	    break;
 	case BADMESSTYPE:
 	    if (error_data != NULL)
-		s += c_format("Bad Message Type - field : %d",
-			      (uint8_t &) *error_data);
+		s += c_format("Bad Message Type(%d) - field : %d",
+			      BADMESSTYPE, error_data[0]);
 	    else
-		s += "Bad Message Type";
+		s += c_format("Bad Message Type(%d) - "
+			      "NO ERROR DATA SUPPLIED", BADMESSTYPE);
 	    break;
 	}
 	break;
     case OPENMSGERROR:
-	s += "OPEN Message Error: ";
+	s += c_format("OPEN Message Error(%d): ", OPENMSGERROR);
 	switch (subcode) {
 	case UNSUPVERNUM:
 	    if (error_data != NULL)
-		s += c_format("Unsupported Version Number. Min supported Version is %d",
-			      ntohs((uint16_t &)*error_data));
+		s += c_format("Unsupported Version Number(%d) - "
+			      "Min supported Version is %d",
+			      UNSUPVERNUM, ntohs((uint16_t &)*error_data));
 	    else
-		s += "Unsupported Version Number.";
+		s += c_format("Unsupported Version Number(%d) - "
+			      "NO ERROR DATA SUPPLIED", UNSUPVERNUM);
 	    break;
 	case BADASPEER:
-	    s += "Bad Peer AS.";
+	    s += c_format("Bad Peer AS(%d)", BADASPEER);
 	    break;
 	case BADBGPIDENT:
-	    s += "Bad BGP Identifier.";
+	    s += c_format("Bad BGP Identifier(%d)", BADBGPIDENT);
 	    break;
 	case UNSUPOPTPAR:
-	    s += "Unsupported Optional Parameter.";
+	    s += c_format("Unsupported Optional Parameter(%d)", UNSUPOPTPAR);
 	    break;
 	case AUTHFAIL:
-	    s += "Authentication Failure.";
+	    s += c_format("Authentication Failure(%d)", AUTHFAIL);
 	    break;
 	case UNACCEPTHOLDTIME:
-	    s += "Unacceptable Hold Time.";
+	    s += c_format("Unacceptable Hold Time(%d)", UNACCEPTHOLDTIME);
 	    break;
 	case UNSUPCAPABILITY:
-	    s += "Unsuported Capability";
+	    s += c_format("Unsuported Capability(%d)", UNSUPCAPABILITY);
 	    break;
 	}
 	break;
     case UPDATEMSGERR:
-	s += "UPDATE Message Error: ";
+	s += c_format("UPDATE Message Error(%d): ", UPDATEMSGERR);
 	switch (subcode) {
 	case MALATTRLIST:
-	    s += "Malformed Attribute List.";
+	    s += c_format("Malformed Attribute List(%d)", MALATTRLIST);
 	    break;
 	case UNRECOGWATTR:
 	    if (error_data != NULL)
-		s += c_format("Unrecognized Well-known Attribute, Type %d",
-			      error_data[0]);
+		s += c_format("Unrecognized Well-known Attribute(%d) - "
+			      "Type %d", UNRECOGWATTR, error_data[0]);
 	    else
-		s += "Unrecognized Well-known Attribute, NO ERROR DATA SUPPLIED";
+		s += c_format("Unrecognized Well-known Attribute(%d) - "
+			      "NO ERROR DATA SUPPLIED", UNRECOGWATTR);
 	    break;
 	case MISSWATTR:
 	    if (error_data != NULL)
-		s += c_format("Missing Well-known Attribute, Type %d",
-			      error_data[0]);
+		s += c_format("Missing Well-known Attribute(%d) - Type %d",
+			      MISSWATTR, error_data[0]);
 	    else
-		s += "Missing Well-known Attribute, NO ERROR DATA SUPPLIED";
+		s += c_format("Missing Well-known Attribute(%d) - "
+			      "NO ERROR DATA SUPPLIED", MISSWATTR);
 	    break;
 	case ATTRFLAGS:
-	    s += "Attribute Flags Error.";
+	    s += c_format("Attribute Flags Error(%d)", ATTRFLAGS);
 	    break;
 	case ATTRLEN:
-	    s += "Attribute Length Error.";
+	    s += c_format("Attribute Length Error(%d)", ATTRLEN);
 	    break;
 	case INVALORGATTR:
-	    s += "Invalid ORIGIN Attribute.";
+	    s += c_format("Invalid ORIGIN Attribute(%d)", INVALORGATTR);
 	    break;
 	case INVALNHATTR:
-	    s += "Invalid NEXT_HOP Attribute.";
+	    s += c_format("Invalid NEXT_HOP Attribute(%d)", INVALNHATTR);
 	    break;
 	case OPTATTR:
-	    s += "Optional Attribute Error.";
+	    s += c_format("Optional Attribute Error(%d)", OPTATTR);
 	    break;
 	case INVALNETFIELD:
-	    s += "Invalid Network Field.";
+	    s += c_format("Invalid Network Field(%d)", INVALNETFIELD);
 	    break;
 	case MALASPATH:
-	    s += "Malformed AS_PATH.";
+	    s += c_format("Malformed AS_PATH(%d)", MALASPATH);
 	    break;
 	}
 	break;
     case HOLDTIMEEXP:
-	s += "Hold Timer Expired.";
+	s += c_format("Hold Timer Expired(%d)", HOLDTIMEEXP);
 	break;
     case FSMERROR:
-	s += "Finite State Machine Error.";
+	s += c_format("Finite State Machine Error(%d)", FSMERROR);
 	break;
     case CEASE:
-	s += "Cease.";
+	s += c_format("Cease(%d)", CEASE);
 	break;
     }
 
