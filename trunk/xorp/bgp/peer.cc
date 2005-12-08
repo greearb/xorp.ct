@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.108 2005/12/07 09:32:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.109 2005/12/08 14:16:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1108,28 +1108,25 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 { 
     TIMESPENT();
 
-    XLOG_WARNING("%s in state %s received %s",
-		 this->str().c_str(),
-		 pretty_print_state(_state),
-		 p.str().c_str());
+    XLOG_INFO("%s in state %s received %s",
+	      this->str().c_str(),
+	      pretty_print_state(_state),
+	      p.str().c_str());
 
     _last_error[0] = p.error_code();
     _last_error[1] = p.error_subcode();
 
     switch(_state) {
     case STATEIDLE:
-    case STATECONNECT:
-    case STATEACTIVE:
 	XLOG_FATAL("%s FSM received EVENTRECNOTMESS in state %s",
 		   this->str().c_str(),
 		   pretty_print_state(_state));
 	break;
 
+    case STATECONNECT:
+    case STATEACTIVE:
     case STATEOPENSENT:
     case STATEOPENCONFIRM:
-	set_state(STATEIDLE);
-	break;
-
     case STATEESTABLISHED:
 	set_state(STATEIDLE);
 	break;
