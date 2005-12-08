@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.33 2005/08/18 15:58:05 bms Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.34 2005/12/07 09:16:34 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -326,13 +326,13 @@ public:
     /**
      * need nothing to parse incoming data
      */
-    KeepAlivePacket(const uint8_t *, uint16_t l)
+    KeepAlivePacket(const uint8_t *buf, uint16_t l)
 		throw(CorruptMessage) {
 	if (l != MINKEEPALIVEPACKET)
 	    xorp_throw(CorruptMessage,
 		c_format("KeepAlivePacket length %d instead of %u",
 			 l, XORP_UINT_CAST(MINKEEPALIVEPACKET)),
-		       MSGHEADERERR, BADMESSLEN);
+		       MSGHEADERERR, BADMESSLEN, buf + MARKER_SIZE, 2);
 
 	_Type = MESSAGETYPEKEEPALIVE;
     }

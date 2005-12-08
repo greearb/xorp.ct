@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.40 2005/12/08 02:34:45 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.41 2005/12/08 03:49:46 atanu Exp $
 #
 
 #
@@ -1195,7 +1195,7 @@ test35()
 
     coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
 
-    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN 0 0
 
     coord peer1 send packet corrupt 17 0 keepalive
 
@@ -1221,7 +1221,7 @@ test36()
 
     coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
 
-    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN 0 20
 
     coord peer1 send packet corrupt 17 20 keepalive
 

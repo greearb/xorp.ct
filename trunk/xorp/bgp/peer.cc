@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.110 2005/12/08 15:00:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.111 2005/12/08 15:15:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -116,7 +116,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	break;
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
-	notify_peer_of_error(MSGHEADERERR, BADMESSLEN);
+	notify_peer_of_error(MSGHEADERERR, BADMESSLEN, buf + MARKER_SIZE, 2);
 // 	event_tranfatal();
 	TIMESPENT_CHECK();
 	return false;
@@ -216,7 +216,6 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 
     const fixed_header *header =
 	reinterpret_cast<const struct fixed_header *>(buf);
-
 
     try {
 
