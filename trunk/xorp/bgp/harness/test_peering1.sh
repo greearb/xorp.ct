@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.39 2005/12/07 09:43:37 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.40 2005/12/08 02:34:45 atanu Exp $
 #
 
 #
@@ -117,6 +117,7 @@ UNACCEPTHOLDTIME=6
 
 UPDATEMSGERR=3		# Update error
     MALATTRLIST=1       # Malformed Attribute List
+    MALASPATH=11	# Malformed AS_PATH
 MISSWATTR=3		# Missing Well-known Attribute
 
 reset()
@@ -1262,12 +1263,46 @@ test37()
     coord peer1 assert idle
 }
 
+test38()
+{
+    echo "TEST38 - Illicit a UPDATE Message Error Malformed AS_PATH."
+    echo "	1) Establish a connection"
+    echo "	2) Send a malformed aspath"
+    echo "	3) Should return a notify UPDATE Message Error."
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $MALASPATH
+
+    # 
+    # Hit the check in AsPath::decode()
+    # 
+    coord peer1 send packet corrupt 38 0 \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nlri 10.10.10.0/24 \
+	nexthop 20.20.20.20
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
-    test32 test33 test34 test35 test36 test37'
+    test32 test33 test34 test35 test36 test37 test38'
 
 # Include command line
 . ${srcdir}/args.sh
