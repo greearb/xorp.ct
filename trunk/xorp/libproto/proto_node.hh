@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.31 2005/08/18 15:33:38 bms Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.32 2005/09/28 17:31:43 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -724,7 +724,7 @@ ProtoNode<V>::vif_name2vif_index(const string& vif_name) const
 {
     map<string, uint32_t>::const_iterator iter;
     
-    iter = find(_vif_name2vif_index_map.find(vif_name));
+    iter = _vif_name2vif_index_map.find(vif_name);
     if (iter != _vif_name2vif_index_map.end())
 	return (iter->second);
     return (Vif::VIF_INDEX_INVALID);
