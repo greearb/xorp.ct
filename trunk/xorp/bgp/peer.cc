@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.107 2005/12/01 02:15:29 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.108 2005/12/07 09:32:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -430,6 +430,8 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart,
 			   bool automatic)
 {
     debug_msg(p.str().c_str());
+
+    XLOG_INFO("Sending: %s", cstring(p));
 
     /*
     ** We need to deal with NOTIFICATION differently from other packets -
