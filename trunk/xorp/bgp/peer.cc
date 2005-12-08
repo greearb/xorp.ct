@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.109 2005/12/08 14:16:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.110 2005/12/08 15:00:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2082,7 +2082,6 @@ AcceptSession::start()
 	_sock = BAD_XORPFD;
 	remove();
 	break;
-    case STATECONNECT:
     case STATEOPENSENT:
 	// Note we are not going to send anything.
 	// Wait for an open message from the peer so that the ID's can
@@ -2110,6 +2109,7 @@ AcceptSession::start()
 	// Send a cease and shutdown this attempt.
 	cease();
 	break;
+    case STATECONNECT:
     case STATEACTIVE:
     case STATESTOPPED:
 	// Accept this connection attempt.
