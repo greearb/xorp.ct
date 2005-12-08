@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.39 2005/10/30 21:58:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.40 2005/12/01 22:39:49 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -344,13 +344,11 @@ ProtoComm::ip_hdr_include(bool is_enabled)
  * ProtoComm::recv_pktinfo:
  * @is_enabled: If true, set the option, otherwise reset it.
  * 
- * Enable/disable receiving information about some of the fields
- * in the IP header on the protocol socket.
+ * Enable/disable receiving information about a packet received on the
+ * protocol socket.
  * If enabled, values such as interface index, destination address and
  * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
  * received as well.
- * XXX: used only for IPv6. In IPv4 we don't have this; the whole IP
- * packet is passed to the application listening on a raw socket.
  * 
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
@@ -359,8 +357,26 @@ ProtoComm::recv_pktinfo(bool is_enabled)
 {
     switch (family()) {
     case AF_INET:
-	break;
+    {
+	// XXX: the setsockopt() argument must be 'int'
+	int bool_flag = is_enabled;
 	
+	//
+	// Interface index
+	//
+#ifdef IP_PKTINFO
+	if (setsockopt(_proto_socket, IPPROTO_IP, IP_PKTINFO,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // IP_PKTINFO
+
+	UNUSED(bool_flag);
+	break;
+    }
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1209,7 +1225,10 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
 	    return;		// Error
 	}
-	
+
+	//
+	// Get the pif_index.
+	//
 	for (cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&_rcvmh));
 	     cmsgp != NULL;
 	     cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&_rcvmh, cmsgp))) {
@@ -1227,6 +1246,19 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	    }
 	    break;
 #endif // IP_RECVIF
+
+#ifdef IP_PKTINFO
+	    case IP_PKTINFO:
+	    {
+		struct in_pktinfo *inp = NULL;
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in_pktinfo)))
+		    continue;
+		inp = reinterpret_cast<struct in_pktinfo *>(CMSG_DATA(cmsgp));
+		pif_index = inp->ipi_ifindex;
+	    }
+	    break;
+#endif // IP_PKTINFO
+
 	    default:
 		break;
 	    }

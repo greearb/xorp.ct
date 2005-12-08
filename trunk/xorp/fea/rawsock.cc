@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.10 2005/10/30 21:58:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.11 2005/12/01 22:39:49 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -343,8 +343,26 @@ RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 {
     switch (family()) {
     case AF_INET:
-	break;
+    {
+	// XXX: the setsockopt() argument must be 'int'
+	int bool_flag = is_enabled;
 	
+	//
+	// Interface index
+	//
+#ifdef IP_PKTINFO
+	if (setsockopt(_proto_socket, IPPROTO_IP, IP_PKTINFO,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // IP_PKTINFO
+
+	UNUSED(bool_flag);
+	break;
+    }
+
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -1280,6 +1298,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    return;		// Error
 	}
 
+	//
+	// Get the pif_index.
+	//
 #ifndef HOST_OS_WINDOWS
 	for (struct cmsghdr *cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_FIRSTHDR(&_rcvmh));
 	     cmsgp != NULL;
@@ -1298,6 +1319,19 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    }
 	    break;
 #endif // IP_RECVIF
+
+#ifdef IP_PKTINFO
+	    case IP_PKTINFO:
+	    {
+		struct in_pktinfo *inp = NULL;
+		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in_pktinfo)))
+		    continue;
+		inp = reinterpret_cast<struct in_pktinfo *>(CMSG_DATA(cmsgp));
+		pif_index = inp->ipi_ifindex;
+	    }
+	    break;
+#endif // IP_PKTINFO
+
 	    default:
 		break;
 	    }

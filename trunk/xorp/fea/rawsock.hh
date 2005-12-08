@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.2 2005/09/21 04:52:44 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.3 2005/09/21 20:17:43 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -119,14 +119,12 @@ public:
     int		enable_ip_hdr_include(bool is_enabled, string& error_msg);
 
     /**
-     * Enable/disable receiving information about some of the fields
-     * in the IP header on the protocol socket.
+     * Enable/disable receiving information about a packet received on the
+     * protocol socket.
      * 
      * If enabled, values such as interface index, destination address and
      * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
      * received as well.
-     * Note: used only for IPv6. In IPv4 we don't have this; the whole IP
-     *  packet is passed to the application listening on a raw socket.
      * 
      * @param is_enabled if true, set the option, otherwise reset it.
      * @param error_msg the error message (if error).
