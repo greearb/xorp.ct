@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.29 2005/11/15 11:43:57 mjh Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.30 2005/12/08 03:49:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -532,7 +532,8 @@ AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 	size_t len = 2 + d[1]*2;	// XXX length in bytes for 16bit AS's
 	if (len > l)
 	    xorp_throw(CorruptMessage,
-		       c_format("Bad ASpath (len) %u > (l) %u\n", len, l),
+		       c_format("Bad ASpath (len) %u > (l) %u\n",
+				XORP_UINT_CAST(len), XORP_UINT_CAST(l)),
 		       UPDATEMSGERR, MALASPATH);
 
 	AsSegment s(d);
