@@ -12,13 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.14 2005/11/27 06:45:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.15 2005/11/27 06:50:08 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+
+#include <sstream>
 
 #include "libxipc/xrl_router.hh"
 
@@ -447,9 +449,9 @@ AllowRangeCommand::expand_actions(string& error_msg)
 	const Filter& filter = iter->second;
 	Filter::const_iterator iter2;
 	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
-	    const pair<int32_t, int32_t>& pair = iter2->first;
-	    int32_t lower_value = pair.first;
-	    int32_t upper_value = pair.second;
+	    const pair<int64_t, int64_t>& pair = iter2->first;
+	    int64_t lower_value = pair.first;
+	    int64_t upper_value = pair.second;
 	    const string& help = iter2->second;
 	    ttn->add_allowed_range(lower_value, upper_value, help);
 	}
@@ -487,7 +489,7 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     string new_help_keyword, new_help_str;
     size_t expected_parameters_n = 5;
     list<string> unparsed_action = action;
-    int32_t new_lower_value, new_upper_value;
+    int64_t new_lower_value, new_upper_value;
 
     //
     // Check the number of parameters
@@ -543,7 +545,7 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     if (new_lower_value > new_upper_value)
 	swap(new_lower_value, new_upper_value);
 
-    pair<int32_t, int32_t> new_range(new_lower_value, new_upper_value);
+    pair<int64_t, int64_t> new_range(new_lower_value, new_upper_value);
 
     // XXX: insert the new pair even if we overwrite an existing one
     filter.insert(make_pair(new_range, new_help_str));
@@ -569,9 +571,9 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 
 	bool is_accepted = true;
 	Filter::iterator iter2;
-	int32_t ival = atoi(value.c_str());
-	int32_t lower_value = 0;
-	int32_t upper_value = 0;
+	int64_t ival = atoi(value.c_str());
+	int64_t lower_value = 0;
+	int64_t upper_value = 0;
 	if (! filter.empty())
 	    is_accepted = false;
 	//
@@ -579,7 +581,7 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 	// of the allowed ranges.
 	//
 	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
-	    const pair<int32_t, int32_t>& range = iter2->first;
+	    const pair<int64_t, int64_t>& range = iter2->first;
 	    lower_value = range.first;
 	    upper_value = range.second;
 	    if ((ival >= lower_value) && (ival <= upper_value)) {
@@ -604,10 +606,11 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 			     "variable \"%s\". ",
 			     value.c_str(), full_varname.c_str());
 	if (filter.size() == 1) {
-	    const pair<int32_t, int32_t>& range = filter.begin()->first;
-	    error_msg += c_format("The only range allowed is %d...%d.",
-				 XORP_INT_CAST(range.first),
-				 XORP_INT_CAST(range.second));
+	    const pair<int64_t, int64_t>& range = filter.begin()->first;
+	    error_msg += c_format("The only range allowed is ");
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    error_msg += c_format("%s.", ost.str().c_str());
 	} else {
 	    error_msg += "Allowed ranges are: ";
 	    bool is_first = true;
@@ -620,12 +623,12 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 		    else
 			error_msg += ", ";
 		}
-		map<pair<int32_t, int32_t>, string>::iterator iter2;
+		map<pair<int64_t, int64_t>, string>::iterator iter2;
 		iter2 = filter.begin();
-		const pair<int32_t, int32_t>& range = iter2->first;
-		error_msg += c_format("%d...%d",
-				      XORP_INT_CAST(range.first),
-				      XORP_INT_CAST(range.second));
+		const pair<int64_t, int64_t>& range = iter2->first;
+		ostringstream ost;
+		ost << "[" << range.first << ".." << range.second << "]";
+		error_msg += c_format("%s.", ost.str().c_str());
 		filter.erase(iter2);
 	    }
 	    error_msg += ".";
@@ -652,10 +655,11 @@ AllowRangeCommand::str() const
 
 	Filter::const_iterator iter2;
 	for (iter2 = filter.begin(); iter2 != filter.end(); ++iter2) {
-	    const pair<int32_t, int32_t>& range = iter2->first;
-	    tmp += c_format("\t\trange: %d...%d\thelp: \"%s\"\n",
-			    XORP_INT_CAST(range.first),
-			    XORP_INT_CAST(range.second),
+	    const pair<int64_t, int64_t>& range = iter2->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    tmp += c_format("\t\trange: %s\thelp: \"%s\"\n",
+			    ost.str().c_str(),
 			    iter2->second.c_str());
 	}
     }

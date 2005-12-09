@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.108 2005/11/16 23:32:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.109 2005/11/30 01:38:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -28,6 +28,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+
+#include <sstream>
 
 #include "cli.hh"
 #include "command_tree.hh"
@@ -1166,13 +1168,14 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	//
 	// Add the command-line completion for the allowed ranges
 	//
-	map<pair<int32_t, int32_t>, string>::const_iterator ranges_iter;
+	map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
 	for (ranges_iter = ttn->allowed_ranges().begin();
 	     ranges_iter != ttn->allowed_ranges().end();
 	     ++ranges_iter) {
-	    const pair<int32_t, int32_t>& range = ranges_iter->first;
-	    string cmd_name = c_format("[%d..%d]", XORP_INT_CAST(range.first),
-				       XORP_INT_CAST(range.second));
+	    const pair<int64_t, int64_t>& range = ranges_iter->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    string cmd_name = ost.str();
 	    string subpath = path + " " + cmd_name;
 	    string help = ranges_iter->second;
 	    if (help == "") {
@@ -2525,13 +2528,14 @@ RouterCLI::text_entry_children_func(const string& path) const
 	//
 	// Add the command-line completion for the allowed ranges
 	//
-	map<pair<int32_t, int32_t>, string>::const_iterator ranges_iter;
+	map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
 	for (ranges_iter = ttn->allowed_ranges().begin();
 	     ranges_iter != ttn->allowed_ranges().end();
 	     ++ranges_iter) {
-	    const pair<int32_t, int32_t>& range = ranges_iter->first;
-	    string cmd_name = c_format("[%d..%d]", XORP_INT_CAST(range.first),
-				       XORP_INT_CAST(range.second));
+	    const pair<int64_t, int64_t>& range = ranges_iter->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    string cmd_name = ost.str();
 	    string help_string = ranges_iter->second;
 	    if (help_string == "") {
 		help_string = "-- no help available --";

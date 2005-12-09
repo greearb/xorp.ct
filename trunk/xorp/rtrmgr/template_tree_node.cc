@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.68 2005/11/27 06:45:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.69 2005/11/30 03:18:42 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -30,6 +30,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
+
+#include <sstream>
 
 #include "command_tree.hh"
 #include "conf_tree.hh"
@@ -983,10 +985,10 @@ TemplateTreeNode::add_allowed_value(const string& value, const string& help)
 }
 
 void
-TemplateTreeNode::add_allowed_range(int32_t lower_value, int upper_value,
+TemplateTreeNode::add_allowed_range(int64_t lower_value, int64_t upper_value,
 				    const string& help)
 {
-    pair<int32_t, int32_t> range(lower_value, upper_value);
+    pair<int64_t, int64_t> range(lower_value, upper_value);
 
     // XXX: insert the new pair even if we overwrite an existing one
     _allowed_ranges.insert(make_pair(range, help));
@@ -1031,20 +1033,20 @@ TemplateTreeNode::check_allowed_value(const string& value,
     // Check the allowed ranges
     //
     bool is_accepted = true;
-    int32_t lower_value = 0;
-    int32_t upper_value = 0;
+    int64_t lower_value = 0;
+    int64_t upper_value = 0;
     //
     // XXX: it is sufficient for the variable's value to belong to any
     // of the allowed ranges.
     //
     if (! _allowed_ranges.empty()) {
 	is_accepted = false;
-	map<pair<int32_t, int32_t>, string>::const_iterator iter;
-	int32_t ival = atoi(value.c_str());
+	map<pair<int64_t, int64_t>, string>::const_iterator iter;
+	int64_t ival = atoi(value.c_str());
 	for (iter = _allowed_ranges.begin();
 	     iter != _allowed_ranges.end();
 	     ++iter) {
-	    const pair<int32_t, int32_t>& range = iter->first;
+	    const pair<int64_t, int64_t>& range = iter->first;
 	    lower_value = range.first;
 	    upper_value = range.second;
 	    if ((ival >= lower_value) && (ival <= upper_value)) {
@@ -1055,13 +1057,14 @@ TemplateTreeNode::check_allowed_value(const string& value,
     }
 
     if (! is_accepted) {
-	map<pair<int32_t, int32_t>, string> ranges = _allowed_ranges;
+	map<pair<int64_t, int64_t>, string> ranges = _allowed_ranges;
 
 	if (ranges.size() == 1) {
-	    const pair<int32_t, int32_t>& range = ranges.begin()->first;
-	    error_msg = c_format("The only range allowed is %d...%d.",
-				 XORP_INT_CAST(range.first),
-				 XORP_INT_CAST(range.second));
+	    const pair<int64_t, int64_t>& range = ranges.begin()->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    error_msg = c_format("The only range allowed is %s.",
+				 ost.str().c_str());
 	} else {
 	    error_msg = "Allowed ranges are: ";
 	    bool is_first = true;
@@ -1074,12 +1077,12 @@ TemplateTreeNode::check_allowed_value(const string& value,
 		    else
 			error_msg += ", ";
 		}
-		map<pair<int32_t, int32_t>, string>::iterator iter;
+		map<pair<int64_t, int64_t>, string>::iterator iter;
 		iter = ranges.begin();
-		const pair<int32_t, int32_t>& range = iter->first;
-		error_msg += c_format("%d...%d",
-				      XORP_INT_CAST(range.first),
-				      XORP_INT_CAST(range.second));
+		const pair<int64_t, int64_t>& range = iter->first;
+		ostringstream ost;
+		ost << "[" << range.first << ".." << range.second << "]";
+		error_msg += c_format("%s", ost.str().c_str());
 		ranges.erase(iter);
 	    }
 	    error_msg += ".";

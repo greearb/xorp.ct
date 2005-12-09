@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.42 2005/11/29 02:34:09 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.43 2005/11/30 03:18:42 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -152,10 +152,10 @@ public:
     const TemplateTreeNode* find_first_deprecated_ancestor() const;
 
     void add_allowed_value(const string& value, const string& help);
-    void add_allowed_range(int32_t lower_value, int upper_value,
+    void add_allowed_range(int64_t lower_value, int64_t upper_value,
 			   const string& help);
     const map<string, string>& allowed_values() const { return _allowed_values; }
-    const map<pair<int32_t, int32_t>, string>& allowed_ranges() const {
+    const map<pair<int64_t, int64_t>, string>& allowed_ranges() const {
 	return _allowed_ranges;
     }
 
@@ -186,7 +186,7 @@ private:
     // where its stored. Otherwise it is an empty string.
     string _varname;
     map<string, string>	_allowed_values; // Allowed values for this template
-    map<pair<int32_t, int32_t>, string> _allowed_ranges; // Allowed int ranges
+    map<pair<int64_t, int64_t>, string> _allowed_ranges; // Allowed int ranges
 
     // Does the node have a default value?
     bool _has_default;

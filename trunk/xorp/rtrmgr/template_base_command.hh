@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.6 2005/11/17 08:31:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_base_command.hh,v 1.7 2005/11/27 05:43:36 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
 #define __RTRMGR_TEMPLATE_BASE_COMMAND_HH__
@@ -133,7 +133,7 @@ public:
 
 private:
     // Map between the pair of [lower, upper] boundaries and the help string
-    typedef map<pair<int32_t, int32_t>, string> Filter;
+    typedef map<pair<int64_t, int64_t>, string> Filter;
     map<string, Filter> _filters;	// Map between a varname and a filter
 };
 
