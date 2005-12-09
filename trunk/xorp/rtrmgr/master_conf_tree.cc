@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.65 2005/10/13 03:41:49 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.66 2005/11/03 17:27:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -328,7 +328,7 @@ MasterConfigTree::find_inactive_modules() const
     set<string> active_modules;
     list<string> ordered_active_modules;
     debug_msg("Active modules:\n");
-    master_root_node().find_active_modules(active_modules);
+    const_master_root_node().find_active_modules(active_modules);
     order_module_list(active_modules, ordered_active_modules);
 
     // Remove things that are common to both lists
