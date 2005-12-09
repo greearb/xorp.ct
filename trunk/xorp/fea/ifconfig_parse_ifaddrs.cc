@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.24 2005/08/18 15:45:47 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifaddrs.cc,v 1.25 2005/10/16 07:10:35 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -62,7 +62,7 @@
 #ifdef HAVE_GETIFADDRS
 
 bool
-IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
+IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs*& ifap)
 {
     u_short if_index = 0;
     string if_name, alias_if_name;
@@ -71,7 +71,7 @@ IfConfigGet::parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs** ifap)
     UNUSED(if_index);
     UNUSED(it);
     
-    for (ifa = *ifap; ifa != NULL; ifa = ifa->ifa_next) {
+    for (ifa = ifap; ifa != NULL; ifa = ifa->ifa_next) {
 	bool is_newlink = false;	// True if really a new link
 
 	if (ifa->ifa_name == NULL) {

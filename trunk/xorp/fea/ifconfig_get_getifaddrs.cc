@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.11 2005/03/25 02:53:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.12 2005/08/23 22:29:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -104,8 +104,14 @@ IfConfigGetGetifaddrs::read_config(IfTree& it)
 	XLOG_ERROR("getifaddrs() failed: %s", strerror(errno));
 	return false;
     }
-    
-    parse_buffer_ifaddrs(it, (const ifaddrs **)&ifap);
+
+    //
+    // XXX: a hack, because gcc-4.0.2 on Fedora Core 4 does not like
+    // casting the ifap pointer to a const pointer.
+    //
+    const struct ifaddrs *const_ifap = ifap;
+    parse_buffer_ifaddrs(it, const_ifap);
+
     freeifaddrs(ifap);
     
     return true;
