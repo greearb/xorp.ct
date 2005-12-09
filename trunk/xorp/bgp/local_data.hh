@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/local_data.hh,v 1.14 2005/11/28 06:45:14 atanu Exp $
+// $XORP: xorp/bgp/local_data.hh,v 1.15 2005/12/06 06:26:36 atanu Exp $
 
 #ifndef __BGP_LOCAL_DATA_HH__
 #define __BGP_LOCAL_DATA_HH__
@@ -38,7 +38,8 @@ public:
     LocalData(EventLoop& eventloop) : _as(AsNum::AS_INVALID), 
 				      _confed_id(AsNum::AS_INVALID),
 				      _route_reflector(false),
-				      _damping(eventloop)
+				      _damping(eventloop),
+				      _jitter(true)
     {}
 
 //     LocalData(const AsNum& as, const IPv4& id)
@@ -123,6 +124,14 @@ public:
 	return _damping;
     }
 
+    void set_jitter(bool jitter) {
+	_jitter = jitter;
+    }
+
+    bool get_jitter() const {
+	return _jitter;
+    }
+
 private:
     AsNum	_as;	                // This routers AS number.
     IPv4	_id;	                // This routers ID.
@@ -131,5 +140,6 @@ private:
     bool	_route_reflector;	// True if this router is a
 					// route reflector
     Damping 	_damping;		// Route Flap Damping parameters
+    bool	_jitter;		// Jitter applied to timers.
 };
 #endif // __BGP_LOCAL_DATA_HH__

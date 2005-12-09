@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.111 2005/12/08 15:15:30 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.112 2005/12/08 20:40:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1663,6 +1663,16 @@ BGPPeer::get_sock()
     }
 }
 
+TimeVal
+BGPPeer::jitter(const TimeVal& t)
+{
+    if (!_localdata->get_jitter())
+	return t;
+
+    // Uniformly distributed between 0.75 and 1.0
+    return random_uniform(TimeVal(t.get_double() * 0.75), t);
+}
+
 void
 BGPPeer::clear_all_timers()
 {
@@ -1681,8 +1691,8 @@ BGPPeer::start_connect_retry_timer()
 	      XORP_UINT_CAST(_peerdata->get_retry_duration()));
 
     _timer_connect_retry = _mainprocess->eventloop().
-	new_oneoff_after(TimeVal(_peerdata->get_retry_duration(), 0),
-			    callback(this, &BGPPeer::event_connexp));
+	new_oneoff_after(jitter(TimeVal(_peerdata->get_retry_duration(), 0)),
+			 callback(this, &BGPPeer::event_connexp));
 }
 
 void
@@ -1748,7 +1758,7 @@ BGPPeer::start_keepalive_timer()
 
     if (duration > 0)
 	_timer_keep_alive = _mainprocess->eventloop().
-	    new_oneoff_after(TimeVal(duration, 0),
+	    new_oneoff_after(jitter(TimeVal(duration, 0)),
 		callback(this, &BGPPeer::event_keepexp));
 }
 
