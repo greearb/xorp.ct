@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.65 2005/11/28 08:34:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.66 2005/11/28 09:17:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,7 +96,7 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Origin attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   UPDATEMSGERR, ATTRFLAGS, d, length(d));
 
     d = payload(d);	// skip header.
 
