@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.32 2005/12/01 02:15:30 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.33 2005/12/09 23:43:51 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -168,8 +168,10 @@ public:
     void event_recvnotify(const NotificationPacket& p); // EVENTRECNOTMESS
 
     void generate_open_message(OpenPacket& open);
-    void notify_peer_of_error(const int error, const int subcode,
-		const uint8_t*data = 0, const size_t len = 0);
+    void notify_peer_of_error(const int error,
+			      const int subcode = UNSPECIFIED,
+			      const uint8_t*data = 0,
+			      const size_t len = 0);
 
     FSMState state()			{ return _state; }
     static const char *pretty_print_state(FSMState s);
@@ -426,7 +428,8 @@ class AcceptSession {
      void swap_sockets(const OpenPacket& p);
 
 
-     void notify_peer_of_error_accept(const int error, const int subcode,
+     void notify_peer_of_error_accept(const int error,
+				      const int subcode = UNSPECIFIED,
 				      const uint8_t*data = 0,
 				      const size_t len = 0);
 
