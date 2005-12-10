@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.42 2005/12/08 20:40:51 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.43 2005/12/10 00:59:11 atanu Exp $
 #
 
 #
@@ -110,15 +110,23 @@ MSGHEADERERR=1		# Message Header Error
     CONNNOTSYNC=1	# Connection Not Synchronized
     BADMESSLEN=2	# Bad Message Length
     BADMESSTYPE=3	# Bad Message Type
-HOLD_TIMER=4
-FSM_ERROR=5
-OPEN_ERROR=2
-UNACCEPTHOLDTIME=6
+
+OPENMSGERROR=2		# OPEN Message Error
+    UNSUPVERNUM=1	# Unsupported Version Number
+    BADASPEER=2		# Bad Peer AS
+    BADBGPIDENT=3	# Bad BGP Identifier
+    UNSUPOPTPAR=4	# Unsupported Optional Parameter
+    AUTHFAIL=5		# Authentication Failure
+    UNACCEPTHOLDTIME=6	# Unacceptable Hold Time
+    UNSUPCAPABILITY=7	# Unsupported Capability (RFC 3392)
 
 UPDATEMSGERR=3		# Update error
     MALATTRLIST=1       # Malformed Attribute List
     MALASPATH=11	# Malformed AS_PATH
-MISSWATTR=3		# Missing Well-known Attribute
+    MISSWATTR=3		# Missing Well-known Attribute
+
+HOLDTIMEEXP=4		# Hold Timer Expired
+FSMERROR=5		# Finite State Machine Error
 
 reset()
 {
@@ -144,7 +152,7 @@ test1()
     coord peer1 expect packet keepalive
     coord peer1 expect packet keepalive
     coord peer1 expect packet keepalive
-    coord peer1 expect packet notify $HOLD_TIMER
+    coord peer1 expect packet notify $HOLDTIMEEXP
     coord peer1 establish AS $PEER1_AS \
 	holdtime $HOLDTIME \
 	id 192.150.187.100 \
@@ -166,7 +174,7 @@ test2()
     coord peer1 connect
 
     sleep 2
-    coord peer1 expect packet notify $FSM_ERROR
+    coord peer1 expect packet notify $FSMERROR
     coord peer1 send packet update
 
     sleep 2
@@ -180,7 +188,7 @@ test3()
     reset
 
     coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME
-    coord peer1 expect packet notify $OPEN_ERROR $UNACCEPTHOLDTIME
+    coord peer1 expect packet notify $OPENMSGERROR $UNACCEPTHOLDTIME
     coord peer1 establish AS $PEER1_AS \
 	holdtime 1 \
 	id 192.150.187.100 \
@@ -1025,7 +1033,7 @@ test29()
     sleep 2
     # We have to add something to the queue in order to make the
     # assertion later
-    coord peer1 expect packet notify $FSM_ERROR
+    coord peer1 expect packet notify $FSMERROR
     coord peer1 send packet notify $UPDATEMSGERR $MALATTRLIST
 
     sleep 2
@@ -1300,9 +1308,8 @@ test38()
 test39()
 {
     echo "TEST39 - Send a short open packet. 20"
-    echo "	1) Establish a connection"
-    echo "	2) Send an open packet with a length field of 20"
-    echo "	3) Should return a notify Bad Message Length."
+    echo "	1) Send an open packet with a length field of 20"
+    echo "	2) Should return a notify Bad Message Length."
     reset
 
     coord peer1 connect
@@ -1322,13 +1329,36 @@ test39()
     coord peer1 assert queue 0
 }    
 
+test40()
+{
+    echo "TEST40 - Open message with illegal version number"
+    echo "	1) Send an open message with a version number of 6"
+    echo "	2) Should get a notify with unsupported version number 4"
+    reset
+
+    coord peer1 connect
+
+    sleep 2
+
+    coord peer1 expect packet notify $OPENMSGERROR $UNSUPVERNUM 0 4
+
+    coord peer1 send packet corrupt 19 6 \
+	open \
+	asnum $PEER2_AS \
+	bgpid 192.150.187.100 \
+	holdtime 0
+
+    sleep 2
+
+    coord peer1 assert queue 0
+}    
 
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
-    test32 test33 test34 test35 test36 test37 test38 test39'
+    test32 test33 test34 test35 test36 test37 test38 test39 test40'
 
 # Include command line
 . ${srcdir}/args.sh

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.114 2005/12/10 00:31:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.115 2005/12/10 01:41:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1210,7 +1210,7 @@ void
 BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 {
     if (p->Version() != BGPVERSION) {
-	uint8_t data[2];
+	static uint8_t data[2];
 	*reinterpret_cast<uint16_t *>(&data[0]) = htons(BGPVERSION);
 	xorp_throw(CorruptMessage,
 		   c_format("Unsupported BGPVERSION %d", p->Version()),
