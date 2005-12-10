@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.41 2005/12/08 03:49:46 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.42 2005/12/08 20:40:51 atanu Exp $
 #
 
 #
@@ -1213,7 +1213,7 @@ test36()
     echo "TEST36 - Illicit a Message Header Error Bad Message Length. 20"
     echo "	1) Establish a connection"
     echo "	2) Send a keepalive with a long message length"
-    echo "	3) Should return a notify Bad Message Length.."
+    echo "	3) Should return a notify Bad Message Length."
 
     coord reset
     coord target $HOST $PORT2
@@ -1297,12 +1297,38 @@ test38()
     coord peer1 assert idle
 }
 
+test39()
+{
+    echo "TEST39 - Send a short open packet. 20"
+    echo "	1) Establish a connection"
+    echo "	2) Send an open packet with a length field of 20"
+    echo "	3) Should return a notify Bad Message Length."
+    reset
+
+    coord peer1 connect
+
+    sleep 2
+
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN 0 20
+
+    coord peer1 send packet corrupt 17 20 \
+	open \
+	asnum $PEER2_AS \
+	bgpid 192.150.187.100 \
+	holdtime 0
+
+    sleep 2
+
+    coord peer1 assert queue 0
+}    
+
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
-    test32 test33 test34 test35 test36 test37 test38'
+    test32 test33 test34 test35 test36 test37 test38 test39'
 
 # Include command line
 . ${srcdir}/args.sh

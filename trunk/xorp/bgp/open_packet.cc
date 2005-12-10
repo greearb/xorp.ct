@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.23 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.24 2005/10/12 22:32:53 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -84,7 +84,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     if (l < MINOPENPACKET) {
 	debug_msg("Open message too short\n");
 	xorp_throw(CorruptMessage, "Open message too short",
-		   MSGHEADERERR, BADMESSLEN);
+		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
     }
     remaining = l;
 
@@ -107,7 +107,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     if (remaining < myOptParmLen) {
 	debug_msg("Open message too short\n");
 	xorp_throw(CorruptMessage, "Open message too short",
-		   MSGHEADERERR, BADMESSLEN);
+		   OPENMSGERROR, UNSPECIFIED);
     }
 
     while (i > 0) {
@@ -116,7 +116,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 	if (remaining < 2) {
 	    debug_msg("Open message too short\n");
 	    xorp_throw(CorruptMessage, "Parameter is too short",
-		       MSGHEADERERR, 0);
+		       OPENMSGERROR, UNSPECIFIED);
 	}
 
 	BGPParameter *p = BGPParameter::create(d, i, len);
@@ -133,7 +133,7 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
     // packet is the same as the total length of the decoded parameters.
     if (myOptParmLen != _OptParmLen) {
 	xorp_throw(CorruptMessage,  "bad parameters length",
-		   OPENMSGERROR, 0);
+		   OPENMSGERROR, UNSPECIFIED);
     }
 
     return;
