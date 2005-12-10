@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.34 2005/03/25 02:52:51 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.36 2005/08/18 15:58:08 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -165,7 +165,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 		   c_format("Unreachable routes length is bogus %u > %u",
 			    XORP_UINT_CAST(wr_len),
 			    XORP_UINT_CAST(l - MINUPDATEPACKET)),
-		   UPDATEMSGERR, ATTRLEN);
+		   UPDATEMSGERR, MALATTRLIST);
     
     size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
     if (MINUPDATEPACKET + pa_len + wr_len > l)
@@ -173,7 +173,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 		   c_format("Pathattr length is bogus %u > %u",
 			    XORP_UINT_CAST(pa_len),
 			    XORP_UINT_CAST(l - wr_len - MINUPDATEPACKET)),
-		UPDATEMSGERR, ATTRLEN);
+		UPDATEMSGERR, MALATTRLIST);
 
     size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
 
