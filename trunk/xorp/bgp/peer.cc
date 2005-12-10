@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.112 2005/12/08 20:40:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.113 2005/12/09 23:43:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2404,7 +2404,8 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	break;
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
-	notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN);
+	notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN,
+				    buf + MARKER_SIZE, 2);
 // 	event_tranfatal_accept();
 	TIMESPENT_CHECK();
 	debug_msg("Returning false\n");
@@ -2427,6 +2428,15 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	reinterpret_cast<const struct fixed_header *>(buf);
 
     try {
+	/*
+	** Check the Marker, total waste of time as it never contains
+	** anything of interest.
+	*/
+	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
+			&header->marker[0], MARKER_SIZE)) {
+	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
+	}
+	
 	switch (header->type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
