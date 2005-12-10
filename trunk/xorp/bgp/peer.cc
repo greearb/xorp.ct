@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.115 2005/12/10 01:41:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.116 2005/12/10 02:13:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1216,6 +1216,7 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 		   c_format("Unsupported BGPVERSION %d", p->Version()),
 		   OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
     }
+
     if (p->as() != _peerdata->as()) {
 	debug_msg("**** Peer has %s, should have %s ****\n",
 		  p->as().str().c_str(),
@@ -1225,6 +1226,14 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 			    p->as().str().c_str(),
 			    _peerdata->as().str().c_str()),
 		   OPENMSGERROR, BADASPEER);
+    }
+
+    // Must be a valid unicast IP host address.
+    if (!p->id().is_unicast() || p->id().is_zero()) {
+	xorp_throw(CorruptMessage,
+		   c_format("Not a valid unicast IP host address %s",
+			    p->id().str().c_str()),
+		   OPENMSGERROR, BADBGPIDENT);
     }
 
     // This has to be a valid IPv4 address.
