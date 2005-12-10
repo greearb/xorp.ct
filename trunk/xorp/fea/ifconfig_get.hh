@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.21 2005/08/18 15:45:46 bms Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.22 2005/12/09 08:53:32 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -81,7 +81,7 @@ public:
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    bool parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs*& ifap);
+    bool parse_buffer_ifaddrs(IfTree& it, const struct ifaddrs* ifap);
 
     /**
      * Parse information about network interface configuration change from
