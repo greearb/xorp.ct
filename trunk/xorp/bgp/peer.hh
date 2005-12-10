@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.33 2005/12/09 23:43:51 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.34 2005/12/10 01:34:12 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -177,7 +177,7 @@ public:
     static const char *pretty_print_state(FSMState s);
 
     /**
-     * If jitter is globally enabled apply it the the time provided or
+     * If jitter is globally enabled apply it to the time provided otherwise
      * just return the input time.
      */
     TimeVal jitter(const TimeVal& t);
