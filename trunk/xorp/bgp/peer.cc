@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.116 2005/12/10 02:13:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.117 2005/12/10 02:37:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1762,10 +1762,13 @@ BGPPeer::start_keepalive_timer()
     debug_msg("KeepAlive timer started with duration %u s\n",
 	      XORP_UINT_CAST(duration));
 
-    if (duration > 0)
+    if (duration > 0) {
+	TimeVal delay = jitter(TimeVal(duration, 0));
+	// A keepalive must not be sent more frequently that once a second.
+	delay = delay < TimeVal(1, 0) ? TimeVal(1, 0) : delay;
 	_timer_keep_alive = _mainprocess->eventloop().
-	    new_oneoff_after(jitter(TimeVal(duration, 0)),
-		callback(this, &BGPPeer::event_keepexp));
+	    new_oneoff_after(delay, callback(this, &BGPPeer::event_keepexp));
+    }
 }
 
 void
