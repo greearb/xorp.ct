@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.67 2005/11/28 09:21:26 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.68 2005/12/07 07:40:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1756,7 +1756,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	size_t size = words.size();
 	if(0 != ((size - (index + 1)) % 2))
 	    xorp_throw(InvalidString,
-	       c_format("Incorrect number of arguments to update:\n[%s]",
+	       c_format("Incorrect number of arguments to open:\n[%s]",
 				line.c_str()));
 
 	string asnum;
