@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.48 2005/11/30 07:31:16 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.49 2005/12/11 09:37:59 atanu Exp $
 #
 
 #
@@ -27,6 +27,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
 . ${srcdir}/../xrl_shell_funcs.sh ""
 . ${srcdir}/../../rib/xrl_shell_funcs.sh ""
+. ${srcdir}/notification_codes.sh
 
 onexit()
 {
@@ -584,9 +585,17 @@ test10()
 
     reset
 
+    coord peer2 connect
+
+    sleep 2
+
     coord peer2 expect packet notify $OPENMSGERROR $BADBGPIDENT
 
-    coord peer2 establish AS $PEER2_AS holdtime 0 id 0.0.0.0
+    coord peer2 send packet \
+	open \
+	asnum $PEER2_AS \
+	bgpid 0.0.0.0 \
+	holdtime 0
 
     sleep 2
 
