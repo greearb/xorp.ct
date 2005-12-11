@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.46 2005/12/11 04:18:15 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.47 2005/12/11 05:18:01 atanu Exp $
 #
 
 #
@@ -1250,8 +1250,8 @@ test37()
 {
     echo "TEST37 - Illicit a Message Header Error Bad Message Type."
     echo "	1) Establish a connection"
-    echo "	2) Send a keepalive with a zero message type"
-    echo "	3) Should return a notify Bad Message Type.."
+    echo "	2) Send a message with the type set to 10"
+    echo "	3) Should return a notify Bad Message Type with the 10"
 
     coord reset
     coord target $HOST $PORT2
@@ -1259,9 +1259,9 @@ test37()
 
     coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
 
-    coord peer1 expect packet notify $MSGHEADERERR $BADMESSTYPE
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSTYPE 10
 
-    coord peer1 send packet corrupt 18 0 keepalive
+    coord peer1 send packet corrupt 18 10 keepalive
 
     sleep 2
 

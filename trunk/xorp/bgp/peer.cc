@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.118 2005/12/10 10:41:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.119 2005/12/11 05:18:01 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -289,7 +289,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    */
 	    XLOG_ERROR("%s Unknown packet type %d",
 		       this->str().c_str(), header->type);
-	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE);
+	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
+				 const_cast<uint8_t *>(&header->type),1);
 // 	    event_tranfatal();
 	    TIMESPENT_CHECK();
 	    return false;
@@ -2493,7 +2494,9 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    */
 	    XLOG_ERROR("%s Unknown packet type %d",
 		       this->str().c_str(), header->type);
-	    notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE);
+	    notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE,
+					const_cast<uint8_t *>(&header->type),
+					1);
 // 	    event_tranfatal_accept();
 	    TIMESPENT_CHECK();
 	    debug_msg("Returning false\n");
