@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.37 2005/12/10 03:22:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.38 2005/12/11 04:18:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -155,7 +155,7 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
     _Type = MESSAGETYPEUPDATE;
     if (l < MINUPDATEPACKET)
 	xorp_throw(CorruptMessage,
-		   c_format("UpdatePacket too short length %d", l),
+		   c_format("Update Message too short %d", l),
 		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
     d += BGP_COMMON_HEADER_LEN;	// move past header
     size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
