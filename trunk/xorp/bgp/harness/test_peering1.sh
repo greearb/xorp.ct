@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.47 2005/12/11 05:18:01 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.48 2005/12/11 05:40:35 atanu Exp $
 #
 
 #
@@ -25,6 +25,7 @@ set -e
 if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/xrl_shell_funcs.sh ""
 . ${srcdir}/../xrl_shell_funcs.sh ""
+. ${srcdir}/notification_codes.sh
 
 onexit()
 {
@@ -105,29 +106,6 @@ configure_bgp()
     set_parameter $LOCALHOST $PORT4 $PEER $PEER4_PORT MultiProtocol.IPv6.Unicast true
     enable_peer $LOCALHOST $PORT4 $PEER $PEER4_PORT
 }
-
-MSGHEADERERR=1		# Message Header Error
-    CONNNOTSYNC=1	# Connection Not Synchronized
-    BADMESSLEN=2	# Bad Message Length
-    BADMESSTYPE=3	# Bad Message Type
-
-OPENMSGERROR=2		# OPEN Message Error
-    UNSUPVERNUM=1	# Unsupported Version Number
-    BADASPEER=2		# Bad Peer AS
-    BADBGPIDENT=3	# Bad BGP Identifier
-    UNSUPOPTPAR=4	# Unsupported Optional Parameter
-    AUTHFAIL=5		# Authentication Failure
-    UNACCEPTHOLDTIME=6	# Unacceptable Hold Time
-    UNSUPCAPABILITY=7	# Unsupported Capability (RFC 3392)
-
-UPDATEMSGERR=3		# Update error
-    MALATTRLIST=1       # Malformed Attribute List
-    MALASPATH=11	# Malformed AS_PATH
-    MISSWATTR=3		# Missing Well-known Attribute
-
-HOLDTIMEEXP=4		# Hold Timer Expired
-FSMERROR=5		# Finite State Machine Error
-CEASE=6			# Cease
 
 reset()
 {
