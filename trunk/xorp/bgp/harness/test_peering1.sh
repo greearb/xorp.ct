@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.44 2005/12/10 02:13:32 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.45 2005/12/10 02:37:37 atanu Exp $
 #
 
 #
@@ -1377,12 +1377,47 @@ test41()
     coord peer1 assert queue 0
 }    
 
+test42()
+{
+    echo "TEST42 - Send an update message that has a short length field."
+    echo "	1) Establish a connection"
+    echo "	2) Send an udate with a short length 22"
+    echo "	3) Should return a notify Bad Message Length"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $MSGHEADERERR $BADMESSLEN 0 22
+
+    # 
+    # Hit the check in AsPath::decode()
+    # 
+    coord peer1 send packet corrupt 17 22 \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nlri 10.10.10.0/24 \
+	nexthop 20.20.20.20
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
-    test32 test33 test34 test35 test36 test37 test38 test39 test40 test41'
+    test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
+    test42'
 
 # Include command line
 . ${srcdir}/args.sh
