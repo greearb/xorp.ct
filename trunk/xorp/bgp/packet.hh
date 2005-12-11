@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.34 2005/12/07 09:16:34 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.35 2005/12/08 20:40:50 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -286,7 +286,7 @@ UpdatePacket::mpunreach(Safi safi) const
 
 class NotificationPacket : public BGPPacket {
 public:
-    NotificationPacket(const uint8_t *d, uint16_t l) throw(InvalidPacket);
+    NotificationPacket(const uint8_t *d, uint16_t l) throw(CorruptMessage);
     NotificationPacket(uint8_t ec, uint8_t esc = 0,
 		       const uint8_t *d = 0, size_t l=0);
     NotificationPacket();

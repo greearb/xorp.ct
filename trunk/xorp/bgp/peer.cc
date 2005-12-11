@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.117 2005/12/10 02:37:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.118 2005/12/10 10:41:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -274,26 +274,12 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	}
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
-	    try {
-		NotificationPacket pac(buf, length);
-		XLOG_TRACE(main()->profile().enabled(trace_message_in),
-			   cstring(pac));
-		// All decode errors should throw an InvalidPacket
-		debug_msg(pac.str().c_str());
-		event_recvnotify(pac);
-	    } catch (InvalidPacket& err) {
-		XLOG_WARNING("%s Received Invalid Notification Packet",
-			     this->str().c_str());
-		// We received a bad notification packet.  We don't
-		// want to send a notification in response to a
-		// notification, so we need to treat this as if it were
-		// a good notification and tear the connection down.
-		// Pretend we received a CEASE, which is really the
-		// catchall error code.
-		// XXX we should rather use a 'bad notification' error code?
-		NotificationPacket pac(CEASE);
-		event_recvnotify(pac);
-	    }
+	    NotificationPacket pac(buf, length);
+	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       cstring(pac));
+	    // All decode errors should throw a CorruptMessage.
+	    debug_msg(pac.str().c_str());
+	    event_recvnotify(pac);
 	    TIMESPENT_CHECK();
 	    break;
 	}
@@ -2492,26 +2478,12 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	}
 	case MESSAGETYPENOTIFICATION: {
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
-	    try {
-		NotificationPacket pac(buf, length);
- 		XLOG_TRACE(main()->profile().enabled(trace_message_in),
- 			   cstring(pac));
-		// All decode errors should throw an InvalidPacket
-		debug_msg(pac.str().c_str());
-		event_recvnotify_accept(pac);
-	    } catch (InvalidPacket& err) {
-		XLOG_WARNING("%s Received Invalid Notification Packet",
-			     this->str().c_str());
-		// We received a bad notification packet.  We don't
-		// want to send a notification in response to a
-		// notification, so we need to treat this as if it were
-		// a good notification and tear the connection down.
-		// Pretend we received a CEASE, which is really the
-		// catchall error code.
-		// XXX we should rather use a 'bad notification' error code?
-		NotificationPacket pac(CEASE);
-		event_recvnotify_accept(pac);
-	    }
+	    NotificationPacket pac(buf, length);
+	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       cstring(pac));
+	    // All decode errors should throw a CorruptMessage.
+	    debug_msg(pac.str().c_str());
+	    event_recvnotify_accept(pac);
 	    TIMESPENT_CHECK();
 	    break;
 	}

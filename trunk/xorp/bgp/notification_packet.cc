@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.22 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.23 2005/12/08 14:50:03 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,11 +57,13 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
 }
 
 NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
-    throw(InvalidPacket)
+    throw(CorruptMessage)
 {
     debug_msg("Data %p len %d\n", d, l);
     if (l < MINNOTIFICATIONPACKET)
-	xorp_throw(InvalidPacket, "Truncated Notification Message");
+	xorp_throw(CorruptMessage,
+		   c_format("Notification message too short %d", l),
+		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
 
     _Length = l;
     _Type = MESSAGETYPENOTIFICATION;
