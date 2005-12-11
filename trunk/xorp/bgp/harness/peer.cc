@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.68 2005/12/07 07:40:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.69 2005/12/10 00:43:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -458,7 +458,8 @@ Peer::send_packet(const string& line, const vector<string>& words)
 	    if (i->offset() >= len)
 		xorp_throw(InvalidString,
 			   c_format("Offset %u larger than packet %u\n[%s]",
-				    i->offset(), len, line.c_str()));
+				    i->offset(), XORP_UINT_CAST(len),
+				    line.c_str()));
 	    buf[i->offset()] = i->val();
 	}
     }
