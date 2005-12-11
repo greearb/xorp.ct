@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.47 2005/11/02 07:38:13 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.48 2005/11/30 07:31:16 atanu Exp $
 #
 
 #
@@ -584,8 +584,13 @@ test10()
 
     reset
 
+    coord peer2 expect packet notify $OPENMSGERROR $BADBGPIDENT
+
     coord peer2 establish AS $PEER2_AS holdtime 0 id 0.0.0.0
-    coord peer2 assert established
+
+    sleep 2
+
+    coord peer2 assert queue 0
 
     reset
 }
