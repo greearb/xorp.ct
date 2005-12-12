@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.69 2005/12/10 00:43:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.70 2005/12/11 20:21:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -471,7 +471,14 @@ Peer::send_packet(const string& line, const vector<string>& words)
     if(update == words[3]) {
 	TimeVal tv;
 	_eventloop->current_time(tv);
-	_trie_sent.process_update_packet(tv, buf, len);
+	try {
+	    _trie_sent.process_update_packet(tv, buf, len);
+	} catch(CorruptMessage& c) {
+	    /*
+	    ** A corrupt message is being sent so catch the decode exception.
+	    */
+	    XLOG_WARNING("BAD Message: %s", c.why().c_str());
+	}
     }
 
     _busy++;
