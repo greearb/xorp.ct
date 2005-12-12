@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.6 2005/03/25 02:52:54 pavlin Exp $
+// $XORP: xorp/bgp/harness/trie_payload.hh,v 1.7 2005/07/08 23:16:39 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TRIE_PAYLOAD_HH__
 #define __BGP_HARNESS_TRIE_PAYLOAD_HH__
@@ -96,7 +96,7 @@ private:
 };
 
 /**
- * The paylaod of a RealTrie.
+ * The payload of a RealTrie.
  */
 class TriePayload {
 public:
