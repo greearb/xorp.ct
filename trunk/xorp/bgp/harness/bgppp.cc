@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.8 2005/08/18 15:58:10 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.9 2005/09/28 17:31:42 pavlin Exp $"
 
 /*
 ** BGP Pretty Print
@@ -67,7 +67,7 @@ bgppp(const uint8_t *buf, const size_t len)
 	    result = c_format("Unknown packet type %d\n", header->type);
 	    XLOG_WARNING("%s", result.c_str());
 	}
-    } catch(CorruptMessage c) {
+    } catch(CorruptMessage& c) {
 	/*
 	** This peer had sent us a bad message.
 	*/
