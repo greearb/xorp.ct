@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.40 2005/11/28 04:51:51 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.41 2005/11/28 08:34:27 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -218,6 +218,14 @@ protected:
     static size_t length(const uint8_t* d)	{
 	return (d[0] & Extended) ?
 		( (d[2]<<8) + d[3] ) : d[2] ;
+    }
+
+    /**
+     * Total length including the header. Used to send the whole TLV
+     * back when an error has been detected.
+     */
+    static size_t total_tlv_length(const uint8_t* d) {
+	return length(d) + (d[0] & Extended) ? 4 : 3;
     }
 
     // helper function returning a pointer to the payload
