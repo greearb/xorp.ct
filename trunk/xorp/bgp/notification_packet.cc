@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.23 2005/12/08 14:50:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.24 2005/12/11 05:18:01 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -163,7 +163,8 @@ NotificationPacket::validate_error_code(const int error,
 
 string
 NotificationPacket::pretty_print_error_code(const int error, const int subcode,
-					    const uint8_t* error_data)
+					    const uint8_t* error_data,
+					    const size_t len)
 {
     string s;
 
@@ -280,6 +281,11 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 	break;
     }
 
+    if (error_data != NULL) {
+	for (size_t i = 0; i < len; i++)
+	    s += c_format(" %#x", error_data[i]);
+    }
+
     return s;
 }
 
@@ -287,7 +293,8 @@ string
 NotificationPacket::str() const
 {
     return "Notification Packet: " +
-	pretty_print_error_code(_error_code, _error_subcode, _error_data) +
+	pretty_print_error_code(_error_code, _error_subcode, _error_data,
+				_Length - MINNOTIFICATIONPACKET) +
 	"\n";
 }
 

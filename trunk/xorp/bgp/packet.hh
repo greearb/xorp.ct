@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.35 2005/12/08 20:40:50 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.36 2005/12/11 05:18:01 atanu Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -301,7 +301,8 @@ public:
      * Generate a human readable error string.
      */
     static string pretty_print_error_code(const int error, const int subcode,
-					  const uint8_t* error_data = 0);
+					  const uint8_t* error_data = 0,
+					  const size_t len = 0);
     const uint8_t* error_data() const 		{ return _error_data; }
     const uint8_t *encode(size_t &len, uint8_t *buf = 0) const;
     string str() const;
