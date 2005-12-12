@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/notification_codes.sh,v 1.1 2005/12/11 20:33:07 atanu Exp $
 #
 
 #
@@ -24,8 +24,16 @@ OPENMSGERROR=2		# OPEN Message Error
 
 UPDATEMSGERR=3		# Update error
     MALATTRLIST=1       # Malformed Attribute List
-    MALASPATH=11	# Malformed AS_PATH
+    UNRECOGWATTR=2	# Unrecognized Well-known Attribute
     MISSWATTR=3		# Missing Well-known Attribute
+    ATTRFLAGS=4		# Attribute Flags Error
+    ATTRLEN=5		# Attribute Length Error
+    INVALORGATTR=6	# Invalid ORIGIN Attribute
+
+    INVALNHATTR=8	# Invalid NEXT_HOP Attribute
+    OPTATTR=9		# Optional Attribute Error
+    INVALNETFIELD=10	# Invalid Network Field
+    MALASPATH=11	# Malformed AS_PATH
 
 HOLDTIMEEXP=4		# Hold Timer Expired
 FSMERROR=5		# Finite State Machine Error
