@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.50 2005/12/13 02:39:51 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.51 2005/12/13 03:43:48 atanu Exp $
 #
 
 #
@@ -1713,13 +1713,54 @@ test51()
     coord peer1 assert idle
 }
 
+test52()
+{
+    echo "TEST52 - An update message with an invalid nexthop"
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a nexthop with an illegal value"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $INVALNHATTR \
+	64 3 4 255 255 255 255
+
+    # 64 - Attribute Flags
+    # 3 - Attribute Type Code (NEXT_HOP)
+    # 4 - Attribute Length
+    # 255 - Value
+    # 255 - Value
+    # 255 - Value
+    # 255 - Value
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	nexthop 20.20.20.20 \
+	pathattr 64,3,4,255,255,255,255 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
-    test42 test43 test44 test45 test46 test47 test48 test49 test50 test51'
+    test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
+    test52'
 
 # Include command line
 . ${srcdir}/args.sh

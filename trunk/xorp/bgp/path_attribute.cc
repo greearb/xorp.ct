@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.71 2005/12/13 03:21:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.72 2005/12/13 03:43:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -220,7 +220,7 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 	xorp_throw(CorruptMessage,
 		   c_format("NextHop %s is not a unicast address",
 			    _next_hop.str().c_str()),
-		   UPDATEMSGERR, INVALNHATTR);
+		   UPDATEMSGERR, INVALNHATTR, d, total_tlv_length(d));
     encode();
 }
 
