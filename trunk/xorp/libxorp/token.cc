@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/token.cc,v 1.6 2005/04/30 21:57:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/token.cc,v 1.7 2005/12/13 03:18:38 pavlin Exp $"
 
 
 //
@@ -109,12 +109,12 @@ pop_token(string& token_line)
 	if (is_token_separator(token_line[i]) && !is_escape_begin) {
 	    if ((token_line[i] == '|') && (token.empty())) {
 		// XXX: "|" with or without a space around it is a token itself
-		token += token_line.substr(i, 1);
+		token += token_line[i];
 		i++;
 	    }
 	    break;
 	}
-	token += token_line.substr(i, 1);
+	token += token_line[i];
     }
     
     token_line = token_line.erase(0, i);
