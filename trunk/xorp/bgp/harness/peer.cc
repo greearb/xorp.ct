@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.70 2005/12/11 20:21:10 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.71 2005/12/12 20:31:10 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1608,6 +1608,7 @@ public:
 // 	    fprintf(stderr, "%#x ", _data[i]);
 	}
 // 	fprintf(stderr, "\n");
+	_size = length(_data);
 
     };
     
