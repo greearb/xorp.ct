@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.52 2005/12/13 03:59:46 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.53 2005/12/13 04:47:33 atanu Exp $
 #
 
 #
@@ -1783,6 +1783,37 @@ test53()
     coord peer1 assert idle
 }
 
+test54()
+{
+    echo "TEST54 - A mandatory unknown path attribute."
+    echo "	1) Establish a connection"
+    echo "	2) Should get an Unrecognized Well-known Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $UNRECOGWATTR 0 255 1 0
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nexthop 20.20.20.20 \
+	nlri 10.10.10.0/24 \
+	pathattr 0,255,1,0
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
@@ -1790,7 +1821,7 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
     test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
-    test52 test53'
+    test52 test53 test54'
 
 # Include command line
 . ${srcdir}/args.sh

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.72 2005/12/13 03:43:48 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.73 2005/12/13 03:59:46 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1306,10 +1306,13 @@ UnknownAttribute::UnknownAttribute(const uint8_t* d)
 	throw(CorruptMessage)
 	: PathAttribute(d)
 {
-    if (!optional() /*|| !transitive()*/)
+    // It shouldn't be possible to receive an unknown attribute that
+    // is well known.
+    if (well_known())
 	xorp_throw(CorruptMessage,
 		   "Bad Flags in Unknown attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   UPDATEMSGERR, UNRECOGWATTR, d, total_tlv_length(d));
+	
     _size = length(d);
     _data = new uint8_t[wire_size()];
     memcpy(_data, d, wire_size());
