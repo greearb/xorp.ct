@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.48 2005/12/11 05:40:35 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.49 2005/12/11 20:35:07 atanu Exp $
 #
 
 #
@@ -1360,7 +1360,7 @@ test42()
 {
     echo "TEST42 - Send an update message that has a short length field."
     echo "	1) Establish a connection"
-    echo "	2) Send an udate with a short length 22"
+    echo "	2) Send an update with a short length 22"
     echo "	3) Should return a notify Bad Message Length"
 
     coord reset
@@ -1413,13 +1413,277 @@ test43()
     coord peer1 assert idle
 }
 
+test44()
+{
+    echo "TEST44 - Send an update message with an origin with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with an origin with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 1 1 1
+
+    coord peer1 send packet \
+	update \
+	pathattr 0,1,1,1 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nexthop 20.20.20.20 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test45()
+{
+    echo "TEST45 - Send an update message with an aspath with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with an aspath with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 2 4 2 1 253 232
+
+    # 0 - Attribute Flags (BAD)
+    # 2 - Attribute Type Code (AS_PATH)
+    # 4 - Attribute Length
+    # 2 - Path Segment Type (AS_SEQUENCE)
+    # 1 - Path Segment Length (One AS)
+    # 253 - Path Segment Value (65000 / 256)
+    # 232 - Path Segment Value (65000 % 256)
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	pathattr 0,2,4,2,1,253,232 \
+	nexthop 20.20.20.20 \
+	nlri 10.10.10.0/24
+
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test46()
+{
+    echo "TEST46 - Send an update message with a nexthop with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a nexthop with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 3 4 20 20 20 20
+
+    # 0 - Attribute Flags (BAD)
+    # 3 - Attribute Type Code (NEXT_HOP)
+    # 4 - Attribute Length
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	pathattr 0,3,4,20,20,20,20 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test47()
+{
+    echo "TEST47 - Send an update message with a med with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a med with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 4 4 20 20 20 20
+
+    # 0 - Attribute Flags (BAD)
+    # 4 - Attribute Type Code (MULTI_EXIT_DISC)
+    # 4 - Attribute Length
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	pathattr 0,4,4,20,20,20,20 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test48()
+{
+    echo "TEST48 - Send an update message with a LOCAL_PREF with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a LOCAL_PREF with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 5 4 20 20 20 20
+
+    # 0 - Attribute Flags (BAD)
+    # 5 - Attribute Type Code (LOCAL_PREF)
+    # 4 - Attribute Length
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+    # 20 - Value
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	pathattr 0,5,4,20,20,20,20 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test49()
+{
+    echo "TEST49 - An update message with an ATOMIC_AGGREGATE with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a ATOMIC_AGGREGATE with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS 0 6 0
+
+    # 0 - Attribute Flags (BAD)
+    # 6 - Attribute Type Code (ATOMIC_AGGREGATE)
+    # 0 - Attribute Length
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	pathattr 0,6,0 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test50()
+{
+    echo "TEST50 - An update message with an AGGREGATOR with bad flags."
+    echo "	1) Establish a connection"
+    echo "	2) Send an update with a AGGREGATOR with bad flags"
+    echo "	3) Should return an UPDATE Message Error Attribute"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $ATTRFLAGS \
+	0 7 6 1 1 20 20 20 20
+
+    # 0 - Attribute Flags (BAD)
+    # 7 - Attribute Type Code (ATOMIC_AGGREGATE)
+    # 6 - Attribute Length
+    # 1 - Last AS
+    # 1 - Last AS
+    # 20 - IP address
+    # 20 - IP address
+    # 20 - IP address
+    # 20 - IP address
+    
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	pathattr 0,7,6,1,1,20,20,20,20 \
+	nlri 10.10.10.0/24
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
     test17 test18 test19 test20 test20_ipv6 test21 test22 test23 test24
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
-    test42 test43'
+    test42 test43 test44 test45 test46 test47 test48 test49 test50'
 
 # Include command line
 . ${srcdir}/args.sh

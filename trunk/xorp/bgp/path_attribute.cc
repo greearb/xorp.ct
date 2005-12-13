@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.66 2005/11/28 09:17:14 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.67 2005/12/10 03:40:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -95,8 +95,8 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 		   UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in Origin attribute",
-		   UPDATEMSGERR, ATTRFLAGS, d, length(d));
+		   c_format("Bad Flags in Origin attribute %#x",flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
     d = payload(d);	// skip header.
 
@@ -165,8 +165,8 @@ ASPathAttribute::ASPathAttribute(const uint8_t* d)
 {
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in AS Path attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   c_format("Bad Flags in AS Path attribute %#x", flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
     _as_path = new AsPath(payload(d), length(d));
     encode();
@@ -207,8 +207,9 @@ NextHopAttribute<A>::NextHopAttribute(const uint8_t* d)
 	: PathAttribute(d)
 {
     if (!well_known() || !transitive())
-	xorp_throw(CorruptMessage, "Bad Flags in NextHop attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+	xorp_throw(CorruptMessage,
+		   c_format("Bad Flags in NextHop attribute %#x", flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     if (length(d) != A::addr_size())
 	xorp_throw(CorruptMessage, "Bad size in NextHop address",
 		   UPDATEMSGERR, INVALNHATTR);
@@ -255,8 +256,9 @@ MEDAttribute::MEDAttribute(const uint8_t* d) throw(CorruptMessage)
     : PathAttribute(d)
 {
     if (!optional() || transitive())
-	xorp_throw(CorruptMessage, "Bad Flags in MEDAttribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+	xorp_throw(CorruptMessage,
+		   c_format("Bad Flags in MEDAttribute %#x", flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in MEDAttribute",
 		   UPDATEMSGERR, INVALNHATTR);
@@ -301,8 +303,9 @@ LocalPrefAttribute::LocalPrefAttribute(const uint8_t* d)
 	: PathAttribute(d)
 {
     if (!well_known() || !transitive())
-	xorp_throw(CorruptMessage, "Bad Flags in LocalPrefAttribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+	xorp_throw(CorruptMessage,
+		   c_format("Bad Flags in LocalPrefAttribute %#x", flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     if (length(d) != 4)
 	xorp_throw(CorruptMessage, "Bad size in LocalPrefAttribute",
 		   UPDATEMSGERR, INVALNHATTR);
@@ -353,8 +356,9 @@ AtomicAggAttribute::AtomicAggAttribute(const uint8_t* d)
 		   UPDATEMSGERR, UNSPECIFIED);
     if (!well_known() || !transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in AtomicAggregate attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+			    flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     set_header(0);	// this is all encode() has to do
 }
 
@@ -387,8 +391,9 @@ AggregatorAttribute::AggregatorAttribute(const uint8_t* d)
 		   UPDATEMSGERR, UNSPECIFIED);
     if (!optional() || !transitive())
 	xorp_throw(CorruptMessage,
-		   "Bad Flags in AtomicAggregate attribute",
-		   UPDATEMSGERR, ATTRFLAGS);
+		   c_format("Bad Flags in AtomicAggregate attribute %#x",
+			    flags()),
+		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
     d = payload(d);
     _as = AsNum(d);
     _speaker = IPv4(d+2);
