@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.70 2005/12/13 03:03:13 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.71 2005/12/13 03:21:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -98,19 +98,19 @@ OriginAttribute::OriginAttribute(const uint8_t* d)
 		   c_format("Bad Flags in Origin attribute %#x",flags()),
 		   UPDATEMSGERR, ATTRFLAGS, d, total_tlv_length(d));
 
-    d = payload(d);	// skip header.
+    const uint8_t* data = payload(d);	// skip header.
 
-    switch (d[0]) {
+    switch (data[0]) {
     case IGP:
     case EGP:
     case INCOMPLETE:
-	_origin = (OriginType)d[0];
+	_origin = (OriginType)data[0];
 	break;
 
     default:
 	xorp_throw(CorruptMessage,
-		   c_format("Unknown Origin Type %d", d[0]),
-		   UPDATEMSGERR, INVALORGATTR);
+		   c_format("Unknown Origin Type %d", data[0]),
+		   UPDATEMSGERR, INVALORGATTR, d, total_tlv_length(d));
     }
     encode();
 }
