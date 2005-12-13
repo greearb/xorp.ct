@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.10 2005/03/25 02:52:50 pavlin Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.12 2005/08/18 15:58:08 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,6 +59,16 @@ BGPUpdateAttrib::copy_out(uint8_t *d) const
 	d[3] = (a >> 8) & 0xff;
     if (d[0] > 24)
 	d[4] = a & 0xff;
+}
+
+size_t
+BGPUpdateAttrib::size(const uint8_t *d) throw(CorruptMessage)
+{
+    if (d[0] > 32)
+	xorp_throw(CorruptMessage,
+		   c_format("inconsistent length %d", d[0]),
+		   UPDATEMSGERR, INVALNETFIELD);
+    return (d[0] + 7)/8 + 1;
 }
 
 size_t
@@ -124,6 +134,7 @@ BGPUpdateAttribList::decode(const uint8_t *d, size_t len)
                    c_format("leftover bytes %u", XORP_UINT_CAST(len)),
                    UPDATEMSGERR, ATTRLEN);
 }
+
 
 string
 BGPUpdateAttribList::str(string nlri_or_withdraw) const

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/update_attrib.hh,v 1.9 2004/06/10 22:40:38 hodson Exp $
+// $XORP: xorp/bgp/update_attrib.hh,v 1.10 2005/03/25 02:52:50 pavlin Exp $
 
 #ifndef __BGP_UPDATE_ATTRIB_HH__
 #define __BGP_UPDATE_ATTRIB_HH__
@@ -61,13 +61,7 @@ public:
     }
 
     // size of next operand in memory
-    static size_t size(const uint8_t *d) throw(CorruptMessage)	{
-	if (d[0] > 32)
-	    xorp_throw(CorruptMessage,
-                c_format("inconsistent length %d", d[0]),
-			0, 0);	// XXX change codes!
-	return (d[0] + 7)/8 + 1;
-    }
+    static size_t size(const uint8_t *d) throw(CorruptMessage);
 
     size_t calc_byte_size() const			{
 	return (prefix_len() + 7) / 8;
