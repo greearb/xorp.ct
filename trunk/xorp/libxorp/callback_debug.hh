@@ -410,9 +410,9 @@ struct XorpMemberCallbackFactory0B0<R, O, false>
  * member function with 0 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)())
+dbg_callback(const char* file, int line,  O* o, R (O::*p)())
 {
-    return XorpMemberCallbackFactory0B0<R, O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory0B0<R,  O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -420,9 +420,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)())
  * member function with 0 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)())
+dbg_callback(const char* file, int line,  O& o, R (O::*p)())
 {
-    return XorpMemberCallbackFactory0B0<R, O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory0B0<R,  O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -538,9 +538,9 @@ struct XorpConstMemberCallbackFactory0B0<R, O, false>
  * const member function with 0 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)() const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)() const)
 {
-    return XorpConstMemberCallbackFactory0B0<R, O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory0B0<R,  const O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -548,9 +548,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)() const)
  * const member function with 0 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)() const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)() const)
 {
-    return XorpConstMemberCallbackFactory0B0<R, O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory0B0<R,  const O, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -723,9 +723,9 @@ struct XorpMemberCallbackFactory0B1<R, O, BA1, false>
  * member function with 0 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class BA1> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory0B1<R, O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory0B1<R,  O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -733,9 +733,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1), BA1 ba1)
  * member function with 0 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class BA1> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory0B1<R, O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory0B1<R,  O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -853,9 +853,9 @@ struct XorpConstMemberCallbackFactory0B1<R, O, BA1, false>
  * const member function with 0 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class BA1> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory0B1<R, O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory0B1<R,  const O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -863,9 +863,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1) const, BA1 ba1)
  * const member function with 0 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class BA1> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory0B1<R, O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory0B1<R,  const O, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -1042,9 +1042,9 @@ struct XorpMemberCallbackFactory0B2<R, O, BA1, BA2, false>
  * member function with 0 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class BA1, class BA2> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory0B2<R, O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory0B2<R,  O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -1052,9 +1052,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2), BA1 ba1, BA2
  * member function with 0 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class BA1, class BA2> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory0B2<R, O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory0B2<R,  O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -1174,9 +1174,9 @@ struct XorpConstMemberCallbackFactory0B2<R, O, BA1, BA2, false>
  * const member function with 0 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class BA1, class BA2> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory0B2<R, O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory0B2<R,  const O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -1184,9 +1184,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2) const, BA1 ba
  * const member function with 0 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class BA1, class BA2> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory0B2<R, O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory0B2<R,  const O, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -1367,9 +1367,9 @@ struct XorpMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, false>
  * member function with 0 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory0B3<R,  O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -1377,9 +1377,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3), BA1 ba1
  * member function with 0 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory0B3<R,  O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -1501,9 +1501,9 @@ struct XorpConstMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, false>
  * const member function with 0 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory0B3<R,  const O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -1511,9 +1511,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3) const, B
  * const member function with 0 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory0B3<R, O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory0B3<R,  const O, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -1698,9 +1698,9 @@ struct XorpMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, false>
  * member function with 0 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory0B4<R,  O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -1708,9 +1708,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4), BA
  * member function with 0 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory0B4<R,  O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -1834,9 +1834,9 @@ struct XorpConstMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, false>
  * const member function with 0 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory0B4<R,  const O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -1844,9 +1844,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4) con
  * const member function with 0 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory0B4<R, O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory0B4<R,  const O, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -2035,9 +2035,9 @@ struct XorpMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, false>
  * member function with 0 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory0B5<R,  O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -2045,9 +2045,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5
  * member function with 0 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory0B5<R,  O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -2173,9 +2173,9 @@ struct XorpConstMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, false>
  * const member function with 0 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory0B5<R,  const O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -2183,9 +2183,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5
  * const member function with 0 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory0B5<R, O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory0B5<R,  const O, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -2378,9 +2378,9 @@ struct XorpMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, false>
  * member function with 0 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory0B6<R,  O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -2388,9 +2388,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5
  * member function with 0 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory0B6<R,  O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -2518,9 +2518,9 @@ struct XorpConstMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, fal
  * const member function with 0 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory0B6<R,  const O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -2528,9 +2528,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(BA1, BA2, BA3, BA4, BA5
  * const member function with 0 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback0<R>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory0B6<R, O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory0B6<R,  const O, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -2722,9 +2722,9 @@ struct XorpMemberCallbackFactory1B0<R, O, A1, false>
  * member function with 1 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1))
 {
-    return XorpMemberCallbackFactory1B0<R, O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory1B0<R,  O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -2732,9 +2732,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1))
  * member function with 1 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1))
 {
-    return XorpMemberCallbackFactory1B0<R, O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory1B0<R,  O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -2850,9 +2850,9 @@ struct XorpConstMemberCallbackFactory1B0<R, O, A1, false>
  * const member function with 1 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1) const)
 {
-    return XorpConstMemberCallbackFactory1B0<R, O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory1B0<R,  const O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -2860,9 +2860,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1) const)
  * const member function with 1 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1) const)
 {
-    return XorpConstMemberCallbackFactory1B0<R, O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory1B0<R,  const O, A1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -3035,9 +3035,9 @@ struct XorpMemberCallbackFactory1B1<R, O, A1, BA1, false>
  * member function with 1 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class BA1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory1B1<R, O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory1B1<R,  O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -3045,9 +3045,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1), BA1 ba1)
  * member function with 1 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class BA1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory1B1<R, O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory1B1<R,  O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -3165,9 +3165,9 @@ struct XorpConstMemberCallbackFactory1B1<R, O, A1, BA1, false>
  * const member function with 1 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class BA1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory1B1<R, O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory1B1<R,  const O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -3175,9 +3175,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1) const, BA1 ba1
  * const member function with 1 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class BA1> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory1B1<R, O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory1B1<R,  const O, A1, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -3354,9 +3354,9 @@ struct XorpMemberCallbackFactory1B2<R, O, A1, BA1, BA2, false>
  * member function with 1 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory1B2<R, O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory1B2<R,  O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -3364,9 +3364,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2), BA1 ba1,
  * member function with 1 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory1B2<R, O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory1B2<R,  O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -3486,9 +3486,9 @@ struct XorpConstMemberCallbackFactory1B2<R, O, A1, BA1, BA2, false>
  * const member function with 1 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory1B2<R, O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory1B2<R,  const O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -3496,9 +3496,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2) const, BA
  * const member function with 1 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory1B2<R, O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory1B2<R,  const O, A1, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -3679,9 +3679,9 @@ struct XorpMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, false>
  * member function with 1 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory1B3<R,  O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -3689,9 +3689,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3), BA1
  * member function with 1 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory1B3<R,  O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -3813,9 +3813,9 @@ struct XorpConstMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, false>
  * const member function with 1 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory1B3<R,  const O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -3823,9 +3823,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3) cons
  * const member function with 1 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory1B3<R, O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory1B3<R,  const O, A1, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -4010,9 +4010,9 @@ struct XorpMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, false>
  * member function with 1 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory1B4<R,  O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -4020,9 +4020,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4)
  * member function with 1 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory1B4<R,  O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -4146,9 +4146,9 @@ struct XorpConstMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, false>
  * const member function with 1 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory1B4<R,  const O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -4156,9 +4156,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4)
  * const member function with 1 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory1B4<R, O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory1B4<R,  const O, A1, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -4347,9 +4347,9 @@ struct XorpMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, false>
  * member function with 1 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory1B5<R,  O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -4357,9 +4357,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4,
  * member function with 1 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory1B5<R,  O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -4485,9 +4485,9 @@ struct XorpConstMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, fals
  * const member function with 1 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory1B5<R,  const O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -4495,9 +4495,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4,
  * const member function with 1 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory1B5<R, O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory1B5<R,  const O, A1, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -4690,9 +4690,9 @@ struct XorpMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, fals
  * member function with 1 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory1B6<R,  O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -4700,9 +4700,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4,
  * member function with 1 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory1B6<R,  O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -4830,9 +4830,9 @@ struct XorpConstMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6,
  * const member function with 1 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory1B6<R,  const O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -4840,9 +4840,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, BA1, BA2, BA3, BA4,
  * const member function with 1 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback1<R, A1>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory1B6<R, O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory1B6<R,  const O, A1, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -5034,9 +5034,9 @@ struct XorpMemberCallbackFactory2B0<R, O, A1, A2, false>
  * member function with 2 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2))
 {
-    return XorpMemberCallbackFactory2B0<R, O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory2B0<R,  O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -5044,9 +5044,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2))
  * member function with 2 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2))
 {
-    return XorpMemberCallbackFactory2B0<R, O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory2B0<R,  O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -5162,9 +5162,9 @@ struct XorpConstMemberCallbackFactory2B0<R, O, A1, A2, false>
  * const member function with 2 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2) const)
 {
-    return XorpConstMemberCallbackFactory2B0<R, O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory2B0<R,  const O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -5172,9 +5172,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2) const)
  * const member function with 2 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2) const)
 {
-    return XorpConstMemberCallbackFactory2B0<R, O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory2B0<R,  const O, A1, A2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -5347,9 +5347,9 @@ struct XorpMemberCallbackFactory2B1<R, O, A1, A2, BA1, false>
  * member function with 2 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory2B1<R, O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory2B1<R,  O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -5357,9 +5357,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1), BA1 ba1)
  * member function with 2 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory2B1<R, O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory2B1<R,  O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -5477,9 +5477,9 @@ struct XorpConstMemberCallbackFactory2B1<R, O, A1, A2, BA1, false>
  * const member function with 2 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory2B1<R, O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory2B1<R,  const O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -5487,9 +5487,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1) const, BA1
  * const member function with 2 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory2B1<R, O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory2B1<R,  const O, A1, A2, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -5666,9 +5666,9 @@ struct XorpMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, false>
  * member function with 2 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory2B2<R,  O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -5676,9 +5676,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2), BA1 
  * member function with 2 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory2B2<R,  O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -5798,9 +5798,9 @@ struct XorpConstMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, false>
  * const member function with 2 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory2B2<R,  const O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -5808,9 +5808,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2) const
  * const member function with 2 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory2B2<R, O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory2B2<R,  const O, A1, A2, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -5991,9 +5991,9 @@ struct XorpMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, false>
  * member function with 2 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory2B3<R,  O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -6001,9 +6001,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3),
  * member function with 2 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory2B3<R,  O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -6125,9 +6125,9 @@ struct XorpConstMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, false>
  * const member function with 2 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory2B3<R,  const O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -6135,9 +6135,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3) 
  * const member function with 2 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory2B3<R, O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory2B3<R,  const O, A1, A2, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -6322,9 +6322,9 @@ struct XorpMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, false>
  * member function with 2 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory2B4<R,  O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -6332,9 +6332,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * member function with 2 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory2B4<R,  O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -6458,9 +6458,9 @@ struct XorpConstMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, false
  * const member function with 2 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory2B4<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -6468,9 +6468,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * const member function with 2 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory2B4<R, O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory2B4<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -6659,9 +6659,9 @@ struct XorpMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, false
  * member function with 2 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory2B5<R,  O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -6669,9 +6669,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * member function with 2 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory2B5<R,  O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -6797,9 +6797,9 @@ struct XorpConstMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, 
  * const member function with 2 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory2B5<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -6807,9 +6807,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * const member function with 2 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory2B5<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory2B5<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -7002,9 +7002,9 @@ struct XorpMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, 
  * member function with 2 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory2B6<R,  O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -7012,9 +7012,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * member function with 2 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory2B6<R,  O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -7142,9 +7142,9 @@ struct XorpConstMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, 
  * const member function with 2 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory2B6<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -7152,9 +7152,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, BA1, BA2, BA3, 
  * const member function with 2 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback2<R, A1, A2>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory2B6<R, O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory2B6<R,  const O, A1, A2, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -7346,9 +7346,9 @@ struct XorpMemberCallbackFactory3B0<R, O, A1, A2, A3, false>
  * member function with 3 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3))
 {
-    return XorpMemberCallbackFactory3B0<R, O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory3B0<R,  O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -7356,9 +7356,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3))
  * member function with 3 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3))
 {
-    return XorpMemberCallbackFactory3B0<R, O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory3B0<R,  O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -7474,9 +7474,9 @@ struct XorpConstMemberCallbackFactory3B0<R, O, A1, A2, A3, false>
  * const member function with 3 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3) const)
 {
-    return XorpConstMemberCallbackFactory3B0<R, O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory3B0<R,  const O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -7484,9 +7484,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3) const)
  * const member function with 3 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3) const)
 {
-    return XorpConstMemberCallbackFactory3B0<R, O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory3B0<R,  const O, A1, A2, A3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -7659,9 +7659,9 @@ struct XorpMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, false>
  * member function with 3 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory3B1<R,  O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -7669,9 +7669,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1), BA1 b
  * member function with 3 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory3B1<R,  O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -7789,9 +7789,9 @@ struct XorpConstMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, false>
  * const member function with 3 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory3B1<R,  const O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -7799,9 +7799,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1) const,
  * const member function with 3 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory3B1<R, O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory3B1<R,  const O, A1, A2, A3, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -7978,9 +7978,9 @@ struct XorpMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, false>
  * member function with 3 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory3B2<R,  O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -7988,9 +7988,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2), 
  * member function with 3 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory3B2<R,  O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -8110,9 +8110,9 @@ struct XorpConstMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, false>
  * const member function with 3 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory3B2<R,  const O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -8120,9 +8120,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2) c
  * const member function with 3 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory3B2<R, O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory3B2<R,  const O, A1, A2, A3, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -8303,9 +8303,9 @@ struct XorpMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, false>
  * member function with 3 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory3B3<R,  O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -8313,9 +8313,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * member function with 3 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory3B3<R,  O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -8437,9 +8437,9 @@ struct XorpConstMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, false>
  * const member function with 3 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory3B3<R,  const O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -8447,9 +8447,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * const member function with 3 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory3B3<R, O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory3B3<R,  const O, A1, A2, A3, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -8634,9 +8634,9 @@ struct XorpMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, false>
  * member function with 3 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory3B4<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -8644,9 +8644,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * member function with 3 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory3B4<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -8770,9 +8770,9 @@ struct XorpConstMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, f
  * const member function with 3 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory3B4<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -8780,9 +8780,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * const member function with 3 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory3B4<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory3B4<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -8971,9 +8971,9 @@ struct XorpMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, f
  * member function with 3 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory3B5<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -8981,9 +8981,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * member function with 3 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory3B5<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -9109,9 +9109,9 @@ struct XorpConstMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, B
  * const member function with 3 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory3B5<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -9119,9 +9119,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * const member function with 3 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory3B5<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory3B5<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -9314,9 +9314,9 @@ struct XorpMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, B
  * member function with 3 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory3B6<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -9324,9 +9324,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * member function with 3 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory3B6<R,  O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -9454,9 +9454,9 @@ struct XorpConstMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, B
  * const member function with 3 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory3B6<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -9464,9 +9464,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, BA1, BA2, B
  * const member function with 3 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback3<R, A1, A2, A3>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory3B6<R, O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory3B6<R,  const O, A1, A2, A3, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -9658,9 +9658,9 @@ struct XorpMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, false>
  * member function with 4 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4))
 {
-    return XorpMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory4B0<R,  O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -9668,9 +9668,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4))
  * member function with 4 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4))
 {
-    return XorpMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory4B0<R,  O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -9786,9 +9786,9 @@ struct XorpConstMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, false>
  * const member function with 4 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4) const)
 {
-    return XorpConstMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory4B0<R,  const O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -9796,9 +9796,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4) const)
  * const member function with 4 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4) const)
 {
-    return XorpConstMemberCallbackFactory4B0<R, O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory4B0<R,  const O, A1, A2, A3, A4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -9971,9 +9971,9 @@ struct XorpMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, false>
  * member function with 4 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory4B1<R,  O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -9981,9 +9981,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1), B
  * member function with 4 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory4B1<R,  O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -10101,9 +10101,9 @@ struct XorpConstMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, false>
  * const member function with 4 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory4B1<R,  const O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -10111,9 +10111,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1) co
  * const member function with 4 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory4B1<R, O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory4B1<R,  const O, A1, A2, A3, A4, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -10290,9 +10290,9 @@ struct XorpMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, false>
  * member function with 4 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory4B2<R,  O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -10300,9 +10300,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * member function with 4 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory4B2<R,  O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -10422,9 +10422,9 @@ struct XorpConstMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, false>
  * const member function with 4 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory4B2<R,  const O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -10432,9 +10432,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * const member function with 4 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory4B2<R, O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory4B2<R,  const O, A1, A2, A3, A4, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -10615,9 +10615,9 @@ struct XorpMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, false>
  * member function with 4 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory4B3<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -10625,9 +10625,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * member function with 4 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory4B3<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -10749,9 +10749,9 @@ struct XorpConstMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, fa
  * const member function with 4 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory4B3<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -10759,9 +10759,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * const member function with 4 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory4B3<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory4B3<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -10946,9 +10946,9 @@ struct XorpMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, fa
  * member function with 4 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory4B4<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -10956,9 +10956,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * member function with 4 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory4B4<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -11082,9 +11082,9 @@ struct XorpConstMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA
  * const member function with 4 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory4B4<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -11092,9 +11092,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * const member function with 4 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory4B4<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory4B4<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -11283,9 +11283,9 @@ struct XorpMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA
  * member function with 4 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory4B5<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -11293,9 +11293,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * member function with 4 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory4B5<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -11421,9 +11421,9 @@ struct XorpConstMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA
  * const member function with 4 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory4B5<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -11431,9 +11431,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * const member function with 4 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory4B5<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory4B5<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -11626,9 +11626,9 @@ struct XorpMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA
  * member function with 4 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory4B6<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -11636,9 +11636,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * member function with 4 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory4B6<R,  O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -11766,9 +11766,9 @@ struct XorpConstMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA
  * const member function with 4 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory4B6<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -11776,9 +11776,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, BA1, BA
  * const member function with 4 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback4<R, A1, A2, A3, A4>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory4B6<R, O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory4B6<R,  const O, A1, A2, A3, A4, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -11970,9 +11970,9 @@ struct XorpMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, false>
  * member function with 5 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5))
 {
-    return XorpMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory5B0<R,  O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -11980,9 +11980,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5))
  * member function with 5 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5))
 {
-    return XorpMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory5B0<R,  O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -12098,9 +12098,9 @@ struct XorpConstMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, false>
  * const member function with 5 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5) const)
 {
-    return XorpConstMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory5B0<R,  const O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -12108,9 +12108,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5) con
  * const member function with 5 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5) const)
 {
-    return XorpConstMemberCallbackFactory5B0<R, O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory5B0<R,  const O, A1, A2, A3, A4, A5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -12283,9 +12283,9 @@ struct XorpMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, false>
  * member function with 5 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory5B1<R,  O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -12293,9 +12293,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory5B1<R,  O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -12413,9 +12413,9 @@ struct XorpConstMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, false>
  * const member function with 5 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory5B1<R,  const O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -12423,9 +12423,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory5B1<R, O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory5B1<R,  const O, A1, A2, A3, A4, A5, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -12602,9 +12602,9 @@ struct XorpMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, false>
  * member function with 5 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory5B2<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -12612,9 +12612,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory5B2<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -12734,9 +12734,9 @@ struct XorpConstMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, fal
  * const member function with 5 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory5B2<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -12744,9 +12744,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory5B2<R, O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory5B2<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -12927,9 +12927,9 @@ struct XorpMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, fal
  * member function with 5 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory5B3<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -12937,9 +12937,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory5B3<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -13061,9 +13061,9 @@ struct XorpConstMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3
  * const member function with 5 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory5B3<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -13071,9 +13071,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory5B3<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory5B3<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -13258,9 +13258,9 @@ struct XorpMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4
  * member function with 5 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory5B4<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -13268,9 +13268,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory5B4<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -13394,9 +13394,9 @@ struct XorpConstMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3
  * const member function with 5 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory5B4<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -13404,9 +13404,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory5B4<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory5B4<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -13595,9 +13595,9 @@ struct XorpMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4
  * member function with 5 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory5B5<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -13605,9 +13605,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory5B5<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -13733,9 +13733,9 @@ struct XorpConstMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3
  * const member function with 5 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory5B5<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -13743,9 +13743,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory5B5<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory5B5<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -13938,9 +13938,9 @@ struct XorpMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4
  * member function with 5 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory5B6<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -13948,9 +13948,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * member function with 5 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory5B6<R,  O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -14078,9 +14078,9 @@ struct XorpConstMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3
  * const member function with 5 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory5B6<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -14088,9 +14088,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, BA1
  * const member function with 5 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback5<R, A1, A2, A3, A4, A5>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory5B6<R, O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory5B6<R,  const O, A1, A2, A3, A4, A5, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -14282,9 +14282,9 @@ struct XorpMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, false>
  * member function with 6 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6))
 {
-    return XorpMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory6B0<R,  O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -14292,9 +14292,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6)
  * member function with 6 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6))
 {
-    return XorpMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory6B0<R,  O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -14410,9 +14410,9 @@ struct XorpConstMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, false>
  * const member function with 6 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
 {
-    return XorpConstMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory6B0<R,  const O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -14420,9 +14420,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6)
  * const member function with 6 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6) const)
 {
-    return XorpConstMemberCallbackFactory6B0<R, O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory6B0<R,  const O, A1, A2, A3, A4, A5, A6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -14595,9 +14595,9 @@ struct XorpMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, false>
  * member function with 6 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory6B1<R,  O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -14605,9 +14605,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory6B1<R,  O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -14725,9 +14725,9 @@ struct XorpConstMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, fals
  * const member function with 6 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory6B1<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -14735,9 +14735,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory6B1<R, O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory6B1<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -14914,9 +14914,9 @@ struct XorpMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, fals
  * member function with 6 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory6B2<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -14924,9 +14924,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory6B2<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -15046,9 +15046,9 @@ struct XorpConstMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2,
  * const member function with 6 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory6B2<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -15056,9 +15056,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory6B2<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory6B2<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -15239,9 +15239,9 @@ struct XorpMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3,
  * member function with 6 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory6B3<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -15249,9 +15249,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory6B3<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -15373,9 +15373,9 @@ struct XorpConstMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2,
  * const member function with 6 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory6B3<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -15383,9 +15383,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory6B3<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory6B3<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -15570,9 +15570,9 @@ struct XorpMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3,
  * member function with 6 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory6B4<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -15580,9 +15580,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory6B4<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -15706,9 +15706,9 @@ struct XorpConstMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2,
  * const member function with 6 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory6B4<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -15716,9 +15716,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory6B4<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory6B4<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -15907,9 +15907,9 @@ struct XorpMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3,
  * member function with 6 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory6B5<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -15917,9 +15917,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory6B5<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -16045,9 +16045,9 @@ struct XorpConstMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2,
  * const member function with 6 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory6B5<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -16055,9 +16055,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory6B5<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory6B5<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -16250,9 +16250,9 @@ struct XorpMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3,
  * member function with 6 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory6B6<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -16260,9 +16260,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 6 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory6B6<R,  O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -16390,9 +16390,9 @@ struct XorpConstMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2,
  * const member function with 6 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory6B6<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -16400,9 +16400,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 6 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback6<R, A1, A2, A3, A4, A5, A6>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory6B6<R, O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory6B6<R,  const O, A1, A2, A3, A4, A5, A6, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -16594,9 +16594,9 @@ struct XorpMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, false>
  * member function with 7 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
 {
-    return XorpMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory7B0<R,  O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -16604,9 +16604,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7))
 {
-    return XorpMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory7B0<R,  O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -16722,9 +16722,9 @@ struct XorpConstMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, false
  * const member function with 7 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
 {
-    return XorpConstMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory7B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -16732,9 +16732,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7) const)
 {
-    return XorpConstMemberCallbackFactory7B0<R, O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory7B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -16907,9 +16907,9 @@ struct XorpMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, false
  * member function with 7 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory7B1<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -16917,9 +16917,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory7B1<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -17037,9 +17037,9 @@ struct XorpConstMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory7B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -17047,9 +17047,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory7B1<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory7B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -17226,9 +17226,9 @@ struct XorpMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, 
  * member function with 7 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory7B2<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -17236,9 +17236,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory7B2<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -17358,9 +17358,9 @@ struct XorpConstMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory7B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -17368,9 +17368,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory7B2<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory7B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -17551,9 +17551,9 @@ struct XorpMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, 
  * member function with 7 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory7B3<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -17561,9 +17561,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory7B3<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -17685,9 +17685,9 @@ struct XorpConstMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory7B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -17695,9 +17695,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory7B3<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory7B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -17882,9 +17882,9 @@ struct XorpMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, 
  * member function with 7 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory7B4<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -17892,9 +17892,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory7B4<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -18018,9 +18018,9 @@ struct XorpConstMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory7B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -18028,9 +18028,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory7B4<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory7B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -18219,9 +18219,9 @@ struct XorpMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, 
  * member function with 7 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory7B5<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -18229,9 +18229,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory7B5<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -18357,9 +18357,9 @@ struct XorpConstMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory7B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -18367,9 +18367,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory7B5<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory7B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -18562,9 +18562,9 @@ struct XorpMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, 
  * member function with 7 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory7B6<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -18572,9 +18572,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 7 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory7B6<R,  O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -18702,9 +18702,9 @@ struct XorpConstMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, 
  * const member function with 7 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory7B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -18712,9 +18712,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 7 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback7<R, A1, A2, A3, A4, A5, A6, A7>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory7B6<R, O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory7B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -18906,9 +18906,9 @@ struct XorpMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, false>
  * member function with 8 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
 {
-    return XorpMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory8B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -18916,9 +18916,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8))
 {
-    return XorpMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory8B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -19034,9 +19034,9 @@ struct XorpConstMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, f
  * const member function with 8 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
 {
-    return XorpConstMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory8B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -19044,9 +19044,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8) const)
 {
-    return XorpConstMemberCallbackFactory8B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory8B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -19219,9 +19219,9 @@ struct XorpMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, f
  * member function with 8 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory8B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -19229,9 +19229,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory8B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -19349,9 +19349,9 @@ struct XorpConstMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory8B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -19359,9 +19359,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory8B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory8B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -19538,9 +19538,9 @@ struct XorpMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, B
  * member function with 8 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory8B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -19548,9 +19548,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory8B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -19670,9 +19670,9 @@ struct XorpConstMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory8B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -19680,9 +19680,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory8B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory8B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -19863,9 +19863,9 @@ struct XorpMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, B
  * member function with 8 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory8B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -19873,9 +19873,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory8B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -19997,9 +19997,9 @@ struct XorpConstMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory8B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -20007,9 +20007,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory8B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory8B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -20194,9 +20194,9 @@ struct XorpMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, B
  * member function with 8 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory8B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -20204,9 +20204,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory8B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -20330,9 +20330,9 @@ struct XorpConstMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory8B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -20340,9 +20340,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory8B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory8B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -20531,9 +20531,9 @@ struct XorpMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, B
  * member function with 8 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory8B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -20541,9 +20541,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory8B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -20669,9 +20669,9 @@ struct XorpConstMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory8B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -20679,9 +20679,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory8B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory8B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -20874,9 +20874,9 @@ struct XorpMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, B
  * member function with 8 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory8B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -20884,9 +20884,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 8 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory8B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -21014,9 +21014,9 @@ struct XorpConstMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, B
  * const member function with 8 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory8B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -21024,9 +21024,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 8 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback8<R, A1, A2, A3, A4, A5, A6, A7, A8>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory8B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory8B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -21218,9 +21218,9 @@ struct XorpMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, fa
  * member function with 9 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
 {
-    return XorpMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory9B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -21228,9 +21228,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9))
 {
-    return XorpMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory9B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -21346,9 +21346,9 @@ struct XorpConstMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
 {
-    return XorpConstMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory9B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -21356,9 +21356,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9) const)
 {
-    return XorpConstMemberCallbackFactory9B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory9B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -21531,9 +21531,9 @@ struct XorpMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory9B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -21541,9 +21541,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory9B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -21661,9 +21661,9 @@ struct XorpConstMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory9B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -21671,9 +21671,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory9B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory9B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -21850,9 +21850,9 @@ struct XorpMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory9B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -21860,9 +21860,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory9B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -21982,9 +21982,9 @@ struct XorpConstMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory9B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -21992,9 +21992,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory9B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory9B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -22175,9 +22175,9 @@ struct XorpMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory9B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -22185,9 +22185,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory9B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -22309,9 +22309,9 @@ struct XorpConstMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory9B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -22319,9 +22319,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory9B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory9B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -22506,9 +22506,9 @@ struct XorpMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory9B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -22516,9 +22516,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory9B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -22642,9 +22642,9 @@ struct XorpConstMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory9B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -22652,9 +22652,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory9B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory9B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -22843,9 +22843,9 @@ struct XorpMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory9B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -22853,9 +22853,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory9B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -22981,9 +22981,9 @@ struct XorpConstMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory9B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -22991,9 +22991,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory9B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory9B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -23186,9 +23186,9 @@ struct XorpMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA
  * member function with 9 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory9B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -23196,9 +23196,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 9 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory9B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -23326,9 +23326,9 @@ struct XorpConstMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A
  * const member function with 9 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory9B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -23336,9 +23336,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 9 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback9<R, A1, A2, A3, A4, A5, A6, A7, A8, A9>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory9B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory9B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -23530,9 +23530,9 @@ struct XorpMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
 {
-    return XorpMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory10B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -23540,9 +23540,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10))
 {
-    return XorpMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory10B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -23658,9 +23658,9 @@ struct XorpConstMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
 {
-    return XorpConstMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory10B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -23668,9 +23668,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10) const)
 {
-    return XorpConstMemberCallbackFactory10B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory10B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -23843,9 +23843,9 @@ struct XorpMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory10B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -23853,9 +23853,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory10B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -23973,9 +23973,9 @@ struct XorpConstMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory10B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -23983,9 +23983,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory10B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory10B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -24162,9 +24162,9 @@ struct XorpMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory10B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -24172,9 +24172,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory10B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -24294,9 +24294,9 @@ struct XorpConstMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory10B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -24304,9 +24304,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory10B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory10B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -24487,9 +24487,9 @@ struct XorpMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory10B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -24497,9 +24497,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory10B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -24621,9 +24621,9 @@ struct XorpConstMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory10B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -24631,9 +24631,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory10B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory10B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -24818,9 +24818,9 @@ struct XorpMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory10B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -24828,9 +24828,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory10B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -24954,9 +24954,9 @@ struct XorpConstMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory10B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -24964,9 +24964,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory10B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory10B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -25155,9 +25155,9 @@ struct XorpMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory10B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -25165,9 +25165,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory10B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -25293,9 +25293,9 @@ struct XorpConstMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory10B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -25303,9 +25303,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory10B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory10B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -25498,9 +25498,9 @@ struct XorpMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 10 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory10B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -25508,9 +25508,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 10 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory10B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -25638,9 +25638,9 @@ struct XorpConstMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 10 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory10B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -25648,9 +25648,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 10 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback10<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory10B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory10B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -25842,9 +25842,9 @@ struct XorpMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
 {
-    return XorpMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory11B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -25852,9 +25852,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11))
 {
-    return XorpMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory11B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -25970,9 +25970,9 @@ struct XorpConstMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
 {
-    return XorpConstMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory11B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -25980,9 +25980,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11) const)
 {
-    return XorpConstMemberCallbackFactory11B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory11B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -26155,9 +26155,9 @@ struct XorpMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory11B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -26165,9 +26165,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory11B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -26285,9 +26285,9 @@ struct XorpConstMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory11B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -26295,9 +26295,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory11B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory11B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -26474,9 +26474,9 @@ struct XorpMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory11B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -26484,9 +26484,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory11B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -26606,9 +26606,9 @@ struct XorpConstMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory11B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -26616,9 +26616,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory11B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory11B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -26799,9 +26799,9 @@ struct XorpMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory11B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -26809,9 +26809,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory11B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -26933,9 +26933,9 @@ struct XorpConstMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory11B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -26943,9 +26943,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory11B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory11B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -27130,9 +27130,9 @@ struct XorpMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory11B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -27140,9 +27140,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory11B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -27266,9 +27266,9 @@ struct XorpConstMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory11B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -27276,9 +27276,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory11B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory11B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -27467,9 +27467,9 @@ struct XorpMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory11B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -27477,9 +27477,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory11B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -27605,9 +27605,9 @@ struct XorpConstMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory11B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -27615,9 +27615,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory11B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory11B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -27810,9 +27810,9 @@ struct XorpMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 11 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory11B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -27820,9 +27820,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 11 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory11B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -27950,9 +27950,9 @@ struct XorpConstMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 11 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory11B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -27960,9 +27960,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 11 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback11<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory11B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory11B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -28154,9 +28154,9 @@ struct XorpMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
 {
-    return XorpMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory12B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -28164,9 +28164,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12))
 {
-    return XorpMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory12B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -28282,9 +28282,9 @@ struct XorpConstMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
 {
-    return XorpConstMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory12B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -28292,9 +28292,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12) const)
 {
-    return XorpConstMemberCallbackFactory12B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory12B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -28467,9 +28467,9 @@ struct XorpMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory12B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -28477,9 +28477,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory12B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -28597,9 +28597,9 @@ struct XorpConstMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory12B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -28607,9 +28607,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory12B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory12B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -28786,9 +28786,9 @@ struct XorpMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory12B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -28796,9 +28796,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory12B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -28918,9 +28918,9 @@ struct XorpConstMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory12B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -28928,9 +28928,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory12B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory12B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -29111,9 +29111,9 @@ struct XorpMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory12B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -29121,9 +29121,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory12B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -29245,9 +29245,9 @@ struct XorpConstMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory12B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -29255,9 +29255,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory12B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory12B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -29442,9 +29442,9 @@ struct XorpMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory12B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -29452,9 +29452,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory12B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -29578,9 +29578,9 @@ struct XorpConstMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory12B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -29588,9 +29588,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory12B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory12B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -29779,9 +29779,9 @@ struct XorpMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory12B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -29789,9 +29789,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory12B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -29917,9 +29917,9 @@ struct XorpConstMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory12B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -29927,9 +29927,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory12B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory12B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -30122,9 +30122,9 @@ struct XorpMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 12 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory12B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -30132,9 +30132,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 12 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory12B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -30262,9 +30262,9 @@ struct XorpConstMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 12 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory12B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -30272,9 +30272,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 12 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback12<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory12B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory12B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -30466,9 +30466,9 @@ struct XorpMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
 {
-    return XorpMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory13B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -30476,9 +30476,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13))
 {
-    return XorpMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory13B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -30594,9 +30594,9 @@ struct XorpConstMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
 {
-    return XorpConstMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory13B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -30604,9 +30604,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13) const)
 {
-    return XorpConstMemberCallbackFactory13B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory13B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -30779,9 +30779,9 @@ struct XorpMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory13B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -30789,9 +30789,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory13B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -30909,9 +30909,9 @@ struct XorpConstMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory13B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -30919,9 +30919,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory13B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory13B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -31098,9 +31098,9 @@ struct XorpMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory13B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -31108,9 +31108,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory13B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -31230,9 +31230,9 @@ struct XorpConstMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory13B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -31240,9 +31240,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory13B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory13B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -31423,9 +31423,9 @@ struct XorpMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory13B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -31433,9 +31433,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory13B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -31557,9 +31557,9 @@ struct XorpConstMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory13B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -31567,9 +31567,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory13B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory13B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -31754,9 +31754,9 @@ struct XorpMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory13B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -31764,9 +31764,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory13B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -31890,9 +31890,9 @@ struct XorpConstMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory13B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -31900,9 +31900,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory13B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory13B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -32091,9 +32091,9 @@ struct XorpMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory13B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -32101,9 +32101,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory13B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -32229,9 +32229,9 @@ struct XorpConstMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory13B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -32239,9 +32239,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory13B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory13B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -32434,9 +32434,9 @@ struct XorpMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 13 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory13B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -32444,9 +32444,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 13 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory13B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -32574,9 +32574,9 @@ struct XorpConstMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 13 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory13B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -32584,9 +32584,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 13 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback13<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory13B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory13B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -32778,9 +32778,9 @@ struct XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
 {
-    return XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory14B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -32788,9 +32788,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14))
 {
-    return XorpMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory14B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -32906,9 +32906,9 @@ struct XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
 {
-    return XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory14B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -32916,9 +32916,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14) const)
 {
-    return XorpConstMemberCallbackFactory14B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory14B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -33091,9 +33091,9 @@ struct XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory14B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -33101,9 +33101,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory14B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -33221,9 +33221,9 @@ struct XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory14B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -33231,9 +33231,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory14B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory14B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -33410,9 +33410,9 @@ struct XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory14B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -33420,9 +33420,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory14B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -33542,9 +33542,9 @@ struct XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory14B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -33552,9 +33552,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory14B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory14B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -33735,9 +33735,9 @@ struct XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory14B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -33745,9 +33745,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory14B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -33869,9 +33869,9 @@ struct XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory14B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -33879,9 +33879,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory14B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory14B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -34066,9 +34066,9 @@ struct XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory14B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -34076,9 +34076,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory14B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -34202,9 +34202,9 @@ struct XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory14B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -34212,9 +34212,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory14B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory14B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -34403,9 +34403,9 @@ struct XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory14B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -34413,9 +34413,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory14B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -34541,9 +34541,9 @@ struct XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory14B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -34551,9 +34551,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory14B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory14B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -34746,9 +34746,9 @@ struct XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 14 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory14B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -34756,9 +34756,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 14 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory14B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -34886,9 +34886,9 @@ struct XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 14 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory14B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -34896,9 +34896,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 14 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback14<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory14B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory14B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -35090,9 +35090,9 @@ struct XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
 {
-    return XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpMemberCallbackFactory15B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -35100,9 +35100,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15))
 {
-    return XorpMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpMemberCallbackFactory15B0<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -35218,9 +35218,9 @@ struct XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
 {
-    return XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
+    return XorpConstMemberCallbackFactory15B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p);
 }
 
 /**
@@ -35228,9 +35228,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 0 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15) const)
 {
-    return XorpConstMemberCallbackFactory15B0<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
+    return XorpConstMemberCallbackFactory15B0<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p);
 }
 
 
@@ -35403,9 +35403,9 @@ struct XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpMemberCallbackFactory15B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -35413,9 +35413,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1), BA1 ba1)
 {
-    return XorpMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpMemberCallbackFactory15B1<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -35533,9 +35533,9 @@ struct XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
+    return XorpConstMemberCallbackFactory15B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1);
 }
 
 /**
@@ -35543,9 +35543,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 1 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1) const, BA1 ba1)
 {
-    return XorpConstMemberCallbackFactory15B1<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
+    return XorpConstMemberCallbackFactory15B1<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1);
 }
 
 
@@ -35722,9 +35722,9 @@ struct XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpMemberCallbackFactory15B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -35732,9 +35732,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2), BA1 ba1, BA2 ba2)
 {
-    return XorpMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpMemberCallbackFactory15B2<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -35854,9 +35854,9 @@ struct XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory15B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2);
 }
 
 /**
@@ -35864,9 +35864,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 2 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2) const, BA1 ba1, BA2 ba2)
 {
-    return XorpConstMemberCallbackFactory15B2<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
+    return XorpConstMemberCallbackFactory15B2<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2);
 }
 
 
@@ -36047,9 +36047,9 @@ struct XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory15B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -36057,9 +36057,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3), BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpMemberCallbackFactory15B3<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -36181,9 +36181,9 @@ struct XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory15B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3);
 }
 
 /**
@@ -36191,9 +36191,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 3 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3) const, BA1 ba1, BA2 ba2, BA3 ba3)
 {
-    return XorpConstMemberCallbackFactory15B3<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
+    return XorpConstMemberCallbackFactory15B3<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3);
 }
 
 
@@ -36378,9 +36378,9 @@ struct XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory15B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -36388,9 +36388,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpMemberCallbackFactory15B4<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -36514,9 +36514,9 @@ struct XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory15B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4);
 }
 
 /**
@@ -36524,9 +36524,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 4 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4)
 {
-    return XorpConstMemberCallbackFactory15B4<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
+    return XorpConstMemberCallbackFactory15B4<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4);
 }
 
 
@@ -36715,9 +36715,9 @@ struct XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory15B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -36725,9 +36725,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpMemberCallbackFactory15B5<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -36853,9 +36853,9 @@ struct XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory15B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 /**
@@ -36863,9 +36863,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 5 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5)
 {
-    return XorpConstMemberCallbackFactory15B5<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
+    return XorpConstMemberCallbackFactory15B5<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5);
 }
 
 
@@ -37058,9 +37058,9 @@ struct XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A
  * member function with 15 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory15B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -37068,9 +37068,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * member function with 15 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6), BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpMemberCallbackFactory15B6<R,  O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 
@@ -37198,9 +37198,9 @@ struct XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, 
  * const member function with 15 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O* o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory15B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 /**
@@ -37208,9 +37208,9 @@ dbg_callback(const char* file, int line, O* o, R (O::*p)(A1, A2, A3, A4, A5, A6,
  * const member function with 15 dispatch time arguments and 6 bound arguments.
  */
 template <class R, class O, class A1, class A2, class A3, class A4, class A5, class A6, class A7, class A8, class A9, class A10, class A11, class A12, class A13, class A14, class A15, class BA1, class BA2, class BA3, class BA4, class BA5, class BA6> typename XorpCallback15<R, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15>::RefPtr
-dbg_callback(const char* file, int line, O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
+dbg_callback(const char* file, int line,  const O& o, R (O::*p)(A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6) const, BA1 ba1, BA2 ba2, BA3 ba3, BA4 ba4, BA5 ba5, BA6 ba6)
 {
-    return XorpConstMemberCallbackFactory15B6<R, O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
+    return XorpConstMemberCallbackFactory15B6<R,  const O, A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, BA1, BA2, BA3, BA4, BA5, BA6, BaseAndDerived<CallbackSafeObject, O>::True>::make(file, line, &o, p, ba1, ba2, ba3, ba4, ba5, ba6);
 }
 
 

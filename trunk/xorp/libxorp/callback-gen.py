@@ -647,11 +647,11 @@ def output_rest(l_types, b_types, dbg):
                 o += "dbg_"
             o += "callback("
             o += starting_csv(flatten_pair_list(debug_args))
-            o += "O%s o, R (O::*p)(%s)%s%s)\n" \
-                 % (p, csv(l_types + b_types), const, joining_csv(decl_args(b_types)))
+            o += "%s O%s o, R (O::*p)(%s)%s%s)\n" \
+                 % (const, p, csv(l_types + b_types), const, joining_csv(decl_args(b_types)))
             o += "{\n"
             o += "    return Xorp%sMemberCallbackFactory%dB%d<" % (CONST, nl, nb)
-            o += "R, O%s, BaseAndDerived<CallbackSafeObject, O>::True>::make(" % joining_csv(l_types + b_types)
+            o += "R, %s O%s, BaseAndDerived<CallbackSafeObject, O>::True>::make(" % (const, joining_csv(l_types + b_types))
             o += starting_csv(second_args(debug_args))
             o += "%so, p%s);\n" % (q, joining_csv(call_args(b_types)))
             o += "}\n"
