@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.24 2005/12/11 05:18:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.25 2005/12/12 23:32:56 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -233,8 +233,8 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 	    break;
 	case UNRECOGWATTR:
 	    if (error_data != NULL)
-		s += c_format("Unrecognized Well-known Attribute(%d) - "
-			      "Type %d", UNRECOGWATTR, error_data[0]);
+		s += c_format("Unrecognized Well-known Attribute(%d) - ",
+			      UNRECOGWATTR);
 	    else
 		s += c_format("Unrecognized Well-known Attribute(%d) - "
 			      "NO ERROR DATA SUPPLIED", UNRECOGWATTR);
@@ -282,8 +282,10 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
     }
 
     if (error_data != NULL) {
+	s += c_format(" [");
 	for (size_t i = 0; i < len; i++)
-	    s += c_format(" %#x", error_data[i]);
+	    s += c_format("%s%#x", i != 0 ? " " : "", error_data[i]);
+	s += c_format("]");
     }
 
     return s;
