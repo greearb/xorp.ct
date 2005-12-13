@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.68 2005/12/13 02:39:51 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.69 2005/12/13 02:56:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1345,20 +1345,20 @@ PathAttribute::create(const uint8_t* d, uint16_t max_len,
     if (max_len < 3)	// must be at least 3 bytes!
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute too short %d bytes", max_len),
-		   UPDATEMSGERR, UNSPECIFIED);
+		   UPDATEMSGERR, ATTRLEN);
 
     // compute length, which is 1 or 2 bytes depending on flags d[0]
     if ( (d[0] & Extended) && max_len < 4)
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute (extended) too short %d bytes",
 			    max_len),
-		   UPDATEMSGERR, UNSPECIFIED);
+		   UPDATEMSGERR, ATTRLEN);
     l = length(d) + (d[0] & Extended ? 4 : 3);
     if (max_len < l)
 	xorp_throw(CorruptMessage,
 		   c_format("PathAttribute too short %d bytes need %u",
 			    max_len, XORP_UINT_CAST(l)),
-		   UPDATEMSGERR, UNSPECIFIED);
+		   UPDATEMSGERR, ATTRLEN);
 
     // now we are sure that the data block is large enough.
     debug_msg("++ create type %d max_len %d actual_len %u\n",
