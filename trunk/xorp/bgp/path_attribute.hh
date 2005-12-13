@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.41 2005/11/28 08:34:27 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.42 2005/12/12 23:35:06 atanu Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -225,7 +225,7 @@ protected:
      * back when an error has been detected.
      */
     static size_t total_tlv_length(const uint8_t* d) {
-	return length(d) + (d[0] & Extended) ? 4 : 3;
+	return length(d) + ((d[0] & Extended) ? 4 : 3);
     }
 
     // helper function returning a pointer to the payload
