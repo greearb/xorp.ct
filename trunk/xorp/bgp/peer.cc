@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.119 2005/12/11 05:18:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.120 2005/12/11 05:40:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -300,7 +300,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
-	XLOG_WARNING("%s %s", this->str().c_str(),c.why().c_str());
+	XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
+		     c.why().c_str());
 	notify_peer_of_error(c.error(), c.subcode(), c.data(), c.len());
 // 	event_tranfatal();
 	TIMESPENT_CHECK();
@@ -2507,7 +2508,8 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	** This peer has sent us a bad message. Send a notification
 	** and drop the the peering.
 	*/
-	XLOG_WARNING("%s %s", this->str().c_str(),c.why().c_str());
+	XLOG_WARNING("%s %s %s", this->str().c_str(), c.where().c_str(),
+		     c.why().c_str());
 	notify_peer_of_error_accept(c.error(), c.subcode(), c.data(), c.len());
 // 	event_tranfatal_accept();
 	TIMESPENT_CHECK();
