@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.88 2005/11/11 05:28:09 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.89 2005/11/14 03:44:57 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -105,6 +105,9 @@ Release 1.2 (2005/??/??)
     - Addition of support for read-only and permanent nodes (specified by
       the new %read-only and %permanent template commands).
 
+    - Modification of the %allow and %allow-range semantics so a help string
+      can be supplied for each allowed value or range.
+
   XORPSH:
     - Addition of support to run xorpsh in non-interactive mode.
 
@@ -125,6 +128,8 @@ Release 1.2 (2005/??/??)
       mode prompts by environmental variables
       XORP_PROMPT_OPERATIONAL and XORP_PROMPT_CONFIGURATION
       respectively.
+
+    - Addition of support for command-line completion for allowed values.
 
   POLICY:
     - 
