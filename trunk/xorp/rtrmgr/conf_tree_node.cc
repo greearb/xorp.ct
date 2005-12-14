@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.102 2005/11/15 02:09:48 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.103 2005/11/27 05:43:36 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1587,7 +1587,13 @@ ConfigTreeNode::find_varname_node(const string& varname, VarType& type)
 
     if (var_parts.back() == "DEFAULT") {
 	// XXX: use the template tree to get the default value
-	if (_template_tree_node->has_default()) {
+	const TemplateTreeNode* ttn = NULL;
+	if ((var_parts.size() > 1) && (_template_tree_node != NULL)) {
+	    ttn = _template_tree_node->find_const_varname_node(varname);
+	} else {
+	    ttn = _template_tree_node;
+	}
+	if ((ttn != NULL) && ttn->has_default()) {
 	    type = TEMPLATE_DEFAULT;
 	    return NULL;
 	}
