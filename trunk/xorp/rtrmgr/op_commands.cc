@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.59 2005/10/10 07:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.60 2005/10/14 17:58:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -737,11 +737,13 @@ OpCommandList::top_level_commands() const
 }
 
 map<string, CliCommandMatch>
-OpCommandList::childlist(const string& path) const
+OpCommandList::childlist(const vector<string>& vector_path) const
 {
     map<string, CliCommandMatch> children;
-    list<string> path_parts = split(path, ' ');
+    list<string> path_parts;
 
+    path_parts.insert(path_parts.end(), vector_path.begin(),
+		      vector_path.end());
     list<OpCommand*>::const_iterator iter;
     for (iter = _op_commands.begin(); iter != _op_commands.end(); ++iter) {
 	const OpCommand* op_command = *iter;

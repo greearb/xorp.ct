@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.42 2005/11/30 01:38:47 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.43 2005/12/14 00:52:41 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -104,7 +104,7 @@ public:
 					     string& value,
 					     string& error_msg);
     map<string, CliCommandMatch> text_entry_children_func(
-	const string& path) const;
+	const vector<string>& vector_path) const;
     int text_entry_func(const string& ,
 			const string& ,
 			uint32_t ,
@@ -158,8 +158,8 @@ public:
     void load_communicated(const XrlError& e);
     void load_done(bool success, string error_msg);
 
-    map<string, CliCommandMatch> op_mode_help(const string& path) const;
-    map<string, CliCommandMatch> configure_mode_help(const string& path) const;
+    map<string, CliCommandMatch> op_mode_help(const vector<string>& command_global_name) const;
+    map<string, CliCommandMatch> configure_mode_help(const vector<string>& command_global_name) const;
 
     typedef XorpCallback1<void, const string&>::RefPtr OpModePrintCallback;
     typedef XorpCallback2<void, bool,const string&>::RefPtr OpModeDoneCallback;
@@ -229,8 +229,8 @@ private:
     void add_command_subtree(CliCommand& current_cli_node,
 			     const CommandTreeNode& current_ctn,
 			     const CLI_PROCESS_CALLBACK& cli_process_callback,
-			     string path, size_t depth, bool can_pipe,
-			     bool include_allowed_values);
+			     vector<string> vector_path, size_t depth,
+			     bool can_pipe, bool include_allowed_values);
     void add_text_entry_commands(CliCommand* com0);
     void add_edit_subtree();
     void add_create_subtree();
@@ -241,7 +241,8 @@ private:
     void display_config_mode_users() const;
     void display_alerts();
 
-    string run_set_command(const string& path, const vector<string>& argv);
+    string run_set_command(const vector<string>& vector_path,
+			   const vector<string>& argv);
 
     bool check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);

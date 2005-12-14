@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.20 2005/10/29 08:06:47 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.21 2005/11/13 09:21:30 pavlin Exp $"
 
 
 //
@@ -844,8 +844,9 @@ CliCommand::child_command_list()
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
 	    new_cmd = add_command(command_name, help_string, false);
-	    string child_name = global_name() + " " + command_name;
-	    new_cmd->set_global_name(child_name);
+	    vector<string> child_global_name = global_name();
+	    child_global_name.push_back(command_name);
+	    new_cmd->set_global_name(child_global_name);
 	    new_cmd->set_can_pipe(can_pipe);
 	    new_cmd->set_type_match_cb(ccm.type_match_cb());
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);

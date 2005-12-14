@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.30 2005/11/11 04:22:16 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.31 2005/12/14 00:52:40 pavlin Exp $"
 
 
 //
@@ -26,6 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"
+#include "libxorp/token.hh"
 #include "libxorp/utils.hh"
 
 #include "libcomm/comm_api.h"
@@ -480,7 +481,7 @@ CliNode::add_cli_command(
 	return (XORP_ERROR);
     }
     
-    c1->set_global_name(command_name);
+    c1->set_global_name(token_line2vector(command_name));
     c1->set_server_name(processor_name);
     
     return (XORP_OK);

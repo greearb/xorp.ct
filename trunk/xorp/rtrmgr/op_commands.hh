@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.34 2005/10/10 07:05:53 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.35 2005/10/14 17:58:43 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -170,7 +170,7 @@ public:
 			RouterCLI::OpModePrintCallback print_cb,
 			RouterCLI::OpModeDoneCallback done_cb) const;
     map<string, CliCommandMatch> top_level_commands() const;
-    map<string, CliCommandMatch> childlist(const string& path) const;
+    map<string, CliCommandMatch> childlist(const vector<string>& vector_path) const;
 
     list<OpCommand*>& op_commands() { return _op_commands; }
 

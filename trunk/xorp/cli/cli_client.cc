@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.47 2005/11/14 09:17:02 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.48 2005/12/14 00:52:39 pavlin Exp $"
 
 
 //
@@ -1352,7 +1352,7 @@ CliClient::process_command(const string& command_line)
     int syntax_error_offset_next = current_cli_prompt().size();
     int syntax_error_offset_prev = syntax_error_offset_next;
     int i, old_len, new_len;
-    string command_global_name;
+    vector<string> command_global_name;
     bool found_type_match_cb = false;
     
     token_line = command_line;
@@ -1376,14 +1376,12 @@ CliClient::process_command(const string& command_line)
 	if (child_cli_command != NULL) {
 	    parent_cli_command = child_cli_command;
 	    // Add the token to the command
-	    if (! command_global_name.empty())
-		command_global_name += " ";
 	    found_type_match_cb |= child_cli_command->has_type_match_cb();
 
 	    if (! found_type_match_cb)
 		command_global_name = child_cli_command->global_name();
 	    else
-		command_global_name += copy_token(token);
+		command_global_name.push_back(copy_token(token));
 	    continue;
 	}
 	
@@ -1492,7 +1490,7 @@ CliClient::process_command(const string& command_line)
 	    final_string = "";
 	    
 	    _executed_cli_command = parent_cli_command;
-	    _executed_cli_command_name = token_line2vector(command_global_name);
+	    _executed_cli_command_name = command_global_name;
 	    _executed_cli_command_args = args_vector;
 	    ret_value = parent_cli_command->_cli_process_callback->dispatch(
 		parent_cli_command->server_name(),
@@ -1540,12 +1538,13 @@ CliClient::process_command(const string& command_line)
 
     // Command that cannot be executed
     if (parent_cli_command->child_command_list().empty()) {
+	string cmd_name = token_vector2line(parent_cli_command->global_name());
 	if (token.empty()) {
 	    cli_print(c_format("syntax error, command \"%s\" is not executable.\n",
-			       parent_cli_command->global_name().c_str()));
+			       cmd_name.c_str()));
 	} else {
 	    cli_print(c_format("syntax error, command \"%s\" cannot be executed with argument \"%s\".\n",
-			       parent_cli_command->global_name().c_str(),
+			       cmd_name.c_str(),
 			       token.c_str()));
 	}
 	return (XORP_ERROR);

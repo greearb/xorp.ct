@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.17 2005/08/23 01:18:59 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.18 2005/12/14 00:52:40 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -63,7 +63,7 @@ typedef XorpCallback5<void,	/* return_value */
 >::RefPtr CLI_INTERRUPT_CALLBACK;
 
 typedef XorpCallback1<map<string, CliCommandMatch>, /* return value */
-    const string&		/* global_name */
+    const vector<string>&	/* global_name */
 >::RefPtr DYNAMIC_CHILDREN_CALLBACK;
 
 //
@@ -339,14 +339,14 @@ public:
      * 
      * @return the global (full) name of this command.
      */
-    const string& global_name() const { return (_global_name); }
+    const vector<string>& global_name() const { return (_global_name); }
     
     /**
      * Set the global name for this command.
      * 
      * @param v the global name value to set.
      */
-    void set_global_name(const string& v) { _global_name = v; }
+    void set_global_name(const vector<string>& v) { _global_name = v; }
     
     /**
      * Get the server (i.e., processor) name for this command.
@@ -469,7 +469,7 @@ private:
     list<CliCommand *>	_child_command_list;	// A list with child commands
     const string	_name;			// The command name
     const string	_help;			// The command help
-    string		_global_name;		// The command global name
+    vector<string>	_global_name;		// The command global name
     string		_server_name;		// The server to process this command
     string		_help_completion;	// The command help completion
     bool		_allow_cd;		// True if we can "cd" to this
