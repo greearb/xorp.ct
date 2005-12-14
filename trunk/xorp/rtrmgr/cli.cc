@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.111 2005/12/14 00:52:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.112 2005/12/14 02:40:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,6 +68,23 @@ get_my_user_name()
     return (get_user_name(getuid()));
 }
 
+//
+// Append the list elements one-by-one to the vector.
+// XXX: we need this helper function instead of
+// "v.append(v.end(), l.begin(), l.end())"
+// because the above statement generates a compilation error on
+// FreeBSD-4.10 with gcc-2.95.4 (probably because of a bug in the STL
+// implementation on that system).
+//
+static void
+append_list_to_vector(vector<string>& result_vector,
+		      const list<string>& append_list)
+{
+    list<string>::const_iterator iter;
+
+    for (iter = append_list.begin(); iter != append_list.end(); ++iter)
+	result_vector.push_back(*iter);
+}
 
 const string RouterCLI::DEFAULT_XORP_PROMPT_OPERATIONAL = "Xorp> ";
 const string RouterCLI::DEFAULT_XORP_PROMPT_CONFIGURATION = "XORP# ";
@@ -1081,8 +1098,7 @@ RouterCLI::apply_path_change()
     add_show_subtree();
     vector<string> vector_path;
     vector_path.push_back("show");
-    if (! _path.empty())
-	vector_path.insert(vector_path.end(),  _path.begin(), _path.end());
+    append_list_to_vector(vector_path, _path);
     _show_node->set_global_name(vector_path);
 
     // Set the prompt appropriately
@@ -1287,8 +1303,7 @@ RouterCLI::add_edit_subtree()
     if (_braces.empty()) {
 	vector<string> vector_path;
 	vector_path.push_back("edit");
-	if (! _path.empty())
-	    vector_path.insert(vector_path.end(),  _path.begin(), _path.end());
+	append_list_to_vector(vector_path, _path);
 
 	add_command_subtree(*_edit_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::edit_func),
@@ -1333,8 +1348,7 @@ RouterCLI::add_delete_subtree()
 
     vector<string> vector_path;
     vector_path.push_back("delete");
-    if (! _path.empty())
-	vector_path.insert(vector_path.end(),  _path.begin(), _path.end());
+    append_list_to_vector(vector_path, _path);
 
     add_command_subtree(*_delete_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::delete_func),
@@ -1369,8 +1383,7 @@ RouterCLI::add_set_subtree()
     if (_braces.empty()) {
 	vector<string> vector_path;
 	vector_path.push_back("set");
-	if (! _path.empty())
-	    vector_path.insert(vector_path.end(),  _path.begin(), _path.end());
+	append_list_to_vector(vector_path, _path);
 
 	add_command_subtree(*_set_node, cmd_tree.root_node(),
 			    callback(this, &RouterCLI::set_func),
@@ -1406,13 +1419,11 @@ RouterCLI::add_show_subtree()
     debug_msg("==========================================================\n");
 
     vector<string> vector_path, vector_path_all;
-    vector_path.push_back("set");
-    vector_path_all.push_back("set");
+    vector_path.push_back("show");
+    vector_path_all.push_back("show");
     vector_path_all.push_back("-all");
-    if (! _path.empty()) {
-	vector_path.insert(vector_path.end(),  _path.begin(), _path.end());
-	vector_path_all.insert(vector_path.end(),  _path.begin(), _path.end());
-    }
+    append_list_to_vector(vector_path, _path);
+    append_list_to_vector(vector_path_all, _path);
 
     add_command_subtree(*_show_node, cmd_tree.root_node(),
 			callback(this, &RouterCLI::show_func),
@@ -1461,10 +1472,7 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 	if (ttn->is_deprecated())
 	    continue;
 
-	if (! pathstr().empty()) {
-	    vector_subpath.insert(vector_subpath.end(), _path.begin(),
-				  _path.end());
-	}
+	append_list_to_vector(vector_subpath, _path);
 	vector_subpath.push_back(ttn->segname());
 
 	string help = ttn->help();
