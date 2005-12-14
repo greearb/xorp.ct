@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.46 2005/11/14 07:03:14 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.47 2005/11/14 09:17:02 pavlin Exp $"
 
 
 //
@@ -1106,7 +1106,7 @@ CliClient::post_process_command()
     // Reset the state for the currently executed command
     //
     _executed_cli_command = NULL;
-    _executed_cli_command_name = "";
+    _executed_cli_command_name.clear();
     _executed_cli_command_args.clear();
 
     //
@@ -1492,7 +1492,7 @@ CliClient::process_command(const string& command_line)
 	    final_string = "";
 	    
 	    _executed_cli_command = parent_cli_command;
-	    _executed_cli_command_name = char_line2token_line(command_global_name.c_str());
+	    _executed_cli_command_name = token_line2vector(command_global_name);
 	    _executed_cli_command_args = args_vector;
 	    ret_value = parent_cli_command->_cli_process_callback->dispatch(
 		parent_cli_command->server_name(),
@@ -1600,7 +1600,7 @@ CliClient::interrupt_command()
  cleanup_label:
     // Reset everything about the command
     _executed_cli_command = NULL;
-    _executed_cli_command_name = "";
+    _executed_cli_command_name.clear();
     _executed_cli_command_args.clear();
     delete_pipe_all();
     set_pipe_mode(false);

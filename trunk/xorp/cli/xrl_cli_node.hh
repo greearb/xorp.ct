@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/xrl_cli_node.hh,v 1.16 2005/02/23 17:37:35 pavlin Exp $
+// $XORP: xorp/cli/xrl_cli_node.hh,v 1.17 2005/03/25 02:52:57 pavlin Exp $
 
 #ifndef __CLI_XRL_CLI_NODE_HH__
 #define __CLI_XRL_CLI_NODE_HH__
@@ -203,8 +203,8 @@ protected:
 			      const string& processor_name,
 			      const string& cli_term_name,
 			      uint32_t cli_session_id,
-			      const string& command_name,
-			      const string& command_args);
+			      const vector<string>& command_global_name,
+			      const vector<string>& command_argv);
     void recv_process_command_output(const XrlError& xrl_error,
 				     const string *processor_name,
 				     const string *cli_term_name,

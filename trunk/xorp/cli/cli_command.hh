@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.16 2005/08/18 00:06:47 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.17 2005/08/23 01:18:59 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -50,7 +50,7 @@ typedef XorpCallback5<int,	/* return_value */
     const string&,		/* server_name */
     const string&,		/* cli_term_name */
     uint32_t,			/* cli_session_id */
-    const string&,		/* command_global_name */
+    const vector<string>&,	/* command_global_name */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_PROCESS_CALLBACK;
 
@@ -58,7 +58,7 @@ typedef XorpCallback5<void,	/* return_value */
     const string&,		/* server_name */
     const string&,		/* cli_term_name */
     uint32_t,			/* cli_session_id */
-    const string&,		/* command_global_name */
+    const vector<string>&,	/* command_global_name */
     const vector<string>&	/* command_args */
 >::RefPtr CLI_INTERRUPT_CALLBACK;
 
@@ -72,12 +72,12 @@ typedef XorpCallback1<map<string, CliCommandMatch>, /* return value */
 typedef int (* CLI_PROCESS_FUNC)(const string& server_name,
 				 const string& cli_term_name,
 				 uint32_t cli_session_id,
-				 const string& command_global_name,
+				 const vector<string>& command_global_name,
 				 const vector<string>& command_args);
 typedef void (* CLI_INTERRUPT_FUNC)(const string& server_name,
 				    const string& cli_term_name,
 				    uint32_t cli_session_id,
-				    const string& command_global_name,
+				    const vector<string>& command_global_name,
 				    const vector<string>& command_args);
 
 //

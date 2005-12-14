@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.24 2005/11/11 04:22:16 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.25 2005/11/13 09:21:30 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -510,7 +510,7 @@ private:
 
     // The command we are currently executing and its arguments
     CliCommand	*_executed_cli_command;	// The command currently executed
-    string	_executed_cli_command_name; // The command name
+    vector<string> _executed_cli_command_name;	// The command name
     vector<string> _executed_cli_command_args;	// The arguments
     
     CliCommand	*_current_cli_command;	// The command we have "cd" to

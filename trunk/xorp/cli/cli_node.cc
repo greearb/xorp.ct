@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.29 2005/08/18 15:48:42 bms Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.30 2005/11/11 04:22:16 pavlin Exp $"
 
 
 //
@@ -528,7 +528,7 @@ int
 CliNode::send_process_command(const string& server_name,
 			      const string& cli_term_name,
 			      uint32_t cli_session_id,
-			      const string& command_global_name,
+			      const vector<string>& command_global_name,
 			      const vector<string>& argv)
 {
     if (server_name.empty())
@@ -544,14 +544,6 @@ CliNode::send_process_command(const string& server_name,
     if (cli_client != find_cli_by_term_name(cli_term_name))
 	return (XORP_ERROR);
     
-    // Create a single string of all arguments
-    string command_args;
-    for (size_t i = 0; i < argv.size(); i++) {
-	if (command_args.size())
-	    command_args += " ";
-	command_args += argv[i];
-    }
-    
     //
     // Send the request
     //
@@ -561,7 +553,7 @@ CliNode::send_process_command(const string& server_name,
 						   cli_term_name,
 						   cli_session_id,
 						   command_global_name,
-						   command_args);
+						   argv);
     }
     
     cli_client->set_is_waiting_for_data(true);

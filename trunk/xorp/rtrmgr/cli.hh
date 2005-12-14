@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.41 2005/11/16 23:32:10 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.42 2005/11/30 01:38:47 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -66,7 +66,7 @@ public:
     int configure_func(const string& ,
 		       const string& ,
 		       uint32_t ,
-		       const string& command_global_name,
+		       const vector<string>& command_global_name,
 		       const vector<string>& argv);
     void enter_config_done(const XrlError& e);
     void got_config_users(const XrlError& e, const XrlAtomList* users);
@@ -76,27 +76,27 @@ public:
     int op_help_func(const string& ,
 		   const string& ,
 		   uint32_t ,
-		   const string& command_global_name,
+		   const vector<string>& command_global_name,
 		   const vector<string>& argv);
     int conf_help_func(const string& ,
 		   const string& ,
 		   uint32_t ,
-		   const string& command_global_name,
+		   const vector<string>& command_global_name,
 		   const vector<string>& argv);
     int logout_func(const string& ,
 		   const string& ,
 		   uint32_t ,
-		   const string& command_global_name,
+		   const vector<string>& command_global_name,
 		   const vector<string>& argv);
     int exit_func(const string& ,
 		  const string& ,
 		  uint32_t ,
-		  const string& command_global_name,
+		  const vector<string>& command_global_name,
 		  const vector<string>& argv);
     int edit_func(const string& ,
 		  const string& ,
 		  uint32_t ,
-		  const string& command_global_name,
+		  const vector<string>& command_global_name,
 		  const vector<string>& argv);
     int extract_leaf_node_operator_and_value(const TemplateTreeNode& ttn,
 					     const vector<string>& argv,
@@ -108,44 +108,44 @@ public:
     int text_entry_func(const string& ,
 			const string& ,
 			uint32_t ,
-			const string& command_global_name,
+			const vector<string>& command_global_name,
 			const vector<string>& argv);
     int delete_func(const string& ,
 		    const string& ,
 		    uint32_t ,
-		    const string& command_global_name,
+		    const vector<string>& command_global_name,
 		    const vector<string>& argv);
     int set_func(const string& ,
 		 const string& ,
 		 uint32_t ,
-		 const string& command_global_name,
+		 const vector<string>& command_global_name,
 		 const vector<string>& argv);
     int immediate_set_func(const string& ,
 			   const string& ,
 			   uint32_t ,
-			   const string& command_global_name,
+			   const vector<string>& command_global_name,
 			   const vector<string>& argv);
     int commit_func(const string& ,
 		    const string& ,
 		    uint32_t ,
-		    const string& command_global_name,
+		    const vector<string>& command_global_name,
 		    const vector<string>& argv);
     void commit_done(bool success, string error_msg);
 
     int show_func(const string& ,
 		  const string& ,
 		  uint32_t ,
-		  const string& command_global_name,
+		  const vector<string>& command_global_name,
 		  const vector<string>& argv);
     int op_mode_func(const string& ,
 		     const string& ,
 		     uint32_t ,
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv);
     int save_func(const string& ,
 		  const string& ,
 		  uint32_t ,
-		  const string& command_global_name,
+		  const vector<string>& command_global_name,
 		  const vector<string>& argv);
     void save_communicated(const XrlError& e);
     void save_done(bool success, string error_msg);
@@ -153,7 +153,7 @@ public:
     int load_func(const string& ,
 		  const string& ,
 		  uint32_t ,
-		  const string& command_global_name,
+		  const vector<string>& command_global_name,
 		  const vector<string>& argv);
     void load_communicated(const XrlError& e);
     void load_done(bool success, string error_msg);
@@ -194,8 +194,8 @@ public:
     void op_mode_cmd_interrupt(const string& server_name,
 			       const string& cli_term_name,
 			       uint32_t cli_session_id,
-			       const string& command_global_name,
-			       const vector<string>&  command_args);
+			       const vector<string>& command_global_name,
+			       const vector<string>& command_args);
 
     /**
      * Tidy up operational mode command.

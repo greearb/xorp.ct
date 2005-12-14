@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.12 2005/03/25 02:52:56 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.13 2005/07/28 23:26:24 pavlin Exp $"
 
 
 //
@@ -120,7 +120,7 @@ int
 CliNode::cli_show_log(const string&		, // server_name
 		      const string& cli_term_name,
 		      uint32_t			, // cli_session_id
-		      const string&		, // command_global_name
+		      const vector<string>&	, // command_global_name
 		      const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -145,7 +145,7 @@ int
 CliNode::cli_show_log_user(const string& 	, // server_name
 			   const string& cli_term_name,
 			   uint32_t		, // cli_session_id
-			   const string&	, // command_global_name
+			   const vector<string>& , // command_global_name
 			   const vector<string>&argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -236,7 +236,7 @@ int
 CliNode::cli_set_log_output_cli(const string&	, // server_name
 				const string& cli_term_name,
 				uint32_t	, // cli_session_id
-				const string&	, // command_global_name
+				const vector<string>& , // command_global_name
 				const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -309,7 +309,7 @@ int
 CliNode::cli_set_log_output_remove_cli(const string&	, // server_name
 				       const string& cli_term_name,
 				       uint32_t		, // cli_session_id
-				       const string&	, // command_global_name
+				       const vector<string>& , // command_global_name
 				       const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -383,7 +383,7 @@ int
 CliNode::cli_set_log_output_file(const string&		, // server_name
 				 const string& cli_term_name,
 				 uint32_t		, // cli_session_id
-				 const string&		, // command_global_name
+				 const vector<string>&	, // command_global_name
 				 const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);
@@ -412,7 +412,7 @@ int
 CliNode::cli_set_log_output_remove_file(const string& ,	// server_name
 					const string& cli_term_name,
 					uint32_t ,	// cli_session_id
-					const string& ,	// command_global_name
+					const vector<string>& ,	// command_global_name
 					const vector<string>& argv)
 {
     CliClient *cli_client = find_cli_by_term_name(cli_term_name);

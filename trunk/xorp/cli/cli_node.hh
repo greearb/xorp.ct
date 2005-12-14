@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.22 2005/08/18 15:48:42 bms Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.23 2005/11/11 04:22:16 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -316,8 +316,8 @@ public:
 	const string&,		// server_name
 	const string&,		// cli_term_name
 	uint32_t,		// cli_session_id
-	const string&,		// command_global_name
-	const string&		// argv
+	const vector<string>&,	// command_global_name
+	const vector<string>&	// argv
     >::RefPtr SenderProcessCallback;
     
     /**
@@ -401,38 +401,38 @@ private:
     int		cli_show_log(const string& server_name,
 			     const string& cli_term_name,
 			     uint32_t cli_session_id,
-			     const string& command_global_name,
+			     const vector<string>& command_global_name,
 			     const vector<string>& argv);
     int		cli_show_log_user(const string& server_name,
 				  const string& cli_term_name,
 				  uint32_t cli_session_id,
-				  const string& command_global_name,
+				  const vector<string>& command_global_name,
 				  const vector<string>& argv);
     int		cli_set_log_output_cli(const string& server_name,
 				       const string& cli_term_name,
 				       uint32_t cli_session_id,
-				       const string& command_global_name,
+				       const vector<string>& command_global_name,
 				       const vector<string>& argv);
     int		cli_set_log_output_file(const string& server_name,
 					const string& cli_term_name,
 					uint32_t cli_session_id,
-					const string& command_global_name,
+					const vector<string>& command_global_name,
 					const vector<string>& argv);
     int		cli_set_log_output_remove_cli(const string& server_name,
 					      const string& cli_term_name,
 					      uint32_t cli_session_id,
-					      const string& command_global_name,
+					      const vector<string>& command_global_name,
 					      const vector<string>& argv);
     int		cli_set_log_output_remove_file(const string& server_name,
 					       const string& cli_term_name,
 					       uint32_t cli_session_id,
-					       const string& command_global_name,
+					       const vector<string>& command_global_name,
 					       const vector<string>& argv);
     
     int send_process_command(const string& server_name,
 			     const string& cli_term_name,
 			     const uint32_t cli_session_id,
-			     const string& command_global_name,
+			     const vector<string>& command_global_name,
 			     const vector<string>& argv);
     
     XorpFd	sock_serv_open();

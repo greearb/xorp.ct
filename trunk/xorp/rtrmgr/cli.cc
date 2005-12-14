@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.109 2005/11/30 01:38:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.110 2005/12/09 01:37:49 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -27,6 +27,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/token.hh"
 #include "libxorp/utils.hh"
 
 #include <sstream>
@@ -1487,13 +1488,14 @@ int
 RouterCLI::configure_func(const string& ,
 			  const string& ,
 			  uint32_t ,
-			  const string& command_global_name,
+			  const vector<string>& command_global_name,
 			  const vector<string>& /* argv */)
 {
     string error_msg;
     bool exclusive = false;
+    string cmd_name = token_vector2line(command_global_name);
 
-    if (command_global_name == "configure exclusive")
+    if (cmd_name == "configure exclusive")
 	exclusive = true;
 
     idle_ui();
@@ -1632,14 +1634,15 @@ int
 RouterCLI::op_help_func(const string& ,
 			const string& ,
 			uint32_t ,		// cli_session_id
-			const string& command_global_name,
+			const vector<string>& command_global_name,
 			const vector<string>& argv)
 {
+    string path;
+    string cmd_name = token_vector2line(command_global_name);
+
     if (! argv.empty())
 	return (XORP_ERROR);
 
-    string cmd_name = command_global_name;
-    string path;
     if (cmd_name.size() == 4) {
 	XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
 	path = "";
@@ -1678,14 +1681,15 @@ int
 RouterCLI::conf_help_func(const string& ,
 			  const string& ,
 			  uint32_t ,		// cli_session_id
-			  const string& command_global_name,
+			  const vector<string>& command_global_name,
 			  const vector<string>& argv)
 {
+    string path;
+    string cmd_name = token_vector2line(command_global_name);
+
     if (! argv.empty())
 	return (XORP_ERROR);
 
-    string cmd_name = command_global_name;
-    string path;
     if (cmd_name.size() == 4) {
 	XLOG_ASSERT(cmd_name.substr(0, 4) == "help");
 	path = "";
@@ -1724,15 +1728,16 @@ int
 RouterCLI::logout_func(const string& ,
 		       const string& ,
 		       uint32_t ,		// cli_session_id
-		       const string& command_global_name,
+		       const vector<string>& command_global_name,
 		       const vector<string>& argv)
 {
     string error_msg;
+    string cmd_name = token_vector2line(command_global_name);
 
     if (! argv.empty()) {
 	error_msg = c_format("ERROR: \"%s\" does not take any additional "
 			     "parameters.\n",
-			     command_global_name.c_str());
+			     cmd_name.c_str());
 	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
@@ -1752,16 +1757,17 @@ int
 RouterCLI::exit_func(const string& ,
 		     const string& ,
 		     uint32_t ,
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv)
 {
     string error_msg;
+    string cmd_name = token_vector2line(command_global_name);
 
-    if (command_global_name == "exit configuration-mode") {
+    if (cmd_name == "exit configuration-mode") {
 	if (! argv.empty()) {
 	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
 				 "parameters.\n",
-				 command_global_name.c_str());
+				 cmd_name.c_str());
 	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
@@ -1784,11 +1790,11 @@ RouterCLI::exit_func(const string& ,
 	}
 	return (XORP_OK);
     }
-    if (command_global_name == "exit discard") {
+    if (cmd_name == "exit discard") {
 	if (! argv.empty()) {
 	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
 				 "parameters.\n",
-				 command_global_name.c_str());
+				 cmd_name.c_str());
 	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
@@ -1807,11 +1813,11 @@ RouterCLI::exit_func(const string& ,
 	}
 	return (XORP_OK);
     }
-    if (command_global_name == "top") {
+    if (cmd_name == "top") {
 	if (! argv.empty()) {
 	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
 				 "parameters.\n",
-				 command_global_name.c_str());
+				 cmd_name.c_str());
 	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
@@ -1824,18 +1830,18 @@ RouterCLI::exit_func(const string& ,
     // Commands up and exit are similar, except up doesn't exit
     // configuration-mode if it's executed at the top level
     //
-    if (command_global_name == "up") {
+    if (cmd_name == "up") {
 	if (! argv.empty()) {
 	    error_msg = c_format("ERROR: \"%s\" does not take any additional "
 				 "parameters.\n",
-				 command_global_name.c_str());
+				 cmd_name.c_str());
 	    cli_client().cli_print(error_msg);
 	    return (XORP_ERROR);
 	}
 	if (! _path.empty())
 	    _path.pop_back();
     }
-    if ((command_global_name == "exit") || (command_global_name == "quit")) {
+    if ((cmd_name == "exit") || (cmd_name == "quit")) {
 	if (! _path.empty()) {
 	    _path.pop_back();
 	} else {
@@ -1869,11 +1875,11 @@ int
 RouterCLI::edit_func(const string& ,
 		     const string& ,
 		     uint32_t ,			// cli_session_id
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv)
 {
-    string cmd_name = command_global_name;
     string path;
+    string cmd_name = token_vector2line(command_global_name);
 
     if (cmd_name != "edit") {
 	XLOG_ASSERT(cmd_name.substr(0, 5) == "edit ");
@@ -2015,15 +2021,18 @@ int
 RouterCLI::text_entry_func(const string& ,
 			   const string& ,
 			   uint32_t ,		// cli_session_id
-			   const string& command_global_name,
+			   const vector<string>& command_global_name,
 			   const vector<string>& argv)
 {
+    string path;
+    list<string> path_segments;
+    string cmd_name = token_vector2line(command_global_name);
+
     //
     // The path contains the part of the command we managed to command-line
     // complete.  The remainder is in argv.
     //
-    string path = command_global_name;
-    list<string> path_segments;
+    path = cmd_name;
     XLOG_TRACE(_verbose, "text_entry_func: %s\n", path.c_str());
     SlaveConfigTreeNode *ctn = NULL, *first_new_ctn = NULL, *brace_ctn;
     const TemplateTreeNode* ttn = NULL;
@@ -2046,16 +2055,15 @@ RouterCLI::text_entry_func(const string& ,
 	}
     }
 
-    path_segments = split(path, ' ');
+    path_segments.insert(path_segments.end(), command_global_name.begin(),
+			 command_global_name.end());
 
     //
     // Push argv onto the list of path segments - there's no
     // substantial difference between the path and argv, except that
     // path has already seen some sanity checking.
     //
-    for (size_t i = 0; i < argv.size(); i++) {
-	path_segments.push_back(argv[i]);
-    }
+    path_segments.insert(path_segments.end(), argv.begin(), argv.end());
 
     //
     // The path_segments probably contain part of the path that already
@@ -2556,14 +2564,14 @@ int
 RouterCLI::delete_func(const string& ,
 		       const string& ,
 		       uint32_t ,
-		       const string& command_global_name,
+		       const vector<string>& command_global_name,
 		       const vector<string>& argv)
 {
     string error_msg;
-    string cmd_name, path;
+    string path;
     list<string> path_segments;
+    string cmd_name = token_vector2line(command_global_name);
 
-    cmd_name = command_global_name;
     XLOG_ASSERT(cmd_name.substr(0, 7) == "delete ");
     path = cmd_name.substr(7, cmd_name.size() - 7);
 
@@ -2639,13 +2647,16 @@ int
 RouterCLI::set_func(const string& ,
 		    const string& ,
 		    uint32_t ,
-		    const string& command_global_name,
+		    const vector<string>& command_global_name,
 		    const vector<string>& argv)
 {
-    string cmd_name = command_global_name;
+    string path;
+    string response;
+    string cmd_name = token_vector2line(command_global_name);
+
     XLOG_ASSERT(cmd_name.substr(0, 4) == "set ");
-    string path = cmd_name.substr(4, cmd_name.size() - 4);
-    string response = run_set_command(path, argv);
+    path = cmd_name.substr(4, cmd_name.size() - 4);
+    response = run_set_command(path, argv);
 
     cli_client().cli_print(response + "\n");
     apply_path_change();
@@ -2657,11 +2668,15 @@ int
 RouterCLI::immediate_set_func(const string& ,
 			      const string& ,
 			      uint32_t ,
-			      const string& command_global_name,
+			      const vector<string>& command_global_name,
 			      const vector<string>& argv)
 {
-    string path = command_global_name;
-    string response = run_set_command(path, argv);
+    string path;
+    string response;
+    string cmd_name = token_vector2line(command_global_name);
+
+    path = cmd_name;
+    response = run_set_command(path, argv);
 
     if (_braces.empty()) {
 	cli_client().cli_print(response + "\n");
@@ -2690,11 +2705,12 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
 {
     string result, error_msg;
     list<string> path_parts;
-    path_parts = split(path, ' ');
     SlaveConfigTreeNode* ctn;
     const TemplateTreeNode* ttn;
     bool create_needed = false;
     vector<string> argv_copy = argv;
+
+    path_parts = token_line2list(path);
 
     ctn = config_tree()->find_node(path_parts);
     if (ctn == NULL) {
@@ -2740,16 +2756,9 @@ RouterCLI::run_set_command(const string& path, const vector<string>& argv)
     int myuid = getuid();
 
     if (create_needed) {
-	string newpath;
-	list<string>::const_iterator iter;
-
-	for (iter = path_parts.begin(); iter != path_parts.end(); ++iter) {
-	    if (newpath.empty())
-		newpath = *iter;
-	    else
-		newpath += " " + *iter;
-	}
+	string newpath = makepath(path_parts);
 	SlaveConfigTreeNode* newnode;
+
 	newnode = new SlaveConfigTreeNode(path_parts.back(),
 					  newpath, ttn,
 					  ctn,
@@ -2785,15 +2794,16 @@ int
 RouterCLI::commit_func(const string& ,
 		       const string& ,
 		       uint32_t ,
-		       const string& command_global_name,
+		       const vector<string>& command_global_name,
 		       const vector<string>& argv)
 {
     string error_msg;
+    string cmd_name = token_vector2line(command_global_name);
 
     if (! argv.empty()) {
 	error_msg = c_format("ERROR: \"%s\" does not take any additional "
 			     "parameters.\n",
-			     command_global_name.c_str());
+			     cmd_name.c_str());
 	cli_client().cli_print(error_msg);
 	return (XORP_ERROR);
     }
@@ -2867,15 +2877,16 @@ int
 RouterCLI::show_func(const string& ,
 		     const string& ,
 		     uint32_t ,			// cli_session_id
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv)
 {
+    string error_msg;
+    string cmd_name = token_vector2line(command_global_name);
     bool is_show_all = false;
     bool suppress_default_values = true;
     bool show_top = false;
     const string show_command_name = "show";
     const string show_all_command_name = "show -all";
-    string error_msg;
 
     if (! argv.empty()) {
 	//
@@ -2892,7 +2903,6 @@ RouterCLI::show_func(const string& ,
 	return (XORP_ERROR);
     }
 
-    string cmd_name = command_global_name;
     XLOG_ASSERT(cmd_name.substr(0, show_command_name.size())
 		== show_command_name);
 
@@ -2955,13 +2965,16 @@ int
 RouterCLI::op_mode_func(const string& ,
 			const string& ,		// cli_term_name
 			uint32_t ,		// cli_session_id
-			const string& command_global_name,
+			const vector<string>& command_global_name,
 			const vector<string>& argv)
 {
-    string full_command = command_global_name;
     list<string> path_segments;
+    string cmd_name = token_vector2line(command_global_name);
+    string full_command;
 
-    path_segments = split(command_global_name, ' ');
+    full_command = cmd_name;
+    path_segments.insert(path_segments.end(), command_global_name.begin(),
+			 command_global_name.end());
     for (size_t i = 0; i < argv.size(); i++) {
 	if (argv[i] == "|")
 	    break;	// The pipe command
@@ -3041,7 +3054,7 @@ void
 RouterCLI::op_mode_cmd_interrupt(const string& server_name,
 				 const string& cli_term_name,
 				 uint32_t cli_session_id,
-				 const string& command_global_name,
+				 const vector<string>& command_global_name,
 				 const vector<string>&  command_args)
 {
     //
@@ -3070,15 +3083,17 @@ int
 RouterCLI::save_func(const string& ,
 		     const string& ,
 		     uint32_t ,			// cli_session_id
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv)
 {
+    string cmd_name = token_vector2line(command_global_name);
+
     if (argv.size() != 1) {
 	cli_client().cli_print("Usage: save <filename>\n");
 	return (XORP_ERROR);
     }
 
-    XLOG_ASSERT(command_global_name == "save");
+    XLOG_ASSERT(cmd_name == "save");
     XLOG_TRACE(_verbose, "save, filename = %s\n", argv[0].c_str());
     if (_xorpsh.save_to_file(argv[0],
 			     callback(this, &RouterCLI::save_communicated),
@@ -3144,15 +3159,17 @@ int
 RouterCLI::load_func(const string& ,
 		     const string& ,
 		     uint32_t ,
-		     const string& command_global_name,
+		     const vector<string>& command_global_name,
 		     const vector<string>& argv)
 {
+    string cmd_name = token_vector2line(command_global_name);
+
     if (argv.size() != 1) {
 	cli_client().cli_print("Usage: load <filename>\n");
 	return (XORP_ERROR);
     }
 
-    XLOG_ASSERT(command_global_name == "load");
+    XLOG_ASSERT(cmd_name == "load");
     XLOG_TRACE(_verbose, "load, filename = %s\n", argv[0].c_str());
     if (_xorpsh.load_from_file(argv[0],
 			       callback(this, &RouterCLI::load_communicated),

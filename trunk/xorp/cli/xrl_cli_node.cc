@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.26 2005/03/25 02:52:57 pavlin Exp $"
+#ident "$XORP: xorp/cli/xrl_cli_node.cc,v 1.27 2005/04/18 19:12:20 pavlin Exp $"
 
 #include "cli_module.h"
 #include "libxorp/xorp.h"
@@ -20,6 +20,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 #include "libxorp/status_codes.h"
+#include "libxorp/token.hh"
 
 #include "xrl_cli_node.hh"
 #include "cli_node.hh"
@@ -408,11 +409,14 @@ XrlCliNode::send_process_command(const string& target,
 				 const string& processor_name,
 				 const string& cli_term_name,
 				 uint32_t cli_session_id,
-				 const string& command_name,
-				 const string& command_args)
+				 const vector<string>& command_global_name,
+				 const vector<string>& command_argv)
 {
     if (! _is_finder_alive)
 	return;		// The Finder is dead
+
+    string command_line = token_vector2line(command_global_name);
+    string args_line = token_vector2line(command_argv);
 
     //
     // Send the request
@@ -422,8 +426,8 @@ XrlCliNode::send_process_command(const string& target,
 	processor_name,
 	cli_term_name,
 	cli_session_id,
-	command_name,
-	command_args,
+	command_line,
+	args_line,
 	callback(this, &XrlCliNode::recv_process_command_output));
     
     return;

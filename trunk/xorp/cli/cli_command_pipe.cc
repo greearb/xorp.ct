@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.9 2005/09/29 01:43:57 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.10 2005/10/29 17:42:19 pavlin Exp $"
 
 
 //
@@ -55,7 +55,7 @@
 static int cli_pipe_dummy_func(const string& server_name,
 			       const string& cli_term_name,
 			       uint32_t cli_session_id,
-			       const string& command_global_name,
+			       const vector<string>& command_global_name,
 			       const vector<string>& argv);
 
 
@@ -1056,7 +1056,7 @@ static int
 cli_pipe_dummy_func(const string&		, // server_name,
 		    const string&		, // cli_term_name
 		    uint32_t			, // cli_session_id
-		    const string&		, // command_global_name
+		    const vector<string>&	, // command_global_name
 		    const vector<string>&	  // argv
     )
 {
