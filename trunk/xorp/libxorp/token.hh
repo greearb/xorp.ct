@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/token.hh,v 1.4 2004/06/10 22:41:22 hodson Exp $
+// $XORP: xorp/libxorp/token.hh,v 1.5 2005/03/25 02:53:48 pavlin Exp $
 
 
 #ifndef __LIBXORP_TOKEN_HH__
@@ -25,6 +25,7 @@
 
 
 #include <list>
+#include <vector>
 #include <string>
 
 #include "xorp.h"
@@ -86,14 +87,37 @@ bool	is_token_separator(const char c);
 bool	has_more_tokens(const string& token_line);
 
 /**
- * Create a copy of a token line.
+ * Split a token line into a vector with the tokens.
  * 
- * Create a copy of a token line, but all tokens with a single space between.
- * 
- * @param char_line C-style token line to copy.
- * @return C++ string copy of @ref char_line, but with all tokens inside
- * with a single space between.
+ * @param token_line the token line to split.
+ * @return a vector with all tokens.
  */
-string	char_line2token_line(const char *char_line);
+vector<string> token_line2vector(const string& token_line);
+
+/**
+ * Split a token line into a list with the tokens.
+ * 
+ * @param token_line the token line to split.
+ * @return a list with all tokens.
+ */
+list<string> token_line2list(const string& token_line);
+
+/**
+ * Combine a vector with the tokens into a single line with spaces as
+ * separators.
+ * 
+ * @param token_vector the vector with the tokens.
+ * @return a line with the tokens separated by spaces.
+ */
+string token_vector2line(const vector<string>& token_vector);
+
+/**
+ * Combine a list with the tokens into a single line with spaces as
+ * separators.
+ * 
+ * @param token_list the list with the tokens.
+ * @return a line with the tokens separated by spaces.
+ */
+string token_list2line(const list<string>& token_list);
 
 #endif // __LIBXORP_TOKEN_HH__

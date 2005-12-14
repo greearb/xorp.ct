@@ -143,23 +143,94 @@ has_more_tokens(const string& token_line)
     return (token.size() > 0);
 }
 
-//
-// Create a copy of @char_line, but all tokens with a single space between.
-//
-string
-char_line2token_line(const char *char_line)
+/**
+ * Split a token line into a vector with the tokens.
+ * 
+ * @param token_line the token line to split.
+ * @return a vector with all tokens.
+ */
+vector<string>
+token_line2vector(const string& token_line)
 {
-    string token_line_org(char_line);
-    string token, token_line_result;
+    string token_line_org(token_line);
+    string token;
+    vector<string> token_vector_result;
     
     do {
 	token = pop_token(token_line_org);
 	if (token.empty())
 	    break;
-	if (token_line_result.size())
-	    token_line_result += " ";
-	token_line_result += token;
+	token_vector_result.push_back(token);
     } while (true);
     
+    return (token_vector_result);
+}
+
+/**
+ * Split a token line into a list with the tokens.
+ * 
+ * @param token_line the token line to split.
+ * @return a list with all tokens.
+ */
+list<string>
+token_line2list(const string& token_line)
+{
+    string token_line_org(token_line);
+    string token;
+    list<string> token_list_result;
+    
+    do {
+	token = pop_token(token_line_org);
+	if (token.empty())
+	    break;
+	token_list_result.push_back(token);
+    } while (true);
+    
+    return (token_list_result);
+}
+
+/**
+ * Combine a vector with the tokens into a single line with spaces as
+ * separators.
+ * 
+ * @param token_vector the vector with the tokens.
+ * @return a line with the tokens separated by spaces.
+ */
+string
+token_vector2line(const vector<string>& token_vector)
+{
+    string token_line_result;
+
+    vector<string>::const_iterator iter;
+    for (iter = token_vector.begin(); iter != token_vector.end(); ++iter) {
+	const string& token = *iter;
+	if (! token_line_result.empty())
+	    token_line_result += " ";	// XXX: the token separator
+	token_line_result += token;
+    }
+
+    return (token_line_result);
+}
+
+/**
+ * Combine a list with the tokens into a single line with spaces as
+ * separators.
+ * 
+ * @param token_list the list with the tokens.
+ * @return a line with the tokens separated by spaces.
+ */
+string
+token_list2line(const list<string>& token_list)
+{
+    string token_line_result;
+
+    list<string>::const_iterator iter;
+    for (iter = token_list.begin(); iter != token_list.end(); ++iter) {
+	const string& token = *iter;
+	if (! token_line_result.empty())
+	    token_line_result += " ";	// XXX: the token separator
+	token_line_result += token;
+    }
+
     return (token_line_result);
 }
