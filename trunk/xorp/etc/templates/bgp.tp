@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.71 2005/12/01 02:55:42 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.72 2005/12/06 07:53:46 atanu Exp $ */
 
 protocols {
     bgp {
@@ -169,7 +169,7 @@ protocols {
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=`~$(DEFAULT)`";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_cluster_id?cluster_id:ipv4=$(@.cluster-id)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    cluster-id {
 		%set:;
@@ -185,7 +185,7 @@ protocols {
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=`~$(DEFAULT)`";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_identifier?as:u32=$(@.identifier)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    identifier {
 		%set:;
@@ -200,7 +200,7 @@ protocols {
 
 	    %create: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
 	    %activate: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=$(@.disable)";
-	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=`~$(DEFAULT)`";
+	    %delete: xrl "$(bgp.targetname)/bgp/0.2/set_damping?half_life:u32=$(@.half-life)&max_suppress:u32=$(@.max-suppress)&reuse:u32=$(@.reuse)&suppress:u32=$(@.suppress)&disable:bool=`~$(@.disable.DEFAULT)`";
 
 	    half-life {
 		%set:;
