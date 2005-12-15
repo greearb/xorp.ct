@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.72 2005/12/06 07:53:46 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.73 2005/12/14 20:35:58 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -63,6 +63,23 @@ protocols {
 	    next-hop:ipv6;
 	    unicast:bool = true;		/* Default unicast */
 	    multicast:bool = false;
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	        message-in {
+		    disable:		toggle = false;
+		}
+	        message-out {
+		    disable:		toggle = false;
+		}
+	        policy-configuration {
+		    disable:		toggle = false;
+		}
+	    }
 	}
 	
 	import: txt;
@@ -346,6 +363,24 @@ protocols {
 		%set:;
 	    }
 	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable {
+		    }
+		}
+	        message-in {
+		    disable:		toggle = false;
+		}
+	        message-out {
+		    disable:		toggle = false;
+		}
+	        policy-configuration {
+		    disable:		toggle = false;
+		}
+	    }
+	}
         
 	import {
 	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
@@ -501,6 +536,23 @@ protocols {
 
 	    ipv6-multicast {
 		%help: short "IPv6 Multicast";
+	    }
+	}
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	        message-in {
+		    disable:		toggle = false;
+		}
+	        message-out {
+		    disable:		toggle = false;
+		}
+	        policy-configuration {
+		    disable:		toggle = false;
+		}
 	    }
 	}
     }

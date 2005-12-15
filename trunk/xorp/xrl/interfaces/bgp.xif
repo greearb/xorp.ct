@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.29 2005/11/30 08:08:44 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.30 2005/12/06 07:30:59 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -479,6 +479,15 @@ interface bgp/0.2 {
 		nlri:ipv6net \
 		& unicast:bool \
 		& multicast:bool
+
+        /**
+         * Enable/Disable tracing.
+         *
+         * @param tvar trace variable.
+         * @param enable set to true to enable false to disable.
+         */
+         trace ? tvar:txt \
+	     & enable:bool
 
 	/**
 	 * Get the first item of a list of BGP peers

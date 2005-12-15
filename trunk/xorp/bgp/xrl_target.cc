@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.51 2005/11/30 08:08:44 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.52 2005/12/06 07:30:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -37,7 +37,7 @@
 #include "bgp.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
-//#include "profile_vars.hh"
+#include "profile_vars.hh"
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	: XrlBgpTargetBase(r),
@@ -838,6 +838,26 @@ XrlBgpTarget::bgp_0_2_withdraw_route6(
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlBgpTarget::bgp_0_2_trace(const string& tvar,
+			    const bool&	enable)
+{
+    debug_msg("trace variable %s %s\n", tvar.c_str(),
+	      enable ? "enable" : "disable");
+    try {
+	if (enable)
+	    _bgp.profile().enable(tvar);
+	else
+	    _bgp.profile().disable(tvar);
+    } catch(PVariableUnknown& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    } catch(PVariableLocked& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError 
 XrlBgpTarget::bgp_0_2_get_peer_list_start(
 					  // Output values, 
@@ -1330,6 +1350,8 @@ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter,
 					   const string& conf) {
     try {
 	debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
+	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+		   "policy filter: %d conf: %s\n", filter, conf.c_str());
 	_bgp.configure_filter(filter,conf);
     } catch(const PolicyException& e) {
 	return XrlCmdError::COMMAND_FAILED("Filter configure failed: " +

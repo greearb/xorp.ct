@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/xrl_target.hh,v 1.36 2005/11/30 08:08:44 atanu Exp $
+// $XORP: xorp/bgp/xrl_target.hh,v 1.37 2005/12/06 07:30:58 atanu Exp $
 
 #ifndef __BGP_XRL_TARGET_HH__
 #define __BGP_XRL_TARGET_HH__
@@ -261,6 +261,11 @@ public:
 	const IPv6Net&	nlri,
 	const bool&	unicast,
 	const bool&	multicast);
+
+    XrlCmdError bgp_0_2_trace(
+	// Input values,
+	const string&	tvar,
+	const bool&	enable);
 
     XrlCmdError bgp_0_2_get_peer_list_start(
         // Output values,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/profile_vars.hh,v 1.6 2005/03/23 04:41:59 atanu Exp $
+// $XORP: xorp/bgp/profile_vars.hh,v 1.7 2005/03/25 02:52:44 pavlin Exp $
 
 #ifndef __BGP_PROFILE_VARS_HH__
 #define __BGP_PROFILE_VARS_HH__
@@ -28,6 +28,7 @@ const string profile_route_rpc_out = "route_rpc_out";
 
 const string trace_message_in = "trace_message_in";
 const string trace_nexthop_resolution = "trace_nexthop_resolution";
+const string trace_policy_configure = "trace_policy_configure";
 
 void initialize_profiling_variables(Profile& p);
 
