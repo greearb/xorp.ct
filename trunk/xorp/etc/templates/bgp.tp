@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.73 2005/12/14 20:35:58 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.74 2005/12/15 18:00:59 atanu Exp $ */
 
 protocols {
     bgp {
@@ -67,6 +67,9 @@ protocols {
 
 	traceoptions {
 	    flag {
+		verbose {
+		    disable:		toggle = false;
+		}
 		all {
 		    disable:		toggle = false;
 		}
@@ -74,6 +77,9 @@ protocols {
 		    disable:		toggle = false;
 		}
 	        message-out {
+		    disable:		toggle = false;
+		}
+	        state-change {
 		    disable:		toggle = false;
 		}
 	        policy-configuration {
@@ -366,18 +372,54 @@ protocols {
 
 	traceoptions {
 	    flag {
-		all {
+		/* Deliberately not included in all */
+	        verbose {
 		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=xlog_verbose&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=xlog_verbose&enable:bool=$(DEFAULT)";
 		    }
 		}
+
+		all {
+		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
+
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
+		    }
+		}
+
 	        message-in {
-		    disable:		toggle = false;
+		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_in&enable:bool=$(DEFAULT)";
+		    }
 		}
+
 	        message-out {
-		    disable:		toggle = false;
+		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_message_out&enable:bool=$(DEFAULT)";
+		    }
 		}
+
+	        state-change {
+		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_state_change&enable:bool=$(DEFAULT)";
+		    }
+		}
+
 	        policy-configuration {
-		    disable:		toggle = false;
+		    disable {
+			%set: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=`~$(@)`";
+			%delete: xrl "$(bgp.targetname)/bgp/0.2/trace?tvar:txt=trace_policy_configure&enable:bool=$(DEFAULT)";
+		    }
 		}
 	    }
 	}
@@ -540,18 +582,50 @@ protocols {
 	}
 
 	traceoptions {
+	    %help:	short "Configure the tracing options";
 	    flag {
+		%help:	short "Configure the tracing operation to perform";
+
+		verbose {
+		    %help:	short	"Configure verbose traces";
+		    disable {
+			%help:	short	"Disable verbose traces";
+		    }
+		}
+
 		all {
-		    disable:		toggle = false;
+		    %help:	short	"Configure all tracing operations";
+		    disable {
+			%help:	short	"Disable all tracing operations";
+		    }
 		}
+
 	        message-in {
-		    disable:		toggle = false;
+		    %help:	short	"Configure receive message tracing";
+		    disable {
+			%help:	short	"Disable receive message tracing";
+		    }
 		}
+
 	        message-out {
-		    disable:		toggle = false;
+		    %help:	short	"Configure send message tracing";
+		    disable {
+			%help:	short	"Disable send message tracing";
+		    }
 		}
+
+	        state-change {
+		    %help:	short	"Configure FSM state change tracing";
+		    disable {
+			%help:	short	"Disable FSM state change tracing";
+		    }
+		}
+
 	        policy-configuration {
-		    disable:		toggle = false;
+		    %help:	short	"Configure policy configuration tracing";
+		    disable {
+			%help:	short	"Disable policy configuration tracing";
+		    }
 		}
 	    }
 	}
