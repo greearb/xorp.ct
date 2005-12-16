@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.13 2005/12/15 18:00:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.14 2005/12/16 16:22:58 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -36,6 +36,7 @@ struct profile_vars {
     {trace_message_out, 	"Trace Message leaving BGP"},
     {trace_nexthop_resolution,	"Trace nexthop resolution with RIB"},
     {trace_policy_configure,	"Trace policy introduction"},
+    {trace_state_change,	"Trace FSM state change"},
 };
 
 void
