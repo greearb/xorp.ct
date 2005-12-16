@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.33 2005/04/12 08:05:20 pavlin Exp $
+# $XORP: xorp/README,v 1.34 2005/04/27 02:47:05 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -85,6 +85,15 @@ Currently, XORP implements the following protocols:
    - RFC 3392 (Capabilities Advertisement with BGP-4)
    - draft-ietf-idr-rfc2858bis-03.txt (Multiprotocol Extensions for BGP-4)
    - RFC 2545 (Use of Multiprotocol Extensions for IPv6 Inter-Domain Routing)
+   - RFC 3392 (Capabilities Advertisement with BGP-4)
+   - RFC 1997 (BGP Communities Attribute)
+   - RFC 2796 (BGP Route Reflection - An Alternative to Full Mesh IBGP)
+   - RFC 3065 (Autonomous System Confederations for BGP)
+   - RFC 2439 (BGP Route Flap Damping)
+
+  * OSPFv2:
+   - RFC 2328 (OSPF Version 2)
+   - RFC 3101 (The OSPF Not-So-Stubby Area (NSSA) Option)
 
   * PIM-SM:
     - draft-ietf-pim-sm-v2-new-11.{ps,txt} (without SSM).
