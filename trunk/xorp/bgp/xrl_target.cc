@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.53 2005/12/15 18:00:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.54 2005/12/16 16:22:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -844,6 +844,15 @@ XrlBgpTarget::bgp_0_2_trace(const string& tvar,
 {
     debug_msg("trace variable %s %s\n", tvar.c_str(),
 	      enable ? "enable" : "disable");
+
+    // A little hack to change the verbosity level of the trace messages.
+    if ("xlog_verbose" == tvar) {
+	xlog_verbose_t verbose = enable ? XLOG_VERBOSE_HIGH : XLOG_VERBOSE_LOW;
+	xlog_level_set_verbose(XLOG_LEVEL_INFO, verbose);
+	xlog_level_set_verbose(XLOG_LEVEL_TRACE, verbose);
+	return XrlCmdError::OKAY();
+    }
+
     try {
 	if (enable)
 	    _bgp.profile().enable(tvar);

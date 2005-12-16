@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.41 2005/03/25 02:52:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/main.cc,v 1.43 2005/08/18 15:58:05 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -53,8 +53,9 @@ main(int /*argc*/, char **argv)
     // XXX: verbosity of the error messages temporary increased
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
-    xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
+    // Enable verbose tracing via configuration to increase the tracing level
+//     xlog_level_set_verbose(XLOG_LEVEL_INFO, XLOG_VERBOSE_HIGH);
+//     xlog_level_set_verbose(XLOG_LEVEL_TRACE, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
 
