@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.63 2005/12/06 06:26:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.64 2005/12/06 07:30:58 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -372,7 +372,7 @@ BGPMain::connect_attempt(XorpFd fd, IoEventType type,
 	debug_msg(" Failed\n");
     }
 
-    XLOG_WARNING("Connection by %s denied", peer_hostname);
+    XLOG_INFO("Connection by %s denied", peer_hostname);
 
     if (comm_close(connfd) != XORP_OK) {
 	XLOG_WARNING("Close failed: %s",
