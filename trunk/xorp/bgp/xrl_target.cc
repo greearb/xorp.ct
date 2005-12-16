@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.52 2005/12/06 07:30:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.53 2005/12/15 18:00:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1363,6 +1363,9 @@ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter,
 XrlCmdError
 XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter) {
     try {
+	debug_msg("[BGP] policy reset: %d\n", filter);
+	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
+		   "policy filter: %d\n", filter);
 	_bgp.reset_filter(filter);
     } catch(const PolicyException& e){ 
 	return XrlCmdError::COMMAND_FAILED("Filter reset failed: " +
