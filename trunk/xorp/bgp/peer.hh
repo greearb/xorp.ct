@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.34 2005/12/10 01:34:12 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.35 2005/12/10 01:35:34 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -469,6 +469,11 @@ class AcceptSession {
 
      bool accept_message() const { return _accept_messages; }
 
+    /**
+     * Return a handle to the peers config data.
+     */ 
+    const BGPPeerData* peerdata() const	{ return _peer.peerdata(); }
+    
      string str() {
 	 return _peer.str();
      }
