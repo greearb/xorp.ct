@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.120 2005/12/11 05:40:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.121 2005/12/13 03:13:48 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -233,6 +233,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -248,6 +249,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
 		       cstring(pac));
 	    // debug_msg(pac.str().c_str());
 	    event_keepmess();
@@ -259,7 +261,9 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    _in_updates++;
 	    _mainprocess->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length);
+
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -276,6 +280,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -325,6 +330,10 @@ PeerOutputState
 BGPPeer::send_message(const BGPPacket& p)
 {
     debug_msg(p.str().c_str());
+
+    XLOG_TRACE(main()->profile().enabled(trace_message_out),
+	       "Send %s",
+	       cstring(p));
 
     uint8_t packet_type = p.type();
 
@@ -419,6 +428,10 @@ BGPPeer::send_notification(const NotificationPacket& p, bool restart,
     debug_msg(p.str().c_str());
 
     XLOG_INFO("Sending: %s", cstring(p));
+
+    XLOG_TRACE(main()->profile().enabled(trace_message_out),
+	       "Send %s",
+	       cstring(p));
 
     /*
     ** We need to deal with NOTIFICATION differently from other packets -
@@ -2157,6 +2170,12 @@ AcceptSession::send_notification_accept(const NotificationPacket& np)
     const uint8_t *buf = np.encode(ccnt);
     debug_msg("Buffer for sent packet is %p\n", buf);
 
+    XLOG_INFO("Sending: %s", cstring(np));
+
+    XLOG_TRACE(main()->profile().enabled(trace_message_out),
+	       "Send %s",
+	       cstring(np));
+    
     // Free the buffer in the completion routine.
     bool ret =_socket_client->send_message(buf, ccnt,
 	       callback(this, &AcceptSession::send_notification_cb));
@@ -2439,6 +2458,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
  	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
  		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -2454,6 +2474,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    // Check that the length is correct or throw an exception
 	    KeepAlivePacket pac(buf, length);
  	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
  		       cstring(pac));
 	    // debug_msg(pac.str().c_str());
 	    event_keepmess_accept();
@@ -2466,6 +2487,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 // 	    main()->eventloop().current_time(_in_update_time);
 	    UpdatePacket pac(buf, length);
  	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
  		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
@@ -2482,6 +2504,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    debug_msg("NOTIFICATION Packet RECEIVED\n");
 	    NotificationPacket pac(buf, length);
 	    XLOG_TRACE(main()->profile().enabled(trace_message_in),
+		       "Receive %s",
 		       cstring(pac));
 	    // All decode errors should throw a CorruptMessage.
 	    debug_msg(pac.str().c_str());
