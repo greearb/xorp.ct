@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.35 2005/12/10 01:35:34 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.36 2005/12/16 17:37:01 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -199,6 +199,10 @@ public:
 
     void start_idle_hold_timer();
     void clear_idle_hold_timer();
+    /**
+     * @return true if the idle hold timer is running.
+     */
+    bool running_idle_hold_timer() const;
 
     void start_delay_open_timer();
     void clear_delay_open_timer();
@@ -469,11 +473,6 @@ class AcceptSession {
 
      bool accept_message() const { return _accept_messages; }
 
-    /**
-     * Return a handle to the peers config data.
-     */ 
-    const BGPPeerData* peerdata() const	{ return _peer.peerdata(); }
-    
      string str() {
 	 return _peer.str();
      }
@@ -488,6 +487,10 @@ class AcceptSession {
 
      BGPMain *main()			{ return _peer.main(); }
      FSMState state()			{ return _peer.state(); }
+     const BGPPeerData* peerdata() const{ return _peer.peerdata(); }
+     bool running_idle_hold_timer() const {
+	return _peer.running_idle_hold_timer();
+     } 
 };
 
 #endif // __BGP_PEER_HH__

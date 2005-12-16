@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.122 2005/12/16 16:22:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.123 2005/12/16 17:39:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1827,6 +1827,15 @@ BGPPeer::clear_idle_hold_timer()
     _idle_hold.unschedule();
 }
 
+bool
+BGPPeer::running_idle_hold_timer() const
+{
+    if (!_damping_peer_oscillations)
+	return false;
+
+    return _idle_hold.scheduled();
+}
+
 void 
 BGPPeer::start_delay_open_timer()
 {
@@ -2105,9 +2114,10 @@ AcceptSession::start()
     case STATEIDLE:
 	// Drop this connection, we are in idle.
 	debug_msg("rejected\n");
-	XLOG_INFO("%s rejecting connection: current state %s",
+	XLOG_INFO("%s rejecting connection: current state %s %s",
 		  str().c_str(),
-		  _peer.pretty_print_state(state()));
+		  _peer.pretty_print_state(state()),
+		  running_idle_hold_timer() ? "holdtimer running" : "");
 	comm_sock_close(_sock);
 	_sock = BAD_XORPFD;
 	remove();
