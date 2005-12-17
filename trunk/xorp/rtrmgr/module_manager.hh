@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.34 2005/10/12 05:39:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.35 2005/11/03 17:27:51 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -37,16 +37,12 @@ class XrlAction;
 class Rtrmgr;
 
 
-#define NO_SETUID_ON_EXEC 0
-
 class Module : public GenericModule {
 public:
     Module(ModuleManager& mmgr, const string& name, bool verbose);
     ~Module();
 
     int set_execution_path(const string& path, string& error_msg);
-    void set_argv(const vector<string>& argv);
-    void set_userid(uid_t userid);
     int run(bool do_exec, bool is_verification,
 	    XorpCallback1<void, bool>::RefPtr cb);
     void module_run_done(bool success);
@@ -61,13 +57,9 @@ public:
     void new_status(ModuleStatus new_status);
 
 private:
-
     ModuleManager& _mmgr;
     string	_path;		// relative path
     string	_expath;	// absolute path
-    vector<string> _argv;	// command line arguments
-    uid_t       _userid;        // userid to execute process as, zero
-				// for current user
     pid_t	_pid;
 #ifdef HOST_OS_WINDOWS
     HANDLE	_phand;
@@ -108,27 +100,6 @@ public:
 
     const string& xorp_root_dir() const { return _xorp_root_dir; }
 
-    /**
-     * @short shell_execute is used to start external processes.
-     *
-     * shell_execute is used to start external processes, running them
-     * in a shell.  It is NOT used to start regular XORP processes,
-     * but rather for background maintenance tasks.  This is
-     * ModuleManager functionality primarily because it simplifies the
-     * handling of SIGCHILD.
-     *
-     * @param userid the UID of the user to run the task as.
-     * @param argv the command and arguments to run.
-     * @param cb callback to call when the child process terminates.
-     * @param do_exec if true then do execute the external processes.
-     * @param is_verification if true then this execution is for verification
-     * purpose only.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int shell_execute(uid_t userid, const vector<string>& argv, 
-		      ModuleManager::CallBack cb, bool do_exec,
-		      bool is_verification, string& error_msg);
     MasterConfigTree* master_config_tree() const { return _master_config_tree; }
     void set_master_config_tree(MasterConfigTree* v) { _master_config_tree = v; }
 #if 0

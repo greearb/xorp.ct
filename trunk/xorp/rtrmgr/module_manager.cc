@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.51 2005/11/03 17:27:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.52 2005/12/01 23:39:45 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -210,7 +210,6 @@ child_handler(int x)
 
 Module::Module(ModuleManager& mmgr, const string& name, bool verbose)
     : GenericModule(name), _mmgr(mmgr),
-      _userid(NO_SETUID_ON_EXEC),
       _pid(0),
       _do_exec(false),
       _verbose(verbose)
@@ -455,25 +454,6 @@ Module::set_execution_path(const string& path, string& error_msg)
     return XORP_OK;
 }
 
-void 
-Module::set_argv(const vector<string>& argv)
-{
-    _argv = argv;
-}
-
-void
-Module::set_userid(uid_t userid)
-{
-#ifdef HOST_OS_WINDOWS
-    UNUSED(userid);
-#else
-    // Don't call this if you don't want to setuid.
-    XLOG_ASSERT(userid != NO_SETUID_ON_EXEC);
-
-    _userid = userid;
-#endif
-}
-
 int
 Module::run(bool do_exec, bool is_verification,
 	    XorpCallback1<void, bool>::RefPtr cb)
@@ -534,11 +514,6 @@ Module::run(bool do_exec, bool is_verification,
 	si.dwFlags |= STARTF_USESTDHANDLES;
 
 	string targv;
-	for (size_t i = 0; i < _argv.size(); i++) {
-	    targv += _argv[i];
-	    targv += ' ';
-	}
-
 	if (CreateProcessA(const_cast<char *>(_expath.c_str()),
 			   const_cast<char *>(targv.c_str()),
 			   NULL, NULL, TRUE,
@@ -557,37 +532,12 @@ Module::run(bool do_exec, bool is_verification,
 	signal(SIGCHLD, child_handler);
 	_pid = fork();
 	if (_pid == 0) {
-
-	    //set userid as required.
-	    if (_userid != NO_SETUID_ON_EXEC) {
-		if (setuid(_userid) != 0) {
-		    XLOG_ERROR("Failed to setuid(%u) on exec",
-			       XORP_UINT_CAST(_userid));
-		    exit(1);
-		}
-	    }
-
 	    // Detach from the controlling terminal.
 	    setsid();
-	    if (_argv.empty()) {
-		if (execl(_expath.c_str(), _expath.c_str(),
-			  static_cast<const char*>(NULL)) < 0) {
-		    XLOG_ERROR("Execution of %s failed", _expath.c_str());
-		    exit(1);
-		}
-	    } else {
-		// Convert argv from strings to char*
-		const char* argv[_argv.size() + 1];
-		size_t i;
-		for (i = 0; i < _argv.size(); i++) {
-		    argv[i] = _argv[i].c_str();
-		}
-		argv[i] = NULL;
-		
-		if (execv(_expath.c_str(),const_cast<char*const*>(argv)) < 0) {
-		    XLOG_ERROR("Execution of %s failed", _expath.c_str());
-		    exit(1);
-		}
+	    if (execl(_expath.c_str(), _expath.c_str(),
+		      static_cast<const char*>(NULL)) < 0) {
+		XLOG_ERROR("Execution of %s failed", _expath.c_str());
+		exit(1);
 	    }
 	}
 #endif // ! HOST_OS_WINDOWS
@@ -825,26 +775,4 @@ ModuleManager::shutdown_complete()
 	}
     }
     return complete;
-}
-
-
-int 
-ModuleManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			     ModuleManager::CallBack cb, bool do_exec,
-			     bool is_verification, string& error_msg)
-{
-    if (!new_module(argv[0], argv[0], error_msg)) {
-	return XORP_ERROR;
-    }
-    Module *module = (Module*)find_module(argv[0]);
-    module->set_userid(userid);
-    module->set_argv(argv);
-    XorpCallback1<void, bool>::RefPtr run_cb 
-	= callback(module, &Module::module_run_done);
-    if (module->run(do_exec, is_verification, run_cb) != XORP_OK) {
-	cb->dispatch(false, "Failed to execute" + argv[0]);
-	return XORP_ERROR;
-    }
-    cb->dispatch(true, "");
-    return XORP_OK;
 }

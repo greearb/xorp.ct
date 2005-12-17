@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.66 2005/11/03 17:27:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.67 2005/12/09 19:07:15 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -746,9 +746,7 @@ MasterConfigTree::unlock_node(const string& /* node */, uid_t /* user_id */)
 }
 
 bool
-MasterConfigTree::save_to_file(const string& filename,
-			       uid_t user_id,
-			       const string& save_hook,
+MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 			       string& error_msg)
 {
     string dummy_error_msg;
@@ -913,40 +911,10 @@ MasterConfigTree::save_to_file(const string& filename,
 	return false;
     }
 
-    run_save_hook(user_id, save_hook, full_filename, error_msg);
-
     error_msg += "Save complete\n";
     _exec_id.restore_saved_exec_id(dummy_error_msg);
     umask(orig_mask);
     return true;
-}
-
-void
-MasterConfigTree::run_save_hook(uid_t userid, const string& save_hook,
-				const string& filename, string& error_msg)
-{
-    if (save_hook.empty())
-	return;
-    debug_msg("run_save_hook: %s %s\n", save_hook.c_str(), filename.c_str());
-    vector<string> argv;
-    argv.reserve(2);
-    argv.push_back(save_hook);
-    argv.push_back(filename);
-    _task_manager->shell_execute(
-	userid,
-	argv,
-	callback(this, &MasterConfigTree::save_hook_complete),
-	error_msg);
-}
-
-void
-MasterConfigTree::save_hook_complete(bool success,
-				     const string error_msg) const
-{
-    if (success)
-	debug_msg("save hook completed successfully\n");
-    else
-	XLOG_ERROR("save hook completed with error %s", error_msg.c_str());
 }
 
 string
@@ -1138,8 +1106,7 @@ MasterConfigTree::apply_config_commit_changes_cb(bool success,
 
 bool
 MasterConfigTree::save_config(const string& filename, uid_t user_id,
-			      const string& save_hook, string& error_msg,
-			      ConfigSaveCallBack cb)
+			      string& error_msg, ConfigSaveCallBack cb)
 {
     string save_file_config;
 
@@ -1171,7 +1138,7 @@ MasterConfigTree::save_config(const string& filename, uid_t user_id,
 	//
 	// Assume that the user tries to save to a local file
 	//
-	if (save_to_file(filename, user_id, save_hook, error_msg) != true) {
+	if (save_to_file(filename, user_id, error_msg) != true) {
 	    XLOG_TRACE(_verbose, "Failed to save file %s: %s",
 		       filename.c_str(), error_msg.c_str());
 	    return false;

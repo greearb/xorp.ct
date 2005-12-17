@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.64 2005/08/18 15:54:27 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.65 2005/10/10 04:10:51 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -32,12 +32,6 @@
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
-#endif
-
-#ifdef HAVE_GLOB_H
-#include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
 #endif
 
 #include "libxipc/sockutil.hh"
@@ -63,10 +57,6 @@
 #include <getopt.h>
 #endif
 
-#ifdef HOST_OS_WINDOWS
-#define	stat	_stat
-#endif
-
 
 //
 // Default values
@@ -82,7 +72,6 @@ static volatile bool	running = false;
 static string	template_dir;
 static string	xrl_targets_dir;
 static string	boot_file;
-static string	save_hook;
 static bool	do_exec = default_do_exec;
 static bool	do_restart = default_do_restart;
 static bool	verbose = default_verbose;
@@ -90,9 +79,10 @@ list<IPv4>	bind_addrs;
 uint16_t	bind_port = FinderConstants::FINDER_DEFAULT_PORT();
 int32_t		quit_time = -1;
 
-void cleanup_and_exit(int errcode);
+static void cleanup_and_exit(int errcode);
 
-static void signalhandler(int)
+static void
+signalhandler(int)
 {
     running = false;
 }
@@ -107,7 +97,6 @@ usage(const char* argv0)
     fprintf(stderr, "  -h        Display this information\n");
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
-    fprintf(stderr, "  -s <app>  Specify save config file hook\n");
     fprintf(stderr, "  -N        Do not execute XRLs and do not start processes\n");
     fprintf(stderr, "  -r        Restart failed processes (partially working; not recommended!)\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
@@ -138,14 +127,16 @@ display_defaults()
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+void
+add_cmd_adaptor(char *cmd, TemplateTree* tt)
 {
     ((MasterTemplateTree*)tt)->add_cmd(cmd);
 }
 
 
-void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt)
+void
+add_cmd_action_adaptor(const string& cmd, 
+		       const list<string>& action, TemplateTree* tt)
 {
     ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
 }
@@ -156,7 +147,6 @@ Rtrmgr::Rtrmgr(const string& template_dir,
 	       const string& boot_file,
 	       const list<IPv4>& bind_addrs,
 	       uint16_t bind_port,
-	       const string& save_hook,
 	       bool	do_exec,
 	       bool	do_restart,
 	       bool	verbose,
@@ -166,7 +156,6 @@ Rtrmgr::Rtrmgr(const string& template_dir,
       _boot_file(boot_file),
       _bind_addrs(bind_addrs),
       _bind_port(bind_port),
-      _save_hook(save_hook),
       _do_exec(do_exec),
       _do_restart(do_restart),
       _verbose(verbose),
@@ -196,15 +185,6 @@ Rtrmgr::run()
     // Initialize the event loop
     //
     EventLoop eventloop;
-
-    // 
-    // Validate the save hook is sane
-    //
-    if (validate_save_hook() != XORP_OK) {
-	XLOG_ERROR("xorp_rtrmgr save hook %s is not executable", 
-		   _save_hook.c_str());
-	return (1);
-    }
 
     //
     // Print various information
@@ -380,62 +360,6 @@ Rtrmgr::ready() const {
     return true;
 }
 
-int
-Rtrmgr::validate_save_hook() {
-    if (_save_hook.empty())
-	return XORP_OK;
-    string expanded_path;
-    if (_save_hook[0] != '/') {
-	// we're going to call glob, but don't want to allow wildcard expansion
-	for (size_t i = 0; i < _save_hook.length(); i++) {
-	    char c = _save_hook[i];
-	    if ((c == '*') || (c == '?') || (c == '[')) {
-		string err = _save_hook + ": bad filename";
-		XLOG_ERROR("%s", err.c_str());
-		return XORP_ERROR;
-	    }
-	}
-	glob_t pglob;
-	glob(_save_hook.c_str(), GLOB_TILDE, NULL, &pglob);
-	if (pglob.gl_pathc != 1) {
-	    string err(_save_hook + ": File does not exist.");
-	    XLOG_ERROR("%s", err.c_str());
-	    return XORP_ERROR;
-	}
-	expanded_path = pglob.gl_pathv[0];
-	globfree(&pglob);
-    } else {
-	expanded_path = _save_hook;
-    }
-
-    struct stat sb;
-    if (stat(expanded_path.c_str(), &sb) < 0) {
-	string err = expanded_path + ": ";
-	switch (errno) {
-	case ENOTDIR:
-	    err += "A component of the path prefix is not a directory.";
-	    break;
-	case ENOENT:
-	    err += "File does not exist.";
-	    break;
-	case EACCES:
-	    err += "Permission denied.";
-	    break;
-#ifdef ELOOP
-	case ELOOP:
-	    err += "Too many symbolic links.";
-	    break;
-#endif
-	default:
-	    err += "Unknown error accessing file.";
-	}
-	XLOG_ERROR("%s", err.c_str());
-	return XORP_ERROR;
-    }
-    _save_hook = expanded_path;
-    return XORP_OK;
-}
-
 void
 Rtrmgr::module_status_changed(const string& module_name,
 			      GenericModule::ModuleStatus status)
@@ -472,10 +396,9 @@ main(int argc, char* const argv[])
     template_dir	= xorp_template_dir();
     xrl_targets_dir	= xorp_xrl_targets_dir();
     boot_file		= xorp_boot_file();
-    save_hook           = "";
 
     int c;
-    while ((c = getopt(argc, argv, "a:n:t:b:s:x:i:p:q:Nrvh")) != EOF) {
+    while ((c = getopt(argc, argv, "a:n:t:b:x:i:p:q:Nrvh")) != EOF) {
 	switch(c) {
 	case 'a':
 	    //
@@ -508,9 +431,6 @@ main(int argc, char* const argv[])
 	    break;
 	case 'b':
 	    boot_file = optarg;
-	    break;
-	case 's':
-	    save_hook = optarg;
 	    break;
 	case 'x':
 	    xrl_targets_dir = optarg;
@@ -575,8 +495,7 @@ main(int argc, char* const argv[])
     // The main procedure
     //
     Rtrmgr rtrmgr(template_dir, xrl_targets_dir, boot_file, bind_addrs,
-		  bind_port, save_hook, do_exec, do_restart, verbose,
-		  quit_time);
+		  bind_port, do_exec, do_restart, verbose, quit_time);
     errcode = rtrmgr.run();
 
     cleanup_and_exit(errcode);

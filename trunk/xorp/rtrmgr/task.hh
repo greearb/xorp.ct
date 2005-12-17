@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.35 2005/10/12 05:39:44 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.36 2005/11/03 17:27:52 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -539,20 +539,6 @@ public:
      * @param module_name the module name of the process to be killed.  
      */
     void kill_process(const string& module_name);
-
-    /**
-     * @short shell_execute is used to start external processes.
-     *
-     * shell_execute is used to start external processes, running them
-     * in a shell.  It is NOT used to start regular XORP processes,
-     * but rather for background maintenance tasks.
-     *
-     * @param userid the UID of the user to run the task as.
-     * @param argv the command and arguements to run
-     * @param callback callback to call when the child process terminates
-     */
-    int shell_execute(uid_t userid, const vector<string>& argv, 
-		      TaskManager::CallBack cb, string& error_msg);
 
     /**
      * Get a reference to the ExecId object.

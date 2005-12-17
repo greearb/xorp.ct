@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.55 2005/10/12 05:39:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.56 2005/11/03 17:27:52 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2300,12 +2300,4 @@ void
 TaskManager::null_callback()
 {
 
-}
-
-int
-TaskManager::shell_execute(uid_t userid, const vector<string>& argv, 
-			   TaskManager::CallBack cb, string& error_msg)
-{
-    return _module_manager.shell_execute(userid, argv, cb, do_exec(),
-					 is_verification(), error_msg);
 }

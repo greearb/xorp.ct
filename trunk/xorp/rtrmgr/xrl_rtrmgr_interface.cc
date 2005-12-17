@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.44 2005/08/21 08:59:53 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.45 2005/09/20 15:03:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -800,9 +800,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
     ConfigSaveCallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::save_config_done,
 		  filename, user_id, target);
-    if (_master_config_tree->save_config(filename, user_id,
-					 _rtrmgr.save_hook(),
-					 response, cb)
+    if (_master_config_tree->save_config(filename, user_id, response, cb)
 	!= true) {
 	return XrlCmdError::COMMAND_FAILED(response);
     }

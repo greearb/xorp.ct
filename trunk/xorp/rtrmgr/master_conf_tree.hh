@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.34 2005/11/03 17:27:51 pavlin Exp $
+// $XORP: xorp/rtrmgr/master_conf_tree.hh,v 1.35 2005/12/09 19:07:15 pavlin Exp $
 
 #ifndef __RTRMGR_MASTER_CONF_TREE_HH__
 #define __RTRMGR_MASTER_CONF_TREE_HH__
@@ -86,8 +86,7 @@ public:
 			     const string& deletions,
 			     ConfigChangeCallBack cb);
     bool save_config(const string& filename, uid_t user_id,
-		     const string& save_hook, string& errmsg,
-		     ConfigSaveCallBack cb);
+		     string& errmsg, ConfigSaveCallBack cb);
     bool load_config(const string& filename, uid_t user_id, string& errmsg,
 		     ConfigLoadCallBack cb);
 
@@ -136,8 +135,7 @@ private:
 				     ConfigSaveCallBack cb);
     void save_config_done_cb(bool success, string errmsg,
 			     ConfigSaveCallBack cb);
-    bool save_to_file(const string& filename, uid_t user_id, 
-		      const string& save_hook, string& errmsg);
+    bool save_to_file(const string& filename, uid_t user_id, string& errmsg);
 
     void load_config_file_received_cb(bool success, string errmsg,
 				      string filename, uid_t user_id,
@@ -168,23 +166,6 @@ private:
     bool verbose() const { return _task_manager->verbose(); }
 
     XorpClient& xorp_client() const { return _task_manager->xorp_client(); }
-
-    /**
-     * @short run_save_hook is executed after the config file has been saved.
-     *
-     * run_save_hook is executed after the config file has been saved.
-     * The main purpose is to allow files saved to a memory filesystem
-     * to be preserved on persistent storage, such as when running
-     * from a LiveCD, but wishing to preserve saved config files onto
-     * a floppy disk. 
-     */
-    void run_save_hook(uid_t userid, const string& save_hook,
-		       const string& filename, string& error_msg);
-
-    /**
-     * @short callback when save hook completes.
-     */
-    void save_hook_complete(bool success, const string errmsg) const;
 
     MasterConfigTreeNode _root_node;
     TaskManager*        _task_manager;
