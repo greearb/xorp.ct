@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.89 2005/11/14 03:44:57 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.90 2005/12/13 22:14:57 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -107,6 +107,11 @@ Release 1.2 (2005/??/??)
 
     - Modification of the %allow and %allow-range semantics so a help string
       can be supplied for each allowed value or range.
+
+    - Removal of the mechanism for specifying the hook for saving
+      a configuration file (the "-s <app>" command-line argument).
+      The mechanism is broken and is superseded by the rtrmgr template
+      support for running external programs.
 
   XORPSH:
     - Addition of support to run xorpsh in non-interactive mode.
