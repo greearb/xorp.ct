@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.73 2005/12/13 03:59:46 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.74 2005/12/13 06:26:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -474,7 +474,7 @@ CommunityAttribute::str() const
     string s = "Community Attribute ";
     const_iterator i = _communities.begin();
     for ( ; i != _communities.end();  ++i)
-	s += c_format("%u ", XORP_UINT_CAST(*i));
+	s += c_format("%#x ", XORP_UINT_CAST(*i));
     return s;
 }
 
