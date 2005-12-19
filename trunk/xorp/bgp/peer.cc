@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.123 2005/12/16 17:39:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.124 2005/12/16 22:06:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -682,33 +682,37 @@ BGPPeer::event_closed()			// EVENTBGPTRANCLOSED
 
     switch(_state) {
     case STATEIDLE:
-	return;
 	break;
 
     case STATECONNECT:
 	if (_SocketClient->is_connected())
 	    _SocketClient->connect_break();
 	clear_connect_retry_timer();
+	set_state(STATEIDLE);
 	break;
 
     case STATEACTIVE:
+	set_state(STATEIDLE);
 	break;
 
     case STATEOPENSENT:
 	// Close Connection
 	_SocketClient->disconnect();
+	// Restart ConnectRetry Timer
+	restart_connect_retry_timer();
+	set_state(STATEACTIVE);
 	break;
 
     case STATEOPENCONFIRM:
     case STATEESTABLISHED:
+	set_state(STATEIDLE);
 	break;
 
     case STATESTOPPED:
 	flush_transmit_queue();		// ensure callback can't happen
+	set_state(STATEIDLE);
 	break;
     }
-
-    set_state(STATEIDLE);
 }
 
 /*
