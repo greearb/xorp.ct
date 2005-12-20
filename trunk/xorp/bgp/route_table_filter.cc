@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.43 2005/11/28 08:34:28 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.44 2005/12/20 09:27:50 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -320,8 +320,14 @@ RRIBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
     //Form a new path attribute list containing the new AS path
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
     if (0 == palist.originator_id()) {
-	ORIGINATOR_IDAttribute originator_id_att(_bgp_id);
-	palist.add_path_attribute(originator_id_att);
+	if (rtmsg->origin_peer()->get_peer_type() == PEER_TYPE_INTERNAL) {
+	    ORIGINATOR_IDAttribute originator_id_att(_bgp_id);
+	    palist.add_path_attribute(originator_id_att);
+	} else {
+	    ORIGINATOR_IDAttribute
+		originator_id_att(rtmsg->origin_peer()->id());
+	    palist.add_path_attribute(originator_id_att);
+	}
     }
 
     // Prepend the CLUSTER_ID to the CLUSTER_LIST, if the CLUSTER_LIST

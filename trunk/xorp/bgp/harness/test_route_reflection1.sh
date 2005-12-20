@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.2 2005/12/03 07:24:25 atanu Exp $
+# $XORP: xorp/bgp/harness/test_route_reflection1.sh,v 1.3 2005/12/20 08:30:54 atanu Exp $
 #
 
 #
@@ -202,7 +202,7 @@ test2()
 	localpref 10
 	clusterlist 1.2.3.4"
 
-    RR_PACKET="$PACKET originatorid $ID clusterlist $CLUSTER_ID"
+    RR_PACKET="$PACKET originatorid 10.10.10.1 clusterlist $CLUSTER_ID"
 
     coord peer1 expect $PACKET	
     coord peer2 expect $RR_PACKET	
@@ -237,7 +237,7 @@ test3()
 	localpref 10
 	clusterlist 1.2.3.4"
 
-    RR_PACKET="$PACKET originatorid $ID clusterlist $CLUSTER_ID"
+    RR_PACKET="$PACKET originatorid 10.10.10.2 clusterlist $CLUSTER_ID"
 
     coord peer1 expect $RR_PACKET	
     coord peer2 expect $RR_PACKET	
