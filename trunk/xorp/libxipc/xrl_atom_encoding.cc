@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.9 2005/03/25 02:53:31 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.11 2005/08/18 15:32:40 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -198,7 +198,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes, string& out)
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);
 	    }
-	    char c;
+	    char c = 0;
 	    ssize_t skip = escape_decode(reg_start, c);
 	    out.insert(out.end(), c);
 	    if (skip < 1) {
@@ -241,7 +241,7 @@ xrlatom_decode_value(const char* input, size_t input_bytes,
 		// Malformed escape at end of string eg, not %[0-f][0-f]
 		return (reg_start - input);
 	    }
-	    char c;
+	    char c = 0;
 	    ssize_t skip = escape_decode(reg_start, c);
 	    out.insert(out.end(), c);
 	    if (skip < 1) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.17 2005/08/21 06:12:57 atanu Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.18 2005/08/30 05:36:39 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -303,7 +303,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
 
     string if_name;
     in_addr if_addr;
-    uint16_t if_flags;
+    uint16_t if_flags = 0;
 
     // Always push loopback first.
     addrs.push_back(IPv4::LOOPBACK());
