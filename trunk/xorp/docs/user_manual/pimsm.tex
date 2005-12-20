@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.21 2005/06/02 18:59:14 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.22 2005/11/11 06:24:03 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -682,7 +682,7 @@ protocols \{\\
 \begin{description}
 \item{\tt rp-priority}: this specifies the priority of the specified
   RP router.  It takes the form of a non-negative integer in the
-  interval [0, 255].
+  interval [0, 255]. Smaller value means higher priority.
 
   If multiple RP routers are known for a particular multicast group,
   then the one with the most specific {\stt group-prefix} will be
@@ -751,8 +751,8 @@ protocols \{\\
   appeared after XORP Release-1.1.}.
 \item{\tt bsr-priority}: this specifies the BSR priority for this
   router.  It takes a positive integer value in the interval [0, 255],
-  which is used in the
-  PIM-SM BSR election process.  For each {\stt scope-zone}, the
+  which is used in the PIM-SM BSR election process. Larger value means higher
+  priority. For each {\stt scope-zone}, the
   candidate bootstrap router with the highest BSR priority will be
   chosen to be BSR. Its default value is 1.
 \item{\tt hash-mask-len}: The BSR mechanism announces a list of
