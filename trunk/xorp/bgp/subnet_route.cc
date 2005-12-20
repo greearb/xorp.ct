@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.18 2005/07/22 01:20:11 abittau Exp $"
+#ident "$XORP: xorp/bgp/subnet_route.cc,v 1.19 2005/11/11 15:23:28 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -41,7 +41,8 @@ SubnetRoute<A>::SubnetRoute(const SubnetRoute<A>& route_to_clone)
 
     _flags = route_to_clone._flags;
     //set our reference count to one (our own self-reference)
-    _flags ^= (_flags & SRF_REFCOUNT);
+    //and clear the deleted flag
+    _flags ^= (_flags & (SRF_REFCOUNT | SRF_DELETED));
 
     //update parent refcount
     if (_parent_route)
