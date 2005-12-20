@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.75 2005/11/11 16:30:01 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.76 2005/11/16 00:51:06 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -641,7 +641,10 @@ class RouterLink {
 	vlink = 4	// Virtual link
     };
 
-    RouterLink(OspfTypes::Version version) : _version(version)
+    RouterLink(OspfTypes::Version version) 
+	: _version(version), _type(p2p), _metric(0), _link_id(0),
+	  _link_data(0), _interface_id(0), _neighbour_interface_id(0),
+	  _neighbour_router_id(0)
     {}
 
     RouterLink(const RouterLink& rhs) : _version(rhs._version) {
