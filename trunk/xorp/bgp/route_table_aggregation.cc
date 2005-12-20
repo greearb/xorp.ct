@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.12 2005/11/29 17:46:21 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.13 2005/12/08 14:02:52 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -60,7 +60,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
-//    XLOG_ASSERT(!rtmsg.changed());
     bool must_push = false;
 
     /*
@@ -99,6 +98,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
 	int res = this->_next_table->
 	    add_route(ibgp_msg, (BGPRouteTable<A>*)this);
+	ibgp_r->unref();
 	return res;
     }
 
@@ -144,6 +144,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
 	this->_next_table->add_route(ebgp_msg, (BGPRouteTable<A>*)this);
+	ebgp_r->unref();
     }
 
     /*
@@ -160,6 +161,7 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
      */
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
     int res = this->_next_table->add_route(ibgp_msg, (BGPRouteTable<A>*)this);
+    ibgp_r->unref();
     if (must_push)
 	this->_next_table->push(this);
     return res;
@@ -182,7 +184,6 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
-//    XLOG_ASSERT(!rtmsg.changed());
     bool must_push = false;
 
     /*
@@ -221,6 +222,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
 	int res = this->_next_table->
 	    delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
+	ibgp_r->unref();
 	return res;
     }
 
@@ -251,6 +253,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
 	this->_next_table->delete_route(ebgp_msg, (BGPRouteTable<A>*)this);
+	ebgp_r->unref();
     }
 
     aggr_route->components_table()->erase(orig_net);
@@ -273,6 +276,7 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     ibgp_r->set_aggr_prefix_len(SR_AGGR_IBGP_ONLY);
     int res = this->_next_table->
 	delete_route(ibgp_msg, (BGPRouteTable<A>*)this);
+    ibgp_r->unref();
     if (must_push)
 	this->_next_table->push(this);
     return res;
@@ -382,6 +386,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->delete_route(tmp_rtmsg, parent);
+	tmp_route->unref();
 	_was_announced = false;
     }
 
@@ -435,7 +440,8 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		debug_msg("announcing\n");
 		parent->_next_table->add_route(new_msg, parent);
 	    }
-	    // XXX deallocate memory - REVISIT this!
+	    old_r->unref();
+	    new_r->unref();
 	}
     }
 
@@ -461,6 +467,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 				     parent->_master_plumbing.rib_handler(),
 				     GENID_UNKNOWN);
 	parent->_next_table->add_route(tmp_rtmsg, parent);
+	tmp_route->unref();
 	_was_announced = true;
     }
 
@@ -525,7 +532,6 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     XLOG_ASSERT(orig_route->nexthop_resolved());
-    XLOG_ASSERT(!rtmsg.changed());
 
     /*
      * If not marked as aggregation candidate, pass the request
@@ -557,9 +563,11 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     if (orig_net.prefix_len() < aggr_prefix_len || dump_peer->ibgp()) {
 	// Send the "original" version downstream, and we are DONE.
 	ibgp_r->set_aggr_prefix_len(SR_AGGR_IGNORE);
-	return this->_next_table->route_dump(ibgp_msg,
-					     (BGPRouteTable<A>*)this,
-					     dump_peer);
+	int res =  this->_next_table->route_dump(ibgp_msg,
+						 (BGPRouteTable<A>*)this,
+						 dump_peer);
+	ibgp_r->unref();
+	return res;
     }
 
     debug_msg("\nXXX *** XXX\nMARKO route_dump orig=%s aggr=%s\n",
@@ -588,9 +596,11 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_NOT_AGGREGATED);
 	else
 	    ebgp_r->set_aggr_prefix_len(SR_AGGR_EBGP_WAS_AGGREGATED);
-	return this->_next_table->route_dump(ebgp_msg,
-					     (BGPRouteTable<A>*)this,
-					     dump_peer);
+	int res = this->_next_table->route_dump(ebgp_msg,
+						(BGPRouteTable<A>*)this,
+						dump_peer);
+	ebgp_r->unref();
+	return res;
     }
 
     debug_msg("XXX Shouldn't get here unless EBGP & aggregate == component\n");
