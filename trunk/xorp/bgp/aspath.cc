@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.30 2005/12/08 03:49:46 atanu Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.31 2005/12/08 03:56:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -678,6 +678,17 @@ AsPath::remove_confed_segments()
 	}
 }
 
+bool
+AsPath::contains_confed_segments() const
+{
+    for (const_iterator i = _segments.begin(); i != _segments.end(); i++) {
+	ASPathSegType type = (*i).type();
+	if (AS_CONFED_SEQUENCE == type || AS_CONFED_SET == type)
+	    return true;
+    }
+
+    return false;
+}
 
 bool
 AsPath::operator==(const AsPath& him) const

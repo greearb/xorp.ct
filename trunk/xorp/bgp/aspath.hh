@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.22 2005/11/14 20:01:39 mjh Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.23 2005/11/15 11:43:58 mjh Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -374,6 +374,11 @@ public:
      * remove all confederation segments from aspath 
      */
     void remove_confed_segments();
+
+    /**
+     * @return true if the AS_PATH Contains confederation segments.
+     */
+    bool contains_confed_segments() const;
 
     bool operator==(const AsPath& him) const;
 

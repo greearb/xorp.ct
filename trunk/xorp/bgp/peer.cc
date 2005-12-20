@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.125 2005/12/19 10:55:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.126 2005/12/20 08:30:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1541,6 +1541,11 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		if (as_path_attr->as_path().first_asnum() != my_asnum)
 		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 	    }
+	    // Receiving confederation path segments when the router
+	    // is not configured for confederations is an error. 
+	    if (!_peerdata->confederation() &&
+		as_path_attr->as_path().contains_confed_segments())
+		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 	}
 
 	// XXX need also to check that the nexthop address is not
