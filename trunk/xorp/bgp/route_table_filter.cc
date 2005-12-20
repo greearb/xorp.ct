@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.42 2005/11/28 04:55:01 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.43 2005/11/28 08:34:28 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -184,6 +184,7 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
     if (_is_confederation_peer) { 
 	new_as_path.prepend_confed_as(_as_num);
     } else {
+	new_as_path.remove_confed_segments();
 	new_as_path.prepend_as(_as_num);
     } 
 
