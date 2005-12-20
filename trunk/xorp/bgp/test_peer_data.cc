@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.12 2005/11/27 06:10:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.13 2005/12/06 06:26:37 atanu Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -75,8 +75,8 @@ test2(TestInfo& info)
     Iptuple iptuple;
     BGPPeerData pd(localdata, iptuple, AsNum(12), IPv4("10.10.10.10"), 0);
 
-    if(!pd.multiprotocol<IPv4>(SAFI_UNICAST)) {
-	DOUT(info) << "We should offer unicast IPv4 by default\n";
+    if(pd.multiprotocol<IPv4>(SAFI_UNICAST)) {
+	DOUT(info) << "We should not offer unicast IPv4 by default\n";
 	return false;
     }
 
@@ -85,6 +85,11 @@ test2(TestInfo& info)
 	return false;
     }
 
+    /*
+    ** We support Unicast IPv4.
+    */
+    pd.add_sent_parameter(new BGPMultiProtocolCapability(AFI_IPV4,
+							 SAFI_UNICAST));
     /*
     ** We support Unicast IPv6.
     */

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.17 2005/06/29 20:03:08 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing2.sh,v 1.18 2005/11/02 10:00:46 atanu Exp $
 #
 
 #
@@ -105,6 +105,7 @@ configure_bgp()
     PORT=$PORT1;PEER_PORT=$PEER_PORT1;PEER_AS=$PEER1_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
     # IBGP - IPV4
@@ -112,6 +113,7 @@ configure_bgp()
     PORT=$PORT2;PEER_PORT=$PEER_PORT2;PEER_AS=$PEER2_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
     # IBGP - IPV4
@@ -119,6 +121,7 @@ configure_bgp()
     PORT=$PORT3;PEER_PORT=$PEER_PORT3;PEER_AS=$PEER3_AS
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"
     add_peer $IPTUPLE $PEER_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
     enable_peer $IPTUPLE
 
     # IBGP - IPV6

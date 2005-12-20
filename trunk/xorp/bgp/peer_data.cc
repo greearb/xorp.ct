@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_data.cc,v 1.27 2005/11/28 04:49:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_data.cc,v 1.28 2005/11/30 08:08:44 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,13 +41,6 @@ BGPPeerData::BGPPeerData(const LocalData& local_data, const Iptuple& iptuple,
     set_configured_hold_time(holdtime);
 
     set_retry_duration(2 * 60);	// Connect retry time.
-
-    // we support routing of IPv4 unicast by default.
-    add_sent_parameter(new BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST));
-
-    // The peer has no way of telling us that it doesn't want IPv4
-    // unicast. So we have to configure the received parameter ourselves.
-    add_recv_parameter(new BGPMultiProtocolCapability(AFI_IPV4, SAFI_UNICAST));
 
     // we support route refresh
     // add_sent_parameter( new BGPRefreshCapability() );
@@ -240,13 +233,19 @@ BGPPeerData::remove_parameter(ParameterList& p_list, const ParameterNode& p)
 void
 BGPPeerData::save_parameters(const ParameterList& plist)
 {
-#if	0
-    copy(plist.begin(), plist.end(),
-	 inserter(_recv_parameters, _recv_parameters.begin()));
-#else
-    for(ParameterList::const_iterator i = plist.begin(); i != plist.end(); i++)
+    bool multiprotocol = false;
+    ParameterList::const_iterator i;
+    for (i = plist.begin(); i != plist.end(); i++) {
 	add_recv_parameter(*i);
-#endif
+	if (dynamic_cast<const BGPMultiProtocolCapability *>((*i).get())) {
+	    multiprotocol = true;
+	}
+    }
+    // If there wasn't any MP capability parameters in the open packet, we must
+    // make fallback and assume that peer supports IPv4 unicast only.    
+    if (!multiprotocol)
+	add_recv_parameter(new BGPMultiProtocolCapability(AFI_IPV4,
+							  SAFI_UNICAST));
 }
 
 void

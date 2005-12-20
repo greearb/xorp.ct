@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/parameter.hh,v 1.19 2005/11/13 21:59:08 mjh Exp $
+// $XORP: xorp/bgp/parameter.hh,v 1.20 2005/11/14 11:38:43 mjh Exp $
 
 #ifndef __BGP_PARAMETER_HH__
 #define __BGP_PARAMETER_HH__
@@ -163,11 +163,6 @@ public:
 	return _data;
     }
 
-    /**
-     * Should this parameter be sent by open.
-     */
-    virtual bool send() const { return true; }
-
     //    BGPParameter* clone() const;
     virtual string str() const = 0;
 protected:
@@ -249,14 +244,6 @@ public:
     }
     bool compare(const BGPParameter& rhs) const;
     
-    bool send() const {
-	if ((_address_family == AFI_IPV4) &&
-	    (_subsequent_address_family == SAFI_UNICAST))
-	    return false;
-	else
-	    return true;
-    }
-
     string str() const;
 protected:
 private:

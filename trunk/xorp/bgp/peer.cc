@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.124 2005/12/16 22:06:40 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.125 2005/12/19 10:55:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1149,8 +1149,7 @@ BGPPeer::generate_open_message(OpenPacket& open)
     ParameterList::const_iterator
 	pi = _peerdata->parameter_sent_list().begin();
     while(pi != _peerdata->parameter_sent_list().end()) {
-	if ((*pi)->send())
-	    open.add_parameter(*pi);
+	open.add_parameter(*pi);
 	pi++;
     }
 }

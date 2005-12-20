@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.53 2005/12/13 04:47:33 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.54 2005/12/13 06:26:16 atanu Exp $
 #
 
 #
@@ -84,12 +84,14 @@ configure_bgp()
     PEER=$PEER1
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT1 $PEER $PEER1_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 
     # EBGP - IPV4
     PEER=$PEER2
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT2 $PEER $PEER2_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
 
     # IBGP - IPV6
@@ -126,7 +128,8 @@ test1()
     # dividing the holdtime by three.  There should be a way of
     # soaking up keepalives.
 
-    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 1 safi 1
     coord peer1 expect packet keepalive
     coord peer1 expect packet keepalive
     coord peer1 expect packet keepalive
@@ -166,7 +169,8 @@ test3()
 
     reset
 
-    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 1 safi 1
     coord peer1 expect packet notify $OPENMSGERROR $UNACCEPTHOLDTIME
     coord peer1 establish AS $PEER1_AS \
 	holdtime 1 \
@@ -937,7 +941,8 @@ test28()
     coord target $HOST $PORT2
     coord initialise attach peer1
 
-    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 1 safi 1
 
     coord peer1 expect packet keepalive
 

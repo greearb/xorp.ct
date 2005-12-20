@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.49 2005/12/11 09:37:59 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.50 2005/12/11 20:39:10 atanu Exp $
 #
 
 #
@@ -82,16 +82,19 @@ configure_bgp()
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT1 $PEER $PEER1_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
 
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT2 $PEER $PEER2_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
 
     PEER=$HOST
     NEXT_HOP=192.150.187.78
     add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
+    set_parameter $LOCALHOST $PORT3 $PEER $PEER3_PORT MultiProtocol.IPv4.Unicast true
     enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.3 2003/10/30 04:37:44 atanu Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.4 2003/11/04 02:27:20 mjh Exp $
 #
 
 #
@@ -73,16 +73,22 @@ configure_bgp()
     register_rib ""
 
     PEER=$HOST
-    add_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT $PEER1_AS $NEXT_HOP $HOLDTIME
-    enable_peer $LOCALHOST $PORT1 $PEER $PEER1_PORT
+    IPTUPLE="$LOCALHOST $PORT1 $PEER $PEER1_PORT"
+    add_peer $IPTUPLE $PEER1_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
+    enable_peer $IPTUPLE
 
     PEER=$HOST
-    add_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT $PEER2_AS $NEXT_HOP $HOLDTIME
-    enable_peer $LOCALHOST $PORT2 $PEER $PEER2_PORT
+    IPTUPLE="$LOCALHOST $PORT2 $PEER $PEER2_PORT"
+    add_peer $IPTUPLE $PEER2_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
+    enable_peer $IPTUPLE
 
     PEER=$HOST
-    add_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT $PEER3_AS $NEXT_HOP $HOLDTIME
-    enable_peer $LOCALHOST $PORT3 $PEER $PEER3_PORT
+    IPTUPLE="$LOCALHOST $PORT3 $PEER $PEER3_PORT"
+    add_peer $IPTUPLE $PEER3_AS $NEXT_HOP $HOLDTIME
+    set_parameter $IPTUPLE MultiProtocol.IPv4.Unicast true
+    enable_peer $IPTUPLE
 }
 
 reset()
