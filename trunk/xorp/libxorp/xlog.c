@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.13 2005/12/21 01:24:47 atanu Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.14 2005/12/21 07:29:37 atanu Exp $"
 
 /*
  * Message logging utility.
@@ -1148,7 +1148,9 @@ x_vasprintf(char **ret, const char *format, va_list ap)
     size_t i, buf_size = 1024 + 1;
     char *buf_ptr = NULL;
     int ret_size;
-/*     va_list temp; */
+#ifdef	va_copy
+    va_list temp;
+#endif
 
     for (i = 0; i < 3; i++) {
 	/*
@@ -1159,8 +1161,18 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	if (buf_ptr == NULL)
 	    break;		/* Cannot allocate memory */
 	buf_ptr[0] = '\0';
-/* 	va_copy(temp, ap); */
+	/* XXX
+	 * va_copy does not exist in older compilers like gcc
+	 * 2.95. On some architectures like the i386 using a va_list
+	 * argument multiple times doesn't seem to cause a problem. On
+	 * the AMD 64 it is required.
+	 */
+#ifdef	va_copy
+ 	va_copy(temp, ap);
+	ret_size = vsnprintf(buf_ptr, buf_size, format, temp);
+#else
 	ret_size = vsnprintf(buf_ptr, buf_size, format, ap);
+#endif
 	if (ret_size < 0)
 	    break;		/* Cannot format the string */
 	if ((size_t)ret_size < buf_size) {
