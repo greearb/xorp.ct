@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.69 2005/11/30 03:18:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.70 2005/12/09 01:37:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1042,7 +1042,7 @@ TemplateTreeNode::check_allowed_value(const string& value,
     if (! _allowed_ranges.empty()) {
 	is_accepted = false;
 	map<pair<int64_t, int64_t>, string>::const_iterator iter;
-	int64_t ival = atoi(value.c_str());
+	int64_t ival = strtoll(value.c_str(), (char **)NULL, 10);
 	for (iter = _allowed_ranges.begin();
 	     iter != _allowed_ranges.end();
 	     ++iter) {
@@ -1394,7 +1394,7 @@ UIntTemplate::UIntTemplate(TemplateTree& template_tree,
 			     initializer.c_str(), error_msg.c_str());
 	xorp_throw(ParseError, error_msg);
     }
-    _default = atoi(s.c_str());
+    _default = strtoll(s.c_str(), (char **)NULL, 10);
     set_has_default();
 }
 
@@ -1507,7 +1507,7 @@ IntTemplate::IntTemplate(TemplateTree& template_tree,
 			     initializer.c_str(), error_msg.c_str());
 	xorp_throw(ParseError, error_msg);
     }
-    _default = atoi(s.c_str());
+    _default = strtoll(s.c_str(), (char **)NULL, 10);
     set_has_default();
 }
 

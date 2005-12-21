@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.103 2005/11/27 05:43:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.104 2005/12/14 20:32:31 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -51,11 +51,11 @@ CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
 		XLOG_ASSERT(!b->const_children().empty());
 		const ConfigTreeNode *child_a = *(a->const_children().begin());
 		const ConfigTreeNode *child_b = *(b->const_children().begin());
-		return (atoi(child_a->segname().c_str()) 
-			< atoi(child_b->segname().c_str()));
+		return (strtoll(child_a->segname().c_str(), (char **)NULL, 10) 
+			< strtoll(child_b->segname().c_str(), (char **)NULL, 10));
 	    } else {
-		return (atoi(a->segname().c_str()) 
-			< atoi(b->segname().c_str()));
+		return (strtoll(a->segname().c_str(), (char **)NULL, 10)
+			< strtoll(b->segname().c_str(), (char **)NULL, 10));
 	    }
 	case ORDER_SORTED_ALPHABETIC:
 	    if (a->is_tag()) {
@@ -94,11 +94,11 @@ CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
 		XLOG_ASSERT(!b->const_children().empty());
 		const ConfigTreeNode *child_a = *(a->const_children().begin());
 		const ConfigTreeNode *child_b = *(b->const_children().begin());
-		return (atoi(child_a->segname().c_str()) 
-			< atoi(child_b->segname().c_str()));
+		return (strtoll(child_a->segname().c_str(), (char **)NULL, 10)
+			< strtoll(child_b->segname().c_str(), (char **)NULL, 10));
 	    } else {
-		return (atoi(a->segname().c_str()) 
-			< atoi(b->segname().c_str()));
+		return (strtoll(a->segname().c_str(), (char **)NULL, 10)
+			< strtoll(b->segname().c_str(), (char **)NULL, 10));
 	    }
 	case ORDER_SORTED_ALPHABETIC:
 	    if (a->is_tag()) {

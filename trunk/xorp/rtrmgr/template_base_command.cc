@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.15 2005/11/27 06:50:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.16 2005/12/09 01:37:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -540,8 +540,8 @@ AllowRangeCommand::add_action(const list<string>& action) throw (ParseError)
     XLOG_ASSERT(iter != _filters.end());
     Filter& filter = iter->second;
 
-    new_lower_value = atoi(new_lower_str.c_str());
-    new_upper_value = atoi(new_upper_str.c_str());
+    new_lower_value = strtoll(new_lower_str.c_str(), (char **)NULL, 10);
+    new_upper_value = strtoll(new_upper_str.c_str(), (char **)NULL, 10);
     if (new_lower_value > new_upper_value)
 	swap(new_lower_value, new_upper_value);
 
@@ -571,7 +571,7 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 
 	bool is_accepted = true;
 	Filter::iterator iter2;
-	int64_t ival = atoi(value.c_str());
+	int64_t ival = strtoll(value.c_str(), (char **)NULL, 10);
 	int64_t lower_value = 0;
 	int64_t upper_value = 0;
 	if (! filter.empty())
