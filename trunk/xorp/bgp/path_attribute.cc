@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.74 2005/12/13 06:26:16 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.75 2005/12/19 19:14:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -949,6 +949,12 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
 		   UPDATEMSGERR, OPTATTR);
     }
 
+    // XXX - Temporary hack as SAFI_UNICAST causes problems.
+    if (SAFI_UNICAST == _safi)
+	xorp_throw(CorruptMessage,
+		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+		   UPDATEMSGERR, OPTATTR);
+
     /*
     ** Next Hop
     */
@@ -1262,6 +1268,12 @@ MPUNReachNLRIAttribute<IPv4>::MPUNReachNLRIAttribute(const uint8_t* d)
 			    SAFI_UNICAST, SAFI_MULTICAST, _safi),
 		   UPDATEMSGERR, OPTATTR);
     }
+
+    // XXX - Temporary hack as SAFI_UNICAST causes problems.
+    if (SAFI_UNICAST == _safi)
+	xorp_throw(CorruptMessage,
+		   c_format("Can't handle AFI_IPv4 and SAFI_UNICAST"),
+		   UPDATEMSGERR, OPTATTR);
 
     /*
     ** NLRI
