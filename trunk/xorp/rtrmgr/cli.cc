@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.112 2005/12/14 02:40:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.113 2005/12/14 19:50:06 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1184,6 +1184,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    }
 	    com->set_can_pipe(can_pipe);
 	    com->set_global_name(vector_subpath);
+	    com->set_is_command_argument(true);
 	}
 
 	//
@@ -1218,6 +1219,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    CliCommand::TypeMatchCb cb;
 	    cb = callback(ttn, &TemplateTreeNode::type_match);
 	    com->set_type_match_cb(cb);
+	    com->set_is_command_argument(true);
 	}
     }
 }
@@ -2545,6 +2547,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    }
 	    CliCommandMatch ccm(cmd_name, help_string,
 				is_executable, can_pipe);
+	    ccm.set_is_command_argument(true);
 	    children.insert(make_pair(cmd_name, ccm));
 	}
 
@@ -2568,6 +2571,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    CliCommand::TypeMatchCb cb;
 	    cb = callback(ttn, &TemplateTreeNode::type_match);
 	    ccm.set_type_match_cb(cb);
+	    ccm.set_is_command_argument(true);
 	    children.insert(make_pair(cmd_name, ccm));
 	}
     }

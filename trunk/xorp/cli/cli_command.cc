@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.21 2005/11/13 09:21:30 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.22 2005/12/14 02:40:17 pavlin Exp $"
 
 
 //
@@ -61,7 +61,8 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
 		       const string& init_command_help)
     : _parent_command(init_parent_command),
       _name(init_command_name),
-      _help(init_command_help)
+      _help(init_command_help),
+      _is_command_argument(false)
 {
     if (_parent_command != NULL)
 	_root_command = _parent_command->root_command();
@@ -843,11 +844,13 @@ CliCommand::child_command_list()
 	    const string& help_string = ccm.help_string();
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
+	    bool is_command_argument = ccm.is_command_argument();
 	    new_cmd = add_command(command_name, help_string, false);
 	    vector<string> child_global_name = global_name();
 	    child_global_name.push_back(command_name);
 	    new_cmd->set_global_name(child_global_name);
 	    new_cmd->set_can_pipe(can_pipe);
+	    new_cmd->set_is_command_argument(is_command_argument);
 	    new_cmd->set_type_match_cb(ccm.type_match_cb());
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);

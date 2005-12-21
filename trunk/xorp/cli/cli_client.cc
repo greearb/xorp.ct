@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.48 2005/12/14 00:52:39 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.49 2005/12/14 02:40:17 pavlin Exp $"
 
 
 //
@@ -1373,7 +1373,8 @@ CliClient::process_command(const string& command_line)
 	syntax_error_offset_next += old_len - new_len;
 	old_len = new_len;
 
-	if (child_cli_command != NULL) {
+	if (child_cli_command != NULL
+	    && (! child_cli_command->is_command_argument())) {
 	    parent_cli_command = child_cli_command;
 	    // Add the token to the command
 	    found_type_match_cb |= child_cli_command->has_type_match_cb();
