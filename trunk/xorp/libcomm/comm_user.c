@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.18 2005/05/12 17:34:36 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.19 2005/09/05 20:28:22 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -123,6 +123,7 @@ comm_get_last_error(void)
 
 /**
  * Retrieve a human readable string (in English) for the given error code.
+ * XXX: This is essentially a duplicate of win_strerror() now.
  * XXX: Not currently thread-safe.
  *
  * @param serrno the socket error number returned by comm_get_last_error().

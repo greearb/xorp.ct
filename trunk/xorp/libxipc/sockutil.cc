@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.18 2005/08/30 05:36:39 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.19 2005/12/20 03:24:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -64,6 +64,10 @@
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
+
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
 
 #include "libcomm/comm_api.h"
 
@@ -271,19 +275,7 @@ get_active_ipv4_addrs(vector<IPv4>& addrs)
     } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
 
     if (result != NO_ERROR) {
-	DWORD dwMsgLen;
-	LPSTR pMsg;
-
-	dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
-				  FORMAT_MESSAGE_ALLOCATE_BUFFER|
-				  FORMAT_MESSAGE_IGNORE_INSERTS|
-				  FORMAT_MESSAGE_MAX_WIDTH_MASK,
-				  NULL, result,
-				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				  (LPSTR)&pMsg, 0, 0);
-	XLOG_FATAL("GetIpAddrTable(): %s\n", pMsg);
-	LocalFree(pMsg);
-	return;
+	XLOG_FATAL("GetIpAddrTable(): %s\n", win_strerror(result));
     }
     XLOG_ASSERT(pAddrTable->dwNumEntries != 0);
 

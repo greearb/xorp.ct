@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.18 2005/07/29 20:06:31 bms Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.19 2005/08/18 15:28:40 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -467,88 +467,3 @@ const IPv6 IPv6Constants::ospfigp_routers("FF02::5");
 const IPv6 IPv6Constants::ospfigp_designated_routers("FF02::6");
 const IPv6 IPv6Constants::rip2_routers("FF02::9");
 const IPv6 IPv6Constants::pim_routers("FF02::D");
-
-// Emulations of if_indextoname() and if_nametoindex() here mostly
-// for Windows' benefit.
-// XXX: These will go away once we can use FriendlyNames.
-
-#ifndef HAVE_IF_INDEXTONAME
-extern "C"
-char *
-if_indextoname(unsigned int ifindex, char *name)
-{
-#ifdef HOST_OS_WINDOWS
-    MIB_IFROW ifrow;
-    DWORD result;
-    const char *kind;
-
-    memset(&ifrow, 0, sizeof(ifrow));
-    ifrow.dwIndex = ifindex;
-    result = GetIfEntry(&ifrow);
-    if (result != NO_ERROR) {
-	*name = '\0';
-	return (NULL);
-    }
-
-    switch (ifrow.dwType) {
-    case MIB_IF_TYPE_ETHERNET:
-	kind = "eth";
-	break;
-    case MIB_IF_TYPE_TOKENRING:
-	kind = "tr";
-	break;
-    case MIB_IF_TYPE_FDDI:
-	kind = "fddi";
-	break;
-    case MIB_IF_TYPE_PPP:
-	kind = "ppp";
-	break;
-    case MIB_IF_TYPE_LOOPBACK:
-	kind = "lo";
-	break;
-    case MIB_IF_TYPE_SLIP:
-	kind = "slip";
-	break;
-    case MIB_IF_TYPE_OTHER:
-    default:
-	kind = "net";
-	break;
-    }
-
-    snprintf(name, IFNAMSIZ, "%s%d", kind, ifindex);
-    return (name);
-
-#else /* !HOST_OS_WINDOWS */
-    return (NULL);
-    UNUSED(ifindex);
-    UNUSED(name);
-#endif /* HOST_OS_WINDOWS */
-}
-#endif /* !HAVE_IF_INDEXTONAME */
-
-#ifndef HAVE_IF_NAMETOINDEX
-extern "C"
-unsigned int
-if_nametoindex(const char *ifname)
-{
-#ifdef HOST_OS_WINDOWS
-    const char *cp;
-    char *ep;
-    unsigned long index;
-
-    cp = ifname;
-    while (*cp != '\0' && !isdigit(*cp++))
-	;
-    if (*cp == '\0')
-	return (0);
-    index = strtoul(--cp, &ep, 10);
-    if (ep != NULL && *ep == '\0')
-	return ((unsigned int)index);
-
-    return (0);
-#else /* !HOST_OS_WINDOWS */
-    return (0);
-    UNUSED(ifname);
-#endif /* HOST_OS_WINDOWS */
-}
-#endif /* !HAVE_IF_NAMETOINDEX */

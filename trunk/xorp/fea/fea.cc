@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.51 2005/09/07 20:15:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.52 2005/10/17 11:14:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -168,7 +168,12 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     //
     // FtiConfig
     //
+#ifdef HOST_OS_WINDOWS
+    // XXX: This is an evil, evil, evil, EVIL hack.
+    FtiConfig fticonfig(eventloop, profile, ifconfig.live_config(), nexthop_port_mapper);
+#else
     FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
+#endif
     if (is_dummy)
 	fticonfig.set_dummy();
     if (fticonfig.start(error_msg) != XORP_OK) {

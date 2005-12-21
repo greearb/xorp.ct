@@ -30,7 +30,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.28 2005/09/09 16:48:54 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.29 2005/11/09 13:07:27 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -71,13 +71,13 @@
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;
 
-#ifdef HOST_OS_WINDOWS
+#if defined(HOST_OS_WINDOWS) && defined(HAVE_IPV6)
 /*
- * XXX: Flag used to determine if libcomm should immediately squelch
- * the socket event mask after a Winsock accept(); for use with Windows
- * dispatch code.
+ * Windows declares these in <ws2tcpip.h> as externs, but does not
+ * supply symbols for them in the -lws2_32 import library or DLL.
  */
-int _comm_squelch_accept = 1;
+const struct in6_addr in6addr_any = { { IN6ADDR_ANY_INIT } };
+const struct in6_addr in6addr_loopback = { { IN6ADDR_LOOPBACK_INIT } };
 #endif
 
 /**
@@ -186,9 +186,6 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     static const int	CSP_HIGHPORT = 65536;
 #ifdef HAVE_IPV6
     struct sockaddr_in6 *psin6;
-    static const struct in6_addr in6addr_loopback = {
-	{ IN6ADDR_LOOPBACK_INIT }
-    };
 #endif
 
     UNUSED(protocol);
@@ -272,10 +269,6 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 	if (st[1] != INVALID_SOCKET) {
 	    break;
 	} else {
-	    /* Squench inherited socket event mask, if applicable. */
-	    if (_comm_squelch_accept != 0)
-		(void)WSAEventSelect(st[1], NULL, 0);
-
 	    if (WSAGetLastError() == WSAEWOULDBLOCK) {
 		SleepEx(100, TRUE);
 	    } else {
@@ -286,6 +279,9 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 
     if (st[1] == INVALID_SOCKET)
 	goto error;
+
+    /* Squelch inherited socket event mask. */
+    (void)WSAEventSelect(st[1], NULL, 0);
 
     /*
      * XXX: Should use getsockname() here to verify that the client socket
@@ -898,14 +894,10 @@ comm_sock_accept(xsock_t sock)
 
 #ifdef HOST_OS_WINDOWS
     /*
-     * If the library is configured to do so, then squelch any
-     * event notifications on the new socket which may have been
-     * inherited from a previous call to WSAAsyncSelect() on the
-     * listening socket. Use WSAEventSelect() to avoid having
-     * to know what the associated window handle was, if any.
+     * Squelch Winsock event notifications on the new socket which may
+     * have been inherited from the parent listening socket.
      */
-    if (_comm_squelch_accept != 0)
-	(void)WSAEventSelect(sock_accept, NULL, 0);
+    (void)WSAEventSelect(sock_accept, NULL, 0);
 #endif
 
     /* Enable TCP_NODELAY */
@@ -933,8 +925,7 @@ comm_sock_close(xsock_t sock)
 #ifndef HOST_OS_WINDOWS
     ret = close(sock);
 #else
-    if (_comm_squelch_accept != 0)
-	(void)WSAEventSelect(sock, NULL, 0);
+    (void)WSAEventSelect(sock, NULL, 0);
     ret = closesocket(sock);
 #endif
 

@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libfeaclient/Makefile.am,v 1.8 2004/11/23 22:43:43 bms Exp $
+## $XORP: xorp/libfeaclient/Makefile.am,v 1.10 2005/08/18 15:34:24 bms Exp $
 ##
 
 # -- Real Programs
@@ -50,6 +50,7 @@ test_remote_copy_LDADD	+= $(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.
 test_remote_copy_LDADD	+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 test_remote_copy_LDADD  += $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
 test_remote_copy_LDADD	+= $(top_builddir)/libxipc/libfinder.la
+test_remote_copy_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 
 ################################################################
 ##

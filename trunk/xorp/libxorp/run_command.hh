@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.8 2005/10/21 20:00:46 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.9 2005/10/23 18:47:25 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -23,6 +23,7 @@
 
 #include "libxorp/asyncio.hh"
 #include "libxorp/callback.hh"
+#include "libxorp/timer.hh"
 
 class EventLoop;
 
@@ -272,12 +273,17 @@ private:
     void done(AsyncFileOperator::Event event, int error_code);
 
 #ifdef HOST_OS_WINDOWS
+    static const int WIN32_PROC_TIMEOUT_MS = 500;
+
     void win_proc_done_cb(XorpFd fd, IoEventType type);
+    void win_proc_reaper_cb();
 #endif
 
     static const size_t	BUF_SIZE = 8192;
     EventLoop&		_eventloop;
+protected:
     string		_command;
+private:
     list<string>	_argument_list;
 
     AsyncFileReader*	_stdout_file_reader;
@@ -291,6 +297,7 @@ private:
     pid_t		_pid;
 #ifdef HOST_OS_WINDOWS
     HANDLE		_ph;
+    XorpTimer		_reaper_timer;
 #endif
     bool		_is_error;
     string		_error_msg;

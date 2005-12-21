@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.9 2005/10/10 04:10:50 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.10 2005/10/22 01:41:44 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -232,5 +232,31 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
 				 const string& filename_template,
 				 string& final_filename,
 				 string& errmsg);
+
+#ifdef HOST_OS_WINDOWS
+/**
+ *
+ * Helper function to quote command line arguments for MSVCRT-linked programs.
+ * 
+ * Given an argv array represented by an STL list of strings, and a
+ * writable command line string, walk through the arguments and perform
+ * quoting/escaping according to the rules for invoking programs linked
+ * against the Microsoft Visual C Runtime Library.
+ *
+ * This function is necessary because the Win32 CreateProcess() API
+ * function accepts a single command line string, as opposed to a
+ * UNIX-style argv[] array; arguments must therefore be delimited by
+ * white space, so white space in arguments themselves must be quoted.
+ *
+ * Note that such extensive quoting shouldn't be performed for the
+ * pathname to the executable -- generally it is desirable to only
+ * wrap the path name with quotes, and then pass that string to this
+ * helper function.
+ *
+ * @param args list of argument strings to be escaped.
+ * @param cmdline string to which the escaped command line should be appended.
+ */
+void win_quote_args(const list<string>& args, string& cmdline);
+#endif
 
 #endif // __LIBXORP_UTILS_HH__

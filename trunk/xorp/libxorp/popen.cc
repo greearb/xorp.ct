@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
@@ -57,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.9 2005/11/05 18:08:17 bms Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.10 2005/11/05 20:13:00 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -109,6 +110,8 @@ static struct pid_s {
 #ifdef HOST_OS_WINDOWS
     DWORD pid;
     HANDLE ph;
+    HANDLE h_out_child;	// child ends of pipes visible in parent
+    HANDLE h_err_child;	// need to be closed after termination. 
 #else
     pid_t pid;
 #endif
@@ -132,10 +135,30 @@ popen2(const string& command, const list<string>& arguments,
 
     if (CreatePipe(&hout[0], &hout[1], &pipesa, 0) == 0)
 	return (0);
-    if (CreatePipe(&herr[0], &herr[1], &pipesa, 0) == 0) {
-	CloseHandle(hout[0]);
-	CloseHandle(hout[1]);
-	return (0);
+#if 0
+    if (redirect_stderr_to_stdout) {
+	if (0 == DuplicateHandle(GetCurrentProcess(), hout[0],
+				 GetCurrentProcess(), &herr[0],
+				 0, TRUE, DUPLICATE_SAME_ACCESS)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
+	if (0 == DuplicateHandle(GetCurrentProcess(), hout[1],
+				 GetCurrentProcess(), &herr[1],
+				 0, TRUE, DUPLICATE_SAME_ACCESS)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
+    } else
+#endif
+    {
+	if (0 == CreatePipe(&herr[0], &herr[1], &pipesa, 0)) {
+	    CloseHandle(hout[0]);
+	    CloseHandle(hout[1]);
+	    return (0);
+	}
     }
     if ((cur = (struct pid_s*)malloc(sizeof(struct pid_s))) == NULL) {
 	CloseHandle(hout[0]);
@@ -149,56 +172,30 @@ popen2(const string& command, const list<string>& arguments,
     si.dwFlags = STARTF_USESTDHANDLES;
     si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
     si.hStdOutput = hout[1];
+    si.hStdError = herr[1];
 
     if (redirect_stderr_to_stdout)
-    	si.hStdError = hout[1];
-    else
-    	si.hStdError = herr[1];
+	si.hStdError = hout[1];
 
-    // Because CreateProcess() accepts a single
-    // string for the command line (vs UNIX's exec*() accepting an argv
-    // array), we have to look for whitespace characters and escape them.
-    //
-    // XXX: We currently force the program name to be escaped with quotes.
-    //
+#if 0
+    // We need to close the child ends of the pipe when the child terminates.
+    // We need not do this for the parent ends; fclose() does this for us.
+    cur->h_out_child = hout[1];
+    cur->h_err_child = herr[1];
+#endif
+
+    // XXX: We currently force the program name to be escaped with quotes
+    // before munging the command line for CreateProcess().
     string escaped_args = "\"" + command + "\"";
-
-    list<string>::const_iterator iter;
-    for (iter = arguments.begin(); iter != arguments.end(); ++iter) {
-	escaped_args += " ";
-	if ((iter->length() == 0 ||
-	     string::npos != iter->find_first_of("\n\t \"") ||
-	     string::npos != iter->find("\\\\"))) {
-	    string thisarg(*iter);
-	    string::size_type len = thisarg.length();
-	    string::size_type pos = 0;
-	    while (pos < len && string::npos != pos) {
-		pos = thisarg.find_first_of("\\\"", pos);
-	        if (thisarg[pos] == '\\') {
-		    if (thisarg[pos+1] == '\\') {
-			pos++;
-		    } else if (pos+1 == len || thisarg[pos+1] == '\"') {
-		        thisarg.insert(pos, "\\");
-			pos += 2;
-		    }
-		} else if (thisarg[pos] == '\"') {
-		    thisarg.insert(pos, "\\");
-		    pos += 2;
-		}
-	    }
-	    escaped_args += "\"" + thisarg + "\"";
-	} else {
-	    escaped_args += *iter;
-	}
-    }
+    win_quote_args(arguments, escaped_args);
 
     debug_msg("Trying to execute: '%s'\n", escaped_args.c_str());
 
     if (CreateProcessA(NULL,
 		       const_cast<char *>(escaped_args.c_str()),
 		       NULL, NULL, TRUE,
-		       CREATE_NO_WINDOW|CREATE_SUSPENDED, NULL, NULL,
-		       &si, &pi) == 0) {
+		       CREATE_DEFAULT_ERROR_MODE | CREATE_SUSPENDED,
+		       NULL, NULL, &si, &pi) == 0) {
 	DWORD err = GetLastError();
 	XLOG_WARNING("CreateProcessA failed: %u", XORP_UINT_CAST(err));
 	CloseHandle(hout[0]);
@@ -411,30 +408,29 @@ pclose2(FILE *iop_out)
     if (cur == NULL)
 	return (-1);
 
-    (void)fclose(cur->fp_out);
-    (void)fclose(cur->fp_err);
-
 #ifdef HOST_OS_WINDOWS
     DWORD dwStat = 0;
     BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
-
     while (dwStat == STILL_ACTIVE) {
     	WaitForSingleObject(cur->ph, INFINITE);
     	result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
     }
-
     XLOG_ASSERT(result != 0);
+#endif
 
+    (void)fclose(cur->fp_out);
+    (void)fclose(cur->fp_err);
+
+#ifdef HOST_OS_WINDOWS
+    //CloseHandle(cur->h_out_child);
+    //CloseHandle(cur->h_err_child);
     CloseHandle(cur->ph);
     pid = cur->pid;
     pstat = (int)dwStat;
-
 #else /* !HOST_OS_WINDOWS */
-
     do {
 	pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
     } while (pid == -1 && errno == EINTR);
-
 #endif /* HOST_OS_WINDOWS */
 
     /* Remove the entry from the linked list. */

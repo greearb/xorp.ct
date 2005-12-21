@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/xorpfd.hh,v 1.2 2005/08/18 15:28:43 bms Exp $
 
 #ifndef __LIBXORP_XORPFD_HH__
 #define __LIBXORP_XORPFD_HH__
@@ -69,141 +70,147 @@ class XorpFd {
 #ifndef	HOST_OS_WINDOWS
 // Non-Windows code.
 public:
-	XorpFd()
-	 : _filedesc(BAD_XORPFD)
-	{}
+    XorpFd() : _filedesc(BAD_XORPFD) {}
 
-	XorpFd(int fd)
-	 : _filedesc(fd)
-	{}
+    XorpFd(int fd) : _filedesc(fd) {}
 
-	inline operator int() const { return _filedesc; }
+    inline operator int() const	    { return _filedesc; }
 
-	inline string str() const { return c_format("%d", _filedesc); }
+    inline string str() const	    { return c_format("%d", _filedesc); }
 
-	inline void clear() { _filedesc = BAD_XORPFD; }
+    inline void clear()		    { _filedesc = BAD_XORPFD; }
 
-	inline bool is_valid() const { return (_filedesc != BAD_XORPFD); }
+    inline bool is_valid() const    { return (_filedesc != BAD_XORPFD); }
 
 private:
-	int	_filedesc;
+    int	    _filedesc;
 
 #else	// HOST_OS_WINDOWS
 // Windows code.
 
 public:
-	enum WinFdType {
-		FDTYPE_ERROR,		// Method failure
-		FDTYPE_FILE,		// Disk file
-		FDTYPE_CONSOLE,		// Character device or console
-		FDTYPE_PIPE,		// Named or anonymous pipe
-		FDTYPE_SOCKET,		// WinSock2 socket
-		FDTYPE_OTHER		// Unknown handle type
-	};
+    enum WinFdType {
+	FDTYPE_ERROR,		// Invalid handle or method failure
+	FDTYPE_FILE,		// Disk file
+	FDTYPE_CONSOLE,		// Console or character device
+	FDTYPE_PIPE,		// Named or anonymous pipe
+	FDTYPE_SOCKET,		// Socket
+	FDTYPE_PROCESS,		// Process handle
+	FDTYPE_OTHER		// Unknown handle type
+    };
 
 private:
-	// Helper function to return what kind of object the encapsulated
-	// Windows object handle points to. Optimized for the HSOCKET case.
-	inline WinFdType get_type() const {
-		if (!this->is_valid())
-		    return (FDTYPE_ERROR);
+    //
+    // Helper function to return what kind of object the encapsulated
+    // Windows object handle points to. Optimized for sockets.
+    //
+    inline WinFdType get_type() const {
+	if (!this->is_valid())
+	    return (FDTYPE_ERROR);
 
-		struct sockaddr_storage ss;
-		socklen_t len = sizeof(ss);
+	// Try to find invalid handles quickly at the cost of 1 syscall.
+	DWORD dwflags;
+	if (GetHandleInformation(*this, &dwflags) == 0)
+	    return (FDTYPE_ERROR);
 
-		int ret = getsockname(*this, (struct sockaddr *)&ss, &len);
-		if (ret != -1)
-			return (FDTYPE_SOCKET);
-		else if (GetLastError() == WSAEINVAL)
-			return (FDTYPE_ERROR);
+	struct sockaddr_storage ss;
+	socklen_t len = sizeof(ss);
+	int ret = getsockname(*this, (struct sockaddr *)&ss, &len);
+	if (ret != -1)
+	    return (FDTYPE_SOCKET);
+	else if (GetLastError() == WSAEINVAL)
+	    return (FDTYPE_ERROR);
 
-		DWORD ntype = GetFileType(*this);
-		switch (ntype) {
-		case FILE_TYPE_CHAR:
-			return (FDTYPE_CONSOLE);
-			break;
-		case FILE_TYPE_DISK:
-			return (FDTYPE_FILE);
-			break;
-		case FILE_TYPE_PIPE:
-			return (FDTYPE_PIPE);
-			break;
-		default:
-			if (GetLastError() != NO_ERROR)
-				return (FDTYPE_ERROR);
-			break;
+	DWORD ntype = GetFileType(*this);
+	switch (ntype) {
+	case FILE_TYPE_CHAR:
+	    return (FDTYPE_CONSOLE);
+	    break;
+	case FILE_TYPE_DISK:
+	    return (FDTYPE_FILE);
+	    break;
+	case FILE_TYPE_PIPE:
+	    return (FDTYPE_PIPE);
+	    break;
+	default:
+	    if (GetLastError() != NO_ERROR) {
+		if (0 != GetProcessId(*this)) {
+		    return(FDTYPE_PROCESS);
 		}
-		return (FDTYPE_OTHER);
+		return (FDTYPE_ERROR);
+	    }
+	    break;
 	}
+
+	return (FDTYPE_OTHER);
+    }
 
 public:
-	XorpFd()
-	 : _filedesc(BAD_XORPFD), _type(FDTYPE_ERROR)
-	{}
+    XorpFd() : _filedesc(BAD_XORPFD), _type(FDTYPE_ERROR) {}
 
-	XorpFd(HANDLE h)
-	 : _filedesc(h), _type(get_type())
-	{}
+    XorpFd(HANDLE h) : _filedesc(h), _type(get_type()) {}
 
-	// _get_osfhandle() returns a long. We need to force a call
-	// to get_type() to discover the underlying handle type.
-	XorpFd(long l)
-	 : _filedesc(reinterpret_cast<HANDLE>(l)), _type(get_type())
-	{}
+    // _get_osfhandle() returns a long. We need to force a call
+    // to get_type() to discover the underlying handle type.
+    XorpFd(long l)
+     : _filedesc(reinterpret_cast<HANDLE>(l)), _type(get_type())
+    {}
 
-	XorpFd(SOCKET s)
-	 : _filedesc(reinterpret_cast<HANDLE>(s)), _type(FDTYPE_SOCKET)
-	{}
+    XorpFd(SOCKET s)
+     : _filedesc(reinterpret_cast<HANDLE>(s)), _type(FDTYPE_SOCKET)
+    {}
 
-	XorpFd(const XorpFd& rhand)
-	 : _filedesc(rhand._filedesc), _type(rhand._type)
-	{}
+    XorpFd(const XorpFd& rhand)
+     : _filedesc(rhand._filedesc), _type(rhand._type)
+    {}
 
-	inline operator HANDLE() const { return _filedesc; }
+    inline operator HANDLE() const { return _filedesc; }
 
-	inline operator SOCKET() const {
-		return reinterpret_cast<SOCKET>(_filedesc);
-	}
+    inline operator SOCKET() const {
+	return reinterpret_cast<SOCKET>(_filedesc);
+    }
 
-	inline void clear() { _filedesc = BAD_XORPFD; _type = FDTYPE_ERROR; }
+    inline void clear() { _filedesc = BAD_XORPFD; _type = FDTYPE_ERROR; }
 
-	inline string str() const { return c_format("%p", _filedesc); }
+    inline string str() const { return c_format("%p", _filedesc); }
 
-	inline WinFdType type() const { return _type; }
+    inline bool is_valid() const { return (_filedesc != BAD_XORPFD); }
 
-	inline bool is_console() const { return (_type == FDTYPE_CONSOLE); }
+    inline WinFdType type() const { return _type; }
 
-	inline bool is_pipe() const { return (_type == FDTYPE_PIPE); }
+    inline bool is_console() const { return (_type == FDTYPE_CONSOLE); }
 
-	inline bool is_socket() const { return (_type == FDTYPE_SOCKET); }
+    inline bool is_process() const { return (_type == FDTYPE_PROCESS); }
 
-	inline bool is_valid() const { return (_filedesc != BAD_XORPFD); }
+    inline bool is_pipe() const { return (_type == FDTYPE_PIPE); }
 
-	// On Windows, HANDLE is a void *.
-	// Because there are several cast operators, and any may be
-	// invoked implicitly in the context of an expression containing
-	// an instance of XorpFd, we must disambiguate by providing
-	// comparison operators here.
+    inline bool is_socket() const { return (_type == FDTYPE_SOCKET); }
 
-	inline bool operator ==(const XorpFd& rhand) const {
-		return (_filedesc == rhand._filedesc);
-	}
+    // On Windows, HANDLE is a void *.
+    // Because there are several cast operators, and any may be
+    // invoked implicitly in the context of an expression containing
+    // an instance of XorpFd, we must disambiguate by providing
+    // comparison operators here.
 
-	inline bool operator !=(const XorpFd& rhand) const {
-		return (_filedesc != rhand._filedesc);
-	}
+    inline bool operator ==(const XorpFd& rhand) const {
+	return (_filedesc == rhand._filedesc);
+    }
 
-	inline bool operator >(const XorpFd& rhand) const {
-		return (_filedesc > rhand._filedesc);
-	}
+    inline bool operator !=(const XorpFd& rhand) const {
+	return (_filedesc != rhand._filedesc);
+    }
 
-	inline bool operator <(const XorpFd& rhand) const {
-		return (_filedesc < rhand._filedesc);
-	}
+    inline bool operator >(const XorpFd& rhand) const {
+	return (_filedesc > rhand._filedesc);
+    }
+
+    inline bool operator <(const XorpFd& rhand) const {
+	return (_filedesc < rhand._filedesc);
+    }
 
 private:
-	HANDLE		_filedesc;
-	WinFdType	_type;
+    HANDLE	_filedesc;
+    WinFdType	_type;
 #endif	// ! HOST_OS_WINDOWS
 };
 

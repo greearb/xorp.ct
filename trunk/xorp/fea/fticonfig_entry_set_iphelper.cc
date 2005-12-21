@@ -11,41 +11,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.2 2005/08/18 15:45:44 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.3 2005/08/23 22:29:10 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/win_io.h"
 
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #endif
-
 #ifdef HAVE_ROUTPROT_H
 #include <routprot.h>
 #endif
 
-#ifndef MIB_IPROUTE_TYPE_OTHER
-#define MIB_IPROUTE_TYPE_OTHER		1
-#endif
-#ifndef MIB_IPROUTE_TYPE_INVALID
-#define MIB_IPROUTE_TYPE_INVALID	2
-#endif
-#ifndef MIB_IPROUTE_TYPE_DIRECT
-#define MIB_IPROUTE_TYPE_DIRECT		3
-#endif
-#ifndef MIB_IPROUTE_TYPE_INDIRECT
-#define MIB_IPROUTE_TYPE_INDIRECT	4
-#endif
-
-#ifndef PROTO_IP_NETMGMT
-#define PROTO_IP_NETMGMT		3
-#endif
-
 #include "fticonfig.hh"
 #include "fticonfig_entry_set.hh"
+
+#include "iftree.hh"
 
 
 //
@@ -186,54 +171,54 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
 	break;
     }
 
-    memset(&ipfwdrow, 0, sizeof(ipfwdrow));
+    bool is_existing;
 
-    fte.net().masked_addr().get_ipv4().copy_out((uint8_t*)
-						&ipfwdrow.dwForwardDest);
+    IPAddr tmpdest;
+    IPAddr tmpnexthop;
+    IPAddr tmpmask;
+    DWORD result;
+
+    fte.net().masked_addr().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(
+						&tmpdest));
+    fte.nexthop().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(&tmpnexthop));
     if (!fte.is_host_route()) {
-	fte.net().netmask().get_ipv4().copy_out((uint8_t*)
-						&ipfwdrow.dwForwardMask);
+    	fte.net().netmask().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(
+						&tmpmask));
+    } else {
+	tmpmask = 0xFFFFFFFF;
     }
-    fte.nexthop().get_ipv4().copy_out((uint8_t*)&ipfwdrow.dwForwardNextHop);
 
-    ipfwdrow.dwForwardIfIndex = (DWORD)if_nametoindex(fte.vifname().c_str());
+    // Check for an already existing specific route to this destination.
+    result = GetBestRoute(tmpdest, 0, &ipfwdrow);
+    if (result == NO_ERROR &&
+	ipfwdrow.dwForwardDest == tmpdest &&
+	ipfwdrow.dwForwardMask == tmpmask &&
+	ipfwdrow.dwForwardNextHop == tmpnexthop) {
+	is_existing = true;
+    } else {
+    	memset(&ipfwdrow, 0, sizeof(ipfwdrow));
+    }
+
+    IfTree& it = ftic().iftree();
+    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+    XLOG_ASSERT(ii != it.ifs().end());
+
+    ipfwdrow.dwForwardDest = tmpdest;
+    ipfwdrow.dwForwardMask = tmpmask;
+    ipfwdrow.dwForwardNextHop = tmpnexthop;
+    ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
     ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
-
-#if 0
-    // We need to tell Windows if the route is a connected route.
-    if (fte.is_connected_route())
-	ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_DIRECT;
-    else
-	ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_INDIRECT;
-#endif
-
-    // XXX: Instead of setting to 0, try the 'other' (not specified by
-    // RFC 1354) forward type, otherwise we need to treat connected routes
-    // differently.
     ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_OTHER;
 
-#if 0
-    debug_msg("About to call CreateIpForwardEntry() with the following:\n");
-    debug_msg("%08lx %08lx %lu %08lx %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-	      ipfwdrow.dwForwardDest,
-	      ipfwdrow.dwForwardMask,
-	      ipfwdrow.dwForwardPolicy,
-	      ipfwdrow.dwForwardNextHop,
-	      ipfwdrow.dwForwardIfIndex,
-	      ipfwdrow.dwForwardType,
-	      ipfwdrow.dwForwardProto,
-	      ipfwdrow.dwForwardAge,
-	      ipfwdrow.dwForwardNextHopAS,
-	      ipfwdrow.dwForwardMetric1,
-	      ipfwdrow.dwForwardMetric2,
-	      ipfwdrow.dwForwardMetric3,
-	      ipfwdrow.dwForwardMetric4,
-	      ipfwdrow.dwForwardMetric5);
-#endif
+    if (is_existing) {
+        result = SetIpForwardEntry(&ipfwdrow);
+    } else {
+        result = CreateIpForwardEntry(&ipfwdrow);
+    }
 
-    DWORD result = CreateIpForwardEntry(&ipfwdrow);
     if (result != NO_ERROR) {
-	XLOG_ERROR("CreateIpForwardEntry() failed, error: %lu\n", result);
+	XLOG_ERROR("%sIpForwardEntry() failed, error: %s\n",
+		   is_existing ? "Set" : "Create", win_strerror(result));
 	return false;
     }
 
@@ -280,68 +265,44 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 	break;
     }
 
+    //
+    // Windows needs to know the next-hop. We don't always know it.
+    // Try to figure it out via GetBestRoute().
+    //
     DWORD result;
+    IPAddr tmpdest;
+    IPAddr tmpmask;
+    IPAddr tmpnexthop;
 
     memset(&ipfwdrow, 0, sizeof(ipfwdrow));
 
-#if 1
-    //
-    // XXX: This is a hack. The upper half of the FEA hasn't passed us
-    // the actual next hop, which is a bug, because Windows' FIB requires
-    // that *all* information is specified for a delete operation.
-    //
-    struct in_addr mydest;
-    fte.net().masked_addr().get_ipv4().copy_out(mydest);
-    result = GetBestRoute((DWORD)mydest.s_addr, 0, &ipfwdrow);
-    if (result != NO_ERROR) {
-	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %lu\n", result);
-	return false;
+    fte.net().masked_addr().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(
+						&tmpdest));
+    fte.net().netmask().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(
+					    &tmpmask));
+    fte.nexthop().get_ipv4().copy_out(reinterpret_cast<uint8_t*>(&tmpnexthop));
+
+    result = GetBestRoute(tmpdest, 0, &ipfwdrow);
+    if (result == NO_ERROR &&
+	ipfwdrow.dwForwardDest == tmpdest &&
+	ipfwdrow.dwForwardMask == tmpmask &&
+	ipfwdrow.dwForwardNextHop == tmpnexthop) {
+	// Don't change any fields
+    } else {
+	ipfwdrow.dwForwardDest = tmpdest;
+	ipfwdrow.dwForwardMask = tmpmask;
+	ipfwdrow.dwForwardNextHop = tmpnexthop;
+        IfTree& it = ftic().iftree();
+        IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+        XLOG_ASSERT(ii != it.ifs().end());
+        ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
+        ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     }
-#else
-    fte.net().masked_addr().get_ipv4().copy_out(
-	(uint8_t*)&(ipfwdrow.dwForwardDest));
-    fte.net().netmask().get_ipv4().copy_out((uint8_t*)&ipfwdrow.dwForwardMask);
-
-    fte.nexthop().get_ipv4().copy_out((uint8_t*)&ipfwdrow.dwForwardNextHop);
-
-    ipfwdrow.dwForwardIfIndex = (DWORD)if_nametoindex(fte.vifname().c_str());
-    ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
-
-    debug_msg("vifname = %s, ifindex = %lu\n", fte.vifname().c_str(),
-	      ipfwdrow.dwForwardIfIndex);
-
-#if 0
-    // We need to tell Windows if the route is a connected route.
-    if (fte.is_connected_route())
-	ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_DIRECT;
-    else
-	ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_INDIRECT;
-#endif
-
-#endif
-
-#if 0
-    debug_msg("About to call DeleteIpForwardEntry() with the following:\n");
-    debug_msg("%08lx %08lx %lu %08lx %lu %lu %lu %lu %lu %lu %lu %lu %lu %lu\n",
-	      ipfwdrow.dwForwardDest,
-	      ipfwdrow.dwForwardMask,
-	      ipfwdrow.dwForwardPolicy,
-	      ipfwdrow.dwForwardNextHop,
-	      ipfwdrow.dwForwardIfIndex,
-	      ipfwdrow.dwForwardType,
-	      ipfwdrow.dwForwardProto,
-	      ipfwdrow.dwForwardAge,
-	      ipfwdrow.dwForwardNextHopAS,
-	      ipfwdrow.dwForwardMetric1,
-	      ipfwdrow.dwForwardMetric2,
-	      ipfwdrow.dwForwardMetric3,
-	      ipfwdrow.dwForwardMetric4,
-	      ipfwdrow.dwForwardMetric5);
-#endif
 
     result = DeleteIpForwardEntry(&ipfwdrow);
     if (result != NO_ERROR) {
-	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %lu\n", result);
+	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %s\n",
+		   win_strerror(result));
 	return false;
     }
 

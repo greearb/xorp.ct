@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.15 2005/10/21 20:00:46 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.16 2005/10/23 18:47:25 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -39,14 +39,25 @@
 #include "libxorp/popen.hh"
 #include "run_command.hh"
 
-// XXX: temporary: fix compilation
 #ifdef HOST_OS_WINDOWS
-#define _PATH_BSHELL "D:\\MSYS\\bin\\sh.exe"
+
+#include "libxorp/win_io.h"
+
+#ifndef _PATH_BSHELL
+#define _PATH_BSHELL "C:\\MSYS\\bin\\sh.exe"
 #endif
+
+static char *_path_bshell = NULL;
+
+#define	fileno(stream) (_get_osfhandle(_fileno(stream)))
+
+#else // !HOST_OS_WINDOWS
 
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "/bin/sh"
 #endif
+
+#endif // HOST_OS_WINDOWS
 
 RunCommand::RunCommand(EventLoop&			eventloop,
 		       const string&			command,
@@ -76,6 +87,19 @@ RunShellCommand::RunShellCommand(EventLoop&			eventloop,
       _done_cb(done_cb)
 {
     list<string> l;
+
+#ifdef HOST_OS_WINDOWS
+    // XXX: THIS IS A DIRTY HACK.
+    // Use the DOS style path to the user's shell specified in the
+    // environment if available; otherwise, fall back to hard-coded default.
+    if (_path_bshell == NULL) {
+	_path_bshell = getenv("SHELL");
+	if (_path_bshell == NULL)
+	    _path_bshell = const_cast<char *>(_PATH_BSHELL);
+	_command = string(_path_bshell);
+    }
+#endif
+
     string final_command_argument_string = command + " " + argument_string;
 
     l.push_back("-c");
@@ -115,6 +139,10 @@ RunCommandBase::~RunCommandBase()
 {
     if (_is_running)
 	terminate();
+#ifdef HOST_OS_WINDOWS
+    _reaper_timer.unschedule();
+    _reaper_timer.clear();
+#endif
 }
 
 int
@@ -169,18 +197,14 @@ RunCommandBase::execute()
 
     // We can't rely on end-of-file indicators alone on Win32 to determine
     // when a child process died; we must wait for it in the event loop.
-    if (!_eventloop.add_ioevent_cb(_ph, IOT_READ,
-				   callback(this, &RunCommandBase::win_proc_done_cb)))
+    if (!_eventloop.add_ioevent_cb(_ph, IOT_EXCEPTION,
+			   callback(this, &RunCommandBase::win_proc_done_cb)))
 	XLOG_FATAL("Cannot add child process handle to event loop.\n");
 #endif
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
-#ifdef HOST_OS_WINDOWS
-      XorpFd(_get_osfhandle(_fileno(_stdout_stream)))
-#else
       XorpFd(fileno(_stdout_stream))
-#endif
      );
     _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
 				    callback(this, &RunCommandBase::append_data));
@@ -193,11 +217,7 @@ RunCommandBase::execute()
     }
 
     _stderr_file_reader = new AsyncFileReader(_eventloop,
-#ifdef HOST_OS_WINDOWS
-      XorpFd(_get_osfhandle(_fileno(_stderr_stream)))
-#else
       XorpFd(fileno(_stderr_stream))
-#endif
      );
     _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
 				    callback(this, &RunCommandBase::append_data));
@@ -226,16 +246,30 @@ RunCommandBase::terminate()
     if (0 != _pid) {
 #ifdef HOST_OS_WINDOWS
 	// _ph will be invalid if the process didn't start.
+	// _ph will be valid if the process handle is open but the
+	// process is no longer running. Calling TerminateProcess()
+	// on a valid handle to a process which has terminated results
+	// in an ACCESS_DENIED error.
+	// Don't close the handle. pclose2() does this.
 	if (_ph != INVALID_HANDLE_VALUE) {
-	    DWORD result = TerminateProcess(_ph, 32768);
-	    if (result == 0)
-		XLOG_WARNING("TerminateProcess(): %lu", GetLastError());
+	    DWORD result; 
+	    GetExitCodeProcess(_ph, &result);
+	    if (result == STILL_ACTIVE) {
+		DWORD result = TerminateProcess(_ph, 32768);
+		if (result == 0) {
+		    XLOG_WARNING("TerminateProcess(): %s",
+				 win_strerror(GetLastError()));
+		}
+	    }
 	}
 #else
 	killpg(_pid, SIGTERM);
 #endif
 	_pid = 0;
     }
+
+    // XXX: May need to delay close on Windows, otherwise we may
+    // lose output if we're terminated in this way.
 
     close_output();
 }
@@ -256,7 +290,7 @@ RunCommandBase::close_output()
     if (_stdout_stream != NULL) {
 #ifdef HOST_OS_WINDOWS
 	// pclose2() will close the process handle from under us.
-	_eventloop.remove_ioevent_cb(_ph, IOT_READ);
+	_eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
 	_ph = INVALID_HANDLE_VALUE;
 #endif
 	int status = pclose2(_stdout_stream);
@@ -407,6 +441,7 @@ RunCommandBase::done(AsyncFileOperator::Event event, int error_code)
     }
 
     _error_msg += suffix;
+
     done_cb_dispatch(!_is_error, _error_msg);
 
     // XXX: the callback will delete us. Don't do anything more in this method.
@@ -545,11 +580,27 @@ RunCommandBase::ExecId::reset()
 
 #ifdef HOST_OS_WINDOWS
 // Hack to get asynchronous notification of Win32 process death.
+// The process handle will be SIGNALLED when the process terminates.
+// Because Win32 pipes must be polled, we must make sure that RunCommand
+// does not tear down the pipes until everything is read, otherwise the
+// process death event will be dispatched before the pipe I/O events.
+// We schedule a timer to make sure output is read from the pipes
+// before they close, as Win32 pipes lose data when closed; the parent
+// must hold handles for both ends of the pipe, unlike UNIX.
 void
 RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
 {
-    XLOG_ASSERT(type == IOT_READ);
-    UNUSED(fd);
+    XLOG_ASSERT(type == IOT_EXCEPTION);
+    XLOG_ASSERT(static_cast<HANDLE>(fd) == _ph);
+    _eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
+    _reaper_timer = _eventloop.new_oneoff_after_ms(WIN32_PROC_TIMEOUT_MS,
+	callback(this, &RunCommandBase::win_proc_reaper_cb));
+    XLOG_ASSERT(_reaper_timer.scheduled());
+}
+
+void
+RunCommandBase::win_proc_reaper_cb()
+{
     done(AsyncFileOperator::END_OF_FILE, 0);
 }
 #endif

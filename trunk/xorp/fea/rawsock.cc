@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.11 2005/12/01 22:39:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.12 2005/12/08 01:54:57 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -57,6 +57,7 @@
 
 #ifdef HOST_OS_WINDOWS
 #include <mswsock.h>
+#include "libxorp/win_io.h"
 #include "ip.h"
 #endif
 
@@ -200,6 +201,13 @@ static uint8_t		raopt[IP6OPT_RTALERT_LEN];
 #endif
 #endif // HAVE_IPV6
 
+// XXX: This is a bit of a dirty hack
+#ifdef HOST_OS_WINDOWS
+#ifdef strerror
+#undef strerror
+#endif
+#define strerror(errnum) win_strerror(GetLastError())
+#endif
 
 RawSocket::RawSocket(EventLoop& eventloop, int init_family,
 		     uint8_t ip_protocol, const IfTree& iftree)
@@ -690,6 +698,23 @@ RawSocket::join_multicast_group(const string& if_name,
 	fa.addr().copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
+
+#ifdef HOST_OS_WINDOWS
+	//
+	// Winsock requires that raw sockets be bound to the interface
+	// they're being used to receive or send on. -bms
+	//
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_addr = in_addr;
+
+	if (SOCKET_ERROR == bind(_proto_socket, (sockaddr *)&sin,
+				 sizeof(sockaddr_in))) {
+	    XLOG_INFO("bind() failed: %s\n", win_strerror(GetLastError()));
+	}
+#endif
+
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    error_msg = c_format("Cannot join group %s on interface %s vif %s: %s",

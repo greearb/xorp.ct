@@ -2673,6 +2673,44 @@ static int gl_control_strings(GetLine *gl, const char *term)
     gl->text_attr_off = gl_tgetstr(gl, "me", &tgetstr_buf_ptr);
   };
 #endif
+
+#ifdef __MINGW32__
+/*
+ * Check to see if it's an NT command prompt window.
+ *
+ * If there were a nice way of loading ANSI.SYS in 32-bit mode,
+ * then this hack wouldn't be necessary. -bms
+ */
+  if(!strcasecmp(term, "ansi-nt")) {
+#define GL_NOT_FOR_WIN32_CMD ""
+    gl->left = "\b \b";    /* ^H, but clear existing character */
+    gl->right = GL_NOT_FOR_WIN32_CMD;
+    gl->up = GL_NOT_FOR_WIN32_CMD;
+    gl->down = "\n";	/* ^J */
+    gl->home = GL_NOT_FOR_WIN32_CMD;
+    gl->bol = "\r";	/* ^M */
+    gl->clear_eol = GL_NOT_FOR_WIN32_CMD;
+    gl->clear_eod = GL_NOT_FOR_WIN32_CMD;
+    /*
+     * These next 4 are used to allow command line history to work;
+     * they are used for input, not output.
+     */
+    gl->u_arrow = GL_ESC_STR "[A";
+    gl->d_arrow = GL_ESC_STR "[B";
+    gl->l_arrow = GL_ESC_STR "[D";
+    gl->r_arrow = GL_ESC_STR "[C";
+    gl->sound_bell = "\a";	/* ^G */
+    gl->bold = GL_NOT_FOR_WIN32_CMD;
+    gl->underline = GL_NOT_FOR_WIN32_CMD;
+    gl->standout = GL_NOT_FOR_WIN32_CMD;
+    gl->dim = GL_NOT_FOR_WIN32_CMD;
+    gl->reverse = GL_NOT_FOR_WIN32_CMD;
+    gl->blink = GL_NOT_FOR_WIN32_CMD;
+    gl->text_attr_off = GL_NOT_FOR_WIN32_CMD;
+#undef GL_NOT_FOR_WIN32_CMD
+  }
+#endif
+
 /*
  * Report term being unusable.
  */

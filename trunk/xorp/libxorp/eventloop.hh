@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.15 2005/08/18 15:28:39 bms Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.16 2005/10/12 01:37:42 bms Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -26,9 +26,12 @@
 #include "timer.hh"
 #include "callback.hh"
 #include "ioevents.hh"
-#include "selector.hh"
 
+#ifdef HOST_OS_WINDOWS
 #include "win_dispatcher.hh"
+#else
+#include "selector.hh"
+#endif
 
 /**
  * @short Event Loop.
@@ -282,7 +285,7 @@ private:
 private:
     ClockBase*		_clock;
     TimerList		_timer_list;
-#ifdef USE_WINDOWS_DISPATCHER
+#ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else
     SelectorList	_selector_list;

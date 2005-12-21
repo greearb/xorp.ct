@@ -12,10 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.15 2005/08/18 15:28:40 bms Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.16 2005/09/05 20:20:04 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
+
+#ifdef HOST_OS_WINDOWS
+#error "This file is not intended to be included on Windows."
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -27,11 +31,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef HOST_OS_WINDOWS
-#include <map>
-#else
 #include <vector>
-#endif
 
 #include "callback.hh"
 #include "ioevents.hh"
@@ -161,11 +161,7 @@ public:
      */
     int	wait_and_dispatch(int millisecs);
 
-#ifdef HOST_OS_WINDOWS
-    inline size_t descriptor_count() const { return _selector_entries.size(); }
-#else
     inline size_t descriptor_count() const { return _descriptor_count; }
-#endif
 
     /**
      * Get a copy of the current list of monitored file descriptors in
@@ -233,13 +229,9 @@ private:
     SelectorListObserverBase * _observer;
     fd_set		_fds[SEL_MAX_IDX];
 
-#ifdef HOST_OS_WINDOWS
-    map<XorpFd, Node>	_selector_entries;
-#else
     vector<Node>	_selector_entries;
     int			_maxfd;
     size_t		_descriptor_count;
-#endif
 };
 
 #endif // __LIBXORP_SELECTOR_HH__

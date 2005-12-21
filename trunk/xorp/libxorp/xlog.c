@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.14 2005/12/21 07:29:37 atanu Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.15 2005/12/21 07:52:25 atanu Exp $"
 
 /*
  * Message logging utility.
@@ -978,6 +978,11 @@ xlog_add_default_output(void)
     FILE *fp = NULL;
     HANDLE hstd = INVALID_HANDLE_VALUE;
 
+    /*
+     * XXX: We may need to duplicate these handles;
+     * fclose() on _open_osfhandle() derived handles results
+     * in the underlying handle being closed.
+     */
     hstd = GetStdHandle(STD_ERROR_HANDLE);
     fp = _fdopen(_open_osfhandle((long)hstd, _O_TEXT), "w");
     if (fp != NULL)

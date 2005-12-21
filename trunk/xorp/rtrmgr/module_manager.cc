@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.52 2005/12/01 23:39:45 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.53 2005/12/17 02:02:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -510,14 +510,15 @@ Module::run(bool do_exec, bool is_verification,
 	PROCESS_INFORMATION pi;
 
 	GetStartupInfoA(&si);
-	si.lpReserved = NULL;
-	si.dwFlags |= STARTF_USESTDHANDLES;
+	si.dwFlags = STARTF_USESTDHANDLES;
+	si.hStdInput = INVALID_HANDLE_VALUE;
+	si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+	si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
 
-	string targv;
-	if (CreateProcessA(const_cast<char *>(_expath.c_str()),
-			   const_cast<char *>(targv.c_str()),
+	if (CreateProcessA(NULL,
+			   const_cast<char *>(_expath.c_str()),
 			   NULL, NULL, TRUE,
-			   CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP,
+			   CREATE_DEFAULT_ERROR_MODE,
 			   NULL, NULL, &si, &pi) == 0) {
 	    XLOG_ERROR("Execution of %s failed", _expath.c_str());
 	    _pid = 0;

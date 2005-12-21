@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/libxorp/gai_strerror.c,v 1.2 2005/08/18 15:28:40 bms Exp $
  */
 
 #ifdef HAVE_CONFIG_H
@@ -26,6 +26,8 @@
 
 #ifdef HOST_OS_WINDOWS
 
+#include "win_io.h"
+
 /*
  * gai_strerror() is actually implemented as an inline on Windows; it is
  * not present in the Winsock2 DLLs. The 'real' inline functions are missing
@@ -33,26 +35,14 @@
  *
  * There is an accompanying kludge to purge the namespace for this function
  * to be visible in <libxorp/xorp_osdep_end.h>.
+ *
+ * This now simply calls the win_strerror() utility routine in win_io.c.
  */
-
-#define	GAI_STRERROR_BUFFER_SIZE	1024
 
 char *
 gai_strerror(int ecode)
 {
-    static char buff[GAI_STRERROR_BUFFER_SIZE + 1];
-    DWORD dwMsgLen;
-
-    dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
-			      FORMAT_MESSAGE_IGNORE_INSERTS|
-			      FORMAT_MESSAGE_MAX_WIDTH_MASK,
-			      NULL,
-			      ecode,
-			      MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-			      (LPSTR)buff,
-			      GAI_STRERROR_BUFFER_SIZE,
-			      NULL);
-     return (buff);
+     return (win_strerror(ecode));
 }
 
 #endif /* HOST_OS_WINDOWS */

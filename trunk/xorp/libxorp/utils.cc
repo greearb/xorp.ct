@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.5 2005/10/10 04:10:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.6 2005/10/22 01:41:44 pavlin Exp $"
 
 #include "xorp.h"
 #include "c_format.hh"
@@ -74,6 +74,41 @@ has_empty_space(const string& s)
 
     return (false);
 }
+
+#ifdef HOST_OS_WINDOWS
+void
+win_quote_args(const list<string>& args, string& cmdline)
+{
+    list<string>::const_iterator curarg;
+    for (curarg = args.begin(); curarg != args.end(); ++curarg) {
+	cmdline += " ";
+	if ((curarg->length() == 0 ||
+	     string::npos != curarg->find_first_of("\n\t \"") ||
+	     string::npos != curarg->find("\\\\"))) {
+	    string tmparg(*curarg);
+	    string::size_type len = tmparg.length();
+	    string::size_type pos = 0;
+	    while (pos < len && string::npos != pos) {
+		pos = tmparg.find_first_of("\\\"", pos);
+	        if (tmparg[pos] == '\\') {
+		    if (tmparg[pos+1] == '\\') {
+			pos++;
+		    } else if (pos+1 == len || tmparg[pos+1] == '\"') {
+		        tmparg.insert(pos, "\\");
+			pos += 2;
+		    }
+		} else if (tmparg[pos] == '\"') {
+		    tmparg.insert(pos, "\\");
+		    pos += 2;
+		}
+	    }
+	    cmdline += "\"" + tmparg + "\"";
+	} else {
+	    cmdline += *curarg;
+	}
+    }
+}
+#endif
 
 const char*
 xorp_basename(const char* argv0)

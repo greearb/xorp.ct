@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.57 2005/11/16 03:46:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.58 2005/11/16 23:32:10 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,6 +51,7 @@
 #endif
 
 #ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
 #define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
 #else
 #define FILENO(x) fileno(x)
@@ -876,7 +877,7 @@ main(int argc, char *argv[])
     char hostname[MAXHOSTNAMELEN];
     if (gethostname(hostname, sizeof(hostname)) < 0) {
 #ifdef HOST_OS_WINDOWS
-	XLOG_FATAL("gethostname() failed: %d", WSAGetLastError());
+	XLOG_FATAL("gethostname() failed: %s", win_strerror(WSAGetLastError()));
 #else
 	XLOG_FATAL("gethostname() failed: %s", strerror(errno));
 #endif

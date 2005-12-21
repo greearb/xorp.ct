@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2005 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.2 2005/08/18 15:45:46 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.3 2005/08/23 22:29:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -23,6 +24,11 @@
 #include "fticonfig.hh"
 #include "fticonfig_table_set.hh"
 
+#ifdef HAVE_WINDOWS_H
+#include <windows.h>
+#endif
+
+#include "libxorp/win_io.h"
 
 //
 // Set whole-table information into the unicast forwarding table.
@@ -31,12 +37,60 @@
 // Windows (IPHLPAPI.DLL).
 //
 
+#ifdef HOST_OS_WINDOWS
+//
+// Helper method to determine if the Routing and Remote Access Service
+// is installed and running.
+//
+static bool
+is_rras_running()
+{
+    bool is_installed = false;
+    bool is_running = false;
+
+    SC_HANDLE h_scm = OpenSCManager(NULL, NULL, GENERIC_READ);
+    if (h_scm != NULL) {
+    	SC_HANDLE h_rras = OpenService(h_scm, RRAS_SERVICE_NAME, GENERIC_READ);
+	if (h_rras != NULL) {
+	    is_installed = true;
+	    SERVICE_STATUS ss;
+	    if (0 != ControlService(h_rras, SERVICE_CONTROL_INTERROGATE, &ss)) {
+		is_running = true;
+	    } else {
+		DWORD result = GetLastError();
+		if (result == ERROR_SERVICE_CANNOT_ACCEPT_CTRL) {
+		    is_running = true;
+		} else if (result != ERROR_SERVICE_NOT_ACTIVE) {
+		    XLOG_WARNING("ControlService() failed: %s",
+				 win_strerror(result));
+		}
+	    }
+	    CloseServiceHandle(h_rras);
+	} else {
+	    DWORD result = GetLastError();
+	    if (result != ERROR_SERVICE_DOES_NOT_EXIST) {
+		XLOG_WARNING("OpenService() failed: %s", win_strerror(result));
+	    }
+	}
+        CloseServiceHandle(h_scm);
+    } else {
+	XLOG_WARNING("OpenSCManager() failed: %s",
+		     win_strerror(GetLastError()));
+    }
+    return (is_running && is_installed);
+}
+#endif
 
 FtiConfigTableSetIPHelper::FtiConfigTableSetIPHelper(FtiConfig& ftic)
     : FtiConfigTableSet(ftic)
 {
 #ifdef HOST_OS_WINDOWS
     register_ftic_primary();
+
+    if (is_rras_running()) {
+	XLOG_WARNING("Windows Routing and Remote Access Service is running.\n"
+		     "Some change operations through IP Helper may not work.");
+    }
 #endif
 }
 

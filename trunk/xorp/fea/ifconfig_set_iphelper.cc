@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.2 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.3 2005/08/23 22:29:11 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/win_io.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -491,6 +492,7 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
 	      (point_to_point)? "true" : "false",
 	      (multicast)? "true" : "false");
 
+#if 0
     MIB_IFROW ifrow;
     DWORD result;
 
@@ -513,6 +515,9 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
 			     (int)result);
 	return (XORP_ERROR);
     }
+#else
+    UNUSED(error_msg);
+#endif
 
     return (XORP_OK);
 
@@ -620,20 +625,51 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
 	      addr.str().c_str(), dst_or_bcast.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
+    PMIB_IPADDRTABLE pAddrTable;
+    DWORD       result, tries;
+    ULONG       dwSize;
     IPAddr	ipaddr;
     IPMask	ipmask;
-    ULONG	ntectx = 0, nteinst = 0;
-    DWORD	result;
 
     addr.copy_out((uint8_t*)&ipaddr);
     IPvX::make_prefix(addr.af(), prefix_len).get_ipv4().copy_out(
 	(uint8_t*)&ipmask);
 
+    tries = 0;
+    result = ERROR_INSUFFICIENT_BUFFER;
+    dwSize = sizeof(*pAddrTable) + (30 * sizeof(MIB_IPADDRROW));
+    do {
+        pAddrTable = (PMIB_IPADDRTABLE) ((tries == 0) ? malloc(dwSize) :
+                   realloc(pAddrTable, dwSize));
+        if (pAddrTable == NULL)
+            break;
+	result = GetIpAddrTable(pAddrTable, &dwSize, FALSE);
+        if (pAddrTable == NULL)
+            break;
+    } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
+
+    if (result != NO_ERROR) {
+        XLOG_ERROR("GetIpAddrTable(): %s\n", win_strerror(result));
+        if (pAddrTable != NULL)
+            free(pAddrTable);
+        return XORP_OK;
+    }
+
+    for (unsigned int i = 0; i < pAddrTable->dwNumEntries; i++) {
+	if (pAddrTable->table[i].dwAddr == ipaddr) {
+	    XLOG_ERROR("IP address already exists on interface with index %lu.",
+			pAddrTable->table[i].dwIndex);
+            return XORP_OK;
+	}
+    }
+
+    ULONG	ntectx = 0, nteinst = 0;
+
     result = AddIPAddress(ipaddr, ipmask, if_index, &ntectx, &nteinst);
     if (result != NO_ERROR) {
 	error_msg = c_format("Cannot add IP address to interface %u: "
 			     "error %d\n", if_index, (int)result);
-	return (XORP_ERROR);
+	return XORP_OK;
     }
 
     // We can't delete IP addresses using IP Helper unless we cache the
@@ -646,8 +682,8 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
     _nte_map.insert(make_pair(make_pair(if_index,
 					(IPAddr)addr.get_ipv4().addr()),
 					ntectx));
+    return XORP_OK;
 
-    return (XORP_OK);
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(is_broadcast);

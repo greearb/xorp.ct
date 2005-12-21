@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.44 2005/10/12 01:25:31 bms Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.45 2005/11/11 04:22:17 pavlin Exp $"
 
 
 //
@@ -51,14 +51,15 @@
 #endif
 
 #ifdef HOST_OS_WINDOWS
-#define DEFAULT_TERM_TYPE "ansi-nt"
-#define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
-#define FDOPEN(x,y) _fdopen(_open_osfhandle((x),_O_RDWR|_O_TEXT),(y))
-#else
+#include "libxorp/win_io.h"
+#define DEFAULT_TERM_TYPE	"ansi-nt"
+#define FILENO(x)	((HANDLE)_get_osfhandle(_fileno(x)))
+#define FDOPEN(x,y)	_fdopen(_open_osfhandle((x),_O_RDWR|_O_TEXT),(y))
+#else // ! HOST_OS_WINDOWS
 #define DEFAULT_TERM_TYPE "vt100"
 #define FILENO(x) fileno(x)
 #define FDOPEN(x,y) fdopen((x), (y))
-#endif
+#endif // HOST_OS_WINDOWS
 
 //
 // Exported variables
@@ -172,8 +173,24 @@ CliNode::add_connection(XorpFd input_fd, XorpFd output_fd, bool is_network,
     _client_list.push_back(cli_client);
 
 #ifdef HOST_OS_WINDOWS
-    if (cli_client->is_interactive())
-	SetConsoleMode(input_fd, ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+    if (cli_client->is_interactive()) {
+	BOOL retval;
+#if 0
+	// XXX: This always fails, so it's commented out.
+	retval = SetConsoleMode(input_fd,
+ENABLE_ECHO_INPUT | ENABLE_PROCESSED_INPUT);
+	if (retval == 0) {
+	    XLOG_WARNING("SetConsoleMode(input) failed: %s",
+	    		 win_strerror(GetLastError()));
+	}
+#endif
+	retval = SetConsoleMode(output_fd,
+ENABLE_PROCESSED_OUTPUT | ENABLE_WRAP_AT_EOL_OUTPUT);
+	if (retval == 0) {
+	    XLOG_WARNING("SetConsoleMode(output) failed: %s",
+			 win_strerror(GetLastError()));
+	}
+    }
 #endif
     
     //
@@ -333,126 +350,15 @@ CliNode::delete_connection(CliClient *cli_client, string& error_msg)
     return (XORP_OK);
 }
 
-// XXX: Making this work with Windows in non-blocking mode is a bit crufty.
-
-#ifdef HOST_OS_WINDOWS
-
-// Helper function to process a raw keystroke into ASCII.
-int
-CliClient::process_key(KEY_EVENT_RECORD &ke)
-{
-    int ch = ke.uChar.AsciiChar;
-
-    switch (ke.wVirtualKeyCode) {
-    case VK_SPACE:
-	return (' ');
-	break;
-    case VK_RETURN:
-	return ('\n');
-	break;
-    case VK_BACK:
-	return (0x08);
-	break;
-    default:
-	if (ch >= 1 && ch <= 255)
-	return (ch);
-	break;
-    }
-    return (0);
-}
-
-// Helper function to return the number of ASCII key-downs in the
-// console input buffer on Win32, and optionally put them in
-// a user-provided buffer which we hand-off to libtecla.
-size_t
-CliClient::peek_keydown_events(HANDLE h, char *buffer, int buffer_size)
-{
-    INPUT_RECORD inr[64];
-    DWORD nevents = 0;
-    size_t nkeystrokes = 0;
-    size_t remaining = buffer_size;
-    char *cp = buffer;
-    int ch;
-
-    BOOL result = PeekConsoleInputA(h, inr, sizeof(inr)/sizeof(inr[0]),
-				    &nevents);
-    if (result == FALSE) {
-	XLOG_ERROR("PeekConsoleInput() failed: %lu\n", GetLastError());
-	return (0);
-    }
-    if (nevents == 0)
-	return (0);
-
-    for (size_t i = 0; i < nevents; i++) {
-	if (inr[i].EventType == KEY_EVENT &&
-	    inr[i].Event.KeyEvent.bKeyDown == TRUE) {
-	    ch = process_key(inr[i].Event.KeyEvent);
-	    if (ch != 0) {
-		++nkeystrokes;
-		// If buffer specified, copy to buffer,
-		// otherwise we're just counting what's in the queue.
-		if (buffer != NULL) {
-		    if (remaining == 0)
-			break;
-		    else {
-			*cp++ = ch;
-			--remaining;
-		    } /* if */
-		} /* if */
-	    } /* if */
-	} /* if */
-    } /* for */
-
-    // Return the number of keystrokes placed into the input buffer.
-    return (nkeystrokes);
-}
-
-bool
-CliClient::poll_conin()
-{
-    // Peek but don't flush the buffer; only invoke callback if needed.
-    // XXX: This gross hack will go away when we have WinDispatcher.
-    _keycnt = peek_keydown_events((HANDLE)input_fd(), NULL, 0);
-    if (_keycnt > 0)
-	client_read(input_fd(), IOT_READ);
-    return true;
-}
-#endif // HOST_OS_WINDOWS
-
-#ifdef HOST_OS_WINDOWS
-#define CONIN_POLL_INTERVAL	250	// milliseconds
-#endif
-
 int
 CliClient::start_connection(string& error_msg)
 {
-#ifdef HOST_OS_WINDOWS
-    UNUSED(error_msg);
-    if (!is_interactive()) {
-	if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
-						  callback(this, &CliClient::client_read))
-	    == false) {
-	    return (XORP_ERROR);
-	}
-    } else {
-	// stdio, so schedule a periodic timer every 400ms
-	// to poll for input.
-	// XXX: This will go away when we bring in the new WinDispatcher;
-	// we can then merely ask to be signalled by the console handle
-	// as for any other system event.
-	_poll_conin_timer = cli_node().eventloop().new_periodic(
-				CONIN_POLL_INTERVAL,
-				callback(this, &CliClient::poll_conin));
-    }
-#else // ! HOST_OS_WINDOWS
     if (cli_node().eventloop().add_ioevent_cb(input_fd(), IOT_READ,
-					      callback(this, &CliClient::client_read))
-	== false) {
+callback(this, &CliClient::client_read)) == false) {
 	return (XORP_ERROR);
     }
-#endif // ! HOST_OS_WINDOWS
-   
-#ifndef HOST_OS_WINDOWS 
+  
+#ifdef HAVE_ARPA_TELNET_H
     //
     // Setup the telnet options
     //
@@ -550,9 +456,22 @@ CliClient::start_connection(string& error_msg)
     // Set the terminal
     string term_name = DEFAULT_TERM_TYPE;
     if (is_output_tty()) {
+#ifdef HOST_OS_WINDOWS
+	//
+	// Do not ask the environment what kind of terminal we use
+	// under Windows, as MSYS is known to lie to us and say 'cygwin'
+	// when in fact we're using an 'ansi-nt'. We've hard-coded
+	// appropriate control sequences in our fork of libtecla to
+	// reflect this fact.
+	// XXX: We need a better way of figuring out when we're in
+	// this situation.
+
+	; // do nothing
+#else
 	term_name = getenv("TERM");
 	if (term_name.empty())
 	    term_name = DEFAULT_TERM_TYPE;	// Set to default
+#endif
     }
 
 #ifdef HAVE_TERMIOS_H
@@ -732,10 +651,15 @@ CliClient::client_read(XorpFd fd, IoEventType type)
     if (!is_interactive()) {
 	n = recv(fd, buf, sizeof(buf), 0);
     } else {
-	// Read keystrokes into buffer and flush them.
-	n = peek_keydown_events((HANDLE)fd, buf, sizeof(buf));
-	if (n > 0)
-	    FlushConsoleInputBuffer((HANDLE)fd);
+	//
+	// A 0-byte interactive read is not an error; it may simply
+	// mean the read routine filtered out an event which we
+	// weren't interested in.
+	//
+	n = win_con_read(fd, buf, sizeof(buf));
+	if (n == 0) {
+	    return;
+	}
     }
 #else /* !HOST_OS_WINDOWS */
     n = read(fd, buf, sizeof(buf) - 1);

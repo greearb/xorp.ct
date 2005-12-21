@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.43 2005/08/31 02:10:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.44 2005/09/28 17:31:42 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -33,6 +33,10 @@
 
 #include "profile_vars.hh"
 #include "fticonfig.hh"
+
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
 #define PROC_LINUX_FILE_FORWARDING_V6 "/proc/sys/net/ipv6/conf/all/forwarding"
@@ -1419,7 +1423,8 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	MIB_IPSTATS ipstats;
 	DWORD error = GetIpStatistics(&ipstats);
 	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatistics() failed: %d", (int)GetLastError());
+	    XLOG_ERROR("GetIpStatistics() failed: %s",
+			win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
@@ -1519,7 +1524,8 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	MIB_IPSTATS ipstats;
 	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
+			win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
@@ -1697,7 +1703,8 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	HANDLE hFwd;
 	DWORD result = EnableRouter(&hFwd, &_overlapped);
 	if (result != ERROR_IO_PENDING) {
-	    error_msg = c_format("Error %lu from EnableRouter", GetLastError());
+	    error_msg = c_format("Error '%s' from EnableRouter",
+				 win_strerror(GetLastError()));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
@@ -1712,8 +1719,8 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 
 	DWORD result = UnenableRouter(&_overlapped, NULL);
 	if (result != NO_ERROR) {
-	    error_msg = c_format("Error %lu from UnenableRouter",
-				 GetLastError());
+	    error_msg = c_format("Error '%s' from UnenableRouter",
+				 win_strerror(GetLastError()));
 	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
@@ -1846,14 +1853,16 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	MIB_IPSTATS ipstats;
 	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
-	    XLOG_ERROR("GetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
+			win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	ipstats.dwForwarding = (enable != 0) ? 1 : 0;
 	ipstats.dwDefaultTTL = MIB_USE_CURRENT_TTL;
 	error = SetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
-	    XLOG_ERROR("SetIpStatisticsEx() failed: %d", (int)GetLastError());
+	    XLOG_ERROR("SetIpStatisticsEx() failed: %s",
+			win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
     }

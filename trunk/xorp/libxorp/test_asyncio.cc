@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.10 2005/08/29 22:36:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.11 2005/08/30 01:32:36 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,6 +33,11 @@ static const int MAX_ITERS	  = 50;
 static const int MAX_BUFFERS	  = 200;
 static const int MAX_BUFFER_BYTES = 1000000;
 
+#ifdef DETAILED_DEBUG
+static int bytes_read = 0;
+static int bytes_written = 0;
+#endif
+
 static void
 writer_check(AsyncFileReader::Event ev,
 	     const uint8_t* buf, size_t bytes, size_t offset,
@@ -41,6 +46,10 @@ writer_check(AsyncFileReader::Event ev,
     assert(ev == AsyncFileWriter::DATA || ev == AsyncFileWriter::FLUSHING);
     assert(buf == exp_buf);
     assert(offset <= bytes);
+
+#ifdef DETAILED_DEBUG
+    bytes_written += bytes;
+#endif
 
     // Defer timeout
     t->schedule_after_ms(TIMEOUT_MS);
@@ -59,6 +68,9 @@ reader_check(AsyncFileReader::Event ev,
     t->schedule_after_ms(TIMEOUT_MS);
     
     if (offset == bytes) {
+#ifdef DETAILED_DEBUG
+    	bytes_read += bytes;
+#endif
 	// Check buffer is filled with expected value (== iteration no)
 	for (size_t i = 0; i < bytes; i++) {
 	    assert(buf[i] == data_value);
@@ -141,8 +153,14 @@ run_test()
 	afw.start(); afw.stop(); afw.start(); // Just walk thru starting and
 	afr.start(); afr.stop(); afr.start(); // stopping...
 
-	while (afw.running() || afr.running())
+	while (afw.running() || afr.running()) {
 	    e.run();
+#ifdef DETAILED_DEBUG
+	    printf("bytes_read = %d bytes_written = %d\n",
+			bytes_read, bytes_written);
+	    fflush(stdout);
+#endif
+	}
 	assert(afw.buffers_remaining() == 0 && afr.buffers_remaining() == 0);
 
 	afw.stop(); // utterly redundant call to stop()

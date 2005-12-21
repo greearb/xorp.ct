@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.14 2005/08/31 22:40:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.15 2005/09/07 20:15:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -53,6 +53,7 @@
 
 /* Windows has no 'struct ip', so ship one. */
 #ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
 #include "ip.h"
 #endif
 
@@ -325,6 +326,8 @@ lookup4(const char* addr)
 	fprintf(stderr, "gethostbyname failed: %s %d\n",
 #ifdef HAVE_HSTRERROR
 		hstrerror(h_errno),
+#elif HOST_OS_WINDOWS
+		win_strerror(WSAGetLastError()),
 #else
 		"",
 #endif

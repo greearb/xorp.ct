@@ -111,7 +111,7 @@ LDADD = ./libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
 test_local_copy_SOURCES = test_local_copy.cc
 
 test_remote_copy_SOURCES = test_remote_copy.cc
-test_remote_copy_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/libxipc/libfinder.la
+test_remote_copy_LDADD = $(LDADD) $(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/libxipc/libfinder.la $(top_builddir)/libxorp/libxorp.la
 
 
 ################################################################
@@ -150,7 +150,8 @@ test_remote_copy_DEPENDENCIES = ./libfeaclient.la \
 	$(top_builddir)/xrl/targets/libtestfeaifmgrmirrorbase.la \
 	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
-	$(top_builddir)/libxipc/libfinder.la
+	$(top_builddir)/libxipc/libfinder.la \
+	$(top_builddir)/libxorp/libxorp.la
 test_remote_copy_LDFLAGS =
 
 DEFS = @DEFS@

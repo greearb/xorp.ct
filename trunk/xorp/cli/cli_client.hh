@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.25 2005/11/13 09:21:30 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.26 2005/12/14 00:52:40 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -469,12 +469,6 @@ private:
     bool	is_prompt_flushed() const { return _is_prompt_flushed; }
     void	set_prompt_flushed(bool v) { _is_prompt_flushed = v; }
 
-#ifdef HOST_OS_WINDOWS
-    int		process_key(KEY_EVENT_RECORD &ke);
-    size_t	peek_keydown_events(HANDLE h, char *buffer, int buffer_size);
-    bool	poll_conin();
-#endif
-    
     CliNode&	_cli_node;		// The CLI node I belong to
     XorpFd	_input_fd;		// File descriptor to read the input
     XorpFd	_output_fd;		// File descriptor to write the output
@@ -589,11 +583,6 @@ private:
     // Misc state
     //
     vector<uint8_t>	_pending_input_data;
-
-#ifdef HOST_OS_WINDOWS
-    XorpTimer	_poll_conin_timer;	// periodic console input callback
-    size_t	_keycnt;		// # of keypresses polled for
-#endif
 };
 
 

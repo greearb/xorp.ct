@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.2 2005/08/18 15:28:43 bms Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.3 2005/08/30 01:02:47 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -76,10 +76,6 @@ extern "C" {
 #ifndef MAXHOSTNAMELEN
 #define MAXHOSTNAMELEN MAX_HOSTNAME_LEN
 #endif
-
-/* XXX: These will go away if we re-tool the IfTree for Windows. */
-extern char *if_indextoname(unsigned int ifindex, char *name);
-extern unsigned int if_nametoindex(const char *ifname);
 
 /*
  * iovec is common enough that we ship our own for Windows,

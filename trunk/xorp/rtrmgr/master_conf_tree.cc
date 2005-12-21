@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.67 2005/12/09 19:07:15 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.68 2005/12/17 02:02:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -774,7 +774,7 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 	return false;
     }
 
-    FILE* file;
+    FILE* file = NULL;
 
 #ifdef HOST_OS_WINDOWS
     {
@@ -831,12 +831,14 @@ MasterConfigTree::save_to_file(const string& filename, uid_t user_id,
 	    fclose(file);
 	}
 	// It seems OK to overwrite this file
-	if (unlink(full_filename.c_str()) < 0) {
+	if (unlink(full_filename.c_str()) < 0 && errno != ENOENT) {
 	    error_msg = c_format("File %s exists, and can not be "
 				 "overwritten.\n",
 				 full_filename.c_str());
 	    error_msg += strerror(errno);
-	    fclose(file);
+	    if (file != NULL) {
+	    	fclose(file);
+	    }
 	    _exec_id.restore_saved_exec_id(dummy_error_msg);
 	    umask(orig_mask);
 	    return false;

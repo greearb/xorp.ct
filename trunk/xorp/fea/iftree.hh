@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.32 2005/10/17 11:16:26 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.33 2005/10/18 04:15:14 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -154,6 +154,16 @@ public:
     inline IfMap::iterator get_if(const string& ifname);
 
     /**
+     * Get iterator corresponding to an interface with a given
+     * physical index.
+     *
+     * @param ifindex interface index to find iterator for.
+     *
+     * @return iterator, will be equal to ifs().end() if invalid.
+     */
+    IfMap::iterator get_if(const uint32_t ifindex);
+
+    /**
      * Get iterator of corresponding to named interface.
      *
      * @param ifname interface name to find iterator for.
@@ -161,6 +171,16 @@ public:
      * @return iterator, will be equal to ifs().end() if invalid.
      */
     inline IfMap::const_iterator get_if(const string& ifname) const;
+
+    /**
+     * Get iterator corresponding to an interface with a given
+     * physical index.
+     *
+     * @param ifindex interface index to find iterator for.
+     *
+     * @return iterator, will be equal to ifs().end() if invalid.
+     */
+    IfMap::const_iterator get_if(const uint32_t ifindex) const;
 
     inline const IfMap& ifs() const { return _ifs; }
 

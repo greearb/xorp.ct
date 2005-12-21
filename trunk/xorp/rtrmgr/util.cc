@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.21 2005/10/22 01:41:45 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.22 2005/11/05 18:01:46 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -66,7 +66,7 @@ find_executable_program_dir(const string& program_name)
     //
     // Look for trailing slash in program_name
     //
-    string::size_type slash = program_name.rfind('/');
+    string::size_type slash = program_name.rfind(PATH_DELIMITER_CHAR);
     if (slash != string::npos) {
 	string path = program_name.substr(0, slash);
 	return path;
@@ -101,21 +101,27 @@ find_executable_program_dir(const string& program_name)
 static string
 xorp_real_path(const string& path)
 {
-#ifdef HOST_OS_WINDOWS
-    return path;
-#else // ! HOST_OS_WINDOWS
     debug_msg("path: %s\n", path.c_str());
 
     char rp[MAXPATHLEN];
+
+#ifdef HOST_OS_WINDOWS
+    char *fp = NULL;
+    if (GetFullPathNameA(path.c_str(), sizeof(rp), rp, &fp) > 0) {
+	debug_msg("return %s\n", rp);
+	return string(rp);
+    }
+#else
     const char* prp = realpath(path.c_str(), rp);
     if (prp != NULL) {
 	debug_msg("return %s\n", prp);
 	return string(prp);
     }
+#endif
+
     // XLOG_WARNING("realpath(%s) failed.", path.c_str());
     debug_msg("return %s\n", path.c_str());
     return path;
-#endif // ! HOST_OS_WINDOWS
 }
 
 void

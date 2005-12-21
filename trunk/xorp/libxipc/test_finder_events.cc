@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.18 2005/07/31 10:11:12 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.20 2005/08/18 15:32:39 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -897,9 +897,12 @@ main(int argc, char * const argv[])
     bool	use_internal_finder = true;
     int		reps = 1;
     uint32_t	burst_cnt = 50;
-
-#ifndef HOST_OS_WINDOWS
-    uint32_t 	dtablesize = getdtablesize();
+    uint32_t 	dtablesize;
+#ifdef HOST_OS_WINDOWS
+    dtablesize = MAXIMUM_WAIT_OBJECTS - 4; // reserve 4 handles.
+#else
+    dtablesize = getdtablesize();
+#endif
     //
     // For systems with small default dtable sizes.
     //
@@ -909,7 +912,6 @@ main(int argc, char * const argv[])
 		    "(descriptor table constraint).\n",
 		    XORP_UINT_CAST(burst_cnt));
     }
-#endif
 
     int ch;
     char* bp = NULL;

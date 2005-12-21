@@ -12,23 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.2 2005/08/18 15:45:44 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.3 2005/08/23 22:29:09 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/win_io.h"
 #include "libxorp/ipvxnet.hh"
 
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #endif
-
-#if 0	// XXX: Missing from MinGW
+#ifdef HAVE_ROUTPROT_H
 #include <routprot.h>
-#else
-#define PROTO_IP_NETMGMT 3
 #endif
 
 #include "fticonfig.hh"
@@ -252,53 +250,44 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
 
     if (result != NO_ERROR) {
-	DWORD dwMsgLen;
-	LPSTR pMsg;
-
-	dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
-				  FORMAT_MESSAGE_ALLOCATE_BUFFER|
-				  FORMAT_MESSAGE_IGNORE_INSERTS|
-				  FORMAT_MESSAGE_MAX_WIDTH_MASK,
-				  NULL, result,
-				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				  (LPSTR)&pMsg, 0, 0);
-	XLOG_ERROR("GetIpForwardTable(): %s\n", pMsg);
-	LocalFree(pMsg);
-
+	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pfwdtable != NULL)
 	    free(pfwdtable);
-
 	return false;
     }
 
-    IPv4Net	destnet;
     IPv4	dest;
     IPv4	nexthop;
     IPv4	mask;
+    IPv4Net	destnet;
     bool	found;
-    char	cifname[IFNAMSIZ];
 
     for (uint32_t i = 0; i < pfwdtable->dwNumEntries; i++) {
 	// XXX: Windows can have multiple routes to the same destination.
 	// Here, we only return the first match.
 	if (dst.get_ipv4().addr() == pfwdtable->table[i].dwForwardDest) {
-
-	    dest.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardDest));
-	    mask.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardMask));
+	    dest.copy_in(reinterpret_cast<uint8_t*>(
+			 &pfwdtable->table[i].dwForwardDest));
+	    mask.copy_in(reinterpret_cast<uint8_t*>(
+			 &pfwdtable->table[i].dwForwardMask));
 	    destnet = IPv4Net(dest, mask.mask_len());
-	    nexthop.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardNextHop));
+	    nexthop.copy_in(reinterpret_cast<uint8_t*>(
+			    &pfwdtable->table[i].dwForwardNextHop));
 
-	    // Map interface index back to a name.
-	    if (if_indextoname(pfwdtable->table[i].dwForwardIfIndex,
-			       cifname) == NULL) {
-		XLOG_FATAL("if_indextoname() failed.\n");
-	    }
+	    uint32_t ifindex = static_cast<uint32_t>(
+				pfwdtable->table[i].dwForwardIfIndex);
+	    IfTree& it = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
+	    XLOG_ASSERT(ii != it.ifs().end());
 
-	    string ifname(cifname);
-
-	    fte = FteX(destnet, nexthop, ifname, ifname, 0xffff, 0xffff,
-		       (pfwdtable->table[i].dwForwardType == PROTO_IP_NETMGMT));
-
+	    // XXX: The old test for a XORP route was:
+	    // pfwdtable->table[i].dwForwardType == PROTO_IP_NETMGMT
+	    // For now, just pass true; we will deal with this better
+	    // once RTMv2 is supported.
+	    //
+	    fte = FteX(destnet, nexthop,
+		       ii->second.ifname(), ii->second.ifname(),
+		       0xffff, 0xffff, true);
 	    found = true;
 	    break;
 	}
@@ -368,49 +357,35 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
     } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
 
     if (result != NO_ERROR) {
-	DWORD dwMsgLen;
-	LPSTR pMsg;
-
-	dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
-				  FORMAT_MESSAGE_ALLOCATE_BUFFER|
-				  FORMAT_MESSAGE_IGNORE_INSERTS|
-				  FORMAT_MESSAGE_MAX_WIDTH_MASK,
-				  NULL, result,
-				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				  (LPSTR)&pMsg, 0, 0);
-	XLOG_ERROR("GetIpForwardTable(): %s\n", pMsg);
-	LocalFree(pMsg);
-
+	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pfwdtable != NULL)
 	    free(pfwdtable);
-
 	return false;
     }
 
     IPv4Net	destnet;
     IPv4	nexthop, mask, dest;
     bool	found;
-    char	cifname[IFNAMSIZ];
 
     for (unsigned int i = 0; i < pfwdtable->dwNumEntries; i++) {
 	// XXX: Windows can have multiple routes to the same destination.
 	// Here, we only return the first match.
-	if (dst.masked_addr().get_ipv4().addr() == pfwdtable->table[i].dwForwardDest) {
-
+	if (dst.masked_addr().get_ipv4().addr() ==
+	    pfwdtable->table[i].dwForwardDest) {
 	    dest.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardDest));
 	    mask.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardMask));
 	    destnet = IPv4Net(dest, mask.mask_len());
 	    nexthop.copy_in((uint8_t*)&(pfwdtable->table[i].dwForwardNextHop));
 
-	    // Map interface index back to a name.
-	    if (if_indextoname(pfwdtable->table[i].dwForwardIfIndex,
-			       cifname) == NULL) {
-		XLOG_FATAL("if_indextoname() failed.\n");
-	    }
-	    string ifname(cifname);
+	    uint32_t ifindex = static_cast<uint32_t>(
+				pfwdtable->table[i].dwForwardIfIndex);
+	    IfTree& it = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
+	    XLOG_ASSERT(ii != it.ifs().end());
 
-	    fte = FteX(destnet, nexthop, ifname, ifname, 0xffff, 0xffff,
-		       (pfwdtable->table[i].dwForwardType == PROTO_IP_NETMGMT));
+	    fte = FteX(destnet, nexthop,
+		       ii->second.ifname(), ii->second.ifname(),
+		       0xffff, 0xffff, true);
 
 	    found = true;
 	    break;

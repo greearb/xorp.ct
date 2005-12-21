@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.24 2005/08/29 22:36:50 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_tcp.cc,v 1.25 2005/08/30 02:36:20 pavlin Exp $"
 
 #include <functional>
 
@@ -343,7 +343,7 @@ FinderTcpListenerBase::connect_hook(XorpFd fd, IoEventType type)
 
     sock = comm_sock_accept(_lsock);
     if (!sock.is_valid()) {
-	XLOG_ERROR("accept(): %s", comm_get_last_error_str());
+	//XLOG_ERROR("accept(): %s", comm_get_last_error_str());
 	return;
     }
 

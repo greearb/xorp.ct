@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.11 2005/08/18 15:28:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.12 2005/10/12 01:37:42 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,8 +24,6 @@
 #include "eventloop.hh"
 #include "xlog.h"
 #include "debug.h"
-
-#include "win_dispatcher.hh"
 
 //
 // Number of EventLoop instances.
@@ -43,7 +41,7 @@ static time_t last_ev_run;
 
 EventLoop::EventLoop()
     : _clock(new SystemClock), _timer_list(_clock),
-#ifdef USE_WINDOWS_DISPATCHER
+#ifdef HOST_OS_WINDOWS
       _win_dispatcher(_clock)
 #else
       _selector_list(_clock)
@@ -82,7 +80,7 @@ EventLoop::run()
 
     _timer_list.advance_time();
     _timer_list.get_next_delay(t);
-#ifdef USE_WINDOWS_DISPATCHER
+#ifdef HOST_OS_WINDOWS
     _win_dispatcher.wait_and_dispatch(&t);
 #else
     _selector_list.wait_and_dispatch(&t);
@@ -95,7 +93,7 @@ EventLoop::run()
 bool
 EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb)
 {
-#ifdef USE_WINDOWS_DISPATCHER
+#ifdef HOST_OS_WINDOWS
     return _win_dispatcher.add_ioevent_cb(fd, type, cb);
 #else
     return _selector_list.add_ioevent_cb(fd, type, cb);
@@ -105,7 +103,7 @@ EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb)
 bool
 EventLoop::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
-#ifdef USE_WINDOWS_DISPATCHER
+#ifdef HOST_OS_WINDOWS
     return _win_dispatcher.remove_ioevent_cb(fd, type);
 #else
     _selector_list.remove_ioevent_cb(fd, type);

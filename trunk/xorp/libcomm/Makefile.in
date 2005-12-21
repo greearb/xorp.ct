@@ -96,7 +96,7 @@ bin_PROGRAMS =
 TESTS = 
 
 # -- No-install Programs
-check_PROGRAMS = test_comm
+check_PROGRAMS = test_comm test_connect
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libcomm.la
@@ -106,6 +106,9 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 test_comm_SOURCES = test_comm.c
+test_connect_SOURCES = test_connect.cc
+
+test_connect_CFLAGS = -I$(top_srcdir)/libxorp
 
 # -- Library Sources
 libcomm_la_SOURCES = comm_module.h comm_api.h comm_private.h comm_sock.c comm_user.c
@@ -124,7 +127,7 @@ libcomm_la_LIBADD =
 am_libcomm_la_OBJECTS = comm_sock.lo comm_user.lo
 libcomm_la_OBJECTS = $(am_libcomm_la_OBJECTS)
 bin_PROGRAMS =
-check_PROGRAMS = test_comm$(EXEEXT)
+check_PROGRAMS = test_comm$(EXEEXT) test_connect$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_test_comm_OBJECTS = test_comm.$(OBJEXT)
@@ -132,6 +135,12 @@ test_comm_OBJECTS = $(am_test_comm_OBJECTS)
 test_comm_LDADD = $(LDADD)
 test_comm_DEPENDENCIES = libcomm.la $(top_builddir)/libxorp/libxorp.la
 test_comm_LDFLAGS =
+am_test_connect_OBJECTS = test_connect.$(OBJEXT)
+test_connect_OBJECTS = $(am_test_connect_OBJECTS)
+test_connect_LDADD = $(LDADD)
+test_connect_DEPENDENCIES = libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_connect_LDFLAGS =
 
 DEFS = @DEFS@
 DEFAULT_INCLUDES =  -I. -I$(srcdir) -I$(top_builddir)
@@ -140,7 +149,7 @@ LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@DEP_FILES = $(DEPDIR)/comm_sock.Plo $(DEPDIR)/comm_user.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/test_comm.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_comm.Po $(DEPDIR)/test_connect.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -149,14 +158,24 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CFLAGS = @CFLAGS@
-DIST_SOURCES = $(libcomm_la_SOURCES) $(test_comm_SOURCES)
+CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
+	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
+LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CXXFLAGS) $(CXXFLAGS)
+CXXLD = $(CXX)
+CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CXXFLAGS = @CXXFLAGS@
+DIST_SOURCES = $(libcomm_la_SOURCES) $(test_comm_SOURCES) \
+	$(test_connect_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in
-SOURCES = $(libcomm_la_SOURCES) $(test_comm_SOURCES)
+SOURCES = $(libcomm_la_SOURCES) $(test_comm_SOURCES) $(test_connect_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -208,6 +227,9 @@ clean-checkPROGRAMS:
 test_comm$(EXEEXT): $(test_comm_OBJECTS) $(test_comm_DEPENDENCIES) 
 	@rm -f test_comm$(EXEEXT)
 	$(LINK) $(test_comm_LDFLAGS) $(test_comm_OBJECTS) $(test_comm_LDADD) $(LIBS)
+test_connect$(EXEEXT): $(test_connect_OBJECTS) $(test_connect_DEPENDENCIES) 
+	@rm -f test_connect$(EXEEXT)
+	$(CXXLINK) $(test_connect_LDFLAGS) $(test_connect_OBJECTS) $(test_connect_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT) core *.core
@@ -218,6 +240,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/comm_sock.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/comm_user.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_comm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_connect.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
@@ -240,6 +263,25 @@ distclean-depend:
 @AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 	$(LTCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
 CCDEPMODE = @CCDEPMODE@
+
+.cc.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+
+.cc.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(CXXCOMPILE) -c -o $@ `cygpath -w $<`
+
+.cc.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCXXCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+CXXDEPMODE = @CXXDEPMODE@
 uninstall-info-am:
 
 tags: TAGS

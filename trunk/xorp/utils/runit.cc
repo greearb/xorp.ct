@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.12 2005/08/01 15:35:39 bms Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.13 2005/08/03 13:15:23 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -58,7 +58,7 @@ typedef pid_t PID_T;
 #include <vector>
 
 #ifndef XORP_WIN32_SH_PATH
-#define XORP_WIN32_SH_PATH "D:\\MSYS\\BIN\\SH.EXE"
+#define XORP_WIN32_SH_PATH "C:\\MINGW\\BIN\\SH.EXE"
 #endif
 
 /**
@@ -210,7 +210,7 @@ xorp_spawn(const string& process, const char *output = "")
     //fprintf(stderr, "new process string is: %s\n", _process.c_str());
 
     if (CreateProcessA(NULL, const_cast<char *>(_process.c_str()), NULL,
-		       NULL, TRUE, CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP,
+		       NULL, TRUE, CREATE_DEFAULT_ERROR_MODE,
 		       NULL, NULL, &si, &pi) == 0) {
 	CloseHandle(houtput);
 	cerr << "Failed to exec: " << _process << endl;
@@ -408,7 +408,7 @@ tidy()
 	    if (INVALID_PID != i->_pid) {
 #ifdef HOST_OS_WINDOWS
 		GenerateConsoleCtrlEvent(CTRL_C_EVENT, GetProcessId(i->_pid));
-		SleepEx(200, TRUE);
+		Sleep(200);
 		TerminateProcess(i->_pid, 0xFF);
 		CloseHandle(i->_pid);
 #else
@@ -457,7 +457,7 @@ tidy()
 	    awhandles[cnt] = i->_pid;
 	}
 	result = WaitForMultipleObjectsEx(cnt, awhandles, FALSE, INFINITE,
-					  TRUE);
+					  FALSE);
 	if (result <= WAIT_OBJECT_0 + cnt - 1) {
 	    result -= WAIT_OBJECT_0;
 	    pid = awhandles[result];

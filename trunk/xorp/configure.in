@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.149 2005/10/30 21:21:40 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.150 2005/11/05 17:56:22 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.149 2005/10/30 21:21:40 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.150 2005/11/05 17:56:22 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -53,24 +53,6 @@ AM_INIT_AUTOMAKE(xorp, 1.1)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_CACHE_SAVE
-
-dnl
-dnl Change the default installation prefix
-dnl
-AC_PREFIX_DEFAULT(/usr/local/xorp)
-test "$prefix" = NONE && prefix="${ac_default_prefix}"
-AC_DEFINE_UNQUOTED(XORP_ROOT, "${prefix}",
-		   [Define the path to the root of the XORP installation])
-
-AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${prefix}",
-		   [Define the path to the root of the XORP installation])
-
-AC_DEFINE_UNQUOTED(XORP_BUILD_ROOT, "${PWD}",
-    		   [Define path to the top-level build directory])
-
-# We'd like to use ac_abs_srcdir, except it's not available just here.
-AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "`cd ${srcdir} && echo ${PWD}`",
-    		   [Define path to the top-level source directory])
 
 dnl ----------------------------
 dnl Set host, host_alias, host_cpu, host_vendor, host_os
@@ -110,15 +92,43 @@ case "${host_os}" in
     ;;
     *mingw* )
 	AC_DEFINE(HOST_OS_WINDOWS, 1, [Define to 1 if the OS is Windows])
-	AC_DEFINE(HAVE_MINGW, 1, [Define to 1 if the build environment is MinGW])
 	AC_DEFINE(HOST_OS_NAME, "Windows", [Define the OS name])
 	_USING_WINDOWS="1"
-	_USING_MINGW="1"
 	dnl This has to be here to stop the ssize_t test from telling lies.
-	CPPFLAGS="${CPPFLAGS} -D_NO_OLDNAMES"
+	dnl Also, <routprot.h> and friends need the MPR version to be defined
+	dnl before inclusion.
+	CPPFLAGS="${CPPFLAGS} -D_NO_OLDNAMES -DMPR50=1"
     ;;
 esac
 AC_CACHE_SAVE
+
+dnl ---------------------------------------------------------------------------
+dnl Set the default installation prefix (and deal with Windows correctly)
+dnl ---------------------------------------------------------------------------
+
+dnl This macro is always expanded once, unconditionally.
+dnl Therefore it needs to be explicitly overridden on Windows.
+AC_PREFIX_DEFAULT([/usr/local/xorp])
+
+if test "${_USING_WINDOWS}" = "1"; then
+	ac_default_prefix="C:/XORP"
+	_REAL_BUILD_ROOT="`pwd -W`"
+	_REAL_SRC_ROOT="`cd ${srcdir} && pwd -W`"
+else
+	_REAL_BUILD_ROOT="${PWD}"
+	_REAL_SRC_ROOT="`cd ${srcdir} && echo ${PWD}`"
+fi
+
+test "$prefix" = NONE && prefix="${ac_default_prefix}"
+AC_DEFINE_UNQUOTED(XORP_ROOT, "${prefix}",
+		   [Define the path to the root of the XORP installation])
+AC_DEFINE_UNQUOTED(XORP_BUILD_ROOT, "${_REAL_BUILD_ROOT}",
+		   [Define path to the top-level build directory])
+AC_DEFINE_UNQUOTED(XORP_INSTALL_ROOT, "${prefix}",
+		   [Define the path to the root of the XORP installation])
+# We'd like to use ac_abs_srcdir, except it's not available just here.
+AC_DEFINE_UNQUOTED(XORP_SRC_ROOT, "${_REAL_SRC_ROOT}",
+		   [Define path to the top-level source directory])
 
 dnl ---------------------------------------------------------------------------
 dnl Compiler probing and basic tools (libtool prerequisites)
@@ -320,15 +330,6 @@ AC_ARG_WITH([path-to-net-snmp-config],
 	     net_snmp_config="net-snmp-config";]
 )
 
-dnl ----------------------------
-dnl --with-windows-dispatcher
-dnl ----------------------------
-AC_ARG_WITH([windows-dispatcher],
-	    AC_HELP_STRING([--with-windows-dispatcher],
-			   [use native Win32 event dispatch]),
-	    [AC_DEFINE(USE_WINDOWS_DISPATCHER, 1,
-	     [Define to 1 if native Win32 event dispatch should be used])])
-
 dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
 dnl ---------------------------------------------------------------------------
@@ -476,10 +477,6 @@ AC_CHECK_LIB(curses, tigetstr, [CLI_CURSES_LIB="-lcurses"], [
     AC_CHECK_LIB(curses, tgetstr, [CLI_CURSES_LIB="-lcurses"])
   ])
 ])
-dnl XXX: This is a hack.
-if test "${_USING_WINDOWS}" = "1"; then
-	CLI_CURSES_LIB=""
-fi
 AC_SUBST(CLI_CURSES_LIB)
 
 dnl Replace main with a function in -lc:
@@ -544,7 +541,10 @@ AC_CHECK_HEADERS([linux/rtnetlink.h linux/types.h linux/sockios.h linux/mroute6.
 dnl
 dnl Check for Windows-specific header files.
 dnl
-AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h iphlpapi.h process.h])
+if test "${_USING_WINDOWS}" = "1"
+then
+AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h iphlpapi.h ipifcons.h iptypes.h iprtrmib.h routprot.h rtinfo.h rtmv2.h mgm.h mprapi.h mprerror.h stm.h process.h])
+fi
 
 dnl
 dnl Check for headers where 'struct ether_addr' is typically defined.
@@ -700,14 +700,11 @@ AC_CHECK_FUNCS([hstrerror])
 
 dnl XXX The autoconf 2.59 generated test for random() fails indiscriminately.
 dnl We need to manually break out detection of the function.
-case "${host_os}" in
- *mingw* )
-  ;;
- * )
+if test ! "${_USING_WINDOWS}"
+then
    AC_DEFINE(HAVE_RANDOM, 1,
              [Define to 1 if you have the `random' function.])
- ;;
-esac
+fi
 
 dnl
 dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.
@@ -750,39 +747,12 @@ dnl IPv4 stack checks
 dnl
 builtin(include, config/acipv4.m4)
 
-dnl-----------------------------
-dnl Check for IPv6
-dnl-----------------------------
-ipv6=no
-AC_MSG_CHECKING(whether the system has IPv6 stack)
-if test "${enable_ipv6}" = "no"; then
-  AC_MSG_RESULT(disabled)
-else
-  AC_LANG_PUSH(C)
-  AC_TRY_RUN([ /* AF_INET6 available check */
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-main()
-{
- if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
-   return (1);
- else
-   return (0);
-}
-],
-  [AC_MSG_RESULT(yes)
-   ipv6=yes],
-  [AC_MSG_RESULT(no)],
-  [AC_MSG_RESULT(no)])
-  AC_LANG_POP(C)
-fi
-
 dnl
 dnl IPv6 stack checks
 dnl
-if test "${ipv6}" = "yes"; then
-  builtin(include, config/acipv6.m4)
+if test ! "${_USING_WINDOWS}"
+then
+builtin(include, config/acipv6.m4)
 fi
 
 dnl
@@ -928,7 +898,7 @@ dnl Win32/64 specific flags go here.
 dnl
 if test "${_USING_WINDOWS}" = "1"; then
 	LDFLAGS="${LDFLAGS} -mconsole"
-	LIBS="${LIBS} -lws2_32 -liphlpapi"
+	LIBS="${LIBS} -lws2_32 -liphlpapi -ladvapi32"
 fi
 
 dnl

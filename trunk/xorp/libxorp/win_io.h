@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/libxorp/win_io.h,v 1.2 2005/08/18 15:28:43 bms Exp $
  */
 
 #ifndef __LIBXORPWIN_IO_H__
@@ -26,10 +26,16 @@ extern "C" {
 #endif
 
 #ifdef HOST_OS_WINDOWS
+
+int win_strerror_r(DWORD errnum, char *strerrbuf, size_t buflen);
+char *win_strerror(DWORD errnum);
+
 #define WINIO_ERROR_HASINPUT (-2)	/* Data is ready to be read */
+
 ssize_t	win_con_read(HANDLE h, void *buf, size_t bufsize);
 ssize_t	win_pipe_read(HANDLE h, void *buf, size_t bufsize);
-#endif
+
+#endif /* HOST_OS_WINDOWS */
 
 #ifdef __cplusplus
 }

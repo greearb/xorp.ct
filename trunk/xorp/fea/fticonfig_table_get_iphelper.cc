@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_table_get_iphelper.cc,v 1.2 2005/08/18 15:45:45 bms Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/win_io.h"
 
 #ifdef HAVE_STDLIB_H
 #include <stdlib.h>
@@ -26,19 +27,11 @@
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
 #endif
-
 #ifdef HAVE_ROUTPROT_H
 #include <routprot.h>
 #endif
-
-// XXX: Missing from MinGW just now (iprtrmib.h definitions, and routprot.h)
-
-#ifndef PROTO_IP_NETMGMT
-#define PROTO_IP_NETMGMT	3
-#endif
-
-#ifndef MIB_IPROUTE_TYPE_DIRECT
-#define MIB_IPROUTE_TYPE_DIRECT	3
+#ifdef HAVE_IPRTRMIB_H
+#include <iprtrmib.h>
 #endif
 
 #include "fticonfig.hh"
@@ -171,22 +164,9 @@ FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
     } while ((++tries < 3) || (result == ERROR_INSUFFICIENT_BUFFER));
 
     if (result != NO_ERROR) {
-	DWORD dwMsgLen;
-	LPSTR pMsg;
-
-	dwMsgLen = FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM|
-				  FORMAT_MESSAGE_ALLOCATE_BUFFER|
-				  FORMAT_MESSAGE_IGNORE_INSERTS|
-				  FORMAT_MESSAGE_MAX_WIDTH_MASK,
-				  NULL, result,
-				  MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
-				  (LPSTR)&pMsg, 0, 0);
-	XLOG_ERROR("GetIpForwardTable(): %s\n", pMsg);
-	LocalFree(pMsg);
-
+	XLOG_ERROR("GetIpForwardTable(): %s\n", win_strerror(result));
 	if (pFwdTable != NULL)
 	    free(pFwdTable);
-
 	return false;
     }
 
@@ -196,27 +176,38 @@ FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
     bool xorp_route;
 
     for (unsigned int i = 0; i < pFwdTable->dwNumEntries; i++) {
-	dst_addr.copy_in((uint8_t*)&(pFwdTable->table[i].dwForwardDest));
-	dst_mask.copy_in((uint8_t*)&(pFwdTable->table[i].dwForwardMask));
-	nexthop_addr.copy_in((uint8_t*)&(pFwdTable->table[i].dwForwardNextHop));
+	PMIB_IPFORWARDROW pFwdRow = &pFwdTable->table[i];
+
+	dst_addr.copy_in(reinterpret_cast<uint8_t*>(&pFwdRow->dwForwardDest));
+	dst_mask.copy_in(reinterpret_cast<uint8_t*>(&pFwdRow->dwForwardMask));
+	nexthop_addr.copy_in(reinterpret_cast<uint8_t*>(
+			     &pFwdRow->dwForwardNextHop));
 
 	// XXX: No easy way of telling XORP routes apart from manually
 	// added statics in NT.
-	if (pFwdTable->table[i].dwForwardProto == PROTO_IP_NETMGMT)
+	if (pFwdRow->dwForwardProto == PROTO_IP_NETMGMT)
 	    xorp_route = true;
 
-	// TODO: define default routing metric and admin distance.
-	char if_name[IFNAMSIZ];
-	if (NULL == if_indextoname(pFwdTable->table[i].dwForwardIfIndex,
-				   if_name)) {
-	    XLOG_FATAL("if_indextoname() failed\n");
+	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
+	IfTree& it = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
+
+	string if_name;
+	if (ii != it.ifs().end()) {
+	    if_name = ii->second.ifname();
+	} else {
+	    if_name = "unknown";
+	    XLOG_WARNING("route via unknown interface %d\n", (int)ifindex);
 	}
+
+	// TODO: define default routing metric and admin distance.
 	Fte4 fte4 = Fte4(IPv4Net(dst_addr, dst_mask.mask_len()), nexthop_addr,
-		   if_name, if_name, 0xffff, 0xffff, xorp_route);
+			 if_name, if_name,
+		   	 0xffff, 0xffff, xorp_route);
 
 	// If the next hop is the final destination, then consider
 	// the route to be a 'connected' route.
-	if (pFwdTable->table[i].dwForwardType == MIB_IPROUTE_TYPE_DIRECT)
+	if (pFwdRow->dwForwardType == MIB_IPROUTE_TYPE_DIRECT)
 	    fte4.mark_connected_route();
 
 	debug_msg("adding entry %s\n", fte4.str().c_str());

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.4 2005/08/29 22:08:43 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.5 2005/11/05 18:05:35 bms Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -33,12 +33,6 @@
 #ifdef HOST_OS_WINDOWS
 
 class ClockBase;
-
-/**
- * A map of sockets to the mask of events for which notifications have
- * been requested for each member.
- */
-typedef map<SOCKET, long>		SocketWSAEventMap;
 
 /**
  * A tuple specifying a Windows object and I/O event type.
@@ -83,12 +77,21 @@ public:
 typedef map<IoEventTuple, IoEventCb>	IoEventMap;
 
 /**
- * Pick a safe range for our private messages which 1) doesn't collide
- * with anything else and 2) may be used with the GetMessage() API's
- * message filtering capabilities.
+ * A map of Windows event handle to socket handle, used for faster
+ * dispatch of socket events on return from WFMO().
+ * Note that XorpFd is used as the value type.
  */
-#define	XM_USER_BASE	(WM_USER + 16384)
-#define	XM_SOCKET	(XM_USER_BASE + 1)
+typedef map<HANDLE, XorpFd>		EventSocketMap;
+
+/**
+ * A value-type tuple of a Windows event handle and a WSA event mask.
+ */
+typedef std::pair<HANDLE, long>		MaskEventPair;
+
+/**
+ * A map of sockets to a MaskEventPair tuple.
+ */
+typedef map<SOCKET, MaskEventPair>	SocketEventMap;
 
 /**
  * Mask of Winsock events for which the I/O event framework is able
@@ -97,9 +100,8 @@ typedef map<IoEventTuple, IoEventCb>	IoEventMap;
 #define	WSAEVENT_SUPPORTED	\
 	(FD_READ | FD_WRITE | FD_OOB | FD_ACCEPT | FD_CONNECT | FD_CLOSE)
 
-
 /**
- * @short A class to provide an interface to Windows I/O multiplexing.
+ * @short A class to provide an interface to Windows native I/O multiplexing.
  *
  * A WinDispatcher provides an entity where callbacks for pending I/O
  * operations on Windows sockets and other Windows system objects may
@@ -178,46 +180,26 @@ public:
     void wait_and_dispatch(int ms);
 
 protected:
-    void dispatch_sockevent();
+    void dispatch_sockevent(HANDLE hevent, XorpFd fd);
 
 private:
     bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
     bool add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
     bool remove_socket_cb(XorpFd& fd, IoEventType type);
     bool remove_handle_cb(XorpFd& fd, IoEventType type);
-    void dispatch_socket_writes();
     void dispatch_pipe_reads();
 
 private:
-    static const char *WNDCLASS_STATIC;
-    static const char *WNDNAME_XORP;
-
-    // NT forces us to poll for certain kinds of events when we're using
-    // a single process, because the programming model is multithreaded.
     static const int POLLED_INTERVAL_MS = 250;
 
 private:
-    ClockBase*		_clock;
-    IoEventMap		_ioevent_map;
+    ClockBase*		_clock;		    // System clock
 
-    // Message map for WSA*Select() dispatch.
-    SocketWSAEventMap	_socket_wsaevent_map;
-
-    // WSAEventSelect() support.
-    HANDLE		_hsockevent;
-    vector<SOCKET>	_eventsocks;
-
-    // Win32 object handles which are set to the 'signalled' state on events.
-    vector<HANDLE>	_handles;
-
-    // Sockets requiring select() polling for writability events.
-    vector<SOCKET>	_writesockets4;
-    vector<SOCKET>	_writesockets6;
-    fd_set		_writefdset4;
-    fd_set		_writefdset6;
-
-    // Pipe handles requiring PeekNamedPipe() polling for readability.
-    vector<HANDLE>	_polled_pipes;
+    IoEventMap		_callback_map;	    // XorpFd + IoEventType -> Callback
+    SocketEventMap	_socket_event_map;  // Socket -> Event + Mask
+    EventSocketMap	_event_socket_map;  // Event -> Socket
+    vector<HANDLE>	_handles;	    // All Win32 handles pending wait
+    vector<HANDLE>	_polled_pipes;	    // Pipe handles pending poll
 };
 
 #endif // HOST_OS_WINDOWS
