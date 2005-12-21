@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.11 2005/08/04 10:05:09 bms Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.12 2005/08/18 18:14:52 pavlin Exp $"
 
 /*
  * Message logging utility.
@@ -1148,6 +1148,7 @@ x_vasprintf(char **ret, const char *format, va_list ap)
     size_t i, buf_size = 1024 + 1;
     char *buf_ptr = NULL;
     int ret_size;
+    va_list temp;
 
     for (i = 0; i < 3; i++) {
 	/*
@@ -1158,7 +1159,8 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	if (buf_ptr == NULL)
 	    break;		/* Cannot allocate memory */
 	buf_ptr[0] = '\0';
-	ret_size = vsnprintf(buf_ptr, buf_size, format, ap);
+	va_copy(temp, ap);
+	ret_size = vsnprintf(buf_ptr, buf_size, format, temp);
 	if (ret_size < 0)
 	    break;		/* Cannot format the string */
 	if ((size_t)ret_size < buf_size) {
@@ -1167,6 +1169,7 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	}
 	/* The allocated buffer was too small. Try again. */
 	free(buf_ptr);
+	buf_ptr = NULL;
 	buf_size = ret_size + 1; /* XXX: include space for trailing '\0' */
     }
 
