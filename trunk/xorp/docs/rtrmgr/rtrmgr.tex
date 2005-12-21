@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.45 2005/11/18 00:22:56 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.46 2005/11/29 01:48:40 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -801,12 +801,10 @@ integer configuration item may take.  The syntax is:
 of the variable to be restricted.  This is typically
 \texttt{\"\$(@)\"}.  The {\it lowValue} and {\it highVal} parameters
 specify the lower and upper bound of the allowed range of values.
-The {\it \%help:} is a mandatory keyword and is followed by the help string.
-Currently the help string is not used, but it may be used in the future
-for command-line completion purpose.
+The {\it \%help:} is a mandatory keyword and is followed by the help
+string. The help string is used for command-line completion purpose.
 
-An example of use appears in the interface address prefix
-specification:
+An example of use appears in the interface address prefix specification:
 
 \begin{verbatim}
        address @: ipv4 {
@@ -821,6 +819,10 @@ specification:
          }
        }
 \end{verbatim}
+
+If there is more than one {\tt \%allow-range} command restricting
+the value of a variable, then the assigned value must belong to any
+of the specified ranges.
 
 \subsubsection{The {\tt \%help} Command.}
 
