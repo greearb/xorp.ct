@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.46 2005/09/01 01:39:17 zec Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.47 2005/09/05 17:00:15 zec Exp $"
 
 #include "rip_module.h"
 
@@ -295,11 +295,8 @@ Port<A>::stop_request_table_timer()
 
 template <typename A>
 bool
-Port<A>::request_table_timeout()
+Port<A>::request_table()
 {
-    if (_peers.empty() == false)
-	return false;
-
     RipPacket<A>* pkt = new RipPacket<A>(RIP_AF_CONSTANTS<A>::IP_GROUP(),
 					 RIP_AF_CONSTANTS<A>::IP_PORT);
 
@@ -314,6 +311,16 @@ Port<A>::request_table_timeout()
     push_packets();
     debug_msg("Sending Request.\n");
     return true;
+}
+
+template <typename A>
+bool
+Port<A>::request_table_timeout()
+{
+    if (_peers.empty() == false)
+	return false;
+
+    return (request_table());
 }
 
 template <typename A>
@@ -549,6 +556,7 @@ Port<A>::start_stop_output_processing()
     if (output_allowed()) {
 	start_request_table_timer();
 	start_output_processing();
+	request_table();
     } else {
 	stop_request_table_timer();
 	stop_output_processing();

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.22 2004/09/17 13:57:15 abittau Exp $
+// $XORP: xorp/rip/port.hh,v 1.23 2005/03/25 02:54:27 pavlin Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -335,6 +335,12 @@ protected:
      * Stop request table timer.
      */
     void stop_request_table_timer();
+
+    /**
+     * Send request packet.
+     * @return true if packet sent, false if no packet sent.
+     */
+    bool request_table();
 
     /**
      * Send request packet if there are no peers.
