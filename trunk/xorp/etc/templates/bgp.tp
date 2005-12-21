@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.75 2005/12/16 18:08:09 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.76 2005/12/19 06:56:52 atanu Exp $ */
 
 protocols {
     bgp {
@@ -279,6 +279,8 @@ protocols {
 	    }
 
 	    holdtime {
+		%allow-range: $(@) "0" "0" %help: "Disable holdtime";
+	        %allow-range: $(@) "3" "65535" %help: "Time to wait for peer";
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_holdtime?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&holdtime:u32=$(@)";
 	    }
 
