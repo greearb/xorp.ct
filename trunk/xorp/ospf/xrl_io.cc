@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.25 2005/11/05 20:43:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.26 2005/11/17 17:43:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -169,7 +169,7 @@ XrlIO<A>::send_cb(const XrlError& xrl_error, string interface, string vif)
 	break;
 
     case NO_FINDER:
-	// XXX - Temporarily code dump if this condition occurs.
+	// XXX - Temporarily core dump if this condition occurs.
 	XLOG_FATAL("NO FINDER");
 	break;
 
