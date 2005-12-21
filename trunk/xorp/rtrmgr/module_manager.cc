@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.53 2005/12/17 02:02:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.54 2005/12/21 09:43:00 bms Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -63,7 +63,7 @@ static map<pid_t, string> module_pids;
 static multimap<string, Module*> module_paths;
 
 
-int
+static int
 restart_module(Module* module)
 {
     XLOG_INFO("Restarting module %s ...", module->name().c_str());

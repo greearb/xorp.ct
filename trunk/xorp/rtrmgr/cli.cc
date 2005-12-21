@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.114 2005/12/21 00:58:44 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.115 2005/12/21 09:43:00 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,7 +51,7 @@ get_user_name(uid_t uid)
     string result;
 
 #ifdef HOST_OS_WINDOWS
-    // TODO: implenent it for Windows
+    // TODO: implement it for Windows
     UNUSED(uid);
     return (result);
 #else // ! HOST_OS_WINDOWS
@@ -117,7 +117,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
 	if (gethostname(buf, sizeof(buf)) < 0) {
 #ifdef HOST_OS_WINDOWS
        	    XLOG_FATAL("gethostname() failed: %s",
-			win_strerror(WSAGetLastError()));
+		       win_strerror(WSAGetLastError()));
 #else
             XLOG_FATAL("gethostname() failed: %s", strerror(errno));
 #endif
