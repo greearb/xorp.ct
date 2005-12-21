@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.4 2003/11/04 02:27:20 mjh Exp $
+# $XORP: xorp/bgp/harness/test_path_attribute1.sh,v 1.5 2005/12/20 08:30:54 atanu Exp $
 #
 
 #
@@ -125,7 +125,7 @@ test1()
     coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
-    ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"
+    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update
@@ -187,7 +187,7 @@ test2()
     coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
-    ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"
+    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update
@@ -253,7 +253,7 @@ test3()
     coord peer3 establish AS $PEER3_AS holdtime 0 id 192.150.187.102
     coord peer3 assert established
 
-    ASPATH="$PEER1_AS,1,2,(3,4,5),6,(7,8),9"
+    ASPATH="$PEER1_AS,1,2,[3,4,5],6,[7,8],9"
     NEXTHOP="20.20.20.20"
 
     PACKET1="packet update

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.19 2005/06/28 16:46:16 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.20 2005/12/20 08:30:54 atanu Exp $
 #
 
 #
@@ -291,18 +291,18 @@ test2()
     # Add a route from peer1.
     coord peer1 send packet update \
 	origin 2 \
-	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9" \
+	aspath "$PEER1_AS,2,[3,4,5],6,[7,8],9" \
 	nexthop $NH1 \
 	nlri 10.10.10.0/24 \
 	nlri 20.20.20.20/24
 
     sleep 2
     coord peer1 trie sent lookup 10.10.10.0/24 \
-	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup 10.10.10.0/24 \
-	aspath "65008,$PEER1_AS,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup 10.10.10.0/24 \
-	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9" 
+	aspath "$PEER1_AS,2,[3,4,5],6,[7,8],9" 
 
     # Add a better route from peer2.
     coord peer2 send packet update \
@@ -327,11 +327,11 @@ test2()
 
     sleep 2
     coord peer1 trie sent lookup 10.10.10.0/24 \
-	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup 10.10.10.0/24 \
-	aspath "65008,$PEER1_AS,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup 10.10.10.0/24 \
-	aspath "$PEER1_AS,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS,2,[3,4,5],6,[7,8],9"
 
 
 # At the end of the test we expect all the peerings to still be established.
@@ -391,25 +391,25 @@ test2_ipv6()
     # Add a route from peer1.
     coord peer1 send packet update \
 	origin 2 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" \
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9" \
 	nexthop6 $NH1_IPV6 \
 	nlri6 $NLRI1 \
 	nlri6 $NLRI2
 
     sleep 2
     coord peer1 trie sent lookup $NLRI1 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup $NLRI1 \
-	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup $NLRI1 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" 
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9" 
 
     coord peer1 trie sent lookup $NLRI2 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup $NLRI2 \
-	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup $NLRI2 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9" 
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9" 
 
     # Add a better route from peer2.
     coord peer2 send packet update \
@@ -438,18 +438,18 @@ test2_ipv6()
 
     sleep 2
     coord peer1 trie sent lookup $NLRI1 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup $NLRI1 \
-	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup $NLRI1 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
 
     coord peer1 trie sent lookup $NLRI2 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer2 trie recv lookup $NLRI2 \
-	aspath "65008,$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "65008,$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
     coord peer3 trie recv lookup $NLRI2 \
-	aspath "$PEER1_AS_IPV6,2,(3,4,5),6,(7,8),9"
+	aspath "$PEER1_AS_IPV6,2,[3,4,5],6,[7,8],9"
 
 
 # At the end of the test we expect all the peerings to still be established.

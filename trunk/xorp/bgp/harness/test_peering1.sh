@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.55 2005/12/20 08:30:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.56 2005/12/20 13:00:38 atanu Exp $
 #
 
 #
@@ -186,7 +186,7 @@ test4()
     echo "TEST4 - Send an update packet and don't get it back"
     PACKET='packet update
 	origin 2
-	aspath 1,2,(3,4,5),6,(7,8),9
+	aspath 1,2,[3,4,5],6,[7,8],9
 	nexthop 20.20.20.20 
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24
@@ -230,7 +230,7 @@ test6()
 {
     echo "TEST6 - Send an update packet without an origin"
     PACKET='packet update
-	aspath 1,2,(3,4,5),6,(7,8),9
+	aspath 1,2,[3,4,5],6,[7,8],9
 	nexthop 20.20.20.20 
 	nlri 10.10.10.0/24
 	nlri 20.20.20.20/24'
@@ -802,7 +802,7 @@ test23()
 
     PACKET="packet update
 	origin 1
-	aspath 1,2,(3,4,5),6,(7,8),9
+	aspath 1,2,[3,4,5],6,[7,8],9
 	nexthop6 20:20:20:20:20:20:20:20
 	nlri6 2000::/3
         localpref 100"
