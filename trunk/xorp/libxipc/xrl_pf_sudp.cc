@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.43 2005/08/30 02:36:21 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.44 2005/08/30 06:29:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -403,7 +403,8 @@ XrlPFSUDPSender::recv(XorpFd fd, IoEventType type)
 
     XrlError	err;
     XUID 	xuid;
-    uint32_t 	content_bytes, header_bytes;
+    uint32_t 	content_bytes = 0;
+    uint32_t	header_bytes = 0;
 
     if (parse_response(buf, err, xuid, header_bytes, content_bytes) != true) {
 	debug_msg("response header parsing failed\n");
