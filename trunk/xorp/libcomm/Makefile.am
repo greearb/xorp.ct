@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libcomm/Makefile.am,v 1.8 2004/11/23 22:43:43 bms Exp $
+## $XORP: xorp/libcomm/Makefile.am,v 1.9 2005/12/21 09:42:55 bms Exp $
 ##
 
 # -- Real Programs
@@ -23,8 +23,6 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 # -- Program Sources
 test_comm_SOURCES = test_comm.c
 test_connect_SOURCES = test_connect.cc
-
-test_connect_CFLAGS = -I$(top_srcdir)/libxorp
 
 # -- Library Sources
 libcomm_la_SOURCES  = comm_module.h

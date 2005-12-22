@@ -108,8 +108,6 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 test_comm_SOURCES = test_comm.c
 test_connect_SOURCES = test_connect.cc
 
-test_connect_CFLAGS = -I$(top_srcdir)/libxorp
-
 # -- Library Sources
 libcomm_la_SOURCES = comm_module.h comm_api.h comm_private.h comm_sock.c comm_user.c
 
