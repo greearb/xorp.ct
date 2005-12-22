@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.40 2005/12/01 22:39:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.41 2005/12/08 01:54:57 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -689,6 +689,23 @@ ProtoComm::join_multicast_group(uint32_t vif_index, const IPvX& group)
 	mfea_vif->addr_ptr()->copy_out(in_addr);
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
+
+#ifdef HOST_OS_WINDOWS
+	//
+	// Winsock requires that raw sockets be bound to the interface
+	// they're being used to receive or send on. -bms
+	//
+	struct sockaddr_in sin;
+	memset(&sin, 0, sizeof(sin));
+	sin.sin_family = AF_INET;
+	sin.sin_addr = in_addr;
+
+	if (SOCKET_ERROR == bind(_proto_socket, (sockaddr *)&sin,
+				 sizeof(sockaddr_in))) {
+	    XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
+	}
+#endif // HOST_OS_WINDOWS
+
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    XLOG_ERROR("Cannot join group %s on vif %s: %s",
