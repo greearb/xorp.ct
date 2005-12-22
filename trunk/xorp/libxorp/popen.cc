@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.10 2005/11/05 20:13:00 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.11 2005/12/21 09:42:57 bms Exp $"
 
 #include "libxorp_module.h"
 
@@ -152,7 +152,7 @@ popen2(const string& command, const list<string>& arguments,
 	    return (0);
 	}
     } else
-#endif
+#endif // 0
     {
 	if (0 == CreatePipe(&herr[0], &herr[1], &pipesa, 0)) {
 	    CloseHandle(hout[0]);
@@ -182,7 +182,7 @@ popen2(const string& command, const list<string>& arguments,
     // We need not do this for the parent ends; fclose() does this for us.
     cur->h_out_child = hout[1];
     cur->h_err_child = herr[1];
-#endif
+#endif // 0
 
     // XXX: We currently force the program name to be escaped with quotes
     // before munging the command line for CreateProcess().
@@ -226,7 +226,7 @@ popen2(const string& command, const list<string>& arguments,
     ResumeThread(pi.hThread);
     return (cur->pid);
 
-#else // !HOST_OS_WINDOWS
+#else // ! HOST_OS_WINDOWS
 
     struct pid_s *cur;
     FILE *iop_out, *iop_err;
@@ -386,7 +386,7 @@ popen2(const string& command, const list<string>& arguments,
     errstream = iop_err;
 
     return pid;
-#endif // !HOST_OS_WINDOWS
+#endif // ! HOST_OS_WINDOWS
 }
 
 /*
@@ -422,16 +422,16 @@ pclose2(FILE *iop_out)
     (void)fclose(cur->fp_err);
 
 #ifdef HOST_OS_WINDOWS
-    //CloseHandle(cur->h_out_child);
-    //CloseHandle(cur->h_err_child);
+    // CloseHandle(cur->h_out_child);
+    // CloseHandle(cur->h_err_child);
     CloseHandle(cur->ph);
     pid = cur->pid;
     pstat = (int)dwStat;
-#else /* !HOST_OS_WINDOWS */
+#else // ! HOST_OS_WINDOWS
     do {
 	pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
     } while (pid == -1 && errno == EINTR);
-#endif /* HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
 
     /* Remove the entry from the linked list. */
     if (last == NULL)
@@ -462,4 +462,4 @@ pgethandle(pid_t pid)
 
     return (cur->ph);
 }
-#endif
+#endif // HOST_OS_WINDOWS

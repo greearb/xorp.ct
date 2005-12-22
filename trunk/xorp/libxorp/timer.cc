@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.27 2005/10/24 12:43:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.28 2005/12/21 09:42:57 bms Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -207,10 +207,10 @@ TimerList::TimerList(ClockBase* clock)
     assert(the_timerlist == NULL);
     the_timerlist = this;
 #ifdef HOST_OS_WINDOWS
-    //timeBeginPeriod(1);	// requires WINMM.DLL
+    // timeBeginPeriod(1);	// requires WINMM.DLL
     _hirestimer = CreateWaitableTimer(NULL, TRUE, NULL);
     assert(_hirestimer != NULL);
-#endif
+#endif // HOST_OS_WINDOWS
 }
 
 TimerList::~TimerList()
@@ -219,7 +219,7 @@ TimerList::~TimerList()
     if (_hirestimer != NULL)
 	CloseHandle(_hirestimer);
     //timeEndPeriod(1);
-#endif
+#endif // HOST_OS_WINDOWS
     the_timerlist = NULL;
 }
 
@@ -275,12 +275,12 @@ TimerList::system_sleep(const TimeVal& tv)
 			 NULL, NULL, FALSE);
 	WaitForSingleObject(instance->_hirestimer, INFINITE);
     }
-#else /* !HOST_OS_WINDOWS */
+#else // ! HOST_OS_WINDOWS
     if (tv.sec() > 0)
 	sleep(tv.sec());
     if (tv.usec() > 0)
 	usleep(tv.usec());
-#endif /* HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
 
     instance->advance_time();
 }

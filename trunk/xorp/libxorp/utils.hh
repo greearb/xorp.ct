@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.10 2005/10/22 01:41:44 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.11 2005/12/21 09:42:58 bms Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -52,13 +52,13 @@
 #define	PATH_ENV_DELIMITER_CHAR		NT_PATH_ENV_DELIMITER_CHAR
 #define	PATH_ENV_DELIMITER_STRING	NT_PATH_ENV_DELIMITER_STRING
 #define	EXECUTABLE_SUFFIX		NT_EXECUTABLE_SUFFIX
-#else	// !HOST_OS_WINDOWS
+#else	// ! HOST_OS_WINDOWS
 #define	PATH_DELIMITER_CHAR		UNIX_PATH_DELIMITER_CHAR
 #define	PATH_DELIMITER_STRING		UNIX_PATH_DELIMITER_STRING
 #define	PATH_ENV_DELIMITER_CHAR		UNIX_PATH_ENV_DELIMITER_CHAR
 #define	PATH_ENV_DELIMITER_STRING	UNIX_PATH_ENV_DELIMITER_STRING
 #define	EXECUTABLE_SUFFIX		UNIX_EXECUTABLE_SUFFIX
-#endif	// HOST_OS_WINDOWS
+#endif	// ! HOST_OS_WINDOWS
 
 /*
  * Convert a UNIX style path to the platform's native path format.
@@ -76,9 +76,9 @@ unix_path_to_native(const string& unixpath)
         nativepath[n] = NT_PATH_DELIMITER_CHAR;
     }
     return (nativepath);
-#else
+#else // ! HOST_OS_WINDOWS
     return string(unixpath);
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 /*
@@ -102,13 +102,13 @@ is_absolute_path(const string& path, bool homeok = false)
         return true;
     return false;
     UNUSED(homeok);
-#else
+#else // ! HOST_OS_WINDOWS
     if (path[0] == '/')
         return true;
     if (homeok && path[0] == '~')
         return true;
     return false;
-#endif
+#endif // ! HOST_OS_WINDOWS
 }
 
 /**
@@ -257,6 +257,6 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
  * @param cmdline string to which the escaped command line should be appended.
  */
 void win_quote_args(const list<string>& args, string& cmdline);
-#endif
+#endif // HOST_OS_WINDOWS
 
 #endif // __LIBXORP_UTILS_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/utils.cc,v 1.6 2005/10/22 01:41:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/utils.cc,v 1.7 2005/12/21 09:42:58 bms Exp $"
 
 #include "xorp.h"
 #include "c_format.hh"
@@ -108,7 +108,7 @@ win_quote_args(const list<string>& args, string& cmdline)
 	}
     }
 }
-#endif
+#endif // HOST_OS_WINDOWS
 
 const char*
 xorp_basename(const char* argv0)
@@ -214,7 +214,7 @@ xorp_make_temporary_file(const string& tmp_dir,
 	if (fp == NULL)
 	    continue;
 
-#else
+#else // ! HOST_OS_WINDOWS
 
 	// Compose the temporary file name and try to create the file
 	string tmp_filename = tmp_dir + PATH_DELIMITER_STRING +

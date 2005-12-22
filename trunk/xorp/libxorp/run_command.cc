@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.16 2005/10/23 18:47:25 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.17 2005/12/21 09:42:57 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,13 +51,13 @@ static char *_path_bshell = NULL;
 
 #define	fileno(stream) (_get_osfhandle(_fileno(stream)))
 
-#else // !HOST_OS_WINDOWS
+#else // ! HOST_OS_WINDOWS
 
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "/bin/sh"
 #endif
 
-#endif // HOST_OS_WINDOWS
+#endif // ! HOST_OS_WINDOWS
 
 RunCommand::RunCommand(EventLoop&			eventloop,
 		       const string&			command,
@@ -98,7 +98,7 @@ RunShellCommand::RunShellCommand(EventLoop&			eventloop,
 	    _path_bshell = const_cast<char *>(_PATH_BSHELL);
 	_command = string(_path_bshell);
     }
-#endif
+#endif // HOST_OS_WINDOWS
 
     string final_command_argument_string = command + " " + argument_string;
 
@@ -197,17 +197,21 @@ RunCommandBase::execute()
 
     // We can't rely on end-of-file indicators alone on Win32 to determine
     // when a child process died; we must wait for it in the event loop.
-    if (!_eventloop.add_ioevent_cb(_ph, IOT_EXCEPTION,
-			   callback(this, &RunCommandBase::win_proc_done_cb)))
+    if (!_eventloop.add_ioevent_cb(
+	    _ph,
+	    IOT_EXCEPTION,
+	    callback(this, &RunCommandBase::win_proc_done_cb)))
 	XLOG_FATAL("Cannot add child process handle to event loop.\n");
-#endif
+#endif // HOST_OS_WINDOWS
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
       XorpFd(fileno(_stdout_stream))
      );
-    _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
-				    callback(this, &RunCommandBase::append_data));
+    _stdout_file_reader->add_buffer(
+	_stdout_buffer,
+	BUF_SIZE,
+	callback(this, &RunCommandBase::append_data));
     if (! _stdout_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stdout reader for command %s",
 		   final_command.c_str());
@@ -219,8 +223,10 @@ RunCommandBase::execute()
     _stderr_file_reader = new AsyncFileReader(_eventloop,
       XorpFd(fileno(_stderr_stream))
      );
-    _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-				    callback(this, &RunCommandBase::append_data));
+    _stderr_file_reader->add_buffer(
+	_stderr_buffer,
+	BUF_SIZE,
+	callback(this, &RunCommandBase::append_data));
     if (! _stderr_file_reader->start()) {
 	XLOG_ERROR("Failed to start a stderr reader for command %s",
 		   final_command.c_str());
@@ -262,9 +268,9 @@ RunCommandBase::terminate()
 		}
 	    }
 	}
-#else
+#else // ! HOST_OS_WINDOWS
 	killpg(_pid, SIGTERM);
-#endif
+#endif // ! HOST_OS_WINDOWS
 	_pid = 0;
     }
 
@@ -292,14 +298,14 @@ RunCommandBase::close_output()
 	// pclose2() will close the process handle from under us.
 	_eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
 	_ph = INVALID_HANDLE_VALUE;
-#endif
+#endif // HOST_OS_WINDOWS
 	int status = pclose2(_stdout_stream);
 	_stdout_stream = NULL;
 
 #ifdef HOST_OS_WINDOWS
 	_command_is_exited = true;
 	_command_exit_status = status;
-#else /* !HOST_OS_WINDOWS */
+#else // ! HOST_OS_WINDOWS
 	// Get the command status
 	if (status >= 0) {
 	    _command_is_exited = WIFEXITED(status);
@@ -315,7 +321,7 @@ RunCommandBase::close_output()
 		_command_stop_signal = WSTOPSIG(status);
 	    }
 	}
-#endif /* HOST_OS_WINDOWS */
+#endif // ! HOST_OS_WINDOWS
     }
 
     //
@@ -383,13 +389,17 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	*last_offset_ptr = 0;
 	if (is_stdout) {
 	    memset(_stdout_buffer, 0, BUF_SIZE);
-	    _stdout_file_reader->add_buffer(_stdout_buffer, BUF_SIZE,
-					    callback(this, &RunCommandBase::append_data));
+	    _stdout_file_reader->add_buffer(
+		_stdout_buffer,
+		BUF_SIZE,
+		callback(this, &RunCommandBase::append_data));
 	    _stdout_file_reader->start();
 	} else {
 	    memset(_stderr_buffer, 0, BUF_SIZE);
-	    _stderr_file_reader->add_buffer(_stderr_buffer, BUF_SIZE,
-					    callback(this, &RunCommandBase::append_data));
+	    _stderr_file_reader->add_buffer(
+		_stderr_buffer,
+		BUF_SIZE,
+		callback(this, &RunCommandBase::append_data));
 	    _stderr_file_reader->start();
 	}
     }
@@ -505,7 +515,7 @@ RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 {
 #ifdef HOST_OS_WINDOWS
     UNUSED(error_msg);
-#else
+#else // ! HOST_OS_WINDOWS
     if (! _is_exec_id_saved)
 	return (XORP_OK);	// Nothing to do, because nothing was saved
 
@@ -520,7 +530,7 @@ RunCommandBase::ExecId::restore_saved_exec_id(string& error_msg) const
 			     XORP_UINT_CAST(saved_gid()), strerror(errno));
 	return (XORP_ERROR);
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -530,7 +540,7 @@ RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
     UNUSED(error_msg);
-#else
+#else // ! HOST_OS_WINDOWS
     if (! is_set())
 	return (XORP_OK);
 
@@ -555,7 +565,7 @@ RunCommandBase::ExecId::set_effective_exec_id(string& error_msg)
 	    return (XORP_ERROR);
 	}
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
     return (XORP_OK);
 }
@@ -593,7 +603,8 @@ RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
     XLOG_ASSERT(type == IOT_EXCEPTION);
     XLOG_ASSERT(static_cast<HANDLE>(fd) == _ph);
     _eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
-    _reaper_timer = _eventloop.new_oneoff_after_ms(WIN32_PROC_TIMEOUT_MS,
+    _reaper_timer = _eventloop.new_oneoff_after_ms(
+	WIN32_PROC_TIMEOUT_MS,
 	callback(this, &RunCommandBase::win_proc_reaper_cb));
     XLOG_ASSERT(_reaper_timer.scheduled());
 }
@@ -603,4 +614,4 @@ RunCommandBase::win_proc_reaper_cb()
 {
     done(AsyncFileOperator::END_OF_FILE, 0);
 }
-#endif
+#endif // HOST_OS_WINDOWS
