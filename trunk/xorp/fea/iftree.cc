@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.32 2005/10/18 04:15:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.33 2005/12/21 09:42:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -77,7 +77,7 @@ IfTree::add_if(const string& ifname)
 }
 
 IfTree::IfMap::iterator
-IfTree::get_if(const uint32_t ifindex)
+IfTree::get_if(uint32_t ifindex)
 {
     IfTree::IfMap::iterator ii;
     for (ii = _ifs.begin(); ii != _ifs.end(); ++ii) {
@@ -88,7 +88,7 @@ IfTree::get_if(const uint32_t ifindex)
 }
 
 IfTree::IfMap::const_iterator
-IfTree::get_if(const uint32_t ifindex) const
+IfTree::get_if(uint32_t ifindex) const
 {
     IfTree::IfMap::const_iterator ii;
     for (ii = _ifs.begin(); ii != _ifs.end(); ++ii) {

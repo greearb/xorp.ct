@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.33 2005/10/18 04:15:14 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.34 2005/12/21 09:42:54 bms Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -161,7 +161,7 @@ public:
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    IfMap::iterator get_if(const uint32_t ifindex);
+    IfMap::iterator get_if(uint32_t ifindex);
 
     /**
      * Get iterator of corresponding to named interface.
@@ -180,7 +180,7 @@ public:
      *
      * @return iterator, will be equal to ifs().end() if invalid.
      */
-    IfMap::const_iterator get_if(const uint32_t ifindex) const;
+    IfMap::const_iterator get_if(uint32_t ifindex) const;
 
     inline const IfMap& ifs() const { return _ifs; }
 
