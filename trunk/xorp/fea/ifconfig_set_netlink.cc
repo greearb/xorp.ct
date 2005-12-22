@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.22 2005/05/08 19:27:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.23 2005/08/18 15:45:48 bms Exp $"
 
 #include "fea_module.h"
 
@@ -131,12 +131,13 @@ IfConfigSetNetlink::stop(string& error_msg)
 bool
 IfConfigSetNetlink::is_discard_emulated(const IfTreeInterface& i) const
 {
+    UNUSED(i);
+
 #ifdef HOST_OS_LINUX
     return (true);
 #else
     return (false);
 #endif
-    UNUSED(i);
 }
 
 #ifndef HAVE_NETLINK_SOCKETS

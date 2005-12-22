@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.41 2005/12/08 01:54:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.42 2005/12/22 11:42:37 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -306,6 +306,8 @@ ProtoComm::stop()
 int
 ProtoComm::ip_hdr_include(bool is_enabled)
 {
+    UNUSED(is_enabled);
+
     switch (family()) {
     case AF_INET:
     {
@@ -335,8 +337,6 @@ ProtoComm::ip_hdr_include(bool is_enabled)
     }
     
     return (XORP_OK);
-    
-    UNUSED(is_enabled);
 }
 
 
@@ -463,8 +463,6 @@ ProtoComm::recv_pktinfo(bool is_enabled)
     }
     
     return (XORP_OK);
-    
-    UNUSED(is_enabled);
 }
 
 
@@ -1080,8 +1078,8 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	return;			// Error
     }
 #else
-    XLOG_FATAL("Needs rewritten to use WSARecv() with WinSock2");
     UNUSED(nbytes);
+    XLOG_FATAL("Needs rewritten to use WSARecv() with WinSock2");
 #endif
     
     // Check if it is a signal from the kernel to the user-level
@@ -1692,7 +1690,6 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 #endif
 	
 #else /* HOST_OS_WINDOWS */
-	XLOG_FATAL("WinSock2 lacks a 'struct ip' definition");
 	UNUSED(ip_option);
 	UNUSED(ip_option_p);
 	UNUSED(ip_hdr_len);
@@ -1702,6 +1699,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	UNUSED(dst);
 	UNUSED(databuf);
 	UNUSED(datalen);
+	XLOG_FATAL("WinSock2 lacks a 'struct ip' definition");
 #endif /* !HOST_OS_WINDOWS */
 	break;
 

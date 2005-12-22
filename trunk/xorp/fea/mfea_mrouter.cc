@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.39 2005/10/30 21:29:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.40 2005/10/30 21:58:04 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -1145,6 +1145,10 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     UNUSED(source);
     UNUSED(group);
 #endif
+
+    UNUSED(oifs_flags);
+    UNUSED(rp_addr);
+
     if (mfea_node().is_log_trace()) {
 	string res;
 	for (uint32_t i = 0; i < mfea_node().maxvifs(); i++) {
@@ -1250,9 +1254,6 @@ MfeaMrouter::add_mfc(const IPvX& source, const IPvX& group,
     }
     
     return (XORP_OK);
-    
-    UNUSED(oifs_flags);
-    UNUSED(rp_addr);
 }
 
 
@@ -1377,6 +1378,16 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
 	       threshold_packets, threshold_bytes,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
+
+#if ! defined(ENABLE_ADVANCED_MULTICAST_API)
+    UNUSED(threshold_interval);
+    UNUSED(threshold_packets);
+    UNUSED(threshold_bytes);
+    UNUSED(is_threshold_in_packets);
+    UNUSED(is_threshold_in_bytes);
+    UNUSED(is_geq_upcall);
+    UNUSED(is_leq_upcall);
+#endif
 
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
@@ -1520,14 +1531,6 @@ MfeaMrouter::add_bw_upcall(const IPvX& source, const IPvX& group,
     }
     
     return (XORP_OK);
-    
-    UNUSED(threshold_interval);
-    UNUSED(threshold_packets);
-    UNUSED(threshold_bytes);
-    UNUSED(is_threshold_in_packets);
-    UNUSED(is_threshold_in_bytes);
-    UNUSED(is_geq_upcall);
-    UNUSED(is_leq_upcall);
 }
 
 /**
@@ -1573,6 +1576,16 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
 	       threshold_packets, threshold_bytes,
 	       is_threshold_in_packets, is_threshold_in_bytes,
 	       is_geq_upcall, is_leq_upcall);
+
+#if ! defined(ENABLE_ADVANCED_MULTICAST_API)
+    UNUSED(threshold_interval);
+    UNUSED(threshold_packets);
+    UNUSED(threshold_bytes);
+    UNUSED(is_threshold_in_packets);
+    UNUSED(is_threshold_in_bytes);
+    UNUSED(is_geq_upcall);
+    UNUSED(is_leq_upcall);
+#endif
 
     //
     // Check if the kernel supports the bandwidth-upcall mechanism.
@@ -1716,14 +1729,6 @@ MfeaMrouter::delete_bw_upcall(const IPvX& source, const IPvX& group,
     }
     
     return (XORP_OK);
-    
-    UNUSED(threshold_interval);
-    UNUSED(threshold_packets);
-    UNUSED(threshold_bytes);
-    UNUSED(is_threshold_in_packets);
-    UNUSED(is_threshold_in_bytes);
-    UNUSED(is_geq_upcall);
-    UNUSED(is_leq_upcall);
 }
 
 /**
@@ -2094,8 +2099,8 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 	return;			// Error
     }
 #else
-    XLOG_FATAL("Needs rewritten to use WSARecv() under Winsock");
     UNUSED(nbytes);
+    XLOG_FATAL("Needs rewritten to use WSARecv() under Winsock");
 #endif
     
     // Check if it is a signal from the kernel to the user-level

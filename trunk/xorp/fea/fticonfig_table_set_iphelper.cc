@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.3 2005/08/23 22:29:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.4 2005/12/21 09:42:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -109,6 +109,8 @@ FtiConfigTableSetIPHelper::~FtiConfigTableSetIPHelper()
 int
 FtiConfigTableSetIPHelper::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
@@ -124,13 +126,13 @@ FtiConfigTableSetIPHelper::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 FtiConfigTableSetIPHelper::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
@@ -145,8 +147,6 @@ FtiConfigTableSetIPHelper::stop(string& error_msg)
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.58 2005/11/01 09:16:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.59 2005/11/02 02:27:21 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1099,6 +1099,8 @@ MfeaNode::vif_shutdown_completed(const string& vif_name)
 {
     vector<MfeaVif *>::iterator iter;
 
+    UNUSED(vif_name);
+
     //
     // If all vifs have completed the shutdown, then de-register with
     // the MFEA.
@@ -1115,8 +1117,6 @@ MfeaNode::vif_shutdown_completed(const string& vif_name)
     // De-register with the FEA
     //
     fea_register_shutdown();
-
-    UNUSED(vif_name);
 }
 
 /**
@@ -1562,6 +1562,8 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
 	       "message_type = %d vif_index = %d src = %s dst = %s",
 	       message_type, vif_index,
 	       cstring(src), cstring(dst));
+
+    UNUSED(src_module_id);
     
     if (! is_up())
 	return (XORP_ERROR);
@@ -1702,8 +1704,6 @@ MfeaNode::signal_message_recv(const string&	, // src_module_instance_name,
     }
     
     return (XORP_OK);
-    
-    UNUSED(src_module_id);
 }
 
 /**

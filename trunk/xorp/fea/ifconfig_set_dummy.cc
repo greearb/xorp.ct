@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.21 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_dummy.cc,v 1.22 2005/08/31 21:58:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -55,27 +55,27 @@ IfConfigSetDummy::~IfConfigSetDummy()
 int
 IfConfigSetDummy::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 IfConfigSetDummy::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool
@@ -110,8 +110,9 @@ IfConfigSetDummy::config_end(string& error_msg)
 bool
 IfConfigSetDummy::is_discard_emulated(const IfTreeInterface& i) const
 {
-    return (false);	// TODO: return appropriate value.
     UNUSED(i);
+
+    return (false);	// TODO: return appropriate value.
 }
 
 int

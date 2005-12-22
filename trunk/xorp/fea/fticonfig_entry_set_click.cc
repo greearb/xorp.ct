@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.23 2005/03/19 23:30:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.24 2005/03/25 02:53:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -440,12 +440,13 @@ FtiConfigEntrySetClick::delete_entry(const FteX& fte)
 void
 FtiConfigEntrySetClick::nexthop_port_mapper_event(bool is_mapping_changed)
 {
+    UNUSED(is_mapping_changed);
+
     //
     // XXX: always reinstall all entries, because they were lost
     // when the new Click config was written.
     //
     start_task_reinstall_all_entries();
-    UNUSED(is_mapping_changed);
 }
 
 void

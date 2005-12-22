@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.38 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.39 2005/08/31 22:02:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -173,12 +173,13 @@ IfConfigSetIoctl::stop(string& error_msg)
 bool
 IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
 {
+    UNUSED(i);
+
 #if defined(HOST_OS_BSDI) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_MACOSX) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
     return (true);
 #else
     return (false);
 #endif
-    UNUSED(i);
 }
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF
@@ -540,13 +541,14 @@ IfConfigSetIoctl::config_interface(const string& ifname,
 				   string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
-    return (XORP_ERROR);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
     UNUSED(is_up);
     UNUSED(is_deleted);
     UNUSED(error_msg);
+
+    return (XORP_ERROR);
 #else
     struct ifreq ifreq;
 
@@ -688,11 +690,11 @@ IfConfigSetIoctl::set_interface_mtu(const string& ifname,
 				    string& error_msg)
 {
 #ifdef HOST_OS_WINDOWS
-    return (XORP_ERROR);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(mtu);
     UNUSED(error_msg);
+    return (XORP_ERROR);
 #else
     struct ifreq ifreq;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.17 2005/03/05 01:41:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.18 2005/03/25 02:53:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -58,27 +58,27 @@ FtiConfigTableGetSysctl::~FtiConfigTableGetSysctl()
 int
 FtiConfigTableGetSysctl::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 FtiConfigTableGetSysctl::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool

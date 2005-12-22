@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.13 2005/12/21 09:42:54 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.14 2005/12/22 11:41:42 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -312,6 +312,8 @@ RawSocket::stop(string& error_msg)
 int
 RawSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
 {
+    UNUSED(is_enabled);
+
     switch (family()) {
     case AF_INET:
     {
@@ -342,8 +344,6 @@ RawSocket::enable_ip_hdr_include(bool is_enabled, string& error_msg)
     }
     
     return (XORP_OK);
-    
-    UNUSED(is_enabled);
 }
 
 int
@@ -458,8 +458,6 @@ RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
     }
     
     return (XORP_OK);
-    
-    UNUSED(is_enabled);
 }
 
 int

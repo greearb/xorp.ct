@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.29 2005/10/10 04:50:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_click.cc,v 1.30 2005/10/17 23:14:30 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -129,8 +129,9 @@ IfConfigSetClick::config_end(string& error_msg)
 bool
 IfConfigSetClick::is_discard_emulated(const IfTreeInterface& i) const
 {
-    return (false);	// TODO: return correct value
     UNUSED(i);
+
+    return (false);	// TODO: return correct value
 }
 
 int
@@ -177,6 +178,8 @@ IfConfigSetClick::add_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index);
 
+    UNUSED(if_index);
+
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
 	error_msg = c_format("Cannot add interface '%s' vif '%s': "
@@ -201,8 +204,6 @@ IfConfigSetClick::add_vif(const string& ifname,
     }
 
     return (XORP_OK);
-
-    UNUSED(if_index);
 }
 
 int
@@ -278,6 +279,9 @@ IfConfigSetClick::config_vif(const string& ifname,
 	      (point_to_point)? "true" : "false",
 	      (multicast)? "true" : "false");
 
+    UNUSED(if_index);
+    UNUSED(flags);
+
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
 	error_msg = c_format("Cannot configure interface '%s' vif '%s': "
@@ -320,9 +324,6 @@ IfConfigSetClick::config_vif(const string& ifname,
     }
 
     return (XORP_OK);
-
-    UNUSED(if_index);
-    UNUSED(flags);
 }
 
 int
@@ -336,6 +337,8 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
     debug_msg("set_interface_mac "
 	      "(ifname = %s if_index = %u mac = %s)\n",
 	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
+
+    UNUSED(if_index);
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -365,8 +368,6 @@ IfConfigSetClick::set_interface_mac_address(const string& ifname,
     }
 
     return (XORP_OK);
-
-    UNUSED(if_index);
 }
 
 int
@@ -380,6 +381,8 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
     debug_msg("set_interface_mtu "
 	      "(ifname = %s if_index = %u mtu = %u)\n",
 	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
+
+    UNUSED(if_index);
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -397,8 +400,6 @@ IfConfigSetClick::set_interface_mtu(const string& ifname,
 	fi.set_mtu(mtu);
 
     return (XORP_OK);
-
-    UNUSED(if_index);
 }
 
 int
@@ -423,6 +424,8 @@ IfConfigSetClick::add_vif_address(const string& ifname,
 	      (is_p2p)? "true" : "false", addr.str().c_str(),
 	      dst_or_bcast.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
+
+    UNUSED(if_index);
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -531,8 +534,6 @@ IfConfigSetClick::add_vif_address(const string& ifname,
     }
 
     return (XORP_OK);
-
-    UNUSED(if_index);
 }
 
 int
@@ -551,6 +552,9 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
+
+    UNUSED(if_index);
+    UNUSED(prefix_len);
 
     ii = _iftree.get_if(ifname);
     if (ii == _iftree.ifs().end()) {
@@ -613,9 +617,6 @@ IfConfigSetClick::delete_vif_address(const string& ifname,
     }
 
     return (XORP_OK);
-
-    UNUSED(if_index);
-    UNUSED(prefix_len);
 }
 
 int

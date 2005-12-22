@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.32 2005/08/18 15:45:50 bms Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.33 2005/09/02 20:42:58 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -86,16 +86,18 @@ NetlinkSocket::~NetlinkSocket()
 int
 NetlinkSocket::start(int af, string& error_msg)
 {
+    UNUSED(af);
+
     error_msg = c_format("The system does not support netlink sockets");
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
-
-    UNUSED(af);
 }
 
 int
 NetlinkSocket::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     //
     // XXX: Even if the system doesn not support netlink sockets, we
     // still allow to call the no-op stop() method and return success.
@@ -103,7 +105,6 @@ NetlinkSocket::stop(string& error_msg)
     // but not used.
     //
     return (XORP_OK);
-    UNUSED(error_msg);
 }
 
 int
@@ -241,6 +242,8 @@ NetlinkSocket::start(int af, string& error_msg)
 int
 NetlinkSocket::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_fd >= 0) {
 	_eventloop.remove_ioevent_cb(_fd);
 	close(_fd);
@@ -248,8 +251,6 @@ NetlinkSocket::stop(string& error_msg)
     }
     
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 ssize_t

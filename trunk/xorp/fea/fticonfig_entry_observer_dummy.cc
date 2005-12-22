@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.11 2005/08/23 22:29:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_dummy.cc,v 1.12 2005/08/31 21:58:40 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -58,6 +58,8 @@ FtiConfigEntryObserverDummy::~FtiConfigEntryObserverDummy()
 int
 FtiConfigEntryObserverDummy::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
@@ -66,13 +68,13 @@ FtiConfigEntryObserverDummy::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
     
 int
 FtiConfigEntryObserverDummy::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     // TODO: XXX: PAVPAVPAV: implement it!
 
     if (! _is_running)
@@ -81,8 +83,6 @@ FtiConfigEntryObserverDummy::stop(string& error_msg)
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 void

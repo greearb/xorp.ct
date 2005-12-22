@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_netlink.cc,v 1.7 2005/03/05 01:41:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_netlink.cc,v 1.8 2005/03/25 02:53:05 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -54,6 +54,8 @@ FtiConfigTableSetNetlink::~FtiConfigTableSetNetlink()
 int
 FtiConfigTableSetNetlink::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
@@ -69,13 +71,13 @@ FtiConfigTableSetNetlink::start(string& error_msg)
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 FtiConfigTableSetNetlink::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
@@ -90,8 +92,6 @@ FtiConfigTableSetNetlink::stop(string& error_msg)
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.3 2005/08/23 22:29:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_iphelper.cc,v 1.4 2005/12/21 09:42:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -64,34 +64,35 @@ IfConfigSetIPHelper::~IfConfigSetIPHelper()
 int
 IfConfigSetIPHelper::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 IfConfigSetIPHelper::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool
 IfConfigSetIPHelper::is_discard_emulated(const IfTreeInterface& i) const
 {
-    return (false);
     UNUSED(i);
+
+    return (false);
 }
 
 
@@ -311,8 +312,6 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
 	      addr.str().c_str(), dst_or_bcast.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
-    return (XORP_ERROR);
-
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
@@ -322,6 +321,8 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
     UNUSED(dst_or_bcast);
     UNUSED(prefix_len);
     UNUSED(error_msg);
+
+    return (XORP_ERROR);
 };
 
 int
@@ -342,8 +343,6 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
 	      dst.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
-    return (XORP_ERROR);
-
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
@@ -352,6 +351,8 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
     UNUSED(dst);
     UNUSED(prefix_len);
     UNUSED(error_msg);
+
+    return (XORP_ERROR);
 }
 
 int
@@ -386,10 +387,11 @@ IfConfigSetIPHelper::config_begin(string& error_msg)
 {
     debug_msg("config_begin\n");
 
-    ; // nothing to do
+    UNUSED(error_msg);
+
+    // XXX: nothing to do
 
     return (XORP_OK);
-    UNUSED(error_msg);
 }
 
 int
@@ -397,10 +399,11 @@ IfConfigSetIPHelper::config_end(string& error_msg)
 {
     debug_msg("config_end\n");
 
-    ; // nothing to do
+    UNUSED(error_msg);
+
+    // XXX: nothing to do
 
     return (XORP_OK);
-    UNUSED(error_msg);
 }
 
 int
@@ -412,12 +415,13 @@ IfConfigSetIPHelper::add_interface(const string& ifname,
 	      "(ifname = %s if_index = %u)\n",
 	      ifname.c_str(), if_index);
 
-    ; // nothing to do
-
-    return (XORP_OK);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(error_msg);
+
+    // XXX: nothing to do
+
+    return (XORP_OK);
 }
 
 int
@@ -430,13 +434,14 @@ IfConfigSetIPHelper::add_vif(const string& ifname,
 	      "(ifname = %s vifname = %s if_index = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index);
 
-    ; // nothing to do
-
-    return (XORP_OK);
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
     UNUSED(error_msg);
+
+    // XXX: nothing to do
+
+    return (XORP_OK);
 }
 
 int
@@ -455,15 +460,16 @@ IfConfigSetIPHelper::config_interface(const string& ifname,
 	      (is_up)? "true" : "false",
 	      (is_deleted)? "true" : "false");
 
-    ; // nothing to do
-
-    return (XORP_OK);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(flags);
     UNUSED(is_up);
     UNUSED(is_deleted);
     UNUSED(error_msg);
+
+    // XXX: nothing to do
+
+    return (XORP_OK);
 }
 
 int
@@ -496,6 +502,15 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
     MIB_IFROW ifrow;
     DWORD result;
 
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(flags);
+    UNUSED(is_deleted);
+    UNUSED(broadcast);
+    UNUSED(loopback);
+    UNUSED(point_to_point);
+    UNUSED(multicast);
+
     memset(&ifrow, 0, sizeof(ifrow));
     ifrow.dwIndex = if_index;
 
@@ -520,15 +535,6 @@ IfConfigSetIPHelper::config_vif(const string& ifname,
 #endif
 
     return (XORP_OK);
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(flags);
-    UNUSED(is_deleted);
-    UNUSED(broadcast);
-    UNUSED(loopback);
-    UNUSED(point_to_point);
-    UNUSED(multicast);
 }
 
 int
@@ -541,12 +547,13 @@ IfConfigSetIPHelper::set_interface_mac_address(const string& ifname,
 	      "(ifname = %s if_index = %u mac = %s)\n",
 	      ifname.c_str(), if_index, EtherMac(ether_addr).str().c_str());
 
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(ether_addr);
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
 }
 
 int
@@ -559,12 +566,13 @@ IfConfigSetIPHelper::set_interface_mtu(const string& ifname,
 	      "(ifname = %s if_index = %u mtu = %u)\n",
 	      ifname.c_str(), if_index, XORP_UINT_CAST(mtu));
 
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
     UNUSED(ifname);
     UNUSED(if_index);
     UNUSED(mtu);
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
 }
 
 int
@@ -631,6 +639,12 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
     IPAddr	ipaddr;
     IPMask	ipmask;
 
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(is_broadcast);
+    UNUSED(is_p2p);
+    UNUSED(dst_or_bcast);
+
     addr.copy_out((uint8_t*)&ipaddr);
     IPvX::make_prefix(addr.af(), prefix_len).get_ipv4().copy_out(
 	(uint8_t*)&ipmask);
@@ -683,12 +697,6 @@ IfConfigSetIPHelper::add_vif_address4(const string& ifname,
 					(IPAddr)addr.get_ipv4().addr()),
 					ntectx));
     return XORP_OK;
-
-    UNUSED(ifname);
-    UNUSED(vifname);
-    UNUSED(is_broadcast);
-    UNUSED(is_p2p);
-    UNUSED(dst_or_bcast);
 };
 
 int
@@ -709,10 +717,6 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
 	      dst.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
 
-    error_msg = "method not supported";
-
-    return (XORP_ERROR);
-
     UNUSED(ifname);
     UNUSED(vifname);
     UNUSED(if_index);
@@ -721,6 +725,10 @@ IfConfigSetIPHelper::add_vif_address6(const string& ifname,
     UNUSED(dst);
     UNUSED(prefix_len);
     UNUSED(error_msg);
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
 }
 
 int
@@ -736,6 +744,9 @@ IfConfigSetIPHelper::delete_vif_address(const string& ifname,
 	      "prefix_len = %u)\n",
 	      ifname.c_str(), vifname.c_str(), if_index, addr.str().c_str(),
 	      XORP_UINT_CAST(prefix_len));
+
+    UNUSED(vifname);
+    UNUSED(prefix_len);
 
     // Check that the family is supported
     switch (addr.af()) {
@@ -781,9 +792,6 @@ IfConfigSetIPHelper::delete_vif_address(const string& ifname,
 				 addr.str().c_str(), (int)result);
 	    return (XORP_ERROR);
 	}
-
-	UNUSED(vifname);
-	UNUSED(prefix_len);
     }
 
 #ifdef HAVE_IPV6

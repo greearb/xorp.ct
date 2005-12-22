@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.3 2005/08/23 22:29:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_iphelper.cc,v 1.4 2005/10/17 11:27:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -56,6 +56,8 @@ IfConfigObserverIPHelper::~IfConfigObserverIPHelper()
 int
 IfConfigObserverIPHelper::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
@@ -73,19 +75,19 @@ IfConfigObserverIPHelper::start(string& error_msg)
     ifc().live_config().finalize_state();
 
     return (XORP_OK);
-    UNUSED(error_msg);
 }
 
 int
 IfConfigObserverIPHelper::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
     _is_running = false;
 
     return (XORP_OK);
-    UNUSED(error_msg);
 }
 
 void

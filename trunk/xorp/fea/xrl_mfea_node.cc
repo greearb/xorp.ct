@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.46 2005/08/18 15:45:52 bms Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.47 2005/08/31 22:39:30 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -1667,6 +1667,8 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_birth(
     const string&	target_class,
     const string&	target_instance)
 {
+    UNUSED(target_instance);
+
     if (target_class == _fea_target) {
 	//
 	// XXX: when the startup is completed,
@@ -1680,7 +1682,6 @@ XrlMfeaNode::finder_event_observer_0_1_xrl_target_birth(
     }
 
     return XrlCmdError::OKAY();
-    UNUSED(target_instance);
 }
 
 /**

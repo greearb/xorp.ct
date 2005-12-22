@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.13 2005/12/09 08:53:32 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_getifaddrs.cc,v 1.14 2005/12/10 01:12:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -58,27 +58,27 @@ IfConfigGetGetifaddrs::~IfConfigGetGetifaddrs()
 int
 IfConfigGetGetifaddrs::start(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (_is_running)
 	return (XORP_OK);
 
     _is_running = true;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 int
 IfConfigGetGetifaddrs::stop(string& error_msg)
 {
+    UNUSED(error_msg);
+
     if (! _is_running)
 	return (XORP_OK);
 
     _is_running = false;
 
     return (XORP_OK);
-
-    UNUSED(error_msg);
 }
 
 bool
