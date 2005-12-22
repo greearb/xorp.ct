@@ -15,11 +15,11 @@
  */
 
 /*
- * $XORP: xorp/libxorp/win_io.h,v 1.2 2005/08/18 15:28:43 bms Exp $
+ * $XORP: xorp/libxorp/win_io.h,v 1.3 2005/12/21 09:42:58 bms Exp $
  */
 
-#ifndef __LIBXORPWIN_IO_H__
-#define __LIBXORPWIN_IO_H__
+#ifndef __LIBXORP_WIN_IO_H__
+#define __LIBXORP_WIN_IO_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -41,4 +41,4 @@ ssize_t	win_pipe_read(HANDLE h, void *buf, size_t bufsize);
 }
 #endif
 
-#endif /* __LIBXORPWIN_IO_H__ */
+#endif /* __LIBXORP_WIN_IO_H__ */
