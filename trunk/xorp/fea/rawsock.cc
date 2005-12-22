@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.12 2005/12/08 01:54:57 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.13 2005/12/21 09:42:54 bms Exp $"
 
 //
 // Raw socket support.
@@ -711,9 +711,9 @@ RawSocket::join_multicast_group(const string& if_name,
 
 	if (SOCKET_ERROR == bind(_proto_socket, (sockaddr *)&sin,
 				 sizeof(sockaddr_in))) {
-	    XLOG_INFO("bind() failed: %s\n", win_strerror(GetLastError()));
+	    XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
 	}
-#endif
+#endif // HOST_OS_WINDOWS
 
 	if (setsockopt(_proto_socket, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
