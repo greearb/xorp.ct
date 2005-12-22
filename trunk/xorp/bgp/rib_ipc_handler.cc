@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.68 2005/11/02 07:36:12 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.69 2005/11/22 18:50:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -749,3 +749,5 @@ XrlQueue<A>::route_command_done(const XrlError& error,
     start();
 }
 
+template class XrlQueue<IPv4>;
+template class XrlQueue<IPv6>;
