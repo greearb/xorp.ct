@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/xorpfd.hh,v 1.2 2005/08/18 15:28:43 bms Exp $
+// $XORP: xorp/libxorp/xorpfd.hh,v 1.3 2005/12/21 09:42:58 bms Exp $
 
 #ifndef __LIBXORP_XORPFD_HH__
 #define __LIBXORP_XORPFD_HH__
@@ -66,9 +66,9 @@
 #define	BAD_XORPFD	(-1)
 #endif
 
-class XorpFd {
 #ifndef	HOST_OS_WINDOWS
 // Non-Windows code.
+class XorpFd {
 public:
     XorpFd() : _filedesc(BAD_XORPFD) {}
 
@@ -84,10 +84,11 @@ public:
 
 private:
     int	    _filedesc;
+};
 
-#else	// HOST_OS_WINDOWS
+#else // HOST_OS_WINDOWS
 // Windows code.
-
+class XorpFd {
 public:
     enum WinFdType {
 	FDTYPE_ERROR,		// Invalid handle or method failure
@@ -211,7 +212,7 @@ public:
 private:
     HANDLE	_filedesc;
     WinFdType	_type;
-#endif	// ! HOST_OS_WINDOWS
 };
+#endif // HOST_OS_WINDOWS
 
 #endif // __LIBXORP_XORPFD_HH__
