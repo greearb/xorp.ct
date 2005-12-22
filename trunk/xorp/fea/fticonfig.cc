@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.44 2005/09/28 17:31:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.45 2005/12/21 09:42:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -1424,7 +1424,7 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	DWORD error = GetIpStatistics(&ipstats);
 	if (error != NO_ERROR) {
 	    XLOG_ERROR("GetIpStatistics() failed: %s",
-			win_strerror(GetLastError()));
+		       win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
@@ -1525,7 +1525,7 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
 	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
-			win_strerror(GetLastError()));
+		       win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	enabled = (int)(ipstats.dwForwarding == MIB_IP_FORWARDING);
@@ -1854,7 +1854,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	DWORD error = GetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
 	    XLOG_ERROR("GetIpStatisticsEx() failed: %s",
-			win_strerror(GetLastError()));
+		       win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
 	ipstats.dwForwarding = (enable != 0) ? 1 : 0;
@@ -1862,7 +1862,7 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	error = SetIpStatisticsEx(&ipstats, AF_INET6);
 	if (error != NO_ERROR) {
 	    XLOG_ERROR("SetIpStatisticsEx() failed: %s",
-			win_strerror(GetLastError()));
+		       win_strerror(GetLastError()));
 	    return (XORP_ERROR);
 	}
     }
