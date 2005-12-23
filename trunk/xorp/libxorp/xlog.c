@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.15 2005/12/21 07:52:25 atanu Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.16 2005/12/21 09:42:58 bms Exp $"
 
 /*
  * Message logging utility.
@@ -1153,7 +1153,7 @@ x_vasprintf(char **ret, const char *format, va_list ap)
     size_t i, buf_size = 1024 + 1;
     char *buf_ptr = NULL;
     int ret_size;
-#ifdef	va_copy
+#ifdef HAVE_VA_COPY
     va_list temp;
 #endif
 
@@ -1172,7 +1172,7 @@ x_vasprintf(char **ret, const char *format, va_list ap)
 	 * argument multiple times doesn't seem to cause a problem. On
 	 * the AMD 64 it is required.
 	 */
-#ifdef	va_copy
+#ifdef HAVE_VA_COPY
  	va_copy(temp, ap);
 	ret_size = vsnprintf(buf_ptr, buf_size, format, temp);
 #else
