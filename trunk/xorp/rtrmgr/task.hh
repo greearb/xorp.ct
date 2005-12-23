@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/task.hh,v 1.36 2005/11/03 17:27:52 pavlin Exp $
+// $XORP: xorp/rtrmgr/task.hh,v 1.37 2005/12/17 02:02:58 pavlin Exp $
 
 #ifndef __RTRMGR_TASK_HH__
 #define __RTRMGR_TASK_HH__
@@ -504,10 +504,10 @@ class TaskManager {
     typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 
 public:
-    TaskManager::TaskManager(MasterConfigTree& config_tree, 
-			     ModuleManager& mmgr,
-			     XorpClient& xclient, bool global_do_exec,
-			     bool verbose);
+    TaskManager(MasterConfigTree& config_tree, 
+		ModuleManager& mmgr,
+		XorpClient& xclient, bool global_do_exec,
+		bool verbose);
     ~TaskManager();
 
     void set_do_exec(bool do_exec, bool is_verification);
