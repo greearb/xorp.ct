@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.150 2005/11/05 17:56:22 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.151 2005/12/21 09:42:51 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.1], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.150 2005/11/05 17:56:22 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.151 2005/12/21 09:42:51 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -732,6 +732,38 @@ AC_CHECK_FUNCS([getifaddrs])
 AC_CHECK_FUNCS([if_nametoindex])
 AC_CHECK_FUNCS([if_indextoname])
 AC_CHECK_FUNCS([uname])
+
+dnl ---------------------------------------------------------------------------
+dnl Misc. other system-related checks
+dnl ---------------------------------------------------------------------------
+
+dnl Check whether the system has va_copy()
+AC_LANG_PUSH(C)
+AC_MSG_CHECKING(whether the build environment has va_copy() support)
+AC_TRY_RUN([
+#include <stdio.h>
+#include <stdarg.h>
+void
+foo(const char *format, ...)
+{
+    va_list ap, ap_copy;
+
+    va_start(ap, format);
+    va_copy(ap_copy, ap);
+    va_end(ap);
+}
+int
+main()
+{
+    foo("%s %s", "my_foo", "my_bar");
+    return (0);
+}
+],
+  [AC_DEFINE(HAVE_VA_COPY, 1,
+	[Define to 1 if the host has va_copy() support in the build environment])
+   AC_MSG_RESULT(yes)],
+  [AC_MSG_RESULT(no)])
+AC_LANG_POP(C)
 
 dnl ---------------------------------------------------------------------------
 dnl Check for system services
