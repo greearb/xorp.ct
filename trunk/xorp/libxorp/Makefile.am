@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.39 2005/10/27 18:37:52 atanu Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.40 2005/12/21 09:42:56 bms Exp $
 ##
 
 # -- Real Programs
@@ -8,7 +8,7 @@ bin_PROGRAMS	 =
 
 # -- No-install Programs
 check_PROGRAMS	 = test_asyncio
-check_PROGRAMS	+= test_buffered_asyncio
+#check_PROGRAMS	+= test_buffered_asyncio
 check_PROGRAMS	+= test_callback
 check_PROGRAMS	+= test_config_param
 check_PROGRAMS	+= test_heap
@@ -37,7 +37,7 @@ check_PROGRAMS	+= test_vif
 
 # -- Test Programs
 TESTS	 = test_asyncio$(EXEEXT)
-TESTS	+= test_buffered_asyncio$(EXEEXT)
+#TESTS	+= test_buffered_asyncio$(EXEEXT)
 TESTS	+= test_callback$(EXEEXT)
 TESTS	+= test_config_param$(EXEEXT)
 TESTS	+= test_heap$(EXEEXT)
@@ -71,11 +71,11 @@ noinst_LTLIBRARIES = libxorp.la
 LDADD			 = $(noinst_LTLIBRARIES)
 
 test_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
-test_buffered_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
+#test_buffered_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
 
 # -- Program Sources
 test_asyncio_SOURCES	= test_asyncio.cc
-test_buffered_asyncio_SOURCES	= test_buffered_asyncio.cc
+#test_buffered_asyncio_SOURCES	= test_buffered_asyncio.cc
 test_callback_SOURCES	= test_callback.cc
 test_config_param_SOURCES = test_config_param.cc
 test_heap_SOURCES	= test_heap.cc
