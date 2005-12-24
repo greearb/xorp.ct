@@ -162,6 +162,9 @@
 /* Define to 1 if you have the `ws2_32' library (-lws2_32). */
 #undef HAVE_LIBWS2_32
 
+/* Define to 1 if you have the <linux/ethtool.h> header file. */
+#undef HAVE_LINUX_ETHTOOL_H
+
 /* Define to 1 if you have the <linux/mroute6.h> header file. */
 #undef HAVE_LINUX_MROUTE6_H
 
