@@ -100,11 +100,6 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 
 #ifdef SIOCGMIIREG
     do {
-	int s;
-	struct ifreq ifreq;
-	memset(&ifreq, 0, sizeof(ifreq));
-	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
-
 	//
 	// Define data structure and definitions used for MII ioctl's.
 	//
@@ -126,6 +121,15 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    uint16_t	val_out;
 	};
 
+	int s;
+	struct ifreq ifreq;
+	struct mii_data* mii;
+	struct mii_data mii_data;
+	memset(&ifreq, 0, sizeof(ifreq));
+	memset(&mii_data, 0, sizeof(mii_data));
+	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
+	ifreq.ifr_data = reinterpret_cast<caddr_t>(&mii_data);
+
 	s = socket(AF_INET, SOCK_DGRAM, 0);
 	if (s < 0) {
 	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
@@ -138,9 +142,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	    return (XORP_ERROR);
 	}
 
-	struct mii_data* mii;
-	
-	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_data);
+	mii = reinterpret_cast<struct mii_data *>(ifreq.ifr_data);
 	mii->reg_num = MII_BMSR;
 	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
 	    error_msg = c_format("ioctl(SIOCGMIIREG) for interface %s "
