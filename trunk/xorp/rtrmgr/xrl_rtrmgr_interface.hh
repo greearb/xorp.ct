@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.23 2005/08/19 20:09:42 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.24 2005/09/20 15:03:46 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -120,11 +120,9 @@ public:
 	const string& deltas,
 	const string& deletions);
 
-    void apply_config_change_done(bool success, string errmsg,
-				  string deltas,
-				  string deletions,
-				  uid_t user_id,
-				  string target);
+    void apply_config_change_done(bool success, string error_msg,
+				  string deltas, string deletions,
+				  uid_t user_id, string target);
 
     void config_saved_done_cb(const XrlError&);
     void apply_config_change_done_cb(const XrlError&);
@@ -196,9 +194,9 @@ public:
 private:
     typedef XorpCallback1<void, const XrlError&>::RefPtr GENERIC_CALLBACK;
 
-    void save_config_done(bool success, string errmsg, string filename,
+    void save_config_done(bool success, string error_msg, string filename,
 			  uid_t user_id, string target);
-    void load_config_done(bool success, string errmsg, string deltas,
+    void load_config_done(bool success, string error_msg, string deltas,
 			  string deletions, string filename, uid_t user_id,
 			  string target);
     UserInstance* find_user_instance(uint32_t user_id,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.45 2005/09/20 15:03:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.46 2005/12/17 02:02:58 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -95,8 +95,11 @@ XrlRtrmgrInterface::common_0_1_get_status(// Output values,
 XrlCmdError
 XrlRtrmgrInterface::common_0_1_shutdown()
 {
+    string error_msg;
+
     // The rtrmgr does not accept XRL requests to shutdown via this interface.
-    return XrlCmdError::COMMAND_FAILED();
+    error_msg = "Command not supported";
+    return XrlCmdError::COMMAND_FAILED(error_msg);
 }
 
 XrlCmdError
@@ -124,15 +127,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 #endif
     const User* user;
     UserInstance* newuser;
+    string error_msg;
 
     //
     // Prevent a clientname passing characters that might cause us to
     // overwrite files later.  Prohibiting "/" makes allowing ".." safe.
     //
     if (strchr(clientname.c_str(), '/') != NULL) {
-	string err = c_format("Illegal character in clientname: %s", 
-			      clientname.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("Illegal character in clientname: %s", 
+			     clientname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     //
@@ -151,9 +155,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 
     FILE* file = fopen(filename.c_str(), "w+");
     if (file == NULL) {
-	string err = c_format("Failed to create temporary file: %s",
-			      filename.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("Failed to create temporary file: %s",
+			     filename.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 #ifndef HOST_OS_WINDOWS
     umask(oldmode);
@@ -166,9 +170,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 #else
 	unlink(filename.c_str());
 #endif
-	string err = c_format("User ID %u not found",
-			      XORP_UINT_CAST(user_id));
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("User ID %u not found",
+			     XORP_UINT_CAST(user_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     newuser = new UserInstance(user->user_id(), user->username());
@@ -191,17 +195,17 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 #else
 	unlink(filename.c_str());
 #endif
-	string err = c_format("Failed to write to temporary file: %s",
-			      filename.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("Failed to write to temporary file: %s",
+			     filename.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
 #ifndef HOST_OS_WINDOWS
     if (fchown(fileno(file), user_id, (gid_t)-1) != 0) {
 	unlink(filename.c_str());
-	string err = c_format("Failed to chown temporary file %s to user_id %u",
-			      filename.c_str(), XORP_UINT_CAST(user_id));
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("Failed to chown temporary file %s to user_id %u",
+			     filename.c_str(), XORP_UINT_CAST(user_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 #endif
 
@@ -211,9 +215,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 #else
 	unlink(filename.c_str());
 #endif
-	string err = c_format("Failed to close temporary file: %s",
-			      filename.c_str());
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = c_format("Failed to close temporary file: %s",
+			     filename.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
 #ifdef NO_XORPSH_AUTHENTICATION
@@ -230,9 +234,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 XrlCmdError
 XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
@@ -261,18 +267,20 @@ XrlRtrmgrInterface::rtrmgr_0_1_authenticate_client(
     const string&	token)
 {
     UserInstance *user;
+    string error_msg;
+
     user = find_user_instance(user_id, clientname);
     if (user == NULL) {
-	string err = "User Instance not found - did login time out?";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "User instance not found (maybe login timed out)";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (token == user->authtoken()) {
 	user->set_authenticated(true);
 	initialize_client_state(user_id, user);
 	return XrlCmdError::OKAY();
     } else {
-	string err = "Bad authtoken";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "Bad authtoken";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 }
 
@@ -373,16 +381,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     const string&	token, 
     const bool&		exclusive)
 {
-    string response;
+    string error_msg;
 
     if (! verify_token(token)) {
-	response = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	response = "You do not have permission for this operation.";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "You do not have permission for this operation";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     XLOG_TRACE(_verbose, "user %u entering config mode\n",
 	       XORP_UINT_CAST(user_id));
@@ -396,12 +404,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     // or there's already an exclusive user, deny the request.
     //
     if (exclusive && !_config_users.empty()) {
-	response = "Exclusive config mode requested, but there are already other config mode users\n";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "Exclusive config mode requested, but there are already "
+	    "other configuration mode users";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_exclusive && !_config_users.empty()) {
-	response = "Another user is in exclusive configuration mode\n";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "Another user is in exclusive configuration mode";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
@@ -424,9 +433,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
     // Input values, 
     const string&	token)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     XLOG_TRACE(_verbose, "user %u leaving config mode\n",
 	       XORP_UINT_CAST(get_user_id_from_token(token)));
@@ -437,8 +448,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
 	    return XrlCmdError::OKAY();
 	}
     }
-    string err = "User was not in config mode.";
-    return XrlCmdError::COMMAND_FAILED(err);
+    error_msg = "User was not in configuration mode";
+    return XrlCmdError::COMMAND_FAILED(error_msg);
 }
 
 XrlCmdError
@@ -448,14 +459,17 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
     // Output values, 
     XrlAtomList&	users)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	string err = "You do not have permission to view the config mode users.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "You do not have permission to view the configuration "
+	    "mode users";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     multimap<uint32_t, UserInstance*>::const_iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
@@ -486,9 +500,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_running_config(
     bool&		ready,
     string&		config)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_rtrmgr.ready()) {
 	ready = true;
@@ -508,18 +524,20 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     const string&	deltas,
     const string&	deletions)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked == false) {
-	string err = "Cannot commit config changes without locking the config";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "Cannot commit config changes without locking the config";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	string err = "You do not have permission for this operation.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "You do not have permission for this operation";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     // XXX: TBD
     XLOG_TRACE(_verbose,
@@ -530,10 +548,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
     cb = callback(this, &XrlRtrmgrInterface::apply_config_change_done,
 		  user_id, string(target));
 
-    string errmsg;
-    if (_master_config_tree->apply_config_change(user_id, errmsg, deltas,
+    if (_master_config_tree->apply_config_change(user_id, error_msg, deltas,
 						 deletions, cb) != true) {
-	return XrlCmdError::COMMAND_FAILED(errmsg);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
@@ -541,7 +558,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_apply_config_change(
 
 void
 XrlRtrmgrInterface::apply_config_change_done(bool success,
-					     string errmsg,
+					     string error_msg,
 					     string deltas,
 					     string deletions,
 					     uid_t user_id,
@@ -549,18 +566,18 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 {
     XLOG_TRACE(_verbose,
 	       "apply_config_change_done: status: %d response: %s target: %s",
-	       success, errmsg.c_str(), target.c_str());
+	       success, error_msg.c_str(), target.c_str());
 
     if (success) {
 	// Check everything really worked, and finalize the commit
-	if (_master_config_tree->check_commit_status(errmsg) == false) {
+	if (_master_config_tree->check_commit_status(error_msg) == false) {
 	    XLOG_TRACE(_verbose,
 		       "check commit status indicates failure: >%s<\n",
-		       errmsg.c_str());
+		       error_msg.c_str());
 	    success = false;
 	}
     }  else {
-	XLOG_TRACE(_verbose, "request failed: >%s<\n", errmsg.c_str());
+	XLOG_TRACE(_verbose, "request failed: >%s<\n", error_msg.c_str());
     }
 
     GENERIC_CALLBACK cb1;
@@ -588,7 +605,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
 	_master_config_tree->discard_changes();
 	debug_msg("Sending config change failed to %s\n", target.c_str());
 	_client_interface.send_config_change_done(target.c_str(),
-						  false, errmsg, cb1);
+						  false, error_msg, cb1);
     }
 }
 
@@ -660,15 +677,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
     bool&		success,
     uint32_t&		holder)
 {
+    string error_msg;
 
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	string err = "You do not have permission to lock the configuration.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "You do not have permission to lock the configuration";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked) {
 	// Can't return COMMAND_FAILED and return the lock holder
@@ -698,23 +716,25 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_config(
     // Input values
     const string&	token)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked) {
 	if (token != _lock_holder_token) {
-	    string err = c_format("Config not held by process %s.", 
-				  token.c_str());
-	    return XrlCmdError::COMMAND_FAILED(err);
+	    error_msg = c_format("Configuration is not held by process %s", 
+				 token.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
 	_config_locked = false;
 	_lock_timer.unschedule();
 	_lock_holder_token = "";
 	return XrlCmdError::OKAY();
     } else {
-	string err = "Config not locked.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "Configuration is not locked";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 }
 
@@ -728,14 +748,16 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
     bool&		success, 
     uint32_t&		holder)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	string err = "You do not have permission to lock the configuration.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "You do not have permission to lock the configuration";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (user_id == (uint32_t)-1) {
 	// Shouldn't be possible as we already checked the token
@@ -751,9 +773,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
     const string&	token, 
     const string&	node)
 {
+    string error_msg;
+
     if (!verify_token(token)) {
-	string err = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (user_id == (uint32_t)-1) {
@@ -765,8 +789,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
     if (success) {
 	return XrlCmdError::OKAY();
     } else {
-	string err = "Unlock failed.";
-	return XrlCmdError::COMMAND_FAILED(err);
+	error_msg = "Unlocking the configuration failed";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 }
 
@@ -776,33 +800,31 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 					   const string& target,
 					   const string& filename)
 {
-    string response;
+    string error_msg;
 
     if (!verify_token(token)) {
-	response = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	response = "You do not have permission to save the configuration.";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "You do not have permission to save the configuration";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {
 	uint32_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = _userdb.find_user_by_user_id(uid)->username();
-	response = "ERROR: The config is currently locked by user " +
-	    holder + 
-	    "\n" + 
-	    "Save was NOT performed.\n";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = c_format("The configuration is currently locked by user %s",
+			     holder.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     ConfigSaveCallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::save_config_done,
 		  filename, user_id, target);
-    if (_master_config_tree->save_config(filename, user_id, response, cb)
+    if (_master_config_tree->save_config(filename, user_id, error_msg, cb)
 	!= true) {
-	return XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
@@ -814,33 +836,31 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 					   const string& target,
 					   const string& filename)
 {
-    string response;
+    string error_msg;
 
     if (!verify_token(token)) {
-	response = "AUTH_FAIL";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "AUTH_FAIL";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     uint32_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
-	response = "You do not have permission to reload the configuration.";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = "You do not have permission to reload the configuration";
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {
 	uint32_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = _userdb.find_user_by_user_id(uid)->username();
-	response = "ERROR: The config is currently locked by user " +
-	    holder + 
-	    "\n" + 
-	    "Load was NOT performed.\n";
-	return XrlCmdError::COMMAND_FAILED(response);
+	error_msg = c_format("The configuration is currently locked by user %s",
+			     holder.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     ConfigLoadCallBack cb;
     cb = callback(this, &XrlRtrmgrInterface::load_config_done,
 		  filename, user_id, target);
-    if (_master_config_tree->load_config(filename, user_id, response, cb)
+    if (_master_config_tree->load_config(filename, user_id, error_msg, cb)
 	!= true) {
-	return XrlCmdError::COMMAND_FAILED(response);
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     return XrlCmdError::OKAY();
@@ -848,7 +868,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 
 void
 XrlRtrmgrInterface::save_config_done(bool success,
-				     string errmsg,
+				     string error_msg,
 				     string filename,
 				     uid_t user_id,
 				     string target)
@@ -857,7 +877,7 @@ XrlRtrmgrInterface::save_config_done(bool success,
 
     cb1 = callback(this, &XrlRtrmgrInterface::config_saved_done_cb);
     _client_interface.send_config_saved_done(target.c_str(), success,
-					     errmsg, cb1);
+					     error_msg, cb1);
 
     UNUSED(filename);
     UNUSED(user_id);
@@ -865,7 +885,7 @@ XrlRtrmgrInterface::save_config_done(bool success,
 
 void
 XrlRtrmgrInterface::load_config_done(bool success,
-				     string errmsg,
+				     string error_msg,
 				     string deltas,
 				     string deletions,
 				     string filename,
@@ -873,7 +893,7 @@ XrlRtrmgrInterface::load_config_done(bool success,
 				     string target)
 {
     // Propagate the changes to all clients
-    apply_config_change_done(success, errmsg, deltas, deletions,
+    apply_config_change_done(success, error_msg, deltas, deletions,
 			     user_id, target);
 
     UNUSED(filename);
