@@ -36,6 +36,9 @@
 #ifdef HAVE_LINUX_SOCKIOS_H
 #include <linux/sockios.h>
 #endif
+#ifdef HAVE_LINUX_ETHTOOL_H
+#include <linux/ethtool.h>
+#endif
 
 //
 // XXX: We should include  <linux/mii.h>, but that file is broken for
@@ -97,6 +100,33 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	return (XORP_OK);
     } while (false);
 #endif // SIOCGIFMEDIA
+
+#ifdef SIOCETHTOOL
+    do {
+	int s;
+	struct ifreq ifreq;
+	memset(&ifreq, 0, sizeof(ifreq));
+	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
+
+	struct ethtool_value edata;
+	memset(&edata, 0, sizeof(edata));
+	edata.cmd = ETHTOOL_GLINK;
+	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
+	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
+	    error_msg = c_format("ioctl(SIOCETHTOOL) for interface %s "
+				 "failed: %s",
+				 if_name.c_str(), strerror(errno));
+	    close(s);
+	    return (XORP_ERROR);
+	}
+	if (edata.data != 0)
+	    no_carrier = false;
+	else
+	    no_carrier = true;
+	close(s);
+	return (XORP_OK);
+    } while (false);
+#endif // SIOCETHTOOL
 
 #ifdef SIOCGMIIREG
     do {
