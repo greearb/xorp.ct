@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.115 2005/12/21 09:43:00 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.116 2005/12/21 20:08:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -803,7 +803,7 @@ RouterCLI::display_config_mode_users() const
 	string user_name = get_user_name(*iter);
 	if (user_name.empty())
 	    user_name = c_format("UID:%u", XORP_UINT_CAST(*iter));
-	cli_client().cli_print(c_format("%s ", user_name.c_str()));
+	cli_client().cli_print(c_format("%s", user_name.c_str()));
     }
     if (_config_mode_users.size() == 1)
 	cli_client().cli_print(" is also in configuration mode.\n");
