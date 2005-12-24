@@ -324,7 +324,7 @@ RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 	return INFIX_OPERATOR;
 	}
 
-[a-zA-Z][a-zA-Z0-9"\-""_"\.]*	{
+[a-zA-Z0-9][a-zA-Z0-9"\-""_"\.]*	{
 	bootlval = strdup(boottext);
 	return LITERAL;
 	}
