@@ -799,7 +799,7 @@ YY_RULE_SETUP
 {
 	/*
 	 * Note that we explicitly allow a literal to start with not only
-	 * by a letter and '/', ut a digit, '_' or '.' .
+	 * by a letter and '/', but a digit, '_' or '.' .
 	 * Also, allow '.' to be part of the literal elsewhere.
 	 * Thus, we can specify more liberally a filename (e.g., now a filename
 	 * can start with a digit, it can contain dots, etc).
