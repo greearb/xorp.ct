@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.46 2005/12/17 02:02:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.47 2005/12/24 07:47:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -403,25 +403,39 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     // If he's asking for exclusive, and we've already got config users,
     // or there's already an exclusive user, deny the request.
     //
+    multimap<uint32_t, UserInstance*>::iterator iter;
     if (exclusive && !_config_users.empty()) {
-	error_msg = "Exclusive config mode requested, but there are already "
-	    "other configuration mode users";
+	string user_names;
+	for (iter = _config_users.begin();
+	     iter != _config_users.end();
+	     ++iter) {
+	    UserInstance* user = iter->second;
+	    if (! user_names.empty())
+		user_names += ", ";
+	    user_names += user->username();
+	}
+	error_msg = c_format("Exclusive config mode requested, but there are "
+			     "already other configuration mode users: %s",
+			     user_names.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_exclusive && !_config_users.empty()) {
-	error_msg = "Another user is in exclusive configuration mode";
+	error_msg = c_format("User %s is in exclusive configuration mode",
+			     _exclusive_username.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    multimap<uint32_t, UserInstance*>::iterator iter;
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
 	    UserInstance* this_user = iter->second;
 	    _config_users.insert(pair<uint32_t, UserInstance*>
 				 (user_id, this_user));
-	    if (exclusive)
+	    if (exclusive) {
 		_exclusive = true;
-	    else
+		_exclusive_username = this_user->username();
+	    } else {
 		_exclusive = false;
+		_exclusive_username = "";
+	    }
 	    return XrlCmdError::OKAY();
 	}
     }

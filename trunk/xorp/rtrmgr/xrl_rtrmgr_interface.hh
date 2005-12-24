@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.24 2005/09/20 15:03:46 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.25 2005/12/24 07:47:25 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -224,6 +224,7 @@ private:
     Rtrmgr&             _rtrmgr;
 
     bool	_exclusive;  // Indicates only one user allowed in config mode
+    string	_exclusive_username;	// The current exclusive user name
 
     // Variables to implement global lock on config changes
     bool	_config_locked;
