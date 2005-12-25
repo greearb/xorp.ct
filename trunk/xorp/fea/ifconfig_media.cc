@@ -37,8 +37,16 @@
 #include <linux/sockios.h>
 #endif
 #ifdef HAVE_LINUX_ETHTOOL_H
+//
+// XXX: A hack defining missing (kernel) types that are used in older versions
+// of <linux/ethtool.h>.
+//
+typedef uint8_t  u8;
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
 #include <linux/ethtool.h>
-#endif
+#endif // HAVE_LINUX_ETHTOOL_H
 
 //
 // XXX: We should include  <linux/mii.h>, but that file is broken for
@@ -63,6 +71,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
     do {
 	int s;
 	struct ifmediareq ifmr;
+
 	memset(&ifmr, 0, sizeof(ifmr));
 	strncpy(ifmr.ifm_name, if_name.c_str(), sizeof(ifmr.ifm_name) - 1);
 	
@@ -101,17 +110,23 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
     } while (false);
 #endif // SIOCGIFMEDIA
 
-#ifdef SIOCETHTOOL
+#if defined(SIOCETHTOOL) && defined(ETHTOOL_GLINK)
     do {
 	int s;
 	struct ifreq ifreq;
+	struct ethtool_value edata;
+
 	memset(&ifreq, 0, sizeof(ifreq));
 	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 
-	struct ethtool_value edata;
 	memset(&edata, 0, sizeof(edata));
 	edata.cmd = ETHTOOL_GLINK;
 	ifreq.ifr_data = reinterpret_cast<caddr_t>(&edata);
+
+	s = socket(AF_INET, SOCK_DGRAM, 0);
+	if (s < 0) {
+	    XLOG_FATAL("Could not initialize IPv4 ioctl() socket");
+	}
 	if (ioctl(s, SIOCETHTOOL, &ifreq) < 0) {
 	    error_msg = c_format("ioctl(SIOCETHTOOL) for interface %s "
 				 "failed: %s",
@@ -126,12 +141,13 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	close(s);
 	return (XORP_OK);
     } while (false);
-#endif // SIOCETHTOOL
+#endif // SIOCETHTOOL && ETHTOOL_GLINK
 
 #ifdef SIOCGMIIREG
     do {
 	int s;
 	struct ifreq ifreq;
+
 	memset(&ifreq, 0, sizeof(ifreq));
 	strncpy(ifreq.ifr_name, if_name.c_str(), sizeof(ifreq.ifr_name) - 1);
 
@@ -169,8 +185,7 @@ ifconfig_media_get_link_status(const string& if_name, bool& no_carrier,
 	}
 
 	struct mii_data* mii;
-	
-	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_data);
+	mii = reinterpret_cast<struct mii_data *>(&ifreq.ifr_addr);
 	mii->reg_num = MII_BMSR;
 	if (ioctl(s, SIOCGMIIREG, &ifreq) < 0) {
 	    error_msg = c_format("ioctl(SIOCGMIIREG) for interface %s "
