@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.16 2005/11/05 19:25:54 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.17 2005/11/05 20:43:49 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -96,7 +96,6 @@ private:
 template <typename A>
 class XrlIO : public IO<A>,
 	      public IfMgrHintObserver,
-	      public ServiceBase,
 	      public ServiceChangeObserverBase {
  public:
     XrlIO(EventLoop& eventloop, XrlRouter& xrl_router, const string& feaname,
@@ -107,7 +106,7 @@ class XrlIO : public IO<A>,
 	  _instance_name(xrl_router.instance_name()),
 	  _feaname(feaname),
 	  _ribname(ribname),
-	  _running(0),
+	  _component_count(0),
 	  _ifmgr(eventloop, feaname.c_str(), _xrl_router.finder_address(),
 		 _xrl_router.finder_port()),
 	  _rib_queue(eventloop, xrl_router)
@@ -150,17 +149,11 @@ class XrlIO : public IO<A>,
 	}
 
  	register_rib();
-	_running++;
+	component_up("startup");
 
 	return (true);
     }
 
-    /**
-     * Return true while the IO subsystem is running.
-     */
-    bool running() {
-	return _running;
-    }
 
     /**
      * Shutdown operation.
@@ -174,9 +167,34 @@ class XrlIO : public IO<A>,
 	//
 
 	unregister_rib();
-	_running--;
+	component_down("shutdown");
 
 	return (_ifmgr.shutdown());
+    }
+
+    /**
+     * Called when internal subsystem comes up.
+     */
+    void component_up(string /*name*/) {
+// 	printf("Component: %s count %d\n", name.c_str(), _component_count + 1);
+	_component_count++;
+	// XXX - Should really get every component to register at
+	// initialisation time and track the individual
+	// status. Simpler to uncomment the printfs and track the count.
+	if (4 == _component_count)
+	    ServiceBase::set_status(SERVICE_RUNNING);
+    }
+
+    /**
+     * Called when internal subsystem goes down.
+     */
+    void component_down(string /*name*/) {
+// 	printf("Component: %s count %d\n", name.c_str(), _component_count - 1);
+	_component_count--;
+	if (0 == _component_count)
+	    ServiceBase::set_status(SERVICE_SHUTDOWN);
+	else
+	    ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
     }
 
     /**
@@ -316,10 +334,13 @@ class XrlIO : public IO<A>,
     void status_change(ServiceBase*  service,
 		       ServiceStatus old_status,
 		       ServiceStatus new_status) {
-	// TODO: nothing to do for now
-	UNUSED(service);
-	UNUSED(old_status);
-	UNUSED(new_status);
+	if (old_status == new_status)
+	    return;
+	if (SERVICE_RUNNING == new_status)
+	    component_up(service->service_name());
+	if (SERVICE_SHUTDOWN == new_status)
+	    component_down(service->service_name());
+
     }
     const ServiceBase* ifmgr_mirror_service_base() const {
 	return dynamic_cast<const ServiceBase*>(&_ifmgr);
@@ -351,7 +372,7 @@ class XrlIO : public IO<A>,
     string		_instance_name;
     string		_feaname;
     string		_ribname;
-    uint32_t		_running;
+    uint32_t		_component_count;
 
     IfMgrXrlMirror	_ifmgr;
     XrlQueue<A>		_rib_queue;

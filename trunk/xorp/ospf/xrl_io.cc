@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.26 2005/11/17 17:43:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.27 2005/12/21 22:50:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,7 @@
 #include "libxorp/ipnet.hh"
 
 #include "libxorp/status_codes.h"
+#include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
@@ -718,9 +719,9 @@ XrlIO<A>::rib_command_done(const XrlError& error, bool up,
     }
 
     if (up)
-	_running++;
+	component_up("rib_command_done");
     else
-	_running--;
+	component_down("rib_command_done");
 }
 
 template <typename A>

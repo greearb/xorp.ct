@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.2 2005/11/05 05:40:44 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.3 2005/11/05 06:16:52 atanu Exp $"
 
 // Print information about OSPF neighbours
 
@@ -43,6 +43,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/service.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"

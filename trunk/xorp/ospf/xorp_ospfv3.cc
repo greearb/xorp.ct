@@ -13,9 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.9 2005/09/09 20:59:11 atanu Exp $"
+#ident "$XORP: xorp/ospf/xorp_ospfv3.cc,v 1.10 2005/10/23 09:29:48 atanu Exp $"
 
 #include "config.h"
+#include <string>
 #include <set>
 
 #include "ospf_module.h"
@@ -23,6 +24,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
+#include "libxorp/service.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"

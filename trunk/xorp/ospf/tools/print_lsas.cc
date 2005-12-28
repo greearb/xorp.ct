@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.12 2005/10/27 23:07:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_lsas.cc,v 1.13 2005/11/05 04:36:46 atanu Exp $"
 
 // Get LSAs (in raw binary) from OSPF and print them.
 
@@ -47,6 +47,7 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 
+#include "libxorp/service.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.75 2005/11/16 11:47:01 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.76 2005/11/16 20:43:17 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -380,12 +380,19 @@ class Ospf {
     /**
      * @return true if ospf should still be running.
      */
-    bool running() { return _io->running(); }
+    bool running() { return _io->status() != SERVICE_SHUTDOWN; }
 
     /**
-     * XXX - Temporary hack to get us up an running.
+     * Status of process.
      */
     ProcessStatus status(string& reason) {
+	if (PROC_NOT_READY == _process_status) {
+	    if (SERVICE_RUNNING == _io->status()) {
+		_process_status = PROC_READY;
+		_reason = "Running";
+	    }
+	}
+
 	reason = _reason;
 	return _process_status;
     }
