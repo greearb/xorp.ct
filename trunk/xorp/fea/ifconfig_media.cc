@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP $"
+#ident "$XORP$"
 
 #include "fea_module.h"
 
