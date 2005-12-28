@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.57 2005/11/12 21:14:47 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.58 2005/11/13 19:25:34 atanu Exp $
 #
 
 TODO
@@ -172,6 +172,8 @@ not hard coded numbers.
 45) The cryptographic authentication does not support configuring the
 Key ID (currently defaults to 1) or timer values for smooth key
 transitions.
+
+46) Replace class Subsystem with class ServiceBase.
 
 Possible issues
 ~~~~~~~~~~~~~~~
