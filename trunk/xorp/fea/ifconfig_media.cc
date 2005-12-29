@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/ifconfig_media.cc,v 1.8 2005/12/28 20:13:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -38,8 +38,8 @@
 #endif
 #ifdef HAVE_LINUX_ETHTOOL_H
 //
-// XXX: A hack defining missing (kernel) types that are used in older versions
-// of <linux/ethtool.h>.
+// XXX: A hack defining missing (kernel) types that are used in
+// <linux/ethtool.h> with some OS distributions.
 //
 typedef uint8_t  u8;
 typedef uint16_t u16;
