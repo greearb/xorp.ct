@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.16 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.17 2005/11/12 08:59:50 pavlin Exp $ */
 
 plumbing {
     rib {
@@ -36,4 +36,7 @@ policy {
      * This MUST be fixed at some other place (where?).
      */
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=connected&variable:txt=DUMMY_DIRTY_HACK&type:txt=u32&access:txt=r&id:u32=9";
+
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=connected&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=connected&variable:txt=network6&type:txt=ipv6net&access:txt=r&id:u32=12";
 }
