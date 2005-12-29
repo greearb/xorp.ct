@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.47 2005/09/05 17:00:15 zec Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.48 2005/12/21 02:29:51 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -938,6 +938,74 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 		continue;
 	    }
 	}
+	if (prefix_len == Addr::ADDR_BITLEN) {
+	    //
+	    // Check if the route is for one of my own addresses or
+	    // for a directly connected broadcast address.
+	    //
+	    bool my_addr_found = false;
+	    bool bcast_addr_found = false;
+	    
+	    const IfMgrIfTree& iftree = _pm.iftree();
+	    IfMgrIfTree::IfMap::const_iterator if_iter;
+	    for (if_iter = iftree.ifs().begin();
+		 if_iter != iftree.ifs().end();
+		 ++if_iter) {
+		const IfMgrIfAtom& iface = if_iter->second;
+
+		// Test if interface is enabled and the link state is up
+		if ((! iface.enabled()) || iface.no_carrier())
+		    continue;
+
+		IfMgrIfAtom::VifMap::const_iterator vif_iter;
+		for (vif_iter = iface.vifs().begin();
+		     vif_iter != iface.vifs().end();
+		     ++vif_iter) {
+		    const IfMgrVifAtom& vif = vif_iter->second;
+
+		    // Test if vif is enabled
+		    if (! vif.enabled())
+			continue;
+
+		    //
+		    // Test if there is a matching interface address
+		    // or a broadcast address.
+		    //
+		    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+
+		    for (a4_iter = vif.ipv4addrs().begin();
+			 a4_iter != vif.ipv4addrs().end();
+			 ++a4_iter) {
+			const IfMgrIPv4Atom& a4 = a4_iter->second;
+
+			if (! a4.enabled())
+			    continue;
+
+			// Test if my own address
+			if (a4.addr() == net.masked_addr()) {
+			    my_addr_found = true;
+			    break;
+			}
+
+			// Test if the broadcast address
+			if (a4.has_broadcast()
+			    && (a4.broadcast_addr() == net.masked_addr())) {
+			    bcast_addr_found = true;
+			    break;
+			}
+		    }
+		}
+	    }
+
+	    if (my_addr_found) {
+		record_bad_route("my interface address", src_addr, src_port, p);
+		continue;
+	    }
+	    if (bcast_addr_found) {
+		record_bad_route("my broadcast address", src_addr, src_port, p);
+		continue;
+	    }
+	}
 
 	IPv4 nh = entries[i].nexthop();
 	if (nh == zero) {
@@ -1037,6 +1105,62 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	if (masked_net.is_loopback()) {
 	    record_bad_route("loopback route", src_addr, src_port, p);
 	    continue;
+	}
+
+	if (entries[i].prefix_len() == Addr::ADDR_BITLEN) {
+	    //
+	    // Check if the route is for one of my own addresses.
+	    //
+	    bool my_addr_found = false;
+	    
+	    const IfMgrIfTree& iftree = _pm.iftree();
+	    IfMgrIfTree::IfMap::const_iterator if_iter;
+	    for (if_iter = iftree.ifs().begin();
+		 if_iter != iftree.ifs().end();
+		 ++if_iter) {
+		const IfMgrIfAtom& iface = if_iter->second;
+
+		// Test if interface is enabled and the link state is up
+		if ((! iface.enabled()) || iface.no_carrier())
+		    continue;
+
+		IfMgrIfAtom::VifMap::const_iterator vif_iter;
+		for (vif_iter = iface.vifs().begin();
+		     vif_iter != iface.vifs().end();
+		     ++vif_iter) {
+		    const IfMgrVifAtom& vif = vif_iter->second;
+
+		    // Test if vif is enabled
+		    if (! vif.enabled())
+			continue;
+
+		    //
+		    // Test if there is a matching interface address
+		    // or a broadcast address.
+		    //
+		    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+
+		    for (a6_iter = vif.ipv6addrs().begin();
+			 a6_iter != vif.ipv6addrs().end();
+			 ++a6_iter) {
+			const IfMgrIPv6Atom& a6 = a6_iter->second;
+
+			if (! a6.enabled())
+			    continue;
+
+			// Test if my own address
+			if (a6.addr() == net.masked_addr()) {
+			    my_addr_found = true;
+			    break;
+			}
+		    }
+		}
+	    }
+
+	    if (my_addr_found) {
+		record_bad_route("my interface address", src_addr, src_port, p);
+		continue;
+	    }
 	}
 
 	if (masked_net == IPv6::ZERO()) {
