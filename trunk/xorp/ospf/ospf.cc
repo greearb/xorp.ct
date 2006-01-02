@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.56 2005/11/21 01:16:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.57 2005/12/28 18:57:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -182,8 +182,18 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 		  A dst, A src,
 		  uint8_t* data, uint32_t len)
 {
-    debug_msg("Interface %s Vif %s data %p len %u",
+    debug_msg("Interface %s Vif %s data %p len %u\n",
 	      interface.c_str(), vif.c_str(), data, len);
+#ifdef	DEBUG_LOGGING
+    try {
+	// Decode the packet in order to pretty print it.
+	Packet *packet = _packet_decoder.decode(data, len);
+	debug_msg("Transmit: %s\n", cstring(*packet));
+	delete packet;
+    } catch(BadPacket& e) {
+	debug_msg("Unable to decode packet\n");
+    }
+#endif
 
     return _io->send(interface, vif, dst, src, data, len);
 }
