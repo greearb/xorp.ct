@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.194 2005/11/19 05:38:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.195 2005/12/28 18:57:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4163,7 +4163,7 @@ Neighbour<A>::event_negotiation_done()
 	    start_rxmt_timer(callback(this,
 				      &Neighbour<A>::
 				      send_data_description_packet),
-			     true,
+			     false,
 			     "send_data_description from NegotiationDone");
 	} else {
 	    // We have now agreed we are the slave so stop retransmitting.
