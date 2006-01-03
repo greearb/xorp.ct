@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.110 2005/11/17 17:41:22 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.111 2005/11/23 11:27:46 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -299,7 +299,13 @@ class PeerOut {
     }
 
     /**
-     * Set InfTransDelay
+     * Set RxmtInterval.
+     */
+    bool set_retransmit_interval(OspfTypes::AreaID area,
+				 uint16_t retransmit_interval);
+
+    /**
+     * Set InfTransDelay.
      */
     bool set_inftransdelay(uint16_t inftransdelay) {
 	_inftransdelay = inftransdelay;

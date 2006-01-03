@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.23 2005/11/14 19:33:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.24 2005/12/28 18:57:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -485,6 +485,56 @@ XrlOspfV2Target::ospfv2_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
 }
 
 XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const uint32_t& cost)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), cost);
+
+    if (!_ospf.set_interface_cost(ifname, vifname, area, cost))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "interface cost");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_retransmit_interval(const string& ifname,
+						    const string& vifname,
+						    const IPv4& a,
+						    const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    if (!_ospf.set_retransmit_interval(ifname, vifname, area, interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "RxmtInterval interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
+					      const string& vifname,
+					      const IPv4& a,
+					      const uint32_t& delay)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), delay);
+
+    if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "inftransdelay delay");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
 						const string& vifname,
 						const IPv4& a,
@@ -529,39 +579,6 @@ XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
     if (!_ospf.set_router_dead_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "router dead interval");
-
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError 
-XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
-					       const string& vifname,
-					       const IPv4& a,
-					       const uint32_t& cost)
-{
-    OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), cost);
-
-    if (!_ospf.set_interface_cost(ifname, vifname, area, cost))
-	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "interface cost");
-    return XrlCmdError::OKAY();
-}
-
-XrlCmdError 
-XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
-					      const string& vifname,
-					      const IPv4& a,
-					      const uint32_t& delay)
-{
-    OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
-	      vifname.c_str(), pr_id(area).c_str(), delay);
-
-    if (!_ospf.set_inftransdelay(ifname, vifname, area, delay))
-	return XrlCmdError::COMMAND_FAILED("Failed to set "
-					   "inftransdelay delay");
 
     return XrlCmdError::OKAY();
 }

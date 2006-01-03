@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.94 2005/11/23 11:32:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.95 2005/12/28 18:57:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -980,6 +980,20 @@ PeerManager<A>::set_interface_cost(const PeerID peerid,
     }
 
     return _peers[peerid]->set_interface_cost(interface_cost);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_retransmit_interval(const PeerID peerid, 
+					OspfTypes::AreaID area,
+					uint16_t retransmit_interval)
+{
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_retransmit_interval(area, retransmit_interval);
 }
 
 template <typename A>

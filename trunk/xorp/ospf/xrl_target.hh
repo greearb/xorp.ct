@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.15 2005/11/12 23:43:22 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.16 2005/11/14 19:33:30 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -282,6 +282,38 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const IPv4&	transit_area);
 
     /**
+     *  The edge cost of this interface.
+     */
+    XrlCmdError ospfv2_0_1_set_interface_cost(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	cost);
+
+    /**
+     *  The RxmtInterval.
+     */
+    XrlCmdError ospfv2_0_1_set_retransmit_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  Update packet will have their age incremented by this amount before
+     *  transmission. This value should take into account transmission and
+     *  propagation delays; it must be greater than zero.
+     */
+    XrlCmdError ospfv2_0_1_set_inftransdelay(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	delay);
+
+    /**
      *  Used in the designated router election.
      */
     XrlCmdError ospfv2_0_1_set_router_priority(
@@ -310,28 +342,6 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	vifname,
 	const IPv4&	area,
 	const uint32_t&	interval);
-
-    /**
-     *  The edge cost of this interface.
-     */
-    XrlCmdError ospfv2_0_1_set_interface_cost(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const IPv4&	area,
-	const uint32_t&	cost);
-
-    /**
-     *  Update packet will have their age incremented by this amount before
-     *  transmission. This value should take into account transmission and
-     *  propagation delays; it must be greater than zero.
-     */
-    XrlCmdError ospfv2_0_1_set_inftransdelay(
-	// Input values,
-	const string&	ifname,
-	const string&	vifname,
-	const IPv4&	area,
-	const uint32_t&	delay);
 
     /**
      *  Configure authentication.

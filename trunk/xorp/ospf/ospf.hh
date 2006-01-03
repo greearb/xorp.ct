@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.76 2005/11/16 20:43:17 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.77 2005/12/28 18:57:17 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -524,7 +524,14 @@ class Ospf {
      */
     bool set_interface_cost(const string& interface, const string& vif,
 			    OspfTypes::AreaID area,
-			    uint16_t interaface_cost);
+			    uint16_t interface_cost);
+
+    /**
+     * Set the RxmtInterval.
+     */
+    bool set_retransmit_interval(const string& interface, const string& vif,
+				 OspfTypes::AreaID area,
+				 uint16_t retransmit_interval);
 
     /**
      * Set InfTransDelay

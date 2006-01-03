@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.57 2005/12/28 18:57:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.58 2006/01/02 08:33:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -333,6 +333,28 @@ Ospf<A>::set_interface_cost(const string& interface, const string& vif,
 	_peer_manager.set_interface_cost(_peer_manager.
 					 get_peerid(interface,vif),
 					 area, interface_cost);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::set_retransmit_interval(const string& interface, const string& vif,
+				 OspfTypes::AreaID area,
+				 uint16_t retransmit_interval)
+{
+    if (0 == retransmit_interval) {
+	XLOG_ERROR("Zero is not a legal value for RxmtInterval");
+	return false;
+    }
+
+    try {
+	_peer_manager.set_retransmit_interval(_peer_manager.
+					      get_peerid(interface,vif),
+					      area, retransmit_interval);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return false;
