@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.9 2005/04/11 21:21:13 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.10 2005/11/11 06:24:03 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -258,6 +258,7 @@ protocols \{\\
   vif/address, it may periodically send a request for a route update
   in case a neighbor appears.  This timer determines how often such a
   request is re-sent. The default value is 1 second.
+  If the timer's value is 0, then the periodic requests are not send.
 \item{\tt interpacket-delay-msecs}: This specifies the default delay
   between back-to-back RIP packets when an update is sent that
   requires multiple packets to be sent.  The default is 50
