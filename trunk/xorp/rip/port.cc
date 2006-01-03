@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.48 2005/12/21 02:29:51 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.49 2005/12/29 00:49:48 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -281,9 +281,25 @@ void
 Port<A>::start_request_table_timer()
 {
     EventLoop& e = _pm.eventloop();
+
+    if (constants().table_request_period_secs() == 0) {
+	// Don't start the timer, but cancel it instead
+	_rt_timer.unschedule();
+	return;
+    }
     _rt_timer = e.new_periodic(constants().table_request_period_secs() * 1000,
 			       callback(this,
 					&Port<A>::request_table_timeout));
+}
+
+template <typename A>
+void
+Port<A>::reschedule_request_table_timer()
+{
+    if (! _rt_timer.scheduled())
+	return;
+
+    start_request_table_timer();
 }
 
 template <typename A>

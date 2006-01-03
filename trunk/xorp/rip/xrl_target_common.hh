@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.20 2005/06/06 20:27:39 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.21 2005/10/27 05:05:40 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -737,14 +737,14 @@ XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
 // The following pair of macros are used in setting timer constants on
 // RIP ports.
 
-#define PORT_TIMER_SET_HANDLER(field, min_val, max_val)			\
+#define PORT_TIMER_SET_HANDLER(field, min_val, max_val, reschedule_method) \
 do {									\
     pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
     if (pp.first == 0)							\
 	return pp.second;						\
     Port<A>* p = pp.first;						\
 									\
-    if (t < min_val) 							\
+    if (static_cast<int32_t>(t) < min_val) 				\
 	return XrlCmdError::COMMAND_FAILED(c_format(			\
 	    "value supplied less than permitted minimum (%u < %u)", 	\
 	    XORP_UINT_CAST(t), XORP_UINT_CAST(min_val)));		\
@@ -755,6 +755,7 @@ do {									\
     if (p->constants().set_##field (t) == false)			\
 	return XrlCmdError::COMMAND_FAILED(				\
 	    "Failed to set value.");					\
+    p->##reschedule_method();						\
     return XrlCmdError::OKAY();						\
 } while (0)
 
@@ -778,7 +779,7 @@ XrlRipCommonTarget<A>::ripx_0_1_set_route_expiry_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(expiry_secs, 10, 10000);
+    PORT_TIMER_SET_HANDLER(expiry_secs, 10, 10000, reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -802,7 +803,7 @@ XrlRipCommonTarget<A>::ripx_0_1_set_route_deletion_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(deletion_secs, 10, 10000);
+    PORT_TIMER_SET_HANDLER(deletion_secs, 10, 10000, reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -826,7 +827,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_table_request_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(table_request_period_secs, 1, 10000);
+    PORT_TIMER_SET_HANDLER(table_request_period_secs, 0, 10000,
+			   reschedule_request_table_timer);
 }
 
 template <typename A>
@@ -850,7 +852,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_min_seconds(
 						const uint32_t& t
 						)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, 1, 300);
+    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, 1, 300,
+			   reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -874,7 +877,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_max_seconds(
 						const uint32_t& t
 						)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, 1, 600);
+    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, 1, 600,
+			   reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -898,7 +902,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_min_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, 1, 10000);
+    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, 1, 10000,
+			   reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -922,7 +927,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_max_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, 1, 10000);
+    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, 1, 10000,
+			   reschedule_dummy_timer);
 }
 
 template <typename A>
@@ -946,7 +952,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_interpacket_delay_milliseconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(interpacket_delay_ms, 10, 10000);
+    PORT_TIMER_SET_HANDLER(interpacket_delay_ms, 10, 10000,
+			   reschedule_dummy_timer);
 }
 
 template <typename A>

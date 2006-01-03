@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.23 2005/03/25 02:54:27 pavlin Exp $
+// $XORP: xorp/rip/port.hh,v 1.24 2005/12/21 02:29:51 pavlin Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -323,6 +323,17 @@ public:
      * Get the current number of bytes buffered in RIP packets.
      */
     uint32_t packet_buffer_bytes() const;
+
+    /**
+     * A dummy method to reschedule a non-existing timer.
+     */
+    void reschedule_dummy_timer() {}
+
+    /**
+     * Reschedule request table timer.  If the timer was not running,
+     * then don't schedule it.
+     */
+    void reschedule_request_table_timer();
 
 protected:
     /**

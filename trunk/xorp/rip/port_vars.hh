@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_vars.hh,v 1.7 2004/06/10 22:41:45 hodson Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.8 2005/03/25 02:54:28 pavlin Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -380,8 +380,10 @@ PortTimerConstants::unsolicited_response_max_secs()
 inline bool
 PortTimerConstants::set_table_request_period_secs(uint32_t t)
 {
-    if (t == 0)
-	return false;
+    //
+    // XXX: value of 0 is accepted because it is used to disable the
+    // periodic request messages.
+    //
     _table_request_secs = t;
     return true;
 }
