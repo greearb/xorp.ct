@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.11 2005/04/14 09:54:34 atanu Exp $"
+#ident "$XORP: xorp/libxorp/test_ref_trie.cc,v 1.12 2005/04/15 00:42:27 atanu Exp $"
 
 #include "libxorp_module.h"
 
@@ -30,8 +30,7 @@ RefTrie<IPv6, IPv6RouteEntry*> trie6;
 void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_net.str().c_str());
-    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator ti = 
-	trie.lookup_node(test_net);
+    RefTrie<IPv4, IPv4RouteEntry*>::iterator ti = trie.lookup_node(test_net);
     if (ti == trie.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -51,8 +50,7 @@ void test(IPv4Net test_net, IPv4RouteEntry *test_route) {
 void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_addr.str().c_str());
-    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator ti = 
-	trie.find(test_addr);
+    RefTrie<IPv4, IPv4RouteEntry*>::iterator ti = trie.find(test_addr);
     if (ti == trie.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -72,8 +70,7 @@ void test_find(IPv4 test_addr, IPv4RouteEntry *test_route) {
 void test_less_specific(IPv4Net test_net, IPv4RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up less specific for net: %s\n", test_net.str().c_str());
-    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator ti = 
-	trie.find_less_specific(test_net);
+    RefTrie<IPv4, IPv4RouteEntry*>::iterator ti = trie.find_less_specific(test_net);
     if (ti == trie.end()) {
 	if (test_route == NULL) {
 	    printf("PASS\n");
@@ -132,8 +129,7 @@ void test_lower_bound(IPv4 test_addr, IPv4 test_answer) {
 void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_net.str().c_str());
-    RefTrie<IPv6, IPv6RouteEntry*>::PostOrderIterator ti = 
-	trie6.lookup_node(test_net);
+    RefTrie<IPv6, IPv6RouteEntry*>::iterator ti = trie6.lookup_node(test_net);
     if (ti == trie6.end()) {
 	printf("Fail: no result\n");
 	trie.print();
@@ -153,8 +149,7 @@ void test6(IPv6Net test_net, IPv6RouteEntry *test_route) {
 void test_find6(IPv6 test_addr, IPv6RouteEntry *test_route) {
     printf("-----------------------------------------------\n");
     printf("looking up net: %s\n", test_addr.str().c_str());
-    RefTrie<IPv6, IPv6RouteEntry*>::PostOrderIterator ti = 
-	trie6.find(test_addr);
+    RefTrie<IPv6, IPv6RouteEntry*>::iterator ti = trie6.find(test_addr);
     const IPv6RouteEntry *r = ti.payload();
     if (ti == trie6.end()) {
 	printf("Fail: no result\n");
@@ -437,7 +432,7 @@ int main() {
     test_upper_bound(IPv4("1.2.2.1"), IPv4("1.2.2.255"));
     
     trie.print();
-    RefTrie<IPv4, IPv4RouteEntry*>::PostOrderIterator iter; 
+    RefTrie<IPv4, IPv4RouteEntry*>::iterator iter; 
     IPv4Net subroot(IPv4("1.2.0.0"), 21);
     iter = trie.search_subtree(subroot);
     while (iter!=trie.end()) {
@@ -654,7 +649,7 @@ int main() {
     int insert_pos = 0;
     int entries = trie.route_count();
 
-    RefTrie<IPv4, IPv4RouteEntry*>::PreOrderIterator iteri;
+    RefTrie<IPv4, IPv4RouteEntry*>::iterator iteri;
 
     for(cnt = 0, iteri = trie.begin(); iteri != trie.end(); iteri++, cnt++) {
 	if (n21 > iteri.cur()->k()) {
