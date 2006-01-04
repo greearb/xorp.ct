@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.28 2005/11/18 00:22:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.29 2005/11/23 12:07:12 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -36,6 +36,7 @@ protocols {
 			hello-interval:		u32 = 10;
 			router-dead-interval:   u32 = 40;
 			interface-cost:		u32 = 1;
+			retransmit-interval:	u32 = 1;
 			transit-delay:		u32 = 1;
 		        authentication {
 			    type:		txt	= "none" ;
@@ -249,6 +250,14 @@ transmitted packets";
 			    %allow-range: $(@) "1" "65535" %help: "The cost of this address";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
+			}
+
+			retransmit-interval {
+			    %help: short "The retransmit interval (RxmtInterval)";
+			
+			    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
+
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			}
 
 			transit-delay {
