@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.19 2004/09/17 14:05:10 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/rib.xif,v 1.20 2005/10/29 20:33:34 pavlin Exp $ */
 
 /*
  * Routing Information Base XRL interface.
@@ -225,6 +225,9 @@ interface rib/0.1 {
 	 *
 	 * @param multicast enable for multicast RIBs matching from and to.
 	 *
+	 * @param network_prefix redistribite only the routes that fall
+	 *        into this prefix address.
+	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
 	 *	  of updates it receives through the redist4/0.1
@@ -234,6 +237,7 @@ interface rib/0.1 {
 		       & from_protocol:txt				\
 		       & unicast:bool					\
 		       & multicast:bool					\
+		       & network_prefix:ipv4net				\
 		       & cookie:txt
 
 	/**
@@ -250,6 +254,9 @@ interface rib/0.1 {
 	 *
 	 * @param multicast enable for multicast RIBs matching from and to.
 	 *
+	 * @param network_prefix redistribite only the routes that fall
+	 *        into this prefix address.
+	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
 	 *	  of updates it receives through the redist6/0.1
@@ -259,6 +266,7 @@ interface rib/0.1 {
 		       & from_protocol:txt				\
 		       & unicast:bool					\
 		       & multicast:bool					\
+		       & network_prefix:ipv6net				\
 		       & cookie:txt
 
 	/**
@@ -278,6 +286,11 @@ interface rib/0.1 {
 	 * @param unicast disable for unicast RIBs matching from and to.
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist4/0.1
+	 *	  interface.
 	 */
 	redist_disable4	? to_xrl_target:txt				\
 			& from_protocol:txt				\
@@ -299,6 +312,11 @@ interface rib/0.1 {
 	 * @param unicast disable for unicast RIBs matching from and to.
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist6/0.1
+	 *	  interface.
 	 */
 	redist_disable6	? to_xrl_target:txt				\
 			& from_protocol:txt				\
@@ -320,6 +338,9 @@ interface rib/0.1 {
 	 *
 	 * @param multicast enable for multicast RIBs matching from and to.
 	 *
+	 * @param network_prefix redistribite only the routes that fall
+	 *        into this prefix address.
+	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
 	 *	  of updates it receives through the redist_transaction4/0.1
@@ -329,6 +350,7 @@ interface rib/0.1 {
 					& from_protocol:txt		\
 					& unicast:bool			\
 					& multicast:bool		\
+					& network_prefix:ipv4net	\
 					& cookie:txt
 
 	/**
@@ -345,6 +367,9 @@ interface rib/0.1 {
 	 *
 	 * @param multicast enable for multicast RIBs matching from and to.
 	 *
+	 * @param network_prefix redistribite only the routes that fall
+	 *        into this prefix address.
+	 *
 	 * @param cookie a text value passed back to creator in each call
 	 *        from the RIB.  This allows creators to identity the source
 	 *	  of updates it receives through the redist_transaction6/0.1
@@ -354,6 +379,7 @@ interface rib/0.1 {
 					& from_protocol:txt		\
 					& unicast:bool			\
 					& multicast:bool		\
+					& network_prefix:ipv6net	\
 					& cookie:txt
 
 	/**
@@ -373,6 +399,11 @@ interface rib/0.1 {
 	 * @param unicast disable for unicast RIBs matching from and to.
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist_transaction4/0.1
+	 *	  interface.
 	 */
 	redist_transaction_disable4	? to_xrl_target:txt		\
 					& from_protocol:txt		\
@@ -394,6 +425,11 @@ interface rib/0.1 {
 	 * @param unicast disable for unicast RIBs matching from and to.
 	 *
 	 * @param multicast disable for multicast RIBs matching from and to.
+	 *
+	 * @param cookie a text value passed back to creator in each call
+	 *        from the RIB.  This allows creators to identity the source
+	 *	  of updates it receives through the redist_transaction6/0.1
+	 *	  interface.
 	 */
 	redist_transaction_disable6	? to_xrl_target:txt		\
 					& from_protocol:txt		\

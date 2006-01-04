@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.7 2004/10/01 22:47:35 atanu Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.8 2005/03/25 02:54:20 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -53,6 +53,7 @@ public:
 		    Profile&		profile,
 		    const string& 	from_protocol,
 		    const string& 	xrl_target_name,
+		    const IPNet<A>&	network_prefix,
 		    const string&	cookie);
     ~RedistXrlOutput();
 
@@ -90,6 +91,7 @@ protected:
     Profile&	_profile;
     string	_from_protocol;
     string	_target_name;
+    IPNet<A>	_network_prefix;
     string	_cookie;
 
     TaskQueue	_tasks;
@@ -114,6 +116,7 @@ public:
 			       Profile&			profile,
 			       const string& 		from_protocol,
 			       const string& 		xrl_target_name,
+			       const IPNet<A>&		network_prefix,
 			       const string&		cookie);
 
     void add_route(const IPRouteEntry<A>& ipr);

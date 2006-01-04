@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.16 2005/10/29 18:09:36 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.17 2005/11/02 03:59:49 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -273,6 +273,8 @@ protected:
     const ShowRoutesOptions& 	_opts;
     XrlRouter*			_rtr;
     XorpTimer			_t;
+    IPv4Net			_network_prefix4;
+    IPv6Net			_network_prefix6;
     string			_cookie;
 };
 
@@ -280,7 +282,9 @@ ShowRoutesProcessor::ShowRoutesProcessor(EventLoop&		e,
 					 ShowRoutesOptions&	o)
     : _e(e),
       _opts(o),
-      _rtr(NULL)
+      _rtr(NULL),
+      _network_prefix4(IPv4::ZERO(), 0),	// XXX: get the whole table
+      _network_prefix6(IPv6::ZERO(), 0)		// XXX: get the whole table
 {
 }
 
@@ -405,13 +409,13 @@ ShowRoutesProcessor::step_200_request_redist()
 	sent = rib.send_redist_enable4(_opts.xrl_target.c_str(),
 				       _rtr->instance_name(),
 				       protocol, _opts.unicast, !_opts.unicast,
-				       _cookie, cb);
+				       _network_prefix4, _cookie, cb);
 
     } else {
 	sent = rib.send_redist_enable6(_opts.xrl_target.c_str(),
 				       _rtr->instance_name(),
 				       protocol, _opts.unicast, !_opts.unicast,
-				       _cookie, cb);
+				       _network_prefix6, _cookie, cb);
     }
 
     if (sent == false) {

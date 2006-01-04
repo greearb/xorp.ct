@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.54 2005/11/01 11:46:34 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.55 2005/11/03 08:50:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -977,10 +977,12 @@ XrlRibTarget::rib_0_1_redist_enable4(const string&	target_name,
 				     const string&	from,
 				     const bool&	ucast,
 				     const bool&	mcast,
+				     const IPv4Net&	network_prefix,
 				     const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output4(target_name, from, ucast, mcast,
-					     cookie, false) != XORP_OK) {
+					     network_prefix, cookie, false)
+	!= XORP_OK) {
 	string err = c_format("Failed to enable route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
@@ -994,10 +996,12 @@ XrlRibTarget::rib_0_1_redist_enable6(const string&	target_name,
 				     const string&	from,
 				     const bool&	ucast,
 				     const bool&	mcast,
+				     const IPv6Net&	network_prefix,
 				     const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
-					     cookie, false) != XORP_OK) {
+					     network_prefix, cookie, false)
+	!= XORP_OK) {
 	string err = c_format("Failed to enable route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
 			      from.c_str(), target_name.c_str());
@@ -1047,10 +1051,12 @@ XrlRibTarget::rib_0_1_redist_transaction_enable4(const string&	target_name,
 						 const string&	from,
 						 const bool&	ucast,
 						 const bool&	mcast,
+						 const IPv4Net&	network_prefix,
 						 const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output4(target_name, from, ucast, mcast,
-					     cookie, true) != XORP_OK) {
+					     network_prefix, cookie, true)
+	!= XORP_OK) {
 	string err = c_format("Failed to enable transaction-based "
 			      "route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",
@@ -1065,10 +1071,12 @@ XrlRibTarget::rib_0_1_redist_transaction_enable6(const string&	target_name,
 						 const string&	from,
 						 const bool&	ucast,
 						 const bool&	mcast,
+						 const IPv6Net&	network_prefix,
 						 const string&	cookie)
 {
     if (_rib_manager->add_redist_xrl_output6(target_name, from, ucast, mcast,
-					     cookie, true) != XORP_OK) {
+					     network_prefix, cookie, true)
+	!= XORP_OK) {
 	string err = c_format("Failed to enable transaction-based "
 			      "route redistribution from "
 			      "protocol \"%s\" to XRL target \"%s\"",

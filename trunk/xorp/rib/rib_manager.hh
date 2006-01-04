@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.31 2005/02/28 19:55:20 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.32 2005/03/25 02:54:21 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -274,6 +274,8 @@ public:
      * @param from_protocol protocol routes are redistributed from.
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
+     * @param network_prefix redistribite only the routes that fall into this
+     * prefix address.
      * @param cookie cookie passed in route redistribution XRLs.
      * @param is_xrl_transaction_output if true the add/delete route XRLs
      * are grouped into transactions.
@@ -284,6 +286,7 @@ public:
 			       const string&	from_protocol,
 			       bool	   	unicast,
 			       bool		multicast,
+			       const IPv4Net&	network_prefix,
 			       const string&	cookie,
 			       bool		is_xrl_transaction_output);
 
@@ -295,6 +298,8 @@ public:
      * @param from_protocol protocol routes are redistributed from.
      * @param unicast apply to unicast rib.
      * @param multicast apply to multicast rib.
+     * @param network_prefix redistribite only the routes that fall into this
+     * prefix address.
      * @param cookie cookie passed in route redistribution XRLs.
      * @param is_xrl_transaction_output if true the add/delete route XRLs
      * are grouped into transactions.
@@ -305,6 +310,7 @@ public:
 			       const string&	from_protocol,
 			       bool	   	unicast,
 			       bool		multicast,
+			       const IPv6Net&	network_prefix,
 			       const string&	cookie,
 			       bool		is_xrl_transaction_output);
 

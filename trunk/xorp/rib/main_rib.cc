@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/main_rib.cc,v 1.25 2005/03/25 02:54:19 pavlin Exp $"
+#ident "$XORP: xorp/rib/main_rib.cc,v 1.26 2005/08/04 11:52:32 bms Exp $"
 
 #include "rib_module.h"
 
@@ -60,6 +60,7 @@ main (int /* argc */, char* argv[])
 					   "all",	/* from_protocol */
 					   true,	/* unicast */
 					   false,	/* multicast */
+					   IPv4Net(IPv4::ZERO(), 0), /* network_prefix */
 					   "all",	/* cookie */
 					   true /* is_xrl_transaction_output */
 	    );
@@ -67,6 +68,7 @@ main (int /* argc */, char* argv[])
 					   "all",	/* from_protocol */
 					   true,	/* unicast */
 					   false,	/* multicast */
+					   IPv6Net(IPv6::ZERO(), 0), /* network_prefix */
 					   "all",	/* cookie */
 					   true /* is_xrl_transaction_output */
 	    );

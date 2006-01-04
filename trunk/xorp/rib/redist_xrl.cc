@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.20 2005/03/25 02:54:20 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.21 2005/10/27 05:05:39 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -431,11 +431,12 @@ RedistXrlOutput<A>::RedistXrlOutput(Redistributor<A>*	redistributor,
 				    Profile&		profile,
 				    const string&	from_protocol,
 				    const string&	xrl_target_name,
+				    const IPNet<A>&	network_prefix,
 				    const string&	cookie)
     : RedistOutput<A>(redistributor), _xrl_router(xrl_router), 
       _profile(profile),
       _from_protocol(from_protocol), _target_name(xrl_target_name),
-      _cookie(cookie), _n_tasks(0)
+      _network_prefix(network_prefix), _cookie(cookie), _n_tasks(0)
 {
 }
 
@@ -498,6 +499,9 @@ template <typename A>
 void
 RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 {
+    if (! _network_prefix.contains(ipr.net()))
+	return;		// The target is not interested in this route
+
     if (_profile.enabled(profile_route_rpc_in))
 	_profile.log(profile_route_rpc_in,
 		     c_format("add %s", ipr.net().str().c_str()));
@@ -512,6 +516,9 @@ template <typename A>
 void
 RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 {
+    if (! _network_prefix.contains(ipr.net()))
+	return;		// The target is not interested in this route
+
     if (_profile.enabled(profile_route_rpc_in))
 	_profile.log(profile_route_rpc_in,
 		     c_format("delete %s", ipr.net().str().c_str()));
@@ -989,10 +996,11 @@ RedistTransactionXrlOutput<A>::RedistTransactionXrlOutput(
 				Profile&		profile,
 				const string&		from_protocol,
 				const string&		xrl_target_name,
+				const IPNet<A>&		network_prefix,
 				const string&		cookie
 				)
     : RedistXrlOutput<A>(redistributor, xrl_router, profile, from_protocol,
-			 xrl_target_name, cookie),
+			 xrl_target_name, network_prefix, cookie),
       _tid(0),
       _transaction_in_progress(false),
       _transaction_in_error(false),

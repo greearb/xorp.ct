@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/xrl_target.hh,v 1.30 2005/03/25 02:54:25 pavlin Exp $
+// $XORP: xorp/rib/xrl_target.hh,v 1.31 2005/10/29 20:33:34 pavlin Exp $
 
 #ifndef __RIB_XRL_TARGET_HH__
 #define __RIB_XRL_TARGET_HH__
@@ -458,6 +458,9 @@ protected:
      *
      *  @param multicast enable for multicast RIBs matching from and to.
      *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
      *  @param cookie a text value passed back to creator in each call from the
      *  RIB. This allows creators to identity the source of updates it receives
      *  through the redist4/0.1 interface.
@@ -468,6 +471,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
+	const IPv4Net&	network_prefix,
 	const string&	cookie);
 
     /**
@@ -483,6 +487,9 @@ protected:
      *
      *  @param multicast enable for multicast RIBs matching from and to.
      *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
      *  @param cookie a text value passed back to creator in each call from the
      *  RIB. This allows creators to identity the source of updates it receives
      *  through the redist6/0.1 interface.
@@ -493,6 +500,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
+	const IPv6Net&	network_prefix,
 	const string&	cookie);
 
     /**
@@ -504,6 +512,10 @@ protected:
      *  @param unicast disable for unicast RIBs matching from and to.
      *
      *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist4/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_disable4(
 	// Input values,
@@ -522,6 +534,10 @@ protected:
      *  @param unicast disable for unicast RIBs matching from and to.
      *
      *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist6/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_disable6(
 	// Input values,
@@ -545,6 +561,9 @@ protected:
      *
      *  @param multicast enable for multicast RIBs matching from and to.
      *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
      *  @param cookie a text value passed back to creator in each call from the
      *  RIB. This allows creators to identity the source of updates it receives
      *  through the redist_transaction4/0.1 interface.
@@ -555,6 +574,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
+	const IPv4Net&	network_prefix,
 	const string&	cookie);
 
     /**
@@ -571,6 +591,9 @@ protected:
      *
      *  @param multicast enable for multicast RIBs matching from and to.
      *
+     *  @param network_prefix redistribite only the routes that fall into this
+     *  prefix address.
+     *
      *  @param cookie a text value passed back to creator in each call from the
      *  RIB. This allows creators to identity the source of updates it receives
      *  through the redist_transaction6/0.1 interface.
@@ -581,6 +604,7 @@ protected:
 	const string&	from_protocol,
 	const bool&	unicast,
 	const bool&	multicast,
+	const IPv6Net&	network_prefix,
 	const string&	cookie);
 
     /**
@@ -594,6 +618,10 @@ protected:
      *  @param unicast disable for unicast RIBs matching from and to.
      *
      *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction4/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_transaction_disable4(
 	// Input values,
@@ -614,6 +642,10 @@ protected:
      *  @param unicast disable for unicast RIBs matching from and to.
      *
      *  @param multicast disable for multicast RIBs matching from and to.
+     *
+     *  @param cookie a text value passed back to creator in each call from the
+     *  RIB. This allows creators to identity the source of updates it receives
+     *  through the redist_transaction6/0.1 interface.
      */
     XrlCmdError rib_0_1_redist_transaction_disable6(
 	// Input values,

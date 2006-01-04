@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.9 2005/02/12 08:09:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.10 2005/03/25 02:54:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -139,7 +139,8 @@ XrlRedistEnable<IPv4>::dispatch()
 
     return cl.send_redist_enable4(
 		xrl_rib_name(), xr.instance_name(), _protocol,
-		true /* unicast */, false /* multicast */, _protocol,
+		true /* unicast */, false /* multicast */,
+		IPv4Net(IPv4::ZERO(), 0), _protocol,
 		callback(this, &XrlRedistEnable<IPv4>::dispatch_complete)
 		);
 }
@@ -157,7 +158,8 @@ XrlRedistEnable<IPv6>::dispatch()
 
     return cl.send_redist_enable6(
 		xrl_rib_name(), xr.instance_name(), _protocol,
-		true /* unicast */, false /* multicast */, _protocol,
+		true /* unicast */, false /* multicast */,
+		IPv6Net(IPv6::ZERO(), 0), _protocol,
 		callback(this, &XrlRedistEnable<IPv6>::dispatch_complete)
 		);
 }

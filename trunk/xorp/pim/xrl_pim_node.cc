@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.90 2005/08/30 23:43:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.91 2005/08/31 00:04:24 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -1031,6 +1031,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
+		IPv4Net(IPv4::ZERO(), 0), // XXX: get the whole table
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
 	    if (success)
@@ -1044,6 +1045,7 @@ XrlPimNode::send_rib_redist_transaction_enable()
 		string("all"),		// TODO: XXX: hard-coded value
 		false,		/* unicast */
 		true,		/* multicast */
+		IPv6Net(IPv6::ZERO(), 0), // XXX: get the whole table
 		string("all"),		// TODO: XXX: hard-coded value
 		callback(this, &XrlPimNode::rib_client_send_redist_transaction_enable_cb));
 	    if (success)

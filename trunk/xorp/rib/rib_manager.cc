@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.47 2005/02/28 19:55:21 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.48 2005/03/25 02:54:21 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -425,6 +425,7 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 			 RIB<A>&	rib,
 			 const string&	to_xrl_target,
 			 const string&	proto,
+			 const IPNet<A>& network_prefix,
 			 const string&	cookie,
 			 bool		is_xrl_transaction_output)
 {
@@ -469,14 +470,17 @@ redist_enable_xrl_output(EventLoop&	eventloop,
 	redist->set_output(
 		    new RedistTransactionXrlOutput<A>(redist, rtr,
 						      profile,
-						      protocol, to_xrl_target,
+						      protocol,
+						      to_xrl_target,
+						      network_prefix,
 						      cookie)
 		    );
     } else {
 	redist->set_output(new RedistXrlOutput<A>(redist, rtr, 
 						  profile,
 						  protocol,
-						  to_xrl_target, cookie));
+						  to_xrl_target,
+						  network_prefix, cookie));
     }
 
     redist->set_policy(redist_policy);
@@ -520,13 +524,15 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
 				   const string&	from_protocol,
 				   bool			unicast,
 				   bool			multicast,
+				   const IPv4Net&	network_prefix,
 				   const string&	cookie,
 				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
 					 _urib4,
-					 to_xrl_target, from_protocol, cookie,
+					 to_xrl_target, from_protocol,
+					 network_prefix, cookie,
 					 is_xrl_transaction_output);
 	if (e != XORP_OK) {
 	    return e;
@@ -535,7 +541,8 @@ RibManager::add_redist_xrl_output4(const string&	to_xrl_target,
     if (multicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
 					 _mrib4,
-					 to_xrl_target, from_protocol, cookie,
+					 to_xrl_target, from_protocol,
+					 network_prefix, cookie,
 					 is_xrl_transaction_output);
 	if (e != XORP_OK && unicast) {
 	    redist_disable_xrl_output(_urib4,
@@ -552,13 +559,15 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
 				   const string&	from_protocol,
 				   bool			unicast,
 				   bool			multicast,
+				   const IPv6Net&	network_prefix,
 				   const string&	cookie,
 				   bool			is_xrl_transaction_output)
 {
     if (unicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
 					 _urib6,
-					 to_xrl_target, from_protocol, cookie,
+					 to_xrl_target, from_protocol,
+					 network_prefix, cookie,
 					 is_xrl_transaction_output);
 	if (e != XORP_OK) {
 	    return e;
@@ -567,7 +576,8 @@ RibManager::add_redist_xrl_output6(const string&	to_xrl_target,
     if (multicast) {
 	int e = redist_enable_xrl_output(_eventloop, _xrl_router, _profile,
 					 _mrib6,
-					 to_xrl_target, from_protocol, cookie,
+					 to_xrl_target, from_protocol,
+					 network_prefix, cookie,
 					 is_xrl_transaction_output);
 	if (e != XORP_OK && unicast) {
 	    redist_disable_xrl_output(_urib6,
