@@ -70,8 +70,13 @@ DEFINES = @DEFS@
 #
 #   DEFINES_R = -D_POSIX_C_SOURCE=199506L
 #
+# If _POSIX_C_SOURCE is defined, then on NetBSD-3.0 (and later?) its
+# value should be at least 200112L (to fix a compilation error):
+#
+#   DEFINES_R = -D_POSIX_C_SOURCE=200112L
+#
 
-DEFINES_R = -D_POSIX_C_SOURCE=199506L
+DEFINES_R = -D_POSIX_C_SOURCE=200112L
 
 #
 # The compiler optimization flags. I like to keep this separate so
