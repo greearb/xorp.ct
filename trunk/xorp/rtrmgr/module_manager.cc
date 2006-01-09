@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.54 2005/12/21 09:43:00 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.55 2005/12/21 20:08:44 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -62,7 +62,7 @@
 static map<pid_t, string> module_pids;
 static multimap<string, Module*> module_paths;
 
-
+#ifndef HOST_OS_WINDOWS
 static int
 restart_module(Module* module)
 {
@@ -84,6 +84,7 @@ restart_module(Module* module)
 
     return (XORP_OK);
 }
+#endif
 
 //
 // XXX: We need to figure out how to get an asynchronous notification
