@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.95 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.96 2006/01/03 03:25:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1111,6 +1111,11 @@ PeerManager<A>::summary_candidate(OspfTypes::AreaID area, IPNet<A> net,
     // Select routes that are candidate for summarisation.
 
     bool candidate = false;
+
+    if (rt.get_directly_connected()) {
+	debug_msg("Rejected directly connected route\n");
+	return false;
+    }
 
     switch (rt.get_destination_type()) {
     case OspfTypes::Router:
