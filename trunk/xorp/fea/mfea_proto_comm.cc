@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.42 2005/12/22 11:42:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.43 2005/12/22 12:18:23 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -73,6 +73,9 @@
 #include "mfea_proto_comm.hh"
 #include "mfea_vif.hh"
 
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
 
 //
 // Exported variables
