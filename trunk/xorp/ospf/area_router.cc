@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.159 2005/12/28 18:57:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.160 2006/01/09 10:22:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2745,7 +2745,7 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	}
 
 	RouteEntry<IPv4> rtf;
-	if (!routing_table.lookup_entry(forwarding, rtf))
+	if (!routing_table.longest_match_entry(forwarding, rtf))
 	    continue;
 	if (aselsa->external()) {
 	    if (RouteEntry<IPv4>::intra_area != rtf.get_path_type() &&
