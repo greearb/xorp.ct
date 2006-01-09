@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.29 2005/11/20 22:58:02 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.30 2005/11/22 23:19:14 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -38,6 +38,7 @@ class RouteEntry {
 
     RouteEntry() : _destination_type(OspfTypes::Router),
 		   _discard(false),
+		   _direct(false),
 		   _address(0),
 		   _id(0),
 		   _area_border_router(false),
@@ -65,6 +66,14 @@ class RouteEntry {
 
     bool get_discard() const {
 	return _discard;
+    }
+
+    void set_directly_connected(bool direct) {
+	_direct = direct;
+    }
+
+    bool get_directly_connected() const {
+	return _direct;
     }
 
     void set_address(uint32_t address) {
@@ -182,6 +191,9 @@ class RouteEntry {
  private:
     OspfTypes::VertexType _destination_type;
     bool _discard;			// True if this is a discard route.
+    bool _direct;			// True if directly connected,
+					// this route should not be
+					// sent to the RIB.
 
     uint32_t _address;			// If dest type is Network
 

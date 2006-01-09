@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.41 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.42 2006/01/09 08:41:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -406,11 +406,13 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
 			      uint32_t& metric, RouteEntry<A>& rt,
 			      PolicyTags& policytags)
 {
-    // Routes to routers are required in the OSPF routing table to
-    // satisfy requirements for AS-External-LSAs and
-    // Summary-LSAs. Drop them here so they don't make it the the RIB.
+    // The OSPF routing table needs to contain directly connected
+    // routes and routes to routers to satisfy requirements for
+    // AS-External-LSAs and Summary-LSAs. Drop them here so they don't
+    // make it the the RIB.
     if (net.contains(nexthop) ||
-	OspfTypes::Router == rt.get_destination_type())
+	OspfTypes::Router == rt.get_destination_type() ||
+	rt.get_directly_connected())
  	return false;
 
     // The import policy filter.
