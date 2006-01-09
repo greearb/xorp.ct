@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.161 2006/01/09 10:32:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.162 2006/01/09 12:01:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -400,9 +400,9 @@ AreaRouter<IPv4>::find_interface_address(Lsa::LsaRef src, Lsa::LsaRef dst,
     const list<RouterLink> &src_links = rlsa->get_router_links();
     const list<RouterLink> &dst_links = dst_rlsa->get_router_links();
     list<RouterLink>::const_iterator si = src_links.begin();
-    list<RouterLink>::const_iterator di = dst_links.begin();
 
     for (; si != src_links.end(); si++) {
+	list<RouterLink>::const_iterator di = dst_links.begin();
 	for (; di != dst_links.end(); di++) {
 	    if (si->get_type() == RouterLink::transit &&
 		di->get_type() == RouterLink::transit) {
