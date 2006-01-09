@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.158 2005/11/23 08:29:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.159 2005/12/28 18:57:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2438,15 +2438,6 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	
 	Vertex node = ri->node();
 
-	// If the nexthop is a router we don't care about it unless it
-	// is an AS boundary router or an area border router. Remove
-	// routes that point at themselves this means they are
-	// directly connected. If the node is a router let it pass as
-	// directly connected host routes are required.
-	if (node.get_type() == OspfTypes::Network &&
-	    ri->node() == ri->nexthop())
-	    continue;
-
 	Lsa::LsaRef lsar = node.get_lsa();
 	RouterLsa *rlsa;
 	NetworkLsa *nlsa;
@@ -2477,18 +2468,14 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	    IPv4 mask = IPv4(htonl(nlsa->get_network_mask()));
 	    net = IPNet<IPv4>(addr, mask.mask_len());
 	}
+	// If nexthop point back to the node itself then it it
+	// directly connected.
+	route_entry.set_directly_connected(ri->node() == ri->nexthop());
 	route_entry.set_path_type(RouteEntry<IPv4>::intra_area);
 	route_entry.set_cost(ri->weight());
 	route_entry.set_type_2_cost(0);
 
 	IPv4 nexthop = IPv4(htonl(ri->nexthop().get_address()));
-	// If nexthop falls into the net being advertised don't
-	// bother. This specifically catches the case of a host route
-	// with an equivalent nexthop. The stub network genarated by a
-	// Point-to-Multipoint interface for example. Allow host
-	// routes for Router nodes.
- 	if (OspfTypes::Network == node.get_type() && net.contains(nexthop))
-	    continue;
 	route_entry.set_nexthop(nexthop);
 
 	route_entry.set_advertising_router(lsar->get_header().
@@ -2962,6 +2949,8 @@ inline
 void
 update_edge(Spt<A>& spt, const Vertex& src, int metric, const Vertex& dst)
 {
+    debug_msg("src %s metric %d dst %s\n", cstring(src), metric, cstring(dst));
+
     if (!spt.add_edge(src, metric, dst)) {
 	// XXX
 	// This warning should not appear during absolute calculation.
