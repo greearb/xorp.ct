@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.58 2005/11/23 11:32:07 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.59 2006/01/03 03:25:26 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -374,6 +374,11 @@ class PeerManager {
     uint32_t compute_options(OspfTypes::AreaType area_type);
 
     // Config (begin)
+
+    /**
+     * The router ID is about to change.
+     */
+    void router_id_changing();
 
 #if	0
     /**

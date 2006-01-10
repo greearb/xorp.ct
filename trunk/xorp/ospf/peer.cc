@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.197 2006/01/03 03:25:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.198 2006/01/10 07:10:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -431,6 +431,16 @@ PeerOut<A>::take_down_peering()
     if (do_multicast(get_linktype()))
 	leave_multicast_group(A::OSPFIGP_ROUTERS());
     _ospf.disable_interface_vif(_interface, _vif);
+}
+
+template <typename A> 
+void
+PeerOut<A>::router_id_changing()
+{
+    typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	(*i).second->router_id_changing();
+    }
 }
 
 template <typename A> 
@@ -2429,6 +2439,19 @@ Peer<A>::pp_interface_state(InterfaceState is)
 	return "DR";
     }
     XLOG_UNREACHABLE();
+}
+
+template <typename A>
+void
+Peer<A>::router_id_changing()
+{
+    // RFC 2328 Section 12.4.2. Network-LSAs
+    // The router ID is about to change so flush out any Network-LSAs
+    // originated by this router.
+    // If this router is the DR changing the state will flush out the
+    // Network-LSA.
+    if (Peer<A>::DR == get_state())
+	change_state(Peer<A>::DR_other);
 }
 
 template <typename A>

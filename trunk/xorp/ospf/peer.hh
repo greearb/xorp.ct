@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.111 2005/11/23 11:27:46 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.112 2006/01/03 03:25:26 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -257,6 +257,11 @@ class PeerOut {
     OspfTypes::LinkType get_linktype() const { return _linktype; }
 
     // Configure the peering.
+
+    /**
+     * The router ID is about to change.
+     */
+    void router_id_changing();
 
     /**
      * Set the interface ID OSPFv3 only.
@@ -783,6 +788,11 @@ class Peer {
      * @return the Area Type.
      */
     OspfTypes::AreaType get_area_type() const { return _area_type; }
+
+    /**
+     * The router ID is about to change.
+     */
+    void router_id_changing();
 
     /**
      * Set the network mask OSPFv2 only.

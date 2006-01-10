@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.58 2006/01/02 08:33:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.59 2006/01/03 03:25:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -559,6 +559,14 @@ bool
 Ospf<A>::withdraw_route(const IPNet<A>& net)
 {
     return _peer_manager.external_withdraw(net);
+}
+
+template <typename A>
+void
+Ospf<A>::set_router_id(OspfTypes::RouterID id)
+{
+    _peer_manager.router_id_changing();
+    _router_id = id;
 }
 
 template class Ospf<IPv4>;

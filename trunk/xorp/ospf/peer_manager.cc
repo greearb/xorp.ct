@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.96 2006/01/03 03:25:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.97 2006/01/09 13:15:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -899,6 +899,15 @@ PeerManager<A>::set_options(const PeerID peerid, OspfTypes::AreaID area,
     return _peers[peerid]->set_options(area, options);
 }
 #endif
+
+template <typename A>
+void
+PeerManager<A>::router_id_changing()
+{
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++)
+	(*i).second->router_id_changing();
+}
 
 template <typename A> 
 bool

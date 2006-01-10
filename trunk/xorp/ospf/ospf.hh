@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.77 2005/12/28 18:57:17 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.78 2006/01/03 03:25:26 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -715,7 +715,7 @@ class Ospf {
     /**
      * Set the Router ID.
      */
-    void set_router_id(OspfTypes::RouterID id) { _router_id = id; }
+    void set_router_id(OspfTypes::RouterID id);
 
 
     Trace& trace() { return _trace; }
