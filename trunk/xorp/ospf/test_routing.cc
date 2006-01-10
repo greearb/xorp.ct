@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.14 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.15 2006/01/09 10:34:21 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -1031,6 +1031,157 @@ routing6(TestInfo& info)
     return true;
 }
 
+/**
+ * http://www.xorp.org/bugzilla/show_bug.cgi?id=375
+ * To test various forwarding address variants in external LSA originated
+ * not by directly connected neighbour.
+ * +-------------+ DR          +----------+ DR          +----------+
+ * | This router | 10.0.0.0/16 |   prid   | 10.2.0.0/16 |   pprid  |
+ * |   10.0.1.1  |-------------| 10.0.1.6 |-------------| 10.2.1.6 |
+ * +-------------+             +----------+             +----------+
+ *             10.0.1.1   10.0.1.6      10.2.1.1   10.2.1.6
+ */
+bool
+routing7(TestInfo& info)
+{
+    OspfTypes::Version version = OspfTypes::V2;
+
+    EventLoop eventloop;
+    DebugIO<IPv4> io(info, version, eventloop);
+    io.startup();
+
+    Ospf<IPv4> ospf(version, eventloop, &io);
+    ospf.trace().all(info.verbose());
+    OspfTypes::AreaID area = set_id("0.0.0.0");
+
+    PeerManager<IPv4>& pm = ospf.get_peer_manager();
+    pm.create_area_router(area, OspfTypes::NORMAL);
+    AreaRouter<IPv4> *ar = pm.get_area_router(area);
+    XLOG_ASSERT(ar);
+
+    OspfTypes::RouterID rid = set_id("10.0.1.1");
+    ospf.set_router_id(rid);
+
+    // Create this router's Router-LSA
+    Lsa::LsaRef lsar;
+    lsar = create_router_lsa(version, rid, rid);
+    RouterLsa *rlsa;
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, rid, 1 /* metric */);
+    lsar->encode();
+    lsar->set_self_originating(true);
+    ar->testing_replace_router_lsa(lsar);
+
+    // Create the peer's Router-LSA
+    OspfTypes::RouterID prid = set_id("10.0.1.6");
+    lsar = create_router_lsa(version, prid, prid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, prid, 1);
+    transit(version, rlsa, set_id("10.2.1.1"), set_id("10.2.1.1"), 1);
+    rlsa->set_e_bit(true);
+    rlsa->set_b_bit(true);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Network-LSA that acts as the binding glue.
+    lsar = create_network_lsa(version, rid, rid, 0xffff0000);
+    NetworkLsa *nlsa;
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(rid);
+    nlsa->get_attached_routers().push_back(prid);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Router-LSA from peer behind 10.0.1.6.
+    OspfTypes::RouterID pprid = set_id("10.2.1.6");
+    lsar = create_router_lsa(version, pprid, pprid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, set_id("10.2.1.1"), pprid, 1);
+    rlsa->set_e_bit(true);
+    rlsa->set_b_bit(true);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Network LSA to bind prid and pprid together.
+    lsar = create_network_lsa(version, set_id("10.2.1.1"), prid, 0xffff0000);
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(prid);
+    nlsa->get_attached_routers().push_back(pprid);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the AS-External-LSA from the peer with peer IP as forwarding
+    // address.
+    lsar = create_external_lsa(version, set_id("10.20.0.0"), pprid);
+    ASExternalLsa *aselsa;
+    aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    aselsa->set_network_mask(0xffff0000);
+    aselsa->set_metric(1);
+    aselsa->set_forwarding_address_ipv4(IPv4("10.2.1.6"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the AS-External-LSA from the peer with 0.0.0.0 as forwarding
+    // address.
+    lsar = create_external_lsa(version, set_id("10.21.0.0"), pprid);
+    aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    aselsa->set_network_mask(0xffff0000);
+    aselsa->set_metric(1);
+    aselsa->set_forwarding_address_ipv4(IPv4("0.0.0.0"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the AS-External-LSA from the peer with third router (not in
+    // OSPF domain) as forwarding address.
+    lsar = create_external_lsa(version, set_id("10.22.0.0"), pprid);
+    aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    aselsa->set_network_mask(0xffff0000);
+    aselsa->set_metric(1);
+    aselsa->set_forwarding_address_ipv4(IPv4("10.2.1.8"));
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    /*********************************************************/
+
+    if (info.verbose())
+        ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 4))
+        return false;
+
+    if (!io.routing_table_verify(IPNet<IPv4>("10.2.0.0/16"),
+				 IPv4("10.0.1.6"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+    if (!io.routing_table_verify(IPNet<IPv4>("10.20.0.0/16"),
+                                 IPv4("10.0.1.6"), 3, false, false)) {
+        DOUT(info) << "Mismatch in routing table\n";
+        return false;
+    }
+    if (!io.routing_table_verify(IPNet<IPv4>("10.21.0.0/16"),
+                                 IPv4("10.0.1.6"), 2, false, false)) {
+        DOUT(info) << "Mismatch in routing table\n";
+        return false;
+    }
+    if (!io.routing_table_verify(IPNet<IPv4>("10.22.0.0/16"),
+                                 IPv4("10.0.1.6"), 3, false, false)) {
+        DOUT(info) << "Mismatch in routing table\n";
+        return false;
+    }
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1055,6 +1206,7 @@ main(int argc, char **argv)
 	{"r4", callback(routing4)},
 	{"r5", callback(routing5)},
 	{"r6", callback(routing6)},
+	{"r7", callback(routing7)},
     };
 
     try {
