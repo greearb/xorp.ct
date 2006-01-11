@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.164 2006/01/11 00:38:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.165 2006/01/11 01:02:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1414,8 +1414,7 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    if (NEWER == search)
 		match = _db[index]->get_self_originating();
 	    if (self_originated((*i), match, index)) {
-		bool multicast_on_peer;
-		publish(peerid, nid, (*i), multicast_on_peer);
+		publish_all(_db[index]);
 		continue;
 	    }
 
