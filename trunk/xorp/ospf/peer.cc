@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.199 2006/01/10 10:50:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.200 2006/01/11 00:25:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2448,10 +2448,14 @@ Peer<A>::router_id_changing()
     // RFC 2328 Section 12.4.2. Network-LSAs
     // The router ID is about to change so flush out any Network-LSAs
     // originated by this router.
-    // If this router is the DR changing the state will flush out the
-    // Network-LSA.
-    if (Peer<A>::DR == get_state())
-	change_state(Peer<A>::DR_other);
+    if (Peer<A>::DR == get_state()) {
+	list<OspfTypes::RouterID> routers;
+	get_attached_routers(routers);
+	if (routers.empty())
+	    return;
+	get_area_router()->withdraw_network_lsa(get_peerid(),
+						get_candidate_id(), false);
+    }
 }
 
 template <typename A>

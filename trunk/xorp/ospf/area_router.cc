@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.162 2006/01/09 12:01:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.163 2006/01/09 12:12:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1243,7 +1243,8 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 template <typename A>
 bool 
 AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
-				    OspfTypes::RouterID link_state_id)
+				    OspfTypes::RouterID link_state_id,
+				    bool strict)
 {
     debug_msg("PeerID %u link state id %s\n", peerid,
 	      pr_id(link_state_id).c_str());
@@ -1254,8 +1255,9 @@ AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
 
     size_t index;
     if (!find_lsa(lsr, index)) {
-	XLOG_FATAL("Couldn't find Network_lsa %s in LSA database",
-		   cstring(lsr));
+	if (strict)
+	    XLOG_FATAL("Couldn't find Network_lsa %s in LSA database",
+		       cstring(lsr));
 	return false;
     }
 
