@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.198 2006/01/10 07:10:42 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.199 2006/01/10 10:50:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2851,7 +2851,7 @@ void
 Neighbour<A>::restart_retransmitter()
 {
     if (_rxmt_wrapper)
-	return;	// Already running.
+	stop_rxmt_timer("restart retransmitter");
 
     start_rxmt_timer(callback(this, &Neighbour<A>::retransmitter),
 		     false,
