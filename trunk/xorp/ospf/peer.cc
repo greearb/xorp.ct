@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.201 2006/01/11 00:38:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.202 2006/01/11 00:43:42 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2455,7 +2455,7 @@ Peer<A>::router_id_changing()
 	if (routers.empty())
 	    return;
 	get_area_router()->withdraw_network_lsa(get_peerid(),
-						get_candidate_id(), false);
+						get_candidate_id());
     }
 }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.88 2005/11/23 08:29:50 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.89 2006/01/11 00:38:52 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -246,11 +246,8 @@ class AreaRouter : Subsystem {
 
     /**
      * Withdraw the Network-LSA for this peer by prematurely aging.
-     * 
-     * @param strict if true it is a fatal error to not find the Network-LSA.
      */
-    bool withdraw_network_lsa(PeerID peer, OspfTypes::RouterID link_state_id,
-			      bool strict = true);
+    bool withdraw_network_lsa(PeerID peer, OspfTypes::RouterID link_state_id);
 
     /**
      * Refresh the Network-LSAs.
