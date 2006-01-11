@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.165 2006/01/11 01:02:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.166 2006/01/11 07:29:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1463,6 +1463,9 @@ AreaRouter<A>::receive_lsas(PeerID peerid,
 	    // (e) Possibly acknowledge this LSA.
 	    // RFC 2328 Section 13.5 Sending Link State Acknowledgment Packets
 
+	    debug_msg("LSA multicast out on peer: %s "
+		      "LSA from DR: %s interface in state backup: %s\n",
+		      pb(multicast_on_peer), pb(dr), pb(backup));
 	    if (!multicast_on_peer) {
 		if ((backup && dr) || !backup)
 		    delayed_ack.push_back(lsah);
