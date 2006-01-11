@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.78 2006/01/03 03:25:26 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.79 2006/01/10 10:50:19 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -331,7 +331,7 @@ from_string_to_area_type(const string& type, bool& status)
 
 inline
 const char *
-pb(bool val)
+pb(const bool val)
 {
     return val ? "true" : "false";
 }
