@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.58 2005/11/13 19:25:34 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.59 2005/12/28 18:59:23 atanu Exp $
 #
 
 TODO
@@ -134,6 +134,8 @@ the LSA itself that the peer code invokes.
 
 If MAX_AGE_IN_DATABASE in database is not defined then a check is now
 made for the duplicate LSA in the retransmission list.
+
+It might be appropriate to leave MaxAge LSAs on the retransmission list.
 
 If this fix works then do away with MAX_AGE_IN_DATABASE.
 
