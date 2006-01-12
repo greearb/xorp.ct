@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.172 2006/01/12 08:23:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.173 2006/01/12 08:28:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -822,7 +822,7 @@ AreaRouter<A>::refresh_summary_lsa(Lsa::LsaRef lsar)
 {
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
-    lsar->update_age_and_seqno(now);
+    update_age_and_seqno(lsar, now);
 
     lsar->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
@@ -1072,7 +1072,7 @@ AreaRouter<A>::external_refresh(Lsa::LsaRef lsar)
 	lsar = external_generate_type7(lsar, indb);
 	XLOG_ASSERT(indb);
 	_ospf.get_eventloop().current_time(now);
-	lsar->update_age_and_seqno(now);
+	update_age_and_seqno(lsar, now);
     }
 	break;
     }
@@ -1224,7 +1224,7 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
-    nlsa->update_age_and_seqno(now);
+    update_age_and_seqno(_db[index], now);
 
     // Prime this Network-LSA to be refreshed.
     nlsa->get_timer() = _ospf.get_eventloop().
@@ -2086,7 +2086,7 @@ AreaRouter<A>::update_router_links()
 
     TimeVal now;
     _ospf.get_eventloop().current_time(now);
-    router_lsa->update_age_and_seqno(now);
+    update_age_and_seqno(_router_lsa, now);
 
     // Prime this Router-LSA to be refreshed.
     router_lsa->get_timer() = _ospf.get_eventloop().
@@ -2329,7 +2329,7 @@ AreaRouter<A>::self_originated(Lsa::LsaRef lsar, bool lsa_exists, size_t index)
     if (lsa_exists) {
 	_db[index]->set_ls_sequence_number(lsar->get_ls_sequence_number());
 	lsar = _db[index];
-	lsar->increment_sequence_number();
+	increment_sequence_number(lsar);
 	lsar->encode();
 	return true;
     }

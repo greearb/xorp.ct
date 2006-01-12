@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.59 2005/12/28 18:59:23 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.60 2006/01/11 01:09:08 atanu Exp $
 #
 
 TODO
@@ -89,10 +89,6 @@ network byte order issues are not being correctly handled.
 32) The IP checksum is consistently mis-used through the code. To fix
 this problem the checksum is returned byte-swapped. Fix the code to
 deal with the checksum correctly.
-
-33) The sequence number reaching OspfTypes:: MaxSequenceNumber is not
-dealt with gracefully. If will take 680 years for this condition to be
-hit.
 
 34) When the code was originally written the interface manager was not
 hooked into the code. Which meant that the prefix length and MTU had
@@ -274,5 +270,11 @@ is not understood by process_scheduled_events().
 
 24) Move is_DR(), is_BDR(), is_DR_or_BDR() and possibly
 is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
+
+[DONE]
+
+33) The sequence number reaching OspfTypes:: MaxSequenceNumber is not
+dealt with gracefully. If will take 680 years for this condition to be
+hit.
 
 [DONE]
