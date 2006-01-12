@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.170 2006/01/12 07:52:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.171 2006/01/12 08:09:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1624,12 +1624,6 @@ AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
 
     lsar->set_maxage();
 
-    size_t index;
-    if (!find_lsa(lsar, index))
-	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
-
-//     delete_lsa(lsar, index, false /* Don't invalidate */);
-
     if (_reincarnate.empty())
 	_reincarnate_timer = _ospf.get_eventloop().
 	    new_periodic(1000, callback(this, &AreaRouter<A>::reincarnate));
@@ -1654,7 +1648,6 @@ AreaRouter<A>::reincarnate()
 	    (*i)->revive(now);
 	    XLOG_INFO("Reviving an LSA that reached MaxSequenceNumber %s",
 		      cstring(*(*i)));
-// 	    add_lsa((*i));
 	    publish_all((*i));
 	    _reincarnate.erase(i++);
 	} else {
