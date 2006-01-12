@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.203 2006/01/11 01:02:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.204 2006/01/11 09:26:02 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2731,8 +2731,19 @@ Neighbour<A>::is_DR_or_BDR() const
 
 template <typename A>
 bool
-Neighbour<A>::is_neighbour_DR_or_BDR()
-    const
+Neighbour<A>::is_neighbour_DR() const
+{
+    XLOG_ASSERT(_peer.do_dr_or_bdr());
+
+    if (get_candidate_id() == _peer.get_designated_router())
+	return true;
+
+    return false;
+}
+
+template <typename A>
+bool
+Neighbour<A>::is_neighbour_DR_or_BDR() const
 {
     XLOG_ASSERT(_peer.do_dr_or_bdr());
 
@@ -3782,7 +3793,7 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     bool dr = false;
     bool bdr = false;
     if (_peer.do_dr_or_bdr()) {
-	dr = is_DR();
+	dr = is_neighbour_DR();
 	bdr = is_BDR();
     }
     
