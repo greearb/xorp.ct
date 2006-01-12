@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.89 2006/01/11 00:38:52 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.90 2006/01/11 01:02:31 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -493,6 +493,11 @@ class AreaRouter : Subsystem {
     
     DelayQueue<Lsa::LsaRef> _queue;	// Router LSA queue.
 
+    XorpTimer _reincarnate_timer;	// Wait for the LSAs to be purged.
+    list<Lsa::LsaRef> _reincarnate;	// Self-originated LSAs where
+					// the sequence number has
+					// reached MaxSequenceNumber.
+
 #ifdef	UNFINISHED_INCREMENTAL_UPDATE
     uint32_t _TransitCapability;	// Used by the spt computation.
 
@@ -602,6 +607,30 @@ class AreaRouter : Subsystem {
      * database flood with age set to MAXAGE.
      */
     void premature_aging(Lsa::LsaRef lsar, size_t index);
+
+    /**
+     * Increment the sequence number of of this LSA, most importantly
+     * handle the sequence number reaching MaxSequenceNumber. 
+     */
+    Lsa::LsaRef increment_sequence_number(Lsa::LsaRef lsar);
+
+    /**
+     * Update the age and increment the sequence number of of this
+     * LSA, most importantly handle the sequence number reaching
+     * MaxSequenceNumber.
+     */
+    Lsa::LsaRef update_age_and_seqno(Lsa::LsaRef lsar, const TimeVal& now);
+
+    /**
+     * Process an LSA where the sequence number has reached MaxSequenceNumber.
+     */
+    Lsa::LsaRef max_sequence_number_reached(Lsa::LsaRef lsar);
+
+    /**
+     * Reincarnate LSAs that have gone through the MaxSequenceNumber
+     * transition. Called on a periodic timer.
+     */
+    bool reincarnate();
 
     /**
      * Add this LSA to the database.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.62 2005/11/19 03:35:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.63 2005/12/28 18:57:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -268,7 +268,24 @@ add_age(uint16_t current, uint16_t delta)
 }
 
 void
-Lsa::update_age_and_seqno(TimeVal& now)
+Lsa::revive(const TimeVal& now)
+{
+    Lsa_header& h = get_header();
+
+    XLOG_ASSERT(get_self_originating());
+    XLOG_ASSERT(h.get_ls_age() == OspfTypes::MaxAge);
+    XLOG_ASSERT(h.get_ls_sequence_number() == OspfTypes::MaxSequenceNumber);
+
+    set_transmitted(false);
+    h.set_ls_sequence_number(OspfTypes::InitialSequenceNumber);
+    get_header().set_ls_age(0);
+    record_creation_time(now);
+
+    encode();
+}
+
+void
+Lsa::update_age_and_seqno(const TimeVal& now)
 {
     XLOG_ASSERT(get_self_originating());
     XLOG_ASSERT(get_header().get_ls_age() != OspfTypes::MaxAge);
@@ -321,6 +338,12 @@ bool
 Lsa::maxage() const
 {
     return OspfTypes::MaxAge == _header.get_ls_age();
+}
+
+bool
+Lsa::max_sequence_number() const
+{
+    return OspfTypes::MaxSequenceNumber == _header.get_ls_sequence_number();
 }
 
 void

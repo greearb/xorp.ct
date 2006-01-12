@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.167 2006/01/11 23:40:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.168 2006/01/12 05:53:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1582,6 +1582,86 @@ AreaRouter<A>::premature_aging(Lsa::LsaRef lsar, size_t i)
     XLOG_ASSERT(lsar->get_self_originating());
     lsar->set_maxage();
     maxage_reached(lsar, i);
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::increment_sequence_number(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->get_self_originating());
+
+    if (lsar->max_sequence_number())
+	return max_sequence_number_reached(lsar);
+
+    lsar->increment_sequence_number();
+
+    return lsar;
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::update_age_and_seqno(Lsa::LsaRef lsar, const TimeVal& now)
+{
+    XLOG_ASSERT(lsar->get_self_originating());
+
+    if (lsar->max_sequence_number())
+	return max_sequence_number_reached(lsar);
+
+    lsar->update_age_and_seqno(now);
+
+    return lsar;
+}
+
+template <typename A>
+Lsa::LsaRef
+AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
+{
+    XLOG_ASSERT(lsar->get_self_originating());
+
+    // Under normal circumstances this code path will be reached
+    // every 680 years.
+    XLOG_INFO("LSA reached MaxSequenceNumber %s", cstring(*lsar));
+
+    size_t index;
+    if (!find_lsa(lsar, index))
+	XLOG_FATAL("LSA not in database: %s", cstring(*lsar));
+
+    delete_lsa(lsar, index, false /* Don't invalidate */);
+
+    if (_reincarnate.empty())
+	_reincarnate_timer = _ospf.get_eventloop().
+	    new_periodic(1000, callback(this, &AreaRouter<A>::reincarnate));
+	
+    _reincarnate.push_back(lsar);
+
+    return lsar;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::reincarnate()
+{
+    list<Lsa::LsaRef>::iterator i = _reincarnate.begin();
+    while(i != _reincarnate.end()) {
+	XLOG_ASSERT((*i)->valid());
+	XLOG_ASSERT((*i)->maxage());
+	XLOG_ASSERT((*i)->max_sequence_number());
+	if ((*i)->empty_nack()) {
+	    TimeVal now;
+	    _ospf.get_eventloop().current_time(now);
+	    (*i)->revive(now);
+	    add_lsa((*i));
+	    publish_all((*i));
+	    _reincarnate.erase(i++);
+	} else {
+	    i++;
+	}
+    }
+
+    if (_reincarnate.empty())
+	return false;
+
+    return true;
 }
 
 template <typename A>

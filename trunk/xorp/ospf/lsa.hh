@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.76 2005/11/16 00:51:06 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.77 2005/12/20 08:07:17 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -402,10 +402,16 @@ class Lsa {
     }
 
     /**
+     * Revive an LSA that is at MaxAge and MaxSequenceNumber. The age
+     * is taken back to zero and sequence number InitialSequenceNumber.
+     */
+    void revive(const TimeVal& now);
+
+    /**
      * Update the age and sequence number of a self originated
      * LSAs. Plus encode.
      */
-    void update_age_and_seqno(TimeVal& now);
+    void update_age_and_seqno(const TimeVal& now);
 
     /**
      * Update the age field based on the current time.
@@ -431,6 +437,11 @@ class Lsa {
      * Is the age of this LSA MaxAge.
      */
     bool maxage() const;
+
+    /**
+     * Is the LS Sequence Number MaxSequenceNumber?
+     */
+    bool max_sequence_number() const;
 
     /**
      * Get the LS Sequence Number.
