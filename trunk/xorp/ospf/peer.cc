@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.206 2006/01/12 10:24:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.207 2006/01/12 11:44:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3051,7 +3051,17 @@ bool
 Neighbour<A>::send_data_description_packet()
 {
     _peer.populate_common_header(_data_description_packet);
-    _data_description_packet.set_interface_mtu(_peer.get_interface_mtu());
+    switch(get_linktype()) {
+    case OspfTypes::PointToPoint:
+    case OspfTypes::BROADCAST:
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+	_data_description_packet.set_interface_mtu(_peer.get_interface_mtu());
+	break;
+    case OspfTypes::VirtualLink:
+	_data_description_packet.set_interface_mtu(0);
+	break;
+    }
     _data_description_packet.set_options(_peer.get_options());
     
     vector<uint8_t> pkt;
@@ -3074,7 +3084,6 @@ Neighbour<A>::send_data_description_packet()
 					 _peer.get_interface_address());
 	break;
     case OspfTypes::VirtualLink:
-	_data_description_packet.set_interface_mtu(0);
 	transmit = new SimpleTransmit<A>(pkt,
 					 get_neighbour_address(),
 					 _peer.get_interface_address());
