@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.79 2006/01/10 10:50:19 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.80 2006/01/11 23:31:26 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -546,6 +546,13 @@ class Ospf {
     bool set_authentication(const string& ifname, const string& vif,
 			    OspfTypes::AreaID area,
 			    string type, string password);
+
+    /**
+     * Toggle the passive status of an interface.
+     */
+    bool set_passive(const string& interface, const string& vif,
+		     OspfTypes::AreaID area,
+		     bool passive);
 
     /**
      * Send router alerts in IP packets or not.

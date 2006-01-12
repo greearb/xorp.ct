@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.113 2006/01/10 10:50:19 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.114 2006/01/12 01:29:30 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -296,6 +296,11 @@ class PeerOut {
 			    string password);
 
     /**
+     * Toggle the passive status of an interface.
+     */
+    bool set_passive(OspfTypes::AreaID area, bool passive);
+
+    /**
      * Set the interface cost.
      */
     bool set_interface_cost(uint16_t interface_cost) {
@@ -390,7 +395,8 @@ class Peer {
     Peer(Ospf<A>& ospf, PeerOut<A>& peerout, OspfTypes::AreaID area_id,
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
-	  _area_type(area_type), _interface_state(Down),
+	  _area_type(area_type), _enabled(false), _passive(false),
+	  _interface_state(Down),
 	  _hello_packet(ospf.get_version())
     {
 	_hello_packet.set_area_id(area_id);
@@ -850,6 +856,11 @@ class Peer {
     bool set_authentication(string method, string password);
 
     /**
+     * Toggle the passive status of an interface.
+     */
+    bool set_passive(bool passive);
+
+    /**
      * Set RxmtInterval.
      */
     bool set_rxmt_interval(uint32_t rxmt_interval);
@@ -912,6 +923,8 @@ class Peer {
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     const OspfTypes::AreaID _area_id;	// Area that is being represented.
     const OspfTypes::AreaType _area_type;// NORMAL or STUB or NSSA.
+    bool _enabled;			// True if the interface is enabled.
+    bool _passive;			// True if the interface is in loopback
 
     Auth _auth_outbound;		// Authentication generation (outbound)
     string _auth_method;		// Authentication method to use.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.59 2006/01/03 03:25:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.60 2006/01/10 10:50:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -395,6 +395,22 @@ Ospf<A>::set_authentication(const string& interface, const string& vif,
 					 get_peerid(interface,vif),
 					 area,
 					 type, password);
+    } catch(BadPeer& e) {
+	XLOG_ERROR("%s", cstring(e));
+	return false;
+    }
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::set_passive(const string& interface, const string& vif,
+		     OspfTypes::AreaID area, bool passive)
+{
+    try {
+	_peer_manager.set_passive(_peer_manager.
+				  get_peerid(interface,vif),
+				  area, passive);
     } catch(BadPeer& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return false;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.24 2005/12/28 18:57:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.25 2006/01/03 03:25:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -598,6 +598,23 @@ XrlOspfV2Target::ospfv2_0_1_set_authentication(const string& ifname,
     if (!_ospf.set_authentication(ifname, vifname, area, type, password))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure "
 					   "authentication");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
+					const string& vifname,
+					const IPv4& a,
+					const bool& passive)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s passive %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
+	      pb(passive));
+
+    if (!_ospf.set_passive(ifname, vifname, area, passive))
+	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
 
     return XrlCmdError::OKAY();
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.59 2006/01/03 03:25:26 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.60 2006/01/10 10:50:19 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -440,6 +440,12 @@ class PeerManager {
      */
     bool set_authentication(const PeerID, OspfTypes::AreaID area,
 			    string& type, string& password);
+
+    /**
+     * Toggle the passive status of an interface.
+     */
+    bool set_passive(const PeerID, OspfTypes::AreaID area,
+		     bool passive);
 
     // Config (end)
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.204 2006/01/11 09:26:02 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.205 2006/01/12 01:29:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -537,6 +537,18 @@ PeerOut<A>::set_authentication(OspfTypes::AreaID area, string method,
     }
 
     return _areas[area]->set_authentication(method, password);
+}
+
+template <typename A>
+bool
+PeerOut<A>::set_passive(OspfTypes::AreaID area, bool passive)
+{
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->set_passive(passive);
 }
 
 template <typename A>
@@ -1225,16 +1237,21 @@ template <typename A>
 void
 Peer<A>::start()
 {
+    _enabled = true;
     //    _interface_state = Down;
     set_designated_router(set_id("0.0.0.0"));
     set_backup_designated_router(set_id("0.0.0.0"));
-    event_interface_up();
+    if (_passive)
+	event_loop_ind();
+    else
+	event_interface_up();
 }
 
 template <typename A>
 void
 Peer<A>::stop()
 {
+    _enabled = false;
     event_interface_down();
 }
 
@@ -2555,6 +2572,27 @@ Peer<A>::set_authentication(string method, string password)
     typename list<Neighbour<A> *>::const_iterator n;
     for(n = _neighbours.begin(); n != _neighbours.end(); n++)
 	(*n)->set_authentication(method, password);
+
+    return true;
+}
+
+template <typename A>
+bool
+Peer<A>::set_passive(bool passive)
+{
+    if (_passive == passive)
+	return true;
+
+    _passive = passive;
+    if (!_enabled)
+	return true;
+
+    if (passive) {
+	event_loop_ind();
+    } else {
+	event_unloop_ind();	
+	event_interface_up();
+    }
 
     return true;
 }

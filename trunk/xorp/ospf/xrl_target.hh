@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.16 2005/11/14 19:33:30 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.17 2006/01/03 03:25:26 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -353,6 +353,16 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const IPv4&	area,
 	const string&	type,
 	const string&	password);
+
+    /**
+     *  Toggle the passive status of an interface.
+     */
+    XrlCmdError ospfv2_0_1_set_passive(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const bool&	passive);
 
     /**
      *  Add area range.

@@ -1,10 +1,18 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.31 2006/01/10 09:25:07 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.32 2006/01/11 08:38:04 atanu Exp $ */
 
 protocols {
     ospf4 {
 	targetname: txt = "ospfv2";
 	router-id: ipv4;
 	ip-router-alert: bool = false;
+
+	traceoptions {
+	    flag {
+		all {
+		    disable:		toggle = false;
+		}
+	    }
+	}
 	
 	area @: ipv4 {
 	    area-type:		txt = "normal";
@@ -40,6 +48,7 @@ protocols {
 			    type:		txt	= "none" ;
 			    password:		txt	= "" ;
 		        }
+			passive:		bool = false;
 
 			neighbour @: ipv4 {
 			    router-id:  ipv4;
@@ -47,14 +56,6 @@ protocols {
 
 			disable:		toggle = false;
 		    }
-		}
-	    }
-	}
-
-	traceoptions {
-	    flag {
-		all {
-		    disable:		toggle = false;
 		}
 	    }
 	}
@@ -278,6 +279,12 @@ transmitted packets";
 			    %update:   xrl "$(ospf4.targetname)/ospfv2/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
 			    %help: short "Set the authentication type and password used for packets sent from address." ;
 		        }
+
+			passive {
+			    %help: short "Set the interface into loopback";
+
+			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
+			}
 
 			disable {
 			    %help: short "disable OSPF on address";

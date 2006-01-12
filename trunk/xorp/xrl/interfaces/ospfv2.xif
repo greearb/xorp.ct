@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.12 2006/01/03 02:24:12 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.13 2006/01/03 03:25:27 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -179,6 +179,14 @@ interface ospfv2/0.1 {
 		       & type:txt \
 		       & password:txt
 
+    /**
+     * Toggle the passive status of an interface.
+     */
+    set_passive ? ifname:txt \
+		& vifname:txt \
+		& area:ipv4 \
+		& passive:bool
+	
     /**
      * Add area range.
      */
