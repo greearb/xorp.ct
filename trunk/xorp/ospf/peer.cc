@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.205 2006/01/12 01:29:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.206 2006/01/12 10:24:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3020,17 +3020,21 @@ Neighbour<A>::build_data_description_packet()
     do {
 	Lsa::LsaRef lsa = get_area_router()->
 	    get_entry_database(_database_handle, last);
-	_data_description_packet.get_lsa_headers().
-	    push_back(lsa->get_header());
 
-	// XXX - We are testing to see if there is space left in the
-	// packet by repeatedly encoding, this is very inefficient. We
-	// should encode to find the base size of the packet and then
-	// compare against the constant LSA header length each time.
-	vector<uint8_t> pkt;
-	_data_description_packet.encode(pkt);
-	if (pkt.size() + Lsa_header::length() >= _peer.get_frame_size())
-	    return;
+	// Don't summarize AS-External-LSAs over virtual adjacencies.
+	if (!(OspfTypes::VirtualLink == get_linktype() && lsa->external())) {
+	    _data_description_packet.get_lsa_headers().
+		push_back(lsa->get_header());
+
+	    // XXX - We are testing to see if there is space left in the
+	    // packet by repeatedly encoding, this is very inefficient. We
+	    // should encode to find the base size of the packet and then
+	    // compare against the constant LSA header length each time.
+	    vector<uint8_t> pkt;
+	    _data_description_packet.encode(pkt);
+	    if (pkt.size() + Lsa_header::length() >= _peer.get_frame_size())
+		return;
+	}
     } while(last == false);
 
  out:
