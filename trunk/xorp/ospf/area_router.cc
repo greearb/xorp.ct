@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.171 2006/01/12 08:09:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.172 2006/01/12 08:23:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1585,35 +1585,35 @@ AreaRouter<A>::premature_aging(Lsa::LsaRef lsar, size_t i)
 }
 
 template <typename A>
-Lsa::LsaRef
+void
 AreaRouter<A>::increment_sequence_number(Lsa::LsaRef lsar)
 {
     XLOG_ASSERT(lsar->get_self_originating());
 
-    if (lsar->max_sequence_number())
-	return max_sequence_number_reached(lsar);
+    if (lsar->max_sequence_number()) {
+	max_sequence_number_reached(lsar);
+	return;
+    }
 
     lsar->increment_sequence_number();
-
-    return lsar;
 }
 
 template <typename A>
-Lsa::LsaRef
+void
 AreaRouter<A>::update_age_and_seqno(Lsa::LsaRef lsar, const TimeVal& now)
 {
     XLOG_ASSERT(lsar->get_self_originating());
 
-    if (lsar->max_sequence_number())
-	return max_sequence_number_reached(lsar);
+    if (lsar->max_sequence_number()) {
+	max_sequence_number_reached(lsar);
+	return;
+    }
 
     lsar->update_age_and_seqno(now);
-
-    return lsar;
 }
 
 template <typename A>
-Lsa::LsaRef
+void
 AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
 {
     XLOG_ASSERT(lsar->get_self_originating());
@@ -1629,8 +1629,6 @@ AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
 	    new_periodic(1000, callback(this, &AreaRouter<A>::reincarnate));
 	
     _reincarnate.push_back(lsar);
-
-    return lsar;
 }
 
 template <typename A>

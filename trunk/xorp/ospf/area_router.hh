@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.90 2006/01/11 01:02:31 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.91 2006/01/12 07:40:39 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -612,19 +612,19 @@ class AreaRouter : Subsystem {
      * Increment the sequence number of of this LSA, most importantly
      * handle the sequence number reaching MaxSequenceNumber. 
      */
-    Lsa::LsaRef increment_sequence_number(Lsa::LsaRef lsar);
+    void increment_sequence_number(Lsa::LsaRef lsar);
 
     /**
      * Update the age and increment the sequence number of of this
      * LSA, most importantly handle the sequence number reaching
      * MaxSequenceNumber.
      */
-    Lsa::LsaRef update_age_and_seqno(Lsa::LsaRef lsar, const TimeVal& now);
+    void update_age_and_seqno(Lsa::LsaRef lsar, const TimeVal& now);
 
     /**
      * Process an LSA where the sequence number has reached MaxSequenceNumber.
      */
-    Lsa::LsaRef max_sequence_number_reached(Lsa::LsaRef lsar);
+    void max_sequence_number_reached(Lsa::LsaRef lsar);
 
     /**
      * Reincarnate LSAs that have gone through the MaxSequenceNumber
