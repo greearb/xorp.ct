@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.166 2006/01/11 07:29:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.167 2006/01/11 23:40:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -796,7 +796,6 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 	    // Remove it if it should no longer be announced.
 	    if(!announce) {
 		lsar = _db[index];
-		lsar->set_maxage();
 		premature_aging(lsar, index);
 	    }
 	    // It is already being announced so out of here.
@@ -868,7 +867,6 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     if (find_lsa(lsar, index)) {
 	// Remove it if it should no longer be announced.
 	lsar = _db[index];
-	lsar->set_maxage();
 	premature_aging(lsar, index);
     } else {
 	XLOG_WARNING("LSA not being announced \n%s", cstring(*lsar));
@@ -1261,7 +1259,6 @@ AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
     }
 
     Lsa::LsaRef lsar = _db[index];
-    lsar->set_maxage();
     premature_aging(lsar, index);
 
     return true;
@@ -1583,6 +1580,7 @@ void
 AreaRouter<A>::premature_aging(Lsa::LsaRef lsar, size_t i)
 {
     XLOG_ASSERT(lsar->get_self_originating());
+    lsar->set_maxage();
     maxage_reached(lsar, i);
 }
 
