@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.61 2006/01/12 10:24:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.62 2006/01/13 10:05:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,6 +103,9 @@ Ospf<A>::enable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
 
+    if (string(VLINK) == interface)
+	return true;
+
     return _io->enable_interface_vif(interface, vif);
 }
 
@@ -111,6 +114,9 @@ bool
 Ospf<A>::disable_interface_vif(const string& interface, const string& vif)
 {
     debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    if (string(VLINK) == interface)
+	return true;
 
     return _io->disable_interface_vif(interface, vif);
 }
