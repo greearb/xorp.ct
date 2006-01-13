@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.32 2006/01/11 08:38:04 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.33 2006/01/12 10:24:31 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -25,6 +25,7 @@ protocols {
 		transit-area: 		ipv4;
 		hello-interval:		u32 = 10;
 		router-dead-interval:   u32 = 40;
+		retransmit-interval:	u32 = 5;
 		transit-delay:		u32 = 1;
 	        authentication {
 		    type:		txt	= "none" ;
@@ -180,6 +181,14 @@ transmitted packets";
 		    %allow-range: $(@) "1" "4294967295" %help: "The neighbour router dead interval (in seconds)";
 
 		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
+		}
+
+		retransmit-interval {
+		    %help: short "The retransmit interval (RxmtInterval)";
+			
+		    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_retransmit_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 		}
 
 		transit-delay {
