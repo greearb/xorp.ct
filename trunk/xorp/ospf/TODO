@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.60 2006/01/11 01:09:08 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.61 2006/01/12 08:41:03 atanu Exp $
 #
 
 TODO
@@ -172,6 +172,11 @@ Key ID (currently defaults to 1) or timer values for smooth key
 transitions.
 
 46) Replace class Subsystem with class ServiceBase.
+
+47) During shutdown the method PeerManager<A>::virtual_link_endpoint
+gets called. The vlink database has knowledge of a peer that has been
+removed and a warning is printed. Modify the code to remove peerids
+from the vlink database when a peer is removed.
 
 Possible issues
 ~~~~~~~~~~~~~~~

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.207 2006/01/12 11:44:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.208 2006/01/12 12:05:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -381,11 +381,8 @@ template <typename A>
 bool 
 PeerOut<A>::virtual_link_endpoint(OspfTypes::AreaID area)
 {
-    // The caller is asking all peers, it has no knowledge of the peer
-    // to area bindings. Hence it is not an error to be asked about an
-    // area this peer is not in.
     if (0 == _areas.count(area)) {
-//  	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+  	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
@@ -943,9 +940,11 @@ bool
 Peer<A>::virtual_link_endpoint() const
 {
     typename list<Neighbour<A> *>::const_iterator n;
-    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	if (OspfTypes::VirtualLink == (*n)->get_linktype())
+    for(n = _neighbours.begin(); n != _neighbours.end(); n++) {
+	XLOG_ASSERT(OspfTypes::VirtualLink == (*n)->get_linktype());
+	if (Neighbour<A>::Full == (*n)->get_state())
 	    return true;
+    }
 
     return false;
 }

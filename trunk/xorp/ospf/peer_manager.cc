@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.98 2006/01/10 10:50:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.99 2006/01/12 10:24:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -654,10 +654,23 @@ template <typename A>
 bool
 PeerManager<A>::virtual_link_endpoint(OspfTypes::AreaID area) const
 {
-    typename map<PeerID, PeerOut<A> *>::const_iterator i;
-    for(i = _peers.begin(); i != _peers.end(); i++)
-	if ((*i).second->virtual_link_endpoint(area)) 
+    list<OspfTypes::RouterID> rids;
+    _vlink.get_router_ids(area, rids);
+
+    typename list<OspfTypes::RouterID>::const_iterator i;
+    for(i = rids.begin(); i != rids.end(); i++) {
+	PeerID peerid = _vlink.get_peerid(*i);
+	typename map<PeerID, PeerOut<A> *>::const_iterator j;
+	j = _peers.find(peerid);
+	if(j == _peers.end()) {
+	    // A peerid can be removed and the vlink database is not notified.
+	    // Happens during shutdown.
+	    XLOG_WARNING("Peer not found %d", peerid);
+	    continue;
+	}
+	if ((*j).second->virtual_link_endpoint(OspfTypes::BACKBONE))
 	    return true;
+    }
 
     return false;
 }
