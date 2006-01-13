@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.60 2006/01/10 10:50:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.61 2006/01/12 10:24:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -135,7 +135,7 @@ Ospf<A>::get_prefix_length(const string& interface, const string& vif,
 
     if (string(VLINK) == interface) {
 	prefix_length = 0;
-	return true;;
+	return true;
     }
 
     prefix_length = _io->get_prefix_length(interface, vif, address);
