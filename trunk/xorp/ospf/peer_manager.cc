@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.100 2006/01/13 20:34:57 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.101 2006/01/13 23:14:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -589,11 +589,17 @@ PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
 
 template <typename A>
 void
-PeerManager<A>::adjacency_changed(const PeerID /*peerid*/,
+PeerManager<A>::adjacency_changed(const PeerID peerid,
 				  OspfTypes::RouterID rid,
 				  bool up)
 {
+    if (0 == _peers.count(peerid))
+	XLOG_FATAL("Unknown PeerID %u", peerid);
+    
     // Is this neighbour a virtual link?
+    if (!_peers[peerid]->virtual_link_endpoint(OspfTypes::BACKBONE))
+	return;
+
     OspfTypes::AreaID transit_area;
     if (!_vlink.get_transit_area(rid, transit_area))
 	return;
