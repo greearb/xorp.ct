@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.60 2006/01/10 10:50:19 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.61 2006/01/12 10:24:32 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -273,6 +273,18 @@ class PeerManager {
     bool send_lsa(const PeerID peerid, OspfTypes::AreaID area,
 		  const OspfTypes::NeighbourID nid,
 		  Lsa::LsaRef lsar);
+
+    /**
+     * Upcall from a peer to notify the peer manager that a full
+     * adjacency has been achieved or lost.
+     *
+     * @param peerid
+     * @param rid neighbours router ID.
+     * @param up true if the adjacency has become full, false if a
+     * full adjacency has been lost.
+     */
+    void adjacency_changed(const PeerID peerid, OspfTypes::RouterID rid,
+			   bool up);
 
     /**
      * Send a new Router-LSA in all areas.

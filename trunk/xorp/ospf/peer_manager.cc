@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.99 2006/01/12 10:24:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.100 2006/01/13 20:34:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -585,6 +585,58 @@ PeerManager<A>::send_lsa(const PeerID peerid, OspfTypes::AreaID area,
     }
 
     return _peers[peerid]->send_lsa(area, nid, lsar);
+}
+
+template <typename A>
+void
+PeerManager<A>::adjacency_changed(const PeerID /*peerid*/,
+				  OspfTypes::RouterID rid,
+				  bool up)
+{
+    // Is this neighbour a virtual link?
+    OspfTypes::AreaID transit_area;
+    if (!_vlink.get_transit_area(rid, transit_area))
+	return;
+
+    list<OspfTypes::RouterID> rids;
+    _vlink.get_router_ids(transit_area, rids);
+
+    uint32_t fully_adjacent_virtual_links = 0;
+    typename list<OspfTypes::RouterID>::const_iterator i;
+    for(i = rids.begin(); i != rids.end(); i++) {
+	PeerID peerid = _vlink.get_peerid(*i);
+	typename map<PeerID, PeerOut<A> *>::const_iterator j;
+	j = _peers.find(peerid);
+	if(j == _peers.end()) {
+	    // A peerid can be removed and the vlink database is not notified.
+	    // Happens during shutdown.
+	    XLOG_WARNING("Peer not found %d", peerid);
+	    continue;
+	}
+	if ((*j).second->virtual_link_endpoint(OspfTypes::BACKBONE))
+	    fully_adjacent_virtual_links++;
+    }
+
+    // Only care if there are no fully adjacent virtual links left or
+    // this is the first fully adjacent virtual link.
+    switch(fully_adjacent_virtual_links) {
+    case 0:
+	XLOG_ASSERT(!up);
+	break;
+    case 1:
+	XLOG_ASSERT(up);
+	break;
+    default:
+	return;
+    }
+
+    AreaRouter<A> *area_router = get_area_router(transit_area);
+    if (0 == area_router) {
+	XLOG_WARNING("Unknown area %s", pr_id(transit_area).c_str());
+	return;
+    }
+
+    area_router->refresh_router_lsa();
 }
 
 template <typename A>
