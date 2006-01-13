@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.174 2006/01/12 08:41:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.175 2006/01/13 10:39:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2055,18 +2055,14 @@ AreaRouter<A>::update_router_links()
     XLOG_ASSERT(router_lsa);
     bool empty = router_lsa->get_router_links().empty();
     router_lsa->get_router_links().clear();
-    bool v_bit = false;
     typename PeerMap::iterator i;
     for(i = _peers.begin(); i != _peers.end(); i++) {
 	PeerStateRef temp_psr = i->second;
 	if (temp_psr->_up) {
 	    typename list<RouterLink>::iterator j = 
 		temp_psr->_router_links.begin();
-	    for(; j != temp_psr->_router_links.end(); j++) {
-		if (RouterLink::vlink == j->get_type())
-		    v_bit = true;
+	    for(; j != temp_psr->_router_links.end(); j++)
 		router_lsa->get_router_links().push_back(*j);
-	    }
 	}
     }
 
@@ -2075,7 +2071,7 @@ AreaRouter<A>::update_router_links()
 	return false;
 
     PeerManager<A>& pm = _ospf.get_peer_manager();
-    router_lsa->set_v_bit(v_bit);
+    router_lsa->set_v_bit(pm.virtual_link_endpoint(_area));
     router_lsa->set_e_bit(pm.as_boundary_router_p());
     router_lsa->set_b_bit(pm.area_border_router_p());
 
