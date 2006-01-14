@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.22 2005/12/21 09:42:57 bms Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.23 2005/12/22 11:51:02 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -193,9 +193,11 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
     }
 #else // ! HOST_OS_WINDOWS
     errno = 0;
+    _last_error = 0;
     done = ::read(_fd, head._buffer + head._offset,
 		  head._buffer_bytes - head._offset);
-    _last_error = errno;
+    if (done < 0)
+	_last_error = errno;
     errno = 0;
 #endif // ! HOST_OS_WINDOWS
 
@@ -503,8 +505,10 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
     sig_t saved_sigpipe = signal(SIGPIPE, SIG_IGN);
 
     errno = 0;
+    _last_error = 0;
     done = ::writev(_fd, _iov, (int)iov_cnt);
-    _last_error = errno;
+    if (done < 0)
+	_last_error = errno;
     errno = 0;
 
     signal(SIGPIPE, saved_sigpipe);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.8 2005/10/03 05:05:46 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/buffered_asyncio.cc,v 1.9 2005/10/20 10:58:25 bms Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -185,8 +185,10 @@ BufferedAsyncReader::io_event(XorpFd fd, IoEventType type)
     }
 #else
     errno = 0;
+    _last_error = 0;
     read_bytes = ::read(fd, tail, tail_bytes);
-    _last_error = errno;
+    if (read_bytes < 0)
+	_last_error = errno;
     errno = 0;
 #endif
 
