@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.9 2005/10/23 18:47:25 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.10 2005/12/21 09:42:57 bms Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -40,9 +40,11 @@ public:
      *
      * @param eventloop the event loop.
      * @param command the command to execute.
+     * @param real_command_name the real command name.
      */
-    RunCommandBase(EventLoop&				eventloop,
-		   const string&			command);
+    RunCommandBase(EventLoop&		eventloop,
+		   const string&	command,
+		   const string&	real_command_name);
 
     /**
      * Destructor.
@@ -69,6 +71,11 @@ public:
     void terminate();
 
     /**
+     * Terminate the command with prejudice.
+     */
+    void terminate_with_prejudice();
+
+    /**
      * Get the name of the command to execute.
      *
      * @return a string with the name of the command to execute.
@@ -81,6 +88,63 @@ public:
      * @return a string with the arguments of the command to execute.
      */
     const list<string>& argument_list() const { return _argument_list; }
+
+    /**
+     * Receive a notification that the status of the process has changed.
+     *
+     * @param wait_status the wait status.
+     */
+    void wait_status_changed(int wait_status);
+
+    /**
+     * Test if the command has exited.
+     *
+     * @return true if the command has exited, otherwise false.
+     */
+    bool is_exited() const { return _command_is_exited; }
+
+    /**
+     * Test if the command has been terminated by a signal.
+     *
+     * @return true if the command has been terminated by a signal,
+     * otherwise false.
+     */
+    bool is_signal_terminated() const { return _command_is_signal_terminated; }
+
+    /**
+     * Test if the command has coredumped.
+     *
+     * @return true if the command has coredumped, otherwise false.
+     */
+    bool is_coredumped() const { return _command_is_coredumped; }
+
+    /**
+     * Test if the command has been stopped.
+     *
+     * @return true if the command has been stopped, otherwise false.
+     */
+    bool is_stopped() const { return _command_is_stopped; }
+
+    /**
+     * Get the command exit status.
+     *
+     * @return the command exit status.
+     */
+    int exit_status() const { return _command_exit_status; }
+
+    /**
+     * Get the signal that terminated the command.
+     *
+     * @return the signal that terminated the command.
+     */
+    int term_signal() const { return _command_term_signal; }
+
+    /**
+     * Get the signal that stopped the command.
+     *
+     * @return the signal that stopped the command.
+     */
+    int stop_signal() const { return _command_stop_signal; }
 
     /**
      * Get a reference to the ExecId object.
@@ -238,6 +302,13 @@ private:
     virtual void done_cb_dispatch(bool success, const string& error_msg) = 0;
 
     /**
+     * A pure virtual method called when the program has been stopped.
+     * 
+     * @param stop_signal the signal used to stop the program.
+     */
+    virtual void stopped_cb_dispatch(int stop_signal) = 0;
+
+    /**
      * Test if the stderr should be redirected to stdout.
      * 
      * @return true if the stderr should be redirected to stdout, otherwise
@@ -246,9 +317,40 @@ private:
     virtual bool redirect_stderr_to_stdout() const = 0;
 
     /**
+     * Cleanup state.
+     *
+     */
+    void cleanup();
+
+    /**
+     * Block child process signal(s) in current signal mask.
+     */
+    int block_child_signals();
+
+    /**
+     * Unblock child process signal(s) in current signal mask.
+     */
+    int unblock_child_signals();
+
+    /**
+     * Terminate the process.
+     *
+     * @param with_prejudice if true then terminate the process with
+     * prejudice, otherwise attempt to kill it gracefully.
+     */
+    void terminate_process(bool with_prejudice);
+
+    /**
      * Close the output for the command.
      */
     void close_output();
+
+    /**
+     * Set the command status.
+     *
+     * @param status the command status.
+     */
+    void set_command_status(int status);
 
     /**
      * Append data from the command.
@@ -262,7 +364,7 @@ private:
 		     size_t buffer_bytes, size_t offset);
 
     /**
-     * The command has completed.
+     * The command's I/O operation has completed.
      *
      * @param event the last event from the command.
      * (@see AsyncFileOperator::Event).
@@ -270,7 +372,12 @@ private:
      * (e.g., if it is not equal to AsyncFileOperator::END_OF_FILE), otherwise
      * its value is ignored.
      */
-    void done(AsyncFileOperator::Event event, int error_code);
+    void io_done(AsyncFileOperator::Event event, int error_code);
+
+    /**
+     * The command has completed.
+     */
+    void done();
 
 #ifdef HOST_OS_WINDOWS
     static const int WIN32_PROC_TIMEOUT_MS = 500;
@@ -281,9 +388,9 @@ private:
 
     static const size_t	BUF_SIZE = 8192;
     EventLoop&		_eventloop;
-protected:
+
     string		_command;
-private:
+    string		_real_command_name;
     list<string>	_argument_list;
 
     AsyncFileReader*	_stdout_file_reader;
@@ -305,12 +412,13 @@ private:
     ExecId		_exec_id;
 
     bool		_command_is_exited;
-    bool		_command_is_signaled;
+    bool		_command_is_signal_terminated;
+    bool		_command_is_coredumped;
     bool		_command_is_stopped;
     int			_command_exit_status;
-    int			_command_term_sig;
-    bool		_command_is_coredump;
+    int			_command_term_signal;
     int			_command_stop_signal;
+    XorpTimer		_done_timer;
 
     bool		_stdout_eof_received;
     bool		_stderr_eof_received;
@@ -323,6 +431,7 @@ class RunCommand : public RunCommandBase {
 public:
     typedef XorpCallback2<void, RunCommand*, const string&>::RefPtr OutputCallback;
     typedef XorpCallback3<void, RunCommand*, bool, const string&>::RefPtr DoneCallback;
+    typedef XorpCallback2<void, RunCommand*, int>::RefPtr StoppedCallback;
 
     /**
      * Constructor for a given command and its list with arguments.
@@ -346,6 +455,13 @@ public:
 	       RunCommand::DoneCallback		done_cb,
 	       bool				redirect_stderr_to_stdout);
 
+    /**
+     * Set the callback to dispatch when the program is stopped.
+     *
+     * @param cb the callback's value.
+     */
+    void set_stopped_cb(StoppedCallback cb) { _stopped_cb = cb; }
+
 private:
     /**
      * A method called when there is output on the program's stdout.
@@ -377,6 +493,16 @@ private:
     }
 
     /**
+     * A method called when the program has been stopped.
+     * 
+     * @param stop_signal the signal used to stop the program.
+     */
+    void stopped_cb_dispatch(int stop_signal) {
+	if (! _stopped_cb.is_empty())
+	    _stopped_cb->dispatch(this, stop_signal);
+    }
+
+    /**
      * Test if the stderr should be redirected to stdout.
      * 
      * @return true if the stderr should be redirected to stdout, otherwise
@@ -389,6 +515,7 @@ private:
     OutputCallback	_stdout_cb;
     OutputCallback	_stderr_cb;
     DoneCallback	_done_cb;
+    StoppedCallback	_stopped_cb;
 
     bool		_redirect_stderr_to_stdout;
 };
@@ -400,6 +527,7 @@ class RunShellCommand : public RunCommandBase {
 public:
     typedef XorpCallback2<void, RunShellCommand*, const string&>::RefPtr OutputCallback;
     typedef XorpCallback3<void, RunShellCommand*, bool, const string&>::RefPtr DoneCallback;
+    typedef XorpCallback2<void, RunShellCommand*, int>::RefPtr StoppedCallback;
 
     /**
      * Constructor for a given command and its list with arguments.
@@ -421,6 +549,13 @@ public:
 		    RunShellCommand::OutputCallback	stderr_cb,
 		    RunShellCommand::DoneCallback	done_cb);
 
+    /**
+     * Set the callback to dispatch when the program is stopped.
+     *
+     * @param cb the callback's value.
+     */
+    void set_stopped_cb(StoppedCallback cb) { _stopped_cb = cb; }
+
 private:
     /**
      * A method called when there is output on the program's stdout.
@@ -452,6 +587,16 @@ private:
     }
 
     /**
+     * A method called when the program has been stopped.
+     * 
+     * @param stop_signal the signal used to stop the program.
+     */
+    void stopped_cb_dispatch(int stop_signal) {
+	if (! _stopped_cb.is_empty())
+	    _stopped_cb->dispatch(this, stop_signal);
+    }
+
+    /**
      * Test if the stderr should be redirected to stdout.
      * 
      * @return true if the stderr should be redirected to stdout, otherwise
@@ -470,6 +615,7 @@ private:
     OutputCallback	_stdout_cb;
     OutputCallback	_stderr_cb;
     DoneCallback	_done_cb;
+    StoppedCallback	_stopped_cb;
 };
 
 #endif // __LIBXORP_RUN_COMMAND_HH__

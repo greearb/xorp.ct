@@ -58,13 +58,14 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.11 2005/12/21 09:42:57 bms Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.12 2005/12/22 11:53:40 pavlin Exp $"
 
 #include "libxorp_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/c_format.hh"
 #include "libxorp/utils.hh"
 
 #ifdef HAVE_SYS_PARAM_H
@@ -197,7 +198,10 @@ popen2(const string& command, const list<string>& arguments,
 		       CREATE_DEFAULT_ERROR_MODE | CREATE_SUSPENDED,
 		       NULL, NULL, &si, &pi) == 0) {
 	DWORD err = GetLastError();
-	XLOG_WARNING("CreateProcessA failed: %u", XORP_UINT_CAST(err));
+	string error_msg = c_format("Execution of %s failed: %u",
+				    command.c_str(),
+				    XORP_UINT_CAST(err));
+	UNUSED(error_msg);
 	CloseHandle(hout[0]);
 	CloseHandle(hout[1]);
 	CloseHandle(herr[0]);
@@ -362,6 +366,10 @@ popen2(const string& command, const list<string>& arguments,
 	setpgid(0, 0);
 	execve(const_cast<char*>(command.c_str()), const_cast<char**>(argv),
 	       environ);
+	string error_msg = c_format("Execution of %s failed: %s",
+				    command.c_str(),
+				    strerror(errno));
+	UNUSED(error_msg);
 	_exit(127);
 	/* NOTREACHED */
     }
@@ -395,7 +403,7 @@ popen2(const string& command, const list<string>& arguments,
  *	if already `pclosed', or waitpid returns an error.
  */
 int
-pclose2(FILE *iop_out)
+pclose2(FILE *iop_out, bool dont_wait)
 {
     register struct pid_s *cur, *last;
     int pstat;
@@ -409,6 +417,7 @@ pclose2(FILE *iop_out)
 	return (-1);
 
 #ifdef HOST_OS_WINDOWS
+    UNUSED(dont_wait);
     DWORD dwStat = 0;
     BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
     while (dwStat == STILL_ACTIVE) {
@@ -428,9 +437,11 @@ pclose2(FILE *iop_out)
     pid = cur->pid;
     pstat = (int)dwStat;
 #else // ! HOST_OS_WINDOWS
-    do {
-	pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
-    } while (pid == -1 && errno == EINTR);
+    if (! dont_wait) {
+	do {
+	    pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
+	} while (pid == -1 && errno == EINTR);
+    }
 #endif // ! HOST_OS_WINDOWS
 
     /* Remove the entry from the linked list. */

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.17 2005/12/21 09:42:57 bms Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.18 2005/12/22 11:53:40 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -26,6 +26,8 @@
 #ifdef HAVE_PATHS_H
 #include <paths.h>
 #endif
+
+#include <map>
 
 #include "libxorp_module.h"
 
@@ -47,8 +49,6 @@
 #define _PATH_BSHELL "C:\\MSYS\\bin\\sh.exe"
 #endif
 
-static char *_path_bshell = NULL;
-
 #define	fileno(stream) (_get_osfhandle(_fileno(stream)))
 
 #else // ! HOST_OS_WINDOWS
@@ -59,6 +59,68 @@ static char *_path_bshell = NULL;
 
 #endif // ! HOST_OS_WINDOWS
 
+static map<pid_t, RunCommandBase *> pid2command;
+
+#ifndef HOST_OS_WINDOWS
+static void
+child_handler(int signo)
+{
+    XLOG_ASSERT(signo == SIGCHLD);
+
+    //
+    // XXX: Wait for any child process.
+    // If we are executing any child process outside of the RunProcess
+    // mechanism, then the waitpid() here may create a wait() blocking
+    // problem for those processes. If this ever becomes an issue, then
+    // we should try non-blocking waitpid() for each pid in the
+    // pid2command map.
+    //
+    do {
+	pid_t pid = 0;
+	int wait_status = 0;
+	map<pid_t, RunCommandBase *>::iterator iter;
+
+	pid = waitpid(-1, &wait_status, WUNTRACED | WNOHANG);
+	debug_msg("pid=%d, wait status=%d\n", pid, wait_status);
+	if (pid <= 0)
+	    return;	// XXX: no more child processes
+
+	XLOG_ASSERT(pid > 0);
+	iter = pid2command.find(pid);
+	if (iter == pid2command.end()) {
+	    // XXX: we don't know anything about the exited process
+	    continue;
+	}
+
+	RunCommandBase* run_command = iter->second;
+	run_command->wait_status_changed(wait_status);
+    } while (true);
+}
+#endif // ! HOST_OS_WINDOWS
+
+static string
+get_path_bshell()
+{
+#ifndef HOST_OS_WINDOWS
+    return (string(_PATH_BSHELL));
+
+#else // HOST_OS_WINDOWS
+    //
+    // Use the DOS style path to the user's shell specified in the
+    // environment if available; otherwise, fall back to hard-coded default.
+    //
+    static string path_bshell;
+    if (path_bshell.empty()) {
+	char* g = getenv("SHELL");
+	if (g != NULL)
+	    path_bshell = string(g);
+	else
+	    path_bshell = string(_PATH_BSHELL);
+    }
+    return (path_bshell);
+#endif // HOST_OS_WINDOWS
+}
+
 RunCommand::RunCommand(EventLoop&			eventloop,
 		       const string&			command,
 		       const list<string>&		argument_list,
@@ -66,7 +128,7 @@ RunCommand::RunCommand(EventLoop&			eventloop,
 		       RunCommand::OutputCallback	stderr_cb,
 		       RunCommand::DoneCallback		done_cb,
 		       bool				redirect_stderr_to_stdout)
-    : RunCommandBase(eventloop, command),
+    : RunCommandBase(eventloop, command, command),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb),
@@ -75,30 +137,18 @@ RunCommand::RunCommand(EventLoop&			eventloop,
     set_argument_list(argument_list);
 }
 
-RunShellCommand::RunShellCommand(EventLoop&			eventloop,
-				 const string&			command,
-				 const string&			argument_string,
+RunShellCommand::RunShellCommand(EventLoop&		eventloop,
+				 const string&		command,
+				 const string&		argument_string,
 				 RunShellCommand::OutputCallback stdout_cb,
 				 RunShellCommand::OutputCallback stderr_cb,
-				 RunShellCommand::DoneCallback	done_cb)
-    : RunCommandBase(eventloop, _PATH_BSHELL),
+				 RunShellCommand::DoneCallback	 done_cb)
+    : RunCommandBase(eventloop, get_path_bshell(), command),
       _stdout_cb(stdout_cb),
       _stderr_cb(stderr_cb),
       _done_cb(done_cb)
 {
     list<string> l;
-
-#ifdef HOST_OS_WINDOWS
-    // XXX: THIS IS A DIRTY HACK.
-    // Use the DOS style path to the user's shell specified in the
-    // environment if available; otherwise, fall back to hard-coded default.
-    if (_path_bshell == NULL) {
-	_path_bshell = getenv("SHELL");
-	if (_path_bshell == NULL)
-	    _path_bshell = const_cast<char *>(_PATH_BSHELL);
-	_command = string(_path_bshell);
-    }
-#endif // HOST_OS_WINDOWS
 
     string final_command_argument_string = command + " " + argument_string;
 
@@ -108,10 +158,12 @@ RunShellCommand::RunShellCommand(EventLoop&			eventloop,
     set_argument_list(l);
 }
 
-RunCommandBase::RunCommandBase(EventLoop&			eventloop,
-			       const string&			command)
+RunCommandBase::RunCommandBase(EventLoop&		eventloop,
+			       const string&		command,
+			       const string&		real_command_name)
     : _eventloop(eventloop),
       _command(command),
+      _real_command_name(real_command_name),
       _stdout_file_reader(NULL),
       _stderr_file_reader(NULL),
       _stdout_stream(NULL),
@@ -122,11 +174,11 @@ RunCommandBase::RunCommandBase(EventLoop&			eventloop,
       _is_error(false),
       _is_running(false),
       _command_is_exited(false),
-      _command_is_signaled(false),
+      _command_is_signal_terminated(false),
+      _command_is_coredumped(false),
       _command_is_stopped(false),
       _command_exit_status(0),
-      _command_term_sig(0),
-      _command_is_coredump(false),
+      _command_term_signal(0),
       _command_stop_signal(0),
       _stdout_eof_received(false),
       _stderr_eof_received(false)
@@ -137,12 +189,65 @@ RunCommandBase::RunCommandBase(EventLoop&			eventloop,
 
 RunCommandBase::~RunCommandBase()
 {
-    if (_is_running)
-	terminate();
-#ifdef HOST_OS_WINDOWS
-    _reaper_timer.unschedule();
-    _reaper_timer.clear();
-#endif
+    cleanup();
+}
+
+void
+RunCommandBase::cleanup()
+{
+    terminate_with_prejudice();
+    close_output();
+    unblock_child_signals();
+}
+
+int
+RunCommandBase::block_child_signals()
+{
+#ifndef HOST_OS_WINDOWS
+    //
+    // Block SIGCHLD signal in current signal mask
+    //
+    int r;
+    sigset_t sigchld_sigset;
+
+    r = sigemptyset(&sigchld_sigset);
+    XLOG_ASSERT(r >= 0);
+    r = sigaddset(&sigchld_sigset, SIGCHLD);
+    XLOG_ASSERT(r >= 0);
+
+    if (sigprocmask(SIG_BLOCK, &sigchld_sigset, NULL) < 0) {
+	XLOG_ERROR("Failed to block SIGCHLD in current signal mask: %s",
+		   strerror(errno));
+	return (XORP_ERROR);
+    }
+#endif // ! HOST_OS_WINDOWS
+
+    return (XORP_OK);
+}
+
+int
+RunCommandBase::unblock_child_signals()
+{
+#ifndef HOST_OS_WINDOWS
+    //
+    // Unblock SIGCHLD signal in current signal mask
+    //
+    int r;
+    sigset_t sigchld_sigset;
+
+    r = sigemptyset(&sigchld_sigset);
+    XLOG_ASSERT(r >= 0);
+    r = sigaddset(&sigchld_sigset, SIGCHLD);
+    XLOG_ASSERT(r >= 0);
+
+    if (sigprocmask(SIG_UNBLOCK, &sigchld_sigset, NULL) < 0) {
+	XLOG_ERROR("Failed to unblock SIGCHLD in current signal mask: %s",
+		   strerror(errno));
+	return (XORP_ERROR);
+    }
+#endif // ! HOST_OS_WINDOWS
+
+    return (XORP_OK);
 }
 
 int
@@ -172,15 +277,29 @@ RunCommandBase::execute()
 	return (XORP_ERROR);
     }
 
+#ifndef HOST_OS_WINDOWS
+    signal(SIGCHLD, child_handler);
+#endif
+
+    //
+    // Temporary block the child signals
+    //
+    block_child_signals();
+
+    //
     // Run the command
+    //
     _pid = popen2(_command, _argument_list, _stdout_stream, _stderr_stream,
 		  redirect_stderr_to_stdout());
     if (_stdout_stream == NULL) {
-	XLOG_ERROR("Failed to execute command %s", final_command.c_str());
-	terminate();
+	XLOG_ERROR("Failed to execute command \"%s\"", final_command.c_str());
+	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
+    // Insert the new process to the map of processes
+    XLOG_ASSERT(pid2command.find(_pid) == pid2command.end());
+    pid2command[_pid] = this;
 
 #ifdef HOST_OS_WINDOWS
     // We need to obtain the handle directly from the popen code because
@@ -189,8 +308,8 @@ RunCommandBase::execute()
 
     // If the handle is invalid, the process failed to start.
     if (_ph == INVALID_HANDLE_VALUE) {
-	XLOG_ERROR("Failed to execute command %s", final_command.c_str());
-	terminate();
+	XLOG_ERROR("Failed to execute command \"%s\"", final_command.c_str());
+	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
@@ -206,31 +325,29 @@ RunCommandBase::execute()
 
     // Create the stdout and stderr readers
     _stdout_file_reader = new AsyncFileReader(_eventloop,
-      XorpFd(fileno(_stdout_stream))
-     );
+					      XorpFd(fileno(_stdout_stream)));
     _stdout_file_reader->add_buffer(
 	_stdout_buffer,
 	BUF_SIZE,
 	callback(this, &RunCommandBase::append_data));
     if (! _stdout_file_reader->start()) {
-	XLOG_ERROR("Failed to start a stdout reader for command %s",
+	XLOG_ERROR("Failed to start a stdout reader for command \"%s\"",
 		   final_command.c_str());
-	terminate();
+	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
 
     _stderr_file_reader = new AsyncFileReader(_eventloop,
-      XorpFd(fileno(_stderr_stream))
-     );
+					      XorpFd(fileno(_stderr_stream)));
     _stderr_file_reader->add_buffer(
 	_stderr_buffer,
 	BUF_SIZE,
 	callback(this, &RunCommandBase::append_data));
     if (! _stderr_file_reader->start()) {
-	XLOG_ERROR("Failed to start a stderr reader for command %s",
+	XLOG_ERROR("Failed to start a stderr reader for command \"%s\"",
 		   final_command.c_str());
-	terminate();
+	cleanup();
 	_exec_id.restore_saved_exec_id(error_msg);
 	return (XORP_ERROR);
     }
@@ -242,26 +359,47 @@ RunCommandBase::execute()
     //
     _exec_id.restore_saved_exec_id(error_msg);
 
+    //
+    // Unblock the child signals that were blocked earlier
+    //
+    unblock_child_signals();
+
     return (XORP_OK);
 }
 
 void
 RunCommandBase::terminate()
 {
+    terminate_process(false);
+}
+
+void
+RunCommandBase::terminate_with_prejudice()
+{
+    terminate_process(true);
+}
+
+void
+RunCommandBase::terminate_process(bool with_prejudice)
+{
     // Kill the process group
     if (0 != _pid) {
 #ifdef HOST_OS_WINDOWS
+	UNUSED(with_prejudice);
+	//
 	// _ph will be invalid if the process didn't start.
 	// _ph will be valid if the process handle is open but the
 	// process is no longer running. Calling TerminateProcess()
 	// on a valid handle to a process which has terminated results
 	// in an ACCESS_DENIED error.
 	// Don't close the handle. pclose2() does this.
+	//
 	if (_ph != INVALID_HANDLE_VALUE) {
 	    DWORD result; 
 	    GetExitCodeProcess(_ph, &result);
 	    if (result == STILL_ACTIVE) {
-		DWORD result = TerminateProcess(_ph, 32768);
+		DWORD result = 0;
+		result = TerminateProcess(_ph, 32768);
 		if (result == 0) {
 		    XLOG_WARNING("TerminateProcess(): %s",
 				 win_strerror(GetLastError()));
@@ -269,15 +407,31 @@ RunCommandBase::terminate()
 	    }
 	}
 #else // ! HOST_OS_WINDOWS
-	killpg(_pid, SIGTERM);
+	if (with_prejudice)
+	    killpg(_pid, SIGKILL);
+	else
+	    killpg(_pid, SIGTERM);
 #endif // ! HOST_OS_WINDOWS
+
+	// Remove the entry from the pid map
+	pid2command.erase(_pid);
 	_pid = 0;
+	_is_running = false;
     }
+}
 
-    // XXX: May need to delay close on Windows, otherwise we may
-    // lose output if we're terminated in this way.
+void
+RunCommandBase::wait_status_changed(int wait_status)
+{
+    set_command_status(wait_status);
 
-    close_output();
+    //
+    // XXX: Schedule a timer to complete the command so we can return
+    // control to the caller.
+    //
+    _done_timer = _eventloop.new_oneoff_after(
+	TimeVal::ZERO(),
+	callback(this, &RunCommandBase::done));
 }
 
 void
@@ -298,29 +452,19 @@ RunCommandBase::close_output()
 	// pclose2() will close the process handle from under us.
 	_eventloop.remove_ioevent_cb(_ph, IOT_EXCEPTION);
 	_ph = INVALID_HANDLE_VALUE;
-#endif // HOST_OS_WINDOWS
-	int status = pclose2(_stdout_stream);
-	_stdout_stream = NULL;
 
-#ifdef HOST_OS_WINDOWS
-	_command_is_exited = true;
-	_command_exit_status = status;
+	//
+	// XXX: in case of Windows we don't use the SIGCHLD mechanism
+	// hence the process is done when the I/O is completed.
+	//
+	int status = pclose2(_stdout_stream, true);
+	_stdout_stream = NULL;
+	set_command_status(status);
+	_command_is_exited = true;	// XXX: A Windows hack
+
 #else // ! HOST_OS_WINDOWS
-	// Get the command status
-	if (status >= 0) {
-	    _command_is_exited = WIFEXITED(status);
-	    _command_is_signaled = WIFSIGNALED(status);
-	    _command_is_stopped = WIFSTOPPED(status);
-	    if (_command_is_exited)
-		_command_exit_status = WEXITSTATUS(status);
-	    if (_command_is_signaled) {
-		_command_term_sig = WTERMSIG(status);
-		_command_is_coredump = WCOREDUMP(status);
-	    }
-	    if (_command_is_stopped) {
-		_command_stop_signal = WSTOPSIG(status);
-	    }
-	}
+	pclose2(_stdout_stream, true);
+	_stdout_stream = NULL;
 #endif // ! HOST_OS_WINDOWS
     }
 
@@ -329,6 +473,42 @@ RunCommandBase::close_output()
     // automatically takes care of the _stderr_stream as well.
     //
     _stderr_stream = NULL;
+}
+
+void
+RunCommandBase::set_command_status(int status)
+{
+    // Reset state
+    _command_is_exited = false;
+    _command_is_signal_terminated = false;
+    _command_is_coredumped = false;
+    _command_is_stopped = false;
+    _command_exit_status = 0;
+    _command_term_signal = 0;
+    _command_stop_signal = 0;
+
+    // Set the command status
+#ifdef HOST_OS_WINDOWS
+    _command_exit_status = status;
+#else // ! HOST_OS_WINDOWS
+    if (status >= 0) {
+	_command_is_exited = WIFEXITED(status);
+	_command_is_signal_terminated = WIFSIGNALED(status);
+	_command_is_stopped = WIFSTOPPED(status);
+	if (_command_is_exited)
+	    _command_exit_status = WEXITSTATUS(status);
+	if (_command_is_signal_terminated) {
+	    _command_term_signal = WTERMSIG(status);
+	    _command_is_coredumped = WCOREDUMP(status);
+	}
+	if (_command_is_stopped) {
+	    _command_stop_signal = WSTOPSIG(status);
+	}
+    }
+#endif // ! HOST_OS_WINDOWS
+
+    if (_command_is_stopped)
+	stopped_cb_dispatch(_command_stop_signal);
 }
 
 void
@@ -360,7 +540,7 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	    error_code = _stdout_file_reader->error();
 	else
 	    error_code = _stderr_file_reader->error();
-	done(event, error_code);
+	io_done(event, error_code);
 	return;
     }
 
@@ -412,16 +592,46 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	}
 	if (_stdout_eof_received
 	    && (_stderr_eof_received || redirect_stderr_to_stdout())) {
-	    done(event, 0);
+	    io_done(event, 0);
 	}
 	return;
     }
 }
 
 void
-RunCommandBase::done(AsyncFileOperator::Event event, int error_code)
+RunCommandBase::io_done(AsyncFileOperator::Event event, int error_code)
 {
-    string prefix, suffix;
+    if (event != AsyncFileOperator::END_OF_FILE) {
+	string prefix, suffix;
+
+	_is_error = true;
+	if (_error_msg.size()) {
+	    prefix = "[";
+	    suffix = "]";
+	}
+	_error_msg += prefix;
+	_error_msg += c_format("Command \"%s\" terminated because of "
+			       "unexpected event (event = 0x%x error = %d).",
+			       _real_command_name.c_str(), event, error_code);
+	_error_msg += suffix;
+	terminate_with_prejudice();
+    }
+
+    close_output();
+
+    done();
+}
+
+void
+RunCommandBase::done()
+{
+    string prefix, suffix, reason;
+
+    if (_stdout_stream != NULL)
+	return;		// XXX: I/O is not done yet
+
+    if (! (_command_is_exited || _command_is_signal_terminated))
+	return;		// XXX: the command is not done yet
 
     if (_error_msg.size()) {
 	prefix = "[";
@@ -429,32 +639,39 @@ RunCommandBase::done(AsyncFileOperator::Event event, int error_code)
     }
     _error_msg += prefix;
 
-    if (event != AsyncFileOperator::END_OF_FILE) {
-	_is_error = true;
-	_error_msg += c_format("Command \"%s\" terminated because of "
-			       "unexpected event (event = 0x%x error = %d).",
-			       _command.c_str(), event, error_code);
-	terminate();
-    } else {
-	close_output();
-    }
-
     if (_command_is_exited && (_command_exit_status != 0)) {
 	_is_error = true;
-	_error_msg += c_format("Command \"%s\" exited with exit status %d.",
-			       _command.c_str(), _command_exit_status);
+	if (! reason.empty())
+	    reason += "; ";
+	reason += c_format("exited with exit status %d",
+			   _command_exit_status);
     }
-    if (_command_is_coredump) {
+    if (_command_is_signal_terminated) {
 	_is_error = true;
-	_error_msg += c_format("Command \"%s\" aborted with a core dump.",
-			       _command.c_str());
+	if (! reason.empty())
+	    reason += "; ";
+	reason += c_format("terminated with signal %d",
+			   _command_term_signal);
+    }
+    if (_command_is_coredumped) {
+	_is_error = true;
+	if (! reason.empty())
+	    reason += "; ";
+	reason += c_format("aborted with a core dump");
+    }
+    if (! reason.empty()) {
+	_error_msg += c_format("Command \"%s\": %s.",
+			       _real_command_name.c_str(),
+			       reason.c_str());
     }
 
     _error_msg += suffix;
 
     done_cb_dispatch(!_is_error, _error_msg);
 
+    //
     // XXX: the callback will delete us. Don't do anything more in this method.
+    //
     // delete this;
 }
 
@@ -589,6 +806,7 @@ RunCommandBase::ExecId::reset()
 }
 
 #ifdef HOST_OS_WINDOWS
+//
 // Hack to get asynchronous notification of Win32 process death.
 // The process handle will be SIGNALLED when the process terminates.
 // Because Win32 pipes must be polled, we must make sure that RunCommand
@@ -597,6 +815,7 @@ RunCommandBase::ExecId::reset()
 // We schedule a timer to make sure output is read from the pipes
 // before they close, as Win32 pipes lose data when closed; the parent
 // must hold handles for both ends of the pipe, unlike UNIX.
+//
 void
 RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
 {
@@ -612,6 +831,6 @@ RunCommandBase::win_proc_done_cb(XorpFd fd, IoEventType type)
 void
 RunCommandBase::win_proc_reaper_cb()
 {
-    done(AsyncFileOperator::END_OF_FILE, 0);
+    io_done(AsyncFileOperator::END_OF_FILE, 0);
 }
 #endif // HOST_OS_WINDOWS
