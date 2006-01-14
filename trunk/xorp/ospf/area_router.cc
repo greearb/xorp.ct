@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.175 2006/01/13 10:39:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.176 2006/01/13 19:26:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2710,10 +2710,9 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 
 	// (4)
 	uint32_t adv = lsar->get_header().get_advertising_router();
-	IPv4 br(htonl(adv));
 	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
 	RouteEntry<IPv4> rt;
-	if (!routing_table.lookup_entry(br, rt))
+	if (!routing_table.lookup_entry_by_advertising_router(_area, adv, rt))
 	    continue;
 
 	if (rt.get_advertising_router() != adv || rt.get_area() != _area)
