@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.11 2005/11/05 20:12:38 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.12 2005/12/21 09:42:57 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -668,16 +668,26 @@ test_command_stderr_reading()
 
     bool success = false;
     do {
-	if (! test_run_command.is_done_received())
+	if (! test_run_command.is_done_received()) {
+	    verbose_log("Command failed, done not received\n");
 	    break;
-	if (! test_run_command.is_done_failed())
+	}
+	if (! test_run_command.is_done_failed()) {
+	    verbose_log("Command failed, done did not indicate failure\n");
 	    break;
-	if (! test_run_command.is_stdout_received())
+	}
+	if (! test_run_command.is_stdout_received()) {
+	    verbose_log("Command failed, unexpected stdout output\n");
 	    break;
-	if (! test_run_command.is_stderr_received())
+	}
+	if (! test_run_command.is_stderr_received()) {
+	    verbose_log("Command failed, no stderr output\n");
 	    break;
-	if (test_run_command.stderr_msg() != stderr_msg_out)
+	}
+	if (test_run_command.stderr_msg() != stderr_msg_out) {
+	    verbose_log("Command failed, stderr output mismatch\n");
 	    break;
+	}
 	success = true;
 	break;
     } while (false);
@@ -743,16 +753,26 @@ test_command_redirect_stderr_to_stdout_reading()
 
     bool success = false;
     do {
-	if (! test_run_command.is_done_received())
+	if (! test_run_command.is_done_received()) {
+	    verbose_log("Command failed, done not received\n");
 	    break;
-	if (test_run_command.is_done_failed())
+	}
+	if (test_run_command.is_done_failed()) {
+	    verbose_log("Command failed, done failed\n");
 	    break;
-	if (test_run_command.is_stderr_received())
+	}
+	if (test_run_command.is_stderr_received()) {
+	    verbose_log("Command failed, unexpected stderr output\n");
 	    break;
-	if (! test_run_command.is_stdout_received())
+	}
+	if (! test_run_command.is_stdout_received()) {
+	    verbose_log("Command failed, no stdout output\n");
 	    break;
-	if (test_run_command.stdout_msg() != stdout_msg_out)
+	}
+	if (test_run_command.stdout_msg() != stdout_msg_out) {
+	    verbose_log("Command failed, stdout output mismatch\n");
 	    break;
+	}
 	success = true;
 	break;
     } while (false);
@@ -818,16 +838,26 @@ test_command_termination_failure()
 
     bool success = false;
     do {
-	if (! test_run_command.is_done_received())
+	if (! test_run_command.is_done_received()) {
+	    verbose_log("Command failed, done not received\n");
 	    break;
-	if (! test_run_command.is_done_failed())
+	}
+	if (! test_run_command.is_done_failed()) {
+	    verbose_log("Command failed, done did not indicate failure\n");
 	    break;
-	if (test_run_command.is_stderr_received())
+	}
+	if (test_run_command.is_stderr_received()) {
+	    verbose_log("Command failed, unexpected stderr output\n");
 	    break;
-	if (! test_run_command.is_stdout_received())
+	}
+	if (! test_run_command.is_stdout_received()) {
+	    verbose_log("Command failed, no stdout output\n");
 	    break;
-	if (test_run_command.stdout_msg() != stdout_msg_out)
+	}
+	if (test_run_command.stdout_msg() != stdout_msg_out) {
+	    verbose_log("Command failed, stdout output mismatch\n");
 	    break;
+	}
 	success = true;
 	break;
     } while (false);
