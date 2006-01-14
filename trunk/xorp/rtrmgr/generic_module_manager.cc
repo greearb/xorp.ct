@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.5 2005/03/25 02:54:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/generic_module_manager.cc,v 1.6 2005/11/03 17:27:51 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -32,7 +32,7 @@ GenericModule::GenericModule(const string& name)
 
 GenericModule::~GenericModule()
 {
-    XLOG_ASSERT(_status == MODULE_NOT_STARTED);
+
 }
 
 void
@@ -44,8 +44,9 @@ GenericModule::new_status(ModuleStatus new_status)
 string
 GenericModule::str() const
 {
-    string s = "Module " + _name + "\n";
+    string s;
 
+    s = c_format("Module %s\n", _name.c_str());
     if (_status != MODULE_NOT_STARTED && _status != MODULE_FAILED)
 	s += c_format("Module is running\n");
     else
@@ -63,17 +64,28 @@ GenericModule::str() const
 
 
 GenericModuleManager::GenericModuleManager(EventLoop& eventloop, bool verbose) 
-    : _eventloop(eventloop), _verbose(verbose)
+    : _eventloop(eventloop),
+      _verbose(verbose)
 {
+}
+
+GenericModuleManager::~GenericModuleManager()
+{
+    while (! _modules.empty()) {
+	GenericModule* module = _modules.begin()->second;
+	delete module;
+	_modules.erase(_modules.begin());
+    }
 }
 
 bool
 GenericModuleManager::store_new_module(GenericModule *module,
 				       string& error_msg)
 {
-    map<string, GenericModule*>::iterator found_mod;
-    found_mod = _modules.find(module->name());
-    if (found_mod == _modules.end()) {
+    map<string, GenericModule *>::iterator iter;
+
+    iter = _modules.find(module->name());
+    if (iter == _modules.end()) {
 	_modules[module->name()] = module;
 	return true;
     } else {
@@ -87,29 +99,30 @@ GenericModuleManager::store_new_module(GenericModule *module,
 GenericModule*
 GenericModuleManager::find_module(const string& module_name)
 {
-    map<string, GenericModule*>::iterator found;
+    map<string, GenericModule *>::iterator iter;
 
-    found = _modules.find(module_name);
-    if (found == _modules.end()) {
+    iter = _modules.find(module_name);
+    if (iter == _modules.end()) {
 	debug_msg("GenericModuleManager: Failed to find module %s\n",
 		  module_name.c_str());
 	return NULL;
     } else {
-	debug_msg("GenericModuleManager: Found module %s\n", module_name.c_str());
-	return found->second;
+	debug_msg("GenericModuleManager: Found module %s\n",
+		  module_name.c_str());
+	return iter->second;
     }
 }
 
 const GenericModule*
 GenericModuleManager::const_find_module(const string& module_name) const
 {
-    map<string, GenericModule*>::const_iterator found;
+    map<string, GenericModule *>::const_iterator iter;
 
-    found = _modules.find(module_name);
-    if (found == _modules.end()) {
+    iter = _modules.find(module_name);
+    if (iter == _modules.end()) {
 	return NULL;
     } else {
-	return found->second;
+	return iter->second;
     }
 }
 
@@ -122,11 +135,10 @@ GenericModuleManager::module_exists(const string& module_name) const
 GenericModule::ModuleStatus 
 GenericModuleManager::module_status(const string& module_name) const
 {
-    const GenericModule *m = const_find_module(module_name);
-    if (m) {
-	return m->status();
+    const GenericModule* module = const_find_module(module_name);
+    if (module != NULL) {
+	return module->status();
     } else {
 	return GenericModule::NO_SUCH_MODULE;
     }
 }
-

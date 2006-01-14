@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.47 2005/12/24 07:47:25 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.48 2005/12/24 08:14:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,6 +31,7 @@
 
 #include "main_rtrmgr.hh"
 #include "master_conf_tree.hh"
+#include "module_manager.hh"
 #include "randomness.hh"
 #include "userdb.hh"
 #include "xrl_rtrmgr_interface.hh"
@@ -353,7 +354,7 @@ XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
     debug_msg("Sending mod status changed to %s\n", client.c_str());
     list<string> module_names;
     ModuleManager &mmgr(_master_config_tree->module_manager());
-    mmgr.get_module_list(module_names);
+    module_names = mmgr.get_module_names();
     list<string>::iterator iter;
     for (iter = module_names.begin(); iter != module_names.end(); ++iter) {
 	const string& module_name = *iter;

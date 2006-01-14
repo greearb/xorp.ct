@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.65 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.66 2005/12/17 02:02:57 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -98,7 +98,7 @@ usage(const char* argv0)
     fprintf(stderr, "  -v        Print verbose information\n");
     fprintf(stderr, "  -b <file> Specify boot file\n");
     fprintf(stderr, "  -N        Do not execute XRLs and do not start processes\n");
-    fprintf(stderr, "  -r        Restart failed processes (partially working; not recommended!)\n");
+    fprintf(stderr, "  -r        Restart failed processes (not implemented yet)\n");
     fprintf(stderr, "  -i <addr> Set or add an interface run Finder on\n");
     fprintf(stderr, "  -p <port> Set port to run Finder on\n");
     fprintf(stderr, "  -q <secs> Set forced quit period\n");
@@ -258,7 +258,7 @@ Rtrmgr::run()
     //
     // Start the module manager
     //
-    ModuleManager mmgr(eventloop, this, _do_restart, _verbose,
+    ModuleManager mmgr(eventloop, *this, _do_restart, _verbose,
 		       xorp_binary_root_dir());
 
     try {
@@ -335,7 +335,8 @@ Rtrmgr::run()
     mmgr.shutdown();
 
     // Wait until child processes have terminated
-    while (mmgr.shutdown_complete() == false && eventloop.timers_pending()) {
+    while ((mmgr.is_shutdown_completed() != true)
+	   && eventloop.timers_pending()) {
 	eventloop.run();
     }
 

@@ -12,16 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.7 2005/03/25 02:54:35 pavlin Exp $
+// $XORP: xorp/rtrmgr/generic_module_manager.hh,v 1.8 2005/11/03 17:27:51 pavlin Exp $
 
 #ifndef __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 #define __RTRMGR_GENERIC_MODULE_MANAGER_HH__
 
-#include <vector>
 #include <map>
 
-#include "libxorp/timer.hh"
-#include "libxorp/callback.hh"
 
 class EventLoop;
 
@@ -61,20 +58,18 @@ public:
     inline ModuleStatus status() const { return _status; }
     inline const string& name() const { return _name; }
     virtual void new_status(ModuleStatus new_status);
+
 protected:
-    string	_name;
-    ModuleStatus _status;
+    string		_name;
+    ModuleStatus	_status;
 
 private:
-    
 };
 
-
 class GenericModuleManager {
-    typedef XorpCallback2<void, bool, string>::RefPtr CallBack;
 public:
     GenericModuleManager(EventLoop& eventloop, bool verbose);
-    virtual ~GenericModuleManager() {};
+    virtual ~GenericModuleManager();
 
     bool module_exists(const string& module_name) const;
     GenericModule::ModuleStatus module_status(const string& module_name) const;
@@ -84,8 +79,9 @@ public:
 
 protected:
     bool store_new_module(GenericModule *module, string& error_msg);
+
     EventLoop&	_eventloop;
-    map<string, GenericModule *> _modules;
+    map<string, GenericModule *> _modules;	// Map module name to module
     bool	_verbose;	// Set to true if output is verbose
 private:
 };

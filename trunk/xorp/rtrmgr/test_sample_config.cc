@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.20 2005/01/18 03:08:07 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.21 2005/03/25 02:54:39 pavlin Exp $"
 
 
 #include <signal.h>
@@ -124,7 +124,7 @@ Rtrmgr::run()
 		    FinderConstants::FINDER_DEFAULT_PORT());
 
     // Start the module manager
-    ModuleManager mmgr(eventloop, this,
+    ModuleManager mmgr(eventloop, *this,
 		       false,	/* do_restart */
 		       false,	/* verbose */
 		       default_xorp_root_dir);
@@ -155,7 +155,8 @@ Rtrmgr::run()
     }
 
     mmgr.shutdown();
-    while ((! mmgr.shutdown_complete()) && eventloop.timers_pending()) {
+    while ((mmgr.is_shutdown_completed() != true)
+	   && eventloop.timers_pending()) {
 	eventloop.run();
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.16 2005/10/12 09:15:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.17 2005/11/03 17:27:52 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -71,7 +71,7 @@ Rtrmgr::run()
     EventLoop eventloop; 
 
     // Start the module manager
-    ModuleManager mmgr(eventloop, this,
+    ModuleManager mmgr(eventloop, *this,
 		       false,	/* do_restart */
 		       true,	/* verbose = */ 
 		       ".");
@@ -111,7 +111,8 @@ Rtrmgr::run()
 
     printf("shutting down\n");
     mmgr.shutdown();
-    while (eventloop.timers_pending() && (! mmgr.shutdown_complete())) {
+    while ((mmgr.is_shutdown_completed() != true)
+	   && eventloop.timers_pending()) {
 	printf(".");
 	eventloop.run();
     }
