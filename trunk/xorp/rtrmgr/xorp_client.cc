@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.22 2005/03/25 02:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorp_client.cc,v 1.23 2005/11/16 03:46:35 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -24,7 +24,6 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/timer.hh"
 
-#include "module_manager.hh"
 #include "template_commands.hh"
 #include "unexpanded_xrl.hh"
 #include "xorp_client.hh"

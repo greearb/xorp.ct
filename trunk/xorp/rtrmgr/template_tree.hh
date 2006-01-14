@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.19 2005/07/03 21:06:00 mjh Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.20 2005/11/27 05:43:37 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -22,7 +22,6 @@
 #include <list>
 #include <set>
 
-#include "module_manager.hh"
 #include "path_segment.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"

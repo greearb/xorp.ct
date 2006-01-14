@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.28 2005/10/12 03:12:26 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.29 2005/11/03 17:18:55 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -25,7 +25,6 @@
 #include "libproto/config_node_id.hh"
 
 #include "conf_tree_node.hh"
-#include "module_manager.hh"
 #include "rtrmgr_error.hh"
 #include "xorp_client.hh"
 
