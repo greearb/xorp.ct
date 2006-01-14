@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.34 2005/11/07 08:21:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.35 2005/12/28 18:57:18 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -365,7 +365,7 @@ populate_as_external_lsa(ASExternalLsa *aelsa,
 {
     populate_lsa_header(aelsa->get_header(), version);
 
-    aelsa->set_metric(5);
+    aelsa->set_metric(OspfTypes::LSInfinity);
     
     switch(version) {
     case OspfTypes::V2:
