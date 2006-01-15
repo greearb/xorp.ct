@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.42 2006/01/09 08:41:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.43 2006/01/09 10:09:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -595,7 +595,8 @@ Adv<A>::add_entry(OspfTypes::AreaID area, uint32_t adv,
     debug_msg("Add entry area %s adv %s\n", pr_id(area).c_str(),
 	   pr_id(adv).c_str());
 
-    XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get()));
+    XLOG_ASSERT(dynamic_cast<RouterLsa *>(rt.get_lsa().get())||
+		dynamic_cast<SummaryRouterLsa *>(rt.get_lsa().get()));
 
     if (0 == _adv.count(area)) {
 	AREA a;
