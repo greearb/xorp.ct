@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.178 2006/01/15 09:20:10 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.179 2006/01/15 09:57:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2750,6 +2750,7 @@ AreaRouter<IPv4>::routing_inter_areaV2()
 	    rtentry.set_address(lsid);
 	} else if (srlsa) {
 	    rtentry.set_destination_type(OspfTypes::Router);
+	    rtentry.set_router_id(lsid);
 	    rtentry.set_as_boundary_router(true);
 	} else
 	    XLOG_UNREACHABLE();
