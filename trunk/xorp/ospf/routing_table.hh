@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.32 2006/01/14 09:37:48 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.33 2006/01/15 08:42:25 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -349,7 +349,7 @@ class Adv {
      *
      * @param area to look in.
      * @param adv router to look for.
-     * @param rt routing entry returned if enty is found.
+     * @param rt routing entry returned if entry is found.
      *
      * @return true if entry is found
      */
