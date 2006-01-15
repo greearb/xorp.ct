@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.13 2006/01/14 00:57:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.14 2006/01/15 03:36:19 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -366,10 +366,10 @@ popen2(const string& command, const list<string>& arguments,
 	setpgid(0, 0);
 	execve(const_cast<char*>(command.c_str()), const_cast<char**>(argv),
 	       environ);
-	string error_msg = c_format("Execution of %s failed: %s",
-				    command.c_str(),
-				    strerror(errno));
-	UNUSED(error_msg);
+	//
+	// XXX: don't call any function that may corrupt the state of the
+	// parent process, otherwise the result is unpredictable.
+	//
 	_exit(127);
 	/* NOTREACHED */
     }
