@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.34 2006/01/15 10:42:45 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.35 2006/01/15 11:02:42 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -251,6 +251,8 @@ class RouteEntry {
 					// that generated this route.
 
     Lsa::LsaRef _lsar;			// LSA that contributed to this route.
+					// Currently only used for debugging.
+
 
     bool _filtered;			// True if this route has been
 					// filtered by policy.
