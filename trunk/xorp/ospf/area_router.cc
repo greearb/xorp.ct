@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.179 2006/01/15 09:57:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.180 2006/01/15 10:36:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -499,6 +499,13 @@ AreaRouter<A>::area_range_covered(IPNet<A> net, bool& advertise)
 
 template <typename A>
 bool
+AreaRouter<A>::area_range_configured()
+{
+    return 0 != _area_range.route_count();
+}
+
+template <typename A>
+bool
 AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
 		       bool& self, vector<uint8_t>& lsa)
 {
@@ -624,7 +631,7 @@ AreaRouter<A>::summary_network_lsa_intra_area(OspfTypes::AreaID area,
     // advertised or not. In both cases we shouldn't announce the LSA.
     bool advertise;
     if (!rt.get_discard() &&
-	_ospf.get_peer_manager(). area_range_covered(area, net, advertise))
+	_ospf.get_peer_manager().area_range_covered(area, net, advertise))
 	announce = false;
 
     // If this route came from the backbone and this is a transit area
@@ -2493,7 +2500,15 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	}
     }
 
-    set_transit_capability(transit_capability);
+    // If the backbone area is configured to generate summaries and
+    // the transit capability of this area just changed then all the
+    // candidate summary routes need to be pushed through this area again.
+    if (get_transit_capability() != transit_capability) {
+	set_transit_capability(transit_capability);
+	PeerManager<IPv4>& pm = _ospf.get_peer_manager();
+	if (pm.area_range_configured(backbone()))
+	    pm.summary_push(_area);
+    }
 
     RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
     routing_table.begin(_area);

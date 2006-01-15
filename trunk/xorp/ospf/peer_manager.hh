@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.61 2006/01/12 10:24:32 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.62 2006/01/13 23:14:28 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -507,6 +507,15 @@ class PeerManager {
     bool area_range_covered(OspfTypes::AreaID area, IPNet<A> net,
 			    bool& advertise);
     
+    /**
+     * Does the specified area have any area ranges configured.
+     *
+     * The primary purpose is to discover if the backbone area has any
+     * area ranges configured, this is required when an area becomes a
+     * transit area.
+     */
+    bool area_range_configured(OspfTypes::AreaID area);
+
     /**
      * An AS-External-LSA has arrived from this area announce it to
      * all others.
