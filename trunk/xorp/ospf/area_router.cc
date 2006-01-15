@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.180 2006/01/15 10:36:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.181 2006/01/15 21:48:06 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2506,7 +2506,7 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
     if (get_transit_capability() != transit_capability) {
 	set_transit_capability(transit_capability);
 	PeerManager<IPv4>& pm = _ospf.get_peer_manager();
-	if (pm.area_range_configured(backbone()))
+	if (pm.area_range_configured(OspfTypes::BACKBONE))
 	    pm.summary_push(_area);
     }
 
