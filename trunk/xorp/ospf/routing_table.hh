@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.31 2006/01/09 10:09:26 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.32 2006/01/14 09:37:48 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -183,7 +183,40 @@ class RouteEntry {
     string str() {
 	string output;
 
-	output = c_format("nexthop %s metric %u", cstring(_nexthop), _cost);
+	output = c_format("RouteEntry: ");
+	output += c_format("%s ", OspfTypes::Router == _destination_type ?
+			  "Router" : "Network");
+	output += c_format("%s", _direct ? "direct " : "");
+	if (OspfTypes::Network == _destination_type)
+	    output += c_format("Address %s ", pr_id(_address).c_str());
+	if (OspfTypes::Router == _destination_type) {
+	    output += c_format("Router ID %s ", pr_id(_id).c_str());
+	    if (_area_border_router)
+		output += c_format("ABR ");
+	    if (_as_boundary_router)
+		output += c_format("ASBR ");
+	}
+	output += c_format("Area %s ", pr_id(_area).c_str());
+	switch(_path_type) {
+	case intra_area:
+	    output += c_format("intra area cost %d ", _cost);
+	    break;
+	case inter_area:
+	    output += c_format("inter area %d ", _cost);
+	    break;
+	case type1:
+	    output += c_format("type1 %d ", _cost);
+	    break;
+	case type2:
+	    output += c_format("type2 %d ", _type_2_cost);
+	    break;
+	}
+
+	output += c_format("nexthop %s ", cstring(_nexthop));
+	output += c_format("advertising router %s ", 
+			   pr_id(_advertising_router).c_str());
+
+	output += c_format("%s ", cstring(*_lsar));
 
 	return output;
     }
