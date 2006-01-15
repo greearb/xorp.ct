@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.33 2006/01/15 08:42:25 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.34 2006/01/15 10:42:45 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -231,6 +231,13 @@ class RouteEntry {
     uint32_t _address;			// If dest type is Network
 
     OspfTypes:: RouterID _id;		// If dest type is Router
+					// The router that is referred too.
+					// For a Router-LSA this is
+					// the LSA itself. For Summary
+					// LSA that refers to a router
+					// (Type 4) its the AS
+					// boundary router.
+
     bool _area_border_router;		// Only valid if dest type is router
     bool _as_boundary_router;		// Only valid if dest type is router
 
@@ -240,7 +247,8 @@ class RouteEntry {
     uint32_t _type_2_cost;
 
     A _nexthop;
-    uint32_t	_advertising_router;
+    uint32_t _advertising_router;	// The router ID from the LSA
+					// that generated this route.
 
     Lsa::LsaRef _lsar;			// LSA that contributed to this route.
 
