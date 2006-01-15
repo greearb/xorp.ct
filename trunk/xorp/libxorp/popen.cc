@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.12 2005/12/22 11:53:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.13 2006/01/14 00:57:48 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -407,7 +407,7 @@ pclose2(FILE *iop_out, bool dont_wait)
 {
     register struct pid_s *cur, *last;
     int pstat;
-    pid_t pid;
+    pid_t pid = 0;
 
     /* Find the appropriate file pointer. */
     for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next)
@@ -437,7 +437,9 @@ pclose2(FILE *iop_out, bool dont_wait)
     pid = cur->pid;
     pstat = (int)dwStat;
 #else // ! HOST_OS_WINDOWS
-    if (! dont_wait) {
+    if (dont_wait) {
+	pid = 0;	// XXX: imitating the result result of wait4(WNOHANG)
+    } else {
 	do {
 	    pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
 	} while (pid == -1 && errno == EINTR);
