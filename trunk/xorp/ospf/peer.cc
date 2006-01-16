@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.210 2006/01/13 23:14:28 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.211 2006/01/14 00:14:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -382,7 +382,8 @@ bool
 PeerOut<A>::virtual_link_endpoint(OspfTypes::AreaID area)
 {
     if (0 == _areas.count(area)) {
-  	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	// Can be call opportunistically
+//   	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
