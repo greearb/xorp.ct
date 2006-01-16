@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.185 2006/01/16 06:19:59 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.186 2006/01/16 06:24:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -493,6 +493,23 @@ AreaRouter<A>::area_range_covered(IPNet<A> net, bool& advertise)
 	return false;
 
     advertise = i.payload()._advertise;
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::area_range_covering(IPNet<A> net, IPNet<A>& sumnet)
+{
+    debug_msg("Net %s\n", cstring(net));
+
+    typename Trie<A, Range>::iterator i = _area_range.find(net);
+    if (_area_range.end() == i) {
+	XLOG_WARNING("Net %s not covered", cstring(net));
+	return false;
+    }
+
+    sumnet = i.key();
 
     return true;
 }
@@ -2657,6 +2674,11 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 	    continue;
 	if (!advertise)
 	    continue;
+	IPNet<IPv4> sumnet;
+	if (!area_range_covering(net, sumnet)) {
+	    XLOG_FATAL("Net %s does not have a covering net", cstring(net));
+	    continue;
+	}
 	route_entry.set_directly_connected(ri->node() == ri->nexthop());
 	route_entry.set_path_type(RouteEntry<IPv4>::intra_area);
 	route_entry.set_cost(ri->weight());
@@ -2671,12 +2693,12 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 
 	// Mark this as a discard route.
 	route_entry.set_discard(true);
-	if (0 != ranges.count(net)) {
-	    RouteEntry<IPv4> r = ranges[net];
+	if (0 != ranges.count(sumnet)) {
+	    RouteEntry<IPv4> r = ranges[sumnet];
 	    if (route_entry.get_cost() < r.get_cost())
 		continue;
 	} 
-	ranges[net] = route_entry;
+	ranges[sumnet] = route_entry;
     }
  
     // Send in the discard routes.
