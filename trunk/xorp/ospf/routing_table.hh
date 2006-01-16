@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/routing_table.hh,v 1.35 2006/01/15 11:02:42 atanu Exp $
+// $XORP: xorp/ospf/routing_table.hh,v 1.36 2006/01/15 11:05:08 atanu Exp $
 
 #ifndef __OSPF_ROUTING_TABLE_HH__
 #define __OSPF_ROUTING_TABLE_HH__
@@ -186,6 +186,7 @@ class RouteEntry {
 	output = c_format("RouteEntry: ");
 	output += c_format("%s ", OspfTypes::Router == _destination_type ?
 			  "Router" : "Network");
+	output += c_format("%s", _discard ? "discard " : "");
 	output += c_format("%s", _direct ? "direct " : "");
 	if (OspfTypes::Network == _destination_type)
 	    output += c_format("Address %s ", pr_id(_address).c_str());
