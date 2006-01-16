@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.181 2006/01/15 21:48:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.182 2006/01/15 22:08:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2099,6 +2099,13 @@ AreaRouter<A>::update_router_links()
     router_lsa->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_router_lsa));
+
+    // This new Router-LSA is being announced, hence something has
+    // changed in a link or a transit capability has
+    // changed. Therefore the routing table needs to be recomputed.
+    // Note: There will be one extra routing computation every half
+    // hour when the LSA is refreshed.
+    routing_schedule_total_recompute();
 
     return true;
 }
