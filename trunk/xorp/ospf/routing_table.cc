@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.45 2006/01/15 11:13:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.46 2006/01/16 07:23:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -93,9 +93,11 @@ bool
 RoutingTable<A>::add_entry(OspfTypes::AreaID area, IPNet<A> net,
 			   const RouteEntry<A>& rt)
 {
-    debug_msg("area %s %s\n", pr_id(area).c_str(), cstring(net));
+    debug_msg("area %s %s %s\n", pr_id(area).c_str(), cstring(net),
+	      const_cast<RouteEntry<A>&>(rt).str().c_str());
     XLOG_ASSERT(_in_transaction);
     XLOG_ASSERT(area == rt.get_area());
+    XLOG_ASSERT(rt.get_directly_connected() || rt.get_nexthop() != A::ZERO());
 
     if (rt.get_destination_type() == OspfTypes::Router)
 	_adv.add_entry(area, rt.get_router_id(), rt);
