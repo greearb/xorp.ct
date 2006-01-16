@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.183 2006/01/16 01:49:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.184 2006/01/16 02:42:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2665,7 +2665,9 @@ AreaRouter<IPv4>::routing_area_rangesV2(list<RouteCmd<Vertex> >& r)
 
 	route_entry.set_advertising_router(lsar->get_header().
 					   get_advertising_router());
-	
+	route_entry.set_area(_area);
+	route_entry.set_lsa(lsar);
+
 	// Mark this as a discard route.
 	route_entry.set_discard(true);
 	if (0 != ranges.count(net)) {
