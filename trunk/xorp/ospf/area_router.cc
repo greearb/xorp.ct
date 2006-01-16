@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.182 2006/01/15 22:08:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.183 2006/01/16 01:49:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -858,25 +858,25 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
     // Set the advertising router otherwise the lookup will fail.
     lsar->get_header().set_advertising_router(_ospf.get_router_id());
 
-    if (!announce) {
-#ifdef PARANOIA
-	// Make sure its not being announced
-	size_t index;
-	if (find_lsa(lsar, index))
-	    XLOG_FATAL("LSA should not be announced \n%s",
-		       cstring(*_db[index]));
-#endif
-	return;
-    }
+    // It would be useful to rely on the announce variable to
+    // determine if an LSA was previously being announced and should
+    // now be withdrawn. Under normal circumstances it works fine,
+    // however a reconfiguration of area ranges may solicit the
+    // messages.
 
     // Withdraw the LSA.
     size_t index;
     if (find_lsa(lsar, index)) {
+	if (!announce)
+	    XLOG_WARNING("LSA probably should not have been announced! "
+			 "Area range change?\n%s", cstring(*lsar));
 	// Remove it if it should no longer be announced.
 	lsar = _db[index];
 	premature_aging(lsar, index);
     } else {
-	XLOG_WARNING("LSA not being announced \n%s", cstring(*lsar));
+	if (announce)
+	    XLOG_WARNING("LSA not being announced! Area range change?\n%s",
+			 cstring(*lsar));
     }
 }
 
