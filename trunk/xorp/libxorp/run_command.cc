@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.19 2006/01/14 00:57:48 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.20 2006/01/18 00:42:23 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -86,6 +86,7 @@ child_handler(int signo)
 	    return;	// XXX: no more child processes
 
 	XLOG_ASSERT(pid > 0);
+	popen2_mark_as_closed(pid, wait_status);
 	iter = pid2command.find(pid);
 	if (iter == pid2command.end()) {
 	    // XXX: we don't know anything about the exited process
@@ -458,7 +459,7 @@ RunCommandBase::close_output()
 	// XXX: in case of Windows we don't use the SIGCHLD mechanism
 	// hence the process is done when the I/O is completed.
 	//
-	int status = pclose2(_stdout_stream, true);
+	int status = pclose2(_stdout_stream, false);
 	_stdout_stream = NULL;
 	set_command_status(status);
 	_command_is_exited = true;	// XXX: A Windows hack
