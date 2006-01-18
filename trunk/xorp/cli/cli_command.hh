@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.19 2005/12/14 02:40:17 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.20 2005/12/21 00:58:45 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -504,15 +504,39 @@ public:
 	  _is_command_argument(false)
     {}
 
+    /**
+     * Get the command name.
+     *
+     * @return the command name.
+     */
     const string& command_name() const { return (_command_name); }
+
+    /**
+     * Get the help string for the command.
+     *
+     * @return the help string for the command.
+     */
     const string& help_string() const { return (_help_string); }
+
+    /**
+     * Test if the command is executable.
+     *
+     * @return true if the command is executable, otherwise false.
+     */
     bool is_executable() const { return (_is_executable); }
+
+    /**
+     * Test if the command supports pipes.
+     *
+     * @return true if the command supports pipes, otherwise false.
+     */
     bool can_pipe() const { return (_can_pipe); }
+
     /**
      * Set a flag whether the command actually represents a command argument.
      * 
      * @param v true if the command represents a command argument, otherwise
-     * false
+     * false.
      */
     void set_is_command_argument(bool v) { _is_command_argument = v; }
 
@@ -523,20 +547,31 @@ public:
      */
     bool is_command_argument() const { return (_is_command_argument); }
 
+    /**
+     * Get a reference to the type matching callback.
+     *
+     * @return a reference to the type matching callback.
+     */
     const CliCommand::TypeMatchCb& type_match_cb() const {
 	return (_type_match_cb);
     }
+
+    /**
+     * Set the type matching callback.
+     *
+     * @param cb the type matching callback.
+     */
     void set_type_match_cb(const CliCommand::TypeMatchCb& cb) {
 	_type_match_cb = cb;
     }
 
 private:
-    string	_command_name;
-    string	_help_string;
-    bool	_is_executable;
-    bool	_can_pipe;
-    bool	_is_command_argument;
-    CliCommand::TypeMatchCb _type_match_cb;
+    string	_command_name;		// The command name
+    string	_help_string;		// The help string for the command
+    bool	_is_executable;		// True if the command is executable
+    bool	_can_pipe;		// True if the command supports pipes
+    bool	_is_command_argument;	// True if this is a command argument
+    CliCommand::TypeMatchCb _type_match_cb;	// The type matching callback
 };
 
 //
