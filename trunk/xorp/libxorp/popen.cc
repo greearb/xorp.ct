@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.14 2006/01/15 03:36:19 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.15 2006/01/15 21:19:05 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -406,7 +406,7 @@ int
 pclose2(FILE *iop_out, bool dont_wait)
 {
     register struct pid_s *cur, *last;
-    int pstat;
+    int pstat = 0;
     pid_t pid = 0;
 
     /* Find the appropriate file pointer. */
