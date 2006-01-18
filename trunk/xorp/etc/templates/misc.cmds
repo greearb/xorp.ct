@@ -5,7 +5,7 @@ ping {
 }
 
 ping <host> {
-    %command: "ping -i 0.01 $2" %help: "Give a hostname or IP address to ping.";
+    %command: "ping $2" %help: "Give a hostname or IP address to ping.";
 }
 
 ping6 {

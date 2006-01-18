@@ -4,10 +4,6 @@ interfaces {
     targetname:		txt = "fea";
     restore-original-config-on-shutdown:	bool = false;
 
-    foo: txt;
-    bar: u32;
-    pav: txt;
-
     interface @: txt {
 	disable:	toggle = false;
 	enabled:	bool;			/* %deprecated */
@@ -58,22 +54,6 @@ interfaces {
 
     targetname {
 	%help:	short "Set the target name";
-	%set:;
-    }
-
-    foo {
-	%allow: $(@) "pav two" %help: "Help for two";
-	%allow: $(@) "three" %help: "Help for three";
-	%set:;
-    }
-    bar {
-	%allow-range: $(@) "1" "20" %help: "Help for 1--20";
-	%allow-range: $(@) "30" "40" %help: "Help for 30--40";
-	%set:;
-    }
-    pav {
-	%allow: $(interfaces.foo) "one" %help: "Help for one";
-	%allow-range: $(interfaces.bar) "1" "10" %help: "Help for 1--10";
 	%set:;
     }
 
