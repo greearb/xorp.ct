@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.18 2005/12/22 11:53:40 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.19 2006/01/14 00:57:48 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -416,6 +416,7 @@ RunCommandBase::terminate_process(bool with_prejudice)
 	// Remove the entry from the pid map
 	pid2command.erase(_pid);
 	_pid = 0;
+	_done_timer.clear();
 	_is_running = false;
     }
 }
@@ -632,6 +633,12 @@ RunCommandBase::done()
 
     if (! (_command_is_exited || _command_is_signal_terminated))
 	return;		// XXX: the command is not done yet
+
+    // Remove the entry from the pid map
+    pid2command.erase(_pid);
+    _pid = 0;
+    _done_timer.clear();
+    _is_running = false;
 
     if (_error_msg.size()) {
 	prefix = "[";
