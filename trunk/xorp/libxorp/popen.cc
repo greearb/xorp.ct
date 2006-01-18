@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.15 2006/01/15 21:19:05 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.16 2006/01/18 00:39:24 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -116,6 +116,8 @@ static struct pid_s {
 #else
     pid_t pid;
 #endif
+    bool is_closed;
+    int pstat;		// The process wait status if is_closed is true
 } *pidlist;
 
 
@@ -220,6 +222,8 @@ popen2(const string& command, const list<string>& arguments,
     cur->fp_err = iop_err;
     cur->pid = pi.dwProcessId;
     cur->ph = pi.hProcess;
+    cur->is_closed = false;
+    cur->pstat = 0;
     cur->next = pidlist;
     pidlist = cur;
 
@@ -387,6 +391,8 @@ popen2(const string& command, const list<string>& arguments,
     cur->fp_out = iop_out;
     cur->fp_err = iop_err;
     cur->pid =  pid;
+    cur->is_closed = false;
+    cur->pstat = 0;
     cur->next = pidlist;
     pidlist = cur;
 
@@ -416,29 +422,44 @@ pclose2(FILE *iop_out, bool dont_wait)
     if (cur == NULL)
 	return (-1);
 
-#ifdef HOST_OS_WINDOWS
-    UNUSED(dont_wait);
-    DWORD dwStat = 0;
-    BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
-    while (dwStat == STILL_ACTIVE) {
-    	WaitForSingleObject(cur->ph, INFINITE);
-    	result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+    pid = cur->pid;
+    if (dont_wait || cur->is_closed) {
+	if (cur->is_closed)
+	    pstat = cur->pstat;
+	else
+	    pstat = 0;	// XXX: imitating the result of wait4(WNOHANG)
     }
-    XLOG_ASSERT(result != 0);
-#endif
+
+#ifdef HOST_OS_WINDOWS
+    if (! (dont_wait || cur->is_closed)) {
+	DWORD dwStat = 0;
+	BOOL result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+	while (dwStat == STILL_ACTIVE) {
+	    WaitForSingleObject(cur->ph, INFINITE);
+	    result = GetExitCodeProcess(cur->ph, (LPDWORD)&dwStat);
+	}
+	XLOG_ASSERT(result != 0);
+	pstat = (int)dwStat;
+    }
 
     (void)fclose(cur->fp_out);
     (void)fclose(cur->fp_err);
 
-#ifdef HOST_OS_WINDOWS
-    // CloseHandle(cur->h_out_child);
-    // CloseHandle(cur->h_err_child);
-    CloseHandle(cur->ph);
-    pid = cur->pid;
-    pstat = (int)dwStat;
+    if (! (dont_wait || cur->is_closed)) {
+	// CloseHandle(cur->h_out_child);
+	// CloseHandle(cur->h_err_child);
+	CloseHandle(cur->ph);
+    }
 #else // ! HOST_OS_WINDOWS
-    if (dont_wait) {
-	pid = 0;	// XXX: imitating the result result of wait4(WNOHANG)
+
+    (void)fclose(cur->fp_out);
+    (void)fclose(cur->fp_err);
+
+    if (dont_wait || cur->is_closed) {
+	if (cur->is_closed)
+	    pstat = cur->pstat;
+	else
+	    pstat = 0;	// XXX: imitating the result of wait4(WNOHANG)
     } else {
 	do {
 	    pid = wait4(cur->pid, &pstat, 0, (struct rusage *)0);
@@ -456,6 +477,23 @@ pclose2(FILE *iop_out, bool dont_wait)
     return (pid == -1 ? -1 : pstat);
 }
 
+int
+popen2_mark_as_closed(pid_t pid, int wait_status)
+{
+    struct pid_s *cur;
+
+    for (cur = pidlist; cur != NULL; cur = cur->next) {
+	if (cur->pid == pid)
+	    break;
+    }
+    if (cur == NULL)
+	return (-1);
+
+    cur->is_closed = true;
+    cur->pstat = wait_status;
+    return (0);
+}
+
 #ifdef HOST_OS_WINDOWS
 /*
  * Return the process handle given the process ID.
@@ -465,11 +503,12 @@ pclose2(FILE *iop_out, bool dont_wait)
 HANDLE
 pgethandle(pid_t pid)
 {
-    register struct pid_s *cur, *last;
+    struct pid_s *cur;
 
-    for (last = NULL, cur = pidlist; cur; last = cur, cur = cur->next)
+    for (cur = pidlist; cur != NULL; cur = cur->next) {
 	if ((pid_t)cur->pid == pid)
 	    break;
+    }
     if (cur == NULL)
 	return (INVALID_HANDLE_VALUE);
 
