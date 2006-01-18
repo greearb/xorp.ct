@@ -1,11 +1,11 @@
-/* $XORP: xorp/etc/templates/misc.cmds,v 1.7 2005/10/10 06:15:37 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/misc.cmds,v 1.8 2005/10/10 07:14:26 pavlin Exp $ */
 
 ping {
     %command: "" %help: "Ping a hostname or IP address";
 }
 
 ping <host> {
-    %command: "ping $2" %help: "Give a hostname or IP address to ping.";
+    %command: "ping -i 0.01 $2" %help: "Give a hostname or IP address to ping.";
 }
 
 ping6 {

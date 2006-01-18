@@ -1,8 +1,12 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.22 2005/10/26 07:02:45 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.23 2005/11/18 00:22:57 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
     restore-original-config-on-shutdown:	bool = false;
+
+    foo: txt;
+    bar: u32;
+    pav: txt;
 
     interface @: txt {
 	disable:	toggle = false;
@@ -54,6 +58,22 @@ interfaces {
 
     targetname {
 	%help:	short "Set the target name";
+	%set:;
+    }
+
+    foo {
+	%allow: $(@) "pav two" %help: "Help for two";
+	%allow: $(@) "three" %help: "Help for three";
+	%set:;
+    }
+    bar {
+	%allow-range: $(@) "1" "20" %help: "Help for 1--20";
+	%allow-range: $(@) "30" "40" %help: "Help for 30--40";
+	%set:;
+    }
+    pav {
+	%allow: $(interfaces.foo) "one" %help: "Help for one";
+	%allow-range: $(interfaces.bar) "1" "10" %help: "Help for 1--10";
 	%set:;
     }
 

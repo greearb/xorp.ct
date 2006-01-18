@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.27 2005/11/12 05:49:24 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.28 2005/11/18 00:22:58 pavlin Exp $ */
 
 protocols {
     static {
@@ -13,8 +13,8 @@ protocols {
 	}
 
 	interface-route4 @: ipv4net {
-	    next-hop-interface: txt = "";
-	    next-hop-vif:	txt = "";
+	    next-hop-interface: txt;
+	    next-hop-vif:	txt;
 	    metric:		u32 = 1;
 	}
 
@@ -25,8 +25,8 @@ protocols {
 	}
 
 	interface-route6 @: ipv6net {
-	    next-hop-interface: txt = "";
-	    next-hop-vif:	txt = "";
+	    next-hop-interface: txt;
+	    next-hop-vif:	txt;
 	    metric:		u32 = 1;
 	}
 
@@ -37,8 +37,8 @@ protocols {
 	}
 
 	mrib-interface-route4 @: ipv4net {
-	    next-hop-interface: txt = "";
-	    next-hop-vif:	txt = "";
+	    next-hop-interface: txt;
+	    next-hop-vif:	txt;
 	    metric:		u32 = 1;
 	}
 
@@ -49,8 +49,8 @@ protocols {
 	}
 
 	mrib-interface-route6 @: ipv6net {
-	    next-hop-interface: txt = "";
-	    next-hop-vif:	txt = "";
+	    next-hop-interface: txt;
+	    next-hop-vif:	txt;
 	    metric:		u32 = 1;
 	}
 	
