@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.9 2005/04/07 04:49:25 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.10 2005/11/11 06:24:03 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -75,22 +75,26 @@ protocols \{\\
 \>\>interface-route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
+\>\>\>next-hop-router: {\it IPv4-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
 \>\>mrib-interface-route4 {\it IPv4-addr}/{\it int(0..32)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
+\>\>\>next-hop-router: {\it IPv4-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
 \\
 \>\>interface-route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
+\>\>\>next-hop-router: {\it IPv6-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
 \>\>mrib-interface-route6 {\it IPv6-addr}/{\it int(0..128)} \{\\
 \>\>\>next-hop-interface: {\it text}\\
 \>\>\>next-hop-vif: {\it text}\\
+\>\>\>next-hop-router: {\it IPv6-addr}\\
 \>\>\>metric: {\it uint}\\
 \>\>\}\\
 \>\}\\
@@ -124,13 +128,12 @@ The configuration parameters are used as follows:
   installed in the RIB.  The parameter is an IPv4 destination subnet
   expressed in the form {\it address/prefix-length}.
 
-  Each {\stt route4}: specification takes the following mandatory
-  attributes:
+  Each {\stt route4}: specification takes the following attributes:
 \begin{description}
 \item{\tt next-hop}: this specifies the IPv4 address of the nexthop
   router towards the destination subnet~\footnote{Note that prior to the XORP
   Release-1.1, the {\tt nexthop} attribute was used instead of {\tt
-  next-hop}.}.
+  next-hop}.}. It is mandatory.
 \item{\tt metric}: this specifies the routing metric or cost for this
   route.  It is a non-negative integer.  The metric for a static route
   is not directly used to decide which route to use, but may affect
@@ -153,11 +156,10 @@ The configuration parameters are used as follows:
   installed in the RIB.  The parameter is an IPv6 destination subnet
   expressed in the form {\it address/prefix-length}.
 
-  Each {\stt route6}: specification takes the following mandatory
-  attributes:
+  Each {\stt route6}: specification takes the following attributes:
 \begin{description}
 \item{\tt next-hop}: this specifies the IPv6 address of the nexthop
-  router towards the destination subnet.
+  router towards the destination subnet. It is mandatory.
 \item{\tt metric}: this specifies the routing metric or cost for this
   route.  See {\stt route4 metric} for details.
 \end{description}
@@ -178,13 +180,14 @@ The configuration parameters are used as follows:
   static routes where this router and next-hop router don't share the same
   subnet address on some (wireless) interface.
 
-  Each {\stt interface-route4}: specification takes the following mandatory
-  attributes:
+  Each {\stt interface-route4}: specification takes the following attributes:
 \begin{description}
 \item{\tt next-hop-interface}: this specifies the name of the nexthop
-  interface towards the destination subnet.
+  interface towards the destination subnet. It is mandatory.
 \item{\tt next-hop-vif}: this specifies the name of the nexthop
-  vif towards the destination subnet.
+  vif towards the destination subnet. It is mandatory.
+\item{\tt next-hop-router}: this specifies the IPv4 address of the nexthop
+  router towards the destination subnet.
 \item{\tt metric}: this specifies the routing metric or cost for this
   route.  See {\stt route4 metric} for details.
 \end{description}

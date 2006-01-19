@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.28 2005/11/18 00:22:58 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.29 2006/01/18 21:50:45 pavlin Exp $ */
 
 protocols {
     static {
@@ -15,6 +15,7 @@ protocols {
 	interface-route4 @: ipv4net {
 	    next-hop-interface: txt;
 	    next-hop-vif:	txt;
+	    next-hop-router:	ipv4 = 0.0.0.0;
 	    metric:		u32 = 1;
 	}
 
@@ -27,6 +28,7 @@ protocols {
 	interface-route6 @: ipv6net {
 	    next-hop-interface: txt;
 	    next-hop-vif:	txt;
+	    next-hop-router:	ipv6 = ::;
 	    metric:		u32 = 1;
 	}
 
@@ -39,6 +41,7 @@ protocols {
 	mrib-interface-route4 @: ipv4net {
 	    next-hop-interface: txt;
 	    next-hop-vif:	txt;
+	    next-hop-router:	ipv4 = 0.0.0.0;
 	    metric:		u32 = 1;
 	}
 
@@ -51,6 +54,7 @@ protocols {
 	mrib-interface-route6 @: ipv6net {
 	    next-hop-interface: txt;
 	    next-hop-vif:	txt;
+	    next-hop-router:	ipv6 = ::;
 	    metric:		u32 = 1;
 	}
 	
@@ -133,8 +137,8 @@ protocols {
 	    %help:	short "Configure an interface-based IPv4 static route";
 	    %mandatory:	$(@.next-hop-interface), $(@.next-hop-vif);
 
-	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_interface_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=0.0.0.0&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
-	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_interface_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=0.0.0.0&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %activate:	xrl "$(static.targetname)/static_routes/0.1/add_interface_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %update:	xrl "$(static.targetname)/static_routes/0.1/replace_interface_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
 	    %delete:	xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=true&multicast:bool=false&network:ipv4net=$(@)";
 
 	    next-hop-interface {
@@ -144,6 +148,11 @@ protocols {
 
 	    next-hop-vif {
 		%help:	short "Configure the next-hop virtual interface name";
+		%set:;
+	    }
+
+	    next-hop-router {
+		%help:	short "Configure the optional next-hop router";
 		%set:;
 	    }
 
@@ -184,8 +193,8 @@ protocols {
 	    %help:	short "Configure an interface-based IPv6 static route";
 	    %mandatory:	$(@.next-hop-interface), $(@.next-hop-vif);
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=::&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=::&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=true&multicast:bool=false&network:ipv6net=$(@)";
 
 	    next-hop-interface {
@@ -195,6 +204,11 @@ protocols {
 
 	    next-hop-vif {
 		%help:	short "Configure the next-hop virtual interface name";
+		%set:;
+	    }
+
+	    next-hop-router {
+		%help:	short "Configure the optional next-hop router";
 		%set:;
 	    }
 
@@ -235,8 +249,8 @@ protocols {
 	    %help:	short "Configure a multicast-specific interface-based IPv4 static route";
 	    %mandatory:	$(@.next-hop-interface), $(@.next-hop-vif);
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=0.0.0.0&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=0.0.0.0&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)&nexthop:ipv4=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route4?unicast:bool=false&multicast:bool=true&network:ipv4net=$(@)";
 
 	    next-hop-interface {
@@ -246,6 +260,11 @@ protocols {
 
 	    next-hop-vif {
 		%help:	short "Configure the next-hop virtual interface name";
+		%set:;
+	    }
+
+	    next-hop-router {
+		%help:	short "Configure the optional next-hop router";
 		%set:;
 	    }
 
@@ -287,8 +306,8 @@ protocols {
 	    %help:	short "Configure a multicast-specific interface-based IPv6 static route";
 	    %mandatory:	$(@.next-hop-interface), $(@.next-hop-vif);
 
-	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=::&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
-	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=::&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %activate: xrl "$(static.targetname)/static_routes/0.1/add_interface_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
+	    %update: xrl "$(static.targetname)/static_routes/0.1/replace_interface_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)&nexthop:ipv6=$(@.next-hop-router)&ifname:txt=$(@.next-hop-interface)&vifname:txt=$(@.next-hop-vif)&metric:u32=$(@.metric)";
 	    %delete: xrl "$(static.targetname)/static_routes/0.1/delete_route6?unicast:bool=false&multicast:bool=true&network:ipv6net=$(@)";
 
 	    next-hop-interface {
@@ -298,6 +317,11 @@ protocols {
 
 	    next-hop-vif {
 		%help:	short "Configure the next-hop virtual interface name";
+		%set:;
+	    }
+
+	    next-hop-router {
+		%help:	short "Configure the optional next-hop router";
 		%set:;
 	    }
 
