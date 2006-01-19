@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.16 2006/01/18 00:39:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.17 2006/01/18 01:25:18 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -390,7 +390,7 @@ popen2(const string& command, const list<string>& arguments,
     /* Link into list of file descriptors. */
     cur->fp_out = iop_out;
     cur->fp_err = iop_err;
-    cur->pid =  pid;
+    cur->pid = pid;
     cur->is_closed = false;
     cur->pstat = 0;
     cur->next = pidlist;
@@ -483,7 +483,7 @@ popen2_mark_as_closed(pid_t pid, int wait_status)
     struct pid_s *cur;
 
     for (cur = pidlist; cur != NULL; cur = cur->next) {
-	if (cur->pid == pid)
+	if (static_cast<pid_t>(cur->pid) == pid)
 	    break;
     }
     if (cur == NULL)
@@ -506,7 +506,7 @@ pgethandle(pid_t pid)
     struct pid_s *cur;
 
     for (cur = pidlist; cur != NULL; cur = cur->next) {
-	if ((pid_t)cur->pid == pid)
+	if (static_cast<pid_t>(cur->pid) == pid)
 	    break;
     }
     if (cur == NULL)
