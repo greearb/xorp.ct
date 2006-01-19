@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.2 2005/11/23 06:56:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.3 2005/12/28 18:57:18 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -264,6 +264,9 @@ routing1(TestInfo& info, OspfTypes::Version /*version*/)
 
     RouteEntry<A> route_entry1;
     RouteEntry<A> route_entry2;
+
+    route_entry1.set_directly_connected(true);
+    route_entry2.set_directly_connected(true);
 
     /****************************************/
     routing_table.begin(a1);
