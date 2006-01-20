@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.50 2006/01/03 01:31:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.51 2006/01/20 02:01:04 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -883,7 +883,6 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
     static IPv4 class_c_net("192.0.0.0");
     static IPv4 class_d_net("224.0.0.0");
     static IPv4 class_e_net("240.0.0.0");
-    IPv4 zero;
 
     Peer<Addr>* p = peer(src_addr);
     if (p == 0) {
@@ -914,7 +913,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 
 	IPv4Net net = entries[i].net();
 	IPv4 addr = entries[i].addr();
-	if (prefix_len == 0 && addr != zero) {
+	if (prefix_len == 0 && addr != IPv4::ZERO()) {
 	    // Subnet mask not specified, thus apply a clasfull mask
 	    if (addr < class_b_net) {
 	        prefix_len = 8;			// Class A
@@ -945,7 +944,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    record_bad_route("experimental route", src_addr, src_port, p);
 	    continue;
 	}
-	if (masked_net == zero) {
+	if (masked_net == IPv4::ZERO()) {
 	    if (net.prefix_len() != 0) {
 		record_bad_route("net 0", src_addr, src_port, p);
 		continue;
@@ -1024,7 +1023,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	}
 
 	IPv4 nh = entries[i].nexthop();
-	if (nh == zero) {
+	if (nh == IPv4::ZERO()) {
 	    nh = src_addr;
 	} else if (nh == _pio->address()) {
 	    // Nexthop points to us, ignore route (either poison-rev or bogus)
@@ -1125,6 +1124,16 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    continue;
 	}
 
+	if (masked_net == IPv6::ZERO()) {
+	    if (net.prefix_len() != 0) {
+		record_bad_route("net 0", src_addr, src_port, p);
+		continue;
+	    } else if (accept_default_route() == false) {
+		record_bad_route("default route", src_addr, src_port, p);
+		continue;
+	    }
+	}
+
 	if (entries[i].prefix_len() == Addr::ADDR_BITLEN) {
 	    //
 	    // Check if the route is for one of my own addresses.
@@ -1177,16 +1186,6 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 
 	    if (my_addr_found) {
 		record_bad_route("my interface address", src_addr, src_port, p);
-		continue;
-	    }
-	}
-
-	if (masked_net == IPv6::ZERO()) {
-	    if (net.prefix_len() != 0) {
-		record_bad_route("net 0", src_addr, src_port, p);
-		continue;
-	    } else if (accept_default_route() == false) {
-		record_bad_route("default route", src_addr, src_port, p);
 		continue;
 	    }
 	}
