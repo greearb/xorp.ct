@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.49 2005/12/29 00:49:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.50 2006/01/03 01:31:50 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -1086,6 +1086,8 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
     for (uint32_t i = 0; i < n_entries; i++) {
 	if (entries[i].is_nexthop()) {
 	    nh = entries[i].nexthop();
+	    if (! nh.is_linklocal_unicast())
+		nh = IPv6::ZERO();
 	    if (nh == IPv6::ZERO()) {
 		nh = src_addr;
 	    }
