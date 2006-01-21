@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.51 2006/01/20 02:01:04 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.52 2006/01/20 02:23:44 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -361,6 +361,7 @@ Port<A>::peer_gc_timeout()
 	Peer<A>* pp = *i;
 
 	if (pp->route_count() == 0) {
+	    delete pp;
 	    _peers.erase(i++);
 	} else {
 	    ++i;
@@ -820,6 +821,21 @@ Port<A>::port_io_receive(const A&	src_address,
     const PacketRouteEntry<A>* entries = 0;
     uint32_t n_entries = 0;
     bool new_peer = (p == NULL);
+
+    if ((p != NULL) && (p->route_count() == 0)) {
+	//
+	// XXX: If the peer hasn't been active for long enough, then
+	// consider it a new peer for authentication purpose.
+	// The reason we need this modification is because the idle
+	// peer state may be kept for a little bit too long (e.g., 2*180
+	// seconds), and if the peer is restarted before that we won't
+	// accept its initial packet with sequence number of zero.
+	// With this modification we can accept the first authentication
+	// packet with sequence number of zero immediately after
+	// all routes have expired (e.g., after 300 seconds).
+	//
+	new_peer = true;
+    }
 
     if (af_state().auth_handler()->authenticate(rip_packet,
 						rip_packet_bytes,
