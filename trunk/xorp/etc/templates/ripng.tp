@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.26 2005/11/17 08:31:56 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.27 2005/11/18 00:22:57 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -83,9 +83,11 @@ protocols {
 		address @ {
 		    %create: xrl "$(ripng.targetname)/ripng/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
 		    %delete: xrl "$(ripng.targetname)/ripng/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)" ;
+		    %activate: xrl "$(ripng.targetname)/ripng/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&enabled:bool=`~$(@.disable)`" ;
 
 		    disable {
 			%help: short "Disable RIPng on address." ;
+			%create:;
 			%set: xrl "$(ripng.targetname)/ripng/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(address.@)&enabled:bool=`~$(@)`" ;
 		    }
 
