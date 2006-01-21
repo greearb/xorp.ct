@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.15 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.16 2005/09/01 01:39:17 zec Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -271,7 +271,7 @@ MD5AuthHandler::MD5Key::MD5Key(uint8_t		id,
 			      uint32_t		start_secs,
 			      XorpTimer		to)
     : _id(id), _start_secs(start_secs), _pkts_recv(false), _lr_sno(0),
-      _o_sno(0xfffffffe), _to(to)
+      _o_sno(0), _to(to)
 {
     string::size_type n = key.copy(_key_data, 16);
     if (n < KEY_BYTES) {
