@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.6 2005/03/25 02:54:26 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.7 2005/09/01 01:39:17 zec Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -46,6 +46,7 @@ public:
      *        entry in packet.  Set to 0 if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
+     * @param new_peer true if this is a new peer.
      *
      * @return true if packet passes authentication checks, false otherwise.
      */
