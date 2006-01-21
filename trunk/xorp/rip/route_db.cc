@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.24 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.25 2005/09/28 16:48:44 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -305,7 +305,43 @@ RouteDB<A>::update_route(const Net&	    net,
 	}
 	// this is "RIP's decision" -- where one route wins another.
 	// Source-match filtering should go here.
-	if (r->cost() > new_route->cost()) {
+	bool should_replace = false;
+	do {
+	    if (r->cost() > new_route->cost()) {
+		should_replace = true;
+		break;
+	    }
+	    if (r->cost() < new_route->cost())
+		break;		// XXX: the old route is better
+
+	    //
+	    // Same cost routes
+	    //
+	    // If the existing route is showing signs of timing out, it
+	    // may be better to switch to an equally-good alternative route
+	    // immediately, rather than waiting for the timeout to happen.
+	    // The heuristic is: if the route is at least halfway to the
+	    // expiration point, switch to the new route
+	    // (see RFC 2453 Section 3.9.2 and RFC 2080 Section 2.4.2).
+	    //
+	    TimeVal expiry_timeval = TimeVal::ZERO();
+	    if (r->origin() != NULL)
+		expiry_timeval = TimeVal(r->origin()->expiry_secs(), 0);
+	    
+	    if (expiry_timeval == TimeVal::ZERO())
+		break;		// XXX: the old route would never expire
+
+	    TimeVal remain;
+	    if (r->timer().time_remaining(remain) != true)
+		break;		// XXX: couldn't get the remaining time
+	    if (remain < (expiry_timeval / 2)) {
+		should_replace = true;
+		break;
+	    }
+	    break;
+	} while (false);
+	    
+	if (should_replace) {
 	    r->set_nexthop(new_route->nexthop());
 	    r->set_tag(new_route->tag());
 	    r->set_cost(new_route->cost());
