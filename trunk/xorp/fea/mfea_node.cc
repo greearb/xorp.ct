@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.59 2005/11/02 02:27:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.60 2005/12/22 12:18:23 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1441,6 +1441,7 @@ MfeaNode::delete_allow_kernel_signal_messages(const string& module_instance_name
  * packet of the outgoung message.
  * @rcvbuf: The data buffer with the message to send.
  * @rcvlen: The data length in @rcvbuf.
+ * @error_msg: The error message (if error).
  * 
  * Receive a protocol message from a user-level process, and send it
  * through the kernel.
@@ -1453,18 +1454,23 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 		     uint32_t vif_index,
 		     const IPvX& src, const IPvX& dst,
 		     int ip_ttl, int ip_tos, bool is_router_alert,
-		     const uint8_t *rcvbuf, size_t rcvlen)
+		     const uint8_t *rcvbuf, size_t rcvlen, string& error_msg)
 {
     ProtoComm *proto_comm;
     
-    if (! is_up())
+    if (! is_up()) {
+	error_msg = c_format("MFEA node is not UP");
 	return (XORP_ERROR);
+    }
     
     // TODO: for now @src_module_id that comes by the
     // upper-layer protocol is used to find-out the ProtoComm entry.
     proto_comm = proto_comm_find_by_module_id(src_module_id);
-    if (proto_comm == NULL)
+    if (proto_comm == NULL) {
+	error_msg = c_format("Protocol with module ID %u is not registered",
+			     XORP_UINT_CAST(src_module_id));
 	return (XORP_ERROR);
+    }
     
     if (proto_comm->proto_socket_write(vif_index,
 				       src, dst,
@@ -1472,7 +1478,8 @@ MfeaNode::proto_recv(const string&	, // src_module_instance_name,
 				       ip_tos,
 				       is_router_alert,
 				       rcvbuf,
-				       rcvlen) < 0) {
+				       rcvlen,
+				       error_msg) < 0) {
 	return (XORP_ERROR);
     }
     
@@ -1487,6 +1494,8 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 			  int ip_ttl, int ip_tos, bool is_router_alert,
 			  const uint8_t *rcvbuf, size_t rcvlen)
 {
+    string error_msg;
+
     XLOG_TRACE(false & is_log_trace(),	// XXX: unconditionally disabled
 	       "RX packet for dst_module_name %s: "
 	       "vif_index = %d src = %s dst = %s ttl = %d tos = %#x "
@@ -1525,7 +1534,8 @@ MfeaNode::proto_comm_recv(xorp_module_id dst_module_id,
 		   ip_tos,
 		   is_router_alert,
 		   rcvbuf,
-		   rcvlen);
+		   rcvlen,
+		   error_msg);
     }
     
     return (XORP_OK);

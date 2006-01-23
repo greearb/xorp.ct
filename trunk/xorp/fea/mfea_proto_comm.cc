@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.43 2005/12/22 12:18:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.44 2006/01/09 12:25:20 bms Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1549,6 +1549,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
  * have the Router Alert option included.
  * @databuf: The data buffer.
  * @datalen: The length of the data in @databuf.
+ * @error_msg: The error message (if error).
  * 
  * Send a packet on a protocol socket.
  * 
@@ -1558,7 +1559,8 @@ int
 ProtoComm::proto_socket_write(uint32_t vif_index,
 			      const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos, bool is_router_alert,
-			      const uint8_t *databuf, size_t datalen)
+			      const uint8_t *databuf, size_t datalen,
+			      string& error_msg)
 {
 #ifndef HOST_OS_WINDOWS
     struct ip	*ip;
@@ -1570,10 +1572,13 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     int		ret;
     MfeaVif	*mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     
-    if (mfea_vif == NULL)
+    if (mfea_vif == NULL) {
+	error_msg = c_format("Cannot find vif with vif_index = %u", vif_index);
 	return (XORP_ERROR);
+    }
     if (! mfea_vif->is_up()) {
 	// The vif is DOWN. Silently ignore the packet
+	error_msg = c_format("Vif %s is DOWN", mfea_vif->name().c_str());
 	return (XORP_ERROR);
     }
     
@@ -1674,14 +1679,15 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	_sndmh.msg_iovlen	= 2;
 	_sndiov[0].iov_len	= ip_hdr_len;
 	if (datalen > IO_BUF_SIZE) {
-	    XLOG_ERROR("proto_socket_write() failed: "
-		       "cannot send packet on vif %s from %s to %s: "
-		       "too much data: %u octets (max = %u)",
-		       mfea_vif->name().c_str(),
-		       src.str().c_str(),
-		       dst.str().c_str(),
-		       XORP_UINT_CAST(datalen),
-		       XORP_UINT_CAST(IO_BUF_SIZE));
+	    error_msg = c_format("proto_socket_write() failed: "
+				 "cannot send packet on vif %s from %s to %s: "
+				 "too much data: %u octets (max = %u)",
+				 mfea_vif->name().c_str(),
+				 src.str().c_str(),
+				 dst.str().c_str(),
+				 XORP_UINT_CAST(datalen),
+				 XORP_UINT_CAST(IO_BUF_SIZE));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
@@ -1729,17 +1735,20 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	    // Space for Router Alert option
 #ifdef HAVE_RFC3542
 	    if ((hbhlen = inet6_opt_init(NULL, 0)) == -1) {
-		XLOG_ERROR("inet6_opt_init(NULL) failed");
+		error_msg = c_format("inet6_opt_init(NULL) failed");
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    if ((hbhlen = inet6_opt_append(NULL, 0, hbhlen,
 					   IP6OPT_ROUTER_ALERT, 2,
 					   2, NULL)) == -1) {
-		XLOG_ERROR("inet6_opt_append(NULL) failed");
+		error_msg = c_format("inet6_opt_append(NULL) failed");
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    if ((hbhlen = inet6_opt_finish(NULL, 0, hbhlen)) == -1) {
-		XLOG_ERROR("inet6_opt_finish(NULL) failed");
+		error_msg = c_format("inet6_opt_finish(NULL) failed");
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    ctllen += CMSG_SPACE(hbhlen);
@@ -1805,18 +1814,24 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	    hbhbuf = CMSG_DATA(cmsgp);
 	    currentlen = inet6_opt_init(hbhbuf, hbhlen);
 	    if (currentlen == -1) {
-		XLOG_ERROR("inet6_opt_init(len = %d) failed", hbhlen);
+		error_msg = c_format("inet6_opt_init(len = %d) failed",
+				     hbhlen);
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    currentlen = inet6_opt_append(hbhbuf, hbhlen, currentlen,
 					  IP6OPT_ROUTER_ALERT, 2, 2, &optp);
 	    if (currentlen == -1) {
-		XLOG_ERROR("inet6_opt_append(len = %d) failed", currentlen);
+		error_msg = c_format("inet6_opt_append(len = %d) failed",
+				     currentlen);
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    inet6_opt_set_val(optp, 0, &rtalert_code, sizeof(rtalert_code));
 	    if (inet6_opt_finish(hbhbuf, hbhlen, currentlen) == -1) {
-		XLOG_ERROR("inet6_opt_finish(len = %d) failed", currentlen);
+		error_msg = c_format("inet6_opt_finish(len = %d) failed",
+				     currentlen);
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    
@@ -1829,11 +1844,13 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	    // have inet6_option_*
 	    //
 	    if (inet6_option_init((void *)cmsgp, &cmsgp, IPV6_HOPOPTS)) {
-		XLOG_ERROR("inet6_option_init(IPV6_HOPOPTS) failed");
+		error_msg = c_format("inet6_option_init(IPV6_HOPOPTS) failed");
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 	    if (inet6_option_append(cmsgp, raopt, 4, 0)) {
-		XLOG_ERROR("inet6_option_append(Router Alert) failed");
+		error_msg = c_format("inet6_option_append(Router Alert) failed");
+		XLOG_ERROR("%s", error_msg.c_str());
 		return (XORP_ERROR);
 	    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -1870,14 +1887,16 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	_sndmh.msg_namelen  = sizeof(_to6);
 	_sndmh.msg_iovlen   = 1;
 	if (datalen > IO_BUF_SIZE) {
-	    XLOG_ERROR("proto_socket_write() failed: "
-		       "error sending packet on vif %s from %s to %s: "
-		       "too much data: %u octets (max = %u)",
-		       mfea_vif->name().c_str(),
-		       src.str().c_str(),
-		       dst.str().c_str(),
-		       XORP_UINT_CAST(datalen),
-		       XORP_UINT_CAST(IO_BUF_SIZE));
+	    error_msg = c_format("proto_socket_write() failed: "
+				 "error sending packet on vif %s "
+				 "from %s to %s: "
+				 "too much data: %u octets (max = %u)",
+				 mfea_vif->name().c_str(),
+				 src.str().c_str(),
+				 dst.str().c_str(),
+				 XORP_UINT_CAST(datalen),
+				 XORP_UINT_CAST(IO_BUF_SIZE));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base
@@ -1889,6 +1908,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     
     default:
 	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family: %d", family());
 	return (XORP_ERROR);
     }
     
@@ -1906,11 +1926,12 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	if (errno == ENETDOWN) {
 	    // TODO: check the interface status. E.g. vif_state_check(family);
 	} else {
-	    XLOG_ERROR("sendmsg(proto %d size %u from %s to %s on vif %s) "
-		       "failed: %s",
-		       _ipproto, XORP_UINT_CAST(datalen),
-		       cstring(src), cstring(dst),
-		       mfea_vif->name().c_str(), strerror(errno));
+	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s "
+				 "on vif %s) failed: %s",
+				 _ipproto, XORP_UINT_CAST(datalen),
+				 cstring(src), cstring(dst),
+				 mfea_vif->name().c_str(), strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
 	}
     }
 #else

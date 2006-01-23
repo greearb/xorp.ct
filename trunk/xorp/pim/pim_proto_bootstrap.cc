@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.19 2005/05/12 09:07:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_bootstrap.cc,v 1.20 2005/08/18 15:38:48 bms Exp $"
 
 
 //
@@ -77,7 +77,8 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
     BsrZone	*bsr_zone = NULL;
     BsrZone	*active_bsr_zone;
     size_t	group_prefix_n = 0;
-    string	error_msg = "";
+    string	error_msg;
+    string	dummy_error_msg;
     int		ret_value = XORP_ERROR;
     
     //
@@ -276,7 +277,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	    if (pim_vif == NULL)
 		continue;
 	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
-					*active_bsr_zone);
+					*active_bsr_zone, dummy_error_msg);
 	}
 	// Housekeeping: reset the bsm_originate flag.
 	active_bsr_zone->set_bsm_originate(false);
@@ -295,7 +296,7 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 	    //	continue;		// Don't forward back on the iif
 	    // XXX: use the BSR zone that was received to forward the message
 	    pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(family()),
-					*bsr_zone);
+					*bsr_zone, dummy_error_msg);
 	}
 	// Housekeeping: reset the bsm_forward flag.
 	active_bsr_zone->set_bsm_forward(false);
@@ -346,32 +347,45 @@ PimVif::pim_bootstrap_recv(PimNbr *pim_nbr, const IPvX& src,
 
 // Return: %XORP_OK on success, otherwise %XORP_ERROR
 int
-PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
+PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone,
+			   string& error_msg)
 {
     size_t avail_buffer_size = 0;
     IPvX src_addr = primary_addr();
 
-    if (is_pim_register())
+    if (is_pim_register()) {
+	error_msg = c_format("Cannot send PIM Bootstrap message on "
+			     "PIM Register vif");
 	return (XORP_ERROR);	// Never send on the PIM Register vif
+    }
 
-    if (bsr_zone.bsr_addr() == dst_addr)
+    if (bsr_zone.bsr_addr() == dst_addr) {
+	error_msg = c_format("Should not send PIM Bootstrap message back "
+			     "to the BSR");
 	return (XORP_ERROR);	// Never send-back to the BSR
+    }
     
-    if (bsr_zone.bsr_addr() == IPvX::ZERO(family()))
+    if (bsr_zone.bsr_addr() == IPvX::ZERO(family())) {
+	error_msg = c_format("Cannot send PIM Bootstrap message: no BSR yet");
 	return (XORP_ERROR);	// There is no BSR yet
+    }
     
-    if (pim_nbrs_number() == 0)
+    if (pim_nbrs_number() == 0) {
+	error_msg = c_format("Should not send PIM Bootstrap message: "
+			     "no PIM neighbors yet");
 	return (XORP_ERROR);	// No PIM neighbors yet, hence don't send it
+    }
     
     if (pim_node().pim_scope_zone_table().is_scoped(bsr_zone.zone_id(),
 						    vif_index())) {
+	error_msg = c_format("Should not send PIM Bootstrap message "
+			     "across scope zone boundary");
 	return (XORP_ERROR);	// Don't across scope zone boundary
     }
     
     buffer_t *buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
 						  bsr_zone, true);
-    if (buffer == NULL)
-	return (XORP_ERROR);
+    XLOG_ASSERT(buffer != NULL);
     
     list<BsrGroupPrefix *>::const_iterator iter_prefix;
     for (iter_prefix = bsr_zone.bsr_group_prefix_list().begin();
@@ -405,12 +419,13 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 	    //
 	    if (iter_prefix != bsr_zone.bsr_group_prefix_list().begin()) {
 		// Send the accumulated prefixes so far
-		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer,
+			     error_msg) < 0) {
 		    return (XORP_ERROR);
+		}
 		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
 						    bsr_zone, false);
-		if (buffer == NULL)
-		    return (XORP_ERROR);
+		XLOG_ASSERT(buffer != NULL);
 	    }
 	}
 	
@@ -462,12 +477,13 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
 		//
 		// Send the accumulated RPs so far
 		//
-		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+		if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer,
+			     error_msg) < 0) {
 		    return (XORP_ERROR);
+		}
 		buffer = pim_bootstrap_send_prepare(src_addr, dst_addr,
 						    bsr_zone, false);
-		if (buffer == NULL)
-		    return (XORP_ERROR);
+		XLOG_ASSERT(buffer != NULL);
 		
 		avail_buffer_size = BUFFER_AVAIL_TAIL(buffer);
 		if (avail_buffer_size <
@@ -528,26 +544,28 @@ PimVif::pim_bootstrap_send(const IPvX& dst_addr, const BsrZone& bsr_zone)
     //
     // Send the lastest fragment
     //
-    if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer) < 0)
+    if (pim_send(src_addr, dst_addr, PIM_BOOTSTRAP, buffer, error_msg) < 0)
 	return (XORP_ERROR);
     
     return (XORP_OK);
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "invalid address family error = %d",
-	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(src_addr), cstring(dst_addr),
-	       family());
+    error_msg = c_format("TX %s from %s to %s: "
+			 "invalid address family error = %d",
+			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
+			 cstring(src_addr), cstring(dst_addr),
+			 family());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_BOOTSTRAP),
-	       cstring(src_addr), cstring(dst_addr));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_BOOTSTRAP),
+			 cstring(src_addr), cstring(dst_addr));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 }
 

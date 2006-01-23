@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.21 2005/04/20 09:50:18 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_hello.cc,v 1.22 2005/07/15 19:38:05 pavlin Exp $"
 
 
 //
@@ -72,9 +72,10 @@ void
 PimVif::pim_hello_stop()
 {
     uint16_t save_holdtime = hello_holdtime().get();
+    string dummy_error_msg;
     
     hello_holdtime().set(0);		// XXX: timeout immediately
-    pim_hello_send();
+    pim_hello_send(dummy_error_msg);
     hello_holdtime().set(save_holdtime);
 }
 
@@ -82,9 +83,10 @@ void
 PimVif::pim_hello_stop_dr()
 {
     uint32_t save_dr_priority = dr_priority().get();
+    string dummy_error_msg;
     
     dr_priority().set(PIM_HELLO_DR_PRIORITY_LOWEST);		// XXX: lowest
-    pim_hello_send();
+    pim_hello_send(dummy_error_msg);
     dr_priority().set(save_dr_priority);
 }
 
@@ -558,7 +560,9 @@ PimVif::hello_timer_start_random(uint32_t sec, uint32_t usec)
 void
 PimVif::hello_timer_timeout()
 {
-    pim_hello_send();
+    string dummy_error_msg;
+
+    pim_hello_send(dummy_error_msg);
     hello_timer_start(hello_period().get(), 0);
 }
 
@@ -576,7 +580,9 @@ PimVif::hello_once_timer_timeout()
 int
 PimVif::pim_hello_first_send()
 {
-    pim_hello_send();
+    string dummy_error_msg;
+
+    pim_hello_send(dummy_error_msg);
     
     //
     // Unicast the Bootstrap message if needed
@@ -601,7 +607,7 @@ PimVif::pim_hello_first_send()
 }
 
 int
-PimVif::pim_hello_send()
+PimVif::pim_hello_send(string& error_msg)
 {
     list<IPvX> address_list;
 
@@ -670,24 +676,26 @@ PimVif::pim_hello_send()
     }
     
     return (pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
-		     PIM_HELLO, buffer));
+		     PIM_HELLO, buffer, error_msg));
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "invalid address family error = %d",
-	       PIMTYPE2ASCII(PIM_HELLO),
-	       cstring(primary_addr()),
-	       cstring(IPvX::PIM_ROUTERS(family())),
-	       family());
+    error_msg = c_format("TX %s from %s to %s: "
+			 "invalid address family error = %d",
+			 PIMTYPE2ASCII(PIM_HELLO),
+			 cstring(primary_addr()),
+			 cstring(IPvX::PIM_ROUTERS(family())),
+			 family());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_HELLO),
-	       cstring(primary_addr()),
-	       cstring(IPvX::PIM_ROUTERS(family())));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_HELLO),
+			 cstring(primary_addr()),
+			 cstring(IPvX::PIM_ROUTERS(family())));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 }

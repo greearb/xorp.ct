@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.19 2005/06/01 00:36:58 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.20 2005/06/01 09:34:00 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -119,11 +119,12 @@ public:
      * @param is_router_alert if true, the IP Router Alert option in
      * the IP packet was set (when applicable).
      * @param buffer the data buffer with the received message.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		mld6igmp_recv(const IPvX& src, const IPvX& dst,
 			      int ip_ttl, int ip_tos, bool is_router_alert,
-			      buffer_t *buffer);
+			      buffer_t *buffer, string& error_msg);
     
     /**
      * Get the string with the flags about the vif status.
@@ -332,13 +333,13 @@ private:
     //
     int		mld6igmp_send(const IPvX& src, const IPvX& dst,
 			      uint8_t message_type, int max_resp_time,
-			      const IPvX& group_address);
+			      const IPvX& group_address, string& error_msg);
     int		igmp_process(const IPvX& src, const IPvX& dst,
 			     int ip_ttl, int ip_tos, bool is_router_alert,
-			     buffer_t *buffer);
+			     buffer_t *buffer, string& error_msg);
     int		mld6_process(const IPvX& src, const IPvX& dst,
 			     int ip_ttl, int ip_tos, bool is_router_alert,
-			     buffer_t *buffer);
+			     buffer_t *buffer, string& error_msg);
     
     int		igmp_membership_query_recv(const IPvX& src,
 					   const IPvX& dst,

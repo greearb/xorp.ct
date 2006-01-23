@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_bsr.hh,v 1.15 2005/05/16 19:17:28 pavlin Exp $
+// $XORP: xorp/pim/pim_bsr.hh,v 1.16 2005/08/18 15:38:46 bms Exp $
 
 
 #ifndef __PIM_PIM_BSR_HH__
@@ -143,9 +143,10 @@ public:
 				 const IPvX& rp_addr,
 				 uint8_t rp_priority,
 				 uint16_t rp_holdtime);
-    int		send_test_bootstrap(const string& vif_name);
+    int		send_test_bootstrap(const string& vif_name, string& error_msg);
     int		send_test_bootstrap_by_dest(const string& vif_name,
-					    const IPvX& dest_addr);
+					    const IPvX& dest_addr,
+					    string& error_msg);
     int		send_test_cand_rp_adv();
     
 private:

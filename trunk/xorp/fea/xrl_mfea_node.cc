@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.47 2005/08/31 22:39:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.48 2005/12/22 12:18:23 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -433,6 +433,7 @@ XrlMfeaNode::finder_deregister_interest_fea_cb(const XrlError& xrl_error)
  * packet of the incoming message was set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
+ * @error_msg: The error message (if error).
  * 
  * Send a protocol message received from the kernel to the user-level process.
  * 
@@ -448,18 +449,23 @@ XrlMfeaNode::proto_send(const string& dst_module_instance_name,
 			int ip_tos,
 			bool is_router_alert,
 			const uint8_t *sndbuf,
-			size_t sndlen
+			size_t sndlen,
+			string& error_msg
     )
 {
     MfeaVif *mfea_vif = MfeaNode::vif_find_by_vif_index(vif_index);
 
-    if (! _is_finder_alive)
+    if (! _is_finder_alive) {
+	error_msg = c_format("Finder is dead");
 	return (XORP_ERROR);	// The Finder is dead
+    }
 
     if (mfea_vif == NULL) {
-	XLOG_ERROR("Cannot send a protocol message on vif with vif_index %d: "
-		   "no such vif",
-		   vif_index);
+	error_msg = c_format("Cannot send a protocol message on vif "
+			     "with vif_index %d: "
+			     "no such vif",
+			     vif_index);
+	XLOG_ERROR("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -2701,14 +2707,15 @@ XrlMfeaNode::mfea_0_1_send_protocol_message4(
 			     ip_tos,
 			     is_router_alert,
 			     &protocol_message[0],
-			     protocol_message.size()) < 0) {
-	// TODO: must find-out and return the reason for failure
+			     protocol_message.size(),
+			     error_msg) < 0) {
 	error_msg = c_format("Cannot send %s protocol message "
-			     "from %s to %s on vif %s",
+			     "from %s to %s on vif %s: %s",
 			     xrl_sender_name.c_str(),
 			     source_address.str().c_str(),
 			     dest_address.str().c_str(),
-			     vif_name.c_str());
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -2766,14 +2773,15 @@ XrlMfeaNode::mfea_0_1_send_protocol_message6(
 			     ip_tos,
 			     is_router_alert,
 			     &protocol_message[0],
-			     protocol_message.size()) < 0) {
-	// TODO: must find-out and return the reason for failure
+			     protocol_message.size(),
+			     error_msg) < 0) {
 	error_msg = c_format("Cannot send %s protocol message "
-			     "from %s to %s on vif %s",
+			     "from %s to %s on vif %s: %s",
 			     xrl_sender_name.c_str(),
 			     source_address.str().c_str(),
 			     dest_address.str().c_str(),
-			     vif_name.c_str());
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

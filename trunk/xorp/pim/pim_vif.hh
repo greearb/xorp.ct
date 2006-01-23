@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.36 2005/06/01 00:36:59 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.37 2005/08/30 22:50:34 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -302,31 +302,39 @@ public:
     // Functions for sending protocol messages.
     //
     int		pim_send(const IPvX& src, const IPvX& dst,
-			 uint8_t message_type, buffer_t *buffer);
-    int		pim_hello_send();
+			 uint8_t message_type, buffer_t *buffer,
+			 string& error_msg);
+    int		pim_hello_send(string& error_msg);
     int		pim_hello_first_send();
-    int		pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header);
+    int		pim_join_prune_send(PimNbr *pim_nbr, PimJpHeader *jp_header,
+				    string& error_msg);
     int		pim_assert_mre_send(PimMre *pim_mre,
-				    const IPvX& assert_source_addr);
-    int		pim_assert_cancel_send(PimMre *pim_mre);
+				    const IPvX& assert_source_addr,
+				    string& error_msg);
+    int		pim_assert_cancel_send(PimMre *pim_mre, string& error_msg);
     int		pim_assert_send(const IPvX& assert_source_addr,
 				const IPvX& assert_group_addr,
 				bool rpt_bit,
 				uint32_t metric_preference,
-				uint32_t metric);
+				uint32_t metric,
+				string& error_msg);
     int		pim_register_send(const IPvX& rp_addr,
 				  const IPvX& source_addr,
 				  const IPvX& group_addr,
 				  const uint8_t *rcvbuf,
-				  size_t rcvlen);
+				  size_t rcvlen,
+				  string& error_msg);
     int		pim_register_null_send(const IPvX& rp_addr,
 				       const IPvX& source_addr,
-				       const IPvX& group_addr);
+				       const IPvX& group_addr,
+				       string& error_msg);
     int		pim_register_stop_send(const IPvX& dr_addr,
 				       const IPvX& source_addr,
-				       const IPvX& group_addr);
+				       const IPvX& group_addr,
+				       string& error_msg);
     int		pim_bootstrap_send(const IPvX& dst_addr,
-				   const BsrZone& bsr_zone);
+				   const BsrZone& bsr_zone,
+				   string& error_msg);
     buffer_t	*pim_bootstrap_send_prepare(const IPvX& src_addr,
 					    const IPvX& dst_addr,
 					    const BsrZone& bsr_zone,

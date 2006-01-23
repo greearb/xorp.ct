@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.91 2005/08/31 00:04:24 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.92 2006/01/04 05:55:26 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -2453,6 +2453,7 @@ XrlPimNode::schedule_add_protocol_mld6igmp()
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
+ * @error_msg: The error message (if error).
  * 
  * Send a protocol message through the FEA/MFEA.
  * 
@@ -2468,7 +2469,8 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 		       int ip_tos,
 		       bool is_router_alert,
 		       const uint8_t *sndbuf,
-		       size_t sndlen)
+		       size_t sndlen,
+		       string& error_msg)
 {
     add_task(new SendProtocolMessage(*this,
 				     dst_module_instance_name,
@@ -2481,6 +2483,7 @@ XrlPimNode::proto_send(const string& dst_module_instance_name,
 				     is_router_alert,
 				     sndbuf,
 				     sndlen));
+    error_msg = "";
 
     return (XORP_OK);
 }
@@ -3246,7 +3249,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message4(
 			ip_tos,
 			is_router_alert,
 			&protocol_message[0],
-			protocol_message.size());
+			protocol_message.size(),
+			error_msg);
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
     
@@ -3304,7 +3308,8 @@ XrlPimNode::mfea_client_0_1_recv_protocol_message6(
 			ip_tos,
 			is_router_alert,
 			&protocol_message[0],
-			protocol_message.size());
+			protocol_message.size(),
+			error_msg);
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
     
@@ -5994,10 +5999,11 @@ XrlPimNode::pim_0_1_send_test_jp_entry4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr)) < 0) {
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg) < 0) {
 	error_msg = c_format("Failed to send Join/Prune test message to %s "
-			     "on vif %s",
-			     cstring(nbr_addr), vif_name.c_str());
+			     "on vif %s: %s",
+			     cstring(nbr_addr), vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6021,10 +6027,11 @@ XrlPimNode::pim_0_1_send_test_jp_entry6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr)) < 0) {
+    if (PimNode::send_test_jp_entry(vif_name, IPvX(nbr_addr), error_msg) < 0) {
 	error_msg = c_format("Failed to send Join/Prune test message to %s "
-			     "on vif %s",
-			     cstring(nbr_addr), vif_name.c_str());
+			     "on vif %s: %s",
+			     cstring(nbr_addr), vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6057,13 +6064,15 @@ XrlPimNode::pim_0_1_send_test_assert4(
 				  IPvX(group_addr),
 				  rpt_bit,
 				  metric_preference,
-				  metric)
+				  metric,
+				  error_msg)
 	< 0) {
 	error_msg = c_format("Failed to send Assert test message "
-			     "for (%s, %s) on vif %s",
+			     "for (%s, %s) on vif %s: %s",
 			     cstring(source_addr),
 			     cstring(group_addr),
-			     vif_name.c_str());
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6096,13 +6105,15 @@ XrlPimNode::pim_0_1_send_test_assert6(
 				  IPvX(group_addr),
 				  rpt_bit,
 				  metric_preference,
-				  metric)
+				  metric,
+				  error_msg)
 	< 0) {
 	error_msg = c_format("Failed to send Assert test message "
-			     "for (%s, %s) on vif %s",
+			     "for (%s, %s) on vif %s: %s",
 			     cstring(source_addr),
 			     cstring(group_addr),
-			     vif_name.c_str());
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6422,9 +6433,11 @@ XrlPimNode::pim_0_1_send_test_bootstrap(
 {
     string error_msg;
 
-    if (PimNode::send_test_bootstrap(vif_name) < 0) {
-	error_msg = c_format("Failed to send Bootstrap test message on vif %s",
-			     vif_name.c_str());
+    if (PimNode::send_test_bootstrap(vif_name, error_msg) < 0) {
+	error_msg = c_format("Failed to send Bootstrap test message "
+			     "on vif %s: %s",
+			     vif_name.c_str(),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6448,11 +6461,14 @@ XrlPimNode::pim_0_1_send_test_bootstrap_by_dest4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr)) < 0) {
+    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr),
+					     error_msg)
+	< 0) {
 	error_msg = c_format("Failed to send Bootstrap test message "
-			     "on vif %s to address %s",
+			     "on vif %s to address %s: %s",
 			     vif_name.c_str(),
-			     cstring(dest_addr));
+			     cstring(dest_addr),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
@@ -6476,11 +6492,13 @@ XrlPimNode::pim_0_1_send_test_bootstrap_by_dest6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr)) < 0) {
+    if (PimNode::send_test_bootstrap_by_dest(vif_name, IPvX(dest_addr),
+					     error_msg) < 0) {
 	error_msg = c_format("Failed to send Bootstrap test message "
-			     "on vif %s to address %s",
+			     "on vif %s to address %s: %s",
 			     vif_name.c_str(),
-			     cstring(dest_addr));
+			     cstring(dest_addr),
+			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     

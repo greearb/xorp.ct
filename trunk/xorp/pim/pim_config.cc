@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.43 2005/09/28 17:31:44 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.44 2005/11/02 02:19:43 pavlin Exp $"
 
 
 //
@@ -40,6 +40,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
     string err;
     map<string, Vif>& configured_vifs = ProtoNode<PimVif>::configured_vifs();
     set<string> send_pim_hello_vifs;
+    string dummy_error_msg;
 
     //
     // Remove vifs that don't exist anymore
@@ -153,7 +154,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	PimVif *pim_vif = vif_find_by_name(vif_name);
 	if ((pim_vif != NULL) && pim_vif->is_up()) {
 	    if (! pim_vif->is_pim_register())
-		pim_vif->pim_hello_send();
+		pim_vif->pim_hello_send(dummy_error_msg);
 	}
     }
     
@@ -413,6 +414,7 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
 			      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -433,7 +435,7 @@ PimNode::set_vif_hello_period(const string& vif_name, uint16_t hello_period,
 	// Send immediately a Hello message, and schedule the next one
 	// at random in the interval [0, hello_period)
 	//
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     }
     
@@ -447,6 +449,7 @@ int
 PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -467,7 +470,7 @@ PimNode::reset_vif_hello_period(const string& vif_name, string& error_msg)
 	// Send immediately a Hello message, and schedule the next one
 	// at random in the interval [0, hello_period)
 	//
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     }
     
@@ -502,6 +505,7 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
 				string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -522,7 +526,7 @@ PimNode::set_vif_hello_holdtime(const string& vif_name,
 	// Send immediately a Hello message, and schedule the next one
 	// at random in the interval [0, hello_period)
 	//
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     }
     
@@ -536,6 +540,7 @@ int
 PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -556,7 +561,7 @@ PimNode::reset_vif_hello_holdtime(const string& vif_name, string& error_msg)
 	// Send immediately a Hello message, and schedule the next one
 	// at random in the interval [0, hello_period)
 	//
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	pim_vif->hello_timer_start_random(pim_vif->hello_period().get(), 0);
     }
     
@@ -589,6 +594,7 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
 			     string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -606,7 +612,7 @@ PimNode::set_vif_dr_priority(const string& vif_name, uint32_t dr_priority,
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	
 	// (Re)elect the DR
 	pim_vif->pim_dr_elect();
@@ -622,6 +628,7 @@ int
 PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -639,7 +646,7 @@ PimNode::reset_vif_dr_priority(const string& vif_name, string& error_msg)
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
 	
 	// (Re)elect the DR
 	pim_vif->pim_dr_elect();
@@ -676,6 +683,7 @@ PimNode::set_vif_propagation_delay(const string& vif_name,
 				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -693,7 +701,7 @@ PimNode::set_vif_propagation_delay(const string& vif_name,
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -706,6 +714,7 @@ int
 PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -723,7 +732,7 @@ PimNode::reset_vif_propagation_delay(const string& vif_name, string& error_msg)
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -757,6 +766,7 @@ PimNode::set_vif_override_interval(const string& vif_name,
 				   string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -774,7 +784,7 @@ PimNode::set_vif_override_interval(const string& vif_name,
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -787,6 +797,7 @@ int
 PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -804,7 +815,7 @@ PimNode::reset_vif_override_interval(const string& vif_name, string& error_msg)
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -838,6 +849,7 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
 					      string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -855,7 +867,7 @@ PimNode::set_vif_is_tracking_support_disabled(const string& vif_name,
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -869,6 +881,7 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
 						string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
+    string dummy_error_msg;
     
     if (start_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -886,7 +899,7 @@ PimNode::reset_vif_is_tracking_support_disabled(const string& vif_name,
     
     if (! pim_vif->is_pim_register()) {
 	// Send immediately a Hello message with the new value
-	pim_vif->pim_hello_send();
+	pim_vif->pim_hello_send(dummy_error_msg);
     }
     
     if (end_config(error_msg) != XORP_OK)
@@ -1871,7 +1884,8 @@ PimNode::add_test_jp_entry(const IPvX& source_addr, const IPvX& group_addr,
 // Return: %XORP_OK on success, otherwise %XORP_ERROR.
 //
 int
-PimNode::send_test_jp_entry(const string& vif_name, const IPvX& nbr_addr)
+PimNode::send_test_jp_entry(const string& vif_name, const IPvX& nbr_addr,
+			    string& error_msg)
 {
     int ret_value = XORP_OK;
     PimVif *pim_vif = vif_find_by_name(vif_name);
@@ -1884,7 +1898,8 @@ PimNode::send_test_jp_entry(const string& vif_name, const IPvX& nbr_addr)
 	 iter != _test_jp_headers_list.end();
 	 ++iter) {
 	PimJpHeader& pim_jp_header = *iter;
-	if (pim_jp_header.network_commit(pim_vif, nbr_addr) != XORP_OK) {
+	if (pim_jp_header.network_commit(pim_vif, nbr_addr, error_msg)
+	    != XORP_OK) {
 	    ret_value = XORP_ERROR;
 	    break;
 	}
@@ -1904,18 +1919,23 @@ PimNode::send_test_assert(const string& vif_name,
 			  const IPvX& group_addr,
 			  bool rpt_bit,
 			  uint32_t metric_preference,
-			  uint32_t metric)
+			  uint32_t metric,
+			  string& error_msg)
 {
     PimVif *pim_vif = vif_find_by_name(vif_name);
     
-    if (pim_vif == NULL)
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot send Test-Assert on vif %s: no such vif",
+			     vif_name.c_str());
 	return (XORP_ERROR);
+    }
     
     if (pim_vif->pim_assert_send(source_addr,
 				 group_addr,
 				 rpt_bit,
 				 metric_preference,
-				 metric) < 0) {
+				 metric,
+				 error_msg) < 0) {
 	return (XORP_ERROR);
     }
     
@@ -1970,9 +1990,9 @@ PimNode::add_test_bsr_rp(const PimScopeZoneId& zone_id,
 }
 
 int
-PimNode::send_test_bootstrap(const string& vif_name)
+PimNode::send_test_bootstrap(const string& vif_name, string& error_msg)
 {
-    if (pim_bsr().send_test_bootstrap(vif_name) < 0) {
+    if (pim_bsr().send_test_bootstrap(vif_name, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     
@@ -1981,9 +2001,12 @@ PimNode::send_test_bootstrap(const string& vif_name)
 
 int
 PimNode::send_test_bootstrap_by_dest(const string& vif_name,
-				     const IPvX& dest_addr)
+				     const IPvX& dest_addr,
+				     string& error_msg)
 {
-    if (pim_bsr().send_test_bootstrap_by_dest(vif_name, dest_addr) < 0) {
+    if (pim_bsr().send_test_bootstrap_by_dest(vif_name, dest_addr,
+					      error_msg)
+	< 0) {
 	return (XORP_ERROR);
     }
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.25 2005/04/26 01:18:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_assert.cc,v 1.26 2005/05/04 01:53:01 pavlin Exp $"
 
 
 //
@@ -291,7 +291,8 @@ PimVif::pim_assert_process(PimNbr *pim_nbr,
 // XXX: applies only for (S,G) and (*,G)
 //
 int
-PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
+PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr,
+			    string& error_msg)
 {
     IPvX	assert_group_addr(family());
     uint32_t	metric_preference, metric;
@@ -315,13 +316,13 @@ PimVif::pim_assert_mre_send(PimMre *pim_mre, const IPvX& assert_source_addr)
     }
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				metric_preference, metric);
+				metric_preference, metric, error_msg);
     return (ret_value);
 }
 
 // XXX: applies only for (S,G) and (*,G)
 int
-PimVif::pim_assert_cancel_send(PimMre *pim_mre)
+PimVif::pim_assert_cancel_send(PimMre *pim_mre, string& error_msg)
 {
     IPvX	assert_source_addr(family());
     IPvX	assert_group_addr(family());
@@ -329,8 +330,10 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     int		ret_value;
     bool	rpt_bit = false;
     
-    if (! (pim_mre->is_sg() || pim_mre->is_wc()))
+    if (! (pim_mre->is_sg() || pim_mre->is_wc())) {
+	error_msg = c_format("Invalid PimMre entry type");
 	return (XORP_ERROR);
+    }
     
     // Prepare the Assert data
     if (pim_mre->is_sg()) {
@@ -346,7 +349,7 @@ PimVif::pim_assert_cancel_send(PimMre *pim_mre)
     metric = PIM_ASSERT_MAX_METRIC;
     
     ret_value = pim_assert_send(assert_source_addr, assert_group_addr, rpt_bit,
-				metric_preference, metric);
+				metric_preference, metric, error_msg);
     return (ret_value);
 }
 
@@ -355,7 +358,8 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
 			const IPvX& assert_group_addr,
 			bool rpt_bit,
 			uint32_t metric_preference,
-			uint32_t metric)
+			uint32_t metric,
+			string& error_msg)
 {
     buffer_t *buffer = buffer_send_prepare();
     uint8_t group_addr_reserved_flags = 0;
@@ -374,25 +378,27 @@ PimVif::pim_assert_send(const IPvX& assert_source_addr,
     BUFFER_PUT_HOST_32(metric, buffer);
     
     return (pim_send(primary_addr(), IPvX::PIM_ROUTERS(family()),
-		     PIM_ASSERT, buffer));
+		     PIM_ASSERT, buffer, error_msg));
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "invalid address family error = %d",
-	       PIMTYPE2ASCII(PIM_ASSERT),
-	       cstring(primary_addr()),
-	       cstring(IPvX::PIM_ROUTERS(family())),
-	       family());
+    error_msg = c_format("TX %s from %s to %s: "
+			 "invalid address family error = %d",
+			 PIMTYPE2ASCII(PIM_ASSERT),
+			 cstring(primary_addr()),
+			 cstring(IPvX::PIM_ROUTERS(family())),
+			 family());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_ASSERT),
-	       cstring(primary_addr()),
-	       cstring(IPvX::PIM_ROUTERS(family())));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_ASSERT),
+			 cstring(primary_addr()),
+			 cstring(IPvX::PIM_ROUTERS(family())));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 }
 

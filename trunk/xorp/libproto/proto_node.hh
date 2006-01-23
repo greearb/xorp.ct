@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.32 2005/09/28 17:31:43 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.33 2005/12/08 19:21:02 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -255,6 +255,8 @@ public:
      * 
      * @param rcvlen the data length in @ref rcvbuf.
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	proto_recv(const string& src_module_instance_name,
@@ -266,7 +268,8 @@ public:
 			   int ip_tos,
 			   bool is_router_alert,
 			   const uint8_t *rcvbuf,
-			   size_t rcvlen) = 0;
+			   size_t rcvlen,
+			   string& error_msg) = 0;
     
     /**
      * Send a protocol message.
@@ -299,6 +302,8 @@ public:
      * 
      * @param sndlen the data length in @ref sndbuf.
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	proto_send(const string& dst_module_instance_name,
@@ -310,7 +315,8 @@ public:
 			   int ip_tos,
 			   bool is_router_alert,
 			   const uint8_t *sndbuf,
-			   size_t sndlen) = 0;
+			   size_t sndlen,
+			   string& error_msg) = 0;
     
     /**
      * Receive a signal message.

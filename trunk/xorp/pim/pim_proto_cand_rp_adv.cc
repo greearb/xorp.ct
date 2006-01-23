@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.17 2005/03/25 02:54:02 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_cand_rp_adv.cc,v 1.18 2005/04/30 21:36:46 pavlin Exp $"
 
 
 //
@@ -289,6 +289,7 @@ int
 PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 {
     IPvX src_addr = domain_wide_addr();
+    string dummy_error_msg;
 
     // TODO: add a check whether I am a Cand-RP for that zone.
     // XXX: for now there is no simple check for that, so add a flag to BsrZone
@@ -365,7 +366,8 @@ PimVif::pim_cand_rp_adv_send(const IPvX& bsr_addr, const BsrZone& bsr_zone)
 				       group_addr_reserved_flags, buffer);
 	    }
 	    
-	    pim_send(src_addr, bsr_addr, PIM_CAND_RP_ADV, buffer);
+	    pim_send(src_addr, bsr_addr, PIM_CAND_RP_ADV, buffer,
+		     dummy_error_msg);
 	}
     }
     

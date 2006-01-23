@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.8 2005/02/27 20:49:49 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_graft.cc,v 1.9 2005/03/25 02:54:02 pavlin Exp $"
 
 
 //
@@ -69,6 +69,7 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
 {
     int ret_value;
     buffer_t *buffer2;
+    string dummy_error_msg;
     
     //
     // Must unicast back a Graft-Ack to the originator of this Graft.
@@ -76,7 +77,8 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     buffer2 = buffer_send_prepare();
     BUFFER_PUT_DATA(BUFFER_DATA_HEAD(buffer), buffer2,
 		    BUFFER_DATA_SIZE(buffer));
-    ret_value = pim_send(domain_wide_addr(), src, PIM_GRAFT_ACK, buffer2);
+    ret_value = pim_send(domain_wide_addr(), src, PIM_GRAFT_ACK, buffer2,
+			 dummy_error_msg);
     
     UNUSED(pim_nbr);
     // UNUSED(dst);
@@ -86,10 +88,11 @@ PimVif::pim_graft_recv(PimNbr *pim_nbr,
     // Various error processing
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_GRAFT_ACK),
-	       cstring(domain_wide_addr()), cstring(src));
+    dummy_error_msg = c_format("TX %s from %s to %s: "
+			       "packet cannot fit into sending buffer",
+			       PIMTYPE2ASCII(PIM_GRAFT_ACK),
+			       cstring(domain_wide_addr()), cstring(src));
+    XLOG_ERROR("%s", dummy_error_msg.c_str());
     return (XORP_ERROR);
 }
 

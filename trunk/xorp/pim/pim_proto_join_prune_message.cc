@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.24 2005/08/18 15:38:49 bms Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune_message.cc,v 1.25 2005/08/30 23:50:15 pavlin Exp $"
 
 
 //
@@ -704,7 +704,8 @@ PimJpHeader::mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 }
 
 int
-PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
+PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
+			    string& error_msg)
 {
     const size_t max_packet_size = PIM_MAXPACKET(family());
     IPvX source_addr(family());
@@ -823,8 +824,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	//
 	if (jp_header.jp_groups_n() == 0xff) {
 	    // Send what we have already
-	    if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+	    if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		< 0) {
 		return (XORP_ERROR);
+	    }
 	    jp_header.reset();
 	}
 	
@@ -835,8 +838,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 	    > max_packet_size) {
 	    if (jp_header.jp_groups_n() > 0) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 	    }
 	}
@@ -858,8 +863,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -882,8 +889,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -910,8 +919,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -934,8 +945,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -975,8 +988,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -1003,8 +1018,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -1031,8 +1048,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -1055,8 +1074,10 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 		|| (jp_header.message_size() + jp_header.extra_source_size()
 		    > max_packet_size)) {
 		// Send what we have already
-		if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+		if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg)
+		    < 0) {
 		    return (XORP_ERROR);
+		}
 		jp_header.reset();
 		j_sources_n = 0;
 		p_sources_n = 0;
@@ -1075,7 +1096,7 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
     
     // Sent the last fragment (if such)
     if (jp_header.jp_groups_n() > 0) {
-	if (jp_header.network_send(pim_vif, target_nbr_addr) < 0)
+	if (jp_header.network_send(pim_vif, target_nbr_addr, error_msg) < 0)
 	    return (XORP_ERROR);
 	jp_header.reset();
     }
@@ -1084,7 +1105,8 @@ PimJpHeader::network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr)
 }
 
 int
-PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
+PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr,
+			  string& error_msg)
 {
     uint32_t	flags;
     uint8_t	source_mask_len;
@@ -1205,7 +1227,7 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
     // Send the message
     //
     if (pim_vif->pim_send(pim_vif->primary_addr(), IPvX::PIM_ROUTERS(family()),
-			  PIM_JOIN_PRUNE, buffer) < 0) {
+			  PIM_JOIN_PRUNE, buffer, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     
@@ -1213,16 +1235,19 @@ PimJpHeader::network_send(PimVif *pim_vif, const IPvX& target_nbr_addr)
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("INTERNAL %s ERROR: "
-	       "invalid address family error = %d",
-	       PIMTYPE2ASCII(PIM_JOIN_PRUNE),
-	       family());
+    error_msg = c_format("INTERNAL %s ERROR: "
+			 "invalid address family error = %d",
+			 PIMTYPE2ASCII(PIM_JOIN_PRUNE),
+			 family());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("INTERNAL %s ERROR: packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_JOIN_PRUNE));
+    error_msg = c_format("INTERNAL %s ERROR: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_JOIN_PRUNE));
+    XLOG_ERROR("%s", error_msg.c_str());
     
     return (XORP_ERROR);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.43 2005/06/21 00:03:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.44 2005/08/18 15:38:46 bms Exp $"
 
 
 //
@@ -159,6 +159,7 @@ int
 PimBsr::stop()
 {
     PimVif *pim_vif_up = NULL;
+    string dummy_error_msg;
 
     if (is_down())
 	return (XORP_OK);
@@ -267,7 +268,8 @@ PimBsr::stop()
 		if (pim_vif == NULL)
 		    continue;
 		pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-					    *active_bsr_zone);
+					    *active_bsr_zone,
+					    dummy_error_msg);
 	    }
 	    active_bsr_zone->set_is_cancel(false);
 	} while (false);
@@ -324,6 +326,7 @@ int
 PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
 {
     list<BsrZone *>::const_iterator iter_zone;
+    string dummy_error_msg;
     
     if (pim_vif->pim_nbr_find(nbr_addr) == NULL)
 	return (XORP_ERROR);
@@ -338,7 +341,7 @@ PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
 	 iter_zone != _expire_bsr_zone_list.end();
 	 ++iter_zone) {
 	BsrZone *bsr_zone = *iter_zone;
-	pim_vif->pim_bootstrap_send(nbr_addr, *bsr_zone);
+	pim_vif->pim_bootstrap_send(nbr_addr, *bsr_zone, dummy_error_msg);
     }
     
     //
@@ -352,7 +355,7 @@ PimBsr::unicast_pim_bootstrap(PimVif *pim_vif, const IPvX& nbr_addr) const
 	if ((bsr_zone_state == BsrZone::STATE_CANDIDATE_BSR)
 	    || (bsr_zone_state == BsrZone::STATE_ELECTED_BSR)
 	    || (bsr_zone_state == BsrZone::STATE_ACCEPT_PREFERRED)) {
-	    pim_vif->pim_bootstrap_send(nbr_addr, *bsr_zone);
+	    pim_vif->pim_bootstrap_send(nbr_addr, *bsr_zone, dummy_error_msg);
 	}
     }
     
@@ -1186,14 +1189,17 @@ PimBsr::add_test_bsr_rp(const PimScopeZoneId& zone_id,
 }
 
 int
-PimBsr::send_test_bootstrap(const string& vif_name)
+PimBsr::send_test_bootstrap(const string& vif_name, string& error_msg)
 {
-    return (send_test_bootstrap_by_dest(vif_name, IPvX::PIM_ROUTERS(family())));
+    return (send_test_bootstrap_by_dest(vif_name,
+					IPvX::PIM_ROUTERS(family()),
+					error_msg));
 }
 
 int
 PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
-				    const IPvX& dest_addr)
+				    const IPvX& dest_addr,
+				    string& error_msg)
 {
     PimVif *pim_vif = pim_node().vif_find_by_name(vif_name);
     int ret_value = XORP_ERROR;
@@ -1211,7 +1217,7 @@ PimBsr::send_test_bootstrap_by_dest(const string& vif_name,
 	 iter_zone != _test_bsr_zone_list.end();
 	 ++iter_zone) {
 	BsrZone *bsr_zone = *iter_zone;
-	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone)
+	if (pim_vif->pim_bootstrap_send(dest_addr, *bsr_zone, error_msg)
 	    < 0) {
 	    ret_value = XORP_ERROR;
 	    goto ret_label;
@@ -2231,6 +2237,8 @@ BsrZone::expire_bsr_timer()
 void
 BsrZone::bsr_timer_timeout()
 {
+    string dummy_error_msg;
+
     XLOG_ASSERT(is_active_bsr_zone());
     
     if (bsr_zone_state() == BsrZone::STATE_CANDIDATE_BSR)
@@ -2286,7 +2294,7 @@ BsrZone::bsr_timer_timeout()
 	if (pim_vif == NULL)
 	    continue;
 	pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-				    *this);
+				    *this, dummy_error_msg);
     }
     
     // Set BS Timer to BS Period
@@ -2307,7 +2315,7 @@ BsrZone::bsr_timer_timeout()
 	if (pim_vif == NULL)
 	    continue;
 	pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
-				    *this);
+				    *this, dummy_error_msg);
     }
     // Set BS Timer to BS Period
     _bsr_timer =

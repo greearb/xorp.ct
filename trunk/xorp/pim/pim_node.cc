@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.74 2005/08/30 23:50:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.75 2005/09/28 17:31:44 pavlin Exp $"
 
 
 //
@@ -1081,6 +1081,7 @@ PimNode::vif_shutdown_completed(const string& vif_name)
  * packet of the incoming message was set.
  * @rcvbuf: The data buffer with the received message.
  * @rcvlen: The data length in @rcvbuf.
+ * @error_msg: The error message (if error).
  * 
  * Receive a protocol message from the kernel.
  * 
@@ -1092,7 +1093,8 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
 		    uint32_t vif_index,
 		    const IPvX& src, const IPvX& dst,
 		    int ip_ttl, int ip_tos, bool is_router_alert,
-		    const uint8_t *rcvbuf, size_t rcvlen)
+		    const uint8_t *rcvbuf, size_t rcvlen,
+		    string& error_msg)
 {
     PimVif *pim_vif = NULL;
     int ret_value = XORP_ERROR;
@@ -1105,15 +1107,19 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
     //
     // Check whether the node is up.
     //
-    if (! is_up())
+    if (! is_up()) {
+	error_msg = c_format("PIM node is not UP");
 	return (XORP_ERROR);
+    }
     
     //
     // Find the vif for that packet
     //
     pim_vif = vif_find_by_vif_index(vif_index);
-    if (pim_vif == NULL)
+    if (pim_vif == NULL) {
+	error_msg = c_format("Cannot find vif with vif_index = %u", vif_index);
 	return (XORP_ERROR);
+    }
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);
@@ -1145,6 +1151,7 @@ PimNode::proto_recv(const string&	, // src_module_instance_name,
  * @is_router_alert: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @buffer: The #buffer_t data buffer with the message to send.
+ * @error_msg: The error message (if error).
  * 
  * Send a PIM message.
  * 
@@ -1154,10 +1161,12 @@ int
 PimNode::pim_send(uint32_t vif_index,
 		  const IPvX& src, const IPvX& dst,
 		  int ip_ttl, int ip_tos, bool is_router_alert,
-		  buffer_t *buffer)
+		  buffer_t *buffer, string& error_msg)
 {
-    if (! (is_up() || is_pending_down()))
+    if (! (is_up() || is_pending_down())) {
+	error_msg = c_format("MLD/IGMP node is not UP");
 	return (XORP_ERROR);
+    }
     
     // TODO: the target name of the MFEA must be configurable.
     if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
@@ -1165,7 +1174,8 @@ PimNode::pim_send(uint32_t vif_index,
 		   vif_index, src, dst,
 		   ip_ttl, ip_tos, is_router_alert,
 		   BUFFER_DATA_HEAD(buffer),
-		   BUFFER_DATA_SIZE(buffer)) < 0) {
+		   BUFFER_DATA_SIZE(buffer),
+		   error_msg) < 0) {
 	return (XORP_ERROR);
     }
     

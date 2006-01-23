@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.49 2005/08/18 15:35:30 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.50 2005/08/30 23:50:14 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -1349,6 +1349,7 @@ XrlMld6igmpNode::mld6igmp_client_send_add_delete_membership_cb(
  * packet of the incoming message should be set.
  * @sndbuf: The data buffer with the message to send.
  * @sndlen: The data length in @sndbuf.
+ * @error_msg: The error message (if error).
  * 
  * Send a protocol message through the FEA/MFEA.
  * 
@@ -1364,7 +1365,8 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 			    int ip_tos,
 			    bool is_router_alert,
 			    const uint8_t *sndbuf,
-			    size_t sndlen)
+			    size_t sndlen,
+			    string& error_msg)
 {
     add_task(new SendProtocolMessage(*this,
 				     dst_module_instance_name,
@@ -1377,6 +1379,7 @@ XrlMld6igmpNode::proto_send(const string& dst_module_instance_name,
 				     is_router_alert,
 				     sndbuf,
 				     sndlen));
+    error_msg = "";
 
     return (XORP_OK);
 }
@@ -2119,7 +2122,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message4(
 			     ip_tos,
 			     is_router_alert,
 			     &protocol_message[0],
-			     protocol_message.size());
+			     protocol_message.size(),
+			     error_msg);
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
     
@@ -2177,7 +2181,8 @@ XrlMld6igmpNode::mfea_client_0_1_recv_protocol_message6(
 			     ip_tos,
 			     is_router_alert,
 			     &protocol_message[0],
-			     protocol_message.size());
+			     protocol_message.size(),
+			     error_msg);
     // XXX: no error returned, because if there is any, it is at the
     // protocol level, and the MFEA shoudn't care about it.
     

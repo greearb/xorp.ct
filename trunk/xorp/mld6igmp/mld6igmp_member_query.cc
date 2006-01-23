@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.12 2005/06/01 09:34:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.14 2005/08/18 15:35:30 bms Exp $"
 
 //
 // Multicast group membership information used by
@@ -145,6 +145,10 @@ MemberQuery::member_query_timer_timeout()
 void
 MemberQuery::last_member_query_timer_timeout()
 {
+    string dummy_error_msg;
+
+    UNUSED(dummy_error_msg);
+
     //
     // XXX: The spec says that we shouldn't care if we changed
     // from a Querier to a non-Querier. Hence, send the group-specific
@@ -159,7 +163,8 @@ MemberQuery::last_member_query_timer_timeout()
 				     group(),
 				     IGMP_MEMBERSHIP_QUERY,
 				     scaled_max_resp_time.sec(),
-				     group());
+				     group(),
+				     dummy_error_msg);
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
 		mld6igmp_vif().query_last_member_interval().get(),
@@ -175,7 +180,8 @@ MemberQuery::last_member_query_timer_timeout()
 				     group(),
 				     MLD_LISTENER_QUERY,
 				     scaled_max_resp_time.sec(),
-				     group());
+				     group(),
+				     dummy_error_msg);
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
 		mld6igmp_vif().query_last_member_interval().get(),

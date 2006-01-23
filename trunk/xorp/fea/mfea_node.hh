@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.31 2005/03/25 02:53:10 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.32 2005/08/18 15:45:49 bms Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -594,6 +594,8 @@ public:
      * 
      * @param rcvlen the data length in @ref rcvbuf.
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_recv(const string& src_module_instance_name,
@@ -601,7 +603,8 @@ public:
 			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
-			   const uint8_t *rcvbuf, size_t rcvlen);
+			   const uint8_t *rcvbuf, size_t rcvlen,
+			   string& error_msg);
     /**
      * Process an incoming message from the kernel.
      * 

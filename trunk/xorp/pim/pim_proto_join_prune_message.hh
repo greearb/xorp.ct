@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.7 2005/03/25 02:54:03 pavlin Exp $
+// $XORP: xorp/pim/pim_proto_join_prune_message.hh,v 1.8 2005/04/30 21:36:45 pavlin Exp $
 
 
 #ifndef __PIM_PIM_PROTO_JOIN_PRUNE_MESSAGE_HH__
@@ -108,8 +108,10 @@ public:
 			     action_jp_t action_jp, uint16_t holdtime,
 			     bool is_new_group);
     int		mrt_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
-    int		network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr);
-    int		network_send(PimVif *pim_vif, const IPvX& target_nbr_addr);
+    int		network_commit(PimVif *pim_vif, const IPvX& target_nbr_addr,
+			       string& error_msg);
+    int		network_send(PimVif *pim_vif, const IPvX& target_nbr_addr,
+			     string& error_msg);
     
     uint32_t	jp_groups_n() const		{ return (_jp_groups_n);  }
     uint32_t	jp_sources_n() const		{ return (_jp_sources_n); }

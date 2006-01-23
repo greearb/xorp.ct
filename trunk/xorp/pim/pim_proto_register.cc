@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.24 2005/08/18 15:38:49 bms Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.25 2005/08/30 23:43:41 pavlin Exp $"
 
 
 //
@@ -84,6 +84,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     bool is_keepalive_timer_restarted = false;
     uint32_t keepalive_timer_sec = PIM_KEEPALIVE_PERIOD_DEFAULT;
     uint32_t register_vif_index = pim_node().pim_register_vif_index();
+    string dummy_error_msg;
     
     //
     // Parse the message
@@ -222,7 +223,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//
 	// "send Register-Stop(S,G) to outer.src"
 	//
-	pim_register_stop_send(src, inner_src, inner_dst);
+	pim_register_stop_send(src, inner_src, inner_dst, dummy_error_msg);
 	++_pimstat_rx_register_not_rp;
 	return (XORP_OK);
     }
@@ -241,7 +242,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//
 	// "send Register-Stop(S,G) to outer.src"
 	//
-	pim_register_stop_send(src, inner_src, inner_dst);
+	pim_register_stop_send(src, inner_src, inner_dst, dummy_error_msg);
 	++_pimstat_rx_register_not_rp;
 	return (XORP_OK);
     }
@@ -283,7 +284,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	    // "send Register-Stop(S,G) to outer.src
 	    // drop the packet silently."
 	    //
-	    pim_register_stop_send(src, inner_src, inner_dst);
+	    pim_register_stop_send(src, inner_src, inner_dst, dummy_error_msg);
 	    return (XORP_OK);
 	}
     }
@@ -305,7 +306,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	//
 	// "send Register-Stop(S,G) to outer.src"
 	//
-	pim_register_stop_send(src, inner_src, inner_dst);
+	pim_register_stop_send(src, inner_src, inner_dst, dummy_error_msg);
 	sent_register_stop = true;
     }
     if (is_sptbit_set || pim_mre->is_switch_to_spt_desired_sg(0, 0)) {
@@ -450,19 +451,22 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 			  const IPvX& source_addr,
 			  const IPvX& group_addr,
 			  const uint8_t *rcvbuf,
-			  size_t rcvlen)
+			  size_t rcvlen,
+			  string& error_msg)
 {
 #ifndef HOST_OS_WINDOWS
     const struct ip *ip4 = (const struct ip *)rcvbuf;
     buffer_t *buffer;
     uint32_t flags = 0;
     size_t mtu = 0;
+    string dummy_error_msg;
     
     if (ip4->ip_v != source_addr.ip_version()) {
-	XLOG_WARNING("Cannot encapsulate IP packet: "
-		     "inner IP version (%u) != expected IP version (%u)",
-		     XORP_UINT_CAST(ip4->ip_v),
-		     XORP_UINT_CAST(source_addr.ip_version()));
+	error_msg = c_format("Cannot encapsulate IP packet: "
+			     "inner IP version (%u) != expected IP version (%u)",
+			     XORP_UINT_CAST(ip4->ip_v),
+			     XORP_UINT_CAST(source_addr.ip_version()));
+	XLOG_WARNING("%s", error_msg.c_str());
 	return (XORP_ERROR);
     }
     
@@ -496,6 +500,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     
     default:
 	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family: %d", family());
 	return (XORP_ERROR);
     }
     
@@ -509,7 +514,8 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	// TODO: XXX: PAVPAVPAV: check the data length, and the inner IP pkt.
 	BUFFER_PUT_DATA(rcvbuf, buffer, rcvlen);
 	
-	return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer));
+	return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
+			 error_msg));
     }
     
     //
@@ -523,10 +529,11 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	
 	if (ntohs(ip4->ip_off) & IP_DF) {
 	    // Fragmentation is forbidded
-	    XLOG_WARNING("Cannot fragment encapsulated IP packet "
-			 "from %s to %s: "
-			 "fragmentation not allowed",
-			 cstring(source_addr), cstring(group_addr));
+	    error_msg = c_format("Cannot fragment encapsulated IP packet "
+				 "from %s to %s: "
+				 "fragmentation not allowed",
+				 cstring(source_addr), cstring(group_addr));
+	    XLOG_WARNING("%s", error_msg.c_str());
 	    // XXX: we don't send ICMP "fragmentation needed" back to the
 	    // sender, because in IPv4 ICMP error messages are not sent
 	    // back for datagrams destinated to an multicast address.
@@ -535,10 +542,11 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	if (((mtu - (ip4->ip_hl << 2)) & ~7) < 8) {
 	    // Fragmentation is possible only if we can put at least
 	    // 8 octets per fragment (except the last one)
-	    XLOG_WARNING("Cannot fragment encapsulated IP packet "
-			 "from %s to %s: "
-			 "cannot send fragment with size less than 8 octets",
-			 cstring(source_addr), cstring(group_addr));
+	    error_msg = c_format("Cannot fragment encapsulated IP packet "
+				 "from %s to %s: "
+				 "cannot send fragment with size less than 8 octets",
+				 cstring(source_addr), cstring(group_addr));
+	    XLOG_WARNING("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	
@@ -572,18 +580,22 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 		// Check for bogus lengths
 		//
 		if ((size_t)cnt < IPOPT_OLEN + sizeof(*cp)) {
-		    XLOG_WARNING("Cannot fragment encapsulated IP packet "
-				 "from %s to %s: "
-				 "malformed IPv4 option",
-				 cstring(source_addr), cstring(group_addr));
+		    error_msg = c_format("Cannot fragment encapsulated IP "
+					 "packet from %s to %s: "
+					 "malformed IPv4 option",
+					 cstring(source_addr),
+					 cstring(group_addr));
+		    XLOG_WARNING("%s", error_msg.c_str());
 		    return (XORP_ERROR);
 		}
                 optlen = cp[IPOPT_OLEN];
 		if (optlen < (int)(IPOPT_OLEN + sizeof(*cp)) || optlen > cnt) {
-		    XLOG_WARNING("Cannot fragment encapsulated IP packet "
-				 "from %s to %s: "
-				 "malformed IPv4 option",
-				 cstring(source_addr), cstring(group_addr));
+		    error_msg = c_format("Cannot fragment encapsulated IP "
+					 "packet from %s to %s: "
+					 "malformed IPv4 option",
+					 cstring(source_addr),
+					 cstring(group_addr));
+		    XLOG_WARNING("%s", error_msg.c_str());
 		    return (XORP_ERROR);
 		}
 		
@@ -627,7 +639,8 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    buffer = buffer_send_prepare();
 	    BUFFER_PUT_HOST_32(flags, buffer);
 	    BUFFER_PUT_DATA(first_frag, buffer, first_frag_len);
-	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer);
+	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
+		     dummy_error_msg);
 	    
 	    data_start += first_frag_len;
 	}
@@ -674,7 +687,8 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    buffer = buffer_send_prepare();
 	    BUFFER_PUT_HOST_32(flags, buffer);
 	    BUFFER_PUT_DATA(frag_buf, buffer, frag_len);
-	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer);
+	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
+		     dummy_error_msg);
 	    
 	    data_start += frag_data_len;
 	}
@@ -693,15 +707,17 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_REGISTER),
-	       cstring(domain_wide_addr()), cstring(rp_addr));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_REGISTER),
+			 cstring(domain_wide_addr()), cstring(rp_addr));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 
 #else /* HOST_OS_WINDOWS */
 
-    XLOG_FATAL("WinSock2 lacks struct ip definition");
+    error_msg = c_format("WinSock2 lacks struct ip definition");
+    XLOG_FATAL("%s", error_msg.c_str());
     return (XORP_ERROR);
 
     UNUSED(rp_addr);
@@ -715,7 +731,8 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 int
 PimVif::pim_register_null_send(const IPvX& rp_addr,
 			       const IPvX& source_addr,
-			       const IPvX& group_addr)
+			       const IPvX& group_addr,
+			       string& error_msg)
 {
 #ifndef HOST_OS_WINDOWS
     buffer_t *buffer = buffer_send_prepare();
@@ -816,23 +833,27 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
     
     default:
 	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family: %d", family());
 	return (XORP_ERROR);
     }
     
-    return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer));
+    return (pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
+		     error_msg));
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s%s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_REGISTER),
-	       "(Null)",
-	       cstring(domain_wide_addr()), cstring(rp_addr));
+    error_msg = c_format("TX %s%s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_REGISTER),
+			 "(Null)",
+			 cstring(domain_wide_addr()), cstring(rp_addr));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 
 #else /* HOST_OS_WINDOWS */
 
-    XLOG_FATAL("WinSock2 lacks struct ip definition");
+    error_msg = c_format("WinSock2 lacks struct ip definition");
+    XLOG_FATAL("%s", error_msg.c_str());
     return (XORP_ERROR);
 
     UNUSED(rp_addr);

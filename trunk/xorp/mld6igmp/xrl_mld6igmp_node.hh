@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.33 2005/06/01 09:34:01 pavlin Exp $
+// $XORP: xorp/mld6igmp/xrl_mld6igmp_node.hh,v 1.34 2005/08/18 15:35:31 bms Exp $
 
 #ifndef __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_XRL_MLD6IGMP_NODE_HH__
@@ -851,7 +851,7 @@ private:
 		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos, bool is_router_alert,
-		   const uint8_t* sndbuf, size_t sndlen);
+		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
     void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
     int send_add_membership(const string& dst_module_instance_name,

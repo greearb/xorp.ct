@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.45 2005/08/18 15:35:30 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.46 2005/09/28 17:31:44 pavlin Exp $"
 
 
 //
@@ -950,6 +950,7 @@ Mld6igmpNode::vif_shutdown_completed(const string& vif_name)
  * packet of the incoming message was set.
  * @rcvbuf: The data buffer with the received message.
  * @rcvlen: The data length in @rcvbuf.
+ * @error_msg: The error message (if error).
  * 
  * Receive a protocol message from the kernel.
  * 
@@ -961,7 +962,8 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
 			 uint32_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool is_router_alert,
-			 const uint8_t *rcvbuf, size_t rcvlen)
+			 const uint8_t *rcvbuf, size_t rcvlen,
+			 string& error_msg)
 {
     Mld6igmpVif *mld6igmp_vif = NULL;
     int ret_value = XORP_ERROR;
@@ -974,15 +976,19 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     //
     // Check whether the node is up.
     //
-    if (! is_up())
+    if (! is_up()) {
+	error_msg = c_format("MLD/IGMP node is not UP");
 	return (XORP_ERROR);
+    }
     
     //
     // Find the vif for that packet
     //
     mld6igmp_vif = vif_find_by_vif_index(vif_index);
-    if (mld6igmp_vif == NULL)
+    if (mld6igmp_vif == NULL) {
+	error_msg = c_format("Cannot find vif with vif_index = %u", vif_index);
 	return (XORP_ERROR);
+    }
     
     // Copy the data to the receiving #buffer_t
     BUFFER_RESET(_buffer_recv);
@@ -991,7 +997,8 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
     // Process the data by the vif
     ret_value = mld6igmp_vif->mld6igmp_recv(src, dst, ip_ttl, ip_tos,
 					    is_router_alert,
-					    _buffer_recv);
+					    _buffer_recv,
+					    error_msg);
     
     return (ret_value);
     
@@ -1014,6 +1021,7 @@ Mld6igmpNode::proto_recv(const string&	, // src_module_instance_name,
  * @is_router_alert: If true, set the Router Alert IP option for the IP
  * packet of the outgoung message.
  * @buffer: The #buffer_t data buffer with the message to send.
+ * @error_msg: The error message (if error).
  * 
  * Send a MLD or IGMP message.
  * 
@@ -1023,10 +1031,12 @@ int
 Mld6igmpNode::mld6igmp_send(uint32_t vif_index,
 			    const IPvX& src, const IPvX& dst,
 			    int ip_ttl, int ip_tos, bool is_router_alert,
-			    buffer_t *buffer)
+			    buffer_t *buffer, string& error_msg)
 {
-    if (! is_up())
+    if (! is_up()) {
+	error_msg = c_format("MLD/IGMP node is not UP");
 	return (XORP_ERROR);
+    }
     
     // TODO: the target name of the MFEA must be configurable.
     if (proto_send(xorp_module_name(family(), XORP_MODULE_MFEA),
@@ -1034,7 +1044,8 @@ Mld6igmpNode::mld6igmp_send(uint32_t vif_index,
 		   vif_index, src, dst,
 		   ip_ttl, ip_tos, is_router_alert,
 		   BUFFER_DATA_HEAD(buffer),
-		   BUFFER_DATA_SIZE(buffer)) < 0) {
+		   BUFFER_DATA_SIZE(buffer),
+		   error_msg) < 0) {
 	return (XORP_ERROR);
     }
     

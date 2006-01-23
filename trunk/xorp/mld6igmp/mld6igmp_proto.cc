@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.16 2005/08/08 15:49:35 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.17 2005/08/25 19:01:32 pavlin Exp $"
 
 
 //
@@ -66,6 +66,7 @@ void
 Mld6igmpVif::other_querier_timer_timeout()
 {
     IPvX ipaddr_zero(family());		// XXX: ANY
+    string dummy_error_msg;
 
     UNUSED(ipaddr_zero);
     
@@ -88,7 +89,8 @@ Mld6igmpVif::other_querier_timer_timeout()
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
-		      ipaddr_zero);
+		      ipaddr_zero,
+		      dummy_error_msg);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
@@ -106,7 +108,8 @@ Mld6igmpVif::other_querier_timer_timeout()
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      scaled_max_resp_time.sec(),
-		      ipaddr_zero);
+		      ipaddr_zero,
+		      dummy_error_msg);
 	_startup_query_count = 0;		// XXX: not a startup case
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
@@ -126,9 +129,11 @@ Mld6igmpVif::query_timer_timeout()
 {
     IPvX ipaddr_zero(family());			// XXX: ANY
     TimeVal interval;
+    string dummy_error_msg;
 
     UNUSED(ipaddr_zero);
     UNUSED(interval);
+    UNUSED(dummy_error_msg);
 
     if (!(_proto_flags & MLD6IGMP_VIF_QUERIER))
 	return;		// I am not the querier anymore. Ignore.
@@ -142,7 +147,8 @@ Mld6igmpVif::query_timer_timeout()
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
-		      ipaddr_zero);
+		      ipaddr_zero,
+		      dummy_error_msg);
 	if (_startup_query_count > 0)
 	    _startup_query_count--;
 	if (_startup_query_count > 0)
@@ -167,7 +173,8 @@ Mld6igmpVif::query_timer_timeout()
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
-		      ipaddr_zero);
+		      ipaddr_zero,
+		      dummy_error_msg);
 	if (_startup_query_count > 0)
 	    _startup_query_count--;
 	if (_startup_query_count > 0)

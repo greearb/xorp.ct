@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.57 2005/06/03 19:07:29 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.58 2005/08/18 15:38:48 bms Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -331,6 +331,8 @@ public:
      * 
      * @param rcvlen the data length in @ref rcvbuf.
      * 
+     * @param error_msg the error message (if error).
+     * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_recv(const string& src_module_instance_name,
@@ -338,7 +340,8 @@ public:
 			   uint32_t vif_index,
 			   const IPvX& src, const IPvX& dst,
 			   int ip_ttl, int ip_tos, bool is_router_alert,
-			   const uint8_t *rcvbuf, size_t rcvlen);
+			   const uint8_t *rcvbuf, size_t rcvlen,
+			   string& error_msg);
     
     /**
      * Send a protocol message.
@@ -356,12 +359,13 @@ public:
      * @param is_router_alert if true, set the IP Router Alert option in
      * the IP packet to send (when applicable).
      * @param buffer the data buffer with the message to send.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		pim_send(uint32_t vif_index,
 			 const IPvX& src, const IPvX& dst,
 			 int ip_ttl, int ip_tos, bool is_router_alert,
-			 buffer_t *buffer);
+			 buffer_t *buffer, string& error_msg);
     
     /**
      * Receive a signal message from the kernel.
@@ -1061,14 +1065,16 @@ public:
 				  action_jp_t action_jp, uint16_t holdtime,
 				  bool is_new_group);
     int		send_test_jp_entry(const string& vif_name,
-				   const IPvX& nbr_addr);
+				   const IPvX& nbr_addr,
+				   string& error_msg);
     // Assert test-related methods
     int		send_test_assert(const string& vif_name,
 				 const IPvX& source_addr,
 				 const IPvX& group_addr,
 				 bool rpt_bit,
 				 uint32_t metric_preference,
-				 uint32_t metric);
+				 uint32_t metric,
+				 string& error_msg);
     // Bootstrap test-related methods
     int		add_test_bsr_zone(const PimScopeZoneId& zone_id,
 				  const IPvX& bsr_addr,
@@ -1084,9 +1090,10 @@ public:
 				const IPvX& rp_addr,
 				uint8_t rp_priority,
 				uint16_t rp_holdtime);
-    int		send_test_bootstrap(const string& vif_name);
+    int		send_test_bootstrap(const string& vif_name, string& error_msg);
     int		send_test_bootstrap_by_dest(const string& vif_name,
-					    const IPvX& dest_addr);
+					    const IPvX& dest_addr,
+					    string& error_msg);
     int		send_test_cand_rp_adv();
     
     

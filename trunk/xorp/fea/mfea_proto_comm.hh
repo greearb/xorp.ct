@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.12 2005/08/18 15:45:50 bms Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.13 2005/12/08 01:54:57 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -233,13 +233,15 @@ public:
      * should have the Router Alert option included.
      * @param databuf the data buffer.
      * @param datalen the length of the data in @ref databuf.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_socket_write(uint32_t vif_index,
 				   const IPvX& src, const IPvX& dst,
 				   int ip_ttl, int ip_tos,
 				   bool is_router_alert,
-				   const uint8_t *databuf, size_t datalen);
+				   const uint8_t *databuf, size_t datalen,
+				   string& error_msg);
     
     /**
      * Set/reset the flag whether to ignore the receiving my own packets.

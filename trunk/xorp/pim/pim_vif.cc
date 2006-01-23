@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.57 2005/08/18 15:38:49 bms Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.58 2005/11/05 09:53:56 pavlin Exp $"
 
 
 //
@@ -523,6 +523,7 @@ PimVif::disable()
  * @dst: The message destination address.
  * @message_type: The PIM type of the message.
  * @buffer: The buffer with the rest of the message.
+ * @error_msg: The error message (if error).
  * 
  * Send PIM message.
  * XXX: The beginning of the @buffer must have been reserved
@@ -532,7 +533,8 @@ PimVif::disable()
  **/
 int
 PimVif::pim_send(const IPvX& src, const IPvX& dst,
-		 uint8_t message_type, buffer_t *buffer)
+		 uint8_t message_type, buffer_t *buffer,
+		 string& error_msg)
 {
     uint8_t pim_vt;
     uint16_t cksum;
@@ -702,7 +704,7 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // Send the message
     //
     ret_value = pim_node().pim_send(vif_index(), src, dst, ttl, ip_tos,
-				    is_router_alert, buffer);
+				    is_router_alert, buffer, error_msg);
     
     //
     // Actions after the message is sent

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.62 2005/06/01 00:36:59 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.63 2005/08/18 15:38:50 bms Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -2214,7 +2214,7 @@ private:
 		   uint32_t vif_index,
 		   const IPvX& src, const IPvX& dst,
 		   int ip_ttl, int ip_tos,  bool is_router_alert,
-		   const uint8_t* sndbuf, size_t sndlen);
+		   const uint8_t* sndbuf, size_t sndlen, string& error_msg);
     void mfea_client_send_protocol_message_cb(const XrlError& xrl_error);
     
     int add_mfc_to_kernel(const PimMfc& pim_mfc);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.31 2005/08/30 02:05:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.32 2005/08/30 22:41:22 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -99,6 +99,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     PimMre *pim_mre_sg;
     const IPvX *rp_addr_ptr;
     PimVif *pim_vif = NULL;
+    string dummy_error_msg;
     
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "RX WHOLEPKT signal from %s: vif_index = %d "
@@ -160,7 +161,8 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 	return (XORP_ERROR);
     }
 
-    pim_vif->pim_register_send(*rp_addr_ptr, src, dst, rcvbuf, rcvlen);
+    pim_vif->pim_register_send(*rp_addr_ptr, src, dst, rcvbuf, rcvlen,
+			       dummy_error_msg);
     
     return (XORP_OK);
 }

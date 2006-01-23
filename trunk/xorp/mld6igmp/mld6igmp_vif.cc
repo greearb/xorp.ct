@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.42 2005/08/18 15:35:30 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.43 2005/08/25 19:01:32 pavlin Exp $"
 
 
 //
@@ -190,6 +190,10 @@ Mld6igmpVif::proto_is_ssm() const
 int
 Mld6igmpVif::start(string& error_msg)
 {
+    string dummy_error_msg;
+    
+    UNUSED(dummy_error_msg);
+
     if (! is_enabled())
 	return (XORP_OK);
 
@@ -258,7 +262,8 @@ Mld6igmpVif::start(string& error_msg)
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      IGMP_MEMBERSHIP_QUERY,
 		      is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
-		      IPvX::ZERO(family()));
+		      IPvX::ZERO(family()),
+		      dummy_error_msg);
 	_startup_query_count = MAX(robust_count().get() - 1, 0);
 	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
@@ -276,7 +281,8 @@ Mld6igmpVif::start(string& error_msg)
 		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
 		      MLD_LISTENER_QUERY,
 		      scaled_max_resp_time.sec(),
-		      IPvX::ZERO(family()));
+		      IPvX::ZERO(family()),
+		      dummy_error_msg);
 	_startup_query_count = MAX(robust_count().get() - 1, 0);
 	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
@@ -408,6 +414,7 @@ Mld6igmpVif::disable()
  * resolution).
  * @group_address: The "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
+ * @error_msg: The error message (if error).
  * 
  * Send MLD or IGMP message.
  * 
@@ -418,14 +425,17 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 			   const IPvX& dst,
 			   uint8_t message_type,
 			   int max_resp_time,
-			   const IPvX& group_address)
+			   const IPvX& group_address,
+			   string& error_msg)
 {
     uint16_t cksum;
     buffer_t *buffer;
     int ret_value;
     
-    if (! (is_up() || is_pending_down()))
+    if (! (is_up() || is_pending_down())) {
+	error_msg = c_format("vif %s is not UP", name().c_str());
 	return (XORP_ERROR);
+    }
     
     XLOG_ASSERT(src != IPvX::ZERO(family()));
     
@@ -480,17 +490,19 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     // Send the message
     //
     ret_value = mld6igmp_node().mld6igmp_send(vif_index(), src, dst,
-					      MINTTL, -1, true, buffer);
+					      MINTTL, -1, true, buffer,
+					      error_msg);
     
     return (ret_value);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       proto_message_type2ascii(message_type),
-	       cstring(src),
-	       cstring(dst));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 proto_message_type2ascii(message_type),
+			 cstring(src),
+			 cstring(dst));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 }
 
@@ -505,6 +517,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
  * @is_router_alert: True if the received IP packet had the Router Alert
  * IP option set.
  * @buffer: The buffer with the received message.
+ * @error_msg: The error message (if error).
  * 
  * Receive MLD or IGMP message and pass it for processing.
  * 
@@ -516,23 +529,26 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 			   int ip_ttl,
 			   int ip_tos,
 			   bool is_router_alert,
-			   buffer_t *buffer)
+			   buffer_t *buffer,
+			   string& error_msg)
 {
     int ret_value = XORP_ERROR;
     
-    if (! is_up())
+    if (! is_up()) {
+	error_msg = c_format("vif %s is not UP", name().c_str());
 	return (XORP_ERROR);
+    }
     
     do {
 	if (proto_is_igmp()) {
 	    ret_value = igmp_process(src, dst, ip_ttl, ip_tos,
-				     is_router_alert, buffer);
+				     is_router_alert, buffer, error_msg);
 	    break;
 	}
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
 	if (proto_is_mld6()) {
 	    ret_value = mld6_process(src, dst, ip_ttl, ip_tos,
-				     is_router_alert, buffer);
+				     is_router_alert, buffer, error_msg);
 	    break;
 	}
 #endif

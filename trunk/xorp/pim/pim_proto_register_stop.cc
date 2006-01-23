@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.12 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.13 2005/03/25 02:54:03 pavlin Exp $"
 
 
 //
@@ -199,7 +199,8 @@ PimVif::pim_register_stop_process(const IPvX& rp_addr,
 int
 PimVif::pim_register_stop_send(const IPvX& dr_addr,
 			       const IPvX& source_addr,
-			       const IPvX& group_addr)
+			       const IPvX& group_addr,
+			       string& error_msg)
 {
     uint8_t group_mask_len = IPvX::addr_bitlen(family());
     buffer_t *buffer = buffer_send_prepare();
@@ -210,22 +211,25 @@ PimVif::pim_register_stop_send(const IPvX& dr_addr,
 			   group_addr_reserved_flags, buffer);
     PUT_ENCODED_UNICAST_ADDR(family(), source_addr, buffer);
     
-    return (pim_send(domain_wide_addr(), dr_addr, PIM_REGISTER_STOP, buffer));
+    return (pim_send(domain_wide_addr(), dr_addr, PIM_REGISTER_STOP, buffer,
+		     error_msg));
     
  invalid_addr_family_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "invalid address family error = %d",
-	       PIMTYPE2ASCII(PIM_REGISTER_STOP),
-	       cstring(domain_wide_addr()), cstring(dr_addr),
-	       family());
+    error_msg = c_format("TX %s from %s to %s: "
+			 "invalid address family error = %d",
+			 PIMTYPE2ASCII(PIM_REGISTER_STOP),
+			 cstring(domain_wide_addr()), cstring(dr_addr),
+			 family());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
     
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("TX %s from %s to %s: "
-	       "packet cannot fit into sending buffer",
-	       PIMTYPE2ASCII(PIM_REGISTER_STOP),
-	       cstring(domain_wide_addr()), cstring(dr_addr));
+    error_msg = c_format("TX %s from %s to %s: "
+			 "packet cannot fit into sending buffer",
+			 PIMTYPE2ASCII(PIM_REGISTER_STOP),
+			 cstring(domain_wide_addr()), cstring(dr_addr));
+    XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
 }
