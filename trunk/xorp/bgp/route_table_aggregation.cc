@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.13 2005/12/08 14:02:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.14 2005/12/20 17:59:21 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -120,12 +120,11 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     // Check we don't already have the original route stored
     XLOG_ASSERT(aggr_route->components_table()->lookup_node(orig_net) == aggr_route->components_table()->end());
-    ComponentRoute<A> *comp_route =
-	new ComponentRoute<A>(rtmsg.route(),
-			      rtmsg.origin_peer(),
-			      rtmsg.genid(),
-			      rtmsg.from_previous_peering());
-    aggr_route->components_table()->insert(orig_net, *comp_route);
+    aggr_route->components_table()->insert(orig_net, ComponentRoute<A>(
+						rtmsg.route(),
+						rtmsg.origin_peer(),
+						rtmsg.genid(),
+						rtmsg.from_previous_peering()));
 
     /*
      * If our component route holds a more specific prefix than the

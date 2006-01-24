@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.50 2005/03/25 02:52:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.51 2005/04/08 22:45:59 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -517,6 +517,9 @@ FanoutTable<A>::add_to_queue(RouteQueueOp operation,
     if (rtmsg.push())
 	queue_entry->set_push(true);
 
+    // we are the end stop for this rtmsg so unref the route if needed
+    if (rtmsg.changed())
+	rtmsg.inactivate();
 }
 
 template<class A>
