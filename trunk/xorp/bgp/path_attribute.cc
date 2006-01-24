@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.75 2005/12/19 19:14:27 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.76 2005/12/21 01:21:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1961,9 +1961,9 @@ void
 PathAttributeList<A>::assert_rehash() const
 {
 #ifdef PARANOID
-    for (int i = 0; i<16; i++)
-	if (_hash[i]!=0)
-	    return;
+    const uint32_t *i = (const uint32_t *)_hash;
+    if (i[0] || i[1] || i[2] || i[3])
+	return;
     XLOG_FATAL("Missing rehash - attempted to use modified PathAttributeList without first calling rehash()\n");
 #endif
 }
