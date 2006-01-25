@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.12 2004/09/18 00:00:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.13 2005/03/25 02:54:26 pavlin Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -53,9 +53,13 @@ OutputUpdates<A>::output_packet()
     RipPacket<A>* pkt = new RipPacket<A>(this->ip_addr(), this->ip_port());
     rpa.packet_start(pkt);
 
+    set<const RouteEntry<A>*> added_routes;
     uint32_t done = 0;
     const RouteEntry<A>* r = 0;
     for (r = _uq.get(_uq_iter); r != 0; r = _uq.next(_uq_iter)) {
+	if (added_routes.find(r) != added_routes.end())
+	    continue;
+
 	pair<A,uint16_t> p = this->_port.route_policy(*r);
 
 	if (p.second > RIP_INFINITY)
@@ -73,7 +77,7 @@ OutputUpdates<A>::output_packet()
 	}
 
 	rpa.packet_add_route(copy->net(), copy->nexthop(), copy->cost(), r->tag());
-
+	added_routes.insert(r);
 	delete copy;
 
 	done++;
