@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.6 2004/06/10 22:41:45 hodson Exp $
+// $XORP: xorp/rip/peer.hh,v 1.7 2005/03/25 02:54:27 pavlin Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -122,7 +122,8 @@ public:
     typedef Port<A> RipPort;
 
 public:
-    Peer(RipPort& p, const Addr& addr) : _port(p), _addr(addr) {}
+    Peer(RipPort& p, const Addr& addr)
+	: RouteEntryOrigin<A>(false), _port(p), _addr(addr) {}
 
     /**
      * Get address of Peer.

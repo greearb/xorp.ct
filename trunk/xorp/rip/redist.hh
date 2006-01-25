@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/redist.hh,v 1.5 2004/09/18 00:00:31 pavlin Exp $
+// $XORP: xorp/rip/redist.hh,v 1.6 2005/03/25 02:54:28 pavlin Exp $
 
 #ifndef __RIP_ROUTE_REDIST_HH__
 #define __RIP_ROUTE_REDIST_HH__
@@ -38,7 +38,7 @@ template <typename A>
 class RedistRouteOrigin : public RouteEntryOrigin<A>
 {
 public:
-    RedistRouteOrigin() {}
+    RedistRouteOrigin() : RouteEntryOrigin<A>(true) {}
 
     /**
      * Retrieve number of seconds before routes associated with this

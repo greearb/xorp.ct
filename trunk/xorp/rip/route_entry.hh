@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.9 2005/03/25 02:54:29 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.11 2005/08/18 15:41:27 bms Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
@@ -285,8 +285,15 @@ public:
     struct RouteEntryStore;
 
 public:
-    RouteEntryOrigin();
+    RouteEntryOrigin(bool is_rib_origin);
     virtual ~RouteEntryOrigin();
+
+    /**
+     * Test if RIB is the originator.
+     *
+     * @return true if RIB is the originator, otherwise false.
+     */
+    bool is_rib_origin() const { return _is_rib_origin; }
 
     /**
      * Associate route with this RouteEntryOrigin.
@@ -338,6 +345,9 @@ private:
 
 protected:
     struct RouteEntryStore* _rtstore;
+
+private:
+    bool	_is_rib_origin;		// True if the origin is RIB
 };
 
 

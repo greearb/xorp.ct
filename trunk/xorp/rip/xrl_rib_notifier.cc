@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.11 2005/02/12 08:09:10 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_rib_notifier.cc,v 1.12 2005/03/25 02:54:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -332,6 +332,10 @@ XrlRibNotifier<A>::updates_available()
 	}
 	if (status() != SERVICE_RUNNING) {
 	    // If we're not running just skip any available updates.
+	    continue;
+	}
+	if ((r->origin() != NULL) && (r->origin()->is_rib_origin())) {
+	    // XXX: don't redistribute the RIB routes back to the RIB
 	    continue;
 	}
 	if (r->cost() < RIP_INFINITY) {

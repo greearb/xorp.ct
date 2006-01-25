@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.10 2004/09/18 00:00:32 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.11 2005/03/25 02:54:29 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -179,7 +179,8 @@ public:
 // RouteEntryOrigin
 
 template <typename A>
-RouteEntryOrigin<A>::RouteEntryOrigin()
+RouteEntryOrigin<A>::RouteEntryOrigin(bool is_rib_origin)
+    : _is_rib_origin(is_rib_origin)
 {
     _rtstore = new RouteEntryStore();
 }
