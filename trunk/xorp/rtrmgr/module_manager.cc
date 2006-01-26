@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.56 2006/01/09 15:17:51 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.57 2006/01/14 01:35:26 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -597,14 +597,29 @@ ModuleManager::process_exited(const string& expath, bool success,
 			      bool is_coredumped)
 {
     list<Module *> modules_list;
-    list<Module *>::iterator iter;
+    list<Module *>::iterator module_iter;
+    map<string, Process *>::iterator process_iter;
 
+    //
+    // Inform all modules that the corresponding process has exited
+    //
     modules_list = find_running_modules_by_path(expath);
-    for (iter = modules_list.begin(); iter != modules_list.end(); ++iter) {
-	Module* module = *iter;
+    for (module_iter = modules_list.begin();
+	 module_iter != modules_list.end();
+	 ++module_iter) {
+	Module* module = *module_iter;
 	module->module_exited(success, is_signal_terminated, term_signal,
 			      is_coredumped);
     }
+
+    //
+    // Remove the process-related state
+    //
+    process_iter = _expath2process.find(expath);
+    XLOG_ASSERT(process_iter != _expath2process.end());
+    Process* process = process_iter->second;
+    _expath2process.erase(process_iter);
+    delete process;
 }
 
 void
@@ -613,6 +628,9 @@ ModuleManager::process_stopped(const string& expath, int stop_signal)
     list<Module *> modules_list;
     list<Module *>::iterator iter;
 
+    //
+    // Inform all modules that the corresponding process has stopped
+    //
     modules_list = find_running_modules_by_path(expath);
     for (iter = modules_list.begin(); iter != modules_list.end(); ++iter) {
 	Module* module = *iter;
@@ -722,6 +740,9 @@ ModuleManager::Process::done_cb(RunShellCommand* run_command, bool success,
 	_run_command = NULL;
     }
 
+    //
+    // XXX: Must be the last action because it will delete the object itself.
+    //
     _mmgr.process_exited(_expath, success, is_signal_terminated, term_signal,
 			 is_coredumped);
 }
