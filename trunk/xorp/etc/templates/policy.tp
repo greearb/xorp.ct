@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.15 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.16 2005/10/11 19:22:08 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -52,6 +52,7 @@ policy {
     %mandatory: $(@.targetname);
 
     targetname {
+	%user-hidden: "XRL target name";
         %help: short "Set the target name";
         %set:;
     }

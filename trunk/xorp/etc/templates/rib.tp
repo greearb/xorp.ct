@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rib.tp,v 1.17 2005/11/12 08:59:50 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rib.tp,v 1.18 2005/12/29 09:51:09 pavlin Exp $ */
 
 plumbing {
     rib {
@@ -23,6 +23,7 @@ plumbing {
 	%mandatory:	$(@.targetname);
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}

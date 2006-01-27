@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.7 2005/03/09 22:50:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.8 2005/08/25 02:23:44 pavlin Exp $ */
 
 protocols {
     fib2mrib {
@@ -23,6 +23,7 @@ protocols {
 	%activate:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/start_fib2mrib";
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}

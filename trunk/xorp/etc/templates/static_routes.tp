@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.29 2006/01/18 21:50:45 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.30 2006/01/19 02:28:00 pavlin Exp $ */
 
 protocols {
     static {
@@ -88,6 +88,7 @@ protocols {
 	%activate:	xrl "$(static.targetname)/static_routes/0.1/start_static_routes";
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}

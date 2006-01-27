@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.15 2005/11/02 02:49:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.16 2005/11/18 00:22:57 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -44,6 +44,7 @@ protocols {
 	%mandatory:	$(@.targetname);
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}

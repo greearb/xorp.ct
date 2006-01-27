@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.27 2005/11/02 02:49:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm6.tp,v 1.28 2005/11/18 00:22:57 pavlin Exp $ */
 
 protocols {
     pimsm6 {
@@ -87,6 +87,7 @@ protocols {
 	%mandatory:	$(@.targetname);
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}

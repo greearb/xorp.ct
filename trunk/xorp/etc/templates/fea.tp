@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.32 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.33 2005/11/18 00:22:57 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -51,6 +51,7 @@ fea {
     %mandatory:	$(@.targetname);
 
     targetname {
+	%user-hidden: "XRL target name";
 	%help:	short "Set the target name";
 	%set:;
     }

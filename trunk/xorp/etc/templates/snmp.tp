@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.14 2005/04/15 00:18:21 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.15 2005/08/25 02:23:45 pavlin Exp $ */
 
 protocols {
     snmp {
@@ -23,6 +23,7 @@ protocols {
 	%mandatory:	$(@.targetname);
 
 	targetname {
+	    %user-hidden: "XRL target name";
 	    %help:	short "Set the target name";
 	    %set:;
 	}
