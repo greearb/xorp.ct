@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.212 2006/01/16 08:51:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.213 2006/01/24 21:58:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2981,6 +2981,8 @@ Neighbour<A>::retransmitter()
 		    lsas_len += len;
 		    lsup.get_lsas().push_back(*i);
 		} else {
+		    XLOG_TRACE(_ospf.trace()._retransmit,
+			       "retransmit: %s", cstring(lsup));
 		    send_link_state_update_packet(lsup);
 		    lsup.get_lsas().clear();
 		    lsas_len = 0;
@@ -2991,8 +2993,11 @@ Neighbour<A>::retransmitter()
 	    }
 	}
 
-	if (!lsup.get_lsas().empty())
+	if (!lsup.get_lsas().empty()) {
+	    XLOG_TRACE(_ospf.trace()._retransmit,
+		       "retransmit: %s", cstring(lsup));
 	    send_link_state_update_packet(lsup);
+	}
 
 	more = true;
     }
@@ -3950,6 +3955,12 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	    XLOG_TRACE(_ospf.trace()._input_errors,
 		       "Ack for LSA not in retransmission list.\n%s\n%s",
 		       cstring(*i), cstring(*lsap));
+	    // Print the retransmision list.
+	    list<Lsa::LsaRef>::iterator k;
+	    for (k = _lsa_rxmt.begin(); k != _lsa_rxmt.end(); k++) {
+		XLOG_TRACE(_ospf.trace()._input_errors,
+			   "Retransmit entry %s", cstring(*(*k)));
+	    }
 	}
     }
 }
