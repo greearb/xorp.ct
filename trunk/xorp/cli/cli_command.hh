@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.20 2005/12/21 00:58:45 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.21 2006/01/18 20:18:43 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -313,19 +313,33 @@ public:
     void set_can_pipe(bool v) { _can_pipe = v; }
 
     /**
-     * Set a flag whether the command actually represents a command argument.
-     * 
-     * @param v true if the command represents a command argument, otherwise
-     * false
-     */
-    void set_is_command_argument(bool v) { _is_command_argument = v; }
-
-    /**
      * Test if the command actually represents a command argument.
      * 
      * @return true if the command actually represents a command argument.
      */
     bool is_command_argument() const { return (_is_command_argument); }
+
+    /**
+     * Set a flag whether the command actually represents a command argument.
+     * 
+     * @param v true if the command represents a command argument, otherwise
+     * false.
+     */
+    void set_is_command_argument(bool v) { _is_command_argument = v; }
+
+    /**
+     * Test if the command expects an argument.
+     *
+     * @return true if the command expects an argument, otherwise false.
+     */
+    bool is_argument_expected() const { return (_is_argument_expected); }
+
+    /**
+     * Set a flag whether the command expects an argument.
+     *
+     * @param v true if the command expectes an argument, otherwise false.
+     */
+    void set_is_argument_expected(bool v) { _is_argument_expected = v; }
 
     /**
      * Get the callback for type matching.
@@ -490,7 +504,8 @@ private:
     bool		_allow_cd;		// True if we can "cd" to this
     string		_cd_prompt;		// The prompt if we can "cd"
     bool		_can_pipe;		// True if accepts "|" after it
-    bool		_is_command_argument;	// True if this is actually a command argument
+    bool		_is_command_argument;	// True if this is a command argument
+    bool		_is_argument_expected;	// True if an argument is expected
     CliCommand		*_cli_command_pipe;	// The "|" pipe command
     TypeMatchCb		_type_match_cb;		// The type match callback
 };
@@ -501,7 +516,7 @@ public:
 		    bool is_executable, bool can_pipe)
 	: _command_name(command_name), _help_string(help_string),
 	  _is_executable(is_executable), _can_pipe(can_pipe),
-	  _is_command_argument(false)
+	  _is_command_argument(false), _is_argument_expected(false)
     {}
 
     /**
@@ -533,6 +548,13 @@ public:
     bool can_pipe() const { return (_can_pipe); }
 
     /**
+     * Test if the command actually represents a command argument.
+     * 
+     * @return true if the command actually represents a command argument.
+     */
+    bool is_command_argument() const { return (_is_command_argument); }
+
+    /**
      * Set a flag whether the command actually represents a command argument.
      * 
      * @param v true if the command represents a command argument, otherwise
@@ -541,12 +563,19 @@ public:
     void set_is_command_argument(bool v) { _is_command_argument = v; }
 
     /**
-     * Test if the command actually represents a command argument.
-     * 
-     * @return true if the command actually represents a command argument.
+     * Test if the command expects an argument.
+     *
+     * @return true if the command expects an argument, otherwise false.
      */
-    bool is_command_argument() const { return (_is_command_argument); }
+    bool is_argument_expected() const { return (_is_argument_expected); }
 
+    /**
+     * Set a flag whether the command expects an argument.
+     *
+     * @param v true if the command expectes an argument, otherwise false.
+     */
+    void set_is_argument_expected(bool v) { _is_argument_expected = v; }
+    
     /**
      * Get a reference to the type matching callback.
      *
@@ -571,6 +600,7 @@ private:
     bool	_is_executable;		// True if the command is executable
     bool	_can_pipe;		// True if the command supports pipes
     bool	_is_command_argument;	// True if this is a command argument
+    bool	_is_argument_expected;	// True if an argument is expected
     CliCommand::TypeMatchCb _type_match_cb;	// The type matching callback
 };
 

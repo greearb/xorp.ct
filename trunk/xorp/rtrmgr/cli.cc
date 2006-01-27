@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.116 2005/12/21 20:08:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.117 2005/12/24 08:09:39 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2507,6 +2507,8 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		CliCommand::TypeMatchCb cb;
 		cb = callback(ttn_child, &TemplateTreeNode::type_match);
 		ccm.set_type_match_cb(cb);
+		if (ttn_child->is_leaf_value())
+		    ccm.set_is_argument_expected(true);
 		children.insert(make_pair(command_name, ccm));
 	    } else {
 		command_name = ttn_child->segname();
@@ -2518,6 +2520,8 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		}
 		CliCommandMatch ccm(command_name, help_string,
 				    is_executable_tmp, can_pipe_tmp);
+		if (ttn_child->is_leaf_value())
+		    ccm.set_is_argument_expected(true);
 		children.insert(make_pair(command_name, ccm));
 	    }
 	}
@@ -2532,6 +2536,26 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    command_name = "{";
 	    CliCommandMatch ccm(command_name, help_string, is_executable,
 				can_pipe);
+		if (ttn->is_leaf_value())
+		    ccm.set_is_argument_expected(true);
+	    children.insert(make_pair(command_name, ccm));
+	}
+	
+	if (ttn->is_leaf_value() && (! ttn->is_tag())
+	    && ttn->allowed_values().empty()
+	    && ttn->allowed_ranges().empty()) {
+	    // Leaf node: add a child with expected value type
+	    help_string = ttn->help();
+	    if (help_string == "") {
+		help_string = "-- no help available --";
+	    }
+	    string encoded_typestr = ttn->encoded_typestr();
+	    command_name = encoded_typestr;
+	    CliCommandMatch ccm(command_name, help_string, is_executable,
+				can_pipe);
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(ttn, &TemplateTreeNode::type_match);
+	    ccm.set_type_match_cb(cb);
 	    children.insert(make_pair(command_name, ccm));
 	}
 

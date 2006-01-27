@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.22 2005/12/14 02:40:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.23 2005/12/21 00:58:45 pavlin Exp $"
 
 
 //
@@ -62,7 +62,8 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     : _parent_command(init_parent_command),
       _name(init_command_name),
       _help(init_command_help),
-      _is_command_argument(false)
+      _is_command_argument(false),
+      _is_argument_expected(false)
 {
     if (_parent_command != NULL)
 	_root_command = _parent_command->root_command();
@@ -553,7 +554,8 @@ CliCommand::cli_attempt_command_completion_byname(void *obj,
     bool is_child_completion = false;
     
     if (cli_command->can_complete()
-	&& ! has_more_tokens(token_line)) {
+	&& (! has_more_tokens(token_line))
+	&& (! cli_command->is_argument_expected())) {
 	// Add the appropriate completion info if the command can be run
 	string line_string1 = "  ";
 	type_suffix = EXECUTE_THIS_COMMAND_STRING.c_str();
@@ -725,7 +727,9 @@ CliCommand::find_command_help(const char *line, int word_end,
 	return (true);
     }
     
-    if ((token.length() == 0) && can_complete()) {
+    if ((token.length() == 0)
+	&& can_complete()
+	&& (! is_argument_expected())) {
 	// The last token, and there is space at the end,
 	// so print the "default" help.
 	ret_string += c_format("  %-15s %s\r\n",
@@ -845,12 +849,14 @@ CliCommand::child_command_list()
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
 	    bool is_command_argument = ccm.is_command_argument();
+	    bool is_argument_expected = ccm.is_argument_expected();
 	    new_cmd = add_command(command_name, help_string, false);
 	    vector<string> child_global_name = global_name();
 	    child_global_name.push_back(command_name);
 	    new_cmd->set_global_name(child_global_name);
 	    new_cmd->set_can_pipe(can_pipe);
 	    new_cmd->set_is_command_argument(is_command_argument);
+	    new_cmd->set_is_argument_expected(is_argument_expected);
 	    new_cmd->set_type_match_cb(ccm.type_match_cb());
 	    new_cmd->set_dynamic_children_callback(_dynamic_children_callback);
 	    new_cmd->set_dynamic_process_callback(_dynamic_process_callback);
