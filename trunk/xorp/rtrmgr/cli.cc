@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.117 2005/12/24 08:09:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.118 2006/01/27 02:15:54 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1297,7 +1297,8 @@ RouterCLI::add_edit_subtree()
 	false,	/* include_children_templates */
 	false,	/* include_leaf_value_nodes */
 	true,	/* include_read_only_nodes */
-	true	/* include_permanent_nodes */);
+	true,	/* include_permanent_nodes */
+	false	/* include_user_hidden_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("edit subtree is:\n\n");
@@ -1343,7 +1344,8 @@ RouterCLI::add_delete_subtree()
 	false,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
 	true,	/* include_read_only_nodes */
-	false	/* include_permanent_nodes */);
+	false,	/* include_permanent_nodes */
+	false	/* include_user_hidden_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("delete subtree is:\n\n");
@@ -1377,7 +1379,8 @@ RouterCLI::add_set_subtree()
 	true,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
 	false,	/* include_read_only_nodes */
-	true	/* include_permanent_nodes */);
+	true,	/* include_permanent_nodes */
+	false	/* include_user_hidden_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("set subtree is:\n\n");
@@ -1415,7 +1418,8 @@ RouterCLI::add_show_subtree()
 	false,	/* include_children_templates */
 	true,	/* include_leaf_value_nodes */
 	true,	/* include_read_only_nodes */
-	true	/* include_permanent_nodes */);
+	true,	/* include_permanent_nodes */
+	false	/* include_user_hidden_nodes */);
 
     debug_msg("==========================================================\n");
     debug_msg("show subtree is:\n\n");
@@ -1474,6 +1478,10 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
 	// XXX: ignore deprecated subtrees
 	if (ttn->is_deprecated())
+	    continue;
+
+	// XXX: ignore user-hidden subtrees
+	if (ttn->is_user_hidden())
 	    continue;
 
 	append_list_to_vector(vector_subpath, _path);
@@ -2109,6 +2117,23 @@ RouterCLI::text_entry_func(const string& ,
     //
 
     //
+    // Test if the node is hidden from the user
+    //
+    if (ctn->is_user_hidden()) {
+	const TemplateTreeNode* ttn = ctn->template_tree_node();
+	const TemplateTreeNode* user_hidden_ttn;
+	user_hidden_ttn = ttn->find_first_user_hidden_ancestor();
+	if (user_hidden_ttn != NULL) {
+	    error_msg = c_format("ERROR: user-hidden path \"%s\" "
+				 "is not valid: %s.\n",
+				 makepath(path_segments).c_str(),
+				 user_hidden_ttn->user_hidden_reason().c_str());
+	    cli_client().cli_print(error_msg);
+	    goto cleanup;
+	}
+    }
+
+    //
     // Test if the node was already created.
     //
     if (new_path_segments.empty() && (! ctn->deleted())) {
@@ -2193,6 +2218,9 @@ RouterCLI::text_entry_func(const string& ,
 		     ++tti) {
 		    // XXX: ignore deprecated subtrees
 		    if ((*tti)->is_deprecated())
+			continue;
+		    // XXX: ignore user-hidden subtrees
+		    if ((*tti)->is_user_hidden())
 			continue;
 		    if ((*tti)->type_match(value, errhelp)) {
 			data_ttn = (*tti);
@@ -2370,9 +2398,23 @@ RouterCLI::text_entry_func(const string& ,
 	    const TemplateTreeNode* deprecated_ttn;
 	    deprecated_ttn = ttn->find_first_deprecated_ancestor();
 	    if (deprecated_ttn != NULL) {
-		error_msg = c_format("ERROR: path \"%s\" is not valid: %s.\n",
+		error_msg = c_format("ERROR: deprecated path \"%s\" "
+				     "is not valid: %s.\n",
 				     makepath(path_segments).c_str(),
 				     deprecated_ttn->deprecated_reason().c_str());
+		cli_client().cli_print(error_msg);
+		goto cleanup;
+	    }
+	    //
+	    // Test if some part of the configuration path is user-hidden
+	    //
+	    const TemplateTreeNode* user_hidden_ttn;
+	    user_hidden_ttn = ttn->find_first_user_hidden_ancestor();
+	    if (user_hidden_ttn != NULL) {
+		error_msg = c_format("ERROR: user-hidden path \"%s\" "
+				     "is not valid: %s.\n",
+				     makepath(path_segments).c_str(),
+				     user_hidden_ttn->user_hidden_reason().c_str());
 		cli_client().cli_print(error_msg);
 		goto cleanup;
 	    }
@@ -2487,13 +2529,16 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
     const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
     is_executable = true;
     can_pipe = false;
-    if (ttn != NULL && (! ttn->is_deprecated())) {
+    if (ttn != NULL && (! ttn->is_deprecated()) && (! ttn->is_user_hidden())) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
 	     ++tti) {
 	    const TemplateTreeNode* ttn_child = *tti;
 	    // XXX: ignore deprecated subtrees
 	    if (ttn_child->is_deprecated())
+		continue;
+	    // XXX: ignore user-hidden subtrees
+	    if (ttn_child->is_user_hidden())
 		continue;
 	    help_string = ttn_child->help();
 	    if (help_string == "") {

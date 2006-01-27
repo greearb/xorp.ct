@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.19 2005/10/26 07:06:29 pavlin Exp $
+// $XORP: xorp/rtrmgr/slave_conf_tree_node.hh,v 1.20 2006/01/14 00:42:36 pavlin Exp $
 
 #ifndef __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
 #define __RTRMGR_SLAVE_CONF_TREE_NODE_HH__
@@ -66,7 +66,8 @@ public:
 			     bool include_children_templates,
 			     bool include_leaf_value_nodes,
 			     bool include_read_only_nodes,
-			     bool include_permanent_nodes) const;
+			     bool include_permanent_nodes,
+			     bool include_user_hidden_nodes) const;
 
     int get_deltas(const SlaveConfigTreeNode& master_node);
     int get_deletions(const SlaveConfigTreeNode& master_node);
@@ -86,7 +87,8 @@ protected:
 			    bool include_children_templates,
 			    bool include_leaf_value_nodes,
 			    bool include_read_only_nodes,
-			    bool include_permanent_nodes) const;
+			    bool include_permanent_nodes,
+			    bool include_user_hidden_nodes) const;
 
 private:
     //

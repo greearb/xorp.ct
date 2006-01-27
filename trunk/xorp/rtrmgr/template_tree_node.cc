@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.70 2005/12/09 01:37:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.71 2005/12/21 20:27:38 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -57,6 +57,7 @@ TemplateTreeNode::TemplateTreeNode(TemplateTree& template_tree,
       _order(ORDER_UNSORTED),
       _verbose(template_tree.verbose()),
       _is_deprecated(false),
+      _is_user_hidden(false),
       _is_mandatory(false),
       _is_read_only(false),
       _is_permanent(false)
@@ -306,6 +307,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	// Nothing to do - the work is done by add_action
     } else if (cmd == "%deprecated") {
 	// Nothing to do - the work is done by add_action
+    } else if (cmd == "%user-hidden") {
+	// Nothing to do - the work is done by add_action
     } else if (cmd == "%read-only") {
 	// XXX: only leaf nodes should have %read-only command
 	if (! is_leaf_value()) {
@@ -357,8 +360,8 @@ TemplateTreeNode::add_cmd(const string& cmd)
 	error_msg = c_format("Invalid command \"%s\".\n", cmd.c_str());
 	error_msg += "Valid commands are %create, %delete, %set, %unset, ";
 	error_msg += "%get, %default, %modinfo, %activate, %update, %allow, ";
-	error_msg += "%allow-range, %mandatory, %deprecated, %read-only, ";
-	error_msg += "%permanent, %order\n";
+	error_msg += "%allow-range, %mandatory, %deprecated, %user-hidden, ";
+	error_msg += "%read-only, %permanent, %order\n";
 	xorp_throw(ParseError, error_msg);
     }
 }
@@ -439,6 +442,21 @@ TemplateTreeNode::add_action(const string& cmd,
 	} else {
 	    // XXX really should say why it's bad.
 	    XLOG_WARNING("Bad %%deprecated specification in template file ignored\n");
+	}
+    } else if (cmd == "%user-hidden") {
+	if (action_list.size() == 1) {
+	    list<string>::const_iterator li = action_list.begin();
+	    // Trim off quotes if present
+	    string reason = unquote(*li);
+	    _is_user_hidden = true;
+	    _user_hidden_reason = reason;
+	    if ((_parent != NULL) && (_parent->is_tag())) {
+		_parent->set_user_hidden(true);
+		_parent->set_user_hidden_reason(reason);
+	    }
+	} else {
+	    // XXX really should say why it's bad.
+	    XLOG_WARNING("Bad %%user-hidden specification in template file ignored\n");
 	}
     } else if (cmd == "%read-only") {
 	if (action_list.size() == 0) {
@@ -977,6 +995,24 @@ TemplateTreeNode::find_first_deprecated_ancestor() const
     return (deprecated_ttn);
 }
 
+const TemplateTreeNode*
+TemplateTreeNode::find_first_user_hidden_ancestor() const
+{
+    const TemplateTreeNode* ttn = _parent;
+    const TemplateTreeNode* user_hidden_ttn = NULL;
+
+    if (is_user_hidden())
+	user_hidden_ttn = this;
+
+    while (ttn != NULL) {
+	if (ttn->is_user_hidden())
+	    user_hidden_ttn = ttn;
+	ttn = ttn->parent();
+    }
+
+    return (user_hidden_ttn);
+}
+
 void
 TemplateTreeNode::add_allowed_value(const string& value, const string& help)
 {
@@ -1171,6 +1207,7 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 				     bool include_intermediate_nodes,
 				     bool include_read_only_nodes,
 				     bool include_permanent_nodes,
+				     bool include_user_hidden_nodes,
 				     size_t depth) const
 {
     bool instantiated = false;
@@ -1179,10 +1216,12 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
     if (is_deprecated())
 	return false;
 
-    // XXX: ignore read-only nodes and permanent nodes
+    // XXX: ignore read-only nodes, permanent nodes and user-hidden nodes
     if (is_read_only() && (! include_read_only_nodes))
 	return false;
     if (is_permanent() && (! include_permanent_nodes))
+	return false;
+    if (is_user_hidden() && (! include_user_hidden_nodes))
 	return false;
 
     debug_msg("TTN:check_command_tree %s type %s depth %u\n",
@@ -1223,6 +1262,7 @@ TemplateTreeNode::check_command_tree(const list<string>& cmd_names,
 					   include_intermediate_nodes,
 					   include_read_only_nodes,
 					   include_permanent_nodes,
+					   include_user_hidden_nodes,
 					   depth + 1)) {
 		instantiated = true;
 		break;

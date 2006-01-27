@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.46 2005/11/29 01:48:40 pavlin Exp $
+% $XORP: xorp/docs/rtrmgr/rtrmgr.tex,v 1.47 2005/12/21 22:36:01 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -846,9 +846,29 @@ The syntax is:
 If the XORP startup configuration contains a statement that uses a
 deprecated node in the template, the rtrmgr prints an error with
 the string with the reason, and exits.
-If, however, somehow the xorpsh sends to the rtrmgr configuration
-that contains a deprecated statement, the rtrmgr returns an error to xorpsh,
-and the error message will contain the string with the reason.
+If, however, a third-party user program (\eg other than xorpsh) sends
+to the rtrmgr configuration that contains a deprecated statement, the
+rtrmgr returns an error to xorpsh, and the error message will contain
+the string with the reason.
+
+\subsubsection{The {\tt \%user-hidden} Command.}
+
+The {\tt \%user-hidden} command can be used to hide a template tree
+node and the subtree below it from the user. Such node or a subtree
+can be used by the rtrmgr itself for internal purpose only and is
+not visible to the user (\eg via xorpsh or when saving the configuration
+to a file).
+The syntax is:
+
+\texttt{\%user-hidden: } \texttt{"String with reason"} \texttt{;}
+
+However, if the XORP startup configuration contains a statement that
+uses an user-hidden node, the rtrmgr will accept
+the configuration. Similarly, if a third-party user program
+(\eg other than xorpsh) sends to the rtrmgr configuration that contains
+an user-hidden statement, the rtrmgr would accept that statement. This
+is an experimental feature may become permanent or may be disabled in
+the future.
 
 \subsubsection{The {\tt \%read-only} Command.}
 

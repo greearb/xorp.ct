@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.44 2005/12/09 01:37:50 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.45 2006/01/14 00:42:36 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -111,6 +111,7 @@ public:
 			    bool include_intermediate_nodes,
 			    bool include_read_only_nodes,
 			    bool include_permanent_nodes,
+			    bool include_user_hidden_nodes,
 			    size_t depth) const;
     bool has_default() const { return _has_default; }
     bool check_variable_name(const vector<string>& parts, size_t part) const;
@@ -137,6 +138,10 @@ public:
     void set_deprecated(bool v) { _is_deprecated = v; }
     const string& deprecated_reason() const { return _deprecated_reason; }
     void set_deprecated_reason(const string& v) { _deprecated_reason = v; }
+    bool is_user_hidden() const { return _is_user_hidden; }
+    void set_user_hidden(bool v) { _is_user_hidden = v; }
+    const string& user_hidden_reason() const { return _user_hidden_reason; }
+    void set_user_hidden_reason(const string& v) { _user_hidden_reason = v; }
     bool is_mandatory() const { return _is_mandatory; }
     void set_mandatory(bool v) { _is_mandatory = v; }
     bool is_read_only() const { return _is_read_only; }
@@ -149,6 +154,12 @@ public:
      * is deprecated.
      */
     const TemplateTreeNode* find_first_deprecated_ancestor() const;
+
+    /**
+     * @return the oldest user-hidden ancestor or NULL if no ancestor
+     * is user-hidden.
+     */
+    const TemplateTreeNode* find_first_user_hidden_ancestor() const;
 
     void add_allowed_value(const string& value, const string& help);
     void add_allowed_range(int64_t lower_value, int64_t upper_value,
@@ -204,14 +215,16 @@ private:
 
     TTSortOrder _order;
 
-    bool		_verbose;	 // Set to true if output is verbose
-    bool		_is_deprecated;	// True if node's usage is deprecated
-    string		_deprecated_reason; // The reason for deprecation
-    bool		_is_mandatory;	// True if this node is mandatory
-    bool		_is_read_only;	// True if a read-only node
-    string		_read_only_reason; // The reason for read-only
-    bool		_is_permanent;	// True if a permanent node
-    string		_permanent_reason; // The reason for permanent
+    bool		_verbose;	  // Set to true if output is verbose
+    bool		_is_deprecated;   // True if node's usage is deprecated
+    string		_deprecated_reason;  // The reason for deprecation
+    bool		_is_user_hidden;     // True if hidden from the user
+    string		_user_hidden_reason; // The reason for user-hidden
+    bool		_is_mandatory;	     // True if this node is mandatory
+    bool		_is_read_only;	     // True if a read-only node
+    string		_read_only_reason;   // The reason for read-only
+    bool		_is_permanent;	     // True if a permanent node
+    string		_permanent_reason;   // The reason for permanent
 };
 
 class UIntTemplate : public TemplateTreeNode {

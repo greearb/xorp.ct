@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.27 2005/10/26 07:06:29 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.28 2005/10/28 02:08:23 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -94,11 +94,13 @@ SlaveConfigTreeNode::create_command_tree(CommandTree& cmd_tree,
 					 bool include_children_templates,
 					 bool include_leaf_value_nodes,
 					 bool include_read_only_nodes,
-					 bool include_permanent_nodes) const
+					 bool include_permanent_nodes,
+					 bool include_user_hidden_nodes) const
 {
     build_command_tree(cmd_tree, cmd_names, 0, include_intermediate_nodes,
 		       include_children_templates, include_leaf_value_nodes,
-		       include_read_only_nodes, include_permanent_nodes);
+		       include_read_only_nodes, include_permanent_nodes,
+		       include_user_hidden_nodes);
 }
 
 bool
@@ -109,7 +111,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					bool include_children_templates,
 					bool include_leaf_value_nodes,
 					bool include_read_only_nodes,
-					bool include_permanent_nodes) const
+					bool include_permanent_nodes,
+					bool include_user_hidden_nodes) const
 {
     bool instantiated = false;
 
@@ -118,6 +121,9 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
     if (_template_tree_node != NULL) {
 	// XXX: ignore deprecated subtrees
 	if (_template_tree_node->is_deprecated())
+	    return false;
+	// XXX: ignore user-hidden subtrees
+	if (_template_tree_node->is_user_hidden())
 	    return false;
     }
 
@@ -142,6 +148,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 	if (is_read_only() && (! include_read_only_nodes))
 	    include_node = false;
 	if (is_permanent() && (! include_permanent_nodes))
+	    include_node = false;
+	if (is_user_hidden() && (! include_user_hidden_nodes))
 	    include_node = false;
 
 	if (include_node) {
@@ -187,7 +195,8 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 					include_children_templates,
 					include_leaf_value_nodes,
 					include_read_only_nodes,
-					include_permanent_nodes);
+					include_permanent_nodes,
+					include_user_hidden_nodes);
 	if (done) {
 	    templates_done.insert(sctn->template_tree_node());
 	    instantiated = true;
@@ -239,6 +248,7 @@ SlaveConfigTreeNode::build_command_tree(CommandTree& cmd_tree,
 						    include_intermediate_nodes,
 						    include_read_only_nodes,
 						    include_permanent_nodes,
+						    include_user_hidden_nodes,
 						    /* depth */ 0)) {
 
 		    XLOG_TRACE(_verbose, "***done == true\n");

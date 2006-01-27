@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.104 2005/12/14 20:32:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.105 2005/12/21 20:27:38 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -836,6 +836,24 @@ ConfigTreeNode::permanent_reason() const
     return (_template_tree_node->permanent_reason());
 }
 
+bool
+ConfigTreeNode::is_user_hidden() const
+{
+    if (_template_tree_node == NULL)
+	return false;
+    return (_template_tree_node->is_user_hidden());
+}
+
+const string&
+ConfigTreeNode::user_hidden_reason() const
+{
+    if (_template_tree_node == NULL) {
+	static const string empty_reason;
+	return empty_reason;
+    }
+    return (_template_tree_node->user_hidden_reason());
+}
+
 unsigned int
 ConfigTreeNode::depth() const
 {
@@ -908,6 +926,15 @@ ConfigTreeNode::show_subtree(bool show_top, int depth, int indent,
 
     if (suppress_default_values && is_default_value())
 	return string("");
+
+    if (_template_tree_node != NULL) {
+	// XXX: ignore deprecated subtrees
+	if (_template_tree_node->is_deprecated())
+	    return string("");
+	// XXX: ignore user-hidden subtrees
+	if (_template_tree_node->is_user_hidden())
+	    return string("");
+    }
 
     if (_template_tree_node != NULL)
 	is_a_tag = is_tag();
