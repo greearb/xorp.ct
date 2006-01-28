@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.60 2005/10/14 17:58:43 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.61 2005/12/14 02:40:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -179,7 +179,8 @@ OpInstance::execute_done(bool success)
 OpCommand::OpCommand(OpCommandList& ocl, const list<string>& command_parts)
     : _ocl(ocl),
       _command_parts(command_parts),
-      _is_invalid(false)
+      _is_invalid(false),
+      _default_nomore_mode(false)
 {
     _command_name = command_parts2command_name(command_parts);
 }
@@ -432,6 +433,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    const string& command_name = opi->first;
 	    const string& help_string = opi->second;
 	    CliCommandMatch ccm(command_name, help_string, true, true);
+	    ccm.set_default_nomore_mode(default_nomore_mode());
 	    return_matches.insert(make_pair(command_name, ccm));
 	}
 	return;
@@ -449,6 +451,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 		const string& command_name = *vi;
 		CliCommandMatch ccm(command_name, _help_string,
 				    is_executable(), can_pipe());
+		ccm.set_default_nomore_mode(default_nomore_mode());
 		return_matches.insert(make_pair(command_name, ccm));
 	    }
 	    break;
@@ -459,6 +462,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    const string& command_name = match;
 	    CliCommandMatch ccm(command_name, _help_string, is_executable(),
 				can_pipe());
+	    ccm.set_default_nomore_mode(default_nomore_mode());
 	    CliCommand::TypeMatchCb cb;
 	    cb = callback(this, &OpCommand::type_match);
 	    ccm.set_type_match_cb(cb);
@@ -468,6 +472,7 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	const string& command_name = match;
 	CliCommandMatch ccm(command_name, _help_string, is_executable(),
 			    can_pipe());
+	ccm.set_default_nomore_mode(default_nomore_mode());
 	return_matches.insert(make_pair(command_name, ccm));
 	break;
     } while (false);
@@ -721,6 +726,7 @@ OpCommandList::top_level_commands() const
 				op_command->help_string(),
 				op_command->is_executable(),
 				op_command->can_pipe());
+	    ccm.set_default_nomore_mode(op_command->default_nomore_mode());
 	    commands.insert(make_pair(top_command, ccm));
 	    continue;
 	}
@@ -730,6 +736,7 @@ OpCommandList::top_level_commands() const
 				string("-- no help available --"),
 				false,
 				false);
+	    ccm.set_default_nomore_mode(false);
 	    commands.insert(make_pair(top_command, ccm));
 	}
     }

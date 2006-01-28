@@ -11,8 +11,9 @@
 #define CMD_HELP 263
 #define CMD_OPT_PARAMETER 264
 #define CMD_TAG 265
-#define VARIABLE 266
-#define WILDCARD 267
-#define LITERAL 268
-#define STRING 269
-#define SYNTAX_ERROR 270
+#define CMD_NOMORE_MODE 266
+#define VARIABLE 267
+#define WILDCARD 268
+#define LITERAL 269
+#define STRING 270
+#define SYNTAX_ERROR 271

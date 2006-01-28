@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.35 2005/10/14 17:58:43 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.36 2005/12/14 02:40:18 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -83,6 +83,22 @@ public:
     bool is_executable() const { return (! _command_action.empty()); }
     bool can_pipe() const { return is_executable(); }
 
+    /**
+     * Test if "no-more" (i.e., unpaged) is the default output mode.
+     *
+     * @return true if "no-more" (i.e., unpaged) is the default output mode,
+     * otherwise false.
+     */
+    bool default_nomore_mode() const { return (_default_nomore_mode); }
+
+    /**
+     * Set the default paging mode.
+     *
+     * @param v if true, then "no-more" (i.e., unpaged) is the default
+     * output mode.
+     */
+    void set_default_nomore_mode(bool v) { _default_nomore_mode = v; }
+
     void add_opt_param(const string& opt_param, const string& opt_param_help);
     bool has_opt_param(const string& opt_param) const;
     string str() const;
@@ -145,6 +161,7 @@ private:
     map<string, string>	_opt_params;	// Optional parameters and the CLI help
     set<OpInstance*>	_instances;
     bool		_is_invalid;	// If true, this command is invalid
+    bool		_default_nomore_mode; // True if "no-more" (i.e., unpaged) mode is default
 };
 
 class OpCommandList {

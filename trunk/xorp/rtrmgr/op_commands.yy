@@ -28,6 +28,7 @@
 %token CMD_HELP
 %token CMD_OPT_PARAMETER
 %token CMD_TAG
+%token CMD_NOMORE_MODE
 %token VARIABLE
 %token WILDCARD
 %token LITERAL
@@ -80,6 +81,7 @@ attribute:		cmd_module
 			| cmd_command
 			| cmd_opt_parameter
 			| cmd_tag
+			| cmd_nomore_mode
 			;
 
 cmd_module:		CMD_MODULE COLON LITERAL END {
@@ -107,6 +109,11 @@ cmd_help:		CMD_HELP COLON LITERAL {
 			}
 			| CMD_HELP COLON STRING {
 				add_cmd_help_string($3);
+			}
+			;
+
+cmd_nomore_mode:	CMD_NOMORE_MODE END {
+				set_nomore_mode(true);
 			}
 			;
 
@@ -471,6 +478,13 @@ add_cmd_help_string(char *s)
 
     help_string = help;
     is_help_tag = false;
+}
+
+static void
+set_nomore_mode(bool v)
+{
+    OpCommand& op_command = op_command_stack.back();
+    op_command.set_default_nomore_mode(v);    
 }
 
 void

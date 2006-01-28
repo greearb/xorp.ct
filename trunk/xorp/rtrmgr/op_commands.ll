@@ -63,6 +63,10 @@
 	return CMD_TAG;
 	}
 
+"%nomore_mode"	{
+	return CMD_NOMORE_MODE;
+	}
+
 \$\([a-zA-Z@][a-zA-Z0-9\-_\.@\*]*\)	{
 	opcmdlval = strdup(opcmdtext);
 	return VARIABLE;
