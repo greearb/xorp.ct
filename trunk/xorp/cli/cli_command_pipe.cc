@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.10 2005/10/29 17:42:19 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command_pipe.cc,v 1.11 2005/12/14 00:52:40 pavlin Exp $"
 
 
 //
@@ -713,6 +713,11 @@ CliPipe::pipe_find_eof(string& input_line)
 int
 CliPipe::pipe_hold_start(string& input_line, string& error_msg)
 {
+    if (_cli_client != NULL) {
+	if (_cli_client->is_interactive())
+	    _cli_client->set_nomore_mode(false);
+    }
+
     _is_running = true;
 
     UNUSED(input_line);
@@ -723,6 +728,11 @@ CliPipe::pipe_hold_start(string& input_line, string& error_msg)
 int
 CliPipe::pipe_hold_stop(string& error_msg)
 {
+    if (_cli_client != NULL) {
+	if (_cli_client->is_interactive())
+	    _cli_client->set_nomore_mode(false); // XXX: default is to hold
+    }
+	
     _is_running = false;
 
     UNUSED(error_msg);
