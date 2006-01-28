@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.118 2006/01/27 02:15:54 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.119 2006/01/27 21:30:14 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -663,8 +663,8 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	com1->set_can_pipe(ccm.can_pipe());
 	com1->set_type_match_cb(ccm.type_match_cb());
 	// Set the callback to generate the node's children
-	com1->set_dynamic_children_callback(callback(op_cmd_list(),
-						     &OpCommandList::childlist));
+	com1->set_dynamic_children_callback(
+	    callback(op_cmd_list(), &OpCommandList::childlist));
 	//
 	// Set the callback to pass to the node's children when they
 	// are executed.
@@ -1524,9 +1524,9 @@ RouterCLI::configure_func(const string& ,
 	exclusive = true;
 
     idle_ui();
-    if (_xorpsh.enter_config_mode(exclusive,
-				  callback(this,
-					   &RouterCLI::enter_config_done))
+    if (_xorpsh.enter_config_mode(
+	    exclusive,
+	    callback(this, &RouterCLI::enter_config_done))
 	!= true) {
 	error_msg = c_format("ERROR: cannot enter configure mode. "
 			     "No Finder?\n");
@@ -1544,8 +1544,8 @@ RouterCLI::enter_config_done(const XrlError& e)
     string error_msg;
 
     if (e == XrlError::OKAY()) {
-	if (_xorpsh.get_config_users(callback(this,
-					      &RouterCLI::got_config_users))
+	if (_xorpsh.get_config_users(
+		callback(this, &RouterCLI::got_config_users))
 	    != true) {
 	    error_msg = c_format("ERROR: cannot get list of users in "
 				 "configure mode. No Finder?\n");
@@ -1803,8 +1803,8 @@ RouterCLI::exit_func(const string& ,
 	    return (XORP_ERROR);
 	}
 	idle_ui();
-	if (_xorpsh.leave_config_mode(callback(this,
-					       &RouterCLI::leave_config_done))
+	if (_xorpsh.leave_config_mode(
+		callback(this, &RouterCLI::leave_config_done))
 	    != true) {
 	    error_msg = c_format("ERROR: failed to inform rtrmgr of leaving "
 				 "configuration mode. No Finder?\n");
@@ -1826,8 +1826,8 @@ RouterCLI::exit_func(const string& ,
 	config_tree()->discard_changes();
 	_changes_made = false;
 	idle_ui();
-	if (_xorpsh.leave_config_mode(callback(this,
-					       &RouterCLI::leave_config_done))
+	if (_xorpsh.leave_config_mode(
+		callback(this, &RouterCLI::leave_config_done))
 	    != true) {
 	    error_msg = c_format("ERROR: failed to inform rtrmgr of leaving "
 				 "config mode. No Finder?\n");
@@ -1877,8 +1877,8 @@ RouterCLI::exit_func(const string& ,
 		return (XORP_ERROR);
 	    }
 	    idle_ui();
-	    if (_xorpsh.leave_config_mode(callback(this,
-						   &RouterCLI::leave_config_done))
+	    if (_xorpsh.leave_config_mode(
+		    callback(this, &RouterCLI::leave_config_done))
 		!= true) {
 		error_msg = c_format("ERROR: failed to inform rtrmgr of leaving "
 				     "config mode. No Finder?\n");
@@ -3081,10 +3081,11 @@ RouterCLI::op_mode_func(const string& ,
 
 	// Verify that any previous command has been disposed of.
 	XLOG_ASSERT(NULL == _op_mode_cmd);
-	_op_mode_cmd = op_cmd_list()->execute(_xorpsh.eventloop(),
-					      path_segments,
-			       callback(this, &RouterCLI::op_mode_cmd_print),
-			       callback(this, &RouterCLI::op_mode_cmd_done));
+	_op_mode_cmd = op_cmd_list()->execute(
+	    _xorpsh.eventloop(),
+	    path_segments,
+	    callback(this, &RouterCLI::op_mode_cmd_print),
+	    callback(this, &RouterCLI::op_mode_cmd_done));
     } else {
 	//
 	// Try to figure out where the error is, so we can give useful
@@ -3373,8 +3374,8 @@ RouterCLI::clientid() const
 bool
 RouterCLI::check_for_rtrmgr_restart()
 {
-    return (_xorpsh.get_rtrmgr_pid(callback(this,
-					    &RouterCLI::verify_rtrmgr_restart))
+    return (_xorpsh.get_rtrmgr_pid(
+		callback(this, &RouterCLI::verify_rtrmgr_restart))
 	    == true);
 }
 
