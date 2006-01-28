@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.23 2005/12/21 00:58:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.24 2006/01/27 02:15:54 pavlin Exp $"
 
 
 //
@@ -62,6 +62,7 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     : _parent_command(init_parent_command),
       _name(init_command_name),
       _help(init_command_help),
+      _default_nomore_mode(false),
       _is_command_argument(false),
       _is_argument_expected(false)
 {
@@ -848,6 +849,7 @@ CliCommand::child_command_list()
 	    const string& help_string = ccm.help_string();
 	    bool is_executable = ccm.is_executable();
 	    bool can_pipe = ccm.can_pipe();
+	    bool default_nomore_mode = ccm.default_nomore_mode();
 	    bool is_command_argument = ccm.is_command_argument();
 	    bool is_argument_expected = ccm.is_argument_expected();
 	    new_cmd = add_command(command_name, help_string, false);
@@ -855,6 +857,7 @@ CliCommand::child_command_list()
 	    child_global_name.push_back(command_name);
 	    new_cmd->set_global_name(child_global_name);
 	    new_cmd->set_can_pipe(can_pipe);
+	    new_cmd->set_default_nomore_mode(default_nomore_mode);
 	    new_cmd->set_is_command_argument(is_command_argument);
 	    new_cmd->set_is_argument_expected(is_argument_expected);
 	    new_cmd->set_type_match_cb(ccm.type_match_cb());

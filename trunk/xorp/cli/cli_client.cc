@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.49 2005/12/14 02:40:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.50 2005/12/21 00:58:45 pavlin Exp $"
 
 
 //
@@ -1060,6 +1060,8 @@ CliClient::process_char_page_mode(uint8_t val)
     
  exit_page_mode_label:
     reset_page_buffer();
+    if (is_interactive())
+	set_nomore_mode(false);
     if (! is_help_mode()) {
 	// Exit the page mode
 	set_page_mode(false);
@@ -1147,6 +1149,8 @@ CliClient::post_process_command()
 	    set_current_cli_prompt(" --More-- (END) ");
     } else {
 	reset_page_buffer();
+	if (is_interactive())
+	    set_nomore_mode(false);
     }
     
     //
@@ -1462,6 +1466,8 @@ CliClient::process_command(const string& command_line)
 	    bool is_error = false;
 	    string error_msg;
 	    
+	    if (parent_cli_command->default_nomore_mode())
+		set_nomore_mode(true);
 	    list<CliPipe*>::iterator iter;
 	    for (iter = _pipe_list.begin(); iter != _pipe_list.end(); ++iter) {
 		CliPipe *cli_pipe = *iter;
@@ -1478,6 +1484,8 @@ CliClient::process_command(const string& command_line)
 		    CliPipe *cli_pipe = *iter;
 		    cli_pipe->stop_func(error_msg2);
 		}
+		if (is_interactive())
+		    set_nomore_mode(false);
 		cli_print(c_format("ERROR: %s\n", error_msg.c_str()));
 		return (XORP_ERROR);
 	    }
@@ -1608,6 +1616,8 @@ CliClient::interrupt_command()
     set_page_mode(false);
     reset_page_buffer();
     set_page_buffer_mode(false);
+    if (is_interactive())
+	set_nomore_mode(false);
 
     if (is_waiting_for_data()) {
 	cli_print("\n");            // XXX: new line

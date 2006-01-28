@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.21 2006/01/18 20:18:43 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.22 2006/01/27 02:15:54 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -313,6 +313,22 @@ public:
     void set_can_pipe(bool v) { _can_pipe = v; }
 
     /**
+     * Test if "no-more" (i.e., unpaged) is the default output mode.
+     *
+     * @return true if "no-more" (i.e., unpaged) is the default output mode,
+     * otherwise false.
+     */
+    bool default_nomore_mode() const { return (_default_nomore_mode); }
+
+    /**
+     * Set the default paging mode.
+     *
+     * @param v if true, then "no-more" (i.e., unpaged) is the default
+     * output mode.
+     */
+    void set_default_nomore_mode(bool v) { _default_nomore_mode = v; }
+
+    /**
      * Test if the command actually represents a command argument.
      * 
      * @return true if the command actually represents a command argument.
@@ -504,6 +520,7 @@ private:
     bool		_allow_cd;		// True if we can "cd" to this
     string		_cd_prompt;		// The prompt if we can "cd"
     bool		_can_pipe;		// True if accepts "|" after it
+    bool		_default_nomore_mode;	// True if "no-more" (i.e., unpaged) mode is default
     bool		_is_command_argument;	// True if this is a command argument
     bool		_is_argument_expected;	// True if an argument is expected
     CliCommand		*_cli_command_pipe;	// The "|" pipe command
@@ -516,7 +533,8 @@ public:
 		    bool is_executable, bool can_pipe)
 	: _command_name(command_name), _help_string(help_string),
 	  _is_executable(is_executable), _can_pipe(can_pipe),
-	  _is_command_argument(false), _is_argument_expected(false)
+	  _default_nomore_mode(false), _is_command_argument(false),
+	  _is_argument_expected(false)
     {}
 
     /**
@@ -546,6 +564,22 @@ public:
      * @return true if the command supports pipes, otherwise false.
      */
     bool can_pipe() const { return (_can_pipe); }
+
+    /**
+     * Test if "no-more" (i.e., unpaged) is the default output mode.
+     *
+     * @return true if "no-more" (i.e., unpaged) is the default output mode,
+     * otherwise false.
+     */
+    bool default_nomore_mode() const { return (_default_nomore_mode); }
+
+    /**
+     * Set the default paging mode.
+     *
+     * @param v if true, then "no-more" (i.e., unpaged) is the default
+     * output mode.
+     */
+    void set_default_nomore_mode(bool v) { _default_nomore_mode = v; }
 
     /**
      * Test if the command actually represents a command argument.
@@ -599,6 +633,7 @@ private:
     string	_help_string;		// The help string for the command
     bool	_is_executable;		// True if the command is executable
     bool	_can_pipe;		// True if the command supports pipes
+    bool	_default_nomore_mode;	// True if "no-more" (i.e., unpaged) mode is default
     bool	_is_command_argument;	// True if this is a command argument
     bool	_is_argument_expected;	// True if an argument is expected
     CliCommand::TypeMatchCb _type_match_cb;	// The type matching callback
