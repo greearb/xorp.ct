@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.17 2005/11/05 20:43:49 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.18 2005/12/28 18:57:19 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -176,7 +176,8 @@ class XrlIO : public IO<A>,
      * Called when internal subsystem comes up.
      */
     void component_up(string /*name*/) {
-// 	printf("Component: %s count %d\n", name.c_str(), _component_count + 1);
+//  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
+// 		_component_count + 1);
 	_component_count++;
 	// XXX - Should really get every component to register at
 	// initialisation time and track the individual
@@ -189,7 +190,8 @@ class XrlIO : public IO<A>,
      * Called when internal subsystem goes down.
      */
     void component_down(string /*name*/) {
-// 	printf("Component: %s count %d\n", name.c_str(), _component_count - 1);
+//  	fprintf(stderr, "Component: %s count %d\n", name.c_str(),
+// 		_component_count - 1);
 	_component_count--;
 	if (0 == _component_count)
 	    ServiceBase::set_status(SERVICE_SHUTDOWN);
