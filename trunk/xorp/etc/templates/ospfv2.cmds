@@ -1,9 +1,8 @@
 /* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.6 2005/11/21 18:44:47 atanu Exp $ */
 
 show ospf4 {
-    %command: "ospf/tools/print_neighbours" %help: HELP;
-    %module: ospf4;
-    %tag: HELP "Show Neighbours";
+    %command: "" %help: "Display information about OSPFv2";
+    %module: ospfv2;
 }
 
 show ospf4 database {
