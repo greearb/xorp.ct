@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.189 2006/01/16 13:35:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.190 2006/01/18 09:23:34 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -828,12 +828,15 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
 	}
     }
 
-#ifdef PARANOIA
-    // Make sure its not being announced
+    // Check to see if its already being announced, another LSA may
+    // already have caused this summary to have been announced. Not
+    // absolutely clear how.
     size_t index;
-    if (find_lsa(lsar, index))
-	XLOG_FATAL("LSA should not be announced \n%s", cstring(*_db[index]));
-#endif
+    if (find_lsa(lsar, index)) {
+	XLOG_WARNING("LSA already being announced \n%s", cstring(*_db[index]));
+	return;
+    }
+
     if (!announce) {
 	return;
     }
