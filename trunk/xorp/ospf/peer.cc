@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.216 2006/01/28 01:14:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.217 2006/01/28 01:55:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3870,6 +3870,28 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
 //     send_ack(direct_ack, /*direct*/true, multicast_on_peer);
     _peer.send_direct_acks(get_neighbour_id(), direct_ack);
     _peer.send_delayed_acks(get_neighbour_id(), delayed_ack);
+
+#ifndef	MAX_AGE_IN_DATABASE
+    // MaxAge LSAs are in the retransmission list with no connection
+    // to the database. The LSAs can either be removed due to an ACK
+    // or because of a new LSA. If an incomming LSA matches a MaxAge
+    // LSA remove the MaxAge LSA.
+ again:
+    for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
+	 i != _lsa_rxmt.end(); i++) {
+	if (!(*i)->maxage())
+	    continue;
+	list<Lsa::LsaRef>& lsas = lsup->get_lsas();
+	list<Lsa::LsaRef>::const_iterator j;
+	for (j = lsas.begin(); j != lsas.end(); j++) {
+	    if ((*i).get()->get_header() == (*j).get()->get_header()) {
+		XLOG_INFO("Same LSA\n%s\n%s", cstring(*(*i)), cstring(*(*j)));
+		_lsa_rxmt.erase(i);
+		goto again;
+	    }
+	}
+    }
+#endif
 
     // Have any of the update packets satisfied outstanding requests?
     if (_ls_request_list.empty())
