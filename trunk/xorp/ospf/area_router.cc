@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.190 2006/01/18 09:23:34 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.191 2006/01/30 19:15:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1259,7 +1259,8 @@ AreaRouter<A>::update_network_lsa(PeerID peerid,
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
 			 callback(this, &AreaRouter<A>::refresh_network_lsa,
 				  peerid,
-				  _db[index]));
+				  _db[index],
+				  true /* timer */));
 
     publish_all(_db[index]);
 
@@ -1294,7 +1295,7 @@ AreaRouter<A>::withdraw_network_lsa(PeerID peerid,
 
 template <typename A>
 void
-AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar)
+AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar, bool timer)
 {
     NetworkLsa *nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
     XLOG_ASSERT(nlsa);
@@ -1314,6 +1315,9 @@ AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar)
 		       nlsa->get_header().get_link_state_id(),
 		       nlsa->get_attached_routers(),
 		       network_mask);
+
+    if (!timer)
+	routing_schedule_total_recompute();
 }
 
 inline
@@ -2122,25 +2126,25 @@ AreaRouter<A>::update_router_links()
     // Prime this Router-LSA to be refreshed.
     router_lsa->get_timer() = _ospf.get_eventloop().
 	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
-			 callback(this, &AreaRouter<A>::refresh_router_lsa));
-
-    // This new Router-LSA is being announced, hence something has
-    // changed in a link or a transit capability has
-    // changed. Therefore the routing table needs to be recomputed.
-    // Note: There will be one extra routing computation every half
-    // hour when the LSA is refreshed.
-    routing_schedule_total_recompute();
+			 callback(this, &AreaRouter<A>::refresh_router_lsa,
+				  /* timer */true));
 
     return true;
 }
 
 template <typename A>
 void
-AreaRouter<A>::refresh_router_lsa()
+AreaRouter<A>::refresh_router_lsa(bool timer)
 {
     if (update_router_links()) {
 	// publish the router LSA.
 	_queue.add(_router_lsa);
+
+	// This new Router-LSA is being announced, hence something has
+	// changed in a link or a transit capability has
+	// changed. Therefore the routing table needs to be recomputed.
+	if (!timer)
+	    routing_schedule_total_recompute();
     }
 }
 

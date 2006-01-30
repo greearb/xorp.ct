@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.93 2006/01/15 21:48:07 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.94 2006/01/16 07:05:30 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -150,10 +150,11 @@ class AreaRouter : Subsystem {
     /**
      * Refresh Router-LSA.
      *
-     * Called if any of the flags carried by the LSA change state.
-     * Also used by the refresh timer.
+     * Cause the generation of a new Router-LSA if necessary.
+     *
+     * @param timer true if called by the timer.
      */
-    void refresh_router_lsa();
+    void refresh_router_lsa(bool timer = false);
 
     /**
      * A new route has been added to the routing table it is being
@@ -262,8 +263,14 @@ class AreaRouter : Subsystem {
 
     /**
      * Refresh the Network-LSAs.
+     *
+     * @param peerid the peer that needs its Network-LSA refreshed.
+     * @param lsar the Network-LSA itself.
+     * @param timer is the Network-LSA being refreshed due to the
+     * timer firing?
      */
-    void refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar);
+    void refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar,
+			     bool timer = false);
 
     /**
      * Add a network to be announced.
