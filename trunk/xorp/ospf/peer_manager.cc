@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.103 2006/01/14 06:00:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.104 2006/01/15 21:48:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -377,6 +377,14 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     _peers[peerid]->set_options(area,
 				compute_options(area_router->get_area_type()));
 
+    _peers[peerid]->set_link_status(_ospf.enabled(interface, vif, source));
+
+    // This call needs to be made only once per invocation of OSPF but
+    // at this point we know that the interface mirror is up and running.
+    _ospf.register_address_status(callback(this,
+					   &PeerManager<A>::
+					   address_status_change));
+
     area_router->add_peer(peerid);
 
     return peerid;
@@ -427,6 +435,35 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
     _peers[peerid]->set_state(state);
 
     return true;
+}
+
+template <typename A>
+void
+PeerManager<A>::address_status_change(const string& interface,
+				      const string& vif, A source,
+				      bool state)
+{
+    debug_msg("interface %s vif %s address %s state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+
+    PeerID peerid;
+
+    // All interface/vif/address changes on the host come through
+    // here, ignore the changes that are not for OSPF.
+    try {
+	peerid = get_peerid(interface, vif);
+    } catch(...) {
+	return;
+    }
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return;
+    }
+
+    _peers[peerid]->set_link_status(state);
+
+    return;
 }
 
 template <typename A>

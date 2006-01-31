@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.114 2006/01/12 01:29:30 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.115 2006/01/12 10:24:32 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -172,6 +172,18 @@ class PeerOut {
     bool get_state() const {
 	return _running;
     }
+
+    /**
+     * Set the link status. This is not only the link status but is
+     * the interface/vif/address configured up.
+     */
+    void set_link_status(bool status);
+
+    /**
+     * Dependent on the configured peer status and the link status
+     * decide if the peer should be brought up or taken down.
+     */
+    void peer_change();
 
     /**
      * Used by external and internal entities to transmit packets.
@@ -354,7 +366,16 @@ class PeerOut {
 					//  Areas being served.
     map<OspfTypes::AreaID, Peer<A> *>  _areas; 
 
+    // In order for the peer to be up and running the peer has to be
+    // configured up and the link also has to be up.
+
     bool _running;			// True if the peer is up and running
+    bool _link_status;			// True if the link is up,
+					// cable connected and
+					// interface/vif/address
+					// configured up.
+    bool _status;			// True if the peer has been
+					// configured up.
 
     /**
      * If this IPv4 then set the mask in the hello packet.

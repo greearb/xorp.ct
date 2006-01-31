@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.217 2006/01/28 01:55:13 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.218 2006/01/30 19:02:26 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,7 +103,7 @@ PeerOut<A>:: PeerOut(Ospf<A>& ospf, const string interface, const string vif,
       _interface_mtu(interface_mtu),
       _interface_cost(1), // Must be greater than 0.
       _inftransdelay(1),  // Must be greater than 0.
-      _linktype(linktype), _running(false)
+      _linktype(linktype), _running(false), _link_status(false), _status(false)
 {
     Peer<A> *peer = _areas[area] = new Peer<A>(ospf, *this, area, area_type);
     set_mask(peer);
@@ -223,16 +223,32 @@ void
 PeerOut<A>::set_state(bool state)
 {
     debug_msg("state %s\n", state ? "up" : "down");
+    _status = state;
+    peer_change();
+}
 
+template <typename A>
+void
+PeerOut<A>::set_link_status(bool state)
+{
+    debug_msg("state %s\n", state ? "up" : "down");
+    _link_status = state;
+    peer_change();
+}
+
+template <typename A>
+void
+PeerOut<A>::peer_change()
+{
     switch (_running) {
     case true:
-	if (false == state) {
+	if (false == _status || false == _link_status) {
 	    take_down_peering();
 	    _running = false;
 	}
 	break;
     case false:
-	if (true == state) {
+	if (true == _status && true == _link_status) {
 	    _running = true;
 	    bring_up_peering();
 	}
