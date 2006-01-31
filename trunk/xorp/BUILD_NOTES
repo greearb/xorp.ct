@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.38 2006/01/12 21:33:31 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.39 2006/01/31 05:23:44 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -200,6 +200,13 @@ gmake check
     for details:
         http://www.xorp.org/bugzilla/show_bug.cgi?id=435
     A simple work-around is not to enable compiler's optimization.
+
+  * There is a known problem with building XORP on Linux with gcc-3.3
+    or gcc-3.4 and post-2.15 binutils.
+    It is a bug in gcc, see XORP Bugzilla #497 for details:
+        http://www.xorp.org/bugzilla/show_bug.cgi?id=497
+    Newer versions of the gcc compiler (e.g., gcc-4.0.2 or gcc-4.1) should
+    be used instead.
 
 3.5. Mac OS X
 =============
