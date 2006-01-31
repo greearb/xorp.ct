@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.50 2005/12/21 00:58:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.51 2006/01/28 01:56:26 pavlin Exp $"
 
 
 //
@@ -1370,32 +1370,34 @@ CliClient::process_command(const string& command_line)
 	 ! token.empty();
 	 token = pop_token(token_line)) {
 
-	child_cli_command = parent_cli_command->command_find(token);
-	
-	new_len = token_line.size();
-	syntax_error_offset_prev = syntax_error_offset_next;
-	syntax_error_offset_next += old_len - new_len;
-	old_len = new_len;
+	if (token != "|") {
+	    child_cli_command = parent_cli_command->command_find(token);
 
-	if (child_cli_command != NULL
-	    && (! child_cli_command->is_command_argument())) {
-	    parent_cli_command = child_cli_command;
-	    // Add the token to the command
-	    found_type_match_cb |= child_cli_command->has_type_match_cb();
+	    new_len = token_line.size();
+	    syntax_error_offset_prev = syntax_error_offset_next;
+	    syntax_error_offset_next += old_len - new_len;
+	    old_len = new_len;
 
-	    if (! found_type_match_cb)
-		command_global_name = child_cli_command->global_name();
-	    else
-		command_global_name.push_back(copy_token(token));
-	    continue;
-	}
+	    if (child_cli_command != NULL
+		&& (! child_cli_command->is_command_argument())) {
+		parent_cli_command = child_cli_command;
+		// Add the token to the command
+		found_type_match_cb |= child_cli_command->has_type_match_cb();
+
+		if (! found_type_match_cb)
+		    command_global_name = child_cli_command->global_name();
+		else
+		    command_global_name.push_back(copy_token(token));
+		continue;
+	    }
 	
-	if (parent_cli_command->has_cli_process_callback()) {
-	    // The parent command has processing function, so the rest
-	    // of the tokens could be arguments for that function
-	    child_cli_command = parent_cli_command;
+	    if (parent_cli_command->has_cli_process_callback()) {
+		// The parent command has processing function, so the rest
+		// of the tokens could be arguments for that function
+		child_cli_command = parent_cli_command;
+	    }
 	}
-	
+
 	// Put-back the token and process the arguments after the loop
 	token_line = copy_token(token) + token_line;
 	break;
