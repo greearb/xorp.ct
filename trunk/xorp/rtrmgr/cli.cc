@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.119 2006/01/27 21:30:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.120 2006/01/28 00:49:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2559,10 +2559,12 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		command_name = ttn_child->segname();
 		bool is_executable_tmp = is_executable;
 		bool can_pipe_tmp = can_pipe;
+#if 0
 		if (ttn_child->is_tag()) {
 		    is_executable_tmp = false;
 		    can_pipe_tmp = false;
 		}
+#endif
 		CliCommandMatch ccm(command_name, help_string,
 				    is_executable_tmp, can_pipe_tmp);
 		if (ttn_child->is_leaf_value())
