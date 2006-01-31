@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.105 2005/12/21 20:27:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.106 2006/01/27 21:30:14 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -676,7 +676,7 @@ ConfigTreeNode::check_config_tree(string& error_msg) const
 	     ++li) {
 	    const string& mandatory_config_node = *li;
 	    string value;
-	    if (expand_variable(mandatory_config_node, value) != true) {
+	    if (expand_variable(mandatory_config_node, value, true) != true) {
 		error_msg = c_format("Missing mandatory configuration node "
 				     "\"%s\" required by node \"%s\"\n",
 				     mandatory_config_node.c_str(),
@@ -1426,7 +1426,8 @@ ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
 
 
 bool
-ConfigTreeNode::expand_variable(const string& varname, string& value) const
+ConfigTreeNode::expand_variable(const string& varname, string& value,
+				bool ignore_deleted_nodes) const
 {
 
     VarType type = NONE;
@@ -1436,6 +1437,11 @@ ConfigTreeNode::expand_variable(const string& varname, string& value) const
 	      _segname.c_str(), varname.c_str());
 
     varname_node = find_const_varname_node(varname, type);
+
+    if (ignore_deleted_nodes && (varname_node != NULL)) {
+	if (varname_node->deleted())
+	    return false;
+    }
 
     switch (type) {
     case NONE:
@@ -1555,7 +1561,7 @@ ConfigTreeNode::expand_expression(const string& expression,
 
     // Expand the variable
     string tmp_value;
-    if (expand_variable(tmp_expr, tmp_value) != true)
+    if (expand_variable(tmp_expr, tmp_value, true) != true)
 	return false;
 
     if (tmp_value == "false")

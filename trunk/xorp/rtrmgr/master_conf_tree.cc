@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.68 2005/12/17 02:02:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.69 2005/12/21 09:43:00 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -956,7 +956,8 @@ MasterConfigTree::remove_tmp_config_file()
     string tmp_config_filename_value;
 
     if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
-				    tmp_config_filename_value)
+				    tmp_config_filename_value,
+				    false)
 	!= true) {
 	tmp_config_filename_value = "";
     } else {
@@ -1601,7 +1602,8 @@ MasterConfigTree::load_config_file_received_cb(bool success,
     //
     string rtrmgr_config_filename;
     if (root_node().expand_variable(RTRMGR_CONFIG_FILENAME_VARNAME,
-				    rtrmgr_config_filename)
+				    rtrmgr_config_filename,
+				    false)
 	!= true) {
 	success = false;
 	error_msg = c_format("internal variable %s not found",

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.16 2005/12/09 01:37:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.17 2005/12/21 20:27:38 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -189,7 +189,7 @@ AllowOptionsCommand::verify_variables(const ConfigTreeNode& ctn,
 
     for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
 	const string& varname = iter->first;
-	if (ctn.expand_variable(varname, value) != true) {
+	if (ctn.expand_variable(varname, value, false) != true) {
 	    // Error: cannot expand the variable
 	    error_msg = c_format("Variable \"%s\" is not defined.",
 				 varname.c_str());
@@ -560,7 +560,7 @@ AllowRangeCommand::verify_variables(const ConfigTreeNode& ctn,
 
     for (iter = _filters.begin(); iter != _filters.end(); ++iter) {
 	const string& varname = iter->first;
-	if (ctn.expand_variable(varname, value) != true) {
+	if (ctn.expand_variable(varname, value, false) != true) {
 	    // Error: cannot expand the variable
 	    error_msg = c_format("Variable \"%s\" is not defined.",
 				 varname.c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.61 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.62 2005/11/27 05:43:36 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -717,7 +717,8 @@ XrlAction::expand_vars(const TreeNode& tn,
 	    // expand variable
 	    string expanded_var;
 	    debug_msg("expanding varname: %s\n", varname.c_str());
-	    bool expand_done = tn.expand_variable(varname, expanded_var);
+	    bool expand_done = tn.expand_variable(varname, expanded_var,
+						  false);
 	    if (expand_done) {
 		debug_msg("expanded to: %s\n", expanded_var.c_str());
 		// expanded_var = xrlatom_encode_value(expanded_var);
@@ -1206,7 +1207,7 @@ ProgramAction::expand_program_variables(const TreeNode& tn,
 		return (XORP_ERROR);
 	    }
 	} else if (segment[0] == '$') {
-	    expand_done = tn.expand_variable(segment, expanded_var);
+	    expand_done = tn.expand_variable(segment, expanded_var, false);
 	    if (expand_done) {
 		word += unquote(expanded_var);
 	    } else {

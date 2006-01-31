@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.72 2006/01/27 21:30:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.73 2006/01/31 02:44:54 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -692,9 +692,12 @@ TemplateTreeNode::name_is_variable() const
 }
 
 bool
-TemplateTreeNode::expand_variable(const string& varname, string& value) const
+TemplateTreeNode::expand_variable(const string& varname, string& value,
+				  bool ignore_deleted_nodes) const
 {
     const TemplateTreeNode* varname_node;
+
+    UNUSED(ignore_deleted_nodes);
 
     varname_node = find_const_varname_node(varname);
     if (varname_node == NULL)
@@ -741,7 +744,7 @@ TemplateTreeNode::expand_expression(const string& expression,
 
     // Expand the variable
     string tmp_value;
-    if (expand_variable(tmp_expr, tmp_value) != true)
+    if (expand_variable(tmp_expr, tmp_value, true) != true)
 	return false;
 
     if (tmp_value == "false")

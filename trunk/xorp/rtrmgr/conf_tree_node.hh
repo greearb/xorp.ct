@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.58 2005/11/03 17:18:56 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.59 2006/01/27 21:30:14 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -152,7 +152,8 @@ public:
     ConfigTreeNode* find_node(const list<string>& path);
     string subtree_str() const;
 
-    bool expand_variable(const string& varname, string& value) const;
+    bool expand_variable(const string& varname, string& value,
+			 bool ignore_deleted_nodes) const;
     bool expand_variable_to_full_varname(const string& varname,
 					 string& full_varname) const;
     bool expand_expression(const string& expression, string& value) const;

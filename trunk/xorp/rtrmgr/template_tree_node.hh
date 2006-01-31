@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.45 2006/01/14 00:42:36 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.46 2006/01/27 21:30:14 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -117,7 +117,8 @@ public:
     bool check_variable_name(const vector<string>& parts, size_t part) const;
     string get_module_name_by_variable(const string& varname) const;
     string get_default_target_name_by_variable(const string& varname) const;
-    bool expand_variable(const string& varname, string& value) const;
+    bool expand_variable(const string& varname, string& value,
+			 bool ignore_deleted_nodes) const;
     bool expand_expression(const string& expression, string& value) const;
     TemplateTreeNode* find_varname_node(const string& varname);
     const TemplateTreeNode* find_const_varname_node(const string& varname) const;
