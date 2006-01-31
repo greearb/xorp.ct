@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.80 2006/01/11 23:31:26 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.81 2006/01/12 10:24:32 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -437,6 +437,19 @@ class Ospf {
      * @return true if it is.
      */
     bool enabled(const string& interface, const string& vif, A address);
+
+    /**
+     * Add a callback for tracking the interface/vif/address status.
+     *
+     * The callback will be invoked whenever the status of the tuple
+     * (interface, vif, address) is changed from disabled to enabled
+     * or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_address_status(typename IO<A>::AddressStatusCb cb) {
+	_io->register_address_status(cb);
+    }
 
     /**
      * @return prefix length for this address.
