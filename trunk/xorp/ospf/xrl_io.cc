@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.27 2005/12/21 22:50:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.28 2005/12/28 18:57:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -615,7 +615,7 @@ XrlIO<A>::leave_multicast_group_cb(const XrlError& xrl_error, string interface,
     case BAD_ARGS:
     case COMMAND_FAILED:
     case INTERNAL_ERROR:
-	XLOG_FATAL("Cannot leave a multicast group on interface %s vif %s: %s",
+	XLOG_ERROR("Cannot leave a multicast group on interface %s vif %s: %s",
 		   interface.c_str(), vif.c_str(), xrl_error.str().c_str());
 	break;
     }
