@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/task.cc,v 1.56 2005/11/03 17:27:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/task.cc,v 1.57 2005/12/17 02:02:58 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1508,15 +1508,14 @@ TaskProgramItem::execute(string& errmsg)
 	find_executable_filename_and_arguments(program_request,
 					       executable_filename,
 					       program_arguments);
-	program_request = executable_filename;
-	if (! program_arguments.empty())
-	    program_request = program_request + " " + program_arguments;
 	if (executable_filename.empty()) {
 	    errmsg = c_format("Could not find program %s",
 			      program_request.c_str());
 	    return (false);
 	}
-
+	program_request = executable_filename;
+	if (! program_arguments.empty())
+	    program_request = program_request + " " + program_arguments;
 	XLOG_TRACE(_verbose, "Executing program: >%s<\n",
 		   program_request.c_str());
 	_run_command = new RunShellCommand(
