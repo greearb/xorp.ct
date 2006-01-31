@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.71 2005/12/21 20:27:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.72 2006/01/27 21:30:14 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1443,7 +1443,7 @@ UIntTemplate::type_match(const string& orig, string& error_msg) const
 {
     string s = strip_quotes(orig);
 
-    for (size_t i = 0; i < s.length(); i++)
+    for (size_t i = 0; i < s.length(); i++) {
 	if (s[i] < '0' || s[i] > '9') {
 	    if (s[i]=='-') {
 		error_msg = "value cannot be negative";
@@ -1454,6 +1454,7 @@ UIntTemplate::type_match(const string& orig, string& error_msg) const
 	    }
 	    return false;
 	}
+    }
     return true;
 }
 
@@ -1743,15 +1744,21 @@ IPv4NetTemplate::type_match(const string& s, string& error_msg) const
     string tmp = strip_quotes(s);
 
     if (tmp.empty()) {
-	error_msg = "value must be a subnet in address/prefix-length form";
+	error_msg = "value must be an IPv4 subnet in address/prefix-length form";
 	return false;
     }
 
     try {
-	IPv4Net* ipv4net = new IPv4Net(tmp.c_str());
-	delete ipv4net;
+	IPv4Net ipv4net = IPv4Net(tmp.c_str());
+	string::size_type slash = tmp.find('/');
+	XLOG_ASSERT(slash != string::npos);
+	IPv4 ipv4(tmp.substr(0, slash).c_str());
+	if (ipv4 != ipv4net.masked_addr()) {
+	    error_msg = "there is a mismatch between the masked address value and the prefix length";
+	    return false;
+	}
     } catch (InvalidString) {
-	error_msg = "value must be a subnet in address/prefix-length form";
+	error_msg = "value must be an IPv4 subnet in address/prefix-length form";
 	return false;
     } catch (InvalidNetmaskLength) {
 	error_msg = c_format("prefix length must be an integer between "
@@ -1944,8 +1951,14 @@ IPv6NetTemplate::type_match(const string& s, string& error_msg) const
     }
 
     try {
-	IPv6Net* ipv6net = new IPv6Net(tmp.c_str());
-	delete ipv6net;
+	IPv6Net ipv6net = IPv6Net(tmp.c_str());
+	string::size_type slash = tmp.find('/');
+	XLOG_ASSERT(slash != string::npos);
+	IPv6 ipv6(tmp.substr(0, slash).c_str());
+	if (ipv6 != ipv6net.masked_addr()) {
+	    error_msg = "there is a mismatch between the masked address value and the prefix length";
+	    return false;
+	}
     } catch (InvalidString) {
 	error_msg = "value must be an IPv6 subnet in address/prefix-length "
 	    "form";
