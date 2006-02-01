@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.19 2005/03/25 02:54:42 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.20 2005/08/31 01:37:34 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -67,7 +67,7 @@ public:
 	  _ifname(ifname), _vifname(vifname),
 	  _metric(metric), 
 	  _route_type(IDLE_ROUTE), _is_ignored(false),
-	  _is_filtered(false) {}
+	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
     /**
      * Constructor for a given IPv6 static route.
@@ -94,7 +94,7 @@ public:
 	  _ifname(ifname), _vifname(vifname),
 	  _metric(metric),
 	  _route_type(IDLE_ROUTE), _is_ignored(false),
-	  _is_filtered(false) {}
+	  _is_filtered(false), _is_accepted_by_nexthop(false) {}
 
     /**
      * Equality Operator
@@ -287,18 +287,46 @@ public:
     void set_policytags(const PolicyTags& tags) { _policytags = tags; }
 
     /**
-     * @return whether route has been rejected by policy filter.
+     * Test whether the route has been rejected by a policy filter.
+     *
+     * @return true if route has been rejected by a policy filter, otherwise
+     * false.
      */
     bool is_filtered() const { return _is_filtered; }
 
     /**
-     * Sets whether the route is to be considered filtered [rejected by the
-     * policy filter].
+     * Set a flag that indicates whether the route is to be considered
+     * filtered [rejected by the policy filter].
      *
-     * @param v true if the route should be considered rejected.
+     * @param v true if the route should be considered filtered, otherwise
+     * false.
      */
     void set_filtered(bool v) { _is_filtered = v; }
 
+    /**
+     * Test whether the route is accepted based on its next-hop information.
+     *
+     * @return true if the route is accepted based on its next-hop
+     * information, otherwise false.
+     */
+    bool is_accepted_by_nexthop() const { return _is_accepted_by_nexthop; }
+
+    /**
+     * Set a flag that indicates whether the route is accepted based
+     * on its next-hop information.
+     *
+     * @param v true if the route is accepted based on its next-hop
+     * information, otherwise false.
+     */
+    void set_accepted_by_nexthop(bool v) { _is_accepted_by_nexthop = v; }
+
+    /**
+     * Test whether the route is accepted for transmission to the RIB.
+     *
+     * @return true if route is accepted for transmission to the RIB,
+     * otherwise false.
+     */
+    bool is_accepted_by_rib() const;
 
 private:
     bool	_unicast;
@@ -311,7 +339,8 @@ private:
     enum RouteType { IDLE_ROUTE, ADD_ROUTE, REPLACE_ROUTE, DELETE_ROUTE };
     RouteType	_route_type;
     bool	_is_ignored;	// True if the route is to be ignored
-    bool	_is_filtered;	// True if rejected by policy filter
+    bool	_is_filtered;	// True if rejected by a policy filter
+    bool	_is_accepted_by_nexthop; // True if the route is accepted based on its next-hop information
     PolicyTags	_policytags;
 };
 
@@ -658,6 +687,18 @@ private:
     int delete_route(const StaticRoute& static_route, string& error_msg);
 
     /**
+     * Prepare a copy of a route for transmission to the RIB.
+     *
+     * Note that the original route will be modified as appropriate.
+     *
+     * @param orig_route the original route to prepare.
+     * @param copy_route the copy of the original route prepared for
+     * transmission to the RIB.
+     */
+    void prepare_route_for_transmission(StaticRoute& orig_route,
+					StaticRoute& copy_route);
+
+    /**
      * Inform the RIB about a route change.
      *
      * This is a pure virtual function, and it must be implemented
@@ -692,10 +733,19 @@ private:
      * Do policy filtering on a route.
      *
      * @param route route to filter.
-     * @return true if route was accepted by policy filter, false otherwise.
+     * @return true if route was accepted by policy filter, otherwise false.
      */
     bool do_filtering(StaticRoute& route);
-    
+
+    /**
+     * Test whether a route is accepted based on its next-hop information.
+     *
+     * @param route the route to test.
+     * @return true if the route is accepted based on its next-hop
+     * information, otherwise false.
+     */
+    bool is_accepted_by_nexthop(const StaticRoute& route) const;
+
     /**
      * Inform the RIB about a route.
      *

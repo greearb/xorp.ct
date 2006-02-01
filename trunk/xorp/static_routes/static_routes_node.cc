@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.29 2005/11/01 07:31:54 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.30 2005/11/02 02:27:22 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -298,6 +298,8 @@ void
 StaticRoutesNode::updates_made()
 {
     list<StaticRoute>::iterator route_iter;
+    list<StaticRoute *> add_routes, replace_routes, delete_routes;
+    list<StaticRoute *>::iterator pending_iter;
 
     for (route_iter = _static_routes.begin();
 	 route_iter != _static_routes.end();
@@ -354,57 +356,88 @@ StaticRoutesNode::updates_made()
 	    continue;			// Nothing changed
 	}
 
-	do {
-	    if ((! is_old_up) && (! is_new_up)) {
-		//
-		// The interface s still down, so nothing to do
-		//
-		break;
-	    }
-	    if ((! is_old_up) && (is_new_up)) {
-		//
-		// The interface is now up, hence add the route
-		//
-		inform_rib_route_change(static_route);
-		break;
-	    }
-	    if ((is_old_up) && (! is_new_up)) {
-		//
-		// The interface went down, hence cancel all pending requests,
-		// and withdraw the route.
-		//
-		cancel_rib_route_change(static_route);
-
-		StaticRoute tmp_route(static_route);
-		tmp_route.set_delete_route();	// XXX: mark as deleted route
-		inform_rib_route_change(tmp_route);
-		break;
-	    }
-	    if (is_old_up && is_new_up) {
-		//
-		// The interface remains up, hence probably the interface or
-		// the vif name has changed.
-		//
-		if ((old_ifname == new_ifname) && (old_vifname == new_vifname))
-		    break;
-
-		//
-		// Delete the route and then add it again so the information
-		// in the RIB will be updated.
-		//
-		StaticRoute tmp_route(static_route);
-		tmp_route.set_delete_route();	// XXX: mark as deleted route
-		inform_rib_route_change(tmp_route);	// Delete the route
-		inform_rib_route_change(static_route);	// Add the route
-	    }
-	    break;
-	} while (false);
+	if ((! is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface s still down, so nothing to do
+	    //
+	    continue;
+	}
+	if ((! is_old_up) && (is_new_up)) {
+	    //
+	    // The interface is now up, hence add the route
+	    //
+	    add_routes.push_back(&static_route);
+	    continue;
+	}
+	if ((is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface went down, hence cancel all pending requests,
+	    // and withdraw the route.
+	    //
+	    delete_routes.push_back(&static_route);
+	    continue;
+	}
+	if (is_old_up && is_new_up) {
+	    //
+	    // The interface remains up, hence probably the interface or
+	    // the vif name has changed.
+	    // Delete the route and then add it again so the information
+	    // in the RIB will be updated.
+	    //
+	    replace_routes.push_back(&static_route);
+	    continue;
+	}
     }
 
     //
     // Update the local copy of the interface tree
     //
     _iftree = ifmgr_iftree();
+
+    //
+    // Process all pending "add route" requests
+    //
+    for (pending_iter = add_routes.begin();
+	 pending_iter != add_routes.end();
+	 ++pending_iter) {
+	StaticRoute& orig_route = *(*pending_iter);
+	StaticRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_add_route();
+	inform_rib(copy_route);
+    }
+
+    //
+    // Process all pending "replace route" requests
+    //
+    for (pending_iter = replace_routes.begin();
+	 pending_iter != replace_routes.end();
+	 ++pending_iter) {
+	StaticRoute& orig_route = *(*pending_iter);
+	StaticRoute copy_route = orig_route;
+	// First delete the route, then add the route
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_delete_route();
+	inform_rib(copy_route);
+	copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_add_route();
+	inform_rib(copy_route);
+    }
+
+    //
+    // Process all pending "delete route" requests
+    //
+    for (pending_iter = delete_routes.begin();
+	 pending_iter != delete_routes.end();
+	 ++pending_iter) {
+	StaticRoute& orig_route = *(*pending_iter);
+	cancel_rib_route_change(orig_route);
+	StaticRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_delete_route();
+	inform_rib(copy_route);
+    }
 }
 
 /**
@@ -617,11 +650,11 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     //
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
-	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != updated_route.network())
+	StaticRoute& orig_route = *iter;
+	if (orig_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != updated_route.unicast())
-	    || (tmp_route.multicast() != updated_route.multicast())) {
+	if ((orig_route.unicast() != updated_route.unicast())
+	    || (orig_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 	error_msg = c_format("Cannot add %s route for %s: "
@@ -638,24 +671,16 @@ StaticRoutesNode::add_route(const StaticRoute& static_route,
     _static_routes.push_back(updated_route);
 
     //
-    // Do policy filtering
+    // Create a copy of the route and inform the RIB if necessary
     //
-    StaticRoute& added_route = _static_routes.back();
+    StaticRoute& orig_route = _static_routes.back();
+    StaticRoute copy_route = orig_route;
+    prepare_route_for_transmission(orig_route, copy_route);
 
     //
-    // We do not want to modify original route, so we may re-filter routes on
-    // filter configuration changes. Hence, copy route.
+    // Inform the RIB about the change
     //
-    StaticRoute copy_route = added_route;
-    
-    bool accepted = do_filtering(copy_route);
-
-    // Tag the original route as filtered or not
-    added_route.set_filtered(!accepted);
-
-    // Inform RIB about the possibly modified route if it was accepted 
-    if (accepted)
-	inform_rib(copy_route);
+    inform_rib(copy_route);
 
     return XORP_OK;
 }
@@ -694,39 +719,44 @@ StaticRoutesNode::replace_route(const StaticRoute& static_route,
     //
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
-	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != updated_route.network())
+	StaticRoute& orig_route = *iter;
+	if (orig_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != updated_route.unicast())
-	    || (tmp_route.multicast() != updated_route.multicast())) {
+	if ((orig_route.unicast() != updated_route.unicast())
+	    || (orig_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 
 	//
 	// Route found. Overwrite its value.
 	//
-	bool was_filtered = tmp_route.is_filtered();
-	tmp_route = updated_route;
+	bool was_accepted = orig_route.is_accepted_by_rib();
+	orig_route = updated_route;
 
-	// Do policy filtering
-	StaticRoute copy_route = updated_route;
-	bool accepted = do_filtering(copy_route);
-	tmp_route.set_filtered(!accepted);
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
+	StaticRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
 
-	// Decide what to do
-	if (accepted) {
-	    if (was_filtered) {
-		copy_route.set_add_route();
+	//
+	// XXX: If necessary, change the type of the route.
+	// E.g., "replace route" may become "add route" or "delete route".
+	//
+	if (copy_route.is_accepted_by_rib()) {
+	    if (was_accepted) {
+		copy_route.set_replace_route();
 	    } else {
+		copy_route.set_add_route();
 	    }
 	} else {
-	    if (was_filtered) {
-		return XORP_OK;
-	    } else {
+	    if (was_accepted) {
 		copy_route.set_delete_route();
+	    } else {
+		return XORP_OK;
 	    }
 	}
-	
+
 	//
 	// Inform the RIB about the change
 	//
@@ -779,23 +809,29 @@ StaticRoutesNode::delete_route(const StaticRoute& static_route,
     //
     list<StaticRoute>::iterator iter;
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
-	StaticRoute& tmp_route = *iter;
-	if (tmp_route.network() != updated_route.network())
+	StaticRoute& orig_route = *iter;
+	if (orig_route.network() != updated_route.network())
 	    continue;
-	if ((tmp_route.unicast() != updated_route.unicast())
-	    || (tmp_route.multicast() != updated_route.multicast())) {
+	if ((orig_route.unicast() != updated_route.unicast())
+	    || (orig_route.multicast() != updated_route.multicast())) {
 	    continue;
 	}
 
 	//
 	// Route found. Create a copy of it and erase it.
 	//
-	StaticRoute copy_route = tmp_route;
-	copy_route.set_delete_route();
+	bool was_accepted = orig_route.is_accepted_by_rib();
+	StaticRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
 	_static_routes.erase(iter);
 
-	// If the route is filtered, then RIB doesn't know about it.
-	if (copy_route.is_filtered())
+	copy_route.set_delete_route();
+
+	//
+	// If the original route wasn't transmitted, then the RIB doesn't
+	// know about it.
+	//
+	if (! was_accepted)
 	    return XORP_OK;
 
 	//
@@ -840,6 +876,18 @@ StaticRoute::is_valid_entry(string& error_msg) const
     return true;
 }
 
+/**
+ * Test whether the route is accepted for transmission to the RIB.
+ *
+ * @return true if route is accepted for transmission to the RIB,
+ * otherwise false.
+ */
+bool
+StaticRoute::is_accepted_by_rib() const
+{
+    return (is_accepted_by_nexthop() && (! is_filtered()));
+}
+
 void
 StaticRoutesNode::configure_filter(const uint32_t& filter, const string& conf)
 {
@@ -859,42 +907,42 @@ StaticRoutesNode::push_routes()
     // XXX: not a background task
     for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
 	StaticRoute& orig_route = *iter;
-	bool was_filtered = orig_route.is_filtered();
+	bool was_accepted = orig_route.is_accepted_by_rib();
 
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
 	StaticRoute copy_route = orig_route;
-	bool accepted = do_filtering(copy_route);
+	prepare_route_for_transmission(orig_route, copy_route);
 
-	debug_msg("[STATIC] Push route: %s, was filtered: %d, accepted %d\n",
-		  orig_route.network().str().c_str(),
-		  was_filtered, accepted);
-
-	orig_route.set_filtered(!accepted);
-
-	if (accepted) {
-	    if (was_filtered) {
-		copy_route.set_add_route();
-	    } else {
+	//
+	// XXX: If necessary, change the type of the route.
+	// E.g., "replace route" may become "add route" or "delete route".
+	//
+	if (copy_route.is_accepted_by_rib()) {
+	    if (was_accepted) {
 		copy_route.set_replace_route();
+	    } else {
+		copy_route.set_add_route();
 	    }
 	} else {
-	    // not accepted
-	    if (was_filtered) {
-		continue;
-	    } else {
+	    if (was_accepted) {
 		copy_route.set_delete_route();
+	    } else {
+		continue;
 	    }
 	}
 
+	//
+	// Inform the RIB about the change
+	//
 	inform_rib(copy_route);
     }
 }
 
-void
-StaticRoutesNode::inform_rib(const StaticRoute& route)
+bool
+StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
 {
-    //
-    // Inform the RIB about the change
-    //
     if (route.is_interface_route()) {
 	const IfMgrIfAtom* if_atom;
 	const IfMgrVifAtom* vif_atom;
@@ -908,13 +956,51 @@ StaticRoutesNode::inform_rib(const StaticRoute& route)
 	    is_up = true;
 	}
 	if (is_up) {
-	    inform_rib_route_change(route);
+	    return (true);
 	}
     } else {
 	string ifname, vifname;
 	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname)) {
-	    inform_rib_route_change(route);
+	    return (true);
 	}
+    }
+
+    return (false);
+}
+
+void
+StaticRoutesNode::prepare_route_for_transmission(StaticRoute& orig_route,
+						 StaticRoute& copy_route)
+{
+    //
+    // We do not want to modify original route, so we may re-filter routes on
+    // filter configuration changes. Hence, copy the route.
+    //
+    copy_route = orig_route;
+
+    // Do policy filtering and other acceptance tests
+    bool filtered = (! do_filtering(copy_route));
+    bool accepted_by_nexthop = is_accepted_by_nexthop(copy_route);
+    copy_route.set_filtered(filtered);
+    copy_route.set_accepted_by_nexthop(accepted_by_nexthop);
+
+    // Tag the original route
+    orig_route.set_filtered(filtered);
+    orig_route.set_accepted_by_nexthop(accepted_by_nexthop);
+}
+
+void
+StaticRoutesNode::inform_rib(const StaticRoute& route)
+{
+    //
+    // Inform the RIB about the change
+    //
+    if (route.is_add_route() || route.is_replace_route()) {
+	if (route.is_accepted_by_rib())
+	    inform_rib_route_change(route);
+    }
+    if (route.is_delete_route()) {
+	inform_rib_route_change(route);
     }
 }
 
