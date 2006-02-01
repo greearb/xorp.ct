@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.61 2006/01/12 08:41:03 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.62 2006/01/13 20:34:57 atanu Exp $
 #
 
 TODO
@@ -177,6 +177,15 @@ transitions.
 gets called. The vlink database has knowledge of a peer that has been
 removed and a warning is printed. Modify the code to remove peerids
 from the vlink database when a peer is removed.
+
+48) If the user disables an address that OSPF is using via the xorpsh
+then the interface/peer is taken down. Part of the interface down
+process involves leaving multicast groups. When leaving a multicast
+group in IPv4 the interface address is used as the key to the
+kernel. Disabling an address via the xorpsh removes the address from
+the kernel the subsequent attempt to leave the multicast group fails
+generating an error. OSPF in the IPv4 case should check if the address
+(key) is still enabled before attempting to leave a group.
 
 Possible issues
 ~~~~~~~~~~~~~~~
