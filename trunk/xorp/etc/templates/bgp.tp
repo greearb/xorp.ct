@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.77 2005/12/21 22:34:11 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.78 2006/01/27 21:35:34 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -128,8 +128,9 @@ policy {
 		was-aggregated: bool;
 	    }
 	    then {
-		nexthop4: ipv4;
-		nexthop6: ipv6;
+/* see: http://www.xorp.org/bugzilla/show_bug.cgi?id=500 */
+/*		nexthop4: ipv4;*/
+/*		nexthop6: ipv6;*/
 
 		as-path-prepend: u32;
 		as-path-expand: u32;
@@ -750,6 +751,7 @@ policy {
 	    } /* to */
 
 	    then {
+/*
 		nexthop4 {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
@@ -758,6 +760,7 @@ policy {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
+*/
 		as-path-prepend {
 			%set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) add aspath;";
 			%delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.56 2005/12/20 13:00:38 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.57 2005/12/21 10:17:05 atanu Exp $
 #
 
 #
@@ -935,7 +935,8 @@ test27_ipv6()
 test28()
 {
     echo "TEST28 - Verify that routes originated by BGP reach an EBGP peer"
-    echo "Also verify that the nexthop in the originate route is honoured"
+    echo "Also verify that the nexthop is rewritten and the provided nexthop"
+    echo "is ignored"
 
     coord reset
     coord target $HOST $PORT2
@@ -948,7 +949,7 @@ test28()
 
     coord peer1 expect packet update \
 	origin 2 \
-	nexthop 20.20.20.20 \
+	nexthop 192.150.187.78 \
 	aspath 65008 \
 	med 1 \
 	nlri 10.10.10.0/24

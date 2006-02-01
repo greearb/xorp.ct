@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.44 2005/12/20 09:27:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.45 2005/12/20 11:26:03 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -231,11 +231,13 @@ const InternalMessage<A>*
 NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 				bool &modified) const
 {
+#if	0
     // If we originated this route don't rewrite the nexthop
     // Locally originated aggregates are exception, they need NH rewrite
     if (rtmsg->origin_peer()->originate_route_handler() &&
 	rtmsg->route()->aggr_prefix_len() != SR_AGGR_EBGP_AGGREGATE)
 	return rtmsg;
+#endif
 
     //Form a new path attribute list containing the new nexthop
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
