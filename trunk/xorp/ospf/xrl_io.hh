@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.18 2005/12/28 18:57:19 atanu Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.19 2006/01/30 21:13:18 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -230,35 +230,49 @@ class XrlIO : public IO<A>,
     bool disable_interface_vif(const string& interface, const string& vif);
 
     /**
-     * Test whether this interface is enabled.
+     * Test whether an interface is enabled.
      *
+     * @param interface the name of the interface to test.
      * @return true if it exists and is enabled, otherwise false.
      */
     bool is_interface_enabled(const string& interface) const;
 
     /**
-     * Test whether this interface/vif is enabled.
+     * Test whether an interface/vif is enabled.
      *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
      * @return true if it exists and is enabled, otherwise false.
      */
     bool is_vif_enabled(const string& interface, const string& vif) const;
 
     /**
-     * Test whether this interface/vif/address is enabled.
+     * Test whether an interface/vif/address is enabled.
      *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
+     * @param address the address to test.
      * @return true if it exists and is enabled, otherwise false.
      */
     bool is_address_enabled(const string& interface, const string& vif,
 			    const A& address) const;
 
     /**
-     * @return prefix length for this address.
+     * Obtain the subnet prefix length for an interface/vif/address.
+     *
+     * @param interface the name of the interface.
+     * @param vif the name of the vif.
+     * @param address the address.
+     * @return the subnet prefix length for the address.
      */
     uint32_t get_prefix_length(const string& interface, const string& vif,
 			       A address);
 
     /**
-     * @return the mtu for this interface.
+     * Obtain the MTU for an interface.
+     *
+     * @param the name of the interface.
+     * @return the mtu for the interface.
      */
     uint32_t get_mtu(const string& interface);
 
@@ -330,12 +344,12 @@ class XrlIO : public IO<A>,
      * A method invoked when the status of a service changes.
      *
      * @param service the service whose status has changed.
-     * @param old_status the old status
+     * @param old_status the old status.
      * @param new_status the new status.
      */
-    void status_change(ServiceBase*  service,
-		       ServiceStatus old_status,
-		       ServiceStatus new_status) {
+    void status_change(ServiceBase*	service,
+		       ServiceStatus	old_status,
+		       ServiceStatus	new_status) {
 	if (old_status == new_status)
 	    return;
 	if (SERVICE_RUNNING == new_status)
@@ -344,19 +358,37 @@ class XrlIO : public IO<A>,
 	    component_down(service->service_name());
 
     }
+
+    /**
+     * Obtain a pointer to the interface manager service base.
+     *
+     * @return a pointer to the interface manager service base.
+     */
     const ServiceBase* ifmgr_mirror_service_base() const {
 	return dynamic_cast<const ServiceBase*>(&_ifmgr);
     }
+
+    /**
+     * Obtain a reference to the interface manager's interface tree.
+     *
+     * @return a reference to the interface manager's interface tree.
+     */
     const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr.iftree(); }
 
-    //
-    // IfMgrHintObserver methods
-    //
+    /**
+     * An IfMgrHintObserver method invoked when the initial interface tree
+     * information has been received.
+     */
     void tree_complete();
+
+    /**
+     * An IfMgrHintObserver method invoked whenever the interface tree
+     * information has been changed.
+     */
     void updates_made();
 
     //
-    // XRL allbacks
+    // XRL callbacks
     //
     void send_cb(const XrlError& xrl_error, string interface, string vif);
     void enable_interface_vif_cb(const XrlError& xrl_error, string interface,
