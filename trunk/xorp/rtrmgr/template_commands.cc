@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.62 2005/11/27 05:43:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.63 2006/01/31 23:47:50 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -1263,7 +1263,11 @@ Command::~Command()
 
 void
 Command::add_action(const list<string>& action, const XRLdb& xrldb)
+    throw (ParseError)
 {
+    if (action.empty())
+	return;		// XXX: no action to perform
+
     if (action.front() == "xrl") {
 	_actions.push_back(new XrlAction(_template_tree_node, action, xrldb));
 	return;
