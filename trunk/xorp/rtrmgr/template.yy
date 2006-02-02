@@ -10,9 +10,10 @@
 
 #include "template_tree_node.hh"
 #include "template_tree.hh"
-extern void add_cmd_adaptor(char *cmd, TemplateTree* tt);
-extern void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt);
+extern void add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError);
+extern void add_cmd_action_adaptor(const string& cmd,
+				   const list<string>& action,
+				   TemplateTree* tt) throw (ParseError);
 
 /* XXX: sigh, the -p flag to yacc should do this for us */
 #define yystacksize tpltstacksize
@@ -212,7 +213,7 @@ command:	cmd_val
 cmd_val:	command_name COLON cmd_list END
 		;
 
-cmd_default:	command_name COLON END
+cmd_default:	command_name COLON END { end_cmd(); }
 		;
 
 command_name:	COMMAND { add_cmd($1); }
