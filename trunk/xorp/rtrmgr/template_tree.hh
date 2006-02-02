@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree.hh,v 1.20 2005/11/27 05:43:37 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree.hh,v 1.21 2006/01/14 00:42:36 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_HH__
 #define __RTRMGR_TEMPLATE_TREE_HH__
@@ -51,8 +51,9 @@ public:
     const TemplateTreeNode* 
         find_node_by_type(const list<ConfPathSegment>& path_segments) const;
     string path_as_string();
-    void add_cmd(char* cmd);
-    void add_cmd_action(const string& cmd, const list<string>& action);
+    void add_cmd(char* cmd) throw (ParseError);
+    void add_cmd_action(const string& cmd, const list<string>& action)
+	throw (ParseError);
     string tree_str() const;
     void register_module(const string& name, ModuleCommand* mc);
     ModuleCommand* find_module(const string& name);

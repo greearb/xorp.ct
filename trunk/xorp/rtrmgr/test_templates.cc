@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.14 2005/03/25 02:54:40 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_templates.cc,v 1.16 2005/08/18 15:54:28 bms Exp $"
 
 
 #include <signal.h>
@@ -74,14 +74,16 @@ usage(const char* name)
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+void
+add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
     tt->add_cmd(cmd);
 }
 
 
-void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt)
+void
+add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+		       TemplateTree* tt) throw (ParseError)
 {
     tt->add_cmd_action(cmd, action);
 }

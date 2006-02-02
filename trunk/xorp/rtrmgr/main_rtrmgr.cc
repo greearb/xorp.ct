@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.66 2005/12/17 02:02:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.67 2006/01/14 01:35:26 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -128,15 +128,15 @@ display_defaults()
 // the parser to call methods on the right version of the TemplateTree
 
 void
-add_cmd_adaptor(char *cmd, TemplateTree* tt)
+add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd(cmd);
 }
 
 
 void
-add_cmd_action_adaptor(const string& cmd, 
-		       const list<string>& action, TemplateTree* tt)
+add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+		       TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
 }

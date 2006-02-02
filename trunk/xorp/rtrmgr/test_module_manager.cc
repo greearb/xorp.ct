@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.17 2005/11/03 17:27:52 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.18 2006/01/14 01:35:26 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -40,18 +40,19 @@ module_run_done(bool success)
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+void
+add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
-    //    ((MasterTemplateTree*)tt)->add_cmd(cmd);
+    // ((MasterTemplateTree*)tt)->add_cmd(cmd);
     UNUSED(cmd);
     UNUSED(tt);
 }
 
-
-void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt)
+void
+add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+		       TemplateTree* tt) throw (ParseError)
 {
-    //((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
+    // ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
     UNUSED(cmd);
     UNUSED(action);
     UNUSED(tt);

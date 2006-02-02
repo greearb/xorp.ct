@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.58 2005/11/16 23:32:10 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.59 2005/12/21 09:43:00 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -99,14 +99,16 @@ wait_for_xrl_router_ready(EventLoop& eventloop, XrlRouter& xrl_router)
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+void
+add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
     tt->add_cmd(cmd);
 }
 
 
-void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt)
+void
+add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+		       TemplateTree* tt) throw (ParseError)
 {
     tt->add_cmd_action(cmd, action);
 }

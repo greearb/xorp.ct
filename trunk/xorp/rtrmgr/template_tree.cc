@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.39 2005/10/10 04:10:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree.cc,v 1.40 2005/11/27 05:43:37 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -512,13 +512,14 @@ TemplateTree::find_node_by_type(const list<ConfPathSegment>& path_segments)
 }
 
 void
-TemplateTree::add_cmd(char* cmd)
+TemplateTree::add_cmd(char* cmd) throw (ParseError)
 {
     _current_node->add_cmd(string(cmd));
 }
 
 void
 TemplateTree::add_cmd_action(const string& cmd, const list<string>& action)
+    throw (ParseError)
 {
     _current_node->add_action(cmd, action);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.21 2005/03/25 02:54:39 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.22 2006/01/14 01:35:27 pavlin Exp $"
 
 
 #include <signal.h>
@@ -52,14 +52,16 @@ static const string default_config_boot = srcdir + "/config.boot.sample";
 // the following two functions are an ugly hack to cause the C code in
 // the parser to call methods on the right version of the TemplateTree
 
-void add_cmd_adaptor(char *cmd, TemplateTree* tt)
+void
+add_cmd_adaptor(char *cmd, TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd(cmd);
 }
 
 
-void add_cmd_action_adaptor(const string& cmd, 
-			    const list<string>& action, TemplateTree* tt)
+void
+add_cmd_action_adaptor(const string& cmd, const list<string>& action,
+		       TemplateTree* tt) throw (ParseError)
 {
     ((MasterTemplateTree*)tt)->add_cmd_action(cmd, action);
 }
