@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.81 2006/01/12 10:24:32 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.82 2006/01/31 21:31:51 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -386,7 +386,7 @@ class Ospf {
      * Status of process.
      */
     ProcessStatus status(string& reason) {
-	if (PROC_NOT_READY == _process_status) {
+	if (PROC_STARTUP == _process_status) {
 	    if (SERVICE_RUNNING == _io->status()) {
 		_process_status = PROC_READY;
 		_reason = "Running";
