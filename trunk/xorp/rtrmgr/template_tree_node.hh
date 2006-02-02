@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.46 2006/01/27 21:30:14 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_tree_node.hh,v 1.47 2006/01/31 23:47:50 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_TREE_NODE_HH__
 #define __RTRMGR_TEMPLATE_TREE_NODE_HH__
@@ -75,7 +75,8 @@ public:
 
     virtual TTNodeType type() const { return NODE_VOID; }
     void add_cmd(const string& cmd) throw (ParseError);
-    void add_action(const string& cmd, const list<string>& action_list);
+    void add_action(const string& cmd, const list<string>& action_list)
+	throw (ParseError);
 
     map<string, string> create_variable_map(const list<string>& segments) const;
 

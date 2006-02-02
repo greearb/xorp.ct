@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.73 2006/01/31 02:44:54 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.74 2006/01/31 23:47:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -272,8 +272,7 @@ TemplateTreeNode::add_child(TemplateTreeNode* child)
 }
 
 void
-TemplateTreeNode::add_cmd(const string& cmd)
-    throw (ParseError)
+TemplateTreeNode::add_cmd(const string& cmd) throw (ParseError)
 {
     string error_msg;
     BaseCommand* command;
@@ -381,9 +380,11 @@ TemplateTreeNode::commands() const
 void
 TemplateTreeNode::add_action(const string& cmd,
 			     const list<string>& action_list)
+    throw (ParseError)
 {
     BaseCommand* command;
     map<string, BaseCommand*>::iterator iter;
+    string error_msg;
 
     if (cmd == "%modinfo") {
 	// only the Master tree cares about this
@@ -419,14 +420,16 @@ TemplateTreeNode::add_action(const string& cmd,
 	    } else if (action_list.front() == "long") {
 		_help_long = help;
 	    } else {
-		XLOG_WARNING(string("Ignored help descriptor "
-				    + action_list.front()
-				    + " in template file - \"short\" "
-				    + "or \"long\" expectted").c_str());
+		error_msg = c_format("Invalid %%help descriptor %s: "
+				     "\"short\" or \"long\" expectted",
+				     action_list.front().c_str());
+		xorp_throw(ParseError, error_msg);
 	    }
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad help specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%help arguments: "
+				 "%u (expected 2)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%deprecated") {
 	if (action_list.size() == 1) {
@@ -440,8 +443,10 @@ TemplateTreeNode::add_action(const string& cmd,
 		_parent->set_deprecated_reason(reason);
 	    }
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad %%deprecated specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%deprecated arguments: "
+				 "%u (expected 1)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%user-hidden") {
 	if (action_list.size() == 1) {
@@ -455,14 +460,13 @@ TemplateTreeNode::add_action(const string& cmd,
 		_parent->set_user_hidden_reason(reason);
 	    }
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad %%user-hidden specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%user-hidden arguments: "
+				 "%u (expected 1)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%read-only") {
-	if (action_list.size() == 0) {
-	    _is_read_only = true;
-	    _is_permanent = true; // XXX: read-only also implies permanent node
-	} else if (action_list.size() == 1) {
+	if (action_list.size() == 1) {
 	    list<string>::const_iterator li = action_list.begin();
 	    // Trim off quotes if present
 	    string reason = unquote(*li);
@@ -470,21 +474,23 @@ TemplateTreeNode::add_action(const string& cmd,
 	    _read_only_reason = reason;
 	    _is_permanent = true; // XXX: read-only also implies permanent node
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad %%read-only specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%user-hidden arguments: "
+				 "%u (expected 1)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%permanent") {
-	if (action_list.size() == 0) {
-	    _is_permanent = true;
-	} else if (action_list.size() == 1) {
+	if (action_list.size() == 1) {
 	    list<string>::const_iterator li = action_list.begin();
 	    // Trim off quotes if present
 	    string reason = unquote(*li);
 	    _is_permanent = true;
 	    _permanent_reason = reason;
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad %%permanent specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%permanent arguments: "
+				 "%u (expected 1)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%order") {
 	if (action_list.size() == 1) {
@@ -497,7 +503,10 @@ TemplateTreeNode::add_action(const string& cmd,
 	    } else if (*li == "sorted-alphabetic") {
 		order = ORDER_SORTED_ALPHABETIC;
 	    } else {
-		XLOG_WARNING("Bad %%order specification in template file ignored - should be unsorted, sorted-numeric, or sorted-alphabetic");
+		error_msg = c_format("Bad %%order specification in template "
+				     "file ignored - should be unsorted, "
+				     "sorted-numeric, or sorted-alphabetic");
+		xorp_throw(ParseError, error_msg);
 	    }
 	    set_order(order);
 
@@ -505,8 +514,10 @@ TemplateTreeNode::add_action(const string& cmd,
 		_parent->set_order(order);
 	    }
 	} else {
-	    // XXX really should say why it's bad.
-	    XLOG_WARNING("Bad %%order specification in template file ignored\n");
+	    error_msg = c_format("Invalid number of %%order arguments: "
+				 "%u (expected 1)",
+				 XORP_UINT_CAST(action_list.size()));
+	    xorp_throw(ParseError, error_msg);
 	}
     } else if (cmd == "%mandatory") {
 	// Add all new mandatory variables
