@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.64 2005/12/06 07:30:58 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.65 2005/12/16 18:02:34 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -51,7 +51,11 @@ EventLoop BGPMain::_eventloop;
 // BGPMain implementation
 
 BGPMain::BGPMain()
-    : _exit_loop(false), _local_data(_eventloop)
+    : _exit_loop(false),
+      _local_data(_eventloop),
+      _component_count(0),
+      _ifmgr(NULL),
+      _is_ifmgr_ready(false)
 {
     debug_msg("BGPMain object created\n");
     /*
@@ -91,12 +95,36 @@ BGPMain::BGPMain()
 				      ::callback(this,
 						 &BGPMain::terminate));
 
+    // Initialize the interface manager
+    // TODO: the FEA targetname is hardcoded here!!
+    _ifmgr = new IfMgrXrlMirror(_eventloop, "fea",
+				_xrl_router->finder_address(),
+				_xrl_router->finder_port());
+    _ifmgr->set_observer(this);
+    _ifmgr->attach_hint_observer(this);
+    //
+    // TODO: for now startup inside the constructor. Ideally, we want
+    // to startup after the FEA birth event.
+    //
+    // startup();
+
     initialize_profiling_variables(_profile);
     comm_init();
 }
 
 BGPMain::~BGPMain()
 {
+    //
+    // TODO: for now shutdown inside the destructor. Ideally, we want
+    // to shutdown gracefully before we call the destructor.
+    //
+    // shutdown();
+    _is_ifmgr_ready = false;
+    _ifmgr->detach_hint_observer(this);
+    _ifmgr->unset_observer(this);
+    delete _ifmgr;
+    _ifmgr = NULL;
+
     /*
     ** Stop accepting network connections.
     */
@@ -207,10 +235,440 @@ BGPMain::status(string& reason)
     } else if (_exit_loop == true) {
 	s = PROC_SHUTDOWN;
 	reason = "Shutting Down";
+#if 0	// TODO: uncomment-out when we start using the interface manager
+    } else if (! _is_ifmgr_ready) {
+	s = PROC_NOT_READY;
+	reason = "Waiting for interface manager";
+#endif
     }
 
     return s;
 }
+
+bool
+BGPMain::startup()
+{
+    //
+    // XXX: when the startup is completed,
+    // IfMgrHintObserver::tree_complete() will be called.
+    //
+    if (_ifmgr->startup() != true) {
+	ServiceBase::set_status(SERVICE_FAILED);
+	return (false);
+    }
+
+    component_up("startup");
+
+    return (true);
+}
+
+bool
+BGPMain::shutdown()
+{
+    //
+    // XXX: when the shutdown is completed, BGPMain::status_change()
+    // will be called.
+    //
+
+    component_down("shutdown");
+
+    _is_ifmgr_ready = false;
+    return (_ifmgr->shutdown());
+}
+
+void
+BGPMain::component_up(const string& component_name)
+{
+    UNUSED(component_name);
+
+    _component_count++;
+    //
+    // TODO: if all components are up, then we should call
+    // ServiceBase::set_status(SERVICE_RUNNING);
+    //
+}
+
+void
+BGPMain::component_down(const string& component_name)
+{
+    UNUSED(component_name);
+
+    XLOG_ASSERT(_component_count > 0);
+    _component_count--;
+    if (0 == _component_count)
+	ServiceBase::set_status(SERVICE_SHUTDOWN);
+    else
+	ServiceBase::set_status(SERVICE_SHUTTING_DOWN);
+}
+
+void
+BGPMain::status_change(ServiceBase*	service,
+		       ServiceStatus	old_status,
+		       ServiceStatus	new_status)
+{
+    if (old_status == new_status)
+	return;
+    if (SERVICE_RUNNING == new_status)
+	component_up(service->service_name());
+    if (SERVICE_SHUTDOWN == new_status)
+	component_down(service->service_name());
+
+    if (service == ifmgr_mirror_service_base()) {
+	if ((old_status == SERVICE_SHUTTING_DOWN)
+	    && (new_status == SERVICE_SHUTDOWN)) {
+	    // XXX: ifmgr shutdown
+	    //
+	    // TODO: if we have to do anything after the ifmgr shutdown
+	    // has completed, this is the place.
+	    //
+	}
+    }
+}
+
+bool
+BGPMain::is_interface_enabled(const string& interface) const
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    if (fi == NULL)
+	return false;
+
+    return (fi->enabled() && (! fi->no_carrier()));
+}
+
+bool
+BGPMain::is_vif_enabled(const string& interface, const string& vif) const
+{
+    debug_msg("Interface %s Vif %s\n", interface.c_str(), vif.c_str());
+
+    if (! is_interface_enabled(interface))
+	return false;
+
+    const IfMgrVifAtom* fv = ifmgr_iftree().find_vif(interface, vif);
+    if (fv == NULL)
+	return false;
+
+    return (fv->enabled());
+}
+
+bool
+BGPMain::is_address_enabled(const string& interface, const string& vif,
+			    const IPv4& address) const
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
+
+    const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
+}
+
+bool
+BGPMain::is_address_enabled(const string& interface, const string& vif,
+			    const IPv6& address) const
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    if (! is_vif_enabled(interface, vif))
+	return false;
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return false;
+
+    return (fa->enabled());
+}
+
+uint32_t
+BGPMain::get_prefix_length(const string& interface, const string& vif,
+			   const IPv4& address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv4Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
+}
+
+uint32_t
+BGPMain::get_prefix_length(const string& interface, const string& vif,
+			   const IPv6& address)
+{
+    debug_msg("Interface %s Vif %s Address %s\n", interface.c_str(),
+	      vif.c_str(), cstring(address));
+
+    const IfMgrIPv6Atom* fa = ifmgr_iftree().find_addr(interface,
+						       vif,
+						       address);
+    if (fa == NULL)
+	return 0;
+
+    return (fa->prefix_len());
+}
+
+uint32_t
+BGPMain::get_mtu(const string& interface)
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    if (fi == NULL)
+	return 0;
+
+    return (fi->mtu_bytes());
+}
+
+void
+BGPMain::tree_complete()
+{
+    _is_ifmgr_ready = true;
+
+    //
+    // XXX: we use same actions when the tree is completed or updates are made
+    //
+    updates_made();
+}
+
+void
+BGPMain::updates_made()
+{
+    IfMgrIfTree::IfMap::const_iterator ii;
+    IfMgrIfAtom::VifMap::const_iterator vi;
+    IfMgrVifAtom::V4Map::const_iterator ai4;
+    IfMgrVifAtom::V6Map::const_iterator ai6;
+    const IfMgrIfAtom* if_atom;
+    const IfMgrIfAtom* other_if_atom;
+    const IfMgrVifAtom* vif_atom;
+    const IfMgrVifAtom* other_vif_atom;
+    const IfMgrIPv4Atom* addr_atom4;
+    const IfMgrIPv4Atom* other_addr_atom4;
+    const IfMgrIPv6Atom* addr_atom6;
+    const IfMgrIPv6Atom* other_addr_atom6;
+
+    //
+    // Check whether the old interfaces, vifs and addresses are still there
+    //
+    for (ii = _iftree.ifs().begin(); ii != _iftree.ifs().end(); ++ii) {
+	bool is_old_interface_enabled = false;
+	bool is_new_interface_enabled = false;
+	bool is_old_vif_enabled = false;
+	bool is_new_vif_enabled = false;
+	bool is_old_address_enabled = false;
+	bool is_new_address_enabled = false;
+
+	if_atom = &ii->second;
+	is_old_interface_enabled = if_atom->enabled();
+	is_old_interface_enabled &= (! if_atom->no_carrier());
+
+	// Check the interface
+	other_if_atom = ifmgr_iftree().find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // The interface has disappeared
+	    is_new_interface_enabled = false;
+	} else {
+	    is_new_interface_enabled = other_if_atom->enabled();
+	    is_new_interface_enabled &= (! other_if_atom->no_carrier());
+	}
+
+	if ((is_old_interface_enabled != is_new_interface_enabled)
+	    && (! _interface_status_cb.is_empty())) {
+	    // The interface's enabled flag has changed
+	    _interface_status_cb->dispatch(if_atom->name(),
+					   is_new_interface_enabled);
+	}
+
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+	    is_old_vif_enabled = vif_atom->enabled();
+	    is_old_vif_enabled &= is_old_interface_enabled;
+
+	    // Check the vif
+	    other_vif_atom = ifmgr_iftree().find_vif(if_atom->name(),
+						     vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// The vif has disappeared
+		is_new_vif_enabled = false;
+	    } else {
+		is_new_vif_enabled = other_vif_atom->enabled();
+	    }
+	    is_new_vif_enabled &= is_new_interface_enabled;
+
+	    if ((is_old_vif_enabled != is_new_vif_enabled)
+		&& (! _vif_status_cb.is_empty())) {
+		// The vif's enabled flag has changed
+		_vif_status_cb->dispatch(if_atom->name(),
+					 vif_atom->name(),
+					 is_new_vif_enabled);
+	    }
+
+	    for (ai4 = vif_atom->ipv4addrs().begin();
+		 ai4 != vif_atom->ipv4addrs().end();
+		 ++ai4) {
+		addr_atom4 = &ai4->second;
+		is_old_address_enabled = addr_atom4->enabled();
+		is_old_address_enabled &= is_old_vif_enabled;
+
+		// Check the address
+		other_addr_atom4 = ifmgr_iftree().find_addr(if_atom->name(),
+							    vif_atom->name(),
+							    addr_atom4->addr());
+		if (other_addr_atom4 == NULL) {
+		    // The address has disappeared
+		    is_new_address_enabled = false;
+		} else {
+		    is_new_address_enabled = other_addr_atom4->enabled();
+		}
+		is_new_address_enabled &= is_new_vif_enabled;
+
+		if ((is_old_address_enabled != is_new_address_enabled)
+		    && (! _address_status4_cb.is_empty())) {
+		    // The address's enabled flag has changed
+		    _address_status4_cb->dispatch(if_atom->name(),
+						 vif_atom->name(),
+						 addr_atom4->addr(),
+						 is_new_address_enabled);
+		}
+	    }
+
+	    for (ai6 = vif_atom->ipv6addrs().begin();
+		 ai6 != vif_atom->ipv6addrs().end();
+		 ++ai6) {
+		addr_atom6 = &ai6->second;
+		is_old_address_enabled = addr_atom6->enabled();
+		is_old_address_enabled &= is_old_vif_enabled;
+
+		// Check the address
+		other_addr_atom6 = ifmgr_iftree().find_addr(if_atom->name(),
+							    vif_atom->name(),
+							    addr_atom6->addr());
+		if (other_addr_atom6 == NULL) {
+		    // The address has disappeared
+		    is_new_address_enabled = false;
+		} else {
+		    is_new_address_enabled = other_addr_atom6->enabled();
+		}
+		is_new_address_enabled &= is_new_vif_enabled;
+
+		if ((is_old_address_enabled != is_new_address_enabled)
+		    && (! _address_status6_cb.is_empty())) {
+		    // The address's enabled flag has changed
+		    _address_status6_cb->dispatch(if_atom->name(),
+						  vif_atom->name(),
+						  addr_atom6->addr(),
+						  is_new_address_enabled);
+		}
+	    }
+	}
+    }
+
+    //
+    // Check for new interfaces, vifs and addresses
+    //
+    for (ii = ifmgr_iftree().ifs().begin();
+	 ii != ifmgr_iftree().ifs().end();
+	 ++ii) {
+	if_atom = &ii->second;
+
+	// Check the interface
+	other_if_atom = _iftree.find_if(if_atom->name());
+	if (other_if_atom == NULL) {
+	    // A new interface
+	    if (if_atom->enabled()
+		&& (! if_atom->no_carrier())
+		&& (! _interface_status_cb.is_empty())) {
+		_interface_status_cb->dispatch(if_atom->name(), true);
+	    }
+	}
+
+	for (vi = if_atom->vifs().begin(); vi != if_atom->vifs().end(); ++vi) {
+	    vif_atom = &vi->second;
+
+	    // Check the vif
+	    other_vif_atom = _iftree.find_vif(if_atom->name(),
+					      vif_atom->name());
+	    if (other_vif_atom == NULL) {
+		// A new vif
+		if (if_atom->enabled()
+		    && (! if_atom->no_carrier())
+		    && (vif_atom->enabled())
+		    && (! _vif_status_cb.is_empty())) {
+		    _vif_status_cb->dispatch(if_atom->name(), vif_atom->name(),
+					     true);
+		}
+	    }
+
+	    for (ai4 = vif_atom->ipv4addrs().begin();
+		 ai4 != vif_atom->ipv4addrs().end();
+		 ++ai4) {
+		addr_atom4 = &ai4->second;
+
+		// Check the address
+		other_addr_atom4 = _iftree.find_addr(if_atom->name(),
+						     vif_atom->name(),
+						     addr_atom4->addr());
+		if (other_addr_atom4 == NULL) {
+		    // A new address
+		    if (if_atom->enabled()
+			&& (! if_atom->no_carrier())
+			&& (vif_atom->enabled())
+			&& (addr_atom4->enabled())
+			&& (! _address_status4_cb.is_empty())) {
+			_address_status4_cb->dispatch(if_atom->name(),
+						      vif_atom->name(),
+						      addr_atom4->addr(),
+						      true);
+		    }
+		}
+	    }
+
+	    for (ai6 = vif_atom->ipv6addrs().begin();
+		 ai6 != vif_atom->ipv6addrs().end();
+		 ++ai6) {
+		addr_atom6 = &ai6->second;
+
+		// Check the address
+		other_addr_atom6 = _iftree.find_addr(if_atom->name(),
+						     vif_atom->name(),
+						     addr_atom6->addr());
+		if (other_addr_atom6 == NULL) {
+		    // A new address
+		    if (if_atom->enabled()
+			&& (! if_atom->no_carrier())
+			&& (vif_atom->enabled())
+			&& (addr_atom6->enabled())
+			&& (! _address_status6_cb.is_empty())) {
+			_address_status6_cb->dispatch(if_atom->name(),
+						      vif_atom->name(),
+						      addr_atom6->addr(),
+						      true);
+		    }
+		}
+	    }
+	}
+    }
+
+    //
+    // Update the local copy of the interface tree
+    //
+    _iftree = ifmgr_iftree();
+}
+
 
 #ifdef	DEBUG_MAXIMUM_DELAY
 #ifndef DEBUG_LOGGING

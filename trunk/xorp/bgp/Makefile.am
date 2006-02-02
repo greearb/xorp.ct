@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.41 2005/11/17 16:53:45 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.42 2005/12/06 06:26:35 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -37,10 +37,14 @@ noinst_LTLIBRARIES	 = libbgp.la
 LDADD		 = libbgp.la
 LDADD		+= $(top_builddir)/xrl/targets/libbgpbase.la
 LDADD		+= $(top_builddir)/policy/backend/libpolicybackend.la
+LDADD		+= $(top_builddir)/libfeaclient/libfeaclient.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libribxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la
 LDADD		+= $(top_builddir)/xrl/interfaces/libprofileclientxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la
+LDADD		+= $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la
+LDADD		+= $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la
 LDADD		+= $(top_builddir)/libxipc/libxipc.la
 LDADD		+= $(top_builddir)/libcomm/libcomm.la
 LDADD		+= $(top_builddir)/libxorp/libxorp.la

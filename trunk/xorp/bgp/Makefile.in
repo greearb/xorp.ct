@@ -109,7 +109,7 @@ TESTS = $(check_SCRIPTS) aspath_test$(EXEEXT) test_packet_coding$(EXEEXT) isolat
 noinst_LTLIBRARIES = libbgp.la
 
 # -- Libraries and library flags to link the binary programs
-LDADD = libbgp.la $(top_builddir)/xrl/targets/libbgpbase.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
+LDADD = libbgp.la $(top_builddir)/xrl/targets/libbgpbase.la $(top_builddir)/policy/backend/libpolicybackend.la $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libribxif.la $(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la $(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/libxipc/libxipc.la $(top_builddir)/libcomm/libcomm.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
 xorp_bgp_SOURCES = bgp.cc bgp.hh main.cc
@@ -174,10 +174,14 @@ aspath_test_LDADD = $(LDADD)
 aspath_test_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -195,10 +199,14 @@ isolation_tests_LDADD = $(LDADD)
 isolation_tests_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -209,10 +217,14 @@ test_packet_LDADD = $(LDADD)
 test_packet_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -223,10 +235,14 @@ test_packet_coding_LDADD = $(LDADD)
 test_packet_coding_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -237,10 +253,14 @@ test_peer_data_LDADD = $(LDADD)
 test_peer_data_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -255,10 +275,14 @@ update_test_LDADD = $(LDADD)
 update_test_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la
@@ -269,10 +293,14 @@ xorp_bgp_LDADD = $(LDADD)
 xorp_bgp_DEPENDENCIES = libbgp.la \
 	$(top_builddir)/xrl/targets/libbgpbase.la \
 	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
 	$(top_builddir)/xrl/interfaces/libribxif.la \
 	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
 	$(top_builddir)/xrl/interfaces/libbgpmibtrapsxif.la \
 	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
 	$(top_builddir)/libxipc/libxipc.la \
 	$(top_builddir)/libcomm/libcomm.la \
 	$(top_builddir)/libxorp/libxorp.la

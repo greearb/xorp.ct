@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.52 2005/11/30 08:08:44 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.53 2005/12/06 07:30:58 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -34,11 +34,14 @@
 #include "peer_handler.hh"
 #include "process_watch.hh"
 
+#include "libfeaclient/ifmgr_xrl_mirror.hh"
 #include "policy/backend/version_filters.hh"
 
 class XrlBgpTarget;
 
-class BGPMain {
+class BGPMain : public ServiceBase,
+		public IfMgrHintObserver,
+		public ServiceChangeObserverBase {
 public:
     BGPMain();
     ~BGPMain();
@@ -47,6 +50,162 @@ public:
      * Get the process status
      */
     ProcessStatus status(string& reason);
+
+    /**
+     * Startup operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool startup();
+
+    /**
+     * Shutdown operation.
+     *
+     * @return true on success, false on failure.
+     */
+    bool shutdown();
+
+    /**
+     * A method that should be called when an internal subsystem comes up.
+     *
+     * @param component_name the name of the component.
+     */
+    void component_up(const string& component_name);
+
+    /**
+     * A method that should be called when an internal subsystem goes down.
+     *
+     * @param component_name the name of the component.
+     */
+    void component_down(const string& component_name);
+
+    /**
+     * Test whether an interface is enabled.
+     *
+     * @param interface the name of the interface to test.
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_interface_enabled(const string& interface) const;
+
+    /**
+     * Test whether an interface/vif is enabled.
+     *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_vif_enabled(const string& interface, const string& vif) const;
+
+    /**
+     * Test whether an IPv4 interface/vif/address is enabled.
+     *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
+     * @param address the address to test.
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_address_enabled(const string& interface, const string& vif,
+			    const IPv4& address) const;
+
+    /**
+     * Test whether an IPv6 interface/vif/address is enabled.
+     *
+     * @param interface the name of the interface to test.
+     * @param vif the name of the vif to test.
+     * @param address the address to test.
+     * @return true if it exists and is enabled, otherwise false.
+     */
+    bool is_address_enabled(const string& interface, const string& vif,
+			    const IPv6& address) const;
+
+    typedef XorpCallback2<void, const string&,
+			  bool>::RefPtr InterfaceStatusCb;
+    typedef XorpCallback3<void, const string&, const string&,
+			  bool>::RefPtr VifStatusCb;
+    typedef XorpCallback4<void, const string&, const string&,
+			  const IPv4&, bool>::RefPtr AddressStatus4Cb;
+    typedef XorpCallback4<void, const string&, const string&,
+			  const IPv6&, bool>::RefPtr AddressStatus6Cb;
+
+    /**
+     * Add a callback for tracking the interface status.
+     *
+     * The callback will be invoked whenever the status of the interface
+     * is changed from disabled to enabled or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_interface_status(InterfaceStatusCb cb) {
+	_interface_status_cb = cb;
+    }
+
+    /**
+     * Add a callback for tracking the interface/vif status.
+     *
+     * The callback will be invoked whenever the status of the interface/vif
+     * is changed from disabled to enabled or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_vif_status(VifStatusCb cb) {
+	_vif_status_cb = cb;
+    }
+
+    /**
+     * Add a callback for tracking the IPv4 interface/vif/address status.
+     *
+     * The callback will be invoked whenever the status of the tuple
+     * (interface, vif, address) is changed from disabled to enabled
+     * or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_address_status(AddressStatus4Cb cb) {
+	_address_status4_cb = cb;
+    }
+
+    /**
+     * Add a callback for tracking the IPv6 interface/vif/address status.
+     *
+     * The callback will be invoked whenever the status of the tuple
+     * (interface, vif, address) is changed from disabled to enabled
+     * or vice-versa.
+     *
+     * @param cb the callback to register.
+     */
+    void register_address_status(AddressStatus6Cb cb) {
+	_address_status6_cb = cb;
+    }
+
+    /**
+     * Obtain the subnet prefix length for an IPv4 interface/vif/address.
+     *
+     * @param interface the name of the interface.
+     * @param vif the name of the vif.
+     * @param address the address.
+     * @return the subnet prefix length for the address.
+     */
+    uint32_t get_prefix_length(const string& interface, const string& vif,
+			       const IPv4& address);
+
+    /**
+     * Obtain the subnet prefix length for an IPv6 interface/vif/address.
+     *
+     * @param interface the name of the interface.
+     * @param vif the name of the vif.
+     * @param address the address.
+     * @return the subnet prefix length for the address.
+     */
+    uint32_t get_prefix_length(const string& interface, const string& vif,
+			       const IPv6& address);
+
+    /**
+     * Obtain the MTU for an interface.
+     *
+     * @param the name of the interface.
+     * @return the mtu for the interface.
+     */
+    uint32_t get_mtu(const string& interface);
 
     /**
      * Set the local configuration.
@@ -616,6 +775,45 @@ public:
 protected:
 private:
     /**
+     * A method invoked when the status of a service changes.
+     *
+     * @param service the service whose status has changed.
+     * @param old_status the old status.
+     * @param new_status the new status.
+     */
+    void status_change(ServiceBase*	service,
+		       ServiceStatus	old_status,
+		       ServiceStatus	new_status);
+
+    /**
+     * Obtain a pointer to the interface manager service base.
+     *
+     * @return a pointer to the interface manager service base.
+     */
+    const ServiceBase* ifmgr_mirror_service_base() const {
+	return dynamic_cast<const ServiceBase*>(_ifmgr);
+    }
+
+    /**
+     * Obtain a reference to the interface manager's interface tree.
+     *
+     * @return a reference to the interface manager's interface tree.
+     */
+    const IfMgrIfTree& ifmgr_iftree() const { return _ifmgr->iftree(); }
+
+    /**
+     * An IfMgrHintObserver method invoked when the initial interface tree
+     * information has been received.
+     */
+    void tree_complete();
+
+    /**
+     * An IfMgrHintObserver method invoked whenever the interface tree
+     * information has been changed.
+     */
+    void updates_made();
+
+    /**
      * Store the socket descriptor and iptuple together.
      */
     struct Server {
@@ -748,6 +946,16 @@ private:
     ProcessWatch *_process_watch;
     VersionFilters _policy_filters;
     Profile _profile;
+
+    size_t		_component_count;
+    IfMgrXrlMirror*	_ifmgr;
+    bool		_is_ifmgr_ready;
+    IfMgrIfTree		_iftree;	// The interface state information
+
+    InterfaceStatusCb	_interface_status_cb;
+    VifStatusCb		_vif_status_cb;
+    AddressStatus4Cb	_address_status4_cb;
+    AddressStatus6Cb	_address_status6_cb;
 };
 
 template <typename A>

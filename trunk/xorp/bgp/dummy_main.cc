@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.12 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.13 2005/12/06 06:26:36 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -49,6 +49,38 @@ BGPMain::~BGPMain() {
 	while(_xrl_router->pending())
 	    eventloop().run();
     
+}
+
+bool
+BGPMain::startup()
+{
+    return (true);
+}
+
+bool
+BGPMain::shutdown()
+{
+    return (true);
+}
+
+void
+BGPMain::status_change(ServiceBase*	service,
+		       ServiceStatus	old_status,
+		       ServiceStatus	new_status)
+{
+    UNUSED(service);
+    UNUSED(old_status);
+    UNUSED(new_status);
+}
+
+void
+BGPMain::tree_complete()
+{
+}
+
+void
+BGPMain::updates_made()
+{
 }
 
 void
