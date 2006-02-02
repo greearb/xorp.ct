@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.17 2005/12/21 20:27:38 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_base_command.cc,v 1.18 2006/01/31 23:47:50 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -291,7 +291,6 @@ void
 AllowOperatorsCommand::add_action(const list<string>& action) throw (ParseError)
 {
     string error_msg;
-    string new_value;
     size_t min_expected_parameters_n = 1;
 
     //
