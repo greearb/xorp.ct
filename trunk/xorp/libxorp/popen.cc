@@ -58,7 +58,7 @@
  * $FreeBSD: src/lib/libc/gen/popen.c,v 1.14 2000/01/27 23:06:19 jasone Exp $
  */
 
-#ident "$XORP: xorp/libxorp/popen.cc,v 1.17 2006/01/18 01:25:18 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/popen.cc,v 1.18 2006/01/19 17:46:44 pavlin Exp $"
 
 #include "libxorp_module.h"
 
@@ -314,6 +314,13 @@ popen2(const string& command, const list<string>& arguments,
 	return 0;
 	/* NOTREACHED */
     case 0:				/* Child. */
+	//
+	// Unblock all signals that may have been blocked by the parent
+	//
+	sigset_t sigset;
+	sigfillset(&sigset);
+	sigprocmask(SIG_UNBLOCK, &sigset, NULL);
+
 	/*
 	 * The dup2() to STDIN_FILENO is repeated to avoid
 	 * writing to pdes[1], which might corrupt the
