@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.77 2005/12/20 08:07:17 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.78 2006/01/12 07:40:40 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -1768,6 +1768,17 @@ lsa_to_net(uint32_t lsid, uint32_t mask)
     IPNet<IPv4> net = IPNet<IPv4>(IPv4(htonl(lsid)), prefix.mask_len());
 
     return net;
+}
+
+/**
+ * Given a link state ID and a mask both in host order return a link
+ * state ID with the host bits set.
+ */
+inline
+uint32_t
+set_host_bits(uint32_t lsid, uint32_t mask)
+{
+    return lsid | ~mask;
 }
 
 #endif // __OSPF_LSA_HH__

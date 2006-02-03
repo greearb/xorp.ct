@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.7 2005/10/18 15:28:52 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.8 2005/10/22 06:15:29 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -124,6 +124,23 @@ class External {
      * flood it out of all areas.
      */
     void maxage_reached(Lsa::LsaRef lsar);
+
+    /**
+     * Networks with same network number but different prefix lengths
+     * can generate the same link state ID. When generating a new LSA
+     * if a collision occurs use: 
+     * RFC 2328 E. An algorithm for assigning Link State IDs
+     * to resolve the clash.
+     */
+    void unique_link_state_id(Lsa::LsaRef lsar);
+
+    /**
+     * Networks with same network number but different prefix lengths
+     * can generate the same link state ID. When looking for an LSA
+     * make sure that there the lsar that matches the net is found.
+     */
+    ASExternalDatabase::iterator unique_find_lsa(Lsa::LsaRef lsar,
+						 const IPNet<A>& net);
 
     void set_net_nexthop(ASExternalLsa *aselsa, IPNet<A> net, A nexthop);
 

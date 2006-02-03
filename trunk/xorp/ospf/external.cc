@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.17 2005/11/21 18:30:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.18 2005/12/28 18:57:17 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -102,6 +102,96 @@ External<A>::push(AreaRouter<A> *area_router)
 
 template <>
 void 
+External<IPv4>::unique_link_state_id(Lsa::LsaRef lsar)
+{
+    ASExternalDatabase::iterator i = _lsas.find(lsar);
+    if (i == _lsas.end())
+	return;
+    
+    Lsa::LsaRef lsar_in_db = *i;
+    XLOG_ASSERT(lsar_in_db->get_self_originating());
+
+    ASExternalLsa *aselsa = dynamic_cast<ASExternalLsa *>(lsar.get());
+    XLOG_ASSERT(aselsa);
+    ASExternalLsa *aselsa_in_db =
+	dynamic_cast<ASExternalLsa *>(lsar_in_db.get());
+    XLOG_ASSERT(aselsa_in_db);
+    if (aselsa->get_network_mask() == aselsa_in_db->get_network_mask())
+	return;
+
+    IPv4 mask = IPv4(htonl(aselsa->get_network_mask()));
+    IPv4 mask_in_db = IPv4(htonl(aselsa_in_db->get_network_mask()));
+    XLOG_ASSERT(mask != mask_in_db);
+
+    // Be very careful the AS-External-LSAs are stored in a set and
+    // the comparator method uses the link state ID. If the link state
+    // ID of the LSA in the database is going to be changed then it
+    // must first be pulled out of the database and then re-inserted.
+
+    // The simple case the new LSA is more specific so its host bits
+    // can be set and we are done.
+    if (mask_in_db.mask_len() < mask.mask_len()) {
+	 Lsa_header& header = lsar->get_header();
+	 header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+						ntohl(mask.addr())));
+	 lsar->encode();
+	 return;
+    } 
+
+    // The harder case, the LSA already in the database needs to be
+    // changed. First pull it out of the database.
+    delete_lsa(lsar_in_db);
+    Lsa_header& header = lsar_in_db->get_header();
+    header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+					   ntohl(mask_in_db.addr())));
+    lsar_in_db->encode();
+    update_lsa(lsar_in_db);
+    refresh(lsar_in_db);
+}
+
+template <>
+void 
+External<IPv6>::unique_link_state_id(Lsa::LsaRef /*lsar*/)
+{
+}
+
+template <>
+ASExternalDatabase::iterator
+External<IPv4>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv4>& net)
+{
+    ASExternalDatabase::iterator i = find_lsa(lsar);
+    if (i == _lsas.end())
+	return i;
+
+    Lsa::LsaRef lsar_in_db = *i;
+    XLOG_ASSERT(lsar_in_db->get_self_originating());
+    ASExternalLsa *aselsa_in_db =
+	dynamic_cast<ASExternalLsa *>(lsar_in_db.get());
+    XLOG_ASSERT(aselsa_in_db);
+    IPv4 mask_in_db = IPv4(htonl(aselsa_in_db->get_network_mask()));
+    // If the mask/prefix lengths match then the LSA has been found.
+    if (mask_in_db.mask_len() == net.prefix_len())
+	return i;
+
+    // The incoming LSA is about to be modified.
+    Lsa_header& header = lsar->get_header();
+    // Set the host bits and try to find it again.
+    header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+					   ntohl(net.netmask().addr())));
+
+    // Recursive
+    return unique_find_lsa(lsar, net);
+}
+
+template <>
+ASExternalDatabase::iterator
+External<IPv6>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv6>& /*net*/)
+{
+    return find_lsa(lsar);
+}
+
+template <>
+void 
 External<IPv4>::set_net_nexthop(ASExternalLsa *aselsa, IPNet<IPv4> net,
 				IPv4 nexthop)
 {
@@ -166,6 +256,8 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     _ospf.get_eventloop().current_time(now);
     aselsa->record_creation_time(now);
     aselsa->encode();
+
+    unique_link_state_id(lsar);
 
     update_lsa(lsar);
 
@@ -262,7 +354,7 @@ External<A>::withdraw(const IPNet<A>& net)
     
     Lsa::LsaRef searchlsar = aselsa;
 
-    ASExternalDatabase::iterator i = find_lsa(searchlsar);
+    ASExternalDatabase::iterator i = unique_find_lsa(searchlsar, net);
     if (i == _lsas.end()) {
 	XLOG_ERROR("Lsa not found for net %s", cstring(net));
 	return false;
