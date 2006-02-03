@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.218 2006/01/30 19:02:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.219 2006/01/31 21:38:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3994,7 +3994,7 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	    XLOG_TRACE(_ospf.trace()._input_errors,
 		       "Ack for LSA not in retransmission list.\n%s\n%s",
 		       cstring(*i), cstring(*lsap));
-	    // Print the retransmision list.
+	    // Print the retransmission list.
 	    list<Lsa::LsaRef>::iterator k;
 	    for (k = _lsa_rxmt.begin(); k != _lsa_rxmt.end(); k++) {
 		XLOG_TRACE(_ospf.trace()._input_errors,
