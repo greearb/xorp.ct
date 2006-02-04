@@ -433,17 +433,25 @@ XrlRipTarget::rip_0_1_set_authentication(const string&	ifname,
 
     if (type == MD5AuthHandler::auth_type_name()) {
 	//
-	// The MD5AuthHandler code supports multiple timed keys, but we're
-	// not exporting this via the xrl interface for time being.
-	//
 	// We create an MD5 authentication handler and add a single
 	// key.  The key has the same start and end time value
 	// indicating that it does not expire.
+	// This is for backward compatibility with the earlier implementation
+	// when we did not manage the MD5 keys.
 	//
+	if (password.empty()) {
+	    //
+	    // XXX: Empty MD5 password in backward compatibility mode
+	    // is not allowed. However, we should silently ignore it
+	    // because we may receive this XRL because of some peculiarity
+	    // of the RIP rtrmgr template.
+	    //
+	    return XrlCmdError::OKAY();
+	}
 	MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
 	if (new_ah->add_key(1, password, /* start */ 0, /* end */ 0) == 0) {
 	    delete new_ah;
-	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed.");
+	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
 	}
 	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
 	delete last_ah;
@@ -483,6 +491,134 @@ XrlRipTarget::rip_0_1_authentication(const string&	ifname,
 	password = kc.front().key();
     }
 
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_set_md5_authentication(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		addr,
+    const uint32_t&	key_id,
+    const string&	password,
+    const string&	start_time,
+    const string&	end_time)
+{
+    string error_msg;
+    uint32_t start_secs = 0;
+    uint32_t end_secs = 0;
+
+    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+    Port<IPv4>* p = pp.first;
+
+    // Check the key ID
+    if (key_id > 255) {
+	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
+			     XORP_UINT_CAST(key_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    //
+    // Decode the start and end time
+    //
+    if (! start_time.empty()) {
+	struct tm tm;
+	const char* s;
+
+	memset(&tm, 0, sizeof(tm));
+	s = strptime(start_time.c_str(), "%Y-%m-%d.%H:%M", &tm);
+	if ((s == NULL) || (*s != '\0')) {
+	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	time_t t = mktime(&tm);
+	if (t == -1) {
+	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	start_secs = t;
+    }
+
+    if (end_time.empty()) {
+	// XXX: if end_secs is same as start_secs, then the key never expires
+	end_secs = start_secs;
+    } else {
+	struct tm tm;
+	const char* s;
+
+	memset(&tm, 0, sizeof(tm));
+	s = strptime(end_time.c_str(), "%Y-%m-%d.%H:%M", &tm);
+	if ((s == NULL) || (*s != '\0')) {
+	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	time_t t = mktime(&tm);
+	if (t == -1) {
+	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	end_secs = t;
+    }
+
+    PortAFSpecState<IPv4>& pss = p->af_state();
+
+    MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
+    if (new_ah->add_key(key_id, password, start_secs, end_secs) == 0) {
+	delete new_ah;
+	return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
+    }
+    AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
+    delete last_ah;
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_delete_md5_authentication(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		addr,
+    const uint32_t&	key_id)
+{
+    string error_msg;
+
+    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+    Port<IPv4>* p = pp.first;
+
+    // Check the key ID
+    if (key_id > 255) {
+	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
+			     XORP_UINT_CAST(key_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    PortAFSpecState<IPv4>& pss = p->af_state();
+    AuthHandlerBase* last_ah = pss.auth_handler();
+    if (last_ah == NULL) {
+	error_msg = c_format("No authentication was configured previously");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    MD5AuthHandler* md5_ah = dynamic_cast<MD5AuthHandler*>(last_ah);
+    if (md5_ah == NULL) {
+	error_msg = c_format("No MD5 authentication was configured previously");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (md5_ah->remove_key(key_id) != true) {
+	error_msg = c_format("Invalid MD5 key ID %u", XORP_UINT_CAST(key_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (md5_ah->key_chain().empty()) {
+	// Remove the MD5 authentication because no more keys
+	last_ah = pss.set_auth_handler(new NullAuthHandler());
+	delete last_ah;
+    }
     return XrlCmdError::OKAY();
 }
 

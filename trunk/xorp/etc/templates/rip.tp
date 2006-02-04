@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.30 2006/01/21 03:55:53 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.31 2006/01/27 21:35:35 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -29,6 +29,12 @@ protocols {
 		    authentication {
 			type:			txt	= "none" ;
 			password:		txt	= "" ;
+
+			md5 @: u32 {
+			    password:		txt	= "" ;
+			    start-time:		txt	= "" ;
+			    end-time:		txt	= "" ;
+			}
 		    }
 		}
 	    }
@@ -198,12 +204,41 @@ protocols {
 		    }
 
 		    authentication {
-			%allow: $(@.type) "none" %help: "No authentication";
-			%allow: $(@.type) "plaintext" %help: "Plain text authentication";
-			%allow: $(@.type) "md5" %help: "MD5 authentication";
-			%activate: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
-			%update: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)" ;
-			%help: short "Set the authentication type and password used for packets sent from address." ;
+			%help: short "Set the authentication" ;
+			%mandatory: $(@.type);
+
+			%activate: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)";
+			%update: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)";
+
+			type {
+			    %help: short "Set the authentication type";
+			    %allow: $(@) "none" %help: "No authentication";
+			    %allow: $(@) "plaintext" %help: "Plain text authentication";
+			    %allow: $(@) "md5" %help: "MD5 authentication";
+			}
+
+			password {
+			    %help: short "Set the authentication password";
+			}
+
+			md5 @ {
+			    %help: short "Set MD5 authentication";
+			    %allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
+			    %allow: $(authentication.type) "md5" %help: "MD5 authentication";
+
+			    %activate: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %update: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)";
+			    password {
+				%help: short "Set the authentication password";
+			    }
+			    start-time {
+				%help: short "Set the authentication start time (YYYY-MM-DD.HH:MM)";
+			    }
+			    end-time {
+				%help: short "Set the authentication end time (YYYY-MM-DD.HH:MM)";
+			    }
+			}
 		    }
 		}
 	    }

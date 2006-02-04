@@ -293,6 +293,38 @@ interface rip/0.1 {
 					 & password:txt
 
     /**
+     * Set MD5 authentication scheme.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param addr the address.
+     * @param key_id the key ID (must be an integer in the interval [0, 255]).
+     * @param password the authentication password.
+     * @param start_time the authentication start time (YYYY-MM-DD.HH:MM).
+     * @param end_time the authentication end time (YYYY-MM-DD.HH:MM).
+     */
+    set_md5_authentication		? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					& key_id:u32			\
+					& password:txt			\
+					& start_time:txt		\
+					& end_time:txt
+
+    /**
+     * Delete MD5 authentication scheme.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param addr the address.
+     * @param key_id the key ID (must be an integer in the interval [0, 255]).
+     */
+    delete_md5_authentication		? ifname:txt			\
+					& vifname:txt			\
+					& addr:ipv4			\
+					& key_id:u32
+
+    /**
      * Get a textual description of the status of address RIP is running
      * upon.
      *

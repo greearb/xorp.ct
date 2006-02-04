@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.16 2005/03/25 02:54:32 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.17 2005/10/27 05:05:40 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -248,6 +248,23 @@ public:
 			   const IPv4&		addr,
 			   string&		type,
 			   string&		password);
+
+    XrlCmdError rip_0_1_set_md5_authentication(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	key_id,
+	const string&	password,
+	const string&	start_time,
+	const string&	end_time);
+
+    XrlCmdError rip_0_1_delete_md5_authentication(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const uint32_t&	key_id);
 
     XrlCmdError rip_0_1_rip_address_status(const string&	ifname,
 					   const string&	vifname,
