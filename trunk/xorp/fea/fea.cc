@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.52 2005/10/17 11:14:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.53 2005/12/21 09:42:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -224,7 +224,8 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     //
     // XXX: currently, the access to the CLI is either IPv4 or IPv6
     CliNode cli_node4(AF_INET, XORP_MODULE_CLI, eventloop);
-    cli_node4.set_cli_port(12000);
+    // cli_node4.set_cli_port(12000);
+    cli_node4.set_cli_port(0);		// XXX: disable CLI telnet access
     XrlCliNode xrl_cli_node(eventloop,
 			    cli_node4.module_name(),
 			    finder_hostname,
