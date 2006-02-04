@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.16 2005/09/01 01:39:17 zec Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.17 2006/01/21 04:10:31 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -367,7 +367,7 @@ MD5AuthHandler::add_key(uint8_t       id,
 	end_secs += _slack_secs;
 	timeout = _e.new_oneoff_at(TimeVal(end_secs, 0),
 				   callback(this,
-					    &MD5AuthHandler::remove_key, id));
+					    &MD5AuthHandler::remove_key_cb, id));
     }
 
     KeyChain::iterator i = _key_chain.begin();
@@ -382,7 +382,7 @@ MD5AuthHandler::add_key(uint8_t       id,
     return true;
 }
 
-void
+bool
 MD5AuthHandler::remove_key(uint8_t id)
 {
     KeyChain::iterator i =
@@ -390,7 +390,9 @@ MD5AuthHandler::remove_key(uint8_t id)
 		bind2nd(mem_fun_ref(&MD5Key::id_matches), id));
     if (_key_chain.end() != i) {
 	_key_chain.erase(i);
+	return true;
     }
+    return false;
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.7 2005/09/01 01:39:17 zec Exp $
+// $XORP: xorp/rip/auth.hh,v 1.8 2006/01/21 04:09:35 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -344,8 +344,16 @@ public:
      * Remove key from MD5 key chain.
      *
      * @param key_id unique id of key to be removed.
+     * @return true if the key was found and removed, otherwise false.
      */
-    void remove_key(uint8_t id);
+    bool remove_key(uint8_t id);
+
+    /**
+     * A callback to remove key from MD5 key chain.
+     *
+     * @param key_id unique id of key to be removed.
+     */
+    void remove_key_cb(uint8_t id) { remove_key(id); }
 
     /**
      * Get currently active key.
