@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.63 2006/01/31 23:47:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.64 2006/02/02 19:42:00 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -1265,20 +1265,29 @@ void
 Command::add_action(const list<string>& action, const XRLdb& xrldb)
     throw (ParseError)
 {
+    string action_type;
+    string error_msg;
+
     if (action.empty())
 	return;		// XXX: no action to perform
 
-    if (action.front() == "xrl") {
+    action_type = action.front();
+
+    if (action_type == "xrl") {
 	_actions.push_back(new XrlAction(_template_tree_node, action, xrldb));
 	return;
     }
 
-    if (action.front() == "program") {
+    if (action_type == "program") {
 	_actions.push_back(new ProgramAction(_template_tree_node, action));
 	return;
     }
 
-    _actions.push_back(new Action(_template_tree_node, action));
+    // Unknown action
+    error_msg = c_format("Unknown action \"%s\". Expected actions: "
+			 "\"%s\", \"%s\".",
+			 action_type.c_str(), "xrl", "program");
+    xorp_throw(ParseError, error_msg);    
 }
 
 int
