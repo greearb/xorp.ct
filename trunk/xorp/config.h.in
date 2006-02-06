@@ -395,6 +395,9 @@
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
 
+/* Define to 1 if you have the `strptime' function. */
+#undef HAVE_STRPTIME
+
 /* Define to 1 if the system has the type `struct cmsghdr'. */
 #undef HAVE_STRUCT_CMSGHDR
 
