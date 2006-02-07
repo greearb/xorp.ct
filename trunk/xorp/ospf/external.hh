@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.8 2005/10/22 06:15:29 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.9 2006/02/03 21:26:19 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -129,7 +129,7 @@ class External {
      * Networks with same network number but different prefix lengths
      * can generate the same link state ID. When generating a new LSA
      * if a collision occurs use: 
-     * RFC 2328 E. An algorithm for assigning Link State IDs
+     * RFC 2328 Appendix E. An algorithm for assigning Link State IDs
      * to resolve the clash.
      */
     void unique_link_state_id(Lsa::LsaRef lsar);
