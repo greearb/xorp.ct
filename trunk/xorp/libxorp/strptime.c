@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.2 2006/02/07 02:10:21 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.3 2006/02/07 03:30:11 pavlin Exp $"
 
 
 /*
@@ -44,6 +44,7 @@
  *	  with "unsigned int".
  */
 
+#define _XOPEN_SOURCE	/* Linux's glibc2 needs this for strptime(3) */
 #include <time.h>
 #include <strings.h>
 
