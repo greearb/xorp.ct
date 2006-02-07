@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.3 2006/02/07 03:30:11 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.4 2006/02/07 03:33:53 pavlin Exp $"
 
 
 /*
@@ -113,7 +113,6 @@ typedef struct {
  * Public domain.
  */
 
-#include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 __RCSID("$NetBSD: _def_time.c,v 1.8 2005/06/12 05:21:27 lukem Exp $");
 #endif /* LIBC_SCCS and not lint */
@@ -185,7 +184,6 @@ const _TimeLocale *_CurrentTimeLocale = &_DefaultTimeLocale;
  * POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include <sys/cdefs.h>
 #if defined(LIBC_SCCS) && !defined(lint)
 __RCSID("$NetBSD: strptime.c,v 1.25 2005/11/29 03:12:00 christos Exp $");
 #endif
