@@ -33,6 +33,31 @@
 #include "xrl_target_rip.hh"
 #include "xrl_target_common.hh"
 
+static time_t
+decode_time_string(const string& time_string)
+{
+    const char* s;
+    const char* format = "%Y-%m-%d.%H:%M";
+    struct tm tm;
+    time_t result;
+
+    if (time_string.empty()) {
+	result = 0;
+	return (result);
+    }
+
+    memset(&tm, 0, sizeof(tm));
+
+    s = xorp_strptime(time_string.c_str(), format, &tm);
+    if ((s == NULL) || (*s != '\0')) {
+	result = -1;
+	return (result);
+    }
+
+    result = mktime(&tm);
+    return (result);
+}
+
 XrlRipTarget::XrlRipTarget(EventLoop&			el,
 			   XrlRouter&			xr,
 			   XrlProcessSpy&		xps,
@@ -508,6 +533,7 @@ XrlRipTarget::rip_0_1_set_md5_authentication(
     string error_msg;
     uint32_t start_secs = 0;
     uint32_t end_secs = 0;
+    time_t decoded_time;
 
     pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
     if (pp.first == 0)
@@ -524,43 +550,22 @@ XrlRipTarget::rip_0_1_set_md5_authentication(
     //
     // Decode the start and end time
     //
-    if (! start_time.empty()) {
-	struct tm tm;
-	const char* s;
-
-	memset(&tm, 0, sizeof(tm));
-	s = strptime(start_time.c_str(), "%Y-%m-%d.%H:%M", &tm);
-	if ((s == NULL) || (*s != '\0')) {
-	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-	time_t t = mktime(&tm);
-	if (t == -1) {
-	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-	start_secs = t;
+    decoded_time = decode_time_string(start_time);
+    if (decoded_time == -1) {
+	error_msg = c_format("Invalid start time: %s", start_time.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-
+    start_secs = decoded_time;
     if (end_time.empty()) {
 	// XXX: if end_secs is same as start_secs, then the key never expires
 	end_secs = start_secs;
     } else {
-	struct tm tm;
-	const char* s;
-
-	memset(&tm, 0, sizeof(tm));
-	s = strptime(end_time.c_str(), "%Y-%m-%d.%H:%M", &tm);
-	if ((s == NULL) || (*s != '\0')) {
+	decoded_time = decode_time_string(end_time);
+	if (decoded_time == -1) {
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
-	time_t t = mktime(&tm);
-	if (t == -1) {
-	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
-	    return XrlCmdError::COMMAND_FAILED(error_msg);
-	}
-	end_secs = t;
+	end_secs = decoded_time;
     }
 
     PortAFSpecState<IPv4>& pss = p->af_state();
