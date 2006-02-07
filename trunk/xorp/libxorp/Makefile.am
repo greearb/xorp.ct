@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.40 2005/12/21 09:42:56 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.41 2005/12/23 17:08:01 atanu Exp $
 ##
 
 # -- Real Programs
@@ -164,6 +164,7 @@ libxorp_la_SOURCES += getopt.c
 libxorp_la_SOURCES += inet_ntop.c
 libxorp_la_SOURCES += inet_pton.c
 libxorp_la_SOURCES += random.c
+libxorp_la_SOURCES += strptime.c
 libxorp_la_SOURCES += utility.c
 libxorp_la_SOURCES += win_io.c
 libxorp_la_SOURCES += xlog.c

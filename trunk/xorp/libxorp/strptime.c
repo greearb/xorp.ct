@@ -1,3 +1,59 @@
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
+
+/*
+ * Copyright (c) 2001-2005 International Computer Science Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software")
+ * to deal in the Software without restriction, subject to the conditions
+ * listed in the XORP LICENSE file. These conditions include: you must
+ * preserve this copyright notice, and you cannot mention the copyright
+ * holders in advertising related to the Software without their permission.
+ * The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+ * notice is a summary of the XORP LICENSE file; the license in that file is
+ * legally binding.
+ */
+
+#ident "$XORP$"
+
+
+/*
+ * strptime(3) implementation: a parser for data and time string
+ */
+
+/*
+ * XXX: the particular implementation is taken from NetBSD-current
+ * (as of 2006/02/06).
+ * The rest is a front-end for it.
+ * Note that the local implementation is used only if the system
+ * doesn't have its own strptime(3) implementation.
+ *
+ * The changes are:
+ *	- The global function named strptime() is redefined as static
+ *	  and is renamed to local_strptime().
+ *	- The inclusion of some header files is removed.
+ *	- Sone unused structure definitions are removed.
+ *	- TM_YEAR_BASE is conditionally defined.
+ *	- A local implementation of UNUSED() is added.
+ *	- All usage of isspace() is replaced with xorp_isspace().
+ *	- New function xorp_strptime() is added as a front-end for
+ *	  the local implementation.
+ */
+
+#include "libxorp/xorp.h"
+
+#ifndef TM_YEAR_BASE
+#define TM_YEAR_BASE 1900
+#endif
+
+static inline void *
+UNCONST(const void *a)
+{
+	return ((const char *)a - (const char *)0) + (char *)0;
+}
+
+
 /*	$NetBSD: localedef.h,v 1.7 2005/11/29 03:12:16 christos Exp $	*/
 
 /*
@@ -30,58 +86,6 @@
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _SYS_LOCALEDEF_H_
-#define _SYS_LOCALEDEF_H_
-
-typedef struct {
-	const char *yesexpr;
-	const char *noexpr;
-	const char *yesstr;
-	const char *nostr;
-} _MessagesLocale;
-
-extern const _MessagesLocale *_CurrentMessagesLocale;
-extern const _MessagesLocale  _DefaultMessagesLocale;
-
-
-typedef struct {
-	const char *int_curr_symbol;
-	const char *currency_symbol;
-	const char *mon_decimal_point;
-	const char *mon_thousands_sep;
-	const char *mon_grouping;
-	const char *positive_sign;
-	const char *negative_sign;
-	char int_frac_digits;
-	char frac_digits;
-	char p_cs_precedes;
-	char p_sep_by_space;
-	char n_cs_precedes;
-	char n_sep_by_space;
-	char p_sign_posn;
-	char n_sign_posn;
-	char int_p_cs_precedes;
-	char int_n_cs_precedes;
-	char int_p_sep_by_space;
-	char int_n_sep_by_space;
-	char int_p_sign_posn;
-	char int_n_sign_posn;
-} _MonetaryLocale;
-
-extern const _MonetaryLocale *_CurrentMonetaryLocale;
-extern const _MonetaryLocale  _DefaultMonetaryLocale;
-
-
-typedef struct {
-	const char *decimal_point;
-	const char *thousands_sep;
-	const char *grouping;
-} _NumericLocale;
-
-extern const _NumericLocale *_CurrentNumericLocale;
-extern const _NumericLocale  _DefaultNumericLocale;
-
-
 typedef struct {
 	const char *abday[7];
 	const char *day[7];
@@ -93,11 +97,6 @@ typedef struct {
 	const char *t_fmt;
 	const char *t_fmt_ampm;
 } _TimeLocale;
-
-extern const _TimeLocale *_CurrentTimeLocale;
-extern const _TimeLocale  _DefaultTimeLocale;
-
-#endif /* !_SYS_LOCALEDEF_H_ */
 
 
 /*	$NetBSD: _def_time.c,v 1.8 2005/06/12 05:21:27 lukem Exp $	*/
@@ -111,9 +110,6 @@ extern const _TimeLocale  _DefaultTimeLocale;
 #if defined(LIBC_SCCS) && !defined(lint)
 __RCSID("$NetBSD: _def_time.c,v 1.8 2005/06/12 05:21:27 lukem Exp $");
 #endif /* LIBC_SCCS and not lint */
-
-#include <sys/localedef.h>
-#include <locale.h>
 
 const _TimeLocale _DefaultTimeLocale = 
 {
@@ -187,16 +183,8 @@ const _TimeLocale *_CurrentTimeLocale = &_DefaultTimeLocale;
 __RCSID("$NetBSD: strptime.c,v 1.25 2005/11/29 03:12:00 christos Exp $");
 #endif
 
-#include "namespace.h"
-#include <sys/localedef.h>
-#include <ctype.h>
-#include <locale.h>
-#include <string.h>
-#include <time.h>
-#include <tzfile.h>
-
 #ifdef __weak_alias
-__weak_alias(strptime,_strptime)
+__weak_alias(local_strptime,_local_strptime)
 #endif
 
 #define	_ctloc(x)		(_CurrentTimeLocale->x)
@@ -215,8 +203,8 @@ static const u_char *find_string(const u_char *, int *, const char * const *,
 	const char * const *, int);
 
 
-char *
-strptime(const char *buf, const char *fmt, struct tm *tm)
+static char *
+local_strptime(const char *buf, const char *fmt, struct tm *tm)
 {
 	unsigned char c;
 	const unsigned char *bp;
@@ -231,8 +219,8 @@ strptime(const char *buf, const char *fmt, struct tm *tm)
 		i = 0;
 
 		/* Eat up white-space. */
-		if (isspace(c)) {
-			while (isspace(*bp))
+		if (xorp_isspace(c)) {
+			while (xorp_isspace(*bp))
 				bp++;
 			continue;
 		}
@@ -297,7 +285,7 @@ literal:
 		case 'x':	/* The date, using the locale's format. */
 			new_fmt =_ctloc(d_fmt);
 		    recurse:
-			bp = (const u_char *)strptime((const char *)bp,
+			bp = (const u_char *)local_strptime((const char *)bp,
 							    new_fmt, tm);
 			LEGAL_ALT(ALT_E);
 			continue;
@@ -434,7 +422,7 @@ literal:
 		 */
 		case 'n':	/* Any kind of white-space. */
 		case 't':
-			while (isspace(*bp))
+			while (xorp_isspace(*bp))
 				bp++;
 			LEGAL_ALT(0);
 			continue;
@@ -445,7 +433,7 @@ literal:
 		}
 	}
 
-	return __UNCONST(bp);
+	return UNCONST(bp);
 }
 
 
@@ -496,4 +484,14 @@ find_string(const u_char *bp, int *tgt, const char * const *n1,
 
 	/* Nothing matched */
 	return NULL;
+}
+
+char *
+xorp_strptime(const char *buf, const char *fmt, struct tm *tm)
+{
+#ifdef HAVE_STRPTIME
+    return strptime(buf, fmt, tm);
+#else
+    return local_strptime(buf, fmt, tm);
+#endif
 }

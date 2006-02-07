@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/utility.h,v 1.10 2005/03/25 02:53:49 pavlin Exp $
+ * $XORP: xorp/libxorp/utility.h,v 1.11 2005/10/26 19:11:11 pavlin Exp $
  */
 
 #ifndef __LIBXORP_UTILITY_H__
@@ -108,6 +108,13 @@ extern int xorp_isupper(int c);
 extern int xorp_isxdigit(int c);
 extern int xorp_tolower(int c);
 extern int xorp_toupper(int c);
+
+/*
+ * A strptime(3) wrapper that uses a local implementation of strptime(3)
+ * if the operating system doesn't have one. Note that the particular
+ * implementation is inside file "libxorp/strptime.c".
+ */
+extern char *xorp_strptime(const char *buf, const char *fmt, struct tm *tm);
 
 #ifdef __cplusplus
 }
