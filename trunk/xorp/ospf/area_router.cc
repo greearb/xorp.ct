@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.191 2006/01/30 19:15:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.192 2006/01/30 20:10:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -565,24 +565,13 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
     return true;
 }
 
-/**
- * XXX - When we support this appendix; hook up the correct code for
- * the time being don't set any host bits.
- */
-inline
-uint32_t
-appendixe(uint32_t link_state_id)
-{
-    return link_state_id;
-}
-
 template <>
 void 
 AreaRouter<IPv4>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
 					      IPNet<IPv4> net)
 {
     Lsa_header& header = snlsa->get_header();
-    header.set_link_state_id(appendixe(ntohl(net.masked_addr().addr())));
+    header.set_link_state_id(ntohl(net.masked_addr().addr()));
     snlsa->set_network_mask(ntohl(net.netmask().addr()));
 }
 
