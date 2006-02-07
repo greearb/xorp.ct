@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.38 2005/11/02 07:36:12 atanu Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.39 2005/11/15 11:43:59 mjh Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -134,7 +134,7 @@ public:
      * @return true if routes are being sent to the RIB.
      */
     bool busy() {
-	return _v4_queue.busy() || _v4_queue.busy();
+	return _v4_queue.busy() || _v6_queue.busy();
     }
 
     /**
