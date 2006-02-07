@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.2 2006/02/07 02:10:21 pavlin Exp $"
 
 
 /*
@@ -30,16 +30,22 @@
  * doesn't have its own strptime(3) implementation.
  *
  * The changes are:
+ *	- Included <time.h> and <strings.h>
  *	- The global function named strptime() is redefined as static
  *	  and is renamed to local_strptime().
  *	- The inclusion of some header files is removed.
  *	- Sone unused structure definitions are removed.
- *	- TM_YEAR_BASE is conditionally defined.
+ *	- TM_YEAR_BASE is defined conditionally.
  *	- A local implementation of UNUSED() is added.
  *	- All usage of isspace() is replaced with xorp_isspace().
  *	- New function xorp_strptime() is added as a front-end for
  *	  the local implementation.
+ *	- Replaced "u_char" with "unsigned char" and "uint"
+ *	  with "unsigned int".
  */
+
+#include <time.h>
+#include <strings.h>
 
 #include "libxorp/xorp.h"
 
@@ -198,8 +204,10 @@ __weak_alias(local_strptime,_local_strptime)
 #define	LEGAL_ALT(x)		{ if (alt_format & ~(x)) return NULL; }
 
 
-static const u_char *conv_num(const unsigned char *, int *, uint, uint);
-static const u_char *find_string(const u_char *, int *, const char * const *,
+static const unsigned char *conv_num(const unsigned char *, int *,
+	unsigned int, unsigned int);
+static const unsigned char *find_string(const unsigned char *, int *,
+	const char * const *,
 	const char * const *, int);
 
 
@@ -211,7 +219,7 @@ local_strptime(const char *buf, const char *fmt, struct tm *tm)
 	int alt_format, i, split_year = 0;
 	const char *new_fmt;
 
-	bp = (const u_char *)buf;
+	bp = (const unsigned char *)buf;
 
 	while (bp != NULL && (c = *fmt++) != '\0') {
 		/* Clear `alternate' modifier prior to new conversion. */
@@ -285,7 +293,7 @@ literal:
 		case 'x':	/* The date, using the locale's format. */
 			new_fmt =_ctloc(d_fmt);
 		    recurse:
-			bp = (const u_char *)local_strptime((const char *)bp,
+			bp = (const unsigned char *)local_strptime((const char *)bp,
 							    new_fmt, tm);
 			LEGAL_ALT(ALT_E);
 			continue;
@@ -433,18 +441,19 @@ literal:
 		}
 	}
 
-	return UNCONST(bp);
+	return (char *)UNCONST(bp);
 }
 
 
-static const u_char *
-conv_num(const unsigned char *buf, int *dest, uint llim, uint ulim)
+static const unsigned char *
+conv_num(const unsigned char *buf, int *dest, unsigned int llim,
+	unsigned int ulim)
 {
-	uint result = 0;
+	unsigned int result = 0;
 	unsigned char ch;
 
 	/* The limit also determines the number of valid digits. */
-	uint rulim = ulim;
+	unsigned int rulim = ulim;
 
 	ch = *buf;
 	if (ch < '0' || ch > '9')
@@ -464,8 +473,8 @@ conv_num(const unsigned char *buf, int *dest, uint llim, uint ulim)
 	return buf;
 }
 
-static const u_char *
-find_string(const u_char *bp, int *tgt, const char * const *n1,
+static const unsigned char *
+find_string(const unsigned char *bp, int *tgt, const char * const *n1,
 		const char * const *n2, int c)
 {
 	int i;
