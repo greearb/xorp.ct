@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.193 2006/02/07 22:17:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.194 2006/02/08 00:34:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -628,11 +628,14 @@ AreaRouter<IPv4>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv4>& net,
     if (!find_lsa(lsar, index))
 	return false;
 
-    SummaryNetworkLsa *snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get());
-    if (0 == snlsa)
+    Lsa::LsaRef lsar_in_db = _db[index];
+    XLOG_ASSERT(lsar_in_db->get_self_originating());
+    SummaryNetworkLsa *snlsa_in_db =
+	dynamic_cast<SummaryNetworkLsa *>(lsar_in_db.get());
+    if (0 == snlsa_in_db)
 	return true;
-    IPv4 mask = IPv4(htonl(snlsa->get_network_mask()));
-    if (mask.mask_len() == net.prefix_len())
+    IPv4 mask_in_db = IPv4(htonl(snlsa_in_db->get_network_mask()));
+    if (mask_in_db.mask_len() == net.prefix_len())
 	return true;
 
     // The incoming LSA can't be modified so create a new LSA to
