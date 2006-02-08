@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.94 2006/01/16 07:05:30 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.95 2006/01/30 20:11:00 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -574,6 +574,23 @@ class AreaRouter : Subsystem {
     };
 
     Trie<A, Range> _area_range;	// Area range for summary generation.
+
+    /**
+     * Networks with same network number but different prefix lengths
+     * can generate the same link state ID. When generating a new LSA
+     * if a collision occurs use: 
+     * RFC 2328 Appendix E. An algorithm for assigning Link State IDs
+     * to resolve the clash. Summary-LSAs only.
+     */
+    void unique_link_state_id(Lsa::LsaRef lsar);
+
+    /**
+     * Networks with same network number but different prefix lengths
+     * can generate the same link state ID. When looking for an LSA
+     * make sure that there the lsar that matches the net is
+     * found. Summary-LSAs only.
+     */
+    bool unique_find_lsa(Lsa::LsaRef lsar, const IPNet<A>& net, size_t& index);
 
     /**
      * Set the network components of the LSA.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.192 2006/01/30 20:10:59 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.193 2006/02/07 22:17:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -567,6 +567,103 @@ AreaRouter<A>::get_lsa(const uint32_t index, bool& valid, bool& toohigh,
 
 template <>
 void 
+AreaRouter<IPv4>::unique_link_state_id(Lsa::LsaRef lsar)
+{
+    SummaryNetworkLsa *snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get());
+    if (0 == snlsa)	// Must be a type 4 lsa.
+	return;
+
+    size_t index;
+    if (!find_lsa(lsar, index))
+	return;
+
+    Lsa::LsaRef lsar_in_db = _db[index];
+    XLOG_ASSERT(lsar_in_db->get_self_originating());
+    SummaryNetworkLsa *snlsa_in_db =
+	dynamic_cast<SummaryNetworkLsa *>(lsar_in_db.get());
+    if (0 == snlsa)
+	return;
+    if (snlsa->get_network_mask() == snlsa_in_db->get_network_mask())
+	return;
+
+    IPv4 mask = IPv4(htonl(snlsa->get_network_mask()));
+    IPv4 mask_in_db = IPv4(htonl(snlsa_in_db->get_network_mask()));
+    XLOG_ASSERT(mask != mask_in_db);
+
+    // The simple case the new LSA is more specific so its host bits
+    // can be set and we are done.
+    if (mask_in_db.mask_len() < mask.mask_len()) {
+	 Lsa_header& header = lsar->get_header();
+	 header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+						ntohl(mask.addr())));
+	 lsar->encode();
+	 return;
+    } 
+    
+    // The harder case, the LSA already in the database needs to be
+    // changed. Its not strictly necessary to remove the LSA from the
+    // database but if we ever use maps to speed up access to the
+    // database the deletion will be required as the link state ID
+    // will be one of the keys.
+    delete_lsa(lsar_in_db, index, false /* invalidate */);
+    Lsa_header& header = lsar_in_db->get_header();
+    header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+					   ntohl(mask_in_db.addr())));
+    lsar_in_db->encode();
+    add_lsa(lsar_in_db);
+    refresh_summary_lsa(lsar_in_db);
+}
+
+template <>
+void 
+AreaRouter<IPv6>::unique_link_state_id(Lsa::LsaRef /*lsar*/)
+{
+}
+
+template <>
+bool
+AreaRouter<IPv4>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv4>& net,
+				  size_t& index)
+{
+    if (!find_lsa(lsar, index))
+	return false;
+
+    SummaryNetworkLsa *snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get());
+    if (0 == snlsa)
+	return true;
+    IPv4 mask = IPv4(htonl(snlsa->get_network_mask()));
+    if (mask.mask_len() == net.prefix_len())
+	return true;
+
+    // The incoming LSA can't be modified so create a new LSA to
+    // continue the search.
+    // Don't worry about the memory it will be freed when the LSA goes
+    // out of scope.
+    SummaryNetworkLsa *search = new SummaryNetworkLsa(_ospf.version());
+    Lsa::LsaRef searchlsar(search);
+    
+    // Copy across the header fields.
+    searchlsar->get_header() = lsar->get_header();
+
+    Lsa_header& header = searchlsar->get_header();
+    // Set the host bits and try to find it again.
+    header.set_link_state_id(set_host_bits(header.get_link_state_id(),
+					   ntohl(net.netmask().addr())));
+
+    // Recursive
+    return unique_find_lsa(searchlsar, net, index);
+}
+
+template <>
+bool
+AreaRouter<IPv6>::unique_find_lsa(Lsa::LsaRef lsar, const IPNet<IPv6>& /*net*/,
+				  size_t& index)
+{
+    return find_lsa(lsar, index);
+}
+
+template <>
+void 
 AreaRouter<IPv4>::summary_network_lsa_set_net(SummaryNetworkLsa *snlsa,
 					      IPNet<IPv4> net)
 {
@@ -806,7 +903,7 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (push) {
 	// See if its already being announced.
 	size_t index;
-	if (find_lsa(lsar, index)) {
+	if (unique_find_lsa(lsar, net, index)) {
 	    // Remove it if it should no longer be announced.
 	    if(!announce) {
 		lsar = _db[index];
@@ -821,7 +918,7 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     // already have caused this summary to have been announced. Not
     // absolutely clear how.
     size_t index;
-    if (find_lsa(lsar, index)) {
+    if (unique_find_lsa(lsar, net, index)) {
 	XLOG_WARNING("LSA already being announced \n%s", cstring(*_db[index]));
 	return;
     }
@@ -829,6 +926,9 @@ AreaRouter<A>::summary_announce(OspfTypes::AreaID area, IPNet<A> net,
     if (!announce) {
 	return;
     }
+
+    unique_link_state_id(lsar);
+
     add_lsa(lsar);
     refresh_summary_lsa(lsar);
 }
@@ -876,7 +976,7 @@ AreaRouter<A>::summary_withdraw(OspfTypes::AreaID area, IPNet<A> net,
 
     // Withdraw the LSA.
     size_t index;
-    if (find_lsa(lsar, index)) {
+    if (unique_find_lsa(lsar, net, index)) {
 	if (!announce)
 	    XLOG_WARNING("LSA probably should not have been announced! "
 			 "Area range change?\n%s", cstring(*lsar));
