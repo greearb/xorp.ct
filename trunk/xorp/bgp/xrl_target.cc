@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.54 2005/12/16 16:22:09 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.55 2005/12/16 18:04:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1215,9 +1215,9 @@ XrlBgpTarget::bgp_0_2_get_v6_route_list_next(
 				       multicast)) {
 	//trivial encoding to keep XRL arg count small enough
 	if (best) {
-	    best_and_origin = (2 << 16) & origin;
+	    best_and_origin = (2 << 16) | origin;
 	} else {
-	    best_and_origin = (1 << 16) & origin;
+	    best_and_origin = (1 << 16) | origin;
 	}
 	valid = true;
     } else {
