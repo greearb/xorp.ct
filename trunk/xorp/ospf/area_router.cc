@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.194 2006/02/08 00:34:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.195 2006/02/08 03:48:14 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3420,7 +3420,8 @@ AreaRouter<A>::routing_router_link_stubV2(Spt<Vertex>& spt,
     Vertex dst;
     dst.set_version(_ospf.get_version());
     dst.set_type(OspfTypes::Network);
-    dst.set_nodeid(rl.get_link_id());
+    // Set the host bits to generate a unique nodeid.
+    dst.set_nodeid(rl.get_link_id() | ~rl.get_link_data());
     // XXX Temporarily
     // Create a Network LSA to satisfy the routing calculation
     NetworkLsa *nlsa = new NetworkLsa(_ospf.get_version());
