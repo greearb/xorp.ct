@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.46 2006/01/16 07:23:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.47 2006/01/16 07:35:41 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -412,7 +412,7 @@ RoutingTable<A>::do_filtering(IPNet<A>& net, A& nexthop,
     // routes and routes to routers to satisfy requirements for
     // AS-External-LSAs and Summary-LSAs. Drop them here so they don't
     // make it the the RIB.
-    if (net.contains(nexthop) ||
+    if (/*net.contains(nexthop) ||*/
 	OspfTypes::Router == rt.get_destination_type() ||
 	rt.get_directly_connected())
  	return false;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.15 2006/01/09 10:34:21 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.16 2006/01/10 05:44:55 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -182,6 +182,61 @@ create_network_lsa(OspfTypes::Version version, uint32_t link_state_id,
     header.set_advertising_router(advertising_router);
 
     return Lsa::LsaRef(nlsa);
+}
+
+Lsa::LsaRef
+create_summary_lsa(OspfTypes::Version version, uint32_t link_state_id,
+		   uint32_t advertising_router, uint32_t mask, uint32_t metric)
+{
+    SummaryNetworkLsa *snlsa = new SummaryNetworkLsa(version);
+    Lsa_header& header = snlsa->get_header();
+
+    uint32_t options = compute_options(version, OspfTypes::NORMAL);
+
+    // Set the header fields.
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(options);
+	snlsa->set_network_mask(mask);
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD");
+	snlsa->set_prefix_options(0x0);
+	break;
+    }
+
+    header.set_link_state_id(link_state_id);
+    header.set_advertising_router(advertising_router);
+
+    snlsa->set_metric(metric);
+
+    return Lsa::LsaRef(snlsa);
+}
+
+Lsa::LsaRef
+create_summary_lsa(OspfTypes::Version version, uint32_t link_state_id,
+		   uint32_t advertising_router, uint32_t metric)
+{
+    SummaryRouterLsa *srlsa = new SummaryRouterLsa(version);
+    Lsa_header& header = srlsa->get_header();
+
+    uint32_t options = compute_options(version, OspfTypes::NORMAL);
+
+    // Set the header fields.
+    switch(version) {
+    case OspfTypes::V2:
+	header.set_options(options);
+	break;
+    case OspfTypes::V3:
+	break;
+    }
+
+    header.set_link_state_id(link_state_id);
+    header.set_advertising_router(advertising_router);
+
+    srlsa->set_metric(metric);
+
+    return Lsa::LsaRef(srlsa);
 }
 
 Lsa::LsaRef
@@ -1182,6 +1237,89 @@ routing7(TestInfo& info)
     return true;
 }
 
+/**
+ * http://www.xorp.org/bugzilla/show_bug.cgi?id=395
+ * Verify that a Summary-LSA with the DefaultDestination is correctly
+ * installed in the routing table.
+ */
+bool
+routing8(TestInfo& info)
+{
+    OspfTypes::Version version = OspfTypes::V2;
+
+    EventLoop eventloop;
+    DebugIO<IPv4> io(info, version, eventloop);
+    io.startup();
+
+    Ospf<IPv4> ospf(version, eventloop, &io);
+    ospf.trace().all(info.verbose());
+    OspfTypes::AreaID area = set_id("0.0.0.0");
+
+    PeerManager<IPv4>& pm = ospf.get_peer_manager();
+    pm.create_area_router(area, OspfTypes::NORMAL);
+    AreaRouter<IPv4> *ar = pm.get_area_router(area);
+    XLOG_ASSERT(ar);
+
+    OspfTypes::RouterID rid = set_id("10.0.1.1");
+    ospf.set_router_id(rid);
+
+    // Create this router's Router-LSA
+    Lsa::LsaRef lsar;
+    lsar = create_router_lsa(version, rid, rid);
+    RouterLsa *rlsa;
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, rid, 1 /* metric */);
+    lsar->encode();
+    lsar->set_self_originating(true);
+    ar->testing_replace_router_lsa(lsar);
+
+    // Create the peer's Router-LSA
+    OspfTypes::RouterID prid = set_id("10.0.1.6");
+    lsar = create_router_lsa(version, prid, prid);
+    rlsa = dynamic_cast<RouterLsa *>(lsar.get());
+    XLOG_ASSERT(rlsa);
+    transit(version, rlsa, rid, prid, 1);
+    transit(version, rlsa, set_id("10.2.1.1"), set_id("10.2.1.1"), 1);
+    rlsa->set_e_bit(true);
+    rlsa->set_b_bit(true);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Network-LSA that acts as the binding glue.
+    lsar = create_network_lsa(version, rid, rid, 0xffff0000);
+    NetworkLsa *nlsa;
+    nlsa = dynamic_cast<NetworkLsa *>(lsar.get());
+    XLOG_ASSERT(nlsa);
+    nlsa->get_attached_routers().push_back(rid);
+    nlsa->get_attached_routers().push_back(prid);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    // Create the Summary-LSA with the DefaultDestination.
+    lsar = create_summary_lsa(version, OspfTypes::DefaultDestination, prid,
+			      0 /* mask */, 1 /* metric */);
+    lsar->encode();
+    ar->testing_add_lsa(lsar);
+
+    /*********************************************************/
+
+    if (info.verbose())
+        ar->testing_print_link_state_database();
+    ar->testing_routing_total_recompute();
+
+    if (!verify_routes(info, __LINE__, io, 1))
+        return false;
+
+    if (!io.routing_table_verify(IPNet<IPv4>("0.0.0.0/0"),
+				 IPv4("10.0.1.6"), 2, false, false)) {
+	DOUT(info) << "Mismatch in routing table\n";
+	return false;
+    }
+
+    return true;
+}
+
 int
 main(int argc, char **argv)
 {
@@ -1207,6 +1345,7 @@ main(int argc, char **argv)
 	{"r5", callback(routing5)},
 	{"r6", callback(routing6)},
 	{"r7", callback(routing7)},
+ 	{"r8", callback(routing8)},
     };
 
     try {

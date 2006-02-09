@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.82 2006/01/31 21:31:51 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.83 2006/02/02 01:20:51 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -175,6 +175,16 @@ struct OspfTypes {
      * defined to be the 24-bit binary value of all ones: 0xffffff.
      */
     static const uint32_t LSInfinity = 0xffffff;
+
+    /*
+     * The Destination ID that indicates the default route.  This route  
+     * is used when no other matching routing table entry can be found.  
+     * The default destination can only be advertised in AS-external-    
+     * LSAs and in stub areas' type 3 summary-LSAs.  Its value is the    
+     * IP address 0.0.0.0. Its associated Network Mask is also always    
+     * 0.0.0.0.                                                          
+     */
+    static const uint32_t DefaultDestination = 0;
 
     /*
      * The value used for LS Sequence Number when originating the first
