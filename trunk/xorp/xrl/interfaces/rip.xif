@@ -275,25 +275,31 @@ interface rip/0.1 {
 					-> t_msecs:u32
 
     /**
-     * Set authentication scheme.
+     * Set simple password authentication key.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param addr the address.
+     * @param password the authentication password.
      */
-    set_authentication			? ifname:txt			\
+    set_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
-					& type:txt			\
 					& password:txt
 
     /**
-     * Get authentication scheme.
+     * Delete simple password authentication key.
+     *
+     * @param ifname the interface name.
+     * @param vifname the vif name.
+     * @param addr the address.
      */
-    authentication			? ifname:txt			\
+    delete_simple_authentication_key	? ifname:txt			\
 					& vifname:txt			\
-					& addr:ipv4			\
-					-> type:txt			\
-					 & password:txt
+					& addr:ipv4
 
     /**
-     * Set MD5 authentication scheme.
+     * Set MD5 authentication key.
      *
      * @param ifname the interface name.
      * @param vifname the vif name.
@@ -303,7 +309,7 @@ interface rip/0.1 {
      * @param start_time the authentication start time (YYYY-MM-DD.HH:MM).
      * @param end_time the authentication end time (YYYY-MM-DD.HH:MM).
      */
-    set_md5_authentication		? ifname:txt			\
+    set_md5_authentication_key		? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
 					& key_id:u32			\
@@ -312,14 +318,14 @@ interface rip/0.1 {
 					& end_time:txt
 
     /**
-     * Delete MD5 authentication scheme.
+     * Delete MD5 authentication key.
      *
      * @param ifname the interface name.
      * @param vifname the vif name.
      * @param addr the address.
      * @param key_id the key ID (must be an integer in the interval [0, 255]).
      */
-    delete_md5_authentication		? ifname:txt			\
+    delete_md5_authentication_key	? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv4			\
 					& key_id:u32

@@ -428,99 +428,88 @@ XrlRipTarget::rip_0_1_interpacket_delay_milliseconds(
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_authentication(const string&	ifname,
-					 const string&	vifname,
-					 const IPv4&	addr,
-					 const string&	type,
-					 const string&	password)
+XrlRipTarget::rip_0_1_set_simple_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		addr,
+    const string&	password)
 {
     pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
     if (pp.first == 0)
 	return pp.second;
     Port<IPv4>* p = pp.first;
-
     PortAFSpecState<IPv4>& pss = p->af_state();
 
-    if (type == NullAuthHandler::auth_type_name()) {
-	AuthHandlerBase* new_ah = new NullAuthHandler();
-	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
-	delete last_ah;
-	return XrlCmdError::OKAY();
-    }
-
-    if (type == PlaintextAuthHandler::auth_type_name()) {
-	PlaintextAuthHandler* new_ah = new PlaintextAuthHandler();
-	new_ah->set_key(password);
-	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
-	delete last_ah;
-	return XrlCmdError::OKAY();
-    }
-
-    if (type == MD5AuthHandler::auth_type_name()) {
-	//
-	// We create an MD5 authentication handler and add a single
-	// key.  The key has the same start and end time value
-	// indicating that it does not expire.
-	// This is for backward compatibility with the earlier implementation
-	// when we did not manage the MD5 keys.
-	//
-	if (password.empty()) {
-	    //
-	    // XXX: Empty MD5 password in backward compatibility mode
-	    // is not allowed. However, we should silently ignore it
-	    // because we may receive this XRL because of some peculiarity
-	    // of the RIP rtrmgr template.
-	    //
-	    return XrlCmdError::OKAY();
-	}
-	MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
-	if (new_ah->add_key(1, password, /* start */ 0, /* end */ 0) == 0) {
-	    delete new_ah;
-	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
-	}
-	AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
-	delete last_ah;
-	return XrlCmdError::OKAY();
-    }
-
-    return XrlCmdError::COMMAND_FAILED("Unrecognized authentication type");
-}
-
-XrlCmdError
-XrlRipTarget::rip_0_1_authentication(const string&	ifname,
-				     const string&	vifname,
-				     const IPv4&	addr,
-				     string&		type,
-				     string&		password)
-{
-    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
-    if (pp.first == 0)
-	return pp.second;
-    Port<IPv4>* p = pp.first;
-
-    PortAFSpecState<IPv4>& pss = p->af_state();
-    AuthHandlerBase* ah = pss.auth_handler();
-
-    type     = ah->name();
-    password = "";
-
-    if (type == PlaintextAuthHandler::auth_type_name()) {
-	const PlaintextAuthHandler* pah =
-	    dynamic_cast<const PlaintextAuthHandler*>(ah);
-	password = pah->key();
-    }
-
-    if (type == MD5AuthHandler::auth_type_name()) {
-	const MD5AuthHandler* mah = dynamic_cast<const MD5AuthHandler*>(ah);
-	const MD5AuthHandler::KeyChain& kc = mah->key_chain();
-	password = kc.front().key();
+    //
+    // Modify an existing simple authentication handler or create a new one
+    //
+    PlaintextAuthHandler* plaintext_ah = NULL;
+    AuthHandlerBase* current_ah = pss.auth_handler();
+    XLOG_ASSERT(current_ah != NULL);
+    if (current_ah->name() == PlaintextAuthHandler::auth_type_name()) {
+	plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(current_ah);
+	XLOG_ASSERT(plaintext_ah != NULL);
+	plaintext_ah->set_key(password);
+    } else {
+	plaintext_ah = new PlaintextAuthHandler();
+	plaintext_ah->set_key(password);
+	pss.set_auth_handler(plaintext_ah);
+	delete current_ah;
     }
 
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_md5_authentication(
+XrlRipTarget::rip_0_1_delete_simple_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		addr)
+{
+    string error_msg;
+
+    pair<Port<IPv4>*, XrlCmdError> pp = _ct->find_port(ifname, vifname, addr);
+    if (pp.first == 0)
+	return pp.second;
+    Port<IPv4>* p = pp.first;
+    PortAFSpecState<IPv4>& pss = p->af_state();
+
+    //
+    // Test whether the simple password handler is really configured
+    //
+    AuthHandlerBase* current_ah = pss.auth_handler();
+    XLOG_ASSERT(current_ah != NULL);
+    if (current_ah->name() != PlaintextAuthHandler::auth_type_name()) {
+	//
+	// XXX: Here we should return a mismatch error.
+	// However, if we are adding both a simple password and MD5 handlers,
+	// then the rtrmgr configuration won't match the RIP state.
+	// Ideally, the rtrmgr and xorpsh shouldn't allow the user to add
+	// both handlers. For the time being we need to live with this
+	// limitation and therefore we shouldn't return an error here.
+	//
+	return XrlCmdError::OKAY();
+#if 0
+	error_msg = c_format("Cannot delete simple password authentication: "
+			     "no such is configured");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+#endif
+    }
+
+    //
+    // Install an empty handler and delete the simple authentication handler
+    //
+    NullAuthHandler* null_handler = new NullAuthHandler();
+    pss.set_auth_handler(null_handler);
+    delete current_ah;
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlRipTarget::rip_0_1_set_md5_authentication_key(
     // Input values,
     const string&	ifname,
     const string&	vifname,
@@ -539,8 +528,11 @@ XrlRipTarget::rip_0_1_set_md5_authentication(
     if (pp.first == 0)
 	return pp.second;
     Port<IPv4>* p = pp.first;
+    PortAFSpecState<IPv4>& pss = p->af_state();
 
+    //
     // Check the key ID
+    //
     if (key_id > 255) {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
 			     XORP_UINT_CAST(key_id));
@@ -568,20 +560,33 @@ XrlRipTarget::rip_0_1_set_md5_authentication(
 	end_secs = decoded_time;
     }
 
-    PortAFSpecState<IPv4>& pss = p->af_state();
-
-    MD5AuthHandler* new_ah = new MD5AuthHandler(_e);
-    if (new_ah->add_key(key_id, password, start_secs, end_secs) == 0) {
-	delete new_ah;
-	return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
+    //
+    // Modify an existing MD5 authentication handler or create a new one
+    //
+    MD5AuthHandler* md5_ah = NULL;
+    AuthHandlerBase* current_ah = pss.auth_handler();
+    XLOG_ASSERT(current_ah != NULL);
+    if (current_ah->name() == MD5AuthHandler::auth_type_name()) {
+	md5_ah = dynamic_cast<MD5AuthHandler*>(current_ah);
+	XLOG_ASSERT(md5_ah != NULL);
+	if (md5_ah->add_key(key_id, password, start_secs, end_secs) != true) {
+	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
+	}
+    } else {
+	md5_ah = new MD5AuthHandler(_e);
+	if (md5_ah->add_key(key_id, password, start_secs, end_secs) != true) {
+	    delete md5_ah;
+	    return XrlCmdError::COMMAND_FAILED("MD5 key add failed");
+	}
+	pss.set_auth_handler(md5_ah);
+	delete current_ah;
     }
-    AuthHandlerBase* last_ah = pss.set_auth_handler(new_ah);
-    delete last_ah;
+
     return XrlCmdError::OKAY();
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_delete_md5_authentication(
+XrlRipTarget::rip_0_1_delete_md5_authentication_key(
     // Input values,
     const string&	ifname,
     const string&	vifname,
@@ -594,36 +599,64 @@ XrlRipTarget::rip_0_1_delete_md5_authentication(
     if (pp.first == 0)
 	return pp.second;
     Port<IPv4>* p = pp.first;
+    PortAFSpecState<IPv4>& pss = p->af_state();
 
+    //
+    // Test whether the MD5 password handler is really configured
+    //
+    AuthHandlerBase* current_ah = pss.auth_handler();
+    XLOG_ASSERT(current_ah != NULL);
+    if (current_ah->name() != MD5AuthHandler::auth_type_name()) {
+	//
+	// XXX: Here we should return a mismatch error.
+	// However, if we are adding both a simple password and MD5 handlers,
+	// then the rtrmgr configuration won't match the RIP state.
+	// Ideally, the rtrmgr and xorpsh shouldn't allow the user to add
+	// both handlers. For the time being we need to live with this
+	// limitation and therefore we shouldn't return an error here.
+	//
+	return XrlCmdError::OKAY();
+#if 0
+	error_msg = c_format("Cannot delete MD5 password authentication: "
+			     "no such is configured");
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+#endif
+    }
+
+    //
     // Check the key ID
+    //
     if (key_id > 255) {
 	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
 			     XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    PortAFSpecState<IPv4>& pss = p->af_state();
-    AuthHandlerBase* last_ah = pss.auth_handler();
-    if (last_ah == NULL) {
-	error_msg = c_format("No authentication was configured previously");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
-    MD5AuthHandler* md5_ah = dynamic_cast<MD5AuthHandler*>(last_ah);
-    if (md5_ah == NULL) {
-	error_msg = c_format("No MD5 authentication was configured previously");
-	return XrlCmdError::COMMAND_FAILED(error_msg);
-    }
+    //
+    // Find the MD5 authentication handler to modify
+    //
+    MD5AuthHandler* md5_ah;
+    md5_ah = dynamic_cast<MD5AuthHandler *>(current_ah);
+    XLOG_ASSERT(md5_ah != NULL);
 
+    //
+    // Remove the key
+    //
     if (md5_ah->remove_key(key_id) != true) {
 	error_msg = c_format("Invalid MD5 key ID %u", XORP_UINT_CAST(key_id));
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
-    if (md5_ah->key_chain().empty()) {
-	// Remove the MD5 authentication because no more keys
-	last_ah = pss.set_auth_handler(new NullAuthHandler());
-	delete last_ah;
+    //
+    // If the last key, then install an empty handler and delete the MD5
+    // authentication handler.
+    //
+    if (md5_ah->key_chain().size() == 0) {
+	NullAuthHandler* null_handler = new NullAuthHandler();
+	pss.set_auth_handler(null_handler);
+	delete current_ah;
     }
+
     return XrlCmdError::OKAY();
 }
 

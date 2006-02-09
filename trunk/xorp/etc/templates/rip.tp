@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.31 2006/01/27 21:35:35 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.32 2006/02/04 06:45:39 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -27,8 +27,9 @@ protocols {
 		    table-request-secs:		u32	=   1 ;
 		    interpacket-delay-msecs:	u32	=  50 ;
 		    authentication {
-			type:			txt	= "none" ;
-			password:		txt	= "" ;
+			type:			txt;	/* %deprecated */
+			password:		txt;	/* %deprecated */
+			simple-password:	txt	= "" ;
 
 			md5 @: u32 {
 			    password:		txt	= "" ;
@@ -204,31 +205,34 @@ protocols {
 		    }
 
 		    authentication {
-			%help: short "Set the authentication" ;
-			%mandatory: $(@.type);
-
-			%activate: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)";
-			%update: xrl "$(rip.targetname)/rip/0.1/set_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&type:txt=$(@.type)&password:txt=$(@.password)";
+			%help: short "Set the authentication";
 
 			type {
+			    %deprecated: "Statement 'type' is obsoleted by 'simple-password' and 'md5'";
 			    %help: short "Set the authentication type";
 			    %allow: $(@) "none" %help: "No authentication";
-			    %allow: $(@) "plaintext" %help: "Plain text authentication";
+			    %allow: $(@) "simple" %help: "Simple password authentication";
 			    %allow: $(@) "md5" %help: "MD5 authentication";
 			}
 
 			password {
+			    %deprecated: "Statement 'password' is replaced with 'simple-password'";
 			    %help: short "Set the authentication password";
 			}
 
-			md5 @ {
-			    %help: short "Set MD5 authentication";
-			    %allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
-			    %allow: $(authentication.type) "md5" %help: "MD5 authentication";
+			simple-password {
+			    %help: short "Set simple password authentication key";
+			    %create: xrl "$(rip.targetname)/rip/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&password:txt=$(@)";
+			    %set: xrl "$(rip.targetname)/rip/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&password:txt=$(@)";
+			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
+			}
 
-			    %activate: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
-			    %update: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
-			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_md5_authentication?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)";
+			md5 @ {
+			    %help: short "Set MD5 authentication key";
+			    %allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
+			    %activate: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %update: xrl "$(rip.targetname)/rip/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)";
+			    %delete: xrl "$(rip.targetname)/rip/0.1/delete_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&key_id:u32=$(@)";
 			    password {
 				%help: short "Set the authentication password";
 			    }

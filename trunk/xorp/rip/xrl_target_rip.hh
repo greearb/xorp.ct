@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.17 2005/10/27 05:05:40 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.18 2006/02/04 06:45:39 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -235,21 +235,20 @@ public:
 					   const IPv4&		addr,
 					   uint32_t&		t_msecs);
 
-    XrlCmdError
-    rip_0_1_set_authentication(const string&	ifname,
-			       const string&	vifname,
-			       const IPv4&	addr,
-			       const string&	type,
-			       const string&	password);
+    XrlCmdError rip_0_1_set_simple_authentication_key(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr,
+	const string&	password);
 
-    XrlCmdError
-    rip_0_1_authentication(const string&	ifname,
-			   const string&	vifname,
-			   const IPv4&		addr,
-			   string&		type,
-			   string&		password);
+    XrlCmdError rip_0_1_delete_simple_authentication_key(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	addr);
 
-    XrlCmdError rip_0_1_set_md5_authentication(
+    XrlCmdError rip_0_1_set_md5_authentication_key(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
@@ -259,7 +258,7 @@ public:
 	const string&	start_time,
 	const string&	end_time);
 
-    XrlCmdError rip_0_1_delete_md5_authentication(
+    XrlCmdError rip_0_1_delete_md5_authentication_key(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
