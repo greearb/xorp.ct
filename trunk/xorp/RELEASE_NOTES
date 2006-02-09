@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.91 2005/12/17 02:05:15 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.92 2006/01/27 21:30:13 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -148,7 +148,33 @@ Release 1.2 (2005/??/??)
       detailed and terse format. The default format is "brief".
 
   RIP:
-    - 
+    - The syntax for configuring the authentication mechanism has changed:
+
+      OLD:
+      authentication {
+          type: "plaintext"
+          password: "FOO"
+      }
+      OR
+      authentication {
+          type: "md5"
+          password: "FOO"
+      }
+
+      NEW:
+      authentication {
+          simple-password: "FOO"
+      }
+      OR
+      authentication {
+          md5 1 {             /* KeyID: [0, 255] */
+              password: "FOO"
+              start-time: "YYYY-MM-DD.HH:MM"
+              end-time: "YYYY-MM-DD.HH:MM"
+          }
+      }
+
+    - Several bug fixes.
 
   BGP:
     - 
