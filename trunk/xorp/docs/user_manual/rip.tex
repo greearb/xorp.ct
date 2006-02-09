@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.10 2005/11/11 06:24:03 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.11 2006/01/03 01:55:35 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -95,7 +95,7 @@ a more generic policy framework. Unfortunately, the same keyword
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xx\=xx\=xx\=xx\=xx\=xx\=\kill
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>rip \{\\
 \>\>targetname {\it text}\\
@@ -121,8 +121,12 @@ protocols \{\\
 \>\>\>\>\>table-request-secs: {\it uint}\\
 \>\>\>\>\>interpacket-delay-msecs: {\it uint}\\
 \>\>\>\>\>authentication \{\\
-\>\>\>\>\>\>type: {\it text}\\
-\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\>simple-password: {\it text}\\
+\>\>\>\>\>\>md5 {\it uint(0..255)} \{\\
+\>\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\}\\
 \>\>\>\>\>\}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
@@ -267,23 +271,43 @@ protocols \{\\
 mechanism used to authorise RIP updates sent and received via this
 vif/address.  
 
-The two parameters used for authentication are:
+The authentication is configured by using one of the following
+mutually-exclusive statements:
+
 \begin{description}
-\item{\tt type}: this specifies the type of authentication to be used.
-  Valid values are ``{\stt none}'', ``{\stt plaintext}'', and ``{\stt
-  md5}''.  Plaintext authentication includes an unencrypted password
-  in every RIP update packet.  MD5 authentication includes a keyed MD5
-  digest in every RIP update packet, and is rather more secure than
-  plaintext.
-\item{\tt password}: this specifies the password used for plaintext or
-  md5 authentication on this vif/address.
+\item{\tt simple-password}: this specifies the password used for
+  plaintext authentication on this vif/address.
+\item{\tt md5}: this specifies an MD5 authentication key. The parameter
+  is the key ID and must be in the interval [0, 255].
+  The MD5 authentication is configured by using the following
+  statements:
+\begin{description}
+  \item{\tt password}: this specifies the MD5 password for the specific
+  key.
+  \item{\tt start-time}: this specifies the start time when the key
+  becomes active. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should become active immediately.
+  \item{\tt end-time}: this specifies the end time when the key becomes
+  inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should never expire.
 \end{description}
+\end{description}
+
+Note that prior to XORP Release-1.2, the authentication configuration
+statement used a different format:
+\begin{verbatim}
+authentication {
+    type: text
+    password: text
+}
+\end{verbatim}
+
 \end{description}
 \end{description}
 
 \section{Configuring RIPng}
 
-The configuration for RIP is basically the same as for RIP, with two
+The configuration for RIPng is basically the same as for RIP, with two
 exceptions:
 \begin{itemize}
 \item The addresses are IPv6 addresses with RIPng whereas they are IPv4
