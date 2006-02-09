@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.195 2006/02/08 03:48:14 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.196 2006/02/08 03:59:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -122,6 +122,7 @@ void
 AreaRouter<A>::shutdown()
 {
     _ospf.get_routing_table().remove_area(_area);
+    clear_database();
     shutdown_complete();
 }
 
@@ -2157,6 +2158,19 @@ AreaRouter<A>::close_database(DataBaseHandle& dbh)
 	XLOG_WARNING("Database closed with entries remaining");
 
     dbh.invalidate();
+}
+
+template <typename A>
+void
+AreaRouter<A>::clear_database()
+{
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	if (!_db[index]->valid())
+	    continue;
+	if (_db[index]->external())
+	    continue;
+	_db[index]->invalidate();
+    }
 }
 
 template <typename A>

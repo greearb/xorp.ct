@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.95 2006/01/30 20:11:00 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.96 2006/02/08 00:34:41 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -407,6 +407,11 @@ class AreaRouter : Subsystem {
      * @param dbd Database descriptor
      */
     void close_database(DataBaseHandle& dbh);
+
+    /**
+     * Clear the database.
+     */
+    void clear_database();
 
     /**
      * Is this the backbone area?
