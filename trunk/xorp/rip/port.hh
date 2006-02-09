@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.24 2005/12/21 02:29:51 pavlin Exp $
+// $XORP: xorp/rip/port.hh,v 1.25 2006/01/03 01:31:50 pavlin Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -92,12 +92,12 @@ public:
     ~PortAFSpecState();
 
     /**
-     * Set authentication handler.
+     * Set the authentication handler.
      *
-     * @param h authentication handler to be used.
+     * @param ah authentication handler to be used.
      * @return pointer to former handler.
      */
-    AuthHandlerBase* set_auth_handler(AuthHandlerBase* h);
+    AuthHandlerBase* set_auth_handler(AuthHandlerBase* ah);
 
     /**
      * Get authentication handler.
