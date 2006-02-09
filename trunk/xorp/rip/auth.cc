@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.17 2006/01/21 04:10:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.18 2006/02/04 06:14:02 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -168,7 +168,7 @@ PlaintextAuthHandler::name() const
 const char*
 PlaintextAuthHandler::auth_type_name()
 {
-    return "plaintext";
+    return "simple";
 }
 
 void
@@ -480,7 +480,7 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
 				   bind2nd(mem_fun_ref(&MD5Key::id_matches),
 					   mpr->key_id()));
     if (_key_chain.end() == k) {
-	set_error(c_format("packet with key id %d for which no key is"
+	set_error(c_format("packet with key id %d for which no key is "
 			   "configured", mpr->key_id()));
 	return false;
     }
