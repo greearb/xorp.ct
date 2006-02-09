@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.36 2005/12/17 02:02:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.37 2006/01/14 01:35:26 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -64,6 +64,7 @@ private:
 				// when we may not actually start any processes
     bool	_verbose;	// Set to true if output is verbose
     XorpTimer	_shutdown_timer;
+    XorpCallback0<void>::RefPtr _terminate_cb; // The cb when module terminated
 };
 
 class ModuleManager : public GenericModuleManager {

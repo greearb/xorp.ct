@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.57 2006/01/14 01:35:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.58 2006/01/26 19:51:58 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -93,6 +93,8 @@ Module::execute(bool do_exec, bool is_verification,
 {
     string error_msg;
 
+    _terminate_cb.release();
+
     if (! is_verification)
 	XLOG_INFO("Executing module: %s (%s)", _name.c_str(), _path.c_str());
 
@@ -151,6 +153,8 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
 {
     debug_msg("Module::terminate() : %s\n", _name.c_str());
 
+    _terminate_cb.release();
+
     if (! _do_exec) {
 	cb->dispatch();
 	return;
@@ -192,6 +196,7 @@ Module::terminate(XorpCallback0<void>::RefPtr cb)
     //
     XLOG_INFO("Killing module: %s", _name.c_str());
     new_status(MODULE_SHUTTING_DOWN);
+    _terminate_cb = cb;
     ModuleManager::Process* process = _mmgr.find_process_by_path(_expath);
     XLOG_ASSERT(process != NULL);
     process->terminate();
@@ -204,6 +209,8 @@ void
 Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
 {
     debug_msg("terminate_with_prejudice\n");
+
+    _terminate_cb.release();
 
     if (_status == MODULE_NOT_STARTED) {
 	cb->dispatch();
@@ -228,6 +235,7 @@ Module::terminate_with_prejudice(XorpCallback0<void>::RefPtr cb)
     //
     XLOG_INFO("Killing module with prejudice: %s", _name.c_str());
     new_status(MODULE_NOT_STARTED);
+    _terminate_cb = cb;
     ModuleManager::Process* process = _mmgr.find_process_by_path(_expath);
     XLOG_ASSERT(process != NULL);
     process->terminate_with_prejudice();
@@ -276,6 +284,9 @@ Module::module_exited(bool success, bool is_signal_terminated, int term_signal,
 	if (_status == MODULE_SHUTTING_DOWN) {
 	    XLOG_INFO("Module killed during shutdown: %s", _name.c_str());
 	    new_status(MODULE_NOT_STARTED);
+	    if (! _terminate_cb.is_empty())
+		_terminate_cb->dispatch();
+	    _terminate_cb.release();
 	    return;
 	}
 
