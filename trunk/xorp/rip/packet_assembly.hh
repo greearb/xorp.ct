@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_assembly.hh,v 1.6 2004/06/10 22:41:44 hodson Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.7 2005/03/25 02:54:27 pavlin Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -49,8 +49,8 @@ public:
     /**
      * IPv4 Specific Constructor.
      */
-    PacketAssemblerSpecState(Port<IPv4>& p)
-	: _ah(*(p.af_state().auth_handler()))
+    PacketAssemblerSpecState(Port<IPv4>& port)
+	: _ah(*(port.af_state().auth_handler()))
     {}
 
     /**
@@ -147,9 +147,9 @@ public:
     /**
      * Constructor.
      *
-     * @param p Port to take configuration information from.
+     * @param port Port to take configuration information from.
      */
-    inline ResponsePacketAssembler(Port<A>& p);
+    inline ResponsePacketAssembler(Port<A>& port);
 
     /**
      * Constructor.
@@ -207,7 +207,7 @@ private:
     ResponsePacketAssembler& operator=(const ResponsePacketAssembler&);
 
 protected:
-    RipPacket<A>* _p;
+    RipPacket<A>* _pkt;
     uint32_t	  _pos;
     SpState	  _sp_state;
 };
@@ -247,15 +247,15 @@ protected:
 
 template <>
 inline
-ResponsePacketAssembler<IPv4>::ResponsePacketAssembler(Port<IPv4>& p)
-    : _p(0), _pos(0), _sp_state(p)
+ResponsePacketAssembler<IPv4>::ResponsePacketAssembler(Port<IPv4>& port)
+    : _pkt(0), _pos(0), _sp_state(port)
 {
 }
 
 template <>
 inline
 ResponsePacketAssembler<IPv4>::ResponsePacketAssembler(SpState& sp)
-    : _p(0), _pos(0), _sp_state(sp)
+    : _pkt(0), _pos(0), _sp_state(sp)
 {
 }
 
@@ -267,15 +267,15 @@ ResponsePacketAssembler<IPv4>::~ResponsePacketAssembler()
 
 template <>
 inline void
-ResponsePacketAssembler<IPv4>::packet_start(RipPacket<IPv4>* p)
+ResponsePacketAssembler<IPv4>::packet_start(RipPacket<IPv4>* pkt)
 {
-    _p = p;
+    _pkt = pkt;
 
     const AuthHandlerBase& ah = _sp_state.ah();
     _pos = ah.head_entries();
-    _p->set_max_entries(ah.head_entries() + ah.max_routing_entries());
-    _p->header()->initialize(RipPacketHeader::RESPONSE,
-			     RipPacketHeader::IPv4_VERSION);
+    _pkt->set_max_entries(ah.head_entries() + ah.max_routing_entries());
+    _pkt->header()->initialize(RipPacketHeader::RESPONSE,
+			       RipPacketHeader::IPv4_VERSION);
 }
 
 template <>
@@ -296,7 +296,7 @@ ResponsePacketAssembler<IPv4>::packet_add_route(const Net&	net,
     if (packet_full()) {
 	return false;
     }
-    _p->route_entry(_pos)->initialize(tag, net, nexthop, cost);
+    _pkt->route_entry(_pos)->initialize(tag, net, nexthop, cost);
     _pos++;
     return true;
 }
@@ -305,18 +305,14 @@ template <>
 inline bool
 ResponsePacketAssembler<IPv4>::packet_finish()
 {
-    vector<uint8_t> trailer;
-
     AuthHandlerBase& ah = _sp_state.ah();
 
-    PacketRouteEntry<IPv4>* fe = (ah.head_entries()) ? _p->route_entry(0) : 0;
-
-    _p->set_max_entries(_pos);
-    if (ah.authenticate(_p->data_ptr(), _p->data_bytes(), fe, trailer) == 0) {
+    _pkt->set_max_entries(_pos);
+    size_t n_routes = 0;
+    if ((ah.authenticate_outbound(*_pkt, n_routes) != true)
+	|| (n_routes == 0)) {
 	XLOG_ERROR("Outbound authentication error: %s\n", ah.error().c_str());
 	return false;
-    } else if (trailer.size() != 0) {
-	_p->append_data(trailer);
     }
     return true;
 }
@@ -326,15 +322,15 @@ ResponsePacketAssembler<IPv4>::packet_finish()
 
 template <>
 inline
-ResponsePacketAssembler<IPv6>::ResponsePacketAssembler(Port<IPv6>& p)
-    : _p(0), _pos(0), _sp_state(p)
+ResponsePacketAssembler<IPv6>::ResponsePacketAssembler(Port<IPv6>& port)
+    : _pkt(0), _pos(0), _sp_state(port)
 {
 }
 
 template <>
 inline
 ResponsePacketAssembler<IPv6>::ResponsePacketAssembler(SpState& sp)
-    : _p(0), _pos(0), _sp_state(sp)
+    : _pkt(0), _pos(0), _sp_state(sp)
 {
 }
 
@@ -346,13 +342,13 @@ ResponsePacketAssembler<IPv6>::~ResponsePacketAssembler()
 
 template <>
 inline void
-ResponsePacketAssembler<IPv6>::packet_start(RipPacket<IPv6>* p)
+ResponsePacketAssembler<IPv6>::packet_start(RipPacket<IPv6>* pkt)
 {
-    _p = p;
+    _pkt = pkt;
     _pos = 0;
     _sp_state.reset_last_nexthop();
-    _p->header()->initialize(RipPacketHeader::RESPONSE,
-			     RipPacketHeader::IPv6_VERSION);
+    _pkt->header()->initialize(RipPacketHeader::RESPONSE,
+			       RipPacketHeader::IPv6_VERSION);
 }
 
 template <>
@@ -373,11 +369,11 @@ ResponsePacketAssembler<IPv6>::packet_add_route(const Net&	net,
 	return false;
     }
     if (nexthop != _sp_state.last_nexthop()) {
-	_p->route_entry(_pos)->initialize_nexthop(nexthop);
+	_pkt->route_entry(_pos)->initialize_nexthop(nexthop);
 	_pos++;
 	_sp_state.set_last_nexthop(nexthop);
     }
-    _p->route_entry(_pos)->initialize_route(tag, net, cost);
+    _pkt->route_entry(_pos)->initialize_route(tag, net, cost);
     _pos++;
     return true;
 }
@@ -386,7 +382,7 @@ template <>
 inline bool
 ResponsePacketAssembler<IPv6>::packet_finish()
 {
-    _p->set_max_entries(_pos);
+    _pkt->set_max_entries(_pos);
     return true;
 }
 
@@ -405,15 +401,11 @@ RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>* pkt)
     pkt->set_max_entries(1 + ah.head_entries());
     pkt->route_entry(ah.head_entries())->initialize_table_request();
 
-    vector<uint8_t> trailer;
-    PacketRouteEntry<IPv4>* fe = (ah.head_entries()) ? pkt->route_entry(0) : 0;
-
-    if (ah.authenticate(pkt->data_ptr(), pkt->data_bytes(),
-			fe, trailer) == 0) {
+    size_t n_routes = 0;
+    if ((ah.authenticate_outbound(*pkt, n_routes) != true)
+	|| (n_routes == 0)) {
 	XLOG_ERROR("Outbound authentication error: %s\n", ah.error().c_str());
 	return false;
-    } else if (trailer.size() != 0) {
-	pkt->append_data(trailer);
     }
     return true;
 }

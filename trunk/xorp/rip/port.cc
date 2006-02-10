@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.52 2006/01/20 02:23:44 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.53 2006/01/21 04:37:18 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -837,11 +837,11 @@ Port<A>::port_io_receive(const A&	src_address,
 	new_peer = true;
     }
 
-    if (af_state().auth_handler()->authenticate(rip_packet,
-						rip_packet_bytes,
-						entries,
-						n_entries,
-						new_peer) == false) {
+    if (af_state().auth_handler()->authenticate_inbound(rip_packet,
+							rip_packet_bytes,
+							entries,
+							n_entries,
+							new_peer) == false) {
 	string cause = c_format("packet failed authentication (%s): %s",
 				af_state().auth_handler()->name(),
 				af_state().auth_handler()->error().c_str());

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.16 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.17 2005/09/01 01:39:17 zec Exp $"
 
 #include "rip_module.h"
 
@@ -72,27 +72,19 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
 	p->initialize(0, IPv4Net("10.0.0.0/8"), IPv4("172.11.100.1"), 3);
     }
 
-    if (ah.head_entries()) {
-	PacketRouteEntry<IPv4>* p = reinterpret_cast<PacketRouteEntry<IPv4>*>
-	    (&pkt[0] + sizeof(RipPacketHeader));
-	if (ah.authenticate(&pkt[0], pkt.size(), p, trailer) != n) {
-	    verbose_log("Unexpected outbound authentication failure: %s\n",
-			ah.error().c_str());
-	    return 1;
-	}
-    } else {
-	if (ah.authenticate(&pkt[0], pkt.size(), 0, trailer) != n) {
-	    verbose_log("Unexpected outbound authentication failure: %s\n",
-			ah.error().c_str());
-	    return 1;
-	} else if (trailer.size() != 0) {
-	    verbose_log("Trailer had unexpected size.\n");
-	    return 1;
-	}
+    RipPacket<IPv4> rip_packet(IPv4::ZERO(), RIP_PORT, n + ah.head_entries());
+    rip_packet.data() = pkt;
+
+    size_t n_routes = 0;
+    if ((ah.authenticate_outbound(rip_packet, n_routes) != true)
+	|| (n_routes != n)) {
+	verbose_log("Unexpected outbound authentication failure: %s\n",
+		    ah.error().c_str());
+	return 1;
     }
 
-    // Push any trailer data to end of packet
-    pkt.insert(pkt.end(), trailer.begin(), trailer.end());
+    // Copy the modified data back to the original packet
+    pkt = rip_packet.data();
 
     return 0;
 }
@@ -116,7 +108,7 @@ check_auth_packet(const vector<uint8_t>& pkt,
     const PacketRouteEntry<IPv4>* entries = 0;
     uint32_t n_entries = 0;
 
-    if (ah.authenticate(&pkt[0], pkt.size(), entries, n_entries, false)
+    if (ah.authenticate_inbound(&pkt[0], pkt.size(), entries, n_entries, false)
 	== false) {
 	if (expect_fail == false) {
 	    verbose_log("Unexpected failure (actual entries %u, "

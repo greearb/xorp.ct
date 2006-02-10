@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.8 2006/01/21 04:09:35 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.9 2006/02/04 06:14:02 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -50,28 +50,22 @@ public:
      *
      * @return true if packet passes authentication checks, false otherwise.
      */
-    virtual bool authenticate(const uint8_t*			packet,
-			      size_t				packet_bytes,
-			      const PacketRouteEntry<IPv4>*&	entries,
-			      uint32_t&				n_entries,
-			      bool				new_peer
-			      ) = 0;
+    virtual bool authenticate_inbound(const uint8_t*	packet,
+				      size_t		packet_bytes,
+				      const PacketRouteEntry<IPv4>*& entries,
+				      uint32_t&		n_entries,
+				      bool		new_peer) = 0;
 
     /**
      * Outbound authentication method.
      *
-     * @param packet pointer to first byte of RIP packet.
-     * @param packet_bytes number of bytes in RIP packet.
-     * @param first_entry pointer to first entry in RIP packet.
-     * @param trailer_data vector of data authentication scheme use for
-     *        authenication scheme data to appear at end of packet sent.
-     * @return number of packet entries on success, 0 when no valid keys
-     * are present.
+     * @param packet the RIP packet to authenticate.
+     * @param n_routes the return-by-reference number of routes in the packet.
+     * @return true if packet was successfully authenticated, false when
+     * no valid keys are present.
      */
-    virtual uint32_t authenticate(const uint8_t*	  packet,
-				  size_t		  packet_bytes,
-				  PacketRouteEntry<IPv4>* first_entry,
-				  vector<uint8_t>& 	  trailer_data) = 0;
+    virtual bool authenticate_outbound(RipPacket<IPv4>&	packet,
+				       size_t&		n_routes) = 0;
 
     /**
      * Get number of routing entries used by authentication scheme at the
@@ -118,16 +112,14 @@ private:
 class NullAuthHandler : public AuthHandlerBase
 {
 public:
-    bool authenticate(const uint8_t*			packet,
-		      size_t				packet_bytes,
-		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries,
-		      bool				new_peer);
+    bool authenticate_inbound(const uint8_t*			packet,
+			      size_t				packet_bytes,
+			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      uint32_t&				n_entries,
+			      bool				new_peer);
 
-    uint32_t authenticate(const uint8_t*	  packet,
-			  size_t		  packet_bytes,
-			  PacketRouteEntry<IPv4>* first_entry,
-			  vector<uint8_t>&	  trailer_data);
+    bool authenticate_outbound(RipPacket<IPv4>&	packet,
+			       size_t&		n_routes);
 
     uint32_t head_entries() const;
 
@@ -144,16 +136,14 @@ public:
 class PlaintextAuthHandler : public AuthHandlerBase
 {
 public:
-    bool authenticate(const uint8_t*			packet,
-		      size_t				packet_bytes,
-		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries,
-		      bool				new_peer);
+    bool authenticate_inbound(const uint8_t*			packet,
+			      size_t				packet_bytes,
+			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      uint32_t&				n_entries,
+			      bool				new_peer);
 
-    uint32_t authenticate(const uint8_t*	  packet,
-			  size_t		  packet_bytes,
-			  PacketRouteEntry<IPv4>* first_entry,
-			  vector<uint8_t>&	  trailer_data);
+    bool authenticate_outbound(RipPacket<IPv4>&	packet,
+			       size_t&		n_routes);
 
     uint32_t head_entries() const;
 
@@ -302,17 +292,14 @@ public:
      */
     MD5AuthHandler(EventLoop& e, uint32_t timing_slack_secs = 3600);
 
-    bool authenticate(const uint8_t*			packet,
-		      size_t				packet_bytes,
-		      const PacketRouteEntry<IPv4>*&	entries_start,
-		      uint32_t&				n_entries,
-		      bool				new_peer
-		      );
+    bool authenticate_inbound(const uint8_t*			packet,
+			      size_t				packet_bytes,
+			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      uint32_t&				n_entries,
+			      bool				new_peer);
 
-    uint32_t authenticate(const uint8_t*	  packet,
-			  size_t		  packet_bytes,
-			  PacketRouteEntry<IPv4>* first_entry,
-			  vector<uint8_t>&	  trailer_data);
+    bool authenticate_outbound(RipPacket<IPv4>&	packet,
+			       size_t&		n_routes);
 
     uint32_t head_entries() const;
 

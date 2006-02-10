@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.18 2006/02/04 06:14:02 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.19 2006/02/09 08:57:39 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -84,11 +84,11 @@ NullAuthHandler::auth_type_name()
 }
 
 bool
-NullAuthHandler::authenticate(const uint8_t*		     packet,
-			      size_t			     packet_bytes,
-			      const PacketRouteEntry<IPv4>*& entries,
-			      uint32_t&			     n_entries,
-			      bool)
+NullAuthHandler::authenticate_inbound(const uint8_t*		packet,
+				      size_t			packet_bytes,
+				      const PacketRouteEntry<IPv4>*& entries,
+				      uint32_t&			n_entries,
+				      bool)
 {
     entries = 0;
     n_entries = 0;
@@ -131,16 +131,18 @@ NullAuthHandler::authenticate(const uint8_t*		     packet,
     return true;
 }
 
-uint32_t
-NullAuthHandler::authenticate(const uint8_t*	      /* packet */,
-			      size_t		      packet_bytes,
-			      PacketRouteEntry<IPv4>* /* first_entry */,
-			      vector<uint8_t>&	      trailer_data)
+bool
+NullAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+				       size_t&		n_routes)
 {
-    trailer_data.resize(0);
+    UNUSED(packet);
+
     reset_error();
-    return (packet_bytes - sizeof(RipPacketHeader)) /
-	sizeof(PacketRouteEntry<IPv4>);
+
+    n_routes = packet.data_bytes() - sizeof(RipPacketHeader);
+    n_routes /= sizeof(PacketRouteEntry<IPv4>);
+
+    return (true);
 }
 
 
@@ -184,11 +186,11 @@ PlaintextAuthHandler::key() const
 }
 
 bool
-PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
-				   size_t			  packet_bytes,
-				   const PacketRouteEntry<IPv4>*& entries,
-				   uint32_t&			  n_entries,
-				   bool)
+PlaintextAuthHandler::authenticate_inbound(const uint8_t*	packet,
+					   size_t		packet_bytes,
+					   const PacketRouteEntry<IPv4>*& entries,
+					   uint32_t&		n_entries,
+					   bool)
 {
     entries = 0;
     n_entries = 0;
@@ -238,28 +240,31 @@ PlaintextAuthHandler::authenticate(const uint8_t*		  packet,
     return true;
 }
 
-uint32_t
-PlaintextAuthHandler::authenticate(const uint8_t*	   packet,
-				   size_t		   packet_bytes,
-				   PacketRouteEntry<IPv4>* first_entry,
-				   vector<uint8_t>&	   trailer_data)
+bool
+PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+					    size_t&		n_routes)
 {
+    PacketRouteEntry<IPv4>* first_entry = NULL;
+
+    if (head_entries() > 0)
+	first_entry = packet.route_entry(0);
+
     static_assert(sizeof(*first_entry) == 20);
     static_assert(sizeof(PlaintextPacketRouteEntry4) == 20);
-    XLOG_ASSERT(packet + sizeof(RipPacketHeader) ==
+    XLOG_ASSERT(packet.data_ptr() + sizeof(RipPacketHeader) ==
 		reinterpret_cast<const uint8_t*>(first_entry));
 
     PlaintextPacketRouteEntry4* ppr =
 	reinterpret_cast<PlaintextPacketRouteEntry4*>(first_entry);
     ppr->initialize(key());
 
-    trailer_data.resize(0);
     reset_error();
 
-    uint32_t n = (packet_bytes - sizeof(RipPacketHeader)) /
-	sizeof(PacketRouteEntry<IPv4>) - 1;
+    n_routes = packet.data_bytes() - sizeof(RipPacketHeader);
+    n_routes /= sizeof(PacketRouteEntry<IPv4>);
+    n_routes--;		// XXX: exclude the first (authentication) entry
 
-    return n;
+    return (true);
 }
 
 
@@ -423,11 +428,11 @@ MD5AuthHandler::currently_active_key() const
 }
 
 bool
-MD5AuthHandler::authenticate(const uint8_t*		    packet,
-			     size_t			    packet_bytes,
-			     const PacketRouteEntry<IPv4>*& entries,
-			     uint32_t&			    n_entries,
-			     bool			    new_peer)
+MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
+				     size_t			packet_bytes,
+				     const PacketRouteEntry<IPv4>*& entries,
+				     uint32_t&			n_entries,
+				     bool			new_peer)
 {
     static_assert(sizeof(MD5PacketTrailer) == 20);
 
@@ -541,12 +546,16 @@ MD5AuthHandler::authenticate(const uint8_t*		    packet,
     return true;
 }
 
-uint32_t
-MD5AuthHandler::authenticate(const uint8_t* 	     packet,
-			     size_t	    	     packet_bytes,
-			     PacketRouteEntry<IPv4>* first_entry,
-			     vector<uint8_t>&	     trailer_data)
+bool
+MD5AuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+				      size_t&		n_routes)
 {
+    vector<uint8_t> trailer;
+    PacketRouteEntry<IPv4>* first_entry = NULL;
+
+    if (head_entries() > 0)
+	first_entry = packet.route_entry(0);
+
     MD5PacketRouteEntry4* mpr =
 	reinterpret_cast<MD5PacketRouteEntry4*>(first_entry);
 
@@ -556,25 +565,29 @@ MD5AuthHandler::authenticate(const uint8_t* 	     packet,
     KeyChain::iterator k = key_at(now.sec());
     if (k == _key_chain.end()) {
 	set_error("no valid keys to authenticate outbound data");
-	return 0;
+	return (false);
     }
 
     static_assert(sizeof(MD5PacketTrailer) == 20);
-    mpr->initialize(packet_bytes, k->id(), sizeof(MD5PacketTrailer),
+    mpr->initialize(packet.data_bytes(), k->id(), sizeof(MD5PacketTrailer),
 		    k->next_seqno_out());
 
-    trailer_data.resize(sizeof(MD5PacketTrailer));
+    trailer.resize(sizeof(MD5PacketTrailer));
     MD5PacketTrailer* mpt =
-	reinterpret_cast<MD5PacketTrailer*>(&trailer_data[0]);
+	reinterpret_cast<MD5PacketTrailer*>(&trailer[0]);
     mpt->initialize();
 
     MD5_CTX ctx;
     MD5_Init(&ctx);
-    MD5_Update(&ctx, packet, mpr->auth_offset());
-    MD5_Update(&ctx, &trailer_data[0], mpt->data_offset());
+    MD5_Update(&ctx, packet.data_ptr(), mpr->auth_offset());
+    MD5_Update(&ctx, &trailer[0], mpt->data_offset());
     MD5_Update(&ctx, k->key_data(), k->key_data_bytes());
     MD5_Final(mpt->data(), &ctx);
 
     reset_error();
-    return packet_bytes / sizeof(MD5PacketRouteEntry4) - 1;
+
+    n_routes = packet.data_bytes() / sizeof(MD5PacketRouteEntry4) - 1;
+
+    packet.append_data(trailer);
+    return (true);
 }
