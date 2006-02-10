@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.196 2006/02/08 03:59:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.197 2006/02/09 19:59:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2715,7 +2715,24 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
 	route_entry.set_area(_area);
 	route_entry.set_lsa(lsar);
 
-	routing_table.add_entry(_area, net, route_entry);
+	// Stub links in router-LSAs are processed in this loop. The
+	// RFC suggests dealing with them later. Either due to
+	// misconfiguration or races a Network-LSA and a stub link in
+	// a Router-LSA can point to the same network. Therefore it is
+	// necessary to check that a route is not already in the table.
+	RouteEntry<IPv4> current_route_entry;
+	if (routing_table.lookup_entry(_area, net, current_route_entry)) {
+	    if (current_route_entry.get_cost() > route_entry.get_cost()) {
+		routing_table.replace_entry(_area, net, route_entry);
+	    } else if (current_route_entry.get_cost() ==
+		       route_entry.get_cost()) {
+		if (route_entry.get_advertising_router() <
+		    current_route_entry.get_advertising_router())
+		    routing_table.replace_entry(_area, net, route_entry);
+	    }
+	} else {
+	    routing_table.add_entry(_area, net, route_entry);
+	}
     }
 
     end_virtual_link();
