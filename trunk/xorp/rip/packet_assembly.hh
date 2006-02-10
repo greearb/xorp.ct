@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_assembly.hh,v 1.7 2005/03/25 02:54:27 pavlin Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.8 2006/02/10 00:44:06 pavlin Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -191,9 +191,11 @@ public:
      * and this method gives that processing a chance to happen.  Common
      * usage is RIPv2 authentication.
      *
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one copy for each valid authentication key).
      * @return true on success, false if a failure is detected.
      */
-    inline bool packet_finish();
+    inline bool packet_finish(list<RipPacket<A>* >& auth_packets);
 
 private:
     /**
@@ -232,10 +234,13 @@ public:
     /**
      * Take RipPacket packet and make it into a table request packet.
      *
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one copy for each valid authentication key).
      * @return true on success, false if an error is encountered.  Should
      * an error be encountered the reason is written to the xlog facility.
      */
-    inline bool prepare(RipPacket<A>* pkt);
+    inline bool prepare(RipPacket<A>*		pkt,
+			list<RipPacket<A>* >&	auth_packets);
 
 protected:
     SpState _sp_state;
@@ -303,13 +308,14 @@ ResponsePacketAssembler<IPv4>::packet_add_route(const Net&	net,
 
 template <>
 inline bool
-ResponsePacketAssembler<IPv4>::packet_finish()
+ResponsePacketAssembler<IPv4>::packet_finish(
+    list<RipPacket<IPv4>* >&	auth_packets)
 {
     AuthHandlerBase& ah = _sp_state.ah();
 
     _pkt->set_max_entries(_pos);
     size_t n_routes = 0;
-    if ((ah.authenticate_outbound(*_pkt, n_routes) != true)
+    if ((ah.authenticate_outbound(*_pkt, auth_packets, n_routes) != true)
 	|| (n_routes == 0)) {
 	XLOG_ERROR("Outbound authentication error: %s\n", ah.error().c_str());
 	return false;
@@ -380,9 +386,14 @@ ResponsePacketAssembler<IPv6>::packet_add_route(const Net&	net,
 
 template <>
 inline bool
-ResponsePacketAssembler<IPv6>::packet_finish()
+ResponsePacketAssembler<IPv6>::packet_finish(
+    list<RipPacket<IPv6>* >&	auth_packets)
 {
     _pkt->set_max_entries(_pos);
+
+    RipPacket<IPv6>* packet = new RipPacket<IPv6>(*_pkt);
+    auth_packets.push_back(packet);
+    
     return true;
 }
 
@@ -392,7 +403,8 @@ ResponsePacketAssembler<IPv6>::packet_finish()
 
 template<>
 inline bool
-RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>* pkt)
+RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>*	    pkt,
+					   list<RipPacket<IPv4>* >& auth_packets)
 {
     pkt->header()->initialize(RipPacketHeader::REQUEST,
 			      RipPacketHeader::IPv4_VERSION);
@@ -402,7 +414,7 @@ RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>* pkt)
     pkt->route_entry(ah.head_entries())->initialize_table_request();
 
     size_t n_routes = 0;
-    if ((ah.authenticate_outbound(*pkt, n_routes) != true)
+    if ((ah.authenticate_outbound(*pkt, auth_packets, n_routes) != true)
 	|| (n_routes == 0)) {
 	XLOG_ERROR("Outbound authentication error: %s\n", ah.error().c_str());
 	return false;
@@ -416,12 +428,17 @@ RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>* pkt)
 
 template<>
 inline bool
-RequestTablePacketAssembler<IPv6>::prepare(RipPacket<IPv6>* pkt)
+RequestTablePacketAssembler<IPv6>::prepare(RipPacket<IPv6>*	    pkt,
+					   list<RipPacket<IPv6>* >& auth_packets)
 {
     pkt->header()->initialize(RipPacketHeader::REQUEST,
 			      RipPacketHeader::IPv6_VERSION);
     pkt->set_max_entries(1);
     pkt->route_entry(0)->initialize_table_request();
+
+    RipPacket<IPv6>* packet = new RipPacket<IPv6>(*pkt);
+    auth_packets.push_back(packet);
+
     return true;
 }
 

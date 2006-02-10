@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.9 2006/02/04 06:14:02 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.10 2006/02/10 00:44:06 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -59,13 +59,20 @@ public:
     /**
      * Outbound authentication method.
      *
+     * Create a list of authenticated packets (one for each valid
+     * authentication key). Note that the original packet is also modified
+     * and authenticated with the first valid key.
+     *
      * @param packet the RIP packet to authenticate.
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one for each valid authentication key).
      * @param n_routes the return-by-reference number of routes in the packet.
      * @return true if packet was successfully authenticated, false when
      * no valid keys are present.
      */
-    virtual bool authenticate_outbound(RipPacket<IPv4>&	packet,
-				       size_t&		n_routes) = 0;
+    virtual bool authenticate_outbound(RipPacket<IPv4>&		packet,
+				       list<RipPacket<IPv4> *>& auth_packets,
+				       size_t&			n_routes) = 0;
 
     /**
      * Get number of routing entries used by authentication scheme at the
@@ -118,8 +125,9 @@ public:
 			      uint32_t&				n_entries,
 			      bool				new_peer);
 
-    bool authenticate_outbound(RipPacket<IPv4>&	packet,
-			       size_t&		n_routes);
+    bool authenticate_outbound(RipPacket<IPv4>&		packet,
+			       list<RipPacket<IPv4> *>&	auth_packets,
+			       size_t&			n_routes);
 
     uint32_t head_entries() const;
 
@@ -142,8 +150,9 @@ public:
 			      uint32_t&				n_entries,
 			      bool				new_peer);
 
-    bool authenticate_outbound(RipPacket<IPv4>&	packet,
-			       size_t&		n_routes);
+    bool authenticate_outbound(RipPacket<IPv4>&		packet,
+			       list<RipPacket<IPv4> *>&	auth_packets,
+			       size_t&			n_routes);
 
     uint32_t head_entries() const;
 
@@ -298,8 +307,9 @@ public:
 			      uint32_t&				n_entries,
 			      bool				new_peer);
 
-    bool authenticate_outbound(RipPacket<IPv4>&	packet,
-			       size_t&		n_routes);
+    bool authenticate_outbound(RipPacket<IPv4>&		packet,
+			       list<RipPacket<IPv4> *>& auth_packets,
+			       size_t&			n_routes);
 
     uint32_t head_entries() const;
 

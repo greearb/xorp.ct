@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.53 2006/01/21 04:37:18 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.54 2006/02/10 00:44:06 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -316,14 +316,20 @@ Port<A>::request_table()
     RipPacket<A>* pkt = new RipPacket<A>(RIP_AF_CONSTANTS<A>::IP_GROUP(),
 					 RIP_AF_CONSTANTS<A>::IP_PORT);
 
+    list<RipPacket<A>*> auth_packets;
     RequestTablePacketAssembler<A> rtpa(*this);
-    if (rtpa.prepare(pkt) == true) {
-	_packet_queue->enqueue_packet(pkt);
-	counters().incr_table_requests_sent();
+    if (rtpa.prepare(pkt, auth_packets) == true) {
+	typename list<RipPacket<A>*>::iterator iter;
+	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+	    RipPacket<A>* auth_pkt = *iter;
+	    _packet_queue->enqueue_packet(auth_pkt);
+	    counters().incr_table_requests_sent();
+	}
     } else {
 	XLOG_ERROR("Failed to assemble table request.\n");
-	delete pkt;
     }
+    delete pkt;
+
     push_packets();
     debug_msg("Sending Request.\n");
     return true;
@@ -737,9 +743,16 @@ Port<A>::parse_request(const Addr&			src_addr,
 	    }
 	    i++;
 	}
-	if (rpa.packet_finish() == true) {
-	    _packet_queue->enqueue_packet(pkt);
-	    counters().incr_non_rip_updates_sent();
+
+	list<RipPacket<A>*> auth_packets;
+	if (rpa.packet_finish(auth_packets) == true) {
+	    typename list<RipPacket<A>*>::iterator iter;
+	    for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+		RipPacket<A>* auth_pkt = *iter;
+		_packet_queue->enqueue_packet(auth_pkt);
+		counters().incr_non_rip_updates_sent();
+	    }
+	    delete pkt;
 	} else {
 	    delete pkt;
 	    break;

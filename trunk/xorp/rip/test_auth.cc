@@ -12,14 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.17 2005/09/01 01:39:17 zec Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.18 2006/02/10 00:44:07 pavlin Exp $"
 
 #include "rip_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
 #include "libxorp/c_format.hh"
 #include "libxorp/eventloop.hh"
+#include "libxorp/utils.hh"
 
 #include "auth.hh"
 #include "test_utils.hh"
@@ -76,12 +78,20 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
     rip_packet.data() = pkt;
 
     size_t n_routes = 0;
-    if ((ah.authenticate_outbound(rip_packet, n_routes) != true)
+    list<RipPacket<IPv4>*> auth_packets;
+    if ((ah.authenticate_outbound(rip_packet, auth_packets, n_routes) != true)
 	|| (n_routes != n)) {
 	verbose_log("Unexpected outbound authentication failure: %s\n",
 		    ah.error().c_str());
 	return 1;
     }
+
+    //
+    // XXX: there should be only one copy of the authenticated packet,
+    // and we don't care about it.
+    //
+    XLOG_ASSERT(auth_packets.size() == 1);
+    delete_pointers_list(auth_packets);
 
     // Copy the modified data back to the original packet
     pkt = rip_packet.data();

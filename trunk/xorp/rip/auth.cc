@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.19 2006/02/09 08:57:39 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.20 2006/02/10 00:44:06 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -133,9 +133,12 @@ NullAuthHandler::authenticate_inbound(const uint8_t*		packet,
 
 bool
 NullAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+				       list<RipPacket<IPv4> *>& auth_packets,
 				       size_t&		n_routes)
 {
-    UNUSED(packet);
+    // XXX: nothing to do so just create a single copy
+    RipPacket<IPv4>* copy_packet = new RipPacket<IPv4>(packet);
+    auth_packets.push_back(copy_packet);
 
     reset_error();
 
@@ -242,6 +245,7 @@ PlaintextAuthHandler::authenticate_inbound(const uint8_t*	packet,
 
 bool
 PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+					    list<RipPacket<IPv4> *>& auth_packets,
 					    size_t&		n_routes)
 {
     PacketRouteEntry<IPv4>* first_entry = NULL;
@@ -257,6 +261,10 @@ PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
     PlaintextPacketRouteEntry4* ppr =
 	reinterpret_cast<PlaintextPacketRouteEntry4*>(first_entry);
     ppr->initialize(key());
+
+    // XXX: just create a single copy
+    RipPacket<IPv4>* copy_packet = new RipPacket<IPv4>(packet);
+    auth_packets.push_back(copy_packet);
 
     reset_error();
 
@@ -548,46 +556,77 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 
 bool
 MD5AuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
+				      list<RipPacket<IPv4> *>& auth_packets,
 				      size_t&		n_routes)
 {
-    vector<uint8_t> trailer;
-    PacketRouteEntry<IPv4>* first_entry = NULL;
-
-    if (head_entries() > 0)
-	first_entry = packet.route_entry(0);
-
-    MD5PacketRouteEntry4* mpr =
-	reinterpret_cast<MD5PacketRouteEntry4*>(first_entry);
-
+    size_t valid_keys = 0;
     TimeVal now;
+    RipPacket<IPv4> first_packet(packet);
+    vector<uint8_t> first_trailer;
+
+    static_assert(sizeof(MD5PacketTrailer) == 20);
+
     _e.current_time(now);
 
-    KeyChain::iterator k = key_at(now.sec());
-    if (k == _key_chain.end()) {
+    //
+    // Create an authenticated copy of the packet for each valid key
+    //
+    KeyChain::iterator iter;
+    for (iter = _key_chain.begin(); iter != _key_chain.end(); ++iter) {
+	MD5Key& key = *iter;
+	if (! key.valid_at(now.sec()))
+	    continue;
+	valid_keys++;
+
+	RipPacket<IPv4>* copy_packet = new RipPacket<IPv4>(packet);
+	auth_packets.push_back(copy_packet);
+
+	PacketRouteEntry<IPv4>* first_entry = NULL;
+	if (head_entries() > 0)
+	    first_entry = copy_packet->route_entry(0);
+
+	MD5PacketRouteEntry4* mpr =
+	    reinterpret_cast<MD5PacketRouteEntry4*>(first_entry);
+
+	mpr->initialize(copy_packet->data_bytes(), key.id(),
+			sizeof(MD5PacketTrailer),
+			key.next_seqno_out());
+
+	vector<uint8_t> trailer;
+	trailer.resize(sizeof(MD5PacketTrailer));
+	MD5PacketTrailer* mpt =
+	    reinterpret_cast<MD5PacketTrailer*>(&trailer[0]);
+	mpt->initialize();
+
+	MD5_CTX ctx;
+	MD5_Init(&ctx);
+	MD5_Update(&ctx, copy_packet->data_ptr(), mpr->auth_offset());
+	MD5_Update(&ctx, &trailer[0], mpt->data_offset());
+	MD5_Update(&ctx, key.key_data(), key.key_data_bytes());
+	MD5_Final(mpt->data(), &ctx);
+
+	//
+	// XXX: create a copy of the first packet without the trailer
+	// and of the trailer itself.
+	//
+	if (valid_keys == 1) {
+	    first_packet = *copy_packet;
+	    first_trailer = trailer;
+	}
+
+	copy_packet->append_data(trailer);
+    }
+
+    if (valid_keys == 0) {
 	set_error("no valid keys to authenticate outbound data");
 	return (false);
     }
 
-    static_assert(sizeof(MD5PacketTrailer) == 20);
-    mpr->initialize(packet.data_bytes(), k->id(), sizeof(MD5PacketTrailer),
-		    k->next_seqno_out());
-
-    trailer.resize(sizeof(MD5PacketTrailer));
-    MD5PacketTrailer* mpt =
-	reinterpret_cast<MD5PacketTrailer*>(&trailer[0]);
-    mpt->initialize();
-
-    MD5_CTX ctx;
-    MD5_Init(&ctx);
-    MD5_Update(&ctx, packet.data_ptr(), mpr->auth_offset());
-    MD5_Update(&ctx, &trailer[0], mpt->data_offset());
-    MD5_Update(&ctx, k->key_data(), k->key_data_bytes());
-    MD5_Final(mpt->data(), &ctx);
+    packet = first_packet;
+    n_routes = packet.data_bytes() / sizeof(MD5PacketRouteEntry4) - 1;
+    packet.append_data(first_trailer);
 
     reset_error();
 
-    n_routes = packet.data_bytes() / sizeof(MD5PacketRouteEntry4) - 1;
-
-    packet.append_data(trailer);
     return (true);
 }

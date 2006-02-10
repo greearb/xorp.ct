@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/output_updates.cc,v 1.13 2005/03/25 02:54:26 pavlin Exp $"
+#ident "$XORP: xorp/rip/output_updates.cc,v 1.14 2006/01/25 04:59:23 pavlin Exp $"
 
 #include "output_updates.hh"
 #include "packet_assembly.hh"
@@ -87,15 +87,20 @@ OutputUpdates<A>::output_packet()
 	}
     }
 
-    if (done == 0 || rpa.packet_finish() == false) {
+    list<RipPacket<A>*> auth_packets;
+    if (done == 0 || rpa.packet_finish(auth_packets) == false) {
 	// No routes added to packet or error finishing packet off.
-	delete pkt;
     } else {
-	this->_pkt_queue.enqueue_packet(pkt);
+	typename list<RipPacket<A>*>::iterator iter;
+	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+	    RipPacket<A>* auth_pkt = *iter;
+	    this->_pkt_queue.enqueue_packet(auth_pkt);
+	    this->_port.counters().incr_triggered_updates();
+	    this->incr_packets_sent();
+	}
 	this->_port.push_packets();
-	this->_port.counters().incr_triggered_updates();
-	this->incr_packets_sent();
     }
+    delete pkt;
 
     if (r != 0) {
 	// Not finished with updates so set time to reschedule self

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.5 2005/03/25 02:54:33 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.8 2005/08/18 15:41:29 bms Exp $"
 
 #include <vector>
 #include <fstream>
@@ -22,6 +22,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
+#include "libxorp/utils.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
@@ -68,21 +69,30 @@ announce_routes(XorpFd fd, vector<RipRoute<IPv4> >* my_routes)
 	    rpa.packet_add_route(rts[i].net, rts[i].nh, rts[i].cost, rts[i].tag);
 	    i++;
 	}
-	rpa.packet_finish();
-	if (pkt.data_bytes() == 0) {
-	    break;
-	}
 
-	sockaddr_in sai;
-	pkt.address().copy_out(sai);
-	sai.sin_port = htons(pkt.port());
-	if (sendto(fd, XORP_BUF_CAST(pkt.data_ptr()), pkt.data_bytes(), 0,
-		   reinterpret_cast<const sockaddr*>(&sai), sizeof(sai)) < 0) {
-	    cerr << "Write failed: " << strerror(errno) << endl;
-	    return false;
-	} else {
-	    cout << "Packet sent" << endl;
+	list<RipPacket<IPv4>*> auth_packets;
+	if (rpa.packet_finish(auth_packets) != true)
+	    break;
+	if (pkt.data_bytes() == 0)
+	    break;
+
+	list<RipPacket<IPv4>*>::iterator iter;
+	for (iter = auth_packets.begin(); iter != auth_packets.end(); ++iter) {
+	    RipPacket<IPv4>* auth_pkt = *iter;
+	    sockaddr_in sai;
+	    auth_pkt->address().copy_out(sai);
+	    sai.sin_port = htons(auth_pkt->port());
+	    if (sendto(fd, XORP_BUF_CAST(auth_pkt->data_ptr()),
+		       auth_pkt->data_bytes(), 0,
+		       reinterpret_cast<const sockaddr*>(&sai),
+		       sizeof(sai)) < 0) {
+		cerr << "Write failed: " << strerror(errno) << endl;
+		return false;
+	    } else {
+		cout << "Packet sent" << endl;
+	    }
 	}
+	delete_pointers_list(auth_packets);
     }
     return true;
 }
