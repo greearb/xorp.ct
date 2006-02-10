@@ -537,6 +537,28 @@ rip_rip_authentication()
     call_xrl_wrapper -p all "${XRL}"
 }
 
+rip_rip_set_md5_authentication()
+{
+    if [ $# -ne 7 ] ; then
+        echo "Usage: rip_rip_set_md5_authentication <ifname:txt> <vifname:txt> <addr:ipv4> <key_id:u32> <password:txt> <start_time:txt> <end_time:txt>"
+        exit 1
+    fi
+
+    XRL="finder://rip/rip/0.1/set_md5_authentication?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&key_id:u32=$4&password:txt=$5&start_time:txt=$6&end_time:txt=$7"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
+rip_rip_delete_md5_authentication()
+{
+    if [ $# -ne 4 ] ; then
+        echo "Usage: rip_rip_delete_md5_authentication <ifname:txt> <vifname:txt> <addr:ipv4> <key_id:u32>"
+        exit 1
+    fi
+
+    XRL="finder://rip/rip/0.1/delete_md5_authentication?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&key_id:u32=$4"
+    call_xrl_wrapper -p all "${XRL}"
+}
+
 rip_rip_rip_address_status()
 {
     if [ $# -ne 3 ] ; then
