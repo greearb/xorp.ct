@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.64 2006/01/12 07:40:39 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.65 2006/01/14 08:22:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -822,6 +822,8 @@ RouterLsa::str() const
     string output;
 
     output += "Router-LSA:\n";
+    if (!valid())
+	output += "INVALID\n";
     output += _header.str();
 
     output += "\n";
@@ -988,6 +990,8 @@ NetworkLsa::str() const
     string output;
 
     output += "Network-LSA:\n";
+    if (!valid())
+	output += "INVALID\n";
     output += _header.str();
 
     switch(version) {
@@ -1137,6 +1141,8 @@ SummaryNetworkLsa::str() const
 	break;
     }
 
+    if (!valid())
+	output += "INVALID\n";
     output += _header.str();
 
     switch(version) {
@@ -1268,6 +1274,8 @@ SummaryRouterLsa::str() const
 	break;
     }
 
+    if (!valid())
+	output += "INVALID\n";
     output += _header.str();
 
     switch(version) {
@@ -1461,6 +1469,8 @@ ASExternalLsa::str() const
 
     output = str_name() + ":\n";
 
+    if (!valid())
+	output += "INVALID\n";
     output += _header.str();
 
     switch(version) {
