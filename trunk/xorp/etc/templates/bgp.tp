@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.78 2006/01/27 21:35:34 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.79 2006/02/01 21:54:39 atanu Exp $ */
 
 protocols {
     bgp {
@@ -47,23 +47,19 @@ protocols {
 /*	    md5-password: txt = "";*/
 	}
 
-	/*
-	 * Originate IPv4 routes
-	 */
+/*
 	network4 @: ipv4net {
 	    next-hop:ipv4;
-	    unicast:bool = true;		/* Default unicast */
+	    unicast:bool = true;
 	    multicast:bool = false;
 	}
 
-	/*
-	 * Originate IPv6 routes
-	 */
 	network6 @: ipv6net {
 	    next-hop:ipv6;
-	    unicast:bool = true;		/* Default unicast */
+	    unicast:bool = true;
 	    multicast:bool = false;
 	}
+*/
 
 	traceoptions {
 	    flag {
@@ -336,6 +332,7 @@ protocols {
 	    }
 	}
 
+/*
 	network4 @: ipv4net {
 	    %mandatory: $(@.next-hop);
 
@@ -373,6 +370,7 @@ protocols {
 		%set:;
 	    }
 	}
+*/
 
 	traceoptions {
 	    flag {

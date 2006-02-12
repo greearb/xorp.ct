@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.92 2006/01/27 21:30:13 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.93 2006/02/09 09:27:27 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -177,7 +177,10 @@ Release 1.2 (2005/??/??)
     - Several bug fixes.
 
   BGP:
-    - 
+    - The network4/network6 directives have been deprecated.
+      If you wish to inject static routes into BGP, you must now add
+      these routes to the static_routes protocol block, and then configure
+      the policy engine to redistribute them to BGP.
 
   STATIC_ROUTES:
     - 
