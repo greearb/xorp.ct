@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.14 2005/03/25 02:53:27 pavlin Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.16 2005/08/18 15:32:38 bms Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
@@ -37,6 +37,9 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ref_ptr.hh"
+
+#define MAX_XRL_INPUT_SIZE	65536	// maximum total XRL input buffer
+					// size on the network.
 
 class FinderTcpBase {
 public:
