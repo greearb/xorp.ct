@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.58 2006/02/01 21:54:38 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.59 2006/02/02 17:29:49 atanu Exp $
 #
 
 #
@@ -948,7 +948,7 @@ test28()
     coord peer1 expect packet keepalive
 
     coord peer1 expect packet update \
-	origin 2 \
+	origin 0 \
 	nexthop 192.150.187.78 \
 	aspath 65008 \
 	med 1 \

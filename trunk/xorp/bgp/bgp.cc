@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.65 2005/12/16 18:02:34 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.66 2006/02/02 02:44:30 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1676,7 +1676,7 @@ BGPMain::originate_route(const IPv4Net& nlri, const IPv4& next_hop,
 
     AsPath aspath;
 
-    return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
+    return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
 					     next_hop, unicast,
 					     multicast, policytags);
 }
@@ -1691,7 +1691,7 @@ BGPMain::originate_route(const IPv6Net& nlri, const IPv6& next_hop,
 
     AsPath aspath;
 
-    return _rib_ipc_handler->originate_route(INCOMPLETE, aspath, nlri,
+    return _rib_ipc_handler->originate_route(IGP, aspath, nlri,
 					      next_hop, unicast,
 					      multicast, policytags);
 }
