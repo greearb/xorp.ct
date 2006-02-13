@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.10 2006/02/10 00:44:06 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.11 2006/02/10 03:47:30 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -295,11 +295,8 @@ public:
      * Constructor
      *
      * @param e the EventLoop instance to used for time reference.
-     * @param timing_slack_secs the amount of slack in time comparisons, eg
-     * the amount of time a key is accepted before or after it's validity
-     * period.
      */
-    MD5AuthHandler(EventLoop& e, uint32_t timing_slack_secs = 3600);
+    MD5AuthHandler(EventLoop& e);
 
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
@@ -378,7 +375,6 @@ protected:
 protected:
     EventLoop&	_e;
     KeyChain	_key_chain;
-    uint32_t	_slack_secs;
 };
 
 #endif // __RIP_AUTH_HH__

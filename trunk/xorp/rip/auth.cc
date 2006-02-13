@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.20 2006/02/10 00:44:06 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.21 2006/02/10 03:47:30 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -336,8 +336,8 @@ MD5AuthHandler::MD5Key::set_last_seqno_recv(uint32_t sno)
 // ----------------------------------------------------------------------------
 // MD5AuthHandler implementation
 
-MD5AuthHandler::MD5AuthHandler(EventLoop& e, uint32_t timing_slack_secs)
-    : _e(e), _slack_secs(timing_slack_secs)
+MD5AuthHandler::MD5AuthHandler(EventLoop& e)
+    : _e(e)
 {
 }
 
@@ -377,7 +377,6 @@ MD5AuthHandler::add_key(uint8_t       id,
 
     XorpTimer timeout;
     if (start_secs != end_secs) {
-	end_secs += _slack_secs;
 	timeout = _e.new_oneoff_at(TimeVal(end_secs, 0),
 				   callback(this,
 					    &MD5AuthHandler::remove_key_cb, id));
