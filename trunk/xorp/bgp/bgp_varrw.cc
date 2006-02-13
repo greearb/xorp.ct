@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.23 2005/11/11 17:52:37 zec Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.24 2005/11/13 22:49:21 zec Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -194,7 +194,7 @@ Element*
 BGPVarRW<A>::read_origin()
 {
     uint32_t origin = _orig_rtmsg->route()->attributes()->origin();
-    return _ef.create(ElemStr::id, to_str(origin).c_str());
+    return _ef.create(ElemU32::id, to_str(origin).c_str());
 }
 
 template <class A>
