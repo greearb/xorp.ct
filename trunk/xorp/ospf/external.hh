@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.10 2006/02/07 22:20:09 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.11 2006/02/07 23:34:48 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -25,13 +25,12 @@ class ASExternalDatabase {
  public:
     struct compare {
 	bool operator ()(const Lsa::LsaRef a, const Lsa::LsaRef b) const {
-	    if (a->get_header().get_link_state_id() <
+	    if (a->get_header().get_link_state_id() ==
 		b->get_header().get_link_state_id())
-		return true;
-	    if (a->get_header().get_advertising_router() <
-		b->get_header().get_advertising_router())
-		return true;
-	    return false;
+		return a->get_header().get_advertising_router() <
+		    b->get_header().get_advertising_router();
+	    return a->get_header().get_link_state_id() <
+		b->get_header().get_link_state_id();
 	}
     };
 
