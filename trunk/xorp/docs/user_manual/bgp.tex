@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.12 2005/04/11 21:21:13 pavlin Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.13 2005/11/11 06:24:02 pavlin Exp $
 %
 
 \chapter{BGP}
@@ -130,18 +130,6 @@ protocols \{\\
 \>\>\>ipv6-unicast: {\it bool}\\
 \>\>\>ipv6-multicast: {\it bool}\\
 \>\>\}\\
-\\
-\>\>network4 {\it IPv4}/{\it int(1..32)} \{\\
-\>\>\>next-hop: {\it IPv4}\\
-\>\>\>unicast: {\it bool}\\
-\>\>\>multicast: {\it bool}\\
-\>\>\}\\
-\\
-\>\>network6 {\it IPv6}/{\it int(1..128)} \{\\
-\>\>\>next-hop: {\it IPv6}\\
-\>\>\>unicast: {\it bool}\\
-\>\>\>multicast: {\it bool}\\
-\>\>\}\\
 \}
 \end{tabbing}
 \end{alltt}
@@ -246,28 +234,6 @@ The configuration parameters are used as follows:
   routes.  It is possible to enable IPv6 multicast support without
   enabling IPv6 unicast support.
 \end{description}
-\item{\tt network4}: this specifies an IPv4 route to be advertised
-  into the BGP routing, originating from this router.  The parameter
-  is an IPv4 subnet in the format {\it address/prefix-length}.  For
-  example {\stt 10.0.0.0/24}.
-\begin{description}
-\item{\tt next-hop}: this is the IPv4 address of the next-hop router
-  to be used in BGP advertisements for this route.  Typically it will
-  be one of the router's IP addresses.
-\item{\tt unicast}: this takes the value {\stt true} or {\stt false}
-and specifies whether this route should be advertised to be used to
-route unicast packets.
-\item{\tt multicast}: this takes the value {\stt true} or {\stt false}
-and specifies whether this route should be advertised to be used to
-route multicast packets.  Either {\stt unicast} or {\stt multicast} or
-both must be true.
-\end{description}
-
-\item{\tt network6}: this specifies an IPv6 route to be advertised
-  into the BGP routing, originating from this router.  The parameter
-  is an IPv6 subnet in the format {\it address/prefix-length}.  For
-  example {\stt 10:0:0:10::/64}.
-\end{description}
 
 \subsection{Example Configurations}
 \vspace{0.1in}
@@ -294,20 +260,6 @@ protocols \{\\
 \>\>\>ipv4-multicast: true\\
 \>\>\>ipv6-unicast: true\\
 \>\>\>ipv6-multicast: true\\
-\>\>\}\\
-\\
-\>\>/* Originate IPv4 Routes */\\
-\>\>network4 128.16.16/24 \{\\
-\>\>\>next-hop: 128.16.64.1\\
-\>\>\>unicast: true\\
-\>\>\>multicast: true\\
-\>\>\}\\
-\\
-\>\>/* Originate IPv6 Routes */\\
-\>\>network6 10:10:10:10::/64 \{\\
-\>\>\>next-hop: 10:10:10:10:10:10:10:10\\
-\>\>\>unicast: true\\
-\>\>\>multicast: false\\
 \>\>\}\\
 \>\}\\
 \}
