@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.66 2006/02/02 02:44:30 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.67 2006/02/12 22:36:55 bms Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -103,10 +103,9 @@ BGPMain::BGPMain()
     _ifmgr->set_observer(this);
     _ifmgr->attach_hint_observer(this);
     //
-    // TODO: for now startup inside the constructor. Ideally, we want
-    // to startup after the FEA birth event.
+    // Ideally, we want to startup after the FEA birth event.
     //
-    // startup();
+    startup();
 
     initialize_profiling_variables(_profile);
     comm_init();
@@ -115,10 +114,9 @@ BGPMain::BGPMain()
 BGPMain::~BGPMain()
 {
     //
-    // TODO: for now shutdown inside the destructor. Ideally, we want
-    // to shutdown gracefully before we call the destructor.
+    // Ideally, we want to shutdown gracefully before we call the destructor.
     //
-    // shutdown();
+    shutdown();
     _is_ifmgr_ready = false;
     _ifmgr->detach_hint_observer(this);
     _ifmgr->unset_observer(this);
@@ -235,11 +233,9 @@ BGPMain::status(string& reason)
     } else if (_exit_loop == true) {
 	s = PROC_SHUTDOWN;
 	reason = "Shutting Down";
-#if 0	// TODO: uncomment-out when we start using the interface manager
     } else if (! _is_ifmgr_ready) {
 	s = PROC_NOT_READY;
 	reason = "Waiting for interface manager";
-#endif
     }
 
     return s;
