@@ -431,35 +431,12 @@ protocols {
             /* ipv6-unicast: true */
             /* ipv6-multicast: true */
 	}
-
-	/* Originate IPv4 Routes */
-/*
-	network4 10.10.10.0/24 {
-	    next-hop: 10.10.10.10
-	    unicast: true
-	    multicast: true
-	}
-*/
-
-	/* Originate IPv6 Routes */
-/*
-	network6 10:10:10:10::/64 {
-	    next-hop: 10:10:10:10:10:10:10:10
-	    unicast: true
-	    multicast: true
-	}
-*/
     }
 }
 </PRE>
 
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
-
-<P>
-Currently BGP is not able to "export" routes from other routing
-protocols such as "static". It is however possible to originate routes
-using network statements such as in the above example.
 
 
 <H4>Multicast Forwarding Engine Abstraction</H4>
