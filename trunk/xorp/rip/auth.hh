@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.11 2006/02/10 03:47:30 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.12 2006/02/13 19:33:49 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -20,6 +20,8 @@
 #include <list>
 #include <vector>
 #include "packets.hh"
+
+class EventLoop;
 
 /**
  * @short Base clase for RIPv2 authentication mechanisms.

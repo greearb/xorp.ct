@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.21 2006/02/10 03:47:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.22 2006/02/13 19:33:49 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -280,15 +280,15 @@ PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
 // MD5AuthHandler::MD5Key implementation
 
 MD5AuthHandler::MD5Key::MD5Key(uint8_t		id,
-			      const string&	key,
-			      uint32_t		start_secs,
-			      XorpTimer		to)
+			       const string&	key,
+			       uint32_t		start_secs,
+			       XorpTimer	to)
     : _id(id), _start_secs(start_secs), _pkts_recv(false), _lr_sno(0),
       _o_sno(0), _to(to)
 {
     string::size_type n = key.copy(_key_data, 16);
     if (n < KEY_BYTES) {
-	memset(_key_data + n , 0, KEY_BYTES - n);
+	memset(_key_data + n, 0, KEY_BYTES - n);
     }
 }
 
@@ -316,10 +316,12 @@ MD5AuthHandler::MD5Key::persistent() const
 bool
 MD5AuthHandler::MD5Key::valid_at(uint32_t when_secs) const
 {
-    if (persistent()) return true;
+    if (persistent())
+	return true;
 
     // XXX Need to deal with clock wrap.
-    if (when_secs - start_secs() > 0x7fffffff) return false;
+    if (when_secs - start_secs() > 0x7fffffff)
+	return false;
 
     // Subtract start time to partially mitigate problems of clock wrap.
     return (when_secs - start_secs() <= end_secs() - start_secs());
@@ -431,7 +433,7 @@ MD5AuthHandler::currently_active_key() const
     if (_key_chain.end() != ki) {
 	return ki->id();
     }
-    return 0xffff;	// an invalid key id
+    return 0xffff;	// an invalid key ID
 }
 
 bool
