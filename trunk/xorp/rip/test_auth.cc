@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.19 2006/02/10 03:47:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.20 2006/02/14 17:43:05 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -118,7 +118,8 @@ check_auth_packet(const vector<uint8_t>& pkt,
     const PacketRouteEntry<IPv4>* entries = 0;
     uint32_t n_entries = 0;
 
-    if (ah.authenticate_inbound(&pkt[0], pkt.size(), entries, n_entries, false)
+    if (ah.authenticate_inbound(&pkt[0], pkt.size(), entries, n_entries,
+				IPv4::ZERO(), false)
 	== false) {
 	if (expect_fail == false) {
 	    verbose_log("Unexpected failure (actual entries %u, "
@@ -232,7 +233,7 @@ check_saved_md5()
     mah.add_key(1, "bgp@icsi", 0, 0);
 
     vector<uint8_t> pkt;
-    for(uint32_t i = 0; i < sizeof(rip_packet); i++)
+    for (uint32_t i = 0; i < sizeof(rip_packet); i++)
 	pkt.push_back(rip_packet[i]);
 
     uint32_t n = 11;

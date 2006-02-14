@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.54 2006/02/10 00:44:06 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.55 2006/02/10 03:47:30 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -854,6 +854,7 @@ Port<A>::port_io_receive(const A&	src_address,
 							rip_packet_bytes,
 							entries,
 							n_entries,
+							src_address,
 							new_peer) == false) {
 	string cause = c_format("packet failed authentication (%s): %s",
 				af_state().auth_handler()->name(),

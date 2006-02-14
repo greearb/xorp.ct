@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.12 2006/02/13 19:33:49 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.13 2006/02/14 20:50:40 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
 
 #include <list>
+#include <map>
 #include <vector>
 #include "packets.hh"
 
@@ -48,6 +49,7 @@ public:
      *        entry in packet.  Set to 0 if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
+     * @param src_addr the source address of the packet.
      * @param new_peer true if this is a new peer.
      *
      * @return true if packet passes authentication checks, false otherwise.
@@ -56,6 +58,7 @@ public:
 				      size_t		packet_bytes,
 				      const PacketRouteEntry<IPv4>*& entries,
 				      uint32_t&		n_entries,
+				      const IPv4&	src_addr,
 				      bool		new_peer) = 0;
 
     /**
@@ -125,6 +128,7 @@ public:
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
 			      uint32_t&				n_entries,
+			      const IPv4&			src_addr,
 			      bool				new_peer);
 
     bool authenticate_outbound(RipPacket<IPv4>&		packet,
@@ -150,6 +154,7 @@ public:
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
 			      uint32_t&				n_entries,
+			      const IPv4&			src_addr,
 			      bool				new_peer);
 
     bool authenticate_outbound(RipPacket<IPv4>&		packet,
@@ -247,37 +252,55 @@ public:
 	bool	 	valid_at(uint32_t when_secs) const;
 
 	/**
-	 * Indicate whether valid packets have been received with this key id.
+	 * Reset the key for a particular source.
+	 *
+	 * @param src_addr the source address.
 	 */
-	inline bool	packets_received() const 	{ return _pkts_recv; }
+	void		reset(const IPv4& src_addr);
 
 	/**
-	 * Get last received sequence number
-	 * @return last sequence number seen.  Value may be garbage if
-	 * no packets have been received (check first with
-	 * @ref packets_received())
+	 * Indicate whether valid packets have been received from a source
+	 * with this key id.
+	 *
+	 * @param src_addr the source address.
+	 * @return true if a packet has been received from the source,
+	 * otherwise false.
 	 */
-	inline uint32_t	last_seqno_recv() const		{ return _lr_sno; }
+	bool		packets_received(const IPv4& src_addr) const;
 
 	/**
-	 * Set last sequence number received.  This method implicitly
-	 * set packets received to true.
+	 * Get last received sequence number from a source.
+	 *
+	 * @param src_addr the source address.
+	 * @return last sequence number seen from the source. Value may be
+	 * garbage if no packets have been received (check first with
+	 * @ref packets_received()).
 	 */
-	inline void set_last_seqno_recv(uint32_t sno);
+	uint32_t	last_seqno_recv(const IPv4& src_addr) const;
+
+	/**
+	 * Set last sequence number received from a source. This method
+	 * implicitly set packets received to true.
+	 *
+	 * @param src_addr the source address.
+	 * @param seqno the last sequence number received from the source.
+	 */
+	void		set_last_seqno_recv(const IPv4& src_addr,
+					    uint32_t seqno);
 
 	/**
 	 * Get next sequence number for outbound packets.  The counter
 	 * is automatically updated with each call of this method.
 	 */
-	inline uint32_t next_seqno_out()		{ return _o_sno++; }
+	inline uint32_t next_seqno_out()		{ return _o_seqno++; }
 
     protected:
 	uint8_t   _id;
 	char	  _key_data[KEY_BYTES];
 	uint32_t  _start_secs;
-	bool	  _pkts_recv;		// true if packets received
-	uint32_t  _lr_sno;		// last received seqno
-	uint32_t  _o_sno;		// next outbound sequence number
+	map<IPv4, bool>	_pkts_recv;	// true if packets received
+	map<IPv4, uint32_t> _lr_seqno;	// last received seqno
+	uint32_t  _o_seqno;		// next outbound sequence number
 	XorpTimer _to;			// expiry timeout
 
 	friend class MD5AuthHandler;
@@ -304,6 +327,7 @@ public:
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
 			      uint32_t&				n_entries,
+			      const IPv4&			src_addr,
 			      bool				new_peer);
 
     bool authenticate_outbound(RipPacket<IPv4>&		packet,

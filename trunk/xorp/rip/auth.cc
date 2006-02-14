@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.22 2006/02/13 19:33:49 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.23 2006/02/14 20:50:40 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -88,6 +88,7 @@ NullAuthHandler::authenticate_inbound(const uint8_t*		packet,
 				      size_t			packet_bytes,
 				      const PacketRouteEntry<IPv4>*& entries,
 				      uint32_t&			n_entries,
+				      const IPv4&,
 				      bool)
 {
     entries = 0;
@@ -193,6 +194,7 @@ PlaintextAuthHandler::authenticate_inbound(const uint8_t*	packet,
 					   size_t		packet_bytes,
 					   const PacketRouteEntry<IPv4>*& entries,
 					   uint32_t&		n_entries,
+					   const IPv4&,
 					   bool)
 {
     entries = 0;
@@ -283,8 +285,7 @@ MD5AuthHandler::MD5Key::MD5Key(uint8_t		id,
 			       const string&	key,
 			       uint32_t		start_secs,
 			       XorpTimer	to)
-    : _id(id), _start_secs(start_secs), _pkts_recv(false), _lr_sno(0),
-      _o_sno(0), _to(to)
+    : _id(id), _start_secs(start_secs), _o_seqno(0), _to(to)
 {
     string::size_type n = key.copy(_key_data, 16);
     if (n < KEY_BYTES) {
@@ -327,11 +328,75 @@ MD5AuthHandler::MD5Key::valid_at(uint32_t when_secs) const
     return (when_secs - start_secs() <= end_secs() - start_secs());
 }
 
-inline void
-MD5AuthHandler::MD5Key::set_last_seqno_recv(uint32_t sno)
+void
+MD5AuthHandler::MD5Key::reset(const IPv4& src_addr)
 {
-    _pkts_recv = true;
-    _lr_sno = sno;
+    map<IPv4, uint32_t>::iterator seqno_iter;
+    map<IPv4, bool>::iterator recv_iter;
+
+    //
+    // Reset the seqno
+    //
+    seqno_iter = _lr_seqno.find(src_addr);
+    if (seqno_iter != _lr_seqno.end())
+	_lr_seqno.erase(seqno_iter);
+
+    //
+    // Reset the flag that a packet has been received
+    //
+    recv_iter = _pkts_recv.find(src_addr);
+    if (recv_iter != _pkts_recv.end())
+	_pkts_recv.erase(recv_iter);
+}
+
+bool
+MD5AuthHandler::MD5Key::packets_received(const IPv4& src_addr) const
+{
+    map<IPv4, bool>::const_iterator iter;
+
+    iter = _pkts_recv.find(src_addr);
+    if (iter == _pkts_recv.end())
+	return (false);
+
+    return (iter->second);
+}
+
+uint32_t
+MD5AuthHandler::MD5Key::last_seqno_recv(const IPv4& src_addr) const
+{
+    map<IPv4, uint32_t>::const_iterator iter;
+
+    iter = _lr_seqno.find(src_addr);
+    if (iter == _lr_seqno.end())
+	return (0);
+
+    return (iter->second);
+}
+
+void
+MD5AuthHandler::MD5Key::set_last_seqno_recv(const IPv4& src_addr,
+					    uint32_t seqno)
+{
+    map<IPv4, uint32_t>::iterator seqno_iter;
+    map<IPv4, bool>::iterator recv_iter;
+
+    //
+    // Set the seqno
+    //
+    seqno_iter = _lr_seqno.find(src_addr);
+    if (seqno_iter == _lr_seqno.end())
+	_lr_seqno.insert(make_pair(src_addr, seqno));
+    else
+	seqno_iter->second = seqno;
+
+    //
+    // Set the flag that a packet has been received
+    //
+    recv_iter = _pkts_recv.find(src_addr);
+    if (recv_iter == _pkts_recv.end())
+	_pkts_recv.insert(make_pair(src_addr, true));
+    else
+	recv_iter->second = true;
 }
 
 
@@ -441,6 +506,7 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 				     size_t			packet_bytes,
 				     const PacketRouteEntry<IPv4>*& entries,
 				     uint32_t&			n_entries,
+				     const IPv4&		src_addr,
 				     bool			new_peer)
 {
     static_assert(sizeof(MD5PacketTrailer) == 20);
@@ -499,12 +565,16 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 	return false;
     }
 
-    if (k->packets_received() && !(new_peer && mpr->seqno() == 0) &&
-	(mpr->seqno() == k->last_seqno_recv() ||
-	 mpr->seqno() - k->last_seqno_recv() >= 0x7fffffff)) {
+    if (new_peer)
+	k->reset(src_addr);
+
+    uint32_t last_seqno_recv = k->last_seqno_recv(src_addr);
+    if (k->packets_received(src_addr) && !(new_peer && mpr->seqno() == 0) &&
+	((mpr->seqno() == last_seqno_recv) ||
+	 (mpr->seqno() - last_seqno_recv >= 0x7fffffff))) {
 	set_error(c_format("bad sequence number 0x%08x < 0x%08x",
 			   XORP_UINT_CAST(mpr->seqno()),
-			   XORP_UINT_CAST(k->last_seqno_recv())));
+			   XORP_UINT_CAST(last_seqno_recv)));
 	return false;
     }
 
@@ -543,7 +613,7 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
     }
 
     // Update sequence number only after packet has passed digest check
-    k->set_last_seqno_recv(mpr->seqno());
+    k->set_last_seqno_recv(src_addr, mpr->seqno());
 
     reset_error();
     n_entries = (mpr->auth_offset() - sizeof(RipPacketHeader)) /
