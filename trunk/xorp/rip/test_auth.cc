@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.18 2006/02/10 00:44:07 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.19 2006/02/10 03:47:31 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -228,7 +228,7 @@ int
 check_saved_md5()
 {
     EventLoop e;
-    MD5AuthHandler mah(e, 0);
+    MD5AuthHandler mah(e);
     mah.add_key(1, "bgp@icsi", 0, 0);
 
     vector<uint8_t> pkt;
@@ -341,7 +341,7 @@ test_main()
  	return 1;
 
     EventLoop e;
-    MD5AuthHandler mah(e, 0);
+    MD5AuthHandler mah(e);
     mah.add_key(1, "Hello World!", 0, 0);
     for (uint32_t n = 0; n < mah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, mah, n)) {
