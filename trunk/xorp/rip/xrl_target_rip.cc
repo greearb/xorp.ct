@@ -485,7 +485,7 @@ XrlRipTarget::rip_0_1_delete_simple_authentication_key(
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
-	// then the rtrmgr configuration won't match the RIP state.
+	// then the rtrmgr configuration won't match the protocol state.
 	// Ideally, the rtrmgr and xorpsh shouldn't allow the user to add
 	// both handlers. For the time being we need to live with this
 	// limitation and therefore we shouldn't return an error here.
@@ -610,7 +610,7 @@ XrlRipTarget::rip_0_1_delete_md5_authentication_key(
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
-	// then the rtrmgr configuration won't match the RIP state.
+	// then the rtrmgr configuration won't match the protocol state.
 	// Ideally, the rtrmgr and xorpsh shouldn't allow the user to add
 	// both handlers. For the time being we need to live with this
 	// limitation and therefore we shouldn't return an error here.
