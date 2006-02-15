@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.27 2005/11/13 06:55:55 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.28 2006/01/14 08:40:23 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -763,7 +763,7 @@ class Options {
 
 inline
 uint16_t
-extract_16(uint8_t *ptr)
+extract_16(const uint8_t *ptr)
 {
     uint16_t val;
     val = ptr[0];
@@ -783,7 +783,7 @@ embed_16(uint8_t *ptr, uint16_t val)
 
 inline
 uint32_t
-extract_24(uint8_t *ptr)
+extract_24(const uint8_t *ptr)
 {
     uint32_t val;
     val = ptr[0];
@@ -806,7 +806,7 @@ embed_24(uint8_t *ptr, uint32_t val)
 
 inline
 uint32_t
-extract_32(uint8_t *ptr)
+extract_32(const uint8_t *ptr)
 {
     uint32_t val;
     val = ptr[0];
