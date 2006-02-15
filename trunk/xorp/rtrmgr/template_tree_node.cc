@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.74 2006/01/31 23:47:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_tree_node.cc,v 1.75 2006/02/02 19:48:30 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -143,19 +143,20 @@ TemplateTreeNode::expand_template_tree(string& error_msg)
 	    return (false);
 	}
 	bool is_multi_value = false;
+	TemplateTreeNode* ttn_check_multi = ttn;
 	do {
 	    //
 	    // Check if there is a multi-value node between the referred
 	    // template node and this node (or the root of the template tree).
 	    //
-	    if (ttn->is_tag()) {
+	    if (ttn_check_multi->is_tag()) {
 		is_multi_value = true;
 		break;
 	    }
-	    ttn = ttn->parent();
-	    if (ttn == this)
+	    ttn_check_multi = ttn_check_multi->parent();
+	    if (ttn_check_multi == this)
 		break;
-	    if (ttn == NULL)
+	    if (ttn_check_multi == NULL)
 		break;
 	} while (true);
 	if (is_multi_value) {
