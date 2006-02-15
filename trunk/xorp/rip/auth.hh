@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.14 2006/02/14 23:39:04 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.15 2006/02/15 17:52:22 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -252,6 +252,11 @@ public:
 	bool	 	valid_at(uint32_t when_secs) const;
 
 	/**
+	 * Reset the key for all sources.
+	 */
+	void		reset();
+
+	/**
 	 * Reset the key for a particular source.
 	 *
 	 * @param src_addr the source address.
@@ -382,6 +387,11 @@ public:
      * value outside valid range otherwise 256-65535.
      */
     uint16_t currently_active_key() const;
+
+    /**
+     * Reset the keys for all sources.
+     */
+    void reset_keys();
 
     /**
      * Get all keys managed by MD5AuthHandler.

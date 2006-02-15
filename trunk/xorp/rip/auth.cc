@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.24 2006/02/14 23:39:04 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.25 2006/02/15 17:52:22 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -329,6 +329,20 @@ MD5AuthHandler::MD5Key::valid_at(uint32_t when_secs) const
 }
 
 void
+MD5AuthHandler::MD5Key::reset()
+{
+    //
+    // Reset the seqno
+    //
+    _lr_seqno.clear();
+
+    //
+    // Reset the flag that a packet has been received
+    //
+    _pkts_recv.clear();
+}
+
+void
 MD5AuthHandler::MD5Key::reset(const IPv4& src_addr)
 {
     map<IPv4, uint32_t>::iterator seqno_iter;
@@ -500,6 +514,15 @@ MD5AuthHandler::currently_active_key() const
 	return ki->id();
     }
     return 0xffff;	// an invalid key ID
+}
+
+void
+MD5AuthHandler::reset_keys()
+{
+    KeyChain::iterator iter;
+
+    for (iter = _key_chain.begin(); iter != _key_chain.end(); ++iter)
+	iter->reset();
 }
 
 bool
