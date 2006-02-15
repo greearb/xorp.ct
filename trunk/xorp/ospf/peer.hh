@@ -13,13 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.115 2006/01/12 10:24:32 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.116 2006/01/31 21:38:55 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
 
 template <typename A> class Ospf;
 template <typename A> class Peer;
+
+#include "auth.hh"
+
 
 /**
  * In OSPF terms this class represents an interface/link; interface is
@@ -302,10 +305,66 @@ class PeerOut {
 				  uint32_t router_dead_interval);
 
     /**
-     * Set authentication parameters.
+     * Set a simple password authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * a simple password authentication handler.
+     *
+     * @param area the area ID.
+     * @param password the password to set.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
      */
-    bool set_authentication(OspfTypes::AreaID area, string method,
-			    string password);
+    bool set_simple_authentication_key(OspfTypes::AreaID area,
+				       const string& password,
+				       string& error_msg);
+
+    /**
+     * Delete a simple password authentication key.
+     *
+     * Note that after the deletion the simple password authentication
+     * handler is replaced with a Null authentication handler.
+     *
+     * @param area the area ID.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_simple_authentication_key(OspfTypes::AreaID area,
+					  string& error_msg);
+
+    /**
+     * Set an MD5 authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * an MD5 authentication handler.
+     *
+     * @param area the area ID.
+     * @param key_id unique ID associated with key.
+     * @param password phrase used for MD5 digest computation.
+     * @param start_secs start time in seconds since midnight 1 Jan 1970.
+     * @param end_secs start time in seconds since midnight 1 Jan 1970.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool set_md5_authentication_key(OspfTypes::AreaID area, uint8_t key_id,
+				    const string& password,
+				    uint32_t start_secs, uint32_t end_secs,
+				    string& error_msg);
+
+    /**
+     * Delete an MD5 authentication key.
+     *
+     * Note that after the deletion if there are no more valid MD5 keys,
+     * the MD5 authentication handler is replaced with a Null authentication
+     * handler.
+     *
+     * @param area the area ID.
+     * @param key_id the ID of the key to delete.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_md5_authentication_key(OspfTypes::AreaID area, uint8_t key_id,
+				       string& error_msg);
 
     /**
      * Toggle the passive status of an interface.
@@ -392,7 +451,6 @@ class PeerOut {
 };
 
 template <typename A> class Neighbour;
-class Auth;
 
 /**
  * A peer represents a single area and is bound to a PeerOut.
@@ -417,6 +475,7 @@ class Peer {
 	 OspfTypes::AreaType area_type)
 	: _ospf(ospf), _peerout(peerout), _area_id(area_id),
 	  _area_type(area_type), _enabled(false), _passive(false),
+	  _auth_handler(_ospf.get_eventloop()),
 	  _interface_state(Down),
 	  _hello_packet(ospf.get_version())
     {
@@ -432,7 +491,6 @@ class Peer {
 	_hello_packet.
 	    set_router_dead_interval(4 * _hello_packet.get_hello_interval());
 	_rxmt_interval = 5;
-	_auth_method = "none";
     }
 
     ~Peer() {
@@ -503,7 +561,7 @@ class Peer {
      * @return maximum frame size.
      */
     uint16_t get_frame_size() const {
-	return _peerout.get_frame_size() - _auth_outbound.additional_payload();
+	return _peerout.get_frame_size() - _auth_handler.additional_payload();
     }
 
     /**
@@ -784,9 +842,9 @@ class Peer {
     }
 
     /**
-     * Return the authentication component.
+     * Return the authentication handler.
      */
-    Auth& get_auth_outbound() { return _auth_outbound; }
+    Auth& get_auth_handler() { return _auth_handler; }
 
 #if	0
     /**
@@ -872,9 +930,58 @@ class Peer {
     uint32_t get_router_dead_interval() const;
 
     /**
-     * Set authentication parameters.
+     * Set a simple password authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * a simple password authentication handler.
+     *
+     * @param password the password to set.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
      */
-    bool set_authentication(string method, string password);
+    bool set_simple_authentication_key(const string& password,
+				       string& error_msg);
+
+    /**
+     * Delete a simple password authentication key.
+     *
+     * Note that after the deletion the simple password authentication
+     * handler is replaced with a Null authentication handler.
+     *
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_simple_authentication_key(string& error_msg);
+
+    /**
+     * Set an MD5 authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * an MD5 authentication handler.
+     *
+     * @param key_id unique ID associated with key.
+     * @param password phrase used for MD5 digest computation.
+     * @param start_secs start time in seconds since midnight 1 Jan 1970.
+     * @param end_secs start time in seconds since midnight 1 Jan 1970.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool set_md5_authentication_key(uint8_t key_id, const string& password,
+				    uint32_t start_secs, uint32_t end_secs,
+				    string& error_msg);
+
+    /**
+     * Delete an MD5 authentication key.
+     *
+     * Note that after the deletion if there are no more valid MD5 keys,
+     * the MD5 authentication handler is replaced with a Null authentication
+     * handler.
+     *
+     * @param key_id the ID of the key to delete.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_md5_authentication_key(uint8_t key_id, string& error_msg);
 
     /**
      * Toggle the passive status of an interface.
@@ -947,9 +1054,7 @@ class Peer {
     bool _enabled;			// True if the interface is enabled.
     bool _passive;			// True if the interface is in loopback
 
-    Auth _auth_outbound;		// Authentication generation (outbound)
-    string _auth_method;		// Authentication method to use.
-    string _auth_password;		// Authentication password.
+    Auth _auth_handler;			// The authentication handler.
 
     XorpTimer _hello_timer;		// Timer used to fire hello messages.
     XorpTimer _wait_timer;		// Wait to discover other DRs.
@@ -1147,19 +1252,9 @@ class Neighbour {
     State get_state() const { return _state; }
 
     /**
-     * Return the authentication component.
+     * Return the authentication handler.
      */
-    Auth& get_auth_inbound() { return _auth_inbound; }
-
-    /**
-     * Return the authentication component.
-     */
-    Auth& get_auth_outbound() { return _peer.get_auth_outbound(); }
-
-    /**
-     * Set authentication parameters.
-     */
-    bool set_authentication(string method, string password);
+    Auth& get_auth_handler() { return _peer.get_auth_handler(); }
 
     /**
      * @return true if this routers neighbour is the DR.
@@ -1284,8 +1379,6 @@ class Neighbour {
     const A _neighbour_address;		// Neighbour's address.
     const OspfTypes::NeighbourID _neighbourid;	// The neighbours ID.
     const OspfTypes::LinkType _linktype;	// Type of this link.
-
-    Auth _auth_inbound;			// Authentication verification.
 
     State _state;			// State of this neighbour.
     HelloPacket *_hello_packet;		// Last hello packet received

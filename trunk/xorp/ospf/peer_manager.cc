@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.106 2006/02/10 03:53:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.107 2006/02/10 04:35:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1135,15 +1135,68 @@ PeerManager<A>::set_inftransdelay(const PeerID peerid,
 
 template <typename A>
 bool
-PeerManager<A>::set_authentication(const PeerID peerid, OspfTypes::AreaID area,
-				   string& type, string& password)
+PeerManager<A>::set_simple_authentication_key(const PeerID	peerid,
+					      OspfTypes::AreaID	area,
+					      const string&	password,
+					      string&		error_msg)
 {
     if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
+	error_msg = c_format("Unknown PeerID %u", peerid);
 	return false;
     }
 
-    return _peers[peerid]->set_authentication(area, type, password);
+    return _peers[peerid]->set_simple_authentication_key(area, password,
+							 error_msg);
+}
+
+template <typename A>
+bool
+PeerManager<A>::delete_simple_authentication_key(const PeerID	peerid,
+						 OspfTypes::AreaID area,
+						 string&	error_msg)
+{
+    if (0 == _peers.count(peerid)) {
+	error_msg = c_format("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->delete_simple_authentication_key(area, error_msg);
+}
+
+template <typename A>
+bool
+PeerManager<A>::set_md5_authentication_key(const PeerID		peerid,
+					   OspfTypes::AreaID	area,
+					   uint8_t		key_id,
+					   const string&	password,
+					   uint32_t		start_secs,
+					   uint32_t		end_secs,
+					   string&		error_msg)
+{
+    if (0 == _peers.count(peerid)) {
+	error_msg = c_format("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->set_md5_authentication_key(area, key_id, password,
+						      start_secs, end_secs,
+						      error_msg);
+}
+
+template <typename A>
+bool
+PeerManager<A>::delete_md5_authentication_key(const PeerID	peerid,
+					      OspfTypes::AreaID	area,
+					      uint8_t		key_id,
+					      string&		error_msg)
+{
+    if (0 == _peers.count(peerid)) {
+	error_msg = c_format("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    return _peers[peerid]->delete_md5_authentication_key(area, key_id,
+							 error_msg);
 }
 
 template <typename A>

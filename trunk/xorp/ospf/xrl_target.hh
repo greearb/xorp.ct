@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.17 2006/01/03 03:25:26 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.18 2006/01/12 10:24:32 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -344,15 +344,82 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const uint32_t&	interval);
 
     /**
-     *  Configure authentication.
+     *  Set simple password authentication key.
+     *
+     *  @param ifname the interface name.
+     *
+     *  @param vifname the vif name.
+     *
+     *  @param area the area ID.
+     *
+     *  @param password the authentication password.
      */
-    XrlCmdError ospfv2_0_1_set_authentication(
+    XrlCmdError ospfv2_0_1_set_simple_authentication_key(
 	// Input values,
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	area,
-	const string&	type,
 	const string&	password);
+
+    /**
+     *  Delete simple password authentication key.
+     *
+     *  @param ifname the interface name.
+     *
+     *  @param vifname the vif name.
+     *
+     *  @param area the area ID.
+     */
+    XrlCmdError ospfv2_0_1_delete_simple_authentication_key(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area);
+
+    /**
+     *  Set MD5 authentication key.
+     *
+     *  @param ifname the interface name.
+     *
+     *  @param vifname the vif name.
+     *
+     *  @param area the area ID.
+     *
+     *  @param key_id the key ID (must be an integer in the interval [0, 255]).
+     *
+     *  @param password the authentication password.
+     *
+     *  @param start_time the authentication start time (YYYY-MM-DD.HH:MM).
+     *
+     *  @param end_time the authentication end time (YYYY-MM-DD.HH:MM).
+     */
+    XrlCmdError ospfv2_0_1_set_md5_authentication_key(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	key_id,
+	const string&	password,
+	const string&	start_time,
+	const string&	end_time);
+
+    /**
+     *  Delete MD5 authentication key.
+     *
+     *  @param ifname the interface name.
+     *
+     *  @param vifname the vif name.
+     *
+     *  @param area the area ID.
+     *
+     *  @param key_id the key ID (must be an integer in the interval [0, 255]).
+     */
+    XrlCmdError ospfv2_0_1_delete_md5_authentication_key(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	key_id);
 
     /**
      *  Toggle the passive status of an interface.

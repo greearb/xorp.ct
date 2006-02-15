@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.25 2006/01/03 03:25:26 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.26 2006/01/12 10:24:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -38,6 +38,31 @@
 #include "ospf.hh"
 #include "xrl_io.hh"
 #include "xrl_target.hh"
+
+static time_t
+decode_time_string(const string& time_string)
+{
+    const char* s;
+    const char* format = "%Y-%m-%d.%H:%M";
+    struct tm tm;
+    time_t result;
+
+    if (time_string.empty()) {
+	result = 0;
+	return (result);
+    }
+
+    memset(&tm, 0, sizeof(tm));
+
+    s = xorp_strptime(time_string.c_str(), format, &tm);
+    if ((s == NULL) || (*s != '\0')) {
+	result = -1;
+	return (result);
+    }
+
+    result = mktime(&tm);
+    return (result);
+}
 
 XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf,
 				 XrlIO<IPv4>& io)
@@ -583,21 +608,150 @@ XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
-XrlCmdError 
-XrlOspfV2Target::ospfv2_0_1_set_authentication(const string& ifname,
-					       const string& vifname,
-					       const IPv4& a,
-					       const string& type,
-					       const string& password)
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_simple_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		area,
+    const string&	password)
 {
-    OspfTypes::AreaID area = ntohl(a.addr());
-    debug_msg("interface %s vif %s area %s type %s password %s\n",
-	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
-	      type.c_str(), password.c_str());
+    string error_msg;
+    OspfTypes::AreaID area_id = ntohl(area.addr());
 
-    if (!_ospf.set_authentication(ifname, vifname, area, type, password))
-	return XrlCmdError::COMMAND_FAILED("Failed to configure "
-					   "authentication");
+    debug_msg("set_simple_authentication_key(): "
+	      "interface %s vif %s area %s password %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
+	      password.c_str());
+
+    if (!_ospf.set_simple_authentication_key(ifname, vifname, area_id,
+					     password, error_msg)) {
+	error_msg = c_format("Failed to set simple authentication key: %s",
+			     error_msg.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_delete_simple_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		area)
+{
+    string error_msg;
+    OspfTypes::AreaID area_id = ntohl(area.addr());
+
+    debug_msg("delete_simple_authentication_key(): "
+	      "interface %s vif %s area %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str());
+
+    if (!_ospf.delete_simple_authentication_key(ifname, vifname, area_id,
+						error_msg)) {
+	error_msg = c_format("Failed to delete simple authentication key: %s",
+			     error_msg.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		area,
+    const uint32_t&	key_id,
+    const string&	password,
+    const string&	start_time,
+    const string&	end_time)
+{
+    string error_msg;
+    uint32_t start_secs = 0;
+    uint32_t end_secs = 0;
+    time_t decoded_time;
+    OspfTypes::AreaID area_id = ntohl(area.addr());
+
+    debug_msg("set_md5_authentication_key(): "
+	      "interface %s vif %s area %s key_id %u password %s "
+	      "start_time %s end_time %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
+	      key_id, password.c_str(), start_time.c_str(), end_time.c_str());
+
+    //
+    // Check the key ID
+    //
+    if (key_id > 255) {
+	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
+			     XORP_UINT_CAST(key_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    //
+    // Decode the start and end time
+    //
+    decoded_time = decode_time_string(start_time);
+    if (decoded_time == -1) {
+	error_msg = c_format("Invalid start time: %s", start_time.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    start_secs = decoded_time;
+    if (end_time.empty()) {
+	// XXX: if end_secs is same as start_secs, then the key never expires
+	end_secs = start_secs;
+    } else {
+	decoded_time = decode_time_string(end_time);
+	if (decoded_time == -1) {
+	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	end_secs = decoded_time;
+    }
+
+    if (!_ospf.set_md5_authentication_key(ifname, vifname, area_id, key_id,
+					  password, start_secs, end_secs,
+					  error_msg)) {
+	error_msg = c_format("Failed to set MD5 authentication key: %s",
+			     error_msg.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV2Target::ospfv2_0_1_delete_md5_authentication_key(
+    // Input values,
+    const string&	ifname,
+    const string&	vifname,
+    const IPv4&		area,
+    const uint32_t&	key_id)
+{
+    string error_msg;
+    OspfTypes::AreaID area_id = ntohl(area.addr());
+
+    debug_msg("delete_md5_authentication_key(): "
+	      "interface %s vif %s area %s key_id %u\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(), key_id);
+
+    //
+    // Check the key ID
+    //
+    if (key_id > 255) {
+	error_msg = c_format("Invalid key ID %u (valid range is [0, 255])",
+			     XORP_UINT_CAST(key_id));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    if (!_ospf.delete_md5_authentication_key(ifname, vifname, area_id, key_id,
+					     error_msg)) {
+	error_msg = c_format("Failed to delete MD5 authentication key: %s",
+			     error_msg.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }

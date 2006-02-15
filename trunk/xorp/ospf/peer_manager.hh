@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.63 2006/01/15 21:48:07 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.64 2006/01/31 21:38:55 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -455,10 +455,74 @@ class PeerManager {
 			   uint16_t inftransdelay);
 
     /**
-     *  Configure authentication.
+     * Set a simple password authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * a simple password authentication handler.
+     *
+     * @param peerid the peer ID.
+     * @param area the area ID.
+     * @param password the password to set.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
      */
-    bool set_authentication(const PeerID, OspfTypes::AreaID area,
-			    string& type, string& password);
+    bool set_simple_authentication_key(const PeerID peerid,
+				       OspfTypes::AreaID area,
+				       const string& password,
+				       string& error_msg);
+
+    /**
+     * Delete a simple password authentication key.
+     *
+     * Note that after the deletion the simple password authentication
+     * handler is replaced with a Null authentication handler.
+     *
+     * @param peerid the peer ID.
+     * @param area the area ID.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_simple_authentication_key(const PeerID peerid,
+					  OspfTypes::AreaID area,
+					  string& error_msg);
+
+    /**
+     * Set an MD5 authentication key.
+     *
+     * Note that the current authentication handler is replaced with
+     * an MD5 authentication handler.
+     *
+     * @param peerid the peer ID.
+     * @param area the area ID.
+     * @param key_id unique ID associated with key.
+     * @param password phrase used for MD5 digest computation.
+     * @param start_secs start time in seconds since midnight 1 Jan 1970.
+     * @param end_secs start time in seconds since midnight 1 Jan 1970.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool set_md5_authentication_key(const PeerID peerid,
+				    OspfTypes::AreaID area, uint8_t key_id,
+				    const string& password,
+				    uint32_t start_secs, uint32_t end_secs,
+				    string& error_msg);
+
+    /**
+     * Delete an MD5 authentication key.
+     *
+     * Note that after the deletion if there are no more valid MD5 keys,
+     * the MD5 authentication handler is replaced with a Null authentication
+     * handler.
+     *
+     * @param peerid the peer ID.
+     * @param area the area ID.
+     * @param key_id the ID of the key to delete.
+     * @param the error message (if error).
+     * @return true on success, otherwise false.
+     */
+    bool delete_md5_authentication_key(const PeerID peerid,
+				       OspfTypes::AreaID area, uint8_t key_id,
+				       string& error_msg);
 
     /**
      * Toggle the passive status of an interface.

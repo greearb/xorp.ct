@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.219 2006/01/31 21:38:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.220 2006/02/03 03:50:16 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -533,9 +533,9 @@ PeerOut<A>::set_router_dead_interval(OspfTypes::AreaID area,
 
 template <typename A>
 bool
-PeerOut<A>::set_authentication(OspfTypes::AreaID area, string method,
-			       string password)
-			       
+PeerOut<A>::set_simple_authentication_key(OspfTypes::AreaID	area,
+					  const string&		password,
+					  string&		error_msg)
 {
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
@@ -546,11 +546,81 @@ PeerOut<A>::set_authentication(OspfTypes::AreaID area, string method,
     }
 
     if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
+	error_msg = c_format("Unknown Area %s", pr_id(area).c_str());
 	return false;
     }
 
-    return _areas[area]->set_authentication(method, password);
+    return _areas[area]->set_simple_authentication_key(password, error_msg);
+}
+
+template <typename A>
+bool
+PeerOut<A>::delete_simple_authentication_key(OspfTypes::AreaID	area,
+					     string&		error_msg)
+{
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	XLOG_FATAL("OSPFv3 does not support authentication");
+	break;
+    }
+
+    if (0 == _areas.count(area)) {
+	error_msg = c_format("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->delete_simple_authentication_key(error_msg);
+}
+
+template <typename A>
+bool
+PeerOut<A>::set_md5_authentication_key(OspfTypes::AreaID	area,
+				       uint8_t			key_id,
+				       const string&		password,
+				       uint32_t			start_secs,
+				       uint32_t			end_secs,
+				       string&			error_msg)
+{
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	XLOG_FATAL("OSPFv3 does not support authentication");
+	break;
+    }
+
+    if (0 == _areas.count(area)) {
+	error_msg = c_format("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->set_md5_authentication_key(key_id, password,
+						    start_secs, end_secs,
+						    error_msg);
+}
+
+template <typename A>
+bool
+PeerOut<A>::delete_md5_authentication_key(OspfTypes::AreaID	area,
+					  uint8_t		key_id,
+					  string&		error_msg)
+{
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	XLOG_FATAL("OSPFv3 does not support authentication");
+	break;
+    }
+
+    if (0 == _areas.count(area)) {
+	error_msg = c_format("Unknown Area %s", pr_id(area).c_str());
+	return false;
+    }
+
+    return _areas[area]->delete_md5_authentication_key(key_id, error_msg);
 }
 
 template <typename A>
@@ -623,7 +693,6 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
     if (0 == n) {
 	n = new Neighbour<A>(_ospf, *this, rid, neighbour_address,
 			     Neighbour<A>::_ticket++, get_linktype());
-	n->set_authentication(_auth_method, _auth_password);
 	_neighbours.push_back(n);
     } else {
 	XLOG_ERROR("Neighbour exists %s", cstring(*n));
@@ -732,20 +801,14 @@ Peer<A>::receive(A dst, A src, Packet *packet)
 
     // Authenticate packet.
     Neighbour<A> *n = find_neighbour(src, packet->get_router_id());
-    Auth *authptr;
-    Auth a;
-    if (0 == n) {
-	a.set_method(_auth_method);
-	a.set_password(_auth_password);
-	a.reset();
-	authptr = &a;
-    } else {
-	Auth& ref = n->get_auth_inbound();
-	authptr = &ref;
-    }
-    if (!authptr->verify(packet->get())) {
+    bool new_peer = true;
+    if (0 == n)
+	new_peer = true;
+    else
+	new_peer = false;
+    if (! _auth_handler.verify(packet->get(), src, new_peer)) {
 	XLOG_TRACE(_ospf.trace()._input_errors, "Authentication failed: %s",
-		   authptr->get_verify_error().c_str());
+		   _auth_handler.error().c_str());
 	return false;
     }
 
@@ -1140,7 +1203,6 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	    return false;
 	n = new Neighbour<A>(_ospf, *this, hello->get_router_id(), src,
 			     Neighbour<A>::_ticket++, get_linktype());
-	n->set_authentication(_auth_method, _auth_password);
 	_neighbours.push_back(n);
     }
 
@@ -1637,7 +1699,7 @@ Peer<A>::send_hello_packet()
     }
 
     _hello_packet.encode(pkt);
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
     
     SimpleTransmit<A> *transmit = 0;
 
@@ -2579,19 +2641,39 @@ Peer<A>::get_router_dead_interval() const
 
 template <typename A>
 bool
-Peer<A>::set_authentication(string method, string password)
+Peer<A>::set_simple_authentication_key(const string&	password,
+				       string&		error_msg)
 {
-    _auth_method = method;
-    _auth_password = password;
-    get_auth_outbound().set_method(method);
-    get_auth_outbound().set_password(password);
-    get_auth_outbound().reset();
+    return get_auth_handler().set_simple_authentication_key(password,
+							    error_msg);
+}
 
-    typename list<Neighbour<A> *>::const_iterator n;
-    for(n = _neighbours.begin(); n != _neighbours.end(); n++)
-	(*n)->set_authentication(method, password);
+template <typename A>
+bool
+Peer<A>::delete_simple_authentication_key(string&	error_msg)
+{
+    return get_auth_handler().delete_simple_authentication_key(error_msg);
+}
 
-    return true;
+template <typename A>
+bool
+Peer<A>::set_md5_authentication_key(uint8_t		key_id,
+				    const string&	password,
+				    uint32_t		start_secs,
+				    uint32_t		end_secs,
+				    string&		error_msg)
+{
+    return get_auth_handler().set_md5_authentication_key(key_id, password,
+							 start_secs, end_secs,
+							 error_msg);
+}
+
+template <typename A>
+bool
+Peer<A>::delete_md5_authentication_key(uint8_t		key_id,
+				       string&		error_msg)
+{
+    return get_auth_handler().delete_md5_authentication_key(key_id, error_msg);
 }
 
 template <typename A>
@@ -2810,17 +2892,6 @@ Neighbour<A>::is_neighbour_DR_or_BDR() const
 	return true;
 
     return false;
-}
-
-template <typename A>
-bool
-Neighbour<A>::set_authentication(string method, string password)
-{
-    get_auth_inbound().set_method(method);
-    get_auth_inbound().set_password(password);
-    get_auth_inbound().reset();
-
-    return true;
 }
 
 template <typename A>
@@ -3090,7 +3161,7 @@ Neighbour<A>::send_data_description_packet()
     
     vector<uint8_t> pkt;
     _data_description_packet.encode(pkt);
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -3156,7 +3227,7 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
     
     vector<uint8_t> pkt;
     lsrp.encode(pkt);
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -3197,7 +3268,7 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
     
     vector<uint8_t> pkt;
     lsup.encode(pkt, _peer.get_inftransdelay());
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -3245,7 +3316,7 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
     
     vector<uint8_t> pkt;
     lsap.encode(pkt);
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
 
     SimpleTransmit<A> *transmit = 0;
 
@@ -4015,7 +4086,7 @@ Neighbour<A>::send_lsa(Lsa::LsaRef lsar)
     
     vector<uint8_t> pkt;
     lsup.encode(pkt, _peer.get_inftransdelay());
-    get_auth_outbound().generate(pkt);
+    get_auth_handler().generate(pkt);
     
     SimpleTransmit<A> *transmit;
 
@@ -4288,7 +4359,7 @@ Neighbour<A>::change_state(State state)
 	tear_down_state(previous_state);
 
     if (Down == state)
-	get_auth_inbound().reset();
+	get_auth_handler().reset();
 }
 
 template <typename A>

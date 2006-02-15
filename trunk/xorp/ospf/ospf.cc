@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.63 2006/01/13 10:08:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.64 2006/02/02 01:20:51 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -392,19 +392,116 @@ Ospf<A>::set_inftransdelay(const string& interface, const string& vif,
 
 template <typename A>
 bool
-Ospf<A>::set_authentication(const string& interface, const string& vif,
-			    OspfTypes::AreaID area,
-			    string type, string password)
+Ospf<A>::set_simple_authentication_key(const string&		interface,
+				       const string&		vif,
+				       OspfTypes::AreaID	area,
+				       const string&		password,
+				       string&			error_msg)
 {
+    PeerID peerid;
+
     try {
-	_peer_manager.set_authentication(_peer_manager.
-					 get_peerid(interface,vif),
-					 area,
-					 type, password);
+	peerid = _peer_manager.get_peerid(interface, vif);
     } catch(BadPeer& e) {
-	XLOG_ERROR("%s", cstring(e));
+	error_msg = e.str();
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    } 
+
+    if (_peer_manager.set_simple_authentication_key(peerid, area,
+						    password, error_msg)
+	!= true) {
+	XLOG_ERROR("%s", error_msg.c_str());
 	return false;
     }
+
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::delete_simple_authentication_key(const string&		interface,
+					  const string&		vif,
+					  OspfTypes::AreaID	area,
+					  string&		error_msg)
+{
+    PeerID peerid;
+
+    try {
+	peerid = _peer_manager.get_peerid(interface, vif);
+    } catch(BadPeer& e) {
+	error_msg = e.str();
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    } 
+
+    if (_peer_manager.delete_simple_authentication_key(peerid, area, error_msg)
+	!= true) {
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::set_md5_authentication_key(const string&		interface,
+				    const string&		vif,
+				    OspfTypes::AreaID		area,
+				    uint8_t			key_id,
+				    const string&		password,
+				    uint32_t			start_secs,
+				    uint32_t			end_secs,
+				    string&			error_msg)
+
+{
+    PeerID peerid;
+
+    try {
+	peerid = _peer_manager.get_peerid(interface, vif);
+    } catch(BadPeer& e) {
+	error_msg = e.str();
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    } 
+
+    if (_peer_manager.set_md5_authentication_key(peerid, area, key_id,
+						 password, start_secs,
+						 end_secs, error_msg)
+	!= true) {
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    }
+
+    return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::delete_md5_authentication_key(const string&		interface,
+				       const string&		vif,
+				       OspfTypes::AreaID	area,
+				       uint8_t			key_id,
+				       string&			error_msg)
+{
+    PeerID peerid;
+
+    try {
+	peerid = _peer_manager.get_peerid(interface, vif);
+    } catch(BadPeer& e) {
+	error_msg = e.str();
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    } 
+
+    if (_peer_manager.delete_md5_authentication_key(peerid, area, key_id,
+						    error_msg)
+	!= true) {
+	XLOG_ERROR("%s", error_msg.c_str());
+	return false;
+    }
+
     return true;
 }
 
