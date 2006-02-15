@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.13 2006/02/14 20:50:40 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.14 2006/02/14 23:39:04 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -198,13 +198,13 @@ public:
 	/**
 	 * Construct an MD5 Key.
 	 */
-	MD5Key(uint8_t		id,
+	MD5Key(uint8_t		key_id,
 	       const string&	key,
 	       uint32_t		start_secs,
 	       XorpTimer	to) ;
 
 	/**
-	 * Get the id associated with the key.
+	 * Get the ID associated with the key.
 	 */
 	inline uint8_t	id() const			{ return _id; }
 
@@ -240,7 +240,7 @@ public:
 	bool		persistent() const;
 
 	/**
-	 * Get whether id matches a particular value (convenient for STL
+	 * Get whether ID matches a particular value (convenient for STL
 	 * algorithms).
 	 */
 	inline bool	id_matches(uint8_t o) const	{ return _id == o; }
@@ -260,7 +260,7 @@ public:
 
 	/**
 	 * Indicate whether valid packets have been received from a source
-	 * with this key id.
+	 * with this key ID.
 	 *
 	 * @param src_addr the source address.
 	 * @return true if a packet has been received from the source,
@@ -347,7 +347,7 @@ public:
      * new settings.  If the start and end times are the same the key
      * is treated as persistant and will not expire.
      *
-     * @param key_id unique id associated with key.
+     * @param key_id unique ID associated with key.
      * @param key phrase used for MD5 digest computation.
      * @param start_secs start time in seconds since midnight 1 Jan 1970.
      * @param end_secs start time in seconds since midnight 1 Jan 1970.
@@ -355,7 +355,7 @@ public:
      * @return true on success, false if end time is less than start time
      * or key has already expired.
      */
-    bool add_key(uint8_t	id,
+    bool add_key(uint8_t	key_id,
 		 const string&	key,
 		 uint32_t	start_secs,
 		 uint32_t	end_secs);
@@ -363,22 +363,22 @@ public:
     /**
      * Remove key from MD5 key chain.
      *
-     * @param key_id unique id of key to be removed.
+     * @param key_id unique ID of key to be removed.
      * @return true if the key was found and removed, otherwise false.
      */
-    bool remove_key(uint8_t id);
+    bool remove_key(uint8_t key_id);
 
     /**
      * A callback to remove key from MD5 key chain.
      *
-     * @param key_id unique id of key to be removed.
+     * @param key_id unique ID of key to be removed.
      */
-    void remove_key_cb(uint8_t id) { remove_key(id); }
+    void remove_key_cb(uint8_t key_id) { remove_key(key_id); }
 
     /**
      * Get currently active key.
      *
-     * @return key id in range 0-255 if key exists,
+     * @return key ID in range 0-255 if key exists,
      * value outside valid range otherwise 256-65535.
      */
     uint16_t currently_active_key() const;

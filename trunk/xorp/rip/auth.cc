@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.23 2006/02/14 20:50:40 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.24 2006/02/14 23:39:04 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -281,11 +281,11 @@ PlaintextAuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
 // ----------------------------------------------------------------------------
 // MD5AuthHandler::MD5Key implementation
 
-MD5AuthHandler::MD5Key::MD5Key(uint8_t		id,
+MD5AuthHandler::MD5Key::MD5Key(uint8_t		key_id,
 			       const string&	key,
 			       uint32_t		start_secs,
 			       XorpTimer	to)
-    : _id(id), _start_secs(start_secs), _o_seqno(0), _to(to)
+    : _id(key_id), _start_secs(start_secs), _o_seqno(0), _to(to)
 {
     string::size_type n = key.copy(_key_data, 16);
     if (n < KEY_BYTES) {
@@ -433,7 +433,7 @@ MD5AuthHandler::auth_type_name()
 }
 
 bool
-MD5AuthHandler::add_key(uint8_t       id,
+MD5AuthHandler::add_key(uint8_t       key_id,
 			const string& key,
 			uint32_t      start_secs,
 			uint32_t      end_secs)
@@ -446,27 +446,28 @@ MD5AuthHandler::add_key(uint8_t       id,
     if (start_secs != end_secs) {
 	timeout = _e.new_oneoff_at(TimeVal(end_secs, 0),
 				   callback(this,
-					    &MD5AuthHandler::remove_key_cb, id));
+					    &MD5AuthHandler::remove_key_cb,
+					    key_id));
     }
 
     KeyChain::iterator i = _key_chain.begin();
     while (i != _key_chain.end()) {
-	if (id == i->id()) {
-	    *i = MD5Key(id, key, start_secs, timeout);
+	if (key_id == i->id()) {
+	    *i = MD5Key(key_id, key, start_secs, timeout);
 	    return true;
 	}
 	++i;
     }
-    _key_chain.push_back(MD5Key(id, key, start_secs, timeout));
+    _key_chain.push_back(MD5Key(key_id, key, start_secs, timeout));
     return true;
 }
 
 bool
-MD5AuthHandler::remove_key(uint8_t id)
+MD5AuthHandler::remove_key(uint8_t key_id)
 {
     KeyChain::iterator i =
 	find_if(_key_chain.begin(), _key_chain.end(),
-		bind2nd(mem_fun_ref(&MD5Key::id_matches), id));
+		bind2nd(mem_fun_ref(&MD5Key::id_matches), key_id));
     if (_key_chain.end() != i) {
 	_key_chain.erase(i);
 	return true;
@@ -560,7 +561,7 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 				   bind2nd(mem_fun_ref(&MD5Key::id_matches),
 					   mpr->key_id()));
     if (_key_chain.end() == k) {
-	set_error(c_format("packet with key id %d for which no key is "
+	set_error(c_format("packet with key ID %d for which no key is "
 			   "configured", mpr->key_id()));
 	return false;
     }
@@ -596,7 +597,7 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
 
     if (memcmp(digest, mpt->data(), mpt->data_bytes()) != 0) {
 	set_error(c_format("authentication digest doesn't match local key "
-			   "(key id = %d)", k->id()));
+			   "(key ID = %d)", k->id()));
 // #define	DUMP_BAD_MD5
 #ifdef	DUMP_BAD_MD5
 	const char badmd5[] = "/tmp/rip_badmd5";
