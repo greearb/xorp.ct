@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.69 2005/11/22 18:50:21 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.70 2005/12/22 12:06:49 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -306,6 +306,13 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
     PathAttributeList<IPv4> pa_list(next_hop, aspath, origin);
 
     /*
+    ** Add a local pref for I-BGP peers.
+    */
+    LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
+    pa_list.add_path_attribute(local_pref_att);
+    pa_list.rehash();
+
+    /*
     ** Create a subnet route
     */
     SubnetRoute<IPv4>* msg_route 
@@ -350,6 +357,13 @@ RibIpcHandler::originate_route(const OriginType origin, const AsPath& aspath,
     ** Construct the path attribute list.
     */
     PathAttributeList<IPv6> pa_list(next_hop, aspath, origin);
+
+    /*
+    ** Add a local pref for I-BGP peers.
+    */
+    LocalPrefAttribute local_pref_att(LocalPrefAttribute::default_value());
+    pa_list.add_path_attribute(local_pref_att);
+    pa_list.rehash();
 
     /*
     ** Create a subnet route

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.60 2006/02/12 22:36:55 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.61 2006/02/13 12:20:34 bms Exp $
 #
 
 #
@@ -1851,6 +1851,77 @@ test55()
     coord peer1 assert idle
 }
 
+test56()
+{
+    echo "TEST56 - Routes originated by BGP sent to an I-BGP peer:"
+    echo "	1) Should have a local pref added."
+    echo "	2) Should have an empty aspath."
+    echo "	3) Should honour the next hop?"
+    
+
+    coord reset
+    coord target $HOST $PORT1
+    coord initialise attach peer1
+
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 1 safi 1
+
+    coord peer1 expect packet keepalive
+
+    coord peer1 expect packet update \
+	origin 0 \
+	nexthop 20.20.20.20 \
+	aspath empty \
+	localpref 100 \
+	nlri 10.10.10.0/24
+
+    # Introduce a route
+    originate_route4 10.10.10.0/24 20.20.20.20 true false
+
+    coord peer1 establish AS $PEER1_AS holdtime 0 id 192.150.187.100
+
+    sleep 2
+    coord peer1 trie recv lookup 10.10.10.0/24 aspath empty
+
+    coord peer1 assert queue 0
+    coord peer1 assert established
+}
+
+test56_ipv6()
+{
+    echo "TEST56 (IPv6) - Routes originated by BGP sent to an I-BGP peer:"
+    echo "	1) Should have a local pref added."
+    echo "	2) Should have an empty aspath."
+    echo "	3) Should honour the next hop?"
+    
+    coord reset
+    coord target $HOST $PORT3
+    coord initialise attach peer1
+
+    coord peer1 expect packet open asnum $AS bgpid $ID holdtime $HOLDTIME \
+	afi 2 safi 1
+
+    coord peer1 expect packet keepalive
+
+    coord peer1 expect packet update \
+	origin 0 \
+	nexthop6 20:20:20:20:20:20:20:20 \
+	aspath empty \
+	localpref 100 \
+	nlri6 2000::/3
+
+    # Introduce a route
+    originate_route6 2000::/3 20:20:20:20:20:20:20:20 true false
+
+    coord peer1 establish AS $PEER3_AS holdtime 0 id 192.150.187.100 ipv6 true
+
+    sleep 2
+    coord peer1 trie recv lookup 2000::/3 aspath empty
+
+    coord peer1 assert queue 0
+    coord peer1 assert established
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
@@ -1858,7 +1929,7 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
     test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
-    test52 test53 test54 test55'
+    test52 test53 test54 test55 test56 test56_ipv6'
 
 # Include command line
 . ${srcdir}/args.sh
