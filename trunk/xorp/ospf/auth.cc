@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.6 2005/12/28 18:57:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.7 2006/02/15 19:06:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -614,7 +614,7 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
     XLOG_ASSERT(plaintext_ah != NULL);
     plaintext_ah->set_key(password);
 
-    error_msg.clear();
+    error_msg = "";
     return (true);
 }
 
@@ -645,7 +645,7 @@ Auth::delete_simple_authentication_key(string& error_msg)
     //
     set_method(NullAuthHandler::auth_type_name());
 
-    error_msg.clear();
+    error_msg = "";
     return (true);
 }
 
