@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.62 2006/01/13 20:34:57 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.63 2006/02/01 18:06:01 atanu Exp $
 #
 
 TODO
@@ -14,12 +14,6 @@ in the standard header decode code.
 7) Can an interface a peer in our code have more than one subnet
 associated with it?
 
-12) Point 2 Point and Point 2 Multipoint.
-When coding this we will need to be told neigbour addresses. When we
-are told them just create the neighbour structures and we should be
-done. Need to be careful that we don't destroy the neighbour
-structures when the timers expire.
-
 16) A data description packet carries a number of LSA headers. There
 is a count in the packet of the number of LSA header. We don't store
 this information as its unnecessary. Need to verify that we actually
@@ -31,22 +25,8 @@ decodable either due to being an unknown type or some other problem
 the whole packet is discarded. Only the bad LSA should be dropped. See
 section 13 of the RFC.
 
-18) The peer manager has a method that tests an address against
-interface addresses. At the moment it checks against configured
-interfaces. When the fea client interface watcher is linked in we
-should get this information from the FEA.
-
 19) The delayed ACKs are not delayed. The peer should probably hold a
 delayed ack list that is transmitted ocassionally.
-
-21) When the support for Virtual links is added make sure the RFC 2328
-secction 8.2, receiving protocol packets covers the virtual link
-backbone checks.
-
-22) Perform authentication.
-
-25) A neighbour should only be listed in a hello packet if a hello
-packet has been seen from it in the last RouterDeadInterval seconds.
 
 26) send_lsa() has not been tested.
 
@@ -96,11 +76,6 @@ to be passed in from the config file. These values are still passed in
 but ignored. Starting from the XRLs go through and remove the passing
 of the prefix length and MTU.
 
-35) OSPF is seeing its own multicast packets. When this happens an
-error message is printed. Until this is fixed in the FEA the code has
-a new trace variable trace._input_errors_that_happen that is set to false.
-As soon as its fixed remove this trace variable.
-
 36) There is a queue to which route adds and deletes are added. The
 queue does not handle replace or discard routes. Plus policy tags
 should be passed in somehow.
@@ -135,10 +110,6 @@ It might be appropriate to leave MaxAge LSAs on the retransmission list.
 
 If this fix works then do away with MAX_AGE_IN_DATABASE.
 
-38) The debug IO subsytem should store all the routes which are sent
-to it. Thus allowing the regression tests to check the table at the
-end of a run.
-
 39) The code that processes AS-External-LSAs will need to be
 re-examined when multiple areas are fully supported.
 
@@ -154,22 +125,11 @@ shutdown on the an area then proceeds to delete the area. It might be
 cleaner to wait for the area to signal that shutdown is complete,
 either by polling running() or by waiting for the shutdown_complete().
 
-42) An entry point "PeerManager<A>::refresh_router_lsas()" exists that
-is used to cause all area to send out a new Router-LSA. This entry
-points exist so that flag transitions between area border, AS boundary
-and virtual link endpoint can be immediately distributed in the form a
-a new Router-LSA. When support for virtual links are added this hook
-should be called.
-
 43) Changing the type of an area currently has no effect. The only way
 to change an area type is to save and reload the config.
 
 44) The packet header encode and decode routines should use AUTH_* consts
 not hard coded numbers.
-
-45) The cryptographic authentication does not support configuring the
-Key ID (currently defaults to 1) or timer values for smooth key
-transitions.
 
 46) Replace class Subsystem with class ServiceBase.
 
@@ -290,5 +250,63 @@ is_neighbour_DR_or_BDR() to the Peer from the Neighbour class.
 33) The sequence number reaching OspfTypes:: MaxSequenceNumber is not
 dealt with gracefully. If will take 680 years for this condition to be
 hit.
+
+[DONE]
+
+12) Point 2 Point and Point 2 Multipoint.
+When coding this we will need to be told neigbour addresses. When we
+are told them just create the neighbour structures and we should be
+done. Need to be careful that we don't destroy the neighbour
+structures when the timers expire.
+
+[DONE]
+
+18) The peer manager has a method that tests an address against
+interface addresses. At the moment it checks against configured
+interfaces. When the fea client interface watcher is linked in we
+should get this information from the FEA.
+
+[DONE]
+
+21) When the support for Virtual links is added make sure the RFC 2328
+secction 8.2, receiving protocol packets covers the virtual link
+backbone checks.
+
+[DONE]
+
+22) Perform authentication.
+
+[DONE]
+
+25) A neighbour should only be listed in a hello packet if a hello
+packet has been seen from it in the last RouterDeadInterval seconds.
+
+[DONE]
+
+35) OSPF is seeing its own multicast packets. When this happens an
+error message is printed. Until this is fixed in the FEA the code has
+a new trace variable trace._input_errors_that_happen that is set to false.
+As soon as its fixed remove this trace variable.
+
+[DONE]
+
+38) The debug IO subsytem should store all the routes which are sent
+to it. Thus allowing the regression tests to check the table at the
+end of a run.
+
+[DONE]
+
+42) An entry point "PeerManager<A>::refresh_router_lsas()" exists that
+is used to cause all area to send out a new Router-LSA. This entry
+points exist so that flag transitions between area border, AS boundary
+and virtual link endpoint can be immediately distributed in the form a
+a new Router-LSA. When support for virtual links are added this hook
+should be called.
+
+[DONE]
+
+45) The cryptographic authentication does not support configuring the
+Key ID (currently defaults to 1) or timer values for smooth key
+transitions.
 
 [DONE]
