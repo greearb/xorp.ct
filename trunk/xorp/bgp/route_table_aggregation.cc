@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.14 2005/12/20 17:59:21 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.15 2006/01/24 11:29:37 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -21,6 +21,7 @@
 #include "libxorp/xlog.h"
 #include "path_attribute.hh"
 #include "bgp.hh"
+#include "dump_iterators.hh"
 #include "route_table_aggregation.hh"
 
 
@@ -102,8 +103,6 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	return res;
     }
 
-    debug_msg("\nXXX *** XXX\nMARKO add_route orig=%s aggr=%s\n",
-		orig_net.str().c_str(), aggr_net.str().c_str());
     // Find existing or create a new aggregate route
     typename RefTrie<A, const AggregateRoute<A> >::iterator ai;
     ai = _aggregates_table.lookup_node(aggr_net);
@@ -225,8 +224,6 @@ AggregationTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	return res;
     }
 
-    debug_msg("\nXXX *** XXX\nMARKO delete_route orig=%s aggr=%s\n",
-		orig_net.str().c_str(), aggr_net.str().c_str());
     // Find the appropriate aggregate route
     typename RefTrie<A, const AggregateRoute<A> >::iterator ai;
     ai = _aggregates_table.lookup_node(aggr_net);
@@ -515,6 +512,76 @@ AggregationTable<A>::push(BGPRouteTable<A> *caller)
 
 
 template<class A>
+bool
+AggregationTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
+    const PeerHandler* peer = dump_iter.current_peer();
+
+    // Propagate the request upstream if not for us.
+    if (peer->get_unique_id() != AGGR_HANDLER_UNIQUE_ID)
+	return _parent->dump_next_route(dump_iter);
+
+    typename RefTrie<A, const AggregateRoute<A> >::iterator route_iterator;
+    debug_msg("dump iter: %s\n", dump_iter.str().c_str());
+   
+    if (dump_iter.route_iterator_is_valid()) {
+	debug_msg("route_iterator is valid\n");
+ 	route_iterator = dump_iter.aggr_iterator();
+	// Make sure the iterator is valid. If it is pointing at a
+	// deleted node this comparison will move it forward.
+	if (route_iterator == _aggregates_table.end()) {
+	    return false;
+	}
+	
+	//we need to move on to the next node, except if the iterator
+	//was pointing at a deleted node, because then it will have
+	//just been moved to the next node to dump, so we need to dump
+	//the node that the iterator is currently pointing at.
+	if (dump_iter.iterator_got_moved(route_iterator.key()) == false)
+	    route_iterator++;
+    } else {
+	debug_msg("route_iterator is not valid\n");
+	route_iterator = _aggregates_table.begin();
+    }
+
+    if (route_iterator == _aggregates_table.end()) {
+	return false;
+    }
+
+    const AggregateRoute<A>* aggr_rt;
+    for ( ; route_iterator != _aggregates_table.end(); route_iterator++) {
+	aggr_rt = &(route_iterator.payload());
+	debug_msg("aggr_rt: %s\n", aggr_rt->net().str().c_str());
+
+	// propagate downstream
+
+	if (dump_iter.peer_to_dump_to() != NULL &&
+	    aggr_rt->was_announced()) {
+	    SubnetRoute<A> *tmp_route = new SubnetRoute<A>(aggr_rt->net(),
+						           aggr_rt->pa_list(),
+						           NULL,
+						           0);
+	    tmp_route->set_nexthop_resolved(true);	// Cheating
+	    tmp_route->set_aggr_prefix_len(SR_AGGR_EBGP_AGGREGATE);
+	    InternalMessage<A> rt_msg(tmp_route, peer, GENID_UNKNOWN);
+	   
+	    this->_next_table->route_dump(rt_msg,
+					  (BGPRouteTable<A>*)this,
+					  dump_iter.peer_to_dump_to());
+	    break;
+	}
+    }
+
+    if (route_iterator == _aggregates_table.end())
+	return false;
+
+    // Store the new iterator value as its valid.
+    dump_iter.set_aggr_iterator(route_iterator);
+
+    return true;
+}
+
+
+template<class A>
 int
 AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 				BGPRouteTable<A> *caller,
@@ -569,8 +636,6 @@ AggregationTable<A>::route_dump(const InternalMessage<A> &rtmsg,
 	return res;
     }
 
-    debug_msg("\nXXX *** XXX\nMARKO route_dump orig=%s aggr=%s\n",
-		orig_net.str().c_str(), aggr_net.str().c_str());
     // Find the appropriate aggregate route
     typename RefTrie<A, const AggregateRoute<A> >::iterator ai;
     ai = _aggregates_table.lookup_node(aggr_net);
@@ -643,6 +708,52 @@ AggregationTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     debug_msg("next table: %s\n", next_table->tablename().c_str());
     // XXX Can this ever be called?  REVISIT!!!
     return 0; // XXX
+}
+
+
+template<class A>
+void
+AggregationTable<A>::peering_went_down(const PeerHandler *peer,
+				       uint32_t genid,
+				       BGPRouteTable<A> *caller)
+{
+    debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
+    XLOG_ASSERT(_parent == caller);
+    XLOG_ASSERT(_next_table != NULL);
+    _next_table->peering_went_down(peer, genid, this);
+}
+
+
+template<class A>
+void
+AggregationTable<A>::peering_down_complete(const PeerHandler *peer,
+					   uint32_t genid,
+					   BGPRouteTable<A> *caller)
+{
+    debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
+    XLOG_ASSERT(_parent == caller);
+    XLOG_ASSERT(_next_table != NULL);
+    _next_table->peering_down_complete(peer, genid, this);
+}
+
+
+template<class A>
+void
+AggregationTable<A>::peering_came_up(const PeerHandler *peer,
+				     uint32_t genid,
+				     BGPRouteTable<A> *caller)
+{
+    debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
+    XLOG_ASSERT(_parent == caller);
+    XLOG_ASSERT(_next_table != NULL);
+    _next_table->peering_came_up(peer, genid, this);
+}
+
+
+AggregationHandler::AggregationHandler()
+    : PeerHandler("AggregationHandler", NULL, NULL, NULL),
+      _fake_unique_id(AGGR_HANDLER_UNIQUE_ID)
+{
 }
 
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_base.hh,v 1.13 2005/11/11 15:23:28 zec Exp $
+// $XORP: xorp/bgp/route_table_base.hh,v 1.14 2005/12/06 06:26:36 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_BASE_HH__
 #define __BGP_ROUTE_TABLE_BASE_HH__
@@ -23,7 +23,10 @@
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ipv4.hh"
 #include "internal_message.hh"
-#include "dump_iterators.hh"
+//#include "dump_iterators.hh"
+
+template<class A>
+class DumpIterator;
 
 enum RouteTableType {
     RIB_IN_TABLE = 1,

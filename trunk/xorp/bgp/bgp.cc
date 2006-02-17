@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.68 2006/02/14 16:41:40 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.69 2006/02/17 19:26:39 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -70,6 +70,7 @@ BGPMain::BGPMain()
     wait_until_xrl_router_is_ready(eventloop(), *_xrl_router);
 
     _rib_ipc_handler = new RibIpcHandler(*_xrl_router, *this);
+    _aggregation_handler = new AggregationHandler();
     _next_hop_resolver_ipv4 = new NextHopResolver<IPv4>(_xrl_router,
 							eventloop(),
 							*this);
@@ -78,12 +79,14 @@ BGPMain::BGPMain()
 							*this);
     _plumbing_unicast = new BGPPlumbing(SAFI_UNICAST,
 					_rib_ipc_handler,
+					_aggregation_handler,
 					*_next_hop_resolver_ipv4,
 					*_next_hop_resolver_ipv6,
 					_policy_filters,
 					*this);
     _plumbing_multicast = new BGPPlumbing(SAFI_MULTICAST,
 					  _rib_ipc_handler,
+					  _aggregation_handler,
 					  *_next_hop_resolver_ipv4,
 					  *_next_hop_resolver_ipv6,
 					  _policy_filters,

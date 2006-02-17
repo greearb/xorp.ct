@@ -20,8 +20,8 @@
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
-#include "route_table_damping.hh"
 #include "bgp.hh"
+#include "route_table_damping.hh"
 
 template<class A>
 DampingTable<A>::DampingTable(string tablename, Safi safi,

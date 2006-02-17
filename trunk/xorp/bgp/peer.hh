@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.36 2005/12/16 17:37:01 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.37 2005/12/16 22:06:40 atanu Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -65,7 +65,8 @@ enum PeerOutputState {
 #define UPDATEMSGOK 0
 
 const uint32_t RIB_IPC_HANDLER_UNIQUE_ID = 0;
-const uint32_t UNIQUE_ID_START = RIB_IPC_HANDLER_UNIQUE_ID + 1;
+const uint32_t AGGR_HANDLER_UNIQUE_ID = 1;
+const uint32_t UNIQUE_ID_START = AGGR_HANDLER_UNIQUE_ID + 1;
 
 class BGPMain;
 class PeerHandler;

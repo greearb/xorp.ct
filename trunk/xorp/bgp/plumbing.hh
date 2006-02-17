@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.34 2005/11/27 06:10:01 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.35 2005/12/06 06:26:36 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -143,6 +143,7 @@ class BGPPlumbing {
 public:
     BGPPlumbing(const Safi safi,
 		RibIpcHandler* rib_handler,
+		AggregationHandler* aggr_handler,
 		NextHopResolver<IPv4>&,
 		NextHopResolver<IPv6>&,
 		PolicyFilters&,
@@ -174,6 +175,7 @@ public:
     const SubnetRoute<IPv6>* 
       lookup_route(const IPNet<IPv6> &net) const;
     RibIpcHandler *rib_handler() const {return _rib_handler;}
+    AggregationHandler *aggr_handler() const {return _aggr_handler;}
     BGPPlumbingAF<IPv4>& plumbing_ipv4() {
 	return _plumbing_ipv4;
     }
@@ -219,6 +221,7 @@ public:
 
 private:
     RibIpcHandler *_rib_handler;
+    AggregationHandler *_aggr_handler;
 
     NextHopResolver<IPv4>& _next_hop_resolver_ipv4;
     NextHopResolver<IPv6>& _next_hop_resolver_ipv6;

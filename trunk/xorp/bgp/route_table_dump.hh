@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.17 2005/03/25 02:52:46 pavlin Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.18 2005/04/04 11:27:21 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -20,6 +20,7 @@
 #include "route_table_base.hh"
 #include "peer_handler.hh"
 #include "bgp_trie.hh"
+#include "dump_iterators.hh"
 #include "peer_route_pair.hh"
 
 #define AUDIT_ENABLE

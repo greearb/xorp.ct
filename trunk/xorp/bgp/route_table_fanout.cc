@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.51 2005/04/08 22:45:59 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.52 2006/01/24 11:29:37 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -120,10 +120,25 @@ NextTableMap<A>::end() {
 template<class A>
 FanoutTable<A>::FanoutTable(string table_name,
 			    Safi safi,
-			    BGPRouteTable<A> *init_parent)
+			    BGPRouteTable<A> *init_parent,
+			    PeerHandler *aggr_handler,
+			    BGPRouteTable<A> *aggr_table)
     : BGPRouteTable<A>("FanoutTable-" + table_name, safi)
 {
     this->_parent = init_parent;
+    if (aggr_table != NULL && aggr_table != NULL)
+	_aggr_peerinfo = new PeerTableInfo<A>(aggr_table,
+					      aggr_handler,
+					      GENID_UNKNOWN);
+    else
+	_aggr_peerinfo = NULL;
+}
+
+template<class A>
+FanoutTable<A>::~FanoutTable()
+{
+    if (_aggr_peerinfo != NULL)
+	delete _aggr_peerinfo;
 }
 
 template<class A>
@@ -471,6 +486,11 @@ FanoutTable<A>::dump_entire_table(BGPRouteTable<A> *child_to_dump_to,
 	if (i.first() == child_to_dump_to)
 	    peer_info = &(i.second());
     }
+
+    // add the aggregation table / handler at the end of the list
+    if (_aggr_peerinfo != NULL)
+	peer_list.push_back(_aggr_peerinfo);
+
     XLOG_ASSERT(peer_info != NULL);
     const PeerHandler *peer_handler = peer_info->peer_handler();
 

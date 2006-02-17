@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.54 2006/02/02 02:44:30 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.55 2006/02/17 19:26:39 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -964,6 +964,7 @@ private:
 
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
+    AggregationHandler *_aggregation_handler;
     LocalData _local_data;
     XrlStdRouter *_xrl_router;
     static EventLoop _eventloop;

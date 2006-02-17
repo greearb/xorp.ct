@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.84 2006/02/17 17:38:29 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.85 2006/02/17 20:00:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,15 +33,18 @@
 #include "plumbing.hh"
 #include "bgp.hh"
 #include "profile_vars.hh"
+#include "dump_iterators.hh"
 #include "libxorp/timespent.hh"
 
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,
+			 AggregationHandler* aggrhandler,
 			 NextHopResolver<IPv4>& next_hop_resolver_ipv4,
 			 NextHopResolver<IPv6>& next_hop_resolver_ipv6,
 			 PolicyFilters& pfs,
 			 BGPMain& bgp)
     : _rib_handler(ribhandler),
+      _aggr_handler(aggrhandler),
       _next_hop_resolver_ipv4(next_hop_resolver_ipv4),
       _next_hop_resolver_ipv6(next_hop_resolver_ipv6),
       _safi(safi),
@@ -317,6 +320,8 @@ BGPPlumbingAF<A>::BGPPlumbingAF(const string& ribname,
     _fanout_table =
 	new FanoutTable<A>(ribname + "FanoutTable",
 			   _master.safi(),
+			   _aggregation_table,
+			   _master.aggr_handler(),
 			   _aggregation_table);
     _aggregation_table->set_next_table(_fanout_table);
 

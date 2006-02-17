@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.18 2005/11/27 06:10:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_plumbing.cc,v 1.19 2005/12/06 06:26:37 atanu Exp $"
 #include "bgp_module.h"
 
 #include "libxorp/debug.h"
@@ -25,7 +25,7 @@ PlumbingTest::PlumbingTest(NextHopResolver<IPv4>& nhr_ipv4,
 			   NextHopResolver<IPv6>& nhr_ipv6,
 			   PolicyFilters& pfs,
 			   BGPMain& bgp)
-    : BGPPlumbing(SAFI_UNICAST, NULL, nhr_ipv4, nhr_ipv6, pfs, bgp)
+    : BGPPlumbing(SAFI_UNICAST, NULL, NULL, nhr_ipv4, nhr_ipv6, pfs, bgp)
 {
 }
 

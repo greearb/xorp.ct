@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_decision.hh,v 1.20 2005/03/25 02:52:46 pavlin Exp $
+// $XORP: xorp/bgp/route_table_decision.hh,v 1.21 2005/11/02 07:36:13 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DECISION_HH__
 #define __BGP_ROUTE_TABLE_DECISION_HH__
 
 #include <map>
 #include "route_table_base.hh"
+#include "dump_iterators.hh"
 #include "peer_handler.hh"
 #include "next_hop_resolver.hh"
 #include "peer_route_pair.hh"

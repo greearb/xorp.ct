@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.8 2005/11/27 06:10:01 atanu Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.9 2006/01/24 11:29:37 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
 
+#include "peer_handler.hh"
 #include "route_table_base.hh"
 #include "libxorp/ref_trie.hh"
 
@@ -71,6 +72,11 @@
  *
  * - {de|re}aggragetion of large aggregates -> timer based vs. atomic
  */
+
+class XrlStdRouter;
+
+template<class A>
+class DumpIterator;
 
 template<class A>
 class AggregationTable;
@@ -161,7 +167,7 @@ public:
                      BGPRouteTable<A> *caller);
     int push(BGPRouteTable<A> *caller);
 
-    //bool dump_next_route(DumpIterator<A>& dump_iter);
+    bool dump_next_route(DumpIterator<A>& dump_iter);
     int route_dump(const InternalMessage<A> &rtmsg,
 		   BGPRouteTable<A> *caller,
 		   const PeerHandler *dump_peer);
@@ -180,11 +186,32 @@ public:
         return _aggregates_table.route_count(); // XXX is this OK?
     }
 
+    void peering_went_down(const PeerHandler *peer, uint32_t genid,
+                           BGPRouteTable<A> *caller);
+    void peering_down_complete(const PeerHandler *peer, uint32_t genid,
+                               BGPRouteTable<A> *caller);
+    void peering_came_up(const PeerHandler *peer, uint32_t genid,
+                         BGPRouteTable<A> *caller);
+
 private:
     friend class AggregateRoute<A>;
 
     RefTrie<A, const AggregateRoute<A> > _aggregates_table;
     BGPPlumbing& _master_plumbing;
+};
+
+
+class AggregationHandler : public PeerHandler {
+public:
+    AggregationHandler();
+
+    virtual PeerType get_peer_type() const {
+	return PEER_TYPE_INTERNAL;
+    }                                                                           
+
+    const uint32_t get_unique_id() const { return _fake_unique_id; }
+    virtual bool originate_route_handler() const { return true; }
+    const uint32_t _fake_unique_id;
 };
 
 

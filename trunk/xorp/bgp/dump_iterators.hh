@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/dump_iterators.hh,v 1.14 2005/03/21 23:51:54 mjh Exp $
+// $XORP: xorp/bgp/dump_iterators.hh,v 1.15 2005/03/25 02:52:40 pavlin Exp $
 
 #ifndef __BGP_DUMP_ITERATORS_HH__
 #define __BGP_DUMP_ITERATORS_HH__
@@ -23,6 +23,7 @@
 #include "bgp_trie.hh"
 #include "route_queue.hh"
 #include "peer_route_pair.hh"
+#include "route_table_aggregation.hh"
 
 class BGPPlumbing;
 class PeerHandler;
@@ -111,9 +112,16 @@ public:
     const typename BgpTrie<A>::iterator& route_iterator() const {
 	return _route_iterator;
     }
+    const typename RefTrie<A, const AggregateRoute<A> >::iterator& aggr_iterator() const {
+	return _aggr_iterator;
+    }
     //    const IPNet<A>& net() const { return _route_iterator_net; }
     void set_route_iterator(typename BgpTrie<A>::iterator& new_iter) {
 	_route_iterator = new_iter;
+	_route_iterator_is_valid = true;
+    }
+    void set_aggr_iterator(typename RefTrie<A, const AggregateRoute<A> >::iterator& new_iter) {
+	_aggr_iterator = new_iter;
 	_route_iterator_is_valid = true;
     }
     //void set_route_iterator_net(const IPNet<A>& net) {
@@ -168,6 +176,7 @@ private:
 
     bool _route_iterator_is_valid;
     typename BgpTrie<A>::iterator _route_iterator;
+    typename RefTrie<A, const AggregateRoute<A> >::iterator _aggr_iterator;
 
     bool _routes_dumped_on_current_peer;
     IPNet<A> _last_dumped_net;

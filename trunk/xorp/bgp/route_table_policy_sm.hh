@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.4 2005/07/22 01:20:11 abittau Exp $
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.5 2005/08/11 18:41:31 abittau Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
 
 #include "route_table_policy.hh"
+#include "peer_route_pair.hh"
 #include "libxorp/eventloop.hh"
 
 /**

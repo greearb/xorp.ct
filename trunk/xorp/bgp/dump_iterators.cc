@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.28 2005/04/07 15:23:46 atanu Exp $"
+#ident "$XORP: xorp/bgp/dump_iterators.cc,v 1.29 2005/07/05 23:57:47 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -148,6 +148,9 @@ DumpIterator<A>::~DumpIterator()
     if (_route_iterator.cur() != NULL)
 	debug_msg("refcnt: %d\n",
 		  XORP_INT_CAST(_route_iterator.cur()->references()));
+    else if (_aggr_iterator.cur() != NULL)
+	debug_msg("aggr refcnt: %d\n",
+		  XORP_INT_CAST(_route_iterator.cur()->references()));
     else 
 	debug_msg("iterator not valid\n");
     //delete the payloads of the map
@@ -254,6 +257,8 @@ DumpIterator<A>::next_peer()
     // Make sure the iterator no longer points at a trie that may go away.
     typename BgpTrie<A>::iterator empty;
     _route_iterator = empty;	
+    typename RefTrie<A, const AggregateRoute<A> >::iterator aggr_empty;
+    _aggr_iterator = aggr_empty;	
     _route_iterator_is_valid = false;
     _routes_dumped_on_current_peer = false;
     if (_current_peer == _peers_to_dump.end())

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.39 2005/11/01 21:52:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.40 2005/11/02 07:36:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,6 +28,7 @@
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
+#include "dump_iterators.hh"
 #include "route_table_decision.hh"
 
 #ifdef PARANOID
