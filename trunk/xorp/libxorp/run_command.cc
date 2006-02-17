@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.21 2006/01/18 01:26:31 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.22 2006/02/09 01:18:58 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -440,14 +440,21 @@ RunCommandBase::wait_status_changed(int wait_status)
 void
 RunCommandBase::close_output()
 {
+    //
+    // XXX: we should close stderr before stdout, because
+    // close_stdout_output() invokes pclose2() that performs the
+    // final cleanup.
+    //
+    close_stderr_output();
+    close_stdout_output();
+}
+
+void
+RunCommandBase::close_stdout_output()
+{
     if (_stdout_file_reader != NULL) {
 	delete _stdout_file_reader;
 	_stdout_file_reader = NULL;
-    }
-
-    if (_stderr_file_reader != NULL) {
-	delete _stderr_file_reader;
-	_stderr_file_reader = NULL;
     }
 
     if (_stdout_stream != NULL) {
@@ -469,6 +476,15 @@ RunCommandBase::close_output()
 	pclose2(_stdout_stream, true);
 	_stdout_stream = NULL;
 #endif // ! HOST_OS_WINDOWS
+    }
+}
+
+void
+RunCommandBase::close_stderr_output()
+{
+    if (_stderr_file_reader != NULL) {
+	delete _stderr_file_reader;
+	_stderr_file_reader = NULL;
     }
 
     //
@@ -593,10 +609,18 @@ RunCommandBase::append_data(AsyncFileOperator::Event	event,
 	} else {
 	    _stderr_eof_received = true;
 	}
-	if (_stdout_eof_received
-	    && (_stderr_eof_received || redirect_stderr_to_stdout())) {
-	    io_done(event, 0);
-	}
+	do {
+	    if (_stdout_eof_received
+		&& (_stderr_eof_received || redirect_stderr_to_stdout())) {
+		io_done(event, 0);
+		break;
+	    }
+	    if ((! is_stdout) && _stderr_eof_received) {
+		close_stderr_output();
+		break;
+	    }
+	    break;
+	} while (false);
 	return;
     }
 }

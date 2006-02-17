@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.10 2005/12/21 09:42:57 bms Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.11 2006/01/14 00:57:48 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -318,7 +318,6 @@ private:
 
     /**
      * Cleanup state.
-     *
      */
     void cleanup();
 
@@ -344,6 +343,16 @@ private:
      * Close the output for the command.
      */
     void close_output();
+
+    /**
+     * Close the stdout output for the command.
+     */
+    void close_stdout_output();
+
+    /**
+     * Close the stderr output for the command.
+     */
+    void close_stderr_output();
 
     /**
      * Set the command status.
