@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.83 2005/12/06 06:26:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.84 2006/02/17 17:38:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -502,8 +502,8 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 
     /* 5. Configure local preference filter.
 	  Remove LOCAL_PREF on transmission to EBGP peers. */
-    if (peer_type == PEER_TYPE_EBGP ||
-	peer_type == PEER_TYPE_EBGP_CONFED) {
+    // Note it is legal to send local pref to a confederation peer.
+    if (peer_type == PEER_TYPE_EBGP) {
 	filter_out->add_localpref_removal_filter();
     }
 

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.14 2005/12/06 07:30:58 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.15 2006/02/17 17:38:29 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -59,11 +59,6 @@ will no longer be required.
 38) Route Flap Damping needs regression tests.
 
 -- 2005-12-05 by AG
-
-39) Add a regression test that verifies that the local preference
-attribute is not set when sending an update to a confederation peer.
-
--- 2006-02-17 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
