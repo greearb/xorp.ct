@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.4 2005/03/25 02:53:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.6 2005/08/18 15:28:39 bms Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
@@ -113,7 +113,8 @@ xdtoi(int c)
 
 /*
  * Convert 's' which has the form "xx:xx:xx:xx:xx:xx" into a new
- * ethernet address.  Assumes 's' is well formed.
+ * ethernet address.
+ * XXX: Does not perform stringent checks on the format of the input string.
  * XXX: returns a pointer to static storage.
  */
 struct ether_addr *
@@ -132,6 +133,8 @@ ether_aton(const char *s)
 		if (isxdigit((uint8_t)*s)) {
 			d <<= 4;
 			d |= xdtoi(*s++);
+		} else {
+			return (NULL);
 		}
 		*ep++ = d;
 	}
