@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.53 2005/12/06 07:30:58 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.54 2006/02/02 02:44:30 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -335,6 +335,18 @@ public:
      * @return true on success
      */
     bool bounce_peer(const Iptuple& iptuple);
+
+    /**
+     * One of the local IP addresses of this router has changed. Where
+     * a change can be an addition or removal or a change in the link
+     * status. If the provided address matches any of the local ip
+     * addresses of any of the peerings unconditionally bounce the
+     * peering. Unconditional bouncing of the peering is all that is
+     * required if a link has gone down the old session will be
+     * dropped and the new one will fail. If the link has just come up
+     * then a session will be made.
+     */
+    void local_ip_changed(string local_address);
 
     /**
      * Change one of the tuple settings of this peering.
@@ -814,6 +826,18 @@ private:
     void updates_made();
 
     /**
+     * Callback method that is invoked when the status of an address changes.
+     */
+    void address_status_change4(const string& interface, const string& vif,
+				const IPv4& source, bool state);
+
+    /**
+     * Callback method that is invoked when the status of an address changes.
+     */
+    void address_status_change6(const string& interface, const string& vif,
+				const IPv6& source, bool state);
+
+    /**
      * Store the socket descriptor and iptuple together.
      */
     struct Server {
@@ -956,6 +980,9 @@ private:
     VifStatusCb		_vif_status_cb;
     AddressStatus4Cb	_address_status4_cb;
     AddressStatus6Cb	_address_status6_cb;
+
+    set<IPv4> 		_interfaces_ipv4;	// IPv4 interface addresses
+    set<IPv6> 		_interfaces_ipv6;	// IPv6 interface addresses
 };
 
 template <typename A>
@@ -1126,5 +1153,12 @@ BGPMain::get_route_list_next(
 // };
 // template <> const char* NameOf<IPv4>::get() { return "IPv4"; }
 // template <> const char* NameOf<IPv6>::get() { return "IPv6"; }
+
+inline
+const char *
+pb(const bool val)
+{
+    return val ? "true" : "false";
+}
 
 #endif // __BGP_MAIN_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.67 2006/02/12 22:36:55 bms Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.68 2006/02/14 16:41:40 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -254,6 +254,9 @@ BGPMain::startup()
     }
 
     component_up("startup");
+
+    register_address_status(callback(this, &BGPMain::address_status_change4));
+    register_address_status(callback(this, &BGPMain::address_status_change6));
 
     return (true);
 }
@@ -665,6 +668,39 @@ BGPMain::updates_made()
     _iftree = ifmgr_iftree();
 }
 
+void
+BGPMain::address_status_change4(const string& interface,
+			       const string& vif, const IPv4& source,
+			       bool state)
+{
+    debug_msg("interface %s vif %s address %s state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+
+    if (state) {
+	_interfaces_ipv4.insert(source);
+    } else {
+	_interfaces_ipv4.erase(source);
+    }
+
+    local_ip_changed(source.str());
+}
+
+void
+BGPMain::address_status_change6(const string& interface,
+			       const string& vif, const IPv6& source,
+			       bool state)
+{
+    debug_msg("interface %s vif %s address %s state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+
+    if (state) {
+	_interfaces_ipv6.insert(source);
+    } else {
+	_interfaces_ipv6.erase(source);
+    }
+
+    local_ip_changed(source.str());
+}
 
 #ifdef	DEBUG_MAXIMUM_DELAY
 #ifndef DEBUG_LOGGING
@@ -1052,6 +1088,20 @@ BGPMain::bounce_peer(const Iptuple& iptuple)
 	peer->event_stop(true /* restart */);
 
     return true;
+}
+
+void
+BGPMain::local_ip_changed(string local_address)
+{
+    list<BGPPeer *>& peers = _peerlist->get_list();
+    list<BGPPeer *>::iterator i;
+    for (i = peers.begin(); i != peers.end(); i++) {
+	const Iptuple& iptuple = (*i)->peerdata()->iptuple();
+	debug_msg("Trying: %s ", iptuple.str().c_str());
+
+	if (iptuple.get_local_addr() == local_address)
+	    bounce_peer(iptuple);
+    }
 }
 
 bool
