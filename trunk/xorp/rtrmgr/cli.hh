@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.43 2005/12/14 00:52:41 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.44 2005/12/14 02:40:18 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -61,7 +61,6 @@ public:
 
     bool done() const;
     bool is_config_mode() const;
-    void commit_done_by_user(int uid);
     void clear_command_set();
     int configure_func(const string& ,
 		       const string& ,
@@ -73,6 +72,7 @@ public:
     void new_config_user(uid_t user_id);
     void leave_config_done(const XrlError& e);
     void notify_user(const string& alert, bool urgent);
+    void config_changed_by_other_user();
     int op_help_func(const string& ,
 		   const string& ,
 		   uint32_t ,

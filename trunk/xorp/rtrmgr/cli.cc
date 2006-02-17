@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.120 2006/01/28 00:49:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.121 2006/01/31 02:10:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -583,21 +583,6 @@ RouterCLI::get_help_c(const string& s) const
 }
 
 void
-RouterCLI::commit_done_by_user(int uid)
-{
-    if (_mode != CLI_MODE_OPERATIONAL)
-	return;
-
-    //
-    // Someone just did a commit, so we may need to regenerate options
-    //
-    string message = c_format("\nUser %d changed the configuration.\n", uid);
-    cli_client().cli_print(message);
-    clear_command_set();
-    add_op_mode_commands(NULL);
-}
-
-void
 RouterCLI::operational_mode()
 {
     if (_mode == CLI_MODE_OPERATIONAL)
@@ -1066,6 +1051,34 @@ RouterCLI::config_mode_prompt()
 	prompt = "[edit " + pathstr() + "]";
     }
     set_prompt(prompt, _configuration_mode_prompt);
+}
+
+void
+RouterCLI::config_changed_by_other_user()
+{
+    if (! is_config_mode()) {
+	// XXX: we care about the changes only if we are in config mode
+	return;	
+    }
+
+    //
+    // Someone just did a commit, so we may need to reset the session's
+    // editing path and mode.
+    // Also, regenerate the command tree to include the configuration changes.
+    //
+    SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
+    if (current_config_node == NULL) {
+	// XXX: the current config node has disappeared hence reset the path
+	reset_path();
+	if (_mode != CLI_MODE_CONFIGURE) {
+	    // If we are in, say text-entry mode, reset back to configure mode
+	    configure_mode();
+	    return;
+	}
+    }
+
+    // Regenerate the command tree
+    apply_path_change();
 }
 
 void

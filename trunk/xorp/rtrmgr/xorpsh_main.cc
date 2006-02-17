@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.59 2005/12/21 09:43:00 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.60 2006/02/02 19:40:35 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -711,6 +711,7 @@ XorpShell::config_changed(uid_t user_id, const string& deltas,
 	alert += sct.show_tree(false);
     }
     _router_cli->notify_user(alert, true);
+    _router_cli->config_changed_by_other_user();
 }
 
 void 
