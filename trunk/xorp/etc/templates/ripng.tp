@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.28 2006/01/21 03:55:53 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.29 2006/01/27 21:35:35 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -207,10 +207,12 @@ protocols {
  */
 
 	import {
+		%help: short "Import policy";
                 %delete: xrl "policy/policy/0.1/import?protocol:txt=$(ripng.targetname)&policies:txt=";
                 %set: xrl "policy/policy/0.1/import?protocol:txt=$(ripng.targetname)&policies:txt=$(@)";
         }
         export {
+		%help: short "Export policy";
                 %delete: xrl "policy/policy/0.1/export?protocol:txt=$(ripng.targetname)&policies:txt=";
                 %set: xrl "policy/policy/0.1/export?protocol:txt=$(ripng.targetname)&policies:txt=$(@)";
         }

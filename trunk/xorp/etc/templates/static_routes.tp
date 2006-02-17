@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.30 2006/01/19 02:28:00 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.31 2006/01/27 21:35:35 pavlin Exp $ */
 
 protocols {
     static {
@@ -334,6 +334,7 @@ protocols {
 	}
 
         import {
+		%help: short "Import policy";
                 %delete: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=";
                 %set: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=$(@)";
         }

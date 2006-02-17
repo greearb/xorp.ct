@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.79 2006/02/01 21:54:39 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.80 2006/02/12 22:33:01 bms Exp $ */
 
 protocols {
     bgp {
@@ -427,10 +427,12 @@ protocols {
 	}
         
 	import {
+	    %help: short "Import policy";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=";
             %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
         }
         export {
+	    %help: short "Export policy";
             %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=";
             %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=$(bgp.targetname)&policies:txt=$(@)";
         }

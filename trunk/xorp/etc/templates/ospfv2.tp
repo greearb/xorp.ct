@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.35 2006/01/27 23:21:39 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.36 2006/02/15 19:06:13 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -422,10 +422,12 @@ transmitted packets";
 	}
 
 	import {
+	    %help: short "Import policy";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=";
             %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=$(@)";
         }
         export {
+	    %help: short "Export policy";
             %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=";
             %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=$(@)";
         }
