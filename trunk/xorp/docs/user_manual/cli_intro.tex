@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.9 2005/11/11 06:24:02 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.10 2005/11/14 03:44:58 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -532,6 +532,70 @@ configuration in the specified file.
 discarding the currently running configuration.
 \end{itemize}
 
+The $<$\textit{filename}$>$ argument may be a path to a disk file,
+or an Uniform Resource Identifier (URI) with a scheme of \emph{file},
+\emph{ftp}, \emph{http}, or \emph{tftp}.
+The \rtrmgr does not know how
+to deal with these schemes on its own; external commands are invoked
+to perform the actual save or load operation. If an URI is used to save
+or load the router configuration, then the appropriate variables must be
+set in the \emph{rtrmgr} block to point to these commands.
+Commands are invoked with the following arguments:
+\begin{itemize}
+\item Any options specified in the \emph{args} variable for the command,
+(\eg \emph{save-tftp-command-args}).
+\item The full path name of a temporary file where the running XORP
+configuration has been saved.
+\item The URI specified to the \emph{save} command in the \xorpsh.
+\end{itemize}
+Note that currently no commands or scripts to perform these operations
+are shipped with XORP.
+
+For example:
+\vspace{0.1in}
+
+\noindent\framebox[\textwidth][l]{
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+\>rtrmgr \{\\
+\>\>load-tftp-command: "/usr/local/sbin/xorp-tftp-get.sh"\\
+\>\>load-tftp-command-args: "-o"\\
+\>\>save-tftp-command: "/usr/local/sbin/xorp-tftp-put.sh"\\
+\>\>save-tftp-command-args: "-i"\\
+\>\}\\
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+
+Then, if the user uses \xorpsh command
+\textbf{load \textit{tftp://hostname/path/to/config.boot}}
+to load the configuration, internally the \rtrmgr will use the following
+command:
+
+\textbf{/usr/local/sbin/xorp-tftp-get.sh -o $<$\textit{tmp-filename}$>$
+\textit{tftp://hostname/path/to/config.boot}}
+
+This command will download the configuration file to a temporary file (chosen
+internally by the \rtrmgr) on the local filesystem and then the \rtrmgr will
+load the configuration from that temporary file before deleting it.
+
+Similarly, if the user uses \xorpsh command
+\textbf{save \textit{tftp://hostname/path/to/config.boot}}
+to save the configuration, internally the \rtrmgr will use the following
+command:
+
+\textbf{/usr/local/sbin/xorp-tftp-put.sh -i $<$\textit{tmp-filename}$>$
+\textit{tftp://hostname/path/to/config.boot}}
+
+First, the \rtrmgr will save the configuration to a temporary file (chosen
+internally by the \rtrmgr) on the local filesystem. Then the
+\textbf{/usr/local/sbin/xorp-tftp-put.sh} command will be used to upload that
+file. Finally, the \rtrmgr will delete the temporary file.
+
+\newpage
 \subsection{Setting Configuration Values}
 
 \begin{itemize}
