@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.84 2006/02/09 22:55:46 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.85 2006/02/15 19:06:13 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -839,52 +839,6 @@ class Ospf {
     OspfTypes::RouterID _router_id;	// Router ID.
 
     Trace _trace;		// Trace variables.
-};
-
-/**
- * A class that should be inherited by all major subsytems that can be
- * used to cleanly shutdown OSPF.
- *
- * XXX 
- * At the moment this class is just a placeholder but in the future
- * the constructor can be implemented to add all classes to a static
- * list of objects that can be systematically shutdown.   
- */
-class Subsystem {
- public:
-    virtual ~Subsystem()
-    {}
-
-    /**
-     * To be implemented by the subsystem.
-     * Called to start the subsystem.
-     */
-    virtual void start() = 0;
-
-    /**
-     * To be implemented by the subsystem.
-     * Called to shutdown the subsystem.
-     */
-    virtual void shutdown() = 0;
-
-    /**
-     * To be implemented by the subsystem.
-     * @return true if the subsystem is running.
-     */
-    virtual bool running() = 0;
-
-    /**
-     * To be implemented by the subsystem.
-     * @return the name of the subsystem.
-     */
-    virtual string str() = 0;
-
-    /**
-     * To be called by the subsystem when the shutdown is complete.
-     */
-    void shutdown_complete() {
-	XLOG_INFO("Shutdown complete %s", str().c_str());
-    }
 };
 
 // The original design did not leave MaxAge LSAs in the database. When

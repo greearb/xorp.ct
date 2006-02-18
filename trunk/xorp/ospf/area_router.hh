@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.96 2006/02/08 00:34:41 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.97 2006/02/09 19:59:32 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -25,7 +25,7 @@ class DataBaseHandle;
  * 
  */
 template <typename A>
-class AreaRouter : Subsystem {
+class AreaRouter : public ServiceBase {
  public:
     AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 	       OspfTypes::AreaType area_type);
@@ -34,13 +34,13 @@ class AreaRouter : Subsystem {
      * Required by the class Subsystem.
      * Called on startup.
      */
-    void start();
+    bool startup();
 
     /**
      * Required by the class Subsystem.
      * Called on shutdown.
      */
-    void shutdown();
+    bool shutdown();
 
     /**
      * Required by the class Subsystem.
