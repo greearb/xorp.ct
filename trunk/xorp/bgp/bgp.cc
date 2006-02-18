@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.69 2006/02/17 19:26:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.70 2006/02/17 23:34:53 zec Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -703,6 +703,18 @@ BGPMain::address_status_change6(const string& interface,
     }
 
     local_ip_changed(source.str());
+}
+
+bool
+BGPMain::interface_address4(IPv4 address) const
+{
+    return _interfaces_ipv4.end() != _interfaces_ipv4.find(address);
+}
+
+bool
+BGPMain::interface_address6(IPv6 address) const
+{
+    return _interfaces_ipv6.end() != _interfaces_ipv6.find(address);
 }
 
 #ifdef	DEBUG_MAXIMUM_DELAY

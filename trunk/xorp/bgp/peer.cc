@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.126 2005/12/20 08:30:53 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.127 2005/12/20 13:00:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1069,7 +1069,9 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	break;
     }
     case STATEESTABLISHED: {
-	NotificationPacket *notification = check_update_packet(&p);
+	bool good_nexthop;
+	NotificationPacket *notification =
+	    check_update_packet(&p, good_nexthop);
 	if ( notification != 0 ) {	// bad message
 	    // Send Notification Message
 	    send_notification(*notification);
@@ -1077,6 +1079,8 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	    set_state(STATESTOPPED);
 	    break;
 	}
+	if (!good_nexthop)
+	    return;
 	// ok the packet is correct.
 	restart_hold_timer();
 	// process the packet...
@@ -1330,7 +1334,7 @@ check_multiprotocol_nlri(const UpdatePacket *p, PathAttribute *pa, bool neg)
 }
 
 NotificationPacket *
-BGPPeer::check_update_packet(const UpdatePacket *p)
+BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 {
     // return codes
     // 1 - Malformed Attribute List
@@ -1368,6 +1372,8 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
     **
     ** For the time being we are going with 1) (a) and 2 (a).
     */
+
+    good_nexthop = true;
 
 //     BGPPeerData::Direction dir = BGPPeerData::NEGOTIATED;
     BGPPeerData::Direction dir = BGPPeerData::SENT;
@@ -1548,12 +1554,58 @@ BGPPeer::check_update_packet(const UpdatePacket *p)
 		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
 	}
 
-	// XXX need also to check that the nexthop address is not
-	// one of our addresses, and with single hop EBGP that the
-	// nexthop address shares a subnet with us or is the
-	// address of our peer
-	// if so, we'd discard the route, but not send a notification
+	// If an update message is received that contains a nexthop
+	// that belongs to this router then discard the update, don't
+	// send a notification.
 
+	if (next_hop_attr != NULL) {
+	    if (_mainprocess->interface_address4(next_hop_attr->nexthop())) {
+		XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			   cstring(*p));
+		good_nexthop = false;
+		return 0;
+	    }
+	}
+
+	if (p->mpreach<IPv4>(SAFI_MULTICAST)) {
+	    if (_mainprocess->
+		interface_address4(p->mpreach<IPv4>(SAFI_MULTICAST)->
+				   nexthop())) {
+		XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			   cstring(*p));
+		good_nexthop = false;
+		return 0;
+	    }
+	}
+
+	if (p->mpreach<IPv6>(SAFI_UNICAST)) {
+	    if (_mainprocess->
+		interface_address6(p->mpreach<IPv6>(SAFI_UNICAST)->
+				   nexthop())) {
+		XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			   cstring(*p));
+		good_nexthop = false;
+		return 0;
+	    }
+	}
+
+	if (p->mpreach<IPv6>(SAFI_MULTICAST)) {
+	    if (_mainprocess->
+		interface_address6(p->mpreach<IPv6>(SAFI_MULTICAST)->
+				   nexthop())) {
+		XLOG_ERROR("Nexthop in update belongs to this router:\n %s",
+			   cstring(*p));
+		good_nexthop = false;
+		return 0;
+	    }
+	}
+
+	// XXX
+	// In our implementation BGP is multihop by default. If we
+	// ever switch to single hop (default in other
+	// implementations) then we need to make sure that the
+	// provided nexthop falls into a common subnet.
+	
 #if	0
 	if (ibgp() && !local_pref)
 	    XLOG_WARNING("%s Update packet from ibgp with no LOCAL_PREF",

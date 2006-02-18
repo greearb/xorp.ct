@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.37 2005/12/16 22:06:40 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.38 2006/02/17 23:34:53 zec Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -301,7 +301,8 @@ private:
     void hook_stopped();
 
     void check_open_packet(const OpenPacket *p) throw (CorruptMessage);
-    NotificationPacket* check_update_packet(const UpdatePacket *p);
+    NotificationPacket* check_update_packet(const UpdatePacket *p,
+					    bool& good_nexthop);
 
     /**
      * Called the first time that we go to the established state.
