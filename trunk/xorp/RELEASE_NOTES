@@ -1,13 +1,16 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.93 2006/02/09 09:27:27 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.94 2006/02/12 22:33:01 bms Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.2 (2005/??/??)
+Release 1.2 (2006/??/??)
 =========================
+  [Note: this is XORP-1.2-RC release candidate and not all documentation
+   is up to date.]
+
   ALL:
     - 
 
