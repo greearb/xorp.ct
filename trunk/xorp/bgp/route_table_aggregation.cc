@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.15 2006/01/24 11:29:37 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.16 2006/02/17 23:34:53 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -518,7 +518,7 @@ AggregationTable<A>::dump_next_route(DumpIterator<A>& dump_iter) {
 
     // Propagate the request upstream if not for us.
     if (peer->get_unique_id() != AGGR_HANDLER_UNIQUE_ID)
-	return _parent->dump_next_route(dump_iter);
+	return this->_parent->dump_next_route(dump_iter);
 
     typename RefTrie<A, const AggregateRoute<A> >::iterator route_iterator;
     debug_msg("dump iter: %s\n", dump_iter.str().c_str());
@@ -718,9 +718,9 @@ AggregationTable<A>::peering_went_down(const PeerHandler *peer,
 				       BGPRouteTable<A> *caller)
 {
     debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
-    XLOG_ASSERT(_parent == caller);
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->peering_went_down(peer, genid, this);
+    XLOG_ASSERT(this->_parent == caller);
+    XLOG_ASSERT(this->_next_table != NULL);
+    this->_next_table->peering_went_down(peer, genid, this);
 }
 
 
@@ -731,9 +731,9 @@ AggregationTable<A>::peering_down_complete(const PeerHandler *peer,
 					   BGPRouteTable<A> *caller)
 {
     debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
-    XLOG_ASSERT(_parent == caller);
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->peering_down_complete(peer, genid, this);
+    XLOG_ASSERT(this->_parent == caller);
+    XLOG_ASSERT(this->_next_table != NULL);
+    this->_next_table->peering_down_complete(peer, genid, this);
 }
 
 
@@ -744,9 +744,9 @@ AggregationTable<A>::peering_came_up(const PeerHandler *peer,
 				     BGPRouteTable<A> *caller)
 {
     debug_msg("%s %d %s\n", peer->peername().c_str(), genid, caller->str().c_str());
-    XLOG_ASSERT(_parent == caller);
-    XLOG_ASSERT(_next_table != NULL);
-    _next_table->peering_came_up(peer, genid, this);
+    XLOG_ASSERT(this->_parent == caller);
+    XLOG_ASSERT(this->_next_table != NULL);
+    this->_next_table->peering_came_up(peer, genid, this);
 }
 
 
