@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.198 2006/02/10 03:14:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.199 2006/02/18 02:17:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -60,7 +60,7 @@ AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 #else
       _TransitCapability(false),
 #endif
-      _routing_recompute_delay(5),	// In seconds.
+      _routing_recompute_delay(1),	// In seconds.
       _translator_role(OspfTypes::CANDIDATE),
       _translator_state(OspfTypes::DISABLED),
       _type7_propagate(false)	// Default from RFC 3210 Appendix A
