@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.14 2006/01/12 10:24:33 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.15 2006/02/15 19:06:15 pavlin Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -23,7 +23,16 @@ interface ospfv2/0.1 {
      * @param type of area "border", "stub", "nssa"
      */
     create_area_router ? area:ipv4 \
-		       & type:txt \
+		       & type:txt
+
+    /**
+     * Change area type.
+     *
+     * @param area id of the area
+     * @param type of area "border", "stub", "nssa"
+     */
+    change_area_router_type ?  area:ipv4 \
+		       & type:txt
 
     /**
      * Destroy area.

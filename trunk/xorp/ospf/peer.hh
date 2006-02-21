@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.116 2006/01/31 21:38:55 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.117 2006/02/15 19:06:14 pavlin Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -143,6 +143,12 @@ class PeerOut {
      * for OSPFv3.
      */
     bool add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type);
+
+    /**
+     * Change the type of this area.
+     */
+    bool change_area_router_type(OspfTypes::AreaID area,
+				 OspfTypes::AreaType area_type);
 
     /**
      * This area is being removed.
@@ -761,6 +767,11 @@ class Peer {
     void stop();
 
     /**
+     * Change the type of this area.
+     */
+    void change_area_router_type(OspfTypes::AreaType area_type);
+
+    /**
      * Event: InterfaceUP
      */
     void event_interface_up();
@@ -873,6 +884,13 @@ class Peer {
      * @return the Area Type.
      */
     OspfTypes::AreaType get_area_type() const { return _area_type; }
+
+    /**
+     * @return the Area Type.
+     */
+    void set_area_type(OspfTypes::AreaType area_type) {
+	_area_type = area_type;
+    }
 
     /**
      * The router ID is about to change.
@@ -1050,7 +1068,7 @@ class Peer {
     Ospf<A>& _ospf;			// Reference to the controlling class.
     PeerOut<A>& _peerout;		// Reference to PeerOut class.
     const OspfTypes::AreaID _area_id;	// Area that is being represented.
-    const OspfTypes::AreaType _area_type;// NORMAL or STUB or NSSA.
+    OspfTypes::AreaType _area_type;	// NORMAL or STUB or NSSA.
     bool _enabled;			// True if the interface is enabled.
     bool _passive;			// True if the interface is in loopback
 

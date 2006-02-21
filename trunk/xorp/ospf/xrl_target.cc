@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.26 2006/01/12 10:24:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.27 2006/02/15 19:06:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -328,6 +328,23 @@ XrlOspfV2Target::ospfv2_0_1_create_area_router(const IPv4& a,
 	
     OspfTypes::AreaID area = ntohl(a.addr());
     if (!_ospf.get_peer_manager().create_area_router(area, t))
+	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
+					   pr_id(area));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_change_area_router_type(const IPv4& a,
+						    const string& type)
+{
+    bool status;
+    OspfTypes::AreaType t = from_string_to_area_type(type, status);
+    if (!status)
+	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+	
+    OspfTypes::AreaID area = ntohl(a.addr());
+    if (!_ospf.get_peer_manager().change_area_router_type(area, t))
 	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
 					   pr_id(area));
 

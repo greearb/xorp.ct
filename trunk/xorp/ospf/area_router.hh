@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.97 2006/02/09 19:59:32 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.98 2006/02/18 02:17:30 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -43,12 +43,6 @@ class AreaRouter : public ServiceBase {
     bool shutdown();
 
     /**
-     * Required by the class Subsystem.
-     * Should return true while the subsystem is running.
-     */
-    bool running();
-
-    /**
      * Add peer
      */
     void add_peer(PeerID peer);
@@ -67,6 +61,11 @@ class AreaRouter : public ServiceBase {
      * Peer went down
      */
     bool peer_down(PeerID peer);
+
+    /**
+     * Change the type of this area.
+     */
+    void change_area_router_type(OspfTypes::AreaType area_type);
 
     /**
      * Add a virtual link endpoint.

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.36 2006/02/15 19:06:13 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.37 2006/02/17 08:20:11 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -155,7 +155,7 @@ transmitted packets";
 		%allow: $(@) "stub" %help: "OSPF stubby area";
 		%allow: $(@) "nssa" %help: "OSPF not-so-stubby area";
 
-		%set:;
+	        %set: xrl "$(ospf4.targetname)/ospfv2/0.1/change_area_router_type?area:ipv4=$(area.@)&type:txt=$(@)";
 	    }
 
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.220 2006/02/03 03:50:16 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.221 2006/02/15 19:06:14 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -168,6 +168,24 @@ PeerOut<A>::add_area(OspfTypes::AreaID area, OspfTypes::AreaType area_type)
     set_mask(peer);
     if (_running)
 	peer->start();
+
+    return true;
+}
+
+template <typename A>
+bool
+PeerOut<A>::change_area_router_type(OspfTypes::AreaID area,
+				    OspfTypes::AreaType area_type)
+{
+    debug_msg("Area %s Type %s\n", pr_id(area).c_str(), 
+	      pp_area_type(area_type).c_str());
+
+    // All the peers are notified when an area type is changed
+    if (0 == _areas.count(area)) {
+	return false;
+    }
+
+    _areas[area]->change_area_router_type(area_type);
 
     return true;
 }
@@ -1333,6 +1351,21 @@ Peer<A>::stop()
 {
     _enabled = false;
     event_interface_down();
+}
+
+template <typename A>
+void
+Peer<A>::change_area_router_type(OspfTypes::AreaType area_type)
+{
+    bool enabled = _enabled;
+
+    if (enabled)
+	stop();
+
+    set_area_type(area_type);
+
+    if (enabled)
+	start();
 }
 
 template <typename A>

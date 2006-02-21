@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.199 2006/02/18 02:17:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.200 2006/02/19 22:05:24 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -130,13 +130,6 @@ AreaRouter<A>::shutdown()
 }
 
 template <typename A>
-bool
-AreaRouter<A>::running()
-{
-    return true;
-}
-
-template <typename A>
 void
 AreaRouter<A>::add_peer(PeerID peerid)
 {
@@ -199,6 +192,29 @@ AreaRouter<A>::peer_down(PeerID peerid)
     refresh_router_lsa();
 
     return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
+{
+    debug_msg("Type %s\n", pp_area_type(area_type).c_str());
+
+    _area_type = area_type;
+
+    // Remove this routers Router-LSA from the database.
+    size_t index;
+    if (!find_lsa(_router_lsa, index))
+	XLOG_FATAL("Couldn't find this router's Router-LSA in database %s\n",
+		   cstring(*_router_lsa));
+    delete_lsa(_router_lsa, index, false /* Don't invalidate */);
+    clear_database();
+
+    // Put the Router-LSA back.
+    add_lsa(_router_lsa);
+
+    // Put the Summary-LSAs and (AS-External-LSAs or Type7-LSAs) back
+    startup();
 }
 
 template <typename A>
@@ -2170,8 +2186,10 @@ AreaRouter<A>::clear_database()
     for (size_t index = 0 ; index < _last_entry; index++) {
 	if (!_db[index]->valid())
 	    continue;
-	if (_db[index]->external())
+	if (_db[index]->external()) {
+	    _db[index] = _invalid_lsa;
 	    continue;
+	}
 	_db[index]->invalidate();
     }
 }

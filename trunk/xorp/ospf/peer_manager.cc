@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.108 2006/02/15 19:06:14 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.109 2006/02/18 02:17:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -69,6 +69,31 @@ PeerManager<A>::~PeerManager()
 
 template <typename A>
 bool
+PeerManager<A>::check_area_type(OspfTypes::AreaID area,
+				OspfTypes::AreaType area_type)
+{
+    debug_msg("Area %s Type %s\n", pr_id(area).c_str(), 
+	      pp_area_type(area_type).c_str());
+
+    bool allowed = true;
+
+    if (OspfTypes::BACKBONE == area) {
+	switch(area_type) {
+	case OspfTypes::NORMAL:
+	    break;
+	case OspfTypes::STUB:
+	    /*FALLTHROUGH*/
+	case OspfTypes::NSSA:
+	    allowed = false;
+	    break;
+	}
+    }
+
+    return allowed;
+}
+
+template <typename A>
+bool
 PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 				   OspfTypes::AreaType area_type)
 {
@@ -81,6 +106,12 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
 	// If the area already exists just return true. This solves
 	// a problem with partially created areas.
 	return true;
+    }
+
+    if (!check_area_type(area, area_type)) {
+	XLOG_ERROR("Area %s cannot be %s", pr_id(area).c_str(), 
+		   pp_area_type(area_type).c_str());
+	return false;
     }
 
     track_area_count(area_type, true /* increment */);
@@ -118,6 +149,46 @@ PeerManager<A>::get_area_router(OspfTypes::AreaID area)
     }
 
     return _areas[area];
+}
+
+template <typename A>
+bool
+PeerManager<A>::change_area_router_type(OspfTypes::AreaID area,
+					OspfTypes::AreaType area_type)
+{
+    debug_msg("Area %s Type %s\n", pr_id(area).c_str(), 
+	      pp_area_type(area_type).c_str());
+
+    // Verify this area exists.
+    if (0 == _areas.count(area)) {
+	XLOG_ERROR("Area %s doesn't exist", pr_id(area).c_str());
+	return false;
+    }
+
+    if (_areas[area]->get_area_type() == area_type)
+	return true;
+
+    if (!check_area_type(area, area_type)) {
+	XLOG_ERROR("Area %s cannot be %s", pr_id(area).c_str(), 
+		   pp_area_type(area_type).c_str());
+	return false;
+    }
+
+    track_area_count(_areas[area]->get_area_type(), false /* decrement */);
+    track_area_count(area_type, true /* increment */);
+
+    _areas[area]->change_area_router_type(area_type);
+
+    // Notify all peers that the type of this area has changed. The
+    // area to peer mapping is not held so all peers must be notified.
+    // When the correct area is found set the new options for the
+    // hello packet.
+    typename map<PeerID, PeerOut<A> *>::iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++)
+	if ((*i).second->change_area_router_type(area, area_type))
+	    (*i).second->set_options(area, compute_options(area_type));
+
+    return true;
 }
 
 template <typename A>
