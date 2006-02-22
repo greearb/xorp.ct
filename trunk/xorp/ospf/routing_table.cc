@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.48 2006/02/09 22:55:46 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.49 2006/02/10 03:14:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -258,7 +258,7 @@ RoutingTable<A>::end()
 	    RouteEntry<A>& rt = tic.payload().get_entry();
 	    if (!add_route(rt.get_area(), tic.key(),
 			   rt.get_nexthop(), rt.get_cost(), rt)) {
-		XLOG_WARNING("Add of %s failed", cstring(tip.key()));
+		XLOG_WARNING("Add of %s failed", cstring(tic.key()));
 	    }
 	}
 	return;
