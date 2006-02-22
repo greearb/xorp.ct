@@ -1,18 +1,22 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.94 2006/02/12 22:33:01 bms Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.95 2006/02/18 01:32:00 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.2 (2006/??/??)
+Release 1.2-RC (2006/02/22)
 =========================
-  [Note: this is XORP-1.2-RC release candidate and not all documentation
-   is up to date.]
-
   ALL:
-    - 
+    [Note: this is XORP-1.2-RC release candidate and not all documentation
+    is up to date. Also, the list below with the changes since the XORP-1.1
+    release is incomplete.]
+
+    - Many improvements, bug fixes and cleanup.
+
+    - The third-party ospfd implementation is replaced with a new
+      OSPF implementation developed from scratch.
 
   CONFIGURATION:
     - Addition of new interface related configuration statement:
@@ -88,16 +92,16 @@ Release 1.2 (2006/??/??)
       all other flags.
 
   LIBXORP:
-    - 
+    - Various improvements in the RunCommand implementation.
 
   LIBXIPC:
-    - 
+    - No significant changes.
 
   LIBFEACLIENT:
-    - 
+    - No significant changes.
 
   XRL:
-    - 
+    - No significant changes.
 
   RTRMGR:
     - Generalization of the %mandatory keyword syntax so now it can
@@ -116,6 +120,8 @@ Release 1.2 (2006/??/??)
       a configuration file (the "-s <app>" command-line argument).
       The mechanism is broken and is superseded by the rtrmgr template
       support for running external programs.
+
+    - Various other improvements and bug fixes.
 
   XORPSH:
     - Addition of support to run xorpsh in non-interactive mode.
@@ -140,11 +146,14 @@ Release 1.2 (2006/??/??)
 
     - Addition of support for command-line completion for allowed values.
 
+    - Various other improvements and bug fixes.
+
   POLICY:
-    - 
+    - Several bug fixes.
 
   FEA/MFEA:
-    - 
+    - Addition of RawSocket{4,6} generic abstraction that is not
+      multicast-specific.
 
   RIB:
     - Addition of support for displaying the routing tables in brief,
@@ -179,6 +188,9 @@ Release 1.2 (2006/??/??)
 
     - Several bug fixes.
 
+  OSPF:
+    - Initial implementation of OSPF that replaces the third-party ospfd.
+
   BGP:
     - The network4/network6 directives have been deprecated.
       If you wish to inject static routes into BGP, you must now add
@@ -186,10 +198,10 @@ Release 1.2 (2006/??/??)
       the policy engine to redistribute them to BGP.
 
   STATIC_ROUTES:
-    - 
+    -  Several bug fixes.
 
   MLD/IGMP:
-    - 
+    - No significant changes.
 
   PIM-SM:
     - Updated to support the lastest PIM-SM specification
@@ -204,13 +216,13 @@ Release 1.2 (2006/??/??)
       a PIM configured interface is gracefully shutdown.
 
   FIB2MRIB:
-    - 
+    - No significant changes.
 
   CLI:
     - Various improvements and bug fixes.
 
   SNMP:
-    - 
+    - No significant changes.
 
 Release 1.1 (2005/04/13)
 =========================
