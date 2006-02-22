@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.21 2005/06/29 20:06:15 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_nhlookup.cc,v 1.22 2005/08/22 06:57:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -313,10 +313,10 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    break;
 	}
 
-	// we can now remove the old queue entry, because it's no longer
-	// needed
-	remove_from_queue(mqe->added_route()->nexthop(), net);
 	if (dont_send_delete) {
+	    // we can now remove the old queue entry, because it's no longer
+	    // needed
+	    remove_from_queue(mqe->added_route()->nexthop(), net);
 	    // there was an ADD in the queue - we just dequeued it, and
 	    // don't need to propagate the delete further
 	    return 0;
@@ -324,8 +324,12 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     bool success = this->_next_table->delete_route(*real_msg, this);
-    if (real_msg != &rtmsg)
+    if (real_msg != &rtmsg) {
 	delete real_msg;
+	// we can now remove the old queue entry, because it's no longer
+	// needed
+	remove_from_queue(mqe->added_route()->nexthop(), net);
+    }
     return success;
 }
 
