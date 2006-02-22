@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/snmp.tp,v 1.16 2006/01/27 21:35:35 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/snmp.tp,v 1.17 2006/02/22 02:07:32 pavlin Exp $ */
 
 protocols {
     snmp {
@@ -35,16 +35,16 @@ protocols {
 
 	    abs-path {
 		%help:	short "Configure the absolute path to load the MIB";
-		%set: ;
-		%get: ;
-		%delete: ;
+		%set:;
+		%get:;
+		%delete:;
 	    }
 
 	    mib-index {
 		%help:	short "Configure the MIB index";
-		%set: ;
-		%get: ;
-		%delete: ;
+		%set:;
+		%get:;
+		%delete:;
 	    }
 	}
     }

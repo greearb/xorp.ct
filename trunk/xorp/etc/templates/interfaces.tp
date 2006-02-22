@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.27 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.28 2006/02/22 02:26:10 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -99,9 +99,9 @@ interfaces {
 
 	description {
 	    %help:	short "Add a human-readable description of an interface";
-	    %set: ;
-	    %get: ;
-	    %delete: ;
+	    %set:;
+	    %get:;
+	    %delete:;
 	}
 
 	mac {
