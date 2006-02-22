@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.31 2006/01/27 21:35:35 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.32 2006/02/17 08:20:11 pavlin Exp $ */
 
 protocols {
     static {
@@ -57,15 +57,15 @@ protocols {
 	    next-hop-router:	ipv6 = ::;
 	    metric:		u32 = 1;
 	}
-	
-        import: txt;
+
+	import: txt;
     }
 }
 
 policy {
     policy-statement @: txt {
-        term @: txt {
-            from {
+	term @: txt {
+	    from {
 		metric: u32range;
 	    }
 	}
@@ -333,11 +333,11 @@ protocols {
 	    }
 	}
 
-        import {
-		%help: short "Import policy";
-                %delete: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=";
-                %set: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=$(@)";
-        }
+	import {
+	    %help: short "Import policy";
+	    %delete: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=";
+	    %set: xrl "policy/policy/0.1/import?protocol:txt=static&policies:txt=$(@)";
+	}
     }
 }
 

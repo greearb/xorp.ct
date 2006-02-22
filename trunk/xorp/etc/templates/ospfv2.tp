@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.37 2006/02/17 08:20:11 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.38 2006/02/21 02:44:48 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -13,7 +13,7 @@ protocols {
 		}
 	    }
 	}
-	
+
 	area @: ipv4 {
 	    area-type:		txt = "normal";
 
@@ -42,7 +42,7 @@ protocols {
 
 	    interface @: txt {
 		link-type:	txt = "broadcast";
-		
+
 		vif @: txt {
 
 		    address @: ipv4 {
@@ -82,13 +82,13 @@ protocols {
 
 policy {
     policy-statement @: txt {
-        term @: txt {
-            from {
+	term @: txt {
+	    from {
 		nexthop4: ipv4range;
 		metric: u32range;
 		ebit: bool;
 		tag: u32range;
-            }
+	    }
 	    to {
 		nexthop4: ipv4range;
 		metric: u32range;
@@ -101,7 +101,7 @@ policy {
 		ebit: bool;
 		tag: u32;
 	    }
-        }
+	}
     }
 }
 
@@ -129,7 +129,7 @@ protocols {
 	    %help: short "A unique 32-bit identifier within this AS";
 	    %help: long
 "A 32-bit number assigned to each router running
-the OSPF protocol. This number uniquely identifies 
+the OSPF protocol. This number uniquely identifies
 the router within an Autonomous System";
 
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_id?id:ipv4=$(@)";
@@ -143,7 +143,7 @@ transmitted packets";
 
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_ip_router_alert?ip_router_alert:bool=$(@)";
 	}
-	
+
 	area @: ipv4 {
 	    %help: short "The OSPF area to which the attached network belongs";
 
@@ -207,7 +207,7 @@ transmitted packets";
 
 		retransmit-interval {
 		    %help: short "The retransmit interval (RxmtInterval)";
-			
+
 		    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
 
 		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_retransmit_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
@@ -309,7 +309,7 @@ transmitted packets";
 
 			interface-cost {
 			    %help: short "Cost of this address";
-			
+
 			    %allow-range: $(@) "1" "65535" %help: "The cost of this address";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_interface_cost?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&cost:u32=$(@)";
@@ -317,7 +317,7 @@ transmitted packets";
 
 			retransmit-interval {
 			    %help: short "The retransmit interval (RxmtInterval)";
-			
+
 			    %allow-range: $(@) "1" "65535" %help: "The retransmit interval (in seconds)";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_retransmit_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
@@ -387,7 +387,7 @@ transmitted packets";
 
 			neighbour @: ipv4 {
 			    %help: short "Neighbours address";
-			    
+
 			    %mandatory: $(@.router-id);
 
 			    router-id {
@@ -424,13 +424,13 @@ transmitted packets";
 	import {
 	    %help: short "Import policy";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=$(@)";
-        }
-        export {
+	    %set: xrl "$(policy.targetname)/policy/0.1/import?protocol:txt=ospf4&policies:txt=$(@)";
+	}
+	export {
 	    %help: short "Export policy";
-            %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=";
-            %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=$(@)";
-        }
+	    %delete: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=";
+	    %set: xrl "$(policy.targetname)/policy/0.1/export?protocol:txt=ospf4&policies:txt=$(@)";
+	}
     }
 }
 
@@ -443,8 +443,8 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf4&variable:txt=tag&type:txt=u32&access:txt=rw&id:u32=14";
 
     policy-statement @: txt {
-        term @: txt {
-            from {
+	term @: txt {
+	    from {
 		nexthop4 {
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
@@ -465,7 +465,7 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
-            }
+	    }
 	    to {
 		nexthop4 {
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
@@ -506,6 +506,6 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 	    }
-        }
+	}
     }
 }

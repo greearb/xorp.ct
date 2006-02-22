@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.25 2006/01/18 21:58:00 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.26 2006/01/27 21:35:34 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -161,8 +161,8 @@ interfaces {
 		prefix-length {
 		    %help:	short "Assign the network prefix length";
 		    %allow-range: $(@) "1" "32" %help: "The network prefix length";
-		    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)"; 
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32"; 
+		    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix4?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)&prefix_len:u32=$(@)";
+		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix4?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv4=$(address.@)->prefix_len:u32";
 		}
 
 		broadcast {
@@ -218,7 +218,7 @@ interfaces {
 		    %help:	short "Assign the network prefix length";
 		    %allow-range: $(@) "1" "128" %help: "The network prefix length";
 		    %set:	xrl "$(interfaces.targetname)/ifmgr/0.1/set_prefix6?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)&prefix_len:u32=$(@)";
-		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32"; 
+		    %get:	xrl "$(interfaces.targetname)/ifmgr/0.1/get_configured_prefix6?ifname:txt=$(interface.@)&vif:txt=$(vif.@)&address:ipv6=$(address.@)->prefix_len:u32";
 		}
 
 		destination {

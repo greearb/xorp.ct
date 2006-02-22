@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.4 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rtrmgr.tp,v 1.5 2006/01/27 21:35:35 pavlin Exp $ */
 
 rtrmgr {
     targetname:			txt = "rtrmgr";
@@ -61,7 +61,7 @@ rtrmgr {
 	%help:	short "Set the name of the directory with the configuration files";
 	%create:	xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
 	%set:		xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(@)";
-	%delete:		xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(DEFAULT)";
+	%delete:	xrl "$(rtrmgr.targetname)/rtrmgr/0.1/set_config_directory?config_directory:txt=$(DEFAULT)";
     }
 
     load-file-command {
