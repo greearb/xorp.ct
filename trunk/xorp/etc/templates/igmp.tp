@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/igmp.tp,v 1.16 2005/11/18 00:22:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/igmp.tp,v 1.17 2006/01/27 21:35:34 pavlin Exp $ */
 
 protocols {
     igmp {
@@ -61,7 +61,6 @@ protocols {
 	    %help:	short "Enable the IGMP protocol";
 	    %create:;
 	    %set:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(@)";
-	    /* %delete:	xrl "$(igmp.targetname)/mld6igmp/0.1/enable_mld6igmp?enable:bool=$(DEFAULT)"; */
 	}
 
 	interface @ {

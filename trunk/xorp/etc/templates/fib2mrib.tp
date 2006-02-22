@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.8 2005/08/25 02:23:44 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fib2mrib.tp,v 1.9 2006/01/27 21:35:34 pavlin Exp $ */
 
 protocols {
     fib2mrib {
@@ -40,7 +40,6 @@ protocols {
 	    %help:	short "Enable the FIB2MRIB module";
 	    %create:;
 	    %set:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(@)";
-	    /* %delete:	xrl "$(fib2mrib.targetname)/fib2mrib/0.1/enable_fib2mrib?enable:bool=$(DEFAULT)"; */
 	}
     }
 }

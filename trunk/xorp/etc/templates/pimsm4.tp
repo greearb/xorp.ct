@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.28 2005/11/18 00:22:57 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.29 2006/01/27 21:35:34 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -104,7 +104,6 @@ protocols {
 	    %help:	short "Enable the IPv4 PIM-SM protocol";
 	    %create:;
 	    %set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(@)";
-	    /* %delete:	xrl "$(pimsm4.targetname)/pim/0.1/enable_pim?enable:bool=$(DEFAULT)"; */
 	}
 
 	interface @ {
@@ -222,7 +221,6 @@ protocols {
 		%help:	short "Enable the IPv4 Bootstrap mechanism";
 		%create: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
 		%set:	xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(@)";
-		/* %delete: xrl "$(pimsm4.targetname)/pim/0.1/enable_bsr?enable:bool=$(DEFAULT)"; */
 	    }
 
 	    cand-bsr {

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.32 2006/02/17 08:20:11 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.33 2006/02/22 02:07:32 pavlin Exp $ */
 
 protocols {
     static {
@@ -105,7 +105,6 @@ protocols {
 	    %help:	short "Enable the static routes";
 	    %create:;
 	    %set:	xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(@)";
-	    /* %delete:	xrl "$(static.targetname)/static_routes/0.1/enable_static_routes?enable:bool=$(DEFAULT)"; */
 	}
 
 	route4 @: ipv4net {
