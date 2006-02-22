@@ -313,10 +313,10 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	    break;
 	}
 
+	// we can now remove the old queue entry, because it's no longer
+	// needed
+	remove_from_queue(mqe->added_route()->nexthop(), net);
 	if (dont_send_delete) {
-	    // we can now remove the old queue entry, because it's no longer
-	    // needed
-	    remove_from_queue(mqe->added_route()->nexthop(), net);
 	    // there was an ADD in the queue - we just dequeued it, and
 	    // don't need to propagate the delete further
 	    return 0;
@@ -324,12 +324,8 @@ NhLookupTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     }
 
     bool success = this->_next_table->delete_route(*real_msg, this);
-    if (real_msg != &rtmsg) {
+    if (real_msg != &rtmsg)
 	delete real_msg;
-	// we can now remove the old queue entry, because it's no longer
-	// needed
-	remove_from_queue(mqe->added_route()->nexthop(), net);
-    }
     return success;
 }
 
