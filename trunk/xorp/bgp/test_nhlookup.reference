@@ -279,5 +279,22 @@ SubnetRoute:
 [comment] SEND PUSH AGAIN
 [PUSH]
 [separator]-------------------------------------
+[comment] TEST 5
+[comment] ADD, REPLACE WITH UNRESOLVABLE, DELETE
+[NH REGISTER]
+NextHop: 2.0.0.1
+Net: 1.0.1.0/24
+[ADD]
+SubnetRoute:
+  Net: 1.0.1.0/24
+  PAList: 
+	Next Hop Attribute 2.0.0.1
+	Origin Path Attribute - IGP
+	AS Path Attribute AsPath: [AS/3, AS/2, AS/1]
 [separator]-------------------------------------
-[comment] SHUTDOWN AND CLEAN UP
+[comment] REPLACE
+[NH REGISTER]
+NextHop: 2.0.0.2
+Net: 1.0.1.0/24
+[separator]-------------------------------------
+[comment] NOW DELETE THE ROUTE

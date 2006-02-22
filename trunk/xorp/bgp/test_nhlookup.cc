@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.29 2005/11/27 06:10:02 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_nhlookup.cc,v 1.30 2005/12/06 06:26:37 atanu Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -516,6 +516,50 @@ test_nhlookup(TestInfo& /*info*/)
     nhlookup_table->push(NULL);
 
     debug_table->write_separator();
+
+    //================================================================
+    //Test5: trivial add when resolves, replace with one that doesn't
+    //resolve, delete
+    //================================================================
+    //add a route
+    debug_table->write_comment("TEST 5");
+    debug_table->write_comment("ADD, REPLACE WITH UNRESOLVABLE, DELETE");
+
+    //pretend we have resolved the nexthop
+    nh_resolver.set_response(true);
+
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    nhlookup_table->add_route(*msg, NULL);
+    delete msg;
+
+    debug_table->write_separator();
+
+    //pretend it now doesn't resolve
+    nh_resolver.set_response(false);
+
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 0);
+    sr2 = new SubnetRoute<IPv4>(net1, palist2, NULL);
+    msg2 = new InternalMessage<IPv4>(sr2, &handler1, 0); 
+    debug_table->write_comment("REPLACE");
+    nhlookup_table->replace_route(*msg, *msg2, NULL);
+    delete msg;
+    delete msg2;
+    //delete sr1 now, as that would have now been deleted from the
+    //RibIn.  sr2 must remain, as the nexthop code assumes the route
+    //is still stored upstream.
+    sr1->unref();
+
+    debug_table->write_separator();
+
+    debug_table->write_comment("NOW DELETE THE ROUTE");
+    //delete the route
+    msg = new InternalMessage<IPv4>(sr2, &handler1, 0);
+    nhlookup_table->delete_route(*msg, NULL);
+
+    debug_table->write_separator();
+    sr2->unref();
+    delete msg;
 
     //================================================================
     //Check debug output against reference
