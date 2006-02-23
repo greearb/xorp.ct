@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.23 2005/10/17 22:20:51 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.24 2005/10/17 22:26:13 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -112,6 +112,11 @@ Code: 0f 18 02 90 2d 34 01 00 00 39 48 34 74 08 85 d2 89 d0 75 ea
 
   RIP:
     - No known issues.
+
+  OSPF:
+    - There are several known issues, but none of them is considered critical.
+      The list of known issues is available from
+      http://www.xorp.org/bugzilla/query.cgi
 
   BGP:
     - If the RIB bug above (failure to delete an existing route) is
