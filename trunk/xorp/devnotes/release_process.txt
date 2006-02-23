@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.37 2005/04/15 23:36:53 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.38 2006/02/18 01:20:09 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -83,7 +83,8 @@ the login shell is csh or tcsh):
  # Edit xorp/README
  # Edit xorp/RELEASE_NOTES
  # Edit xorp/VERSION
- # Edit all relevant configure.in (the second argument in AM_INIT_AUTOMAKE()):
+ # Edit all relevant configure.in (the second argument to AC_INIT() if
+ # exists, and the second argument to AM_INIT_AUTOMAKE()):
         xorp/configure.in
         xorp/mibs/configure.in
  cd xorp
@@ -135,6 +136,7 @@ the login shell is csh or tcsh):
 	      - If necessary, update www/html_src/snmp.html
 	      - Update the date and release version in
 		www/html_src/status.html
+	      - If necessary, update www/html_src/roadmap.html
 
 ========================================================================
 1150.	TASK: Regenerate the Web pages in www
