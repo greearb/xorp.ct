@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.38 2006/02/18 01:20:09 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.39 2006/02/23 03:17:54 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -424,6 +424,16 @@ the login shell is csh or tcsh):
 	      and/or xorp-users@xorp.org about the new release 
 	WHO:  XORP project leader
 	WHEN: Right after the release
+
+========================================================================
+2920.	TASK: Add a Bugzilla "Version" entry for the new version.
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: Login to the XORP Bugzilla site, and then click on
+	      - "Edit products" (at the bottom of the page)
+	      - "Edit product: XORP"
+	      - "Edit versions:" (at the bottom of the page)
+	      - "Edit version ...: Add a new version"
 
 ========================================================================
 2950.	TASK: Update the FreshMeat XORP entry:
