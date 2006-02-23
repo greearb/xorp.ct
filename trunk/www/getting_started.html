@@ -96,19 +96,17 @@ operating system installed.
 <P>
 XORP should be fairly portable.  At the present time, the main
 development platforms for XORP are FreeBSD and Linux.  XORP should run
-on all recent versions of FreeBSD (as of April 2005, we recommend
-FreeBSD 4.10) and on most versions of Linux with a 2.4.x kernel.
+on all recent versions of FreeBSD, on most versions of Linux with a 2.4.x or
+2.6.x kernel.
 
 <P>
-XORP also appears to work on NetBSD, OpenBSD and MacOS X (10.2 or later),
-but if you want to use it for multicast routing make sure that the kernel
-has the appropriate support (not available for MacOS X at this time).
+XORP also appears to work on NetBSD, OpenBSD, MacOS X (10.2 or later),
+and on Windows Server 2003, but if you want to use it for multicast
+routing make sure that the kernel has the appropriate support (not
+available for MacOS X and Windows at this time).
 If you try XORP on another platform, let us know
 how you fare.  See <a href="porting.html">porting</a> if you're
 interested in porting XORP to a new platform.
-
-<P>
-We aim to add Windows XP to our supported platforms during 2005.
 
 <a name="compiling"></a><h2>Compiling XORP from source</h2>
 
@@ -120,7 +118,7 @@ compiled with variants of gcc.  XORP is known to compile on gcc
 
 <P>
 We run a tinderbox that checks daily that XORP still compiles and
-passes its unit testswith 2.95.4, 3.3.4, and 3.4-prerelease.  The aim
+passes its unit tests with 2.95.4, 3.3.4, and 3.4-prerelease.  The aim
 is that you should always be able to check out a current source
 snapshot from CVS, compile it, and have it pass all the internal
 validation tests.  We don't always succeed, but failures identified by
@@ -156,6 +154,9 @@ will be left in the rtrmgr directory, and so on.  This default can be
 overridden (for example, if you're cross-compiling multiple platforms
 from the same source), but there's no need to if you're just starting
 out.
+<P>
+To compile XORP on Windows see file "BUILD_NOTES" in the top-level
+XORP source directory.
 
 <a name="validating"></a><h2>Validating a XORP Compilation</h2>
 <P>
@@ -926,7 +927,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 14/Feb/2006 at 12:03:33.</em>
+<br>Generated on 22/Feb/2006 at 17:16:34.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
