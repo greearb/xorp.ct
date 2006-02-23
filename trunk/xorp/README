@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.36 2006/02/18 01:34:38 pavlin Exp $
+# $XORP: xorp/README,v 1.37 2006/02/22 23:13:13 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -68,6 +68,14 @@ Supported platforms:
   * Linux RedHat-7.3 (kernel 2.4-20) with:
     - gcc/g++ version 2.96 (default)
     - libtool version 1.4
+
+  * Gentoo (kernel 2.6.8) with:
+    - gcc/g++ version "Gentoo 3.4.4-r1, ssp-3.4.4-1.0, pie-8.7.8"
+
+  * Windows Server 2003 (Service Pack 1) with:
+    - MinGW port of gcc 3.4.2
+    - [See the Windows entry in ${XORP}/BUILD_NOTES for additional
+      details]
 
 See ${XORP}/BUILD_NOTES for the list of additional platforms this
 release of XORP may compile or work on.
