@@ -83,27 +83,30 @@ OpenBSD and Linux is basically complete. The MFEA for Click doesn't
 exist.
 
 <P>
+<DT><B>POLICY</B>
+A policy module has been integrated with all routing protocols and
+the RIB, allowing route redistribution and route filtering. 
+
+<P>
 <DT><B>BGP</B>
 
 <DD>The core of BGP is basically complete, with respect to the
-functionality described in draft-ietf-idr-bgp4-26.txt.  There are
-probably still some bugs but the core is reasonably stable.
+functionality described in RFC 4271.  There are probably still some
+bugs but the core is reasonably stable.
 <P>
-Since the last release profiling and some trace functionality has been
-added to BGP.  You can't install any optional filters, or redistribute
-routes into BGP. We are testing policy code that should allow this
-functionality in the next release. IPv4 and IPv6 routing
-works. Multicast SAFI has been implemented and has been tested.
+
+In addition, there is also support for multiprotocol externsion
+(RFC 2858) multiprotocol extensions for IPv6 (RFC 2545), Communities
+(RFC 1997), Capabilities (RFC 3392), route reflection (RFC 2796),
+Confederations (RFC 3065) and route flap damping (RFC 2439).
 
 <P>
 <DT><B>OSPF</B>
 
-<DD>A reasonably complete port of John Moy's OSPFd (on FreeBSD) to the
-XORP environment exists, but it hasn't been well enough tested to know
-if it works or doesn't work.  OSPFd is IPv4 only.
-<P>
-We do not intend to do any futher work on this port as we will be
-producing our own OSPF implementation.
+<DD>A reasonably complete OSPF version 2 is available along with support
+for Not-So-Stubby areas. This is new code so there may still be some
+problems but it seems reasonably stable. OSPF version 2 only supports
+IPv4, OSPF version 3 that supports IPv6 is not yet complete.
 
 <P>
 <DT><B>RIP</B>
@@ -165,7 +168,7 @@ the release.
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 22/Feb/2006 at 17:38:01.</em>
+<br>Generated on 22/Feb/2006 at 18:36:00.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
