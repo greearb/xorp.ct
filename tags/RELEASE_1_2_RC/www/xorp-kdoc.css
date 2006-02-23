@@ -1,0 +1,49 @@
+@import url("xorp.css");
+
+body {
+     margin: 0 5em;
+}
+
+#kdoc-titlebox tr, #kdoc-titlebox td, #kdoc-titlebox table {
+   background: white;
+   color: black;
+}
+
+#kdoc-titlebox tr, #kdoc-titlebox td, #kdoc-titlebox th, #kdoc-titlebox table {
+   background: white;
+   color: black;
+}
+
+.listing-table table, .listing-table tr, .listing-table td {
+   border: 0;
+   margin: 0;
+}
+
+.listing-subtable table {
+   background: white;
+   margin: 0;
+   border: 0;
+}
+
+.listing-subtable th {
+   background: #0047b9;
+   color: white;
+   padding: 0 1em;
+}
+
+.listing-subtable tr {
+   padding: 0 1em;
+}
+
+.lodd {
+   background: white;
+   color:      black;
+   padding: 0 1em;
+}
+
+.leven {
+   background: #e0e0e0;
+   color:      black;
+   padding: 0 1em;
+}
+

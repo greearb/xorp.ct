@@ -1,0 +1,528 @@
+\def\filedate{12/09/92 12:56pm}
+%\iffalse
+%%% ====================================================================
+%%%  @LaTeX-file{
+%%%     filename        = "bnf.sty",
+%%%     date            = "9 Dec 1992",
+%%%     time            = "12:56 BST",
+%%%     author          = "Mike Piff",
+%%%     address         = "Dr M. J. Piff
+%%%                        University of Sheffield
+%%%                        Department of Pure Mathematics
+%%%                        Hicks Building
+%%%                        Hounsfield Road
+%%%                        SHEFFIELD S3 7RH
+%%%                        England",
+%%%     telephone       = "0742-305468",
+%%%     email           = "M.Piff@shef.ac.uk (Janet)",
+%%%     keywords        = "Backus,Naur,syntax,grammar",
+%%%     supported       = "yes",
+%%%     checksum        = "10141 528 2414 20734",
+%%%     docstring       = "A style option to LaTeX for producing
+%%%                        Backus-Naur Form syntax notation.",
+%%%  }
+%%% ====================================================================
+%% This is BNF.STY
+%% Copyright (C) 1992 by Mike Piff.
+%% All rights reserved.
+%% Copying of this file is authorized only if
+%% you make absolutely no changes to your copy.
+%%
+%% Usage:
+%% \documentstyle[bnf]{article} %% in LaTeX
+%<+driver>\documentstyle[12pt,doc,bnf]{article}
+%<+driver>%    Select paper size.
+%<+driver>\def\firstletter#1#2\end{#1}
+%<+driver>\typein[\papersize]{Intended paper size?^^J%
+%<+driver>Choices: US letter size or A4; enter u or a, please:}%
+%<+driver>\edef\setpapersize{\lowercase{\edef\noexpand\papersize{%
+%<+driver>  \noexpand\firstletter\papersize u\noexpand\end}}}
+%<+driver>\setpapersize
+%<+driver>\if a\papersize\relax
+%<+driver>  \typeout{%
+%<+driver>OK, adjusting textwidth and textheight for A4 paper size}
+%<+driver>%    A4 paper size, 21cm x 30cm
+%<+driver>  \textwidth 6.375 true in \textheight 42\baselineskip
+%<+driver>\else
+%<+driver>  \typeout{%
+%<+driver>Adjusting textwidth and textheight for US letter paper size}
+%<+driver>%    US letter-size paper, 8.5 x 11 in:
+%<+driver>  \textwidth 6.5in \textheight 8.9in
+%<+driver>\fi
+%<+driver>\begin{document}
+%<+driver>   \DocInput{bnf.doc}
+%<+driver>\end{document}
+%<*style>
+%\fi
+%
+\typeout{Backus-Naur Form style option for LaTeX, (c) Mike Piff, \filedate}
+%\CheckSum{334}
+%\MakeShortVerb{\"}
+%\emergencystretch1in
+%\title{{\protect\bf Backus Naur Form in \protect\LaTeX}}
+%\author{Mike Piff}
+%\date{\filedate}
+%\maketitle
+%\thispagestyle{headings}
+%\begin{abstract}
+%  This article explains how to produce Backus-Naur Form
+%  in a \LaTeX\ document.
+%  The objective is to produce this notation as simply and efficiently
+%  as possible.
+%  Thus, short cuts looking like the teletype equivalents are set up
+%  for most of the symbolism.
+%  This has the advantage that the source looks generally comparable
+%  to the typeset equivalent.
+%\end{abstract}
+%
+%\section{Introduction}
+%\begin{bnf}
+%The macros described below grew out of a sub-task of the \LaTeX-3 project.
+%The objective was to program \LaTeX\ to produce Backus-Naur Form, or BNF
+%for short, which is a way of describing the syntax of formal languages.
+%In particular, the context-free syntax of modern programming languages
+%and of \TeX\ itself are described in this notation.
+%
+%The idea is that we set up an extended language consisting of all of
+%the symbols that are part of our real language, the {\bf terminal}
+%symbols, such as "a", "(", "@" or "{", and also some {\bf non-terminal}
+%symbols which represent syntactic structures, such as
+%$<statement>$, $<space token>$ or $<module>$.
+%A list of {\bf productions} is then given.
+%In the usual {\bf context-free} case, each one of these productions states
+%that a certain non-terminal can be replaced by a string of terminal
+%and non-terminal symbols. For instance, a production might express the fact
+%that a $<statement>$ could be a $<while statement>$. We write
+%$$<statement>-><while statement>$$
+%in BNF. Another production might say
+%$$<while statement>->"WHILE" <condition> "DO" <statement sequence> "END"$$
+%to indicate the form of a while-loop in the language.
+%
+%In general there will be several productions from any given non-terminal.
+%For instance, a $<statement>$ could also be a $<for statement>$.
+%Each non-terminal defines a {\bf language} of strings or {\bf words}
+%in the terminal alphabet. Starting from the non-terminal, randomly
+%substitute a replacement string for it. Then, in that replacement string,
+%choose any non-terminal and randomly substitute one of its replacement
+%expressions. Continue randomly replacing non-terminals until a string
+%with no non-terminals results. This string is in the language defined
+%by the non-terminal. For instance, the non-terminal $<statement>$ would
+%define a language consisting of all valid statements in the programming
+%language, and a non-terminal $<module>$ would generate all valid
+%modules.
+%
+%Because it is possible for a non-terminal to expand to nothing at all,
+%we introduce the symbol $\Empty$ to indicate a null replacement string.
+%
+%In more complicated examples, we have {\bf context sensitive} productions,
+%such as
+%$$"a"<B>"cd"<E>->"d"<D>$$
+%which say that the string $"a"<B>"cd"<E>$ may be replaced by the string
+%$"d"<D>$ anywhere that it appears. There might not be any direct replacement
+%for either $<B>$ or $<E>$.
+%
+%Backus-Naur Form allows us to condense several productions into one
+%compound production.
+%Thus, the productions
+%\begin{eqnarray*}
+%  <S>&->&"a"<B><D>"c"\\
+%  <S>&->&"a"<C><D>"c"
+%\end{eqnarray*}
+%are condensed into the single production
+%$$<S>->"a"(<B>|<C>)<D>"c".$$
+%It indicates certain {\em alternatives\/} in the replacement.
+%
+%Similarly, the two productions
+%\begin{eqnarray*}
+%  <S>&->&"a"<B><C>"c"<D>"c"\\
+%  <S>&->&"a"<D>"c"
+%\end{eqnarray*}
+%can be condensed into
+%$$<S>->"a"[<B><C>"c"]<D>"c".$$
+%This indicates that a substring $s$ in the replacement string
+%is {\em optional}. We have the alternative form
+%$$<S>->"a"(<B><C>"c"|\Empty)<D>"c".$$
+%
+%
+%A more complex case is that of an unlimited number of repetitions of a
+%substring. For instance, identifiers are often defined as consisting of
+%a letter followed by arbitrarily many letters and digits.
+%An example might then be
+%\begin{eqnarray*}
+%  <identifier>&->&<letter><sequence>\\
+%  <sequence>&->&\Empty\\
+%  <sequence>&->&<letter><sequence>\\
+%  <sequence>&->&<digit><sequence>
+%\end{eqnarray*}
+%where it is assumed that these are the only productions that use the
+%non-terminal $<sequence>$. The above productions are condensed into
+%$$<identifier>-><letter>{@ <letter>|<digit>}.$$
+%
+%Further notation is used to express the fact that the string $w_2$ is
+%obtained from the string $w_1$ by the use of just one substitution defined
+%by one production. We write $w_1=>w_2$. If $w_2$ is obtainable from $w_1$
+%by a sequence of substitutions we write $w_1=>^*w_2$.
+%\end{bnf}
+%
+%\section{The macros}
+%The macros in "bnf.sty" can be used in one of two ways.
+%The first is to use the long forms of the commands to generate the
+%BNF notation. These only work in mathematics mode.
+%
+%The second is to
+%surround the block where BNF notation is required within a "bnf"
+%environment, or to use the command "\bnf" locally or globally.
+%In either case, the effect is to change the meaning of certain characters
+%in the input stream when they are met in mathematics mode. This makes
+%it possible to use the short forms of the commands.
+%
+%We first describe the long forms of the commands.
+%
+%The notation $\begin{NonTerminal}non terminal\end{NonTerminal}$
+%is produced by the environment "NonTerminal",
+%surrounding the name of the symbol. Spaces in the name are respected, and
+%the font used is governed by the definition of "\NonTerminalStyle".
+%
+%A terminal letter or string is produced by the command "\Terminal",
+%which equates to "\verb*" in \LaTeX; thus \verb*|\Terminal"xy z"|
+%produces $\Terminal"xy z"$, and \verb*|\Terminal`"`|
+%produces~$\Terminal`"`$.
+%By redefining the commands "\PreTerminal" and "\PostTerminal", the
+%terminal strings can be started and ended with given strings; for instance,
+%we might want all such terminal strings to begin and end with a
+%double quote symbol. We could achieve this by means of the following
+%definitions.
+%\begin{verbatim}
+%   \def\PreTerminal{\mbox{\tt"}} \let\PostTerminal\PreTerminal
+%\end{verbatim}
+%The empty string $\Empty$ is generated
+%by "\Empty".
+%
+%The production symbol $\Production$ is produced by "\Production", while
+%"\Yields" yields $\Yields$. The alternative symbol $\OR$ is "\OR",
+%and the optional brackets $\Optional w_1\endOptional$ are generated by
+%the environment "Optional". Environment "Star" will generate the
+%repetition braces $\Star w_2\endStar$. Ordinary round meta-brackets
+%$\Bracket w_3\endBracket$ are generated by the "Bracket" environment.
+%
+%Here is an example, taken from Modula-2.
+%\begin{verbatim}
+%$$    \begin{NonTerminal}Case Statement\end{NonTerminal}
+%      \Production\Terminal"CASE"
+%      \begin{NonTerminal}expression\end{NonTerminal}
+%      \Terminal"OF"
+%      \begin{NonTerminal}case\end{NonTerminal}
+%      \begin{Star}
+%         \Terminal"|"\begin{NonTerminal}case\end{NonTerminal}
+%      \end{Star}
+%      \begin{Optional}
+%         \Terminal"ELSE"
+%         \begin{NonTerminal}Statement Sequence\end{NonTerminal}
+%      \end{Optional}
+%      \Terminal"END" $$
+%\end{verbatim}
+%{\small
+%$$    \begin{NonTerminal}Case Statement\end{NonTerminal}
+%      \Production\Terminal"CASE"
+%      \begin{NonTerminal}expression\end{NonTerminal}
+%      \Terminal"OF"
+%      \begin{NonTerminal}case\end{NonTerminal}
+%      \begin{Star}
+%         \Terminal"|"\begin{NonTerminal}case\end{NonTerminal}
+%      \end{Star}
+%      \begin{Optional}
+%         \Terminal"ELSE"
+%         \begin{NonTerminal}Statement Sequence\end{NonTerminal}
+%      \end{Optional}
+%      \Terminal"END" $$
+%}%
+%
+%\begin{bnf}
+%The short forms are now described. We can get $<A>$ by typing "<A>",
+%and
+%\DeleteShortVerb\"
+%$"ab c"$
+%\MakeShortVerb\"
+%by typing \verb*|"ab c"| or \verb*|`ab c`|. The pairs "->" and "=>" give
+%$->$ and $=>$ respectively, and $[s_1](s_2|s_3)$ is obtained by
+%typing "[s_1](s_2|s_3)". Notice that these yield "\left" and "\right"
+%style brackets. The Star environment ${@w}$ can be produced by
+%"{@w}". There seemed to be no obvious way to obtain this one
+%directly from the braces. The "@" symbol produces a "Star" group
+%starting at the current point and ending at the end of the current group.
+%Thus, it must be used within grouping brackets "{" and~"}".
+%
+%There is another restriction on the use of "@". Because we might also want to
+%produce $@<$ and $@>$ in some BNF text, these can be obtained by using
+%the pairs "@<" and "@>". An alternative that is provided is to use
+%"\lt" and~"\gt". Otherwise "<" and ">" will attempt to open and close
+%a "NonTerminal" environment, probably unsuccessfully.
+%\end{bnf}
+%
+%Here are some examples of the short forms.
+%\begin{verbatim}
+%\begin{bnf}
+%   \begin{eqnarray*}
+%      <assignment>& -> & <non-macro assignment> | <macro assignment>\\
+%      <equals> & ->& <optional spaces> | <optional spaces>"="_{12}\\
+%      <def>&->&"\def"|"\gdef"|"\edef"|"\xdef"\\
+%      <normal integer>&->&<integer constant>\\
+%               &&|<integer constant><one optional space>\\
+%               &&|"'"_{12}<octal constant><one optional space>\\
+%               &&|`"`_{12}<hexadecimal constant><one optional space>\\
+%               &&|"`"_{12}<character token><one optional space>\\
+%      <S>&->& "a" <B>\\
+%      <S>&->&\Empty\\
+%      <B>&->& "b" <B>\\
+%      <B>&->&{@ a{@ b{@ c{@ d{@ e<B>}}}}}\\
+%      <B>&->& ["c"{@"ab"}"d"] | {@ {@"aba"}["d"]{@"baab"}}
+%   \end{eqnarray*}
+%\end{bnf}
+%\end{verbatim}
+%\begin{bnf}
+%   \begin{eqnarray*}
+%      <assignment>& -> & <non-macro assignment> | <macro assignment>\\
+%      <equals> & ->& <optional spaces> | <optional spaces>"="_{12}\\
+%      <def>&->&"\def"|"\gdef"|"\edef"|"\xdef"\\
+%      <normal integer>&->&<integer constant>\\
+%               &&|<integer constant><one optional space>\\
+%               &&|"'"_{12}<octal constant><one optional space>\\
+%               &&|`"`_{12}<hexadecimal constant><one optional space>\\
+%               &&|"`"_{12}<character token><one optional space>\\
+%      <S>&->& "a" <B>\\
+%      <S>&->&\Empty\\
+%      <B>&->& "b" <B>\\
+%      <B>&->&{@ a{@ b{@ c{@ d{@ e<B>}}}}}\\
+%      <B>&->& ["c"{@"ab"}"d"] | {@ {@"aba"}["d"]{@"baab"}}
+%   \end{eqnarray*}
+%\end{bnf}
+%
+%\StopEventually{}
+%\section{Implementation of the long forms}
+%The "NonTerminal" environment is easy to implement.
+%We set nonterminal letters in roman by default, that is, maths family~0,
+%and make sure that spaces are respected. The boolean is there to
+%make the checking of the short forms easier later. Certain characters
+%can be excluded from the text of a nonterminal, and an error message
+%issued if they are encountered.
+%    \begin{macrocode}
+\newif\ifnonterminal
+\def\NonTerminal{\left\langle\obeyspaces\ControlSpaces
+   \nonterminaltrue\NonTerminalStyle}
+\def\endNonTerminal{\right\rangle}
+\def\NonTerminalStyle{\fam0 }
+{\obeyspaces\gdef\ControlSpaces{\let =\ }}
+%    \end{macrocode}
+%
+%The "Star", "Optional" and "Bracket" environments are all similar.
+%A small amount of extra space has been introduced round each,
+%to improve their appearance.
+%    \begin{macrocode}
+\def\Star{\,\left\{}  \def\endStar{\right\}\,}
+\def\Optional{\,\left[} \def\endOptional{\right]\,}
+\def\Bracket{\,\left(} \def\endBracket{\right)\,}
+%    \end{macrocode}
+%
+%The single symbols have easy definitions.
+%    \begin{macrocode}
+\def\OR{\mathop{\left|\right.}\nolimits}
+\def\Production{\mathrel{\longrightarrow}}
+\def\Yields{\mathrel{\Longrightarrow}}
+\def\Empty{\varepsilon}
+%    \end{macrocode}
+%
+%By far the most difficult effect to produce is that of a terminal.
+%We could make "\Terminal" expand to "\verb*", but that prevents us
+%from including extra text before and after the terminal string.
+%Thus a definition similar to that of "\verb*" from NFSS is included.
+%    \begin{macrocode}
+\begingroup
+ \catcode`\`=\active
+ \gdef\TerminalFont{\tt \catcode96\active
+   \def`{\leavevmode\kern\z@\char96 }}
+\endgroup
+\begingroup
+  \catcode`\~=\active
+  \lccode`\~=`\^^M
+  \lowercase{\endgroup
+    \gdef\Terminal{\relax\PreTerminal
+      \ifmmode \hbox \else \leavevmode\null \fi
+      \bgroup
+      \TerminalFont
+      \catcode`~\active
+      \def~{\egroup\@latexerr{Terminal string ended by
+                              end of line.}\@ehc}%
+    \let\do\@makeother \dospecials
+    \@sTerminal}}
+\def\@sTerminal#1{%
+  \catcode`#1\active
+  \lccode`\~`#1%
+  \lowercase{\def~{\egroup\PostTerminal}}}%
+%    \end{macrocode}
+%The default leading and trailing text is defined to be empty.
+%    \begin{macrocode}
+\def\PreTerminal{} \def\PostTerminal{}
+%    \end{macrocode}
+%
+%\section{Implementation of the short forms}
+%
+%Our first task is to make $<$ and $>$ available as mathematical symbols.
+%    \begin{macrocode}
+\mathchardef\lt="313C \mathchardef\gt="313E
+%    \end{macrocode}
+%The next task is more subtle, and at first puzzled the author when he
+%tried to make a preliminary version of these macros work.
+%The problem is that we are making "-" into an active character.
+%If we do this we find that it tries to expand in text as well, and so
+%we make sure that it only expands in maths mode.
+%Our objective is to make "->" expand to $\Production$, but here is
+%where things go wrong. In plain \TeX, the control sequence
+%"\longrightarrow" is defined to expand to a "\relbar" and a "\rightarrow".
+%In turn, a relbar expands to yield a "-" again, and so we are in an
+%infinite loop.
+%
+%The solution seems to be to abandon the definition of "\relbar" in
+%plain \TeX\ and produce our own. The same applies to "=" and "\Relbar".
+%We also make a hyphen available for use within nonterminals.
+%    \begin{macrocode}
+\mathchardef\HYPHEN="2D  \mathchardef\MINUS="2200
+\mathchardef\Relbar="303D  \def\relbar{\mathrel{\smash{\MINUS}}}
+\mathchardef\EQUALS="303D
+%    \end{macrocode}
+%
+%We next define "\bnf" to set the mathcodes of the characters we wish to
+%use to the active value \verb|"8000|. Thus in text they will behave as
+%normal characters, but in mathematics they will expand as though they were
+%active characters.  We also allow "bnf" to be an environment.
+%    \begin{macrocode}
+\def\mathactive{"8000}
+\def\bnf{%
+   \mathcode`"=\mathactive
+   \mathcode`[=\mathactive \mathcode`\]=\mathactive
+   \mathcode`(=\mathactive \mathcode`\)=\mathactive
+   \mathcode`|=\mathactive \mathcode`-=\mathactive
+   \mathcode`<=\mathactive \mathcode`\>=\mathactive
+   \mathcode`@=\mathactive \mathcode`==\mathactive
+   \mathcode96 \mathactive
+}
+\def\endbnf{}
+%    \end{macrocode}
+%
+%Several characters are not allowed to appear in nonterminal names,
+%and so we define an error message to warn the user.
+%    \begin{macrocode}
+\def\NotInNonTerminal{\errmessage{Not allowed in a non-terminal}}
+%    \end{macrocode}
+%
+%Several of our mathactive characters have similar definitions;
+%we use this fact to allow some condensation of our file.
+%    \begin{macrocode}
+\def\NotNTdef#1#2{\gdef#1{\ifnonterminal\NotInNonTerminal\else#2\fi}}
+%    \end{macrocode}
+%
+%The expansion text of all our mathactive characters must be defined
+%inside a group in which they are all active.
+%    \begin{macrocode}
+\begingroup
+   \catcode`"\active
+   \catcode`[\active \catcode`\]\active
+   \catcode`(\active \catcode`\)\active
+   \catcode`|\active \catcode`-\active
+   \catcode`<\active \catcode`>\active
+   \catcode`@\active \catcode`=\active
+   \catcode96 \active
+%    \end{macrocode}
+%First we have the two short forms of "\Terminal".
+%    \begin{macrocode}
+   \gdef"{\Terminal"}%
+   \gdef`{\Terminal`}%
+%    \end{macrocode}
+%Next a block of definitions of characters which are illegal inside
+%nonterminals.
+%    \begin{macrocode}
+   \NotNTdef[\Optional        \NotNTdef]\endOptional
+   \NotNTdef(\Bracket         \NotNTdef)\endBracket
+   \NotNTdef|\OR              \NotNTdef<\NonTerminal
+%    \end{macrocode}
+%The end of a nonterminal has to be defined directly, of course.
+%    \begin{macrocode}
+   \gdef>{\endNonTerminal}%
+%    \end{macrocode}
+%A "-" character in a nonterminal is just a hyphen, but otherwise it
+%could possibly be a production arrow.
+%    \begin{macrocode}
+   \gdef-{%
+      \ifnonterminal
+         \def\Nnext{\HYPHEN}%
+      \else
+         \def\Nnext{\futurelet\Next\SeeIfProdn}%
+      \fi\Nnext}
+%    \end{macrocode}
+%The "=" character, on the other hand, should not appear in a nonterminal.
+%Otherwise, it could be a yields arrow.
+%    \begin{macrocode}
+   \gdef={%
+      \ifnonterminal
+         \def\Nnext{\NotInNonTerminal}%
+      \else
+         \def\Nnext{\futurelet\Next\SeeIfYields}%
+      \fi\Nnext}%
+%    \end{macrocode}
+%The "@" character should examine the next character to see whether it should
+%be given a special treatment.
+%    \begin{macrocode}
+   \gdef@{% either an escape char or a star group
+      \ifnonterminal
+         \def\Nnext{\NotInNonTerminal}%
+      \else
+         \def\Nnext{\futurelet\Next\SeeIfSpecial}%
+      \fi\Nnext}%
+\endgroup
+%    \end{macrocode}
+%
+%All that remains now is to see that the checks used above
+%are defined. First we have the check for a production.
+%    \begin{macrocode}
+\def\SeeIfProdn{%
+   \if\noexpand\Next\noexpand>%
+      \def\Nnext{\Production\@gobble}%
+   \else
+      \def\Nnext{\MINUS}%
+   \fi
+   \Nnext}
+%    \end{macrocode}
+%Second we have the check for a yields.
+%    \begin{macrocode}
+\def\SeeIfYields{%
+   \if\noexpand\Next\noexpand>%
+      \def\Nnext{\Yields\@gobble}%
+   \else
+      \def\Nnext{\EQUALS}%
+   \fi\Nnext}
+%    \end{macrocode}
+%Finally the "@" character must produce a "Star" environment unless it
+%is immediately followed by "<" or~">".
+%    \begin{macrocode}
+\def\SeeIfSpecial{%
+   \if\noexpand\Next\noexpand<%
+      \def\Nnext{\lt\@gobble}%
+   \else
+      \if\noexpand\Next\noexpand>%
+         \def\Nnext{\gt\@gobble}%
+      \else
+         \def\Nnext{\Star\bgroup\aftergroup\endStar\aftergroup\egroup}%
+      \fi
+   \fi\Nnext}
+%    \end{macrocode}
+%\Finale
+
+%\endinput
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Dr M J Piff                      %%  e-mail:
+%% Department of Pure Mathematics   %%
+%% University of Sheffield          %%  M.Piff@sheffield.ac.uk
+%% Hicks Building                   %%  M.Piff@pa.shef.ac.uk
+%% Hounsfield Road                  %%  %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% SHEFFIELD S3 7RH                 %%  Telephone: SHEFFIELD (0742) 768555
+%% England                          %%             Ext. 4431
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

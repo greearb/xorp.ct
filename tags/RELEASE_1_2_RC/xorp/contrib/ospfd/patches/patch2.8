@@ -1,0 +1,267 @@
+diff -X exclude_files -Nabur ospfd2.7/linux/ospfd_linux.C ospfd2.8/linux/ospfd_linux.C
+--- ospfd2.7/linux/ospfd_linux.C	Mon Oct 22 13:51:59 2001
++++ ospfd2.8/linux/ospfd_linux.C	Tue Oct 23 15:44:10 2001
+@@ -42,6 +42,12 @@
+ #include <errno.h>
+ #include <signal.h>
+ #include <syslog.h>
++// Hack to include mroute.h file
++#define _LINUX_SOCKIOS_H
++#define _LINUX_IN_H
++#include <linux/mroute.h>
++#include <netinet/ip.h>
++#include <linux/if_tunnel.h>
+ #include "../src/ospfinc.h"
+ #include "../src/monitor.h"
+ #include "../src/system.h"
+@@ -226,6 +232,7 @@
+     // Dispatch based on IP protocol
+     InPkt *pkt = (InPkt *) buffer;
+     switch (pkt->i_prot) {
++        MCache *ce;
+       case PROT_OSPF:
+         ospf->rxpkt(rcvint, pkt, plen);
+ 	break;
+@@ -233,7 +240,8 @@
+         ospf->rxigmp(rcvint, pkt, plen);
+ 	break;
+       case 0:
+-	ospf->mclookup(pkt->i_src, pkt->i_dest);
++	ce = ospf->mclookup(ntoh32(pkt->i_src), ntoh32(pkt->i_dest));
++	sys->add_mcache(ntoh32(pkt->i_src), ntoh32(pkt->i_dest), ce);
+ 	break;
+       default:
+ 	break;
+@@ -415,6 +423,9 @@
+     changing_routerid = false;
+     change_complete = false;
+     dumping_remnants = false;
++    // No current VIFs
++    for (int i = 0; i < MAXVIFS; i++)
++        vifs[i] = 0;
+     // Allow core files
+     rlim.rlim_max = RLIM_INFINITY;
+     (void) setrlimit(RLIMIT_CORE, &rlim);
+@@ -643,7 +654,6 @@
+ 	size = sizeof(InAddr) + sizeof(ifrp->ifr_name);
+ 	if (size < sizeof(ifreq))
+ 	    size = sizeof(ifreq);
+-	// Ignore loopback interfaces
+ 	// Get interface flags
+ 	short ifflags;
+ 	memcpy(ifr.ifr_name, ifrp->ifr_name, sizeof(ifr.ifr_name));
+@@ -651,8 +661,12 @@
+ 	    syslog(LOG_ERR, "SIOCGIFFLAGS Failed: %m");
+ 	    exit(1);
+ 	}
++	// Ignore loopback interfaces
+ 	if ((ifr.ifr_flags & IFF_LOOPBACK) != 0)
+ 	    continue;
++	// Ignore master tunnel interface
++	if (strncmp(ifrp->ifr_name, "tunl0", 5) == 0)
++	    continue;
+ 	ifflags = ifr.ifr_flags;
+ #if LINUX_VERSION_CODE >= LINUX22
+ 	int ifindex;
+@@ -676,11 +690,27 @@
+ 	    strcpy(phyp->phyname, ifrp->ifr_name);
+ 	    phyp->flags = 0;
+ 	    phyints.add(phyp);
++	    if (strncmp(phyp->phyname, "tunl", 4) == 0) {
++	        ip_tunnel_parm tp;
++		phyp->tunl = true;
++		ifr.ifr_ifru.ifru_data = (char *)&tp;
++		if (ioctl(udpfd, SIOCGETTUNNEL, &ifr) == -1) {
++	            syslog(LOG_ERR, "SIOCGETTUNNEL failed: %m");
++		    continue;
++		}
++		phyp->tsrc = ntoh32(tp.iph.saddr);
++		phyp->tdst = ntoh32(tp.iph.daddr);
++		
++	    }
+ 	}
+ 	if (!memchr(ifrp->ifr_name, ':', sizeof(ifrp->ifr_name)))
+ 	    set_flags(phyp, ifflags);
+-	// store address information; IP interfaces only
+-	if (ifrp->ifr_addr.sa_family != AF_INET)
++	// Get interface MTU
++	phyp->mtu = ((phyp->flags & IFF_BROADCAST) != 0) ? 1500 : 576;
++	if (ioctl(udpfd, SIOCGIFMTU, (char *)&ifr) >= 0)
++	    phyp->mtu = ifr.ifr_mtu;
++	// store address information; real IP interfaces only
++	if (phyp->tunl || ifrp->ifr_addr.sa_family != AF_INET)
+ 	    continue;
+ 	insock = (sockaddr_in *) &ifrp->ifr_addr;
+ 	addr = phyp->addr = ntoh32(insock->sin_addr.s_addr);
+@@ -693,10 +723,6 @@
+ 	phyp->mask = ntoh32(insock->sin_addr.s_addr);
+ 	add_direct(phyp, addr, phyp->mask);
+ 	add_direct(phyp, addr, 0xffffffffL);
+-	// Get interface MTU
+-	phyp->mtu = ((phyp->flags & IFF_BROADCAST) != 0) ? 1500 : 576;
+-	if (ioctl(udpfd, SIOCGIFMTU, (char *)&ifr) >= 0)
+-	    phyp->mtu = ifr.ifr_mtu;
+ 	// For point-to-point links, get other end's address
+ 	phyp->dstaddr = 0;
+ 	if ((phyp->flags & IFF_POINTOPOINT) != 0 &&
+diff -X exclude_files -Nabur ospfd2.7/linux/ospfd_linux.h ospfd2.8/linux/ospfd_linux.h
+--- ospfd2.7/linux/ospfd_linux.h	Mon Oct 22 13:51:59 2001
++++ ospfd2.8/linux/ospfd_linux.h	Tue Oct 23 15:44:10 2001
+@@ -38,6 +38,7 @@
+     bool changing_routerid;
+     bool change_complete;
+     bool dumping_remnants;
++    int vifs[MAXVIFS];
+   public:
+     LinuxOspfd();
+     ~LinuxOspfd();
+@@ -90,6 +91,10 @@
+     InMask mask;
+     InAddr dstaddr;	// Other end of p-p link
+     int mtu;
++    bool tunl;
++    int vifno;
++    InAddr tsrc;	// Tunnel endpoint addresses
++    InAddr tdst;
+ 
+     inline BSDPhyInt(int index);
+     friend class LinuxOspfd;
+@@ -103,6 +108,10 @@
+     addr = 0;
+     mask = 0;
+     dstaddr = 0;
++    tunl = false;
++    vifno = 0;
++    tsrc = 0;
++    tdst = 0;
+ }
+ 
+ inline int BSDPhyInt::phyint()
+diff -X exclude_files -Nabur ospfd2.7/linux/system.C ospfd2.8/linux/system.C
+--- ospfd2.7/linux/system.C	Mon Oct 22 13:52:00 2001
++++ ospfd2.8/linux/system.C	Tue Oct 23 15:44:10 2001
+@@ -300,18 +300,53 @@
+     vifctl vif;
+     BSDPhyInt *phyp;
+     int optname;
++    int vifno;
+ 
+     phyp = (BSDPhyInt *)phyints.find(phyint, 0);
+     if (igmpfd == -1)
+         return;
+-    if ((phyp->flags & IFF_MULTICAST) == 0)
++    // Kernel will enable multicast on tunnels
++    if ((phyp->flags & IFF_MULTICAST) == 0 && !phyp->tunl)
+ 	return;
+-    vif.vifc_vifi = phyint;
++    vifno = phyp->vifno;
++    // Not a state change?
++    if (enabled != (vifno == 0))
++        return;
++    // If enabling, allocate VIF. This is necessary since there
++    // aren't many possible, so you can't just use IfIndex.
++    // Reserve VIF of 0 to indicate "no interface"
++    if (enabled) {
++	for (int i = 1; ; i++) {
++	    if (i >= MAXVIFS) {
++	        syslog(LOG_ERR, "Can't allocate VIF, ifc %s", phyp->phyname);
++		return;
++	    }
++	    if (vifs[i] == 0) {
++	        phyp->vifno = vifno = i;
++		vifs[i] = phyint;
++		break;
++	    }
++	}
++    }
++    else {
++	// De-allocate VIF
++        vifs[vifno] = 0;
++        phyp->vifno = 0;
++    }
++
++    vif.vifc_vifi = vifno;
+     vif.vifc_flags = 0;
+     vif.vifc_threshold = 1;
+     vif.vifc_rate_limit = 0;
++    if (!phyp->tunl) {
+     vif.vifc_lcl_addr.s_addr = hton32(phyp->addr);
+     vif.vifc_rmt_addr.s_addr = 0;
++    }
++    else {
++        vif.vifc_lcl_addr.s_addr = hton32(phyp->tsrc);
++	vif.vifc_rmt_addr.s_addr = hton32(phyp->tdst);
++	vif.vifc_flags = VIFF_TUNNEL;
++    }
+     optname = (enabled ? MRT_ADD_VIF : MRT_DEL_VIF);
+     if (setsockopt(igmpfd, IPPROTO_IP, optname, &vif, sizeof(vif)) == -1)
+         syslog(LOG_ERR, "MRT_ADD/DEL_VIF failed: %m");
+@@ -614,17 +649,54 @@
+ /* Add a multicast routing table entry to the kernel.
+  */
+ 
+-void LinuxOspfd::add_mcache(InAddr, InAddr, MCache *)
++void LinuxOspfd::add_mcache(InAddr src, InAddr grp, MCache *e)
+ 
+ {
++    mfcctl mfe;
++    int i;
++
++    // Initially set to drop matching packets
++    mfe.mfcc_origin.s_addr = hton32(src);
++    mfe.mfcc_mcastgrp.s_addr = hton32(grp);
++    mfe.mfcc_parent = 0;
++    for (i = 0; i < MAXVIFS; i++)
++        mfe.mfcc_ttls[i] = 255;
++
++    // Now fill in with MOSPF information
++    if (e) {
++        BSDPhyInt *phyp;
++        if (e->n_upstream && (phyp=(BSDPhyInt *)phyints.find(*e->up_phys, 0)))
++	    mfe.mfcc_parent = phyp->vifno;
++	for (i = 0; i < e->n_downstream; i++) {
++	    if (e->down_str[i].nbr_addr != 0)
++  	        // NBMA multicast not supported by Linux
++	        continue;
++	    if (!(phyp = (BSDPhyInt *)phyints.find(e->down_str[i].phyint, 0)))
++	        continue;
++	    if (phyp->vifno == 0)
++	        continue;
++	    // Linux ignores TTL 0, so bump to 1 in that case
++	    if ((mfe.mfcc_ttls[phyp->vifno] = e->down_str[i].ttl) == 0)
++	        mfe.mfcc_ttls[phyp->vifno] = 1;
++	}
++    }
++
++    if (setsockopt(igmpfd, IPPROTO_IP, MRT_ADD_MFC, &mfe, sizeof(mfe)) == -1)
++        syslog(LOG_ERR, "MRT_ADD_MFC failed: %m");
+ }
+ 
+ /* Delete a multicast routing table entry from the kernel.
+  */
+ 
+-void LinuxOspfd::del_mcache(InAddr, InAddr)
++void LinuxOspfd::del_mcache(InAddr src, InAddr grp)
+ 
+ {
++    mfcctl mfe;
++
++    mfe.mfcc_origin.s_addr = hton32(src);
++    mfe.mfcc_mcastgrp.s_addr = hton32(grp);
++    if (setsockopt(igmpfd, IPPROTO_IP, MRT_DEL_MFC, &mfe, sizeof(mfe)) == -1)
++        syslog(LOG_ERR, "MRT_DEL_MFC failed: %m");
+ }
+ 
+ /* Return the printable name of a physical interface.
+diff -X exclude_files -Nabur ospfd2.7/src/ospf.h ospfd2.8/src/ospf.h
+--- ospfd2.7/src/ospf.h	Mon Oct 22 13:51:58 2001
++++ ospfd2.8/src/ospf.h	Tue Oct 23 15:44:08 2001
+@@ -329,7 +329,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 7,	// Minor version number
++	vminor = 8,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code

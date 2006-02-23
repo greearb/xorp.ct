@@ -1,0 +1,7 @@
+/* $XORP: xorp/xrl/targets/demo_fea_ifmgr_client.tgt,v 1.1.1.1 2002/12/11 23:56:18 hodson Exp $ */
+
+#include "common.xif"
+#include "fea_ifmgr_client.xif"
+
+target demo_fea_ifmgr_client implements		common/0.1,		\
+						fea_ifmgr_client/0.1

@@ -1,0 +1,96 @@
+diff -X exclude_files -Nabur ospfd2.2/src/ospf.C ospfd2.3/src/ospf.C
+--- ospfd2.2/src/ospf.C	Mon May 14 14:27:10 2001
++++ ospfd2.3/src/ospf.C	Mon May 21 10:19:27 2001
+@@ -445,8 +445,10 @@
+ 	hp->ip->updated = true;
+ 	ap->updated = true;
+     }
+-    // Reoriginate area's router-LSA
+-    ap->rl_orig();
++    // Reoriginate router-LSA for all areas
++    // Can't do just one, because host address may be advertised
++    // in a different area if configured area has no active interfaces
++    rl_orig();
+     calc_my_addr();
+ }
+ 
+@@ -457,7 +459,7 @@
+ 
+ {
+     ap->hosts.remove(this);
+-    ap->rl_orig();
++    ospf->rl_orig();
+     delete this;
+     ospf->calc_my_addr();
+ }
+diff -X exclude_files -Nabur ospfd2.2/src/ospf.h ospfd2.3/src/ospf.h
+--- ospfd2.2/src/ospf.h	Mon May 14 14:27:10 2001
++++ ospfd2.3/src/ospf.h	Mon May 21 10:19:27 2001
+@@ -194,6 +194,7 @@
+     void flush_donotage();
+     void shutdown_continue();
+     void rl_orig();
++    void delete_from_ifmap(SpfIfc *ip);
+     void upload_opq(LSA *);
+ 
+     // Database aging
+@@ -272,7 +273,7 @@
+     // Version numbers
+     enum {
+ 	vmajor = 2,	// Major version number
+-	vminor = 2,	// Minor version number
++	vminor = 3,	// Minor version number
+     };
+ 
+     // Entry points into the OSPF code
+diff -X exclude_files -Nabur ospfd2.2/src/rtrlsa.C ospfd2.3/src/rtrlsa.C
+--- ospfd2.2/src/rtrlsa.C	Mon May 14 14:27:10 2001
++++ ospfd2.3/src/rtrlsa.C	Mon May 21 10:19:27 2001
+@@ -382,14 +382,19 @@
+  * map along with it.
+  */
+ 
+-void SpfArea::delete_from_ifmap(SpfIfc *ip)
++void OSPF::delete_from_ifmap(SpfIfc *ip)
+ 
+ {
++    AreaIterator iter(this);
++    SpfArea *ap;
++
++    while ((ap = iter.get_next())) {
+     int i;
+-    for (i= 0; i < n_ifmap; i++)
+-        if (ifmap[i] == ip) {
+-	    ifmap[i] = 0;
+-	    ifmap_valid = false;
++	for (i= 0; i < ap->n_ifmap; i++)
++            if (ap->ifmap[i] == ip) {
++	        ap->ifmap[i] = 0;
++		ap->ifmap_valid = false;
++	    }
+ 	}
+ }
+ 
+diff -X exclude_files -Nabur ospfd2.2/src/spfarea.C ospfd2.3/src/spfarea.C
+--- ospfd2.2/src/spfarea.C	Mon May 14 14:27:10 2001
++++ ospfd2.3/src/spfarea.C	Mon May 21 10:19:27 2001
+@@ -225,7 +225,7 @@
+ 	}
+     }
+     // Delete from interface map
+-    delete_from_ifmap(ip);
++    ospf->delete_from_ifmap(ip);
+ }
+ 
+ /* An interface to the area has gone up or down. Adjust the
+diff -X exclude_files -Nabur ospfd2.2/src/spfarea.h ospfd2.3/src/spfarea.h
+--- ospfd2.2/src/spfarea.h	Mon May 14 14:27:10 2001
++++ ospfd2.3/src/spfarea.h	Mon May 21 10:19:27 2001
+@@ -106,7 +106,6 @@
+     void IfcChange(int increment);
+     void add_to_update(LShdr *hdr, bool demand);
+     void add_to_ifmap(SpfIfc *ip);
+-    void delete_from_ifmap(SpfIfc *ip);
+     InAddr id_to_addr(rtid_t id);
+     void adj_change(SpfNbr *, int n_ostate);
+ 

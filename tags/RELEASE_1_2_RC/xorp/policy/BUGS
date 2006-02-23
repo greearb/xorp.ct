@@ -1,0 +1,14 @@
+* How do we ad the varmap ?
+
+* What happens if Source match is up, but export is not!!!!!!
+
+* rip v6/v4 are different processes... rib will send route to any process...
+  dunno
+
+* Sets: escape comma escape quote in instructions etc.
+
+* bgp check if route going through pipeline before doing a policy push
+
+* push route races... e.g stuff going from X->Y will cause X and Y to push, so
+  same route may be "added" from X and repushed from Y inside of Y. May cause
+  problems.

@@ -1,0 +1,7 @@
+/* $XORP$ */
+
+#include "common.xif"
+#include "test_xrls.xif"
+
+target test_xrls implements	common/0.1,				\
+				test_xrls/0.1

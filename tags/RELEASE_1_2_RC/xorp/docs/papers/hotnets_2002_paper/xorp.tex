@@ -1,0 +1,416 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{XORP Overview}
+
+XORP divides into two subsystems. 
+The higher-level (so-called ``user-level'') subsystem
+consists of the routing protocols themselves, along with routing
+information bases
+and support processes. 
+The lower-level subsystem, which initially runs inside an OS kernel, manages the
+forwarding path---anything that needs to touch every packet---and provides
+APIs for the higher level to access.
+The goal is for almost all of
+the higher-level code to be agnostic as to the details of the
+forwarding path.
+
+For user-level XORP, we've developed a multi-process architecture with
+one process per routing protocol, plus extra processes for management,
+configuration, and coordination.  To enable extensibility we designed
+a novel inter-process communication mechanism for communication
+between these modules.  This mechanism is called XORP Resource
+Locators (XRLs), and is conceptually similar to URLs.  URL mechanisms
+such as redirection aid reliability and extensibility, and their
+human-readable nature makes them easy to understand and embed in
+scripting languages.
+
+The lower level uses the Click modular router~\cite{click}, a
+modular, extensible toolkit for packet processing on conventional PCs.
+Further work will help this architecture span a
+large range of hardware forwarding platforms, from commodity
+PC hardware, through mid-range PC-based platforms
+enhanced with intelligent network interfaces (such as Intel's
+IXP1200~\cite{ixp1200,scoutixp}), to high-end hardware-based forwarding engines.
+We may also support alternative forwarding paths, such as the
+FreeBSD forwarding path with AltQ queuing extensions~\cite{altq}
+or an alternative extensible forwarding path such as
+Scout~\cite{pathrouter}.
+Some forwarding path choices may influence the functionality available
+for end users to extend or change.  But for many aspects of research, such
+as routing protocol experiments that don't
+require access to the forwarding path, a conventional FreeBSD
+lower level would suffice.
+
+\begin{figure}[h]
+\centerline{\psfig{figure=processes3.ps,width=3.0in}}
+\caption{XORP High-level Processes}
+\label{fig:processes}
+\vspace{-0.1in}
+\end{figure}
+
+Figure~\ref{fig:processes} shows how a XORP router's user-level processes
+and Click forwarding path fit together.
+The shared user-level processes are the XORP architecture's most innovative
+feature. Four core processes are particularly worthy of comment: the
+\emph{router manager},
+the \emph{finder}, the \emph{routing information base}, and the 
+\emph{forwarding engine abstraction}.  
+
+The \emph{router manager}
+process manages the router as a whole.  It maintains
+configuration information; starts other processes, such as routing
+protocols, as required by the configuration; and restarts failed
+processes as necessary.
+
+The \emph{finder} process stores mappings between abstracted application
+requests, such as ``How many interfaces does this router have?'', and the
+particular IPC calls necessary to answer those requests.
+Think of it as an IPC redirector:
+when an application wishes to make an IPC
+call, it consults the finder to discover how to do it.  The
+application typically caches this information so future calls
+circumvent the finder.  Furthermore, the finder can instruct
+applications to update contact information.  Thus it is easy to change
+how application requests are handled at run-time.  We
+can trace XORP's communication pattern by asking the finder to map
+abstract requests to sequences of IPCs, some for tracing and some for
+doing the work.  XORP processes can communicate without
+bootstrapping using the finder, but since XRLs are relatively low cost we
+have not found this necessary to date.
+
+%% XXX This is duptext from Eddie and Orion editing at the same time.
+%% Either this or the next paragraph should go.
+
+%The \emph{forwarding engine abstraction} process, or FEA, abstracts the
+%details of how the router's forwarding path is implemented.
+%Routing protocols talk to the FEA to install routes and discover properties
+%of interfaces, for example. 
+%Interfaces to the FEA remain the same regardless of whether the forwarding
+%path is implemented in Click, in a conventional kernel, or even in external
+%hardware.
+%Again, XORP processes can bypass the FEA when required.
+
+The \emph{routing information base} process (RIB) receives routes from
+the routing processes, and arbitrates which routes should be
+propagated into the forwarding path, or redistributed to other routing
+processes.  The forwarding path is managed
+by the \emph{forwarding engine abstraction} process (FEA).  The FEA
+abstracts the details of how the forwarding path of the router is
+implemented and as a result, the routing processes are agnostic to
+whether the forwarding plane is Click based, a conventional UNIX
+kernel, or an alternative method.  The FEA manages the networking
+interfaces and forwarding table in the router, and provides information to routing processes
+about the interface properties and events occurring on interfaces, such as an
+interface being taken down.  As with the finder, XORP processes can bypass the
+FEA when required.
+
+
+\section{Solving Design Challenges}
+
+This section shows how we address the four design challenges of traditional
+router features, extensibility, robustness, and performance.
+Space constraints prevent inclusion of much detail, but we do
+describe our IPC mechanism, XORP Resource Locators (XRLs), at length.
+
+%Routing protocol processes speak with the router manager to get their configurations, with the finder to redirect XRL-based
+%IPCs, and with the FEA (via the finder) to query interface state and
+%to open routing connections.  The unicast and multicast routing
+%information bases are stored in still other processes.  Thus, the
+%routing tables themselves survive protocol crashes---only those routes
+%added by a protocol will be affected.  The RIB processes speak with
+%the FEA to install and uninstall particular routes.
+
+\subsection{Features}
+
+To be successful, a router platform needs to be have good support
+for the routing and management protocols that are in widespread use
+today.  The minimal list of routing and routing-support protocols is:
+\begin{itemize}\addtolength{\itemsep}{-0.5\baselineskip}
+\item{\bf BGP4+}
+%(Multi-protocol BGP) 
+%for 
+inter-domain routing.
+% of IPv4 and IPv6 unicast and multicast RIBs.
+\item{\bf OSPF}
+intra-domain routing.
+\item{\bf RIPv2/RIPng}
+intra-domain routing.
+\item{\bf Integrated IS-IS}
+intra-domain routing.
+\item{\bf PIM-SM/SSM}
+multicast routing.
+\item{\bf IGMPv3/MLD}
+local multicast membership.
+\item{\bf PPP}
+for point-to-point links (as per RFC 1812).
+\end{itemize}
+
+With the exception of IS-IS, all of these are currently being worked
+upon within XORP.  The aim is for both IPv4 and
+IPv6 support.  MPLS is deliberately omitted at
+this stage.  The multi-process architecture helps us to leverage 
+existing code where
+appropriate;  our OSPF and RIP implementations are derived from John
+Moy's {\it OSPFd}~\cite{ospfd} and BSD's {\it routed} respectively.
+
+For management interfaces, we are pursuing a command line interface
+resembling that of Juniper and intend to support SNMP.
+
+
+\subsection{Extensibility}
+
+Open interfaces are the key to extensibility.
+Interfaces must exist at any point where an extension might plug in,
+and those interfaces must be relatively easy to use.
+XORP's design encourages the construction of useful
+interfaces through multi-process design.
+A routing protocol process, for example, must communicate with other
+processes to install routes and discover information about the router
+itself.
+Open inter-process interfaces, built in to the system from the beginning,
+form the basic source of user-level XORP's extensibility.
+
+\subsubsection{XRLs}
+\def\xrl#1{\textsf{\small #1}}
+
+Most inter-process communication within XORP takes place via XORP
+Resource Locators, or XRLs.  XRLs resemble the Web's URLs. They specify in
+human-readable form the type of IPC transport desired (the
+``protocol''), the abstract name for the entity being communicated
+with, the method being invoked, and a list of named arguments.  Unlike
+URLs, they can also specify the nature of the response expected.
+
+As an example, the general form of one of the XRLs for the forwarding
+engine abstraction (FEA) process might be rendered in human readable
+form as:
+%
+\begin{figure}[h]
+\vspace{-0.05in}
+\centerline{\psfig{figure=xrl.ps,width=3.5in}}
+\vspace{-0.1in}
+\end{figure}
+
+\noindent The initial `\xrl{finder:}' portion specifies the protocol;
+in this case the actual protocol has not yet been resolved.
+The first time this XRL is called, the client XRL library
+contacts the finder, which responds with a redirection to a new XRL
+containing the actual protocol to be used, together with all the
+parameters needed to contact the current FEA.
+Subsequent communication then goes
+directly between the client and the FEA process.
+If the FEA restarts, the client's XRL calls to the old FEA will fail, and
+it can consult the finder to update the redirection.
+
+The XRL library, which all of our processes link against, takes an XRL
+and performs argument marshaling, then it invokes the specified transport
+mechanism, and handles the response or any
+failure that might occur.  Unlike many RPC or remote method invocation
+mechanisms, XRLs don't try and hide from the programmer that
+off-process communication is taking place.  While this makes the
+programmer's job harder at first, it is essential for robustness that
+the programmer is made aware that the failure modes of IPC are different from those of
+a local procedure call.  
+To help the programmer and improve performance, an IDL and a stub
+generator exist, so most XRL clients never need to parse the human
+readable form.
+
+The original motivation for XRLs was to encapsulate existing
+protocols within our consistent IPC framework.   For example, we
+might wish to run third-party software that uses SNMPv3 for
+configuration. 
+To integrate this software into our XRL-based management framework, we
+might write an SNMP `protocol family' for the XRL client library.
+Then XORP processes could transparently interoperate with the third-party
+software via XRLs that start with `\xrl{snmp:}'.
+XRLs are general enough to encompass simple
+communication with the kernel via \texttt{ioctl}s, and even signaling
+via \texttt{kill()}.  At the present time, we have not had a need to
+add this functionality, but should the need arise, our architecture
+would support it.  The current XRL library supports
+XORP-specific protocols for remote procedure call, one layered over
+TCP and the other over UDP, and a local procedure call mechanism for
+intra-process communication.
+
+\subsubsection{XRL Example: Command-line Interface}
+
+One of the biggest issues faced by an {extensible} router is 
+the integration of separately maintained components into a coherent
+system.  Consider the interaction between management mechanisms such
+as a command-line interface (CLI) and a new routing protocol.  The
+author of each of the management processes has no knowledge of future
+routing protocols.  At the same time, the author of each routing
+protocol has no knowledge of future management mechanisms. Our
+solution is for all management, including initial configuration, to
+take place using XRLs.  To add support for a specific management
+mechanism, such as SNMP or a command-line interface, the protocol
+implementor writes simple text files that map management requests to
+XRL calls.  These thin mapping files are easy enough to write that
+third parties might add them as new management interfaces become
+available.
+
+To get more concrete, our configuration manager has a strict hierarchy
+of configuration parameters, which is directly reflected in our
+default CLI.  A fragment of a router configuration file might look
+like:
+
+\begin{quotation}
+\noindent \sf \small protocols ospf \{\\
+\parindent 10pt 
+\indent     router-id: 128.16.64.1\\
+\indent     area 128.16.0.1 \{\\\
+\parindent 20pt 
+\indent       interface xl0 \{\\
+\parindent 30pt 
+\indent         hello-interval: 30\\
+\parindent 20pt 
+\indent       \}\\
+\parindent 10pt 
+\indent     \}\\
+\}
+\end{quotation}
+
+The configuration manager takes a directory of template files, which
+define the possible configurable parameters for each XORP routing
+protocol, and generates mappings of configuration parameters to XRL
+dispatches.  The designer of a new routing protocol can simply add a
+template file specifying the new functionality provided.  Thus, the
+template entry for OSPF might contain the fragment:
+
+\begin{quotation}
+\noindent \sf \small hello-interval: uint \{ \\
+\parindent 10pt 
+\indent \%set: xrl ``ospf/ospf/1.0/set\_hello\_interval?\\
+\parindent 60pt 
+\indent if:txt=\$(IFNAME)\&interval:i32=\$(VALUE)'';\\
+\parindent 10pt 
+\indent \%get: xrl ``ospf/ospf/1.0/hello\_interval?if:txt\\
+\parindent 60pt 
+\indent -$>$ interval:i32'';\\
+\}
+\end{quotation}
+
+The configuration manager can read the template file, discover the new
+functionality, and know how to communicate with the process to use it.
+The new functionality is then immediately available through the CLI.
+
+\subsection{Performance}
+
+Simultaneouly satisfying the three goals of extensibility,
+performance, and robustness without compromise is probably not
+possible. Different parts of XORP have different priorities.
+User-level XORP does not need particularly performance-conscious
+design.  Route updates can arrive at high rates, but nowhere near the
+rates of packet arrival.  It is well within the capabilities of a
+desktop PC to handle the volume of data and computation required for
+unicast routing. (The main issues here are of the computational
+complexity of the protocol implementations.)  At user-level, our
+priorities are extensibility and robustness.
+
+The forwarding path, however, must touch every packet and performance
+is paramount.  Initially we have focused on a PC-based hardware
+platform as this allows for easy testing and early deployment, but
+great care is being taken to design a modular forwarding path
+architecture which can support some or all of the forwarding functions
+happening in hardware.  For our own work, the preferred forwarding
+path is based on the Click modular router~\cite{click}.  Click
+provides a high-performance forwarding path in the kernel, 
+running on commodity hardware, and
+allows for run-time extensions and reconfiguration.  Click's
+modularity allows for many divisions of work between software and
+hardware.  If researchers or developers decide they want to augment
+XORP with network processors\footnote{Network processors~\cite{ixp1200} are interface
+cards containing a number of high-speed network interfaces, typically
+together with a processor and some specialized programmable hardware
+for performing forwarding.  Typically the network processor can
+perform simple forwarding very well, but more complex functionality
+needs to be off-loaded to be handled by software running on the host
+processor~\cite{scoutixp}.} or 
+special-purpose hardware~\cite{fpx}, this will
+be an advantage.
+
+Click forwarding paths are extensible in two key ways:
+\begin{itemize}
+\vspace{-0.07in}
+\item Existing defined elements can by interposed into a forwarding
+path to add new functionality.
+\vspace{-0.07in}
+\item New Click elements can be created, loaded as kernel modules, and
+then plumbed in to the forwarding path.
+\vspace{-0.07in}
+\end{itemize}
+In the context of XORP, this extensibility can aid performance.
+For example, a network administrator can ensure that only a small subset of
+traffic goes through a possibly-slow extension, by defining
+a new special-purpose classifier that matches extension traffic and 
+inserting it into
+the relevant place in the forwarding path.
+
+% When we need to use hardware assistance to improve performance, Click
+% should aid the integration of such hardware.  It is a fairly natural
+% process whereby some parts of the forwarding path are performed in
+% what to other Click elements look like just another element, but in
+% fact are a shim to special purpose hardware.  However our initial
+% implementation does not target advanced platforms due to our limited
+% resources.
+
+\subsection{Robustness}
+
+The routing and coordination processes in XORP run in user space on a
+traditional UNIX operating system.  Routing processes are protected
+from each other and can have their resources constrained according to
+administrative preference.  Furthermore, routing processes can crash
+without affecting the kernel, forwarding plane, or each other.  And if
+a routing protocol does crash, the RIB will remove its routes
+from the forwarding engine, and optionally inform the re-starting
+routing process of the routes it previously held.
+
+Multiple processes are used in Zebra~\cite{zebra} and Cisco's proposed ENA
+router operating system, but not by some of the larger
+commercial vendors today.
+
+A significant aspect of robustness is security.  One benefit of
+being forwarding-path agnostic is that we can abstract
+privileged operations, such as sending on a raw socket, into
+the FEA via XRLs.  This allows us to run many routing protocols
+in a sandbox. They have no interaction with the outside world except
+through XRLs and packets, and so an exploitable vulnerability in a routing
+protocol is far more difficult to escalate into full control of the
+router.
+
+Robustness in the forwarding path is also important, but solutions
+such as memory protection that work well in user-space are not
+acceptable.  In the Click forwarding path robustness comes from the
+granularity and simplicity of Click's components.  Each element is
+small enough to be well understood and tested in isolation.  And since
+many of Click's components can be run and debugged in user-space,
+confidence about their robustness can be attained before being used in
+the kernel.
+
+% \subsection{Leftover Crud}
+
+% The routing protocol needs to be able to send routes to the routing
+% information base (RIB), which coordinates route updates from different
+% routing protocols.  But it also may need access to routes from other
+% routing protocols.  For example BGP needs to know when an IGP route
+% changes, and PIM-SM needs to know how to get to the multicast source
+% or PIM RP router.  Most likely it needs this information to be
+% supplied to it asynchronously, as changes occur. To do this
+% efficiently in a multi-process environment requires careful design of
+% this API, so that the RIB client can register interest in an
+% appropriate granularity of information.
+
+% But perhaps most important factor is the design of the IPC mechanism
+% used.  This is illustrated by considering how a management process
+% such a command-line interface (CLI), embedded web server, or SNMP
+% might interact with the new routing protocol.  The author of each of
+% the management processes has no knowledge of future routing protocols.
+% At the same time, the author of each routing protocol has no knowledge
+% of future management mechanisms.  Thus it is not viable to build CLI,
+% web or SNMP support directly into a routing protocol.  The only really
+% viable solution is for the routing protocol to interact with the rest
+% of the router through the IPC mechanism, providing a control interface
+% that is relatively independent of who is doing the control.  How then
+% does the introduction of the new routing protocol cause the management
+% protocols to increase the functionality available to the user?  Our
+% solution to this problem is an IPC mechanism we call XORP Resource
+% Locations or XRLs.
