@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.95 2006/02/18 01:32:00 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.96 2006/02/22 23:33:20 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -196,6 +196,26 @@ Release 1.2-RC (2006/02/22)
       If you wish to inject static routes into BGP, you must now add
       these routes to the static_routes protocol block, and then configure
       the policy engine to redistribute them to BGP.
+
+    - Proper support for policy filters.
+
+    - Addition of support for route flap damping.
+
+    - Addition of support for route aggregation.
+
+    - Addition of support for route reflection.
+
+    - Addition of support for confederations.
+
+    - Bug fix to correctly handle connection collisions.
+
+    - Addition of default support for NO_EXPORT, NO_ADVERTISE, and
+      NO_EXPORT_SUBCONFED well-known communities.
+
+    - Addition of the capability to reconfigure a peering (e.g., from IBGP to
+      EBGP) which requires re-configuring the default filters.
+
+    - Numerous bug fixes that should greatly improve stability.
 
   STATIC_ROUTES:
     -  Several bug fixes.
