@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.22 2005/04/16 00:03:13 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.23 2006/02/23 02:09:20 pavlin Exp $
 #
 
 #
@@ -567,7 +567,7 @@ kdoc_ospf()
     html_start_page="index.html"
     files="ospf/*.h ospf/*.hh"
     excludes="ospf/test_*.h ospf/test_*.hh"
-    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
+    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libproto libfeaclient libpolicybackend"
     kdocify
 }
 
