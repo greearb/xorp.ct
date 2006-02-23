@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.21 2005/04/13 03:02:22 pavlin Exp $
+# $XORP: xorp/docs/kdoc/gen-kdoc.sh,v 1.22 2005/04/16 00:03:13 pavlin Exp $
 #
 
 #
@@ -558,6 +558,20 @@ kdoc_mibs()
 }
 
 #
+# ospf
+#
+kdoc_ospf()
+{
+    lib="ospf"
+    desc="Open Shortest Path First daemon"
+    html_start_page="index.html"
+    files="ospf/*.h ospf/*.hh"
+    excludes="ospf/test_*.h ospf/test_*.hh"
+    xref="libxorp libxorp-callback libxipc xrl-interfaces xrl-targets libfeaclient libpolicybackend"
+    kdocify
+}
+
+#
 # rib
 #
 kdoc_rib()
@@ -616,7 +630,7 @@ kdoc_static_routes()
 
 KDOC_ALL_TGTS="libxorp callback libcomm libxipc libproto xrl_interfaces \
 	       xrl_targets mrt cli libfeaclient fea mld6igmp pim policycommon \
-	       libpolicybackend policy bgp fib2mrib mibs rib rip rtrmgr static_routes"
+	       libpolicybackend policy bgp fib2mrib mibs ospf rib rip rtrmgr static_routes"
 : ${KDOC_TGTS:=${KDOC_ALL_TGTS}}
 for i in ${KDOC_TGTS} ; do
     kdoc_$i
