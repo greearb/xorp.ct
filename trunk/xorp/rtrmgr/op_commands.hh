@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/op_commands.hh,v 1.36 2005/12/14 02:40:18 pavlin Exp $
+// $XORP: xorp/rtrmgr/op_commands.hh,v 1.37 2006/01/28 02:12:00 pavlin Exp $
 
 #ifndef __RTRMGR_OP_COMMAND_HH__
 #define __RTRMGR_OP_COMMAND_HH__
@@ -42,6 +42,16 @@ public:
 	       RouterCLI::OpModePrintCallback	print_cb,
 	       RouterCLI::OpModeDoneCallback	done_cb);
     ~OpInstance();
+
+    /**
+     * Terminate the instance.
+     */
+    void terminate();
+
+    /**
+     * Terminate the instance with prejudice.
+     */
+    void terminate_with_prejudice();
 
 private:
     OpInstance(const OpInstance&);		// Not implemented

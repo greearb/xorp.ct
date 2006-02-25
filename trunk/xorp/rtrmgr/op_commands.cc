@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.61 2005/12/14 02:40:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.62 2006/01/28 02:12:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -133,6 +133,20 @@ OpInstance::~OpInstance()
 	_run_command = NULL;
     }
     _op_command.remove_instance(this);
+}
+
+void
+OpInstance::terminate()
+{
+    if (_run_command != NULL)
+	_run_command->terminate();
+}
+
+void
+OpInstance::terminate_with_prejudice()
+{
+    if (_run_command != NULL)
+	_run_command->terminate_with_prejudice();
 }
 
 void
