@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.221 2006/02/15 19:06:14 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.222 2006/02/21 02:44:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1837,7 +1837,8 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 
 template <typename A>
 OspfTypes::RouterID
-Peer<A>::designated_router(list<Candidate>& candidates) const
+Peer<A>::designated_router(list<Candidate>& candidates,
+			   OspfTypes::RouterID backup_designated_router) const
 {
     XLOG_ASSERT(do_dr_or_bdr());
 
@@ -1857,15 +1858,9 @@ Peer<A>::designated_router(list<Candidate>& candidates) const
     }
 
     // It is possible that no router was selected because no router
-    // had itself as DR.
+    // had itself as DR. Therefore just select the backup designated router.
     if (0 == c._router_priority) {
-	for(i = candidates.begin(); i != candidates.end(); i++) {
-	    if ((*i)._router_priority > c._router_priority)
-		c = *i;
-	    else if ((*i)._router_priority == c._router_priority &&
-		     (*i)._router_id > c._router_id)
-		c = *i;
-	}
+	return backup_designated_router;
     }
 
     return c._router_id;
@@ -1912,7 +1907,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 
     // Step (3)
     // Calculate the designated router.
-    OspfTypes::RouterID dr = designated_router(candidates);
+    OspfTypes::RouterID dr = designated_router(candidates, bdr);
 
     // Step (4)
     // If the router has become the DR or BDR or it was the DR or BDR
@@ -1954,7 +1949,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	}
 	// Repeat steps (2) and (3).
 	bdr = backup_designated_router(candidates);
-	dr = designated_router(candidates);
+	dr = designated_router(candidates, bdr);
     }
     
     // Step(5)

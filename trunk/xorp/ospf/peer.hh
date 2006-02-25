@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.117 2006/02/15 19:06:14 pavlin Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.118 2006/02/21 02:44:49 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1153,7 +1153,8 @@ class Peer {
     OspfTypes::RouterID
     backup_designated_router(list<Candidate>& candidates) const;
     OspfTypes::RouterID
-    designated_router(list<Candidate>& candidates) const;
+    designated_router(list<Candidate>& candidates,
+		      OspfTypes::RouterID backup_designated_router) const;
 
     void compute_designated_router_and_backup_designated_router();
 
