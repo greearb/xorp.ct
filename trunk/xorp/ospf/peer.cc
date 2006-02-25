@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.222 2006/02/21 02:44:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.223 2006/02/25 03:42:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1804,10 +1804,12 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
     // Calculate the the new backup designated router.
     // Look for routers that do not consider themselves to be the DR
     // but do consider themselves to the the BDR.
-    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"), 0);
+    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"),
+		set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
-	if ((*i)._router_id != (*i)._dr && (*i)._router_id == (*i)._bdr) {
+	if ((*i)._candidate_id != (*i)._dr &&
+	    (*i)._candidate_id == (*i)._bdr) {
 	    if ((*i)._router_priority > c._router_priority)
 		c = *i;
 	    else if ((*i)._router_priority == c._router_priority &&
@@ -1821,7 +1823,7 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
     // had itself as BDR.
     if (0 == c._router_priority) {
 	for(i = candidates.begin(); i != candidates.end(); i++) {
-	    if ((*i)._router_id != (*i)._dr) {
+	    if ((*i)._candidate_id != (*i)._dr) {
 		if ((*i)._router_priority > c._router_priority)
 		    c = *i;
 		else if ((*i)._router_priority == c._router_priority &&
@@ -1832,7 +1834,7 @@ Peer<A>::backup_designated_router(list<Candidate>& candidates) const
 	}
     }
 
-    return c._router_id;
+    return c._candidate_id;
 }
 
 template <typename A>
@@ -1844,10 +1846,11 @@ Peer<A>::designated_router(list<Candidate>& candidates,
 
     // Step (3)
     // Calculate the designated router.
-    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"), 0);
+    Candidate c(set_id("0.0.0.0"), set_id("0.0.0.0"), set_id("0.0.0.0"),
+		set_id("0.0.0.0"), 0);
     typename list<Candidate>::const_iterator i;
     for(i = candidates.begin(); i != candidates.end(); i++) {
-	if ((*i)._router_id == (*i)._dr) {
+	if ((*i)._candidate_id == (*i)._dr) {
 	    if ((*i)._router_priority > c._router_priority)
 		c = *i;
 	    else if ((*i)._router_priority == c._router_priority &&
@@ -1863,7 +1866,7 @@ Peer<A>::designated_router(list<Candidate>& candidates,
 	return backup_designated_router;
     }
 
-    return c._router_id;
+    return c._candidate_id;
 }
 
 template <typename A>
@@ -1878,6 +1881,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
     if (0 != _hello_packet.get_router_priority()) {
 	candidates.
 	    push_back(Candidate(get_candidate_id(),
+				_ospf.get_router_id(),
 				_hello_packet.get_designated_router(),
 				_hello_packet.get_backup_designated_router(),
 				_hello_packet.get_router_priority()));
@@ -1895,6 +1899,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	    Neighbour<A>::TwoWay <= (*n)->get_state()) {
 	    candidates.
 		push_back(Candidate((*n)->get_candidate_id(),
+				    (*n)->get_router_id(),
 				    hello->get_designated_router(),
 				    hello->get_backup_designated_router(),
 				    hello->get_router_priority()));
@@ -1942,7 +1947,7 @@ Peer<A>::compute_designated_router_and_backup_designated_router()
 	    typename list<Candidate>::iterator i = candidates.begin();
 	    // Verify that the first entry in the candidate list is
 	    // this router.
-	    XLOG_ASSERT((*i)._router_id == get_candidate_id());
+	    XLOG_ASSERT((*i)._candidate_id == get_candidate_id());
 	    // Update the DR and BDR
 	    (*i)._dr = dr;
 	    (*i)._bdr = bdr;

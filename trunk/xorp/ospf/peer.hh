@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.118 2006/02/21 02:44:49 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.119 2006/02/25 03:42:49 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1094,13 +1094,17 @@ class Peer {
      * Possible DR or BDR candidates.
      */
     struct Candidate {
-	Candidate(OspfTypes::RouterID router_id, OspfTypes::RouterID dr,
+	Candidate(OspfTypes::RouterID candidate_id,
+		  OspfTypes::RouterID router_id, OspfTypes::RouterID dr,
 		  OspfTypes::RouterID bdr, uint8_t router_priority) 
-	    : _router_id(router_id), _dr(dr), _bdr(bdr), 
-	      _router_priority(router_priority)
+	    : _candidate_id(candidate_id), _router_id(router_id), _dr(dr),
+	      _bdr(bdr), _router_priority(router_priority)
 	{}
 
-	OspfTypes::RouterID _router_id;	// Candidate's ID
+	// OSPFv2 the candidate ID is the interface address.
+	// OSPFv3 the candidate ID is the Router ID.
+	OspfTypes::RouterID _candidate_id;// Candidate's ID
+	OspfTypes::RouterID _router_id;	// Router ID
 	OspfTypes::RouterID _dr;	// Designated router.
 	OspfTypes::RouterID _bdr;	// Backup Designated router.
 	uint8_t  _router_priority;	// Router Priority.
