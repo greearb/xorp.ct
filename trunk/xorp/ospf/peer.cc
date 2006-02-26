@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.224 2006/02/25 06:44:38 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.225 2006/02/26 18:59:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1430,6 +1430,16 @@ Peer<A>::event_wait_timer()
 	break;
     case Waiting:
 	compute_designated_router_and_backup_designated_router();
+
+	// The user has set the priority to zero while the router is in
+	// state waiting.
+	if (0 == _hello_packet.get_router_priority()) {
+	    debug_msg("State(%s) Priority(%d)\n",
+		      pp_interface_state(get_state()).c_str(),
+		      _hello_packet.get_router_priority());
+	    if (get_state() == Waiting)
+		change_state(DR_other);
+	}
 
 	XLOG_ASSERT(get_state() == DR_other || get_state() == Backup ||
 		    get_state() == DR);
