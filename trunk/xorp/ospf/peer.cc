@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.223 2006/02/25 03:42:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.224 2006/02/25 06:44:38 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4000,6 +4000,8 @@ Neighbour<A>::link_state_update_received(LinkStateUpdatePacket *lsup)
     for (list<Lsa::LsaRef>::iterator i = _lsa_rxmt.begin();
 	 i != _lsa_rxmt.end(); i++) {
 	if (!(*i)->maxage())
+	    continue;
+	if ((*i)->max_sequence_number())
 	    continue;
 	list<Lsa::LsaRef>& lsas = lsup->get_lsas();
 	list<Lsa::LsaRef>::const_iterator j;
