@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.201 2006/02/21 02:44:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.202 2006/02/26 09:20:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2045,7 +2045,8 @@ AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
     // every 680 years.
     XLOG_INFO("LSA reached MaxSequenceNumber %s", cstring(*lsar));
 
-    lsar->set_maxage();
+    if (!lsar->maxage())
+	lsar->set_maxage();
 
     if (_reincarnate.empty())
 	_reincarnate_timer = _ospf.get_eventloop().
