@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.39 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.40 2006/02/26 09:20:57 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -17,7 +17,7 @@ protocols {
 	area @: ipv4 {
 	    area-type:		txt = "normal";
 
-	    default-metric {
+	    default-lsa {
 		disable:	toggle = false;
 		metric:		u32 = 0;
 	    }
@@ -170,7 +170,7 @@ transmitted packets";
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
 
-	    default-metric {
+	    default-lsa {
 		%help: short "Originate default route in stub or not-so-stubby areas";
 
 		disable {
