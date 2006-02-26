@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.119 2006/02/25 03:42:49 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.120 2006/02/25 06:44:38 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1541,8 +1541,10 @@ class Neighbour {
 
     /**
      * Send link state update packet.
+     * @param direct if true send directly to the neighbour.
      */
-    bool send_link_state_update_packet(LinkStateUpdatePacket& lsup);
+    bool send_link_state_update_packet(LinkStateUpdatePacket& lsup,
+				       bool direct = false);
 
     /**
      * Send link state ack packet.

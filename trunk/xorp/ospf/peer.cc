@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.225 2006/02/26 18:59:31 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.226 2006/02/26 20:00:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3114,7 +3114,7 @@ Neighbour<A>::retransmitter()
 		    XLOG_TRACE(_ospf.trace()._retransmit,
 			       "retransmit: %s %s", str().c_str(),
 			       cstring(lsup));
-		    send_link_state_update_packet(lsup);
+		    send_link_state_update_packet(lsup, true /* direct */);
 		    lsup.get_lsas().clear();
 		    lsas_len = 0;
 		}
@@ -3127,7 +3127,7 @@ Neighbour<A>::retransmitter()
 	if (!lsup.get_lsas().empty()) {
 	    XLOG_TRACE(_ospf.trace()._retransmit,
 		       "retransmit: %s %s", str().c_str(), cstring(lsup));
-	    send_link_state_update_packet(lsup);
+	    send_link_state_update_packet(lsup, true /* direct */);
 	}
 
 	more = true;
@@ -3305,7 +3305,8 @@ Neighbour<A>::send_link_state_request_packet(LinkStateRequestPacket& lsrp)
 
 template <typename A>
 bool
-Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
+Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup, 
+					    bool direct)
 {
     _peer.populate_common_header(lsup);
     
@@ -3323,10 +3324,14 @@ Neighbour<A>::send_link_state_update_packet(LinkStateUpdatePacket& lsup)
 	break;
     case OspfTypes::BROADCAST: {
 	A dest;
-	if (is_DR_or_BDR()) {
-	    dest = A::OSPFIGP_ROUTERS();
+	if (direct) {
+	    dest = get_neighbour_address();
 	} else {
-	    dest = A::OSPFIGP_DESIGNATED_ROUTERS();
+	    if (is_DR_or_BDR()) {
+		dest = A::OSPFIGP_ROUTERS();
+	    } else {
+		dest = A::OSPFIGP_DESIGNATED_ROUTERS();
+	    }
 	}
 	transmit = new SimpleTransmit<A>(pkt,
 					 dest, 
@@ -3364,39 +3369,37 @@ Neighbour<A>::send_link_state_ack_packet(LinkStateAcknowledgementPacket& lsap,
     SimpleTransmit<A> *transmit = 0;
 
     multicast_on_peer = false;
-    if (direct) {
-	transmit = new SimpleTransmit<A>(pkt,
-					 get_neighbour_address(),
-					 _peer.get_interface_address());
-    } else {
 
-	switch(get_linktype()) {
-	case OspfTypes::PointToPoint:
-	    transmit = new SimpleTransmit<A>(pkt,
-					     A::OSPFIGP_ROUTERS(), 
-					     _peer.get_interface_address());
-	    break;
-	case OspfTypes::BROADCAST: {
-	    A dest;
+    switch(get_linktype()) {
+    case OspfTypes::PointToPoint:
+	transmit = new SimpleTransmit<A>(pkt,
+					 A::OSPFIGP_ROUTERS(), 
+					 _peer.get_interface_address());
+	break;
+    case OspfTypes::BROADCAST: {
+	A dest;
+	if (direct) {
+	    dest = get_neighbour_address();
+	} else {
 	    multicast_on_peer = true;
 	    if (is_DR_or_BDR()) {
 		dest = A::OSPFIGP_ROUTERS();
 	    } else {
 		dest = A::OSPFIGP_DESIGNATED_ROUTERS();
 	    }
-	    transmit = new SimpleTransmit<A>(pkt,
-					     dest, 
-					     _peer.get_interface_address());
 	}
-	    break;
-	case OspfTypes::NBMA:
-	case OspfTypes::PointToMultiPoint:
-	case OspfTypes::VirtualLink:
-	    transmit = new SimpleTransmit<A>(pkt,
-					     get_neighbour_address(),
-					     _peer.get_interface_address());
-	    break;
-	}
+	transmit = new SimpleTransmit<A>(pkt,
+					 dest, 
+					 _peer.get_interface_address());
+    }
+	break;
+    case OspfTypes::NBMA:
+    case OspfTypes::PointToMultiPoint:
+    case OspfTypes::VirtualLink:
+	transmit = new SimpleTransmit<A>(pkt,
+					 get_neighbour_address(),
+					 _peer.get_interface_address());
+	break;
     }
 
     typename Transmit<A>::TransmitRef tr(transmit);
