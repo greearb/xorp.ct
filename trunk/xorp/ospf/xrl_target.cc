@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.27 2006/02/15 19:06:14 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.28 2006/02/21 02:44:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -786,6 +786,48 @@ XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
 
     if (!_ospf.set_passive(ifname, vifname, area, passive))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
+						    const bool&	enable)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    if (!_ospf.originate_default_route(area, enable))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed to configure default route");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_stub_default_cost(const IPv4& a,
+					      const uint32_t& cost)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s cost %u\n", pr_id(area).c_str(), cost);
+
+    if (!_ospf.stub_default_cost(area, cost))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed set StubDefaultCost");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
+				      const bool& enable)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    if (!_ospf.summaries(area, enable))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed to configure summaries");
 
     return XrlCmdError::OKAY();
 }

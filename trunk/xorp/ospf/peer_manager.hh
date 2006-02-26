@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.65 2006/02/15 19:06:14 pavlin Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.66 2006/02/21 02:44:50 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -308,6 +308,14 @@ class PeerManager {
 			   bool up);
 
     /**
+     * Track border router transitions.
+     *
+     * @param up true of the router just became an area border router,
+     * false if the router was an area border router and is no longer.
+     */
+    void area_border_router_transition(bool up) const;
+
+    /**
      * Send a new Router-LSA in all areas.
      *
      * Typically called when one of the Router-LSA flags changes state.
@@ -543,6 +551,23 @@ class PeerManager {
      */
     bool set_passive(const PeerID, OspfTypes::AreaID area,
 		     bool passive);
+
+    /**
+     * If this is a "stub" or "nssa" area toggle the sending of a default
+     *  route.
+     */
+    bool originate_default_route(OspfTypes::AreaID area, bool enable);
+
+    /**
+     *  Set the StubDefaultCost, the default cost sent in a default route in a
+     *  "stub" or "nssa" area.
+     */
+    bool stub_default_cost(OspfTypes::AreaID area, uint32_t cost);
+
+    /**
+     *  Toggle the sending of summaries into "stub" or "nssa" areas.
+     */
+    bool summaries(OspfTypes::AreaID area, bool enable);
 
     // Config (end)
 

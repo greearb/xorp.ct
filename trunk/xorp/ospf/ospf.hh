@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.85 2006/02/15 19:06:13 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.86 2006/02/18 02:17:30 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -646,6 +646,23 @@ class Ospf {
     bool set_passive(const string& interface, const string& vif,
 		     OspfTypes::AreaID area,
 		     bool passive);
+
+    /**
+     * If this is a "stub" or "nssa" area toggle the sending of a default
+     *  route.
+     */
+    bool originate_default_route(OspfTypes::AreaID area, bool enable);
+
+    /**
+     *  Set the StubDefaultCost, the default cost sent in a default route in a
+     *  "stub" or "nssa" area.
+     */
+    bool stub_default_cost(OspfTypes::AreaID area, uint32_t cost);
+
+    /**
+     *  Toggle the sending of summaries into "stub" or "nssa" areas.
+     */
+    bool summaries(OspfTypes::AreaID area, bool enable);
 
     /**
      * Send router alerts in IP packets or not.

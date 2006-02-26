@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.200 2006/02/19 22:05:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.201 2006/02/21 02:44:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -49,7 +49,7 @@ template <typename A>
 AreaRouter<A>::AreaRouter(Ospf<A>& ospf, OspfTypes::AreaID area,
 			  OspfTypes::AreaType area_type) 
     : _ospf(ospf), _area(area), _area_type(area_type),
-      _summaries(true), _stub_default_cost(0),
+      _summaries(true), _stub_default_announce(false), _stub_default_cost(0),
       _external_flooding(false),
       _last_entry(0), _allocated_entries(0), _readers(0),
       _queue(ospf.get_eventloop(),
@@ -104,6 +104,8 @@ template <typename A>
 bool
 AreaRouter<A>::startup()
 {
+    generate_default_route();
+
     // Request the peer manager to send routes that are candidates
     // from summarisation. Also request an AS-External-LSAs that
     // should be announced. These requests are only relevant when
@@ -196,6 +198,17 @@ AreaRouter<A>::peer_down(PeerID peerid)
 
 template <typename A>
 void
+AreaRouter<A>::area_border_router_transition(bool up)
+{
+    if (up) {
+	generate_default_route();
+    } else {
+	withdraw_default_route();
+    }
+}
+
+template <typename A>
+void
 AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
 {
     debug_msg("Type %s\n", pp_area_type(area_type).c_str());
@@ -208,10 +221,15 @@ AreaRouter<A>::change_area_router_type(OspfTypes::AreaType area_type)
 	XLOG_FATAL("Couldn't find this router's Router-LSA in database %s\n",
 		   cstring(*_router_lsa));
     delete_lsa(_router_lsa, index, false /* Don't invalidate */);
+
+    save_default_route();
+
     clear_database();
 
     // Put the Router-LSA back.
     add_lsa(_router_lsa);
+
+    restore_default_route();
 
     // Put the Summary-LSAs and (AS-External-LSAs or Type7-LSAs) back
     startup();
@@ -539,6 +557,91 @@ bool
 AreaRouter<A>::area_range_configured()
 {
     return 0 != _area_range.route_count();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::originate_default_route(bool enable)
+{
+    if (_stub_default_announce == enable)
+	return true;
+
+    _stub_default_announce = enable;
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return true;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (_stub_default_announce)
+	generate_default_route();
+    else
+	withdraw_default_route();
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::stub_default_cost(uint32_t cost)
+{
+    if (_stub_default_cost == cost)
+	return true;
+
+    _stub_default_cost = cost;
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return true;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (_stub_default_announce)
+	refresh_default_route();
+
+    return true;
+}
+
+template <typename A>
+bool
+AreaRouter<A>::summaries(bool enable)
+{
+    if (_summaries == enable)
+	return true;
+
+    _summaries = enable;
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return true;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (_summaries) {
+	_ospf.get_peer_manager().summary_push(_area);
+	return true;
+    }
+
+    save_default_route();
+
+    // Remove all the Summary-LSAs from the database by MaxAging them.
+    OspfTypes::Version version = _ospf.get_version();
+    maxage_type_database(SummaryNetworkLsa(version).get_ls_type());
+    maxage_type_database(SummaryRouterLsa(version).get_ls_type());
+
+    restore_default_route();
+
+    return true;
 }
 
 template <typename A>
@@ -1432,6 +1535,179 @@ AreaRouter<A>::refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar, bool timer)
 	routing_schedule_total_recompute();
 }
 
+template <typename A>
+void
+AreaRouter<A>::generate_default_route()
+{
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (!_stub_default_announce)
+	return;
+
+    if (!_ospf.get_peer_manager().area_border_router_p())
+	return;
+
+    size_t index;
+    if (find_default_route(index))
+	return;
+
+    SummaryNetworkLsa *snlsa = new SummaryNetworkLsa(_ospf.get_version());
+
+    snlsa->set_self_originating(true);
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    snlsa->record_creation_time(now);
+
+    Lsa_header& header = snlsa->get_header();
+    header.set_link_state_id(OspfTypes::DefaultDestination);
+    header.set_advertising_router(_ospf.get_router_id());
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	snlsa->set_network_mask(0);
+	break;
+    case OspfTypes::V3:
+	// It is probably the case that the IPNet<IPv6> initialisation
+	// has done the correct thing.
+	XLOG_WARNING("TBD: Set to the default route");
+	break;
+    }
+
+#ifdef	MAX_AGE_IN_DATABASE
+    XLOG_UNFINISHED();
+#else
+    add_lsa(Lsa::LsaRef(snlsa));
+#endif
+
+    // No need to set the cost it will be done in refresh_default_route().
+
+    refresh_default_route();
+}
+
+template <typename A>
+bool
+AreaRouter<A>::find_default_route(size_t& index)
+{
+    OspfTypes::Version version = _ospf.get_version();
+    Ls_request lsr(version, SummaryNetworkLsa(version).get_ls_type(),
+		   OspfTypes::DefaultDestination, _ospf.get_router_id());
+
+    if (!find_lsa(lsr, index)) {
+	return false;
+    }
+
+    return true;
+}
+
+template <typename A>
+void
+AreaRouter<A>::save_default_route()
+{
+    _saved_default_route = _invalid_lsa;
+
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (!_stub_default_announce)
+	return;
+
+    size_t index;
+    if (!find_default_route(index)) {
+	return;
+    }
+
+    _saved_default_route = _db[index];
+    delete_lsa(_saved_default_route, index, false /* Don't invalidate */);
+}
+
+template <typename A>
+void
+AreaRouter<A>::restore_default_route()
+{
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	return;
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	break;
+    }
+
+    if (!_stub_default_announce)
+	return;
+
+    // No LSA was saved so generate a new one.
+    if (!_saved_default_route->valid()) {
+	generate_default_route();
+	return;
+    }
+
+    // Restore the saved LSA.
+    add_lsa(_saved_default_route);
+    refresh_default_route();
+}
+
+template <typename A>
+void
+AreaRouter<A>::withdraw_default_route()
+{
+    size_t index;
+    if (!find_default_route(index))
+	return;
+
+    premature_aging(_db[index], index);
+}
+
+template <typename A>
+void
+AreaRouter<A>::refresh_default_route()
+{
+    size_t index;
+    if (!find_default_route(index)) {
+	XLOG_WARNING("Couldn't find default route");
+	return;
+    }
+
+    SummaryNetworkLsa *snlsa =
+	dynamic_cast<SummaryNetworkLsa *>(_db[index].get());
+    XLOG_ASSERT(snlsa);
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	snlsa->get_header().set_options(get_options());
+	break;
+    case OspfTypes::V3:
+	XLOG_WARNING("TBD: set prefix options");
+	break;
+    }
+    
+    snlsa->set_metric(_stub_default_cost);
+
+    TimeVal now;
+    _ospf.get_eventloop().current_time(now);
+    update_age_and_seqno(_db[index], now);
+
+    snlsa->get_timer() = _ospf.get_eventloop().
+	new_oneoff_after(TimeVal(OspfTypes::LSRefreshTime, 0),
+			 callback(this,
+				  &AreaRouter<A>::refresh_default_route));
+
+    publish_all(_db[index]);
+}
+
 inline
 string
 pp_lsas(const list<Lsa::LsaRef>& lsas)
@@ -2191,6 +2467,21 @@ AreaRouter<A>::clear_database()
 	    continue;
 	}
 	_db[index]->invalidate();
+    }
+}
+
+template <typename A>
+void
+AreaRouter<A>::maxage_type_database(uint16_t type)
+{
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	if (!_db[index]->valid())
+	    continue;
+	if (!_db[index]->get_self_originating())
+	    continue;
+	if (_db[index]->get_ls_type() != type)
+	    continue;
+	premature_aging(_db[index], index);
     }
 }
 

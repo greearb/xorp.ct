@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.98 2006/02/18 02:17:30 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.99 2006/02/21 02:44:49 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -61,6 +61,14 @@ class AreaRouter : public ServiceBase {
      * Peer went down
      */
     bool peer_down(PeerID peer);
+
+    /**
+     * Track border router transitions.
+     *
+     * @param up true of the router just became an area border router,
+     * false if the router was an area border router and is no longer.
+     */
+    void area_border_router_transition(bool up);
 
     /**
      * Change the type of this area.
@@ -134,6 +142,23 @@ class AreaRouter : public ServiceBase {
      * Does this area have any area ranges configured.
      */
     bool area_range_configured();
+
+    /**
+     * If this is a "stub" or "nssa" area toggle the sending of a default
+     *  route.
+     */
+    bool originate_default_route(bool enable);
+
+    /**
+     *  Set the StubDefaultCost, the default cost sent in a default route in a
+     *  "stub" or "nssa" area.
+     */
+    bool stub_default_cost(uint32_t cost);
+
+    /**
+     *  Toggle the sending of summaries into "stub" or "nssa" areas.
+     */
+    bool summaries(bool enable);
 
     /**
      * get lsa at index if it exists.
@@ -270,6 +295,48 @@ class AreaRouter : public ServiceBase {
      */
     void refresh_network_lsa(PeerID peerid, Lsa::LsaRef lsar,
 			     bool timer = false);
+
+    /**
+     * Create an LSA that will be used to announce the default route
+     * into "stub" and "nssa" areas.
+     */
+    void generate_default_route();
+
+    /**
+     * Find the default route LSA in the database if it exists.
+     */
+    bool find_default_route(size_t& index);
+
+    // Temporary storage used by save_default_route() and
+    // restore_default_route().
+    Lsa::LsaRef _saved_default_route;
+    
+    /**
+     * If the default route LSA is in the database remove it.
+     * Typically to stop it being purged when the area type changes or
+     * summarisation is disable.
+     */
+    void save_default_route();
+
+    /**
+     * If the default route LSA should be in the database put it
+     * back. Either from the previously saved or generate a new one if
+     * necessary. Typically paired with save_default_route().
+     */
+    void restore_default_route();
+
+    /**
+     * Withdraw the default route LSA if it exists.
+     * Set the LSA to MaxAge and floods.
+     */
+    void withdraw_default_route();
+
+    /**
+     * Refresh the default route LSA.
+     * Increments the sequence and floods updates the cost if it has
+     * changed.
+     */
+    void refresh_default_route();
 
     /**
      * Add a network to be announced.
@@ -413,6 +480,11 @@ class AreaRouter : public ServiceBase {
     void clear_database();
 
     /**
+     * All self originated LSAs of this type MaxAge them.
+     */
+    void maxage_type_database(uint16_t type);
+
+    /**
      * Is this the backbone area?
      */
     bool backbone() const {
@@ -492,6 +564,8 @@ class AreaRouter : public ServiceBase {
 					// virtual links.
     bool _summaries;			// True if summaries should be
 					// generated into a stub area.
+    bool _stub_default_announce;	// Announce a default route into
+					// stub or nssa
     uint32_t _stub_default_cost;	// The cost of the default
 					// route that is injected into
 					// a stub area.

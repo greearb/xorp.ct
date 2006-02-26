@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.64 2006/02/02 01:20:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.65 2006/02/15 19:06:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -519,6 +519,33 @@ Ospf<A>::set_passive(const string& interface, const string& vif,
 	return false;
     }
     return true;
+}
+
+template <typename A>
+bool
+Ospf<A>::originate_default_route(OspfTypes::AreaID area, bool enable)
+{
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    return _peer_manager.originate_default_route(area, enable);
+}
+
+template <typename A>
+bool
+Ospf<A>::stub_default_cost(OspfTypes::AreaID area, uint32_t cost)
+{
+    debug_msg("Area %s cost %u\n", pr_id(area).c_str(), cost);
+
+    return _peer_manager.stub_default_cost(area, cost);
+}
+
+template <typename A>
+bool
+Ospf<A>::summaries(OspfTypes::AreaID area, bool enable)
+{
+    debug_msg("Area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    return _peer_manager.summaries(area, enable);
 }
 
 template <typename A>

@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.38 2006/02/21 02:44:48 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.39 2006/02/22 02:07:31 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -16,6 +16,15 @@ protocols {
 
 	area @: ipv4 {
 	    area-type:		txt = "normal";
+
+	    default-metric {
+		disable:	toggle = false;
+		metric:		u32 = 0;
+	    }
+
+	    summaries {
+		disable:	toggle = false;
+	    }
 
 	    area-range @: ipv4net {
 		advertise:	bool = true;
@@ -160,6 +169,35 @@ transmitted packets";
 
 	    %create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_area_router?area:ipv4=$(@)&type:txt=$(@.area-type)";
 	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/destroy_area_router?area:ipv4=$(@)";
+
+	    default-metric {
+		%help: short "Originate default route in stub or not-so-stubby areas";
+
+		disable {
+		    %help: short "disable the origination of the default route";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/originate_default_route?area:ipv4=$(area.@)&enable:bool=`~$(@)`";
+		    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/originate_default_route?area:ipv4=$(area.@)&enable:bool=$(DEFAULT)";
+		}
+
+		metric {
+		    %help: short "Metric of default route";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/stub_default_cost?area:ipv4=$(area.@)&cost:u32=$(@)";
+		    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/stub_default_cost?area:ipv4=$(area.@)&cost:u32=$(DEFAULT)";
+		}
+	    }
+
+	    summaries {
+                %help: short "Generate summaries into stub or not-so-stubby areas";
+
+		disable {
+		    %help: short "disable summaries into stub or not-so-stubby areas";
+
+		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/summaries?area:ipv4=$(area.@)&enable:bool=`~$(@)`";
+		    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/summaries?area:ipv4=$(area.@)&enable:bool=$(DEFAULT)";
+		}
+	    }
 
 	    area-range @: ipv4net {
 		%help: short "Area range for generating summaries";

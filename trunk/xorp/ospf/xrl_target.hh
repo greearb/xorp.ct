@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.19 2006/02/15 19:06:14 pavlin Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.20 2006/02/21 02:44:50 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -442,6 +442,32 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	vifname,
 	const IPv4&	area,
 	const bool&	passive);
+
+    /**
+     *  If this is a "stub" or "nssa" area toggle the sending of a default
+     *  route.
+     */
+    XrlCmdError ospfv2_0_1_originate_default_route(
+	// Input values,
+	const IPv4&	area,
+	const bool&	enable);
+
+    /**
+     *  Set the StubDefaultCost, the default cost sent in a default route in a
+     *  "stub" or "nssa" area.
+     */
+    XrlCmdError ospfv2_0_1_stub_default_cost(
+	// Input values,
+	const IPv4&	area,
+	const uint32_t&	cost);
+
+    /**
+     *  Toggle the sending of summaries into "stub" or "nssa" areas.
+     */
+    XrlCmdError ospfv2_0_1_summaries(
+	// Input values,
+	const IPv4&	area,
+	const bool&	enable);
 
     /**
      *  Add area range.
