@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.106 2006/01/27 21:30:14 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.107 2006/01/31 23:47:50 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1298,8 +1298,7 @@ ConfigTreeNode::retain_different_nodes(const ConfigTreeNode& them,
 	}
 
 	if (retain_child == false) {
-	    remove_child(my_child);
-	    delete my_child;
+	    my_child->delete_subtree_silently();
 	} else {
 	    retained_children = true;
 	}
@@ -1361,21 +1360,18 @@ ConfigTreeNode::retain_deletion_nodes(const ConfigTreeNode& them,
 		 their_iter != my_child->children().end(); ) {
 		ConfigTreeNode* del_node = *their_iter;
 		++their_iter;
-		my_child->remove_child(del_node);
-		delete del_node;
+		del_node->delete_subtree_silently();
 		found_deletion_child = true;
 	    }
 	}
 
 	if (retain_child == false) {
-	    remove_child(my_child);
-	    delete my_child;
+	    my_child->delete_subtree_silently();
 	    found_deletion_child = true;
 	}
 	if (! found_deletion_child) {
 	    // XXX: common child among both trees, hence just prune it
-	    remove_child(my_child);
-	    delete my_child;
+	    my_child->delete_subtree_silently();
 	}
 
 	if (found_deletion_child)
@@ -1413,13 +1409,11 @@ ConfigTreeNode::retain_common_nodes(const ConfigTreeNode& them)
 	    }
 	}
 	if (retain_child == false) {
-	    remove_child(my_child);
-	    delete my_child;
+	    my_child->delete_subtree_silently();
 	}
     }
     if (_parent != NULL && retained_children == false && is_tag()) {
-	_parent->remove_child(this);
-	delete this;
+	delete_subtree_silently();
 	return;
     }
 }
