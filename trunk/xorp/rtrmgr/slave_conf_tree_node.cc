@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.28 2005/10/28 02:08:23 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/slave_conf_tree_node.cc,v 1.29 2006/01/27 21:30:14 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -306,8 +306,7 @@ SlaveConfigTreeNode::get_deltas(const SlaveConfigTreeNode& master_node)
     }
     if ((deltas == 0) && (_parent != NULL)) {
 	XLOG_TRACE(_verbose, "removing >%s<\n", _path.c_str());
-	_parent->remove_child(this);
-	delete this;
+	delete_subtree_silently();	// XXX: will delete 'this' as well
     }
     return deltas;
 }
@@ -347,8 +346,7 @@ SlaveConfigTreeNode::get_deletions(const SlaveConfigTreeNode& master_node)
     }
     if ((deletions == 0) && (_parent != NULL)) {
 	XLOG_TRACE(_verbose, "removing >%s<\n", _path.c_str());
-	_parent->remove_child(this);
-	delete this;
+	delete_subtree_silently();	// XXX: will delete 'this' as well
     }
     return deletions;
 }
