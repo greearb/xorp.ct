@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.39 2006/02/23 03:17:54 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.40 2006/02/23 04:06:58 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -471,6 +471,13 @@ the login shell is csh or tcsh):
 	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
 	      The maintainer's email address is available from the Makefile:
 	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
+	WHO:  Release manager
+	WHEN: Right after the release
+
+========================================================================
+2970.	TASK: Update the LinuxLinks XORP entry (if necessary):
+	       http://www.linuxlinks.com/
+	       http://www.linuxlinks.com/portal/cgi-bin/modify.cgi
 	WHO:  Release manager
 	WHEN: Right after the release
 
