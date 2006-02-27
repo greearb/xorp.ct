@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.226 2006/02/26 20:00:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.227 2006/02/26 23:36:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3460,6 +3460,9 @@ Neighbour<A>::event_hello_received(HelloPacket *hello)
 
     switch(get_state()) {
     case Down:
+	// Its legal to delete 0!
+	delete _hello_packet;
+	_hello_packet = 0;
 	change_state(Init);
 	break;
     case Attempt:
