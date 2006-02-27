@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.110 2006/02/21 02:44:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.111 2006/02/26 09:20:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -523,6 +523,22 @@ PeerManager<A>::set_state_peer(const PeerID peerid, bool state)
 }
 
 template <typename A>
+bool
+PeerManager<A>::set_link_status_peer(const PeerID peerid, bool state)
+{
+    debug_msg("PeerID %u\n", peerid);
+
+    if (0 == _peers.count(peerid)) {
+	XLOG_ERROR("Unknown PeerID %u", peerid);
+	return false;
+    }
+
+    _peers[peerid]->set_link_status(state);
+
+    return true;
+}
+
+template <typename A>
 void
 PeerManager<A>::address_status_change(const string& interface,
 				      const string& vif, A source,
@@ -1007,6 +1023,9 @@ PeerManager<A>::up_virtual_link(OspfTypes::RouterID rid, A source,
 	return;
     
     if (!set_state_peer(peerid, true))
+	return;
+
+    if (!set_link_status_peer(peerid, true))
 	return;
 }
 
