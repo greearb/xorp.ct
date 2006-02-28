@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/area_router.hh,v 1.99 2006/02/21 02:44:49 atanu Exp $
+// $XORP: xorp/ospf/area_router.hh,v 1.100 2006/02/26 09:20:58 atanu Exp $
 
 #ifndef __OSPF_AREA_ROUTER_HH__
 #define __OSPF_AREA_ROUTER_HH__
@@ -241,8 +241,10 @@ class AreaRouter : public ServiceBase {
      *
      * @param lsar the AS-External-LSA
      * @param push set to true if the push is a result of an external_push().
+     * @param redist true if this LSA was locally generated due to a
+     * redistribution.
      */
-    void external_announce(Lsa::LsaRef lsar, bool push);
+    void external_announce(Lsa::LsaRef lsar, bool push, bool redist);
 
     /**
      * Called to complete a series of calls to external_announce().

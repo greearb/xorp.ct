@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.18 2005/12/28 18:57:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.19 2006/02/03 21:26:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -64,7 +64,8 @@ External<A>::announce(OspfTypes::AreaID area, Lsa::LsaRef lsar)
     for (i = _areas.begin(); i != _areas.end(); i++) {
  	if ((*i).first == area)
  	    continue;
-	(*i).second->external_announce(lsar, false /* push */);
+	(*i).second->external_announce(lsar, false /* push */,
+				       false /* redist */);
     }
 
     lsar->get_timer() = _ospf.get_eventloop().
@@ -97,7 +98,9 @@ External<A>::push(AreaRouter<A> *area_router)
 
     ASExternalDatabase::iterator i;
     for(i = _lsas.begin(); i != _lsas.end(); i++)
-	area_router->external_announce((*i), true /* push */);
+	area_router->
+	    external_announce((*i), true /* push */,
+			      (*i)->get_self_originating() /* redist */);
 }
 
 template <>
@@ -263,7 +266,8 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 
     typename map<OspfTypes::AreaID, AreaRouter<A> *>::iterator i;
     for (i = _areas.begin(); i != _areas.end(); i++) {
-	(*i).second->external_announce(lsar, false /* push */);
+	(*i).second->external_announce(lsar, false /* push */,
+				       true /* redist */);
 	(*i).second->external_shove();
     }
 

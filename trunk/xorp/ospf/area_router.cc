@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.202 2006/02/26 09:20:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.203 2006/02/26 18:52:30 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1258,7 +1258,7 @@ AreaRouter<A>::external_generate_external(Lsa::LsaRef lsar)
 
 template <typename A>
 void
-AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
+AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/, bool redist)
 {
     XLOG_ASSERT(lsar->external());
 
@@ -1269,6 +1269,8 @@ AreaRouter<A>::external_announce(Lsa::LsaRef lsar, bool /*push*/)
 	return;
 	break;
     case OspfTypes::NSSA: {
+	if (!redist)
+	    return;
 	bool indb;
 	lsar = external_generate_type7(lsar, indb);
 	if (indb)
