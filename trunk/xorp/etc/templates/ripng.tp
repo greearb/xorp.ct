@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.31 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.32 2006/02/22 02:31:29 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -263,6 +263,7 @@ policy {
 	    }
 	    then {
 		nexthop6 {
+		    %help: short "Set IPv6 nexthop";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

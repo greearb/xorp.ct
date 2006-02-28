@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.35 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.36 2006/02/22 02:31:29 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -317,6 +317,7 @@ policy {
 	    }
 	    then {
 		nexthop4 {
+		    %help: short "Set IPv4 nexthop";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}

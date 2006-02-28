@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.17 2006/01/27 21:35:34 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.18 2006/02/22 02:07:31 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -41,7 +41,7 @@ policy {
 }
 
 policy {
-    %help:      short "Configure policies";
+    %help:      short "Configure routing policies";
     %modinfo:   provides policy;
     %modinfo:   depends rib;
     %modinfo:   path "policy/xorp_policy";
@@ -58,56 +58,56 @@ policy {
     }
 
     policy-statement @: txt {
-	%help: short "Set the policy statement name";
+	%help: short "Routing policy";
 	%create: xrl "$(policy.targetname)/policy/0.1/create_policy?policy:txt=$(@)";
 	%delete: xrl "$(policy.targetname)/policy/0.1/delete_policy?policy:txt=$(@)";
 
 	term @: txt {
-	    %help: short "Set the policy term number";
+	    %help: short "Term of the routing policy";
 	    %create: xrl "$(policy.targetname)/policy/0.1/create_term?policy:txt=$(policy-statement.@)&order:txt=$(#)&term:txt=$(@)";
 	    %delete: xrl "$(policy.targetname)/policy/0.1/delete_term?policy:txt=$(policy-statement.@)&term:txt=$(@)";
 
 	    from {
-		%help: short "Set the policy 'from' term";
+		%help: short "Conditions to match the source of a route";
 		protocol {
-		    %help: short "Set the 'from protocol' in the policy term";
+		    %help: short "Protocol from which route was learned";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 
 		network4 {
-		    %help: short "Set the 'from' IPv4 network";
+		    %help: short "IPv4 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 
 		network6 {
-		    %help: short "Set the 'from' IPv6 network";
+		    %help: short "IPv6 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 
 		network4-list {
-		    %help: short "Set the 'from' name of a valid network4-list";
+		    %help: short "Valid named set of IPv4 networks";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		network6-list {
-		    %help: short "Set the 'from' name of a valid network6-list";
+		    %help: short "Valid named set of IPv6 networks";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 <= SET $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 
 		prefix-length4 {
-		    %help: short "Set the 'from' IPv4 prefix length range";
+		    %help: short "IPv4 prefix length range";
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		prefix-length6 {
-		    %help: short "Set the 'from' IPv6 prefix length range";
+		    %help: short "IPv6 prefix length range";
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
@@ -115,39 +115,39 @@ policy {
 	    }
 
 	    to {
-		%help: short "Set the policy 'to' term";
+		%help: short "Conditions to match the destination of a route";
 		network4 {
-		    %help: short "Set the 'to' IPv4 network";
+		    %help: short "IPv4 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		network6 {
-		    %help: short "Set the 'to' IPv6 network";
+		    %help: short "IPv6 network";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 
 		network4-list {
-		    %help: short "Set the 'to' name of a valid network4-list";
+		    %help: short "Valid named set of IPv4 networks";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 <= SET $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		network6-list {
-		    %help: short "Set the 'to' name of a valid network6-list";
+		    %help: short "Valid named set of IPv6 networks";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 <= SET $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 
 		prefix-length4 {
-		    %help: short "Set the 'to' IPv4 prefix length range";
+		    %help: short "IPv4 prefix length range";
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		prefix-length6 {
-		    %help: short "Set the 'to' IPv6 prefix length range";
+		    %help: short "IPv6 prefix length range";
 		    %allow-operator: "==" "!=" "<" "<=" ">" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
@@ -155,7 +155,7 @@ policy {
 	    }
 
 	    then {
-		%help: short "Set the policy action term";
+		%help: short "Actions to take if conditions match";
 		trace {
 		    %help: short "Set the tracing";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=trace = $(@);";
@@ -163,12 +163,12 @@ policy {
 		}
 
 		accept {
-		    %help: short "Set the action to accept";
+		    %help: short "Accept a route";
 		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=accept;";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		reject {
-		    %help: short "Set the action to reject";
+		    %help: short "Reject a route";
 		    %create: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=reject;";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
@@ -177,22 +177,22 @@ policy {
     }
 
     network4-list @: txt {
-	%help: short "Set the name of a valid network4-list";
+	%help: short "Named set of IPv4 networks";
 	%delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
 	%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
 
 	elements {
-	    %help: short "Set the elements in the network4-list";
+	    %help: short "Elements in the named set of IPv4 networks";
 	    %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&elements:txt=$(@)";
 	}
     }
     network6-list @: txt {
-	%help: short "Set the name of a valid network6-list";
+	%help: short "Named set of IPv6 networks";
 	%delete: xrl "$(policy.targetname)/policy/0.1/delete_set?set:txt=$(@)";
 	%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
 
 	elements {
-	    %help: short "Set the elements in the network6-list";
+	    %help: short "Elements in the named set of IPv6 networks";
 	    %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&elements:txt=$(@)";
 	}
     }

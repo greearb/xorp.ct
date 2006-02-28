@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.40 2006/02/26 09:20:57 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.41 2006/02/26 20:56:20 atanu Exp $ */
 
 protocols {
     ospf4 {
@@ -215,7 +215,7 @@ transmitted packets";
 	    }
 
 	    virtual-link @: ipv4 {
-		%help: short "virtual link";
+		%help: short "Virtual link";
 
 		%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_virtual_link?neighbour_id:ipv4=$(virtual-link.@)&area:ipv4=$(area.@)";
 		%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_virtual_link?neighbour_id:ipv4=$(virtual-link.@)";
@@ -302,6 +302,7 @@ transmitted packets";
 	    }
 
 	    interface @: txt {
+	    	%help: short "Include an interface in this area";
 		%mandatory: $(@.link-type);
 
 		link-type {
@@ -314,8 +315,10 @@ transmitted packets";
 		}
 
 		vif @: txt {
+		    %help: short "Include an vif in this area";
 
 		    address @ {
+		    	%help: short "Address on vif used for OSPF";
 			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=0&mtu:u32=0&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
 			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
 
@@ -412,24 +415,24 @@ transmitted packets";
 			}
 
 			passive {
-			    %help: short "Set the interface into loopback";
+			    %help: short "Do not run OSPF, but advertise it";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_passive?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&passive:bool=$(@)";
 			}
 
 			disable {
-			    %help: short "disable OSPF on address";
+			    %help: short "Disable OSPF on address";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(@)`";
 			}
 
 			neighbour @: ipv4 {
-			    %help: short "Neighbours address";
+			    %help: short "NBMA neighbours address";
 
 			    %mandatory: $(@.router-id);
 
 			    router-id {
-				%help: short "Neighbours router-id";
+				%help: short "NBMA neighbours router-id";
 
 				%set:;
 			    }
@@ -489,16 +492,19 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		metric {
+		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		ebit {
+		    %help: short "Type of external OSPF route";
 		    %allow-operator: ":" "==" "!=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
 		tag {
+		    %help: short "Tag string";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
@@ -511,16 +517,19 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		metric {
+		    %help: short "Metric value";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		ebit {
+		    %help: short "Type of external OSPF route";
 		    %allow-operator: ":" "==" "!=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		tag {
+		    %help: short "Tag string";
 		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
@@ -532,14 +541,17 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		metric {
+		    %help: short "Metric value";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		ebit {
+		    %help: short "Type of external OSPF route";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=ebit $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		tag {
+		    %help: short "Tag string";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=tag $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
