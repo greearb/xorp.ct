@@ -44,7 +44,7 @@ libtecla$(SUFFIX)$(SHARED_EXT): $(LIB_OBJECTS) $(srcdir)/libtecla.map \
 	rm -f $(PROGS)
 
 libtecla.map.opt: $(srcdir)/libtecla.map
-	sed -n 's/^[ 	]*\([_a-zA-Z0-9]*\)[ 	]*;.*/+e \1/p' $? >$@
+	sed -n 's/^[ 	]*\([_[:alnum:]]*\)[ 	]*;.*/+e \1/p' $? >$@
 
 demos: demo$(SUFFIX) demo2$(SUFFIX)
 
