@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.28 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.29 2006/01/31 21:32:57 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1390,6 +1390,8 @@ XrlIO<IPv6>::updates_made()
     _iftree = ifmgr_iftree();
 }
 
+template class XrlQueue<IPv4>;
+template class XrlQueue<IPv6>;
 
 template class XrlIO<IPv4>;
 template class XrlIO<IPv6>;
