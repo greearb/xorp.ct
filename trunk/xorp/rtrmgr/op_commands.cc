@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.62 2006/01/28 02:12:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.63 2006/02/25 08:15:15 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -747,7 +747,7 @@ OpCommandList::top_level_commands() const
 
 	if (commands.find(top_command) == commands.end()) {
 	    CliCommandMatch ccm(top_command,
-				string("-- no help available --"),
+				string("-- No help available --"),
 				false,
 				false);
 	    ccm.set_default_nomore_mode(false);

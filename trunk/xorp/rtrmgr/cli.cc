@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.121 2006/01/31 02:10:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.122 2006/02/17 00:06:16 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -274,7 +274,7 @@ configuration tree.  For example, if the configuration contained:\n\
     protocols {\n\
         bgp {\n\
             peer 10.0.0.1 {\n\
-                as 65001 \n\
+                as: 65001 \n\
             }\n\
         }\n\
     }\n\
@@ -286,7 +286,7 @@ default values:\n\
     protocols {\n\
         bgp {\n\
             peer 10.0.0.1 {\n\
-                as 65001 \n\
+                as: 65001 \n\
             }\n\
         }\n\
 >       static {\n\
@@ -311,7 +311,7 @@ will also be deleted.  For example, if the configuration contained:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -327,7 +327,7 @@ configuration examined. For example, if the configuration contained:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -349,7 +349,7 @@ to exit one level.  For example, if the configuration was:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -404,7 +404,7 @@ to quit one level.  For example, if the configuration was:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -450,7 +450,7 @@ For example, if the configuration contained:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -478,7 +478,7 @@ be highlighted.  For example, if \"show\" displays:\n\
   protocols {\n\
       bgp {\n\
 >        peer 10.0.0.1 {\n\
->           as 65001 \n\
+>           as: 65001 \n\
 >        }\n\
   }\n\
 \n\
@@ -502,7 +502,7 @@ configuration was:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -521,7 +521,7 @@ to move up one level.  For example, if the configuration was:\n\
    protocols {\n\
        bgp {\n\
           peer 10.0.0.1 {\n\
-             as 65001 \n\
+             as: 65001 \n\
           }\n\
    }\n\
 \n\
@@ -1152,7 +1152,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	vector_subpath.push_back(cmd_name);
 	string help = ctn.help();
 	if (help == "") {
-	    help = "-- no help available --";
+	    help = "-- No help available --";
 	}
 
 	CliCommand* com;
@@ -1185,7 +1185,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    vector_subpath.push_back(cmd_name);
 	    string help = values_iter->second;
 	    if (help == "") {
-		help = "-- no help available --";
+		help = "-- No help available --";
 	    }
 
 	    CliCommand* com;
@@ -1217,7 +1217,7 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 	    vector_subpath.push_back(cmd_name);
 	    string help = ranges_iter->second;
 	    if (help == "") {
-		help = "-- no help available --";
+		help = "-- No help available --";
 	    }
 
 	    CliCommand* com;
@@ -1502,7 +1502,7 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
 	string help = ttn->help();
 	if (help == "") {
-	    help = "-- no help available --";
+	    help = "-- No help available --";
 	}
 
 	com = com0->add_command(ttn->segname(),
@@ -2488,7 +2488,7 @@ RouterCLI::text_entry_func(const string& ,
 	CliCommand* com;
 	com = _cli_node.cli_command_root()->add_command(
 	    "}",
-	    "complete this configuration level",
+	    "Complete this configuration level",
 	    false,
 	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name(token_line2vector("}"));
@@ -2555,7 +2555,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		continue;
 	    help_string = ttn_child->help();
 	    if (help_string == "") {
-		help_string = "-- no help available --";
+		help_string = "-- No help available --";
 	    }
 	    if (ttn_child->segname() == "@") {
 		string encoded_typestr = ttn_child->encoded_typestr();
@@ -2592,7 +2592,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	}
 #endif // 0
 	if (!ttn->is_tag() && !ttn->children().empty()) {
-	    help_string = "enter text on multiple lines";
+	    help_string = "Enter text on multiple lines";
 	    command_name = "{";
 	    CliCommandMatch ccm(command_name, help_string, is_executable,
 				can_pipe);
@@ -2607,7 +2607,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    // Leaf node: add a child with expected value type
 	    help_string = ttn->help();
 	    if (help_string == "") {
-		help_string = "-- no help available --";
+		help_string = "-- No help available --";
 	    }
 	    string encoded_typestr = ttn->encoded_typestr();
 	    command_name = encoded_typestr;
@@ -2629,7 +2629,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    const string& cmd_name = values_iter->first;
 	    string help_string = values_iter->second;
 	    if (help_string == "") {
-		help_string = "-- no help available --";
+		help_string = "-- No help available --";
 	    }
 	    CliCommandMatch ccm(cmd_name, help_string,
 				is_executable, can_pipe);
@@ -2650,7 +2650,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	    string cmd_name = ost.str();
 	    string help_string = ranges_iter->second;
 	    if (help_string == "") {
-		help_string = "-- no help available --";
+		help_string = "-- No help available --";
 	    }
 	    CliCommandMatch ccm(cmd_name, help_string,
 				is_executable, can_pipe);
@@ -2796,7 +2796,7 @@ RouterCLI::immediate_set_func(const string& ,
 	CliCommand* com;
 	com = _cli_node.cli_command_root()->add_command(
 	    "}",
-	    "complete this configuration level",
+	    "Complete this configuration level",
 	    false,
 	    callback(this, &RouterCLI::text_entry_func));
 	com->set_global_name(token_line2vector("}"));
