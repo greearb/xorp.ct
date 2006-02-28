@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.16 2006/02/17 23:34:53 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.17 2006/02/18 01:49:35 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -495,6 +495,13 @@ AggregationTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(old_rtmsg.route()->nexthop_resolved());
     XLOG_ASSERT(new_rtmsg.route()->nexthop_resolved());
+
+    if (old_rtmsg.route()->aggr_prefix_len() == SR_AGGR_IGNORE &&
+        new_rtmsg.route()->aggr_prefix_len() == SR_AGGR_IGNORE) {
+	return this->_next_table->replace_route(old_rtmsg,
+						new_rtmsg,
+						(BGPRouteTable<A>*)this);
+    }
 
     this->delete_route(old_rtmsg, (BGPRouteTable<A>*)caller);
     return this->add_route(new_rtmsg, (BGPRouteTable<A>*)caller);
