@@ -15,7 +15,7 @@
  *
  */
 
-#ident "$XORP: xorp/libxorp/win_io.c,v 1.3 2005/08/18 18:45:14 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/win_io.c,v 1.4 2005/12/21 09:42:58 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,7 +33,7 @@
 /* Maximum number of console input records to buffer on stack per read. */
 #define	MAX_INPUT_RECORDS 64
 
-/*
+/**
  * win_strerror_r:
  *
  * A friendly wrapper for FormatMessageA() which uses static storage
@@ -68,7 +68,7 @@ win_strerror_r(DWORD errnum, char *strerrbuf, size_t buflen)
     return (0);
 }
 
-/*
+/**
  * win_strerror:
  *
  * This is the thread-unsafe version of the win_strerror_r() function which
@@ -85,7 +85,7 @@ win_strerror(DWORD errnum)
     return (buf); 
 }
 
-/*
+/**
  * win_con_input_filter:
  *
  * Helper function to filter only the KeyEvents we are interested in.
@@ -190,7 +190,7 @@ win_con_input_filter(const KEY_EVENT_RECORD *ke, char *buf, size_t remaining)
     return (chsz);
 }
 
-/*
+/**
  * win_con_read:
  *
  * Read keyboard input from a Windows console in a non-blocking mode, with
@@ -264,7 +264,7 @@ win_con_read(HANDLE h, void *buf, size_t bufsize)
     return (ncharsread);
 }
 
-/*
+/**
  * win_pipe_read:
  *
  * Read input from a Windows pipe in a non-blocking mode, with similar

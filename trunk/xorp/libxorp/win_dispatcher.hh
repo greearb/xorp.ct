@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.5 2005/11/05 18:05:35 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.6 2005/12/21 09:42:58 bms Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -123,7 +123,7 @@ public:
      */
     virtual ~WinDispatcher();
 
-    /*
+    /**
      * Add a hook for pending I/O operations on a callback.
      *
      * Only one callback may be registered for each possible IoEventType.

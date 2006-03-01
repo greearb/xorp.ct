@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.11 2005/12/21 09:42:58 bms Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.12 2005/12/22 11:53:40 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -60,7 +60,7 @@
 #define	EXECUTABLE_SUFFIX		UNIX_EXECUTABLE_SUFFIX
 #endif	// ! HOST_OS_WINDOWS
 
-/*
+/**
  * Convert a UNIX style path to the platform's native path format.
  *
  * @param path the UNIX style path to be converted.
@@ -81,7 +81,7 @@ unix_path_to_native(const string& unixpath)
 #endif // ! HOST_OS_WINDOWS
 }
 
-/*
+/**
  * Determine if a provided native path string is an absolute path, or
  * possibly relative to a user's home directory under UNIX.
  *
@@ -235,7 +235,6 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
 
 #ifdef HOST_OS_WINDOWS
 /**
- *
  * Helper function to quote command line arguments for MSVCRT-linked programs.
  * 
  * Given an argv array represented by an STL list of strings, and a
