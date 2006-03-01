@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.83 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.84 2006/02/28 06:15:15 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -762,6 +762,7 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}
 		was-aggregated {
+		    %help: short "True if this route contributed to origination of an aggregate";
 		    %allow-operator: ":" "==" "!=";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=was_aggregated $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
@@ -827,6 +828,7 @@ policy {
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 		aggregate-prefix-len {
+		    %help: short "Originate an aggregate route with this prefix length";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aggregate_prefix_len $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
