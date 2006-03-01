@@ -1,4 +1,5 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
 
 /*
  * Copyright (c) 2001-2005 International Computer Science Institute
@@ -14,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libcomm/test_comm.c,v 1.9 2005/05/05 19:49:08 bms Exp $"
+#ident "$XORP: xorp/libcomm/test_comm.c,v 1.10 2005/05/06 23:32:14 pavlin Exp $"
 
 
 /*

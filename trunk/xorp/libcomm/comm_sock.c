@@ -1,4 +1,5 @@
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
+/* vim:set sts=4 ts=8: */
 /*
  * Copyright (c) 2001
  * YOID Project.
@@ -30,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.29 2005/11/09 13:07:27 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.30 2005/12/21 09:42:55 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -1484,7 +1485,7 @@ comm_sock_is_connected(xsock_t sock)
     return (XORP_OK);
 }
 
-/*
+/**
  * comm_sock_no_ipv6:
  *
  * Log an error when an IPv6 specific method is called when IPv6 is
@@ -1493,6 +1494,8 @@ comm_sock_is_connected(xsock_t sock)
  *
  * XXX This is currently done with knowledge of how the error code is
  * internally stored, which is a design bug (we're not thread friendly).
+ *
+ * @param method C-style string denoting the ipv6 function called.
  **/
 void
 comm_sock_no_ipv6(const char* method, ...)

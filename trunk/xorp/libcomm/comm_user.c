@@ -1,4 +1,5 @@
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
+/* vim:set sts=4 ts=8: */
 /*
  * Copyright (c) 2001
  * YOID Project.
@@ -30,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.19 2005/09/05 20:28:22 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.20 2005/12/21 09:42:55 bms Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.

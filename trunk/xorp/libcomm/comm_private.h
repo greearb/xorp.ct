@@ -1,4 +1,5 @@
 /* -*-  Mode:C; c-basic-offset:4; tab-width:8; indent-tabs-mode:t -*- */
+/* vim:set sts=4 ts=8: */
 /*
  * Copyright (c) 2001
  * YOID Project.
@@ -31,7 +32,7 @@
  */
 
 /*
- *  $XORP: xorp/libcomm/comm_private.h,v 1.2 2004/03/21 03:14:08 hodson Exp $
+ *  $XORP: xorp/libcomm/comm_private.h,v 1.3 2005/05/05 19:49:08 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_PRIVATE_H__
