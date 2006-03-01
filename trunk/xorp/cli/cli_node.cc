@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.31 2005/12/14 00:52:40 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.32 2005/12/14 02:40:17 pavlin Exp $"
 
 
 //
@@ -117,9 +117,11 @@ CliNode::start()
     //
     // Start accepting connections
     //
-    if (sock_serv_open().is_valid()) {
-	eventloop().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
-				   callback(this, &CliNode::accept_connection));
+    if (_cli_port != 0) {
+	if (sock_serv_open().is_valid()) {
+	    eventloop().add_ioevent_cb(_cli_socket, IOT_ACCEPT,
+				       callback(this, &CliNode::accept_connection));
+	}
     }
     
     add_internal_cli_commands();
