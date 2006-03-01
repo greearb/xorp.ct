@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.41 2006/02/26 20:56:20 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.42 2006/02/28 06:15:15 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -427,12 +427,12 @@ transmitted packets";
 			}
 
 			neighbour @: ipv4 {
-			    %help: short "NBMA neighbours address";
+			    %help: short "Neighbours address";
 
 			    %mandatory: $(@.router-id);
 
 			    router-id {
-				%help: short "NBMA neighbours router-id";
+				%help: short "Neighbours router-id";
 
 				%set:;
 			    }
