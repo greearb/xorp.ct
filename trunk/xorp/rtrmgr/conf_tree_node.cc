@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.107 2006/01/31 23:47:50 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.108 2006/02/27 18:48:30 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1369,7 +1369,9 @@ ConfigTreeNode::retain_deletion_nodes(const ConfigTreeNode& them,
 	    my_child->delete_subtree_silently();
 	    found_deletion_child = true;
 	}
-	if (! found_deletion_child) {
+	if ((! found_deletion_child)
+	    && node_found
+	    && (! my_child->has_undeleted_children())) {
 	    // XXX: common child among both trees, hence just prune it
 	    my_child->delete_subtree_silently();
 	}
@@ -2214,6 +2216,20 @@ ConfigTreeNode::is_default_value(const string& test_value) const
 	return (false);
 
     return (test_value == _template_tree_node->default_str());
+}
+
+bool
+ConfigTreeNode::has_undeleted_children() const
+{
+    list<ConfigTreeNode *>::const_iterator iter;
+
+    for (iter = _children.begin(); iter != _children.end(); ++iter) {
+	const ConfigTreeNode* child = *iter;
+	if ((child != NULL) && (! child->deleted()))
+	    return (true);
+    }
+
+    return (false);
 }
 
 string

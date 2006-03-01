@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.59 2006/01/27 21:30:14 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.60 2006/01/31 23:47:50 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -167,6 +167,7 @@ public:
     bool is_uncommitted() const;
     bool is_default_value() const;
     bool is_default_value(const string& test_value) const;
+    bool has_undeleted_children() const;
 
 protected:
     bool split_up_varname(const string& varname,
