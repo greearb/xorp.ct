@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.26 2005/11/01 07:31:54 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.27 2005/11/02 02:27:21 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -298,6 +298,8 @@ void
 Fib2mribNode::updates_made()
 {
     multimap<IPvXNet, Fib2mribRoute>::iterator route_iter;
+    list<Fib2mribRoute *> add_routes, replace_routes, delete_routes;
+    list<Fib2mribRoute *>::iterator pending_iter;
 
     for (route_iter = _fib2mrib_routes.begin();
 	 route_iter != _fib2mrib_routes.end();
@@ -356,57 +358,88 @@ Fib2mribNode::updates_made()
 	    continue;			// Nothing changed
 	}
 
-	do {
-	    if ((! is_old_up) && (! is_new_up)) {
-		//
-		// The interface s still down, so nothing to do
-		//
-		break;
-	    }
-	    if ((! is_old_up) && (is_new_up)) {
-		//
-		// The interface is now up, hence add the route
-		//
-		inform_rib_route_change(fib2mrib_route);
-		break;
-	    }
-	    if ((is_old_up) && (! is_new_up)) {
-		//
-		// The interface went down, hence cancel all pending requests,
-		// and withdraw the route.
-		//
-		cancel_rib_route_change(fib2mrib_route);
-
-		Fib2mribRoute tmp_route(fib2mrib_route);
-		tmp_route.set_delete_route();	// XXX: mark as deleted route
-		inform_rib_route_change(tmp_route);
-		break;
-	    }
-	    if (is_old_up && is_new_up) {
-		//
-		// The interface remains up, hence probably the interface or
-		// the vif name has changed.
-		//
-		if ((old_ifname == new_ifname) && (old_vifname == new_vifname))
-		    break;
-
-		//
-		// Delete the route and then add it again so the information
-		// in the RIB will be updated.
-		//
-		Fib2mribRoute tmp_route(fib2mrib_route);
-		tmp_route.set_delete_route();	// XXX: mark as deleted route
-		inform_rib_route_change(tmp_route);	 // Delete the route
-		inform_rib_route_change(fib2mrib_route); // Add the route
-	    }
-	    break;
-	} while (false);
+	if ((! is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface s still down, so nothing to do
+	    //
+	    continue;
+	}
+	if ((! is_old_up) && (is_new_up)) {
+	    //
+	    // The interface is now up, hence add the route
+	    //
+	    add_routes.push_back(&fib2mrib_route);
+	    continue;
+	}
+	if ((is_old_up) && (! is_new_up)) {
+	    //
+	    // The interface went down, hence cancel all pending requests,
+	    // and withdraw the route.
+	    //
+	    delete_routes.push_back(&fib2mrib_route);
+	    continue;
+	}
+	if (is_old_up && is_new_up) {
+	    //
+	    // The interface remains up, hence probably the interface or
+	    // the vif name has changed.
+	    // Delete the route and then add it again so the information
+	    // in the RIB will be updated.
+	    //
+	    replace_routes.push_back(&fib2mrib_route);
+	    continue;
+	}
     }
 
     //
     // Update the local copy of the interface tree
     //
     _iftree = ifmgr_iftree();
+
+    //
+    // Process all pending "add route" requests
+    //
+    for (pending_iter = add_routes.begin();
+	 pending_iter != add_routes.end();
+	 ++pending_iter) {
+	Fib2mribRoute& orig_route = *(*pending_iter);
+	Fib2mribRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_add_route();
+	inform_rib(copy_route);
+    }
+
+    //
+    // Process all pending "replace route" requests
+    //
+    for (pending_iter = replace_routes.begin();
+	 pending_iter != replace_routes.end();
+	 ++pending_iter) {
+	Fib2mribRoute& orig_route = *(*pending_iter);
+	Fib2mribRoute copy_route = orig_route;
+	// First delete the route, then add the route
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_delete_route();
+	inform_rib(copy_route);
+	copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_add_route();
+	inform_rib(copy_route);
+    }
+
+    //
+    // Process all pending "delete route" requests
+    //
+    for (pending_iter = delete_routes.begin();
+	 pending_iter != delete_routes.end();
+	 ++pending_iter) {
+	Fib2mribRoute& orig_route = *(*pending_iter);
+	cancel_rib_route_change(orig_route);
+	Fib2mribRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	copy_route.set_delete_route();
+	inform_rib(copy_route);
+    }
 }
 
 /**
@@ -626,11 +659,11 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
     multimap<IPvXNet, Fib2mribRoute>::iterator iter;
     iter = _fib2mrib_routes.find(updated_route.network());
     for ( ; iter != _fib2mrib_routes.end(); ++iter) {
-	Fib2mribRoute& tmp_route = iter->second;
-	if (tmp_route.network() != updated_route.network())
+	Fib2mribRoute& orig_route = iter->second;
+	if (orig_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != updated_route.ifname())
-	    || (tmp_route.vifname() != updated_route.vifname())) {
+	if ((orig_route.ifname() != updated_route.ifname())
+	    || (orig_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
 
@@ -657,24 +690,16 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
 					     updated_route));
 
     //
-    // Do policy filtering
+    // Create a copy of the route and inform the RIB if necessary
     //
-    Fib2mribRoute& added_route = iter->second;
+    Fib2mribRoute& orig_route = iter->second;
+    Fib2mribRoute copy_route = orig_route;
+    prepare_route_for_transmission(orig_route, copy_route);
 
     //
-    // We do not want to modify original route, so we may re-filter routes on
-    // filter configuration changes. Hence, copy route.
+    // Inform the RIB about the change
     //
-    Fib2mribRoute copy_route = added_route;
-
-    bool accepted = do_filtering(copy_route);
-
-    // Tag the original route as filtered or not
-    added_route.set_filtered(!accepted);
-
-    // Inform RIB about the possibly modified route if it was accepted 
-    if (accepted)
-	inform_rib(copy_route);
+    inform_rib(copy_route);
 
     return XORP_OK;
 }
@@ -731,18 +756,18 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
     // update the first route for the same subnet.
     //
     for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
-	Fib2mribRoute& tmp_route = iter2->second;
-	if (tmp_route.network() != updated_route.network())
+	Fib2mribRoute& orig_route = iter2->second;
+	if (orig_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != updated_route.ifname())
-	    || (tmp_route.vifname() != updated_route.vifname())) {
+	if ((orig_route.ifname() != updated_route.ifname())
+	    || (orig_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
 
 	//
 	// Route found.
 	//
-	route_to_replace_ptr = &tmp_route;
+	route_to_replace_ptr = &orig_route;
 	break;
     }
 
@@ -751,45 +776,49 @@ Fib2mribNode::replace_route(const Fib2mribRoute& fib2mrib_route,
 	// No route found with the same ifname and vifname.
 	// Update the first route for the same subnet.
 	//
-	Fib2mribRoute& tmp_route = iter->second;
+	Fib2mribRoute& orig_route = iter->second;
 
-	route_to_replace_ptr = &tmp_route;
+	route_to_replace_ptr = &orig_route;
     }
 
     //
-    // Overwrite the route's value.
+    // Route found. Overwrite its value.
     //
     do {
 	XLOG_ASSERT(route_to_replace_ptr != NULL);
-	Fib2mribRoute& tmp_route = *route_to_replace_ptr;
+	Fib2mribRoute& orig_route = *route_to_replace_ptr;
 
-	bool was_filtered = tmp_route.is_filtered();
-	tmp_route = updated_route;
+	bool was_accepted = orig_route.is_accepted_by_rib();
+	orig_route = updated_route;
 
-	// Do policy filtering
-	Fib2mribRoute copy_route = updated_route;
-	bool accepted = do_filtering(copy_route);
-	tmp_route.set_filtered(!accepted);
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
+	Fib2mribRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
 
-	// Decide what to do
-	if (accepted) {
-	    if (was_filtered) {
-		copy_route.set_add_route();
+	//
+	// XXX: If necessary, change the type of the route.
+	// E.g., "replace route" may become "add route" or "delete route".
+	//
+	if (copy_route.is_accepted_by_rib()) {
+	    if (was_accepted) {
+		copy_route.set_replace_route();
 	    } else {
+		copy_route.set_add_route();
 	    }
 	} else {
-	    if (was_filtered) {
-		return XORP_OK;
-	    } else {
+	    if (was_accepted) {
 		copy_route.set_delete_route();
+	    } else {
+		return XORP_OK;
 	    }
 	}
-	
+
 	//
 	// Inform the RIB about the change
 	//
 	inform_rib(copy_route);
-
     } while (false);
 
     return XORP_OK;
@@ -846,11 +875,11 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
     // delete the first route for the same subnet.
     //
     for (iter2 = iter; iter2 != _fib2mrib_routes.end(); ++iter2) {
-	Fib2mribRoute& tmp_route = iter2->second;
-	if (tmp_route.network() != updated_route.network())
+	Fib2mribRoute& orig_route = iter2->second;
+	if (orig_route.network() != updated_route.network())
 	    break;
-	if ((tmp_route.ifname() != updated_route.ifname())
-	    || (tmp_route.vifname() != updated_route.vifname())) {
+	if ((orig_route.ifname() != updated_route.ifname())
+	    || (orig_route.vifname() != updated_route.vifname())) {
 	    continue;
 	}
 
@@ -876,21 +905,32 @@ Fib2mribNode::delete_route(const Fib2mribRoute& fib2mrib_route,
 	iter2 = iter;
     }
 
-    //
-    // Create a copy of the route and erase it.
-    //
-    Fib2mribRoute copy_route = iter2->second;
-    copy_route.set_delete_route();
-    _fib2mrib_routes.erase(iter2);
+    do {
+	//
+	// Route found. Create a copy of it and erase it.
+	//
+	Fib2mribRoute& orig_route = iter2->second;
 
-    // If the route is filtered, then RIB doesn't know about it.
-    if (copy_route.is_filtered())
-	return XORP_OK;
+	bool was_accepted = orig_route.is_accepted_by_rib();
+	Fib2mribRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+	_fib2mrib_routes.erase(iter2);
 
-    //
-    // Inform the RIB about the change
-    //
-    inform_rib(copy_route);
+	copy_route.set_delete_route();
+
+	//
+	// If the original route wasn't transmitted, then the RIB doesn't
+	// know about it.
+	//
+	if (! was_accepted)
+	    return XORP_OK;
+
+	//
+	// Inform the RIB about the change
+	//
+	inform_rib(copy_route);
+
+    } while (false);
 
     return XORP_OK;
 }
@@ -907,6 +947,18 @@ Fib2mribRoute::is_valid_entry(string& error_msg) const
     UNUSED(error_msg);
 
     return true;
+}
+
+/**
+ * Test whether the route is accepted for transmission to the RIB.
+ *
+ * @return true if route is accepted for transmission to the RIB,
+ * otherwise false.
+ */
+bool
+Fib2mribRoute::is_accepted_by_rib() const
+{
+    return (is_accepted_by_nexthop() && (! is_filtered()));
 }
 
 void
@@ -926,45 +978,46 @@ Fib2mribNode::push_routes()
     multimap<IPvXNet, Fib2mribRoute>::iterator iter;
 
     // XXX: not a background task
-    for (iter = _fib2mrib_routes.begin(); iter != _fib2mrib_routes.end();
+    for (iter = _fib2mrib_routes.begin();
+	 iter != _fib2mrib_routes.end();
 	 ++iter) {
 	Fib2mribRoute& orig_route = iter->second;
-	bool was_filtered = orig_route.is_filtered();
-	
+	bool was_accepted = orig_route.is_accepted_by_rib();
+
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
 	Fib2mribRoute copy_route = orig_route;
-	bool accepted = do_filtering(copy_route);
+	prepare_route_for_transmission(orig_route, copy_route);
 
-	debug_msg("[FIB2MRIB] Push route: %s, was filtered: %d, accepted %d\n",
-		  orig_route.network().str().c_str(),
-		  was_filtered, accepted);
-
-	orig_route.set_filtered(!accepted);
-
-	if (accepted) {
-	    if (was_filtered) {
-		copy_route.set_add_route();
-	    } else {
+	//
+	// XXX: If necessary, change the type of the route.
+	// E.g., "replace route" may become "add route" or "delete route".
+	//
+	if (copy_route.is_accepted_by_rib()) {
+	    if (was_accepted) {
 		copy_route.set_replace_route();
+	    } else {
+		copy_route.set_add_route();
 	    }
 	} else {
-	    // not accepted
-	    if (was_filtered) {
-		continue;
-	    } else {
+	    if (was_accepted) {
 		copy_route.set_delete_route();
+	    } else {
+		continue;
 	    }
 	}
 
+	//
+	// Inform the RIB about the change
+	//
 	inform_rib(copy_route);
     }
 }
 
-void
-Fib2mribNode::inform_rib(const Fib2mribRoute& route)
+bool
+Fib2mribNode::is_accepted_by_nexthop(const Fib2mribRoute& route) const
 {
-    //
-    // Inform the RIB about the change
-    //
     if (route.is_interface_route()) {
 	const IfMgrIfAtom* if_atom;
 	const IfMgrVifAtom* vif_atom;
@@ -978,13 +1031,51 @@ Fib2mribNode::inform_rib(const Fib2mribRoute& route)
 	    is_up = true;
 	}
 	if (is_up) {
-	    inform_rib_route_change(route);
+	    return (true);
 	}
     } else {
 	string ifname, vifname;
 	if (_iftree.is_directly_connected(route.nexthop(), ifname, vifname)) {
-	    inform_rib_route_change(route);
+	    return (true);
 	}
+    }
+
+    return (false);
+}
+
+void
+Fib2mribNode::prepare_route_for_transmission(Fib2mribRoute& orig_route,
+					     Fib2mribRoute& copy_route)
+{
+    //
+    // We do not want to modify original route, so we may re-filter routes on
+    // filter configuration changes. Hence, copy the route.
+    //
+    copy_route = orig_route;
+
+    // Do policy filtering and other acceptance tests
+    bool filtered = (! do_filtering(copy_route));
+    bool accepted_by_nexthop = is_accepted_by_nexthop(copy_route);
+    copy_route.set_filtered(filtered);
+    copy_route.set_accepted_by_nexthop(accepted_by_nexthop);
+
+    // Tag the original route
+    orig_route.set_filtered(filtered);
+    orig_route.set_accepted_by_nexthop(accepted_by_nexthop);
+}
+
+void
+Fib2mribNode::inform_rib(const Fib2mribRoute& route)
+{
+    //
+    // Inform the RIB about the change
+    //
+    if (route.is_add_route() || route.is_replace_route()) {
+	if (route.is_accepted_by_rib())
+	    inform_rib_route_change(route);
+    }
+    if (route.is_delete_route()) {
+	inform_rib_route_change(route);
     }
 }
 
