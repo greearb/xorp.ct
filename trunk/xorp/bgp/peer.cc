@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.127 2005/12/20 13:00:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.128 2006/02/18 00:07:25 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1430,6 +1430,7 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
     } else {
 	// if we have path attributes, check that they are valid.
 	bool local_pref = false;
+	bool route_reflector = false;
 
 	list<PathAttribute*> l = p->pa_list();
 	list<PathAttribute*>::const_iterator i;
@@ -1463,6 +1464,11 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	    case AGGREGATOR:
 		break;
 	    case COMMUNITY:
+		break;
+	    case ORIGINATOR_ID:
+		/* FALLTHROUGH */
+	    case CLUSTER_LIST:
+		route_reflector = true;
 		break;
 	    default:
 		if ((*i)->well_known()) {
@@ -1546,6 +1552,11 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 		AsNum my_asnum(peerdata()->as());
 		if (as_path_attr->as_path().first_asnum() != my_asnum)
 		    return new NotificationPacket(UPDATEMSGERR, MALASPATH);
+
+		// If this is an EBGP peering and a route reflector
+		// attribute has been received then generate an error.
+		if (route_reflector)
+		    return new NotificationPacket(UPDATEMSGERR, MALATTRLIST);
 	    }
 	    // Receiving confederation path segments when the router
 	    // is not configured for confederations is an error. 

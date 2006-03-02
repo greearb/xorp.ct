@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.61 2006/02/13 12:20:34 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering1.sh,v 1.62 2006/02/16 04:08:51 atanu Exp $
 #
 
 #
@@ -1922,6 +1922,68 @@ test56_ipv6()
     coord peer1 assert established
 }
 
+test57()
+{
+    echo "TEST57 - Send an ORIGINATOR_ID on an E-BGP peering."
+    echo "	1) Establish a connection"
+    echo "	2) Should get a Malformed AS_PATH"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $MALATTRLIST
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nexthop 20.20.20.20 \
+	nlri 10.10.10.0/24 \
+	originatorid 1.2.3.4
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
+test58()
+{
+    echo "TEST58 - Send CLUSTER_LIST on an E-BGP peering."
+    echo "	1) Establish a connection"
+    echo "	2) Should get a Malformed AS_PATH"
+
+    coord reset
+    coord target $HOST $PORT2
+    coord initialise attach peer1
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+
+    coord peer1 expect packet notify $UPDATEMSGERR $MALATTRLIST
+
+    coord peer1 send packet \
+	update \
+	origin 2 \
+	aspath "[$PEER2_AS],[$PEER2_AS]" \
+	nexthop 20.20.20.20 \
+	nlri 10.10.10.0/24 \
+	clusterlist 1.2.3.4
+
+    sleep 2
+
+    coord peer1 assert queue 0
+
+    sleep 2
+    
+    coord peer1 assert idle
+}
+
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test9 test10 test11 test12 test12_ipv6 test13 test14 test15 test16
@@ -1929,7 +1991,7 @@ TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test8_ipv6
     test25 test26 test27 test27_ipv6 test28 test28_ipv6 test29 test30 test31
     test32 test33 test34 test35 test36 test37 test38 test39 test40 test41
     test42 test43 test44 test45 test46 test47 test48 test49 test50 test51
-    test52 test53 test54 test55 test56 test56_ipv6'
+    test52 test53 test54 test55 test56 test56_ipv6 test57 test58'
 
 # Include command line
 . ${srcdir}/args.sh
