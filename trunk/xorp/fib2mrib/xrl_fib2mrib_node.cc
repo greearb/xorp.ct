@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.32 2005/03/25 02:53:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/xrl_fib2mrib_node.cc,v 1.33 2005/08/05 13:04:07 bms Exp $"
 
 #include "fib2mrib_module.h"
 
@@ -1871,9 +1871,7 @@ XrlFib2mribNode::fib2mrib_0_1_enable_fib2mrib(
     // Input values,
     const bool&	enable)
 {
-    UNUSED(enable);
-
-    // XLOG_UNFINISHED();
+    Fib2mribNode::set_enabled(enable);
 
     return XrlCmdError::OKAY();
 }

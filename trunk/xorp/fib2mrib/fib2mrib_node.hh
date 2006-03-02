@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.16 2005/08/31 01:36:29 pavlin Exp $
+// $XORP: xorp/fib2mrib/fib2mrib_node.hh,v 1.17 2006/03/02 23:30:48 pavlin Exp $
 
 #ifndef __FIB2MRIB_FIB2MRIB_NODE_HH__
 #define __FIB2MRIB_FIB2MRIB_NODE_HH__
@@ -414,6 +414,24 @@ public:
     bool	is_done() const { return (_node_status == PROC_DONE); }
 
     /**
+     * Test whether the node operation is enabled.
+     *
+     * @return true if the node operation is enabled, otherwise false.
+     */
+    bool	is_enabled() const { return _is_enabled; }
+
+    /**
+     * Enable/disable node operation.
+     *
+     * Note that for the time being it affects only whether the routes
+     * are installed into RIB. In the future it may affect the interaction
+     * with other modules as well.
+     *
+     * @param enable if true then enable node operation, otherwise disable it.
+     */
+    void	set_enabled(bool enable);
+
+    /**
      * Add an IPv4 route.
      *
      * @param network the network address prefix this route applies to.
@@ -582,6 +600,13 @@ public:
      * Push all the routes through the policy filters for re-filtering.
      */
     void push_routes();
+
+    /**
+     * Push or pull all the routes to/from the RIB.
+     *
+     * @param is_push if true, then push the routes, otherwise pull them
+     */
+    void push_pull_rib_routes(bool is_push);
 
 
 protected:
@@ -782,6 +807,7 @@ private:
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
+    bool		_is_enabled;		// Flag whether node is enabled
 
     //
     // The routes are stored in a multimap, because we allow more than one

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.27 2005/11/02 02:27:21 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.28 2006/03/02 23:30:48 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -33,6 +33,7 @@ Fib2mribNode::Fib2mribNode(EventLoop& eventloop)
     : ServiceBase("Fib2mrib"),
       _eventloop(eventloop),
       _protocol_name("fib2mrib"),	// TODO: must be known by RIB
+      _is_enabled(true),		// XXX: enabled by default
       _startup_requests_n(0),
       _shutdown_requests_n(0),
       _is_log_trace(true)		// XXX: default to print trace logs
@@ -439,6 +440,30 @@ Fib2mribNode::updates_made()
 	prepare_route_for_transmission(orig_route, copy_route);
 	copy_route.set_delete_route();
 	inform_rib(copy_route);
+    }
+}
+
+/**
+ * Enable/disable node operation.
+ *
+ * Note that for the time being it affects only whether the routes
+ * are installed into RIB. In the future it may affect the interaction
+ * with other modules as well.
+ *
+ * @param enable if true then enable node operation, otherwise disable it.
+ */
+void
+Fib2mribNode::set_enabled(bool enable)
+{
+    if (enable == is_enabled())
+	return;			// XXX: nothing changed
+
+    if (enable) {
+	_is_enabled = true;
+	push_pull_rib_routes(true);
+    } else {
+	push_pull_rib_routes(false);
+	_is_enabled = false;
     }
 }
 
@@ -1015,6 +1040,41 @@ Fib2mribNode::push_routes()
     }
 }
 
+void
+Fib2mribNode::push_pull_rib_routes(bool is_push)
+{
+    multimap<IPvXNet, Fib2mribRoute>::iterator iter;
+
+    // XXX: not a background task
+    for (iter = _fib2mrib_routes.begin();
+	 iter != _fib2mrib_routes.end(); ++iter) {
+	Fib2mribRoute& orig_route = iter->second;
+
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
+	Fib2mribRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+
+	//
+	// XXX: Only routes that are accepted by RIB should be added or deleted
+	//
+	if (! copy_route.is_accepted_by_rib())
+	    continue;
+
+	if (is_push) {
+	    copy_route.set_add_route();
+	} else {
+	    copy_route.set_delete_route();
+	}
+
+	//
+	// Inform the RIB about the change
+	//
+	inform_rib(copy_route);
+    }
+}
+
 bool
 Fib2mribNode::is_accepted_by_nexthop(const Fib2mribRoute& route) const
 {
@@ -1067,6 +1127,9 @@ Fib2mribNode::prepare_route_for_transmission(Fib2mribRoute& orig_route,
 void
 Fib2mribNode::inform_rib(const Fib2mribRoute& route)
 {
+    if (! is_enabled())
+	return;
+
     //
     // Inform the RIB about the change
     //
