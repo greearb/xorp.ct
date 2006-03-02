@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/static_routes/static_routes_node.hh,v 1.20 2005/08/31 01:37:34 pavlin Exp $
+// $XORP: xorp/static_routes/static_routes_node.hh,v 1.21 2006/02/01 01:35:06 pavlin Exp $
 
 #ifndef __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
 #define __STATIC_ROUTES_STATIC_ROUTES_NODE_HH__
@@ -411,6 +411,24 @@ public:
     bool	is_done() const { return (_node_status == PROC_DONE); }
 
     /**
+     * Test whether the node operation is enabled.
+     *
+     * @return true if the node operation is enabled, otherwise false.
+     */
+    bool	is_enabled() const { return _is_enabled; }
+
+    /**
+     * Enable/disable node operation.
+     *
+     * Note that for the time being it affects only whether the routes
+     * are installed into RIB. In the future it may affect the interaction
+     * with other modules as well.
+     *
+     * @param enable if true then enable node operation, otherwise disable it.
+     */
+    void	set_enabled(bool enable);
+    
+    /**
      * Add a static IPv4 route.
      *
      * @param unicast if true, then the route would be used for unicast
@@ -577,6 +595,13 @@ public:
      * Push all the routes through the policy filters for re-filtering.
      */
     void push_routes();
+
+    /**
+     * Push or pull all the routes to/from the RIB.
+     *
+     * @param is_push if true, then push the routes, otherwise pull them
+     */
+    void push_pull_rib_routes(bool is_push);
 
 
 protected:
@@ -763,6 +788,7 @@ private:
     EventLoop&		_eventloop;		// The event loop
     ProcessStatus	_node_status;		// The node/process status
     const string	_protocol_name;		// The protocol name
+    bool		_is_enabled;		// Flag whether node is enabled
 
     list<StaticRoute>	_static_routes;		// The routes
 

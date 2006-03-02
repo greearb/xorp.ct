@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.30 2005/11/02 02:27:22 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/static_routes_node.cc,v 1.31 2006/02/01 01:35:06 pavlin Exp $"
 
 //
 // StaticRoutes node implementation.
@@ -33,6 +33,7 @@ StaticRoutesNode::StaticRoutesNode(EventLoop& eventloop)
     : ServiceBase("StaticRoutes"),
       _eventloop(eventloop),
       _protocol_name("static"),		// TODO: must be known by RIB
+      _is_enabled(true),		// XXX: enabled by default
       _startup_requests_n(0),
       _shutdown_requests_n(0),
       _is_log_trace(true)		// XXX: default to print trace logs
@@ -437,6 +438,30 @@ StaticRoutesNode::updates_made()
 	prepare_route_for_transmission(orig_route, copy_route);
 	copy_route.set_delete_route();
 	inform_rib(copy_route);
+    }
+}
+
+/**
+ * Enable/disable node operation.
+ *
+ * Note that for the time being it affects only whether the routes
+ * are installed into RIB. In the future it may affect the interaction
+ * with other modules as well.
+ *
+ * @param enable if true then enable node operation, otherwise disable it.
+ */
+void
+StaticRoutesNode::set_enabled(bool enable)
+{
+    if (enable == is_enabled())
+	return;			// XXX: nothing changed
+
+    if (enable) {
+	_is_enabled = true;
+	push_pull_rib_routes(true);
+    } else {
+	push_pull_rib_routes(false);
+	_is_enabled = false;
     }
 }
 
@@ -940,6 +965,40 @@ StaticRoutesNode::push_routes()
     }
 }
 
+void
+StaticRoutesNode::push_pull_rib_routes(bool is_push)
+{
+    list<StaticRoute>::iterator iter;
+
+    // XXX: not a background task
+    for (iter = _static_routes.begin(); iter != _static_routes.end(); ++iter) {
+	StaticRoute& orig_route = *iter;
+
+	//
+	// Create a copy of the route and inform the RIB if necessary
+	//
+	StaticRoute copy_route = orig_route;
+	prepare_route_for_transmission(orig_route, copy_route);
+
+	//
+	// XXX: Only routes that are accepted by RIB should be added or deleted
+	//
+	if (! copy_route.is_accepted_by_rib())
+	    continue;
+
+	if (is_push) {
+	    copy_route.set_add_route();
+	} else {
+	    copy_route.set_delete_route();
+	}
+
+	//
+	// Inform the RIB about the change
+	//
+	inform_rib(copy_route);
+    }
+}
+
 bool
 StaticRoutesNode::is_accepted_by_nexthop(const StaticRoute& route) const
 {
@@ -992,6 +1051,9 @@ StaticRoutesNode::prepare_route_for_transmission(StaticRoute& orig_route,
 void
 StaticRoutesNode::inform_rib(const StaticRoute& route)
 {
+    if (! is_enabled())
+	return;
+
     //
     // Inform the RIB about the change
     //

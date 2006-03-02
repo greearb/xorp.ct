@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.31 2005/03/23 21:39:59 pavlin Exp $"
+#ident "$XORP: xorp/static_routes/xrl_static_routes_node.cc,v 1.32 2005/03/25 02:54:43 pavlin Exp $"
 
 #include "static_routes_module.h"
 
@@ -1054,9 +1054,7 @@ XrlStaticRoutesNode::static_routes_0_1_enable_static_routes(
     // Input values,
     const bool&	enable)
 {
-    UNUSED(enable);
-
-    // XLOG_UNFINISHED();
+    StaticRoutesNode::set_enabled(enable);
 
     return XrlCmdError::OKAY();
 }
