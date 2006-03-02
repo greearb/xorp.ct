@@ -14,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.23 2005/11/28 04:55:01 atanu Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.24 2005/11/28 08:34:28 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -215,6 +215,23 @@ private:
     IPv4 _cluster_id;
 };
 
+/**
+ * @short RRPurge Remove ORIGINATOR_ID and CLUSTER_LIST attributes.
+ *
+ * Outbound filter on E-BGP peers to remove ORIGINATOR_ID and
+ * CLUSTER_LIST attributes (Route Reflection attributes that should
+ * never go to an E-BGP peer).
+ */
+
+template<class A>
+class RRPurgeFilter : public BGPRouteFilter<A> {
+public:
+    RRPurgeFilter();
+    const InternalMessage<A>* 
+       filter(const InternalMessage<A> *rtmsg, 
+	      bool &modified) const ;
+private:
+};
 
 /**
  * @short BGPRouteFilter that inserts a LocalPref attribute.
@@ -372,6 +389,7 @@ public:
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,
 					     IPv4 cluster_id);
+    int add_route_reflector_purge_filter();
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();
@@ -459,6 +477,7 @@ public:
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,
 					     IPv4 cluster_id);
+    int add_route_reflector_purge_filter();
     int add_localpref_insertion_filter(uint32_t default_local_pref);
     int add_localpref_removal_filter();
     int add_med_insertion_filter();

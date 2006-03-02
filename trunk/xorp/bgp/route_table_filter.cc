@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.45 2005/12/20 11:26:03 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.46 2006/02/01 21:54:38 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -344,6 +344,65 @@ RRIBGPLoopFilter<A>::filter(const InternalMessage<A> *rtmsg,
     }
     ncla->prepend_cluster_id(_cluster_id);
     palist.add_path_attribute(ncla);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
+			     rtmsg->route()->igp_metric());
+
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+    
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    XLOG_ASSERT(new_rtmsg->changed());
+
+    debug_msg("Route with originator id and cluster list %s\n",
+	      new_rtmsg->str().c_str());
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
+RRPurgeFilter<A>::RRPurgeFilter() 
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+RRPurgeFilter<A>::filter(const InternalMessage<A> *rtmsg,
+			 bool &modified) const 
+{
+    if (!rtmsg->route()->attributes()->originator_id() &&
+	!rtmsg->route()->attributes()->cluster_list())
+	return rtmsg;
+
+    //Form a new path attribute list.
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+
+    // If an ORIGINATOR_ID is present remove it.
+    if (0 != palist.originator_id())
+	palist.remove_attribute_by_type(ORIGINATOR_ID);
+
+    // If a CLUSTER_LIST is present remove it.
+    if (0 != palist.cluster_list())
+	palist.remove_attribute_by_type(CLUSTER_LIST);
+
     palist.rehash();
     
     //Create a new route message with the new path attribute list
@@ -819,6 +878,16 @@ FilterVersion<A>::add_route_reflector_ibgp_loop_filter(bool client,
 
 template<class A>
 int
+FilterVersion<A>::add_route_reflector_purge_filter()
+{
+    RRPurgeFilter<A>* rr_purge_filter;
+    rr_purge_filter = new RRPurgeFilter<A>;
+    _filters.push_back(rr_purge_filter);
+    return 0;
+}
+
+template<class A>
+int
 FilterVersion<A>::add_localpref_insertion_filter(uint32_t default_local_pref)
 {
     LocalPrefInsertionFilter<A> *localpref_filter;
@@ -1248,6 +1317,14 @@ FilterTable<A>::add_route_reflector_ibgp_loop_filter(bool client,
     _current_filter->add_route_reflector_ibgp_loop_filter(client,
 							  bgp_id,
 							  cluster_id);
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_route_reflector_purge_filter()
+{
+    _current_filter->add_route_reflector_purge_filter();
     return 0;
 }
 
