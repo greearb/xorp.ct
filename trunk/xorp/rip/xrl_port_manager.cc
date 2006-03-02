@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.20 2005/08/30 01:02:47 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_port_manager.cc,v 1.21 2005/11/02 02:27:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -31,6 +31,35 @@
 
 // ----------------------------------------------------------------------------
 // Utility methods
+
+/**
+ * Query whether an address exists on given interface and vif path and all
+ * items on path are enabled.
+ */
+template <typename A>
+static bool
+address_exists(const IfMgrIfTree&	iftree,
+	       const string&		ifname,
+	       const string&		vifname,
+	       const A&			addr)
+{
+    debug_msg("Looking for %s/%s/%s\n",
+	      ifname.c_str(), vifname.c_str(), addr.str().c_str());
+
+    const IfMgrIfAtom* ia = iftree.find_if(ifname);
+    if (ia == NULL)
+	return false;
+
+    const IfMgrVifAtom* va = ia->find_vif(vifname);
+    if (va == NULL)
+	return false;
+
+    const typename IfMgrIP<A>::Atom* aa = va->find_addr(addr);
+    if (aa == NULL)
+	return false;
+
+    return true;
+}
 
 /**
  * Query whether an address exists on given interface and vif path and all
@@ -284,10 +313,10 @@ XrlPortManager<A>::add_rip_address(const string& ifname,
 	return false;
     }
 
-    // Check whether address exists and is enabled, fail if not.
+    // Check whether address exists, fail if not.
     const IfMgrIfTree& iftree = _ifm.iftree();
-    if (address_enabled(iftree, ifname, vifname, addr) == false) {
-	debug_msg("add_rip_address failed: address does not exist or is not enabled.\n");
+    if (address_exists(iftree, ifname, vifname, addr) == false) {
+	debug_msg("add_rip_address failed: address does not exist.\n");
 	return false;
     }
 
