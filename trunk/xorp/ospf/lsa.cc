@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.65 2006/01/14 08:22:08 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.66 2006/02/12 00:06:03 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -54,7 +54,7 @@ verify_checksum(uint8_t *buf, size_t len, size_t offset)
 {
     int32_t x, y;
     fletcher_checksum(buf, len, offset, x, y);
-    if (!(0 == x && 0 == y)) {
+    if (!(255 == x && 255 == y)) {
 	return false;
     }
 

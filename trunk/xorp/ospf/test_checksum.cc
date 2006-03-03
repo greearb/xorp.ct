@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.2 2005/01/14 21:36:32 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.3 2005/11/04 20:54:35 atanu Exp $"
 
 #include "config.h"
 
@@ -49,7 +49,7 @@ test1(TestInfo& info)
 
     DOUT(info) << "x: " << x << " y: " << y << endl;
 
-    if (!(0 == x && 0 == y)) {
+    if (!(255 == x && 255 == y)) {
 	DOUT(info) << "Both values must be zero\n";
 	return false;
     }

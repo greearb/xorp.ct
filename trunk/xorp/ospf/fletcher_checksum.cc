@@ -32,7 +32,7 @@ onecomp(int32_t a)
 
 	res = a % 255;
 
-	if(res < 0)
+	if(res <= 0)
 		res = 255 + res;
 
 	return res;
