@@ -1,19 +1,23 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP$
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.1 2006/02/13 15:42:07 bms Exp $
  */
 
 !include LogicLib.nsh
 !include StrFunc.nsh
 !include WinMessages.nsh
 !include Sections.nsh
+!include Library.nsh
 
+!include AddToPath.nsh
+
+# XXX Uncomment to stop bundling all the .EXEs.
 #!define DEBUG
-!define DO_SPLASH
-!define DO_ADD_DLLS_TO_PATH
 
-!define PRODUCT_NAME		"XORP/Win32"
+!define DO_SPLASH
+
+!define PRODUCT_NAME		"XORP (Debug)"
 !define PRODUCT_VERSION		"1.2"
 !define PRODUCT_URL		"http://www.xorp.org/"
 !define PRODUCT_HELP_URL	"mailto:feedback@xorp.org"
@@ -30,26 +34,33 @@
 !define TCPIP_KEY	\
 	"SYSTEM\CurrentControlSet\Services\Tcpip\Parameters"
 
-!define SRCDIR		"E:\p4\xorp_win"
-!define DLLDIR		"D:\gnuwin32\bin"
-!define DEFAULT_INSTALL_DIR "C:\XORP"
-
 !define SPLASH_IMAGE	"xorp_splash.bmp"
 #!define BRANDING_IMAGE	"xorp-logo-medium.bmp"
 #!define ICON_IMAGE	"none_yet"
 
+###################################################
 
+# XXX: This needs to be a system-wide DLL directory.
+# DLLs will be copied from this location.
+!define DLLDIR		"C:\MinGW\bin"
 
+# XXX: Set this to the Windows-style path of your source build directory.
+!define SRCDIR		"C:\p4\xorp"
+
+# XXX
+!define TMPDIR		"C:\windows\temp"
+
+# The default location for the installed stuff.
+!define DEFAULT_INSTALL_DIR "C:\XORP"
+
+###################################################
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 Caption "${PRODUCT_NAME} ${PRODUCT_VERSION} Installer"
-#Icon "${ICON_IMAGE}
-# Old fashioned desktop background
-#BGGradient 008080 008080 ffffff
 InstProgressFlags smooth
 XPStyle on
 
-OutFile "xorpinst.exe"
+OutFile "xorp-${PRODUCT_VERSION}-setup.exe"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "ProductName" "${PRODUCT_NAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileDescription" "${PRODUCT_NAME}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "FileVersion" "${PRODUCT_VERSION}"
@@ -57,7 +68,7 @@ VIProductVersion "1.2.0.0"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "Comments" "Find more information about ${PRODUCT_NAME} at ${PRODUCT_URL}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "CompanyName" "${PRODUCT_PUBLISHER}"
 VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalTrademarks" ""
-VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2001-2005 International Computer Science Institute"
+VIAddVersionKey /LANG=${LANG_ENGLISH} "LegalCopyright" "(c) 2001-2006 International Computer Science Institute"
 
 
 InstallDir ${DEFAULT_INSTALL_DIR}
@@ -88,48 +99,39 @@ Page instfiles
 UninstPage uninstConfirm
 UninstPage instfiles
 
+
 #
 # Required DLLs; hidden, and installed in app-private dir.
 #
-!ifdef DO_ADD_DLLS_TO_PATH
-${StrStr}
-VAR ind
-VAR reg
-!endif
 
 Section "-RequiredDLLs"
   SetOutPath $INSTDIR\dlls
   CreateDirectory $INSTDIR\dlls
 
-  File ${DLLDIR}\libssl32.dll
-  File ${DLLDIR}\libeay32.dll
-  File ${DLLDIR}\pcreposix.dll
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\libeay32.dll" "$INSTDIR\dlls\libeay32.dll" "${TMPDIR}"
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\libssl32.dll" "$INSTDIR\dlls\libssl32.dll" "${TMPDIR}"
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcre.dll" "$INSTDIR\dlls\pcre.dll" "${TMPDIR}"
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcreposix.dll" "$INSTDIR\dlls\pcreposix.dll" "${TMPDIR}"
 
-!ifdef DO_ADD_DLLS_TO_PATH
-  #ReadRegStr $reg HKCU "Environment" "path"
-  #WriteRegStr HKCU "Environment" "XORP_ROOT" "$INSTDIR"
-  ReadRegStr $reg HKLM "${SYSTEM_ENVIRONMENT_KEY}" "path"
-  WriteRegStr HKLM "${SYSTEM_ENVIRONMENT_KEY}" "XORP_ROOT" "$INSTDIR"
-  ${StrStr} $ind $reg "%XORP_ROOT%\dlls"
-  StrCmp $ind "" notfound found
-  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-  SetRebootFlag true
+  #
+  # Add XORP_ROOT to environment
+  #
+  Push "XORP_ROOT"
+  Push "$INSTDIR"
+  Call AddToEnvVar
 
-notfound:
-  #WriteRegStr HKCU "Environment" "path" "$reg;%XORP_ROOT%\dlls;"
-  WriteRegStr HKLM "${SYSTEM_ENVIRONMENT_KEY}" "path" "$reg;%XORP_ROOT%\dlls;"
-  SendMessage ${HWND_BROADCAST} ${WM_WININICHANGE} 0 "STR:Environment" /TIMEOUT=5000
-  SetRebootFlag true
-  
-found:
+  #
+  # Add XORP_ROOT\dlls to PATH
+  #
+  Push "$INSTDIR\dlls"
+  Call AddToPath
 
-!endif
 SectionEnd
 
 #
-# XORP core install.
+# XORP core install. Non-optional.
 #
-Section "!Base"
+Section "-Base"
 
   SetOutPath $INSTDIR
 
@@ -159,6 +161,10 @@ Section "!Base"
   SetOutPath $INSTDIR\fea\tools
   File ${SRCDIR}\fea\tools\show_interfaces.exe
 
+  CreateDirectory $INSTDIR\fib2mrib
+  SetOutPath $INSTDIR\fib2mrib
+  File ${SRCDIR}\fib2mrib\xorp_fib2mrib.exe
+
   CreateDirectory $INSTDIR\libxipc
   SetOutPath $INSTDIR\libxipc
   File ${SRCDIR}\libxipc\call_xrl.exe
@@ -167,6 +173,11 @@ Section "!Base"
   CreateDirectory $INSTDIR\policy
   SetOutPath $INSTDIR\policy
   File ${SRCDIR}\policy\xorp_policy.exe
+
+  #CreateDirectory $INSTDIR\policy\test
+  #SetOutPath $INSTDIR\policy\test
+  #File ${SRCDIR}\policy\test\compilepolicy.exe
+  #File ${SRCDIR}\policy\test\execpolicy.exe
 
   CreateDirectory $INSTDIR\rib
   SetOutPath $INSTDIR\rib
@@ -201,10 +212,8 @@ Section "!Base"
 
 SectionEnd
 
-# TODO: add documentation section
-# TODO: add source section
-
-Section "BGP"
+Section "BGP" 1
+ SectionSetText 1 "BGP: Border Gateway Protocol"
 !ifndef DEBUG
   CreateDirectory $INSTDIR\bgp
   SetOutPath $INSTDIR\bgp
@@ -219,7 +228,8 @@ Section "BGP"
 !endif
 SectionEnd
 
-Section "RIP"
+Section "RIP" 2
+ SectionSetText 2 "RIP: Routing Information Protocol"
 !ifndef DEBUG
   CreateDirectory $INSTDIR\rip
   SetOutPath $INSTDIR\rip
@@ -235,6 +245,40 @@ Section "RIP"
 !endif
 SectionEnd
 
+Section /o "OSPF" 3
+ SectionSetText 3 "OSPF: Open Shortest Path First"
+!ifndef DEBUG
+  CreateDirectory $INSTDIR\ospf
+  SetOutPath $INSTDIR\ospf
+  File ${SRCDIR}\ospf\xorp_ospfv2.exe
+  File ${SRCDIR}\ospf\xorp_ospfv3.exe
+
+  CreateDirectory $INSTDIR\ospf\tools
+  SetOutPath $INSTDIR\ospf\tools
+  File ${SRCDIR}\ospf\tools\print_lsas.exe
+  File ${SRCDIR}\ospf\tools\print_neighbours.exe
+!endif
+SectionEnd
+
+Section /o "PIM" 4
+ SectionSetText 4 "PIM: Protocol Independent Multicast"
+!ifndef DEBUG
+  CreateDirectory $INSTDIR\pim
+  SetOutPath $INSTDIR\pim
+  File ${SRCDIR}\pim\xorp_pimsm4.exe
+  File ${SRCDIR}\pim\xorp_pimsm6.exe
+!endif
+SectionEnd
+
+Section /o "MLD6IGMP" 5
+ SectionSetText 5 "MLD: Multicast Listener Discovery and IGMP"
+!ifndef DEBUG
+  CreateDirectory $INSTDIR\mld6igmp
+  SetOutPath $INSTDIR\mld6igmp
+  File ${SRCDIR}\mld6igmp\xorp_igmp.exe
+  File ${SRCDIR}\mld6igmp\xorp_mld.exe
+!endif
+SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
@@ -307,11 +351,87 @@ FunctionEnd
 ## Uninstaller
 ########################
 
+# XXX: TODO: Tidy this up.
+
 Section Uninstall
+
+  # Try removing BGP.
+  Delete "$INSTDIR\bgp\tools\*.exe"
+  RMDir "$INSTDIR\bgp\tools"
+  Delete "$INSTDIR\bgp\*.exe"
+  RMDir "$INSTDIR\bgp"
+
+  # Try removing OSPF.
+  Delete "$INSTDIR\ospf\tools\*.exe"
+  RMDir "$INSTDIR\ospf\tools"
+  Delete "$INSTDIR\ospf\*.exe"
+  RMDir "$INSTDIR\ospf"
+
+  # Try removing RIP.
+  Delete "$INSTDIR\rip\tools\*.exe"
+  RMDir "$INSTDIR\rip\tools"
+  Delete "$INSTDIR\rip\*.exe"
+  RMDir "$INSTDIR\rip"
+
+  # Try removing everything else.
+  Delete "$INSTDIR\pim\*.exe"
+  RMDir "$INSTDIR\pim"
+  Delete "$INSTDIR\mld6igmp\*.exe"
+  RMDir "$INSTDIR\mld6igmp"
+
+!ifndef DEBUG
+  Delete "$INSTDIR\cli\tools\*.exe"
+  RMDir "$INSTDIR\cli\tools"
+  RMDir "$INSTDIR\cli"
+  Delete "$INSTDIR\fea\tools\*.exe"
+  RMDir "$INSTDIR\fea\tools"
+  Delete "$INSTDIR\fea\*.exe"
+  RMDir "$INSTDIR\fea"
+  Delete "$INSTDIR\fib2mrib\*.exe"
+  RMDir "$INSTDIR\fib2mrib"
+  Delete "$INSTDIR\libxipc\*.exe"
+  RMDir "$INSTDIR\libxipc"
+  #Delete "$INSTDIR\policy\test\*.exe"
+  #RMDir "$INSTDIR\policy\test"
+  Delete "$INSTDIR\policy\*.exe"
+  RMDir "$INSTDIR\policy"
+  Delete "$INSTDIR\rib\*.exe"
+  RMDir "$INSTDIR\rib"
+  Delete "$INSTDIR\rtrmgr\*.exe"
+  RMDir "$INSTDIR\rtrmgr"
+  Delete "$INSTDIR\static_routes\*.exe"
+  RMDir "$INSTDIR\static_routes"
+!endif
+  Delete "$INSTDIR\xrl\targets\*.tgt"
+  Delete "$INSTDIR\xrl\targets\*.xrls"
+  RMDir "$INSTDIR\xrl\targets"
+  RMDir "$INSTDIR\xrl"
+
+  Delete "$INSTDIR\etc\templates\*.cmds"
+  Delete "$INSTDIR\etc\templates\*.tp"
+  RMDir "$INSTDIR\etc\templates"
+  RMDir "$INSTDIR\etc"
+
+  Delete "$INSTDIR\dlls\*.dll"
+  RMDir "$INSTDIR\dlls"
+
+  Delete "$INSTDIR\*.txt"
+
   Delete "$INSTDIR\uninst.exe"
-  # XXX: Much more to do here
+  RMDir "$INSTDIR"
+
+  # and finally the registry cleanup
+
+  Push "$INSTDIR\dlls"
+  Call un.RemoveFromPath
+
+  Push "XORP_ROOT"
+  Push "$INSTDIR"
+  Call un.RemoveFromEnvVar
+ 
   DeleteRegKey ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}"
-  SetAutoClose true
+
+  #SetAutoClose true
 SectionEnd
 
 Function un.onUninstSuccess
