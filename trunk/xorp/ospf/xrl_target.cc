@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.28 2006/02/21 02:44:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.29 2006/02/26 09:20:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -265,12 +265,19 @@ XrlOspfV2Target::policy_backend_0_1_push_routes()
 
 XrlCmdError
 XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
-					       const bool& /*unicast*/,
-					       const bool& /*multicast*/,
+					       const bool& unicast,
+					       const bool& multicast,
 					       const IPv4& nexthop,
 					       const uint32_t& metric,
 					       const XrlAtomList& policytags)
 {
+    debug_msg("Net: %s Nexthop: %s Unicast: %s Multicast %s metric %d\n",
+	      cstring(network), cstring(nexthop), pb(unicast), pb(multicast),
+	      metric);
+
+    if (!unicast)
+	return XrlCmdError::OKAY();
+
     if (!_ospf.originate_route(network, nexthop, metric, policytags)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
@@ -280,9 +287,15 @@ XrlOspfV2Target::policy_redist4_0_1_add_route4(const IPv4Net& network,
 
 XrlCmdError
 XrlOspfV2Target::policy_redist4_0_1_delete_route4(const IPv4Net& network,
-						  const bool& /*unicast*/,
-						  const bool& /*multicast*/)
+						  const bool& unicast,
+						  const bool& multicast)
 {
+    debug_msg("Net: %s Unicast: %s Multicast %s\n",
+	      cstring(network), pb(unicast), pb(multicast));
+
+    if (!unicast)
+	return XrlCmdError::OKAY();
+
     if (!_ospf.withdraw_route(network)) {
 	return XrlCmdError::COMMAND_FAILED("Network: " + network.str());
     }
