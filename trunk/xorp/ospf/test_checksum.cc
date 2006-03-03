@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.3 2005/11/04 20:54:35 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.4 2006/03/03 21:31:40 atanu Exp $"
 
 #include "config.h"
 
@@ -38,19 +38,27 @@ uint8_t data[] = {
 #include "iso512.data"
 };
 
+uint8_t lsa1[] = {
+#include "lsa1.data"
+};
+
+uint8_t lsa2[] = {
+#include "lsa2.data"
+};
+
 bool
-test1(TestInfo& info)
+test_checksum(TestInfo& info, const char *name, uint8_t* data, size_t len)
 {
-    DOUT(info) << "Starting test" << endl;
+    DOUT(info) << "Testing: " << name << endl;
 
     int32_t x, y;
 
-    fletcher_checksum(&data[0], sizeof(data), 0 /* offset */, x, y);
+    fletcher_checksum(data, len, 0 /* offset */, x, y);
 
     DOUT(info) << "x: " << x << " y: " << y << endl;
 
     if (!(255 == x && 255 == y)) {
-	DOUT(info) << "Both values must be zero\n";
+	DOUT(info) << "Both values must be 255\n";
 	return false;
     }
 
@@ -72,7 +80,12 @@ main(int argc, char **argv)
 	string test_name;
 	XorpCallback1<bool, TestInfo&>::RefPtr cb;
     } tests[] = {
-	{"test1", callback(test1)},
+	{"test1",
+	 callback(test_checksum, "iso512.data", &data[0], sizeof(data))},
+	{"test2",
+	 callback(test_checksum, "lsa1.data", &lsa1[0], sizeof(lsa1))},
+	{"test3",
+	 callback(test_checksum, "lsa2.data", &lsa2[0], sizeof(lsa2))},
     };
 
     try {
