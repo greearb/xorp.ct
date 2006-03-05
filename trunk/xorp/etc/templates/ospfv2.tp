@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.43 2006/03/01 00:55:35 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.44 2006/03/05 21:28:33 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -202,8 +202,6 @@ transmitted packets";
 	    area-range @: ipv4net {
 		%help: short "Area range for generating summaries";
 
-		%mandatory: $(@.advertise);
-
 		%create: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_add?area:ipv4=$(area.@)&net:ipv4net=$(@)&advertise:bool=$(@.advertise)";
 		%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/area_range_delete?area:ipv4=$(area.@)&net:ipv4net=$(@)";
 
@@ -309,7 +307,6 @@ transmitted packets";
 
 	    interface @: txt {
 	    	%help: short "Include an interface in this area";
-		%mandatory: $(@.link-type);
 
 		link-type {
 		    %help: short "broadcast or p2p or p2m";
