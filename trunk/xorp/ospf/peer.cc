@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.229 2006/02/27 23:53:47 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.230 2006/03/03 04:28:07 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -717,6 +717,8 @@ Peer<A>::add_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 	return false;
     }
 
+    update_router_links();
+
     return true;
 }
 
@@ -739,6 +741,7 @@ Peer<A>::remove_neighbour(A neighbour_address, OspfTypes::RouterID rid)
 	    (*ni)->event_kill_neighbour();
 	    delete (*ni);
 	    _neighbours.erase(ni);
+	    update_router_links();
 	    return true;
 	}
     }
@@ -2169,7 +2172,10 @@ Peer<IPv4>::update_router_linksV2(list<RouterLink>& router_links)
     case OspfTypes::PointToPoint: {
 	// RFC 2328 Section 12.4.1.1. Describing point-to-point interfaces
 	// There should be a single neighbour configured
-	XLOG_ASSERT(1 == _neighbours.size());
+	if (1 != _neighbours.size()) {
+	    XLOG_ERROR("A single neighbour should be configured");
+	    return;
+	}
 	list<Neighbour<IPv4> *>::const_iterator n = _neighbours.begin();
 	XLOG_ASSERT(n != _neighbours.end());
 
