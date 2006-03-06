@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.13 2005/11/27 06:10:02 atanu Exp $
+# $XORP: xorp/bgp/xrl_shell_funcs.sh,v 1.14 2005/11/29 15:25:59 atanu Exp $
 #
 
 CALLXRL=${CALLXRL:-../libxipc/call_xrl}
@@ -17,6 +17,12 @@ route_reflector()
 {
     echo "route_reflector" $*
     $CALLXRL "finder://bgp/bgp/0.2/set_cluster_id?cluster_id:ipv4=$1&disable:bool=$2"
+}
+
+set_damping()
+{
+    echo "route_flap_damping" $*
+    $CALLXRL "finder://bgp/bgp/0.2/set_damping?half_life:u32=$1&max_suppress:u32=$2&reuse:u32=$3&suppress:u32=$4&disable:bool=$5"
 }
 
 add_peer()

@@ -115,7 +115,13 @@ DampingTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     // Find the record for this route which must exist. If the route
     // was being damped continue to damp.
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(old_rtmsg.net());
-    XLOG_ASSERT(i != _damp.end());
+    // An entry should be found, but if damping was enabled after the
+    // original route passed through here it won't be found.
+    if (i == _damp.end()) {
+	return this->_next_table->
+	    replace_route(old_rtmsg, new_rtmsg,
+			  static_cast<BGPRouteTable<A>*>(this));
+    }
     Damp& damp = i.payload();
     if (damp._damped) {
 	typename RefTrie<A, DampRoute<A> >::iterator r;
@@ -174,7 +180,12 @@ DampingTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     // Don't update the figure of merit just remove the route if it
     // was being damped.
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(rtmsg.net());
-    XLOG_ASSERT(i != _damp.end());
+    // An entry should be found, but if damping was enabled after the
+    // original route passed through here it won't be found.
+    if (i == _damp.end()) {
+	return this->_next_table->
+	    delete_route(rtmsg, static_cast<BGPRouteTable<A>*>(this));
+    }
     Damp& damp = i.payload();
     if (damp._damped) {
 	typename RefTrie<A, DampRoute<A> >::iterator r;
