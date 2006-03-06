@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.22 2006/01/03 01:31:50 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.23 2006/01/03 07:57:57 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -1338,8 +1338,11 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_add_routex(const IPNet<A>&	net,
 						     const uint32_t&	metric,
 						     const XrlAtomList& policytags)
 {
-    UNUSED(unicast);
     UNUSED(multicast);
+
+    if (! unicast)
+	return XrlCmdError::OKAY();
+
     _xrm.add_route("policy", net, nexthop, metric, 0, policytags);
     return XrlCmdError::OKAY();
 }
@@ -1350,8 +1353,11 @@ XrlRipCommonTarget<A>::policy_redistx_0_1_delete_routex(const IPNet<A>&	net,
 							const bool&	unicast,
 							const bool&	multicast)
 {
-    UNUSED(unicast);
     UNUSED(multicast);
+
+    if (! unicast)
+	return XrlCmdError::OKAY();
+
     _xrm.delete_route("policy", net);
     return XrlCmdError::OKAY();
 }

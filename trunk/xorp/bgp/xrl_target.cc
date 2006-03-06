@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.55 2005/12/16 18:04:49 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.56 2006/02/08 22:03:57 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1356,7 +1356,8 @@ XrlBgpTarget::finder_event_observer_0_1_xrl_target_death(
 
 XrlCmdError
 XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter, 
-					   const string& conf) {
+					   const string& conf)
+{
     try {
 	debug_msg("[BGP] policy filter: %d conf: %s\n", filter, conf.c_str());
 	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
@@ -1370,7 +1371,8 @@ XrlBgpTarget::policy_backend_0_1_configure(const uint32_t& filter,
 }
 
 XrlCmdError
-XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter) {
+XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter)
+{
     try {
 	debug_msg("[BGP] policy reset: %d\n", filter);
 	XLOG_TRACE(_bgp.profile().enabled(trace_policy_configure),
@@ -1384,7 +1386,8 @@ XrlBgpTarget::policy_backend_0_1_reset(const uint32_t& filter) {
 }
 
 XrlCmdError
-XrlBgpTarget::policy_backend_0_1_push_routes() {
+XrlBgpTarget::policy_backend_0_1_push_routes()
+{
     debug_msg("[BGP] Route Push\n");
     _bgp.push_routes();
     return XrlCmdError::OKAY();
@@ -1397,9 +1400,13 @@ XrlBgpTarget::policy_redist4_0_1_add_route4(
         const bool&	    multicast,
         const IPv4&	    nexthop,
         const uint32_t&	    metric,
-        const XrlAtomList&  policytags) {
-
+        const XrlAtomList&  policytags)
+{
     UNUSED(metric);
+
+    if (! unicast)
+	return XrlCmdError::OKAY();
+
     _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
     return XrlCmdError::OKAY();
 	
@@ -1409,7 +1416,10 @@ XrlCmdError
 XrlBgpTarget::policy_redist4_0_1_delete_route4(
         const IPv4Net&	network,
         const bool&     unicast,
-        const bool&     multicast) {
+        const bool&     multicast)
+{
+    if (! unicast)
+	return XrlCmdError::OKAY();
 
     _bgp.withdraw_route(network,unicast,multicast);
     return XrlCmdError::OKAY();
@@ -1422,9 +1432,13 @@ XrlBgpTarget::policy_redist6_0_1_add_route6(
         const bool&	    multicast,
         const IPv6&	    nexthop,
         const uint32_t&	    metric,
-        const XrlAtomList&  policytags) {
-    
+        const XrlAtomList&  policytags)
+{
     UNUSED(metric);
+
+    if (! unicast)
+	return XrlCmdError::OKAY();
+
     _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
     return XrlCmdError::OKAY();
 }	
@@ -1433,8 +1447,11 @@ XrlCmdError
 XrlBgpTarget::policy_redist6_0_1_delete_route6(
         const IPv6Net&  network,
         const bool&     unicast,
-        const bool&     multicast) {
-    
+        const bool&     multicast)
+{
+    if (! unicast)
+	return XrlCmdError::OKAY();
+
     _bgp.withdraw_route(network,unicast,multicast);
     return XrlCmdError::OKAY();
 }	
