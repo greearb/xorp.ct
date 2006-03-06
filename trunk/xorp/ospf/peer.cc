@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.230 2006/03/03 04:28:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.231 2006/03/06 07:21:33 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -651,6 +651,19 @@ PeerOut<A>::set_passive(OspfTypes::AreaID area, bool passive)
     }
 
     return _areas[area]->set_passive(passive);
+}
+
+template <typename A>
+ bool
+PeerOut<A>::set_interface_cost(uint16_t interface_cost)
+{
+    _interface_cost = interface_cost;
+
+    typename map<OspfTypes::AreaID, Peer<A> *>::iterator i;
+    for(i = _areas.begin(); i != _areas.end(); i++)
+	(*i).second->update_router_links();
+
+    return true;
 }
 
 template <typename A>
