@@ -166,7 +166,7 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 
 "protocol"	return YY_PROTOCOL;
 
-[[:alpha:]][[:alnum:]_]*		{ yylval.c_str = strdup(yytext);
+[[:alpha:]][[:alnum:]_-]*		{ yylval.c_str = strdup(yytext);
 					  return YY_ID;
 					}  
 
