@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.5 2006/02/07 17:50:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.6 2006/02/07 18:42:39 pavlin Exp $"
 
 
 /*
@@ -35,6 +35,7 @@
  *	  and is renamed to local_strptime().
  *	- The inclusion of some header files is removed.
  *	- Sone unused structure definitions are removed.
+ *	- Conditional usage of __weak_alias() is removed.
  *	- TM_YEAR_BASE is defined conditionally.
  *	- A local implementation of UNUSED() is added.
  *	- All usage of isspace() is replaced with xorp_isspace().
@@ -186,10 +187,6 @@ const _TimeLocale *_CurrentTimeLocale = &_DefaultTimeLocale;
 
 #if defined(LIBC_SCCS) && !defined(lint)
 __RCSID("$NetBSD: strptime.c,v 1.25 2005/11/29 03:12:00 christos Exp $");
-#endif
-
-#ifdef __weak_alias
-__weak_alias(local_strptime,_local_strptime)
 #endif
 
 #define	_ctloc(x)		(_CurrentTimeLocale->x)
