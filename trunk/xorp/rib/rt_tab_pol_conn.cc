@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.5 2005/03/25 02:54:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.6 2005/07/08 02:06:24 abittau Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -229,6 +229,12 @@ PolicyConnectedTable<A>::do_filtering(IPRouteEntry<A>& route)
     try {
 	debug_msg("[RIB] PolicyConnectedTable Filtering: %s\n",
 		  route.str().c_str());
+
+	//
+	// XXX: a hack to reset the policy tags in case the policies
+	// are removed.
+	//
+	route.set_policytags(PolicyTags());
 
 	RIBVarRW<A> varrw(route);
 
