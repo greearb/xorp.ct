@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.26 2005/03/25 02:54:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.27 2005/07/22 01:41:18 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -208,17 +208,20 @@ RegisterTable<A>::notify_relevant_modules(bool add,
 	// Move the iterator on, because otherwise a deletion may invalidate it
 	nextiter = iter;
 	nextiter++;
+
+	const IPRouteEntry<A>* ipregistry_route = iter.payload()->route();
 	if (add) {
 	    debug_msg("NRM:   add\n");
 	    if (changed_net.contains(iter.payload()->valid_subnet())
-		&& iter.payload()->route()->net().contains(changed_net)) {
+		&& ((ipregistry_route == NULL)
+		    || ipregistry_route->net().contains(changed_net))) {
 		debug_msg("NRM:   child_matches\n");
 		notify_invalidated(iter);
 		matches = true;
 	    }
 	} else {
-	    if (iter.payload()->route() != NULL
-		&& iter.payload()->route()->net() == changed_net) {
+	    if ((ipregistry_route != NULL)
+		&& (ipregistry_route->net() == changed_net)) {
 		notify_invalidated(iter);
 		matches = true;
 	    }
