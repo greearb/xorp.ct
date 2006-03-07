@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.49 2006/02/10 03:14:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.50 2006/02/22 22:27:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -417,6 +417,45 @@ RoutingTable<A>::replace_route(OspfTypes::AreaID area, IPNet<A> net, A nexthop,
     result = add_route(area, net, nexthop, metric, rt);
 
     return result;
+}
+
+template <typename A>
+void
+RoutingTable<A>::push_routes()
+{
+    typename Trie<A, InternalRouteEntry<A> >::iterator tic;
+
+    for (tic = _current->begin(); tic != _current->end(); tic++) {
+	RouteEntry<A>& rt = tic.payload().get_entry();
+	if (rt.get_discard())
+	    continue;
+	PolicyTags policytags;
+	IPNet<A> net = tic.key();
+	A nexthop = rt.get_nexthop();
+	uint32_t metric = rt.get_cost();
+	bool accepted = do_filtering(net, nexthop, metric, rt, policytags);
+
+	if (accepted) {
+	    if (!rt.get_filtered()) {
+		_ospf.replace_route(net, nexthop, metric,
+				    false /* equal */,
+				    false /* discard */,
+				    policytags);
+				    
+	    } else {
+		_ospf.add_route(net, nexthop, metric,
+				false /* equal */,
+				false /* discard */,
+				policytags);
+	    }
+	} else {
+	    if (!rt.get_filtered()) {
+		_ospf.delete_route(net);
+	    }
+	}
+
+	rt.set_filtered(!accepted);
+    }
 }
 
 template <typename A>

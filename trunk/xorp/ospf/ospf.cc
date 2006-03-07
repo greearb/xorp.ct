@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.65 2006/02/15 19:06:13 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.66 2006/02/26 09:20:58 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -687,7 +687,8 @@ template <typename A>
 void
 Ospf<A>::push_routes()
 {
-    XLOG_WARNING("TBD - policy route pushing");
+    _peer_manager.external_push_routes();
+    _routing_table.push_routes();
 }
 
 template <typename A>

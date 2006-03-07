@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.19 2006/02/03 21:26:19 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.20 2006/02/28 00:30:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -274,6 +274,13 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
     start_refresh_timer(lsar);
 
     return true;
+}
+
+template <typename A>
+void
+External<A>::push_routes()
+{
+//     XLOG_WARNING("TBD - policy route pushing");
 }
 
 template <typename A>

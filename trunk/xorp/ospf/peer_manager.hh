@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.67 2006/02/26 09:20:58 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.68 2006/02/27 00:50:59 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -674,6 +674,11 @@ class PeerManager {
      * @param area that all AS-External-LSAs should be sent to.
      */
     void external_push(OspfTypes::AreaID area);
+
+    /**
+     * Re-run the policy filters on all routes.
+     */
+    void external_push_routes();
 
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.

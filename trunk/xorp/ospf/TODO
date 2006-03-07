@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.64 2006/02/16 03:18:16 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.65 2006/02/18 02:17:30 atanu Exp $
 #
 
 TODO
@@ -144,6 +144,24 @@ kernel. Disabling an address via the xorpsh removes the address from
 the kernel the subsequent attempt to leave the multicast group fails
 generating an error. OSPF in the IPv4 case should check if the address
 (key) is still enabled before attempting to leave a group.
+
+49) When a policy is modified OSPF receives a push_routes call. All
+routes that are sent to the RIB are re-filtered, the import policies.
+
+The routes that are introduced to OSPF via an export policy are
+currently not re-filtered. A method External<A>::push_routes() exists
+but currently does nothing. If the "then" part of an export policy is
+changed such as setting the nexthop, or the ebit or the tag. The route
+is currently pushed through the system again so the filter can be
+re-run. Currently no functionality seems to be lost by not
+implementing this method, as the routes are always pushed through the
+system anyway. For completeness the method should be implemented for
+the day that a policy change does not force all routes back through
+the system.
+
+In order to implement the push_routes the network, nexthop, metric and
+possibly policytags must be saved in a separate list, Or the
+AS-External-LSA could be augmented to hold the original values.
 
 Possible issues
 ~~~~~~~~~~~~~~~

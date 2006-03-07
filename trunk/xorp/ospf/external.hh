@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/external.hh,v 1.11 2006/02/07 23:34:48 atanu Exp $
+// $XORP: xorp/ospf/external.hh,v 1.12 2006/02/13 23:01:13 atanu Exp $
 
 #ifndef __OSPF_EXTERNAL_HH__
 #define __OSPF_EXTERNAL_HH__
@@ -94,6 +94,11 @@ class External {
 	return _originating != 0;
     }
     
+    /**
+     * Re-run the policy filters on all routes.
+     */
+    void push_routes();
+
  private:
     Ospf<A>& _ospf;			// Reference to the controlling class.
     map<OspfTypes::AreaID, AreaRouter<A> *>& _areas;	// All the areas
