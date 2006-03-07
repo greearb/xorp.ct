@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.84 2006/02/28 06:15:15 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.85 2006/03/01 18:37:40 zec Exp $ */
 
 protocols {
     bgp {
@@ -303,6 +303,7 @@ protocols {
 
 	    disable {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(@)`";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_peer_state?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&toggle:bool=`~$(DEFAULT)`";
 	    }
 
 	    enabled {
