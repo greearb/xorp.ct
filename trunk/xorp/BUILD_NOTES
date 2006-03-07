@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.40 2006/01/31 05:28:25 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.41 2006/02/23 02:05:36 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -35,8 +35,15 @@ compiler respectively).
 =================
 
 To run the internal tests, you must have "bash" and "python" installed.
-Then, after the code is compiled, you need to run the following command
-in the top-level directory:
+Note that if the python's executable filename is not "python", then
+you would have to create a symbolic link with such name. E.g., execute
+as a root:
+
+cd /path/to/python/binary
+ln -s python2.4 python
+
+After the code is compiled, you need to run the following command
+in the top-level XORP directory:
 
 gmake check
 
