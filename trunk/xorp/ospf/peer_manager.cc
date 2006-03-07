@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.112 2006/02/27 00:50:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.113 2006/03/07 01:43:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1451,7 +1451,7 @@ template <typename A>
 void
 PeerManager<A>::external_push_routes()
 {
-    return _external.push_routes();
+    _external.push_routes();
 }
 
 template <typename A>
