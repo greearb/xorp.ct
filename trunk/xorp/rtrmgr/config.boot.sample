@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.32 2005/10/12 09:59:50 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.33 2005/10/28 18:55:34 pavlin Exp $ */
 
 
 interfaces {
@@ -127,10 +127,35 @@ protocols {
     }
 }
 
+policy {
+    /* Describe connected routes for redistribution */
+    policy-statement connected {
+	term export {
+	    from {
+		protocol: "connected"
+	    }
+	}
+    }
+}
+
+policy {
+    /* Describe static routes for redistribution */
+    policy-statement static {
+	term export {
+	    from {
+		protocol: "static"
+	    }
+	}
+    }
+}
+
 protocols {
     rip {
+
+/* Connected interfaces will only be advertised if explicitly exported */
+	export: "connected"
+
 /* Run on specified network interface addresses */
-/*
 	interface dc0 {
 	    vif dc0 {
 		address 10.10.10.10 {
@@ -138,33 +163,165 @@ protocols {
 		}
 	    }
 	}
-*/
     }
 }
 
-/*
 protocols {
-    ospf {
+    ospf4 {
 	router-id: 10.10.10.10
-	area 0.0.0.0 {
-	    stub: false
-	    interface dc0 {
-		hello-interval: 5
+
+	/* export: "static" */
+
+/*
+	traceoptions {
+	    flag {
+		all {
+		    disable: false
+		}
 	    }
 	}
+*/
+	
+	area 0.0.0.0 {
+
+/*
+	    virtual-link 20.20.20.20 {
+		transit-area: 0.0.0.1
+	    }
+*/
+
+/*
+	    area-range: 10.0.0.0/8 {
+		advertise: true
+	    }
+*/
+
+	    interface dco0 {
+		/* link-type: "broadcast" */
+		vif dc0 {
+		    address 10.10.10.10 {
+			/* priority: 128 */
+			/* hello-interval: 10 */
+			/* router-dead-interval: 40 */
+			/* interface-cost: 1 */
+			/* retransmit-interval: 5 */
+			/* transit-delay: 1 */
+
+/*
+			authentication {
+			    simple-password: "password";
+
+			    md5 @: u32 {
+				password: "password";
+			    }
+			}
+*/
+
+			/* passive: false */
+
+			/* disable: false */			
+
+		    }
+		}
+	    }
+	}
+
+	area 0.0.0.1 {
+	    /* area-type: "normal" */	
+
+	    interface dc1 {
+		vif dc1 {
+		    address 10.10.11.10 {
+		    }
+		}
+	    }
+	}
+
+/*
+	area 0.0.0.2 {
+	    area-type: "stub"
+
+	    default-lsa {
+		metric: 0
+	    }
+
+	    summaries {
+		disable: false
+	    }
+	
+	    interface dc2 {
+		vif dc2 {
+		    address 10.10.12.10 {
+		    }
+		}
+	    }
+	}
+*/
+
+/*
+	area 0.0.0.3 {
+	    area-type: "nssa"
+
+	    default-lsa {
+		metric: 0
+	    }
+
+	    summaries {
+		disable: true
+	    }
+	
+	    interface dc3 {
+		vif dc3 {
+		    address 10.10.13.10 {
+		    }
+		}
+	    }
+	}
+*/
+
     }
 }
-*/
 
 protocols {
     bgp {
 	bgp-id: 10.10.10.10
 	local-as: 65002
 
+	/* export: "static" */
+
+/*
+	traceoptions {
+	    flag {
+		verbose
+		message-in
+		message-out
+		state-change
+		policy-configuration
+	    }
+	}
+*/
+
+/*
+	route-reflector {
+	    cluster-id: 20.20.20.20
+	}
+*/	
+
+/*
+	confederation {
+	    cluster-id: 65005
+	}
+*/	
+
 	peer 10.30.30.30 {
 	    local-ip: 10.10.10.10
 	    as: 65000
 	    next-hop: 10.10.10.20
+
+	    /* Route reflector client */
+	    /* client: false */
+	    /* confederation-member: false */
+
 /*
 	    local-port: 179
 	    peer-port: 179
