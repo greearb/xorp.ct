@@ -354,32 +354,52 @@ routes that are to be announced. For example, "connected", "static" and
 
 <P>
 <B>
-Note that this mechanism for originating
-routes is temporary. In the next release it will be replaced by
-a more generic policy framework. Unfortunately, the same keyword
-"export" will be used but with different syntax.
+Starting with release candidate 1.1-RC policy is used to redistribute
+routes into RIP. The same keyword "export" is used but the syntax has
+changed. 
 </B>
 
 <p><u>Note</u>: In release candidate 1.0-RC, the "import" keyword is used in
 place of "export".
 
 <PRE>
+policy {
+    /* Describe connected routes for redistribution */
+    policy-statement connected {
+	term export {
+	    from {
+		protocol: "connected"
+	    }
+	}
+    }
+}
+
+policy {
+    /* Describe static routes for redistribution */
+    policy-statement static {
+	term export {
+	    from {
+		protocol: "static"
+	    }
+	}
+    }
+}
+
 protocols {
     rip {
 /* Redistribute routes for connected interfaces */
 /*
-	export connected {
-	    metric: 0
-	    tag: 0
-	}
+	export: "connected"
 */
 /* Redistribute static routes */
 /*
-	export static {
-	    metric: 1
-	    tag: 0
-	}
+	export: "static"
 */
+/* Redistribute connected and static routes */
+/*
+	export: "connected,static"
+*/
+
 /* Run on specified network interface addresses */
 /*
 	interface dc0 {
