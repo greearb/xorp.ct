@@ -417,6 +417,37 @@ protocols {
 <P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
 instead of "disable".
 
+<H4>Open Shortest Path First</H4>
+
+In order to run OSPF Version 2 the "router-id" must be specified, it
+is a unique IPv4 address with the Autonomous System. The smallest IP
+address of an interface belonging to the router is a good choice.
+<P>
+OSPF splits networks into areas so an "area" must be configured.
+
+<P>
+Configure one or more of the routers configured interface/vif/address
+in this area.
+
+<P><U>Note</U>: The 4 in "ospf4" refers to the IPv4 address family.
+
+<PRE>
+protocols {
+    ospf4 {
+	router-id: 10.10.10.10
+
+	area 0.0.0.0 {
+	    interface dc0 {
+		vif dc0 {
+		    address 10.10.10.10 {
+		    }
+		}
+	    }
+	}
+    }
+}
+</PRE>
+
 <H4>Border Gateway Protocol</H4>
 
 In order to run BGP the "bgp-id" (BGP Identifier) and "local-as"
