@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.13 2006/03/08 08:14:09 atanu Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.14 2006/03/08 19:26:35 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -77,11 +77,11 @@ explicitly configured, and typically a metric will also be configured.
 
 In addition, to originate routes via RIP, it is necessary to use the
 {\stt export} command to export routes from the router's routing table
-via RIP. The {\stt export} commands arguments are policy statements
-see Chapter \ref{policy}.
-
-{\bf Note that before release 1.2-RC the {\stt export} command did not
-refer to policy and used a different syntax}
+via RIP~\footnote{Starting with XORP Release-1.2 policy is used to
+export routes into RIP with the {\tt export} statement.  Prior to XORP
+Release-1.2 the {\tt export} statement was used with a different syntax.}.
+The {\stt export} commands arguments are policy statements;
+see Chapter \ref{policy} for additional detais.
 
 \subsection{Configuration Syntax}
 
