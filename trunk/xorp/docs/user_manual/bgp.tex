@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.14 2006/02/14 19:54:19 bms Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.15 2006/02/15 19:18:15 pavlin Exp $
 %
 
 \chapter{BGP}
@@ -8,8 +8,7 @@
 
 BGP is the Border Gateway Protocol, which is the principal inter-domain
 routing protocol in the Internet.  BGP version 4 is specified in RFC
-1771.  However, RFC 1771 is shortly to be replaced by a much improved
-newer RFC, and XORP BGP is compliant with the new RFC.  Earlier
+4271,  XORP BGP is compliant with the new RFC.  Earlier
 versions of BGP are now considered historic.  XORP implements what is
 known as BGP4+.  This is the core BGP-4 protocol, plus the
 multiprotocol extensions needed to route IPv6 traffic and to provide
@@ -85,7 +84,7 @@ to an alternative path.
 
 XORP BGP complies with the following standards:
 \begin{description}
-\item{\bf draft-ietf-idr-bgp4-22.txt}: BGP-4 Specification (obsoletes RFC 1771)
+\item{\bf RFC 4271}: BGP-4 Specification (obsoletes RFC 1771)
 \item{\bf RFC 1657}: Definitions of Managed Objects for the Fourth Version
      of the Border Gateway Protocol (BGP-4) using SMIv2.
 \item{\bf RFC 2858}: Multiprotocol Extensions for BGP-4.
