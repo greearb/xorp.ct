@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.15 2005/10/12 09:58:30 pavlin Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.16 2006/02/14 19:56:18 bms Exp $
 %
 
 \chapter{Configuration Overview}
@@ -219,13 +219,12 @@ or disable each part of the configuration.}.
 If you wish to announce routes then it is necessary to
 {\tt export}~\footnote{Note that in release candidate 1.0-RC, the {\tt import}
  keyword is used in place of {\tt export}.}
-the routes that are to be announced. For example, {\tt connected},
-{\tt static} and {\tt rip}.
+the routes that are to be announced. For example, {\tt connected} and 
+{\tt static}.
 
-{\bf Note that this mechanism for originating
-routes is temporary. In the next release it will be replaced by
-a more generic policy framework. Unfortunately, the same keyword
-{\stt export} will be used but with different syntax.}
+{\bf Starting with release candidate 1.2-RC policy is used to export
+routes into RIP. The same keyword {\stt export} is used but the syntax has
+changed.}
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
@@ -233,24 +232,41 @@ a more generic policy framework. Unfortunately, the same keyword
 \begin{alltt}
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
+policy \{\\
+\>/* Describe connected routes for redistribution */\\
+\>policy-statement connected \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "connected"\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+policy \{\\
+\>/* Describe static routes for redistribution */\\
+\>policy-statement static \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "static"\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
 protocols \{\\
 \>rip \{\\
-\>/* Redistribute routes for connected interfaces */\\
-\>\>/*\\
-\>\>export connected \{\\
-\>\>\>metric: 0\\
-\>\>\>tag: 0\\
-\>\>\}\\
-\>\>*/\\
-\>/* Redistribute static routes */\\
-\>\>/*\\
-\>\>export static \{\\
-\>\>\>metric: 1\\
-\>\>\>tag: 0\\
-\>\>\}\\
-\>\>*/\\
-\>/* Run on specified network interface addresses */\\
-\>/*\\
+/* Redistribute routes for connected interfaces */\\
+/*\\
+\>\>export: "connected"\\
+*/\\
+/* Redistribute static routes */\\
+/*\\
+\>\>export: "static"\\
+*/\\
+/* Redistribute connected and static routes */\\
+/*\\
+\>\>export: "connected,static"\\
+*/\\
+/* Run on specified network interface addresses */\\
 \>\>interface dc0 \{\\
 \>\>\>vif dc0 \{\\
 \>\>\>\>address 10.10.10.10 \{\\
@@ -258,7 +274,6 @@ protocols \{\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
-\>*/\\
 \>\}\\
 \}
 \end{tabbing}
