@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.3 2006/03/08 10:08:27 atanu Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.4 2006/03/08 17:17:50 zec Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -274,6 +274,47 @@ Note that it is pure ``coincidence'' that the directive to match a list of
 prefixes {\tt network4-list} is the same as the one used to declare the set.  It
 is not a requirement.
 
+\section{Ranges}
+Certain variables can be matched against linear ranges of their corresponding type.
+The policy engine supports matching against ranges of unsigned integers and IPv4 / IPv6 addresses.
+Ranges are expressed by specifiying their lower and upper inclusive boundaries separated by two dots, for example:
+
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+from \{\\
+\>nexthop4: 10.0.0.11..10.0.0.15\\
+\>neighbor: 10.0.0.0..10.0.0.255\\
+\>med: 100..200\\
+\} \\
+\end{tabbing} 
+\end{alltt}
+\end{minipage}
+}
+
+An abbreviated form of specifying a range containing a single value is allowed, in which case both the lower and upper boundary are considered to be equal.  Hence, the following two expressions are equivalent:
+
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
+from \{\\
+\>neighbor: 10.1.2.3\\
+\>med: 1000\\
+\} \\
+from \{\\
+\>neighbor: 10.1.2.3..10.1.2.3\\
+\>med: 100..100\\
+\} \\
+\end{tabbing} 
+\end{alltt}
+\end{minipage}
+}
+
+
 \section{Tracing}
 It is often useful to trace routes going through filters in order to debug
 policies.  Another utility of this would be to log specific routes or simply to
@@ -478,9 +519,9 @@ the specified range. \\
 {\tt origin} & {\tt :} & u32 & Matches the origin attribute of the route. 0
 stands for IGP, 1 for EGP and 2 for INCOMPLETE.  \\
 \hline
-{\tt med} & {\tt :} & u32 & Matches the MED of the route. \\
+{\tt med} & {\tt :} & u32range & Matches the MED of the route. \\
 \hline
-{\tt localpref} & {\tt :} & u32 & Matches the local preference of the route. \\
+{\tt localpref} & {\tt :} & u32range & Matches the local preference of the route. \\
 \hline
 {\tt was-aggregated} & {\tt :} & bool & True if this route contributed to origination of an aggregate route. \\
 \end{tabular}
