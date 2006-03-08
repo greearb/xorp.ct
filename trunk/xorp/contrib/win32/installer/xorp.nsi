@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.1 2006/02/13 15:42:07 bms Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.2 2006/03/03 14:41:22 bms Exp $
  */
 
 !include LogicLib.nsh
@@ -45,7 +45,7 @@
 !define DLLDIR		"C:\MinGW\bin"
 
 # XXX: Set this to the Windows-style path of your source build directory.
-!define SRCDIR		"C:\p4\xorp"
+!define SRCDIR		"C:\cvs\xorp"
 
 # XXX
 !define TMPDIR		"C:\windows\temp"
