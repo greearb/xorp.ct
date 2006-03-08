@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.44 2006/03/05 21:28:33 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.45 2006/03/05 21:34:06 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -74,7 +74,7 @@ protocols {
 			}
 			passive:		bool = false;
 
-			neighbour @: ipv4 {
+			neighbor @: ipv4 {
 			    router-id:  ipv4;
 			}
 
@@ -237,9 +237,9 @@ transmitted packets";
 		}
 
 		router-dead-interval {
-		    %help: short "Seconds to wait before considering a neighbour dead";
+		    %help: short "Seconds to wait before considering a neighbor dead";
 
-		    %allow-range: $(@) "1" "4294967295" %help: "The neighbour router dead interval (in seconds)";
+		    %allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
 
 		    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 		    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
@@ -346,9 +346,9 @@ transmitted packets";
 
 			router-dead-interval {
 			    %help: short
-	"Seconds to wait before considering a neighbour dead";
+	"Seconds to wait before considering a neighbor dead";
 
-			    %allow-range: $(@) "1" "4294967295" %help: "The neighbour router dead interval (in seconds)";
+			    %allow-range: $(@) "1" "4294967295" %help: "The neighbor router dead interval (in seconds)";
 
 			    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(@)";
 			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_dead_interval?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&interval:u32=$(DEFAULT)";
@@ -437,13 +437,13 @@ transmitted packets";
 			    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_peer_state?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&enable:bool=`~$(DEFAULT)`";
 			}
 
-			neighbour @: ipv4 {
-			    %help: short "Neighbours address";
+			neighbor @: ipv4 {
+			    %help: short "Neighbors address";
 
 			    %mandatory: $(@.router-id);
 
 			    router-id {
-				%help: short "Neighbours router-id";
+				%help: short "Neighbors router-id";
 
 				%set:;
 			    }
