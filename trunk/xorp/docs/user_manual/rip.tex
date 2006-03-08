@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.11 2006/01/03 01:55:35 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.12 2006/02/09 10:00:06 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -77,16 +77,11 @@ explicitly configured, and typically a metric will also be configured.
 
 In addition, to originate routes via RIP, it is necessary to use the
 {\stt export} command to export routes from the router's routing table
-via RIP.  At present, the configuration for route export is
-coarse-grain, allowing all routes originating from a particular
-routing ``protocol'' to be exported.  For example, to export routes
-for directly connected interfaces, the directive ``{\stt export
-connected}'' would be used.
+via RIP. The {\stt export} commands arguments are policy statements
+see Chapter \ref{policy}.
 
-{\bf Note that this mechanism for originating
-routes is temporary. In the next release it will be replaced by
-a more generic policy framework. Unfortunately, the same keyword
-{\stt export} will be used but with different syntax.}
+{\bf Note that before release 1.2-RC the {\stt export} command did not
+refer to policy and used a different syntax}
 
 \subsection{Configuration Syntax}
 
@@ -99,10 +94,7 @@ xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 protocols \{\\
 \>rip \{\\
 \>\>targetname {\it text}\\
-\>\>export {\it text} \{\\
-\>\>\>metric: {\it int}\\
-\>\>\>tag: {\it int}\\
-\>\>\}\\
+\>\>export {\it text}\\
 \>\>interface {\it text} \{\\
 \>\>\>vif {\it text} \{\\
 \>\>\>\>address {\it IPv4} \{\\
@@ -148,30 +140,8 @@ protocols \{\\
 \item{\tt targetname}: this is the name for this instance of RIP.  It
   defaults to ``{\stt rip}'', and it is not recommended that this
   default is overridden under normal usage scenarios.
-\item{\tt export}: this directive specifies an export rule.  Routes
-  matching the export rule will be exported from the routing table via
-  RIP to the outside world.  The {\stt export} directive takes a
-  parameter indicating which routes are to be exported via RIP.  Valid
-  values are ``{\stt connected}'' indicating directly connected subnets
-  should be advertised via RIP, ``{\stt static}'' indicating configured
-  static routes should be re-advertised via RIP, and ``{\stt bgp}''
-  indicating all BGP routes should be re-advertised via RIP.
-  Re-advertising BGP routes is not advised unless the router has only
-  a {\it very} limited BGP routing table.
-
-  Each export statement can take the following parameters:
-\begin{description}
-\item{\tt metric}: this specifies the metric RIP should advertise for
-  these exported subnets.  It takes an integer value between 1 and
-  15. Note that 15 is regarded as infinity as far as RIP is concerned.
-  The sum of all the metrics across the entire RIP domain should be
-  less than 15.
-\item{\tt tag}: this specifies the RIP tag should should advertise for
-  these exported subnets.  Tags can be used to distinguish between
-  routes from different origins when doing policy filtering at routers
-  receiving these routes.  If specified, the tag must be an integer
-  between 0 and 65535.
-\end{description}
+\item{\tt export}: this directive specifies an export policy statement
+(see Chapter \ref{policy}).
 \item{\tt interface}: this specifies a network interface that should
   be used by RIP for routing.  See Chapter \ref{interfaces} for
   details of interfaces.  The interface must be configured
@@ -324,23 +294,40 @@ exceptions:
 \begin{alltt}
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
+policy \{\\
+\>policy-statement connected-to-rip \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "connected"\\
+\>\>\>\}\\
+\>\>\>then \{\\
+\>\>\>\>metric: 0\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
+policy \{\\
+\>policy-statement static-to-rip \{\\
+\>\>term export \{\\
+\>\>\>from \{\\
+\>\>\>\>protocol: "static"\\
+\>\>\>\}\\
+\>\>\>then \{\\
+\>\>\>\>metric: 1\\
+\>\>\>\}\\
+\>\>\}\\
+\>\}\\
+\}\\
+\\
 protocols \{\\
 \>rip \{\\
-\>/* Redistribute routes for connected interfaces */\\
-\>\>export connected \{\\
-\>\>\>metric: 0\\
-\>\>\>tag: 0\\
-\>\>\}\\
-\>/* Redistribute static routes */\\
-\>\>export static \{\\
-\>\>\>metric: 1\\
-\>\>\>tag: 0\\
-\>\>\}\\
-\>/* Run on specified network interface addresses */\\
-\>\>interface dc0 \{\\
-\>\>\>vif dc0 \{\\
-\>\>\>\>address 10.10.10.10 \{\\
-\>\>\>\>\>disable: false\\
+\>\>/* Redistribute connected and static routes */\\
+\>\>export: "connected-to-rip,static-to-rip"\\
+\>\>/* Run on specified network interface addresses */\\
+\>\>interface fxp0 \{\\
+\>\>\>vif fxp0 \{\\
+\>\>\>\>address 69.110.224.158 \{\\
 \>\>\>\>\}\\
 \>\>\>\}\\
 \>\>\}\\
