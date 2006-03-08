@@ -10,14 +10,14 @@
 
 \title{XORP BGP Routing Daemon \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 %\twocolumn
 \begin{document}
@@ -151,7 +151,7 @@ is the responsibility of the receive code in the Peer classes to check
 that received update messages are syntactically and semantically
 valid.
 
-The current (April 2005) version of XORP stores all routes in the RibIn,
+The current (March 2006) version of XORP stores all routes in the RibIn,
 irrespective of whether or not they will fail to pass a downstream
 filter.  However, the RibIn has enough information (from the values
 returned by the {\tt add\_route}, {\tt delete\_route} and {\tt
