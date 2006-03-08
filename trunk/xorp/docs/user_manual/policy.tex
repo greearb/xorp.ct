@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.2 2005/08/12 15:30:15 abittau Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.3 2006/03/08 10:08:27 atanu Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -481,6 +481,8 @@ stands for IGP, 1 for EGP and 2 for INCOMPLETE.  \\
 {\tt med} & {\tt :} & u32 & Matches the MED of the route. \\
 \hline
 {\tt localpref} & {\tt :} & u32 & Matches the local preference of the route. \\
+\hline
+{\tt was-aggregated} & {\tt :} & bool & True if this route contributed to origination of an aggregate route. \\
 \end{tabular}
 \caption{\label{policy_bgp_match}BGP specific match conditions.}
 \end{table}
@@ -510,6 +512,8 @@ specified number of times. \\
 {\tt med} & {\tt :} & u32 & Sets the MED. \\
 \hline
 {\tt localpref} & {\tt :} & u32 & Sets the localpref. \\
+\hline
+{\tt aggregate-prefix-len} & {\tt :} & u32 & Originate an aggregate route with this prefix length. \\
 \end{tabular}
 \caption{\label{policy_bgp_action}BGP specific actions.}
 \end{table}
