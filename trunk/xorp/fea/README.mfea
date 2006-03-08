@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/README.mfea,v 1.15 2004/07/09 05:22:26 pavlin Exp $
+# $XORP: xorp/fea/README.mfea,v 1.16 2005/01/13 23:22:16 pavlin Exp $
 #
 
 Multicast Forwarding Engine Abstraction
@@ -44,6 +44,8 @@ XRLs. At the very least a MFEA module must be provided with
 the set of network interfaces to enable for multicast forwarding.
 For information how to configure the MFEA see
 http://www.xorp.org/getting_started.html
+or
+http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
 
 Startup
 =======
@@ -148,8 +150,8 @@ the BGP testing framework.
 Status
 ======
 
-Currently (July 2004), the MFEA supports abstraction for
+Currently (March 2006), the MFEA supports abstraction for
 the following systems:
 
- * {Free,Net,Open}BSD OS (tested only on FreeBSD-4.5 and FreeBSD-4.7).
- * Lunux OS (tested only on Red Hat Linux 7.2 with kernel 2.4.18)
+ * {Free,Net,Open}BSD OS
+ * Lunux OS
