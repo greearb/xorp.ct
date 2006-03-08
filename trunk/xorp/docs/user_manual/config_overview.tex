@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.17 2006/03/08 06:23:12 atanu Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.18 2006/03/08 06:44:48 atanu Exp $
 %
 
 \chapter{Configuration Overview}
@@ -217,14 +217,10 @@ the {\tt enable} flag was used instead of {\tt disable} to enable
 or disable each part of the configuration.}.
 
 If you wish to announce routes then it is necessary to
-{\tt export}~\footnote{Note that in release candidate 1.0-RC, the {\tt import}
- keyword is used in place of {\tt export}.}
 the routes that are to be announced. For example, {\tt connected} and 
-{\tt static}.
-
-{\bf Starting with release candidate 1.2-RC policy is used to export
-routes into RIP. The same keyword {\stt export} is used but the syntax has
-changed.}
+{\tt static}~\footnote{Starting with XORP Release-1.2 policy is used to
+export routes into RIP with the {\tt export} statement.  Prior to XORP
+Release-1.2 the {\tt export} statement was used with a different syntax.}.
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
