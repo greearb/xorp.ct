@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.15 2005/04/21 23:04:33 pavlin Exp $
+# $XORP: xorp/TODO,v 1.16 2005/04/23 00:32:04 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -17,7 +17,9 @@
   for various fields, etc in system header files. Instead,
   it should use AC_TRY_COMPILE or AC_TRY_RUN.
 
-* Make all #include "config.h" to be #ifdef HAVE_CONFIG_H  (??)
+* Remove all #include "config.h" (except for "libxorp/xorp.h"),
+  and fix the devnotes/coding-style.txt that "libxorp/xorp.h"
+  should be included by all files (rather than "config.h").
 
 * Fix all file names.
   E.g. all names non-capital letters + numbers, and use underscores.
