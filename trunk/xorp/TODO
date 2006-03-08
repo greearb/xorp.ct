@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/TODO,v 1.16 2005/04/23 00:32:04 pavlin Exp $
+# $XORP: xorp/TODO,v 1.17 2006/03/08 01:19:06 pavlin Exp $
 #
 
 * Add a list with acknowledgments for all people who have contributed:
@@ -28,4 +28,7 @@
   of bool2str() vs truefalse() vs explicit tertiary operator consistent
   and settle on one only if possible.
 
- * Libtoolize flower_malloc.
+* Libtoolize flower_malloc.
+
+* Don't use sprintf(3) and friends. Instead, use the safer snprintf(3)
+  and friends.
