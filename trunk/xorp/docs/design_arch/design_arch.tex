@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.16 2005/04/13 21:08:16 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.17 2005/11/29 01:48:35 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,14 +38,14 @@
 
 \title{XORP Design Overview \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 \maketitle
 
@@ -116,7 +116,7 @@ yet.
 
 \begin{itemize}
   \item {\bf BGP4+} ({\bf IPv4} and {\bf IPv6})
-  \item OSPF (IPv4 and IPv6)
+  \item {\bf OSPF} ({\bf IPv4} and IPv6)
   \item {\bf RIPv2 (IPv4)}, {\bf RIPng (IPv6)}
   \item IS-IS
 \end{itemize}
@@ -145,7 +145,15 @@ yet.
 \begin{itemize}
   \item {\bf Traditional UNIX forwarding path}
   \item {\bf Click forwarding path}
+  \item {\bf Windows Server 2003 forwarding path}
   \item User-level simulation-like environment
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%
+\subsubsection*{Miscellaneous}
+
+\begin{itemize}
+  \item {\bf Routing policies} ({\bf unicast} and multicast)
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -160,7 +168,7 @@ The XORP design philosophy stresses {\em extensibility},
 For routing and management modules, the primary goals are
 extensibility and robustness.  These goals are achieved by carefully
 separating functionality into independent modules, running in separate
-Unix processes, with well-defined APIs between them.  Clearly, there
+UNIX processes, with well-defined APIs between them.  Clearly, there
 are performance penalties to pay for such an architecture, but we
 believe that so long as careful attention is paid to computational
 complexity, the costs associated with inter-process communication will
@@ -190,12 +198,12 @@ and each of the routing protocols that update that forwarding engine
 running on a separate control processor system.
 
 The lower-level subsystem can use traditional UNIX kernel forwarding,
-or the Click modular router~\cite{CLICK-PROJECT}. The modularity and
-minimal dependencies between the lower-level and user-level subsystems
-allow for many future possibilities for forwarding engines.  As
-standards such as those being developed in the IETF ForCES Working
-Group emerge, we expect to support them to provide true forwarding
-engine interchangeability.
+the Click modular router~\cite{CLICK-PROJECT} or Windows kernel
+forwarding (Windows Server 2003). The modularity and minimal
+dependencies between the lower-level and user-level subsystems allow for
+many future possibilities for forwarding engines.  As standards such as
+those being developed in the IETF ForCES Working Group emerge, we expect
+to support them to provide true forwarding engine interchangeability.
 
 \begin{figure}[htbp]
   \begin{center}
@@ -302,13 +310,8 @@ For more information about the XORP BGP implementation, see \cite{xorp:bgp}.
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{OSPF}
 
-This is the OSPF routing daemon. There will be separate IPv4 and IPv6
+This is the OSPF routing daemon. There are separate IPv4 and IPv6
 daemons, because unlike BGP there is no real need to tie them together.
-
-Currently, we are using a port of an existing OSPF implementation
-(http://www.ospf.org/) to the XORP architecture.  However this does
-not support IPv6.  In the future, we may decide to implement a new
-OSPF implementation to support both IPv4 and IPv6.
 
 %%%%%%%%%%%%%%%%%%%%%
 \subsubsection{RIP}
@@ -388,6 +391,16 @@ router. For example, it can be used to translate SNMP requests into XRL
 requests. Internally, SNMP will communicate with the other processes
 using XRLs.
 
+%%%%%%%%%%%%%%%%%%%%%
+\subsubsection{Routing Policies}
+
+This is the routing policies coordination process.~\footnote{This
+process is not shown in Figure~\ref{fig:process_model} for simplicity
+purpose.} It interacts with all routing protocols and RIB and instructs
+them how the handle the routes flowing to the system: export routes from
+one protocol to another, modify or remove routes as they flow through
+the system, etc.  Currently only unicast routing policies are supported.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
@@ -404,8 +417,8 @@ using XRLs.
 
   \item June 9, 2003: Updated to match XORP version 0.3 release code.
 
-  \item August 28, 2003: Add SNMP to the set of implemented items. Bump-up the
-  version to 0.4, and the date.
+  \item August 28, 2003: Add SNMP to the set of implemented
+  items. Bump-up the version to 0.4, and the date.
 
   \item November 6, 2003: Updated the BGP status (now it supports
   IPv6). Bump-up the version to 0.5, and the date.
@@ -415,6 +428,10 @@ using XRLs.
 
   \item April 13, 2005: Updated the status (now there is support for
   Click forwarding path, etc); bump-up the version to 1.1, and the date.
+
+  \item March 8, 2006: Updated the status (now XORP has its own OSPF
+  implementation, there is policy support, and support for Windows
+  forwarding path); bump-up the version to 1.2, and the date.
 
 \end{itemize}
 
