@@ -4,7 +4,7 @@
 See the <a href="design_docs.html">design documentation</a> for details of the
 XORP processes.
 <P>
-As of February 2006 (Release 1.2-RC), the status is as follows:
+As of March 2006 (Release 1.2), the status is as follows:
 <DL>
 <DT><B>RIB</B>
 
@@ -19,7 +19,7 @@ nexthop resolution does not work.
 <DT><B>FEA</B>
 
 <DD>The unicast FEA for FreeBSD, NetBSD, OpenBSD, Linux, Mac OS X,
-Windows  Server 2003, the dummy FEA for testing purposes, and the FEA
+Windows Server 2003, the dummy FEA for testing purposes, and the FEA
 for Click are basically complete. The multicast FEA (MFEA) for FreeBSD,
 NetBSD, OpenBSD and Linux is basically complete. The MFEA for Click
 doesn't exist.
@@ -104,7 +104,6 @@ router) needs more polishing.
 allows MIB modules to access information from XORP processes.  Currently we
 have fully implemented one such module, BGP4-MIB (RFC 1657).  The rtrmgr
 can be configured to start the SNMP agent and to load MIB modules.
-Just before Release-1.1 we noticed that the SNMP support is broken,
-hence it should not be enabled. This will be fixed immediately after
-the release.
+However, it has not been tested as well as the rest of the XORP modules,
+hence there could be some issues.
 </DL>
