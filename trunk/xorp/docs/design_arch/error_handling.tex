@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.34 2005/04/13 21:08:16 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.35 2005/11/29 01:48:35 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -49,14 +49,14 @@
 
 \title{XORP Error Handling \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 \maketitle
 
@@ -174,12 +174,15 @@ running process and start a new process.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Actions to take on detecting process failure}
 
-Table \ref{failure_table} indicates what action a process should take
-on detecting failure in other processes. The ``(G)'' denotes that the
-process should attempt to exit gracefully. Figure \ref{failure_fig}
-shows the relationship between the various processes. The thick arrows
-should be modelled as a signal sent from a process dying to its
-dependent processes.
+Table \ref{failure_table} indicates what action a process should take on
+detecting failure in other processes~\footnote{Note that currently this
+document does not describe the policy manager. Such description will be
+included in the future. For all practical reasons, the policy manager is
+as important as the rtrmgr/finder, even though it is running as a
+separate process.}. The ``(G)'' denotes that the process should attempt
+to exit gracefully. Figure \ref{failure_fig} shows the relationship
+between the various processes. The thick arrows should be modelled as a
+signal sent from a process dying to its dependent processes.
 
 \begin{figure}
   \begin{center}
