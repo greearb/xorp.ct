@@ -1,22 +1,25 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.96 2006/02/22 23:33:20 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.97 2006/02/23 00:57:49 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.2-RC (2006/02/22)
+Release 1.2 (2006/03/08)
 =========================
   ALL:
-    [Note: this is XORP-1.2-RC release candidate and not all documentation
-    is up to date. Also, the list below with the changes since the XORP-1.1
-    release is incomplete.]
-
-    - Many improvements, bug fixes and cleanup.
+    - Numerous improvements, bug fixes and cleanup.
 
     - The third-party ospfd implementation is replaced with a new
       OSPF implementation developed from scratch.
+
+    - The integration of the routing policy mechanism with the rest of
+      the system is completed.
+
+    - XORP now builds on Windows Server 2003 (Service Pack 1),
+      amd64+FreeBSD-6.0, FreeBSD-6.1 (BETA3), NetBSD-3.0, OpenBSD-2.8,
+      MacOS X 10.4.5 (among others).
 
   CONFIGURATION:
     - Addition of new interface related configuration statement:
@@ -159,6 +162,8 @@ Release 1.2-RC (2006/02/22)
     - Addition of support for displaying the routing tables in brief,
       detailed and terse format. The default format is "brief".
 
+   - Few bug fixes.
+
   RIP:
     - The syntax for configuring the authentication mechanism has changed:
 
@@ -236,7 +241,7 @@ Release 1.2-RC (2006/02/22)
       a PIM configured interface is gracefully shutdown.
 
   FIB2MRIB:
-    - No significant changes.
+    - Several bug fixes.
 
   CLI:
     - Various improvements and bug fixes.
