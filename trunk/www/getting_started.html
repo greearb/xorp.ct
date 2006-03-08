@@ -125,7 +125,7 @@ validation tests.  We don't always succeed, but failures identified by
 the tinderbox are always fixed very rapidly.
 
 <P>
-To compile XORP requires nearly 1GB of free disk space, and up to an
+To compile XORP requires nearly 1.3GB of free disk space, and up to an
 hour depending on your CPU speed and the version of the compiler
 you're using.  Much of this is spent compiling the validation tests,
 which are always built by default.
@@ -209,9 +209,9 @@ will be in the rtrmgr subdirectory.
 <P>
 xorp_rtrmgr will expect to find a configuration file in the same
 directory it is started from.  By default this configuration file is
-called <B>config.boot</B>.  There's a sample config.boot file in the
-rtrmgr directory - please <B>do not</B> use this without tailoring the
-IP addresses, interfaces and routing protocols to match your local
+called <B>config.boot</B>.  There's a sample config.boot.sample file in
+the rtrmgr directory - please <B>do not</B> use this without tailoring
+the IP addresses, interfaces and routing protocols to match your local
 network environment.  You can specify a different filename for the
 configuration file using the -b command line flag.  The -N "no
 execute" flag will cause xorp_rtrmgr to startup and pretend the router
@@ -228,7 +228,7 @@ drive.
 <P>
 To interact with the router via the command line interface, the
 operator uses the XORP command shell <B>xorpsh</B>.  If you compiled
-from source, this should also be in the rtrmgr subdirectory.  xorpsh
+from source, this should also be in the rtrmgr subdirectory.  Xorpsh
 should not normally be run as root, but if a user is going to change
 the configuration of the router (as opposed to simply monitor the
 router's operation) then they need to be in the "xorp" Unix group.  If
@@ -322,7 +322,7 @@ interfaces {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 
 <P>
@@ -356,7 +356,7 @@ fea {
 If IPv4 and IPv6 forwarding are required you will require the configuration
 above.
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enable-unicast-forwarding4"
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enable-unicast-forwarding4"
 and "enable-unicast-forwarding6" flags were used instead to enable or disable
 the IPv4 and IPv6 forwarding.
 
@@ -411,7 +411,7 @@ routes that are to be announced. For example, "connected" and "static".
 
 <P>
 <B>
-Starting with release candidate 1.2-RC policy is used to export
+Starting with XORP Release-1.2 policy is used to export
 routes into RIP. The same keyword "export" is used but the syntax has
 changed. 
 </B>
@@ -471,7 +471,7 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 
 <H4>Open Shortest Path First</H4>
@@ -544,7 +544,7 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 
 
@@ -603,7 +603,7 @@ plumbing {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 
 <P>
@@ -670,7 +670,7 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 <P><U>Note</U>: The "version", "enable-ip-router-alert-option-check",
 "query-interval", "query-last-member-interval", "query-response-interval",
@@ -851,7 +851,7 @@ protocols {
 }
 </PRE>
 
-<P><U>Note</U>: Prior to XORP Release 1.1, the "enabled" flag was used
+<P><U>Note</U>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 <P><U>Note</U>: The "enable-ip-router-alert-option-check",
 "cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
@@ -972,12 +972,12 @@ protocols {
 }
 </PRE>
 
-<p><u>Note</u>: Prior to XORP Release 1.1, the "enabled" flag was used
+<p><u>Note</u>: Prior to XORP Release-1.1, the "enabled" flag was used
 instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.12 2005/04/14 10:43:17 mjh Exp $.
-<br>Generated on 07/Mar/2006 at 14:37:40.</em>
+<br>Generated on 07/Mar/2006 at 19:51:11.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
