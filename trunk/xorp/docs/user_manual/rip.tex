@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.12 2006/02/09 10:00:06 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.13 2006/03/08 08:14:09 atanu Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -24,7 +24,7 @@ RIPng introduces IPv6 support.  It is very similar to RIPv2, but for
 IPv6 instead of IPv4.
 
 RIP is a distance vector protocol, which means that when a router
-receives a route from a neighbour, that route comes with a distance
+receives a route from a neighbor, that route comes with a distance
 metric indicating the cost associated with reaching the destination
 via that neighbor.  The router adds its metric for the link on which
 the route was received to the metric in the received route, and then
@@ -218,7 +218,7 @@ protocols \{\\
   triggered-update-min-secs} for details.  The default is 5 seconds,
   and should not normally need to be changed.
 \item{\tt table-announce-min-secs}: A RIP router will typically tell
-  its neighbours its entire routing table every 30 seconds.  To avoid
+  its neighbors its entire routing table every 30 seconds.  To avoid
   self-synchronization of routing updates, the precise time interval
   between telling each neighbor about routing updates is randomly
   jittered, with the delay chosen uniformly at random between {\stt
