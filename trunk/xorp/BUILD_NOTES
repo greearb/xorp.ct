@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.41 2006/02/23 02:05:36 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.42 2006/03/07 19:29:46 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -86,7 +86,12 @@ gmake check
     - Multicast routing doesn't work because of a broken "struct igmpmsg"
       definition inside <netinet/ip_mroute.h>.
       The fix (already in the FreeBSD CVS repository) is to replace
-      u_long with uint32_t inside the body of "struct igmpmsg".
+      u_long with uint32_t inside the body of "struct igmpmsg", and
+      then recompile both the FreeBSD kernel and XORP.
+    - The SNMP support inside the "mibs" directory fails to compile.
+    - The rest of code compiles with the default compiler, and the internal
+      tests appear to succeed:
+      gcc (GCC) 3.4.4 [FreeBSD] 20050518
 
   * The following compiler is known to be buggy, and should not be used
     to compile XORP:
@@ -94,11 +99,18 @@ gmake check
     A newer compiler such as the following should be used instead:
     - gcc34 (GCC) 3.4.2 20040827 (prerelease) [FreeBSD]
 
+  * FreeBSD-6.1 (BETA3)
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.4 [FreeBSD] 20050518
+
 3.2. NetBSD
 ===========
 
   * NetBSD-2.0 and NetBSD-3.0:
-    - The code compiles, and the internal tests appear to succeed.
+    - The SNMP support inside the "mibs" directory may fail to compile.
+    - The rest of code compiles, and the internal tests appear to succeed:
+      gcc (GCC) 3.3.3 (NetBSD nb3 20040520)
     - If the compilation fails with the following error:
       "/usr/pkg/bin/bash: Undefined PLT symbol "read" (reloc type = 7, symnum = 92)"
       then just run "gmake" again, and the compilation should continue from
@@ -157,11 +169,14 @@ gmake check
       then you should increase the file descriptors limit by
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
-  * OpenBSD-3.6-current (as of February 2005) on i386 and amd64:
+  * OpenBSD-3.6-current (as of February 2005) on i386 and amd64,
+    and OpenBSD-3.8:
     - The default gcc/g++ compiler (version 3.3.5 (propolice)) has a bug
-      in the propolice implementation, hence you must disable the propolice
-      feature. You need to add the "-fno-stack-protector" flag to your
-      CFLAGS and CXXFLAGS environmental variables. E.g. (in csh/tcsh):
+      in the propolice implementation:
+          http://www.monkey.org/openbsd/archive2/tech/200503/msg00011.html
+      Hence, you must disable the propolice feature. You need to add the
+      "-fno-stack-protector" flag to your CFLAGS and CXXFLAGS
+      environmental variables. E.g. (in csh/tcsh): 
 	  setenv CFLAGS -fno-stack-protector
 	  setenv CXXFLAGS -fno-stack-protector
 	  ./configure
@@ -209,8 +224,9 @@ gmake check
     - The code compiles, but some of the internal tests may fail.
 
   * Linux Fedora Core4 (kernel 2.6.11-1.1369_FC4smp):
-    - The code compiles, and the internal tests appear to succeed.
-    - gcc-4.0.0 (default) or gcc-4.0.1
+    - The code compiles, and the internal tests appear to succeed
+      with the following compilers: gcc-4.0.0 (default), gcc-4.0.1,
+      gcc-4.0.2
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
@@ -238,7 +254,7 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
 
   * OS X 10.4.2 (Darwin 8.2.0), OS X 10.4.3 (Darwin 8.3.0),
-    OS X 10.4.4 (Darwin 8.4.0):
+    OS X 10.4.4 (Darwin 8.4.0), OS X 10.4.5 (Darwin 8.5.0).
     - gcc version 4.0.0 20041026 (Apple Computer, Inc. build 4061)
     - The code compiles, and the internal tests appear to succeed.
 
