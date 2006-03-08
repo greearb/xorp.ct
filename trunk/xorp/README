@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.37 2006/02/22 23:13:13 pavlin Exp $
+# $XORP: xorp/README,v 1.38 2006/02/23 00:01:46 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -49,8 +49,7 @@ paper available from http://www.xorp.org/ :
 2. Status
 =========
 
-This is XORP Release-1.2-RC (Release Candidate).
-It is reasonably stable and can be used for
+This is XORP Release-1.2. It is reasonably stable and can be used for
 routing, but there are known issues.
 
 Supported platforms:
@@ -130,10 +129,12 @@ See ${XORP}/BUILD_NOTES for additional information of building XORP.
 
 In general, configuration and startup of the various XORP processes are
 normally meant to happen via the router manager (rtrmgr), so please
-refer first to the XORP configuration guide
-(http://www.xorp.org/getting_started.html),
-the rtrmgr documentation (${XORP}/docs/rtrmgr/),
-and then the documentation of the individual modules.
+refer first to the XORP configuration guide:
+http://www.xorp.org/getting_started.html
+
+For additional information see the user documentation:
+http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
+and ${XORP}/docs/user_manual.
 
 
 4. Code structure and documentation
@@ -182,18 +183,19 @@ The content of each of the directories is the following:
 
   * fib2mrib : Forwarding Information Base to the Multicast Routing
     Information Base route propagator.
-    It uses the FEA to obtain the FIB information from the underlying system,
-    and propagates it to the MRIB, so it can be used by multicast routing
-    protocols such as PIM-SM. Typically, it is needed only if the unicast
-    routing protocols run within XORP do not inject routes in the MRIB.
+    It uses the FEA to obtain the FIB information from the underlying
+    system, and propagates it to the MRIB, so it can be used by
+    multicast routing protocols such as PIM-SM. Typically, it is needed
+    only if the unicast routing protocols run within XORP do not inject
+    routes in the MRIB.
 
   * libcomm : Communication socket library.
-    Currently, it is used only by the cli.
 
   * libfeaclient : Library that is useful to clients of the FEA.
 
   * libproto : Abstract protocol library.
-    Used by the following modules/directories: cli, fea, mld6igmp, pim.
+    Used by the following modules/directories: cli, fea, mld6igmp, ospf,
+    pim.
 
   * libxipc : XRL (XORP Resource Locator) library and XRL-related
     programs.
@@ -211,6 +213,10 @@ The content of each of the directories is the following:
 
   * mrt : Various multicast-related code.
     Used by the following modules/directories: fea, mld6igmp, pim.
+
+  * ospf : Open Shortest Path First implementation.
+
+  * policy : Policy-related library.
 
   * pim : Protocol Independent Multicast - Sparse Mode (PIM-SM)
     implementation.
@@ -236,12 +242,9 @@ limited interest, or are not relevant to the current release:
   * contrib : various contributed code.
 
   * contrib/ospfd : John Moy's OSPFd implementation (http://www.ospf.org/).
-    Not supported with this release.
+    Not supported anymore.
 
   * devnotes : various notes for the XORP core members.
-
-  * policy : Policy-related library.
-    Currently, it is work in progress, and is not used yet.
 
   * utils : Various XORP-related utilities.
 
@@ -267,6 +270,7 @@ In the long-term, we plan to add:
 The core team currently consists of:
 
   * Fred Bauer
+  * Andrea Bittau
   * Javier Cardona
   * Atanu Ghosh
   * Adam Greenhalgh
@@ -293,6 +297,7 @@ The core team currently consists of:
 	expressed in this material are those of the author(s) and do not
 	necessarily reflect the views of the National Science Foundation.
     - Microsoft
+    - Vyatta
 
   * Martin C. Shepherd for the libtecla library (used by the CLI).
 
