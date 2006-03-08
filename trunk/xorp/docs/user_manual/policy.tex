@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.1 2005/08/12 12:19:39 abittau Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.2 2005/08/12 15:30:15 abittau Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -138,7 +138,7 @@ the result of each statement. An example would be as follows:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 from \{\\
-\>protocol: "static\_routes"\\
+\>protocol: "static"\\
 \>metric < 5\\
 \} \\
 to \{\\
@@ -332,7 +332,7 @@ policy \{\\
 \>policy-statement "static-to-bgp" \{\\
 \>\>term a \{\\
 \>\>\>from \{\\
-\>\>\>\>protocol: "static\_routes"\\
+\>\>\>\>protocol: "static"\\
 \>\>\>\>metric: 2\\
 \>\>\>\}\\
 \>\>\>to \{\\
@@ -574,7 +574,7 @@ policy \{\\
 \>policy-statement static-to-bgp \{\\
 \>\>term friend \{\\
 \>\>\>from \{\\
-\>\>\>\>protocol: "static\_routes"\\
+\>\>\>\>protocol: "static"\\
 \>\>\>\}\\
 \>\>\>to \{\\
 \>\>\>\>neighbor: 10.0.0.1\\
@@ -586,7 +586,7 @@ policy \{\\
 \>\>\} \\
 \>\>term metric \{\\
 \>\>\>from \{\\
-\>\>\>\>protocol: "static\_routes"\\
+\>\>\>\>protocol: "static"\\
 \>\>\>\>metric: 7\\
 \>\>\>\}\\
 \>\>\>to \{\\
@@ -600,7 +600,7 @@ policy \{\\
 \>\>\} \\
 \>\>term drop \{\\
 \>\>\>from \{\\
-\>\>\>\>protocol: "static\_routes"\\
+\>\>\>\>protocol: "static"\\
 \>\>\>\}\\
 \>\>\>then \{\\
 \>\>\>\>reject\\
