@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/user_manual/Makefile.am,v 1.6 2005/08/12 12:19:39 abittau Exp $
+## $XORP: xorp/docs/user_manual/Makefile.am,v 1.7 2005/08/26 22:41:21 pavlin Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -19,6 +19,7 @@ user_manual_LATEX	+= interfaces.tex
 user_manual_LATEX	+= livecd.tex
 user_manual_LATEX	+= multicast_routing.tex
 user_manual_LATEX	+= multicast_topology.tex
+user_manual_LATEX	+= ospf.tex
 user_manual_LATEX	+= pimsm.tex
 user_manual_LATEX	+= policy.tex
 user_manual_LATEX	+= preface.tex
