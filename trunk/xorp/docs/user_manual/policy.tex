@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.7 2006/03/09 06:45:18 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.8 2006/03/09 07:49:04 atanu Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -579,6 +579,67 @@ attributes specific to static routes.
 \section{RIP}
 RIP supports policy and may be used as a source and target for route
 redistribution.
+
+\section{OSPF}
+OSPF supports policy and route redistribution.  It can be used both as
+a source for redistribution (OSPF-to-something) and as a target
+(something-to-OSPF). The following sections summarize which aspects of
+OSPF routes may be matched and what actions may be taken. These are
+also specified in the {\tt ospfv2.tp} template file.
+
+\subsection{Match Conditions}
+Table~\ref{policy_ospf_match} summarizes the match conditions specific to OSPF.
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|p{7cm}|}
+\hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
+{\tt nexthop4} & {\tt :} & ipv4range & Matches if the IPv4 next-hop of the route
+lies within the specified range.\\
+
+\hline
+{\tt metric} & {\tt :} & u32 & Matches metric \\
+\hline
+
+\hline
+{\tt ebit} & {\tt :} & bool & Matches ebit true for type1 false for type2 \\
+\hline
+
+\hline
+{\tt tag} & {\tt :} & u32range & Matches tag field in AS-external-LSA \\
+\hline
+
+\end{tabular}
+\caption{\label{policy_ospf_match}OSPF specific match conditions.}
+\end{table}
+
+\subsection{Actions}
+Table~\ref{policy_ospf_action} summarizes the actions specific to OSPF.
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|p{7cm}|}
+\hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
+{\tt nexthop4} & {\tt :} & ipv4 & Set the forwarding field in an
+AS-external-LSA \\
+
+\hline
+{\tt metric} & {\tt :} & u32 & Set the metric \\
+\hline
+
+\hline
+{\tt ebit} & {\tt :} & bool & Set ebit true for type1 false for type2 \\
+\hline
+
+\hline
+{\tt tag} & {\tt :} & u32 & Set tag field in AS-external-LSA \\
+\hline
+
+\end{tabular}
+\caption{\label{policy_ospf_action}OSPF specific actions.}
+\end{table}
 
 \section{Examples}
 Some common policies are presented in this section for a better understanding of
