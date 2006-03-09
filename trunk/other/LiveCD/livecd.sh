@@ -1,7 +1,7 @@
 #!/bin/sh -
 
 #
-# $XORP: other/LiveCD/livecd.sh,v 1.12 2005/04/13 04:53:01 pavlin Exp $
+# $XORP: other/LiveCD/livecd.sh,v 1.13 2005/04/13 22:05:25 pavlin Exp $
 #
 
 # Copyright (c) 2004-2005 International Computer Science Institute
@@ -526,7 +526,13 @@ create_iso() {
     if [ -f /usr/local/bin/mkisofs ] ; then
 
 #        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -r -J -h -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
-        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -l -r -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
+
+#
+# XXX: Don't use the -r flag when generating the ISO image with mkisofs,
+# because it will reset the suid/sgid flags that are needed for commands
+# like ping and traceroute. Instead, use the -R flag.
+#        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -l -r -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
+        /usr/local/bin/mkisofs -b boot/cdboot -no-emul-boot -c boot/boot.catalog  -l -R -V LiveCD -o $LIVEISODIR/LiveCD.iso . >> $LIVEDIR/log || aviso
 	dialog --title "XORP LiveCD" --msgbox "Creation process done." 5 60
 
     elif then
