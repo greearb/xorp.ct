@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim/pim_arch.tex,v 1.19 2005/08/30 02:05:14 pavlin Exp $
+% $XORP: xorp/docs/pim/pim_arch.tex,v 1.20 2005/11/29 01:48:39 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,14 +38,14 @@
 
 \title{XORP PIM-SM Routing Daemon \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 \maketitle
 
@@ -78,7 +78,7 @@ implementation is well tested, we would
 try to optimize those parts of the implementation that should prove
 to be a bottleneck.
 
-Currently (April 2005), the PIM-SM implementation is based
+Currently (March 2006), the PIM-SM implementation is based
 on the specification in the following documents:
 
 \begin{itemize}
@@ -230,7 +230,7 @@ capable, and the loopback interface are ignored for multicast
 routing.
 
 Typically, from developer's point of view, all interaction with PimVif
-would be through PimNode~\footnote{For simplicity, currently (April 2005)
+would be through PimNode~\footnote{For simplicity, currently (March 2006)
 there are few occasions when XrlPimNode uses direct access to PimVif.}.
 
 The public interface for PimVif contains the methods to manipulate a
@@ -265,7 +265,7 @@ PimScopeZoneTable is a table that contains information about scoped
 zones. There is one such table per PimNode. This table is used to check
 whether various control messages are allowed to be sent or accepted a
 specific network interface~\footnote{Note that in the current implementation
-(April 2005) the PimScopeZoneTable is used only for PIM
+(March 2006) the PimScopeZoneTable is used only for PIM
 Bootstrap messages. In the future, the scope zone information would be
 used for other control messages as well.}.
 
@@ -325,12 +325,12 @@ contains PimMre entries (described in file \verb=pim/pim_mre.hh=):
 
 \end{itemize}
 
-For simplicity of implementation, currently (April 2005) PimMrt
+For simplicity of implementation, currently (March 2006) PimMrt
 contains one more table: PimMrtMfc PIM-specific table with Multicast
 Forwarding Cache (PimMfc) entries (in the future, this table may be
 moved out of PimMrt to PimNode). This table contains all
 entries that have been installed in the multicast forwarding table in
-the multicast forwarding engine. Currently (April 2005), those
+the multicast forwarding engine. Currently (March 2006), those
 entries are source-group-specific, and are installed ``on-demand'' (\ie
 only if there is an active source for some multicast group). In the future,
 group-specific entries may be supported as well (assuming that that
@@ -663,7 +663,7 @@ them.
 \subsection{PimConfig Description}
 
 PimConfig handles the PIM-specific configuration~\footnote{Currently
-(April 2005), PimConfig is not implemented; rather, all state is
+(March 2006), PimConfig is not implemented; rather, all state is
 kept inside PimNode instead.}. This configuration is used to configure the
 following units:
 
@@ -709,6 +709,8 @@ following units:
   does not deal with the MRIB information anymore.
 
   \item April 13, 2005: Bump-up the version to 1.1, and the date.
+
+  \item March 8, 2006: Bump-up the version to 1.2, and the date.
 
 \end{itemize}
 
