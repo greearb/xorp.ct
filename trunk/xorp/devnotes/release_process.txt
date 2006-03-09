@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.41 2006/02/27 23:57:15 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.42 2006/03/09 02:30:06 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -68,12 +68,29 @@ the login shell is csh or tcsh):
 		code
 
 ========================================================================
-0725.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
+0720.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
 	      (NOTE: for the time being, do not do it yet, until we
 	      have a better idea about the particular purpose, if any,
 	      of XORP_MODULE_VERSION).
 	WHO:  Release manager
 	WHEN: 1 day before the release date
+
+========================================================================
+0730.	TASK: Add a new year to the copyright license (only if
+	      necessary) 
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: All files in xorp/
+
+========================================================================
+0740.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
+	WHO:  Release manager
+	WHEN: 1 day before the release date
+	MISC: - If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add
+		new subdirectories.
+	      - Fix all kdoc-related compilation issues that may be
+		discovered by running the xorp/docs/kdoc/gen-kdoc.sh
+		script.
 
 ========================================================================
 0750.	TASK: Bump-up the release version number
@@ -198,23 +215,9 @@ the login shell is csh or tcsh):
  egrep '\\date' */*.tex
 
 ========================================================================
-1400.	TASK: Add a new year to the copyright license (only if
-	      necessary) 
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: All files in xorp/
-
-========================================================================
 1600.	TASK: Update xorp/README
 	WHO:  Release manager
 	WHEN: 1 day before the release date
-
-========================================================================
-1800.	TASK: Update xorp/docs/kdoc/gen-kdoc.sh
-	WHO:  Release manager
-	WHEN: 1 day before the release date
-	MISC: If necessary, edit xorp/docs/kdoc/gen-kdoc.sh and add new
-	      subdirectories.
 
 ========================================================================
 1900.	TASK: Stop the XORP tinderbox crontab job (OPTIONAL)
