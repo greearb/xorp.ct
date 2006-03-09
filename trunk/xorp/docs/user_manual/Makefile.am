@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/docs/user_manual/Makefile.am,v 1.7 2005/08/26 22:41:21 pavlin Exp $
+## $XORP: xorp/docs/user_manual/Makefile.am,v 1.8 2006/03/08 10:32:01 atanu Exp $
 ##
 
 include $(top_srcdir)/docs/mk/Makefile.doc.am
@@ -8,7 +8,8 @@ include $(top_srcdir)/docs/mk/Makefile.doc.am
 # -- Document Names
 DOCS			 = user_manual
 
-user_manual_LATEX	 = bgp.tex
+user_manual_LATEX	 = ../tex/xorp.bib
+user_manual_LATEX	+= bgp.tex
 user_manual_LATEX	+= cli_intro.tex
 user_manual_LATEX	+= config_overview.tex
 user_manual_LATEX	+= diagnostics.tex
