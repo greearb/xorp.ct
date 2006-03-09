@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.8 2006/03/08 06:53:31 atanu Exp $
+% $XORP: xorp/docs/user_manual/unicast_routing.tex,v 1.9 2006/03/08 06:55:23 atanu Exp $
 %
 
 \chapter{Unicast Routing}
@@ -51,8 +51,6 @@ protocol.  Such routes are known as {\it dynamic routes}.
 Many different routing protocols can supply dynamic routes.  The dynamic
 routing protocols that are in most common use are:
 \begin{itemize}
-\item {\bf Border Gateway Protocol (BGP)}.  This is used for
-inter-domain routing.
 \item {\bf Routing Information Protocol (RIP)}.  This is probably the
 simplest intra-domain routing protocol, and is often used on small
 networks.
@@ -62,12 +60,15 @@ often on large ISP networks.
 on large ISP networks.  Similar to OSPF.
 \item {\bf IGRP}: Used for intra-domain routing, typically in small to
 medium sized networks.  Cisco-proprietary.
+\item {\bf Border Gateway Protocol (BGP)}.  This is used for
+inter-domain routing.
 \end{itemize}
-Currently (April 2005), XORP supports BGP and RIP.  We plan to
-implement OSPF and IS-IS shortly.  Our BGP implementation is discussed
-in Chapter \ref{bgp} and our RIP implementation is discussed in
-Chapter \ref{rip}.  In addition, there are also multicast routing
-protocols, which we will discuss in Chapter \ref{multicast}.
+Currently (March 2006), XORP supports RIP, OSPF and BGP.
+The RIP, OSPF and BGP implementations are discussed in Chapter \ref{rip},
+Chapter \ref{ospf} and Chapter \ref{bgp} respectively.
+In the future we plan to implement IS-IS as well.
+In addition, there are also multicast routing protocols, which we will
+discuss in Chapter \ref{multicast}.
 
 \subsection{Administrative Distance}
 
@@ -107,7 +108,7 @@ xxx\=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\=\kill
 \end{tabbing}
 Hence, in the example above, the route learned from BGP will be prefered.
 
-Currently (April 2005), there is no way to modify these default
+Currently (March 2006), there is no way to modify these default
 administrative distances, but this capability will be added soon.
 
 \subsection{Route Redistribution}
@@ -131,21 +132,21 @@ protocols.  Some examples might be:
   routes into BGP.  
 \end{itemize}
 
-%% Currently, XORP has an experimental policy mechanism that allows
-%% route redistribution. This feature will be enabled in the next release.
+XORP is capable of performing such route redistribution.  This is
+generally configured using the {\stt import} and {\stt export}
+configuration statements.  These terms are relative to the router's
+routing table, so if the directive {\stt export static} is added to the
+RIP configuration, then this indicates that RIP should export all the
+static routes to its neighbors via the RIP protocol.
 
-%% XORP is capable of performing such route redistribution.  This is
-%% generally configured using the {\stt import} and {\stt export}
-%% configuration statements.  These terms are relative to the router's
-%% routing table, so if the directive {\stt export static} is added to
-%% the RIP configuration, then this indicates that RIP should export all
-%% the static routes to its neighbors via the RIP protocol.
+While route redistribution is a powerful tool, it needs to be used
+carefully.  For example, redistributing BGP routes into RIP at one
+router, and redistributing RIP routes into BGP at another router,
+would cause all the BGP routes to lose their original AS paths, and
+hence for much of the Internet to believe your AS is the best way to
+everywhere.  In any event, it is rarely a good idea to distribute a
+large number of BGP routes into an IGP because most IGPs simply do not
+cope well with large routing tables.
 
-%% While route redistribution is a powerful tool, it needs to be used
-%% carefully.  For example, redistributing BGP routes into RIP at one
-%% router, and redistributing RIP routes into BGP at another router,
-%% would cause all the BGP routes to lose their original AS paths, and
-%% hence for much of the Internet to believe your AS is the best way to
-%% everywhere.  In any event, it is rarely a good idea to distribute a
-%% large number of BGP routes into an IGP because most IGPs simply do not
-%% cope well with large routing tables.
+In XORP route redistribution is implemented as part of the routing
+policy framework (see Chapter \ref{policy} for details).
