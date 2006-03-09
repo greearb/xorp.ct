@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.203 2006/02/26 18:52:30 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.204 2006/02/28 00:30:50 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2528,7 +2528,15 @@ AreaRouter<A>::update_router_links()
 
     PeerManager<A>& pm = _ospf.get_peer_manager();
     router_lsa->set_v_bit(pm.virtual_link_endpoint(_area));
-    router_lsa->set_e_bit(pm.as_boundary_router_p());
+    switch(_area_type) {
+    case OspfTypes::NORMAL:
+	router_lsa->set_e_bit(pm.as_boundary_router_p());
+	break;
+    case OspfTypes::STUB:
+    case OspfTypes::NSSA:
+	router_lsa->set_e_bit(false);
+	break;
+    }
     router_lsa->set_b_bit(pm.area_border_router_p());
 
     switch (_ospf.get_version()) {
