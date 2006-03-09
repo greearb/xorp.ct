@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.42 2006/03/07 19:29:46 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.43 2006/03/08 20:26:34 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -354,6 +354,18 @@ gmake check
 
     - The XORP Shell (xorpsh.exe) should be run from within a native Win32
       command prompt.
+
+  * Instructions for building the XORP Installer for Windows:
+    - Make sure you have a full MSYS/MinGW environment set up as
+      described above.
+    - Make sure you have the Nullsoft Installer toolkit installed:
+        http://nsis.sourceforge.net/
+    - Make sure the path to makensis.exe is in your PATH.
+    - Check out the xorp/contrib/win32/installer/xorp.nsi script.
+    - Fiddle with the SRCDIR and DLLDIR settings if you have to, to
+      point to where you have built the source and installed MinGW.
+    - Run makensis xorp.nsi.
+    - Test the installer.
 
 4. Known problems
 =================
