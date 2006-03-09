@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.21 2005/04/13 21:08:17 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.22 2005/11/29 01:48:36 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -38,14 +38,14 @@
 
 \title{XORP Libxorp Library Overview \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 \maketitle
 
@@ -80,8 +80,8 @@ components (in alphabetical order):
   \item \emph{buffered\_asyncio.hh: class BufferedAsyncReader}:
   Buffered asynchronous file reader class.
 
-  \item \emph{c\_format.hh: c\_format()}: A macro that creates a C++ string
-  from a C-style printf(3)-formatted string.
+  \item \emph{c\_format.hh: c\_format()}: A macro that creates a C++
+  string from a C-style printf(3)-formatted string.
 
   \item \emph{callback.hh, callback\_debug.hh, callback\_nodebug.hh,
   safe\_callback\_obj.hh}:
@@ -95,7 +95,8 @@ components (in alphabetical order):
 
   \item \emph{debug.h}: Provides facility for generating debug messages.
 
-  \item \emph{ether\_compat.h}: Ethernet manipulation compatibility functions.
+  \item \emph{ether\_compat.h}: Ethernet manipulation compatibility
+  functions.
 
   \item \emph{eventloop.hh: class EventLoop}: Event loop class for
   coordinated operations between timers and I/O operations on file
@@ -124,7 +125,12 @@ components (in alphabetical order):
   \item \emph{popen.hh}: The interface for the local implementation
   of \emph{popen(2)} and \emph{pclose(2)}.
 
-  \item \emph{profile.hh}: Implementation of a mechanism for event profiling.
+  \item \emph{profile.hh}: Implementation of a mechanism for event
+  profiling.
+
+  \item \emph{range.hh: class U32Range, class IPv4Range, class
+  IPv4Range}: A set of classes that implement linear ranges (\eg
+  integers or addresses).
 
   \item \emph{ref\_ptr.hh: template class ref\_ptr}: Reference counted
   pointer class.
@@ -157,6 +163,9 @@ components (in alphabetical order):
   \item \emph{timeval.hh: class TimeVal}: A class for storing time values
   (similar to \emph{struct timeval}).
 
+  \item \emph{tlv.hh, class Tlv}: Facility for reading and writing TLV
+  (Type-Lenght-Value) records.
+
   \item \emph{token.hh}: Token related definitions.
 
   \item \emph{transactions.hh}: Facility for transaction operations.
@@ -177,6 +186,9 @@ components (in alphabetical order):
 
   \item \emph{xorp.h}: The XORP main include file that should be included
   by all XORP C and C++ files.
+
+  \item \emph{xorpfd.hh: class XorpFd}: Implementation of a wrapper
+  class used to encapsulate a file descriptor.
 
 \end{itemize}
 
@@ -424,6 +436,17 @@ and those strings can be read at some later stage.
 % TODO: add an example of using the profiling mechanism.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{range.hh}
+
+This file implements the following classes:
+\emph{class U32Range, class IPv4Range, class IPv4Range}.
+
+Those classes implement linear ranges X..Y (\eg for integers or
+addresses). A linear range is defined by its low and high inclusive
+boundaries. It is the user's responisibility to ensure that the
+condition (low $\leq$ high) always holds.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{ref\_ptr.hh}
 
 This file declares \emph{template class ref\_ptr}: reference counted
@@ -547,6 +570,13 @@ This file contains implementation of \emph{class TimeVal} for
 storing time values (similar to \emph{struct timeval}).
 \emph{TimeVal} implements the appropriate constructors and numerous
 helper methods (\eg Less-Than and Addition operators, etc).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{tlv.hh}
+
+This file contains the implementation of \emph{class Tlv} for reading
+and writing TLV (Type-Lenght-Value) records from/to a file. The records
+are stored in network byte order format.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{token.hh}
@@ -812,6 +842,20 @@ This is the XORP main include file that should be included by all XORP
 C and C++ files. This file itself includes a number of frequently used system
 header files, defines several commonly used values, etc.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{xorpfd.hh}
+
+This file contains the implementation of \emph{class XorpFd} used to
+encapsulate a file descriptor.
+
+It exists because of fundamental differences between UNIX and Windows
+in terms of how the two families of operating systems deal with file
+descriptors; in most flavours of UNIX, all file descriptors are
+created equal, and may be represented using an 'int' type which is
+usually 32 bits wide. In Windows, sockets are of type SOCKET, which
+is a typedef alias of u\_int; whereas all other system objects are
+of type HANDLE, which in turn is a typedef alias of 'void *'.
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
@@ -838,6 +882,10 @@ header files, defines several commonly used values, etc.
   \item April 13, 2005: Updated to match XORP version 1.1 release code:
    added information for \emph{buffered\_asyncio.hh}, \emph{clock.hh},
    \emph{popen.hh}, \emph{profile.hh} and \emph{run\_command.hh}.
+
+  \item March 8, 2006: Updated to match XORP version 1.2 release code:
+   added information for \emph{range.hh}, \emph{tlv.hh} and
+   \emph{xorpfd.hh}.
 
 \end{itemize}
 
