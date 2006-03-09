@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.12 2005/07/14 02:21:56 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.13 2005/11/29 01:48:41 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -57,12 +57,12 @@
 
 \title{An Introduction to Writing a XORP Process \\
 \vspace{1ex}
-Version 1.1}
+Version 1.2}
 \author{ XORP Project					\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{April 13, 2005}
+\date{March 8, 2006}
 
 \maketitle
 
@@ -690,7 +690,7 @@ XrlStaticRoutesNode::XrlStaticRoutesNode(EventLoop&	eventloop,
 		   finder_port),
       XrlStaticRoutesTargetBase(&xrl_router()),
       ...
-     _xrl_rib_client(xrl_router),
+     _xrl_rib_client(&xrl_router()),
       ...
 {
   ...
@@ -1518,6 +1518,8 @@ file {\stt xorp/etc/templates/static\_routes.tp} as an example.
 
   \item April 13, 2005: Added the XLOG logging facility section. Udated to
   match version 1.1.
+
+  \item March 8, 2006: Bump-up the version to 1.2, and the date.
 
 \end{itemize}
 
