@@ -1,21 +1,387 @@
 %
-% $XORP$
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.1 2006/03/08 10:32:02 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
 \label{ospf}
-\section{OSPF  Terminology and Concepts}
+\section{OSPF Terminology and Concepts}
+
+OSPF is the Open Shortest Path First protocol it one of two principle
+Interior Gateway Protocols (IGP) the other being IS-IS. RIP is also an
+IGP however OSPF and IS-IS have better scaling properties.
+
+The initial OSPF specification is RFC 2328 OSPF Version 2 or
+OSPFv2. This specification is specific to IPv4. There is a later
+specification RFC 2740 OSPF for IPv6, which happens to be Version 3 or
+OSPFv3.
+
+The specifications for OSPFv2 and OSPFv3 are fairly similar the
+obvious difference is the handing of IPv4 and IPv6 addresses.
+
+The XORP implementation of OSPF supports both OSPFv2 and OSPFv3
+however only OSPFv2 is currently available in Release-1.2.
+
+For consistency with our other protocols OSPFv2 is {\tt ospf4} in the
+configuration files, the {\tt 4} in {\tt ospf4} refers to the IPv4
+address family.
 
 \subsection{Key OSPF Concepts}
 
+As an Interior Gateway Protocol OSPF runs within a single Autonomous
+System. One way that OSPF achieves good scaling properties is to allow
+an AS to split into distinct regions that OSPF calls areas. The areas
+are structured in a two level hierarchy, area {\tt 0.0.0.0} is special
+and is called the {\tt BACKBONE} area. All other areas must be
+connected to that {\tt BACKBONE} either directly or through virtual links.
+
+A fundamental quantity in OSPF that describes topology and routing
+information is the Link State Advertisement (LSA). Every OSPF router
+within an area should have exactly the same LSAs in its
+database. There are different type of LSAs the base specification
+describes Router-LSAs, Network-LSAs, Summary-LSAs and AS-external-LSAs.
+
+The OSPF protocol has explicit support for introducing routes from
+other protocols, these routes are introduced via
+AS-external-LSAs. Routes from a RIP cloud can be introduced into OSPF
+and will appear as AS-external-LSAs.
+
+Areas in OSPF can be one of three different types {\tt normal}, {\tt
+stub} and {\tt Not-So-Stubby}. The {\tt BACKBONE} is always {\tt
+normal}. All LSAs in OSPF are flooded only within an area the
+exception is the AS-external-LSA that can be flooded between all {\tt
+normal} areas.
+
+OSPF routers are categorised into four overlapping categories, an
+internal router whose interfaces are all in one area, an area border
+router ({\tt ABR}) that has interfaces in more than one area, a backbone router
+that has an interface to the {\tt BACKBONE} and an AS boundary router
+that introduces routes from other protocols.
+
+An AS boundary router can be configured in {\tt normal} and {\tt
+Not-So-Stubby} areas. In a {\tt normal} area the AS boundary router
+generates an AS-external-LSA that is flooded to all other {\tt normal}
+areas. In a {\tt Not-So-Stubby} an AS boundary router generates a
+Type-7 LSA that {\bf may} be translated at a area border router to an
+AS-external-LSA, which will be flooded to all {\tt normal} areas. An
+AS-external-LSA is never flooded into a {\tt stub} or {\tt
+Not-So-Stubby} area. The different types of areas exist to limit the
+number of LSAs in a particular area, for example a {\tt stub} area may
+have a small number of internal routes and default routes to the
+{\tt ABR}s.
+
 \section{Standards}
+
+XORP OSPF complies with the following standards:
+\begin{description}
+\item{\bf RFC 2328}: OSPF Version 2
+\item{\bf RFC 3101}: The OSPF Not-So-Stubby Area (NSSA) Option
+\end{description}
 
 \newpage
 \section{Configuring OSPF}
 
 \subsection{Configuration Syntax}
 
-\subsection{Example Configurations}
+The configuration syntax for XORP OSPFv2 is given below.
 
-\newpage
-\section{Monitoring OSPF}
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+protocols \{\\
+\>ospf4 \{\\
+\>\>targetname: {\it text}\\
+\>\>router-id: {\it IPv4}\\
+\>\>ip-router-alert: {\it bool}\\
+\\
+\>\>traceoptions \{\\
+\>\>\>flag \{\\
+\>\>\>\>all \{\\
+\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>area {\it IPv4} \{\\
+\>\>\>area-type: {\it text}\\
+\\
+\>\>\>default-lsa \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\>metric: {\it uint(0..0xffffff)}\\
+\>\>\>\}\\
+\\
+\>\>\>summaries \{\\
+\>\>\>\>disable: {\it bool}\\
+\>\>\>\}\\
+\\
+\>\>\>area-range {\it IPv4Net} \{\\
+\>\>\>\>advertise: {\it bool}\\
+\>\>\>\}\\
+\\
+\>\>\>virtual-link {\it IPv4} \{\\
+\>\>\>\>transit-area: {\it ipv4}\\
+\>\>\>\>hello-interval: {\it uint(1..65535)}\\
+\>\>\>\>router-dead-interval: {\it uint(1..65535)}\\
+\>\>\>\>retransmit-interval: {\it uint(1..65535)}\\
+\>\>\>\>transit-delay: {\it uint(0..3600)}\\
+\>\>\>\>authentication \{\\
+\>\>\>\>\>simple-password: {\it text}\\
+\\
+\>\>\>\>\>md5 {\it uint(0..255)} \{\\
+\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
+\>\>\>interface {\it text} \{\\
+\>\>\>\>link-type: {\it text}\\
+\\
+\>\>\>\>vif {\it text} \{\\
+\\
+\>\>\>\>\>address {\it IPv4} \{\\
+\>\>\>\>\>\>priority: {\it uint(0..255)}\\
+\>\>\>\>\>\>hello-interval: {\it uint(1..65535)}\\
+\>\>\>\>\>\>router-dead-interval: {\it uint(1..4294967295)}\\
+\>\>\>\>\>\>interface-cost: {\it uint(1..65535)}\\
+\>\>\>\>\>\>retransmit-interval: {\it uint(1..65535)}\\
+\>\>\>\>\>\>transit-delay: {\it uint(0..3600)}\\
+\>\>\>\>\>\>authentication \{\\
+\>\>\>\>\>\>\>simple-password: {\it text}\\
+\\
+\>\>\>\>\>\>\>md5 {\it uint(0..255)} \{\\
+\>\>\>\>\>\>\>\>password: {\it text}\\
+\>\>\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\>\}\\
+\>\>\>\>\>\>\}\\
+\>\>\>\>\>\>passive: {\it text}\\
+\\
+\>\>\>\>\>\>neighbor  {\it IPv4}\{\\
+\>\>\>\>\>\>\>router-id: {\it IPv4}\\
+\>\>\>\>\>\>\}\\
+\\
+\>\>\>\>\>\>disable: {\it bool}\\
+\>\>\>\>\>\}\\
+\>\>\>\>\}\\
+\>\>\>\}\\
+\>\>\}\\
+\\
+\>\>import: {\it text} \\
+\>\>export: {\it text}\\
+\>\}\\
+\}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\vspace{0.1in}
+
+\noindent
+The configuration parameters are used as follows:
+\begin{description}
+\item{\tt protocols}: This delimits the configuration for all routing
+  protocols in the XORP router configuration.  It is mandatory that
+  OSPF configuration is under the {\stt protocols} node in the
+  configuration.
+\item{\tt ospf4}: This delimits the OSPF configuration part of the XORP
+  router configuration.
+\item{\tt targetname}: This is the name for this instance of OSPF.  It
+  defaults to ``{\stt ospfv2}'', and it is not recommended that this
+  default is overridden under normal usage scenarios.
+\item{\tt router-id}: This is a unique IPv4 address within the
+Autonomous System. The smallest IP address of an interface belonging
+to the router is a good choice. The required format of the {\stt
+router-id} is a dotted-decimal IPv4 address.
+\item{\tt ip-router-alert}: This takes the value {\stt true} or {\stt
+false}. The default state is {\stt false}, if set to {\stt true} the
+IP router alert option will be placed in all transmitted packets.
+\item{\tt traceoptions}: This directive if present will enable all tracing.
+\item{\tt area}: This delimits an area in which multiple virtual links
+and interfaces can be configured. The {\stt area} directive take an
+area identifier parameter, which by convention is specified as a
+dotted-decimal IPv4 address.
+\begin{description}
+
+\item{\tt area-type}: This is the type of the area, {\stt normal},
+{\stt stub} or {\stt nssa}.
+
+\item{\tt default-lsa}: This directive if present is affective for
+{\stt stub} or {\stt nssa} areas only. If the router is an Area Border
+Router, then a default-lsa will be introduced into this area.
+\begin{description}
+\item{\tt metric}: This is the metric in the default-lsa.
+\item{\tt disable}: This takes the value {\stt true} or {\stt
+false}. The default setting is {\stt false} it can be set to {\stt
+true} to disable the sending of the default-lsa.
+\end{description}
+\end{description}
+\begin{description}
+
+\item{\tt summaries}: This directive if present is affective for
+{\stt stub} or {\stt nssa} areas only. If the router is an Area Border
+Router, then this option controls the introduction of summaries into
+the area.
+\begin{description}
+\item{\tt disable}: This takes the value {\stt true} or {\stt
+false}. The default setting is {\stt false} it can be set to {\stt
+true} to disable the sending of summaries.
+\end{description}
+\end{description}
+
+\begin{description}
+\item{\tt area-range}: If the router is an Area Border Router the IPv4
+network defines how to summarize this area into other areas.
+\begin{description}
+\item{\tt advertise}: This takes the value {\stt true} or {\stt
+false}. The default setting is {\stt true} it can be set to {\stt
+false} to disable the sending of Summary-LSAs. 
+\end{description}
+\end{description}
+
+\begin{description}
+\item{\tt virtual-link}: This is the {\stt router-id} of the router
+with which a virtual link should be formed. Virtual links can only be
+configured in the {\stt BACKBONE} area. The format of the parameter is
+a dotted-decimal IPv4 address.
+\begin{description}
+\item{\tt transit-area}: This is the transit area through which the
+virtual link is formed.
+\item{\tt hello-interval}: This is the time in seconds between sending
+hello packets.
+\item{\tt router-dead-interval}: This is the time in seconds to wait before
+considering a neighbor dead. If no hello packets are seen from the
+neighbor in this time then it is considered dead.
+\item{\tt retransmit-interval}: This is the time in seconds between
+retransmitting various packets, such as link state update packets or
+link state request packets.
+
+\item{\tt authentication}: This directive specifies the authentication
+mechanism used to authorise OSPF updates sent and received via this
+vif/address.  
+
+The authentication is configured by using one of the following
+mutually-exclusive statements:
+
+\begin{description}
+\item{\tt simple-password}: this specifies the password used for
+  plaintext authentication on this vif/address.
+\item{\tt md5}: this specifies an MD5 authentication key. The parameter
+  is the key ID and must be in the interval [0, 255].
+  The MD5 authentication is configured by using the following
+  statements:
+\begin{description}
+  \item{\tt password}: this specifies the MD5 password for the specific
+  key.
+  \item{\tt start-time}: this specifies the start time when the key
+  becomes active. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should become active immediately.
+  \item{\tt end-time}: this specifies the end time when the key becomes
+  inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+  then the key should never expire.
+\end{description}
+\end{description}
+\end{description}
+
+\item{\tt interface}: This specifies a network interface that should
+  be used by OSPF for routing.  See Chapter \ref{interfaces} for
+  details of interfaces.  The interface must be configured
+  in the {\stt interfaces} part of the router configuration.
+\begin{description}
+\item{\tt link-type}: This specifies the type of the link, {\stt
+broadcast}, {\stt p2p} (Point-to-Point) or {\stt p2m} (Point-to-Multipoint).
+\begin{description}
+\item{\tt vif}: This specifies a vif that should be used by OSPF for routing.
+  See Chapter \ref{interfaces} for details of vifs.
+\begin{description}
+\item{\tt address}: This specifies an IPv4 address that should be used
+  by OSPF for routing.  OSPF will peer with other routers on this {\stt
+  interface/vif} using this {\stt address}.  The address must be a
+  valid configured address for this vif.
+
+  The parameters that can be specified for each address are:
+\begin{description}
+\item{\tt priority}: This is the priority used to select the
+Designated Router on a {\stt broadcast} or {\stt nbma} {\stt
+link-type}. The priorities range from 0 to 255. If a value of 0 is
+choosen this router will not be a candidate to become the Designated Router
+\item{\tt hello-interval}: This is the time in seconds between sending
+hello packets.
+\item{\tt router-dead-interval}: This is the time in seconds to wait before
+considering a neighbor dead. If no hello packets are seen from the
+neighbor in this time then it is considered dead.
+\item{\tt interface-cost}: The cost for this address that is placed in
+the Router-LSA.
+\item{\tt retransmit-interval}:  This is the time in seconds between
+retransmitting various packets, such as link state update packets or
+link state request packets.
+\item{\tt transit-delay}: The time to transmit an LSA on this address,
+this value is added to the age field of all LSAs.
+%% \item{\tt authentication}: This directive specifies the authentication
+%% mechanism used to authorise OSPF updates sent and received via this
+%% vif/address.  
+
+%% The authentication is configured by using one of the following
+%% mutually-exclusive statements:
+
+%% \begin{description}
+%% \item{\tt simple-password}: this specifies the password used for
+%%   plaintext authentication on this vif/address.
+%% \item{\tt md5}: this specifies an MD5 authentication key. The parameter
+%%   is the key ID and must be in the interval [0, 255].
+%%   The MD5 authentication is configured by using the following
+%%  statements:
+%% \begin{description}
+%%   \item{\tt password}: this specifies the MD5 password for the specific
+%%   key.
+%%   \item{\tt start-time}: this specifies the start time when the key
+%%   becomes active. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+%%   then the key should become active immediately.
+%%   \item{\tt end-time}: this specifies the end time when the key becomes
+%%   inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
+%%   then the key should never expire.
+%% \end{description}
+%% \end{description}
+
+\item{\tt passive}: This takes the value {\stt true} or {\stt
+false}. The default setting is {\stt false} it can be set to {\stt
+true} to set the interface in loopback. The protocol is no longer run
+on this address and the Router-LSA contains a host route for this address.
+\item{\tt neighbor}: This allows neighbors to be configured for {\stt
+link-type}s of {\stt p2p} or {\stt p2m}. The parameter is the IPv4
+address of the neighbor. The {\stt router-id} of the neighbor must
+also be configured.
+%% \begin{description}
+%% \item{\tt router-id}:
+%% \end{description}
+\item{\tt disable}:  This takes the value {\stt true} or {\stt
+false}. The default setting is {\stt false} it can be set to {\stt
+true} to disable OSPF on this address without removing all the configuration.
+\end{description}
+\end{description}
+\end{description}
+\end{description}
+
+\end{description}
+\end{description}
+
+%% \subsection{Example Configurations}
+
+%% \newpage
+%% \section{Monitoring OSPF}
