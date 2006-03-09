@@ -1,0 +1,60 @@
+/**
+ * Interface that users of socket4/0.1 should implement.
+ *
+ * This interface only contains asynchronous notifications that a socket
+ * user should be interested in, ie data arrived, error occured.
+ */
+interface socket4_user/0.1 {
+    /**
+     * Method invoked by target implementing socket4/0.1 when a packet
+     * arrives from an IPv4 source.
+     *
+     * @param sockid the identifier associated with socket where error
+     *               occurred.
+     *
+     * @param src_host the originating host.
+     *
+     * @param src_port the originating IP port.
+     *
+     * @param data the data received.
+     */
+    recv_event		? sockid:txt					\
+			& src_host:ipv4					\
+			& src_port:u32					\
+			& data:binary
+
+    /**
+     * Method invoked by target implementing socket4/0.1 when a connection
+     * request is received from an IPv4 source.
+     */
+     connect_event	? sockid:txt					\
+			& src_host:ipv4					\
+			& src_port:u32					\
+			& new_sockid:txt				\
+			-> accept:bool
+
+    /**
+     * Method invoked by target implementing socket4/0.1 when an error occurs.
+     *
+     * @param sockid the identifier associated with socket where error
+     *               occurred.
+     *
+     * @param error a textual description of the error.
+     *
+     * @param fatal indication of whether socket is shutdown because of error.
+     */
+    error_event		? sockid:txt					\
+			& error:txt					\
+			& fatal:bool
+
+    /**
+     * Method invoked by target implementing socket4/0.1 when a socket is
+     * forcibly closed.  This would typically happen when the address the
+     * socket is bound to is removed from an interface.
+     *
+     * This method is not called if the socket is closed through
+     * socket/0.1/close.
+     */
+     close_event	? sockid:txt					\
+			& reason:txt
+}

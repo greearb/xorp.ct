@@ -1,0 +1,172 @@
+% -*- mode: latex; tex-main-file: "pospaper.tex" -*-
+
+\section{Validating Internet Research}
+
+A yawning gap exists between research and practice concerning Internet
+routing and forwarding disciplines.  The savvy researcher has the
+tools of theory and simulation at hand, but 
+validating results in the
+real world is hard.  
+Why should this be so?
+
+%% such as MRT\cite{mrt}, Gated\cite{gated} and Zebra\cite{zebra} 
+
+%% Whilst the breadth and depth of Internet research is impressive, its
+%% impact is more limited than we would hope.  
+%% Internet research is in a difficult situation: we have tools
+%% such as the {\em ns}
+%% network simulator that are well suited and extensively used for
+%% certain types of research, but verifying these results in the
+%% real-world can be difficult.  For research involving end-to-end
+%% protocols, we have open-source operating systems, such as Linux
+%% and FreeBSD, that permit experimentation and deployment of new work,
+%% but if the research requires the involvement of routers then the
+%% situation is much more difficult.
+
+For network applications research, we have access to languages, APIs,
+and systems that make development and deployment easy.  For end-to-end
+protocol research, we have access to open source operating systems,
+such as 
+Linux and FreeBSD.  End-to-end protocols can be simulated and
+implemented in these systems.  And since these operating systems are
+used in both research and production environments, migration from the
+research to the production environment is feasible.  TCP
+SACK provides an excellent example~\cite{sack}.
+
+Unfortunately the same cannot be said of router software.  Router
+vendors do not provide API's that allow third party applications to
+run on their hardware.  Thus, even conducting a pilot study in a
+production network requires the router vendor to implement the
+protocol.  Unless the router vendor perceives a reward in return
+for the effort, they are unlikely to invest resources in the protocol
+implementation.  Similarly, customers are unlikely to request a
+feature unless they have faith in existing research results or can
+experiment in their own environment.  A catch-22 
+situation exists of not being able to prototype and deploy new
+experimental protocols in any kind of realistic environment.  Even
+when vendors can be convinced to implement, it is not uncommon for
+initial implementations of a protocol to be found wanting, and the
+path to improving the protocols is often difficult and slow.  Finally,
+network operators are almost always reluctant to deploy experimental
+services in production networks for fear of destabilizing their
+existing (hopefully money-making) services.
+
+Thus, we believe the difficulty in validating Internet research is largely
+attributable to
+the absence of open Internet routers for researchers to
+experiment with and deploy new work on.  Routing toolkits exist, but
+typically they implement a subset of IP routing functionality and are
+rarely used in production environments---routing and forwarding
+research requires access to real production traffic and routing
+information to be validated.
+Similarly, open-source-based testbed networks such as CAIRN~\cite{cairn}
+provide valuable tools for the researcher, 
+but they rarely provide a realistic
+test environment and are usually limited to a small number of sites
+due to cost.
+A recent spate of research in open, extensible forwarding
+paths is moving in the right direction~\cite{click,pathrouter}, but
+a truly extensible, production-quality router would need routing daemons,
+forwarding information bases, management interfaces, and so on in addition
+to a forwarding path.
+
+How then can we enable a pathway that permits research and
+experimentation to be performed in production environments whilst
+minimally impacting existing network services?  In part, this
+is the same problem that Active Networks attempted to solve, but we
+believe that a much more conservative approach is more likely to see
+real-world usage.
+
+We envision an integrated open-source software router platform,
+running on commodity hardware, that is viable as a research and as a
+production platform.  The software architecture should be designed
+with extensibility as a primary goal and should permit experimental
+protocol deployment with minimal risk to existing services using that
+router.  Internet researchers needing access to router software could
+then share a common platform for experimentation
+deployed in places where real traffic conditions exist.  Researchers
+working on novel router hardware could also use the mature software
+from this platform to test their hardware in real
+networks. In these ways, the loop between research and realistic
+real-world experimentation can be closed, and innovation can take
+place much more freely.
+
+
+\subsection{Alternatives}
+
+Having motivated the need for an open router on which network research can
+be deployed, we discuss the alternatives in more detail---simulations and
+network testbeds.
+
+First, we note that it has not always been so difficult to deploy
+experimental work on the Internet.
+Prior to the advent of the World Wide Web, the Net was
+predominantly non-commercial.  Most of its users came from
+universities and other research labs.  Whilst there was a tension
+between conducting research and providing a networking service,
+researchers could have access to the network to run experiments, develop
+and test new protocols, and so forth.
+With the advent of the Web, the network grew rapidly and commercial
+ISPs emerged.  Even the academic parts of the network became reluctant
+to perform networking experiments for fear of disrupting regular
+traffic.  In the commercial parts of the network, where interesting
+scaling phenomena started to emerge, it was nearly impossible to do
+any form of experimentation.  Growth was so rapid that it was all ISPs
+could do to keep up with provisioning.
+These problems were recognised, and two main solutions emerged:
+network testbeds and network simulators.
+
+Network testbeds rarely resulted in good network research.  One
+notable exception was DARTnet~\cite{dartnet}, which used programmable routers that
+network researchers had access to.  Among its achievements, DARTnet
+demonstrated IP multicast and audio and video conferencing over IP.
+It 
+worked well because the network users were also the network
+researchers and so there was less tension involved in running
+experiments.
+
+Over recent years, the majority of network research that
+involved testing protocols has taken place in network simulators such
+as {\em ns}.  Among the desirable properties of simulators is the
+complete control they provide over all the parameters of a system, and
+so a
+large range of scenarios can be examined.  Within the research
+community the \emph{ns} simulator has been particularly successful\footnote{
+One could criticize the details of the {\em ns}
+architecture and some of the default settings, but that would miss the
+point.  }.  
+Many researchers have contributed to improve {\em ns}
+itself, but an even greater number have used it in their research.
+Many published results are supported by publicly available simulation
+code and scripts.  This has allowed for the direct comparison of
+contemporary networking algorithms and allowed for independent
+verification of results.  It could therefore be argued that {\em ns}
+has increased the rigor of network research.
+
+%%Unfortunately, the relative ease of running simulations without
+%%understanding the components in the simulation results in many bad
+%%experiments being run.
+%% XXX All simulators have faults, these seem very specific given
+%% earlier comment on not critizing ns too much. [oh]
+%%  Examples include
+%%defaulting to Tahoe TCP (when most of the Internet currently uses
+%%NewReno or SACK), not configuring buffer sizes or choosing arbitrary
+%%ones, using default parameters for queue management schemes, assuming
+%%all packets are the same size, and so forth.  The list is extremely
+%%long.  
+
+Conversely, it could equally well be argued that simulators make it
+{\em too easy} to run experiments and are responsible for numerous
+papers that bear little, or no, relationship to real
+networks. Accordingly there is understandable doubt about any claims
+until they've been demonstrated in the real world.
+
+Even in skilled hands, simulators have limits.
+When work requires access to real traffic patterns, or needs to interact
+with real routing protocols, or relates to deployed implementations
+warts-and-all, there is no substitute for real-world experimentation.
+
+%%
+%For experiments needing access to routers, the transition from
+%simulation to the real world has never been more difficult.
+%%

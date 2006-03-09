@@ -1,0 +1,55 @@
+#!/usr/bin/make -f
+# Made with the aid of dh_make, by Craig Small
+# Sample debian/rules that uses debhelper. GNU copyright 1997 by Joey Hess.
+# Some lines taken from debmake, by Cristoph Lameter.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+build:
+	dh_testdir
+	if test ! -f configure; then \
+	  $(MAKE) -f Makefile.cvs ;\
+	fi
+	./configure --prefix=/usr --mandir=/usr/share/man \
+		--infodir=/usr/share/info --with-htmldir=/usr/share/doc/kde/HTML
+	$(MAKE) 
+	touch build
+
+clean:
+	dh_testdir
+	-rm -f build configure
+	-$(MAKE) distclean
+	-rm -f `find . -name "*~"`
+	dh_clean
+
+binary-indep: build
+	dh_testroot
+	dh_testdir
+
+binary-arch: build
+	dh_testroot
+	dh_testdir
+	dh_clean
+	dh_installdirs
+	$(MAKE) install DESTDIR=`pwd`/debian/tmp/
+	dh_installdocs
+	dh_installexamples
+	dh_installmanpages
+	dh_undocumented
+	dh_installchangelogs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+	dh_makeshlibs
+	dh_perl
+	dh_installdeb
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+binary: binary-indep binary-arch
+
+.PHONY: binary binary-arch binary-indep clean checkroot

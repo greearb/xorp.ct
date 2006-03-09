@@ -1,0 +1,76 @@
+
+KDOC -- C++ and IDL Source Documentation System
+Version 2.0 ALPHA
+
+KDOC creates cross-referenced documentation for C++ and CORBA IDL libraries
+directly from the source. Documentation can be embedded in special doc
+comments in the source.
+
+Also included:
+
+qt2kdoc:	Generates cross-reference index to link kdoc output with 
+		Qt documentation.
+
+makekdedoc:	Generates documentation for the KDE libraries.
+
+KDOC 2.0 is still under development.
+
+REQUIREMENTS
+
+You need perl 5.6.0 or newer to run kdoc.
+
+
+
+HOWTO
+
+If you are running this straight from CVS, you will need to run 
+
+	make -f Makefile.cvs
+
+before building.
+
+This should install kdoc:
+
+./configure; make; make install
+rehash; man kdoc
+
+
+
+USING KDOC
+
+The KDOC manual in docbook format is available in doc/kdoc.docbook.
+This can be converted to various other online and print formats using
+the jade and docbook packages.
+
+Also, man pages are included for all utilities in this package. Best to
+start with kdoc[1], and makekdedoc[1] if you wish to generate 
+KDE Library API docs.
+
+
+
+WEB SITE AND MORE INFO
+
+Please report bugs to kdoc@kde.org.
+The kdoc web page is at http://www.ph.unimelb.edu.au/~ssk/kde/kdoc/
+
+
+
+CREDITS
+
+Wolfgang Bangerth has been a great help. Also, thanks to the following people 
+for providing testing, feedback, encouragment, new features and patches:
+
+Bernd Gehrmann
+David Sweet
+Harald Hoyer
+Jochen Wilhelmy
+Marcin Kasperski
+Rainer Dorsch
+Stephane Matamontero
+Torben Weis
+Wolfgang Bangerth
+Andrew W. Nosenko
+
+------
+Copyright(C) 1999, Sirtaj Singh Kang <taj@kde.org>
+Distributed under the GPL.
