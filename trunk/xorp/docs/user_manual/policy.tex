@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.5 2006/03/08 17:58:52 zec Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.6 2006/03/08 18:08:18 zec Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -426,9 +426,10 @@ Table~\ref{policy_common_match_from} summarizes the match conditions
 in a {\tt from} block for all protocols.
 \begin{table}[h]
 \centering
-\begin{tabular}{l|c|c|p{7.5cm}}
-Variable & Operator & Argument type & Semantics \\
+\begin{tabular}{|l|c|c|p{7.5cm}|}
 \hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
 {\tt protocol} & {\tt :} & txt & Matches the protocol via which the route was
 learnt.  Only valid for export policies.  Used in route redistribution. \\
 \hline
@@ -444,6 +445,7 @@ the route.\\
 prefix length within the specified range. \\
 {\tt prefix6-length} & {\tt :} & u32range & Matches if the IPv6 route has a
 prefix length within the specified range. \\
+\hline
 \end{tabular}
 \caption{\label{policy_common_match_from}Common match conditions in the {\tt from}
 block for all protocols}
@@ -463,9 +465,10 @@ table~\ref{policy_common_action}.
 
 \begin{table}[h]
 \centering
-\begin{tabular}{l|c|c|p{9cm}}
-Variable & Operator & Argument type & Semantics \\
+\begin{tabular}{|l|c|c|p{9cm}|}
 \hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
 {\tt accept} & none & none & Propagate this route downstream and stop executing
 all policies associated to this route.\\
 {\tt reject} & none & none & Do not propagate this route downstream and stop executing
@@ -473,6 +476,7 @@ all policies associated to this route.\\
 \hline
 {\tt trace} & {\tt :} & u32 & Enable tracing at a specific verbosity level.
 Currently 1 means a single line of logging and 3 is the most verbose level. \\
+\hline
 \end{tabular}
 \caption{\label{policy_common_action}Common actions for all protocols}
 \end{table}
@@ -495,9 +499,10 @@ change the routing table.
 Table~\ref{policy_bgp_match} summarizes the match conditions specific to BGP.
 \begin{table}[h]
 \centering
-\begin{tabular}{l|c|c|p{7cm}}
-Variable & Operator & Argument type & Semantics \\
+\begin{tabular}{|l|c|c|p{7cm}|}
 \hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
 {\tt nexthop4} & {\tt :} & ipv4range & Matches if the IPv4 next-hop of the route
 lies within the specified range.\\
 {\tt nexhtop6} & {\tt :} & ipv6range & Matches if the IPv6 next-hop of the route
@@ -523,7 +528,9 @@ stands for IGP, 1 for EGP and 2 for INCOMPLETE.  \\
 \hline
 {\tt localpref} & {\tt :} & u32range & Matches the local preference of the route. \\
 \hline
-{\tt was-aggregated} & {\tt :} & bool & True if this route contributed to origination of an aggregate route. \\
+{\tt was-aggregated} & {\tt :} & bool & True if this route contributed to
+origination of an aggregate route. \\
+\hline
 \end{tabular}
 \caption{\label{policy_bgp_match}BGP specific match conditions.}
 \end{table}
@@ -532,9 +539,10 @@ stands for IGP, 1 for EGP and 2 for INCOMPLETE.  \\
 Table~\ref{policy_bgp_action} summarizes the actions specific to BGP.
 \begin{table}[h]
 \centering
-\begin{tabular}{l|c|c|p{7cm}}
-Variable & Operator & Argument type & Semantics \\
+\begin{tabular}{|l|c|c|p{7cm}|}
 \hline
+Variable & Operator & Argument type & Semantics \\
+\hline\hline
 {\tt nexthop4} & {\tt :} & ipv4 & Replaces the IPv4 nexthop. \\
 {\tt nexhtop6} & {\tt :} & ipv6 & Replaces the IPv6 nexthop. \\
 \hline
@@ -554,7 +562,9 @@ specified number of times. \\
 \hline
 {\tt localpref} & {\tt :} & u32 & Sets the localpref. \\
 \hline
-{\tt aggregate-prefix-len} & {\tt :} & u32 & Originate an aggregate route with this prefix length. \\
+{\tt aggregate-prefix-len} & {\tt :} & u32 & Originate an aggregate route with
+this prefix length. \\
+\hline
 \end{tabular}
 \caption{\label{policy_bgp_action}BGP specific actions.}
 \end{table}
