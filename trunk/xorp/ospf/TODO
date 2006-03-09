@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.65 2006/02/18 02:17:30 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.66 2006/03/07 01:43:54 atanu Exp $
 #
 
 TODO
@@ -110,23 +110,8 @@ It might be appropriate to leave MaxAge LSAs on the retransmission list.
 
 If this fix works then do away with MAX_AGE_IN_DATABASE.
 
-39) The code that processes AS-External-LSAs will need to be
-re-examined when multiple areas are fully supported.
-
 40) When the adding of routes is more robust change the XLOG_ERROR to
 an XLOG_FATAL in route_command_done().
-
-41) While adding support for multiple areas created an abstract class
-Subsystem that includes start() and shutdown() methods. It should be
-possible to enhance this class to allow clean shutdown. Both total
-shutdown and the removal of a single area. That is withdraw all
-announced LSAs before shutting down. The peer manager currently calls
-shutdown on the an area then proceeds to delete the area. It might be
-cleaner to wait for the area to signal that shutdown is complete,
-either by polling running() or by waiting for the shutdown_complete().
-
-43) Changing the type of an area currently has no effect. The only way
-to change an area type is to save and reload the config.
 
 44) The packet header encode and decode routines should use AUTH_* consts
 not hard coded numbers.
@@ -330,3 +315,25 @@ transitions.
 46) Replace class Subsystem with class ServiceBase.
 
 [DONE]
+
+39) The code that processes AS-External-LSAs will need to be
+re-examined when multiple areas are fully supported.
+
+[DONE]
+
+41) While adding support for multiple areas created an abstract class
+Subsystem that includes start() and shutdown() methods. It should be
+possible to enhance this class to allow clean shutdown. Both total
+shutdown and the removal of a single area. That is withdraw all
+announced LSAs before shutting down. The peer manager currently calls
+shutdown on the an area then proceeds to delete the area. It might be
+cleaner to wait for the area to signal that shutdown is complete,
+either by polling running() or by waiting for the shutdown_complete().
+
+[Switched to using ServiceBase that already existed]
+
+43) Changing the type of an area currently has no effect. The only way
+to change an area type is to save and reload the config.
+
+[DONE]
+
