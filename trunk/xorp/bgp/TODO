@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.15 2006/02/17 17:38:29 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.16 2006/02/17 20:00:38 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -31,12 +31,6 @@ unicast and multicast decision tables will be notified. This is not a
 big deal.
 
 -- added 2003-10-13 by AG
-
-34) The rib_ipc_handler sets the window of XRLs in flight to the RIB
-to 1. Now that XRLs are pipelined this value should be increased. Its
-too close to the 1.1-RC to make this change now.
-
--- added 2005-03-10 by AG
 
 35) BGP makes its own TCP connections it should be changed to make its
 connections through the FEA. It should be noted that BGP is using the
@@ -175,6 +169,12 @@ if deletion has completed (DeleteAllNodes::running()).
 -- added 2004-05-05 AG
 
 21) Ensure we keep the right connection during simultaneous open.
+
+34) The rib_ipc_handler sets the window of XRLs in flight to the RIB
+to 1. Now that XRLs are pipelined this value should be increased. Its
+too close to the 1.1-RC to make this change now.
+
+-- added 2005-03-10 by AG
 
 ------------------------------ TESTING --------------------------
 
