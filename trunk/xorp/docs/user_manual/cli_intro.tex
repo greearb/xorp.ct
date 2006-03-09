@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.10 2005/11/14 03:44:58 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.11 2006/02/17 19:45:13 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -15,7 +15,7 @@ chapters we describe the details of how to configure BGP, PIM, SNMP and
 other processes.
 
 The user interface style is loosely modelled on that of a Juniper
-router.  This manual and the xorpsh itself are works in progress, and
+router.  This manual and the \xorpsh itself are works in progress, and
 so may change significantly in the future.
 
 \section{Running xorpsh}
@@ -289,7 +289,7 @@ The main commands in operational mode are:
 \item{\bf configure}: switches from operational mode to configuration
 mode.
 \item{\bf help}: provides online help.
-\item{\bf quit}: quit from xorpsh.
+\item{\bf quit}: quit from \xorpsh.
 \item{\bf show}: displays many aspects of the running state of the
 router.
 \end{description}
@@ -800,7 +800,7 @@ OK
 The \emph{commit} command commits all the current configuration changes.
 This can take a number of seconds before the response is given.
 
-{\it If xorpsh was built with debugging enabled, the response can be
+{\it If \xorpsh was built with debugging enabled, the response can be
 considerably more verbose than shown above!}
 
 If two or more users are logged in using configuration mode, and one
@@ -860,7 +860,7 @@ The default operational and configuration mode prompts are
 The operational and configuration mode prompts can be modified by the
 following environmental variables respectively:
 {\textbf XORP\_PROMPT\_OPERATIONAL} and
-{\textbf XORP\_PROMPT\_CONFIGURATION}.
+{\textbf XORP\_PROMPT\_CONFIGURATION}. For example:
 
 \begin{verbatim}
 user@hostname[10] env XORP_PROMPT_OPERATIONAL="foo " 
