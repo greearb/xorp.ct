@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/README,v 1.10 2004/07/09 05:21:52 pavlin Exp $
+# $XORP: xorp/bgp/README,v 1.11 2005/04/12 01:16:41 pavlin Exp $
 #
 
 Border Gateway Protocol (BGP) Implementation
@@ -48,17 +48,15 @@ committed to bgp must come with it's own set of validation checks.
 Status
 ======
 
-April 2005: The core functionality of BGP is basically complete. We
+March 2006: The core functionality of BGP is basically complete. We
 have a reasonable number of test suites available, but nowhere near
-enough to be sure of correct operation in all cases.  Pretty much no
-optional functionality is supported:
+enough to be sure of correct operation in all cases.
 
-- No user-configurable filters are supported (but the internal code to
-  hold and apply filters is operational).
-- Confederations are not supported.
-- Route Reflection is not supported.
+- BGP is totally integrated with the policy code.
+- Confederations are supported.
+- Route Reflection is supported.
+- Communities are supported via policy. 
 - IPv6 is supported.
-- Route import from IGPs is not supported.
 
 Known problems:
 
