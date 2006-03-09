@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: other/LiveCD/files/rc.live,v 1.4 2005/04/12 07:38:47 pavlin Exp $
 #
 
 # Copyright (c) 2004-2005 International Computer Science Institute
@@ -113,7 +113,7 @@ tar -xzpf /mfs/local_etc.tgz -C / >/dev/null 2>&1
 
 echo "Generating /usr/local/xorp under MFS"
 echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
-mount_mfs -s 98304 -c 20 -o noatime swap /usr/local/xorp 2>&1
+mount_mfs -s 131072 -c 20 -o noatime swap /usr/local/xorp 2>&1
 tar -xzpf /mfs/local_xorp.tgz -C / >/dev/null 2>&1
 
 mount -t msdos /dev/fd0 /mnt/floppy 2>&1
