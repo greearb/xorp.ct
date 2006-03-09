@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.42 2006/03/09 02:30:06 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.43 2006/03/09 02:52:35 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -316,11 +316,27 @@ the login shell is csh or tcsh):
  #   gzip LiveCD.iso
 
 ========================================================================
+2470.	TASK: Prepare the XORP Installer for Windows
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # Make sure you have a full MSYS/MinGW environment set up as per BUILD_NOTES.
+ # Make sure you have the Nullsoft Installer toolkit installed:
+ #   http://nsis.sourceforge.net/
+ # Make sure the path to makensis.exe is in your PATH.
+ # Check out the xorp/contrib/win32/installer/xorp.nsi script.
+ # Fiddle with the SRCDIR and DLLDIR settings if you have to, to point to
+ #   where you have built the source and installed MinGW.
+ # Run makensis xorp.nsi.
+ # Test the installer.
+
+========================================================================
 2500.	TASK: Copy the tarballs to the web server
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
- # Commands continue from the previous task
+ # Commands continue from TASK 2400: "Prepare sofware and documentation
+ # tarballs for distribution".
  scp -p xorp-$ReleaseVersion.tar.gz www.xorp.org:~/
  scp -p docs-$ReleaseVersion.tar.gz www.xorp.org:~/
  ssh www.xorp.org "(echo $ReleaseVersion > _XORP_VERSION)";
