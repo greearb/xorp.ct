@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.22 2005/11/11 06:24:03 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.23 2005/12/20 22:02:17 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -270,9 +270,9 @@ before starting XORP:
     IPv6 (only with the IPv6 USAGI toolkit after 2005/02/14:
     http://www.linux-ipv6.org/).
 
-    \item {\tt MacOS X}: No multicast routing support (as of MacOS X 10.3.x).
+    \item {\tt MacOS X}: No multicast routing support (as of MacOS X 10.4.x).
 
-    \item {\tt NetBSD}: IPv4 (any release after NetBSD-2.0), IPv6 (NetBSD-1.5
+    \item {\tt NetBSD}: IPv4 (NetBSD-3.0 and later), IPv6 (NetBSD-1.5
     and later).
 
     \item {\tt OpenBSD}: IPv4 (OpenBSD-3.7 and later), IPv6 (OpenBSD-2.7 and
@@ -419,6 +419,7 @@ multicast_router=YES
 
 \end{itemize}
 
+\newpage
 \subsection{Configuration Syntax}
 
 \vspace{0.1in}
@@ -1638,5 +1639,5 @@ The fields for each entry (in order of appearance) are:
 
 \end{itemize}
 
-Note that currently (April 2005), configuring multicast scoped zones is not
+Note that currently (March 2006), configuring multicast scoped zones is not
 supported. This feature should be added in the future.
