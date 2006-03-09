@@ -1,17 +1,36 @@
-*** THIS CODE IS STILL UNDER DEVELOPMENT AND CANNOT BE USED FOR ROUTING. ***
+#
+# $XORP$
+#
 
-* In the interface code currently Peer, Peerout and Neightbour classes
-  never cache any state such as router ID or area. We use the hello
-  packet to hold the definitive state for this peerings. If the router
-  ID or some other state is changed then the new values should be
-  adopted immediately in any outbound packets.
+Open Shortest Path First (OSPF) Implementation
+==============================================
 
-* Always change the state as the first operation in an event
-  routine. If any subsequent code checks the state it should see the
-  new state.
+This directory contains the XORP implementation of the OSPF protocol.
 
-* In the interface code various state variables need to be held. A lot
-  of this state will eventually be transmitted. Hold as much as
-  possible of this state in a packet (HelloPacket) itself. Saves the
-  additional copy and reduces the likelyhood of getting out of sync.
+Configuration
+=============
 
+Startup
+=======
+
+Documentation
+=============
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/ospf/
+
+Testing
+=======
+
+As with most XORP processes, running "gmake check" in the ospf
+directory will run a set of validation checks.  Any new functionality
+committed to ospf must come with it's own set of validation checks.
+
+Status
+======
+
+March 2006: OSPFv2 is complete, the NSSA implementation does not
+support translator election.
+
+The OSPFv3 implementation still requires the IPv6 specific routing
+computations to be completed.
