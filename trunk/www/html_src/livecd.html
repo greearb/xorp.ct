@@ -41,11 +41,11 @@ functionality and stability, so if you're thinking of downloading the
 <P>
 XORP version: Release-1.2
 <br>
-<a href="releases/1.2/LiveCD.iso.gz">Download</a> the Live CD ISO image (93MB).  
+<a href="releases/1.2/LiveCD.iso.gz">Download</a> the Live CD ISO image (89MB).  
 <br>
 Or try the nearest <a href="mirrors.html">mirror site</a>.
 <br>
-MD5 (LiveCD.iso.gz) = a7d7ff374b35ed84e19cc44920a317e2
+MD5 (LiveCD.iso.gz) = de2d6445f2f1e6df49543df58ad8640a
 
 <P>
 Once you've downloaded the CD image, you will need to burn it using a
@@ -172,10 +172,21 @@ configuration file is stored in <B>/etc/xorp.cfg</B>
 If you change the router configuration using the XORP shell, and want
 to save it, you need to enter the following in configuration mode:
 <P>
-XORP> <B>save /etc/xorp.cfg</B>
+xorp@LiveCD# <B>save /etc/xorp.cfg</B>
 <P>
+If you want to preserve the configuration on a floppy, you would
+have to explicitly specify a filename on the mounted floppy, or copy (by
+using the UNIX prompt) the saved configuration from the memory
+filesystem to the floppy.
+
+<!---
+XXX: text commented-out because currently the automatic saving to
+     a floppy doesn't work (the rtrmgr doesn't support the -s flag anymore).
+
 If you save to any other location, the file will still be preserved on
 the floppy, but will not be loaded automatically the next time XORP reboots.
+-->
+
 
 <!--
 XXX: Debugging text commented-out because since Release-1.2 the size of
