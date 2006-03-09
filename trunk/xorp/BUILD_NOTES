@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.43 2006/03/08 20:26:34 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.44 2006/03/09 07:53:44 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -352,8 +352,8 @@ gmake check
       routing tables. The FEA will detect when this service is running
       and print a warning message to the XORP process log.
 
-    - The XORP Shell (xorpsh.exe) should be run from within a native Win32
-      command prompt.
+    - The XORP Shell (xorpsh.exe) should be run from within a native
+      Win32 command prompt.
 
   * Instructions for building the XORP Installer for Windows:
     - Make sure you have a full MSYS/MinGW environment set up as
