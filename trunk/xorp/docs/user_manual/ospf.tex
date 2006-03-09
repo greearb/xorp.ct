@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.4 2006/03/09 08:43:03 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.5 2006/03/09 10:32:42 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -407,6 +407,10 @@ protocols \{\\
 \end{alltt}
 \end{minipage}
 }
+
+This configuration is an example of the minimal possible
+configuration. OSPF is running in the {\tt BACKBONE} area, on a single
+interface/vif the {\tt router-id} is set to the interface/vif address.
 
 \newpage
 \section{Monitoring OSPF}
