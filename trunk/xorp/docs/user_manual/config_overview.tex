@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.18 2006/03/08 06:44:48 atanu Exp $
+% $XORP: xorp/docs/user_manual/config_overview.tex,v 1.19 2006/03/08 22:44:04 pavlin Exp $
 %
 
 \chapter{Configuration Overview}
@@ -10,8 +10,8 @@ The configuration information can be provided in one of the two ways:
 
 \begin{itemize}
 \item
-  Use a configuration file when the rtrmgr is started.
-  By default, the rtrmgr will load the configuration from file
+  Use a configuration file when the \rtrmgr is started.
+  By default, the \rtrmgr will load the configuration from file
   ``config.boot'' in the XORP installation directory.
   This file can be specified by the ``-b~~$<$filename$>$'' command line
   option:
@@ -24,14 +24,14 @@ The configuration information can be provided in one of the two ways:
     before using it).
 
 \item
-  Use the xorpsh command line interface after the rtrmgr is started.
-  It should be noted that command line completion in the xorpsh
+  Use the \xorpsh command line interface after the \rtrmgr is started.
+  It should be noted that command line completion in the \xorpsh
   does greatly simplify configuration.
 \end{itemize}
 
 \noindent
 A mixture of both methods is permissible. For example,
-a configuration file can also be loaded from within the xorpsh.
+a configuration file can also be loaded from within the \xorpsh.
 
 At very minimum, a router's interfaces must be configured (see
 Section~\ref{sec:network_interfaces}). Typically, the FEA needs to be
