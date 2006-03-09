@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.10 2005/11/11 06:24:03 pavlin Exp $
+% $XORP: xorp/docs/user_manual/static_routes.tex,v 1.11 2006/01/19 02:28:00 pavlin Exp $
 %
 
 \chapter{Static Routes}
@@ -268,16 +268,12 @@ table ipv4 unicast static}:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxx\=xxxxxxxxxxxxxxxx\=\kill
+xxxxxxxxxxxxxxxx\=\kill
 user@hostname> \textbf{show route table ipv4 unicast static}\\
-user@hostname> {\bf show route table ipv4 unicast static}\\
-Network 192.168.0.0/24\\
-\>Nexthop := 192.150.187.1\\
-\>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0\\
-Network 192.168.1.0/24\\
-\>Nexthop := 192.150.187.2\\
-\>Metric :=     1    Protocol := static    Interface := fxp0    Vif := fxp0\\
-user@hostname> 
+192.168.0.0/24 \>[static(1)/1]\\
+               \>> to 192.150.187.1 via fxp0/fxp0\\
+192.168.1.0/24 \>[static(1)/1]\\
+               \>> to 192.150.187.2 via fxp0/fxp0
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -285,7 +281,7 @@ user@hostname>
 
 \vspace{0.1in} 
 The information shown for each route not only indicates the configured
-information (Network, Nexthop and Metric), but also the interface
+information (network, nexthop and metric), but also the interface
 and vif via which this route will forward packets.
 
 If the nexthop is not actually reachable, the route will not be shown

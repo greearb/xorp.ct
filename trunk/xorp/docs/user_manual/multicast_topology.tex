@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/multicast_topology.tex,v 1.4 2005/04/09 03:17:11 pavlin Exp $
+% $XORP: xorp/docs/user_manual/multicast_topology.tex,v 1.5 2005/11/11 06:24:02 pavlin Exp $
 %
 
 \chapter{Multicast Topology Discovery}
@@ -144,23 +144,18 @@ routes:
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxx\=xxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxx\=\kill
+xxxxxxxxxxxxxxxx\=\kill
 user@hostname> \textbf{show route table ipv4 multicast fib2mrib}\\
-Network 10.2.0.0/24\\
-    \>Nexthop := 0.0.0.0\\
-    \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2\\
-Network 10.3.0.0/24\\
-    \>Nexthop := 0.0.0.0\\
-    \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc1    \>Vif := dc1\\
-Network 10.4.0.0/24\\
-    \>Nexthop := 10.3.0.2\\
-    \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc1    \>Vif := dc1\\
-Network 10.5.0.0/24\\
-    \>Nexthop := 10.2.0.4\\
-    \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2\\
-Network 10.6.0.0/24\\
-    \>Nexthop := 10.2.0.1\\
-    \>Metric := 65535    \>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2
+10.2.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 0.0.0.0 via dc2/dc2\\
+10.3.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 0.0.0.0 via dc1/dc1\\
+10.4.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.3.0.2 via dc1/dc1\\
+10.5.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.4 via dc2/dc2\\
+10.6.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.1 via dc2/dc2
 \end{tabbing}
 \end{alltt}
 \end{minipage}
@@ -168,30 +163,24 @@ Network 10.6.0.0/24\\
 \vspace{0.1in}
 
 The final MRIB table can be shown with the following command:
-routes:
 
 \vspace{0.1in}
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
 \begin{alltt}
 \begin{tabbing}
-xxxx\=xxxxxxxxxxxxxx\=xxxxx\=xxxxxxxxxxxxxxxxxxxxxxxx\=xxxxxxxxxxxxxxxxxxxx\=\kill
+xxxxxxxxxxxxxxxx\=\kill
 user@hostname> \textbf{show route table ipv4 multicast final}\\
-Network 10.2.0.0/24\\
-    \>Nexthop := 10.2.0.2\\
-    \>Metric :=     \>0    \>Protocol := connected    \>Interface := dc2    \>Vif := dc2\\
-Network 10.3.0.0/24\\
-    \>Nexthop := 10.3.0.1\\
-    \>Metric :=     \>0    \>Protocol := connected    \>Interface := dc1    \>Vif := dc1\\
-Network 10.4.0.0/24\\
-    \>Nexthop := 10.3.0.2\\
-    \>Metric := 65535    \>\>Protocol := fib2mrib    \>Interface := dc1    \>Vif := dc1\\
-Network 10.5.0.0/24\\
-    \>Nexthop := 10.2.0.4\\
-    \>Metric := 65535    \>\>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2\\
-Network 10.6.0.0/24\\
-    \>Nexthop := 10.2.0.1\\
-    \>Metric := 65535    \>\>Protocol := fib2mrib    \>Interface := dc2    \>Vif := dc2
+10.2.0.0/24    \>[connected(0)/0]\\
+               \>> to 0.0.0.0 via dc2/dc2\\
+10.3.0.0/24    \>[connected(0)/0]\\
+               \>> to 0.0.0.0 via dc1/dc1\\
+10.4.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.3.0.2 via dc1/dc1\\
+10.5.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.4 via dc2/dc2\\
+10.6.0.0/24    \>[fib2mrib(254)/65535]\\
+               \>> to 10.2.0.1 via dc2/dc2
 \end{tabbing}
 \end{alltt}
 \end{minipage}
