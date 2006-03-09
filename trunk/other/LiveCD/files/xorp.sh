@@ -101,7 +101,11 @@ start() {
 	start_services
 
 	echo "Starting XORP router manager process"
-	/usr/local/xorp/bin/xorp_rtrmgr -b $CFG_FILE -s /usr/local/xorp/bin/xorp_load.py 1>/dev/null 2>/dev/null &
+	# TODO: comment the original command, because the rtrmgr doesn't
+	# support anymore the "-s" argument.
+	#
+	# /usr/local/xorp/bin/xorp_rtrmgr -b $CFG_FILE -s /usr/local/xorp/bin/xorp_load.py 1>/dev/null 2>/dev/null &
+	/usr/local/xorp/bin/xorp_rtrmgr -b $CFG_FILE 1>/dev/null 2>/dev/null &
 	exit 0
 }
 
