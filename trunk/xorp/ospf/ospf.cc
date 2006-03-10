@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.66 2006/02/26 09:20:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.67 2006/03/07 01:43:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,7 +43,8 @@ template <typename A>
 Ospf<A>::Ospf(OspfTypes::Version version, EventLoop& eventloop, IO<A>* io)
     : _version(version), _eventloop(eventloop),
       _io(io), _reason("Waiting for IO"), _process_status(PROC_STARTUP),
-      _lsa_decoder(version), _peer_manager(*this), _routing_table(*this)
+      _lsa_decoder(version), _peer_manager(*this), _routing_table(*this),
+      _RFC1583Compatibility(false)
 {
     // Register the LSAs and packets with the associated decoder.
     initialise_lsa_decoder(version, _lsa_decoder);
