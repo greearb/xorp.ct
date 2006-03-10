@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.231 2006/03/06 07:21:33 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.232 2006/03/06 07:48:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -4128,6 +4128,7 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 	// Its probably going to be a common occurence that an ACK
 	// arrives for a LSA that has since been updated. A LSA that
 	// we don't know about at all is more interesting.
+#if	0
 	if (!found && !partial) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
 		       "Ack for LSA not in retransmission list.\n%s\n%s",
@@ -4139,6 +4140,7 @@ link_state_acknowledgement_received(LinkStateAcknowledgementPacket *lsap)
 			   "Retransmit entry %s", cstring(*(*k)));
 	    }
 	}
+#endif
     }
 }
 
