@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.204 2006/02/28 00:30:50 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.205 2006/03/09 22:42:45 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3075,6 +3075,12 @@ AreaRouter<IPv4>::routing_total_recomputeV2()
     routing_as_externalV2();
 
     routing_table.end();
+
+    // XXX
+    // This is a temporary hack to make sure that transit area routes
+    // are re-applied.
+    if (backbone())
+	_ospf.get_peer_manager().routing_recompute_all_areas_except_backbone();
 }
 
 template <>
@@ -3276,7 +3282,83 @@ template <>
 void 
 AreaRouter<IPv4>::routing_transit_areaV2()
 {
-    XLOG_WARNING("TBD");
+    // RFC 2328 Section 16.3.  Examining transit areas' summary-LSAs
+    for (size_t index = 0 ; index < _last_entry; index++) {
+	Lsa::LsaRef lsar = _db[index];
+	if (!lsar->valid() || lsar->maxage())
+	    continue;
+
+	SummaryNetworkLsa *snlsa;	// Type 3
+	SummaryRouterLsa *srlsa;	// Type 4
+	uint32_t metric = 0;
+	IPv4 mask;
+
+	if (0 != (snlsa = dynamic_cast<SummaryNetworkLsa *>(lsar.get()))) {
+	    metric = snlsa->get_metric();
+	    mask = IPv4(htonl(snlsa->get_network_mask()));
+	}
+	if (0 != (srlsa = dynamic_cast<SummaryRouterLsa *>(lsar.get()))) {
+	    metric = srlsa->get_metric();
+	    mask = IPv4::ALL_ONES();
+	}
+	if (0 == snlsa && 0 == srlsa)
+	    continue;
+	if (OspfTypes::LSInfinity == metric)
+	    continue;
+
+	// (2)
+	if (lsar->get_self_originating())
+	    continue;
+
+	uint32_t lsid = lsar->get_header().get_link_state_id();
+	IPNet<IPv4> n = IPNet<IPv4>(IPv4(htonl(lsid)), mask.mask_len());
+
+	// (3)
+	// Lookup this route first 
+	RoutingTable<IPv4>& routing_table = _ospf.get_routing_table();
+	RouteEntry<IPv4> rtnet;
+	if (!routing_table.lookup_entry(n, rtnet))
+	    continue;
+
+	bool match = true;
+	switch(rtnet.get_path_type()) {
+	case RouteEntry<IPv4>::intra_area:
+	case RouteEntry<IPv4>::inter_area:
+	    break;
+	case RouteEntry<IPv4>::type1:
+	case RouteEntry<IPv4>::type2:
+	    match = false;
+	    break;
+	}
+
+	if (!match)
+	    continue;
+
+	// (4)
+	// Is the BR reachable?
+	uint32_t adv = lsar->get_header().get_advertising_router();
+	RouteEntry<IPv4> rtrtr;
+	if (!routing_table.
+	    lookup_entry_by_advertising_router(rtnet.get_area(), adv, rtrtr))
+	    continue;
+
+	uint32_t iac = rtrtr.get_cost() + metric;
+
+	// (5)
+	if (rtnet.get_cost() <= iac)
+	    continue;
+
+// 	rtnet.set_area(_area);
+// 	rtnet.set_path_type(RouteEntry<IPv4>::inter_area);
+	rtnet.set_cost(iac);
+	rtnet.set_nexthop(rtrtr.get_nexthop());
+	rtnet.set_advertising_router(rtrtr.get_advertising_router());
+	rtnet.set_lsa(lsar);
+
+	// Change the existing route, so if the original route goes
+	// away the route will be removed.
+	routing_table.replace_entry(rtnet.get_area(), n, rtnet);
+    }
 }
 
 template <>

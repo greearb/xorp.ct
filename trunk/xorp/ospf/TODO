@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.66 2006/03/07 01:43:54 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.67 2006/03/09 07:01:20 atanu Exp $
 #
 
 TODO
@@ -148,6 +148,17 @@ In order to implement the push_routes the network, nexthop, metric and
 possibly policytags must be saved in a separate list, Or the
 AS-External-LSA could be augmented to hold the original values.
 
+50) When computing transit area routes, routes can only be installed
+if a backbone or inter area route exists. If a better route is found
+the cost and nexthop of the original route are overriden. Thus when
+the orignal route is withdrawn the lower cost route will be
+automatically withdrawn. To make sure the transit route will be
+re-applied *temporarily* whenever a routing computation happens on the
+backbone all other areas also have routing computations run. The
+recomputation should only occur if the other areas are actually
+transit areas. Even better the internal routing entry code could be
+taught about this type of transit derived route.
+  
 Possible issues
 ~~~~~~~~~~~~~~~
 

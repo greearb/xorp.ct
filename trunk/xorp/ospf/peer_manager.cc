@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.113 2006/03/07 01:43:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.114 2006/03/07 06:41:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1452,6 +1452,33 @@ void
 PeerManager<A>::external_push_routes()
 {
     _external.push_routes();
+}
+
+template <typename A>
+void
+PeerManager<A>::routing_recompute_all_areas()
+{
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++)
+	if ((*i).first == BACKBONE) {
+	    (*i).second->testing_routing_total_recompute();
+	    break;
+	}
+
+    // XXX
+    // Currently a call the recompute the backbone will cause a
+    // recompute of all areas so this call is not necessary.
+    // routing_recompute_all_areas_except_backbone();
+}
+
+template <typename A>
+void
+PeerManager<A>::routing_recompute_all_areas_except_backbone()
+{
+    typename map<OspfTypes::AreaID, AreaRouter<A> *>::const_iterator i;
+    for (i = _areas.begin(); i != _areas.end(); i++)
+	if ((*i).first != BACKBONE)
+	    (*i).second->testing_routing_total_recompute();
 }
 
 template <typename A>
