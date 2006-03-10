@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.20 2006/02/21 02:44:50 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.21 2006/02/26 09:20:58 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -159,6 +159,13 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
     XrlCmdError ospfv2_0_1_set_router_id(
 	// Input values,
 	const IPv4&	id);
+
+    /**
+     *  Set RFC1583Compatibility.
+     */
+    XrlCmdError ospfv2_0_1_set_rfc1583compatibility(
+	// Input values,
+	const bool&	compatibility);
 
     /**
      *  Set the router alert in the IP options.

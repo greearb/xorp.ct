@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.29 2006/02/26 09:20:58 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.30 2006/03/03 20:44:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -309,6 +309,14 @@ XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
     OspfTypes::RouterID rid = ntohl(id.addr());
 
     _ospf.set_router_id(rid);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV2Target::ospfv2_0_1_set_rfc1583compatibility(const bool& compatibility)
+{
+    _ospf.set_RFC1583Compatibility(compatibility);
 
     return XrlCmdError::OKAY();
 }
