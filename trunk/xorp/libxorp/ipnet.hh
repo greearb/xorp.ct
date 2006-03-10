@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.18 2005/07/27 01:04:13 zec Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.19 2005/10/28 01:23:28 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -20,6 +20,8 @@
 #include "xorp.h"
 #include "exceptions.hh"
 #include "c_format.hh"
+#include "ipv4.hh"
+#include "ipv6.hh"
 #include "range.hh"
 
 /**
@@ -498,6 +500,51 @@ IPNet<A>::overlap(const IPNet<A>& other) const
     }
     return i - 1;
 }
+
+template <>
+inline uint32_t
+IPNet<IPv6>::overlap(const IPNet<IPv6>& other) const
+{
+    uint32_t p = (prefix_len() < other.prefix_len()) ?
+	prefix_len() : other.prefix_len();
+    uint32_t done = 32;
+    const uint32_t* a1 = masked_addr().addr();
+    const uint32_t* a2 = other.masked_addr().addr();
+    for (int word = 0; word < 4 && done < p+32; word++) {
+	uint32_t xor_addr = htonl(*a1 ^ *a2);
+	if (xor_addr != 0) {
+	    while (xor_addr != 0) {
+		xor_addr >>= 1;
+		done--;
+	    }
+	    break;
+	}
+	done += 32;
+	a1++;
+	a2++;
+    }
+    if (done > p) done = p;
+    return done;
+}
+
+
+template <>
+inline uint32_t
+IPNet<IPv4>::overlap(const IPNet<IPv4>& other) const
+{
+    uint32_t p = (prefix_len() < other.prefix_len()) ?
+	prefix_len() : other.prefix_len();
+    uint32_t done = 32;
+    uint32_t xor_addr 
+	= htonl(masked_addr().addr() ^ other.masked_addr().addr());
+    while (xor_addr != 0) {
+	xor_addr >>= 1;
+	done--;
+    }
+    if (done > p) done = p;
+    return done;
+}
+
 
 /**
  * Determine the number of the most significant bits overlapping
