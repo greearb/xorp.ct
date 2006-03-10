@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.205 2006/03/09 22:42:45 atanu Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.206 2006/03/10 03:33:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -3451,6 +3451,14 @@ AreaRouter<IPv4>::routing_as_externalV2()
 	if (routing_table.lookup_entry(n, rtnet)) {
 	    switch(rtnet.get_path_type()) {
 	    case RouteEntry<IPv4>::intra_area:
+		if (!_ospf.get_RFC1583Compatibility()) {
+		    if (RouteEntry<IPv4>::intra_area == rtf.get_path_type()) {
+			if (!backbone(rtf.get_area()) &&
+			    backbone(rtnet.get_area())) {
+				replace_entry = true;
+			    }
+		    }
+		}
 		break;
 	    case RouteEntry<IPv4>::inter_area:
 		break;
