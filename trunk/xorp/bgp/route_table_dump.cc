@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.35 2005/03/25 02:52:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_dump.cc,v 1.36 2005/04/04 11:27:21 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -50,6 +50,7 @@ DumpTable<A>::DumpTable(string table_name,
     _output_busy = false;
     _waiting_for_deletion_completion = false;
     _completed = false;
+    _dump_chunk_active = false;
 #ifdef AUDIT_ENABLE
     _audit_entries = 0;
     _first_audit = 0;
@@ -286,8 +287,12 @@ template<class A>
 void
 DumpTable<A>::wakeup_downstream()
 {
+    _dump_chunk_active = true;
+
     //wakeup the folks downstream so they start requesting data from us
     this->_next_table->wakeup();
+
+    _dump_chunk_active = false;
 }
 
 template<class A>
@@ -380,10 +385,19 @@ DumpTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	// next route
 	messages_queued = this->_parent->
 	    get_next_message(static_cast<BGPRouteTable<A>*>(this));
-	if (messages_queued)
+	if (messages_queued) {
 	    return true;
-	else
+	} else if (_dump_chunk_active) {
+	    // Only dump the next chunk if we have been woken up as a
+	    // background task.  Otherwise it's not safe to dump a
+	    // chunk, as we may be in the middle of processing an
+	    // event elsewhere, and we need to be careful never to do
+	    // a dump between events that some other route table
+	    // assumes are atomic
 	    return do_next_route_dump();
+	} else {
+	    return false;
+	}
     }
 }
 

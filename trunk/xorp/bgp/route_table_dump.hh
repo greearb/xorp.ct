@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.18 2005/04/04 11:27:21 mjh Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.19 2006/02/17 23:34:54 zec Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -104,7 +104,10 @@ private:
     bool _output_busy;
 
     int _dumped;
-    bool _dump_active;
+    bool _dump_active;  // true if the dump is in progress
+    bool _dump_chunk_active;  // true if DumpTable has been woken up
+			      // to dump one chunk, false if execution
+			      // is due to an external event.
     XorpTimer _dump_timer;
 
     //if we get to the end of the route dump, and some peers that went
