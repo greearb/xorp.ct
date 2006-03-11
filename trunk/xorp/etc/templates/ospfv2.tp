@@ -1,10 +1,10 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.46 2006/03/08 19:23:09 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.47 2006/03/10 04:47:35 atanu Exp $ */
 
 protocols {
     ospf4 {
 	targetname: txt = "ospfv2";
 	router-id: ipv4;
-	RFC1583Compatibility: bool = false;
+	rfc1583-compatibility: bool = false;
 	ip-router-alert: bool = false;
 
 	traceoptions {
@@ -145,11 +145,11 @@ the router within an Autonomous System";
 	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_router_id?id:ipv4=$(@)";
 	}
 
-	RFC1583Compatibility {
+	rfc1583-compatibility {
 	    %help: short "Criteria for handling AS external routes";
 
-	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_rfc1583compatibility?compatibility:bool=$(@)";
-	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_rfc1583compatibility?compatibility:bool=$(DEFAULT)";
+	    %set: xrl "$(ospf4.targetname)/ospfv2/0.1/set_rfc1583_compatibility?compatibility:bool=$(@)";
+	    %delete: xrl "$(ospf4.targetname)/ospfv2/0.1/set_rfc1583_compatibility?compatibility:bool=$(DEFAULT)";
 	}
 
 	ip-router-alert {

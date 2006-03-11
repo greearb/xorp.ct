@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.87 2006/02/26 09:20:58 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.88 2006/03/10 04:13:38 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -835,17 +835,17 @@ class Ospf {
     void set_router_id(OspfTypes::RouterID id);
 
     /**
-     * Get RFC1583Compatibility.
+     * Get RFC 1583 compatibility.
      */
-    bool get_RFC1583Compatibility() const { return _RFC1583Compatibility;}
+    bool get_rfc1583_compatibility() const { return _rfc1583_compatibility;}
 
     /**
-     * Set RFC1583Compatibility.
+     * Set RFC 1583 compatibility.
      */
-    void set_RFC1583Compatibility(bool compatibility) {
+    void set_rfc1583_compatibility(bool compatibility) {
 	// Don't check for equality we can use this as a hack to force
 	// routing recomputation.
-	_RFC1583Compatibility = compatibility;
+	_rfc1583_compatibility = compatibility;
 	_peer_manager.routing_recompute_all_areas();
     }
 
@@ -868,7 +868,7 @@ class Ospf {
     PolicyFilters _policy_filters;	// The policy filters.
 
     OspfTypes::RouterID _router_id;	// Router ID.
-    bool _RFC1583Compatibility;		// Preference rules for route
+    bool _rfc1583_compatibility;	// Preference rules for route
 					// selection. 
 
     Trace _trace;		// Trace variables.

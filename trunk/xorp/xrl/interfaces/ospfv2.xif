@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.17 2006/02/26 09:20:59 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.18 2006/03/10 04:35:22 atanu Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -12,9 +12,9 @@ interface ospfv2/0.1 {
     set_router_id ? id:ipv4
 
     /**
-     * Set RFC1583Compatibility.
+     * Set RFC 1583 compatibility.
      */
-    set_RFC1583Compatibility ? compatibility:bool
+    set_rfc1583_compatibility ? compatibility:bool
 
     /**
      * Set the router alert in the IP options.
