@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_dump.hh,v 1.19 2006/02/17 23:34:54 zec Exp $
+// $XORP: xorp/bgp/route_table_dump.hh,v 1.20 2006/03/11 08:30:06 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DUMP_HH__
 #define __BGP_ROUTE_TABLE_DUMP_HH__
@@ -85,6 +85,11 @@ public:
     void peering_came_up(const PeerHandler *peer, uint32_t genid,
 			 BGPRouteTable<A> *caller);
 
+    /**
+     * Signal from upstream that triggered data is ready
+     */
+    void wakeup();
+
 #ifdef AUDIT_ENABLE
     void print_and_clear_audit();
 #endif
@@ -105,9 +110,11 @@ private:
 
     int _dumped;
     bool _dump_active;  // true if the dump is in progress
-    bool _dump_chunk_active;  // true if DumpTable has been woken up
-			      // to dump one chunk, false if execution
-			      // is due to an external event.
+    bool _triggered_event;   // true if DumpTable has been woken up by
+			     // a triggered event (in which case we
+			     // shouldn't do any dumping or we may
+			     // surprise the upstream by dumping in
+			     // the middle of an event )
     XorpTimer _dump_timer;
 
     //if we get to the end of the route dump, and some peers that went
