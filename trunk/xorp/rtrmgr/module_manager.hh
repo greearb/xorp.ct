@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.37 2006/01/14 01:35:26 pavlin Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.38 2006/02/09 01:24:29 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -30,7 +30,7 @@ class EventLoop;
 class MasterConfigTree;
 class ModuleManager;
 class Rtrmgr;
-class RunShellCommand;
+class RunCommand;
 
 
 class Module : public GenericModule {
@@ -122,15 +122,15 @@ public:
 	void terminate_with_prejudice();
 
     private:
-	void stdout_cb(RunShellCommand* run_command, const string& output);
-	void stderr_cb(RunShellCommand* run_command, const string& output);
-	void done_cb(RunShellCommand* run_command, bool success,
+	void stdout_cb(RunCommand* run_command, const string& output);
+	void stderr_cb(RunCommand* run_command, const string& output);
+	void done_cb(RunCommand* run_command, bool success,
 		     const string& error_msg);
-	void stopped_cb(RunShellCommand* run_command, int stop_signal);
+	void stopped_cb(RunCommand* run_command, int stop_signal);
 
 	ModuleManager&	_mmgr;
 	string		_expath;
-	RunShellCommand* _run_command;
+	RunCommand* _run_command;
     };
 
 private:

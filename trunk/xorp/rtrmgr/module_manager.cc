@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.58 2006/01/26 19:51:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.59 2006/02/09 01:24:29 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -679,15 +679,18 @@ ModuleManager::Process::~Process()
 int
 ModuleManager::Process::startup(string& error_msg)
 {
+    list<string> empty_args;
+
     XLOG_ASSERT(_run_command == NULL);
 
-    _run_command = new RunShellCommand(
+    _run_command = new RunCommand(
 	_mmgr.eventloop(),
 	_expath,
-	string(""),	// XXX: no arguments allowed
+	empty_args,	// XXX: no arguments allowed
 	callback(this, &ModuleManager::Process::stdout_cb),
 	callback(this, &ModuleManager::Process::stderr_cb),
-	callback(this, &ModuleManager::Process::done_cb));
+	callback(this, &ModuleManager::Process::done_cb),
+	true);
     _run_command->set_stopped_cb(
 	callback(this, &ModuleManager::Process::stopped_cb));
     if (_run_command->execute() != XORP_OK) {
@@ -716,7 +719,7 @@ ModuleManager::Process::terminate_with_prejudice()
 }
 
 void
-ModuleManager::Process::stdout_cb(RunShellCommand* run_command,
+ModuleManager::Process::stdout_cb(RunCommand* run_command,
 				  const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -725,7 +728,7 @@ ModuleManager::Process::stdout_cb(RunShellCommand* run_command,
 }
 
 void
-ModuleManager::Process::stderr_cb(RunShellCommand* run_command,
+ModuleManager::Process::stderr_cb(RunCommand* run_command,
 				  const string& output)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -734,7 +737,7 @@ ModuleManager::Process::stderr_cb(RunShellCommand* run_command,
 }
 
 void
-ModuleManager::Process::done_cb(RunShellCommand* run_command, bool success,
+ModuleManager::Process::done_cb(RunCommand* run_command, bool success,
 				const string& error_msg)
 {
     XLOG_ASSERT(run_command == _run_command);
@@ -759,7 +762,7 @@ ModuleManager::Process::done_cb(RunShellCommand* run_command, bool success,
 }
 
 void
-ModuleManager::Process::stopped_cb(RunShellCommand* run_command,
+ModuleManager::Process::stopped_cb(RunCommand* run_command,
 				   int stop_signal)
 {
     XLOG_ASSERT(run_command == _run_command);
