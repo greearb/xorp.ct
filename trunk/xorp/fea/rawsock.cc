@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.14 2005/12/22 11:41:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.15 2005/12/22 12:18:23 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -699,16 +699,17 @@ RawSocket::join_multicast_group(const string& if_name,
 
 #ifdef HOST_OS_WINDOWS
 	//
-	// Winsock requires that raw sockets be bound to the interface
-	// they're being used to receive or send on. -bms
+	// Winsock requires that raw sockets be bound to an interface
+	// address, or INADDR_ANY, before a multicast group is joined.
 	//
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
-	sin.sin_addr = in_addr;
+	sin.sin_addr.s_addr = INADDR_ANY;
 
 	if (SOCKET_ERROR == bind(_proto_socket, (sockaddr *)&sin,
 				 sizeof(sockaddr_in))) {
+	    // XXX: The following error may be erroneous.
 	    XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
 	}
 #endif // HOST_OS_WINDOWS
