@@ -1,4 +1,5 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
+/* vim:set sts=4 ts=8: */
 
 /*
  * Copyright (c) 2001-2005 International Computer Science Institute
@@ -14,11 +15,12 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.6 2005/08/18 15:28:39 bms Exp $"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.7 2006/02/17 11:33:06 bms Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
  *   tcpdump/addrtoname.c (from FreeBSD)
+ *   lib/libc/net/ether_addr.c (from FreeBSD)
  * The copyright message(s) with the original file(s) is/are included below.
  */
 
@@ -46,6 +48,7 @@
  *  and address to string conversion routines
  *
  * $FreeBSD: src/contrib/tcpdump/addrtoname.c,v 1.12 2004/03/31 14:57:24 bms Exp $
+ * $FreeBSD: src/lib/libc/net/ether_addr.c,v 1.15 2002/04/08 07:51:10 ru Exp $
  */
 #if 0
 static const char rcsid[] _U_ =
@@ -95,50 +98,26 @@ ether_ntoa(const struct ether_addr *e)
 #endif /* !HAVE_ETHER_NTOA */
 
 #ifndef HAVE_ETHER_ATON
-
-/* Hex digit to integer. */
-#ifdef __STDC__
-inline
-#endif
-static int
-xdtoi(int c)
-{
-	if (isdigit(c))
-		return (c - '0');
-	else if (islower(c))
-		return (c - 'a' + 10);
-	else
-		return (c - 'A' + 10);
-}
-
 /*
- * Convert 's' which has the form "xx:xx:xx:xx:xx:xx" into a new
+ * Convert 's' which has the form "x:x:x:x:x:x" into a new
  * ethernet address.
- * XXX: Does not perform stringent checks on the format of the input string.
  * XXX: returns a pointer to static storage.
  */
 struct ether_addr *
 ether_aton(const char *s)
 {
-	static struct ether_addr o;
-	uint8_t *ep, *e;
-	unsigned int d;
+    int i;
+    static struct ether_addr o;
+    unsigned int od[6];
 
-	e = ep = (uint8_t *)&o;
+    i = sscanf(s, "%x:%x:%x:%x:%x:%x",
+	       &od[0], &od[1], &od[2], &od[3], &od[4], &od[5]);
+    if (i != 6)
+	return (NULL);
 
-	while (*s) {
-		if (*s == ':')
-			s += 1;
-		d = xdtoi(*s++);
-		if (isxdigit((uint8_t)*s)) {
-			d <<= 4;
-			d |= xdtoi(*s++);
-		} else {
-			return (NULL);
-		}
-		*ep++ = d;
-	}
+    for (i = 0; i < 6; i++)
+	o.octet[i] = od[i];
 
-	return (&o);
+    return (&o);
 }
 #endif /* !HAVE_ETHER_ATON */
