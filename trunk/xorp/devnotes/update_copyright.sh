@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP$
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.1 2006/03/15 23:16:22 pavlin Exp $
 #
 
 #
@@ -37,6 +37,12 @@ TMP_SUFFIX="debog"
 find . -type f -print | 
 while read FILENAME
 do
+    grep "${OLD_STRING}" ${FILENAME} > /dev/null
+    if [ $? -ne 0 ] ; then
+	# XXX: no match found
+	continue
+    fi
+
     cat ${FILENAME} | sed "${SED_COMMAND}" > ${FILENAME}.${TMP_SUFFIX}
     if [ $? -ne 0 ] ; then
 	echo "Error updating ${FILENAME}"
