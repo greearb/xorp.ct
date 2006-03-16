@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.2 2006/03/03 14:41:22 bms Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.3 2006/03/08 19:44:25 bms Exp $
  */
 
 !include LogicLib.nsh
@@ -110,8 +110,8 @@ Section "-RequiredDLLs"
 
   !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\libeay32.dll" "$INSTDIR\dlls\libeay32.dll" "${TMPDIR}"
   !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\libssl32.dll" "$INSTDIR\dlls\libssl32.dll" "${TMPDIR}"
-  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcre.dll" "$INSTDIR\dlls\pcre.dll" "${TMPDIR}"
-  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcreposix.dll" "$INSTDIR\dlls\pcreposix.dll" "${TMPDIR}"
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcre3.dll" "$INSTDIR\dlls\pcre3.dll" "${TMPDIR}"
+  !insertmacro InstallLib DLL NOTSHARED NOREBOOT_NOTPROTECTED "${DLLDIR}\pcreposix3.dll" "$INSTDIR\dlls\pcreposix3.dll" "${TMPDIR}"
 
   #
   # Add XORP_ROOT to environment
@@ -184,6 +184,9 @@ Section "-Base"
   File ${SRCDIR}\rib\add_route.exe
   File ${SRCDIR}\rib\main_routemap.exe
   File ${SRCDIR}\rib\xorp_rib.exe
+
+  CreateDirectory $INSTDIR\rib\tools
+  SetOutPath $INSTDIR\rib\tools
   File ${SRCDIR}\rib\tools\show_routes.exe
 
   CreateDirectory $INSTDIR\rtrmgr
@@ -395,6 +398,8 @@ Section Uninstall
   #RMDir "$INSTDIR\policy\test"
   Delete "$INSTDIR\policy\*.exe"
   RMDir "$INSTDIR\policy"
+  Delete "$INSTDIR\rib\tools\*.exe"
+  RMDir "$INSTDIR\rib\tools"
   Delete "$INSTDIR\rib\*.exe"
   RMDir "$INSTDIR\rib"
   Delete "$INSTDIR\rtrmgr\*.exe"
