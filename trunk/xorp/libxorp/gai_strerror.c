@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/gai_strerror.c,v 1.2 2005/08/18 15:28:40 bms Exp $
+ * $XORP: xorp/libxorp/gai_strerror.c,v 1.3 2005/12/21 09:42:57 bms Exp $
  */
 
 #ifdef HAVE_CONFIG_H

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.9 2005/10/24 17:39:29 atanu Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.10 2005/11/15 19:26:35 atanu Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__

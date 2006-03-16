@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.12 2005/10/30 21:23:38 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.13 2005/11/14 17:29:28 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__

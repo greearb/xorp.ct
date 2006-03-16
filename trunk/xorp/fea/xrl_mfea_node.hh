@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.24 2005/08/18 15:45:53 bms Exp $
+// $XORP: xorp/fea/xrl_mfea_node.hh,v 1.25 2006/01/23 21:03:38 pavlin Exp $
 
 #ifndef __FEA_XRL_MFEA_NODE_HH__
 #define __FEA_XRL_MFEA_NODE_HH__

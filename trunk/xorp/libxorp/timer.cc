@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.28 2005/12/21 09:42:57 bms Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.29 2005/12/22 11:53:40 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"

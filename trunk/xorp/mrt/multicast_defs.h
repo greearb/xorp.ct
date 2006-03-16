@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/multicast_defs.h,v 1.5 2005/03/25 02:53:57 pavlin Exp $
+ * $XORP: xorp/mrt/multicast_defs.h,v 1.6 2005/08/18 15:36:58 bms Exp $
  */
 
 #ifndef __MRT_MULTICAST_DEFS_H__

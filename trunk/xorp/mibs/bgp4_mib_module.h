@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*- */
 
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mibs/bgp4_mib_module.h,v 1.5 2005/07/14 01:48:05 atanu Exp $
+ * $XORP: xorp/mibs/bgp4_mib_module.h,v 1.6 2005/07/14 02:26:23 pavlin Exp $
  */
 
 /*

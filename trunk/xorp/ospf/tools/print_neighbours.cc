@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.3 2005/11/05 06:16:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.4 2005/12/28 18:57:20 atanu Exp $"
 
 // Print information about OSPF neighbours
 

@@ -1,7 +1,7 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.11 2006/01/14 00:57:48 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.12 2006/02/17 07:52:08 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__

@@ -2,7 +2,7 @@
 /* vim:set sts=4 ts=8: */
 
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  *
  * Permission is hereby granted, free of charge, to any person obtaining a
  * copy of this software and associated documentation files (the "Software")
@@ -15,4 +15,4 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/devnotes/template.c,v 1.4 2004/09/17 22:54:16 pavlin Exp $"
+#ident "$XORP: xorp/devnotes/template.c,v 1.5 2005/03/25 02:52:59 pavlin Exp $"

@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/config_operators.hh,v 1.3 2005/07/13 17:44:06 mjh Exp $
+// $XORP: xorp/rtrmgr/config_operators.hh,v 1.4 2005/11/27 05:22:59 pavlin Exp $
 
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__

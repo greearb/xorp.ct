@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -21,7 +21,7 @@
 // along with this program; if not, write to the Free Software
 // Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 
-#ident "$XORP: xorp/contrib/ospfd/xorp/ospf_config.C,v 1.3 2004/06/10 22:40:44 hodson Exp $"
+#ident "$XORP: xorp/contrib/ospfd/xorp/ospf_config.C,v 1.4 2005/03/25 02:52:58 pavlin Exp $"
 
 #if defined(OLD_CONFIG_CODE)
 

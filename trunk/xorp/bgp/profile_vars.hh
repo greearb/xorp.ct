@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/profile_vars.hh,v 1.9 2005/12/16 16:22:58 atanu Exp $
+// $XORP: xorp/bgp/profile_vars.hh,v 1.10 2005/12/16 17:38:00 atanu Exp $
 
 #ifndef __BGP_PROFILE_VARS_HH__
 #define __BGP_PROFILE_VARS_HH__

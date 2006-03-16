@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.6 2005/02/27 21:32:55 pavlin Exp $"
+#ident "$XORP: xorp/mrt/test_mrib.cc,v 1.7 2005/03/25 02:53:57 pavlin Exp $"
 
 
 //

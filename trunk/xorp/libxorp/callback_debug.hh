@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2001-2005 International Computer Science Institute
+ * Copyright (c) 2001-2006 International Computer Science Institute
  * See LICENSE file for licensing, conditions, and warranties on use.
  *
  * This file is PROGRAMMATICALLY GENERATED.

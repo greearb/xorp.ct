@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.15 2005/08/18 15:45:48 bms Exp $"
+#ident "$XORP: xorp/fea/libfeaclient_bridge.cc,v 1.16 2005/10/16 07:10:35 pavlin Exp $"
 
 #include "fea_module.h"
 

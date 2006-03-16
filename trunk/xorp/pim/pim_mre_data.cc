@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.18 2005/05/27 20:37:03 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_data.cc,v 1.19 2005/08/18 15:38:47 bms Exp $"
 
 //
 // PIM Multicast Routing Entry data handling

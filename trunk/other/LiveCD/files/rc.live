@@ -1,10 +1,10 @@
 #!/bin/sh
 
 #
-# $XORP: other/LiveCD/files/rc.live,v 1.4 2005/04/12 07:38:47 pavlin Exp $
+# $XORP: other/LiveCD/files/rc.live,v 1.5 2006/03/09 18:00:24 pavlin Exp $
 #
 
-# Copyright (c) 2004-2005 International Computer Science Institute
+# Copyright (c) 2004-2006 International Computer Science Institute
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),

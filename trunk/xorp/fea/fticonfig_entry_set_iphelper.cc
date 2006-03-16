@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 // // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
 // to deal in the Software without restriction, subject to the conditions
@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.4 2005/12/21 09:42:53 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.5 2005/12/22 12:18:20 pavlin Exp $"
 
 #include "fea_module.h"
 

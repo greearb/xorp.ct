@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2005 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.3 2005/09/27 17:49:56 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.4 2005/10/27 21:00:42 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
