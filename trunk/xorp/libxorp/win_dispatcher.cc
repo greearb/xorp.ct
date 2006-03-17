@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.6 2005/12/21 09:42:58 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.7 2006/03/16 00:04:37 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -403,28 +403,11 @@ WinDispatcher::wait_and_dispatch(int ms)
     if (retval == WAIT_FAILED) {
 	DWORD lasterr = GetLastError();
 	if (lasterr == ERROR_INVALID_HANDLE && !_handles.empty()) {
-	    // There's a bad handle in the handles vector.
-#if 1
-	    // Treat this as a fatal error for now -- it's definitely
-	    // a programming error.
-	    XLOG_FATAL("bad handle in handles array");
-#else
-	    // Find it and remove it. Note, however, that we don't
-	    // garbage-collect it from any of the event maps.
-	    DWORD dwFlags;
-	    for (vector<HANDLE>::iterator kk = _handles.begin();
-	         kk != _handles.end();
-		 ++kk) {
-		if (GetHandleInformation(*kk, &dwFlags) == 0) {
-		    XLOG_ERROR("handle %p is bad, removing it.", *kk);
-		    kk = _handles.erase(kk);
-		}
-	    }
-#endif
+	    callback_bad_handle();
 	} else {
 	    // Programming error.
 	    XLOG_FATAL("WaitForMultipleObjects(%d,%p,%d,%d) failed "
-		       "with the error code %lu (%s)."
+		       "with the error code %lu (%s). "
 		       "Please report this error to the XORP core team.",
 			_handles.empty() ? 0 : _handles.size(),
 			_handles.empty() ? NULL : &_handles[0],
@@ -462,7 +445,8 @@ WinDispatcher::wait_and_dispatch(int ms)
     } else {
 	// Programming error.
 	XLOG_FATAL("WaitForMultipleObjects(%d,%p,%d,%d) returned an "
-		   "unhandled return value %lu. This should never happen.",
+		   "unhandled return value %lu. "
+		   "Please report this error to the XORP core team.",
 		   _handles.empty() ? 0 : _handles.size(),
 		   _handles.empty() ? NULL : &_handles[0],
 		   FALSE, ms, retval);
@@ -500,6 +484,7 @@ WinDispatcher::dispatch_sockevent(HANDLE hevent, XorpFd fd)
 	    // we get the event.
 	    XLOG_WARNING("WSAEnumNetworkEvents() returned WSAENOTSOCK for "
 			 "socket %s", fd.str().c_str());
+	    callback_bad_socket(fd);
 	}
 	return;
     }
@@ -531,6 +516,78 @@ WinDispatcher::dispatch_sockevent(HANDLE hevent, XorpFd fd)
 		continue;
 	    }
 	    jj->second->dispatch(fd, type);
+	}
+    }
+}
+
+//
+// If a socket is detected as being bad, force all callbacks
+// registered for it to be invoked, just like
+// SelectorList::callback_bad_fd() on the UNIX path.
+//
+// Just as with the UNIX path, removal of the bad socket is
+// the caller's responsibility.
+//
+// We can't detect this case at WFMO level because the condition
+// has been detected on the socket, not the associated event object
+// which XORP actually waits on.
+//
+void
+WinDispatcher::callback_bad_socket(XorpFd& fd)
+{
+    for (int i = IOT_READ; i < IOT_DISCONNECT; ++i) {
+	IoEventType type = static_cast<IoEventType>(i);
+	IoEventMap::iterator jj = _callback_map.find(IoEventTuple(fd, type));
+	if (jj == _callback_map.end())
+	    continue;
+	jj->second->dispatch(fd, type);
+    }
+}
+
+//
+// If an opaque Windows handle is detected as being bad, force
+// all of its callbacks to be invoked.
+//
+// Just as with the UNIX path, removal of the bad handle is
+// the caller's responsibility.
+//
+// This sweeps the entire handle vector for bad handles.
+//
+void
+WinDispatcher::callback_bad_handle()
+{
+    DWORD dwFlags;
+
+    for (vector<HANDLE>::iterator ii = _handles.begin();
+	 ii != _handles.end();
+	 ++ii) {
+	if (GetHandleInformation(*ii, &dwFlags) == 0) {
+	    EventSocketMap::iterator jj = _event_socket_map.find(*ii);
+	    if (jj != _event_socket_map.end()) {
+		//
+		// The bad handle is an Event handle associated with a
+		// socket and therefore managed within the event framework.
+		//
+		// Bad sockets are meant to be caught (and handled) by
+		// dispatch_sockevent() and callback_bad_socket()
+		// respectively.
+		//
+		// This means Something Is Horribly Wrong. Abort fatally.
+		//
+		XLOG_FATAL("Event handle associated with a socket is bad.");
+	    }
+	    //
+	    // Force all of this handle's callbacks to be invoked.
+	    //
+	    XorpFd fd(*ii);
+	    for (int i = IOT_READ; i < IOT_DISCONNECT; ++i) {
+		IoEventType type = static_cast<IoEventType>(i);
+		IoEventMap::iterator kk =
+_callback_map.find(IoEventTuple(fd, type));
+		if (kk == _callback_map.end())
+		    continue;
+		kk->second->dispatch(fd, type);
+	    }
 	}
     }
 }

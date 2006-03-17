@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.7 2006/03/01 13:03:16 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.8 2006/03/16 00:04:37 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -185,6 +185,8 @@ protected:
 private:
     bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
     bool add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
+    void callback_bad_handle();
+    void callback_bad_socket(XorpFd& fd);
     bool remove_socket_cb(XorpFd& fd, IoEventType type);
     bool remove_handle_cb(XorpFd& fd, IoEventType type);
     void dispatch_pipe_reads();
