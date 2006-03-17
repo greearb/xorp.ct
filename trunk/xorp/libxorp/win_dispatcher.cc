@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.7 2006/03/16 00:04:37 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.8 2006/03/17 20:57:00 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -583,7 +583,7 @@ WinDispatcher::callback_bad_handle()
 	    for (int i = IOT_READ; i < IOT_DISCONNECT; ++i) {
 		IoEventType type = static_cast<IoEventType>(i);
 		IoEventMap::iterator kk =
-_callback_map.find(IoEventTuple(fd, type));
+		    _callback_map.find(IoEventTuple(fd, type));
 		if (kk == _callback_map.end())
 		    continue;
 		kk->second->dispatch(fd, type);
