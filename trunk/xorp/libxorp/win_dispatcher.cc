@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.8 2006/03/17 20:57:00 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.9 2006/03/17 21:02:26 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -73,7 +73,7 @@ _ioe2wsa(const IoEventType ioevent)
     case IOT_DISCONNECT:
 	return FD_CLOSE;
     case IOT_ANY:
-	return 0;
+	return (FD_READ|FD_WRITE|FD_OOB|FD_ACCEPT|FD_CONNECT|FD_CLOSE);
     }
     return 0;
 }
@@ -307,13 +307,33 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 	_event_socket_map.erase(jj);
     }
 
-    IoEventMap::iterator jj = _callback_map.find(IoEventTuple(fd, type));
-    if (jj != _callback_map.end()) {
-	_callback_map.erase(jj);
-	unregistered = true;
+    //
+    // Deal with IOT_ANY shorthand removals as per old-style
+    // dispatch management code (some code notably BGP does not
+    // remove its callbacks individually).
+    //
+    // XXX: Requests to remove all callbacks in the old model's
+    // shorthand will mean the return value of this function
+    // can't be relied upon as its meaning is then overloaded.
+    //
+    int imin, imax;
+    if (type == IOT_ANY) {
+	imin = IOT_READ;
+	imax = IOT_DISCONNECT;
     } else {
-	debug_msg("Attempt to remove a nonexistent callback of "
-		  "type %d from socket %s.\n", type, fd.str().c_str());
+	imin = imax = (int)type;
+    }
+
+    for (int i = imin; i <= imax; i++) {
+	IoEventType itype = static_cast<IoEventType>(i);
+	IoEventMap::iterator jj = _callback_map.find(IoEventTuple(fd, itype));
+	if (jj != _callback_map.end()) {
+	    _callback_map.erase(jj);
+	    unregistered = true;
+	} else {
+	    debug_msg("Attempt to remove a nonexistent callback of "
+		      "type %d from socket %s.\n", itype, fd.str().c_str());
+	}
     }
 
     return unregistered;
