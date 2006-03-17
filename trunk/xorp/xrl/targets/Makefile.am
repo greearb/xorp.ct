@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.57 2005/09/07 22:48:54 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.58 2005/10/14 18:12:28 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -24,7 +24,6 @@ tgt_files		+= finder.tgt
 tgt_files		+= finder_client.tgt
 tgt_files		+= mfea.tgt
 tgt_files		+= mld6igmp.tgt
-tgt_files		+= ospf.tgt
 tgt_files		+= ospfv2.tgt
 tgt_files		+= ospfv3.tgt
 tgt_files		+= packet_acl.tgt
@@ -71,7 +70,6 @@ noinst_LTLIBRARIES	+= libfinderbase.la
 noinst_LTLIBRARIES	+= libfinderclientbase.la
 noinst_LTLIBRARIES	+= libmfeabase.la
 noinst_LTLIBRARIES	+= libmld6igmpbase.la
-noinst_LTLIBRARIES	+= libospfbase.la
 noinst_LTLIBRARIES	+= libospfv2base.la
 noinst_LTLIBRARIES	+= libospfv3base.la
 noinst_LTLIBRARIES	+= libpacketaclbase.la
@@ -207,12 +205,6 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/mld6igmp.xif
-
-# OSPF (deprecated)
-libospfbase_la_SOURCES = ospf_base.hh ospf_base.cc
-$(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/ospf.xif
 
 # OSPF V2
 libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc

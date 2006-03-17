@@ -96,7 +96,7 @@ TARGET_DIR = $(top_srcdir)/xrl/targets
 ###############################################################################
 
 # Add your target file here
-tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospf.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt pim.tgt policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt ripng.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
+tgt_files = bgp.tgt bgp4_mib.tgt cli.tgt coord.tgt demo_fea_ifmgr_client.tgt fea.tgt fea_ifmgr_mirror.tgt fib2mrib.tgt finder.tgt finder_client.tgt mfea.tgt mld6igmp.tgt ospfv2.tgt ospfv3.tgt packet_acl.tgt pim.tgt policy.tgt profiler.tgt rib.tgt ribclient.tgt rip.tgt ripng.tgt rtrmgr.tgt show_routes.tgt socket_server.tgt static_routes.tgt test.tgt test_fea_ifmgr_mirror.tgt test_finder_events.tgt test_peer.tgt test_socket4.tgt test_socket6.tgt test_xrls.tgt xorp_if_mib.tgt xorpsh.tgt
 
 # Automatically compute the list of the *.xrls files
 xrls_files = $(tgt_files:%.tgt=%.xrls)
@@ -105,7 +105,7 @@ xrls_files = $(tgt_files:%.tgt=%.xrls)
 data_DATA = $(xrls_files)
 
 # Add your target's library here
-noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la libcoordbase.la libdemofeaifmgrclientbase.la libfeabase.la libfeaifmgrmirrorbase.la libfib2mribbase.la libfinderbase.la libfinderclientbase.la libmfeabase.la libmld6igmpbase.la libospfbase.la libospfv2base.la libospfv3base.la libpacketaclbase.la libpimbase.la libpolicybase.la libprofileclientbase.la libribbase.la libribclientbase.la libripbase.la libripngbase.la librtrmgrbase.la libshowroutesbase.la libsocketserverbase.la libstaticroutesbase.la libtestbase.la libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la libtestpeerbase.la libtestsocket4.la libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
+noinst_LTLIBRARIES = libbgpbase.la libbgp4mibbase.la libclibase.la libcoordbase.la libdemofeaifmgrclientbase.la libfeabase.la libfeaifmgrmirrorbase.la libfib2mribbase.la libfinderbase.la libfinderclientbase.la libmfeabase.la libmld6igmpbase.la libospfv2base.la libospfv3base.la libpacketaclbase.la libpimbase.la libpolicybase.la libprofileclientbase.la libribbase.la libribclientbase.la libripbase.la libripngbase.la librtrmgrbase.la libshowroutesbase.la libsocketserverbase.la libstaticroutesbase.la libtestbase.la libtestfeaifmgrmirrorbase.la libtestfindereventsbase.la libtestpeerbase.la libtestsocket4.la libtestsocket6.la libtestxrlsbase.la libxorpifmibbase.la libxorpshbase.la
 
 # BGP
 libbgpbase_la_SOURCES = bgp_base.hh bgp_base.cc
@@ -156,9 +156,6 @@ libmfeabase_la_SOURCES = mfea_base.hh mfea_base.cc
 
 # MLD6IGMP
 libmld6igmpbase_la_SOURCES = mld6igmp_base.hh mld6igmp_base.cc
-
-# OSPF (deprecated)
-libospfbase_la_SOURCES = ospf_base.hh ospf_base.cc
 
 # OSPF V2
 libospfv2base_la_SOURCES = ospfv2_base.hh ospfv2_base.cc
@@ -307,10 +304,6 @@ libmld6igmpbase_la_LDFLAGS =
 libmld6igmpbase_la_LIBADD =
 am_libmld6igmpbase_la_OBJECTS = mld6igmp_base.lo
 libmld6igmpbase_la_OBJECTS = $(am_libmld6igmpbase_la_OBJECTS)
-libospfbase_la_LDFLAGS =
-libospfbase_la_LIBADD =
-am_libospfbase_la_OBJECTS = ospf_base.lo
-libospfbase_la_OBJECTS = $(am_libospfbase_la_OBJECTS)
 libospfv2base_la_LDFLAGS =
 libospfv2base_la_LIBADD =
 am_libospfv2base_la_OBJECTS = ospfv2_base.lo
@@ -422,8 +415,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/finder_base.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/finder_client_base.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/mfea_base.Plo $(DEPDIR)/mld6igmp_base.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/ospf_base.Plo $(DEPDIR)/ospfv2_base.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/ospfv3_base.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/ospfv2_base.Plo $(DEPDIR)/ospfv3_base.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/packet_acl_base.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/pim_base.Plo $(DEPDIR)/policy_base.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/profiler_base.Plo $(DEPDIR)/rib_base.Plo \
@@ -464,13 +456,13 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 	$(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) \
 	$(libfib2mribbase_la_SOURCES) $(libfinderbase_la_SOURCES) \
 	$(libfinderclientbase_la_SOURCES) $(libmfeabase_la_SOURCES) \
-	$(libmld6igmpbase_la_SOURCES) $(libospfbase_la_SOURCES) \
-	$(libospfv2base_la_SOURCES) $(libospfv3base_la_SOURCES) \
-	$(libpacketaclbase_la_SOURCES) $(libpimbase_la_SOURCES) \
-	$(libpolicybase_la_SOURCES) $(libprofileclientbase_la_SOURCES) \
-	$(libribbase_la_SOURCES) $(libribclientbase_la_SOURCES) \
-	$(libripbase_la_SOURCES) $(libripngbase_la_SOURCES) \
-	$(librtrmgrbase_la_SOURCES) $(libshowroutesbase_la_SOURCES) \
+	$(libmld6igmpbase_la_SOURCES) $(libospfv2base_la_SOURCES) \
+	$(libospfv3base_la_SOURCES) $(libpacketaclbase_la_SOURCES) \
+	$(libpimbase_la_SOURCES) $(libpolicybase_la_SOURCES) \
+	$(libprofileclientbase_la_SOURCES) $(libribbase_la_SOURCES) \
+	$(libribclientbase_la_SOURCES) $(libripbase_la_SOURCES) \
+	$(libripngbase_la_SOURCES) $(librtrmgrbase_la_SOURCES) \
+	$(libshowroutesbase_la_SOURCES) \
 	$(libsocketserverbase_la_SOURCES) \
 	$(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) \
 	$(libtestfeaifmgrmirrorbase_la_SOURCES) \
@@ -481,7 +473,7 @@ DIST_SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) \
 DATA = $(data_DATA)
 
 DIST_COMMON = Makefile.am Makefile.in
-SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) $(libclibase_la_SOURCES) $(libcoordbase_la_SOURCES) $(libdemofeaifmgrclientbase_la_SOURCES) $(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) $(libfib2mribbase_la_SOURCES) $(libfinderbase_la_SOURCES) $(libfinderclientbase_la_SOURCES) $(libmfeabase_la_SOURCES) $(libmld6igmpbase_la_SOURCES) $(libospfbase_la_SOURCES) $(libospfv2base_la_SOURCES) $(libospfv3base_la_SOURCES) $(libpacketaclbase_la_SOURCES) $(libpimbase_la_SOURCES) $(libpolicybase_la_SOURCES) $(libprofileclientbase_la_SOURCES) $(libribbase_la_SOURCES) $(libribclientbase_la_SOURCES) $(libripbase_la_SOURCES) $(libripngbase_la_SOURCES) $(librtrmgrbase_la_SOURCES) $(libshowroutesbase_la_SOURCES) $(libsocketserverbase_la_SOURCES) $(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) $(libtestfeaifmgrmirrorbase_la_SOURCES) $(libtestfindereventsbase_la_SOURCES) $(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) $(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) $(libxorpifmibbase_la_SOURCES) $(libxorpshbase_la_SOURCES)
+SOURCES = $(libbgp4mibbase_la_SOURCES) $(libbgpbase_la_SOURCES) $(libclibase_la_SOURCES) $(libcoordbase_la_SOURCES) $(libdemofeaifmgrclientbase_la_SOURCES) $(libfeabase_la_SOURCES) $(libfeaifmgrmirrorbase_la_SOURCES) $(libfib2mribbase_la_SOURCES) $(libfinderbase_la_SOURCES) $(libfinderclientbase_la_SOURCES) $(libmfeabase_la_SOURCES) $(libmld6igmpbase_la_SOURCES) $(libospfv2base_la_SOURCES) $(libospfv3base_la_SOURCES) $(libpacketaclbase_la_SOURCES) $(libpimbase_la_SOURCES) $(libpolicybase_la_SOURCES) $(libprofileclientbase_la_SOURCES) $(libribbase_la_SOURCES) $(libribclientbase_la_SOURCES) $(libripbase_la_SOURCES) $(libripngbase_la_SOURCES) $(librtrmgrbase_la_SOURCES) $(libshowroutesbase_la_SOURCES) $(libsocketserverbase_la_SOURCES) $(libstaticroutesbase_la_SOURCES) $(libtestbase_la_SOURCES) $(libtestfeaifmgrmirrorbase_la_SOURCES) $(libtestfindereventsbase_la_SOURCES) $(libtestpeerbase_la_SOURCES) $(libtestsocket4_la_SOURCES) $(libtestsocket6_la_SOURCES) $(libtestxrlsbase_la_SOURCES) $(libxorpifmibbase_la_SOURCES) $(libxorpshbase_la_SOURCES)
 
 all: all-am
 
@@ -530,8 +522,6 @@ libmfeabase.la: $(libmfeabase_la_OBJECTS) $(libmfeabase_la_DEPENDENCIES)
 	$(CXXLINK)  $(libmfeabase_la_LDFLAGS) $(libmfeabase_la_OBJECTS) $(libmfeabase_la_LIBADD) $(LIBS)
 libmld6igmpbase.la: $(libmld6igmpbase_la_OBJECTS) $(libmld6igmpbase_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libmld6igmpbase_la_LDFLAGS) $(libmld6igmpbase_la_OBJECTS) $(libmld6igmpbase_la_LIBADD) $(LIBS)
-libospfbase.la: $(libospfbase_la_OBJECTS) $(libospfbase_la_DEPENDENCIES) 
-	$(CXXLINK)  $(libospfbase_la_LDFLAGS) $(libospfbase_la_OBJECTS) $(libospfbase_la_LIBADD) $(LIBS)
 libospfv2base.la: $(libospfv2base_la_OBJECTS) $(libospfv2base_la_DEPENDENCIES) 
 	$(CXXLINK)  $(libospfv2base_la_LDFLAGS) $(libospfv2base_la_OBJECTS) $(libospfv2base_la_LIBADD) $(LIBS)
 libospfv3base.la: $(libospfv3base_la_OBJECTS) $(libospfv3base_la_DEPENDENCIES) 
@@ -597,7 +587,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/finder_client_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mfea_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_base.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospf_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospfv2_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/ospfv3_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet_acl_base.Plo@am__quote@
@@ -860,9 +849,6 @@ $(srcdir)/mld6igmp_base.hh $(srcdir)/mld6igmp_base.cc: 			\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/mfea_client.xif			\
 		$(INTERFACES_DIR)/mld6igmp.xif
-$(srcdir)/ospf_base.hh $(srcdir)/ospf_base.cc:				\
-		$(INTERFACES_DIR)/common.xif				\
-		$(INTERFACES_DIR)/ospf.xif
 $(srcdir)/ospfv2_base.hh $(srcdir)/ospfv2_base.cc:			\
 		$(INTERFACES_DIR)/common.xif				\
 		$(INTERFACES_DIR)/fea_rawpkt4_client.xif		\
