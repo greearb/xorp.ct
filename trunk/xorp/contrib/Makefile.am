@@ -1,9 +1,7 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/Makefile.am,v 1.14 2004/02/18 00:14:02 pavlin Exp $
+## $XORP: xorp/contrib/Makefile.am,v 1.1 2004/06/10 16:14:42 hodson Exp $
 ##
-
-SUBDIRS = @OSPFD@
 
 ################################################################
 ##

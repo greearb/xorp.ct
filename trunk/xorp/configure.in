@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.156 2006/02/18 01:34:38 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.157 2006/03/08 02:23:21 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.156 2006/02/18 01:34:38 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.157 2006/03/08 02:23:21 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -934,15 +934,6 @@ dnl
 if test "${enable_debug_linker_maps}" = "yes" ; then
 	LDFLAGS="--Wl,-M --Wl,--cref ${LDFLAGS}"
 fi
-
-dnl ---------------------------------------------------------------------------
-dnl Hack to stop building Moy OSPF unconditionally until new code is merged.
-dnl ---------------------------------------------------------------------------
-
-OSPFD=""
-OSPFD_OS="unsupported"
-AC_SUBST(OSPFD)
-AC_SUBST(OSPFD_OS)
 
 dnl ---------------------------------------------------------------------------
 dnl Add files to under-go substitution here.

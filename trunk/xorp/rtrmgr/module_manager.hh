@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/module_manager.hh,v 1.39 2006/03/14 13:34:10 bms Exp $
+// $XORP: xorp/rtrmgr/module_manager.hh,v 1.40 2006/03/16 00:06:00 pavlin Exp $
 
 #ifndef __RTRMGR_MODULE_MANAGER_HH__
 #define __RTRMGR_MODULE_MANAGER_HH__
@@ -130,7 +130,7 @@ public:
 
 	ModuleManager&	_mmgr;
 	string		_expath;
-	RunCommand* _run_command;
+	RunCommand*	_run_command;
     };
 
 private:
