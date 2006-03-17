@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.129 2006/03/02 02:43:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.130 2006/03/16 00:03:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -146,7 +146,11 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     // 6) Keep the file open.
     // 7) Don't call gettimeofday directly, get the time from the eventloop.
 
+#ifndef HOST_OS_WINDOWS
     string fname = "/tmp/bgpin.mrtd";
+#else
+    string fname = "C:\\BGPIN.MRTD";
+#endif
 
     FILE *fp = fopen(fname.c_str(), "a");
     if(0 == fp)
@@ -169,9 +173,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	uint32_t dest_ip;
     };
 
-    timeval now;
-    gettimeofday(&now, 0);
-    TimeVal tv(now);
+    TimeVal tv;
+    TimerList::system_gettimeofday(&tv);
     
     mrt_header mrt_header;
     mrt_header.time = htonl(tv.sec());
