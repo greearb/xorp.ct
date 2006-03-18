@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.51 2006/03/07 01:43:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.52 2006/03/16 00:04:49 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -424,6 +424,9 @@ void
 RoutingTable<A>::push_routes()
 {
     typename Trie<A, InternalRouteEntry<A> >::iterator tic;
+
+    if (0 == _current)
+	return;
 
     for (tic = _current->begin(); tic != _current->end(); tic++) {
 	RouteEntry<A>& rt = tic.payload().get_entry();
