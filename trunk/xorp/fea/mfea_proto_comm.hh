@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.16 2006/03/19 21:54:20 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.17 2006/03/19 22:30:34 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -57,10 +57,10 @@ public:
      * (@ref xorp_module_id).
      * 
      * @param mfea_node the MFEA node (@ref MfeaNode) this entry belongs to.
-     * @param ipproto the IP protocol number (e.g., IPPROTO_PIM for PIM).
+     * @param ip_protocol the IP protocol number (e.g., IPPROTO_PIM for PIM).
      * @param module_id the module ID (@ref xorp_module_id) for the protocol.
      */
-    ProtoComm(MfeaNode& mfea_node, int ipproto, xorp_module_id module_id);
+    ProtoComm(MfeaNode& mfea_node, int ip_protocol, xorp_module_id module_id);
     
     /**
      * Destructor
@@ -86,7 +86,7 @@ public:
      * 
      * @return the IP protocol number.
      */
-    int		ipproto() const { return (_ipproto); }
+    int		ip_protocol() const { return (_ip_protocol); }
     
     /**
      * Get the protocol socket.
@@ -259,7 +259,7 @@ private:
     
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
-    int		  _ipproto;	// The protocol number (IPPROTO_*)
+    int		  _ip_protocol;	// The protocol number (IPPROTO_*)
     xorp_module_id _module_id;	// The corresponding module id (XORP_MODULE_*)
     XorpFd	  _proto_socket;   // The socket for protocol message
     uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving

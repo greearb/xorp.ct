@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.46 2006/03/16 00:03:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.47 2006/03/19 21:54:20 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -219,15 +219,15 @@ static uint8_t		raopt[IP6OPT_RTALERT_LEN];
  * @mfea_node: The MfeaNode I belong to.
  * @proto: The protocol number (e.g., %IPPROTO_IGMP, %IPPROTO_PIM, etc).
  **/
-ProtoComm::ProtoComm(MfeaNode& mfea_node, int ipproto,
+ProtoComm::ProtoComm(MfeaNode& mfea_node, int ip_protocol,
 		     xorp_module_id module_id)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node),
-      _ipproto(ipproto),
+      _ip_protocol(ip_protocol),
       _module_id(module_id)
 {
 #ifdef HOST_OS_WINDOWS
-    XLOG_FATAL("Multicast routing is not supported for Windows");
+    XLOG_FATAL("Multicast routing is not supported on Windows");
 #endif
 
     // Init Router Alert related option stuff
@@ -323,7 +323,7 @@ ProtoComm::start()
     if (ProtoUnit::start() < 0)
 	return (XORP_ERROR);
     
-    if (_ipproto >= 0) {
+    if (_ip_protocol >= 0) {
 	if (open_proto_socket() != XORP_OK) {
 	    stop();
 	    return (XORP_ERROR);
@@ -331,7 +331,7 @@ ProtoComm::start()
     }
     
     // If necessary, start PIM multicast routing
-    if (_ipproto == IPPROTO_PIM) {
+    if (_ip_protocol == IPPROTO_PIM) {
 	if (mfea_node().mfea_mrouter().start_pim() < 0) {
 	    stop();
 	    return (XORP_ERROR);
@@ -359,7 +359,7 @@ ProtoComm::stop()
 	return (XORP_ERROR);
     
     // If necessary, stop PIM multicast routing
-    if (_ipproto == IPPROTO_PIM) {
+    if (_ip_protocol == IPPROTO_PIM) {
 	mfea_node().mfea_mrouter().stop_pim();
     }
     
@@ -924,14 +924,15 @@ ProtoComm::leave_multicast_group(uint32_t vif_index, const IPvX& group)
 int
 ProtoComm::open_proto_socket()
 {
-    if (_ipproto < 0)
+    if (_ip_protocol < 0)
 	return (XORP_ERROR);
     
     // If necessary, open the protocol socket
     do {
 	if (_proto_socket.is_valid())
 	    break;
-	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
+	if (_ip_protocol
+	    == mfea_node().mfea_mrouter().kernel_mrouter_ip_protocol()) {
 	    // XXX: reuse the mrouter socket
 	    _proto_socket = mfea_node().mfea_mrouter().mrouter_socket();
 	    if (_proto_socket.is_valid()) {
@@ -941,7 +942,7 @@ ProtoComm::open_proto_socket()
 		break;
 	    }
 	}
-	_proto_socket = socket(family(), SOCK_RAW, _ipproto);
+	_proto_socket = socket(family(), SOCK_RAW, _ip_protocol);
 	if (!_proto_socket.is_valid()) {
 	    char *errstr;
 
@@ -951,7 +952,7 @@ ProtoComm::open_proto_socket()
 	    errstr = "unknown error";
 #endif
 	    XLOG_ERROR("Cannot open IP protocol %d raw socket stream: %s",
-		       _ipproto, errstr);
+		       _ip_protocol, errstr);
 	    return (XORP_ERROR);
 	}
     } while (false);
@@ -1025,7 +1026,7 @@ ProtoComm::open_proto_socket()
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
-	if (ipproto() == IPPROTO_ICMPV6) {
+	if (ip_protocol() == IPPROTO_ICMPV6) {
 	    struct icmp6_filter filter;
 	    
 	    // Pass all ICMPv6 messages
@@ -1045,7 +1046,7 @@ ProtoComm::open_proto_socket()
 #endif
 	    }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
-	    if (setsockopt(_proto_socket, _ipproto, ICMP6_FILTER,
+	    if (setsockopt(_proto_socket, _ip_protocol, ICMP6_FILTER,
 			   XORP_SOCKOPT_CAST(&filter), sizeof(filter)) < 0) {
 		close_proto_socket();
 		XLOG_ERROR("setsockopt(ICMP6_FILTER) failed: %s",
@@ -1111,7 +1112,8 @@ ProtoComm::close_proto_socket()
     
     // If this is the mrouter socket, then don't close it
     do {
-	if (_ipproto == mfea_node().mfea_mrouter().kernel_mrouter_ipproto()) {
+	if (_ip_protocol
+	    == mfea_node().mfea_mrouter().kernel_mrouter_ip_protocol()) {
 	    if (_proto_socket == mfea_node().mfea_mrouter().mrouter_socket()) {
 		if (!mfea_node().mfea_mrouter().adopt_mrouter_socket().is_valid()) {
 		    _proto_socket.clear();
@@ -1263,7 +1265,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 #endif // HOST_OS_WINDOWS
     
     // Check if it is a signal from the kernel to the user-level
-    switch (_ipproto) {
+    switch (_ip_protocol) {
     case IPPROTO_IGMP:
     {
 #ifndef HAVE_IPV4_MULTICAST_ROUTING
@@ -1817,7 +1819,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	ip->ip_v	= IPVERSION;
 	ip->ip_id	= 0;				// Let kernel fill in
 	ip->ip_off	= 0x0;
-	ip->ip_p	= _ipproto;
+	ip->ip_p	= _ip_protocol;
 	ip->ip_ttl	= ip_ttl;
 	ip->ip_tos	= ip_tos;
 
@@ -2082,7 +2084,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	} else {
 	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s "
 				 "on vif %s) failed: %s",
-				 _ipproto, XORP_UINT_CAST(datalen),
+				 _ip_protocol, XORP_UINT_CAST(datalen),
 				 cstring(src), cstring(dst),
 				 mfea_vif->name().c_str(), strerror(errno));
 	    XLOG_ERROR("%s", error_msg.c_str());

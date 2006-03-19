@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.42 2006/03/16 00:03:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.43 2006/03/19 22:18:03 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -264,10 +264,10 @@ MfeaMrouter::have_multicast_routing4() const
     if (mrouter_socket() >= 0)
 	return (true);		// XXX: already have an open mrouter socket
     
-    if (kernel_mrouter_ipproto() < 0)
+    if (kernel_mrouter_ip_protocol() < 0)
 	return (false);
     
-    s = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    s = socket(family(), SOCK_RAW, kernel_mrouter_ip_protocol());
     if (s < 0)
 	return (false);		// Failure to open the socket
     
@@ -309,10 +309,10 @@ MfeaMrouter::have_multicast_routing6() const
     if (mrouter_socket() >= 0)
 	return (true);		// XXX: already have an open mrouter socket
     
-    if (kernel_mrouter_ipproto() < 0)
+    if (kernel_mrouter_ip_protocol() < 0)
 	return (false);
     
-    s = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    s = socket(family(), SOCK_RAW, kernel_mrouter_ip_protocol());
     if (s < 0)
 	return (false);		// Failure to open the socket
     
@@ -330,7 +330,7 @@ MfeaMrouter::have_multicast_routing6() const
 }
 
 /**
- * MfeaMrouter::kernel_mrouter_ipproto:
+ * MfeaMrouter::kernel_mrouter_ip_protocol:
  * @: 
  * 
  * Get the protocol that would be used in case of mrouter socket.
@@ -338,7 +338,7 @@ MfeaMrouter::have_multicast_routing6() const
  * Return value: the protocol number on success, otherwise %XORP_ERROR.
  **/
 int
-MfeaMrouter::kernel_mrouter_ipproto() const
+MfeaMrouter::kernel_mrouter_ip_protocol() const
 {
     switch (family()) {
     case AF_INET:
@@ -371,7 +371,7 @@ MfeaMrouter::open_mrouter_socket()
     if (_mrouter_socket.is_valid())
 	return (_mrouter_socket);
 
-    if (kernel_mrouter_ipproto() < 0)
+    if (kernel_mrouter_ip_protocol() < 0)
 	return (badfd);
     
     //
@@ -379,7 +379,7 @@ MfeaMrouter::open_mrouter_socket()
     //
     do {
 	ProtoComm *proto_comm;
-	proto_comm = mfea_node().proto_comm_find_by_ipproto(kernel_mrouter_ipproto());
+	proto_comm = mfea_node().proto_comm_find_by_ip_protocol(kernel_mrouter_ip_protocol());
 	if (proto_comm == NULL)
 	    break;
 	_mrouter_socket = proto_comm->proto_socket();
@@ -388,7 +388,7 @@ MfeaMrouter::open_mrouter_socket()
 	break;
     } while (false);
     
-    _mrouter_socket = socket(family(), SOCK_RAW, kernel_mrouter_ipproto());
+    _mrouter_socket = socket(family(), SOCK_RAW, kernel_mrouter_ip_protocol());
     if (!_mrouter_socket.is_valid()) {
 	XLOG_ERROR("Cannot open mrouter socket");
 	return (badfd);
@@ -494,7 +494,7 @@ MfeaMrouter::close_mrouter_socket()
     if (!_mrouter_socket.is_valid())
 	return (XORP_ERROR);
     
-    if (kernel_mrouter_ipproto() < 0)
+    if (kernel_mrouter_ip_protocol() < 0)
 	return (XORP_ERROR);
     
     //
@@ -503,7 +503,7 @@ MfeaMrouter::close_mrouter_socket()
     //
     do {
 	ProtoComm *proto_comm;
-	proto_comm = mfea_node().proto_comm_find_by_ipproto(kernel_mrouter_ipproto());
+	proto_comm = mfea_node().proto_comm_find_by_ip_protocol(kernel_mrouter_ip_protocol());
 	if (proto_comm == NULL)
 	    break;
 	// If there is already IGMP or ICMPV6 socket, then don't close it.

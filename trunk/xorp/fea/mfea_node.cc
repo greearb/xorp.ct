@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.61 2006/01/23 21:03:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.62 2006/03/16 00:03:58 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -1133,7 +1133,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 		       xorp_module_id module_id)
 {
     ProtoComm *proto_comm;
-    int ipproto;
+    int ip_protocol;
     size_t i;
     
     // Add the state
@@ -1150,16 +1150,16 @@ MfeaNode::add_protocol(const string& module_instance_name,
     //
     // Get the IP protocol number (IPPROTO_*)
     //
-    ipproto = -1;
+    ip_protocol = -1;
     switch (module_id) {
     case XORP_MODULE_MLD6IGMP:
 	switch (family()) {
 	case AF_INET:
-	    ipproto = IPPROTO_IGMP;
+	    ip_protocol = IPPROTO_IGMP;
 	    break;
 #ifdef HAVE_IPV6
 	case AF_INET6:
-	    ipproto = IPPROTO_ICMPV6;
+	    ip_protocol = IPPROTO_ICMPV6;
 	    break;
 #endif // HAVE_IPV6
 	default:
@@ -1170,7 +1170,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 	break;
     case XORP_MODULE_PIMSM:
     case XORP_MODULE_PIMDM:
-	ipproto = IPPROTO_PIM;
+	ip_protocol = IPPROTO_PIM;
 	break;
     default:
 	XLOG_UNREACHABLE();
@@ -1178,7 +1178,7 @@ MfeaNode::add_protocol(const string& module_instance_name,
 	return (XORP_ERROR);
     }
     
-    proto_comm = new ProtoComm(*this, ipproto, module_id);
+    proto_comm = new ProtoComm(*this, ip_protocol, module_id);
     
     // Add the new entry
     for (i = 0; i < _proto_comms.size(); i++) {
@@ -2349,19 +2349,20 @@ MfeaNode::proto_comm_find_by_module_id(xorp_module_id module_id) const
 }
 
 /**
- * MfeaNode::proto_comm_find_by_ipproto:
- * @ipproto: The IP protocol number to search for.
+ * MfeaNode::proto_comm_find_by_ip_protocol:
+ * @ip_protocol: The IP protocol number to search for.
  * 
- * Return the #ProtoComm entry that corresponds to @ipproto IP protocol number.
+ * Return the #ProtoComm entry that corresponds to @ip_protocol IP protocol
+ * number.
  * 
  * Return value: The corresponding #ProtoComm entry if found, otherwise NULL.
  **/
 ProtoComm *
-MfeaNode::proto_comm_find_by_ipproto(int ipproto) const
+MfeaNode::proto_comm_find_by_ip_protocol(int ip_protocol) const
 {
     for (size_t i = 0; i < _proto_comms.size(); i++) {
 	if (_proto_comms[i] != NULL) {
-	    if (_proto_comms[i]->ipproto() == ipproto)
+	    if (_proto_comms[i]->ip_protocol() == ip_protocol)
 		return (_proto_comms[i]);
 	}
     }
