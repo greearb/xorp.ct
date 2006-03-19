@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.15 2006/03/16 00:03:59 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.16 2006/03/19 21:54:20 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -268,18 +268,20 @@ private:
     uint8_t*	  _sndbuf1;	// Data buffer1 for sending
     uint8_t*	  _rcvcmsgbuf;	// Control recv info (IPv6 only)
     uint8_t*	  _sndcmsgbuf;	// Control send info (IPv6 only)
-#ifdef HAVE_STRUCT_MSGHDR
-    struct msghdr _rcvmh;	// The msghdr structure used by recvmsg()
-    struct msghdr _sndmh;	// The msghdr structure used by sendmsg()
-#endif
-    struct iovec  _rcviov[2];	// The rcvmh scatter/gatter array
-    struct iovec  _sndiov[2];	// The sndmh scatter/gatter array
+
+    struct iovec	_rcviov[2]; // The rcvmh scatter/gatter array
+    struct iovec	_sndiov[2]; // The sndmh scatter/gatter array
+
+#ifndef HOST_OS_WINDOWS
+    struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
+    struct msghdr	_sndmh;	// The msghdr structure used by sendmsg()
     struct sockaddr_in  _from4;	// The source addr of recvmsg() msg (IPv4)
     struct sockaddr_in  _to4;	// The dest.  addr of sendmsg() msg (IPv4)
 #ifdef HAVE_IPV6
     struct sockaddr_in6 _from6;	// The source addr of recvmsg() msg (IPv6)
     struct sockaddr_in6 _to6;	// The dest.  addr of sendmsg() msg (IPv6)
 #endif
+#endif // ! HOST_OS_WINDOWS
 };
 
 //
