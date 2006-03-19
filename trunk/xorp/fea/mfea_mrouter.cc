@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.41 2005/12/22 12:18:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.42 2006/03/16 00:03:58 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -101,6 +101,10 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node)
 {
+#ifdef HOST_OS_WINDOWS
+    XLOG_FATAL("Multicast routing is not supported on Windows");
+#endif
+
     // Allocate the buffers
     _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
     _sndbuf0 = new uint8_t[IO_BUF_SIZE];
@@ -108,36 +112,8 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndbuf1 = new uint8_t[IO_BUF_SIZE];
     _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
-  
-    switch (family()) {
-    case AF_INET:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
-	_rcvmh.msg_name		= (caddr_t)&_from4;
-	_sndmh.msg_name		= (caddr_t)&_to4;
-	_rcvmh.msg_namelen	= sizeof(_from4);
-	_sndmh.msg_namelen	= sizeof(_to4);
-#endif
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAME
-	_rcvmh.msg_name		= (caddr_t)&_from6;
-	_sndmh.msg_name		= (caddr_t)&_to6;
-	_rcvmh.msg_namelen	= sizeof(_from6);
-	_sndmh.msg_namelen	= sizeof(_to6);
-#endif
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
 
-#ifdef HAVE_STRUCT_MSGHDR_MSG_IOV
-    _rcvmh.msg_iov		= _rcviov;
-    _sndmh.msg_iov		= _sndiov;
-    _rcvmh.msg_iovlen		= 1;
-    _sndmh.msg_iovlen		= 1;
+    // Scatter/gatter array initialization
     _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
     _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
     _rcviov[0].iov_len		= IO_BUF_SIZE;
@@ -146,15 +122,38 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
     _sndiov[0].iov_len		= 0;
     _sndiov[1].iov_len		= 0;
-#endif
 
-#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
+    // recvmsg() and sendmsg() related initialization
+#ifndef HOST_OS_WINDOWS
+    switch (family()) {
+    case AF_INET:
+	_rcvmh.msg_name		= (caddr_t)&_from4;
+	_sndmh.msg_name		= (caddr_t)&_to4;
+	_rcvmh.msg_namelen	= sizeof(_from4);
+	_sndmh.msg_namelen	= sizeof(_to4);
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	_rcvmh.msg_name		= (caddr_t)&_from6;
+	_sndmh.msg_name		= (caddr_t)&_to6;
+	_rcvmh.msg_namelen	= sizeof(_from6);
+	_sndmh.msg_namelen	= sizeof(_to6);
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	break;
+    }
+    _rcvmh.msg_iov		= _rcviov;
+    _sndmh.msg_iov		= _sndiov;
+    _rcvmh.msg_iovlen		= 1;
+    _sndmh.msg_iovlen		= 1;
     _rcvmh.msg_control		= (caddr_t)_rcvcmsgbuf;
     _sndmh.msg_control		= (caddr_t)_sndcmsgbuf;
     _rcvmh.msg_controllen	= CMSG_BUF_SIZE;
     _sndmh.msg_controllen	= 0;
-#endif
-    
+#endif // ! HOST_OS_WINDOWS
+
     _mrt_api_mrt_mfc_flags_disable_wrongvif = false;
     _mrt_api_mrt_mfc_flags_border_vif = false;
     _mrt_api_mrt_mfc_rp = false;
@@ -201,7 +200,7 @@ MfeaMrouter::start()
 	exit (1);
 	// return (XORP_ERROR);
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
     
     // Open kernel multicast routing access socket
     if (!open_mrouter_socket().is_valid())
@@ -2049,21 +2048,16 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
     UNUSED(fd);
     UNUSED(type);
  
-#ifdef HAVE_STRUCT_MSGHDR_MSG_CONTROL
+#ifndef HOST_OS_WINDOWS
     // Zero and reset various fields
     _rcvmh.msg_controllen = CMSG_BUF_SIZE;
-#endif
 
     // TODO: when resetting _from4 and _from6 do we need to set the address
     // family and the sockaddr len?
     switch (family()) {
     case AF_INET:
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAMELEN
 	memset(&_from4, 0, sizeof(_from4));
 	_rcvmh.msg_namelen = sizeof(_from4);
-#else
-	XLOG_FATAL("Needs rewritten to use WSABUFs under Winsock");
-#endif
 	break;
 
 #ifdef HAVE_IPV6
@@ -2074,10 +2068,8 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 		   "IPv6 multicast routing not supported");
 	return;
 #else
-#ifdef HAVE_STRUCT_MSGHDR_MSG_NAMELEN
 	memset(&_from6, 0, sizeof(_from6));
 	_rcvmh.msg_namelen = sizeof(_from6);
-#endif
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
@@ -2088,7 +2080,6 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 	return;			// Error
     }
 
-#ifdef HAVE_RECVMSG
     // Read from the socket
     nbytes = recvmsg(_mrouter_socket, &_rcvmh, 0);
     if (nbytes < 0) {
@@ -2098,9 +2089,9 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 		   _mrouter_socket.str().c_str(), strerror(errno));
 	return;			// Error
     }
-#else
-    UNUSED(nbytes);
-    XLOG_FATAL("Needs rewritten to use WSARecv() under Winsock");
+
+#else // HOST_OS_WINDOWS
+    XLOG_FATAL("Multicast routing is not supported on Windows");
 #endif
     
     // Check if it is a signal from the kernel to the user-level
