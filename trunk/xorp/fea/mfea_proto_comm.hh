@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.14 2006/01/23 21:03:38 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.15 2006/03/16 00:03:59 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -244,14 +244,6 @@ public:
 				   string& error_msg);
     
     /**
-     * Set/reset the flag whether to ignore the receiving my own packets.
-     * 
-     * @param v if true, ignore my own packets on receiving, otherwise don't
-     * ignore them.
-     */
-    void	set_ignore_my_packets(bool v) { _ignore_my_packets = v; }
-    
-    /**
      * Get the module ID (@ref xorp_module_id) for the protocol that created
      * this entry.
      * 
@@ -264,7 +256,6 @@ public:
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);	}
-    bool	ignore_my_packets() const { return (_ignore_my_packets); }
     
     // Private state
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
@@ -289,7 +280,6 @@ private:
     struct sockaddr_in6 _from6;	// The source addr of recvmsg() msg (IPv6)
     struct sockaddr_in6 _to6;	// The dest.  addr of sendmsg() msg (IPv6)
 #endif
-    bool	_ignore_my_packets; // If true, ignore packets originated by me
 };
 
 //
