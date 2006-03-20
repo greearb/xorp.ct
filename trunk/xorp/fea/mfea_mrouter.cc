@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.44 2006/03/19 23:29:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.45 2006/03/20 02:06:47 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -85,6 +85,10 @@
 // Local structures/classes, typedefs and macros
 //
 
+#ifdef HOST_OS_WINDOWS
+typedef char *caddr_t;
+#endif
+
 //
 // Local variables
 //
@@ -101,10 +105,6 @@ MfeaMrouter::MfeaMrouter(MfeaNode& mfea_node)
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node)
 {
-#ifdef HOST_OS_WINDOWS
-    XLOG_FATAL("Multicast routing is not supported on Windows");
-#endif
-
     // Allocate the buffers
     _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
     _sndbuf0 = new uint8_t[IO_BUF_SIZE];
@@ -184,6 +184,11 @@ MfeaMrouter::~MfeaMrouter()
 int
 MfeaMrouter::start()
 {
+#ifdef HOST_OS_WINDOWS
+    XLOG_ERROR("Multicast routing is not supported on Windows");
+    return (XORP_ERROR);
+#endif
+
     // XXX: MfeaMrouter is automatically enabled by default
     ProtoUnit::enable();
     
@@ -2091,6 +2096,7 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
     }
 
 #else // HOST_OS_WINDOWS
+    UNUSED(nbytes);
     XLOG_FATAL("Multicast routing is not supported on Windows");
 #endif
     

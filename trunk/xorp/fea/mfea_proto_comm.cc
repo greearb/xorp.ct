@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.49 2006/03/20 02:06:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.50 2006/03/20 07:29:44 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -229,10 +229,6 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ip_protocol,
       _module_id(module_id),
       _is_ip_hdr_included(false)
 {
-#ifdef HOST_OS_WINDOWS
-    XLOG_FATAL("Multicast routing is not supported on Windows");
-#endif
-
     // Init Router Alert related option stuff
 #ifdef HAVE_IPV6
     rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
@@ -317,6 +313,11 @@ ProtoComm::~ProtoComm()
 int
 ProtoComm::start()
 {
+#ifdef HOST_OS_WINDOWS
+    XLOG_ERROR("Multicast routing is not supported on Windows");
+    return (XORP_ERROR);
+#endif
+
     // XXX: all ProtoComm are automatically enabled by default
     ProtoUnit::enable();
     
@@ -783,7 +784,7 @@ ProtoComm::join_multicast_group(uint32_t vif_index, const IPvX& group)
 	struct sockaddr_in sin;
 	memset(&sin, 0, sizeof(sin));
 	sin.sin_family = AF_INET;
-	sin.sin_addr = INADDR_ANY;
+	sin.sin_addr.s_addr = INADDR_ANY;
 
 	if (SOCKET_ERROR == bind(_proto_socket_in, (sockaddr *)&sin,
 				 sizeof(sockaddr_in))) {
@@ -1426,7 +1427,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	// TODO: get rid of this and always use ip->ip_src ??
 	src.copy_in(_from4);
 #else
-	src_address.copy_in(ip->ip_src);
+	src.copy_in(ip->ip_src);
 #endif
 	dst.copy_in(ip->ip_dst);
 	ip_ttl = ip->ip_ttl;
