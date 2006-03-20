@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.50 2006/03/20 07:29:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.51 2006/03/20 21:33:24 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -2235,7 +2235,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	struct sockaddr_in to;
 	DWORD sent, error;
 
-	dst_address.copy_out(to);
+	dst.copy_out(to);
 	error = WSASendTo(_proto_socket_out,
 			  reinterpret_cast<WSABUF *>(_sndiov),
 			  2, &sent, 0,
@@ -2252,7 +2252,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	struct sockaddr_in6 to;
 	DWORD sent, error;
 
-	dst_address.copy_out(to);
+	dst.copy_out(to);
 	error = WSASendTo(_proto_socket_out,
 			  reinterpret_cast<WSABUF *>(_sndiov),
 			  1, &sent, 0,
