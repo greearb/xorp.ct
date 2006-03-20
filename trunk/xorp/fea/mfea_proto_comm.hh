@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.17 2006/03/19 22:30:34 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.18 2006/03/19 23:29:14 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -89,42 +89,52 @@ public:
     int		ip_protocol() const { return (_ip_protocol); }
     
     /**
-     * Get the protocol socket.
+     * Get the protocol socket for receiving.
      * 
      * The protocol socket is specific to the particular protocol of
      * this entry.
      * 
      * @return the socket value if valid, otherwise XORP_ERROR.
      */
-    XorpFd	proto_socket() const { return (_proto_socket); }
-    
+    XorpFd	proto_socket_in() const { return (_proto_socket_in); }
+
     /**
-     * Open an protocol socket.
+     * Get the protocol socket for sending.
      * 
      * The protocol socket is specific to the particular protocol of
      * this entry.
      * 
-     * @return XORP_OK on success, otherwise XORP_ERROR.
+     * @return the socket value if valid, otherwise XORP_ERROR.
      */
-    int		open_proto_socket();
+    XorpFd	proto_socket_out() const { return (_proto_socket_out); }
     
     /**
-     * Add the method to read from the protocol socket.
+     * Open the protocol sockets.
+     * 
+     * The protocol sockets are specific to the particular protocol of
+     * this entry.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		add_proto_socket_callback();
+    int		open_proto_sockets();
+    
+    /**
+     * Add the method to read from the incoming protocol socket.
+     * 
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		add_proto_socket_in_callback();
 
     /**
-     * Close the protocol socket.
+     * Close the protocol sockets.
      * 
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		close_proto_socket();
+    int		close_proto_sockets();
     
     /**
-     * Set/reset the "Header Included" option (for IPv4) on the protocol
-     * socket.
+     * Set/reset the "Header Included" option (for IPv4) on the outgoing
+     * protocol socket.
      * 
      * If set, the IP header of a raw packet should be created
      * by the application itself, otherwise the kernel will build it.
@@ -143,7 +153,7 @@ public:
     
     /**
      * Enable/disable receiving information about a packet received on the
-     * protocol socket.
+     * incoming protocol socket.
      * 
      * If enabled, values such as interface index, destination address and
      * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
@@ -156,7 +166,7 @@ public:
     
     /**
      * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
-     * packets on the protocol socket.
+     * packets on the outgoing protocol socket.
      * 
      * @param ttl the desired IP TTL (a.k.a. hop-limit in IPv6) value.
      * @return XORP_OK on success, otherwise XORP_ERROR.
@@ -164,7 +174,7 @@ public:
     int		set_multicast_ttl(int ttl);
     
     /**
-     * Set/reset the "Multicast Loop" flag on the protocol socket.
+     * Set/reset the "Multicast Loop" flag on the outgoing protocol socket.
      * 
      * If the multicast loopback flag is set, a multicast datagram sent on
      * that socket will be delivered back to this host (assuming the host
@@ -176,8 +186,8 @@ public:
     int		set_multicast_loop(bool is_enabled);
     
     /**
-     * Set default interface for outgoing multicast on the protocol socket.
-     * 
+     * Set default interface for outgoing multicast on the outgoing protocol
+     * socket.
      * 
      * @param vif_index the vif index of the interface to become the default
      * multicast interface.
@@ -261,7 +271,8 @@ private:
     MfeaNode&	  _mfea_node;	// The MFEA node I belong to
     int		  _ip_protocol;	// The protocol number (IPPROTO_*)
     xorp_module_id _module_id;	// The corresponding module id (XORP_MODULE_*)
-    XorpFd	  _proto_socket;   // The socket for protocol message
+    XorpFd	  _proto_socket_in;  // The socket to receive protocol message
+    XorpFd	  _proto_socket_out; // The socket to send protocol message
     uint8_t*	  _rcvbuf0;	// Data buffer0 for receiving
     uint8_t*	  _sndbuf0;	// Data buffer0 for sending
     uint8_t*	  _rcvbuf1;	// Data buffer1 for receiving

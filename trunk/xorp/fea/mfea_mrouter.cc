@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.43 2006/03/19 22:18:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.44 2006/03/19 23:29:14 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -382,7 +382,7 @@ MfeaMrouter::open_mrouter_socket()
 	proto_comm = mfea_node().proto_comm_find_by_ip_protocol(kernel_mrouter_ip_protocol());
 	if (proto_comm == NULL)
 	    break;
-	_mrouter_socket = proto_comm->proto_socket();
+	_mrouter_socket = proto_comm->proto_socket_in();
 	if (_mrouter_socket.is_valid())
 	    return (_mrouter_socket);
 	break;
@@ -507,10 +507,10 @@ MfeaMrouter::close_mrouter_socket()
 	if (proto_comm == NULL)
 	    break;
 	// If there is already IGMP or ICMPV6 socket, then don't close it.
-	if (_mrouter_socket == proto_comm->proto_socket()) {
+	if (_mrouter_socket == proto_comm->proto_socket_in()) {
 	    // Transfer the I/O event callback to the protocol socket
 	    mfea_node().eventloop().remove_ioevent_cb(_mrouter_socket);
-	    proto_comm->add_proto_socket_callback();
+	    proto_comm->add_proto_socket_in_callback();
 	    _mrouter_socket.clear();
 	    return (XORP_OK);
 	}

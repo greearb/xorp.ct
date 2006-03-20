@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.4 2005/12/08 01:54:57 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.5 2006/03/16 00:04:01 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -99,8 +99,8 @@ public:
     int		ip_protocol() const { return (_ip_protocol); }
 
     /**
-     * Enable/disable the "Header Included" option (for IPv4) on the protocol
-     * socket.
+     * Enable/disable the "Header Included" option (for IPv4) on the outgoing
+     * protocol socket.
      * 
      * If enabled, the IP header of a raw packet should be created
      * by the application itself, otherwise the kernel will build it.
@@ -120,7 +120,7 @@ public:
 
     /**
      * Enable/disable receiving information about a packet received on the
-     * protocol socket.
+     * incoming protocol socket.
      * 
      * If enabled, values such as interface index, destination address and
      * IP TTL (a.k.a. hop-limit in IPv6), and hop-by-hop options will be
@@ -134,7 +134,7 @@ public:
 
     /**
      * Set the default TTL (or hop-limit in IPv6) for the outgoing multicast
-     * packets on the protocol socket.
+     * packets on the outgoing protocol socket.
      * 
      * @param ttl the desired IP TTL (a.k.a. hop-limit in IPv6) value.
      * @param error_msg the error message (if error).
@@ -143,7 +143,8 @@ public:
     int		set_multicast_ttl(int ttl, string& error_msg);
 
     /**
-     * Enable/disable the "Multicast Loop" flag on the protocol socket.
+     * Enable/disable the "Multicast Loop" flag on the outgoing protocol
+     * socket.
      * 
      * If the multicast loopback flag is enabled, a multicast datagram sent on
      * that socket will be delivered back to this host (assuming the host
@@ -156,7 +157,8 @@ public:
     int		enable_multicast_loopback(bool is_enabled, string& error_msg);
 
     /**
-     * Set default interface for outgoing multicast on the protocol socket.
+     * Set default interface for outgoing multicast on the outgoing protocol
+     * socket.
      * 
      * @param if_name the name of the interface that would become the default
      * multicast interface.
@@ -314,23 +316,23 @@ public:
 
 private:
     /**
-     * Open a protocol socket.
+     * Open the protocol sockets.
      * 
-     * The protocol socket is specific to the particular protocol of
+     * The protocol sockets are specific to the particular protocol of
      * this entry.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		open_proto_socket(string& error_msg);
+    int		open_proto_sockets(string& error_msg);
     
     /**
-     * Close the protocol socket.
+     * Close the protocol sockets.
      * 
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		close_proto_socket(string& error_msg);
+    int		close_proto_sockets(string& error_msg);
 
     /**
      * Read data from a protocol socket, and then call the appropriate protocol
@@ -349,7 +351,8 @@ private:
     uint8_t	_ip_protocol;	// The protocol number (IPPROTO_*)
     const IfTree& _iftree;	// The interface tree
 
-    XorpFd	_proto_socket;	// The socket for protocol message
+    XorpFd	_proto_socket_in;  // The socket to receive protocol message
+    XorpFd	_proto_socket_out; // The socket to end protocol message
 
     uint8_t*	_rcvbuf0;	// Data buffer0 for receiving
     uint8_t*	_sndbuf0;	// Data buffer0 for sending
