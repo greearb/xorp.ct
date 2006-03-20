@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.5 2006/03/16 00:04:01 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.6 2006/03/20 02:06:47 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -351,8 +351,9 @@ private:
     uint8_t	_ip_protocol;	// The protocol number (IPPROTO_*)
     const IfTree& _iftree;	// The interface tree
 
-    XorpFd	_proto_socket_in;  // The socket to receive protocol message
-    XorpFd	_proto_socket_out; // The socket to end protocol message
+    XorpFd	_proto_socket_in;    // The socket to receive protocol message
+    XorpFd	_proto_socket_out;   // The socket to end protocol message
+    bool	_is_ip_hdr_included; // True if IP header is included on send
 
     uint8_t*	_rcvbuf0;	// Data buffer0 for receiving
     uint8_t*	_sndbuf0;	// Data buffer0 for sending

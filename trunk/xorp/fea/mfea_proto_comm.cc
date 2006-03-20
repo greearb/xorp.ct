@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.48 2006/03/19 23:29:14 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.49 2006/03/20 02:06:47 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -226,7 +226,8 @@ ProtoComm::ProtoComm(MfeaNode& mfea_node, int ip_protocol,
     : ProtoUnit(mfea_node.family(), mfea_node.module_id()),
       _mfea_node(mfea_node),
       _ip_protocol(ip_protocol),
-      _module_id(module_id)
+      _module_id(module_id),
+      _is_ip_hdr_included(false)
 {
 #ifdef HOST_OS_WINDOWS
     XLOG_FATAL("Multicast routing is not supported on Windows");
@@ -406,6 +407,7 @@ ProtoComm::ip_hdr_include(bool is_enabled)
 		       strerror(errno));
 	    return (XORP_ERROR);
 	}
+	_is_ip_hdr_included = is_enabled;
 #endif // IP_HDRINCL
     }
     break;
@@ -1028,10 +1030,22 @@ ProtoComm::open_proto_sockets()
 	return (XORP_ERROR);
     }
     // Include IP header when sending (XXX: doesn't do anything for IPv6)
+#ifndef HOST_OS_LINUX
+    //
+    // XXX: In case of Linux don't include the IP header, but use socket
+    // options instead, because the IP_HDRINCL IP packets are not fragmented
+    // and are limited to the interface MTU. The raw(7) Linux manual is wrong
+    // by saying it is a limitation only in Linux 2.2. It is a limitation
+    // in 2.4 and 2.6, and there is no indication this is going to be fixed
+    // in the future.
+    // Fragmenting the packet in user space before transmition is very messy,
+    // especially because we cannot manage the ip_id field in the IP header.
+    //
     if (ip_hdr_include(true) < 0) {
 	close_proto_sockets();
 	return (XORP_ERROR);
     }
+#endif // ! HOST_OS_LINUX
     // Show interest in receiving information from IP header (XXX: IPv6 only)
     if (recv_pktinfo(true) < 0) {
 	close_proto_sockets();
@@ -1786,7 +1800,20 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	error_msg = c_format("Vif %s is DOWN", mfea_vif->name().c_str());
 	return (XORP_ERROR);
     }
-    
+
+    if (datalen > IO_BUF_SIZE) {
+	error_msg = c_format("proto_socket_write() failed: "
+			     "cannot send packet on vif %s from %s to %s: "
+			     "too much data: %u octets (max = %u)",
+			     mfea_vif->name().c_str(),
+			     src.str().c_str(),
+			     dst.str().c_str(),
+			     XORP_UINT_CAST(datalen),
+			     XORP_UINT_CAST(IO_BUF_SIZE));
+	XLOG_ERROR("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
     //
     // Assign the TTL and TOS if they were not specified
     //
@@ -1837,13 +1864,104 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     
     //
     // Setup the IP header (including the Router Alert option, if specified)
-    // In case of IPv4, the IP header and the data are specified as
-    // two entries to the sndiov[] scatter/gatter array.
+    // In case of IPv4, if the IP_HDRINCL socket option is enabled, the IP
+    // header and the data are specified as two entries to the sndiov[]
+    // scatter/gatter array, otherwise we use socket options to set the IP
+    // header information and a single sndiov[] entry with the payload.
     // In case of IPv6, the IP header information is specified as
     // ancillary data.
     //
     switch (family()) {
     case AF_INET:
+	if (! _is_ip_hdr_included) {
+	    //
+	    // Use socket options to set the IP header information
+	    //
+
+	    //
+	    // Include the Router Alert option
+	    //
+#ifdef IP_OPTIONS
+	    if (is_router_alert) {
+		ip_option = htonl((IPOPT_RA << 24) | (0x04 << 16));
+		if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_OPTIONS,
+			       XORP_SOCKOPT_CAST(&ip_option),
+			       sizeof(ip_option))
+		    < 0) {
+		    error_msg = c_format("setsockopt(IP_OPTIONS, IPOPT_RA) "
+					 "failed: %s",
+					 strerror(errno));
+		    XLOG_ERROR("%s", error_msg.c_str());
+		    return (XORP_ERROR);
+		}
+	    }
+#endif // IP_OPTIONS
+
+	    //
+	    // Set the TTL
+	    //
+#ifdef IP_TTL
+	    int_val = ip_ttl;
+	    if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_TTL,
+			   XORP_SOCKOPT_CAST(&int_val), sizeof(int_val))
+		< 0) {
+		error_msg = c_format("setsockopt(IP_TTL, %d) failed: %s",
+				     int_val, strerror(errno));
+		XLOG_ERROR("%s", error_msg.c_str());
+		return (XORP_ERROR);
+	    }
+#endif // IP_TTL
+
+	    //
+	    // Set the TOS
+	    //
+#ifdef IP_TOS
+	    int_val = ip_tos;
+	    if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_TOS,
+			   XORP_SOCKOPT_CAST(&int_val), sizeof(int_val))
+		< 0) {
+		error_msg = c_format("setsockopt(IP_TOS, 0x%x) failed: %s",
+				     int_val, strerror(errno));
+		XLOG_ERROR("%s", error_msg.c_str());
+		return (XORP_ERROR);
+	    }
+#endif // IP_TOS
+
+	    //
+	    // XXX: bind to the source address so the outgoing IP packet
+	    // will use that address.
+	    //
+	    struct sockaddr_in sin;
+	    src.copy_out(sin);
+	    if (bind(_proto_socket_out,
+		     reinterpret_cast<struct sockaddr*>(&sin),
+		     sizeof(sin))
+		< 0) {
+		error_msg = c_format("raw socket bind(%s) failed: %s",
+				     cstring(src), strerror(errno));
+		XLOG_ERROR("%s", error_msg.c_str());
+		return (XORP_ERROR);
+	    }
+
+	    //
+	    // Now hook the data
+	    //
+#ifndef HOST_OS_WINDOWS
+	    dst.copy_out(_to4);
+	    _sndmh.msg_namelen		= sizeof(_to4);
+	    _sndmh.msg_iovlen		= 1;
+	    _sndmh.msg_control		= NULL;
+	    _sndmh.msg_controllen	= 0;
+#endif // ! HOST_OS_WINDOWS
+	    memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base
+	    // _sndiov[0].iov_base	= (caddr_t)databuf;
+	    _sndiov[0].iov_len	= datalen;
+	    break;
+	}
+
+	//
+	// Compose the IP header
+	//
 	ip = reinterpret_cast<struct ip *>(_sndbuf0);
 	if (is_router_alert) {
 	    // Include the Router Alert option
@@ -1876,8 +1994,10 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	ip->ip_len = htons(ip->ip_len);
 #endif
 	ip->ip_sum = 0;					// Let kernel fill in
-	
+
+	//
 	// Now hook the data
+	//
 #ifndef HOST_OS_WINDOWS
 	dst.copy_out(_to4);
 	_sndmh.msg_namelen	= sizeof(_to4);
@@ -1886,18 +2006,6 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	_sndmh.msg_controllen	= 0;
 #endif // ! HOST_OS_WINDOWS
 	_sndiov[0].iov_len	= ip_hdr_len;
-	if (datalen > IO_BUF_SIZE) {
-	    error_msg = c_format("proto_socket_write() failed: "
-				 "cannot send packet on vif %s from %s to %s: "
-				 "too much data: %u octets (max = %u)",
-				 mfea_vif->name().c_str(),
-				 src.str().c_str(),
-				 dst.str().c_str(),
-				 XORP_UINT_CAST(datalen),
-				 XORP_UINT_CAST(IO_BUF_SIZE));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
     	memcpy(_sndbuf1, databuf, datalen); // XXX: goes to _sndiov[1].iov_base
 	// _sndiov[1].iov_base	= (caddr_t)databuf;
 	_sndiov[1].iov_len	= datalen;
@@ -2081,19 +2189,6 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	_sndmh.msg_namelen  = sizeof(_to6);
 	_sndmh.msg_iovlen   = 1;
 #endif // ! HOST_OS_WINDOWS
-	if (datalen > IO_BUF_SIZE) {
-	    error_msg = c_format("proto_socket_write() failed: "
-				 "error sending packet on vif %s "
-				 "from %s to %s: "
-				 "too much data: %u octets (max = %u)",
-				 mfea_vif->name().c_str(),
-				 src.str().c_str(),
-				 dst.str().c_str(),
-				 XORP_UINT_CAST(datalen),
-				 XORP_UINT_CAST(IO_BUF_SIZE));
-	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
 	memcpy(_sndbuf0, databuf, datalen); // XXX: goes to _sndiov[0].iov_base
 	// _sndiov[0].iov_base	= (caddr_t)databuf;
 	_sndiov[0].iov_len  = datalen;
