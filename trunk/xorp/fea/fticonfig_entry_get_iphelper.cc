@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.5 2005/12/22 12:18:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.6 2006/03/22 00:41:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -279,7 +279,7 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	    uint32_t ifindex = static_cast<uint32_t>(
 				pfwdtable->table[i].dwForwardIfIndex);
 	    const IfTree& iftree = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = itree.get_if(ifindex);
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(ifindex);
 	    XLOG_ASSERT(ii != iftree.ifs().end());
 
 	    // XXX: The old test for a XORP route was:
