@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.16 2005/12/21 09:42:54 bms Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.17 2006/03/16 00:04:02 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -57,7 +57,8 @@
 #include "ip.h"
 #endif
 
-#include "iftree.hh"
+#include "ifconfig.hh"
+#include "nexthop_port_mapper.hh"
 #include "rawsock4.hh"
 
 /* ------------------------------------------------------------------------- */
@@ -177,15 +178,12 @@ private:
  * The pinger stop sending pings when the sum of the good and bad responses
  * equals the constructor argument "count".
  */
-static const string local_if_name = "lo0";
-static const string local_vif_name = "lo0";
-
 class Pinger : public FilterRawSocket4 {
 public:
     Pinger(EventLoop& e, const IfTree& iftree, const IPv4& src,
 	   const IPv4& dst, size_t count = 3)
 	: FilterRawSocket4(e, IPPROTO_ICMP, iftree),
-	  _src(src), _dst(dst),
+	  _iftree(iftree), _src(src), _dst(dst),
 	  _sent(0), _good(0), _bad(0), _count(count)
     {
 	_id = getpid();
@@ -201,10 +199,41 @@ public:
     size_t done() const { return _good + _bad == _count; }
 
 protected:
+
+    bool find_outgoing_interface(const IPvX& src, const IPvX& dst,
+				 string& ifname, string& vifname) const {
+	const IfTreeInterface* iftree_if = NULL;
+	const IfTreeVif* iftree_vif = NULL;
+
+	UNUSED(dst);
+	ifname = "";
+	vifname = "";
+
+	if (find_interface_vif_by_addr(src, iftree_if, iftree_vif) != true)
+	    return (false);
+
+	// Interface found
+	XLOG_ASSERT(iftree_if != NULL);
+	XLOG_ASSERT(iftree_vif != NULL);
+	ifname = iftree_if->ifname();
+	vifname = iftree_vif->vifname();
+
+	return (true);
+    }
+
     bool send() {
+	string ifname, vifname;
+
 	XLOG_ASSERT(_waiting == false);
 	if (_sent == _count) {
 	    return false;
+	}
+
+	if (find_outgoing_interface(IPvX(_src), IPvX(_dst), ifname, vifname)
+	    != true) {
+	    fprintf(stderr, "Cannot find outgoing interface for destination "
+		    "%s\n", _src.str().c_str());
+	    exit(EXIT_FAILURE);
 	}
 
 	_timeout.schedule_after_ms(1000);
@@ -221,7 +250,7 @@ protected:
 	string error_msg;
 	int32_t ip_ttl = 64;
 	int32_t ip_tos = -1;
-	if (proto_socket_write(local_if_name, local_vif_name,
+	if (proto_socket_write(ifname, vifname,
 			       _src, _dst, ip_ttl, ip_tos,
 			       false, payload, error_msg)
 	    
@@ -301,18 +330,19 @@ protected:
     }
 
 protected:
-    XorpTimer	_timeout;
-    IPv4	_src;
-    IPv4	_dst;
-    uint16_t	_seq;
-    uint16_t	_id;
+    const IfTree&	_iftree;
+    XorpTimer		_timeout;
+    IPv4		_src;
+    IPv4		_dst;
+    uint16_t		_seq;
+    uint16_t		_id;
 
-    bool	_waiting; // waiting for packet
+    bool		_waiting; // waiting for packet
 
-    size_t	_sent;
-    size_t	_good;
-    size_t	_bad;
-    const size_t _count;
+    size_t		_sent;
+    size_t		_good;
+    size_t		_bad;
+    const size_t	_count;
 };
 
 /* ------------------------------------------------------------------------- */
@@ -445,48 +475,33 @@ main(int argc, char* const* argv)
     }
 
     printf("Running \"ping\" from %s to %s\n",
-	   dst.str().c_str(), src.str().c_str());
+	   src.str().c_str(), dst.str().c_str());
 
     try {
-	EventLoop e;
-
-	// Create the interface tree
-	IfTree iftree;
-	iftree.add_if(local_if_name);
-	IfTree::IfMap::iterator ii = iftree.get_if(local_if_name);
-	XLOG_ASSERT(ii != iftree.ifs().end());
-	IfTreeInterface& fi = ii->second;
-	fi.add_vif(local_vif_name);
-	IfTreeInterface::VifMap::iterator vi = fi.get_vif(local_vif_name);
-	XLOG_ASSERT(vi != fi.vifs().end());
-	IfTreeVif& fv = vi->second;
-	fv.add_addr(src);
-	IfTreeVif::V4Map::iterator ai4 = fv.get_addr(src);
-	XLOG_ASSERT(ai4 != fv.v4addrs().end());
-	IfTreeAddr4& a4 = ai4->second;
-	if (src != dst) {
-	    //
-	    // XXX: a hack so the dst address appears directly connected
-	    // so we can find the corresponding interface and vif.
-	    //
-	    fv.set_point_to_point(true);
-	    a4.set_endpoint(dst);
-	    a4.set_point_to_point(true);
-	}
-	
-	fi.set_enabled(true);
-	fv.set_enabled(true);
-	a4.set_enabled(true);
-	
-	Pinger pinger(e, iftree, src, dst, count);
+	EventLoop eventloop;
 	string error_msg;
+
+	//
+	// Create the interface tree
+	//
+	NexthopPortMapper nexthop_port_mapper;
+	IfConfigUpdateReplicator ifc_repl;
+	IfConfigErrorReporter if_err;
+
+	IfConfig ifconfig(eventloop, ifc_repl, if_err, nexthop_port_mapper);
+	if (ifconfig.start(error_msg) != XORP_OK) {
+	    XLOG_FATAL("Cannot start IfConfig: %s", error_msg.c_str());
+	}
+	const IfTree& iftree = ifconfig.pull_config();
+
+	Pinger pinger(eventloop, iftree, src, dst, count);
 	if (pinger.start(error_msg) != XORP_OK) {
 	    fprintf(stderr, "Cannot start pinger: %s", error_msg.c_str());
 	    exit(EXIT_FAILURE);
 	}
 	
 	while (pinger.done() == false)
-	    e.run();
+	    eventloop.run();
 
 	printf("Received %u good responses and %u bad responses.\n",
 	       XORP_UINT_CAST(pinger.good()), XORP_UINT_CAST(pinger.bad()));
