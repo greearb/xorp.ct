@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.24 2005/08/18 15:45:45 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.25 2006/03/16 00:03:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -299,9 +299,9 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	    //
 	    if (fte.ifname().empty())
 		break;
-	    IfTree& it = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-	    XLOG_ASSERT(ii != it.ifs().end());
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	    XLOG_ASSERT(ii != iftree.ifs().end());
 
 	    if (ii->second.discard()) {
 		rtmsg->rtm_type = RTN_BLACKHOLE;
@@ -476,8 +476,8 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	IfTree& it = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
+	const IfTree& iftree = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
 	//
 	// XXX: unlike adding a route, we don't use XLOG_ASSERT()
 	// to check whether the interface is configured in the system.
@@ -485,7 +485,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	// routes while we still don't have any interface tree configuration.
 	//
 
-	if ((ii != it.ifs().end()) && ii->second.discard())
+	if ((ii != iftree.ifs().end()) && ii->second.discard())
 	    rtmsg->rtm_type = RTN_BLACKHOLE;
 
 	break;

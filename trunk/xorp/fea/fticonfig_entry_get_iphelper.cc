@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.4 2005/12/21 09:42:53 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_iphelper.cc,v 1.5 2005/12/22 12:18:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -278,9 +278,9 @@ FtiConfigEntryGetIPHelper::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 
 	    uint32_t ifindex = static_cast<uint32_t>(
 				pfwdtable->table[i].dwForwardIfIndex);
-	    IfTree& it = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
-	    XLOG_ASSERT(ii != it.ifs().end());
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = itree.get_if(ifindex);
+	    XLOG_ASSERT(ii != iftree.ifs().end());
 
 	    // XXX: The old test for a XORP route was:
 	    // pfwdtable->table[i].dwForwardType == PROTO_IP_NETMGMT
@@ -381,9 +381,9 @@ FtiConfigEntryGetIPHelper::lookup_route_by_network(const IPvXNet& dst,
 
 	    uint32_t ifindex = static_cast<uint32_t>(
 				pfwdtable->table[i].dwForwardIfIndex);
-	    IfTree& it = ftic().iftree();
-	    IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
-	    XLOG_ASSERT(ii != it.ifs().end());
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(ifindex);
+	    XLOG_ASSERT(ii != iftree.ifs().end());
 
 	    fte = FteX(destnet, nexthop,
 		       ii->second.ifname(), ii->second.ifname(),

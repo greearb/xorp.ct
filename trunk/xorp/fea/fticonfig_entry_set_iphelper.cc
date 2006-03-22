@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.5 2005/12/22 12:18:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.6 2006/03/16 00:03:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -201,9 +201,9 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
     	memset(&ipfwdrow, 0, sizeof(ipfwdrow));
     }
 
-    IfTree& it = ftic().iftree();
-    IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-    XLOG_ASSERT(ii != it.ifs().end());
+    const IfTree& iftree = ftic().iftree();
+    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+    XLOG_ASSERT(ii != iftree.ifs().end());
 
     ipfwdrow.dwForwardDest = tmpdest;
     ipfwdrow.dwForwardMask = tmpmask;
@@ -294,9 +294,9 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 	ipfwdrow.dwForwardDest = tmpdest;
 	ipfwdrow.dwForwardMask = tmpmask;
 	ipfwdrow.dwForwardNextHop = tmpnexthop;
-        IfTree& it = ftic().iftree();
-        IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-        XLOG_ASSERT(ii != it.ifs().end());
+        const IfTree& iftree = ftic().iftree();
+        IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+        XLOG_ASSERT(ii != iftree.ifs().end());
         ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
         ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     }

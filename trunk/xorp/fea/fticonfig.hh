@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.36 2005/08/31 22:02:11 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.37 2006/03/16 00:03:49 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -64,7 +64,7 @@ public:
      * @param profile the profile entity.
      * @param nexthop_port_mapper the next-hop port mapper.
      */
-    FtiConfig(EventLoop& eventloop, Profile& profile, IfTree& iftree,
+    FtiConfig(EventLoop& eventloop, Profile& profile, const IfTree& iftree,
 	      NexthopPortMapper& nexthop_port_mapper);
 
     /**
@@ -91,7 +91,7 @@ public:
      *
      * @return a reference to the @ref IfTree instance.
      */
-    IfTree& iftree() { return _iftree; }
+    const IfTree& iftree() const { return _iftree; }
     
     int register_ftic_entry_get_primary(FtiConfigEntryGet *ftic_entry_get);
     int register_ftic_entry_set_primary(FtiConfigEntrySet *ftic_entry_set);
@@ -561,7 +561,7 @@ private:
     EventLoop&				_eventloop;
     Profile&				_profile;
     NexthopPortMapper&			_nexthop_port_mapper;
-    IfTree&				_iftree;
+    const IfTree&			_iftree;
 
     FtiConfigEntryGet*			_ftic_entry_get_primary;
     FtiConfigEntrySet*			_ftic_entry_set_primary;

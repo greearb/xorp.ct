@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.32 2005/10/26 19:11:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.33 2006/03/16 00:03:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -210,9 +210,9 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 	//
 	if (fte.ifname().empty())
 	    break;
-	IfTree& it = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-	if (ii == it.ifs().end()) {
+	const IfTree& iftree = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	if (ii == iftree.ifs().end()) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
 	    return false;
 	}
@@ -345,9 +345,9 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 
 	sdl->sdl_family = AF_LINK;
 	sdl->sdl_len = sdl_len;
-	IfTree& it = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = it.get_if(fte.ifname());
-	if (ii == it.ifs().end()) {
+	const IfTree& iftree = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	if (ii == iftree.ifs().end()) {
 	    XLOG_ERROR("Invalid interface name: %s", fte.ifname().c_str());
 	    return false;
 	}

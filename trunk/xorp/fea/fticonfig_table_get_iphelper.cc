@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_iphelper.cc,v 1.4 2005/12/22 12:18:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_iphelper.cc,v 1.5 2006/03/16 00:03:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -189,11 +189,11 @@ FtiConfigTableGetIPHelper::get_table(int family, list<FteX>& fte_list)
 	    xorp_route = true;
 
 	uint32_t ifindex = static_cast<uint32_t>(pFwdRow->dwForwardIfIndex);
-	IfTree& it = ftic().iftree();
-	IfTree::IfMap::const_iterator ii = it.get_if(ifindex);
+	const IfTree& iftree = ftic().iftree();
+	IfTree::IfMap::const_iterator ii = iftree.get_if(ifindex);
 
 	string if_name;
-	if (ii != it.ifs().end()) {
+	if (ii != iftree.ifs().end()) {
 	    if_name = ii->second.ifname();
 	} else {
 	    if_name = "unknown";
