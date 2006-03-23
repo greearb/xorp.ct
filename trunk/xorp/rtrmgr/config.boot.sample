@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.35 2006/03/09 12:18:20 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.36 2006/03/15 02:06:23 pavlin Exp $ */
 
 
 interfaces {
@@ -61,6 +61,10 @@ fea {
 */
 
     click {
+	/*
+	 * The Click forwarding path.
+	 * http://www.read.cs.ucla.edu/click/
+	 */
 	disable: false
 
 	/*
