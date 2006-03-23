@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.66 2006/02/12 00:06:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.67 2006/03/03 21:31:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -828,19 +828,19 @@ RouterLsa::str() const
 
     output += "\n";
 
-    output += c_format("\tNt-bit %s\n", pb(get_nt_bit()));
+    output += c_format("\tbit Nt %s\n", pb(get_nt_bit()));
 
     switch(version) {
     case OspfTypes::V2:
 	break;
     case OspfTypes::V3:
-	output += c_format("\tW-bit %s\n", pb(get_w_bit()));
+	output += c_format("\tbit W %s\n", pb(get_w_bit()));
 	break;
     }
 
-    output += c_format("\tV-bit %s\n", pb(get_v_bit()));
-    output += c_format("\tE-bit %s\n", pb(get_e_bit()));
-    output += c_format("\tB-bit %s", pb(get_b_bit()));
+    output += c_format("\tbit V %s\n", pb(get_v_bit()));
+    output += c_format("\tbit E %s\n", pb(get_e_bit()));
+    output += c_format("\tbit B %s", pb(get_b_bit()));
 
     switch(version) {
     case OspfTypes::V2:
