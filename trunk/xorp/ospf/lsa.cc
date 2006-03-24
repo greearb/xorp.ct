@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.67 2006/03/03 21:31:40 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.68 2006/03/23 20:03:40 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1476,7 +1476,7 @@ ASExternalLsa::str() const
     switch(version) {
     case OspfTypes::V2:
 	output += c_format("\n\tNetwork Mask %#x", get_network_mask());
-	output += c_format("\n\tE-bit %s", pb(get_e_bit()));
+	output += c_format("\n\tbit E %s", pb(get_e_bit()));
 	output += c_format("\n\tMetric %d %#x", get_metric(), get_metric());
 	if (get_metric() == OspfTypes::LSInfinity)
 	    output += c_format(" LSInfinity");
@@ -1486,9 +1486,9 @@ ASExternalLsa::str() const
 			   get_external_route_tag());
 	break;
     case OspfTypes::V3:
-	output += c_format("\n\tE-bit %s", pb(get_e_bit()));
-	output += c_format("\n\tF-bit %s", pb(get_f_bit()));
-	output += c_format("\n\tT-bit %s", pb(get_t_bit()));
+	output += c_format("\n\tbit E %s", pb(get_e_bit()));
+	output += c_format("\n\tbit F %s", pb(get_f_bit()));
+	output += c_format("\n\tbit T %s", pb(get_t_bit()));
 	output += c_format("\n\tMetric %d %#x", get_metric(), get_metric());
 	if (get_metric() == OspfTypes::LSInfinity)
 	    output += c_format(" LSInfinity");
