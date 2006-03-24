@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.5 2006/03/09 10:32:42 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.6 2006/03/09 10:45:00 atanu Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -133,6 +133,7 @@ protocols \{\\
 \>\>\>\>\>\>password: {\it text}\\
 \>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
 \>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>max-time-drift-secs: {\it uint(0..65535)}\\
 \>\>\>\>\>\}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
@@ -169,6 +170,7 @@ xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 \>\>\>\>\>\>\>\>password: {\it text}\\
 \>\>\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
 \>\>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
+\>\>\>\>\>\>\>\>max-time-drift-secs: {\it uint(0..65535)}\\
 \>\>\>\>\>\>\>\}\\
 \>\>\>\>\>\>\}\\
 \>\>\>\>\>\>passive: {\it text}\\
@@ -295,6 +297,19 @@ mutually-exclusive statements:
   \item{\tt end-time}: this specifies the end time when the key becomes
   inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
   then the key should never expire.
+  \item{\tt max-time-drift-secs}: this specifies the maximum time drift
+  (in seconds) among all OSPF routers.  The allowed values are in the
+  interval [0, 65535]. If the value is 65535, the time drift is
+  unlimited. The purpose of this statement is to decide when to start
+  accepting the MD5 keys in case other routers's clocks are not
+  syncronized and  have started to generate messages with a particular
+  key:
+
+\begin{description}
+  \item KeyStartAccept = KeyStartGenerate - MaxTimeDrift
+  \item KeyStopAccept  = KeyStopGenerate  + MaxTimeDrift
+\end{description}
+
 \end{description}
 \end{description}
 \end{description}
@@ -333,9 +348,14 @@ retransmitting various packets, such as link state update packets or
 link state request packets.
 \item{\tt transit-delay}: The time to transmit an LSA on this address,
 this value is added to the age field of all LSAs.
-%% \item{\tt authentication}: This directive specifies the authentication
-%% mechanism used to authorise OSPF updates sent and received via this
-%% vif/address.  
+
+\item{\tt authentication}: This directive specifies the authentication
+mechanism used to authorise OSPF updates sent and received via this
+vif/address.  
+
+The authentication is configured by using same configuration statements
+as those in case of virtual links (see the {\tt virtual-link}
+configuration statement above).
 
 %% The authentication is configured by using one of the following
 %% mutually-exclusive statements:
@@ -346,7 +366,7 @@ this value is added to the age field of all LSAs.
 %% \item{\tt md5}: this specifies an MD5 authentication key. The parameter
 %%   is the key ID and must be in the interval [0, 255].
 %%   The MD5 authentication is configured by using the following
-%%  statements:
+%%   statements:
 %% \begin{description}
 %%   \item{\tt password}: this specifies the MD5 password for the specific
 %%   key.
@@ -356,6 +376,19 @@ this value is added to the age field of all LSAs.
 %%   \item{\tt end-time}: this specifies the end time when the key becomes
 %%   inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
 %%   then the key should never expire.
+%%   \item{\tt max-time-drift-secs}: this specifies the maximum time drift
+%%   (in seconds) among all OSPF routers.  The allowed values are in the
+%%   interval [0, 65535]. If the value is 65535, the time drift is
+%%   unlimited. The purpose of this statement is to decide when to start
+%%   accepting the MD5 keys in case other routers's clocks are not
+%%   syncronized and  have started to generate messages with a particular
+%%   key:
+
+%% \begin{description}
+%%   \item KeyStartAccept = KeyStartGenerate - MaxTimeDrift
+%%   \item KeyStopAccept  = KeyStopGenerate  + MaxTimeDrift
+%% \end{description}
+
 %% \end{description}
 %% \end{description}
 
