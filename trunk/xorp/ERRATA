@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.26 2006/03/08 18:56:02 zec Exp $
+# $XORP: xorp/ERRATA,v 1.27 2006/03/08 21:59:58 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -112,13 +112,6 @@
     - It is *essential* for an IPv6 peering that an IPv6 nexthop is
       provided. Unfortunately the configuration does not enforce this
       requrement. This will be fixed in the future.
-
-    - If a policy is configured for marking routes as candidates for
-      aggregation, and an update for such a route arrives while a
-      peering is being brought up (XORP is dumping routes to it), a race
-      condition can occur which is considered by BGP as a fatal error.
-      The problem was observed only on IPv6 peerings, and will be fixed
-      in the future.
 
   STATIC_ROUTES:
     - No known issues.
