@@ -11,9 +11,8 @@
 # The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
- */
 
-# $XORP$
+# $XORP: xorp/devnotes/template.sh,v 1.1 2006/03/24 18:03:00 atanu Exp $
 
 # Local Variables:
 # mode: shell-script
