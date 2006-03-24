@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.34 2005/11/27 05:29:41 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_command.cc,v 1.35 2006/03/16 00:05:59 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -509,6 +509,8 @@ ModuleCommand::xrl_action_complete(const XrlError& err,
 {
     debug_msg("ModuleCommand::xrl_action_complete\n");
 
+    UNUSED(cmd);
+
     if (err != XrlError::OKAY()) {
 	//
 	// There was an error.  There's nothing we can so here - errors
@@ -517,54 +519,7 @@ ModuleCommand::xrl_action_complete(const XrlError& err,
 	return;
     }
 
-    if (xrl_args->empty())
-	return;
-
-    //
-    // Handle the XRL arguments
-    //
-    debug_msg("ARGS: %s\n", xrl_args->str().c_str());
-
-    // Create a list with the return arguments
-    list<string> spec_args;
-    XrlAction* xa = dynamic_cast<XrlAction*>(action);
-    XLOG_ASSERT(xa != NULL);
-    string s = xa->xrl_return_spec();
-    while (true) {
-	string::size_type start = s.find("&");
-	if (start == string::npos) {
-	    spec_args.push_back(s);
-	    break;
-	}
-	spec_args.push_back(s.substr(0, start));
-	debug_msg("spec_args: %s\n", s.substr(0, start).c_str());
-	s = s.substr(start + 1, s.size() - (start + 1));
-    }
-
-    list<string>::const_iterator iter;
-    for (iter = spec_args.begin(); iter != spec_args.end(); ++iter) {
-	string::size_type eq = iter->find("=");
-	if (eq == string::npos)
-	    continue;
-
-	XrlAtom atom(iter->substr(0, eq).c_str());
-	debug_msg("atom name=%s\n", atom.name().c_str());
-	string varname = iter->substr(eq + 1, iter->size() - (eq + 1));
-	debug_msg("varname=%s\n", varname.c_str());
-	XrlAtom returned_atom;
-	try {
-	    returned_atom = xrl_args->item(atom.name());
-	} catch (const XrlArgs::XrlAtomNotFound& x) {
-	    // TODO: XXX: IMPLEMENT IT!!
-	    XLOG_UNFINISHED();
-	}
-	string value = returned_atom.value();
-	debug_msg("found atom = %s\n", returned_atom.str().c_str());
-	debug_msg("found value = %s\n", value.c_str());
-	ctn->set_variable(varname, value);
-    }
-
-    UNUSED(cmd);
+    process_xrl_action_return_arguments(xrl_args, ctn, action);
 }
 
 void

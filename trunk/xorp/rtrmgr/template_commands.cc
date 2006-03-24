@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.65 2006/02/05 00:14:17 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.66 2006/03/16 00:06:02 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -1303,7 +1303,7 @@ Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 	    if (xa != NULL) {
 		result = xa->execute(
 		    ctn, task_manager,
-		    callback(this, &Command::xrl_action_complete, &ctn));
+		    callback(this, &Command::xrl_action_complete, &ctn, *iter));
 		break;
 	    }
 	    const ProgramAction* pa = dynamic_cast<const ProgramAction*>(*iter);
@@ -1333,16 +1333,78 @@ Command::execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const
 
 void
 Command::xrl_action_complete(const XrlError& err,
-			     XrlArgs* ,
-			     MasterConfigTreeNode* ctn) const
+			     XrlArgs* xrl_args,
+			     MasterConfigTreeNode* ctn,
+			     Action* action) const
 {
     debug_msg("Command::xrl_action_complete\n");
 
-    if (err == XrlError::OKAY()) {
-	ctn->command_status_callback(this, true);
-    } else {
+    if (err != XrlError::OKAY()) {
 	ctn->command_status_callback(this, false);
+	return;
     }
+
+    if (process_xrl_action_return_arguments(xrl_args, ctn, action) != true) {
+	ctn->command_status_callback(this, false);
+	return;
+    }
+
+    ctn->command_status_callback(this, true);
+}
+
+bool
+Command::process_xrl_action_return_arguments(XrlArgs* xrl_args,
+					     MasterConfigTreeNode *ctn,
+					     Action* action) const
+{
+    if ((xrl_args == NULL) || xrl_args->empty())
+	return (true);
+
+    //
+    // Handle the XRL arguments
+    //
+    debug_msg("ARGS: %s\n", xrl_args->str().c_str());
+
+    // Create a list with the return arguments
+    list<string> spec_args;
+    XrlAction* xa = dynamic_cast<XrlAction*>(action);
+    XLOG_ASSERT(xa != NULL);
+    string s = xa->xrl_return_spec();
+    while (true) {
+	string::size_type start = s.find("&");
+	if (start == string::npos) {
+	    spec_args.push_back(s);
+	    break;
+	}
+	spec_args.push_back(s.substr(0, start));
+	debug_msg("spec_args: %s\n", s.substr(0, start).c_str());
+	s = s.substr(start + 1, s.size() - (start + 1));
+    }
+
+    list<string>::const_iterator iter;
+    for (iter = spec_args.begin(); iter != spec_args.end(); ++iter) {
+	string::size_type eq = iter->find("=");
+	if (eq == string::npos)
+	    continue;
+
+	XrlAtom atom(iter->substr(0, eq).c_str());
+	debug_msg("atom name=%s\n", atom.name().c_str());
+	string varname = iter->substr(eq + 1, iter->size() - (eq + 1));
+	debug_msg("varname=%s\n", varname.c_str());
+	XrlAtom returned_atom;
+	try {
+	    returned_atom = xrl_args->item(atom.name());
+	} catch (const XrlArgs::XrlAtomNotFound& x) {
+	    // TODO: XXX: IMPLEMENT IT!!
+	    XLOG_UNFINISHED();
+	}
+	string value = returned_atom.value();
+	debug_msg("found atom = %s\n", returned_atom.str().c_str());
+	debug_msg("found value = %s\n", value.c_str());
+	ctn->set_variable(varname, value);
+    }
+
+    return (true);
 }
 
 void

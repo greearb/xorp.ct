@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/template_commands.hh,v 1.32 2006/02/02 19:42:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/template_commands.hh,v 1.33 2006/03/16 00:06:02 pavlin Exp $
 
 #ifndef __RTRMGR_TEMPLATE_COMMANDS_HH__
 #define __RTRMGR_TEMPLATE_COMMANDS_HH__
@@ -129,7 +129,11 @@ public:
     int execute(MasterConfigTreeNode& ctn, TaskManager& task_manager) const;
     void xrl_action_complete(const XrlError& err,
 			     XrlArgs* xrl_args,
-			     MasterConfigTreeNode* ctn) const;
+			     MasterConfigTreeNode* ctn,
+			     Action* action) const;
+    bool process_xrl_action_return_arguments(XrlArgs* xrl_args,
+					     MasterConfigTreeNode* ctn,
+					     Action* action) const;
     void program_action_complete(bool success,
 				 const string& command_stdout,
 				 const string& command_stderr,
