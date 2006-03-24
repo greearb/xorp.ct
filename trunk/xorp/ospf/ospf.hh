@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.88 2006/03/10 04:13:38 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.89 2006/03/11 03:01:24 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -610,15 +610,16 @@ class Ospf {
      * @param area the area ID.
      * @param key_id unique ID associated with key.
      * @param password phrase used for MD5 digest computation.
-     * @param start_secs start time in seconds since midnight 1 Jan 1970.
-     * @param end_secs start time in seconds since midnight 1 Jan 1970.
+     * @param start_timeval start time when key becomes valid.
+     * @param end_timeval end time when key becomes invalid.
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
     bool set_md5_authentication_key(const string& interface, const string& vif,
 				    OspfTypes::AreaID area, uint8_t key_id,
 				    const string& password,
-				    uint32_t start_secs, uint32_t end_secs,
+				    const TimeVal& start_timeval,
+				    const TimeVal& end_timeval,
 				    string& error_msg);
 
     /**

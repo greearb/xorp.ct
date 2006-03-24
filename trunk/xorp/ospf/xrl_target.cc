@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.31 2006/03/10 04:35:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.32 2006/03/11 03:01:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,8 +39,8 @@
 #include "xrl_io.hh"
 #include "xrl_target.hh"
 
-static time_t
-decode_time_string(const string& time_string)
+static int
+decode_time_string(const string& time_string, TimeVal& timeval)
 {
     const char* s;
     const char* format = "%Y-%m-%d.%H:%M";
@@ -48,20 +48,23 @@ decode_time_string(const string& time_string)
     time_t result;
 
     if (time_string.empty()) {
-	result = 0;
-	return (result);
+	timeval = TimeVal::ZERO();
+	return (XORP_OK);
     }
 
     memset(&tm, 0, sizeof(tm));
 
     s = xorp_strptime(time_string.c_str(), format, &tm);
     if ((s == NULL) || (*s != '\0')) {
-	result = -1;
-	return (result);
+	return (XORP_ERROR);
     }
 
     result = mktime(&tm);
-    return (result);
+    if (result == -1)
+	return (XORP_ERROR);
+
+    timeval = TimeVal(result, 0);
+    return (XORP_OK);
 }
 
 XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf,
@@ -708,9 +711,8 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     const string&	end_time)
 {
     string error_msg;
-    uint32_t start_secs = 0;
-    uint32_t end_secs = 0;
-    time_t decoded_time;
+    TimeVal start_timeval = TimeVal::ZERO();
+    TimeVal end_timeval = TimeVal::MAXIMUM();
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("set_md5_authentication_key(): "
@@ -731,26 +733,21 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     //
     // Decode the start and end time
     //
-    decoded_time = decode_time_string(start_time);
-    if (decoded_time == -1) {
-	error_msg = c_format("Invalid start time: %s", start_time.c_str());
-	return XrlCmdError::COMMAND_FAILED(error_msg);
+    if (! start_time.empty()) {
+	if (decode_time_string(start_time, start_timeval) != XORP_OK) {
+	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
     }
-    start_secs = decoded_time;
-    if (end_time.empty()) {
-	// XXX: if end_secs is same as start_secs, then the key never expires
-	end_secs = start_secs;
-    } else {
-	decoded_time = decode_time_string(end_time);
-	if (decoded_time == -1) {
+    if (! end_time.empty()) {
+	if (decode_time_string(end_time, end_timeval) != XORP_OK) {
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
-	end_secs = decoded_time;
     }
 
     if (!_ospf.set_md5_authentication_key(ifname, vifname, area_id, key_id,
-					  password, start_secs, end_secs,
+					  password, start_timeval, end_timeval,
 					  error_msg)) {
 	error_msg = c_format("Failed to set MD5 authentication key: %s",
 			     error_msg.c_str());

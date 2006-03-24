@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.114 2006/03/07 06:41:10 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.115 2006/03/10 03:33:28 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1277,8 +1277,8 @@ PeerManager<A>::set_md5_authentication_key(const PeerID		peerid,
 					   OspfTypes::AreaID	area,
 					   uint8_t		key_id,
 					   const string&	password,
-					   uint32_t		start_secs,
-					   uint32_t		end_secs,
+					   const TimeVal&	start_timeval,
+					   const TimeVal&	end_timeval,
 					   string&		error_msg)
 {
     if (0 == _peers.count(peerid)) {
@@ -1287,7 +1287,8 @@ PeerManager<A>::set_md5_authentication_key(const PeerID		peerid,
     }
 
     return _peers[peerid]->set_md5_authentication_key(area, key_id, password,
-						      start_secs, end_secs,
+						      start_timeval,
+						      end_timeval,
 						      error_msg);
 }
 
