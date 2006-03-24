@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.36 2006/03/15 02:06:23 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.37 2006/03/23 18:52:32 pavlin Exp $ */
 
 
 interfaces {
@@ -165,6 +165,16 @@ protocols {
 	    vif dc0 {
 		address 10.10.10.10 {
 		    disable: false
+/*
+		    authentication {
+			simple-password: "password";
+			md5 @: u32 {
+			    password: "password";
+			    start-time: "2006-01-01.12:00"
+			    end-time: "2007-01-01.12:00"
+			}
+		    }
+*/
 		}
 	    }
 	}
@@ -218,6 +228,9 @@ protocols {
 
 			    md5 @: u32 {
 				password: "password";
+				start-time: "2006-01-01.12:00"
+				end-time: "2007-01-01.12:00"
+				max-time-drift-secs: 3600
 			    }
 			}
 */
