@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/auth.hh,v 1.7 2006/03/16 00:04:49 pavlin Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.8 2006/03/24 03:16:55 pavlin Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
@@ -250,11 +250,20 @@ public:
     public:
 	/**
 	 * Construct an MD5 Key.
+	 *
+	 * @param key_id unique ID associated with key.
+	 * @param key phrase used for MD5 digest computation.
+	 * @param start_timeval start time when key becomes valid.
+	 * @param end_timeval end time when key becomes invalid.
+	 * @param max_time_drift the maximum time drift among all routers.
+	 * @param start_timer the timer to mark when the key becomes valid.
+	 * @param end_timer the timer to mark when the key becomes invalid.
 	 */
 	MD5Key(uint8_t		key_id,
 	       const string&	key,
 	       const TimeVal&	start_timeval,
 	       const TimeVal&	end_timeval,
+	       const TimeVal&	max_time_drift,
 	       XorpTimer	start_timer,
 	       XorpTimer	end_timer);
 
@@ -289,6 +298,11 @@ public:
 	const TimeVal&	end_timeval() const	{ return _end_timeval; }
 
 	/**
+	 * Get the maximum time drift among all routers.
+	 */
+	const TimeVal&	max_time_drift() const	{ return _max_time_drift; }
+
+	/**
 	 * Get indication of whether key is persistent.
 	 */
 	bool		is_persistent() const	{ return _is_persistent; }
@@ -311,7 +325,7 @@ public:
 	 *
 	 * @param when the time to test whether the key is valid.
 	 */
-	bool	 	valid_at(const TimeVal& when) const;
+	bool		valid_at(const TimeVal& when) const;
 
 	/**
 	 * Reset the key for all sources.
@@ -368,6 +382,7 @@ public:
 	char		_key_data[KEY_BYTES]; // Key data
 	TimeVal		_start_timeval;	// Start time of the key
 	TimeVal		_end_timeval;	// End time of the key
+	TimeVal		_max_time_drift; // Max. time drift among all routers
 	bool		_is_persistent;	// True if key is persistent
 	map<IPv4, bool>	_pkts_recv;	// True if packets received
 	map<IPv4, uint32_t> _lr_seqno;	// Last received seqno
@@ -445,6 +460,7 @@ public:
      * @param key phrase used for MD5 digest computation.
      * @param start_timeval start time when key becomes valid.
      * @param end_timeval end time when key becomes invalid.
+     * @param max_time_drift the maximum time drift among all routers.
      * @param error_msg the error message (if error).
      * @return true on success, false if end time is less than start time
      * or key has already expired.
@@ -453,6 +469,7 @@ public:
 		 const string&	key,
 		 const TimeVal&	start_timeval,
 		 const TimeVal&	end_timeval,
+		 const TimeVal&	max_time_drift,
 		 string&	error_msg);
 
     /**
@@ -479,15 +496,15 @@ public:
     void key_stop_cb(uint8_t key_id);
 
     /**
-     * Select the best key at a given time.
+     * Select the best key for outbound messages.
      *
      * The chosen key is the one with most recent start-time in the past.
      * If there is more than one key that matches the criteria, then select
      * the key with greatest ID.
      *
-     * @param when the time to evaluate the keys against.
+     * @param now current time.
      */
-    MD5Key* best_key_at(const TimeVal& when);
+    MD5Key* best_outbound_key(const TimeVal& now);
 
     /**
      * Reset the keys for all sources.
@@ -638,13 +655,16 @@ class Auth {
      * @param password phrase used for MD5 digest computation.
      * @param start_timeval start time when key becomes valid.
      * @param end_timeval end time when key becomes invalid.
+     * @param max_time_drift the maximum time drift among all routers.
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
-    bool set_md5_authentication_key(uint8_t key_id, const string& password,
-				    const TimeVal& start_timeval,
-				    const TimeVal& end_timeval,
-				    string& error_msg);
+    bool set_md5_authentication_key(uint8_t		key_id,
+				    const string&	password,
+				    const TimeVal&	start_timeval,
+				    const TimeVal&	end_timeval,
+				    const TimeVal&	max_time_drift,
+				    string&		error_msg);
 
     /**
      * Delete an MD5 authentication key.

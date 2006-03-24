@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.69 2006/03/11 03:01:24 pavlin Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.70 2006/03/24 03:16:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -447,14 +447,15 @@ Ospf<A>::delete_simple_authentication_key(const string&		interface,
 
 template <typename A>
 bool
-Ospf<A>::set_md5_authentication_key(const string&		interface,
-				    const string&		vif,
-				    OspfTypes::AreaID		area,
-				    uint8_t			key_id,
-				    const string&		password,
-				    const TimeVal&		start_timeval,
-				    const TimeVal&		end_timeval,
-				    string&			error_msg)
+Ospf<A>::set_md5_authentication_key(const string&	interface,
+				    const string&	vif,
+				    OspfTypes::AreaID	area,
+				    uint8_t		key_id,
+				    const string&	password,
+				    const TimeVal&	start_timeval,
+				    const TimeVal&	end_timeval,
+				    const TimeVal&	max_time_drift,
+				    string&		error_msg)
 
 {
     PeerID peerid;
@@ -469,7 +470,8 @@ Ospf<A>::set_md5_authentication_key(const string&		interface,
 
     if (_peer_manager.set_md5_authentication_key(peerid, area, key_id,
 						 password, start_timeval,
-						 end_timeval, error_msg)
+						 end_timeval, max_time_drift,
+						 error_msg)
 	!= true) {
 	XLOG_ERROR("%s", error_msg.c_str());
 	return false;

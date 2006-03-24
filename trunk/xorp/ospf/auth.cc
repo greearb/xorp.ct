@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.9 2006/03/16 00:04:49 pavlin Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.10 2006/03/24 03:16:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -261,11 +261,13 @@ MD5AuthHandler::MD5Key::MD5Key(uint8_t		key_id,
 			       const string&	key,
 			       const TimeVal&	start_timeval,
 			       const TimeVal&	end_timeval,
+			       const TimeVal&	max_time_drift,
 			       XorpTimer	start_timer,
 			       XorpTimer	stop_timer)
     : _id(key_id),
       _start_timeval(start_timeval),
       _end_timeval(end_timeval),
+      _max_time_drift(max_time_drift),
       _is_persistent(false),
       _o_seqno(0),
       _start_timer(start_timer),
@@ -532,7 +534,7 @@ MD5AuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
 
     _eventloop.current_time(now);
 
-    MD5Key* key = best_key_at(now);
+    MD5Key* key = best_outbound_key(now);
 
     //
     // XXX: if no valid keys, then don't use any authentication
@@ -580,9 +582,10 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 			const string&	key,
 			const TimeVal&	start_timeval,
 			const TimeVal&	end_timeval,
+			const TimeVal&	max_time_drift,
 			string&		error_msg)
 {
-    TimeVal now;
+    TimeVal now, adj_timeval;
     XorpTimer start_timer, end_timer;
     string dummy_error_msg;
 
@@ -597,15 +600,27 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 	return false;
     }
 
-    if (start_timeval > now) {
+    // Adjust the time when we start using the key to accept messages
+    adj_timeval = start_timeval;
+    if (adj_timeval >= max_time_drift)
+	adj_timeval -= max_time_drift;
+    else
+	adj_timeval = TimeVal::ZERO();
+    if (adj_timeval > now) {
 	start_timer = _eventloop.new_oneoff_at(
-	    start_timeval,
+	    adj_timeval,
 	    callback(this, &MD5AuthHandler::key_start_cb, key_id));
     }
 
-    if (end_timeval != TimeVal::MAXIMUM()) {
+    // Adjust the time when we stop using the key to accept messages
+    adj_timeval = end_timeval;
+    if (TimeVal::MAXIMUM() - max_time_drift > adj_timeval)
+	adj_timeval += max_time_drift;
+    else
+	adj_timeval = TimeVal::MAXIMUM();
+    if (adj_timeval != TimeVal::MAXIMUM()) {
 	end_timer = _eventloop.new_oneoff_at(
-	    end_timeval,
+	    adj_timeval,
 	    callback(this, &MD5AuthHandler::key_stop_cb, key_id));
     }
 
@@ -627,7 +642,7 @@ MD5AuthHandler::add_key(uint8_t		key_id,
 
     // Add the new key to the appropriate chain
     MD5Key new_key = MD5Key(key_id, key, start_timeval, end_timeval,
-			    start_timer, end_timer);
+			    max_time_drift, start_timer, end_timer);
     if (start_timer.scheduled())
 	_invalid_key_chain.push_back(new_key);
     else
@@ -705,16 +720,16 @@ MD5AuthHandler::key_stop_cb(uint8_t key_id)
 }
 
 /**
- * Select the best key at a given time.
+ * Select the best key for outbound messages.
  *
  * The chosen key is the one with most recent start-time in the past.
  * If there is more than one key that matches the criteria, then select
  * the key with greatest ID.
  *
- * @param when the time to evaluate the keys against.
+ * @param now current time.
  */
 MD5AuthHandler::MD5Key*
-MD5AuthHandler::best_key_at(const TimeVal& when)
+MD5AuthHandler::best_outbound_key(const TimeVal& now)
 {
     MD5Key* best_key = NULL;
     KeyChain::iterator iter;
@@ -723,8 +738,10 @@ MD5AuthHandler::best_key_at(const TimeVal& when)
 	 iter != _valid_key_chain.end();
 	 ++iter) {
 	MD5Key* key = &(*iter);
-	if (! key->valid_at(when))
+
+	if (! key->valid_at(now))
 	    continue;
+
 	if (best_key == NULL) {
 	    best_key = key;
 	    continue;
@@ -824,6 +841,7 @@ bool
 Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
 				 const TimeVal& start_timeval,
 				 const TimeVal& end_timeval,
+				 const TimeVal& max_time_drift,
 				 string& error_msg)
 {
     MD5AuthHandler* md5_ah = NULL;
@@ -833,7 +851,7 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
 	md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
 	XLOG_ASSERT(md5_ah != NULL);
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			    error_msg) != true) {
+			    max_time_drift, error_msg) != true) {
 	    error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	    return (false);
 	}
@@ -843,7 +861,7 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
     // Create a new MD5 authentication handler and delete the old handler
     md5_ah = new MD5AuthHandler(_eventloop);
     if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
-			error_msg) != true) {
+			max_time_drift, error_msg) != true) {
 	error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
 	delete md5_ah;
 	return (false);

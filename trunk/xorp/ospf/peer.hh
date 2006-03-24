@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.122 2006/03/06 07:48:47 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.123 2006/03/24 03:16:56 pavlin Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -349,6 +349,7 @@ class PeerOut {
      * @param password phrase used for MD5 digest computation.
      * @param start_timeval start time when key becomes valid.
      * @param end_timeval end time when key becomes invalid.
+     * @param max_time_drift the maximum time drift among all routers.
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
@@ -356,6 +357,7 @@ class PeerOut {
 				    const string& password,
 				    const TimeVal& start_timeval,
 				    const TimeVal& end_timeval,
+				    const TimeVal& max_time_drift,
 				    string& error_msg);
 
     /**
@@ -979,12 +981,14 @@ class Peer {
      * @param password phrase used for MD5 digest computation.
      * @param start_timeval start time when key becomes valid.
      * @param end_timeval end time when key becomes invalid.
+     * @param max_time_drift the maximum time drift among all routers.
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
     bool set_md5_authentication_key(uint8_t key_id, const string& password,
 				    const TimeVal& start_timeval,
 				    const TimeVal& end_timeval,
+				    const TimeVal& max_time_drift,
 				    string& error_msg);
 
     /**

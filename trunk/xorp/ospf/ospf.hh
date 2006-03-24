@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.89 2006/03/11 03:01:24 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.90 2006/03/24 03:16:56 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -612,6 +612,7 @@ class Ospf {
      * @param password phrase used for MD5 digest computation.
      * @param start_timeval start time when key becomes valid.
      * @param end_timeval end time when key becomes invalid.
+     * @param max_time_drift the maximum time drift among all routers.
      * @param the error message (if error).
      * @return true on success, otherwise false.
      */
@@ -620,6 +621,7 @@ class Ospf {
 				    const string& password,
 				    const TimeVal& start_timeval,
 				    const TimeVal& end_timeval,
+				    const TimeVal& max_time_drift,
 				    string& error_msg);
 
     /**

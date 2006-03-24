@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.234 2006/03/20 10:24:06 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.235 2006/03/24 03:16:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -594,12 +594,13 @@ PeerOut<A>::delete_simple_authentication_key(OspfTypes::AreaID	area,
 
 template <typename A>
 bool
-PeerOut<A>::set_md5_authentication_key(OspfTypes::AreaID	area,
-				       uint8_t			key_id,
-				       const string&		password,
-				       const TimeVal&		start_timeval,
-				       const TimeVal&		end_timeval,
-				       string&			error_msg)
+PeerOut<A>::set_md5_authentication_key(OspfTypes::AreaID area,
+				       uint8_t		key_id,
+				       const string&	password,
+				       const TimeVal&	start_timeval,
+				       const TimeVal&	end_timeval,
+				       const TimeVal&	max_time_drift,
+				       string&		error_msg)
 {
     switch(_ospf.get_version()) {
     case OspfTypes::V2:
@@ -616,7 +617,7 @@ PeerOut<A>::set_md5_authentication_key(OspfTypes::AreaID	area,
 
     return _areas[area]->set_md5_authentication_key(key_id, password,
 						    start_timeval, end_timeval,
-						    error_msg);
+						    max_time_drift, error_msg);
 }
 
 template <typename A>
@@ -2726,11 +2727,13 @@ Peer<A>::set_md5_authentication_key(uint8_t		key_id,
 				    const string&	password,
 				    const TimeVal&	start_timeval,
 				    const TimeVal&	end_timeval,
+				    const TimeVal&	max_time_drift,
 				    string&		error_msg)
 {
     return get_auth_handler().set_md5_authentication_key(key_id, password,
 							 start_timeval,
 							 end_timeval,
+							 max_time_drift,
 							 error_msg);
 }
 
