@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.6 2006/03/09 10:45:00 atanu Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.7 2006/03/24 08:58:46 pavlin Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -133,7 +133,7 @@ protocols \{\\
 \>\>\>\>\>\>password: {\it text}\\
 \>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
 \>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
-\>\>\>\>\>\>max-time-drift-secs: {\it uint(0..65535)}\\
+\>\>\>\>\>\>max-time-drift: {\it uint(0..65535)}\\
 \>\>\>\>\>\}\\
 \>\>\>\>\}\\
 \>\>\>\}\\
@@ -170,7 +170,7 @@ xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=xx\=\kill
 \>\>\>\>\>\>\>\>password: {\it text}\\
 \>\>\>\>\>\>\>\>start-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
 \>\>\>\>\>\>\>\>end-time: {\it text(``YYYY-MM-DD.HH:MM'')}\\
-\>\>\>\>\>\>\>\>max-time-drift-secs: {\it uint(0..65535)}\\
+\>\>\>\>\>\>\>\>max-time-drift: {\it uint(0..65535)}\\
 \>\>\>\>\>\>\>\}\\
 \>\>\>\>\>\>\}\\
 \>\>\>\>\>\>passive: {\it text}\\
@@ -297,7 +297,7 @@ mutually-exclusive statements:
   \item{\tt end-time}: this specifies the end time when the key becomes
   inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
   then the key should never expire.
-  \item{\tt max-time-drift-secs}: this specifies the maximum time drift
+  \item{\tt max-time-drift}: this specifies the maximum time drift
   (in seconds) among all OSPF routers.  The allowed values are in the
   interval [0, 65535]. If the value is 65535, the time drift is
   unlimited. The purpose of this statement is to decide when to start
@@ -376,7 +376,7 @@ configuration statement above).
 %%   \item{\tt end-time}: this specifies the end time when the key becomes
 %%   inactive. The format is ``YYYY-MM-DD.HH:MM''. If it is empty,
 %%   then the key should never expire.
-%%   \item{\tt max-time-drift-secs}: this specifies the maximum time drift
+%%   \item{\tt max-time-drift}: this specifies the maximum time drift
 %%   (in seconds) among all OSPF routers.  The allowed values are in the
 %%   interval [0, 65535]. If the value is 65535, the time drift is
 %%   unlimited. The purpose of this statement is to decide when to start

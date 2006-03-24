@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.37 2006/03/23 18:52:32 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.38 2006/03/24 09:05:54 pavlin Exp $ */
 
 
 interfaces {
@@ -230,7 +230,7 @@ protocols {
 				password: "password";
 				start-time: "2006-01-01.12:00"
 				end-time: "2007-01-01.12:00"
-				max-time-drift-secs: 3600
+				max-time-drift: 3600
 			    }
 			}
 */

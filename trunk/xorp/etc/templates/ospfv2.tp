@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.48 2006/03/11 03:01:24 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.49 2006/03/24 08:20:08 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -46,7 +46,7 @@ protocols {
 			password:		txt	= "";
 			start-time:		txt	= "";
 			end-time:		txt	= "";
-			max-time-drift-secs:	u32	= 3600;
+			max-time-drift:		u32	= 3600;
 		    }
 		}
 	    }
@@ -72,7 +72,7 @@ protocols {
 				password:	txt	= "";
 				start-time:	txt	= "";
 				end-time:	txt	= "";
-				max-time-drift-secs:	u32	= 3600;
+				max-time-drift:	u32	= 3600;
 			    }
 			}
 			passive:		bool = false;
@@ -299,8 +299,8 @@ transmitted packets";
 		    md5 @ {
 			%help: short "Set MD5 authentication key";
 			%allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
-			%activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift_secs:u32=$(@.max-time-drift-secs)";
-			%update: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift_secs:u32=$(@.max-time-drift-secs)";
+			%activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
+			%update: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
 			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)";
 			password {
 			    %help: short "Set the authentication password";
@@ -311,8 +311,8 @@ transmitted packets";
 			end-time {
 			    %help: short "Set the authentication end time (YYYY-MM-DD.HH:MM)";
 			}
-			max-time-drift-secs {
-			    %help: short "Set the maximum time drift (in secs) among all routers";
+			max-time-drift {
+			    %help: short "Set the maximum time drift (in seconds) among all routers";
 			    %allow-range: $(@) "0" "65534" %help: "The maximum time drift (in seconds)";
 			    %allow-range: $(@) "65535" "65535" %help: "Unlimited time drift";
 			}
@@ -423,8 +423,8 @@ transmitted packets";
 			    md5 @ {
 				%help: short "Set MD5 authentication key";
 				%allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
-				%activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift_secs:u32=$(@.max-time-drift-secs)";
-				%update: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift_secs:u32=$(@.max-time-drift-secs)";
+				%activate: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
+				%update: xrl "$(ospf4.targetname)/ospfv2/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
 				%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)";
 				password {
 				    %help: short "Set the authentication password";
@@ -435,8 +435,8 @@ transmitted packets";
 				end-time {
 				    %help: short "Set the authentication end time (YYYY-MM-DD.HH:MM)";
 				}
-				max-time-drift-secs {
-				    %help: short "Set the maximum time drift (in secs) among all routers";
+				max-time-drift {
+				    %help: short "Set the maximum time drift (in seconds) among all routers";
 				    %allow-range: $(@) "0" "65534" %help: "The maximum time drift (in seconds)";
 				    %allow-range: $(@) "65535" "65535" %help: "Unlimited time drift";
 				}

@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.19 2006/03/11 03:01:25 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.20 2006/03/24 08:20:09 pavlin Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -218,7 +218,7 @@ interface ospfv2/0.1 {
      * @param password the authentication password.
      * @param start_time the authentication start time (YYYY-MM-DD.HH:MM).
      * @param end_time the authentication end time (YYYY-MM-DD.HH:MM).
-     * @param max_time_drift_secs the maximum time drift (in seconds) among
+     * @param max_time_drift the maximum time drift (in seconds) among
      * all routers. Allowed values are [0--65534] seconds or 65535 for
      * unlimited time drift.
      */
@@ -229,7 +229,7 @@ interface ospfv2/0.1 {
 					& password:txt			\
 					& start_time:txt		\
 					& end_time:txt			\
-					& max_time_drift_secs:u32
+					& max_time_drift:u32
 
     /**
      * Delete MD5 authentication key.

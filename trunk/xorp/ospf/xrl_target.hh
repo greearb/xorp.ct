@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.23 2006/03/11 03:01:24 pavlin Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.24 2006/03/24 08:20:09 pavlin Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -412,7 +412,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *
      *  @param end_time the authentication end time (YYYY-MM-DD.HH:MM).
      *
-     *  @param max_time_drift_secs the maximum time drift (in seconds) among
+     *  @param max_time_drift the maximum time drift (in seconds) among
      *  all routers. Allowed values are [0--65534] seconds or 65535 for
      *  unlimited time drift.
      */
@@ -425,7 +425,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	password,
 	const string&	start_time,
 	const string&	end_time,
-	const uint32_t&	max_time_drift_secs);
+	const uint32_t&	max_time_drift);
 
     /**
      *  Delete MD5 authentication key.

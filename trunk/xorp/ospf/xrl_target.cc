@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.33 2006/03/24 03:16:56 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.34 2006/03/24 08:20:09 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -709,20 +709,20 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     const string&	password,
     const string&	start_time,
     const string&	end_time,
-    const uint32_t&	max_time_drift_secs)
+    const uint32_t&	max_time_drift)
 {
     string error_msg;
     TimeVal start_timeval = TimeVal::ZERO();
     TimeVal end_timeval = TimeVal::MAXIMUM();
-    TimeVal max_time_drift = TimeVal::ZERO();
+    TimeVal max_time_drift_timeval = TimeVal::ZERO();
     OspfTypes::AreaID area_id = ntohl(area.addr());
 
     debug_msg("set_md5_authentication_key(): "
 	      "interface %s vif %s area %s key_id %u password %s "
-	      "start_time %s end_time %s max_time_drift_secs %u\n",
+	      "start_time %s end_time %s max_time_drift %u\n",
 	      ifname.c_str(), vifname.c_str(), pr_id(area_id).c_str(),
 	      key_id, password.c_str(), start_time.c_str(), end_time.c_str(),
-	      max_time_drift_secs);
+	      max_time_drift);
 
     //
     // Check the key ID
@@ -749,19 +749,19 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
 	}
     }
     // XXX: Allowed time drift seconds are [0--65534] and 65535 for infinity
-    if (max_time_drift_secs > 65535) {
+    if (max_time_drift > 65535) {
 	error_msg = c_format("Invalid maximum time drift seconds: %u "
 			     "(allowed range is [0--65535])",
-			     max_time_drift_secs);
+			     max_time_drift);
     }
-    if (max_time_drift_secs <= 65534)
-	max_time_drift = TimeVal(max_time_drift_secs, 0);
+    if (max_time_drift <= 65534)
+	max_time_drift_timeval = TimeVal(max_time_drift, 0);
     else
-	max_time_drift = TimeVal::MAXIMUM();
+	max_time_drift_timeval = TimeVal::MAXIMUM();
 
     if (!_ospf.set_md5_authentication_key(ifname, vifname, area_id, key_id,
 					  password, start_timeval, end_timeval,
-					  max_time_drift, error_msg)) {
+					  max_time_drift_timeval, error_msg)) {
 	error_msg = c_format("Failed to set MD5 authentication key: %s",
 			     error_msg.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
