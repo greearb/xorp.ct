@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.21 2006/02/14 23:39:04 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.22 2006/03/16 00:05:53 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -230,7 +230,9 @@ check_saved_md5()
 {
     EventLoop e;
     MD5AuthHandler mah(e);
-    mah.add_key(1, "bgp@icsi", 0, 0);
+    string dummy_error_msg;
+    mah.add_key(1, "bgp@icsi", TimeVal::ZERO(), TimeVal::MAXIMUM(),
+		dummy_error_msg);
 
     vector<uint8_t> pkt;
     for (uint32_t i = 0; i < sizeof(rip_packet); i++)
@@ -253,6 +255,8 @@ check_saved_md5()
 static int
 test_main()
 {
+    string dummy_error_msg;
+
     // Static sizing tests
     static_assert(sizeof(RipPacketHeader) == 4);
     static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
@@ -343,7 +347,8 @@ test_main()
 
     EventLoop e;
     MD5AuthHandler mah(e);
-    mah.add_key(1, "Hello World!", 0, 0);
+    mah.add_key(1, "Hello World!", TimeVal::ZERO(), TimeVal::MAXIMUM(),
+		dummy_error_msg);
     for (uint32_t n = 0; n < mah.max_routing_entries(); n++) {
 	if (build_auth_packet(pkt, mah, n)) {
 	    verbose_log("Failed to build MD5 authentication scheme packet "
@@ -393,8 +398,8 @@ test_main()
     //
     // Check removing the 1 MD5 key we have on ring works
     //
-    mah.remove_key(1);
-    if (mah.key_chain().size() != 0) {
+    mah.remove_key(1, dummy_error_msg);
+    if (! mah.empty()) {
 	verbose_log("Key removal failed\n");
 	return 1;
     }
@@ -406,8 +411,10 @@ test_main()
     e.current_time(now);
     uint32_t i;
     for (i = 0; i < 5; i++) {
-	mah.add_key(i, "testing123", now.sec(), now.sec() + i);
+	mah.add_key(i, "testing123", now, now + TimeVal(i, 0),
+		    dummy_error_msg);
     }
+    mah.add_key(i, "testing123", now, TimeVal::MAXIMUM(), dummy_error_msg);
 
     bool stop_eventloop = false;
     XorpTimer to = e.set_flag_after(TimeVal(i, 0), &stop_eventloop);
@@ -415,9 +422,9 @@ test_main()
 	e.run();
     }
 
-    if (mah.key_chain().size() != 1) {
+    if (mah.valid_key_chain().size() != 1) {
 	verbose_log("Bogus key count: expected 1 key left, have %u\n",
-		    XORP_UINT_CAST(mah.key_chain().size()));
+		    XORP_UINT_CAST(mah.valid_key_chain().size()));
 	return 1;
     }
 

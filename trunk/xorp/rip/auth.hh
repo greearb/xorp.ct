@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.16 2006/02/15 18:38:03 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.17 2006/03/16 00:05:48 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -35,10 +35,33 @@ class EventLoop;
  * Error during authentication set an error buffer that clients may
  * query using the error() method.
  */
-class AuthHandlerBase
-{
+class AuthHandlerBase {
 public:
+    /**
+     * Virtual destructor.
+     */
     virtual ~AuthHandlerBase();
+
+    /**
+     * Get name of authentication scheme.
+     */
+    virtual const char* name() const = 0;
+
+    /**
+     * Get number of routing entries used by authentication scheme at the
+     * head of the RIP packet.
+     *
+     * @return the number of routing entries used by the authentication scheme
+     * at the head of the RIP packet: 0 for unauthenticated packets, 1
+     * otherwise.
+     */
+    virtual uint32_t head_entries() const = 0;
+
+    /**
+     * Get maximum number of non-authentication scheme use routing entries
+     * in a RIP packet.
+     */
+    virtual uint32_t max_routing_entries() const = 0;
 
     /**
      * Inbound authentication method.
@@ -80,23 +103,6 @@ public:
 				       size_t&			n_routes) = 0;
 
     /**
-     * Get number of routing entries used by authentication scheme at the
-     * head of the RIP packet.  0 for unauthenticated packets, 1 otherwise.
-     */
-    virtual uint32_t head_entries() const = 0;
-
-    /**
-     * Get maximum number of non-authentication scheme use routing entries
-     * in a RIP packet.
-     */
-    virtual uint32_t max_routing_entries() const = 0;
-
-    /**
-     * Get name of authentication scheme.
-     */
-    virtual const char* name() const = 0;
-
-    /**
      * Get textual description of last error.
      */
     const string& error() const;
@@ -121,9 +127,50 @@ private:
  * @short RIPv2 Authentication handler when no authentication scheme is
  * employed.
  */
-class NullAuthHandler : public AuthHandlerBase
-{
+class NullAuthHandler : public AuthHandlerBase {
 public:
+    /**
+     * Get name of authentication scheme.
+     */
+    const char* name() const;
+
+    /**
+     * Get the method-specific name of the authentication scheme.
+     *
+     * @return the method-specific name of the authentication scheme.
+     */
+    static const char* auth_type_name();
+
+    /**
+     * Get number of routing entries used by authentication scheme at the
+     * head of the RIP packet.
+     *
+     * @return the number of routing entries used by the authentication scheme
+     * at the head of the RIP packet: 0 for unauthenticated packets, 1
+     * otherwise.
+     */
+    uint32_t head_entries() const;
+
+    /**
+     * Get maximum number of non-authentication scheme use routing entries
+     * in a RIP packet.
+     */
+    uint32_t max_routing_entries() const;
+
+    /**
+     * Inbound authentication method.
+     *
+     * @param packet pointer to first byte of RIP packet.
+     * @param packet_bytes number of bytes in RIP packet.
+     * @param entries_start output variable set to point to first
+     *        entry in packet.  Set to 0 if there are no entries, or
+     *        on authentication failure.
+     * @param n_entries number of entries in the packet.
+     * @param src_addr the source address of the packet.
+     * @param new_peer true if this is a new peer.
+     *
+     * @return true if packet passes authentication checks, false otherwise.
+     */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
@@ -131,25 +178,72 @@ public:
 			      const IPv4&			src_addr,
 			      bool				new_peer);
 
+    /**
+     * Outbound authentication method.
+     *
+     * Create a list of authenticated packets (one for each valid
+     * authentication key). Note that the original packet is also modified
+     * and authenticated with the first valid key.
+     *
+     * @param packet the RIP packet to authenticate.
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one for each valid authentication key).
+     * @param n_routes the return-by-reference number of routes in the packet.
+     * @return true if packet was successfully authenticated, false when
+     * no valid keys are present.
+     */
     bool authenticate_outbound(RipPacket<IPv4>&		packet,
 			       list<RipPacket<IPv4> *>&	auth_packets,
 			       size_t&			n_routes);
-
-    uint32_t head_entries() const;
-
-    uint32_t max_routing_entries() const;
-
-    const char* name() const;
-
-    static const char* auth_type_name();
 };
 
 /**
  * @short RIPv2 Authentication handler for plaintext scheme.
  */
-class PlaintextAuthHandler : public AuthHandlerBase
-{
+class PlaintextAuthHandler : public AuthHandlerBase {
 public:
+    /**
+     * Get name of authentication scheme.
+     */
+    const char* name() const;
+
+    /**
+     * Get the method-specific name of the authentication scheme.
+     *
+     * @return the method-specific name of the authentication scheme.
+     */
+    static const char* auth_type_name();
+
+    /**
+     * Get number of routing entries used by authentication scheme at the
+     * head of the RIP packet.
+     *
+     * @return the number of routing entries used by the authentication scheme
+     * at the head of the RIP packet: 0 for unauthenticated packets, 1
+     * otherwise.
+     */
+    uint32_t head_entries() const;
+
+    /**
+     * Get maximum number of non-authentication scheme use routing entries
+     * in a RIP packet.
+     */
+    uint32_t max_routing_entries() const;
+
+    /**
+     * Inbound authentication method.
+     *
+     * @param packet pointer to first byte of RIP packet.
+     * @param packet_bytes number of bytes in RIP packet.
+     * @param entries_start output variable set to point to first
+     *        entry in packet.  Set to 0 if there are no entries, or
+     *        on authentication failure.
+     * @param n_entries number of entries in the packet.
+     * @param src_addr the source address of the packet.
+     * @param new_peer true if this is a new peer.
+     *
+     * @return true if packet passes authentication checks, false otherwise.
+     */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
@@ -157,24 +251,40 @@ public:
 			      const IPv4&			src_addr,
 			      bool				new_peer);
 
+    /**
+     * Outbound authentication method.
+     *
+     * Create a list of authenticated packets (one for each valid
+     * authentication key). Note that the original packet is also modified
+     * and authenticated with the first valid key.
+     *
+     * @param packet the RIP packet to authenticate.
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one for each valid authentication key).
+     * @param n_routes the return-by-reference number of routes in the packet.
+     * @return true if packet was successfully authenticated, false when
+     * no valid keys are present.
+     */
     bool authenticate_outbound(RipPacket<IPv4>&		packet,
 			       list<RipPacket<IPv4> *>&	auth_packets,
 			       size_t&			n_routes);
 
-    uint32_t head_entries() const;
-
-    uint32_t max_routing_entries() const;
-
-    const char* name() const;
-
-    static const char* auth_type_name();
-
-    void set_key(const string& plaintext_key);
-
+    /**
+     * Get the authentication key.
+     *
+     * @return the authentication key.
+     */
     const string& key() const;
 
+    /**
+     * Set the authentication key.
+     *
+     * @param plaintext_key the plain-text key.
+     */
+    void set_key(const string& plaintext_key);
+
 protected:
-    string _key;
+    string	_key;
 };
 
 
@@ -185,23 +295,22 @@ protected:
  * authentication data to outbound RIP packets. The RIP MD5
  * authentication scheme is described in RFC 2082.
  */
-class MD5AuthHandler : public AuthHandlerBase
-{
+class MD5AuthHandler : public AuthHandlerBase {
 public:
     /**
-     * Structure to hold MD5 key information.
+     * Class to hold MD5 key information.
      */
-    struct MD5Key
-    {
-	static const uint32_t KEY_BYTES = 16;
-
+    class MD5Key {
+    public:
 	/**
 	 * Construct an MD5 Key.
 	 */
 	MD5Key(uint8_t		key_id,
 	       const string&	key,
-	       uint32_t		start_secs,
-	       XorpTimer	to) ;
+	       const TimeVal&	start_timeval,
+	       const TimeVal&	end_timeval,
+	       XorpTimer	start_timer,
+	       XorpTimer	end_timer);
 
 	/**
 	 * Get the ID associated with the key.
@@ -226,18 +335,24 @@ public:
 	/**
 	 * Get the start time of the key.
 	 */
-	inline uint32_t	start_secs() const		{ return _start_secs; }
+	const TimeVal&	start_timeval() const	{ return _start_timeval; }
 
 	/**
-	 * Get the end time of the key.  If the end time is the same as the
-	 * start time, the key is persistent and never expires.
+	 * Get the end time of the key.
 	 */
-	uint32_t	end_secs() const;
+	const TimeVal&	end_timeval() const	{ return _end_timeval; }
 
 	/**
 	 * Get indication of whether key is persistent.
 	 */
-	bool		persistent() const;
+	bool		is_persistent() const	{ return _is_persistent; }
+
+	/**
+	 * Set the flag whether the key is persistent.
+	 *
+	 * @param v if true the key is persistent.
+	 */
+	void		set_persistent(bool v) { _is_persistent = v; }
 
 	/**
 	 * Get whether ID matches a particular value (convenient for STL
@@ -247,9 +362,10 @@ public:
 
 	/**
 	 * Get key validity status of key at a particular time.
-	 * @param when_secs time in seconds since midnight 1 Jan 1970.
+	 *
+	 * @param when the time to test whether the key is valid.
 	 */
-	bool	 	valid_at(uint32_t when_secs) const;
+	bool	 	valid_at(const TimeVal& when) const;
 
 	/**
 	 * Reset the key for all sources.
@@ -300,34 +416,74 @@ public:
 	inline uint32_t next_seqno_out()		{ return _o_seqno++; }
 
     protected:
-	uint8_t   _id;
-	char	  _key_data[KEY_BYTES];
-	uint32_t  _start_secs;
-	map<IPv4, bool>	_pkts_recv;	// true if packets received
-	map<IPv4, uint32_t> _lr_seqno;	// last received seqno
-	uint32_t  _o_seqno;		// next outbound sequence number
-	XorpTimer _to;			// expiry timeout
+	static const uint32_t KEY_BYTES = 16;
+
+	uint8_t		_id;		// Key ID
+	char		_key_data[KEY_BYTES]; // Key data
+	TimeVal		_start_timeval;	// Start time of the key
+	TimeVal		_end_timeval;	// End time of the key
+	bool		_is_persistent;	// True if key is persistent
+	map<IPv4, bool>	_pkts_recv;	// True if packets received
+	map<IPv4, uint32_t> _lr_seqno;	// Last received seqno
+	uint32_t	_o_seqno;	// Next outbound sequence number
+	XorpTimer	_start_timer;	// Key start timer
+	XorpTimer	_stop_timer;	// Key stop timer
 
 	friend class MD5AuthHandler;
     };
 
     typedef list<MD5Key> KeyChain;
 
-    /**
-     * Get iterator pointing at first key valid at a particular time.
-     *
-     * @param when_secs time in seconds since midnight 1 Jan 1970.
-     */
-    KeyChain::const_iterator key_at(uint32_t when_secs) const;
-
 public:
     /**
      * Constructor
      *
-     * @param e the EventLoop instance to used for time reference.
+     * @param eventloop the EventLoop instance to used for time reference.
      */
-    MD5AuthHandler(EventLoop& e);
+    MD5AuthHandler(EventLoop& eventloop);
 
+    /**
+     * Get name of authentication scheme.
+     */
+    const char* name() const;
+
+    /**
+     * Get the method-specific name of the authentication scheme.
+     *
+     * @return the method-specific name of the authentication scheme.
+     */
+    static const char* auth_type_name();
+
+    /**
+     * Get number of routing entries used by authentication scheme at the
+     * head of the RIP packet.
+     *
+     * @return the number of routing entries used by the authentication scheme
+     * at the head of the RIP packet: 0 for unauthenticated packets, 1
+     * otherwise.
+     */
+    uint32_t head_entries() const;
+
+    /**
+     * Get maximum number of non-authentication scheme use routing entries
+     * in a RIP packet.
+     */
+    uint32_t max_routing_entries() const;
+
+    /**
+     * Inbound authentication method.
+     *
+     * @param packet pointer to first byte of RIP packet.
+     * @param packet_bytes number of bytes in RIP packet.
+     * @param entries_start output variable set to point to first
+     *        entry in packet.  Set to 0 if there are no entries, or
+     *        on authentication failure.
+     * @param n_entries number of entries in the packet.
+     * @param src_addr the source address of the packet.
+     * @param new_peer true if this is a new peer.
+     *
+     * @return true if packet passes authentication checks, false otherwise.
+     */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
 			      const PacketRouteEntry<IPv4>*&	entries_start,
@@ -335,58 +491,65 @@ public:
 			      const IPv4&			src_addr,
 			      bool				new_peer);
 
+    /**
+     * Outbound authentication method.
+     *
+     * Create a list of authenticated packets (one for each valid
+     * authentication key). Note that the original packet is also modified
+     * and authenticated with the first valid key.
+     *
+     * @param packet the RIP packet to authenticate.
+     * @param auth_packets a return-by-reference list with the
+     * authenticated RIP packets (one for each valid authentication key).
+     * @param n_routes the return-by-reference number of routes in the packet.
+     * @return true if packet was successfully authenticated, false when
+     * no valid keys are present.
+     */
     bool authenticate_outbound(RipPacket<IPv4>&		packet,
 			       list<RipPacket<IPv4> *>& auth_packets,
 			       size_t&			n_routes);
 
-    uint32_t head_entries() const;
-
-    uint32_t max_routing_entries() const;
-
-    const char* name() const;
-
-    static const char* auth_type_name();
-
     /**
-     * Add key to MD5 key chain.  If key already exists, it is updated with
-     * new settings.  If the start and end times are the same the key
-     * is treated as persistant and will not expire.
+     * Add a key to the MD5 key chain.
+     *
+     * If the key already exists, it is updated with the new settings.
      *
      * @param key_id unique ID associated with key.
      * @param key phrase used for MD5 digest computation.
-     * @param start_secs start time in seconds since midnight 1 Jan 1970.
-     * @param end_secs start time in seconds since midnight 1 Jan 1970.
-     *
+     * @param start_timeval start time when key becomes valid.
+     * @param end_timeval end time when key becomes invalid.
+     * @param error_msg the error message (if error).
      * @return true on success, false if end time is less than start time
      * or key has already expired.
      */
     bool add_key(uint8_t	key_id,
 		 const string&	key,
-		 uint32_t	start_secs,
-		 uint32_t	end_secs);
+		 const TimeVal&	start_timeval,
+		 const TimeVal&	end_timeval,
+		 string&	error_msg);
 
     /**
-     * Remove key from MD5 key chain.
+     * Remove a key from the MD5 key chain.
      *
      * @param key_id unique ID of key to be removed.
+     * @param error_msg the error message (if error).
      * @return true if the key was found and removed, otherwise false.
      */
-    bool remove_key(uint8_t key_id);
+    bool remove_key(uint8_t key_id, string& error_msg);
 
     /**
-     * A callback to remove key from MD5 key chain.
+     * A callback that a key from the MD5 key chain has become valid.
      *
-     * @param key_id unique ID of key to be removed.
+     * @param key_id unique ID of the key that has become valid.
      */
-    void remove_key_cb(uint8_t key_id) { remove_key(key_id); }
+    void key_start_cb(uint8_t key_id);
 
     /**
-     * Get currently active key.
+     * A callback that a key from the MD5 key chain has expired and is invalid.
      *
-     * @return key ID in range 0-255 if key exists,
-     * value outside valid range otherwise 256-65535.
+     * @param key_id unique ID of the key that has expired.
      */
-    uint16_t currently_active_key() const;
+    void key_stop_cb(uint8_t key_id);
 
     /**
      * Reset the keys for all sources.
@@ -394,23 +557,31 @@ public:
     void reset_keys();
 
     /**
-     * Get all keys managed by MD5AuthHandler.
+     * Get all valid keys managed by the MD5AuthHandler.
      *
-     * @return list of keys.
+     * @return list of all valid keys.
      */
-    inline const KeyChain& key_chain() const		{ return _key_chain; }
+    const KeyChain& valid_key_chain() const	{ return _valid_key_chain; }
 
-protected:
     /**
-     * Get iterator pointing at first key valid at a particular time.
+     * Get all invalid keys managed by the MD5AuthHandler.
      *
-     * @param when_secs time in seconds since midnight 1 Jan 1970.
+     * @return list of all invalid keys.
      */
-    KeyChain::iterator key_at(uint32_t when_secs);
+    const KeyChain& invalid_key_chain() const	{ return _invalid_key_chain; }
+
+    /**
+     * Test where the MD5AuthHandler contains any keys.
+     *
+     * @return if the MD5AuthHandler contains any keys, otherwise false.
+     */
+    bool empty() const;
 
 protected:
-    EventLoop&	_e;
-    KeyChain	_key_chain;
+    EventLoop&	_eventloop;		// The event loop
+    KeyChain	_valid_key_chain;	// The set of all valid keys
+    KeyChain	_invalid_key_chain;	// The set of all invalid keys
+    NullAuthHandler _null_handler;	// Null handler if no valid keys
 };
 
 #endif // __RIP_AUTH_HH__
