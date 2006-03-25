@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.17 2006/03/16 00:05:48 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.18 2006/03/24 03:03:57 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -46,6 +46,11 @@ public:
      * Get name of authentication scheme.
      */
     virtual const char* name() const = 0;
+
+    /**
+     * Reset the authentication state.
+     */
+    virtual void reset() = 0;
 
     /**
      * Get number of routing entries used by authentication scheme at the
@@ -142,6 +147,11 @@ public:
     static const char* auth_type_name();
 
     /**
+     * Reset the authentication state.
+     */
+    void reset();
+
+    /**
      * Get number of routing entries used by authentication scheme at the
      * head of the RIP packet.
      *
@@ -213,6 +223,11 @@ public:
      * @return the method-specific name of the authentication scheme.
      */
     static const char* auth_type_name();
+
+    /**
+     * Reset the authentication state.
+     */
+    void reset();
 
     /**
      * Get number of routing entries used by authentication scheme at the
@@ -453,6 +468,11 @@ public:
      * @return the method-specific name of the authentication scheme.
      */
     static const char* auth_type_name();
+
+    /**
+     * Reset the authentication state.
+     */
+    void reset();
 
     /**
      * Get number of routing entries used by authentication scheme at the

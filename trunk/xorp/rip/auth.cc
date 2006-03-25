@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.28 2006/03/24 03:03:57 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.29 2006/03/25 03:44:13 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -69,6 +69,11 @@ const char*
 NullAuthHandler::auth_type_name()
 {
     return "none";
+}
+
+void
+NullAuthHandler::reset()
+{
 }
 
 uint32_t
@@ -163,6 +168,11 @@ const char*
 PlaintextAuthHandler::auth_type_name()
 {
     return "simple";
+}
+
+void
+PlaintextAuthHandler::reset()
+{
 }
 
 uint32_t
@@ -427,6 +437,20 @@ const char*
 MD5AuthHandler::auth_type_name()
 {
     return "md5";
+}
+
+void
+MD5AuthHandler::reset()
+{
+    //
+    // XXX: if no valid keys, then don't use any authentication
+    //
+    if (_valid_key_chain.empty()) {
+	_null_handler.reset();
+	return;
+    }
+
+    reset_keys();
 }
 
 uint32_t
