@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_io.hh,v 1.9 2005/03/25 02:54:27 pavlin Exp $
+// $XORP: xorp/rip/port_io.hh,v 1.10 2006/03/16 00:05:50 pavlin Exp $
 
 #ifndef __RIP_PORT_IO_HH__
 #define __RIP_PORT_IO_HH__
@@ -109,7 +109,7 @@ public:
     /**
      * Set enabled status of I/O system.  The user object associated with
      * the I/O system will be notified through
-     * @ref PortIOBase<A>::port_io_enable_change() if the enabled state
+     * @ref PortIOBase<A>::port_io_enabled_change() if the enabled state
      * changes.
      *
      * @param en new enable state.
