@@ -14,15 +14,13 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.4 2005/11/05 18:01:45 bms Exp $"
+#ident "$XORP: xorp/libxorp/random.c,v 1.5 2006/03/16 00:04:31 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "libxorp/xorp.h"
-
-#include "random.h"
 
 #ifndef HAVE_RANDOM	/* This entire file is not needed if we have random() */
 
