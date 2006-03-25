@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/random.h,v 1.2 2005/08/01 15:07:32 bms Exp $
+ * $XORP: xorp/libxorp/random.h,v 1.3 2006/03/16 00:04:31 pavlin Exp $
  */
 
 #ifndef __LIBXORP_RANDOM_H__
@@ -23,6 +23,15 @@
 
 #ifdef __cplusplus
 extern "C" {
+#endif
+
+/*
+ * Define the maximum bound of the random() function
+ * as per 4.2BSD / SUSV2:
+ * http://www.opengroup.org/onlinepubs/007908799/xsh/initstate.html
+ */
+#ifndef RANDOM_MAX
+#define RANDOM_MAX	0x7FFFFFFF  /* 2^31 - 1 in 2's complement */
 #endif
 
 #ifndef HAVE_RANDOM
