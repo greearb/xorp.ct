@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.130 2006/03/16 00:03:30 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.131 2006/03/17 15:57:33 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1210,16 +1210,7 @@ BGPPeer::event_open(const XorpFd sock)
 	XLOG_INFO("%s rejecting connection: current state %s",
 		  this->str().c_str(),
 		  pretty_print_state(_state));
-
-#ifdef HOST_OS_WINDOWS
-	closesocket((SOCKET)sock);
-#else
-	if (-1 == ::close(sock)) {
-	    XLOG_WARNING("%s Close of incoming connection failed: %s",
-			 this->str().c_str(),
-			 strerror(errno));
-	}
-#endif
+	comm_sock_close(sock);
     }
 }
 
