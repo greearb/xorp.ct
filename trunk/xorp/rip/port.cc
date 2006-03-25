@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.56 2006/02/14 23:39:04 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.57 2006/03/16 00:05:49 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -591,6 +591,13 @@ void
 Port<A>::kill_peer_routes()
 {
     RouteDB<Addr>& rdb = _pm.system().route_db();
+
+#ifdef INSTANTIATE_IPV4
+    // Reset the authentication handler
+    PortAFSpecState<IPv4>& pss = af_state();
+    if (pss.auth_handler() != NULL)
+	pss.auth_handler()->reset();
+#endif
 
     typename PeerList::iterator pli = _peers.begin();
     while (pli != _peers.end()) {
