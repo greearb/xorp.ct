@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.10 2006/03/24 03:16:55 pavlin Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.11 2006/03/24 08:20:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -483,8 +483,7 @@ MD5AuthHandler::authenticate_inbound(const vector<uint8_t>& pkt,
 
     uint32_t last_seqno_recv = key->last_seqno_recv(src_addr);
     if (key->packets_received(src_addr) && !(new_peer && seqno == 0) &&
-	((seqno == last_seqno_recv) ||
-	 (seqno - last_seqno_recv >= 0x7fffffff))) {
+	(seqno - last_seqno_recv >= 0x7fffffff)) {
 	set_error(c_format("bad sequence number 0x%08x < 0x%08x",
 			   XORP_UINT_CAST(seqno),
 			   XORP_UINT_CAST(last_seqno_recv)));
