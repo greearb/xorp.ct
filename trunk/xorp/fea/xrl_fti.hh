@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_fti.hh,v 1.13 2005/03/25 02:53:15 pavlin Exp $
+// $XORP: xorp/fea/xrl_fti.hh,v 1.14 2006/03/16 00:04:03 pavlin Exp $
 
 #ifndef __FEA_XRL_FTI_HH__
 #define __FEA_XRL_FTI_HH__
@@ -116,42 +116,42 @@ public:
     /**
      * Add an IPv4 FIB client.
      *
-     * @param target_name the target name of the client to add.
+     * @param client_target_name the target name of the client to add.
      * @param send_updates whether updates should be sent.
      * @param send_resolves whether resolve requests should be sent.
      * @return the XRL command error.
      */
-    XrlCmdError add_fib_client4(const string& target_name,
+    XrlCmdError add_fib_client4(const string& client_target_name,
 				const bool send_updates,
 				const bool send_resolves);
 
     /**
      * Add an IPv6 FIB client.
      * 
-     * @param target_name the target name of the client to add.
+     * @param client_target_name the target name of the client to add.
      * @param send_updates whether updates should be sent.
      * @param send_resolves whether resolve requests should be sent.
      * @return the XRL command error.
      */
-    XrlCmdError add_fib_client6(const string& target_name,
+    XrlCmdError add_fib_client6(const string& client_target_name,
 				const bool send_updates,
 				const bool send_resolves);
 
     /**
      * Delete an IPv4 FIB client.
      * 
-     * @param target_name the target name of the client to delete.
+     * @param client_target_name the target name of the client to delete.
      * @return the XRL command error.
      */
-    XrlCmdError delete_fib_client4(const string& target_name);
+    XrlCmdError delete_fib_client4(const string& client_target_name);
 
     /**
      * Delete an IPv6 FIB client.
      * 
-     * @param target_name the target name of the client to delete.
+     * @param client_target_name the target name of the client to delete.
      * @return the XRL command error.
      */
-    XrlCmdError delete_fib_client6(const string& target_name);
+    XrlCmdError delete_fib_client6(const string& client_target_name);
 
     /**
      * Send an XRL to a FIB client to add an IPv4 route.

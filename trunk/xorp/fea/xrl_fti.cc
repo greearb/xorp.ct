@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.19 2005/10/28 08:40:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_fti.cc,v 1.20 2006/03/16 00:04:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -119,20 +119,20 @@ XrlFtiTransactionManager::process_fib_changes(const list<Fte6>& fte_list)
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client4(const string& target_name,
+XrlFtiTransactionManager::add_fib_client4(const string& client_target_name,
 	const bool send_updates, const bool send_resolves)
 {
     // Test if we have this client already
-    if (_fib_clients4.find(target_name) != _fib_clients4.end()) {
+    if (_fib_clients4.find(client_target_name) != _fib_clients4.end()) {
 	string error_msg = c_format("Target %s is already an IPv4 FIB client",
-				    target_name.c_str());
+				    client_target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // Add the client
-    _fib_clients4.insert(make_pair(target_name,
-				   FibClient4(target_name, *this)));
-    FibClient4& fib_client = _fib_clients4.find(target_name)->second;
+    _fib_clients4.insert(make_pair(client_target_name,
+				   FibClient4(client_target_name, *this)));
+    FibClient4& fib_client = _fib_clients4.find(client_target_name)->second;
 
     fib_client.set_send_updates(send_updates);
     fib_client.set_send_resolves(send_resolves);
@@ -149,20 +149,20 @@ XrlFtiTransactionManager::add_fib_client4(const string& target_name,
 }
 
 XrlCmdError
-XrlFtiTransactionManager::add_fib_client6(const string& target_name,
+XrlFtiTransactionManager::add_fib_client6(const string& client_target_name,
 	const bool send_updates, const bool send_resolves)
 {
     // Test if we have this client already
-    if (_fib_clients6.find(target_name) != _fib_clients6.end()) {
+    if (_fib_clients6.find(client_target_name) != _fib_clients6.end()) {
 	string error_msg = c_format("Target %s is already an IPv6 FIB client",
-				    target_name.c_str());
+				    client_target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
     // Add the client
-    _fib_clients6.insert(make_pair(target_name,
-				   FibClient6(target_name, *this)));
-    FibClient6& fib_client = _fib_clients6.find(target_name)->second;
+    _fib_clients6.insert(make_pair(client_target_name,
+				   FibClient6(client_target_name, *this)));
+    FibClient6& fib_client = _fib_clients6.find(client_target_name)->second;
 
     fib_client.set_send_updates(send_updates);
     fib_client.set_send_resolves(send_resolves);
@@ -179,14 +179,14 @@ XrlFtiTransactionManager::add_fib_client6(const string& target_name,
 }
 
 XrlCmdError
-XrlFtiTransactionManager::delete_fib_client4(const string& target_name)
+XrlFtiTransactionManager::delete_fib_client4(const string& client_target_name)
 {
     map<string, FibClient4>::iterator iter;
 
-    iter = _fib_clients4.find(target_name);
+    iter = _fib_clients4.find(client_target_name);
     if (iter == _fib_clients4.end()) {
 	string error_msg = c_format("Target %s is not an IPv4 FIB client",
-				    target_name.c_str());
+				    client_target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 
@@ -196,14 +196,14 @@ XrlFtiTransactionManager::delete_fib_client4(const string& target_name)
 }
 
 XrlCmdError
-XrlFtiTransactionManager::delete_fib_client6(const string& target_name)
+XrlFtiTransactionManager::delete_fib_client6(const string& client_target_name)
 {
     map<string, FibClient6>::iterator iter;
 
-    iter = _fib_clients6.find(target_name);
+    iter = _fib_clients6.find(client_target_name);
     if (iter == _fib_clients6.end()) {
 	string error_msg = c_format("Target %s is not an IPv6 FIB client",
-				    target_name.c_str());
+				    client_target_name.c_str());
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
 

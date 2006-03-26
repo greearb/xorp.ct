@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.78 2005/12/22 12:18:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.79 2006/03/16 00:04:05 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -509,27 +509,29 @@ XrlFeaTarget::fea_click_0_1_set_user_click_config_generator_file(
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_add_fib_client4(
     // Input values,
-    const string&	target_name,
+    const string&	client_target_name,
     const bool&		send_updates,
     const bool&		send_resolves)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    return _xftm.add_fib_client4(target_name, send_updates, send_resolves);
+    return _xftm.add_fib_client4(client_target_name, send_updates,
+				 send_resolves);
 }
 
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_add_fib_client6(
     // Input values,
-    const string&	target_name,
+    const string&	client_target_name,
     const bool&		send_updates,
     const bool&		send_resolves)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    return _xftm.add_fib_client6(target_name, send_updates, send_resolves);
+    return _xftm.add_fib_client6(client_target_name, send_updates,
+				 send_resolves);
 }
 
 /**
@@ -540,23 +542,23 @@ XrlFeaTarget::fea_fib_0_1_add_fib_client6(
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_delete_fib_client4(
     // Input values,
-    const string&	target_name)
+    const string&	client_target_name)
 {
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
-    return _xftm.delete_fib_client4(target_name);
+    return _xftm.delete_fib_client4(client_target_name);
 }
 
 XrlCmdError
 XrlFeaTarget::fea_fib_0_1_delete_fib_client6(
     // Input values,
-    const string&	target_name)
+    const string&	client_target_name)
 {
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
-    return _xftm.delete_fib_client6(target_name);
+    return _xftm.delete_fib_client6(client_target_name);
 }
 
 XrlCmdError
