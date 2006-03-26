@@ -113,8 +113,6 @@ install_sh = @install_sh@
 
 # FEA FIB Client Interface
 
-# FEA Packet ACL (formerly Firewall) Interface
-
 # FEA Interface Manager Client Interface
 
 # FEA Interface Manager Mirror Interface
@@ -152,6 +150,8 @@ install_sh = @install_sh@
 # OSPF V2 Interface
 
 # OSPF V3 Interface
+
+# FEA Packet ACL (formerly Firewall) Interface
 
 # PIM Interface
 
@@ -206,7 +206,7 @@ install_sh = @install_sh@
 #
 # Sample Test Client Interface
 #
-noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la libclimanagerxif.la libcliprocessorxif.la libcommonxif.la libcoordxif.la libdatainxif.la libfeaclickxif.la libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la libpacketaclxif.la libfeaifmgrclientxif.la libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la libfib2mribxif.la libftixif.la libfearawpkt4.la libfearawpkt4client.la libfearawpkt6.la libfearawpkt6client.la libfinderxif.la libfindereventnotifierxif.la libfindereventobserverxif.la libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la libmld6igmpxif.la libmld6igmpclientxif.la libospfv2xif.la libospfv3xif.la libpimxif.la libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la libredist4xif.la libredist6xif.la libredisttransaction4xif.la libredisttransaction6xif.la libribxif.la libribclientxif.la libripxif.la libripngxif.la librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la libsocket4locatorxif.la libsocket4userxif.la libsocket6xif.la libsocket6locatorxif.la libsocket6userxif.la libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la libtestxif.la
+noinst_LTLIBRARIES = libbgpmibtrapsxif.la libbgpxif.la libclimanagerxif.la libcliprocessorxif.la libcommonxif.la libcoordxif.la libdatainxif.la libfeaclickxif.la libfeaifmgrxif.la libfeafibxif.la libfeafibclientxif.la libfeaifmgrclientxif.la libfeaifmgrmirrorxif.la libfeaifmgrreplicatorxif.la libfib2mribxif.la libftixif.la libfearawpkt4.la libfearawpkt4client.la libfearawpkt6.la libfearawpkt6client.la libfinderxif.la libfindereventnotifierxif.la libfindereventobserverxif.la libfinderclientxif.la libmfeaxif.la libmfeaclientxif.la libmld6igmpxif.la libmld6igmpclientxif.la libospfv2xif.la libospfv3xif.la libpacketaclxif.la libpimxif.la libpolicyxif.la libpolicybackendxif.la libpolicyredist4xif.la libpolicyredist6xif.la libprofilexif.la libprofileclientxif.la libredist4xif.la libredist6xif.la libredisttransaction4xif.la libredisttransaction6xif.la libribxif.la libribclientxif.la libripxif.la libripngxif.la librtrmgrxif.la librtrmgr_clientxif.la libsocket4xif.la libsocket4locatorxif.la libsocket4userxif.la libsocket6xif.la libsocket6locatorxif.la libsocket6userxif.la libstaticroutesxif.la libtestpeerxif.la libtestxrlsxif.la libxorpifmibxif.la libtestxif.la
 libbgpmibtrapsxif_la_SOURCES = bgp_mib_traps_xif.hh bgp_mib_traps_xif.cc
 libbgpxif_la_SOURCES = bgp_xif.hh bgp_xif.cc
 libclimanagerxif_la_SOURCES = cli_manager_xif.hh cli_manager_xif.cc
@@ -218,7 +218,6 @@ libfeaclickxif_la_SOURCES = fea_click_xif.hh fea_click_xif.cc
 libfeaifmgrxif_la_SOURCES = fea_ifmgr_xif.hh fea_ifmgr_xif.cc
 libfeafibxif_la_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
 libfeafibclientxif_la_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
-libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 libfeaifmgrclientxif_la_SOURCES = fea_ifmgr_client_xif.hh fea_ifmgr_client_xif.cc
 libfeaifmgrmirrorxif_la_SOURCES = fea_ifmgr_mirror_xif.hh fea_ifmgr_mirror_xif.cc
 libfeaifmgrreplicatorxif_la_SOURCES = fea_ifmgr_replicator_xif.hh fea_ifmgr_replicator_xif.cc
@@ -238,6 +237,7 @@ libmld6igmpxif_la_SOURCES = mld6igmp_xif.hh mld6igmp_xif.cc
 libmld6igmpclientxif_la_SOURCES = mld6igmp_client_xif.hh mld6igmp_client_xif.cc
 libospfv2xif_la_SOURCES = ospfv2_xif.hh ospfv2_xif.cc
 libospfv3xif_la_SOURCES = ospfv3_xif.hh ospfv3_xif.cc
+libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 libpimxif_la_SOURCES = pim_xif.hh pim_xif.cc
 libpolicyxif_la_SOURCES = policy_xif.hh policy_xif.cc
 libpolicybackendxif_la_SOURCES = policy_backend_xif.hh policy_backend_xif.cc

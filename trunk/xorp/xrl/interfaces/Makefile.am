@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.30 2004/12/28 09:49:14 atanu Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.31 2006/03/17 11:46:01 pavlin Exp $
 ##
 
 ###############################################################################
@@ -50,10 +50,6 @@ libfeafibxif_la_SOURCES = fea_fib_xif.hh fea_fib_xif.cc
 # FEA FIB Client Interface
 noinst_LTLIBRARIES += libfeafibclientxif.la
 libfeafibclientxif_la_SOURCES = fea_fib_client_xif.hh fea_fib_client_xif.cc
-
-# FEA Packet ACL (formerly Firewall) Interface
-noinst_LTLIBRARIES += libpacketaclxif.la
-libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 
 # FEA Interface Manager Client Interface
 noinst_LTLIBRARIES += libfeaifmgrclientxif.la
@@ -139,6 +135,10 @@ libospfv2xif_la_SOURCES = ospfv2_xif.hh ospfv2_xif.cc
 # OSPF V3 Interface
 noinst_LTLIBRARIES += libospfv3xif.la
 libospfv3xif_la_SOURCES = ospfv3_xif.hh ospfv3_xif.cc
+
+# FEA Packet ACL (formerly Firewall) Interface
+noinst_LTLIBRARIES += libpacketaclxif.la
+libpacketaclxif_la_SOURCES = packet_acl_xif.hh packet_acl_xif.cc
 
 # PIM Interface
 noinst_LTLIBRARIES += libpimxif.la
