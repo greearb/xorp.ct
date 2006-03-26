@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/ospf.tex,v 1.7 2006/03/24 08:58:46 pavlin Exp $
+% $XORP: xorp/docs/user_manual/ospf.tex,v 1.8 2006/03/24 20:02:47 pavlin Exp $
 % 
 
 \chapter{OSPFv2 and OSPFv3}
@@ -311,6 +311,12 @@ mutually-exclusive statements:
 \end{description}
 
 \end{description}
+
+If there are multiple configured keys, among the keys that are valid
+for message generation, the one with the most recent {\stt start-time}
+(and the largest key ID as a tie breaker) would be used to generate the
+messages.
+
 \end{description}
 \end{description}
 
