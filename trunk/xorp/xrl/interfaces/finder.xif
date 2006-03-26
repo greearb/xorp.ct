@@ -7,7 +7,7 @@ interface finder/0.2 {
 	   * Finder to respond to queries about the client.
 	   *
 	   * Fails if instance_name is already registered, or another instance
-	   * of the same class is registered as a singleton. The target_name
+	   * of the same class is registered as a singleton. The client
 	   * must support the finder_client interface in order to be
 	   * able to process messages from the finder.
 	   */
