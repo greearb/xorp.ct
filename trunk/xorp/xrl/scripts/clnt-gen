@@ -28,8 +28,8 @@ def kdoc_comment(method):
     if kdoc_source == "":
         return ""
     kdt = Xif.kdoc.parse_kdoc_comment(kdoc_source)
-    kdt.add_kdoc_param("tgt_name", "Xrl Target name")
-    params = ["tgt_name"]
+    kdt.add_kdoc_param("dst_xrl_target_name", "Destination Xrl Target name")
+    params = ["dst_xrl_target_name"]
     for a in method.args():
         params.append(a.name())
 
@@ -46,7 +46,7 @@ def declare_send_xrl(method_no, method):
         % (1 + len(rtypes), joining_csv(rtypes), cb_name)
 
     s += kdoc_comment(method) + "\n"
-    atypes = ["\n\tconst char*\ttarget_name"]
+    atypes = ["\n\tconst char*\tdst_xrl_target_name"]
     for a in method.args():
         atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
     atypes.append("\n\tconst %s&\tcb" % cb_name)
@@ -56,14 +56,14 @@ def declare_send_xrl(method_no, method):
 
 def implement_send_xrl(cls, method_no, method, ifqname):
     cb_name = "%sCB" % (caps_cpp_classname(method.name()))
-    atypes = ["\n\tconst char*\tthe_tgt"]
+    atypes = ["\n\tconst char*\tdst_xrl_target_name"]
     for a in method.args():
         atypes.append("\n\tconst %s&\t%s" % (a.cpp_type(), a.name()))
     atypes.append("\n\tconst %s&\tcb" % cb_name)
     s = "\nbool\n%s::send_%s(%s\n)\n{\n" \
         % (cls, cpp_name(method.name()), csv(atypes))
 
-    s += "    Xrl x(the_tgt, \"%s\");\n" % ifqname
+    s += "    Xrl x(dst_xrl_target_name, \"%s\");\n" % ifqname
     for a in method.args():
         s += "    x.args().add(\"%s\", %s);\n" % (a.name(), a.name())
     s += "    return _sender->send(x, callback(this, &%s::unmarshall_%s, cb));\n" % (cls, method.name())
