@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.14 2006/03/09 02:11:58 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.15 2006/03/09 02:17:56 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -309,7 +309,7 @@ public:
      *
      *  Add/replace/delete a static route.
      *
-     *  @param tgt_name Xrl Target name
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
      *
      *  @param unicast if true, then the route would be used for unicast
      *  routing.
@@ -325,7 +325,7 @@ public:
      *  @param metric the metric distance for this route.
      */
     bool send_add_route4(
-	const char*	target_name,
+	const char*	dst_xrl_target_name,
 	const bool&	unicast,
 	const bool&	multicast,
 	const IPv4Net&	network,
@@ -1118,7 +1118,7 @@ public:
      *
      *  Add/replace/delete a route.
      *
-     *  @param tgt_name Xrl Target name
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
      *  @param protocol the name of the protocol this route comes from.
      *  @param unicast true if the route is for the unicast RIB.
      *  @param multicast true if the route is for the multicast RIB.
@@ -1129,7 +1129,7 @@ public:
      *  @param policytags a set of policy tags used for redistribution.
      */
     bool send_add_route4(
-	const char*	target_name,
+	const char*	dst_xrl_target_name,
 	const string&	protocol,
 	const bool&	unicast,
 	const bool&	multicast,
@@ -1147,13 +1147,13 @@ e4CB;
      *
      *  Lookup nexthop.
      *
-     *  @param tgt_name Xrl Target name
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
      *  @param addr address to lookup.
      *  @param unicast look in unicast RIB.
      *  @param multicast look in multicast RIB.
      */
     bool send_lookup_route_by_dest4(
-        const char*     target_name,
+        const char*     dst_xrl_target_name,
         const IPv4&     addr,
         const bool&     unicast,
         const bool&     multicast,

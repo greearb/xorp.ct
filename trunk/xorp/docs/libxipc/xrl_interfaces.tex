@@ -221,14 +221,14 @@ public:
     /**
      *  Send Xrl intended to:
      *
-     *  Get greeting
+     *  Get greeting.
      *
-     *  @param tgt_name Xrl Target name
+     *  @param dst_xrl_target_name the Xrl target name of the destination.
      *
-     *  @param greeting_num index of greeting
+     *  @param greeting_num index of greeting.
      */
     void send_get_greeting(
-        const char*     target_name,
+        const char*     dst_xrl_target_name,
         const int32_t&  greeting_num,
         const CB3&      cb
     );
