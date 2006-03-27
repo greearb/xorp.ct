@@ -28,7 +28,7 @@ def kdoc_comment(method):
     if kdoc_source == "":
         return ""
     kdt = Xif.kdoc.parse_kdoc_comment(kdoc_source)
-    kdt.add_kdoc_param("dst_xrl_target_name", "Destination Xrl Target name")
+    kdt.add_kdoc_param("dst_xrl_target_name", "the Xrl target name of the destination.")
     params = ["dst_xrl_target_name"]
     for a in method.args():
         params.append(a.name())
