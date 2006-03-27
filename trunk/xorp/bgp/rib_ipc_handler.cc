@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.71 2006/02/16 04:08:50 atanu Exp $"
+#ident "$XORP: xorp/bgp/rib_ipc_handler.cc,v 1.72 2006/03/16 00:03:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -478,7 +478,7 @@ XrlQueue<A>::XrlQueue(RibIpcHandler& rib_ipc_handler,
 		      XrlStdRouter& xrl_router, BGPMain& bgp)
     : _rib_ipc_handler(rib_ipc_handler),
       _xrl_router(xrl_router), _bgp(bgp),
-      _flying(0)
+      _flying(0), _flow_controlled(false)
 {
 }
 
@@ -565,7 +565,7 @@ XrlQueue<A>::start()
     if (busy())
 	return;
 #else
-    if (maximum_number_inflight())
+    if (flow_controlled())
 	return;
 #endif
 
@@ -597,7 +597,7 @@ XrlQueue<A>::start()
 	if (sent) {
 	    _flying++;
 	    _xrl_queue.pop_front();
-	    if (maximum_number_inflight())
+	    if (flow_controlled())
 		return;
  	    continue;
 	}

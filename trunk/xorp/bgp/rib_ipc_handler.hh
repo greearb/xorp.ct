@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.41 2006/03/16 00:03:32 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.42 2006/03/27 01:56:00 pavlin Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -45,8 +45,11 @@ public:
 
     bool busy();
 private:
-    static const size_t WINDOW = 100;	// Maximum number of XRLs
-					// allowed in flight.
+    static const size_t XRL_HIWAT = 100;	// Maximum number of XRLs
+						// allowed in flight.
+    static const size_t XRL_LOWAT = 10;		// Low watermark for XRL
+						// in-flight flow control
+						// hysteresis.
 
     RibIpcHandler &_rib_ipc_handler;
     XrlStdRouter &_xrl_router;
@@ -65,12 +68,17 @@ private:
 
     deque <Queued> _xrl_queue;
     size_t _flying; //XRLs currently in flight
+    bool _flow_controlled;
 
     /**
-     * Maximum number in flight
+     * Flow control hysteresis
      */
-    inline bool maximum_number_inflight() const {
-	return _flying >= WINDOW;
+    inline bool flow_controlled() {
+	if (_flying >= XRL_HIWAT)
+	    _flow_controlled = true;
+	else if (_flying <= XRL_LOWAT)
+	    _flow_controlled = false;
+	return _flow_controlled;
     }
 
     /**
