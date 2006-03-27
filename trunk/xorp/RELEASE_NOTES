@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.103 2006/03/24 17:51:23 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.104 2006/03/24 20:02:47 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -20,6 +20,17 @@ Release 1.3 (2006/??/??)
       It is used to set the maximum time drift (in seconds) among all
       OSPF routers. The allowed values are in the range [0--65535]. If
       the value is 65535, the time drift is unlimited.
+
+    - The following statements for configuring static routes have been
+      deprecated:
+      route4, route6, interface-route4, interface-route6, mrib-route4,
+      mrib-route6, mrib-interface-route4, mrib-interface-route6.
+
+      The new replacement statements are:
+      route, interface-route, mrib-route, mrib-interface-route.
+
+      Each of the new statements can be used to configure either IPv4Net
+      or IPv6Net route.
 
   LIBXORP:
     - 
