@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.21 2005/03/25 02:54:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_redist.cc,v 1.22 2006/03/16 00:05:39 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -44,8 +44,12 @@ RedistOutput<A>::~RedistOutput()
 // ----------------------------------------------------------------------------
 // Redistributor<A>
 
-template <typename A>
-const IPNet<A> Redistributor<A>::NO_LAST_NET(A::ALL_ONES(), A::ADDR_BITLEN);
+template <>
+const IPv4Net Redistributor<IPv4>::NO_LAST_NET(IPv4::ALL_ONES(),
+					       IPv4::ADDR_BITLEN);
+template <>
+const IPv6Net Redistributor<IPv6>::NO_LAST_NET(IPv6::ALL_ONES(),
+					       IPv6::ADDR_BITLEN);
 
 template <typename A>
 Redistributor<A>::Redistributor(EventLoop& 	e,
