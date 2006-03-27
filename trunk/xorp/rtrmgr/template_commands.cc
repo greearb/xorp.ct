@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.66 2006/03/16 00:06:02 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/template_commands.cc,v 1.67 2006/03/24 01:29:00 pavlin Exp $"
 
 #include <list>
 #include "rtrmgr_module.h"
@@ -507,19 +507,17 @@ XrlAction::execute(const MasterConfigTreeNode& ctn,
 	expanded_cmd.push_back(word);
 
     // Go through the expanded version and copy to an array
-    string args[expanded_cmd.size()];
-    size_t words = 0;
+    vector<string> args;
     for (iter = expanded_cmd.begin(); iter != expanded_cmd.end(); ++iter) {
-	args[words] = *iter;
-	++words;
+	args.push_back(*iter);
     }
-    if (words == 0)
+    if (args.empty())
 	return (XORP_ERROR);
 
     // Now we're ready to begin...
     int result;
     if (args[0] == "xrl") {
-	if (words < 2) {
+	if (args.size() < 2) {
 	    string err = c_format("XRL command is missing the XRL on node %s",
 				  ctn.path().c_str());
 	    XLOG_WARNING("%s", err.c_str());
@@ -1124,19 +1122,17 @@ ProgramAction::execute(const MasterConfigTreeNode&	ctn,
 	expanded_cmd.push_back(word);
 
     // Go through the expanded version and copy to an array
-    string args[expanded_cmd.size()];
-    size_t words = 0;
+    vector<string> args;
     for (iter = expanded_cmd.begin(); iter != expanded_cmd.end(); ++iter) {
-	args[words] = *iter;
-	++words;
+	args.push_back(*iter);
     }
-    if (words == 0)
+    if (args.empty())
 	return (XORP_ERROR);
 
     // Now we're ready to begin...
     int result;
     if (args[0] == "program") {
-	if (words < 2) {
+	if (args.size() < 2) {
 	    string err = c_format("Program command is missing the program "
 				  "on node %s",
 				  ctn.path().c_str());
