@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.39 2005/10/10 04:50:49 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.40 2006/03/16 00:03:56 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -302,7 +302,7 @@ private:
     virtual int add_interface(const string& ifname,
 			      uint32_t if_index,
 			      string& error_msg);
-    virtual int add_vif(const string& vifname,
+    virtual int add_vif(const string& ifname,
 			const string& vifname,
 			uint32_t if_index,
 			string& error_msg);
@@ -384,7 +384,7 @@ private:
     virtual int add_interface(const string& ifname,
 			      uint32_t if_index,
 			      string& error_msg);
-    virtual int add_vif(const string& vifname,
+    virtual int add_vif(const string& ifname,
 			const string& vifname,
 			uint32_t if_index,
 			string& error_msg);
@@ -489,7 +489,7 @@ private:
     virtual int add_interface(const string& ifname,
 			      uint32_t if_index,
 			      string& error_msg);
-    virtual int add_vif(const string& vifname,
+    virtual int add_vif(const string& ifname,
 			const string& vifname,
 			uint32_t if_index,
 			string& error_msg);
@@ -599,7 +599,7 @@ private:
     virtual int add_interface(const string& ifname,
 			      uint32_t if_index,
 			      string& error_msg);
-    virtual int add_vif(const string& vifname,
+    virtual int add_vif(const string& ifname,
 			const string& vifname,
 			uint32_t if_index,
 			string& error_msg);
@@ -733,7 +733,7 @@ private:
     virtual int add_interface(const string& ifname,
 			      uint32_t if_index,
 			      string& error_msg);
-    virtual int add_vif(const string& vifname,
+    virtual int add_vif(const string& ifname,
 			const string& vifname,
 			uint32_t if_index,
 			string& error_msg);
