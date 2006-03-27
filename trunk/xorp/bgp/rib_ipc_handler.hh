@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.40 2006/02/07 22:16:56 bms Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.41 2006/03/16 00:03:32 pavlin Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -117,7 +117,7 @@ public:
 		      const SubnetRoute<IPv4> &new_rt, bool new_ibgp, 
 		      Safi safi);
     int replace_route(const SubnetRoute<IPv6> &old_rt, bool old_ibgp, 
-		      const SubnetRoute<IPv6> &new_rt, bool old_ibgp, 
+		      const SubnetRoute<IPv6> &new_rt, bool new_ibgp, 
 		      Safi safi);
     int delete_route(const SubnetRoute<IPv4> &rt, bool ibgp, Safi safi);
     int delete_route(const SubnetRoute<IPv6> &rt, bool ibgp, Safi safi);
