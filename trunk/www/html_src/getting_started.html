@@ -319,20 +319,20 @@ reverse-path information by multicast routing protocols such as PIM-SM.
 <PRE>
 protocols {
     static {
-	route4 10.20.0.0/16 {
+	route 10.20.0.0/16 {
 	    next-hop: 10.10.10.20
 	    metric: 1
 	}
-	mrib-route4 10.20.0.0/16 {
+	mrib-route 10.20.0.0/16 {
 	    next-hop: 10.10.10.30
 	    metric: 1
 	}
 /*
-	route6 20:20:20:20::/64 {
+	route 20:20:20:20::/64 {
 	    next-hop: 10:10:10:10:10:10:10:20
 	    metric: 1
 	}
-	mrib-route6 20:20:20:20::/64 {
+	mrib-route 20:20:20:20::/64 {
 	    next-hop: 10:10:10:10:10:10:10:30
 	    metric: 1
 	}
@@ -340,6 +340,10 @@ protocols {
     }
 }
 </PRE>
+
+<P><U>Note</U>: Prior to XORP Release-1.3, the "route4" and "route6"
+statements were used instead of "route". Also, "mrib-route4" and "mrib-route6"
+statements were used instead of "mrib-route".
 
 <H4>Routing Information Protocol</H4>
 
