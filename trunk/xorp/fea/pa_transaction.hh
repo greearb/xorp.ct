@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_transaction.hh,v 1.2 2005/03/25 02:53:13 pavlin Exp $
+// $XORP: xorp/fea/pa_transaction.hh,v 1.3 2006/03/16 00:04:00 pavlin Exp $
 
 #ifndef __FEA_PA_TRANSACTION_HH__
 #define __FEA_PA_TRANSACTION_HH__
@@ -223,7 +223,7 @@ protected:
     struct PaTransaction {
     public:
 	PaTransaction(const PaSnapshot4* sn4,
-		      const PaBackend::Snapshot4* bsn4);
+		      const PaBackend::Snapshot4Base* bsn4);
 	~PaTransaction();
 
 	inline const PaSnapshot4* snap4() const { return _snap4; }
@@ -231,9 +231,9 @@ protected:
 	inline void set_snap4(const PaSnapshot4* sn4)
 	    { _snap4 = sn4; }
 
-	inline const PaBackend::Snapshot4* bsnap4() const { return _bsnap4; }
+	inline const PaBackend::Snapshot4Base* bsnap4() const { return _bsnap4; }
 
-	inline void set_bsnap4(const PaBackend::Snapshot4* bsn4)
+	inline void set_bsnap4(const PaBackend::Snapshot4Base* bsn4)
 	    { _bsnap4 = bsn4; }
 
 #ifdef notyet
@@ -242,17 +242,17 @@ protected:
 	inline void set_snap6(const PaSnapshot6* sn6)
 	    { _snap6 = sn6; }
 
-	inline const PaBackend::Snapshot6* bsnap6() const { return _bsnap6; }
+	inline const PaBackend::Snapshot6Base* bsnap6() const { return _bsnap6; }
 
-	inline void set_bsnap6(PaBackend::Snapshot6* bsn6)
+	inline void set_bsnap6(PaBackend::Snapshot6Base* bsn6)
 	    { _bsnap6 = bsn6; }
 #endif
     private:
 	const PaSnapshot4*		_snap4;
-	const PaBackend::Snapshot4*	_bsnap4;
+	const PaBackend::Snapshot4Base*	_bsnap4;
 #ifdef notyet
 	const PaSnapshot6*		_snap6;
-	const PaBackend::Snapshot6*	_bsnap6;
+	const PaBackend::Snapshot6Base*	_bsnap6;
 #endif
     };
 

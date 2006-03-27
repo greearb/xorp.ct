@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.6 2005/08/18 15:45:51 bms Exp $"
+#ident "$XORP: xorp/fea/pa_backend_ipfw2.cc,v 1.7 2006/03/16 00:04:00 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -181,7 +181,7 @@ PaIpfw2Backend::delete_all_entries4()
 #endif
 }
 
-const PaBackend::Snapshot4*
+const PaBackend::Snapshot4Base*
 PaIpfw2Backend::create_snapshot4()
 {
 #ifndef HAVE_PACKETFILTER_IPFW2
@@ -214,7 +214,7 @@ PaIpfw2Backend::create_snapshot4()
 }
 
 bool
-PaIpfw2Backend::restore_snapshot4(const PaBackend::Snapshot4* snap4)
+PaIpfw2Backend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
 #ifndef HAVE_PACKETFILTER_IPFW2
     UNUSED(snap4);
@@ -585,9 +585,11 @@ PaIpfw2Backend::copy_ruleset4(int src_index, int dst_index)
 /* Snapshot scoped classes (Memento pattern) */
 
 // Cannot be copied or assigned from base class.
-PaIpfw2Backend::Snapshot4::Snapshot4(const PaBackend::Snapshot4& snap4)
+PaIpfw2Backend::Snapshot4::Snapshot4(const PaBackend::Snapshot4Base& snap4)
     throw(PaInvalidSnapshotException)
-    : PaBackend::Snapshot4(snap4), _parent(NULL), _ruleset(RESERVED_RULESET)
+    : PaBackend::Snapshot4Base(snap4),
+      _parent(NULL),
+      _ruleset(RESERVED_RULESET)
 {
     throw PaInvalidSnapshotException();
 }
@@ -595,7 +597,7 @@ PaIpfw2Backend::Snapshot4::Snapshot4(const PaBackend::Snapshot4& snap4)
 // May be copied or assigned from own class.
 PaIpfw2Backend::Snapshot4::Snapshot4(const PaIpfw2Backend::Snapshot4& snap4)
     throw(PaInvalidSnapshotException)
-    : PaBackend::Snapshot4(snap4),
+    : PaBackend::Snapshot4Base(snap4),
       _parent(snap4._parent), _ruleset(snap4._ruleset)
 {
 }
@@ -603,7 +605,7 @@ PaIpfw2Backend::Snapshot4::Snapshot4(const PaIpfw2Backend::Snapshot4& snap4)
 // This constructor is marked private and used internally.
 PaIpfw2Backend::Snapshot4::Snapshot4(PaIpfw2Backend& parent, uint8_t ruleset)
     throw(PaInvalidSnapshotException)
-    : PaBackend::Snapshot4(),
+    : PaBackend::Snapshot4Base(),
       _parent(&parent), _ruleset(ruleset)
 {
 }

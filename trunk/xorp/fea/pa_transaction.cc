@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.8 2005/08/18 15:45:51 bms Exp $"
+#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.9 2006/03/16 00:04:00 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -36,10 +36,10 @@ PaTransactionManager::pre_commit(uint32_t tid)
     unset_error();
 
     const PaSnapshot4* ps4 = _ptm.create_snapshot4();
-    const PaBackend::Snapshot4* bps4 = _pbp->create_snapshot4();
+    const PaBackend::Snapshot4Base* bps4 = _pbp->create_snapshot4();
 #ifdef notyet
     const PaSnapshot6* ps6 = _ptm.create_snapshot6();
-    const PaBackend::Snapshot4* bps6 = _pbp->create_snapshot6();
+    const PaBackend::Snapshot6Base* bps6 = _pbp->create_snapshot6();
     _pa_transactions.insert(PaTransactionDB::value_type(
 	tid, PaTransaction(ps4, ps6, bps4, bps6)));
 #else
@@ -182,7 +182,7 @@ PaTransactionManager::set_backend(const char* name)
 /* ------------------------------------------------------------------------- */
 
 PaTransactionManager::PaTransaction::PaTransaction(
-    const PaSnapshot4* sn4, const PaBackend::Snapshot4* bsn4)
+    const PaSnapshot4* sn4, const PaBackend::Snapshot4Base* bsn4)
     : _snap4(sn4), _bsnap4(bsn4)
 {
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_backend_dummy.cc,v 1.4 2005/03/25 02:53:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_backend_dummy.cc,v 1.5 2006/03/16 00:03:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -70,14 +70,14 @@ PaDummyBackend::delete_all_entries4()
     return true;
 }
 
-const PaBackend::Snapshot4*
+const PaBackend::Snapshot4Base*
 PaDummyBackend::create_snapshot4()
 {
     return (new PaDummyBackend::Snapshot4());
 }
 
 bool
-PaDummyBackend::restore_snapshot4(const PaBackend::Snapshot4* snap4)
+PaDummyBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 {
     // Simply check if the snapshot is an instance of our derived snapshot.
     // If it is not, we received it in error, and it is of no interest to us.
@@ -98,7 +98,7 @@ PaDummyBackend::Snapshot4::Snapshot4()
 PaDummyBackend::Snapshot4::Snapshot4(
     const PaDummyBackend::Snapshot4& snap4)
     throw(PaInvalidSnapshotException)
-    : PaBackend::Snapshot4()
+    : PaBackend::Snapshot4Base()
 {
     // Nothing to do.
     UNUSED(snap4);

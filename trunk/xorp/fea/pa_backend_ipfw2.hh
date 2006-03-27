@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend_ipfw2.hh,v 1.2 2005/03/25 02:53:12 pavlin Exp $
+// $XORP: xorp/fea/pa_backend_ipfw2.hh,v 1.3 2006/03/16 00:04:00 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_IPFW2_HH__
 #define __FEA_PA_BACKEND_IPFW2_HH__
@@ -51,12 +51,12 @@ protected:
      * both of these classes and override the virtuals, and check that
      * snapshots passed to it are its own by using dynamic casts.
      */
-    class Snapshot4 : public PaBackend::Snapshot4 {
+    class Snapshot4 : public PaBackend::Snapshot4Base {
 	friend class PaIpfw2Backend;
     public:
 	Snapshot4(const Snapshot4& snap4)
 	    throw(PaInvalidSnapshotException);
-	Snapshot4(const PaBackend::Snapshot4& snap4)
+	Snapshot4(const PaBackend::Snapshot4Base& snap4)
 	    throw(PaInvalidSnapshotException);
 	virtual ~Snapshot4();
 	inline uint8_t get_ruleset() const { return _ruleset; }
@@ -115,8 +115,8 @@ public:
 
     bool push_entries4(const PaSnapshot4* snap);
     bool delete_all_entries4();
-    const PaBackend::Snapshot4* create_snapshot4();
-    bool restore_snapshot4(const PaBackend::Snapshot4* snap);
+    const PaBackend::Snapshot4Base* create_snapshot4();
+    bool restore_snapshot4(const PaBackend::Snapshot4Base* snap);
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
@@ -124,8 +124,8 @@ public:
 
     bool push_entries6(const PaSnapshot6* snap);
     bool delete_all_entries6();
-    const PaBackend::Snapshot6* create_snapshot6() const;
-    bool restore_snapshot6(const PaBackend::Snapshot6* snap);
+    const PaBackend::Snapshot6Base* create_snapshot6() const;
+    bool restore_snapshot6(const PaBackend::Snapshot6Base* snap);
 #endif
 
 #ifdef HAVE_PACKETFILTER_IPFW2

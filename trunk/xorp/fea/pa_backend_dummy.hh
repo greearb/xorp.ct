@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend_dummy.hh,v 1.3 2005/03/25 02:53:12 pavlin Exp $
+// $XORP: xorp/fea/pa_backend_dummy.hh,v 1.4 2006/03/16 00:03:59 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_DUMMY_HH__
 #define __FEA_PA_BACKEND_DUMMY_HH__
@@ -48,7 +48,7 @@ protected:
      * snapshots passed to it are its own by using dynamic casts.
      */
 
-    class Snapshot4 : public PaBackend::Snapshot4 {
+    class Snapshot4 : public PaBackend::Snapshot4Base {
     public:
 	Snapshot4()
 	    throw(PaInvalidSnapshotException);
@@ -73,8 +73,8 @@ public:
 
     bool push_entries4(const PaSnapshot4* snap);
     bool delete_all_entries4();
-    const PaBackend::Snapshot4* create_snapshot4();
-    bool restore_snapshot4(const PaBackend::Snapshot4* snap);
+    const PaBackend::Snapshot4Base* create_snapshot4();
+    bool restore_snapshot4(const PaBackend::Snapshot4Base* snap);
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
@@ -82,8 +82,8 @@ public:
 
     bool push_entries6(const PaSnapshot6* snap);
     bool delete_all_entries6();
-    const PaBackend::Snapshot6* create_snapshot6();
-    bool restore_snapshot6(const PaBackend::Snapshot6* snap);
+    const PaBackend::Snapshot6Base* create_snapshot6();
+    bool restore_snapshot6(const PaBackend::Snapshot6Base* snap);
 #endif
 };
 

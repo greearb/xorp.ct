@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/pa_backend.hh,v 1.3 2005/03/25 02:53:11 pavlin Exp $
+// $XORP: xorp/fea/pa_backend.hh,v 1.4 2006/03/16 00:03:59 pavlin Exp $
 
 #ifndef __FEA_PA_BACKEND_HH__
 #define __FEA_PA_BACKEND_HH__
@@ -31,7 +31,7 @@ class PaInvalidBackendException {};
  * Abstract class defining the interface to a packet filtering provider.
  */
 class PaBackend {
-    friend class Snapshot4;
+    friend class Snapshot4Base;
 public:
     PaBackend() throw(PaInvalidBackendException)
         { throw PaInvalidBackendException(); }
@@ -50,26 +50,26 @@ public:
      * both of these classes and override the virtuals, and check that
      * snapshots passed to it are its own by using dynamic casts.
      */
-    class Snapshot4 {
+    class Snapshot4Base {
     public:
-	Snapshot4()
+	Snapshot4Base()
 	    throw(PaInvalidSnapshotException)
 	    { throw PaInvalidSnapshotException(); }
-	Snapshot4(const Snapshot4&)
+	Snapshot4Base(const Snapshot4Base&)
 	    throw(PaInvalidSnapshotException)
 	    { throw PaInvalidSnapshotException(); }
-	virtual ~Snapshot4() {}
+	virtual ~Snapshot4Base() {}
     };
 
 #ifdef notyet
-    class Snapshot6 {
+    class Snapshot6Base {
     public:
-	virtual ~Snapshot6() {}
+	virtual ~Snapshot6Base() {}
     protected:
-	Snapshot6()
+	Snapshot6Base()
 	    throw(PaInvalidSnapshotException)
 	    { throw PaInvalidSnapshotException(); }
-	Snapshot6(const Snapshot6&)
+	Snapshot6Base(const Snapshot6&)
 	    throw(PaInvalidSnapshotException)
 	    { throw PaInvalidSnapshotException(); }
     };
@@ -87,8 +87,8 @@ public:
 
     virtual bool push_entries4(const PaSnapshot4* snap) = 0;
     virtual bool delete_all_entries4() = 0;
-    virtual const Snapshot4* create_snapshot4() = 0;
-    virtual bool restore_snapshot4(const Snapshot4* snap) = 0;
+    virtual const Snapshot4Base* create_snapshot4() = 0;
+    virtual bool restore_snapshot4(const Snapshot4Base* snap) = 0;
 
 #ifdef notyet
     /* --------------------------------------------------------------------- */
@@ -96,8 +96,8 @@ public:
 
     virtual bool push_entries6(const PaSnapshot6* snap) = 0;
     virtual bool delete_all_entries6() = 0;
-    virtual const Snapshot6* create_snapshot6() = 0;
-    virtual bool restore_snapshot6(const Snapshot6* snap) = 0;
+    virtual const Snapshot6Base* create_snapshot6() = 0;
+    virtual bool restore_snapshot6(const Snapshot6Base* snap) = 0;
 #endif
 };
 
