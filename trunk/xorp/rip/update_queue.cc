@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/update_queue.cc,v 1.14 2005/03/25 02:54:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/update_queue.cc,v 1.15 2006/03/16 00:05:53 pavlin Exp $"
 
 #include <vector>
 #include <list>
@@ -486,8 +486,10 @@ UpdateQueue<A>::updates_queued() const
 
 #ifdef INSTANTIATE_IPV4
 template class UpdateQueue<IPv4>;
+template class UpdateQueueReader<IPv4>;
 #endif
 
 #ifdef INSTANTIATE_IPV6
 template class UpdateQueue<IPv6>;
+template class UpdateQueueReader<IPv6>;
 #endif
