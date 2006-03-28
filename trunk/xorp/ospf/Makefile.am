@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.22 2005/11/11 11:06:12 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.23 2005/11/14 19:33:29 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -18,12 +18,14 @@ check_PROGRAMS	+= test_checksum
 check_PROGRAMS	+= test_peering
 check_PROGRAMS	+= test_routing
 check_PROGRAMS	+= test_routing_table
+check_PROGRAMS	+= test_build_lsa_main
 
 TESTS		 = test_packet$(EXEEXT)
 TESTS		+= test_checksum$(EXEEXT)
 TESTS		+= test_peering$(EXEEXT)
 TESTS		+= test_routing$(EXEEXT)
 TESTS		+= test_routing_table$(EXEEXT)
+TESTS		+= test_routing1.py
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES	 = libospf.la
@@ -48,21 +50,25 @@ LDADD		+= $(top_builddir)/libxorp/libxorp.la
 LDADD		+= $(top_builddir)/libproto/libproto.la
 
 # -- Program Sources
-xorp_ospfv2_SOURCES		= xorp_ospfv2.cc
+xorp_ospfv2_SOURCES		 = xorp_ospfv2.cc
 
-xorp_ospfv3_SOURCES		= xorp_ospfv3.cc
+xorp_ospfv3_SOURCES		 = xorp_ospfv3.cc
 
 test_packet_SOURCES		 = test_common.hh
 test_packet_SOURCES		+= test_packet.cc
 
-test_checksum_SOURCES		= test_checksum.cc
+test_checksum_SOURCES		 = test_checksum.cc
 
-test_peering_SOURCES		= test_peering.cc
+test_peering_SOURCES		 = test_peering.cc
 
 test_routing_SOURCES		 = test_common.hh
 test_routing_SOURCES		+= test_routing.cc
 
 test_routing_table_SOURCES	 = test_routing_table.cc
+
+test_build_lsa_main_SOURCES	 = test_build_lsa.hh
+test_build_lsa_main_SOURCES	+= test_build_lsa.cc
+test_build_lsa_main_SOURCES	+= test_build_lsa_main.cc
 
 # -- Library Sources
 libospf_la_SOURCES  = auth.hh

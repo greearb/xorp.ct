@@ -96,9 +96,9 @@ SUBDIRS = . tools
 bin_PROGRAMS = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
-check_PROGRAMS = test_packet test_checksum test_peering test_routing test_routing_table
+check_PROGRAMS = test_packet test_checksum test_peering test_routing test_routing_table test_build_lsa_main
 
-TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT) test_routing$(EXEEXT) test_routing_table$(EXEEXT)
+TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT) test_routing$(EXEEXT) test_routing_table$(EXEEXT) test_routing1.py
 
 # -- No-install Libtool Libraries
 noinst_LTLIBRARIES = libospf.la
@@ -120,6 +120,8 @@ test_peering_SOURCES = test_peering.cc
 test_routing_SOURCES = test_common.hh test_routing.cc
 
 test_routing_table_SOURCES = test_routing_table.cc
+
+test_build_lsa_main_SOURCES = test_build_lsa.hh test_build_lsa.cc test_build_lsa_main.cc
 
 # -- Library Sources
 libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh vlink.hh auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc vlink.cc
@@ -146,9 +148,31 @@ libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
 	test_peering$(EXEEXT) test_routing$(EXEEXT) \
-	test_routing_table$(EXEEXT)
+	test_routing_table$(EXEEXT) test_build_lsa_main$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+am_test_build_lsa_main_OBJECTS = test_build_lsa.$(OBJEXT) \
+	test_build_lsa_main.$(OBJEXT)
+test_build_lsa_main_OBJECTS = $(am_test_build_lsa_main_OBJECTS)
+test_build_lsa_main_LDADD = $(LDADD)
+test_build_lsa_main_DEPENDENCIES = libospf.la \
+	$(top_builddir)/xrl/targets/libospfv2base.la \
+	$(top_builddir)/xrl/targets/libospfv3base.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libproto/libproto.la
+test_build_lsa_main_LDFLAGS =
 am_test_checksum_OBJECTS = test_checksum.$(OBJEXT)
 test_checksum_OBJECTS = $(am_test_checksum_OBJECTS)
 test_checksum_LDADD = $(LDADD)
@@ -310,6 +334,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/peer.Plo $(DEPDIR)/peer_manager.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/policy_varrw.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/routing_table.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/test_build_lsa.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_build_lsa_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_checksum.Po $(DEPDIR)/test_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/test_routing.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_routing_table.Po $(DEPDIR)/vlink.Plo \
@@ -332,10 +358,11 @@ LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
 CCLD = $(CC)
 LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) \
-	$(test_packet_SOURCES) $(test_peering_SOURCES) \
-	$(test_routing_SOURCES) $(test_routing_table_SOURCES) \
-	$(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
+DIST_SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) \
+	$(test_checksum_SOURCES) $(test_packet_SOURCES) \
+	$(test_peering_SOURCES) $(test_routing_SOURCES) \
+	$(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) \
+	$(xorp_ospfv3_SOURCES)
 
 RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-info-recursive all-recursive install-data-recursive \
@@ -343,7 +370,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libospf_la_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(test_routing_SOURCES) $(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
+SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(test_routing_SOURCES) $(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
 
 all: all-recursive
 
@@ -397,6 +424,9 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+test_build_lsa_main$(EXEEXT): $(test_build_lsa_main_OBJECTS) $(test_build_lsa_main_DEPENDENCIES) 
+	@rm -f test_build_lsa_main$(EXEEXT)
+	$(CXXLINK) $(test_build_lsa_main_LDFLAGS) $(test_build_lsa_main_OBJECTS) $(test_build_lsa_main_LDADD) $(LIBS)
 test_checksum$(EXEEXT): $(test_checksum_OBJECTS) $(test_checksum_DEPENDENCIES) 
 	@rm -f test_checksum$(EXEEXT)
 	$(CXXLINK) $(test_checksum_LDFLAGS) $(test_checksum_OBJECTS) $(test_checksum_LDADD) $(LIBS)
@@ -436,6 +466,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/peer_manager.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/policy_varrw.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/routing_table.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_build_lsa.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_build_lsa_main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_checksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peering.Po@am__quote@
