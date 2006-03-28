@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.9 2005/08/04 11:52:32 bms Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.10 2006/03/16 00:05:41 pavlin Exp $"
 
 #include <set>
 
@@ -126,8 +126,12 @@ protected:
 template <typename A>
 const IPNet<A> TestOutput<A>::ANY_NET(A::ZERO(), 0);
 
-template <typename A>
-const IPNet<A> TestOutput<A>::NO_NET(A::ALL_ONES(), A::ADDR_BITLEN);
+template <>
+const IPNet<IPv4> TestOutput<IPv4>::NO_NET(IPv4::ALL_ONES(),
+					   IPv4::ADDR_BITLEN);
+template <>
+const IPNet<IPv6> TestOutput<IPv6>::NO_NET(IPv6::ALL_ONES(),
+					   IPv6::ADDR_BITLEN);
 
 template <typename A>
 void
