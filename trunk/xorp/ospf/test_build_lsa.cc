@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.1 2006/03/28 01:50:07 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -303,7 +303,7 @@ BuildLsa::as_external_lsa(Args& args)
 	} else if ("metric" == word) {
 	    lsa->set_metric(get_next_number(args, "metric"));
 	} else if ("forward4" == word) {
-	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward").
+	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward4").
 					     c_str());
 	} else if ("tag" == word) {
 	    lsa->set_external_route_tag(get_next_number(args, "tag"));
@@ -333,7 +333,7 @@ BuildLsa::type_7_lsa(Args& args)
 	} else if ("metric" == word) {
 	    lsa->set_metric(get_next_number(args, "metric"));
 	} else if ("forward4" == word) {
-	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward").
+	    lsa->set_forwarding_address_ipv4(get_next_word(args, "forward4").
 					     c_str());
 	} else if ("tag" == word) {
 	    lsa->set_external_route_tag(get_next_number(args, "tag"));
