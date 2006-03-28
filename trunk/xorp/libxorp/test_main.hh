@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.11 2005/07/08 07:13:37 pavlin Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.12 2006/03/16 00:04:34 pavlin Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -257,6 +257,19 @@ public:
 	    _exit_status = false;
 	}
     }
+
+    /**
+     * Get the state of the verbose flag. Used by test programs that
+     * don't use the run method to run tests.
+     */
+    bool get_verbose() const { return _verbose; }
+
+    /**
+     * Get the the verbose level, should only be used if get_verbose()
+     * is true. Used by test programs that don't use the run method to
+     * run the tests.
+     */
+    int get_verbose_level() const { return _verbose_level; }
 
     /**
      * Run a test function/method. The test function/method is passed
