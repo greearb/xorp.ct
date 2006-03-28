@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.1 2006/03/28 01:50:07 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.2 2006/03/28 03:06:55 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -56,7 +56,6 @@ main(int argc, char **argv)
     if (v2 == v3 || v2) {
 	version = OspfTypes::V2;
     } else {
-	printf("v3\n");
 	version = OspfTypes::V3;
     }
 
