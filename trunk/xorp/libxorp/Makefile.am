@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.43 2006/03/25 00:07:07 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.44 2006/03/25 01:14:21 bms Exp $
 ##
 
 # -- Real Programs
@@ -30,7 +30,6 @@ check_PROGRAMS	+= test_test_main
 check_PROGRAMS	+= test_time_slice
 check_PROGRAMS	+= test_timer
 check_PROGRAMS	+= test_timeval
-check_PROGRAMS	+= test_random_uniform
 check_PROGRAMS	+= test_trie
 check_PROGRAMS	+= test_types
 check_PROGRAMS	+= test_utils
@@ -60,7 +59,6 @@ TESTS	+= test_test_main$(EXEEXT)
 TESTS	+= test_time_slice$(EXEEXT)
 TESTS	+= test_timer$(EXEEXT)
 TESTS	+= test_timeval$(EXEEXT)
-TESTS	+= test_random_uniform$(EXEEXT)
 TESTS	+= test_trie$(EXEEXT)
 TESTS	+= test_types$(EXEEXT)
 TESTS	+= test_utils$(EXEEXT)
@@ -99,7 +97,6 @@ test_test_main_SOURCES	= test_test_main.cc
 test_time_slice_SOURCES	= test_time_slice.cc
 test_timer_SOURCES	= test_timer.cc
 test_timeval_SOURCES	= test_timeval.cc
-test_random_uniform_SOURCES	= test_random_uniform.cc
 test_trie_SOURCES	= test_trie.cc
 test_types_SOURCES	= test_types.cc
 test_utils_SOURCES	= test_utils.cc
