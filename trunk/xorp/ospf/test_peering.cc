@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.50 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.51 2006/03/28 03:06:55 atanu Exp $"
 
 #include "config.h"
 #include <map>
@@ -500,6 +500,11 @@ main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
 
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
     TestMain t(argc, argv);
 
     string test =
@@ -556,6 +561,9 @@ main(int argc, char **argv)
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
+
+    xlog_stop();
+    xlog_exit();
 
     return t.exit();
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.12 2006/03/16 00:04:34 pavlin Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.13 2006/03/28 04:40:58 atanu Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -21,7 +21,6 @@
 #include <list>
 
 #include "xorp.h"
-#include "xlog.h"
 #include "callback.hh"
 
 /**
@@ -105,23 +104,20 @@ private:
 /**
  * A helper class for test programs.
  *
- * This class is used to parse the command line arguments, enable the
- * xlog_ framework and return the exit status from the test
- * functions/methods. An example of how to use this class can be found
- * in test_test_main.cc.
+ * This class is used to parse the command line arguments and return
+ * the exit status from the test functions/methods. An example of how
+ * to use this class can be found in test_test_main.cc.
  *
  */
 class TestMain {
 public:
     /**
-     * Start the parsing of command line arguments and enable xlog_*.
+     * Start the parsing of command line arguments.
      */
     TestMain(int argc, char **argv) :
 	_verbose(false), _verbose_level(0), _exit_status(true)
     {
 	_progname = argv[0];
-
-	xlog_begin(argv[0]);
 
 	for (int i = 1; i < argc; i++) {
 	    string argname;
@@ -244,7 +240,6 @@ public:
 
 	if (h || q) {
 	    cerr << usage();
-	    xlog_end();
 	    ::exit(0);
 	}
 
@@ -334,8 +329,6 @@ public:
 	if ("" != _error_string)
 	    cerr << _error_string;
 
-	xlog_end();
-
 	return _exit_status ? 0 : -1;
     }
 
@@ -348,31 +341,6 @@ private:
     bool _exit_status;
     string _error_string;
     string _usage;
-
-    void
-    xlog_begin(const char *progname)
-    {
-	//
-	// Initialize and start xlog
-	//
-	xlog_init(progname, NULL);
-	xlog_set_verbose(XLOG_VERBOSE_LOW);	// Least verbose messages
-	// XXX: verbosity of the error messages temporary increased
-	xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
-	xlog_level_set_verbose(XLOG_LEVEL_WARNING, XLOG_VERBOSE_HIGH);
-	xlog_add_default_output();
-	xlog_start();
-    }
-
-    void
-    xlog_end()
-    {
-	//
-	// Gracefully stop and exit xlog
-	//
-	xlog_stop();
-	xlog_exit();
-    }
 
     class Arg {
     public:

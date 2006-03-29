@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.2 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.3 2006/03/28 03:15:03 atanu Exp $"
 
 #include "config.h"
 #include "ospf_module.h"
@@ -40,6 +40,11 @@ int
 main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
+
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
 
     TestMain t(argc, argv);
 
@@ -72,6 +77,9 @@ main(int argc, char **argv)
 	xorp_print_standard_exceptions();
 	return -1;
     }
+
+    xlog_stop();
+    xlog_exit();
 
     return 0;
 }

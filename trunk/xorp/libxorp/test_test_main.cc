@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.10 2005/08/18 15:28:42 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_test_main.cc,v 1.11 2006/03/16 00:04:34 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
 
 #include "libxorp_module.h"
+#include "xlog.h"
 #include "test_main.hh"
 #include "exceptions.hh"
 
@@ -91,6 +92,11 @@ main(int argc, char **argv)
 {
     XorpUnexpectedHandler x(xorp_unexpected_handler);
 
+    xlog_init(argv[0], NULL);
+    xlog_set_verbose(XLOG_VERBOSE_HIGH);
+    xlog_add_default_output();
+    xlog_start();
+
     TestMain t(argc, argv);
 
     string test =
@@ -135,6 +141,9 @@ main(int argc, char **argv)
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
+
+    xlog_stop();
+    xlog_exit();
 
     return t.exit();
 }
