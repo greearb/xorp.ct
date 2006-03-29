@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.47 2006/03/11 00:44:06 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.48 2006/03/11 17:29:57 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -266,21 +266,21 @@ gmake check
 ========================================
 
   * All:
-    - Unicast routing appears to work.
-    - Multicast routing doesn't work, because the system doesn't have
-      the appropriate support.
-    - IPv6 is not supported at this time. We are looking at supporting
-      this on Longhorn.
-    - All regression tests pass as of the XORP 1.2 Release Candidate.
+    - XORP is only supported on Windows Server 2003 SP1.
 
-    - We do not support the use of XORP on any Windows platform other than
-      Windows Server 2003 SP1 at this time.
+    - Unicast routing appears to work.
+    - All regression tests pass as of XORP 1.2.
+    - IPv6 is not supported.
+    - RTMv2 is not supported.
+    - Multicast is not supported.
 
     - The code compiles using the MinGW port of gcc 3.4.2, using the
       MSYS shell environment.
 
-    - Instructions for building XORP on Windows Server are now almost
-      identical to those for building XORP on a UNIX platform.
+    - Instructions for building XORP on Windows Server are identical
+      to those for building XORP on a UNIX platform, with the exception
+      that any paths passed to the configure script must be in MinGW
+      UNIX-style format (e.g. C:\XORP -> /c/xorp).
 
       However, certain manual patches must be applied to the toolchain before
       attempting to build XORP, as we use API functions which are present in
@@ -339,10 +339,15 @@ gmake check
 
       They may be found at: http://gnuwin32.sourceforge.net/packages.html
 
-    - The RunCommand class has a hard-coded path to the MSYS shell of
-      C:\MINGW\BIN\SH.EXE. This will eventually go away but for now
-      we recommend you use SUBST and/or NT junction points to symlink
-      this to the correct path for your installation.
+    - You must install Python for Windows if you intend to run the
+      regression tests. This may be found at: http://www.python.org/download/
+
+      The path to the python.exe binary must either be present in PATH after
+      installation, or a symlink created in the MinGW environment.
+
+    - The RunShellCommand class has a hard-coded path to the MSYS shell.
+      This is currently a no-op because the router manager no longer uses
+      this class for running XORP modules.
 
     - To take a full BGP route feed, a registry key must be updated:
       HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters
@@ -351,16 +356,27 @@ gmake check
       if the kernel FIB memory requirements ever exceed physical memory,
       the NT kernel will panic.
 
+      The XORP installer has a property page which allows this to be set
+      by the administrator, but it does not roll back these settings when
+      XORP is uninstalled.
+
     - If the Windows Routing and Remote Access (RRAS) service is running,
       the XORP FEA process may not be able to update the Windows IPv4
       routing tables. The FEA will detect when this service is running
       and print a warning message to the XORP process log.
 
     - The XORP Shell (xorpsh.exe) should be run from within a native
-      Win32 command prompt.
+      Win32 command prompt. If run from within any other kind of shell,
+      it may not work.
 
   * For instructions how to build the XORP Installer for Windows
     see xorp/contrib/win32/installer/README.
+
+3.7 Windows 'Longhorn' Server
+=============================
+
+  * All:
+    - This operating system is not currently supported.
 
 4. Known problems
 =================
