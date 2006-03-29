@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.18 2006/03/20 02:06:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.19 2006/03/20 07:29:44 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -703,23 +703,6 @@ RawSocket::join_multicast_group(const string& if_name,
 	group.copy_out(mreq.imr_multiaddr);
 	mreq.imr_interface.s_addr = in_addr.s_addr;
 
-#ifdef HOST_OS_WINDOWS
-	//
-	// Winsock requires that raw sockets be bound to an interface
-	// address, or INADDR_ANY, before a multicast group is joined.
-	//
-	struct sockaddr_in sin;
-	memset(&sin, 0, sizeof(sin));
-	sin.sin_family = AF_INET;
-	sin.sin_addr.s_addr = INADDR_ANY;
-
-	if (SOCKET_ERROR == bind(_proto_socket_in, (sockaddr *)&sin,
-				 sizeof(sockaddr_in))) {
-	    // XXX: The following error may be erroneous.
-	    XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
-	}
-#endif // HOST_OS_WINDOWS
-
 	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_ADD_MEMBERSHIP,
 		       XORP_SOCKOPT_CAST(&mreq), sizeof(mreq)) < 0) {
 	    error_msg = c_format("Cannot join group %s on interface %s vif %s: %s",
@@ -1043,6 +1026,23 @@ RawSocket::open_proto_sockets(string& error_msg)
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
+
+#ifdef HOST_OS_WINDOWS
+    //
+    // Winsock requires that raw sockets be bound, either to the IPv4
+    // address of a physical interface, or the INADDR_ANY address,
+    // in order to receive traffic or to join multicast groups.
+    //
+    struct sockaddr_in sin;
+    memset(&sin, 0, sizeof(sin));
+    sin.sin_family = AF_INET;
+    sin.sin_addr.s_addr = INADDR_ANY;
+    
+    if (SOCKET_ERROR == bind(_proto_socket_in, (sockaddr *)&sin,
+			     sizeof(sockaddr_in))) {
+	XLOG_WARNING("bind() failed: %s\n", win_strerror(GetLastError()));
+    }
+#endif // HOST_OS_WINDOWS
 
     // Assign a method to read from this socket
     if (eventloop().add_ioevent_cb(_proto_socket_in,
