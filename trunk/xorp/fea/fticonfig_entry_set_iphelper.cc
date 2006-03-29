@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.6 2006/03/16 00:03:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.7 2006/03/22 00:41:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -296,8 +296,13 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
 	ipfwdrow.dwForwardNextHop = tmpnexthop;
         const IfTree& iftree = ftic().iftree();
         IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
-        XLOG_ASSERT(ii != iftree.ifs().end());
-        ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
+	if (ii != iftree.ifs().end()) {
+	    ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
+	} else {
+	    XLOG_WARNING("Failed to lookup iftree object for '%s'",
+			 fte.ifname().c_str());
+	    ipfwdrow.dwForwardIfIndex = 0;
+	}
         ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     }
 
