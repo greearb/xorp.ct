@@ -104,9 +104,6 @@ noinst_LTLIBRARIES = libxorp.la
 # -- Libraries and library flags to link the binary programs
 LDADD = $(noinst_LTLIBRARIES)
 
-test_asyncio_LDADD = ../libcomm/libcomm.la $(LDADD)
-#test_buffered_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
-
 # -- Program Sources
 test_asyncio_SOURCES = test_asyncio.cc
 #test_buffered_asyncio_SOURCES	= test_buffered_asyncio.cc
@@ -180,7 +177,8 @@ PROGRAMS = $(bin_PROGRAMS)
 
 am_test_asyncio_OBJECTS = test_asyncio.$(OBJEXT)
 test_asyncio_OBJECTS = $(am_test_asyncio_OBJECTS)
-test_asyncio_DEPENDENCIES = ../libcomm/libcomm.la libxorp.la
+test_asyncio_LDADD = $(LDADD)
+test_asyncio_DEPENDENCIES = libxorp.la
 test_asyncio_LDFLAGS =
 am_test_callback_OBJECTS = test_callback.$(OBJEXT)
 test_callback_OBJECTS = $(am_test_callback_OBJECTS)

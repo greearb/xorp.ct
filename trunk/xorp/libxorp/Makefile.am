@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.44 2006/03/25 01:14:21 bms Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.45 2006/03/29 09:12:03 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -69,9 +69,6 @@ noinst_LTLIBRARIES = libxorp.la
 
 # -- Libraries and library flags to link the binary programs
 LDADD			 = $(noinst_LTLIBRARIES)
-
-test_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
-#test_buffered_asyncio_LDADD	 = ../libcomm/libcomm.la $(LDADD)
 
 # -- Program Sources
 test_asyncio_SOURCES	= test_asyncio.cc
