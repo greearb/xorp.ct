@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.29 2005/05/08 19:27:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.30 2006/03/16 00:03:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,9 +42,8 @@
 
 FtiConfigEntryGetNetlink::FtiConfigEntryGetNetlink(FtiConfig& ftic)
     : FtiConfigEntryGet(ftic),
-      NetlinkSocket4(ftic.eventloop()),
-      NetlinkSocket6(ftic.eventloop()),
-      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
+      NetlinkSocket(ftic.eventloop()),
+      _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ftic_primary();
@@ -69,22 +68,9 @@ FtiConfigEntryGetNetlink::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ftic().have_ipv4()) {
-	if (NetlinkSocket4::start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
+    if (NetlinkSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
     
-#ifdef HAVE_IPV6
-    if (ftic().have_ipv6()) {
-	if (NetlinkSocket6::start(error_msg) < 0) {
-	    string error_msg2;
-	    if (ftic().have_ipv4())
-		NetlinkSocket4::stop(error_msg2);
-	    return (XORP_ERROR);
-	}
-    }
-#endif
-
     _is_running = true;
 
     return (XORP_OK);
@@ -93,25 +79,10 @@ FtiConfigEntryGetNetlink::start(string& error_msg)
 int
 FtiConfigEntryGetNetlink::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-    int ret_value6 = XORP_OK;
-
     if (! _is_running)
 	return (XORP_OK);
 
-    if (ftic().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop(error_msg);
-    
-#ifdef HAVE_IPV6
-    if (ftic().have_ipv6()) {
-	string error_msg2;
-	ret_value6 = NetlinkSocket6::stop(error_msg2);
-	if ((ret_value6 < 0) && (ret_value4 >= 0))
-	    error_msg = error_msg2;	// XXX: update the error message
-    }
-#endif
-    
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if (NetlinkSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;
@@ -247,7 +218,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     struct rtmsg	*rtmsg;
     struct rtattr	*rtattr;
     int			rta_len;
-    NetlinkSocket	*ns_ptr = NULL;
+    NetlinkSocket&	ns = *this;
     int			family = dst.af();
     
     // Zero the return information
@@ -273,23 +244,6 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	return false;
     }
     
-    // Get the pointer to the NetlinkSocket
-    do {
-	if (dst.is_ipv4()) {
-	    NetlinkSocket4& ns4 = *this;
-	    ns_ptr = &ns4;
-	    break;
-	}
-	if (dst.is_ipv6()) {
-	    NetlinkSocket6& ns6 = *this;
-	    ns_ptr = &ns6;
-	    break;
-	}
-	
-	XLOG_UNREACHABLE();
-	break;
-    } while(false);
-    
     //
     // Set the request. First the socket, then the request itself.
     //
@@ -306,8 +260,8 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
-    nlh->nlmsg_seq = ns_ptr->seqno();
-    nlh->nlmsg_pid = ns_ptr->pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);
@@ -330,9 +284,8 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
     
-    if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
-		       reinterpret_cast<struct sockaddr*>(&snl),
-		       sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s",
 		   strerror(errno));
@@ -343,8 +296,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     // Force to receive data from the kernel, and then parse it
     //
     string error_msg;
-    if (_ns_reader.receive_data(*ns_ptr, nlh->nlmsg_seq, error_msg)
-	!= XORP_OK) {
+    if (_ns_reader.receive_data(ns, nlh->nlmsg_seq, error_msg) != XORP_OK) {
 	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return (false);
     }

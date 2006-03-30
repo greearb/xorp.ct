@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.14 2005/08/18 15:45:47 bms Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.15 2006/03/16 00:03:55 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -144,8 +144,7 @@ private:
 };
 
 class IfConfigObserverNetlink : public IfConfigObserver,
-				public NetlinkSocket4,
-				public NetlinkSocket6,
+				public NetlinkSocket,
 				public NetlinkSocketObserver {
 public:
     IfConfigObserverNetlink(IfConfig& ifc);

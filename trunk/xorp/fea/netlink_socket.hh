@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.16 2005/08/18 15:45:50 bms Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.17 2006/03/16 00:03:59 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -38,11 +38,10 @@ public:
     /**
      * Start the netlink socket operation.
      * 
-     * @param af the address family.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int start(int af, string& error_msg);
+    int start(string& error_msg);
 
     /**
      * Stop the netlink socket operation.
@@ -196,51 +195,9 @@ private:
     friend class NetlinkSocketPlumber; // class that hooks observers in and out
 };
 
-/**
- * NetlinkSocket4 class is a wrapper for NetlinkSocket class for IPv4.
- */
-class NetlinkSocket4 : public NetlinkSocket {
-public:
-    NetlinkSocket4(EventLoop& e) : NetlinkSocket(e) { }
-
-    /**
-     * Start the netlink socket operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start(string& error_msg) {
-	return NetlinkSocket::start(AF_INET, error_msg);
-    }
-};
-
-/**
- * NetlinkSocket6 class is a wrapper for NetlinkSocket class for IPv6.
- */
-class NetlinkSocket6 : public NetlinkSocket {
-public:
-    NetlinkSocket6(EventLoop& e) : NetlinkSocket(e) { }
-
-    /**
-     * Start the netlink socket operation.
-     * 
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int start(string& error_msg) {
-#ifdef HAVE_IPV6
-	return NetlinkSocket::start(AF_INET6, error_msg);
-#else
-	error_msg = c_format("Cannot start IPv6 netlink sockets: "
-			     "the system does not support IPv6");
-	return (XORP_ERROR);
-#endif
-    }
-};
-
 class NetlinkSocketObserver {
 public:
-    NetlinkSocketObserver(NetlinkSocket4& ns4, NetlinkSocket6& ns6);
+    NetlinkSocketObserver(NetlinkSocket& ns);
     virtual ~NetlinkSocketObserver();
 
     /**
@@ -256,42 +213,18 @@ public:
     virtual void nlsock_data(const uint8_t* data, size_t nbytes) = 0;
 
     /**
-     * Get NetlinkSocket for IPv4 associated with Observer.
+     * Get NetlinkSocket associated with Observer.
      */
-    NetlinkSocket& netlink_socket4();
-
-    /**
-     * Get NetlinkSocket for IPv6 associated with Observer.
-     */
-    NetlinkSocket& netlink_socket6();
+    NetlinkSocket& netlink_socket();
 
 private:
-    NetlinkSocket4& _ns4;
-    NetlinkSocket6& _ns6;
+    NetlinkSocket& _ns;
 };
 
 class NetlinkSocketReader : public NetlinkSocketObserver {
 public:
-    NetlinkSocketReader(NetlinkSocket4& ns4, NetlinkSocket6& ns6);
+    NetlinkSocketReader(NetlinkSocket& ns);
     virtual ~NetlinkSocketReader();
-
-    /**
-     * Force the reader to receive data from the IPv4 netlink socket.
-     *
-     * @param seqno the sequence number of the data to receive.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int receive_data4(uint32_t seqno, string& error_msg);
-
-    /**
-     * Force the reader to receive data from the IPv6 netlink socket.
-     *
-     * @param seqno the sequence number of the data to receive.
-     * @param error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     */
-    int receive_data6(uint32_t seqno, string& error_msg);
 
     /**
      * Force the reader to receive data from the specified netlink socket.
@@ -331,8 +264,7 @@ public:
     virtual void nlsock_data(const uint8_t* data, size_t nbytes);
 
 private:
-    NetlinkSocket4& _ns4;
-    NetlinkSocket6& _ns6;
+    NetlinkSocket&  _ns;
 
     bool	    _cache_valid;	// Cache data arrived.
     uint32_t	    _cache_seqno;	// Seqno of netlink socket data to

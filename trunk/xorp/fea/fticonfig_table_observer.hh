@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.15 2005/08/18 15:45:45 bms Exp $
+// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.16 2006/03/16 00:03:52 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FTICONFIG_TABLE_OBSERVER_HH__
@@ -167,8 +167,7 @@ private:
 };
 
 class FtiConfigTableObserverNetlink : public FtiConfigTableObserver,
-				      public NetlinkSocket4,
-				      public NetlinkSocket6,
+				      public NetlinkSocket,
 				      public NetlinkSocketObserver {
 public:
     FtiConfigTableObserverNetlink(FtiConfig& ftic);

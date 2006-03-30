@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.34 2005/12/22 12:18:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.35 2006/03/16 00:03:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -84,10 +84,8 @@ NetlinkSocket::~NetlinkSocket()
 #ifndef HAVE_NETLINK_SOCKETS
 
 int
-NetlinkSocket::start(int af, string& error_msg)
+NetlinkSocket::start(string& error_msg)
 {
-    UNUSED(af);
-
     error_msg = c_format("The system does not support netlink sockets");
     XLOG_UNREACHABLE();
     return (XORP_ERROR);
@@ -120,42 +118,21 @@ NetlinkSocket::force_read(string& error_msg)
 #else // HAVE_NETLINK_SOCKETS
 
 int
-NetlinkSocket::start(int af, string& error_msg)
+NetlinkSocket::start(string& error_msg)
 {
-    int			socket_protocol = -1;
     struct sockaddr_nl	snl;
     socklen_t		snl_len;
 
     if (_fd >= 0)
 	return (XORP_OK);
-    
-    //
-    // Select the protocol
-    //
-    switch (af) {
-    case AF_INET:
-	socket_protocol = NETLINK_ROUTE;
-	break;
-#ifdef HAVE_IPV6
-    case AF_INET6:
-	//
-	// XXX: the netlink(7) manual page is incorrect that for IPv6
-	// we need NETLINK_ROUTE6.
-	// The truth is that it has to be NETLINK_ROUTE.
-	//
-	// socket_protocol = NETLINK_ROUTE6;
-	socket_protocol = NETLINK_ROUTE;
-	break;
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-    
+
     //
     // Open the socket
     //
-    _fd = socket(AF_NETLINK, SOCK_RAW, socket_protocol);
+    // XXX: Older versions of the  netlink(7) manual page are incorrect
+    // that for IPv6 we need NETLINK_ROUTE6.
+    // The truth is that for both IPv4 and IPv6 it has to be NETLINK_ROUTE.
+    _fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
     if (_fd < 0) {
 	error_msg = c_format("Could not open netlink socket: %s",
 			     strerror(errno));
@@ -570,38 +547,26 @@ struct NetlinkSocketPlumber {
     }
 };
 
-NetlinkSocketObserver::NetlinkSocketObserver(NetlinkSocket4& ns4,
-					     NetlinkSocket6& ns6)
-    : _ns4(ns4),
-      _ns6(ns6)
+NetlinkSocketObserver::NetlinkSocketObserver(NetlinkSocket& ns)
+    : _ns(ns)
 {
-    NetlinkSocketPlumber::plumb(ns4, this);
-    NetlinkSocketPlumber::plumb(ns6, this);
+    NetlinkSocketPlumber::plumb(ns, this);
 }
 
 NetlinkSocketObserver::~NetlinkSocketObserver()
 {
-    NetlinkSocketPlumber::unplumb(_ns4, this);
-    NetlinkSocketPlumber::unplumb(_ns6, this);
+    NetlinkSocketPlumber::unplumb(_ns, this);
 }
 
 NetlinkSocket&
-NetlinkSocketObserver::netlink_socket4()
+NetlinkSocketObserver::netlink_socket()
 {
-    return _ns4;
+    return _ns;
 }
 
-NetlinkSocket&
-NetlinkSocketObserver::netlink_socket6()
-{
-    return _ns6;
-}
-
-NetlinkSocketReader::NetlinkSocketReader(NetlinkSocket4& ns4,
-					 NetlinkSocket6& ns6)
-    : NetlinkSocketObserver(ns4, ns6),
-      _ns4(ns4),
-      _ns6(ns6),
+NetlinkSocketReader::NetlinkSocketReader(NetlinkSocket& ns)
+    : NetlinkSocketObserver(ns),
+      _ns(ns),
       _cache_valid(false),
       _cache_seqno(0)
 {
@@ -611,46 +576,6 @@ NetlinkSocketReader::NetlinkSocketReader(NetlinkSocket4& ns4,
 NetlinkSocketReader::~NetlinkSocketReader()
 {
 
-}
-
-/**
- * Force the reader to receive data from the IPv4 netlink socket.
- *
- * @param seqno the sequence number of the data to receive.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-NetlinkSocketReader::receive_data4(uint32_t seqno, string& error_msg)
-{
-    _cache_seqno = seqno;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	if (_ns4.force_read(error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
-}
-
-/**
- * Force the reader to receive data from the IPv6 netlink socket.
- *
- * @param seqno the sequence number of the data to receive.
- * @param error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- */
-int
-NetlinkSocketReader::receive_data6(uint32_t seqno, string& error_msg)
-{
-    _cache_seqno = seqno;
-    _cache_valid = false;
-    while (_cache_valid == false) {
-	if (_ns6.force_read(error_msg) != XORP_OK)
-	    return (XORP_ERROR);
-    }
-
-    return (XORP_OK);
 }
 
 /**

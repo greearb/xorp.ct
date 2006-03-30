@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.13 2005/10/17 11:27:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.14 2006/03/16 00:03:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,9 +42,8 @@
 
 IfConfigObserverNetlink::IfConfigObserverNetlink(IfConfig& ifc)
     : IfConfigObserver(ifc),
-      NetlinkSocket4(ifc.eventloop()),
-      NetlinkSocket6(ifc.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
+      NetlinkSocket(ifc.eventloop()),
+      NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc_primary();
@@ -75,6 +74,8 @@ IfConfigObserverNetlink::start(string& error_msg)
 
 #else // HAVE_NETLINK_SOCKETS
 
+    uint32_t nl_groups = 0;
+
     if (_is_running)
 	return (XORP_OK);
 
@@ -82,29 +83,25 @@ IfConfigObserverNetlink::start(string& error_msg)
     // Listen to the netlink multicast group for network interfaces status
     // and IPv4 addresses.
     //
-    if (ifc().have_ipv4()) {
-	NetlinkSocket4::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
-
-	if (NetlinkSocket4::start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
+    if (ifc().have_ipv4()) 
+	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV4_IFADDR);
 
 #ifdef HAVE_IPV6
     //
     // Listen to the netlink multicast group for network interfaces status
     // and IPv6 addresses.
     //
-    if (ifc().have_ipv6()) {
-	NetlinkSocket6::set_nl_groups(RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
-
-	if (NetlinkSocket6::start(error_msg) < 0) {
-	    string error_msg2;
-	    if (ifc().have_ipv4())
-		NetlinkSocket4::stop(error_msg2);
-	    return (XORP_ERROR);
-	}
-    }
+    if (ifc().have_ipv6())
+	nl_groups |= (RTMGRP_LINK | RTMGRP_IPV6_IFADDR);
 #endif // HAVE_IPV6
+
+    //
+    // Set the netlink multicast groups to listen for on the netlink socket
+    //
+    NetlinkSocket::set_nl_groups(nl_groups);
+
+    if (NetlinkSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = true;
 
@@ -115,25 +112,10 @@ IfConfigObserverNetlink::start(string& error_msg)
 int
 IfConfigObserverNetlink::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-    int ret_value6 = XORP_OK;
-
     if (! _is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop(error_msg);
-    
-#ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
-	string error_msg2;
-	ret_value6 = NetlinkSocket6::stop(error_msg2);
-	if ((ret_value6 < 0) && (ret_value4 >= 0))
-	    error_msg = error_msg2;	// XXX: update the error message
-    }
-#endif
-    
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if (NetlinkSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;

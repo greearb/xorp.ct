@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.23 2005/12/10 01:12:21 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.24 2006/03/16 00:03:54 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -315,8 +315,7 @@ private:
 };
 
 class IfConfigGetNetlink : public IfConfigGet,
-			   public NetlinkSocket4,
-			   public NetlinkSocket6 {
+			   public NetlinkSocket {
 public:
     IfConfigGetNetlink(IfConfig& ifc);
     virtual ~IfConfigGetNetlink();

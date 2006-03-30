@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.16 2005/08/18 15:45:46 bms Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.17 2006/03/16 00:03:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -42,9 +42,8 @@
 
 IfConfigGetNetlink::IfConfigGetNetlink(IfConfig& ifc)
     : IfConfigGet(ifc),
-      NetlinkSocket4(ifc.eventloop()),
-      NetlinkSocket6(ifc.eventloop()),
-      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
+      NetlinkSocket(ifc.eventloop()),
+      _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc_primary();
@@ -69,21 +68,8 @@ IfConfigGetNetlink::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4()) {
-	if (NetlinkSocket4::start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-    
-#ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
-	if (NetlinkSocket6::start(error_msg) < 0) {
-	    string error_msg2;
-	    if (ifc().have_ipv4())
-		NetlinkSocket4::stop(error_msg2);
-	    return (XORP_ERROR);
-	}
-    }
-#endif
+    if (NetlinkSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = true;
 
@@ -93,25 +79,10 @@ IfConfigGetNetlink::start(string& error_msg)
 int
 IfConfigGetNetlink::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-    int ret_value6 = XORP_OK;
-
     if (! _is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop(error_msg);
-    
-#ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
-	string error_msg2;
-	ret_value6 = NetlinkSocket6::stop(error_msg2);
-	if ((ret_value6 < 0) && (ret_value4 >= 0))
-	    error_msg = error_msg2;	// XXX: update the error message
-    }
-#endif
-    
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if (NetlinkSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;
@@ -144,10 +115,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     struct sockaddr_nl	snl;
     struct ifinfomsg	*ifinfomsg;
     struct ifaddrmsg	*ifaddrmsg;
-    NetlinkSocket4&	ns4 = *this;
-#ifdef HAVE_IPV6
-    NetlinkSocket6&	ns6 = *this;
-#endif
+    NetlinkSocket&	ns = *this;
     
     //
     // Set the request. First the socket, then the request itself.
@@ -171,8 +139,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_GETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
-    nlh->nlmsg_seq = ns4.seqno();
-    nlh->nlmsg_pid = ns4.pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -180,9 +148,9 @@ IfConfigGetNetlink::read_config(IfTree& it)
     ifinfomsg->ifi_flags = 0;
     ifinfomsg->ifi_change = 0xffffffff;
     
-    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-		   reinterpret_cast<struct sockaddr*>(&snl),
-		   sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl),
+		  sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
 	return false;
@@ -197,14 +165,14 @@ IfConfigGetNetlink::read_config(IfTree& it)
     // may not set the NLM_F_MULTI flag for the multipart messages.
     //
     string error_msg;
-    ns4.set_multipart_message_read(true);
-    if (_ns_reader.receive_data4(nlh->nlmsg_seq, error_msg) != XORP_OK) {
-	ns4.set_multipart_message_read(false);
+    ns.set_multipart_message_read(true);
+    if (_ns_reader.receive_data(ns, nlh->nlmsg_seq, error_msg) != XORP_OK) {
+	ns.set_multipart_message_read(false);
 	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return (false);
     }
     // XXX: reset the multipart message read hackish flag
-    ns4.set_multipart_message_read(false);
+    ns.set_multipart_message_read(false);
     if (parse_buffer_nlm(it, _ns_reader.buffer(), _ns_reader.buffer_size())
 	!= true) {
 	return (false);
@@ -248,8 +216,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    nlh->nlmsg_type = RTM_GETADDR;
 	    // Get the whole table
 	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
-	    nlh->nlmsg_seq = ns4.seqno();
-	    nlh->nlmsg_pid = ns4.pid();
+	    nlh->nlmsg_seq = ns.seqno();
+	    nlh->nlmsg_pid = ns.pid();
 	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
 	    ifaddrmsg->ifa_family = AF_INET;
 	    ifaddrmsg->ifa_prefixlen = 0;
@@ -257,9 +225,9 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
 	
-	    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-			   reinterpret_cast<struct sockaddr*>(&snl),
-			   sizeof(snl))
+	    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+			  reinterpret_cast<struct sockaddr*>(&snl),
+			  sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {
 		XLOG_ERROR("Error writing to netlink socket: %s",
 			   strerror(errno));
@@ -275,16 +243,16 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
 	    string error_msg;
-	    ns4.set_multipart_message_read(true);
-	    if (_ns_reader.receive_data4(nlh->nlmsg_seq, error_msg)
+	    ns.set_multipart_message_read(true);
+	    if (_ns_reader.receive_data(ns, nlh->nlmsg_seq, error_msg)
 		!= XORP_OK) {
-		ns4.set_multipart_message_read(false);
+		ns.set_multipart_message_read(false);
 		XLOG_ERROR("Error reading from netlink socket: %s",
 			   error_msg.c_str());
 		return (false);
 	    }
 	    // XXX: reset the multipart message read hackish flag
-	    ns4.set_multipart_message_read(false);
+	    ns.set_multipart_message_read(false);
 	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
 				 _ns_reader.buffer_size())
 		!= true) {
@@ -303,8 +271,8 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    nlh->nlmsg_type = RTM_GETADDR;
 	    // Get the whole table
 	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
-	    nlh->nlmsg_seq = ns6.seqno();
-	    nlh->nlmsg_pid = ns6.pid();
+	    nlh->nlmsg_seq = ns.seqno();
+	    nlh->nlmsg_pid = ns.pid();
 	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
 	    ifaddrmsg->ifa_family = AF_INET6;
 	    ifaddrmsg->ifa_prefixlen = 0;
@@ -312,9 +280,9 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
 	
-	    if (ns6.sendto(buffer, nlh->nlmsg_len, 0,
-			   reinterpret_cast<struct sockaddr*>(&snl),
-			   sizeof(snl))
+	    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+			  reinterpret_cast<struct sockaddr*>(&snl),
+			  sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {
 		XLOG_ERROR("Error writing to netlink socket: %s",
 			   strerror(errno));
@@ -330,16 +298,16 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // may not set the NLM_F_MULTI flag for the multipart messages.
 	    //
 	    string error_msg;
-	    ns6.set_multipart_message_read(true);
-	    if (_ns_reader.receive_data6(nlh->nlmsg_seq, error_msg)
+	    ns.set_multipart_message_read(true);
+	    if (_ns_reader.receive_data(ns, nlh->nlmsg_seq, error_msg)
 		!= XORP_OK) {
-		ns6.set_multipart_message_read(false);
+		ns.set_multipart_message_read(false);
 		XLOG_ERROR("Error reading from netlink socket: %s",
 			   error_msg.c_str());
 		return (false);
 	    }
 	    // XXX: reset the multipart message read hackish flag
-	    ns6.set_multipart_message_read(false);
+	    ns.set_multipart_message_read(false);
 	    if (parse_buffer_nlm(it, _ns_reader.buffer(),
 				 _ns_reader.buffer_size())
 		!= true) {

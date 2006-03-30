@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_netlink.cc,v 1.10 2005/03/25 02:53:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_netlink.cc,v 1.11 2006/03/16 00:03:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -45,9 +45,8 @@
 
 FtiConfigEntryObserverNetlink::FtiConfigEntryObserverNetlink(FtiConfig& ftic)
     : FtiConfigEntryObserver(ftic),
-      NetlinkSocket4(ftic.eventloop()),
-      NetlinkSocket6(ftic.eventloop()),
-      NetlinkSocketObserver(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
+      NetlinkSocket(ftic.eventloop()),
+      NetlinkSocketObserver(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ftic_primary();
@@ -78,63 +77,46 @@ FtiConfigEntryObserverNetlink::start(string& error_msg)
 
 #else // HAVE_NETLINK_SOCKETS
 
+    uint32_t nl_groups = 0;
+
     if (_is_running)
 	return (XORP_OK);
 
     //
-    // Listen to the netlink multicast group for IPv4 routing entries.
+    // Listen to the netlink multicast group for IPv4 routing entries
     //
-    if (ftic().have_ipv4()) {
-	NetlinkSocket4::set_nl_groups(RTMGRP_IPV4_ROUTE);
-
-	if (NetlinkSocket4::start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
+    if (ftic().have_ipv4())
+	nl_groups |= RTMGRP_IPV4_ROUTE;
 
 #ifdef HAVE_IPV6
     //
-    // Listen to the netlink multicast group for IPv6 routing entries.
+    // Listen to the netlink multicast group for IPv6 routing entries
     //
-    if (ftic().have_ipv6()) {
-	NetlinkSocket6::set_nl_groups(RTMGRP_IPV6_ROUTE);
-
-	if (NetlinkSocket6::start(error_msg) < 0) {
-	    string error_msg2;
-	    if (ftic().have_ipv4())
-		NetlinkSocket4::stop(error_msg2);
-	    return (XORP_ERROR);
-	}
-    }
+    if (ftic().have_ipv6())
+	nl_groups |= RTMGRP_IPV6_ROUTE;
 #endif // HAVE_IPV6
+
+    //
+    // Set the netlink multicast groups to listen for on the netlink socket
+    //
+    NetlinkSocket::set_nl_groups(nl_groups);
+
+    if (NetlinkSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = true;
 
     return (XORP_OK);
 #endif // HAVE_NETLINK_SOCKETS
 }
-    
+
 int
 FtiConfigEntryObserverNetlink::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-    int ret_value6 = XORP_OK;
-
     if (! _is_running)
 	return (XORP_OK);
 
-    if (ftic().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop(error_msg);
-    
-#ifdef HAVE_IPV6
-    if (ftic().have_ipv6()) {
-	string error_msg2;
-	ret_value6 = NetlinkSocket6::stop(error_msg);
-	if ((ret_value6 < 0) && (ret_value4 >= 0))
-	    error_msg = error_msg2;	// XXX: update the error message
-    }
-#endif
-    
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if (NetlinkSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;

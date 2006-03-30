@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.24 2005/12/22 12:18:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.25 2006/03/16 00:03:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -51,9 +51,8 @@
 
 IfConfigSetNetlink::IfConfigSetNetlink(IfConfig& ifc)
     : IfConfigSet(ifc),
-      NetlinkSocket4(ifc.eventloop()),
-      NetlinkSocket6(ifc.eventloop()),
-      _ns_reader(*(NetlinkSocket4 *)this, *(NetlinkSocket6 *)this)
+      NetlinkSocket(ifc.eventloop()),
+      _ns_reader(*(NetlinkSocket *)this)
 {
 #ifdef HAVE_NETLINK_SOCKETS
     register_ifc_primary();
@@ -78,21 +77,8 @@ IfConfigSetNetlink::start(string& error_msg)
     if (_is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4()) {
-	if (NetlinkSocket4::start(error_msg) < 0)
-	    return (XORP_ERROR);
-    }
-    
-#ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
-	if (NetlinkSocket6::start(error_msg) < 0) {
-	    string error_msg2;
-	    if (ifc().have_ipv4())
-		NetlinkSocket4::stop(error_msg2);
-	    return (XORP_ERROR);
-	}
-    }
-#endif
+    if (NetlinkSocket::start(error_msg) < 0)
+	return (XORP_ERROR);
 
     _is_running = true;
 
@@ -102,25 +88,10 @@ IfConfigSetNetlink::start(string& error_msg)
 int
 IfConfigSetNetlink::stop(string& error_msg)
 {
-    int ret_value4 = XORP_OK;
-    int ret_value6 = XORP_OK;
-
     if (! _is_running)
 	return (XORP_OK);
 
-    if (ifc().have_ipv4())
-	ret_value4 = NetlinkSocket4::stop(error_msg);
-    
-#ifdef HAVE_IPV6
-    if (ifc().have_ipv6()) {
-	string error_msg2;
-	ret_value6 = NetlinkSocket6::stop(error_msg2);
-	if ((ret_value6 < 0) && (ret_value4 >= 0))
-	    error_msg = error_msg2;	// XXX: update the error message
-    }
-#endif
-    
-    if ((ret_value4 < 0) || (ret_value6 < 0))
+    if (NetlinkSocket::stop(error_msg) < 0)
 	return (XORP_ERROR);
 
     _is_running = false;
@@ -447,7 +418,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     struct sockaddr_nl	snl;
     struct nlmsghdr*	nlh;
     struct ifinfomsg*	ifinfomsg;
-    NetlinkSocket4&	ns4 = *this;
+    NetlinkSocket&	ns = *this;
 
     UNUSED(ifname);
     UNUSED(is_up);
@@ -468,8 +439,8 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns4.seqno();
-    nlh->nlmsg_pid = ns4.pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -484,14 +455,14 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     }
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len);
 
-    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
-    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					error_msg) < 0) {
 	return (XORP_ERROR);
     }
@@ -588,7 +559,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     struct ifinfomsg*	ifinfomsg;
     struct rtattr*	rtattr;
     int			rta_len;
-    NetlinkSocket4&	ns4 = *this;
+    NetlinkSocket&	ns = *this;
 
     UNUSED(ifname);
 
@@ -607,8 +578,8 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_SETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns4.seqno();
-    nlh->nlmsg_pid = ns4.pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;	// TODO: set to ARPHRD_ETHER ??
@@ -629,14 +600,14 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     memcpy(RTA_DATA(rtattr), &ether_addr, ETH_ALEN);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
-    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					error_msg) < 0) {
 	return (XORP_ERROR);
     }
@@ -697,7 +668,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     struct ifinfomsg*	ifinfomsg;
     struct rtattr*	rtattr;
     int			rta_len;
-    NetlinkSocket4&	ns4 = *this;
+    NetlinkSocket&	ns = *this;
 
     UNUSED(ifname);
 
@@ -716,8 +687,8 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns4.seqno();
-    nlh->nlmsg_pid = ns4.pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -739,14 +710,14 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     memcpy(RTA_DATA(rtattr), &uint_mtu, sizeof(uint_mtu));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns4.sendto(buffer, nlh->nlmsg_len, 0,
-		   reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
-    if (NlmUtils::check_netlink_request(_ns_reader, ns4, nlh->nlmsg_seq,
+    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					error_msg) < 0) {
 	return (XORP_ERROR);
     }
@@ -801,7 +772,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     struct rtattr*	rtattr;
     int			rta_len;
     uint8_t*		data;
-    NetlinkSocket*	ns_ptr = NULL;
+    NetlinkSocket&	ns = *this;
 
     debug_msg("add_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
@@ -845,27 +816,6 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
 
-    // Get the pointer to the NetlinkSocket
-    switch(addr.af()) {
-    case AF_INET:
-    {
-	NetlinkSocket4& ns4 = *this;
-	ns_ptr = &ns4;
-	break;
-    }
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-	NetlinkSocket6& ns6 = *this;
-	ns_ptr = &ns6;
-	break;
-    }
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-
     //
     // Set the request
     //
@@ -873,8 +823,8 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
     nlh->nlmsg_type = RTM_NEWADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns_ptr->seqno();
-    nlh->nlmsg_pid = ns_ptr->pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;
@@ -917,14 +867,14 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	}
     }
 
-    if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
-		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
-    if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
+    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					error_msg) < 0) {
 	return (XORP_ERROR);
     }
@@ -948,7 +898,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     struct rtattr*	rtattr;
     int			rta_len;
     uint8_t*		data;
-    NetlinkSocket*	ns_ptr = NULL;
+    NetlinkSocket&	ns = *this;
 
     debug_msg("delete_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
@@ -990,27 +940,6 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
     snl.nl_groups = 0;
 
-    // Get the pointer to the NetlinkSocket
-    switch(addr.af()) {
-    case AF_INET:
-    {
-	NetlinkSocket4& ns4 = *this;
-	ns_ptr = &ns4;
-	break;
-    }
-#ifdef HAVE_IPV6
-    case AF_INET6:
-    {
-	NetlinkSocket6& ns6 = *this;
-	ns_ptr = &ns6;
-	break;
-    }
-#endif // HAVE_IPV6
-    default:
-	XLOG_UNREACHABLE();
-	break;
-    }
-
     //
     // Set the request
     //
@@ -1018,8 +947,8 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
     nlh->nlmsg_type = RTM_DELADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
-    nlh->nlmsg_seq = ns_ptr->seqno();
-    nlh->nlmsg_pid = ns_ptr->pid();
+    nlh->nlmsg_seq = ns.seqno();
+    nlh->nlmsg_pid = ns.pid();
     ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;
@@ -1041,14 +970,14 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     addr.copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns_ptr->sendto(buffer, nlh->nlmsg_len, 0,
-		       reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
+    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
 			     strerror(errno));
 	return (XORP_ERROR);
     }
-    if (NlmUtils::check_netlink_request(_ns_reader, *ns_ptr, nlh->nlmsg_seq,
+    if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
 					error_msg) < 0) {
 	return (XORP_ERROR);
     }
