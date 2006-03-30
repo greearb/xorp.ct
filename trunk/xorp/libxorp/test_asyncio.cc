@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.13 2006/03/16 00:04:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_asyncio.cc,v 1.14 2006/03/30 00:29:13 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -152,7 +152,7 @@ local_comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     struct sockaddr_in	*psin;
     socklen_t		sslen;
     SOCKET		st[3];
-    long		optval;
+    u_long		optval;
     int			numtries, error, intdomain;
     unsigned short	port;
     static const int	CSP_LOWPORT = 40000;

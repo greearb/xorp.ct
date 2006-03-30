@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.31 2006/03/01 12:55:33 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.32 2006/03/30 00:32:02 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -181,7 +181,7 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
     struct sockaddr_in	*psin;
     socklen_t		sslen;
     SOCKET		st[3];
-    long		optval;
+    u_long		optval;
     int			numtries, error, intdomain;
     unsigned short	port;
     static const int	CSP_LOWPORT = 40000;
