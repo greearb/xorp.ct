@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.8 2006/03/29 17:25:35 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.9 2006/03/30 15:23:09 bms Exp $"
 
 #include "fea_module.h"
 
@@ -328,24 +328,24 @@ FtiConfigEntrySetIPHelper::delete_entry(const FteX& fte)
     // so Windows will pick the metric from the interface's default metric.
     //
     ipfwdrow.dwForwardMetric1 = ipfwdrow.dwForwardMetric2 =
-ipfwdrow.dwForwardMetric3 = ipfwdrow.dwForwardMetric4 =
-ipfwdrow.dwForwardMetric5 = MIB_IPROUTE_METRIC_UNUSED;
+	ipfwdrow.dwForwardMetric3 = ipfwdrow.dwForwardMetric4 =
+	ipfwdrow.dwForwardMetric5 = MIB_IPROUTE_METRIC_UNUSED;
 
     // XXX: debug_msg() does not support >=12 arguments at this time
     debug_msg("DeleteIpForwardEntry(%p) : %08lx %08lx %lu %08lx %08lx %lu "
-"%lu %lu %lu %lu\n",
-		&ipfwdrow,
-		ipfwdrow.dwForwardDest,
-		ipfwdrow.dwForwardMask,
-		ipfwdrow.dwForwardPolicy,
-		ipfwdrow.dwForwardNextHop,
-		ipfwdrow.dwForwardIfIndex,
-		ipfwdrow.dwForwardType, // format string break above
-		ipfwdrow.dwForwardProto,
-		ipfwdrow.dwForwardAge,
-		ipfwdrow.dwForwardNextHopAS,
-		ipfwdrow.dwForwardMetric1);
-
+	      "%lu %lu %lu %lu\n",
+	      &ipfwdrow,
+	      ipfwdrow.dwForwardDest,
+	      ipfwdrow.dwForwardMask,
+	      ipfwdrow.dwForwardPolicy,
+	      ipfwdrow.dwForwardNextHop,
+	      ipfwdrow.dwForwardIfIndex,
+	      ipfwdrow.dwForwardType,		// format string break above
+	      ipfwdrow.dwForwardProto,
+	      ipfwdrow.dwForwardAge,
+	      ipfwdrow.dwForwardNextHopAS,
+	      ipfwdrow.dwForwardMetric1);
+    
     DWORD result = DeleteIpForwardEntry(&ipfwdrow);
     if (result != NO_ERROR) {
 	XLOG_ERROR("DeleteIpForwardEntry() failed, error: %s\n",
