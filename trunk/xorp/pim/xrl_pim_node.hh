@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.64 2006/01/23 21:03:43 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.65 2006/03/16 00:04:56 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -554,7 +554,12 @@ protected:
     XrlCmdError redist_transaction4_0_1_delete_route(
 	// Input values,
 	const uint32_t&	tid,
-	const IPv4Net&	network,
+	const IPv4Net&	dst,
+	const IPv4&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 
@@ -637,7 +642,12 @@ protected:
     XrlCmdError redist_transaction6_0_1_delete_route(
 	// Input values,
 	const uint32_t&	tid,
-	const IPv6Net&	network,
+	const IPv6Net&	dst,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.18 2006/01/04 05:55:28 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.19 2006/03/16 00:05:47 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -222,7 +222,12 @@ public:
 				      const uint32_t&	admin_distance,
 				      const string&	cookie,
 				      const string&	protocol_origin);
-    XrlCmdError redist4_0_1_delete_route(const IPv4Net&	network,
+    XrlCmdError redist4_0_1_delete_route(const IPv4Net&	dst,
+					 const IPv4&	nexthop,
+					 const string&	ifname,
+					 const string&	vifname,
+					 const uint32_t& metric,
+					 const uint32_t& admin_distance,
 					 const string&	cookie,
 					 const string&	protocol_origin);
 
@@ -236,7 +241,12 @@ public:
 				      const uint32_t&	admin_distance,
 				      const string&	cookie,
 				      const string&	protocol_origin);
-    XrlCmdError redist6_0_1_delete_route(const IPv6Net&	network,
+    XrlCmdError redist6_0_1_delete_route(const IPv6Net&	dst,
+					 const IPv6&	nexthop,
+					 const string&	ifname,
+					 const string&	vifname,
+					 const uint32_t& metric,
+					 const uint32_t& admin_distance,
 					 const string&	cookie,
 					 const string&	protocol_origin);
 
@@ -594,11 +604,25 @@ ShowRoutesProcessor::redist4_0_1_add_route(const IPv4Net&	dst,
 }
 
 XrlCmdError
-ShowRoutesProcessor::redist4_0_1_delete_route(const IPv4Net&	/* network */,
-					      const string&	/* cookie  */,
-					      const string&	/* protocol_origin */)
+ShowRoutesProcessor::redist4_0_1_delete_route(const IPv4Net&	dst,
+					      const IPv4&	nexthop,
+					      const string&	ifname,
+					      const string&	vifname,
+					      const uint32_t&	metric,
+					      const uint32_t&	admin_distance,
+					      const string&	cookie,
+					      const string&	protocol_origin)
 {
-    // XXX For now we ignore deletions that occur during route dump
+    // TODO: XXX: For now we ignore deletions that occur during route dump
+    UNUSED(dst);
+    UNUSED(nexthop);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_distance);
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+
     return XrlCmdError::OKAY();
 }
 
@@ -650,11 +674,25 @@ ShowRoutesProcessor::redist6_0_1_add_route(const IPv6Net&	dst,
 }
 
 XrlCmdError
-ShowRoutesProcessor::redist6_0_1_delete_route(const IPv6Net&	/* network */,
-					      const string&	/* cookie */,
-					      const string&	/* protocol_origin*/)
+ShowRoutesProcessor::redist6_0_1_delete_route(const IPv6Net&	dst,
+					      const IPv6&	nexthop,
+					      const string&	ifname,
+					      const string&	vifname,
+					      const uint32_t&	metric,
+					      const uint32_t&	admin_distance,
+					      const string&	cookie,
+					      const string&	protocol_origin)
 {
-    // XXX For now we ignore deletions that occur during route dump
+    // TODO: XXX: For now we ignore deletions that occur during route dump
+    UNUSED(dst);
+    UNUSED(nexthop);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_distance);
+    UNUSED(cookie);
+    UNUSED(protocol_origin);
+
     return XrlCmdError::OKAY();
 }
 

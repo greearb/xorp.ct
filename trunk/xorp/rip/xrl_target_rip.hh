@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.19 2006/02/09 09:20:44 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.20 2006/03/16 00:05:55 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -314,6 +314,11 @@ public:
 				      const string&		protocol_origin);
 
     XrlCmdError redist4_0_1_delete_route(const IPv4Net&		net,
+					 const IPv4&		nexthop,
+					 const string&		ifname,
+					 const string&		vifname,
+					 const uint32_t&	metric,
+					 const uint32_t&	ad,
 					 const string&		cookie,
 					 const string&		protocol_origin);
 

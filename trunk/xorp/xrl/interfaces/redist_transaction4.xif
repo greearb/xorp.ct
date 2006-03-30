@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.7 2004/08/03 05:21:27 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist_transaction4.xif,v 1.8 2004/08/03 18:09:15 pavlin Exp $ */
 
 /*
  * RIB routes redistribution transaction-based XRL interface.
@@ -45,20 +45,25 @@ interface redist_transaction4/0.1 {
 	 * @param protocol_origin the name of the protocol that originated
 	 * this routing entry.
 	 */
-	add_route ? tid:u32						\
-		  & dst:ipv4net						\
-		  & nexthop:ipv4					\
-		  & ifname:txt						\
-		  & vifname:txt						\
-		  & metric:u32						\
-		  & admin_distance:u32					\
-		  & cookie:txt						\
-		  & protocol_origin:txt
+	add_route	? tid:u32					\
+			& dst:ipv4net					\
+			& nexthop:ipv4					\
+			& ifname:txt					\
+			& vifname:txt					\
+			& metric:u32					\
+			& admin_distance:u32				\
+			& cookie:txt					\
+			& protocol_origin:txt
 
-	delete_route ? tid:u32						\
-		     & network:ipv4net					\
-		     & cookie:txt					\
-		     & protocol_origin:txt
+	delete_route	? tid:u32					\
+			& dst:ipv4net					\
+			& nexthop:ipv4					\
+			& ifname:txt					\
+			& vifname:txt					\
+			& metric:u32					\
+			& admin_distance:u32				\
+			& cookie:txt					\
+			& protocol_origin:txt
 
 	/**
 	 * Delete all routing entries.

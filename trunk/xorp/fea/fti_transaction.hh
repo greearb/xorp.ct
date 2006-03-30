@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fti_transaction.hh,v 1.11 2005/03/25 02:53:00 pavlin Exp $
+// $XORP: xorp/fea/fti_transaction.hh,v 1.12 2006/03/16 00:03:49 pavlin Exp $
 
 #ifndef __FEA_FTI_TRANSACTION_HH__
 #define __FEA_FTI_TRANSACTION_HH__
@@ -80,8 +80,16 @@ class FtiDeleteEntry4 : public FtiTransactionOperation {
 public:
     FtiDeleteEntry4(FtiConfig&		ftic,
 		    const IPv4Net&	net,
+		    const IPv4&		nexthop,
+		    const string&	ifname,
+		    const string&	vifname,
+		    uint32_t		metric,
+		    uint32_t		admin_distance,
+		    bool		xorp_route,
 		    bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net) {
+	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
+					      metric, admin_distance,
+					      xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }
@@ -145,8 +153,16 @@ class FtiDeleteEntry6 : public FtiTransactionOperation {
 public:
     FtiDeleteEntry6(FtiConfig&		ftic,
 		    const IPv6Net&	net,
+		    const IPv6&		nexthop,
+		    const string&	ifname,
+		    const string&	vifname,
+		    uint32_t		metric,
+		    uint32_t		admin_distance,
+		    bool		xorp_route,
 		    bool		is_connected_route)
-	: FtiTransactionOperation(ftic), _fte(net) {
+	: FtiTransactionOperation(ftic), _fte(net, nexthop, ifname, vifname,
+					      metric, admin_distance,
+					      xorp_route) {
 	if (is_connected_route)
 	    _fte.mark_connected_route();
     }

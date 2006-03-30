@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.22 2006/01/04 05:55:27 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.23 2006/03/16 00:05:30 pavlin Exp $"
 
 #include <list>
 #include <string>
@@ -103,6 +103,11 @@ public:
     void dispatch_complete(const XrlError& xe);
 protected:
     IPNet<A>	_net;
+    A		_nexthop;
+    string	_ifname;
+    string	_vifname;
+    uint32_t	_metric;
+    uint32_t	_admin_distance;
     string	_protocol_origin;
 };
 
@@ -142,9 +147,13 @@ private:
 
 template <typename A>
 AddRoute<A>::AddRoute(RedistXrlOutput<A>* parent, const IPRouteEntry<A>& ipr)
-    : RedistXrlTask<A>(parent), _net(ipr.net()), _nexthop(ipr.nexthop_addr()),
-      _ifname(ipr.vif()->ifname()), _vifname(ipr.vif()->name()),
-      _metric(ipr.metric()), _admin_distance(ipr.admin_distance()),
+    : RedistXrlTask<A>(parent),
+      _net(ipr.net()),
+      _nexthop(ipr.nexthop_addr()),
+      _ifname(ipr.vif()->ifname()),
+      _vifname(ipr.vif()->name()),
+      _metric(ipr.metric()),
+      _admin_distance(ipr.admin_distance()),
       _protocol_origin(ipr.protocol().name())
 {
 }
@@ -165,7 +174,7 @@ AddRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     _admin_distance, p->cookie(),
 			     _protocol_origin,
 			     callback(this, &AddRoute<IPv4>::dispatch_complete)
-			     );
+	);
 }
 
 template <>
@@ -184,7 +193,7 @@ AddRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     _admin_distance, p->cookie(),
 			     _protocol_origin,
 			     callback(this, &AddRoute<IPv6>::dispatch_complete)
-			     );
+	);
 
 }
 
@@ -218,6 +227,11 @@ DeleteRoute<A>::DeleteRoute(RedistXrlOutput<A>* parent,
 			    const IPRouteEntry<A>& ipr)
     : RedistXrlTask<A>(parent),
       _net(ipr.net()),
+      _nexthop(ipr.nexthop_addr()),
+      _ifname(ipr.vif()->ifname()),
+      _vifname(ipr.vif()->name()),
+      _metric(ipr.metric()),
+      _admin_distance(ipr.admin_distance()),
       _protocol_origin(ipr.protocol().name())
 {
 }
@@ -233,12 +247,13 @@ DeleteRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
     RedistXrlOutput<IPv4>* p = this->parent();
 
     XrlRedist4V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-		p->xrl_target_name().c_str(),
-		_net, p->cookie(),
-		_protocol_origin,
-		callback(this, &DeleteRoute<IPv4>::dispatch_complete)
-		);
+    return cl.send_delete_route(p->xrl_target_name().c_str(),
+				_net, _nexthop, _ifname, _vifname, _metric,
+				_admin_distance, p->cookie(),
+				_protocol_origin,
+				callback(this,
+					 &DeleteRoute<IPv4>::dispatch_complete)
+	);
 }
 
 template <>
@@ -252,12 +267,13 @@ DeleteRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
     RedistXrlOutput<IPv6>* p = this->parent();
 
     XrlRedist6V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-		p->xrl_target_name().c_str(),
-		_net, p->cookie(),
-		_protocol_origin,
-		callback(this, &DeleteRoute<IPv6>::dispatch_complete)
-		);
+    return cl.send_delete_route(p->xrl_target_name().c_str(),
+				_net, _nexthop, _ifname, _vifname, _metric,
+				_admin_distance, p->cookie(),
+				_protocol_origin,
+				callback(this,
+					 &DeleteRoute<IPv6>::dispatch_complete)
+	);
 }
 
 template <typename A>
@@ -695,7 +711,7 @@ AddTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     _protocol_origin,
 			     callback(static_cast<AddRoute<IPv4>*>(this),
 				      &AddRoute<IPv4>::dispatch_complete)
-			     );
+	);
 }
 
 template <>
@@ -728,7 +744,7 @@ AddTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			     _protocol_origin,
 			     callback(static_cast<AddRoute<IPv6>*>(this),
 				      &AddRoute<IPv6>::dispatch_complete)
-			     );
+	);
 }
 
 
@@ -756,13 +772,13 @@ DeleteTransactionRoute<IPv4>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      _net.str().c_str()));
 
     XrlRedistTransaction4V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-	p->xrl_target_name().c_str(),
-	p->tid(),
-	_net, p->cookie(),
-	_protocol_origin,
-	callback(static_cast<DeleteRoute<IPv4>*>(this),
-		 &DeleteRoute<IPv4>::dispatch_complete)
+    return cl.send_delete_route(p->xrl_target_name().c_str(),
+				p->tid(),
+				_net, _nexthop, _ifname, _vifname, _metric,
+				_admin_distance, p->cookie(),
+				_protocol_origin,
+				callback(static_cast<DeleteRoute<IPv4>*>(this),
+					 &DeleteRoute<IPv4>::dispatch_complete)
 	);
 }
 
@@ -787,13 +803,13 @@ DeleteTransactionRoute<IPv6>::dispatch(XrlRouter& xrl_router, Profile& profile)
 			      _net.str().c_str()));
 
     XrlRedistTransaction6V0p1Client cl(&xrl_router);
-    return cl.send_delete_route(
-	p->xrl_target_name().c_str(),
-	p->tid(),
-	_net, p->cookie(),
-	_protocol_origin,
-	callback(static_cast<DeleteRoute<IPv6>*>(this),
-		 &DeleteRoute<IPv6>::dispatch_complete)
+    return cl.send_delete_route(p->xrl_target_name().c_str(),
+				p->tid(),
+				_net, _nexthop, _ifname, _vifname, _metric,
+				_admin_distance, p->cookie(),
+				_protocol_origin,
+				callback(static_cast<DeleteRoute<IPv6>*>(this),
+					 &DeleteRoute<IPv6>::dispatch_complete)
 	);
 }
 

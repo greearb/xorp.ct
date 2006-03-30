@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.92 2006/01/04 05:55:26 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.93 2006/01/23 21:03:42 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -3617,8 +3617,8 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     // Input values, 
     const uint32_t&	tid,
     const IPv4Net&	dst,
-    const IPv4&		nexthop, 
-    const string&	/* ifname */, 
+    const IPv4&		nexthop,
+    const string&	ifname,
     const string&	vifname,
     const uint32_t&	metric,
     const uint32_t&	admin_distance,
@@ -3629,6 +3629,7 @@ XrlPimNode::redist_transaction4_0_1_add_route(
     uint32_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
+    UNUSED(ifname);
     UNUSED(cookie);
     UNUSED(protocol_origin);
 
@@ -3667,13 +3668,23 @@ XrlPimNode::redist_transaction4_0_1_add_route(
 XrlCmdError
 XrlPimNode::redist_transaction4_0_1_delete_route(
     // Input values, 
-    const uint32_t&	tid, 
-    const IPv4Net&	network,
+    const uint32_t&	tid,
+    const IPv4Net&	dst,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
     string error_msg;
 
+    UNUSED(nexthop);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_distance);
     UNUSED(cookie);
     UNUSED(protocol_origin);
 
@@ -3689,7 +3700,7 @@ XrlPimNode::redist_transaction4_0_1_delete_route(
     //
     // Create the Mrib entry
     //
-    Mrib mrib = Mrib(IPvXNet(network));
+    Mrib mrib = Mrib(IPvXNet(dst));
     
     //
     // Add the Mrib to the list of pending transactions as an 'remove()' entry
@@ -3816,8 +3827,8 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     // Input values, 
     const uint32_t&	tid,
     const IPv6Net&	dst,
-    const IPv6&		nexthop, 
-    const string&	/* ifname */, 
+    const IPv6&		nexthop,
+    const string&	ifname,
     const string&	vifname,
     const uint32_t&	metric,
     const uint32_t&	admin_distance,
@@ -3828,6 +3839,7 @@ XrlPimNode::redist_transaction6_0_1_add_route(
     uint32_t vif_index = Vif::VIF_INDEX_INVALID;
     PimVif *pim_vif = PimNode::vif_find_by_name(vifname);
 
+    UNUSED(ifname);
     UNUSED(cookie);
     UNUSED(protocol_origin);
 
@@ -3866,13 +3878,23 @@ XrlPimNode::redist_transaction6_0_1_add_route(
 XrlCmdError
 XrlPimNode::redist_transaction6_0_1_delete_route(
     // Input values, 
-    const uint32_t&	tid, 
-    const IPv6Net&	network,
+    const uint32_t&	tid,
+    const IPv6Net&	dst,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
     string error_msg;
 
+    UNUSED(nexthop);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_distance);
     UNUSED(cookie);
     UNUSED(protocol_origin);
 
@@ -3888,7 +3910,7 @@ XrlPimNode::redist_transaction6_0_1_delete_route(
     //
     // Create the Mrib entry
     //
-    Mrib mrib = Mrib(IPvXNet(network));
+    Mrib mrib = Mrib(IPvXNet(dst));
     
     //
     // Add the Mrib to the list of pending transactions as an 'remove()' entry

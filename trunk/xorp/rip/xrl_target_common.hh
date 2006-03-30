@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.24 2006/03/06 03:23:43 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.25 2006/03/16 00:05:55 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -289,6 +289,11 @@ public:
 				      const string&		protocol_origin);
 
     XrlCmdError redistx_0_1_delete_route(const IPNet<A>&	net,
+					 const A&		nexthop,
+					 const string&		ifname,
+					 const string&		vifname,
+					 const uint32_t&	metric,
+					 const uint32_t&	ad,
 					 const string&		cookie,
 					 const string&		protocol_origin);
 
@@ -1200,14 +1205,23 @@ template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 					     const A&		nexthop,
-					     const string&	/* ifname */,
-					     const string&	/* vifname */,
-					     const uint32_t&	/* metric */,
-					     const uint32_t&	/* admin_d */,
+					     const string&	ifname,
+					     const string&	vifname,
+					     const uint32_t&	metric,
+					     const uint32_t&	admin_d,
 					     const string&	cookie,
-					     const string&	/* protocol_origin */)
+					     const string&	protocol_origin)
 {
-    // We use cookie of the protocol name to make find the relevant redist table simple.
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_d);
+    UNUSED(protocol_origin);
+
+    //
+    // XXX: We use cookie of the protocol name to make find the relevant
+    // redist table simple.
+    //
     _xrm.add_route(cookie, net, nexthop, PolicyTags());
     return XrlCmdError::OKAY();
 }
@@ -1215,9 +1229,25 @@ XrlRipCommonTarget<A>::redistx_0_1_add_route(const IPNet<A>&	net,
 template <typename A>
 XrlCmdError
 XrlRipCommonTarget<A>::redistx_0_1_delete_route(const IPNet<A>&	net,
+						const A&	nexthop,
+						const string&	ifname,
+						const string&	vifname,
+						const uint32_t&	metric,
+						const uint32_t&	admin_d,
 						const string&	cookie,
-						const string&	/* protocol_origin */)
+						const string&	protocol_origin)
 {
+    UNUSED(nexthop);
+    UNUSED(ifname);
+    UNUSED(vifname);
+    UNUSED(metric);
+    UNUSED(admin_d);
+    UNUSED(protocol_origin);
+
+    //
+    // XXX: We use cookie of the protocol name to make find the relevant
+    // redist table simple.
+    //
     _xrm.delete_route(cookie, net);
     return XrlCmdError::OKAY();
 }

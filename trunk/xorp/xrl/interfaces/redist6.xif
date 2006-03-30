@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/redist6.xif,v 1.7 2004/08/03 03:01:09 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/redist6.xif,v 1.8 2005/10/27 05:05:40 pavlin Exp $ */
 
 /*
  * RIB routes redistribution XRL interface.
@@ -23,18 +23,23 @@ interface redist6/0.1 {
 	 * @param protocol_origin the name of the protocol that originated
 	 *        this routing entry.
 	 */
-	add_route ? dst:ipv6net						\
-		  & nexthop:ipv6					\
-		  & ifname:txt						\
-		  & vifname:txt						\
-		  & metric:u32						\
-		  & admin_distance:u32					\
-		  & cookie:txt						\
-		  & protocol_origin:txt
+	add_route	? dst:ipv6net					\
+			& nexthop:ipv6					\
+			& ifname:txt					\
+			& vifname:txt					\
+			& metric:u32					\
+			& admin_distance:u32				\
+			& cookie:txt					\
+			& protocol_origin:txt
 
-	delete_route ? network:ipv6net					\
-		     & cookie:txt					\
-		     & protocol_origin:txt
+	delete_route	? dst:ipv6net					\
+			& nexthop:ipv6					\
+			& ifname:txt					\
+			& vifname:txt					\
+			& metric:u32					\
+			& admin_distance:u32				\
+			& cookie:txt					\
+			& protocol_origin:txt
 
 	/**
 	 * When route redistribution begins, the receiver is sent the existing

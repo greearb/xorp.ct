@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.56 2006/03/16 00:04:05 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.57 2006/03/26 08:05:03 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -918,7 +918,12 @@ public:
     XrlCmdError redist_transaction4_0_1_delete_route(
 	// Input values,
 	const uint32_t&	tid,
-	const IPv4Net&	network,
+	const IPv4Net&	dst,
+	const IPv4&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 
@@ -1001,7 +1006,12 @@ public:
     XrlCmdError redist_transaction6_0_1_delete_route(
 	// Input values,
 	const uint32_t&	tid,
-	const IPv6Net&	network,
+	const IPv6Net&	dst,
+	const IPv6&	nexthop,
+	const string&	ifname,
+	const string&	vifname,
+	const uint32_t&	metric,
+	const uint32_t&	admin_distance,
 	const string&	cookie,
 	const string&	protocol_origin);
 

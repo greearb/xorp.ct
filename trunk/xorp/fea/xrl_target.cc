@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.79 2006/03/16 00:04:05 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.80 2006/03/26 08:05:03 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2090,15 +2090,27 @@ XrlCmdError
 XrlFeaTarget::redist_transaction4_0_1_delete_route(
     // Input values,
     const uint32_t&	tid,
-    const IPv4Net&	network,
+    const IPv4Net&	dst,
+    const IPv4&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
+    bool is_xorp_route;
     bool is_connected_route = false;
 
     debug_msg("redist_transaction4_0_1_delete_route(): "
-	      "network = %s protocol_origin = %s\n",
-	      network.str().c_str(),
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str());
 
     UNUSED(cookie);
@@ -2106,18 +2118,22 @@ XrlFeaTarget::redist_transaction4_0_1_delete_route(
     if (! have_ipv4())
 	return XrlCmdError::COMMAND_FAILED("IPv4 is not available");
 
+    is_xorp_route = true;	// XXX: unconditionally set to true
+
     // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in,
-		     c_format("delete %s", network.str().c_str()));
+		     c_format("delete %s", dst.str().c_str()));
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry4(_xftm.ftic(), network, is_connected_route)
+	new FtiDeleteEntry4(_xftm.ftic(), dst, nexthop, ifname, vifname,
+			    metric, admin_distance, is_xorp_route,
+			    is_connected_route)
 	);
     return _xftm.add(tid, op);
 }
@@ -2220,15 +2236,27 @@ XrlCmdError
 XrlFeaTarget::redist_transaction6_0_1_delete_route(
     // Input values,
     const uint32_t&	tid,
-    const IPv6Net&	network,
+    const IPv6Net&	dst,
+    const IPv6&		nexthop,
+    const string&	ifname,
+    const string&	vifname,
+    const uint32_t&	metric,
+    const uint32_t&	admin_distance,
     const string&	cookie,
     const string&	protocol_origin)
 {
+    bool is_xorp_route;
     bool is_connected_route = false;
 
     debug_msg("redist_transaction6_0_1_delete_route(): "
-	      "network = %s protocol_origin = %s\n",
-	      network.str().c_str(),
+	      "dst = %s nexthop = %s ifname = %s vifname = %s "
+	      "metric = %u admin_distance = %u protocol_origin = %s\n",
+	      dst.str().c_str(),
+	      nexthop.str().c_str(),
+	      ifname.c_str(),
+	      vifname.c_str(),
+	      XORP_UINT_CAST(metric),
+	      XORP_UINT_CAST(admin_distance),
 	      protocol_origin.c_str());
 
     UNUSED(cookie);
@@ -2236,18 +2264,22 @@ XrlFeaTarget::redist_transaction6_0_1_delete_route(
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
+    is_xorp_route = true;	// XXX: unconditionally set to true
+
     // TODO: XXX: get rid of the hard-coded "connected" string here
     if (protocol_origin == "connected")
 	is_connected_route = true;
 
     if (_profile.enabled(profile_route_in))
 	_profile.log(profile_route_in,
-		     c_format("delete %s", network.str().c_str()));
+		     c_format("delete %s", dst.str().c_str()));
 
     // FtiTransactionManager::Operation is a ref_ptr object, allocated
     // memory here is handed it to to manage.
     FtiTransactionManager::Operation op(
-	new FtiDeleteEntry6(_xftm.ftic(), network, is_connected_route)
+	new FtiDeleteEntry6(_xftm.ftic(), dst, nexthop, ifname, vifname,
+			    metric, admin_distance, is_xorp_route,
+			    is_connected_route)
 	);
     return _xftm.add(tid, op);
 }
