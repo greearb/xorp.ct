@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.20 2005/12/21 09:42:55 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.21 2006/03/01 12:55:33 bms Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
@@ -68,7 +68,7 @@ comm_init(void)
     if (init_flag)
 	return (XORP_OK);
 
-#if defined(HOST_OS_WINDOWS)
+#ifdef HOST_OS_WINDOWS
     {
 	int result;
 	WORD version;
@@ -84,7 +84,7 @@ comm_init(void)
 	    return (XORP_ERROR);
 	}
     }
-#endif
+#endif /* HOST_OS_WINDOWS */
 
     init_flag = 1;
 
@@ -332,10 +332,11 @@ comm_bind_tcp6(const struct in6_addr *my_addr, unsigned short my_port,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_bind_tcp6", my_addr, my_port, is_blocking);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -358,7 +359,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 	    return comm_bind_tcp4(&sin->sin_addr, sin->sin_port, is_blocking);
 	}
 	break;
-#ifdef AF_INET6
+#ifdef HAVE_IPV6
     case AF_INET6:
 	{
 	    const struct sockaddr_in6 *sin = (const struct sockaddr_in6 *)((const void *)sock);
@@ -366,7 +367,7 @@ comm_bind_tcp(const struct sockaddr *sock, int is_blocking)
 				  is_blocking);
 	}
 	break;
-#endif
+#endif /* HAVE_IPV6 */
     default:
 	XLOG_FATAL("Error comm_bind_tcp invalid family = %d", sock->sa_family);
 	return (XORP_ERROR);
@@ -437,10 +438,11 @@ comm_bind_udp6(const struct in6_addr *my_addr, unsigned short my_port,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_bind_udp6", my_addr, my_port, is_blocking);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 
@@ -569,11 +571,12 @@ comm_bind_join_udp6(const struct in6_addr *mcast_addr,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_bind_join_udp6", mcast_addr, join_if_index,
 		      my_port, reuse_flag, is_blocking);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -665,14 +668,15 @@ comm_connect_tcp6(const struct in6_addr *remote_addr,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     if (in_progress != NULL)
 	*in_progress = 0;
 
     comm_sock_no_ipv6("comm_connect_tcp6", remote_addr, remote_port,
 		      is_blocking, in_progress);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -764,14 +768,15 @@ comm_connect_udp6(const struct in6_addr *remote_addr,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     if (in_progress != NULL)
 	*in_progress = 0;
 
     comm_sock_no_ipv6("comm_connect_udp6", remote_addr, remote_port,
 		      is_blocking, in_progress);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -885,13 +890,13 @@ comm_bind_connect_udp6(const struct in6_addr *local_addr,
     }
 
     return (sock);
-#else
+
+#else /* ! HAVE_IPV6 */
     if (in_progress != NULL)
 	*in_progress = 0;
 
     comm_sock_no_ipv6("comm_bind_connect_udp6", local_addr, local_port,
 		      remote_addr, remote_port, is_blocking, in_progress);
     return (XORP_BAD_SOCKET);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
-

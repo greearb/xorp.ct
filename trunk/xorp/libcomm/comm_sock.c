@@ -31,7 +31,7 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.30 2005/12/21 09:42:55 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.31 2006/03/01 12:55:33 bms Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
@@ -175,7 +175,8 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 	return (XORP_ERROR);
     }
     return (XORP_OK);
-#else
+
+#else /* HOST_OS_WINDOWS */
     struct sockaddr_storage ss;
     struct sockaddr_in	*psin;
     socklen_t		sslen;
@@ -219,7 +220,7 @@ comm_sock_pair(int domain, int type, int protocol, xsock_t sv[2])
 	ss.ss_family = AF_INET6;
 	psin6->sin6_addr = in6addr_loopback;
     } else
-#endif
+#endif /* HAVE_IPV6 */
     {
 	sslen = sizeof(struct sockaddr_in);
 	ss.ss_family = AF_INET;
@@ -413,10 +414,10 @@ comm_sock_bind6(xsock_t sock, const struct in6_addr *my_addr,
     }
 
     return (XORP_OK);
-#else
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_sock_bind6", sock, my_addr, my_port);
     return (XORP_ERROR);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -438,14 +439,14 @@ comm_sock_bind(xsock_t sock, const struct sockaddr *sin)
 	    return comm_sock_bind4(sock, &sin4->sin_addr, sin4->sin_port);
 	}
 	break;
-#ifdef AF_INET6
+#ifdef HAVE_IPV6
     case AF_INET6:
 	{
 	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
 	    return comm_sock_bind6(sock, &sin6->sin6_addr, sin6->sin6_port);
 	}
 	break;
-#endif
+#endif /* HAVE_IPV6 */
     default:
 	XLOG_FATAL("Error comm_sock_bind invalid family = %d", sin->sa_family);
 	return (XORP_ERROR);
@@ -552,10 +553,11 @@ comm_sock_join6(xsock_t sock, const struct in6_addr *mcast_addr,
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_sock_join6", sock, mcast_addr, my_ifindex);
     return (XORP_ERROR);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -654,10 +656,11 @@ comm_sock_leave6(xsock_t sock, const struct in6_addr *mcast_addr,
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_sock_leave6", sock, mcast_addr, my_ifindex);
     return (XORP_ERROR);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -810,14 +813,15 @@ comm_sock_connect6(xsock_t sock, const struct in6_addr *remote_addr,
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! HAVE_IPV6 */
     if (in_progress != NULL)
 	*in_progress = 0;
 
     comm_sock_no_ipv6("comm_sock_connect6", sock, remote_addr, remote_port,
 		      is_blocking);
     return (XORP_ERROR);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -850,7 +854,7 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
 				      is_blocking, in_progress);
 	}
 	break;
-#ifdef AF_INET6
+#ifdef HAVE_IPV6
     case AF_INET6:
 	{
 	    const struct sockaddr_in6 *sin6 = (const struct sockaddr_in6 *)((const void *)sin);
@@ -858,7 +862,7 @@ comm_sock_connect(xsock_t sock, const struct sockaddr *sin, int is_blocking,
 				      is_blocking, in_progress);
 	}
 	break;
-#endif
+#endif /* HAVE_IPV6 */
     default:
 	XLOG_FATAL("Error comm_sock_connect invalid family = %d",
 		   sin->sa_family);
@@ -988,13 +992,14 @@ comm_set_reuseaddr(xsock_t sock, int val)
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! SO_REUSEADDR */
     UNUSED(sock);
     UNUSED(val);
     XLOG_WARNING("SO_REUSEADDR Undefined!");
 
     return (XORP_ERROR);
-#endif /* !SO_REUSEADDR */
+#endif /* ! SO_REUSEADDR */
 }
 
 /**
@@ -1021,13 +1026,14 @@ comm_set_reuseport(xsock_t sock, int val)
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! SO_REUSEPORT */
     UNUSED(sock);
     UNUSED(val);
     XLOG_WARNING("SO_REUSEPORT Undefined!");
 
     return (XORP_OK);
-#endif /* !SO_REUSEPORT */
+#endif /* ! SO_REUSEPORT */
 }
 
 /**
@@ -1108,13 +1114,14 @@ comm_set_tcpmd5(xsock_t sock, int val)
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! TCP_MD5SIG */
     UNUSED(sock);
     UNUSED(val);
     XLOG_WARNING("TCP_MD5SIG Undefined!");
 
     return (XORP_ERROR);
-#endif
+#endif /* ! TCP_MD5SIG */
 }
 
 /**
@@ -1241,10 +1248,11 @@ comm_set_iface6(xsock_t sock, u_int ifindex)
     }
 
     return (XORP_OK);
-#else
+
+#else /* ! HAVE_IPV6 */
     comm_sock_no_ipv6("comm_set_iface6", sock, ifindex);
     return (XORP_ERROR);
-#endif /* HAVE_IPV6 */
+#endif /* ! HAVE_IPV6 */
 }
 
 /**
@@ -1367,7 +1375,7 @@ comm_sock_set_rcvbuf(xsock_t sock, int desired_bufsize, int min_bufsize)
 int
 comm_sock_get_family(xsock_t sock)
 {
-#if defined(HOST_OS_WINDOWS)
+#ifdef HOST_OS_WINDOWS
     WSAPROTOCOL_INFO wspinfo;
     int err, len;
 
@@ -1382,7 +1390,8 @@ comm_sock_get_family(xsock_t sock)
     }
 
     return ((int)wspinfo.iAddressFamily);
-#else /* !HOST_OS_WINDOWS */
+
+#else /* ! HOST_OS_WINDOWS */
     /* XXX: Should use struct sockaddr_storage. */
 #ifndef MAXSOCKADDR
 #define MAXSOCKADDR	128	/* max socket address structure size */
@@ -1402,7 +1411,7 @@ comm_sock_get_family(xsock_t sock)
     }
 
     return (un.sa.sa_family);
-#endif
+#endif /* ! HOST_OS_WINDOWS */
 }
 
 /**
@@ -1435,7 +1444,8 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 		   comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
-#else /* !HOST_OS_WINDOWS */
+
+#else /* ! HOST_OS_WINDOWS */
     int flags;
     if ( (flags = fcntl(sock, F_GETFL, 0)) < 0) {
 	_comm_set_serrno();
@@ -1455,7 +1465,8 @@ comm_sock_set_blocking(xsock_t sock, int is_blocking)
 		   comm_get_error_str(comm_get_last_error()));
 	return (XORP_ERROR);
     }
-#endif /* HOST_OS_WINDOWS */
+#endif /* ! HOST_OS_WINDOWS */
+
     return (XORP_OK);
 }
 
@@ -1509,7 +1520,7 @@ comm_sock_no_ipv6(const char* method, ...)
 }
 
 /**
- * comm_set_errno:
+ * _comm_set_serrno:
  *
  * Fetch the socket layer error code from the underlying system, clear
  * the general error condition, and record it.
@@ -1524,8 +1535,10 @@ _comm_set_serrno(void)
     WSASetLastError(0);
 #else
     _comm_serrno = errno;
-    /* XXX - Temporarily don't set errno to 0 we still have code
-       using errno 2005-05-09 Atanu. */
-/*     errno = 0; */
+    /*
+     * TODO: XXX - Temporarily don't set errno to 0 we still have code
+     * using errno 2005-05-09 Atanu.
+     */
+    /* errno = 0; */
 #endif
 }
