@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.27 2006/03/08 21:59:58 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.28 2006/03/24 18:23:39 zec Exp $
 #
 
 		XORP ERRATA
@@ -71,6 +71,20 @@
       fixed for more recent Linux kernel versions:
 
         https://bugzilla.redhat.com/bugzilla/show_bug.cgi?id=121697
+
+    - On Linux with kernel older than linux-2.6.15-rc7 there is a
+      kernel bug that prevents the FEA to receive netlink(7) notifications
+      about added/deleted IPv6 network addresses and routes:
+
+        http://www.uwsg.indiana.edu/hypermail/linux/kernel/0512.2/2121.html
+
+      Typically, this could be an issue only if someone is running
+      IPv6 PIM-SM on Linux, and only if the unicast routes may be modified
+      while XORP is running. In that case the fix would be to replace
+      "RTMGRP_IPV6_IFADDR" with "RTMGRP_IPV6_IFADDR >> 1" inside
+      fea/ifconfig_observer_netlink.cc, and to replace "RTMGRP_IPV6_ROUTE"
+      with "RTMGRP_IPV6_ROUTE >> 1" inside fticonfig_entry_observer_netlink.cc
+      and fticonfig_table_observer_netlink.cc.
 
     - The mechanism for tracking the network interface link status
       may not work for the following OS-es because the kernel for those
