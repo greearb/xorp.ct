@@ -132,12 +132,12 @@ ripng_redist6_add_route()
 
 ripng_redist6_delete_route()
 {
-    if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_redist6_delete_route <network:ipv6net> <cookie:txt> <protocol_origin:txt>"
+    if [ $# -ne 8 ] ; then
+        echo "Usage: ripng_redist6_delete_route <dst:ipv6net> <nexthop:ipv6> <ifname:txt> <vifname:txt> <metric:u32> <admin_distance:u32> <cookie:txt> <protocol_origin:txt>"
         exit 1
     fi
 
-    XRL="finder://ripng/redist6/0.1/delete_route?network:ipv6net=$1&cookie:txt=$2&protocol_origin:txt=$3"
+    XRL="finder://ripng/redist6/0.1/delete_route?dst:ipv6net=$1&nexthop:ipv6=$2&ifname:txt=$3&vifname:txt=$4&metric:u32=$5&admin_distance:u32=$6&cookie:txt=$7&protocol_origin:txt=$8"
     call_xrl_wrapper -p all "${XRL}"
 }
 
