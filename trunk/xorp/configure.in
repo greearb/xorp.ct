@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.157 2006/03/08 02:23:21 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.158 2006/03/17 00:24:12 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.157 2006/03/08 02:23:21 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.158 2006/03/17 00:24:12 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -66,6 +66,10 @@ case "${host_os}" in
     darwin* )
 	AC_DEFINE(HOST_OS_MACOSX, 1, [Define to 1 if the OS is MacOS X])
 	AC_DEFINE(HOST_OS_NAME, "MacOS X", [Define the OS name])
+    ;;
+    dragonfly* )
+	AC_DEFINE(HOST_OS_DRAGONFLYBSD, 1, [Define to 1 if the OS is DragonFlyBSD])
+	AC_DEFINE(HOST_OS_NAME, "DragonFlyBSD", [Define the OS name])
     ;;
     freebsd* )
 	AC_DEFINE(HOST_OS_FREEBSD, 1, [Define to 1 if the OS is FreeBSD])
@@ -527,6 +531,12 @@ dnl
 dnl Check for typical BSD-like multicast header files.
 dnl
 AC_CHECK_HEADERS([netinet/igmp.h netinet/ip_mroute.h netinet/pim.h])
+dnl
+dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
+dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
+dnl to its appropriate location.
+dnl
+AC_CHECK_HEADERS([net/ip_mroute/ip_mroute.h])
 
 dnl
 dnl Check for BSD-specific header files.

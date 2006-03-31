@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.4 2005/10/28 17:05:15 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.5 2005/11/14 17:32:42 pavlin Exp $
 dnl
 
 dnl
@@ -88,6 +88,14 @@ AC_CHECK_HEADER(netinet/ip_mroute.h,
 #undef _KERNEL
 "],
   [test_netinet_ip_mroute_h=""])
+dnl
+dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
+dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
+dnl to its appropriate location.
+dnl
+AC_CHECK_HEADER(net/ip_mroute/ip_mroute.h,
+  [test_net_ip_mroute_ip_mroute_h="#include <net/ip_mroute/ip_mroute.h>"],
+  [test_net_ip_mroute_ip_mroute_h=""])
 AC_CHECK_HEADER(linux/mroute.h,
   [test_linux_mroute_h=["
 #include <linux/types.h>
@@ -124,6 +132,7 @@ ${test_net_route_h}
 #include <netinet/in.h>
 ${test_netinet_in_var_h}
 ${test_netinet_ip_mroute_h}
+${test_net_ip_mroute_ip_mroute_h}
 ${test_linux_mroute_h}
 ${test_linux_mroute_h_missing_defines}
 "]

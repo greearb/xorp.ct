@@ -293,6 +293,9 @@
 /* Define to 1 if you have the <net/if_var.h> header file. */
 #undef HAVE_NET_IF_VAR_H
 
+/* Define to 1 if you have the <net/ip_mroute/ip_mroute.h> header file. */
+#undef HAVE_NET_IP_MROUTE_IP_MROUTE_H
+
 /* Define to 1 if you have the <net/route.h> header file. */
 #undef HAVE_NET_ROUTE_H
 
@@ -532,6 +535,9 @@
 
 /* Define to 1 if the OS is BSDI */
 #undef HOST_OS_BSDI
+
+/* Define to 1 if the OS is DragonFlyBSD */
+#undef HOST_OS_DRAGONFLYBSD
 
 /* Define to 1 if the OS is FreeBSD */
 #undef HOST_OS_FREEBSD

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/acipmrt.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
 dnl
 
 dnl
@@ -12,13 +12,35 @@ dnl ----------------------------
 
 AC_LANG_PUSH(C)
 
+AC_CHECK_HEADER(netinet/ip_mroute.h,
+  [test_netinet_ip_mroute_h="
+/*
+ * XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
+ * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+ * to define _KERNEL before including <netinet/ip_mroute.h>.
+ */
+#define _KERNEL
+#include <netinet/ip_mroute.h>
+#undef _KERNEL
+"],
+  [test_netinet_ip_mroute_h=""])
+dnl
+dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
+dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
+dnl to its appropriate location.
+dnl
+AC_CHECK_HEADER(net/ip_mroute/ip_mroute.h,
+  [test_net_ip_mroute_ip_mroute_h="#include <net/ip_mroute/ip_mroute.h>"],
+  [test_net_ip_mroute_ip_mroute_h=""])
+
 test_mfcctl2_headers=["
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
-#include <netinet/ip_mroute.h>
+${test_netinet_ip_mroute_h}
+${test_net_ip_mroute_ip_mroute_h}
 "]
 
 AC_CHECK_TYPE([struct mfcctl2],
