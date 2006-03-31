@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.28 2006/03/24 18:23:39 zec Exp $
+# $XORP: xorp/ERRATA,v 1.29 2006/03/30 09:06:25 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -81,10 +81,20 @@
       Typically, this could be an issue only if someone is running
       IPv6 PIM-SM on Linux, and only if the unicast routes may be modified
       while XORP is running. In that case the fix would be to replace
-      "RTMGRP_IPV6_IFADDR" with "RTMGRP_IPV6_IFADDR >> 1" inside
+      "RTMGRP_IPV6_IFADDR" with "(RTMGRP_IPV6_IFADDR >> 1)" inside
       fea/ifconfig_observer_netlink.cc, and to replace "RTMGRP_IPV6_ROUTE"
-      with "RTMGRP_IPV6_ROUTE >> 1" inside fticonfig_entry_observer_netlink.cc
-      and fticonfig_table_observer_netlink.cc.
+      with "(RTMGRP_IPV6_ROUTE >> 1)" inside
+      fticonfig_entry_observer_netlink.cc and
+      fticonfig_table_observer_netlink.cc.
+
+    - On Linux, adding and deleting multiple IPv4 addresses per interface
+      may trigger an error: typically, if the primary IPv4 address
+      is deleted, the kernel automatically deletes all secondary IPv4
+      addresses on that interface. In Linux kernel 2.6.12 and later,
+      enabling the new sysctl net.ipv4.conf.all.promote_secondaries
+      (or one of the interface specific variants) can be used to
+      automatically promote one of the secondary addresses to become
+      the new primary address.
 
     - The mechanism for tracking the network interface link status
       may not work for the following OS-es because the kernel for those
