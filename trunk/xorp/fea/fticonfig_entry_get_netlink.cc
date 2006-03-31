@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.30 2006/03/16 00:03:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.31 2006/03/30 08:32:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -261,7 +261,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = IPvX::addr_bitlen(family);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.27 2006/03/16 00:03:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.28 2006/03/30 08:32:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -187,7 +187,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     rtgenmsg = reinterpret_cast<struct rtgenmsg*>(NLMSG_DATA(nlh));
     rtgenmsg->rtgen_family = family;
     

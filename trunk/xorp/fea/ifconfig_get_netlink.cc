@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.17 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.18 2006/03/30 08:32:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -140,7 +140,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     nlh->nlmsg_type = RTM_GETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -217,7 +217,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Get the whole table
 	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
 	    nlh->nlmsg_seq = ns.seqno();
-	    nlh->nlmsg_pid = ns.pid();
+	    nlh->nlmsg_pid = ns.nl_pid();
 	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
 	    ifaddrmsg->ifa_family = AF_INET;
 	    ifaddrmsg->ifa_prefixlen = 0;
@@ -272,7 +272,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    // Get the whole table
 	    nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;
 	    nlh->nlmsg_seq = ns.seqno();
-	    nlh->nlmsg_pid = ns.pid();
+	    nlh->nlmsg_pid = ns.nl_pid();
 	    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
 	    ifaddrmsg->ifa_family = AF_INET6;
 	    ifaddrmsg->ifa_prefixlen = 0;

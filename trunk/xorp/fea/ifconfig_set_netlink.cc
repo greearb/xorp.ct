@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.25 2006/03/16 00:03:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.26 2006/03/30 08:32:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -440,7 +440,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -579,7 +579,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     nlh->nlmsg_type = RTM_SETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;	// TODO: set to ARPHRD_ETHER ??
@@ -688,7 +688,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
@@ -824,7 +824,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     nlh->nlmsg_type = RTM_NEWADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;
@@ -948,7 +948,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     nlh->nlmsg_type = RTM_DELADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;

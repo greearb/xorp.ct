@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.35 2006/03/16 00:03:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.36 2006/03/30 08:32:13 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -53,7 +53,6 @@
 
 
 uint16_t NetlinkSocket::_instance_cnt = 0;
-pid_t NetlinkSocket::_pid = getpid();
 
 //
 // Netlink Sockets (see netlink(7)) communication with the kernel
@@ -151,7 +150,7 @@ NetlinkSocket::start(string& error_msg)
     //
     memset(&snl, 0, sizeof(snl));
     snl.nl_family = AF_NETLINK;
-    snl.nl_pid    = 0;		// nl_pid = 0 if destination is the kernel
+    snl.nl_pid    = 0;		// Let the kernel assign the pid to the socket
     snl.nl_groups = _nl_groups;
     if (bind(_fd, reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl)) < 0) {
 	error_msg = c_format("bind(AF_NETLINK) failed: %s", strerror(errno));
@@ -188,19 +187,13 @@ NetlinkSocket::start(string& error_msg)
 	_fd = -1;
 	return (XORP_ERROR);
     }
-#if 0				// XXX
-    // XXX: 'nl_pid' is supposed to be defined as 'pid_t'
-    if ( (pid_t)snl.nl_pid != pid()) {
-	error_msg = c_format("Wrong nl_pid of AF_NETLINK socket: "
-			     "%u instead of %u",
-			     XORP_UINT_CAST(snl.nl_pid),
-			     XORP_UINT_CAST(pid()));
-	close(_fd);
-	_fd = -1;
-	return (XORP_ERROR);
-    }
-#endif // 0
-    
+
+    //
+    // Store the pid of the socket for checking the unicast destination of
+    // the netlink(7) messages.
+    //
+    _nl_pid = snl.nl_pid;
+
     //
     // Add the socket to the event loop
     //
@@ -622,24 +615,16 @@ NetlinkSocketReader::nlsock_data(const uint8_t* data, size_t nbytes)
 #else // HAVE_NETLINK_SOCKETS
 
     size_t d = 0, off = 0;
-    // XXX: we don't use the pid (see below why).
-    // pid_t my_pid = _ns4.pid();
 
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
     _cache_data.resize(nbytes);
     while (d < nbytes) {
-	const struct nlmsghdr* nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
-	if (nlh->nlmsg_seq == _cache_seqno) {
-	    //
-	    // TODO: XXX: here we should add the following check as well:
-	    //       ((pid_t)nlh->nlmsg_pid == my_pid)
-	    // However, it appears that on return Linux doesn't fill-in
-	    // nlh->nlmsg_pid to our pid (e.g., it may be set to 0xffffefff).
-	    // Unfortunately, Linux's netlink(7) is not helpful on the
-	    // subject, hence we ignore this additional test.
-	    //
+	const struct nlmsghdr* nlh;
+	nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
+	if ((nlh->nlmsg_seq == _cache_seqno)
+	    && (nlh->nlmsg_pid == _ns.nl_pid())) {
 	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
 	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
 	    off += nlh->nlmsg_len;

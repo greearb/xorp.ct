@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.17 2006/03/16 00:03:59 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.18 2006/03/30 08:32:13 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -94,11 +94,11 @@ public:
     inline uint32_t seqno() const { return (_instance_no << 16 | _seqno); }
 
     /**
-     * Get cached process identifier value.
+     * Get cached netlink socket identifier value.
      * 
-     * @return the cached process identifier value.
+     * @return the cached netlink socket identifier value.
      */
-    inline pid_t pid() const { return _pid; }
+    inline uint32_t nl_pid() const { return _nl_pid; }
 
     /**
      * Force socket to read data.
@@ -187,7 +187,7 @@ private:
     uint16_t	 _instance_no;  // Instance number of this netlink socket
     
     static uint16_t _instance_cnt;
-    static pid_t    _pid;
+    uint32_t	_nl_pid;
 
     uint32_t	_nl_groups;	// The netlink multicast groups to listen for
     bool	_is_multipart_message_read; // If true, expect to read a multipart message

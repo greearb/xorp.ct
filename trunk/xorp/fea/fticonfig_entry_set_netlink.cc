@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.26 2006/03/22 00:41:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.27 2006/03/30 08:32:11 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -192,7 +192,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     nlh->nlmsg_type = RTM_NEWROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = fte.net().prefix_len(); // The destination mask length
@@ -372,7 +372,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     nlh->nlmsg_type = RTM_DELROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
-    nlh->nlmsg_pid = ns.pid();
+    nlh->nlmsg_pid = ns.nl_pid();
     rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = fte.net().prefix_len(); // The destination mask length
