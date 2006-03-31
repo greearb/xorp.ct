@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.13 2005/11/14 17:29:28 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.14 2006/03/16 00:04:48 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
@@ -64,6 +64,17 @@
  */
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 #undef _KERNEL
+#endif
+
+/*
+ * DragonFlyBSD
+ *
+ * DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
+ * <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
+ * to its appropriate location.
+ */
+#ifdef HAVE_NET_IP_MROUTE_IP_MROUTE_H
+# include <net/ip_mroute/ip_mroute.h>
 #endif
 
 /*
