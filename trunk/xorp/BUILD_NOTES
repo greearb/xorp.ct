@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.48 2006/03/11 17:29:57 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.49 2006/03/29 10:19:02 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -226,13 +226,18 @@ gmake check
   * Linux Fedora Core4 (kernel 2.6.11-1.1369_FC4smp):
     - The code compiles, and the internal tests appear to succeed
       with the following compilers: gcc-4.0.0 (default), gcc-4.0.1,
-      gcc-4.0.2
+      gcc-4.0.2.
+
+  * Linux Fedora Core5 (2.6.16-1.2080_FC5smp):
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc (GCC) 4.1.0 20060304 (Red Hat 4.1.0-3)
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
     for details:
         http://www.xorp.org/bugzilla/show_bug.cgi?id=435
-    A simple work-around is not to enable compiler's optimization.
+    A simple work-around is not to enable compiler's optimization, or
+    just to upgrade to a newer compiler (4.1.x or later).
 
   * There is a known problem with building XORP on Linux with gcc-3.3
     or gcc-3.4 and post-2.15 binutils.
