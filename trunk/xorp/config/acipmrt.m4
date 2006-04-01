@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.2 2006/03/31 22:53:46 pavlin Exp $
 dnl
 
 dnl
@@ -12,17 +12,29 @@ dnl ----------------------------
 
 AC_LANG_PUSH(C)
 
+dnl XXX: <inet/ip.h> is needed on Solaris-10
+AC_CHECK_HEADER(inet/ip.h,
+  [test_inet_ip_h="#include <inet/ip.h>"],
+  [test_inet_ip_h=""])
+dnl
+dnl XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
+dnl and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+dnl to define _KERNEL before including <netinet/ip_mroute.h>.
+dnl
+test_define_kernel=""
+test_undef_kernel=""
+case "${host_os}" in
+    netbsd* )
+	test_define_kernel="#define _KERNEL"
+	test_undef_kernel="#undef _KERNEL"
+    ;;
+    openbsd* )
+	test_define_kernel="#define _KERNEL"
+	test_undef_kernel="#undef _KERNEL"
+    ;;
+esac
 AC_CHECK_HEADER(netinet/ip_mroute.h,
-  [test_netinet_ip_mroute_h="
-/*
- * XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
- * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
- * to define _KERNEL before including <netinet/ip_mroute.h>.
- */
-#define _KERNEL
-#include <netinet/ip_mroute.h>
-#undef _KERNEL
-"],
+  [test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"],
   [test_netinet_ip_mroute_h=""])
 dnl
 dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
@@ -39,7 +51,10 @@ test_mfcctl2_headers=["
 #include <sys/socket.h>
 #include <net/route.h>
 #include <netinet/in.h>
+${test_inet_ip_h}
+${test_define_kernel}
 ${test_netinet_ip_mroute_h}
+${test_undef_kernel}
 ${test_net_ip_mroute_ip_mroute_h}
 "]
 

@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.5 2005/11/14 17:32:42 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.6 2006/03/31 22:53:46 pavlin Exp $
 dnl
 
 dnl
@@ -76,17 +76,29 @@ AC_CHECK_HEADER(net/route.h,
 AC_CHECK_HEADER(netinet/in_var.h,
   [test_netinet_in_var_h="#include <netinet/in_var.h>"],
   [test_netinet_in_var_h=""])
+dnl XXX: <inet/ip.h> is needed on Solaris-10
+AC_CHECK_HEADER(inet/ip.h,
+  [test_inet_ip_h="#include <inet/ip.h>"],
+  [test_inet_ip_h=""])
+dnl
+dnl XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
+dnl and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
+dnl to define _KERNEL before including <netinet/ip_mroute.h>.
+dnl
+test_define_kernel=""
+test_undef_kernel=""
+case "${host_os}" in
+    netbsd* )
+	test_define_kernel="#define _KERNEL"
+	test_undef_kernel="#undef _KERNEL"
+    ;;
+    openbsd* )
+	test_define_kernel="#define _KERNEL"
+	test_undef_kernel="#undef _KERNEL"
+    ;;
+esac
 AC_CHECK_HEADER(netinet/ip_mroute.h,
-  [test_netinet_ip_mroute_h="
-/*
- * XXX: On NetBSD and OpenBSD the definition of 'struct igmpmsg'
- * and IGMPMSG_* is wrapped inside #ifdef _KERNEL hence we need
- * to define _KERNEL before including <netinet/ip_mroute.h>.
- */
-#define _KERNEL
-#include <netinet/ip_mroute.h>
-#undef _KERNEL
-"],
+  [test_netinet_ip_mroute_h="#include <netinet/ip_mroute.h>"],
   [test_netinet_ip_mroute_h=""])
 dnl
 dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
@@ -131,7 +143,10 @@ ${test_net_if_var_h}
 ${test_net_route_h}
 #include <netinet/in.h>
 ${test_netinet_in_var_h}
+${test_inet_ip_h}
+${test_define_kernel}
 ${test_netinet_ip_mroute_h}
+${test_undef_kernel}
 ${test_net_ip_mroute_ip_mroute_h}
 ${test_linux_mroute_h}
 ${test_linux_mroute_h_missing_defines}

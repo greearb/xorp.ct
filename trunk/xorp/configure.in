@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.159 2006/03/31 22:53:45 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.160 2006/04/01 08:14:20 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.159 2006/03/31 22:53:45 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.160 2006/04/01 08:14:20 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -537,6 +537,8 @@ dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
 dnl to its appropriate location.
 dnl
 AC_CHECK_HEADERS([net/ip_mroute/ip_mroute.h])
+dnl XXX: <inet/ip.h> is needed on Solaris-10
+AC_CHECK_HEADERS([inet/ip.h])
 
 dnl
 dnl Check for BSD-specific header files.

@@ -111,6 +111,9 @@
 /* Define to 1 if you have the `if_nametoindex' function. */
 #undef HAVE_IF_NAMETOINDEX
 
+/* Define to 1 if you have the <inet/ip.h> header file. */
+#undef HAVE_INET_IP_H
+
 /* Define to 1 if you have the `inet_ntop' function. */
 #undef HAVE_INET_NTOP
 
