@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.50 2006/03/31 20:25:39 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.51 2006/04/01 03:34:06 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -51,7 +51,15 @@ gmake check
 3. OS-specific notes
 ======================
 
-3.1. FreeBSD
+3.1. DragonFlyBSD
+============
+
+  * DragonFlyBSD-1.4
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
+
+3.2. FreeBSD
 ============
 
   * FreeBSD-4.5, FreeBSD-4.6.2, FreeBSD-4.6-RELEASE, FreeBSD-4.8-RELEASE:
@@ -104,7 +112,7 @@ gmake check
       appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518
 
-3.2. NetBSD
+3.3. NetBSD
 ===========
 
   * NetBSD-2.0 and NetBSD-3.0:
@@ -131,7 +139,7 @@ gmake check
       then you should increase the file descriptors limit by
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
-3.3. OpenBSD
+3.4. OpenBSD
 ============
 
   * If the system would be used as a multicast router, then add the
@@ -197,14 +205,6 @@ gmake check
 
       then you should increase the file descriptors limit by
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
-
-3.4. DragonFlyBSD
-============
-
-  * DragonFlyBSD-1.4
-    - The code compiles with the default compiler, and the internal tests
-      appear to succeed:
-      gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
 
 3.5. Linux
 ==========
