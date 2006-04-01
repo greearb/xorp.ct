@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.106 2006/03/31 06:14:18 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.107 2006/03/31 20:26:00 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,7 @@ This file contains XORP release notes (most recent releases first).
 Release 1.3 (2006/??/??)
 =========================
   ALL:
-    - XORP now builds on Linux Fedora Core5.
+    - XORP now builds on Linux Fedora Core5 and DragonFlyBSD-1.4.
 
   CONFIGURATION:
     - Addition of new OSPF configuration statement as part of the MD5

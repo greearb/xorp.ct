@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.49 2006/03/29 10:19:02 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.50 2006/03/31 20:25:39 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -198,7 +198,15 @@ gmake check
       then you should increase the file descriptors limit by
       "limit descriptors 400" in csh/tcsh or "ulimit -n 400" in sh.
 
-3.4. Linux
+3.4. DragonFlyBSD
+============
+
+  * DragonFlyBSD-1.4
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
+
+3.5. Linux
 ==========
 
   * Linux RedHat-7.2 (kernel 2.4.18):
@@ -246,7 +254,7 @@ gmake check
     Newer versions of the gcc compiler (e.g., gcc-4.0.2 or gcc-4.1) should
     be used instead.
 
-3.5. Mac OS X
+3.6. Mac OS X
 =============
 
   * All:
@@ -267,7 +275,7 @@ gmake check
     - gcc version 4.0.1 (Apple Computer, Inc. build 5250)
     - The code compiles, and the internal tests appear to succeed.
 
-3.6 Windows Server 2003 (Service Pack 1)
+3.7 Windows Server 2003 (Service Pack 1)
 ========================================
 
   * All:
@@ -377,7 +385,7 @@ gmake check
   * For instructions how to build the XORP Installer for Windows
     see xorp/contrib/win32/installer/README.
 
-3.7 Windows 'Longhorn' Server
+3.8 Windows 'Longhorn' Server
 =============================
 
   * All:
