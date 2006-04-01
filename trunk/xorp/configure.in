@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.158 2006/03/17 00:24:12 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.159 2006/03/31 22:53:45 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.158 2006/03/17 00:24:12 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.159 2006/03/31 22:53:45 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -426,7 +426,7 @@ if test "${xr_openssl_prefix}" = "" ; then
 	xr_cv_openssl_prefix,
 	[
 	    # Prefer base install over local install, assume base if not found
-	    for xr_cv_openssl_prefix in /usr /usr/local /mingw /gnuwin32 /opt /usr ; do
+	    for xr_cv_openssl_prefix in /usr /usr/local /mingw /gnuwin32 /opt /usr /usr/sfw ; do
 		if test -d ${xr_cv_openssl_prefix}/include/openssl; then
 		    break
 		fi
