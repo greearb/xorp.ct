@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.57 2006/02/18 00:07:25 atanu Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.58 2006/03/16 00:03:27 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -851,7 +851,7 @@ private:
      * Store the socket descriptor and iptuple together.
      */
     struct Server {
-	Server(XorpFd fd, Iptuple iptuple) : _serverfd(fd) {
+	Server(XorpFd fd, const Iptuple& iptuple) : _serverfd(fd) {
 	    _tuples.push_back(iptuple);
 	}
 	Server(const Server& rhs) {
