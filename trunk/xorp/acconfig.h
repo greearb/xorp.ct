@@ -48,7 +48,7 @@ typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 #endif
 #ifndef HAVE_UINT32_T
-typedef unsgned int uint32_t;
+typedef unsigned int uint32_t;
 #endif
 #ifndef HAVE_UINT64_T
 typedef unsigned long long uint64_t;
