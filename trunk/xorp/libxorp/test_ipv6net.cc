@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.9 2005/07/29 20:06:32 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.10 2006/03/16 00:04:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -24,10 +24,16 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv6net.hh"
 
+#include "libxorp/test_main.hh"
+
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 
+//
+// TODO: XXX: remove after the switch to the TestMain facility is completed
+//
+#if 0
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM
 //
@@ -37,14 +43,16 @@ static const char *program_version_id	= "0.1";
 static const char *program_date		= "December 2, 2002";
 static const char *program_copyright	= "See file LICENSE.XORP";
 static const char *program_return_value	= "0 on success, 1 if test error, 2 if internal error";
+#endif // 0
 
 static bool s_verbose = false;
 bool verbose()			{ return s_verbose; }
 void set_verbose(bool v)	{ s_verbose = v; }
 
 static int s_failures = 0;
-bool failures()			{ return s_failures; }
+bool failures()			{ return (s_failures)? (true) : (false); }
 void incr_failures()		{ s_failures++; }
+void reset_failures()		{ s_failures = 0; }
 
 
 
@@ -104,6 +112,10 @@ _verbose_assert(const char* file, int line, bool cond, const string& desc)
 }
 
 
+//
+// TODO: XXX: remove after the switch to the TestMain facility is completed
+//
+#if 0
 /**
  * Print program info to output stream.
  * 
@@ -133,13 +145,16 @@ usage(const char* progname)
     fprintf(stderr, "       -h          : usage (this message)\n");
     fprintf(stderr, "       -v          : verbose output\n");
 }
+#endif // 0
 
 /**
  * Test IPv6Net valid constructors.
  */
-void
-test_ipv6net_valid_constructors()
+bool
+test_ipv6net_valid_constructors(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     // Test values for IPv6 address: "1234:5678:9abc:def0:fed:cba9:8765:4321"
     const char *addr_string = "1234:5678:9abc:def0:fed:cba9:8765:4321";
     struct in6_addr in6_addr = { { { 0x12, 0x34, 0x56, 0x78,
@@ -184,14 +199,18 @@ test_ipv6net_valid_constructors()
     //
     IPv6Net ipnet4(ipnet3);
     verbose_match(ipnet4.str(), netaddr_string);
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net invalid constructors.
  */
-void
-test_ipv6net_invalid_constructors()
+bool
+test_ipv6net_invalid_constructors(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     //
     // Constructor for invalid prefix length.
     //
@@ -233,14 +252,18 @@ test_ipv6net_invalid_constructors()
 	// The problem was caught
 	verbose_log("%s : OK\n", e.str().c_str());
     }
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net operators.
  */
-void
-test_ipv6net_operators()
+bool
+test_ipv6net_operators(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     IPv6Net ipnet_a("1234:5678::/32");
     IPv6Net ipnet_b("1234:5679::/32");
     IPv6Net ipnet_c("1234:5678:9abc::/48");
@@ -297,14 +320,18 @@ test_ipv6net_operators()
     verbose_assert(! IPv6Net().is_valid(), "is_valid()");
     verbose_assert(! IPv6Net("::/0").is_valid(), "is_valid()");
     verbose_assert(IPv6Net("::/1").is_valid(), "is_valid()");
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net address type.
  */
-void
-test_ipv6net_address_type()
+bool
+test_ipv6net_address_type(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     IPv6Net ipnet_a("1234:5678::/32");
     
     //
@@ -313,14 +340,18 @@ test_ipv6net_address_type()
     IPv6Net ipnet1("ff00:1::/32");
     verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
     verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net address overlap.
  */
-void
-test_ipv6net_address_overlap()
+bool
+test_ipv6net_address_overlap(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     IPv6Net ipnet_a("1234:5678::/32");
     IPv6Net ipnet_b("1234:5679::/32");
     IPv6Net ipnet_c("1234:5678:9abc::/48");
@@ -357,14 +388,18 @@ test_ipv6net_address_overlap()
     verbose_assert(ipnet_a.overlap(ipnet_a) == 32, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_b) == 31, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_c) == 32, "overlap()");
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net address constant values.
  */
-void
-test_ipv6net_address_const()
+bool
+test_ipv6net_address_const(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     IPv6Net ipnet_a("1234:5678::/32");
     
     //
@@ -402,14 +437,18 @@ test_ipv6net_address_const()
     IPv6Net ipnet1("ffff:1:2::/48");
     verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
     verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
+
+    return (! failures());
 }
 
 /**
  * Test IPv6Net address manipulation.
  */
-void
-test_ipv6net_manipulate_address()
+bool
+test_ipv6net_manipulate_address(TestInfo& test_info)
 {
+    UNUSED(test_info);
+
     IPv6Net ipnet_a("1234:5678::/32");
     
     //
@@ -424,12 +463,14 @@ test_ipv6net_manipulate_address()
     verbose_match(IPv6Net::common_subnet(IPv6Net("1234:5678:1::/48"),
 					 IPv6Net("1234:5678:8000::/48")).str(),
 		  "1234:5678::/32");
+
+    return (! failures());
 }
 
 int
 main(int argc, char * const argv[])
 {
-    int ret_value = 0;
+    XorpUnexpectedHandler x(xorp_unexpected_handler);
     
     //
     // Initialize and start xlog
@@ -440,49 +481,82 @@ main(int argc, char * const argv[])
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
-    
-    int ch;
-    while ((ch = getopt(argc, argv, "hv")) != -1) {
-	switch (ch) {
-	case 'v':
-	    set_verbose(true);
-	    break;
-	case 'h':
-	case '?':
-	default:
-	    usage(argv[0]);
-	    xlog_stop();
-	    xlog_exit();
-	    if (ch == 'h')
-		return (0);
-	    else
-		return (1);
+
+    TestMain test_main(argc, argv);
+
+    string test = test_main.get_optional_args("-t", "--test",
+					      "run only the specified test");
+    test_main.complete_args_parsing();
+
+    //
+    // TODO: XXX: a temporary glue until we complete the switch to the
+    // TestMain facility.
+    //
+    if (test_main.get_verbose())
+	set_verbose(true);
+
+    struct test {
+	string	test_name;
+	XorpCallback1<bool, TestInfo&>::RefPtr cb;
+	bool	run_by_default;
+    } tests[] = {
+	{ "test_ipv6net_valid_constructors",
+	  callback(test_ipv6net_valid_constructors),
+	  true
+	},
+	{ "test_ipv6net_invalid_constructors",
+	  callback(test_ipv6net_invalid_constructors),
+	  true
+	},
+	{ "test_ipv6net_operators",
+	  callback(test_ipv6net_operators),
+	  true
+	},
+	{ "test_ipv6net_address_type",
+	  callback(test_ipv6net_address_type),
+	  true
+	},
+	{ "test_ipv6net_address_overlap",
+	  callback(test_ipv6net_address_overlap),
+	  true
+	},
+	{ "test_ipv6net_address_const",
+	  callback(test_ipv6net_address_const),
+	  true
+	},
+	{ "test_ipv6net_manipulate_address",
+	  callback(test_ipv6net_manipulate_address),
+	  true
 	}
-    }
-    argc -= optind;
-    argv += optind;
-    
-    XorpUnexpectedHandler x(xorp_unexpected_handler);
+    };
+
     try {
-	test_ipv6net_valid_constructors();
-	test_ipv6net_invalid_constructors();
-	test_ipv6net_operators();
-	test_ipv6net_address_overlap();
-	test_ipv6net_address_type();
-	test_ipv6net_address_const();
-	test_ipv6net_manipulate_address();
-	ret_value = failures() ? 1 : 0;
+	if (test.empty()) {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++) {
+		if (! tests[i].run_by_default)
+		    continue;
+		reset_failures();
+		test_main.run(tests[i].test_name, tests[i].cb);
+	    }
+	} else {
+	    for (size_t i = 0; i < sizeof(tests) / sizeof(struct test); i++) {
+		if (test == tests[i].test_name) {
+		    reset_failures();
+		    test_main.run(tests[i].test_name, tests[i].cb);
+		    return test_main.exit();
+		}
+	    }
+	    test_main.failed("No test with name " + test + " found\n");
+	}
     } catch (...) {
-	// Internal error
 	xorp_print_standard_exceptions();
-	ret_value = 2;
     }
-    
+
     //
     // Gracefully stop and exit xlog
     //
     xlog_stop();
     xlog_exit();
-    
-    return (ret_value);
+
+    return test_main.exit();    
 }
