@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.24 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.25 2006/04/02 04:30:27 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -81,7 +81,7 @@ child_handler(int signo)
 	map<pid_t, RunCommandBase *>::iterator iter;
 
 	pid = waitpid(-1, &wait_status, WUNTRACED | WNOHANG);
-	debug_msg("pid=%d, wait status=%d\n", /*XORP_INT_CAST(pid)*/ pid, wait_status);
+	debug_msg("pid=%d, wait status=%d\n", XORP_INT_CAST(pid), wait_status);
 	if (pid <= 0)
 	    return;	// XXX: no more child processes
 
