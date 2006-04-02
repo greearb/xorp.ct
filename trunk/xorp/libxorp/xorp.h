@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp.h,v 1.12 2005/08/18 15:28:43 bms Exp $
+ * $XORP: xorp/libxorp/xorp.h,v 1.13 2006/03/16 00:04:38 pavlin Exp $
  */
 
 
@@ -47,6 +47,17 @@
 #endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
+#endif
+/*
+ * XXX: Include <net/if.h> upfront so we can create a work-around because
+ * of a problematic name collusion in the Solaris-10 header file.
+ * That file contains "struct map *" pointer that prevents us from
+ * including the STL <map> file.
+ */
+#ifdef HAVE_NET_IF_H
+#define map solaris_class_map
+#include <net/if.h>
+#undef map
 #endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
