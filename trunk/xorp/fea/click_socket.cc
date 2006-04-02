@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.28 2005/10/21 20:01:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.29 2006/03/16 00:03:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -743,16 +743,16 @@ ClickSocket::mount_click_file_system(string& error_msg)
 
     //
     // XXX: Linux has different mount(2) API, hence we need to take
-    // care of this. Sigh...
+    // care of this.
     //
     int ret_value = -1;
-#ifndef HOST_OS_LINUX
-    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
-		      _kernel_click_mount_directory.c_str(), 0, 0);
-#else // HOST_OS_LINUX
+#ifdef HOST_OS_LINUX
     ret_value = mount("none", _kernel_click_mount_directory.c_str(),
 		      CLICK_FILE_SYSTEM_TYPE.c_str(), 0, 0);
-#endif // HOST_OS_LINUX
+#else // ! HOST_OS_LINUX
+    ret_value = mount(CLICK_FILE_SYSTEM_TYPE.c_str(),
+		      _kernel_click_mount_directory.c_str(), 0, 0);
+#endif // ! HOST_OS_LINUX
 
     if (ret_value != 0) {
 	error_msg = c_format("Cannot mount Click file system "
@@ -779,15 +779,15 @@ ClickSocket::unmount_click_file_system(string& error_msg)
 	return (XORP_OK);	// Directory not mounted
 
     //
-    // XXX: Linux doesn't have unmount(2). Instead, it has umount(2), hence
-    // we need to take care of this. Sigh...
+    // XXX: Linux and Solaris don't have unmount(2). Instead, they have
+    // umount(2), hence we need to take care of this.
     //
     int ret_value = -1;
-#ifndef HOST_OS_LINUX
-    ret_value = unmount(_mounted_kernel_click_mount_directory.c_str(), 0);
-#else // HOST_OS_LINUX
+#if defined(HOST_OS_LINUX) || defined(HOST_OS_SOLARIS)
     ret_value = umount(_mounted_kernel_click_mount_directory.c_str());
-#endif // HOST_OS_LINUX
+#else
+    ret_value = unmount(_mounted_kernel_click_mount_directory.c_str(), 0);
+#endif
 
     if (ret_value != 0) {
 	error_msg = c_format("Cannot unmount Click file system "
