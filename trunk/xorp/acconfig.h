@@ -13,18 +13,6 @@
 @TOP@
 
 /*
- * If you don't have these types in <inttypes.h>, #define these to be
- * the types you do have.
- */
-#undef int8_t
-#undef int16_t
-#undef int32_t
-#undef int64_t
-#undef uint8_t
-#undef uint16_t
-#undef uint32_t
-
-/*
  * Debugging:
  * DEBUG: general debugging
  * DEBUG_MEM: debug memory allocation
@@ -36,6 +24,36 @@
 /*
  * XXX: everything below is unconditionally copied to the generated file
  */
+
+/*
+ * If you don't have these types in <inttypes.h> or <stdint.h>,
+ * typedef these to be the types you do have.
+ */
+#ifndef HAVE_INT8_T
+typedef char int8_t;
+#endif
+#ifndef HAVE_INT16_T
+typedef short int16_t;
+#endif
+#ifndef HAVE_INT32_T
+typedef int int32_t;
+#endif
+#ifndef HAVE_INT64_T
+typedef long long int64_t;
+#endif
+#ifndef HAVE_UINT8_T
+typedef unsigned char uint8_t;
+#endif
+#ifndef HAVE_UINT16_T
+typedef unsigned short uint16_t;
+#endif
+#ifndef HAVE_UINT32_T
+typedef unsgned int uint32_t;
+#endif
+#ifndef HAVE_UINT64_T
+typedef unsigned long long uint64_t;
+#endif
+
 
 /*
  * XXX: Workaround a bug whereby the GNU autoconf tests will happily
