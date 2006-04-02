@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.11 2005/08/18 15:28:39 bms Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.12 2006/03/16 00:04:28 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -23,46 +23,49 @@
 #ifndef __LIBXORP_ETHER_COMPAT_H__
 #define __LIBXORP_ETHER_COMPAT_H__
 
-#ifndef __XORP_CONFIG_H__
-#error "config.h must be included before ether_compat.h"
-#endif /* __XORP_CONFIG_H__ */
+#include "libxorp/xorp.h"
 
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_SOCKET_H
+#include <sys/socket.h>
+#endif
+#ifdef HAVE_SYS_ETHERNET_H
+#include <sys/ethernet.h>
+#endif
 #ifdef HAVE_NET_ETHERNET_H
-# include <net/ethernet.h>
-#elif defined(HAVE_NET_IF_ETHER_H)
-# ifdef HAVE_NET_IF_H
-#  include <net/if.h>
-# endif
-# include <net/if_ether.h>
-#elif defined(HAVE_SYS_ETHERNET_H)
-# ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-# endif
-# include <sys/ethernet.h>
+#include <net/ethernet.h>
+#endif
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
+#endif
+#ifdef HAVE_NET_IF_ETHER_H
+#include <net/if_ether.h>
+#endif
+#ifdef HAVE_NETINET_IN_H
+#include <netinet/in.h>
+#endif
+#ifdef HAVE_NETINET_IF_ETHER_H
+#include <netinet/if_ether.h>
+#endif
+#ifdef HAVE_NETINET_ETHER_H
+#include <netinet/ether.h>
 #endif
 
-#if defined(HAVE_NETINET_ETHER_H)
-# ifdef HAVE_NET_IF_H
-#  include <net/if.h>
-# endif
-# include <netinet/ether.h>
-#elif defined(HAVE_NETINET_IF_ETHER_H)
-# ifdef HAVE_NET_IF_H
-#  include <net/if.h>
-# endif
-# include <netinet/if_ether.h>
-#endif
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
+#ifndef HAVE_STRUCT_ETHER_ADDR
 #ifndef ETHER_ADDR_LEN
 #define ETHER_ADDR_LEN 6
+#endif
 struct ether_addr {
 	char	octet[ETHER_ADDR_LEN];
 };
-#endif
+#endif /* HAVE_STRUCT_ETHER_ADDR */
 
 #ifndef HAVE_ETHER_ATON
 struct ether_addr* ether_aton(const char *a);
