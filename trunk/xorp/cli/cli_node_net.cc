@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.47 2005/12/22 11:37:17 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.48 2006/03/16 00:03:45 pavlin Exp $"
 
 
 //
@@ -25,6 +25,9 @@
 
 #include <errno.h>
 
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
 #ifdef HAVE_TERMIOS_H
 #include <termios.h>
 #endif
