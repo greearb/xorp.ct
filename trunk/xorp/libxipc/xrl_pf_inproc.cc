@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.28 2005/11/05 20:13:54 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.29 2006/03/16 00:04:22 pavlin Exp $"
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -276,7 +276,8 @@ XrlPFInProcListener::XrlPFInProcListener(EventLoop& e, XrlDispatcher* xr)
 {
     _instance_no = _next_instance_no ++;
 
-    _address = this_host() + c_format(":%d.%d", getpid(),XORP_INT_CAST(_instance_no));
+    _address = this_host() + c_format(":%d.%d", XORP_INT_CAST(getpid()),
+				      XORP_INT_CAST(_instance_no));
     add_inproc_listener(_instance_no, this);
 }
 
