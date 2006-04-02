@@ -3204,7 +3204,7 @@ if test "${tecla_cv_reentrant+set}" = set; then
 else
 
   KEPT_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199506L"
+  CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=200112L"
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"

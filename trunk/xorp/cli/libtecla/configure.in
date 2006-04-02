@@ -148,7 +148,7 @@ dnl "no" to the terminal.
 
 AC_CACHE_CHECK(for reentrant functions, tecla_cv_reentrant, [
   KEPT_CFLAGS="$CFLAGS"
-  CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=199506L"
+  CFLAGS="$CFLAGS -D_POSIX_C_SOURCE=200112L"
   AC_TRY_LINK([
 #include <unistd.h>
 #include <sys/types.h>
