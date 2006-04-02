@@ -12,11 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.18 2005/08/18 15:32:38 bms Exp $"
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.19 2006/03/16 00:04:14 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "finder_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -33,12 +39,6 @@
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
-
-#include "finder_module.h"
-
-#include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/eventloop.hh"
 
 #include "libcomm/comm_api.h"
 
