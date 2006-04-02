@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mrt/netstream_access.h,v 1.4 2005/03/25 02:53:57 pavlin Exp $
+ * $XORP: xorp/mrt/netstream_access.h,v 1.5 2006/03/16 00:04:47 pavlin Exp $
  */
 
 
@@ -32,19 +32,45 @@
  * Idea taken from Eddy Rusty (eddy@isi.edu).
  */
 
+#include "libxorp/xorp.h"
 
 #include <sys/types.h>
 
 
-#if !defined(BYTE_ORDER)
-#if defined(__BYTE_ORDER)
+#ifndef BYTE_ORDER
+#ifdef __BYTE_ORDER
 #define BYTE_ORDER	__BYTE_ORDER
 #define LITTLE_ENDIAN	__LITTLE_ENDIAN
 #define BIG_ENDIAN	__BIG_ENDIAN
+
+#else /* ! _BYTE_ORDER */
+
+/*
+ * XXX: Presume that the autoconf script used the AC_C_BIGENDIAN() macro
+ * to test whether the system is big or little endian.
+ * If the system is big endian, then WORDS_BIGENDIAN is defined.
+ */
+#ifndef LITTLE_ENDIAN
+#define LITTLE_ENDIAN	1234
+#endif
+#ifndef BIG_ENDIAN
+#define BIG_ENDIAN	4321
+#endif
+
+#ifdef WORDS_BIGENDIAN
+#define BYTE_ORDER	BIG_ENDIAN
 #else
-#error "BYTE_ORDER not defined! Define it to either LITTLE_ENDIAN (e.g. i386, vax) or BIG_ENDIAN (e.g.  68000, ibm, net) based on your architecture!"
+#define BYTE_ORDER	LITTLE_ENDIAN
 #endif
-#endif
+
+/*
+ * XXX: The old C preprocessor error if BYTE_ORDER is not defined.
+ *
+ * #error "BYTE_ORDER not defined! Define it to either LITTLE_ENDIAN (e.g. i386, vax) or BIG_ENDIAN (e.g.  68000, ibm, net) based on your architecture!"
+ */
+
+#endif /* ! __BYTE_ORDER */
+#endif /* ! BYTE_ORDER */
 
 /*
  * Constants definitions
