@@ -13,11 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.8 2005/10/02 22:21:54 abittau Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.9 2006/03/16 00:05:16 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
+
+#include "libxorp/xorp.h"
 
 #include "elem_set.hh"
 #include "policy_utils.hh"
@@ -34,12 +36,11 @@ ElemSetAny<T>::ElemSetAny(const char* c_str)
     if(!c_str)
 	return;
 
-    // create each eleemnt in the list
-    typedef set<string> SS;
-    SS s;
+    // create each element in the list
+    set<string> s;
     policy_utils::str_to_set(c_str, s);
 
-    for (SS::iterator i = s.begin(); i != s.end(); ++i) {
+    for (set<string>::iterator i = s.begin(); i != s.end(); ++i) {
 	const char* str = (*i).c_str();
 	_val.insert(T(str));
     }
