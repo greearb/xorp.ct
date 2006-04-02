@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.13 2006/03/28 04:40:58 atanu Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.14 2006/03/29 22:41:24 atanu Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -114,7 +114,7 @@ public:
     /**
      * Start the parsing of command line arguments.
      */
-    TestMain(int argc, char **argv) :
+    TestMain(int argc, char * const argv[]) :
 	_verbose(false), _verbose_level(0), _exit_status(true)
     {
 	_progname = argv[0];
