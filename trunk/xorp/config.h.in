@@ -66,10 +66,10 @@
 /* Define to 1 if system getopt() is in unistd.h */
 #undef HAVE_DECL_GETOPT
 
-/* Define to 1 if the C library has ether_aton(3) */
+/* Define to 1 if you have the `ether_aton' function. */
 #undef HAVE_ETHER_ATON
 
-/* Define to 1 if the C library has ether_ntoa(3) */
+/* Define to 1 if you have the `ether_ntoa' function. */
 #undef HAVE_ETHER_NTOA
 
 /* Define to 1 if you have the <fcntl.h> header file. */
@@ -406,6 +406,9 @@
 
 /* Define to 1 if the system has the type `struct cmsghdr'. */
 #undef HAVE_STRUCT_CMSGHDR
+
+/* Define to 1 if the system has the type `struct ether_addr'. */
+#undef HAVE_STRUCT_ETHER_ADDR
 
 /* Define to 1 if the system has the type `struct iovec'. */
 #undef HAVE_STRUCT_IOVEC

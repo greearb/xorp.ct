@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.160 2006/04/01 08:14:20 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.161 2006/04/01 09:09:24 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.160 2006/04/01 08:14:20 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.161 2006/04/01 09:09:24 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -559,59 +559,47 @@ AC_CHECK_HEADERS([windows.h winsock2.h ws2tcpip.h iphlpapi.h ipifcons.h iptypes.
 fi
 
 dnl
+dnl Check for Ethernet-related types and functions.
+dnl
+AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if_ether.h net/if.h netinet/in.h netinet/if_ether.h netinet/ether.h])
 dnl Check for headers where 'struct ether_addr' is typically defined.
-dnl
-AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if_ether.h netinet/if_ether.h netinet/ether.h])
-if test "${ac_cv_header_sys_ethernet_h}" = "yes"
-then
-	xr_cv_ether_header="sys/ethernet.h"
-fi
-if test "${ac_cv_header_net_ethernet_h}" = "yes"
-then
-	xr_cv_ether_header="net/ethernet.h"
-fi
-if test "${ac_cv_header_net_if_ether_h}" = "yes"
-then
-	xr_cv_ether_header="net/if_ether.h"
-fi
-if test "${ac_cv_header_netinet_if_ether_h}" = "yes"
-then
-	xr_cv_ether_header="netinet/if_ether.h"
-fi
-if test "${ac_cv_header_netinet_ether_h}" = "yes"
-then
-	xr_cv_ether_header="netinet/ether.h"
-fi
+AC_CHECK_HEADER(sys/ethernet.h,
+  [test_sys_ethernet_h="#include <sys/ethernet.h>"],
+  [test_sys_ethernet_h=""])
+AC_CHECK_HEADER(net/ethernet.h,
+  [test_net_ethernet_h="#include <net/ethernet.h>"],
+  [test_net_ethernet_h=""])
+AC_CHECK_HEADER(net/if_ether.h,
+  [test_net_if_ether_h="#include <net/if_ether.h>"],
+  [test_net_if_ether_h=""])
+dnl File <net/if.h> is needed by <netinet/if_ether.h> on Solaris-10
+AC_CHECK_HEADER(net/if.h,
+  [test_net_if_h="#include <net/if.h>"],
+  [test_net_if_h=""])
+dnl File <netinet/in.h> is needed by <netinet/if_ether.h> on FreeBSD-4.10
+AC_CHECK_HEADER(netinet/in.h,
+  [test_netinet_in_h="#include <netinet/in.h>"],
+  [test_netinet_in_h=""])
+AC_CHECK_HEADER(netinet/if_ether.h,
+  [test_netinet_if_ether_h="#include <netinet/if_ether.h>"],
+  [test_netinet_if_ether_h=""])
+AC_CHECK_HEADER(netinet/ether.h,
+  [test_netinet_ether_h="#include <netinet/ether.h>"],
+  [test_netinet_ether_h=""])
+test_ethernet_header_files=["
+#include <sys/types.h>
+#include <sys/socket.h>
+${test_sys_ethernet_h}
+${test_net_ethernet_h}
+${test_net_if_ether_h}
+${test_net_if_h}
+${test_netinet_in_h}
+${test_netinet_if_ether_h}
+${test_netinet_ether_h}
+"]
 
-dnl
-dnl Check for the ether_ntoa() function.
-dnl
-AC_CACHE_CHECK(for ether_ntoa in $xr_cv_ether_header,
-	       xr_cv_have_ether_ntoa,
-	       AC_EGREP_HEADER(ether_ntoa,
-			       $xr_cv_ether_header,
-			       xr_cv_have_ether_ntoa=yes,
-			       xr_cv_have_ether_ntoa=no)
-)
-if test "${xr_cv_have_ether_ntoa}" = "yes" ; then
-   AC_DEFINE(HAVE_ETHER_NTOA, 1,
-		[Define to 1 if the C library has ether_ntoa(3)])
-fi
-
-dnl
-dnl Check for the ether_aton() function.
-dnl
-AC_CACHE_CHECK(for ether_aton in $xr_cv_ether_header,
-	       xr_cv_have_ether_aton,
-	       AC_EGREP_HEADER(ether_aton,
-			       $xr_cv_ether_header,
-			       xr_cv_have_ether_aton=yes,
-			       xr_cv_have_ether_aton=no)
-)
-if test "${xr_cv_have_ether_aton}" = "yes" ; then
-   AC_DEFINE(HAVE_ETHER_ATON, 1,
-		[Define to 1 if the C library has ether_aton(3)])
-fi
+AC_CHECK_TYPES([struct ether_addr], , , [${test_ethernet_header_files}])
+AC_CHECK_FUNCS([ether_ntoa ether_aton])
 
 
 dnl
