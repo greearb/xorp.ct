@@ -102,6 +102,9 @@
 /* Define to 1 if you have the <inet/ip.h> header file. */
 #undef HAVE_INET_IP_H
 
+/* Define to 1 if you have the <inet/nd.h> header file. */
+#undef HAVE_INET_ND_H
+
 /* Define to 1 if you have the `inet_ntop' function. */
 #undef HAVE_INET_NTOP
 
@@ -400,6 +403,9 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #undef HAVE_STRING_H
+
+/* Define to 1 if you have the <stropts.h> header file. */
+#undef HAVE_STROPTS_H
 
 /* Define to 1 if you have the `strptime' function. */
 #undef HAVE_STRPTIME

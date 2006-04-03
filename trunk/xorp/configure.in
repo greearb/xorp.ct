@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.163 2006/04/02 02:25:08 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.164 2006/04/02 04:11:01 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.163 2006/04/02 02:25:08 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.164 2006/04/02 04:11:01 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -519,7 +519,7 @@ AC_CHECK_HEADERS([pcreposix.h])
 dnl
 dnl Check for headers commonly found on UNIX systems (BSD, SYSV etc).
 dnl
-AC_CHECK_HEADERS([paths.h sysexits.h sys/param.h])
+AC_CHECK_HEADERS([paths.h stropts.h sysexits.h inet/nd.h sys/param.h])
 AC_HEADER_SYS_WAIT
 
 dnl
