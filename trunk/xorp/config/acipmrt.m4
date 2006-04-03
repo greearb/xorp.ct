@@ -1,16 +1,25 @@
 dnl
-dnl $XORP: xorp/config/acipmrt.m4,v 1.2 2006/03/31 22:53:46 pavlin Exp $
+dnl $XORP: xorp/config/acipmrt.m4,v 1.3 2006/04/01 09:09:23 pavlin Exp $
 dnl
 
 dnl
-dnl Checks related to the advanced multicast API.
+dnl Multicast-related checks: advanced multicast API, etc.
 dnl
-
-dnl ----------------------------
-dnl Check for advanced multicast API support
-dnl ----------------------------
 
 AC_LANG_PUSH(C)
+
+dnl
+dnl Check for typical BSD-like multicast header files.
+dnl
+AC_CHECK_HEADERS([netinet/igmp.h netinet/ip_mroute.h netinet/pim.h])
+dnl
+dnl XXX: DragonFlyBSD (as per version 1.4) has moved <netinet/ip_mroute.h> to
+dnl <net/ip_mroute/ip_mroute.h>. Hopefully, in the future it will be back
+dnl to its appropriate location.
+dnl
+AC_CHECK_HEADERS([net/ip_mroute/ip_mroute.h])
+dnl XXX: <inet/ip.h> is needed on Solaris-10
+AC_CHECK_HEADERS([inet/ip.h])
 
 dnl XXX: <inet/ip.h> is needed on Solaris-10
 AC_CHECK_HEADER(inet/ip.h,
@@ -45,6 +54,27 @@ AC_CHECK_HEADER(net/ip_mroute/ip_mroute.h,
   [test_net_ip_mroute_ip_mroute_h="#include <net/ip_mroute/ip_mroute.h>"],
   [test_net_ip_mroute_ip_mroute_h=""])
 
+dnl
+dnl Test whether <netinet/pim.h> has "struct pim" and field "pim.pim_vt"
+dnl
+test_pim_headers=["
+#include <sys/types.h>
+${test_inet_ip_h}
+#include <netinet/pim.h>
+"]
+AC_CHECK_TYPES([struct pim], , ,
+[
+${test_pim_headers}
+])
+AC_CHECK_MEMBERS([struct pim.pim_vt], , ,
+[
+#define _PIM_VT 1
+${test_pim_headers}
+])
+
+dnl ----------------------------
+dnl Check for IPv4 advanced multicast API support
+dnl ----------------------------
 test_mfcctl2_headers=["
 #include <sys/types.h>
 #include <sys/time.h>
@@ -80,6 +110,9 @@ AC_CHECK_MEMBER([struct mfcctl2.mfcc_rp.s_addr],
     [Define to 1 if your struct mfcctl2 has field mfcc_rp])], ,
  [${test_mfcctl2_headers}])
 
+dnl ----------------------------
+dnl Check for IPv6 advanced multicast API support
+dnl ----------------------------
 test_mf6cctl2_headers=["
 #include <sys/types.h>
 #include <sys/time.h>

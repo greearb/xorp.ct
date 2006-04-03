@@ -437,6 +437,12 @@
 /* Define to 1 if `msg_namelen' is member of `struct msghdr'. */
 #undef HAVE_STRUCT_MSGHDR_MSG_NAMELEN
 
+/* Define to 1 if the system has the type `struct pim'. */
+#undef HAVE_STRUCT_PIM
+
+/* Define to 1 if `pim_vt' is member of `struct pim'. */
+#undef HAVE_STRUCT_PIM_PIM_VT
+
 /* Define to 1 if your struct sockaddr_un has field sun_len */
 #undef HAVE_SUN_LEN
 
