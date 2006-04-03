@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2006 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.14 2005/12/21 09:43:01 bms Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.15 2006/03/16 00:06:08 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -175,19 +176,11 @@ xorp_spawn(const string& process, const char *output = "")
     //fprintf(stderr, "old argv[0] is: '%s'\n", _cmd.c_str());
 
     // Convert slashes.
-#if 1
-    n = 0;
-    while (string::npos != (n = _cmd.find('/', n))) {
-	_cmd[n] = '\\';
-    }
-#else
     _cmd = unix_path_to_native(_cmd);
-#endif
 
     //fprintf(stderr, "argv[0] after slashify is: '%s'\n", _cmd.c_str());
 
     // Deal with shell scripts.
-
     bool is_shell_script = false;
     if (_cmd.rfind(sh_suffix) != string::npos)
 	is_shell_script = true;
@@ -207,18 +200,28 @@ xorp_spawn(const string& process, const char *output = "")
     _process.erase(0, _cmd_end);
     _process.insert(0, _cmd);
 
-    //fprintf(stderr, "new process string is: %s\n", _process.c_str());
+    fprintf(stderr, "XXX: about to launch: '%s'\n", _process.c_str());
 
-    if (CreateProcessA(NULL, const_cast<char *>(_process.c_str()), NULL,
-		       NULL, TRUE, CREATE_DEFAULT_ERROR_MODE,
+    if (CreateProcessA(NULL,
+		       const_cast<char *>(_process.c_str()),
+		       NULL, NULL, TRUE,
+		       CREATE_DEFAULT_ERROR_MODE | CREATE_SUSPENDED,
 		       NULL, NULL, &si, &pi) == 0) {
+	DWORD err = GetLastError();
 	CloseHandle(houtput);
-	cerr << "Failed to exec: " << _process << endl;
+	fprintf(stderr, "Failed to exec: %s reason: %ld\n",
+		_process.c_str(), err);
 	return (0);
     }
 
+    // XXX
+    fprintf(stderr, "XXX: process 0x%08lx launched!\n", pi.hProcess);
+
+    ResumeThread(pi.hThread);
     return (pi.hProcess);
+
 #else /* !HOST_OS_WINDOWS */
+
     PID_T pid;
     switch (pid = fork()) {
     case 0:
@@ -593,6 +596,8 @@ main(int argc, char *argv[])
 	    exit(-1);
 	}
  	sleep(1);
+#else
+	SleepEx(1 * 1000, FALSE);
 #endif
 	if ("" != commands[i]._wait_command) {
 	    wait_command = commands[i]._wait_command;
@@ -630,7 +635,11 @@ main(int argc, char *argv[])
     ** Wait five seconds for the commands that we have started to
     ** settle.
     */
+#ifdef HOST_OS_WINDOWS
+    SleepEx(5 * 1000, FALSE);
+#else
 //     sleep(5);
+#endif
 
     /*
     ** Start the main script.
