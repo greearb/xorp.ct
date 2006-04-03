@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.15 2006/03/16 00:06:08 pavlin Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.16 2006/04/03 20:10:40 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -200,7 +200,7 @@ xorp_spawn(const string& process, const char *output = "")
     _process.erase(0, _cmd_end);
     _process.insert(0, _cmd);
 
-    fprintf(stderr, "XXX: about to launch: '%s'\n", _process.c_str());
+    //fprintf(stderr, "XXX: about to launch: '%s'\n", _process.c_str());
 
     if (CreateProcessA(NULL,
 		       const_cast<char *>(_process.c_str()),
@@ -215,7 +215,7 @@ xorp_spawn(const string& process, const char *output = "")
     }
 
     // XXX
-    fprintf(stderr, "XXX: process 0x%08lx launched!\n", pi.hProcess);
+    //fprintf(stderr, "XXX: process 0x%08lx launched!\n", pi.hProcess);
 
     ResumeThread(pi.hThread);
     return (pi.hProcess);
