@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.45 2006/03/20 02:06:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.46 2006/03/20 21:33:24 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -28,6 +28,9 @@
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
 #endif
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
