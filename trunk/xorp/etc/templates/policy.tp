@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.18 2006/02/22 02:07:31 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.19 2006/02/28 06:15:15 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -71,6 +71,12 @@ policy {
 		%help: short "Conditions to match the source of a route";
 		protocol {
 		    %help: short "Protocol from which route was learned";
+		    %allow: $(@) "bgp" %help: "BGP routes";
+		    %allow: $(@) "connected" %help: "Directly connected sub-network routes";
+		    %allow: $(@) "ospf4" %help: "OSPF IPv4 routes";
+		    %allow: $(@) "rip" %help: "RIP routes";
+		    %allow: $(@) "ripng" %help: "RIPng routes";
+		    %allow: $(@) "static" %help: "Static routes";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=protocol $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
