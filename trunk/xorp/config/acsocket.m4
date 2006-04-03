@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.1 2005/05/05 19:38:32 bms Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.2 2005/08/18 15:21:57 bms Exp $
 dnl
 
 dnl
@@ -110,6 +110,20 @@ AC_CHECK_MEMBER([struct sockaddr_un.sun_len],
  [AC_DEFINE(HAVE_SUN_LEN, 1,
 	    [Define to 1 if your struct sockaddr_un has field sun_len])], ,
  [${test_sun_len_headers}])
+
+dnl ----------------------------
+dnl Check for sdl_len in sockaddr_dl (Windows: No)
+dnl ----------------------------
+
+test_sdl_len_headers=["
+	#include <sys/types.h>
+	#include <net/if_dl.h>
+"]
+
+AC_CHECK_MEMBER([struct sockaddr_dl.sdl_len],
+ [AC_DEFINE(HAVE_SDL_LEN, 1,
+	    [Define to 1 if your struct sockaddr_dl has field sdl_len])], ,
+ [${test_sdl_len_headers}])
 
 
 dnl -------------------------------------------------------------

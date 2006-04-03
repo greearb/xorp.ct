@@ -365,6 +365,9 @@
 /* Define to 1 if your struct sockaddr has field sa_len */
 #undef HAVE_SA_LEN
 
+/* Define to 1 if your struct sockaddr_dl has field sdl_len */
+#undef HAVE_SDL_LEN
+
 /* Define to 1 if you have the `sendmsg' function. */
 #undef HAVE_SENDMSG
 
