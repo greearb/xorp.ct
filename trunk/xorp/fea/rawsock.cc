@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.19 2006/03/20 07:29:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.20 2006/03/29 17:42:35 bms Exp $"
 
 //
 // Raw socket support.
@@ -67,7 +67,7 @@
 
 // XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h>
 #define _PIM_VT 1
-#ifdef HAVE_NETINET_PIM_H
+#if defined(HAVE_NETINET_PIM_H) && defined(HAVE_STRUCT_PIM_PIM_VT)
 #include <netinet/pim.h>
 #else
 #include "mrt/include/netinet/pim.h"
@@ -1499,7 +1499,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    {
 			struct ip6_hbh *ext;
 			int currentlen;
-			u_int8_t type;
+			uint8_t type;
 			size_t extlen;
 			socklen_t len;
 			void *databuf;
