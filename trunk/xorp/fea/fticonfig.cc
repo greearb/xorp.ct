@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.48 2006/03/16 00:03:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.49 2006/03/22 00:41:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -23,12 +23,24 @@
 
 #include "libcomm/comm_api.h"
 
-#ifdef HAVE_SYS_SYSCTL_H
-#include <sys/sysctl.h>
+#ifdef HAVE_STROPTS_H
+#include <stropts.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
+#include <fcntl.h>
 #endif
 
 #ifdef HAVE_IPHLPAPI_H
 #include <iphlpapi.h>
+#endif
+
+#ifdef HAVE_INET_ND_H
+#include <inet/nd.h>
+#endif
+
+#ifdef HAVE_SYS_SYSCTL_H
+#include <sys/sysctl.h>
 #endif
 
 #include "profile_vars.hh"
@@ -40,6 +52,11 @@
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
 #define PROC_LINUX_FILE_FORWARDING_V6 "/proc/sys/net/ipv6/conf/all/forwarding"
+#define DEV_SOLARIS_DRIVER_FORWARDING_V4 "/dev/ip"
+#define DEV_SOLARIS_DRIVER_FORWARDING_V6 "/dev/ip6"
+#define DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4 "ip_forwarding"
+#define DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6 "ip6_forwarding"
+#define DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6 "ip6_ignore_redirect"
 
 #ifdef __MINGW32__
 #define MIB_IP_FORWARDING	1
@@ -1420,6 +1437,62 @@ FtiConfig::unicast_forwarding_enabled4(bool& ret_value, string& error_msg) const
 	}
 	fclose(fh);
     }
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V4, O_RDONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for reading: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4,
+		sizeof(buf) - 1);
+	strioctl.ic_cmd = ND_GET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Error testing whether IPv4 unicast "
+				 "forwarding is enabled: %s",
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (sscanf(buf, "%d", &enabled) != 1) {
+	    error_msg = c_format("Error reading result %s: %s",
+				 buf, strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
+    }
 #elif defined(HOST_OS_WINDOWS)
     {
 	MIB_IPSTATS ipstats;
@@ -1520,6 +1593,62 @@ FtiConfig::unicast_forwarding_enabled6(bool& ret_value, string& error_msg) const
 	}
 	fclose(fh);
     }
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_RDONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for reading: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6,
+		sizeof(buf) - 1);
+	strioctl.ic_cmd = ND_GET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Error testing whether IPv6 unicast "
+				 "forwarding is enabled: %s",
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (sscanf(buf, "%d", &enabled) != 1) {
+	    error_msg = c_format("Error reading result %s: %s",
+				 buf, strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
+    }
 #elif defined(HOST_OS_WINDOWS) && 0
     // XXX: Not in MinGW w32api yet.
     {
@@ -1606,6 +1735,73 @@ FtiConfig::accept_rtadv_enabled6(bool& ret_value, string& error_msg) const
 #elif defined(HOST_OS_LINUX)
     // XXX: nothing to do in case of Linux
     error_msg = "";
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+	int ignore_redirect = 0;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_RDONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for reading: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	strncpy(buf, DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6,
+		sizeof(buf) - 1);
+	strioctl.ic_cmd = ND_GET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Error testing whether the acceptance of "
+				 "IPv6 Router Advertisement messages is "
+				 "enabled: %s",
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (sscanf(buf, "%d", &ignore_redirect) != 1) {
+	    error_msg = c_format("Error reading result %s: %s",
+				 buf, strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
+
+	//
+	// XXX: The logic of "Accept IPv6 Router Advertisement" is just the
+	// opposite of "Ignore Redirect".
+	//
+	if (ignore_redirect == 0)
+	    enabled = 1;
+	else
+	    enabled = 0;
+    }
 #else
 #error "OS not supported: don't know how to test whether"
 #error "the acceptance of IPv6 Router Advertisement messages"
@@ -1699,6 +1895,54 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	    return (XORP_ERROR);
 	}
 	fclose(fh);
+    }
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V4, O_WRONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for writing: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V4);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	snprintf(buf, sizeof(buf) - 1, "%s %d",
+		 DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V4, enable);
+	strioctl.ic_cmd = ND_SET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Cannot set IPv4 unicast forwarding to %s: %s",
+				 (v) ? "true": "false", strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
     }
 #elif defined(HOST_OS_WINDOWS)
     if (enable) {
@@ -1849,6 +2093,54 @@ FtiConfig::set_unicast_forwarding_enabled6(bool v, string& error_msg)
 	}
 	fclose(fh);
     }
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_WRONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for writing: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	snprintf(buf, sizeof(buf) - 1, "%s %d",
+		 DEV_SOLARIS_DRIVER_PARAMETER_FORWARDING_V6, enable);
+	strioctl.ic_cmd = ND_SET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
+				 (v) ? "true": "false", strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
+    }
 #elif defined(HOST_OS_WINDOWS) && 0
     // XXX: Not yet in MinGW w32api
     {
@@ -1961,6 +2253,65 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
 	// XXX: nothing to do in case of Linux
 	error_msg = "";
 	UNUSED(enable);
+    }
+#elif defined(HOST_OS_SOLARIS)
+    {
+	struct strioctl strioctl;
+	char buf[256];
+	int fd;
+	int ignore_redirect = 0;
+
+	//
+	// XXX: The logic of "Accept IPv6 Router Advertisement" is just the
+	// opposite of "Ignore Redirect".
+	//
+	if (enable == 0)
+	    ignore_redirect = 1;
+	else
+	    ignore_redirect = 0;
+
+	fd = open(DEV_SOLARIS_DRIVER_FORWARDING_V6, O_WRONLY);
+	if (fd < 0) {
+	    error_msg = c_format("Cannot open file %s for writing: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
+	int r = isastream(fd);
+	if (r < 0) {
+	    error_msg = c_format("Error testing whether file %s is a stream: %s",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6,
+				 strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	if (r == 0) {
+	    error_msg = c_format("File %s is not a stream",
+				 DEV_SOLARIS_DRIVER_FORWARDING_V6);
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+
+	memset(&strioctl, 0, sizeof(strioctl));
+	memset(buf, 0, sizeof(buf));
+	snprintf(buf, sizeof(buf) - 1, "%s %d",
+		 DEV_SOLARIS_DRIVER_PARAMETER_IGNORE_REDIRECT_V6,
+		 ignore_redirect);
+	strioctl.ic_cmd = ND_SET;
+	strioctl.ic_timout = 0;
+	strioctl.ic_len = sizeof(buf);
+	strioctl.ic_dp = buf;
+	if (ioctl(fd, I_STR, &strioctl) < 0) {
+	    error_msg = c_format("Cannot set IPv6 unicast forwarding to %s: %s",
+				 (v) ? "true": "false", strerror(errno));
+	    XLOG_ERROR("%s", error_msg.c_str());
+	    close(fd);
+	    return (XORP_ERROR);
+	}
+	close(fd);
     }
 #elif defined(HOST_OS_WINDOWS)
     {
