@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.52 2006/03/20 23:06:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.53 2006/03/29 17:55:13 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -68,7 +68,7 @@
 
 // XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h>
 #define _PIM_VT 1
-#ifdef HAVE_NETINET_PIM_H
+#if defined(HAVE_NETINET_PIM_H) && defined(HAVE_STRUCT_PIM_PIM_VT)
 #include <netinet/pim.h>
 #else
 #include "mrt/include/netinet/pim.h"
