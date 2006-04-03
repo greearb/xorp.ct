@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.54 2006/02/04 07:22:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.55 2006/03/16 00:03:49 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -336,14 +336,10 @@ int
 main(int argc, char *argv[])
 {
     int ch;
+    string::size_type idx;
     const char *argv0 = argv[0];
-    char finder_hostname[MAXHOSTNAMELEN + 1];
+    string finder_hostname = FinderConstants::FINDER_DEFAULT_HOST().str();
     uint16_t finder_port = FinderConstants::FINDER_DEFAULT_PORT();
-
-    // Default finder hostname
-    strncpy(finder_hostname, FinderConstants::FINDER_DEFAULT_HOST().str().c_str(),
-	    sizeof(finder_hostname) - 1);
-    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
 
     //
     // Initialize and start xlog
@@ -362,21 +358,17 @@ main(int argc, char *argv[])
 	switch (ch) {
 	case 'F':
 	    // Finder hostname and port
-	    char *p;
-	    strncpy(finder_hostname, optarg, sizeof(finder_hostname) - 1);
-	    finder_hostname[sizeof(finder_hostname) - 1] = '\0';
-	    p = strrchr(finder_hostname, ':');
-	    if (p != NULL)
-		*p = '\0';
-	    p = strrchr(optarg, ':');
-	    if (p != NULL) {
-		p++;
-		if (*p == '\0') {
+	    finder_hostname = optarg;
+	    idx = finder_hostname.find(':');
+	    if (idx != string::npos) {
+		if (idx + 1 >= finder_hostname.length()) {
+		    // No port number
 		    usage(argv0, 1);
 		    // NOTREACHED
-		    break;
 		}
+		char* p = &finder_hostname[idx + 1];
 		finder_port = static_cast<uint16_t>(atoi(p));
+		finder_hostname = finder_hostname.substr(0, idx);
 	    }
 	    break;
 	case 'h':
@@ -399,11 +391,8 @@ main(int argc, char *argv[])
     }
 
     //
-    // XXX
-    // Do all that daemon stuff take off into the background disable signals
-    // and all that other good stuff.
+    // Run everything
     //
-
     try {
 	fea_main(finder_hostname, finder_port);
     } catch(...) {
