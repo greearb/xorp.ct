@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.53 2006/03/29 17:55:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.54 2006/04/03 05:26:25 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1603,7 +1603,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		    {
 			struct ip6_hbh *ext;
 			int currentlen;
-			u_int8_t type;
+			uint8_t type;
 			size_t extlen;
 			socklen_t len;
 			void *databuf;
