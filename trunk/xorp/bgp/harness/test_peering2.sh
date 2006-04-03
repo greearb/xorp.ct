@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.50 2005/12/11 20:39:10 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.51 2005/12/20 08:30:54 atanu Exp $
 #
 
 #
@@ -804,7 +804,7 @@ test15()
     # Check all the sent packets and verify that they arrived at peer3
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
-    cat $SENT | python $srcdir/lookup.py --peer peer3 \
+    cat $SENT | $PYTHON $srcdir/lookup.py --peer peer3 \
 					 --trie recv \
 					 --add 65008 > $XRLS
     echo "Performing lookup"					 
@@ -813,7 +813,7 @@ test15()
     # Check all the received packets and verify that they were sent by peer1
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
-    cat $RECV | python $srcdir/lookup.py --peer peer1 \
+    cat $RECV | $PYTHON $srcdir/lookup.py --peer peer1 \
 					 --trie sent \
 					 --remove 65008 > $XRLS
     echo "Performing lookup"					 
@@ -874,7 +874,7 @@ test16()
     # Check all the sent packets and verify that they arrived at peer1
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
-    cat $SENT | python $srcdir/lookup.py --peer peer1 \
+    cat $SENT | $PYTHON $srcdir/lookup.py --peer peer1 \
 					 --trie recv > $XRLS
     echo "Performing lookup"					 
     $CALLXRL -f $XRLS
@@ -883,7 +883,7 @@ test16()
     # Check all the received packets and verify that they were sent by peer2
     XRLS=${TMPDIR}/xrls.$EXT
     echo "Building lookup list in $XRLS"
-    cat $RECV | python $srcdir/lookup.py --peer peer2 \
+    cat $RECV | $PYTHON $srcdir/lookup.py --peer peer2 \
 					 --trie sent \
 					 --remove 65008 > $XRLS
     echo "Performing lookup"					 
@@ -958,14 +958,14 @@ test_work_in_progress()
 
 	# Check all the sent packets and verify that they arrived at peer3
 	XRLS=${TMPDIR}/xrls.$EXT
-	cat $SENT | python $srcdir/lookup.py --peer peer3 \
+	cat $SENT | $PYTHON $srcdir/lookup.py --peer peer3 \
 					 --trie recv \
 					 --add 65008 > $XRLS
 	$CALLXRL -f $XRLS
 
 	# Check all the received packets and verify that they were sent by peer1
 	XRLS=${TMPDIR}/xrls.$EXT
-	cat $RECV | python $srcdir/lookup.py --peer peer1 \
+	cat $RECV | $PYTHON $srcdir/lookup.py --peer peer1 \
 					 --trie sent \
 					 --remove 65008 > $XRLS
 	$CALLXRL -f $XRLS
@@ -1004,7 +1004,7 @@ test_work_in_progress()
 
 	# Check all the sent packets and verify that they arrived at peer3
 	XRLS=${TMPDIR}/xrls.$EXT
-	cat $SENT | python $srcdir/lookup.py --peer peer3 \
+	cat $SENT | $PYTHON $srcdir/lookup.py --peer peer3 \
 					 --trie recv \
 					 --add 65008 > $XRLS
 	$CALLXRL -f $XRLS
@@ -1020,6 +1020,15 @@ test_work_in_progress()
 TESTS_NOT_FIXED=''
 TESTS='test1 test2 test3 test4 test5 test6 test7 test8 test9 test10 test11
     test12 test13 test14 test15 test16 test17'
+
+# Sanity check that python is present on the host system.
+PYTHON=${PYTHON:=python}
+python_version=$(${PYTHON} -V 2>&1)
+if [ "X${python_version}" = "X" ]; then
+    exit 2
+else
+    export PYTHON
+fi
 
 # Include command line
 . ${srcdir}/args.sh
