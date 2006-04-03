@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.30 2005/10/27 19:54:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.31 2006/03/16 00:04:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -176,10 +176,15 @@ void
 RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
 			   const struct sockaddr* rti_info[])
 {
+    size_t sa_len = sizeof(*sock);
+
     for (uint32_t i = 0; i < RTAX_MAX; i++) {
 	if (amask & (1 << i)) {
-	    debug_msg("\tPresent 0x%02x af %d size %d\n",
-		      1 << i, sock->sa_family, sock->sa_len);
+#ifdef HAVE_SA_LEN
+	    sa_len = sock->sa_len;
+#endif
+	    debug_msg("\tPresent 0x%02x af %d size %u\n",
+		      1 << i, sock->sa_family, XORP_UINT_CAST(sa_len));
 	    rti_info[i] = sock;
 	    sock = next_sa(sock);
 	} else {
@@ -205,7 +210,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	return (netmask.mask_len());
     }
 #ifdef HAVE_IPV6
-    case AF_INET:
+    case AF_INET6:
     {
 	// XXX: sock->sa_family is undefined
 	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
