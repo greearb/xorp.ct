@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.51 2005/12/20 08:30:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.52 2006/04/03 18:41:47 bms Exp $
 #
 
 #
@@ -69,6 +69,8 @@ HOLDTIME=5
 TRAFFIC_DIR="${srcdir}/../../../data/bgp"
 TRAFFIC_FILES="${TRAFFIC_DIR}/icsi1.mrtd"
 
+# NOTE: The Win32 versions of coord and peer will perform
+# path conversion and expansion of /tmp internally.
 TMPDIR=${TMPDIR:-/tmp}
 EXT=${LOGNAME:-unknown}
 
@@ -210,8 +212,11 @@ test1()
 
     # Reset the connection
     reset
-    
-    uptime;echo "NOTE: Ocassionally we fail to make a connection. See the comment in the reset function"
+
+    if [ x"$OSTYPE" != xmsys ]; then
+	uptime
+	echo "NOTE: Occasionally, we fail to make a connection. See the comment in the reset function."
+    fi
 
     # Establish the new connection.
     coord peer2 establish AS $PEER2_AS holdtime 0 id 192.150.187.102
@@ -1030,13 +1035,27 @@ else
     export PYTHON
 fi
 
+# Perform Win32 path conversion for runit if required.
+RUNIT="runit"
+RUNITDIR="../../utils"
+RUNITPRE=""
+if [ x"$OSTYPE" = xmsys ]; then
+    RUNITPRE="cmd //c"
+    RUNITDIR=$(cd ${RUNITDIR} && pwd -W)
+fi
+
+runit()
+{
+    ${RUNITPRE} ${RUNITDIR}/${RUNIT} "$@"
+}
+
 # Include command line
 . ${srcdir}/args.sh
 
 if [ $START_PROGRAMS = "yes" ]
 then
-CXRL="$CALLXRL -r 10"
-    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    CXRL="$CALLXRL -r 10"
+    runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/xorp_finder
     ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
