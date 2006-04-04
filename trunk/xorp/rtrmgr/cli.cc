@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.123 2006/02/28 02:56:36 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.124 2006/03/16 00:05:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -841,12 +841,10 @@ RouterCLI::add_static_configure_mode_commands()
     CliCommand *com0, *com1, *com2, *help_com;
 
     com0 = _cli_node.cli_command_root();
-    if (_changes_made) {
-	// Commit command
-	com1 = com0->add_command("commit", get_help_c("commit"), false,
-				 callback(this, &RouterCLI::commit_func));
-	com1->set_can_pipe(false);
-    }
+    // Commit command
+    com1 = com0->add_command("commit", get_help_c("commit"), false,
+			     callback(this, &RouterCLI::commit_func));
+    com1->set_can_pipe(false);
 
     // Create command
     _create_node = com0->add_command("create", get_help_c("create"), false);
@@ -2913,6 +2911,13 @@ RouterCLI::commit_func(const string& ,
 			     "parameters.\n",
 			     cmd_name.c_str());
 	cli_client().cli_print(error_msg);
+	return (XORP_ERROR);
+    }
+
+    if (! _changes_made) {
+	error_msg = c_format("No configuration changes to commit.\n");
+	cli_client().cli_print(error_msg);
+	config_mode_prompt();
 	return (XORP_ERROR);
     }
 
