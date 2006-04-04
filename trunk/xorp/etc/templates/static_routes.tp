@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.35 2006/02/25 00:56:23 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.36 2006/03/27 07:56:43 pavlin Exp $ */
 
 protocols {
     static {
@@ -632,6 +632,7 @@ policy {
 	term @: txt {
 	    from {
 		metric {
+		    %help: short "Set the metric value";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=metric $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
