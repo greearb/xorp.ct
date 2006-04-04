@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.86 2006/03/07 03:57:09 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.87 2006/03/07 04:04:33 atanu Exp $ */
 
 protocols {
     bgp {
@@ -771,7 +771,6 @@ policy {
 	    } /* to */
 
 	    then {
-/*
 		nexthop4 {
 		    %help: short "Set the IPv4 nexthop";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop4 $(<>) $(@);";
@@ -782,7 +781,6 @@ policy {
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=nexthop6 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
-*/
 		as-path-prepend {
 		    %help: short "Prepend AS numbers to an AS path";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aspath = $(@) add aspath;";
