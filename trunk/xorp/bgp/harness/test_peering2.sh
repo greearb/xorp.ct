@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.52 2006/04/03 18:41:47 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.53 2006/04/04 09:47:45 bms Exp $
 #
 
 #
@@ -1034,20 +1034,6 @@ if [ "X${python_version}" = "X" ]; then
 else
     export PYTHON
 fi
-
-# Perform Win32 path conversion for runit if required.
-RUNIT="runit"
-RUNITDIR="../../utils"
-RUNITPRE=""
-if [ x"$OSTYPE" = xmsys ]; then
-    RUNITPRE="cmd //c"
-    RUNITDIR=$(cd ${RUNITDIR} && pwd -W)
-fi
-
-runit()
-{
-    ${RUNITPRE} ${RUNITDIR}/${RUNIT} "$@"
-}
 
 # Include command line
 . ${srcdir}/args.sh

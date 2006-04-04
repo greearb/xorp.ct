@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/harness/args.sh,v 1.2 2003/08/02 00:40:01 atanu Exp $
+# $XORP: xorp/bgp/harness/args.sh,v 1.3 2003/10/23 00:13:47 pavlin Exp $
 #
 
 #
@@ -11,6 +11,20 @@ CONFIGURE="yes"
 QUIET=""
 VERBOSE=""
 RESTART="yes"
+
+# Perform Win32 path conversion for runit if required.
+RUNIT="runit"
+RUNITDIR="../../utils"
+RUNITPRE=""
+if [ x"$OSTYPE" = xmsys ]; then
+    RUNITPRE="cmd //c"
+    RUNITDIR=$(cd ${RUNITDIR} && pwd -W)
+fi
+
+runit()
+{
+    ${RUNITPRE} ${RUNITDIR}/${RUNIT} "$@"
+}
 
 # -q (Quiet)
 # -v (Verbose)

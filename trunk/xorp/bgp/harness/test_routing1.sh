@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.20 2005/12/20 08:30:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.21 2005/12/21 10:17:05 atanu Exp $
 #
 
 #
@@ -943,8 +943,8 @@ TESTS='test1 test1_ipv6 test2 test2_ipv6 test3 test4 test5 test6 test7 test8'
 
 if [ $START_PROGRAMS = "yes" ]
 then
-CXRL="$CALLXRL -r 10"
-   ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    CXRL="$CALLXRL -r 10"
+    runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/xorp_finder
     ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name

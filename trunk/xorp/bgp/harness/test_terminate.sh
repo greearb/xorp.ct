@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.5 2003/07/17 00:28:32 pavlin Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.6 2004/11/24 02:40:12 atanu Exp $
 #
 
 #
@@ -96,8 +96,8 @@ TESTS='test1 test2'
 
 if [ $START_PROGRAMS = "yes" ]
 then
-CXRL="$CALLXRL -r 10"
-    ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    CXRL="$CALLXRL -r 10"
+    runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/xorp_finder
     ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name

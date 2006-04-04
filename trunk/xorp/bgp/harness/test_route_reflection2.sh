@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP$
+# $XORP: xorp/bgp/harness/test_route_reflection2.sh,v 1.1 2006/03/02 02:08:48 atanu Exp $
 #
 
 #
@@ -318,8 +318,8 @@ TESTS='test1 test2 test3 test4'
 
 if [ $START_PROGRAMS = "yes" ]
 then
-CXRL="$CALLXRL -r 10"
-   ../../utils/runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
+    CXRL="$CALLXRL -r 10"
+    runit $QUIET $VERBOSE -c "$0 -s -c $*" <<EOF
     ../../libxipc/xorp_finder
     ../../fea/xorp_fea_dummy  = $CXRL finder://fea/common/0.1/get_target_name
     ../../rib/xorp_rib        = $CXRL finder://rib/common/0.1/get_target_name
