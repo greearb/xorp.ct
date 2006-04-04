@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.72 2005/12/13 02:37:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.73 2006/03/16 00:03:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include <string>
+#include <string.h>
 #include <stdlib.h>
 
 #ifdef HAVE_CONFIG_H
@@ -31,6 +32,7 @@
 
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4net.hh"
+#include "libxorp/utils.hh"
 
 #include "bgp/local_data.hh"
 #include "bgp/packet.hh"
@@ -1191,6 +1193,25 @@ Peer::dump(const string& line, const vector<string>& words)
     string filename;
     if(words.size() == 7)
 	filename = words[6];
+
+#ifdef HOST_OS_WINDOWS
+    //
+    // If run from an MSYS shell, we need to perform UNIX->NT path
+    // conversion and expansion of /tmp by ourselves.
+    //
+    filename = unix_path_to_native(filename);
+    static const char tmpdirprefix[] = "\\tmp\\";
+    if (0 == _strnicmp(filename.c_str(), tmpdirprefix,
+		       strlen(tmpdirprefix))) {
+    	char tmpexp[MAXPATHLEN];
+    	size_t size = GetTempPathA(sizeof(tmpexp), tmpexp);
+    	if (size == 0 || size >= sizeof(tmpexp)) {
+		xorp_throw(InvalidString,
+        	   c_format("Internal error during tmpdir expansion"));
+	}
+	filename.replace(0, strlen(tmpdirprefix), string(tmpexp));
+    }
+#endif
 
     if("traffic" == words[5]) {
 	if("" == filename) {
