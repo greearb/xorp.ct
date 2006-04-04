@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.15 2005/11/12 23:37:42 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.16 2006/03/16 00:05:01 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -79,10 +79,20 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
 	    != _out_of_order_nodes[block].end())) {
 	debug_msg("[POLICY] Deleting previous statement...\n");
 	del_block(block, order);
-/*	
+#if 0
+	//
+	// XXX: don't throw an error if a previous statement is in this
+	// position. Given that currently, say, same "nexthop4"
+	// rtrmgr policy template node exists in more than one template
+	// (bgp.tp, ospfv2.tp, rip.tp), we could receive three times same
+	// XRL to set same block. The reason for this is because each
+	// *.tp "nexthop4" entry incremantally adds same "%set xrl" action.
+	// The alternative solution would be to avoid node/action duplication
+	// in the rtrmgr templates.
+	//
 	throw term_syntax_error("A statement is already present in position: " 
 				+ to_str(order));
-*/				
+#endif // 0
     }
 
     debug_msg("[POLICY] Statement=(%s)\n", statement.c_str());
@@ -157,8 +167,20 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
 	return;
     }
 
+#if 0
+    //
+    // XXX: don't throw an error if no previous statement is in this
+    // position. Given that currently, say, same "nexthop4"
+    // rtrmgr policy template node exists in more than one template
+    // (bgp.tp, ospfv2.tp, rip.tp), we could receive three times same
+    // XRL to delete same block. The reason for this is because each
+    // *.tp "nexthop4" entry incremantally adds same "%delete xrl" action.
+    // The alternative solution would be to avoid node/action duplication
+    // in the rtrmgr templates.
+    //
     throw term_syntax_error("Want to delete an empty position: " 
 			    + order.str());
+#endif // 0
 }
 
 list<pair<ConfigNodeId, Node*> >::iterator
