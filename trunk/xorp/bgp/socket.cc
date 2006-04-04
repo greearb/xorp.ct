@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.38 2005/09/23 17:02:55 atanu Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.39 2006/03/16 00:03:35 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -106,7 +106,11 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
     struct addrinfo hints, *res0;
     // Need to provide a hint because we are providing a numeric port number.
     memset(&hints, 0, sizeof(hints));
+#ifdef HOST_OS_WINDOWS
+    hints.ai_family = PF_INET;
+#else
     hints.ai_family = PF_UNSPEC;
+#endif
     hints.ai_socktype = SOCK_STREAM;
     // addr must be numeric so this can't fail.
     if ((error = getaddrinfo(addr.c_str(), port.c_str(), &hints, &res0))) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.14 2005/08/18 15:58:05 bms Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.15 2006/03/16 00:03:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -140,7 +140,11 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
     struct addrinfo hints, *res0;
     // Need to provide a hint because we are providing a numeric port number.
     memset(&hints, 0, sizeof(hints));
+#ifdef HOST_OS_WINDOWS
+    hints.ai_family = PF_INET;
+#else
     hints.ai_family = PF_UNSPEC;
+#endif
     hints.ai_socktype = SOCK_STREAM;
     if ((error = getaddrinfo(interface, servname, &hints, &res0))) {
 	const char *error_string = gai_strerror(error);
