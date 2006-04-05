@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.14 2006/03/16 00:04:37 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.15 2006/04/05 05:40:18 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -270,7 +270,7 @@ void win_quote_args(const list<string>& args, string& cmdline);
  * http://www-db.stanford.edu/~manku/bitcount/bitcount.html
  *
  * @param x the value to test.
- * @return the number of bits that are set in @ref value.
+ * @return the number of bits that are set in @ref x.
  */
 inline uint32_t
 xorp_bitcount_uint32(uint32_t x)
@@ -288,6 +288,27 @@ xorp_bitcount_uint32(uint32_t x)
     x &= 0x0000003f;
 
     return (x);
+}
+
+/**
+ * Count the number of leading zeroes in a 32-bit wide integer.
+ *
+ * Code taken from the following URL (the "Leading Zero Count" algorithm):
+ * http://aggregate.org/MAGIC/
+ *
+ * @param x the value to test.
+ * @return the number of leading zeroes in @ref x.
+ */
+inline uint32_t
+xorp_lzc_uint32(uint32_t x)
+{
+    x |= (x >> 1);
+    x |= (x >> 2);
+    x |= (x >> 4);
+    x |= (x >> 8);
+    x |= (x >> 16);
+
+    return (32 - xorp_bitcount_uint32(x));
 }
 
 #endif // __LIBXORP_UTILS_HH__
