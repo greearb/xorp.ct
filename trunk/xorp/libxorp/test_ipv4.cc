@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.17 2005/08/18 15:28:41 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.18 2006/03/16 00:04:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -655,6 +655,23 @@ test_ipv4_manipulate_address()
     // Test extracting bits from an address.
     //
     verbose_assert(IPv4("12.34.56.78").bits(0, 8) == 78, "bits()");
+
+    //
+    // Test counting the number of bits in an address.
+    //
+    verbose_assert(IPv4::ZERO().bit_count() == 0, "bit_count()");
+    verbose_assert(IPv4::ALL_ONES().bit_count() == 32, "bit_count()");
+    verbose_assert(IPv4("240.15.240.15").bit_count() == 16, "bit_count()");
+
+    //
+    // Test counting the number of leading zeroes in an address.
+    //
+    verbose_assert(IPv4::ZERO().leading_zero_count() == 32,
+		   "leading_zero_count()");
+    verbose_assert(IPv4::ALL_ONES().leading_zero_count() == 0,
+		   "leading_zero_count()");
+    verbose_assert(IPv4("0.1.255.255").leading_zero_count() == 15,
+		   "leading_zero_count()");
 }
 
 /**

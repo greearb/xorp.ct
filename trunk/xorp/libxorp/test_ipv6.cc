@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.17 2005/08/18 15:28:41 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.18 2006/03/16 00:04:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -705,6 +705,23 @@ test_ipv6_manipulate_address()
     verbose_assert(IPv6("1234:5678:9abc:def0:fed:cba9:8765:4321").bits(0, 8)
 		   == 0x21,
 		   "bits()");
+
+    //
+    // Test counting the number of bits in an address.
+    //
+    verbose_assert(IPv6::ZERO().bit_count() == 0, "bit_count()");
+    verbose_assert(IPv6::ALL_ONES().bit_count() == 128, "bit_count()");
+    verbose_assert(IPv6("f00f:0ff0:f00f:0ff0:f00f:0ff0:f00f:0ff0").bit_count() == 64, "bit_count()");
+
+    //
+    // Test counting the number of leading zeroes in an address.
+    //
+    verbose_assert(IPv6::ZERO().leading_zero_count() == 128,
+		   "leading_zero_count()");
+    verbose_assert(IPv6::ALL_ONES().leading_zero_count() == 0,
+		   "leading_zero_count()");
+    verbose_assert(IPv6("0000:0000:0000:0001:ffff:ffff:ffff:ffff").leading_zero_count() == 63,
+		   "leading_zero_count()");
 }
 
 /**

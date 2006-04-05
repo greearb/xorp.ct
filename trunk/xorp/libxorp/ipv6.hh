@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.24 2005/08/04 10:07:57 bms Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.25 2006/03/16 00:04:30 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -36,6 +36,7 @@
 #include "xorp.h"
 #include "exceptions.hh"
 #include "range.hh"
+#include "utils.hh"
 
 struct in6_addr;
 
@@ -540,6 +541,20 @@ public:
     inline uint32_t bits(uint32_t lsb, uint32_t len) const;
 
     /**
+     * Count the number of bits that are set in this address.
+     *
+     * @return the number of bits that are set in this address.
+     */
+    inline uint32_t bit_count() const;
+
+    /**
+     * Count the number of leading zeroes in this address.
+     *
+     * @return the number of leading zeroes in this address.
+     */
+    inline uint32_t leading_zero_count() const;
+
+    /**
      * Pre-defined IPv6 address constants.
      */
     inline static const IPv6& ZERO(int af = AF_INET6);
@@ -573,6 +588,31 @@ IPv6::bits(uint32_t lsb, uint32_t len) const
 	mask = 0xffffffffU;	// XXX: shifting with >= 32 bits is undefined
 
     return ntohl((*this >> lsb)._addr[3]) & mask;
+}
+
+inline uint32_t
+IPv6::bit_count() const
+{
+    // XXX: no need for ntohl()
+    return (xorp_bit_count_uint32(_addr[0])
+	    + xorp_bit_count_uint32(_addr[1])
+	    + xorp_bit_count_uint32(_addr[2])
+	    + xorp_bit_count_uint32(_addr[3]));
+}
+
+inline uint32_t
+IPv6::leading_zero_count() const
+{
+    uint32_t r = 0;
+
+    for (int i = 0; i < 4; i++) {
+	if (_addr[i] != 0) {
+	    r += xorp_leading_zero_count_uint32(ntohl(_addr[i]));
+	    break;
+	}
+	r += 32;
+    }
+    return (r);
 }
 
 struct IPv6Constants {

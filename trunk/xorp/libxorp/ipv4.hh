@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.24 2005/08/02 20:52:14 zec Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.25 2006/03/16 00:04:29 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -36,6 +36,7 @@
 #include "xorp.h"
 #include "exceptions.hh"
 #include "range.hh"
+#include "utils.hh"
 
 struct in_addr;
 
@@ -550,6 +551,20 @@ public:
     inline uint32_t bits(uint32_t lsb, uint32_t len) const;
 
     /**
+     * Count the number of bits that are set in this address.
+     *
+     * @return the number of bits that are set in this address.
+     */
+    inline uint32_t bit_count() const;
+
+    /**
+     * Count the number of leading zeroes in this address.
+     *
+     * @return the number of leading zeroes in this address.
+     */
+    inline uint32_t leading_zero_count() const;
+
+    /**
      * Pre-defined IPv4 address constants.
      */
     inline static const IPv4& ZERO(int af = AF_INET);
@@ -582,6 +597,19 @@ IPv4::bits(uint32_t lsb, uint32_t len) const
     if (len >= 32)
 	mask = 0xffffffffU;	// XXX: shifting with >= 32 bits is undefined
     return (ntohl(_addr) >> lsb) & mask;
+}
+
+inline uint32_t
+IPv4::bit_count() const
+{
+    // XXX: no need for ntohl()
+    return (xorp_bit_count_uint32(_addr));
+}
+
+inline uint32_t
+IPv4::leading_zero_count() const
+{
+    return (xorp_leading_zero_count_uint32(ntohl(_addr)));
 }
 
 struct IPv4Constants {

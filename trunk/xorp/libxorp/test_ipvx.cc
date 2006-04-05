@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.17 2005/08/18 15:28:41 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.18 2006/03/16 00:04:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1169,6 +1169,34 @@ test_ipvx_manipulate_address()
     verbose_assert(IPvX("1234:5678:9abc:def0:fed:cba9:8765:4321").bits(0, 8)
 		   == 0x21,
 		   "bits()");
+
+    //
+    // Test counting the number of bits in an address.
+    //
+    verbose_assert(IPvX::ZERO(AF_INET).bit_count() == 0, "bit_count()");
+    verbose_assert(IPvX::ALL_ONES(AF_INET).bit_count() == 32, "bit_count()");
+    verbose_assert(IPvX("240.15.240.15").bit_count() == 16, "bit_count()");
+
+    verbose_assert(IPvX::ZERO(AF_INET6).bit_count() == 0, "bit_count()");
+    verbose_assert(IPvX::ALL_ONES(AF_INET6).bit_count() == 128, "bit_count()");
+    verbose_assert(IPvX("f00f:0ff0:f00f:0ff0:f00f:0ff0:f00f:0ff0").bit_count() == 64, "bit_count()");
+
+    //
+    // Test counting the number of leading zeroes in an address.
+    //
+    verbose_assert(IPvX::ZERO(AF_INET).leading_zero_count() == 32,
+		   "leading_zero_count()");
+    verbose_assert(IPvX::ALL_ONES(AF_INET).leading_zero_count() == 0,
+		   "leading_zero_count()");
+    verbose_assert(IPvX("0.15.255.255").leading_zero_count() == 12,
+		   "leading_zero_count()");
+
+    verbose_assert(IPvX::ZERO(AF_INET6).leading_zero_count() == 128,
+		   "leading_zero_count()");
+    verbose_assert(IPvX::ALL_ONES(AF_INET6).leading_zero_count() == 0,
+		   "leading_zero_count()");
+    verbose_assert(IPv6("0000:0000:0000:0001:ffff:ffff:ffff:ffff").leading_zero_count() == 63,
+		   "leading_zero_count()");
 
     //
     // Test if this address is IPv4 address.

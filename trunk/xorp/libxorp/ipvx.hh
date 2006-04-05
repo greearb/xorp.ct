@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.18 2005/03/25 02:53:42 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.19 2006/03/16 00:04:30 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -607,6 +607,20 @@ public:
     inline uint32_t bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily);
 
     /**
+     * Count the number of bits that are set in this address.
+     *
+     * @return the number of bits that are set in this address.
+     */
+    inline uint32_t bit_count() const;
+
+    /**
+     * Count the number of leading zeroes in this address.
+     *
+     * @return the number of leading zeroes in this address.
+     */
+    inline uint32_t leading_zero_count() const;
+
+    /**
      * Pre-defined IPvX address constants.
      */
     static const IPvX& ZERO(int family)
@@ -673,6 +687,22 @@ IPvX::bits(uint32_t lsb, uint32_t len) const throw (InvalidFamily)
 
     xorp_throw(InvalidFamily, _af);
     return (0x0U);
+}
+
+inline uint32_t
+IPvX::bit_count() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().bit_count();
+    return get_ipv6().bit_count();
+}
+
+inline uint32_t
+IPvX::leading_zero_count() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().leading_zero_count();
+    return get_ipv6().leading_zero_count();
 }
 
 //
