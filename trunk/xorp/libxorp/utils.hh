@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.13 2006/03/01 13:03:16 bms Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.14 2006/03/16 00:04:37 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -257,5 +257,37 @@ FILE*	xorp_make_temporary_file(const string& tmp_dir,
  */
 void win_quote_args(const list<string>& args, string& cmdline);
 #endif // HOST_OS_WINDOWS
+
+/**
+ * Count the number of bits that are set in a 32-bit wide integer.
+ *
+ * Code taken from the following URL (the "Population Count (Ones Count)"
+ * algorithm):
+ * http://aggregate.org/MAGIC/
+ *
+ * Note: this solution appears to be faster even compared to the
+ * "Parallel Count" and "MIT HACKMEM Count" from:
+ * http://www-db.stanford.edu/~manku/bitcount/bitcount.html
+ *
+ * @param x the value to test.
+ * @return the number of bits that are set in @ref value.
+ */
+inline uint32_t
+xorp_bitcount_uint32(uint32_t x)
+{
+    //
+    // 32-bit recursive reduction using SWAR...
+    // but first step is mapping 2-bit values
+    // into sum of 2 1-bit values in sneaky way.
+    //
+    x -= ((x >> 1) & 0x55555555);
+    x = (((x >> 2) & 0x33333333) + (x & 0x33333333));
+    x = (((x >> 4) + x) & 0x0f0f0f0f);
+    x += (x >> 8);
+    x += (x >> 16);
+    x &= 0x0000003f;
+
+    return (x);
+}
 
 #endif // __LIBXORP_UTILS_HH__
