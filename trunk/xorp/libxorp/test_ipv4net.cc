@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.14 2006/04/02 22:31:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.15 2006/04/05 07:47:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -350,6 +350,10 @@ test_ipv4net_address_overlap(TestInfo& test_info)
     IPv4Net ipnet_a("12.34.0.0/16");
     IPv4Net ipnet_b("12.35.0.0/16");
     IPv4Net ipnet_c("12.34.56.0/24");
+    IPv4Net ipnet_d("12.32.0.0/16");
+    IPv4Net ipnet_e("12.33.0.0/16");
+    IPv4Net ipnet_f("1.2.1.0/24");
+    IPv4Net ipnet_g("1.2.3.0/24");
     
     //
     // Test if subnets overlap.
@@ -383,6 +387,8 @@ test_ipv4net_address_overlap(TestInfo& test_info)
     verbose_assert(ipnet_a.overlap(ipnet_a) == 16, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_b) == 15, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_c) == 16, "overlap()");
+    verbose_assert(ipnet_d.overlap(ipnet_e) == 15, "overlap()");
+    verbose_assert(ipnet_f.overlap(ipnet_g) == 22, "overlap()");
 
     return (! failures());
 }

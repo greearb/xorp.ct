@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.13 2006/04/02 22:31:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.14 2006/04/05 07:47:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -518,10 +518,18 @@ test_ipvxnet_address_overlap(TestInfo& test_info)
     IPvXNet ipnet4_a("12.34.0.0/16");
     IPvXNet ipnet4_b("12.35.0.0/16");
     IPvXNet ipnet4_c("12.34.56.0/24");
+    IPvXNet ipnet4_d("12.32.0.0/16");
+    IPvXNet ipnet4_e("12.33.0.0/16");
+    IPvXNet ipnet4_f("1.2.1.0/24");
+    IPvXNet ipnet4_g("1.2.3.0/24");
     
     IPvXNet ipnet6_a("1234:5678::/32");
     IPvXNet ipnet6_b("1234:5679::/32");
     IPvXNet ipnet6_c("1234:5678:9abc::/48");
+    IPvXNet ipnet6_d("1234:0020::/32");
+    IPvXNet ipnet6_e("1234:0021::/32");
+    IPvXNet ipnet6_f("0001:0002:0001::/48");
+    IPvXNet ipnet6_g("0001:0002:0003::/48");
     
     //
     // Test if subnets overlap.
@@ -571,10 +579,14 @@ test_ipvxnet_address_overlap(TestInfo& test_info)
     verbose_assert(ipnet4_a.overlap(ipnet4_a) == 16, "overlap()");
     verbose_assert(ipnet4_a.overlap(ipnet4_b) == 15, "overlap()");
     verbose_assert(ipnet4_a.overlap(ipnet4_c) == 16, "overlap()");
+    verbose_assert(ipnet4_d.overlap(ipnet4_e) == 15, "overlap()");
+    verbose_assert(ipnet4_f.overlap(ipnet4_g) == 22, "overlap()");
     
     verbose_assert(ipnet6_a.overlap(ipnet6_a) == 32, "overlap()");
     verbose_assert(ipnet6_a.overlap(ipnet6_b) == 31, "overlap()");
     verbose_assert(ipnet6_a.overlap(ipnet6_c) == 32, "overlap()");
+    verbose_assert(ipnet6_d.overlap(ipnet6_e) == 31, "overlap()");
+    verbose_assert(ipnet6_f.overlap(ipnet6_g) == 46, "overlap()");
 
     return (! failures());
 }

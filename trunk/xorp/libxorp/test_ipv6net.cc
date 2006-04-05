@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.11 2006/04/02 22:31:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.12 2006/04/05 07:47:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -356,6 +356,10 @@ test_ipv6net_address_overlap(TestInfo& test_info)
     IPv6Net ipnet_a("1234:5678::/32");
     IPv6Net ipnet_b("1234:5679::/32");
     IPv6Net ipnet_c("1234:5678:9abc::/48");
+    IPv6Net ipnet_d("1234:0020::/32");
+    IPv6Net ipnet_e("1234:0021::/32");
+    IPv6Net ipnet_f("0001:0002:0001::/48");
+    IPv6Net ipnet_g("0001:0002:0003::/48");
     
     //
     // Test if subnets overlap.
@@ -389,6 +393,8 @@ test_ipv6net_address_overlap(TestInfo& test_info)
     verbose_assert(ipnet_a.overlap(ipnet_a) == 32, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_b) == 31, "overlap()");
     verbose_assert(ipnet_a.overlap(ipnet_c) == 32, "overlap()");
+    verbose_assert(ipnet_d.overlap(ipnet_e) == 31, "overlap()");
+    verbose_assert(ipnet_f.overlap(ipnet_g) == 46, "overlap()");
 
     return (! failures());
 }
