@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.21 2006/03/11 03:13:39 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.22 2006/03/16 00:04:29 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -21,6 +21,7 @@
 #include "exceptions.hh"
 #include "c_format.hh"
 #include "range.hh"
+#include "utils.hh"
 
 /**
  * @short A template class for subnets
@@ -485,18 +486,14 @@ IPNet<A>::overlap(const IPNet<A>& other) const
     if (masked_addr().af() != other.masked_addr().af())
 	return 0;
 
-    A addr = masked_addr() ^ other.masked_addr();
+    A xor_addr = masked_addr() ^ other.masked_addr();
+    uint32_t done = xor_addr.leading_zero_count();
 
     uint32_t p = (prefix_len() < other.prefix_len()) ?
 	prefix_len() : other.prefix_len();
-
-    uint32_t i = 0;
-
-    for (A o(A::ALL_ONES(_masked_addr.af())); i <= p; o = o >> 1, i++) {
-	if (o < addr)
-	    return i - 1;
-    }
-    return i - 1;
+    if (done > p)
+	done = p;
+    return done;
 }
 
 /**
