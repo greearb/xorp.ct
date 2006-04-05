@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.12 2006/03/16 00:04:34 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.13 2006/04/02 22:31:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,6 +23,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipvxnet.hh"
+#include "libxorp/timer.hh"
 
 #include "libxorp/test_main.hh"
 
@@ -579,6 +580,58 @@ test_ipvxnet_address_overlap(TestInfo& test_info)
 }
 
 /**
+ * Test performance of IPvXNet address overlap.
+ */
+bool
+test_performance_ipvxnet_address_overlap(TestInfo& test_info)
+{
+    UNUSED(test_info);
+
+    IPvXNet ipnet4_a("255.0.0.0/8");
+    IPvXNet ipnet4_b("255.255.255.0/24");
+    IPv6Net ipnet6_a("ffff:ffff::/32");
+    IPv6Net ipnet6_b("ffff:ffff:ffff:ffff:ffff:ffff::/96");
+
+    //
+    // Test overlapping subnets.
+    //
+    do {
+	size_t i;
+	size_t c = 0;
+	TimeVal begin_timeval, end_timeval, delta_timeval;
+
+	TimerList::system_gettimeofday(&begin_timeval);
+	for (i = 0; i < 0xffffff; i++) {
+	    c += ipnet4_a.overlap(ipnet4_b);
+	}
+	TimerList::system_gettimeofday(&end_timeval);
+	delta_timeval = end_timeval - begin_timeval;
+	verbose_log("Execution time IPvXNet::overlap(): %s seconds\n",
+		    delta_timeval.str().c_str());
+    } while (false);
+
+    //
+    // Test overlapping subnets.
+    //
+    do {
+	size_t i;
+	size_t c = 0;
+	TimeVal begin_timeval, end_timeval, delta_timeval;
+
+	TimerList::system_gettimeofday(&begin_timeval);
+	for (i = 0; i < 0xffffff; i++) {
+	    c += ipnet6_a.overlap(ipnet6_b);
+	}
+	TimerList::system_gettimeofday(&end_timeval);
+	delta_timeval = end_timeval - begin_timeval;
+	verbose_log("Execution time IPvXNet::overlap(): %s seconds\n",
+		    delta_timeval.str().c_str());
+    } while (false);
+
+    return (! failures());
+}
+
+/**
  * Test IPvXNet address constant values.
  */
 bool
@@ -848,6 +901,10 @@ main(int argc, char * const argv[])
 	{ "test_ipvxnet_invalid_manipulate_address",
 	  callback(test_ipvxnet_invalid_manipulate_address),
 	  true
+	},
+	{ "test_performance_ipvxnet_address_overlap",
+	  callback(test_performance_ipvxnet_address_overlap),
+	  false
 	}
     };
 

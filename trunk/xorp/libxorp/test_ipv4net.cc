@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.13 2006/03/16 00:04:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.14 2006/04/02 22:31:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -23,6 +23,7 @@
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv4net.hh"
+#include "libxorp/timer.hh"
 
 #include "libxorp/test_main.hh"
 
@@ -387,6 +388,38 @@ test_ipv4net_address_overlap(TestInfo& test_info)
 }
 
 /**
+ * Test performance of IPv4Net address overlap.
+ */
+bool
+test_performance_ipv4net_address_overlap(TestInfo& test_info)
+{
+    UNUSED(test_info);
+
+    IPv4Net ipnet_a("255.0.0.0/8");
+    IPv4Net ipnet_b("255.255.255.0/24");
+
+    //
+    // Test overlapping subnets.
+    //
+    do {
+	size_t i;
+	size_t c = 0;
+	TimeVal begin_timeval, end_timeval, delta_timeval;
+
+	TimerList::system_gettimeofday(&begin_timeval);
+	for (i = 0; i < 0xffffff; i++) {
+	    c += ipnet_a.overlap(ipnet_b);
+	}
+	TimerList::system_gettimeofday(&end_timeval);
+	delta_timeval = end_timeval - begin_timeval;
+	verbose_log("Execution time IPv4Net::overlap(): %s seconds\n",
+		    delta_timeval.str().c_str());
+    } while (false);
+
+    return (! failures());
+}
+
+/**
  * Test IPv4Net address constant values.
  */
 bool
@@ -520,6 +553,10 @@ main(int argc, char * const argv[])
 	{ "test_ipv4net_manipulate_address",
 	  callback(test_ipv4net_manipulate_address),
 	  true
+	},
+	{ "test_performance_ipv4net_address_overlap",
+	  callback(test_performance_ipv4net_address_overlap),
+	  false
 	}
     };
 
