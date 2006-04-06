@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.61 2006/03/01 03:07:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.62 2006/03/16 00:05:58 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -42,11 +42,6 @@ class TemplateTreeNode;
 class ConfigTreeNode;
 
 class CTN_Compare {
-public:
-    bool operator() (ConfigTreeNode* a, ConfigTreeNode *b);
-};
-
-class CTN_CompareValue {
 public:
     bool operator() (ConfigTreeNode* a, ConfigTreeNode *b);
 };
@@ -182,7 +177,7 @@ protected:
 					     VarType& type);
     ConfigTreeNode* find_child_varname_node(const list<string>& var_parts,
 					    VarType& type);
-    void sort_by_value(list <ConfigTreeNode*>& children) const;
+    void sort_by_template(list<ConfigTreeNode*>& children) const;
     string show_node_id(bool numbered, const ConfigNodeId& node_id) const;
     virtual void allocate_unique_node_id();
     string quoted_value(const string& value) const;

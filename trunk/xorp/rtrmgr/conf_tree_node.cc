@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.109 2006/03/01 03:07:57 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.110 2006/03/16 00:05:58 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -39,48 +39,6 @@ CTN_Compare::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
     //
     // If the nodes have the same template, then we sort according to their
     // own sort order, otherwise we sort them into template tree order.
-    //
-    if (a->template_tree_node() == b->template_tree_node()) {
-	TTSortOrder order = a->template_tree_node()->order();
-	switch (order) {
-	case ORDER_UNSORTED:
-	    return false;
-	case ORDER_SORTED_NUMERIC:
-	    if (a->is_tag()) {
-		XLOG_ASSERT(!a->const_children().empty());
-		XLOG_ASSERT(!b->const_children().empty());
-		const ConfigTreeNode *child_a = *(a->const_children().begin());
-		const ConfigTreeNode *child_b = *(b->const_children().begin());
-		return (strtoll(child_a->segname().c_str(), (char **)NULL, 10) 
-			< strtoll(child_b->segname().c_str(), (char **)NULL, 10));
-	    } else {
-		return (strtoll(a->segname().c_str(), (char **)NULL, 10)
-			< strtoll(b->segname().c_str(), (char **)NULL, 10));
-	    }
-	case ORDER_SORTED_ALPHABETIC:
-	    if (a->is_tag()) {
-		XLOG_ASSERT(!a->const_children().empty());
-		XLOG_ASSERT(!b->const_children().empty());
-		const ConfigTreeNode *child_a = *(a->const_children().begin());
-		const ConfigTreeNode *child_b = *(b->const_children().begin());
-		return (child_a->str() < child_b->str());
-	    } else {
-		return (a->str() < b->str());
-	    }
-	}
-    }
-
-    // Nodes have different templates, so sort by template file order
-    return (a->child_number() < b->child_number());
-}
-
-
-bool
-CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
-{
-    //
-    // If the nodes have the same template, then we sort according to
-    // their own sort order, otherwise we leave them as they are.
     //
     if (a->template_tree_node() == b->template_tree_node()) {
 	TTSortOrder order = a->template_tree_node()->order();
@@ -113,8 +71,8 @@ CTN_CompareValue::operator() (ConfigTreeNode* a, ConfigTreeNode *b)
 	}
     }
 
-    // Nodes have different templates, so don't sort them
-    return false;
+    // Nodes have different templates, so sort by template file order
+    return (a->child_number() < b->child_number());
 }
 
 
@@ -261,7 +219,7 @@ ConfigTreeNode::add_child(ConfigTreeNode* child)
 {
     _children.push_back(child);
     list<ConfigTreeNode *> sorted_children = _children;
-    sort_by_value(sorted_children);
+    sort_by_template(sorted_children);
     _children = sorted_children;
 }
 
@@ -2056,9 +2014,9 @@ ConfigTreeNode::child_number() const
 }
 
 void
-ConfigTreeNode::sort_by_value(list <ConfigTreeNode*>& children) const
+ConfigTreeNode::sort_by_template(list<ConfigTreeNode*>& children) const
 {
-    children.sort(CTN_CompareValue());
+    children.sort(CTN_Compare());
 } 
 
 string
@@ -2090,7 +2048,7 @@ ConfigTreeNode::allocate_unique_node_id()
     //
     debug_msg("finding order (phase 1)...\n");
     list<ConfigTreeNode *> sorted_children = _parent->children();
-    sort_by_value(sorted_children);
+    sort_by_template(sorted_children);
     bool found_this = false;
     list<ConfigTreeNode*>::iterator iter;
     for (iter = sorted_children.begin(); 
@@ -2129,7 +2087,7 @@ ConfigTreeNode::allocate_unique_node_id()
 	found_this = false;
 	debug_msg("finding order (phase 2)...\n");
 	list<ConfigTreeNode *> sorted_children = effective_parent->children();
-	sort_by_value(sorted_children);
+	sort_by_template(sorted_children);
 	for (iter = sorted_children.begin(); 
 	     iter != sorted_children.end();
 	     ++iter) {
