@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.7 2005/10/02 22:21:50 abittau Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.8 2006/03/16 00:04:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -90,9 +90,18 @@ CodeGenerator::visit_term(Term& term)
 	throw CodeGeneratorErr("Term " + term.name() + " has a dest part!");
     }
 
-    // do the action block
+    //
+    // Do the action block.
+    // XXX: We generate last the code for the "accept" or "reject" statements.
+    //
     for(i = actions.begin(); i != actions.end(); ++i) {
+	if ((i->second)->is_accept_or_reject())
+	    continue;
         (i->second)->accept(*this);
+    }
+    for(i = actions.begin(); i != actions.end(); ++i) {
+	if ((i->second)->is_accept_or_reject())
+	    (i->second)->accept(*this);
     }
 
     _os << "TERM_END\n";

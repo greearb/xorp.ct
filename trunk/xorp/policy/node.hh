@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.7 2006/03/16 00:04:58 pavlin Exp $
+// $XORP: xorp/policy/node.hh,v 1.8 2006/04/06 00:27:57 pavlin Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -249,6 +249,13 @@ public:
     NodeAccept(unsigned line) : Node(line) {}
 
     DEFINE_VISITABLE();
+
+    /**
+     * Test whether this is "accept" or "reject" statement.
+     *
+     * @return true if this is "accept" or "reject" statement.
+     */
+    virtual bool is_accept_or_reject() const { return (true); }
 };
 
 /**
@@ -262,6 +269,13 @@ public:
     NodeReject(unsigned line) : Node(line) {}
 
     DEFINE_VISITABLE();
+
+    /**
+     * Test whether this is "accept" or "reject" statement.
+     *
+     * @return true if this is "accept" or "reject" statement.
+     */
+    virtual bool is_accept_or_reject() const { return (true); }
 };
 
 /**
@@ -278,7 +292,9 @@ public:
     DEFINE_VISITABLE();
 
     /**
-     * @return true if this is a protocol statement.
+     * Test whether this is a "protocol" statement.
+     *
+     * @return true if this is a "protocol" statement.
      */
     virtual bool is_protocol_statement() const { return (true); }
 
