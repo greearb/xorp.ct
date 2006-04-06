@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node.hh,v 1.6 2005/10/02 22:21:50 abittau Exp $
+// $XORP: xorp/policy/node.hh,v 1.7 2006/03/16 00:04:58 pavlin Exp $
 
 #ifndef __POLICY_NODE_HH__
 #define __POLICY_NODE_HH__
@@ -276,6 +276,11 @@ public:
     NodeProto(const string& proto, unsigned line) : Node(line), _proto(proto) {}
 
     DEFINE_VISITABLE();
+
+    /**
+     * @return true if this is a protocol statement.
+     */
+    virtual bool is_protocol_statement() const { return (true); }
 
     /**
      * @return the protocol being referenced.

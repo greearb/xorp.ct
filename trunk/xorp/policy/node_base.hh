@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/node_base.hh,v 1.2 2005/03/25 02:54:07 pavlin Exp $
+// $XORP: xorp/policy/node_base.hh,v 1.3 2006/03/16 00:04:58 pavlin Exp $
 
 #ifndef __POLICY_NODE_BASE_HH__
 #define __POLICY_NODE_BASE_HH__
@@ -47,6 +47,11 @@ public:
      * @return element at the end of node evaluation.
      */
     virtual const Element* accept(Visitor& v) =0;
+
+    /**
+     * @return true if this is a protocol statement.
+     */
+    virtual bool is_protocol_statement() const { return (false); }
 
 private:
     unsigned _line;

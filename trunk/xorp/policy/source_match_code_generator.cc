@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.7 2005/10/02 22:21:51 abittau Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.8 2006/03/16 00:05:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -109,8 +109,25 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
     _protocol = "";
 
-    // generate code for source block
+    //
+    // XXX: Generate first the source block for the protocol statement,
+    // because the protocol value is needed by the processing of other
+    // statements.
+    //
     for(i = source.begin(); i != source.end(); ++i) {
+	if ((i->second)->is_protocol_statement())
+	    (i->second)->accept(*this);
+    }
+
+    //
+    // Generate the remaining code for the source block
+    //
+    for(i = source.begin(); i != source.end(); ++i) {
+	if ((i->second)->is_protocol_statement()) {
+	    // XXX: the protocol statement was processes above
+	    continue;
+	}
+
 	_protocol_statement = false;
 	(i->second)->accept(*this);
     
