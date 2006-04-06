@@ -1169,99 +1169,70 @@ RouterCLI::add_command_subtree(CliCommand& current_cli_node,
 			    include_allowed_values);
     }
 
-    //
-    // Add the command-line completions
-    //
     const TemplateTreeNode* ttn = current_ctn.template_tree_node();
     if (include_allowed_values && (ttn != NULL)) {
-	list<const TemplateTreeNode*> ttn_list;
-	list<const TemplateTreeNode*>::const_iterator ttn_iter;
-	if (ttn->is_tag()) {
-	    list<TemplateTreeNode*>::const_iterator ttn_tmp_iter;
-	    for (ttn_tmp_iter = ttn->children().begin();
-		 ttn_tmp_iter != ttn->children().end();
-		 ++ttn_tmp_iter) {
-		ttn_list.push_back(*ttn_tmp_iter);
-	    }
-	} else {
-	    ttn_list.push_back(ttn);
-	}
-	//
-	// XXX: if the parent is a tag, then it would have handled
-	// our command-line completion.
-	//
-	if ((ttn->parent() != NULL) && (ttn->parent()->is_tag()))
-	    ttn_list.clear();
-
 	//
 	// Add the command-line completion for the allowed values
 	//
-	for (ttn_iter = ttn_list.begin();
-	     ttn_iter != ttn_list.end();
-	     ++ttn_iter) {
-	    const TemplateTreeNode* ttn_completion = *ttn_iter;
-	    map<string, string>::const_iterator values_iter;
-	    for (values_iter = ttn_completion->allowed_values().begin();
-		 values_iter != ttn_completion->allowed_values().end();
-		 ++values_iter) {
-		const string& cmd_name = values_iter->first;
-		vector<string> vector_subpath = vector_path;
-		vector_subpath.push_back(cmd_name);
-		string help = values_iter->second;
-		if (help == "") {
-		    help = "-- No help available --";
-		}
-
-		CliCommand* com;
-		if (current_ctn.has_command()) {
-		    com = current_cli_node.add_command(cmd_name, help, false,
-						       cb);
-		} else {
-		    com = current_cli_node.add_command(cmd_name, help, false);
-		}
-		if (com == NULL) {
-		    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
-		}
-		com->set_can_pipe(can_pipe);
-		com->set_global_name(vector_subpath);
-		com->set_is_command_argument(true);
+	map<string, string>::const_iterator values_iter;
+	for (values_iter = ttn->allowed_values().begin();
+	     values_iter != ttn->allowed_values().end();
+	     ++values_iter) {
+	    const string& cmd_name = values_iter->first;
+	    vector<string> vector_subpath = vector_path;
+	    vector_subpath.push_back(cmd_name);
+	    string help = values_iter->second;
+	    if (help == "") {
+		help = "-- No help available --";
 	    }
 
-	    //
-	    // Add the command-line completion for the allowed ranges
-	    //
-	    map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
-	    for (ranges_iter = ttn_completion->allowed_ranges().begin();
-		 ranges_iter != ttn_completion->allowed_ranges().end();
-		 ++ranges_iter) {
-		const pair<int64_t, int64_t>& range = ranges_iter->first;
-		ostringstream ost;
-		ost << "[" << range.first << ".." << range.second << "]";
-		string cmd_name = ost.str();
-		vector<string> vector_subpath = vector_path;
-		vector_subpath.push_back(cmd_name);
-		string help = ranges_iter->second;
-		if (help == "") {
-		    help = "-- No help available --";
-		}
-
-		CliCommand* com;
-		if (current_ctn.has_command()) {
-		    com = current_cli_node.add_command(cmd_name, help, false,
-						       cb);
-		} else {
-		    com = current_cli_node.add_command(cmd_name, help, false);
-		}
-		if (com == NULL) {
-		    XLOG_FATAL("add_command %s failed", cmd_name.c_str());
-		}
-		com->set_can_pipe(can_pipe);
-		com->set_global_name(vector_subpath);
-		CliCommand::TypeMatchCb cb;
-		cb = callback(ttn_completion, &TemplateTreeNode::type_match);
-		com->set_type_match_cb(cb);
-		com->set_is_command_argument(true);
+	    CliCommand* com;
+	    if (current_ctn.has_command()) {
+		com = current_cli_node.add_command(cmd_name, help, false, cb);
+	    } else {
+		com = current_cli_node.add_command(cmd_name, help, false);
 	    }
+	    if (com == NULL) {
+		XLOG_FATAL("add_command %s failed", cmd_name.c_str());
+	    }
+	    com->set_can_pipe(can_pipe);
+	    com->set_global_name(vector_subpath);
+	    com->set_is_command_argument(true);
+	}
+
+	//
+	// Add the command-line completion for the allowed ranges
+	//
+	map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
+	for (ranges_iter = ttn->allowed_ranges().begin();
+	     ranges_iter != ttn->allowed_ranges().end();
+	     ++ranges_iter) {
+	    const pair<int64_t, int64_t>& range = ranges_iter->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    string cmd_name = ost.str();
+	    vector<string> vector_subpath = vector_path;
+	    vector_subpath.push_back(cmd_name);
+	    string help = ranges_iter->second;
+	    if (help == "") {
+		help = "-- No help available --";
+	    }
+
+	    CliCommand* com;
+	    if (current_ctn.has_command()) {
+		com = current_cli_node.add_command(cmd_name, help, false, cb);
+	    } else {
+		com = current_cli_node.add_command(cmd_name, help, false);
+	    }
+	    if (com == NULL) {
+		XLOG_FATAL("add_command %s failed", cmd_name.c_str());
+	    }
+	    com->set_can_pipe(can_pipe);
+	    com->set_global_name(vector_subpath);
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(ttn, &TemplateTreeNode::type_match);
+	    com->set_type_match_cb(cb);
+	    com->set_is_command_argument(true);
 	}
     }
 }
@@ -2647,71 +2618,45 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	}
 
 	//
-	// Add the rest of the command-line completions
+	// Add the command-line completion for the allowed values
 	//
-	list<const TemplateTreeNode*> ttn_list;
-	list<const TemplateTreeNode*>::const_iterator ttn_iter;
-	if (ttn->is_tag()) {
-	    list<TemplateTreeNode*>::const_iterator ttn_tmp_iter;
-	    for (ttn_tmp_iter = ttn->children().begin();
-		 ttn_tmp_iter != ttn->children().end();
-		 ++ttn_tmp_iter) {
-		ttn_list.push_back(*ttn_tmp_iter);
+	map<string, string>::const_iterator values_iter;
+	for (values_iter = ttn->allowed_values().begin();
+	     values_iter != ttn->allowed_values().end();
+	     ++values_iter) {
+	    const string& cmd_name = values_iter->first;
+	    string help_string = values_iter->second;
+	    if (help_string == "") {
+		help_string = "-- No help available --";
 	    }
-	} else {
-	    ttn_list.push_back(ttn);
+	    CliCommandMatch ccm(cmd_name, help_string,
+				is_executable, can_pipe);
+	    ccm.set_is_command_argument(true);
+	    children.insert(make_pair(cmd_name, ccm));
 	}
-	//
-	// XXX: if the parent is a tag, then it would have handled
-	// our command-line completion.
-	//
-	if ((ttn->parent() != NULL) && (ttn->parent()->is_tag()))
-	    ttn_list.clear();
-	for (ttn_iter = ttn_list.begin();
-	     ttn_iter != ttn_list.end();
-	     ++ttn_iter) {
-	    const TemplateTreeNode* ttn_completion = *ttn_iter;
-	    //
-	    // Add the command-line completion for the allowed values
-	    //
-	    map<string, string>::const_iterator values_iter;
-	    for (values_iter = ttn_completion->allowed_values().begin();
-		 values_iter != ttn_completion->allowed_values().end();
-		 ++values_iter) {
-		const string& cmd_name = values_iter->first;
-		string help_string = values_iter->second;
-		if (help_string == "") {
-		    help_string = "-- No help available --";
-		}
-		CliCommandMatch ccm(cmd_name, help_string,
-				    is_executable, can_pipe);
-		ccm.set_is_command_argument(true);
-		children.insert(make_pair(cmd_name, ccm));
-	    }
 
-	    //
-	    // Add the command-line completion for the allowed ranges
-	    //
-	    map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
-	    for (ranges_iter = ttn_completion->allowed_ranges().begin();
-		 ranges_iter != ttn_completion->allowed_ranges().end();
-		 ++ranges_iter) {
-		const pair<int64_t, int64_t>& range = ranges_iter->first;
-		ostringstream ost;
-		ost << "[" << range.first << ".." << range.second << "]";
-		string cmd_name = ost.str();
-		string help_string = ranges_iter->second;
-		if (help_string == "") {
-		    help_string = "-- No help available --";
-		}
-		CliCommandMatch ccm(cmd_name, help_string,
-				    is_executable, can_pipe);
-		CliCommand::TypeMatchCb cb;
-		cb = callback(ttn_completion, &TemplateTreeNode::type_match);
-		ccm.set_type_match_cb(cb);
-		ccm.set_is_command_argument(true);
-		children.insert(make_pair(cmd_name, ccm));
+	//
+	// Add the command-line completion for the allowed ranges
+	//
+	map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
+	for (ranges_iter = ttn->allowed_ranges().begin();
+	     ranges_iter != ttn->allowed_ranges().end();
+	     ++ranges_iter) {
+	    const pair<int64_t, int64_t>& range = ranges_iter->first;
+	    ostringstream ost;
+	    ost << "[" << range.first << ".." << range.second << "]";
+	    string cmd_name = ost.str();
+	    string help_string = ranges_iter->second;
+	    if (help_string == "") {
+		help_string = "-- No help available --";
 	    }
+	    CliCommandMatch ccm(cmd_name, help_string,
+				is_executable, can_pipe);
+	    CliCommand::TypeMatchCb cb;
+	    cb = callback(ttn, &TemplateTreeNode::type_match);
+	    ccm.set_type_match_cb(cb);
+	    ccm.set_is_command_argument(true);
+	    children.insert(make_pair(cmd_name, ccm));
 	}
     }
 
