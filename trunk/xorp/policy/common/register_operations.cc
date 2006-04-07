@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.15 2005/11/23 03:20:36 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.16 2006/03/16 00:05:20 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -170,11 +170,24 @@ str_mul(const ElemStr& left, const ElemU32& right)
 }
 
 Element* 
-ctr(const ElemStr& type, const Element& arg)
+ctr_base(const ElemStr& type, const string& arg_str)
 {
     ElementFactory ef;
 
-    return ef.create(type.val(), arg.str().c_str());
+    return ef.create(type.val(), arg_str.c_str());
+}
+
+Element* 
+ctr(const ElemStr& type, const Element& arg)
+{
+    return ctr_base(type, arg.str());
+}
+
+template <class T>
+Element* 
+ctr(const ElemStr& type, const T& arg)
+{
+    return ctr_base(type, arg.str());
 }
 
 Element*
@@ -331,6 +344,25 @@ do {									\
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_ne_int>(OpNEInt());
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_add>(OpAdd());
     disp.add<ElemSetCom32, ElemSetCom32, operations::set_del>(OpSub());
+
+    //
+    // The "ctr" operator.
+    // It takes 2 arguments. A string representing the type to be
+    // constructed, and any type of element to construct it from.
+    // Think of it as a cast---powerful but dangerous.
+    //
+    disp.add<ElemStr, ElemInt32, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemU32, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemCom32, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemStr, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemBool, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv4, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv6, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv4Range, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv6Range, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv4Net, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemIPv6Net, operations::ctr>(OpCtr());
+    disp.add<ElemStr, ElemU32Range, operations::ctr>(OpCtr());
 
     // ASPATH operations
     disp.add<ElemU32, ElemAsPath, operations::aspath_prepend>(OpAdd());
