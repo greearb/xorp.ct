@@ -12,13 +12,14 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP$
+# $XORP: xorp/ospf/test_routing1.py,v 1.1 2006/03/28 01:50:07 atanu Exp $
 
 import sys
 import os
 
 TESTS_NOT_FIXED=[]
 TESTS=['test1']
+PATH_CHAR='/'
 
 def test1():
     """
@@ -54,14 +55,17 @@ def test1():
             ASExternalLsa, Type7Lsa]
 
     for i in lsas:
-        if 0 != os.system("./test_build_lsa_main -l '%s'" %  i):
+        if 0 != os.system('%s%stest_build_lsa_main -l "%s"' % (os.getcwd(), PATH_CHAR, i)):
             return -1
 
     return 0
 
 def main():
 
-    global TESTS, TESTS_NOT_FIXED
+    global TESTS, TESTS_NOT_FIXED, PATH_CHAR
+
+    if sys.platform == 'win32':
+        PATH_CHAR='\\'
 
     for i in TESTS:
         test = i + '()'
