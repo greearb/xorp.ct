@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/test_start.py,v 1.1 2006/04/07 05:13:08 atanu Exp $
 
 import threading,time,sys
 from test_process import Process
@@ -40,7 +40,7 @@ class Start:
         coord = self.builddir + "bgp/harness/coord"
         self.__start_process(coord)
 
-        peer = self.builddir + "bgp/harness/test_peer"
+        peer = self.builddir + "bgp/harness/test_peer -t -v"
         for i in ["peer1", "peer2", "peer3"]:
             self.__start_process(peer + " -s " + i)
 
