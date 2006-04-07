@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.78 2006/03/16 00:03:30 pavlin Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.79 2006/04/07 19:38:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -485,7 +485,9 @@ CommunityAttribute::str() const
 	    s += "NO_EXPORT_SUBCONFED ";
 	    break;
 	}
-	s += c_format("%#x ", XORP_UINT_CAST(*i));
+	s += c_format("%d:%d %#x ", XORP_UINT_CAST(((*i >> 16) & 0xffff)),
+		      XORP_UINT_CAST((*i & 0xffff)),
+		      XORP_UINT_CAST(*i));
     }
     return s;
 }
