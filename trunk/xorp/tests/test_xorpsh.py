@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/test_xorpsh.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
 
 import popen2
 
@@ -36,7 +36,7 @@ def xorpsh(builddir, command, templates = '../templates'):
         if not line:
             break
         for i in error_responses:
-            if line[0:len(i)] == i:
+            if line.startswith(i):
                 raise Exception, line
         print line,
     status = process.wait()
