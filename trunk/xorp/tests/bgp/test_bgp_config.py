@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -113,6 +113,45 @@ commit
 
     return True
 
+def conf_EBGP_EBGP(builddir):
+    """
+    Configure two EBGP peerings
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 65000
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 65001
+up
+
+create peer peer2
+edit peer peer2
+set local-port 10002
+set peer-port 20002
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 65002
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
 def conf_EBGP_IBGP_IBGP(builddir):
     """
     Configure One EBGP peering and two IBGP peerings
@@ -190,15 +229,62 @@ create from
 edit from
 set protocol static
 
-up
-create then
-edit then
-set origin 2
-
 top
 
 edit protocols bgp
 set export static
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_redist_static_incomplete(builddir):
+    """
+    Redistribute static into BGP and set the origin to INCOMPLETE
+    """
+
+    conf_redist_static(builddir)
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+edit policy policy-statement static term export 
+
+create then
+edit then
+set origin 2
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_redist_static_no_export(builddir):
+    """
+    Redistribute static into BGP and set NO_EXPORT
+    """
+
+    conf_redist_static(builddir)
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+edit policy policy-statement static term export
+
+create then
+edit then
+set community NO_EXPORT
 
 commit
 """
