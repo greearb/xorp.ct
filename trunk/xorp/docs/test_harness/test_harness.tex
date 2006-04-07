@@ -289,6 +289,7 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   med $<$value$>$
   originatorid $<$ipv4$>$ 
   clusterlist $<$ipv4$>$ 
+  community $<$community$>$
   pathattr $<$num,num,num,...$>$}
 
   Send a BGP update packet to the BGP test target with the specified
@@ -297,7 +298,11 @@ peer1 trie recv lookup 212.174.196.0/24 aspath 1
   hex. The ``patthattr'' exists to test optional path attributes. It
   should be noted that at this time it is not possible to create an
   illegal path attribute. The aspath can take the argument ``empty''
-  denoting and empty aspath.
+  denoting and empty aspath. The community can take either a number
+  (in octal, decimal or hex)
+  or the well known name ``NO\_EXPORT'', ``NO\_ADVERTISE'' or
+  ``NO\_EXPORT\_SUBCONFED'', multiple communities can be added using
+  multiple community statements. 
 
 \item {\sf send packet notify $<$error code$>$ $<$sub error code$>$}
 

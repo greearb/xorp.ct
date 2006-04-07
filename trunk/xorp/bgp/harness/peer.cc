@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.73 2006/03/16 00:03:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.74 2006/04/04 09:43:23 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1657,6 +1657,30 @@ Peer::path_attribute(const char *) const throw(InvalidString)
     return PathAttribute::create(&path[0], max_len, actual_length);
 }
 
+/**
+ * Helper function to decipher a community string
+ */
+uint32_t
+community_interpret(const string& community)
+{
+    char *endptr;
+    uint32_t val = strtoul(community.c_str(), &endptr, 0);
+    if (0 == *endptr)
+	return val;
+
+    if ("NO_EXPORT" == community)
+	return CommunityAttribute::NO_EXPORT;
+    else if ("NO_ADVERTISE" == community)
+	return CommunityAttribute::NO_ADVERTISE;
+    else if ("NO_EXPORT_SUBCONFED" == community)
+	return CommunityAttribute::NO_EXPORT_SUBCONFED;
+    else
+	xorp_throw(InvalidString,
+		   c_format("Invalid community name %s", community.c_str()));
+
+    return val;
+}
+
 /*
 ** Generate a BGP message from the textual description.
 ** Note: It is up to the caller of this method to delete the packet
@@ -1712,6 +1736,7 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	MPReachNLRIAttribute<IPv6> mpipv6_nlri(SAFI_UNICAST);
 	MPUNReachNLRIAttribute<IPv6> mpipv6_withdraw(SAFI_UNICAST);
 	CLUSTER_LISTAttribute cl;
+	CommunityAttribute community;	
 
 	for(size_t i = index + 1; i < size; i += 2) {
 	    debug_msg("name: %s value: <%s>\n",
@@ -1761,6 +1786,8 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	    } else if("clusterlist" == words[i]) {
  		cl.prepend_cluster_id(IPv4((const char *)
  					   (words[i+1].c_str())));
+	    } else if("community" == words[i]) {
+		community.add_community(community_interpret(words[i+1]));
 	    } else if("pathattr" == words[i]) {
 		AnyAttribute aa(words[i+1].c_str());
 		bgpupdate->add_pathatt(aa);
@@ -1779,6 +1806,9 @@ Peer::packet(const string& line, const vector<string>& words, int index)
 	}
 	if(!cl.cluster_list().empty()) {
 	    bgpupdate->add_pathatt(cl);
+	}
+	if(!community.community_set().empty()) {
+	    bgpupdate->add_pathatt(community);
 	}
 
 	pac = bgpupdate;
