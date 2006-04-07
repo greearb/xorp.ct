@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -30,8 +30,16 @@ import getopt
 sys.path.append("..")
 from test_call_xrl import call_xrl
 from test_builddir import builddir
-from test_bgp_config import conf_IBGP, conf_EBGP, conf_EBGP_IBGP_IBGP, \
-     conf_interfaces, conf_redist_static, conf_add_static_route4
+from test_bgp_config import \
+     conf_IBGP, \
+     conf_EBGP, \
+     conf_EBGP_EBGP, \
+     conf_EBGP_IBGP_IBGP, \
+     conf_interfaces, \
+     conf_redist_static, \
+     conf_redist_static_incomplete, \
+     conf_redist_static_no_export, \
+     conf_add_static_route4
 
 TESTS=[
     # Fields:
@@ -46,7 +54,11 @@ TESTS=[
     ['1.1B', 'test1_1_B', True, '',
      ['conf_EBGP']],
     ['1.10C', 'test1_10_C', True, '',
-     ['conf_EBGP_IBGP_IBGP', 'conf_interfaces', 'conf_redist_static']],
+     ['conf_EBGP_IBGP_IBGP', 'conf_interfaces',
+      'conf_redist_static_incomplete']],
+    ['4.6A', 'test4_6_A', True, '',
+     ['conf_EBGP_EBGP', 'conf_interfaces',
+      'conf_redist_static_no_export']],
     ]
 
 def coord(command):
@@ -160,6 +172,52 @@ def test1_10_C():
     coord("peer3 assert established")
 
     coord("peer1 assert queue 0")
+
+    return True
+
+def test4_6_A():
+    """
+    Verify that the NO_EXPORT community can be set on a redistributed route
+    """
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("peer1 establish AS 65001 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 65002 holdtime 0 id 10.0.0.2 keepalive false")
+    
+    time.sleep(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+
+    time.sleep(2)
+
+    packet = "packet update \
+    nexthop 127.0.0.1 \
+    origin 0 \
+    aspath 65000 \
+    med 0 \
+    nlri 172.16.0.0/16 \
+    community NO_EXPORT"
+
+    coord("peer1 expect %s" % packet)
+    coord("peer2 expect %s" % packet)
+
+    if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
+        return False
+
+    time.sleep(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 0")
+    coord("peer2 assert queue 0")
 
     return True
 
