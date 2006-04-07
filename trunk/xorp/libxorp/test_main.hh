@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/test_main.hh,v 1.14 2006/03/29 22:41:24 atanu Exp $
+// $XORP: xorp/libxorp/test_main.hh,v 1.15 2006/04/02 22:30:09 pavlin Exp $
 
 #ifndef __LIBXORP_TEST_MAIN_HH__
 #define __LIBXORP_TEST_MAIN_HH__
@@ -240,7 +240,7 @@ public:
 
 	if (h || q) {
 	    cerr << usage();
-	    ::exit(0);
+	    ::exit(-1);
 	}
 
 	if (!_args.empty()) {
