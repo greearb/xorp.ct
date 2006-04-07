@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.35 2005/09/28 17:31:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.36 2006/03/16 00:03:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -869,6 +869,8 @@ main(int argc, char **argv)
     xlog_level_set_verbose(XLOG_LEVEL_ERROR, XLOG_VERBOSE_HIGH);
     xlog_add_default_output();
     xlog_start();
+
+    setlinebuf(stdout);
 
     int c;
     string finder_host = FinderConstants::FINDER_DEFAULT_HOST().str();
