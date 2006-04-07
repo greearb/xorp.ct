@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.25 2006/02/13 21:57:12 bms Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.26 2006/03/16 00:03:27 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -289,6 +289,8 @@ template <class A>
 void
 BGPVarRW<A>::write_community(const Element& e)
 {
+    _route_modify = true;
+
     XLOG_ASSERT(e.type() == ElemSetCom32::id);
 
     const ElemSetCom32& es = dynamic_cast<const ElemSetCom32&>(e);
