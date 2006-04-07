@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.7 2005/10/02 22:21:51 abittau Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.8 2006/03/16 00:05:02 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -92,8 +92,12 @@ VarMap::add_variable(VariableMap& vm, Variable* var)
     VariableMap::iterator i = vm.find(var->id);
 
     if(i != vm.end()) {
-	ostringstream oss;
+	// XXX: if the same variable already exists, then return silently
+	Variable* old_var = i->second;
+	if (*old_var == *var)
+	    return;
 
+	ostringstream oss;
 	oss << "Variable " << var->id << " exists already";
 	delete var;
 	throw VarMapErr(oss.str());

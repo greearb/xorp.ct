@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/var_map.hh,v 1.5 2005/10/02 22:21:51 abittau Exp $
+// $XORP: xorp/policy/var_map.hh,v 1.6 2006/03/16 00:05:02 pavlin Exp $
 
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
@@ -78,6 +78,13 @@ public:
 	bool writable() const 
 	{ 
 	    return access == READ_WRITE || access == WRITE; 
+	}
+	
+	bool operator==(const Variable& other) const {
+	    return ((access == other.access)
+		    && (name == other.name)
+		    && (type == other.type)
+		    && (id == other.id));
 	}
     };
 
