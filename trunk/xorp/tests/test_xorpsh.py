@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_xorpsh.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
+# $XORP: xorp/tests/test_xorpsh.py,v 1.2 2006/04/07 20:16:26 atanu Exp $
 
 import popen2
 
@@ -29,7 +29,8 @@ def xorpsh(builddir, command, templates = '../templates'):
 
     # XXX - This is not really a satisfactory way of determining if an
     # error has occurred
-    error_responses = ["ERROR", "unknown command", "syntax error"]
+    error_responses = ["ERROR", "unknown command", "syntax error",
+                       "Commit Failed"]
 
     while 1:
         line = process.fromchild.readline()
