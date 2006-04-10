@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.32 2005/12/20 13:00:38 atanu Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.33 2006/03/16 00:03:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -588,7 +588,8 @@ AsPath::short_str() const
     string s;
     const_iterator iter = _segments.begin();
     while(iter != _segments.end()) {
-	s.append(" ");
+	if (iter != _segments.begin())
+	    s.append(" ");
 	s.append((*iter).short_str());
 	++iter;
     }
