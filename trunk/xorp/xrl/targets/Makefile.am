@@ -1,7 +1,7 @@
 ##
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/targets/Makefile.am,v 1.58 2005/10/14 18:12:28 pavlin Exp $
+## $XORP: xorp/xrl/targets/Makefile.am,v 1.59 2006/03/17 11:46:04 pavlin Exp $
 ##
 
 INTERFACES_DIR=$(top_srcdir)/xrl/interfaces
@@ -164,6 +164,7 @@ $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/fea_fib_client.xif 			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/fib2mrib.xif
 
 #

@@ -830,6 +830,7 @@ $(srcdir)/fib2mrib_base.hh $(srcdir)/fib2mrib_base.cc:			\
 		$(INTERFACES_DIR)/common.xif 				\
 		$(INTERFACES_DIR)/finder_event_observer.xif		\
 		$(INTERFACES_DIR)/fea_fib_client.xif 			\
+		$(INTERFACES_DIR)/policy_backend.xif			\
 		$(INTERFACES_DIR)/fib2mrib.xif
 $(srcdir)/finder_base.hh $(srcdir)/finder_base.cc : 			\
 		$(INTERFACES_DIR)/common.xif 				\
