@@ -127,17 +127,19 @@ DampingTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	typename RefTrie<A, DampRoute<A> >::iterator r;
 	r = _damped.lookup_node(old_rtmsg.net());
 	XLOG_ASSERT(r != _damped.end());
-	TimeVal exp = r.payload().timer().expiry();
+	TimeVal exp;
+	if (!r.payload().timer().time_remaining(exp))
+	    XLOG_FATAL("Route is being damped but no timer is scheduled");
 	r.payload().timer().unschedule();
 	_damped.erase(r);
 	if (damping_global()) {
 		DampRoute<A> damproute(new_rtmsg.route(), new_rtmsg.genid());
-		_damped.insert(new_rtmsg.net(), damproute);
 		damproute.timer() = eventloop().
 		    new_oneoff_after(exp,
 				     callback(this,
 					      &DampingTable<A>::undamp,
 					      new_rtmsg.net()));
+		_damped.insert(new_rtmsg.net(), damproute);
 	    return ADD_UNUSED;
 	}
 	
@@ -149,8 +151,11 @@ DampingTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    add_route(new_rtmsg, static_cast<BGPRouteTable<A>*>(this));
     }
 
-    if (update_figure_of_merit(damp, new_rtmsg))
+    if (update_figure_of_merit(damp, new_rtmsg)) {
+	this->_next_table->
+	    delete_route(old_rtmsg, static_cast<BGPRouteTable<A>*>(this));
 	return ADD_UNUSED;
+    }
 
     return this->_next_table->
 	replace_route(old_rtmsg, new_rtmsg,
