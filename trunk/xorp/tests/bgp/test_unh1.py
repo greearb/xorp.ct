@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.2 2006/04/07 20:31:34 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -35,11 +35,17 @@ from test_bgp_config import \
      conf_EBGP, \
      conf_EBGP_EBGP, \
      conf_EBGP_IBGP_IBGP, \
+     conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3, \
      conf_interfaces, \
      conf_redist_static, \
      conf_redist_static_incomplete, \
      conf_redist_static_no_export, \
-     conf_add_static_route4
+     conf_add_static_route4, \
+     conf_import_med_change, \
+     conf_import_origin_change, \
+     conf_export_origin_change, \
+     conf_preference_TR1, \
+     conf_damping
 
 TESTS=[
     # Fields:
@@ -51,14 +57,38 @@ TESTS=[
     # NOTE: One of field 4 or 5 must be set and the other must be empty.
     ['1.1A', 'test1_1_A', True, '',
      ['conf_IBGP']],
+
     ['1.1B', 'test1_1_B', True, '',
      ['conf_EBGP']],
+
     ['1.10C', 'test1_10_C', True, '',
      ['conf_EBGP_IBGP_IBGP', 'conf_interfaces',
       'conf_redist_static_incomplete']],
+
     ['4.6A', 'test4_6_A', True, '',
      ['conf_EBGP_EBGP', 'conf_interfaces',
       'conf_redist_static_no_export']],
+
+    ['4.11A', 'test4_11_A', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_damping']],
+
+    ['4.11BCD', 'test4_11_BCD', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_preference_TR1', 'conf_damping']],
+
+    # Move these tests to a separate policy test script.
+    ['test_import_med1', 'test_policy_med1', False, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_import_med_change']],
+
+    ['test_import_origin1', 'test_policy_origin1', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_import_origin_change']],
+
+    ['test_export_origin1', 'test_policy_origin1', False, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_export_origin_change']],
     ]
 
 def coord(command):
@@ -218,6 +248,301 @@ def test4_6_A():
 
     coord("peer1 assert queue 0")
     coord("peer2 assert queue 0")
+
+    return True
+
+def test4_11_A():
+    """
+    Test route flap damping
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    time.sleep(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+    coord("peer3 assert established");
+
+    time.sleep(2)
+
+    packet = "packet update \
+    nexthop %s \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+
+    spacket = packet % ("127.0.0.2", "1")
+    epacket = packet % ("127.0.0.1", "2,1")
+    
+    coord("peer1 expect %s" % epacket)
+    coord("peer2 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    time.sleep(2)
+
+    coord("peer1 send %s" % spacket)
+
+    time.sleep(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
+
+    return True
+
+def test4_11_BCD():
+    """
+    Test route flap damping
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    time.sleep(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+    coord("peer3 assert established");
+
+    time.sleep(2)
+
+    packet = "packet update \
+    nexthop %s \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+
+    spacket = packet % ("127.0.0.3", "1")
+    epacket = packet % ("127.0.0.1", "2,1")
+    
+    coord("peer1 expect %s" % epacket)
+    coord("peer2 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    time.sleep(2)
+
+    # 9. TR2 Sends an update message with a route of 192.1.0.0/16 ...
+
+    coord("peer2 send %s" % spacket)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
+
+    spacket = packet % ("127.0.0.2", "1")
+
+    coord("peer3 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    coord("peer3 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    time.sleep(2)
+
+    # Flap the route from peer1
+
+    spacket = packet % ("127.0.0.2", "1")
+
+    coord("peer1 send %s" % spacket)
+    coord("peer1 send packet update withdraw 192.1.0.0/16")
+
+    coord("peer1 send %s" % spacket)
+    coord("peer1 send packet update withdraw 192.1.0.0/16")
+
+    time.sleep(2)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
+    
+    # Part C
+
+    coord("peer1 send %s" % spacket)
+    coord("peer1 send packet update withdraw 192.1.0.0/16")
+
+    coord("peer1 send %s" % spacket)
+#    coord("peer1 send packet update withdraw 192.1.0.0/16")
+
+    # Part D
+
+    time.sleep(10)
+
+    # The release of the damped packet.
+    coord("peer3 expect %s" % epacket)
+    
+    sleep = 5 * 60
+
+    print 'Sleeping for %d seconds, waiting for damped route' % sleep
+
+    time.sleep(sleep)
+
+    # Make sure that at the end of the test all the connections still exist.
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
+
+    return True
+
+def test_policy_med1():
+    """
+    Introduce a med of 0 and expect a med of 2 at the peers.
+    Allows the testing of import and export policies to change the med.
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    time.sleep(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+    coord("peer3 assert established");
+
+    time.sleep(2)
+
+    packet = "packet update \
+    nexthop %s \
+    origin 0 \
+    aspath %s \
+    med %s \
+    nlri 192.1.0.0/16"
+
+    spacket = packet % ("127.0.0.2", "1", "0")
+    epacket = packet % ("127.0.0.1", "2,1", "42")
+    
+    coord("peer1 expect %s" % epacket)
+    coord("peer2 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    time.sleep(2)
+
+    coord("peer2 send %s" % spacket)
+
+    time.sleep(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
+
+    return True
+
+def test_policy_origin1():
+    """
+    Introduce an origin of 0 and expect and origin of 2 at the peers.
+    Allows the testing of import and export policies to change the origin.
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    time.sleep(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+    coord("peer3 assert established");
+
+    time.sleep(2)
+
+    packet = "packet update \
+    nexthop %s \
+    origin %s \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+
+    spacket = packet % ("127.0.0.2", "0", "1")
+    epacket = packet % ("127.0.0.1", "2", "2,1")
+    
+    coord("peer1 expect %s" % epacket)
+    coord("peer2 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket)
+
+    time.sleep(2)
+
+    coord("peer2 send %s" % spacket)
+
+    time.sleep(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 1")
+    coord("peer3 assert queue 0")
 
     return True
 

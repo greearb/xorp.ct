@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.1 2006/04/07 05:13:09 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.2 2006/04/07 20:17:53 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -26,6 +26,37 @@ AS_LOCAL_1=AS
 AS_PEER_1=AS
 PORT_LOCAL_1=10001
 PORT_PEER_1=20001
+
+def conf_interfaces(builddir):
+    """
+    Configure an interface
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+create interfaces
+edit interfaces
+
+create interface fxp0
+edit interface fxp0
+
+create vif fxp0
+edit vif fxp0
+
+create address 127.0.0.1
+edit address 127.0.0.1
+set prefix-length 16
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
 
 def conf_IBGP(builddir):
     """
@@ -201,6 +232,55 @@ commit
 
     return True
 
+def conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3(builddir):
+    """
+    Configure One EBGP peering and two IBGP peerings
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 2
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 1
+up
+
+create peer peer2
+edit peer peer2
+set local-port 10002
+set peer-port 20002
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 1
+up
+
+create peer peer3
+edit peer peer3
+set local-port 10003
+set peer-port 20003
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 3
+up
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
 def conf_redist_static(builddir):
     """
     Redistribute static into BGP
@@ -294,9 +374,135 @@ commit
 
     return True
 
-def conf_interfaces(builddir):
+def conf_preference_TR1(builddir):
     """
-    Configure an interface
+    Configure TR1 to have a higher preference than TR2
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+    """
+configure
+
+create policy policy-statement preference term 1
+edit policy policy-statement preference term 1
+
+create from
+edit from
+set nexthop4 127.0.0.2..127.0.0.2
+up
+
+create then
+edit then
+set localpref 200
+top
+
+edit protocols bgp
+set import preference
+
+commit
+    """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_import_med_change(builddir):
+    """
+    Set the med of all incoming packets to 42
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+    """
+configure
+
+create policy policy-statement preference term 1
+edit policy policy-statement preference term 1
+
+create then
+edit then
+set med 42
+top
+
+edit protocols bgp
+set import preference
+
+commit
+    """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_import_origin_change(builddir):
+    """
+    Set the origin of all incoming packets to incomplete
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+    """
+configure
+
+create policy policy-statement preference term 1
+edit policy policy-statement preference term 1
+
+create then
+edit then
+set origin 2
+top
+
+edit protocols bgp
+set import preference
+
+commit
+    """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_export_origin_change(builddir):
+    """
+    Set the origin of all outgoing packets to incomplete
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+    """
+configure
+
+create policy policy-statement preference term 1
+edit policy policy-statement preference term 1
+
+create from
+edit from
+set protocol bgp
+up
+
+create then
+edit then
+set origin 2
+top
+
+edit protocols bgp
+set export preference
+
+commit
+    """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_damping(builddir):
+    """
+    Configure damping
     """
 
     # Configure the xorpsh
@@ -304,18 +510,14 @@ def conf_interfaces(builddir):
 """
 configure
 
-create interfaces
-edit interfaces
+edit protocols bgp
 
-create interface fxp0
-edit interface fxp0
-
-create vif fxp0
-edit vif fxp0
-
-create address 127.0.0.1
-edit address 127.0.0.1
-set prefix-length 30
+create damping
+edit damping
+set suppress 2000
+set reuse 800
+set half-life 3
+set max-suppress 5
 
 commit
 """
@@ -324,7 +526,6 @@ commit
         return False
 
     return True
-
 
 def conf_add_static_route4(builddir, net):
     """
