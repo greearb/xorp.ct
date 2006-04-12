@@ -269,17 +269,26 @@ DampingTable<A>::update_figure_of_merit(Damp& damp,
     damp._merit = _damping.compute_merit(damp._time, damp._merit);
     damp._time = _damping.get_tick();
 
+    debug_msg("\n         %s\n rtmsg: %p route: %p\n%s\n",
+	      this->tablename().c_str(),
+	      &rtmsg,
+	      rtmsg.route(),
+	      rtmsg.str().c_str());
+    debug_msg("Merit %d\n", damp._merit);
+
     // The figure of merit is above the cutoff threshold damp the route.
     if (_damping.cutoff(damp._merit)) {
+	debug_msg("Damped\n");
 	damp._damped = true;
 	_damp_count++;
 	DampRoute<A> damproute(rtmsg.route(), rtmsg.genid());
-	_damped.insert(rtmsg.net(), damproute);
 	damproute.timer() = eventloop().
 	    new_oneoff_after(TimeVal(_damping.get_reuse_time(damp._merit), 0),
 			     callback(this,
 				      &DampingTable<A>::undamp,
 				      rtmsg.net()));
+	_damped.insert(rtmsg.net(), damproute);
+
 	return true;
     }
 
@@ -304,6 +313,8 @@ template<class A>
 void
 DampingTable<A>::undamp(IPNet<A> net)
 {
+    debug_msg("Released net %s\n", cstring(net));
+
     typename Trie<A, Damp>::iterator i = _damp.lookup_node(net);
     XLOG_ASSERT(i != _damp.end());
     Damp& damp = i.payload();
