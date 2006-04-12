@@ -112,8 +112,6 @@ Damping::halt()
 bool
 Damping::tick()
 {
-    debug_msg("tick\n");
-
     _tick++;    
 
     return true;
@@ -122,18 +120,25 @@ Damping::tick()
 uint32_t
 Damping::compute_merit(uint32_t last_time, uint32_t last_merit) const
 {
+    debug_msg("last_time %d last_merit %d\n", last_time, last_merit);
+
     uint32_t tdiff = get_tick() - last_time;
     if (tdiff >= _max_hold_down * 60)
 	return FIXED;
     else
-	return (last_merit * _decay[tdiff]) / FIXED;
+	return ((last_merit * _decay[tdiff]) / FIXED) + FIXED;
 }
 
 uint32_t
 Damping::get_reuse_time(uint32_t merit) const
 {
+    debug_msg("merit %d\n", merit);
+
     uint32_t damp_time = (((merit / _reuse) - 1) * _half_life * 60);
     uint32_t max_time = _max_hold_down * 60; 
 
-    return damp_time > max_time ? max_time : damp_time;
+    uint32_t reuse = damp_time > max_time ? max_time : damp_time;
+    debug_msg("reuse %d\n", reuse);
+
+    return reuse;
 }
