@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.2 2006/04/07 20:31:34 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.3 2006/04/12 18:17:23 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -36,6 +36,7 @@ from test_bgp_config import \
      conf_EBGP_EBGP, \
      conf_EBGP_IBGP_IBGP, \
      conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3, \
+     conf_RUT_as2_TR1_as1_TR2_as3, \
      conf_interfaces, \
      conf_redist_static, \
      conf_redist_static_incomplete, \
@@ -77,6 +78,10 @@ TESTS=[
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
       'conf_preference_TR1', 'conf_damping']],
 
+    ['4.12', 'test4_12', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as3', 'conf_interfaces',
+      'conf_damping']],
+
     # Move these tests to a separate policy test script.
     ['test_import_med1', 'test_policy_med1', False, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
@@ -90,6 +95,48 @@ TESTS=[
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
       'conf_export_origin_change']],
     ]
+
+def delay(seconds):
+    """
+    Sleep for the number of seconds specified and provide some feedback
+    """
+
+    print "Sleeping for %d seconds" % seconds
+    os.system("date")
+
+    columns = 80
+
+    slept = 0
+
+    if seconds < columns:
+        bars = columns / seconds
+        for i in range(seconds):
+            for b in range(bars):
+                sys.stdout.write('-')
+                sys.stdout.flush()
+            time.sleep(1)
+            slept += 1
+    else:
+        delay = seconds / columns
+        remainder = seconds % columns
+        for i in range(columns):
+            sys.stdout.write('-')
+            sys.stdout.flush()
+            if 0 != remainder:
+                snooze = delay + 1
+                remainder -= 1
+            else:
+                snooze = delay
+            time.sleep(snooze)
+            slept += snooze
+
+    print
+
+    os.system("date")
+
+    if slept != seconds:
+        raise Exception, 'Delay was too short should have been %s was %s' % \
+              (seconds, slept)
 
 def coord(command):
     """
@@ -105,7 +152,7 @@ def coord(command):
     for i in range(5):
         if pending() == False:
             return
-        time.sleep(1)
+        delay(1)
 
     print >> sys.stderr, "Still pending"
 
@@ -132,7 +179,7 @@ def test1_1_A():
 
     coord("peer1 establish AS 65000 holdtime 0 id 1.2.3.4 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
 
@@ -150,7 +197,7 @@ def test1_1_B():
 
     coord("peer1 establish AS 65001 holdtime 0 id 1.2.3.4 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
 
@@ -176,13 +223,13 @@ def test1_10_C():
     coord("peer2 establish AS 65000 holdtime 0 id 10.0.0.2 keepalive false")
     coord("peer3 establish AS 65000 holdtime 0 id 10.0.0.3 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
     coord("peer3 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     incomplete = 2
     coord("peer1 expect packet update \
@@ -195,7 +242,7 @@ def test1_10_C():
     if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
         return False
 
-    time.sleep(10)
+    delay(10)
 
     coord("peer1 assert established")
     coord("peer2 assert established")
@@ -220,12 +267,12 @@ def test4_6_A():
     coord("peer1 establish AS 65001 holdtime 0 id 10.0.0.1 keepalive false")
     coord("peer2 establish AS 65002 holdtime 0 id 10.0.0.2 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     packet = "packet update \
     nexthop 127.0.0.1 \
@@ -241,7 +288,7 @@ def test4_6_A():
     if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
         return False
 
-    time.sleep(10)
+    delay(10)
 
     coord("peer1 assert established")
     coord("peer2 assert established")
@@ -271,13 +318,13 @@ def test4_11_A():
     coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
     coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
     coord("peer3 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     packet = "packet update \
     nexthop %s \
@@ -293,11 +340,11 @@ def test4_11_A():
     coord("peer2 expect %s" % epacket)
     coord("peer3 expect %s" % epacket)
 
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 send %s" % spacket)
 
-    time.sleep(10)
+    delay(10)
 
     coord("peer1 assert established")
     coord("peer2 assert established")
@@ -329,13 +376,13 @@ def test4_11_BCD():
     coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
     coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
     coord("peer3 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     packet = "packet update \
     nexthop %s \
@@ -351,7 +398,7 @@ def test4_11_BCD():
     coord("peer2 expect %s" % epacket)
     coord("peer3 expect %s" % epacket)
 
-    time.sleep(2)
+    delay(2)
 
     # 9. TR2 Sends an update message with a route of 192.1.0.0/16 ...
 
@@ -373,7 +420,7 @@ def test4_11_BCD():
     coord("peer3 expect %s" % epacket)
     coord("peer3 expect %s" % epacket)
 
-    time.sleep(2)
+    delay(2)
 
     # Flap the route from peer1
 
@@ -385,7 +432,7 @@ def test4_11_BCD():
     coord("peer1 send %s" % spacket)
     coord("peer1 send packet update withdraw 192.1.0.0/16")
 
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established")
     coord("peer2 assert established")
@@ -405,7 +452,7 @@ def test4_11_BCD():
 
     # Part D
 
-    time.sleep(10)
+    delay(10)
 
     # The release of the damped packet.
     coord("peer3 expect %s" % epacket)
@@ -414,7 +461,7 @@ def test4_11_BCD():
 
     print 'Sleeping for %d seconds, waiting for damped route' % sleep
 
-    time.sleep(sleep)
+    delay(sleep)
 
     # Make sure that at the end of the test all the connections still exist.
 
@@ -425,6 +472,78 @@ def test4_11_BCD():
     coord("peer1 assert queue 1")
     coord("peer2 assert queue 1")
     coord("peer3 assert queue 0")
+
+    return True
+
+def test4_12():
+    """
+    Test route flap damping
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 3 holdtime 0 id 10.0.0.2 keepalive false")
+
+    delay(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+
+    packet = "packet update \
+    nexthop %s \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+    
+    spacket1 = packet % ("127.0.0.3", "1,12")
+    spacket2 = packet % ("127.0.0.3", "1,14")
+
+    epacket1 = packet % ("127.0.0.1", "2,1,12")
+    epacket2 = packet % ("127.0.0.1", "2,1,14")
+
+    # This is a hack to test that no packets arrive on this peer.
+    coord("peer1 expect %s" % spacket1)
+
+    coord("peer2 expect %s" % epacket1)
+    coord("peer2 expect %s" % epacket2)
+    coord("peer2 send packet update withdraw 192.1.0.0/16")
+    
+    for i in range(5):
+        coord("peer1 send %s" % spacket1)
+        coord("peer1 send %s" % spacket2)
+
+    delay(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 0")
+
+    # The release of the damped packet.
+    coord("peer2 expect %s" % epacket2)
+    
+    sleep = 5 * 60
+
+    print 'Sleeping for %d seconds, waiting for damped route' % sleep
+
+    delay(sleep)
+
+    # Make sure that at the end of the test all the connections still exist.
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 1")
+    coord("peer2 assert queue 0")
 
     return True
 
@@ -449,13 +568,13 @@ def test_policy_med1():
     coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
     coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
     coord("peer3 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     packet = "packet update \
     nexthop %s \
@@ -471,11 +590,11 @@ def test_policy_med1():
     coord("peer2 expect %s" % epacket)
     coord("peer3 expect %s" % epacket)
 
-    time.sleep(2)
+    delay(2)
 
     coord("peer2 send %s" % spacket)
 
-    time.sleep(10)
+    delay(10)
 
     coord("peer1 assert established")
     coord("peer2 assert established")
@@ -508,13 +627,13 @@ def test_policy_origin1():
     coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
     coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
     
-    time.sleep(2)
+    delay(2)
 
     coord("peer1 assert established");
     coord("peer2 assert established");
     coord("peer3 assert established");
 
-    time.sleep(2)
+    delay(2)
 
     packet = "packet update \
     nexthop %s \
@@ -530,11 +649,11 @@ def test_policy_origin1():
     coord("peer2 expect %s" % epacket)
     coord("peer3 expect %s" % epacket)
 
-    time.sleep(2)
+    delay(2)
 
     coord("peer2 send %s" % spacket)
 
-    time.sleep(10)
+    delay(10)
 
     coord("peer1 assert established")
     coord("peer2 assert established")

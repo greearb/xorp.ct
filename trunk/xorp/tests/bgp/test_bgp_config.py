@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.2 2006/04/07 20:17:53 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.3 2006/04/12 18:17:23 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -272,6 +272,45 @@ set next-hop 127.0.0.1
 set local-ip 127.0.0.1
 set as 3
 up
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_RUT_as2_TR1_as1_TR2_as3(builddir):
+    """
+    Configure One EBGP peering and two IBGP peerings
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 2
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 1
+up
+
+create peer peer2
+edit peer peer2
+set local-port 10002
+set peer-port 20002
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 3
 
 commit
 """
