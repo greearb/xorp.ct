@@ -191,7 +191,7 @@ DampingTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	typename RefTrie<A, DampRoute<A> >::iterator r;
 	r = _damped.lookup_node(rtmsg.net());
 	XLOG_ASSERT(r != _damped.end());
-	r.payload().timer().unschedule();	// Not strictly necesary.
+	r.payload().timer().unschedule();	// Not strictly necessary.
 	_damped.erase(r);
 
 	damp._damped = false;
