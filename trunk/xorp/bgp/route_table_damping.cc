@@ -196,6 +196,8 @@ DampingTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
 	damp._damped = false;
 	_damp_count--;
+
+	return 0;
     }
 
     return this->_next_table->
