@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.11 2006/02/17 19:45:13 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.12 2006/03/09 06:35:45 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -75,7 +75,7 @@ you:
 \begin{alltt}
 \begin{tabbing}
 user@hostname> \textbf{?}\\
-Po\=ssible compl\=etions:\\
+Po\=ssible completions:   \=\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
@@ -101,7 +101,7 @@ example:
 \begin{alltt}
 \begin{tabbing}
 user@hostname> \textbf{config?}\\
-Po\=ssible compl\=etions:\\
+Po\=ssible completions:   \=\\
 \>configure\>Switch to configuration mode\\
 user@hostname> \textbf{config}
 \end{tabbing}
@@ -120,7 +120,7 @@ parameters for the command:
 \begin{alltt}
 \begin{tabbing}
 user@hostname> \textbf{configure ?}\\
-Po\=ssible compl\=etions:\\
+Po\=ssible completions:   \=\\
 \><[Enter]>       \>Execute this command\\
 \>exclusive       \>Switch to configuration mode, locking out other users\\
 user@hostname> \textbf{configure}
@@ -220,8 +220,8 @@ UNIX-like pipe command '$\mid$' as one of the options:
 \begin{minipage}[l]{\textwidth}
 \begin{alltt}
 \begin{tabbing}
-user@hostname> \textbf{show | ?}\\
-Po\=ssible compl\=etions:\\
+user@hostname> \textbf{show host date | ?}\\
+Po\=ssible completions:   \=\\
 \>count           \>Count occurrences\\
 \>except          \>Show only text that does not match a pattern\\
 \>find            \>Search for the first occurrence of a pattern\\
@@ -273,7 +273,7 @@ Unix group.
 \begin{alltt}
 \begin{tabbing}
 user@hostname> \textbf{?}\\
-Po\=ssible compl\=etions:\\
+Po\=ssible completions:   \=\\
 \>configure       \>Switch to configuration mode\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
@@ -301,8 +301,7 @@ router.
 \begin{alltt}
 \begin{tabbing}
 user@hostname> \textbf{show ?}\\
-Po\=ssible compl\=etions:\\
-\>  <[Enter]>       \>Execute this command\\
+Po\=ssible completions:   \=\\
 \>  bgp             \>Display information about BGP\\
 \>  host            \>Display information about the host\\
 \>  igmp            \>Display information about IGMP\\
@@ -388,7 +387,7 @@ part of the configuration tree is currently being edited.
 \begin{tabbing}
 [edit]\\
 user@hostname\# \textbf{?}\\
-Po\=ssible completi\=ons:\\
+Po\=ssible completions:   \=\\
 \>  create          \>Create a sub-element\\
 \>  delete          \>Delete a configuration element\\
 \>  edit            \>Edit a sub-element\\
