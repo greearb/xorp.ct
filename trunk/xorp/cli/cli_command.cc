@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.25 2006/01/28 01:56:27 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.26 2006/03/16 00:03:44 pavlin Exp $"
 
 
 //
@@ -49,7 +49,7 @@
 //
 
 static string EXECUTE_THIS_COMMAND_STRING =
-    "<[Enter]>       Execute this command\r\n";
+    "<[Enter]>            Execute this command\r\n";
 
 //
 // Local functions prototypes
@@ -77,7 +77,7 @@ CliCommand::CliCommand(CliCommand *init_parent_command,
     
     // Set the command-completion help string
     // TODO: parameterize the hard-coded number
-    _help_completion = c_format(" %*s%s\r\n", (int)(15 - _name.size()), " ",
+    _help_completion = c_format(" %*s%s\r\n", (int)(20 - _name.size()), " ",
 				_help.c_str());
 
     // XXX: set the CLI completion function to its default value
@@ -723,7 +723,7 @@ CliCommand::find_command_help(const char *line, int word_end,
     
     if ((token.length() == 0) && is_no_space_at_end) {
 	// The last token, and there is no space, so print my help.
-	ret_string += c_format("  %-15s %s\r\n",
+	ret_string += c_format("  %-19s  %s\r\n",
 			       name().c_str(), help().c_str());
 	return (true);
     }
@@ -733,7 +733,7 @@ CliCommand::find_command_help(const char *line, int word_end,
 	&& (! is_argument_expected())) {
 	// The last token, and there is space at the end,
 	// so print the "default" help.
-	ret_string += c_format("  %-15s %s\r\n",
+	ret_string += c_format("  %-19s  %s\r\n",
 			       "<[Enter]>", "Execute this command");
 	ret_value = true;
     }
