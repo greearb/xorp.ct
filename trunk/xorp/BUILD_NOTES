@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.51 2006/04/01 03:34:06 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.52 2006/04/01 03:40:32 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -267,7 +267,8 @@ gmake check
     - The code compiles, and the internal tests appear to succeed.
 
   * OS X 10.4.2 (Darwin 8.2.0), OS X 10.4.3 (Darwin 8.3.0),
-    OS X 10.4.4 (Darwin 8.4.0), OS X 10.4.5 (Darwin 8.5.0) on PowerPC:
+    OS X 10.4.4 (Darwin 8.4.0), OS X 10.4.5 (Darwin 8.5.0),
+    OS X 10.4.6 (Darwin 8.6.0)  on PowerPC:
     - gcc version 4.0.0 20041026 (Apple Computer, Inc. build 4061)
     - The code compiles, and the internal tests appear to succeed.
 
