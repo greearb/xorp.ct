@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.109 2006/04/04 21:21:10 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.110 2006/04/13 06:39:32 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -35,6 +35,9 @@ Release 1.3 (2006/??/??)
     - If a "then" policy block contains "accept" or "reject" statement,
       now all statements inside the "then" block are evaluated
       regardless of their position.
+
+    - Addition of a new "exit" operational mode command that is
+      equivalent to the "quit" operational mode command.
 
   LIBXORP:
     - 
