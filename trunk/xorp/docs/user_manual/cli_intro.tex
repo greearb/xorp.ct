@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.12 2006/03/09 06:35:45 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.13 2006/04/12 02:44:53 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -77,6 +77,7 @@ you:
 user@hostname> \textbf{?}\\
 Po\=ssible completions:   \=\\
 \>configure       \>Switch to configuration mode\\
+\>exit            \>Exit this command session\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
 \>show            \>Display information about the system
@@ -275,6 +276,7 @@ Unix group.
 user@hostname> \textbf{?}\\
 Po\=ssible completions:   \=\\
 \>configure       \>Switch to configuration mode\\
+\>exit            \>Exit this command session\\
 \>help            \>Provide help with commands\\
 \>quit            \>Quit this command session\\
 \>show            \>Display information about the system
@@ -288,8 +290,10 @@ The main commands in operational mode are:
 \begin{description}
 \item{\bf configure}: switches from operational mode to configuration
 mode.
+\item{\bf exit}: exit from \xorpsh.
 \item{\bf help}: provides online help.
-\item{\bf quit}: quit from \xorpsh.
+\item{\bf quit}: quit from \xorpsh. It is equivalent to the {\bf exit}
+command.
 \item{\bf show}: displays many aspects of the running state of the
 router.
 \end{description}
