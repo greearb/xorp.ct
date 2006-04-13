@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.4 2006/04/12 21:28:00 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.5 2006/04/13 00:00:21 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -546,11 +546,6 @@ configure
 
 create policy policy-statement preference term 1
 edit policy policy-statement preference term 1
-
-create from
-edit from
-set protocol bgp
-up
 
 create then
 edit then

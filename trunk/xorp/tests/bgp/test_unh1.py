@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.4 2006/04/12 21:28:00 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.5 2006/04/13 00:00:21 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -96,7 +96,7 @@ TESTS=[
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
       'conf_import_origin_change']],
 
-    ['test_export_origin1', 'test_policy_origin1', False, '',
+    ['test_export_origin1', 'test_policy_origin1', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
       'conf_export_origin_change']],
     ]
