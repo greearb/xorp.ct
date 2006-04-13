@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.6 2006/04/13 00:06:51 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.7 2006/04/13 00:08:37 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -35,12 +35,14 @@ from test_bgp_config import \
      conf_EBGP, \
      conf_EBGP_EBGP, \
      conf_EBGP_IBGP_IBGP, \
-     conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3, \
+     conf_RUT_as2_TR1_as1_TR2_as2, \
+     conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3, \
      conf_RUT_as2_TR1_as1_TR2_as3, \
      conf_interfaces, \
      conf_redist_static, \
      conf_redist_static_incomplete, \
      conf_redist_static_no_export, \
+     conf_redist_static_med, \
      conf_add_static_route4, \
      conf_import_med_change, \
      conf_export_med_change, \
@@ -67,12 +69,16 @@ TESTS=[
      ['conf_EBGP_IBGP_IBGP', 'conf_interfaces',
       'conf_redist_static_incomplete']],
 
+    ['1.13A', 'test1_13_A', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces',
+      'conf_redist_static_med']],
+
     ['4.6A', 'test4_6_A', True, '',
      ['conf_EBGP_EBGP', 'conf_interfaces',
       'conf_redist_static_no_export']],
 
     ['4.11A', 'test4_11_A', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
       'conf_damping']],
 
     ['4.11BCD', 'test4_11_BCD', True, '',
@@ -257,10 +263,57 @@ def test1_10_C():
 
     return True
 
+def test1_13_A():
+    """
+    MULTI_EXIT_DISC Attribute
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 2 holdtime 0 id 10.0.0.2 keepalive false")
+
+    packet1 = "packet update \
+    nexthop 127.0.0.1 \
+    origin 0 \
+    aspath 2 \
+    med 42 \
+    nlri 172.16.0.0/16"
+
+    packet2 = "packet update \
+    nexthop 127.0.0.1 \
+    origin 0 \
+    aspath empty \
+    localpref 100 \
+    nlri 172.16.0.0/16"
+
+    coord("peer1 expect %s" % packet1)
+    coord("peer2 expect %s" % packet2)
+
+    if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
+        return False
+
+    delay(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 0")
+    coord("peer2 assert queue 0")
+
+    return True
+
 def test4_6_A():
     """
     Verify that the NO_EXPORT community can be set on a redistributed route
     """
+
     coord("reset")
 
     coord("target 127.0.0.1 10001")

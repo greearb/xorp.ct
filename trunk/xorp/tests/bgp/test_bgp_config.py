@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.5 2006/04/13 00:00:21 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.6 2006/04/13 00:06:50 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -232,7 +232,47 @@ commit
 
     return True
 
-def conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3(builddir):
+def conf_RUT_as2_TR1_as1_TR2_as2(builddir):
+    """
+    Configure One EBGP peering and one IBGP peerings
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 2
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 1
+up
+
+create peer peer2
+edit peer peer2
+set local-port 10002
+set peer-port 20002
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 2
+up
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3(builddir):
     """
     Configure One EBGP peering and two IBGP peerings
     """
@@ -341,8 +381,8 @@ edit policy
 create policy-statement static
 edit policy-statement static
 
-create term export
-edit term export
+create term 1
+edit term 1
 
 create from
 edit from
@@ -373,7 +413,7 @@ def conf_redist_static_incomplete(builddir):
 """
 configure
 
-edit policy policy-statement static term export 
+edit policy policy-statement static term 1
 
 create then
 edit then
@@ -399,11 +439,50 @@ def conf_redist_static_no_export(builddir):
 """
 configure
 
-edit policy policy-statement static term export
+edit policy policy-statement static term 1
 
 create then
 edit then
 set community NO_EXPORT
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_redist_static_med(builddir):
+    """
+    Redistribute static into BGP and set the MED to 42
+    """
+
+    conf_redist_static(builddir)
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+edit policy policy-statement static term 1
+
+create then
+edit then
+set med 42
+up
+up
+
+create term 2
+edit term 2
+create to
+edit to
+set as-path ^$
+up
+
+create then
+edit then
+set med-remove true
 
 commit
 """
