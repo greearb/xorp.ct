@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.3 2006/04/12 18:17:23 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.4 2006/04/12 21:28:00 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -43,6 +43,7 @@ from test_bgp_config import \
      conf_redist_static_no_export, \
      conf_add_static_route4, \
      conf_import_med_change, \
+     conf_export_med_change, \
      conf_import_origin_change, \
      conf_export_origin_change, \
      conf_preference_TR1, \
@@ -86,6 +87,10 @@ TESTS=[
     ['test_import_med1', 'test_policy_med1', False, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
       'conf_import_med_change']],
+
+    ['test_export_med1', 'test_policy_med1', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+      'conf_export_med_change']],
 
     ['test_import_origin1', 'test_policy_origin1', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',

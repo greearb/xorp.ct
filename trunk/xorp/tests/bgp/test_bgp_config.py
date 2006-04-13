@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.3 2006/04/12 18:17:23 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.4 2006/04/12 21:28:00 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -467,6 +467,35 @@ top
 
 edit protocols bgp
 set import preference
+
+commit
+    """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_export_med_change(builddir):
+    """
+    Set the med of all outgoing packets to 42
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+    """
+configure
+
+create policy policy-statement preference term 1
+edit policy policy-statement preference term 1
+
+create then
+edit then
+set med 42
+top
+
+edit protocols bgp
+set export preference
 
 commit
     """
