@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.7 2006/04/13 00:08:37 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.8 2006/04/13 01:46:25 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -72,6 +72,9 @@ TESTS=[
     ['1.13A', 'test1_13_A', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces',
       'conf_redist_static_med']],
+
+    ['1.13B', 'test1_13_B', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces']],
 
     ['4.6A', 'test4_6_A', True, '',
      ['conf_EBGP_EBGP', 'conf_interfaces',
@@ -305,6 +308,48 @@ def test1_13_A():
     coord("peer2 assert established")
 
     coord("peer1 assert queue 0")
+    coord("peer2 assert queue 0")
+
+    return True
+
+def test1_13_B():
+    """
+    MULTI_EXIT_DISC Attribute
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 2 holdtime 0 id 10.0.0.2 keepalive false")
+
+    packet = "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath 1 \
+    %s \
+    nlri 172.16.0.0/16"
+
+    spacket = packet % "med 42"
+
+    epacket = packet % "localpref 100"
+
+    coord("peer1 expect %s" % epacket)
+    coord("peer2 expect %s" % epacket)
+
+    coord("peer1 send %s" % spacket)
+
+    delay(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 1")
     coord("peer2 assert queue 0")
 
     return True
