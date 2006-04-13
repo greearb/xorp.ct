@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.21 2005/12/21 10:17:05 atanu Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.22 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -771,19 +771,18 @@ test6()
 	    origin 2
 	    aspath $1
 	    nexthop $2
-	    nlri 10.10.10.0/24
-	    med $3"
+	    nlri 10.10.10.0/24"
 
 	echo $PACKET
     }
 
     local MED=50
 
-    coord peer1 expect $(packet $PEER1_AS $LOCAL_NH $MED)
-    coord peer2 expect $(packet $AS,$PEER1_AS $NEXT_HOP 0)
-    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH $MED) localpref 100
+    coord peer1 expect $(packet $PEER1_AS $LOCAL_NH) med $MED
+    coord peer2 expect $(packet $AS,$PEER1_AS $NEXT_HOP) med 0
+    coord peer3 expect $(packet $PEER1_AS $LOCAL_NH) localpref 100
 
-    coord peer1 send $(packet $PEER1_AS $LOCAL_NH $MED) localpref 17
+    coord peer1 send $(packet $PEER1_AS $LOCAL_NH) med $MED localpref 17
 
     sleep 2
     

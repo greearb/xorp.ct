@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.87 2006/03/02 02:08:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.88 2006/03/16 00:03:31 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -495,8 +495,8 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
     /* 3. Configure MED filter.
 	  Remove old MED and add new one on transmission to EBGP peers. */
     /* Note: this MUST come before the nexthop rewriter */
+    filter_out->add_med_removal_filter();
     if (peer_type == PEER_TYPE_EBGP) {
-	filter_out->add_med_removal_filter();
 	filter_out->add_med_insertion_filter();
     }
 
