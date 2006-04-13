@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.9 2006/03/09 08:25:11 atanu Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.10 2006/03/09 08:29:18 atanu Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -199,11 +199,10 @@ If neither {\tt accept} nor {\tt reject} are specified, the default action will
 occur.  The default action will execute the next term or accept the route if the
 last term has been reached.
 
-It is important to place {\tt accept} and {\tt reject} as the {\em last} action in
-a {\tt then} block.  This is not enforced, although not doing so will result in
-actions specified after {\tt accept} or {\tt reject} not being executed.  This
-has to do with the fact that policy execution terminates once these commands are
-hit.
+Note that if the {\tt then} block contains an {\tt accept} or {\tt reject}
+action, all other actions within the {\tt then} block will be executed
+regardless whether in the configuration they are placed before or after
+the {\tt accept} or {\tt reject} statements.
 
 \section{Sets}
 Many times it is useful to match against a set of values.  For example it is
