@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.125 2006/04/04 19:23:42 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.127 2006/04/06 23:41:06 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -176,6 +176,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     _help_o["configure"] = "Switch to configuration mode";
     _help_o["configure exclusive"] 
 	= "Switch to configuration mode, locking out other users";
+    _help_o["exit"] = "Exit this command session";
     _help_o["help"] = "Provide help with commands";
     _help_o["quit"] = "Quit this command session";
 
@@ -237,6 +238,10 @@ To enter exclusive configuration mode you use the command:\n\
 This will allow you to make changes to the router configuration and lock\n\
 all other users out of configuration mode until you exit.\n\
 Use this command sparingly.";
+
+    _help_long_o["exit"] = "\
+The \"exit\" command will log you out of this command session.\n\
+Typing ^D (control-D) also has the same effect.";
 
     _help_long_o["quit"] = "\
 The \"quit\" command will log you out of this command session.\n\
@@ -598,7 +603,7 @@ RouterCLI::operational_mode()
 void
 RouterCLI::add_op_mode_commands(CliCommand* com0)
 {
-    CliCommand *com1, *com2, *help_com, *quit_com;
+    CliCommand *com1, *com2, *help_com, *exit_com, *quit_com;
 
     // com0->add_command("clear", "Clear information in the system *", false);
 
@@ -628,6 +633,13 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	help_com->set_dynamic_process_callback(
 	    callback(this, &RouterCLI::op_help_func));
 	help_com->set_can_pipe(true);
+
+	// Exit Command
+	exit_com = com0->add_command("exit",
+				     get_help_o("exit"),
+				     false,
+				     callback(this, &RouterCLI::logout_func));
+	exit_com->set_can_pipe(false);
 
 	// Quit Command
 	quit_com = com0->add_command("quit",
@@ -689,7 +701,7 @@ RouterCLI::op_mode_help(const vector<string>& command_global_name) const
 
     if (trimmed_path == "") {
 	// Add the static commands
-	string commands[] = { "configure", "quit", "help" };
+	string commands[] = { "configure", "exit", "quit", "help" };
 	is_executable = true;
 	can_pipe = false;
 	size_t i;
@@ -721,6 +733,9 @@ RouterCLI::op_mode_help(const vector<string>& command_global_name) const
 			    can_pipe);
 	children.insert(make_pair(command_name, ccm));
     } else if (trimmed_path == "configure exclusive") {
+	is_executable = true;
+	can_pipe = false;
+    } else if (trimmed_path == "exit") {
 	is_executable = true;
 	can_pipe = false;
     } else if (trimmed_path == "quit") {
