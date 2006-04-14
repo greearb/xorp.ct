@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.8 2006/04/14 04:41:44 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.9 2006/04/14 11:07:05 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -80,6 +80,26 @@ create state-change
 
 commit
 """
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_set_holdtime(builddir, peer, holdtime):
+    """
+    Set the holdtime on the specified peer.
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+set protocols bgp peer %s holdtime %s
+
+commit
+""" % (peer, holdtime)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False
