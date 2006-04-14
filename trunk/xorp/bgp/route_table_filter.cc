@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.48 2006/03/16 00:03:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.49 2006/04/14 05:57:59 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -249,6 +249,59 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
     if (_directly_connected && _subnet.contains(rtmsg->route()->nexthop())) {
 	return rtmsg;
     }
+
+    //Form a new path attribute list containing the new nexthop
+    PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
+    palist.replace_nexthop(_local_nexthop);
+    palist.rehash();
+    
+    //Create a new route message with the new path attribute list
+    SubnetRoute<A> *new_route 
+	= new SubnetRoute<A>(rtmsg->net(), &palist,
+			     rtmsg->route()->original_route(), 
+			     rtmsg->route()->igp_metric());
+    
+    // policy needs this
+    propagate_flags(*(rtmsg->route()),*new_route);
+
+    debug_msg("NexthopRewriteFilter: new route: %p with attributes %p\n",
+	      new_route, new_route->attributes());
+    InternalMessage<A> *new_rtmsg = 
+	new InternalMessage<A>(new_route, rtmsg->origin_peer(), 
+			       rtmsg->genid());
+
+    propagate_flags(rtmsg, new_rtmsg);
+
+    //drop and free the old message
+    drop_message(rtmsg, modified);
+
+    //note that we changed the route
+    modified = true;
+    new_rtmsg->set_changed();
+
+    return new_rtmsg;
+}
+
+/*************************************************************************/
+
+template<class A>
+NexthopPeerCheckFilter<A>::NexthopPeerCheckFilter(const A& local_nexthop,
+						  const A& peer_address) 
+    : _local_nexthop(local_nexthop), _peer_address(peer_address)
+{
+}
+
+template<class A>
+const InternalMessage<A>* 
+NexthopPeerCheckFilter<A>::filter(const InternalMessage<A> *rtmsg,
+				  bool &modified) const
+{
+    // If the nexthop does not match the peer's address all if fine.
+    if (rtmsg->route()->nexthop() != _peer_address) {
+	return rtmsg;
+    }
+
+    // The nexthop matches the peer's address so rewrite it.
 
     //Form a new path attribute list containing the new nexthop
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
@@ -870,6 +923,18 @@ FilterVersion<A>::add_nexthop_rewrite_filter(const A& nexthop,
 
 template<class A>
 int
+FilterVersion<A>::add_nexthop_peer_check_filter(const A& nexthop,
+						const A& peer_address)
+{
+    NexthopPeerCheckFilter<A>* nh_peer_check;
+    nh_peer_check = new NexthopPeerCheckFilter<A>(nexthop, peer_address);
+
+    _filters.push_back(nh_peer_check);
+    return 0;
+}
+
+template<class A>
+int
 FilterVersion<A>::add_ibgp_loop_filter()
 {
     IBGPLoopFilter<A>* ibgp_filter;
@@ -1314,6 +1379,16 @@ FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop,
 {
     _current_filter->add_nexthop_rewrite_filter(nexthop, directly_connected,
 						subnet);
+    return 0;
+}
+
+template<class A>
+int
+FilterTable<A>::add_nexthop_peer_check_filter(const A& nexthop,
+					      const A& peer_address)
+{
+    _current_filter->add_nexthop_peer_check_filter(nexthop, peer_address);
+
     return 0;
 }
 

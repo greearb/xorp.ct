@@ -14,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.26 2006/03/16 00:03:34 pavlin Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.27 2006/04/14 05:57:59 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -172,6 +172,29 @@ private:
     A _local_nexthop;
     bool _directly_connected;
     IPNet<A> _subnet;
+};
+
+
+/**
+ * @short BGPRouteFilter rewrites the nexthop if it matches the peers
+ * address.
+ *
+ * NexthopPeerCheckFilter is a BGPRouteFilter that checks that the
+ * nexthop is not equal to the peers address. If the nexthop is equal
+ * to the peers address then the nexthop is rewritten to the routers
+ * nexthop address.
+ */
+
+template<class A>
+class NexthopPeerCheckFilter : public BGPRouteFilter<A> {
+public:
+    NexthopPeerCheckFilter(const A &local_nexthop, const A &peer_address);
+    const InternalMessage<A>* 
+       filter(const InternalMessage<A> *rtmsg, 
+	      bool &modified) const ;
+private:
+    A _local_nexthop;
+    A _peer_address;
 };
 
 
@@ -392,6 +415,8 @@ public:
     int add_nexthop_rewrite_filter(const A& nexthop,
 				   bool directly_connected,
 				   const IPNet<A> &subnet);
+    int add_nexthop_peer_check_filter(const A& nexthop,
+				      const A& peer_address);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,
@@ -482,6 +507,8 @@ public:
     int add_nexthop_rewrite_filter(const A& nexthop,
 				   bool directly_connected,
 				   const IPNet<A> &subnet);
+    int add_nexthop_peer_check_filter(const A& nexthop,
+				      const A& peer_address);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.89 2006/04/13 17:45:39 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.90 2006/04/14 05:57:59 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -501,12 +501,15 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
     }
 
     /* 4. configure next_hop rewriter for EBGP peers*/
+    IPNet<A> subnet;
+    A peer;
+    bool direct = directly_connected(peer_handler, subnet, peer);
     if (peer_type == PEER_TYPE_EBGP) {
-	IPNet<A> subnet;
-	A peer;
-	bool direct = directly_connected(peer_handler, subnet, peer);
 	filter_out->add_nexthop_rewrite_filter(my_nexthop, direct, subnet);
     }
+
+    /* 4.a If the nexthop and the peer address are equal rewrite the nexthop */
+    filter_out->add_nexthop_peer_check_filter(my_nexthop, peer);
 
     /* 5. Configure local preference filter.
 	  Remove LOCAL_PREF on transmission to EBGP peers. */
