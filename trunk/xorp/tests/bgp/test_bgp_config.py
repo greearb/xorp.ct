@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.6 2006/04/13 00:06:50 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.7 2006/04/13 01:46:25 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -669,7 +669,7 @@ commit
 
     return True
 
-def conf_add_static_route4(builddir, net):
+def conf_add_static_route4(builddir, net, next_hop = "127.0.0.1"):
     """
     Add a static route
     """
@@ -682,10 +682,10 @@ configure
 edit protocols static
 create route %s
 edit route %s
-set next-hop 127.0.0.1
+set next-hop %s
 
 commit
-""" % (net, net)
+""" % (net, net, next_hop)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False
