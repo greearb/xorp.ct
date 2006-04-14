@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.53 2006/04/13 06:44:37 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.54 2006/04/14 20:39:59 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -316,9 +316,11 @@ gmake check
         into a writable location.
       * Change into this directory.
       * Apply the w32api-3.5-xorp.patch to this tree with 'patch -p1'.
-      * From within the w32api-3.5 directory, run ./configure --prefix=/
+      * From within the w32api-3.5 directory, run ./configure --prefix=/usr
         to ensure that the existing w32api binary installation will be
         overwritten.
+        (The paths under the MinGW / are aliased under /usr too, but the
+        w32api makefiles are confused by a single slash in their PREFIX.)
       * make && make install
 
       Lastly, apply the mingw.patch within /usr/include. If this patch
