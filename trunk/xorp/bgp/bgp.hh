@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.58 2006/03/16 00:03:27 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.59 2006/04/01 00:26:50 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -122,10 +122,10 @@ public:
 			  bool>::RefPtr InterfaceStatusCb;
     typedef XorpCallback3<void, const string&, const string&,
 			  bool>::RefPtr VifStatusCb;
-    typedef XorpCallback4<void, const string&, const string&,
-			  const IPv4&, bool>::RefPtr AddressStatus4Cb;
-    typedef XorpCallback4<void, const string&, const string&,
-			  const IPv6&, bool>::RefPtr AddressStatus6Cb;
+    typedef XorpCallback5<void, const string&, const string&, const IPv4&,
+			  uint32_t, bool>::RefPtr AddressStatus4Cb;
+    typedef XorpCallback5<void, const string&, const string&, const IPv6&,
+			  uint32_t, bool>::RefPtr AddressStatus6Cb;
 
     /**
      * Add a callback for tracking the interface status.
@@ -210,12 +210,34 @@ public:
     /**
      * Is the address one of this routers interface addresses?
      */
-    bool interface_address4(IPv4 address) const;
+    bool interface_address4(const IPv4& address) const;
 
     /**
      * Is the address one of this routers interface addresses?
      */
-    bool interface_address6(IPv6 address) const;
+    bool interface_address6(const IPv6& address) const;
+
+    /**
+     * Obtain the prefix length for a particular IPv4 address.
+     *
+     * @param address the address to search for.
+     * @param prefix_len the return-by-reference prefix length
+     * for @ref address.
+     * @return true if the address belongs to this router, otherwise false.
+     */
+    bool interface_address_prefix_len4(const IPv4& address,
+				       uint32_t& prefix_len) const;
+
+    /**
+     * Obtain the prefix length for a particular IPv6 address.
+     *
+     * @param address the address to search for.
+     * @param prefix_len the return-by-reference prefix length
+     * for @ref address.
+     * @return true if the address belongs to this router, otherwise false.
+     */
+    bool interface_address_prefix_len6(const IPv6& address,
+				       uint32_t& prefix_len) const;
 
     /**
      * Set the local configuration.
@@ -839,13 +861,15 @@ private:
      * Callback method that is invoked when the status of an address changes.
      */
     void address_status_change4(const string& interface, const string& vif,
-				const IPv4& source, bool state);
+				const IPv4& source, uint32_t prefix_len,
+				bool state);
 
     /**
      * Callback method that is invoked when the status of an address changes.
      */
     void address_status_change6(const string& interface, const string& vif,
-				const IPv6& source, bool state);
+				const IPv6& source, uint32_t prefix_len,
+				bool state);
 
     /**
      * Store the socket descriptor and iptuple together.
@@ -992,8 +1016,8 @@ private:
     AddressStatus4Cb	_address_status4_cb;
     AddressStatus6Cb	_address_status6_cb;
 
-    set<IPv4> 		_interfaces_ipv4;	// IPv4 interface addresses
-    set<IPv6> 		_interfaces_ipv6;	// IPv6 interface addresses
+    map<IPv4, uint32_t> _interfaces_ipv4;	// IPv4 interface addresses
+    map<IPv6, uint32_t> _interfaces_ipv6;	// IPv6 interface addresses
 };
 
 template <typename A>

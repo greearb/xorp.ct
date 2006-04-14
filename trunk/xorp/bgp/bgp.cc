@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.71 2006/02/18 00:07:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.72 2006/03/16 00:03:27 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -542,9 +542,10 @@ BGPMain::updates_made()
 		    && (! _address_status4_cb.is_empty())) {
 		    // The address's enabled flag has changed
 		    _address_status4_cb->dispatch(if_atom->name(),
-						 vif_atom->name(),
-						 addr_atom4->addr(),
-						 is_new_address_enabled);
+						  vif_atom->name(),
+						  addr_atom4->addr(),
+						  addr_atom4->prefix_len(),
+						  is_new_address_enabled);
 		}
 	    }
 
@@ -573,6 +574,7 @@ BGPMain::updates_made()
 		    _address_status6_cb->dispatch(if_atom->name(),
 						  vif_atom->name(),
 						  addr_atom6->addr(),
+						  addr_atom6->prefix_len(),
 						  is_new_address_enabled);
 		}
 	    }
@@ -634,6 +636,7 @@ BGPMain::updates_made()
 			_address_status4_cb->dispatch(if_atom->name(),
 						      vif_atom->name(),
 						      addr_atom4->addr(),
+						      addr_atom4->prefix_len(),
 						      true);
 		    }
 		}
@@ -658,6 +661,7 @@ BGPMain::updates_made()
 			_address_status6_cb->dispatch(if_atom->name(),
 						      vif_atom->name(),
 						      addr_atom6->addr(),
+						      addr_atom6->prefix_len(),
 						      true);
 		    }
 		}
@@ -672,15 +676,16 @@ BGPMain::updates_made()
 }
 
 void
-BGPMain::address_status_change4(const string& interface,
-			       const string& vif, const IPv4& source,
-			       bool state)
+BGPMain::address_status_change4(const string& interface, const string& vif,
+				const IPv4& source, uint32_t prefix_len,
+				bool state)
 {
-    debug_msg("interface %s vif %s address %s state %s\n",
-	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+    debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
+	      pb(state));
 
     if (state) {
-	_interfaces_ipv4.insert(source);
+	_interfaces_ipv4.insert(make_pair(source, prefix_len));
     } else {
 	_interfaces_ipv4.erase(source);
     }
@@ -689,15 +694,16 @@ BGPMain::address_status_change4(const string& interface,
 }
 
 void
-BGPMain::address_status_change6(const string& interface,
-			       const string& vif, const IPv6& source,
-			       bool state)
+BGPMain::address_status_change6(const string& interface, const string& vif,
+				const IPv6& source, uint32_t prefix_len,
+				bool state)
 {
-    debug_msg("interface %s vif %s address %s state %s\n",
-	      interface.c_str(), vif.c_str(), cstring(source), pb(state));
+    debug_msg("interface %s vif %s address %s prefix_len %u state %s\n",
+	      interface.c_str(), vif.c_str(), cstring(source), prefix_len,
+	      pb(state));
 
     if (state) {
-	_interfaces_ipv6.insert(source);
+	_interfaces_ipv6.insert(make_pair(source, prefix_len));
     } else {
 	_interfaces_ipv6.erase(source);
     }
@@ -706,15 +712,45 @@ BGPMain::address_status_change6(const string& interface,
 }
 
 bool
-BGPMain::interface_address4(IPv4 address) const
+BGPMain::interface_address4(const IPv4& address) const
 {
     return _interfaces_ipv4.end() != _interfaces_ipv4.find(address);
 }
 
 bool
-BGPMain::interface_address6(IPv6 address) const
+BGPMain::interface_address6(const IPv6& address) const
 {
     return _interfaces_ipv6.end() != _interfaces_ipv6.find(address);
+}
+
+bool
+BGPMain::interface_address_prefix_len4(const IPv4& address,
+				       uint32_t& prefix_len) const
+{
+    map<IPv4, uint32_t>::const_iterator iter;
+
+    prefix_len = 0;		// XXX: always reset
+    iter = _interfaces_ipv4.find(address);
+    if (iter == _interfaces_ipv4.end())
+	return (false);
+
+    prefix_len = iter->second;
+    return (true);
+}
+
+bool
+BGPMain::interface_address_prefix_len6(const IPv6& address,
+				       uint32_t& prefix_len) const
+{
+    map<IPv6, uint32_t>::const_iterator iter;
+
+    prefix_len = 0;		// XXX: always reset
+    iter = _interfaces_ipv6.find(address);
+    if (iter == _interfaces_ipv6.end())
+	return (false);
+
+    prefix_len = iter->second;
+    return (true);
 }
 
 #ifdef	DEBUG_MAXIMUM_DELAY
