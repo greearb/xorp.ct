@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.7 2006/04/13 01:46:25 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.8 2006/04/14 04:41:44 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -49,6 +49,34 @@ edit vif fxp0
 create address 127.0.0.1
 edit address 127.0.0.1
 set prefix-length 16
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_tracing_state(builddir):
+    """
+    Enable the tracing of state changes, assume that BGP is already configured.
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+edit protocols bgp
+
+create traceoptions
+edit traceoptions
+
+create flag
+edit flag
+
+create state-change
 
 commit
 """
