@@ -14,7 +14,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_filter.hh,v 1.25 2006/03/02 02:08:47 atanu Exp $
+// $XORP: xorp/bgp/route_table_filter.hh,v 1.26 2006/03/16 00:03:34 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FILTER_HH__
 #define __BGP_ROUTE_TABLE_FILTER_HH__
@@ -155,18 +155,23 @@ private:
  * attribute in a route passing though the filter.  A typicaly use is
  * when passing a route to an EBGP peer, we change the nexthop
  * attribute to be our own IP address on the appropriate interface to
- * that peer.
+ * that peer. If the EBGP peer is on the the same subnet as the router
+ * and the NEXT_HOP is on the same subnet the NEXT_HOP should not be
+ * rewritten.
  */
 
 template<class A>
 class NexthopRewriteFilter : public BGPRouteFilter<A> {
 public:
-    NexthopRewriteFilter(const A &local_nexthop);
+    NexthopRewriteFilter(const A &local_nexthop, bool directly_connected,
+			 const IPNet<A> &subnet);
     const InternalMessage<A>* 
        filter(const InternalMessage<A> *rtmsg, 
 	      bool &modified) const ;
 private:
     A _local_nexthop;
+    bool _directly_connected;
+    IPNet<A> _subnet;
 };
 
 
@@ -384,7 +389,9 @@ public:
     int add_simple_AS_filter(const AsNum &asn);
     int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
     int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
-    int add_nexthop_rewrite_filter(const A& nexthop);
+    int add_nexthop_rewrite_filter(const A& nexthop,
+				   bool directly_connected,
+				   const IPNet<A> &subnet);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,
@@ -472,7 +479,9 @@ public:
     int add_simple_AS_filter(const AsNum &asn);
     int add_route_reflector_input_filter(IPv4 bgp_id, IPv4 cluster_id);
     int add_AS_prepend_filter(const AsNum &asn, bool is_confederation_peer);
-    int add_nexthop_rewrite_filter(const A& nexthop);
+    int add_nexthop_rewrite_filter(const A& nexthop,
+				   bool directly_connected,
+				   const IPNet<A> &subnet);
     int add_ibgp_loop_filter();
     int add_route_reflector_ibgp_loop_filter(bool client,
 					     IPv4 bgp_id,

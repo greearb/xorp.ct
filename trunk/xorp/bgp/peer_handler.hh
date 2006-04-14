@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.20 2005/11/27 06:10:00 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.21 2006/03/16 00:03:31 pavlin Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -156,6 +156,20 @@ public:
 
     const IPv6& my_v6_nexthop() const	{
 	return _peer->peerdata()->get_v6_local_addr();
+    }
+
+    /**
+     * Get the local address as a string in numeric form.
+     */
+    string get_local_addr() const {
+	return _peer->peerdata()->iptuple().get_local_addr();
+    }
+
+    /**
+     * Get the peer address as a string in numeric form.
+     */
+    string get_peer_addr() const {
+	return _peer->peerdata()->iptuple().get_peer_addr();
     }
 
     virtual EventLoop& eventloop() const;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.88 2006/03/16 00:03:31 pavlin Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.89 2006/04/13 17:45:39 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -502,7 +502,10 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 
     /* 4. configure next_hop rewriter for EBGP peers*/
     if (peer_type == PEER_TYPE_EBGP) {
-	filter_out->add_nexthop_rewrite_filter(my_nexthop);
+	IPNet<A> subnet;
+	A peer;
+	bool direct = directly_connected(peer_handler, subnet, peer);
+	filter_out->add_nexthop_rewrite_filter(my_nexthop, direct, subnet);
     }
 
     /* 5. Configure local preference filter.
@@ -1177,6 +1180,67 @@ BGPPlumbingAF<IPv6>::get_local_nexthop(const PeerHandler *peerhandler) const
     return peerhandler->my_v6_nexthop();
 }
 
+template <>
+bool
+BGPPlumbingAF<IPv4>::directly_connected(const PeerHandler *peer_handler,
+					IPNet<IPv4>& subnet, IPv4& p) const
+{
+    // Get the routers interface address.
+    // There is no reason for the transport address for the session to
+    // match the address family, hence the necessity to catch a
+    // possible exception (IPv6 session with IPv4 AFI).
+    try {
+	IPv4 local(peer_handler->get_local_addr().c_str());
+	IPv4 peer(peer_handler->get_peer_addr().c_str());
+
+	uint32_t prefix_len;
+	if (!_master.main().interface_address_prefix_len4(local, prefix_len))
+	    return false;
+
+	IPNet<IPv4> net(local, prefix_len);
+	if (net.contains(peer)) {
+	    subnet = net;
+	    p = peer;
+	    return true;
+	}
+	
+    } catch(...) {
+	return false;
+    }
+
+    return false;
+}
+
+template <>
+bool
+BGPPlumbingAF<IPv6>::directly_connected(const PeerHandler *peer_handler,
+					IPNet<IPv6>& subnet, IPv6& p) const
+{
+    // Get the routers interface address.
+    // There is no reason for the transport address for the session to
+    // match the address family, hence the necessity to catch a
+    // possible exception (IPv4 session with IPv6 AFI).
+    try {
+	IPv6 local(peer_handler->get_local_addr().c_str());
+	IPv6 peer(peer_handler->get_peer_addr().c_str());
+
+	uint32_t prefix_len;
+	if (!_master.main().interface_address_prefix_len6(local, prefix_len))
+	    return false;
+
+	IPNet<IPv6> net(local, prefix_len);
+	if (net.contains(peer)) {
+	    subnet = net;
+	    p = peer;
+	    return true;
+	}
+	
+    } catch(...) {
+	return false;
+    }
+
+    return false;
+}
 
 template <class A>
 list <RibInTable<A>*>

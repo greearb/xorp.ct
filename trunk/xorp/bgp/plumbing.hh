@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.36 2006/02/17 23:34:53 zec Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.37 2006/03/16 00:03:31 pavlin Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -107,6 +107,14 @@ private:
     void reconfigure_filters(PeerHandler* peer_handler);
 
     const A& get_local_nexthop(const PeerHandler *peer_handler) const;
+
+    /**
+     * Is the peer directly connected and if it is return the common
+     * subnet and the peer address.
+     */
+    bool directly_connected(const PeerHandler *peer_handler,
+			    IPNet<A>& subnet, A& peer) const;
+
     list <RibInTable<A>*> ribin_list() const;
 
     map <PeerHandler*, RibInTable<A>* > _in_map;

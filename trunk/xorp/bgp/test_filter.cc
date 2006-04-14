@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.36 2005/12/06 06:26:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.37 2006/03/16 00:03:36 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -367,7 +367,8 @@ test_filter(TestInfo& /*info*/)
     // Test6: add and delete with a local_pref_insertion filter and a 
     // next_hop_rewrite_filter - both these modify a route
     // ================================================================
-    filter_table->add_nexthop_rewrite_filter(IPv4("128.16.64.4"));
+    filter_table->add_nexthop_rewrite_filter(IPv4("128.16.64.4"), false,
+					     IPNet<IPv4>());
     // add a route
     debug_table->write_comment("TEST 6");
     debug_table->write_comment("ADD AND DELETE");

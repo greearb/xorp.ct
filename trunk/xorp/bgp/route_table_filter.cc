@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.47 2006/03/02 02:08:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.48 2006/03/16 00:03:34 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -221,8 +221,12 @@ ASPrependFilter<A>::filter(const InternalMessage<A> *rtmsg,
 /*************************************************************************/
 
 template<class A>
-NexthopRewriteFilter<A>::NexthopRewriteFilter(const A& local_nexthop) 
-    : _local_nexthop(local_nexthop)
+NexthopRewriteFilter<A>::NexthopRewriteFilter(const A& local_nexthop,
+					      bool directly_connected,
+					      const IPNet<A>& subnet) 
+    : _local_nexthop(local_nexthop),
+      _directly_connected(directly_connected),
+      _subnet(subnet)
 {
 }
 
@@ -238,6 +242,13 @@ NexthopRewriteFilter<A>::filter(const InternalMessage<A> *rtmsg,
 	rtmsg->route()->aggr_prefix_len() != SR_AGGR_EBGP_AGGREGATE)
 	return rtmsg;
 #endif
+
+    // If the peer and the router are directly connected and the
+    // NEXT_HOP is in the same network don't rewrite the
+    // NEXT_HOP. This is known as a third party NEXT_HOP.
+    if (_directly_connected && _subnet.contains(rtmsg->route()->nexthop())) {
+	return rtmsg;
+    }
 
     //Form a new path attribute list containing the new nexthop
     PathAttributeList<A> palist(*(rtmsg->route()->attributes()));
@@ -846,10 +857,13 @@ FilterVersion<A>::add_AS_prepend_filter(const AsNum& as_num,
 
 template<class A>
 int
-FilterVersion<A>::add_nexthop_rewrite_filter(const A& nexthop)
+FilterVersion<A>::add_nexthop_rewrite_filter(const A& nexthop,
+					     bool directly_connected,
+					     const IPNet<A> &subnet)
 {
     NexthopRewriteFilter<A>* nh_rewriter;
-    nh_rewriter = new NexthopRewriteFilter<A>(nexthop);
+    nh_rewriter = new NexthopRewriteFilter<A>(nexthop, directly_connected,
+					      subnet);
     _filters.push_back(nh_rewriter);
     return 0;
 }
@@ -1294,9 +1308,12 @@ FilterTable<A>::add_AS_prepend_filter(const AsNum& as_num,
 
 template<class A>
 int
-FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop)
+FilterTable<A>::add_nexthop_rewrite_filter(const A& nexthop,
+					   bool directly_connected,
+					   const IPNet<A> &subnet)
 {
-    _current_filter->add_nexthop_rewrite_filter(nexthop);
+    _current_filter->add_nexthop_rewrite_filter(nexthop, directly_connected,
+						subnet);
     return 0;
 }
 

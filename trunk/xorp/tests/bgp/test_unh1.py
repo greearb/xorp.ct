@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.10 2006/04/13 21:08:19 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.11 2006/04/14 01:28:41 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -68,6 +68,10 @@ TESTS=[
     ['1.10C', 'test1_10_C', True, '',
      ['conf_EBGP_IBGP_IBGP', 'conf_interfaces',
       'conf_redist_static_incomplete']],
+
+    ['1.12AB', 'test1_12_AB', True, '',
+     ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces',
+      'conf_redist_static']],
 
     ['1.13A', 'test1_13_A', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces',
@@ -266,6 +270,50 @@ def test1_10_C():
     coord("peer3 assert established")
 
     coord("peer1 assert queue 0")
+
+    return True
+
+def test1_12_AB():
+    """
+    Check the rewriting of the NEXT_HOP attribute.
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 2 holdtime 0 id 10.0.0.2 keepalive false")
+    
+    delay(2)
+
+    coord("peer1 assert established");
+    coord("peer2 assert established");
+
+    delay(2)
+
+    packet = "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    nlri 172.16.0.0/16 %s"
+    
+    coord("peer1 expect %s" % (packet % "aspath 2 med 0"))
+    coord("peer2 expect %s" % (packet % "aspath empty localpref 100"))
+
+    if not conf_add_static_route4(builddir(1), "172.16.0.0/16", "127.0.0.2"):
+        return False
+
+    delay(10)
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+
+    coord("peer1 assert queue 0")
+    coord("peer2 assert queue 0")
 
     return True
 
