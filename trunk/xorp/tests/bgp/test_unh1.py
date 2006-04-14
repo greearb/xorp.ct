@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.11 2006/04/14 01:28:41 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.12 2006/04/14 05:57:59 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -105,15 +105,15 @@ TESTS=[
 #      'conf_import_med_change']],
 
     ['test_export_med1', 'test_policy_med1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
       'conf_export_med_change']],
 
     ['test_import_origin1', 'test_policy_origin1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
       'conf_import_origin_change']],
 
     ['test_export_origin1', 'test_policy_origin1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
+     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
       'conf_export_origin_change']],
     ]
 
@@ -427,8 +427,8 @@ def test1_13_C():
     nlri 172.16.0.0/16"
 
     spacket = packet % "nexthop 127.0.0.2 aspath empty med 42"
-
-    epacket = packet % "nexthop 127.0.0.1 aspath 2 med 0"
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket = packet % "nexthop 127.0.0.2 aspath 2 med 0"
 
     coord("peer1 expect %s" % epacket)
     coord("peer2 expect %s" % epacket)
@@ -528,7 +528,8 @@ def test4_11_A():
     nlri 192.1.0.0/16"
 
     spacket = packet % ("127.0.0.2", "1")
-    epacket = packet % ("127.0.0.1", "2,1")
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket = packet % ("127.0.0.2", "2,1")
     
     coord("peer1 expect %s" % epacket)
     coord("peer2 expect %s" % epacket)
@@ -586,11 +587,13 @@ def test4_11_BCD():
     nlri 192.1.0.0/16"
 
     spacket = packet % ("127.0.0.3", "1")
-    epacket = packet % ("127.0.0.1", "2,1")
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket2 = packet % ("127.0.0.2", "2,1")
+    epacket3 = packet % ("127.0.0.3", "2,1")
     
-    coord("peer1 expect %s" % epacket)
-    coord("peer2 expect %s" % epacket)
-    coord("peer3 expect %s" % epacket)
+    coord("peer1 expect %s" % epacket3)
+    coord("peer2 expect %s" % epacket3)
+    coord("peer3 expect %s" % epacket3)
 
     delay(2)
 
@@ -608,11 +611,11 @@ def test4_11_BCD():
 
     spacket = packet % ("127.0.0.2", "1")
 
-    coord("peer3 expect %s" % epacket)
-    coord("peer3 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket2)
+    coord("peer3 expect %s" % epacket3)
 
-    coord("peer3 expect %s" % epacket)
-    coord("peer3 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket2)
+    coord("peer3 expect %s" % epacket3)
 
     delay(2)
 
@@ -649,7 +652,7 @@ def test4_11_BCD():
     delay(10)
 
     # The release of the damped packet.
-    coord("peer3 expect %s" % epacket)
+    coord("peer3 expect %s" % epacket2)
     
     sleep = 5 * 60
 
@@ -700,8 +703,9 @@ def test4_12():
     spacket1 = packet % ("127.0.0.3", "1,12")
     spacket2 = packet % ("127.0.0.3", "1,14")
 
-    epacket1 = packet % ("127.0.0.1", "2,1,12")
-    epacket2 = packet % ("127.0.0.1", "2,1,14")
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket1 = packet % ("127.0.0.3", "2,1,12")
+    epacket2 = packet % ("127.0.0.3", "2,1,14")
 
     # This is a hack to test that no packets arrive on this peer.
     coord("peer1 expect %s" % spacket1)
@@ -778,7 +782,8 @@ def test_policy_med1():
     nlri 192.1.0.0/16"
 
     spacket = packet % ("127.0.0.2", "1", "0")
-    epacket = packet % ("127.0.0.1", "2,1", "42")
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket = packet % ("127.0.0.2", "2,1", "42")
     
     coord("peer1 expect %s" % epacket)
     coord("peer2 expect %s" % epacket)
@@ -837,7 +842,8 @@ def test_policy_origin1():
     nlri 192.1.0.0/16"
 
     spacket = packet % ("127.0.0.2", "0", "1")
-    epacket = packet % ("127.0.0.1", "2", "2,1")
+    # The nexthop is not re-written as it is on a common subnet.
+    epacket = packet % ("127.0.0.2", "2", "2,1")
     
     coord("peer1 expect %s" % epacket)
     coord("peer2 expect %s" % epacket)
