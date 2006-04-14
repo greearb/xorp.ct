@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.14 2006/04/14 11:07:05 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.15 2006/04/14 12:04:31 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -87,6 +87,9 @@ TESTS=[
 
     ['1.13C', 'test1_13_C', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces']],
+
+    ['3.8A', 'test3_8_A', True, '',
+     ['conf_EBGP']],
 
     ['4.6A', 'test4_6_A', True, '',
      ['conf_EBGP_EBGP', 'conf_interfaces',
@@ -213,7 +216,7 @@ def test1_1_A():
 
 def test1_1_B():
     """
-    Direct connection Basic IBGP
+    Direct connection Basic EBGP
     """
 
     # configure the test peering.
@@ -462,6 +465,41 @@ def test1_13_C():
 
     coord("peer1 assert queue 0")
     coord("peer2 assert queue 1")
+
+    return True
+
+def test3_8_A():
+    """
+    To verify that correct handling of NLRI field errors in UPDATE messages
+    """
+
+    print "Manual checks"
+    print "1) Verify that the multicast NLRI generated an error message"
+    print "2) Verify the route has not been installed"
+
+    # configure the test peering.
+    coord("reset")
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("peer1 establish AS 65001 holdtime 0 id 1.2.3.4 keepalive false")
+    
+    delay(2)
+
+    coord("peer1 assert established");
+
+    bad_packet = "packet update \
+    origin 0 \
+    aspath 65001 \
+    nexthop 127.0.0.1 \
+    nlri 172.16.0.0/16 \
+    nlri 224.0.0.5/16"
+
+    coord("peer1 send %s" % bad_packet)
+
+    delay(10)
+
+    coord("peer1 assert established")
 
     return True
 
