@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.52 2006/04/01 03:40:32 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.53 2006/04/13 06:44:37 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -276,11 +276,15 @@ gmake check
     - gcc version 4.0.1 (Apple Computer, Inc. build 5250)
     - The code compiles, and the internal tests appear to succeed.
 
-3.7 Windows Server 2003 (Service Pack 1)
-========================================
+3.7 Windows Server 2003 (Service Pack 1) (32-bit, x86)
+======================================================
 
   * All:
-    - XORP is only supported on Windows Server 2003 SP1.
+    - XORP is only supported on Windows Server 2003 SP1, and is
+      targeted for 32-bit x86 systems.
+
+    - If a Win32 support patch is shipped for your release, please apply
+      it before filing bug reports with the core team.
 
     - Unicast routing appears to work.
     - All regression tests pass as of XORP 1.2.
@@ -292,11 +296,16 @@ gmake check
       MSYS shell environment.
 
     - Instructions for building XORP on Windows Server are identical
-      to those for building XORP on a UNIX platform, with the exception
-      that any paths passed to the configure script must be in MinGW
-      UNIX-style format (e.g. C:\XORP -> /c/xorp).
+      to those for building XORP on a UNIX platform. However, the
+      following caveats apply.
 
-      However, certain manual patches must be applied to the toolchain before
+      * If you specify the --with-openssl option to configure, it may be
+        propagated to the libtecla build, causing the top-level make to break.
+
+      * Any paths passed to the configure script must be in MinGW UNIX-style
+        format. Example: 'C:\XORP' becomes '/c/xorp'.
+
+      Certain patches must be manually applied to the MinGW toolchain before
       attempting to build XORP, as we use API functions which are present in
       Microsoft's Platform SDK but which are not yet present in the system
       headers which ship with MinGW as of January 2006.
@@ -320,7 +329,7 @@ gmake check
       development team with this information.
 
     - We recommend that you install MinGW, MSYS, and the required GNU/Win32
-      ports under the path C:\MinGW\.
+      ports under the path C:\MinGW\, in that order.
 
     - We recommend that you initially use the Nullsoft Installer which
       is now shipping on MinGW.org to install the 'current' version of
@@ -328,7 +337,8 @@ gmake check
 
     - Once the base MinGW installation is complete, you should then
       manually update the toolchain which this program installs by
-      downloading and untarring the following packages:-
+      downloading and untarring the following packages in the root of
+      your MinGW installation.
 
        * MSYS-1.0.11-2004
        * binutils-2.15.91
@@ -390,7 +400,9 @@ gmake check
 =============================
 
   * All:
-    - This operating system is not currently supported.
+    - This operating system is not currently supported for building XORP.
+    - The results of trying to run XORP compiled for Windows Server 2003 SP1
+      (32-bit x86) are currently undefined.
 
 4. Known problems
 =================
