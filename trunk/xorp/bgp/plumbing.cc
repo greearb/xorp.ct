@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.90 2006/04/14 05:57:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.91 2006/04/14 11:15:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -508,7 +508,8 @@ BGPPlumbingAF<A>::configure_outbound_filter(PeerHandler* peer_handler,
 	filter_out->add_nexthop_rewrite_filter(my_nexthop, direct, subnet);
     }
 
-    /* 4.a If the nexthop and the peer address are equal rewrite the nexthop */
+    /* 4.a If the route was originated by this router and the nexthop
+       and the peer address are equal rewrite the nexthop. */
     filter_out->add_nexthop_peer_check_filter(my_nexthop, peer);
 
     /* 5. Configure local preference filter.

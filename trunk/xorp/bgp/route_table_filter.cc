@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.49 2006/04/14 05:57:59 atanu Exp $"
+#ident "$XORP: xorp/bgp/route_table_filter.cc,v 1.50 2006/04/14 11:15:53 atanu Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -296,6 +296,11 @@ const InternalMessage<A>*
 NexthopPeerCheckFilter<A>::filter(const InternalMessage<A> *rtmsg,
 				  bool &modified) const
 {
+    // Only consider rewritting if this is a self originated route.
+    if (! rtmsg->origin_peer()->originate_route_handler()) {
+	return rtmsg;
+    }
+
     // If the nexthop does not match the peer's address all if fine.
     if (rtmsg->route()->nexthop() != _peer_address) {
 	return rtmsg;
