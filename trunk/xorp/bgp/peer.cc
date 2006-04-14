@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.131 2006/03/17 15:57:33 bms Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.132 2006/03/25 02:02:48 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1620,8 +1620,12 @@ BGPPeer::check_update_packet(const UpdatePacket *p, bool& good_nexthop)
 	    XLOG_WARNING("%s Update packet from ebgp with LOCAL_PREF",
 			 this->str().c_str());
 #endif
-	// XXX Check Network layer reachability fields
-
+	// A semantically incorrect NLRI generates an error message
+	// for the log and is ignored, it does *not* generate a
+	// notification message and drop the peering. The semantic
+	// check is therefore performed in the peer handler where the
+	// update packet is being turned into individual messages
+	// where the offending NLRIs can be dropped.
     }
 
     // XXX Check withdrawn routes are correct.

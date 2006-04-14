@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.40 2005/11/28 06:43:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.41 2006/03/16 00:03:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,6 +118,12 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	BGPUpdateAttribList::const_iterator ni4;
 	ni4 = p->nlri_list().begin();
 	while (ni4 != p->nlri_list().end()) {
+	    if (!ni4->net().masked_addr().is_unicast()) {
+		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
+			   cstring(ni4->net()), cstring(*p));
+		++ni4;
+		continue;
+	    }
 	    SubnetRoute<IPv4>* msg_route 
 		= new SubnetRoute<IPv4>(ni4->net(), &pa_list, NULL);
 	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
@@ -138,6 +144,12 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	list<IPNet<IPv4> >::const_iterator ni;
 	ni = mpreach->nlri_list().begin();
 	while (ni != mpreach->nlri_list().end()) {
+	    if (!ni->masked_addr().is_unicast()) {
+		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
+			   cstring(*ni), cstring(*p));
+		++ni;
+		continue;
+	    }
 	    SubnetRoute<IPv4>* msg_route =
 		new SubnetRoute<IPv4>(*ni, &pa_list, NULL);
 	    InternalMessage<IPv4> msg(msg_route, this, GENID_UNKNOWN);
@@ -203,6 +215,12 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
     list<IPNet<IPv6> >::const_iterator ni;
     ni = mpreach->nlri_list().begin();
     while (ni != mpreach->nlri_list().end()) {
+	if (!ni->masked_addr().is_unicast()) {
+	    XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
+		       cstring(*ni), cstring(*p));
+	    ++ni;
+	    continue;
+	}
 	SubnetRoute<IPv6>* msg_route =
 	    new SubnetRoute<IPv6>(*ni, &pa_list, NULL);
 	InternalMessage<IPv6> msg(msg_route, this, GENID_UNKNOWN);
