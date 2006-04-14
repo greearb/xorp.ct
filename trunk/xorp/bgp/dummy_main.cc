@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.15 2006/02/18 00:07:25 atanu Exp $"
+#ident "$XORP: xorp/bgp/dummy_main.cc,v 1.16 2006/03/16 00:03:28 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -84,13 +84,27 @@ BGPMain::updates_made()
 }
 
 bool
-BGPMain::interface_address4(IPv4 /*address*/) const
+BGPMain::interface_address4(const IPv4& /*address*/) const
 {
     return false;
 }
 
 bool
-BGPMain::interface_address6(IPv6 /*address*/) const
+BGPMain::interface_address6(const IPv6& /*address*/) const
+{
+    return false;
+}
+
+bool
+BGPMain::interface_address_prefix_len4(const IPv4& /*address*/,
+				       uint32_t& /*prefix_len*/) const
+{
+    return false;
+}
+
+bool
+BGPMain::interface_address_prefix_len6(const IPv6& /*address*/,
+				       uint32_t& /*prefix_len*/) const
 {
     return false;
 }
