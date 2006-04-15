@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.117 2006/03/24 08:20:09 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.118 2006/03/28 03:06:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,9 +103,7 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
     // Check this area doesn't already exist.
     if (0 != _areas.count(area)) {
 	XLOG_WARNING("Area %s already exists\n", pr_id(area).c_str());
-	// If the area already exists just return true. This solves
-	// a problem with partially created areas.
-	return true;
+	return false;
     }
 
     if (!check_area_type(area, area_type)) {
