@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.15 2006/04/14 12:04:31 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.16 2006/04/14 22:37:38 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -41,6 +41,7 @@ from test_bgp_config import \
      conf_interfaces, \
      conf_tracing_state, \
      conf_set_holdtime, \
+     conf_set_prefix_limit, \
      conf_redist_static, \
      conf_redist_static_incomplete, \
      conf_redist_static_no_export, \
@@ -68,6 +69,9 @@ TESTS=[
      ['conf_EBGP']],
 
     ['1.4C', 'test1_4_C', True, '',
+     ['conf_EBGP', 'conf_interfaces']],
+
+    ['1.6B', 'test1_6_B', True, '',
      ['conf_EBGP', 'conf_interfaces']],
 
     ['1.10C', 'test1_10_C', True, '',
@@ -246,6 +250,50 @@ def test1_4_C():
         return True
 
     return False
+
+def test1_6_B():
+    """
+    Cease notification message
+    """
+
+
+    # Set the prefix limit to 3
+    conf_set_prefix_limit(builddir(1), "127.0.0.1", 3)
+
+    coord("reset")
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("peer1 establish AS 65001 holdtime 0 id 1.2.3.4 keepalive false")
+    
+    delay(2)
+
+    coord("peer1 assert established");
+
+    packet = "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath 65001 \
+    med 0\
+    nlri %s"
+
+    cease = 6
+    coord("peer1 expect packet notify %s" % cease)
+
+    # Send four NRLIs to trigger a cease
+
+    coord("peer1 send %s" % (packet % "172.16.0.0/16"))
+    coord("peer1 send %s" % (packet % "172.16.0.0/17"))
+    coord("peer1 send %s" % (packet % "172.16.0.0/18"))
+    coord("peer1 send %s" % (packet % "172.16.0.0/19"))
+
+    delay(2)
+
+    coord("peer1 assert idle")
+
+    coord("peer1 assert queue 0")
+
+    return True
 
 def test1_10_C():
     """

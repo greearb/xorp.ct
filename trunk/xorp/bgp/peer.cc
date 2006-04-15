@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.132 2006/03/25 02:02:48 bms Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.133 2006/04/14 21:11:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1085,6 +1085,20 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	if (!good_nexthop)
 	    return;
 	// ok the packet is correct.
+
+	// Check that the prefix limit if set will not be exceeded.
+	ConfigVar<uint32_t> &prefix_limit =
+	    const_cast<BGPPeerData *>(peerdata())->get_prefix_limit();
+	if (prefix_limit.get_enabled()) {
+	    if ((_handler->get_prefix_count() + p.nlri_list().size())
+		> prefix_limit.get_var()) {
+		NotificationPacket np(CEASE);
+		send_notification(np);
+		set_state(STATESTOPPED);
+		break;
+	    }
+	}
+
 	restart_hold_timer();
 	// process the packet...
 	debug_msg("Process the packet!!!\n");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.41 2006/03/16 00:03:30 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.42 2006/04/14 21:11:37 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -670,6 +670,13 @@ PeerHandler::output_no_longer_busy()
 	_plumbing_unicast->output_no_longer_busy(this);
 	_plumbing_multicast->output_no_longer_busy(this);
     }
+}
+
+uint32_t
+PeerHandler::get_prefix_count() const
+{
+    return _plumbing_unicast->get_prefix_count(this) +
+	_plumbing_multicast->get_prefix_count(this);
 }
 
 EventLoop&

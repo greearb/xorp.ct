@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.57 2006/03/06 03:23:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.58 2006/03/16 00:03:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -576,6 +576,35 @@ XrlBgpTarget::bgp_0_2_set_confederation_member(
 			peer_port);
 
 	if(!_bgp.set_confederation_member(iptuple, state))
+	    return XrlCmdError::COMMAND_FAILED();
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlBgpTarget::bgp_0_2_set_prefix_limit(
+				       // Input values,
+				       const string& local_ip,
+				       const uint32_t& local_port,
+				       const string& peer_ip,
+				       const uint32_t& peer_port,
+				       const uint32_t&	maximum,
+				       const bool& state)
+{
+    debug_msg("local ip %s local port %u peer ip %s peer port %u"
+	      " maximum %u state %s\n",
+	      local_ip.c_str(), XORP_UINT_CAST(local_port),
+	      peer_ip.c_str(), XORP_UINT_CAST(peer_port),
+	      XORP_UINT_CAST(maximum), state ? "true" : "false");
+
+    try {
+	Iptuple iptuple(local_ip.c_str(), local_port, peer_ip.c_str(),
+			peer_port);
+
+	if(!_bgp.set_prefix_limit(iptuple, maximum, state))
 	    return XrlCmdError::COMMAND_FAILED();
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());

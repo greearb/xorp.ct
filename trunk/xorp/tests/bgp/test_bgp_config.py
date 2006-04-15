@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.9 2006/04/14 11:07:05 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.10 2006/04/14 12:03:13 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -100,6 +100,28 @@ set protocols bgp peer %s holdtime %s
 
 commit
 """ % (peer, holdtime)
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_set_prefix_limit(builddir, peer, maximum):
+    """
+    Set the prefix limit on a peer
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+create protocols bgp peer %s prefix-limit
+edit  protocols bgp peer %s prefix-limit
+set maximum %s
+
+commit
+""" % (peer, peer, maximum)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False

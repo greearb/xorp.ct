@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.91 2006/04/14 11:15:52 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.92 2006/04/14 18:49:32 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -214,6 +214,16 @@ BGPPlumbing::output_no_longer_busy(PeerHandler *peer_handler)
 {
     plumbing_ipv4().output_no_longer_busy(peer_handler);
     plumbing_ipv6().output_no_longer_busy(peer_handler);
+}
+
+uint32_t
+BGPPlumbing::get_prefix_count(const PeerHandler *peer_handler)
+{
+    return
+	plumbing_ipv4().
+	get_prefix_count(const_cast<PeerHandler *>(peer_handler)) +
+	plumbing_ipv6().
+	get_prefix_count(const_cast<PeerHandler *>(peer_handler));
 }
 
 template<>
@@ -1168,6 +1178,19 @@ BGPPlumbingAF<A>::lookup_route(const IPNet<A> &net) const
     //because of output filters that may modify attributes.
     uint32_t genid;
     return _ipc_rib_out_table->lookup_route(net, genid);
+}
+
+template <class A>
+uint32_t
+BGPPlumbingAF<A>::get_prefix_count(PeerHandler* peer_handler) const
+{
+    typename map <PeerHandler*, RibInTable<A>* >::const_iterator iter;
+    iter = _in_map.find(peer_handler);
+    if (iter == _in_map.end())
+	XLOG_FATAL("BGPPlumbingAF: Get prefix count for a PeerHandler \
+that has no associated RibIn");
+
+    return iter->second->route_count();
 }
 
 template <>

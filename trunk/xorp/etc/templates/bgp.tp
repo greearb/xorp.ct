@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.87 2006/03/07 04:04:33 atanu Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.88 2006/04/04 02:44:23 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -35,6 +35,10 @@ protocols {
 	    delay-open-time: u32 = 0;
 	    client: bool = false;
 	    confederation-member: bool = false;
+	    prefix-limit {
+		maximum: u32 = 250000;
+		disable: bool = false;
+	    }
 
 	    disable: bool = false;
 	    enabled: bool;			/* %deprecated */
@@ -293,6 +297,20 @@ protocols {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_confederation_member?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&state:bool=$(@)";
 	    }
 
+	    prefix-limit {
+		%create: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
+		%activate: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=`~$(@.disable)`";
+		%delete: xrl "$(bgp.targetname)/bgp/0.2/set_prefix_limit?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&maximum:u32=$(@.maximum)&state:bool=$(@.disable.DEFAULT)";
+
+		maximum {
+		    %set:;
+		}
+
+		disable {
+		    %set:;
+		}
+	    }
+
 	    next-hop {
 		%set: xrl "$(bgp.targetname)/bgp/0.2/set_nexthop4?local_ip:txt=$(peer.@.local-ip)&local_port:u32=$(peer.@.local-port)&peer_ip:txt=$(peer.@)&peer_port:u32=$(peer.@.peer-port)&next_hop:ipv4=$(@)";
 	    }
@@ -537,6 +555,18 @@ protocols {
 	    confederation-member {
 		%help: short
 			"Set to true if the peer is a confederation member";
+	    }
+
+	    prefix-limit {
+		%help: short "Threshold for the number of prefixes that can be accepted.";
+
+		maximum {
+		    %help: short "Number of prefixes to accept before tearing down session";
+		}
+
+		disable {
+		    %help: short "Disable the prefix-limit";
+		}
 	    }
 
 	    next-hop {

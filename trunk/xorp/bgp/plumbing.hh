@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.37 2006/03/16 00:03:31 pavlin Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.38 2006/04/14 05:57:59 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -68,6 +68,12 @@ public:
       lookup_route(const IPNet<A> &net) const;
     void push(PeerHandler* peer_handler);
     void output_no_longer_busy(PeerHandler* peer_handler);
+
+    /**
+     * @return the number of prefixes in the RIB-IN.
+     */
+    uint32_t get_prefix_count(PeerHandler* peer_handler) const;
+
     /**
      * Hook to the next hop resolver so that xrl calls from the RIB
      * can be passed through.
@@ -182,6 +188,12 @@ public:
       lookup_route(const IPNet<IPv4> &net) const;
     const SubnetRoute<IPv6>* 
       lookup_route(const IPNet<IPv6> &net) const;
+
+    /**
+     * @return the number of prefixes in the RIB-IN.
+     */
+    uint32_t get_prefix_count(const PeerHandler* peer_handler);
+
     RibIpcHandler *rib_handler() const {return _rib_handler;}
     AggregationHandler *aggr_handler() const {return _aggr_handler;}
     BGPPlumbingAF<IPv4>& plumbing_ipv4() {

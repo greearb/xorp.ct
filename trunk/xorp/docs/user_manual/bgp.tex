@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/bgp.tex,v 1.19 2006/03/09 06:34:46 pavlin Exp $
+% $XORP: xorp/docs/user_manual/bgp.tex,v 1.20 2006/04/12 02:44:52 pavlin Exp $
 %
 
 \chapter{BGP}
@@ -123,6 +123,10 @@ protocols \{\\
 \>\>\>local-port: {\it int(1..65535)}\\
 \>\>\>peer-port: {\it int(1..65535)}\\
 \>\>\>holdtime: {\it uint}\\
+\>\>\>prefix-limit \{\\
+\>\>\>\>maximum: {\it uint}\\
+\>\>\>\>disable:  {\it bool}\\
+\>\>\>\}\\
 \>\>\>disable: {\it bool}\\
 \>\>\>ipv4-unicast: {\it bool}\\
 \>\>\>ipv4-multicast: {\it bool}\\
@@ -228,6 +232,8 @@ to be disabled without removing the configuration.
   negotiating the connection with this peer.  If no message is
   received from a BGP peer during the negotiated holdtime, the
   peering will be shut down.
+\item{\tt prefix-limit}: A peering can be configured to be torn down
+if the {\stt maximum} number of prefixes is exceeded.
 \item{\tt delay-open-time}: This is a time in seconds to wait before
 sending an OPEN message, one the TCP session is established. This
 option is to allow the peer to send the first OPEN message. The

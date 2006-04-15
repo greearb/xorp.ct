@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.59 2006/04/01 00:26:50 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.60 2006/04/14 03:20:01 pavlin Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -481,6 +481,17 @@ public:
      * @return true on success
      */
     bool set_confederation_member(const Iptuple& iptuple, bool conf);
+
+    /**
+     * set prefix limit
+     *
+     * @param maximum number of prefixes
+     * @param state true if the prefix limit is being enforced
+     *
+     * @return true on success
+     */
+    bool set_prefix_limit(const Iptuple& iptuple, 
+			  uint32_t maximum, bool state);
 
     /**
      * set IPv4 next-hop.

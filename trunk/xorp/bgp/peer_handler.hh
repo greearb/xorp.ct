@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.21 2006/03/16 00:03:31 pavlin Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.22 2006/04/14 05:57:59 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -171,6 +171,11 @@ public:
     string get_peer_addr() const {
 	return _peer->peerdata()->iptuple().get_peer_addr();
     }
+
+    /**
+     * @return the number of prefixes in the RIB-IN.
+     */
+    uint32_t get_prefix_count() const;
 
     virtual EventLoop& eventloop() const;
 protected:

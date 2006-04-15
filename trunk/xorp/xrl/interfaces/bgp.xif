@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.30 2005/12/06 07:30:59 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/bgp.xif,v 1.31 2005/12/15 18:00:59 atanu Exp $ */
 
 /*
 ** BGP protocol XRL interface.
@@ -290,6 +290,25 @@ interface bgp/0.2 {
 	        & local_port:u32 \
 		& peer_ip:txt \
 		& peer_port:u32 \
+		& state:bool
+
+	/**
+	 * Set the prefix limit.
+	 *
+	 * @param local IP address.
+	 * @param local server port.
+	 * @param peer IP address.
+	 * @param peer port.
+	 * @param maximum number of prefixes
+	 * @param state true if the prefix limit is being enforced
+	 */
+	set_prefix_limit \
+		? \
+		local_ip:txt \
+	        & local_port:u32 \
+		& peer_ip:txt \
+		& peer_port:u32 \
+		& maximum:u32 \
 		& state:bool
 
 	/**

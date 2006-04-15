@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.72 2006/03/16 00:03:27 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.73 2006/04/14 03:20:01 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1360,6 +1360,25 @@ BGPMain::set_confederation_member(const Iptuple& iptuple, bool conf)
     const_cast<BGPPeerData*>(peer->peerdata())->set_confederation(conf);
 
     bounce_peer(iptuple);
+
+    return true;
+}
+
+bool
+BGPMain::set_prefix_limit(const Iptuple& iptuple, uint32_t maximum, bool state)
+{
+    BGPPeer *peer = find_peer(iptuple);
+
+    if (peer == 0) {
+	XLOG_WARNING("Could not find peer: %s", iptuple.str().c_str());
+	return false;
+    }
+
+    ConfigVar<uint32_t> &prefix_limit =
+	const_cast<BGPPeerData *>(peer->peerdata())->get_prefix_limit();
+
+    prefix_limit.set_var(maximum);
+    prefix_limit.set_enabled(state);
 
     return true;
 }

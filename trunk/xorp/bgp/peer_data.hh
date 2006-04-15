@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.19 2005/11/30 08:08:44 atanu Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.20 2006/03/16 00:03:30 pavlin Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
@@ -41,6 +41,36 @@ enum PeerType {
     PEER_TYPE_UNCONFIGURED = 4,	// The peer type has not yet been configured.
     PEER_TYPE_INTERNAL = 255 	// connects to RIB
 } ;
+
+/**
+ * The value of a configuration variable and its state enable/disabled.
+ */
+template <typename A>
+class ConfigVar {
+ public:    
+    ConfigVar(A var, bool enabled = false) :  _var(var), _enabled(enabled)
+    {}
+
+    void set_var(A var) {
+	_var = var;
+    }
+
+    A get_var() const {
+	return _var;
+    }
+
+    void set_enabled(bool enabled) {
+	_enabled = enabled;
+    }
+
+    bool get_enabled() const {
+	return _enabled;
+    }
+    
+ private:
+    A _var;
+    bool _enabled;
+};
 
 /**
  * Data that applies to a specific peering.
@@ -76,6 +106,13 @@ public:
 
     bool confederation() const 			{ return _confederation; }
     void set_confederation(bool conf) 		{ _confederation = conf; }
+
+    /**
+     * @return the prefix limit.
+     */
+    ConfigVar<uint32_t>& get_prefix_limit() {
+	return _prefix_limit;
+    }
 
     /**
      * Return this routers AS number. Normally this is simple, but if
@@ -290,6 +327,12 @@ private:
     AsNum _as;			// Peer's AS number.
     bool _route_reflector;	// True if this is a route reflector client.
     bool _confederation;	// True if this is a confederation peer.
+
+    /**
+     * If enabled the maximum number of prefixes that will be accepted
+     * on a peer before the session is torn down.
+     */
+    ConfigVar<uint32_t>  _prefix_limit;
 
     /**
      * Holdtime in seconds. Value sent in open negotiation.
