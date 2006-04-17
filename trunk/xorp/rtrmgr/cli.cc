@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.127 2006/04/06 23:41:06 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.128 2006/04/13 21:16:27 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -658,6 +658,7 @@ RouterCLI::add_op_mode_commands(CliCommand* com0)
 	command_vector_name.push_back(ccm.command_name());
 	com1->set_global_name(command_vector_name);
 	com1->set_can_pipe(ccm.can_pipe());
+	com1->set_default_nomore_mode(ccm.default_nomore_mode());
 	com1->set_type_match_cb(ccm.type_match_cb());
 	// Set the callback to generate the node's children
 	com1->set_dynamic_children_callback(
