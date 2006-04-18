@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.10 2006/04/18 05:27:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.11 2006/04/18 05:41:40 pavlin Exp $"
 
 
 /*
@@ -51,13 +51,12 @@
  * On the other hand, OpenBSD-3.9 cannot process <net/if.h> (included by
  * "libxorp/xorp.h") if _XOPEN_SOURCE is defined.
  * Hence, as an exception we include some stuff before "libxorp/xorp.h",
- * but only for specific platforms.
+ * but then we undefine _XOPEN_SOURCE
  */
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_LINUX)
 #define _XOPEN_SOURCE	500
 #include <time.h>
 #include <strings.h>
-#endif // HOST_OS_NETBSD || HOST_OS_LINUX
+#undef _XOPEN_SOURCE
 
 #include "libxorp/xorp.h"
 
