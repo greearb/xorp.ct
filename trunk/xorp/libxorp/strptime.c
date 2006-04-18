@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.9 2006/03/16 00:04:33 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.10 2006/04/18 05:27:30 pavlin Exp $"
 
 
 /*
@@ -53,7 +53,6 @@
  * Hence, as an exception we include some stuff before "libxorp/xorp.h",
  * but only for specific platforms.
  */
-
 #if defined(HOST_OS_NETBSD) || defined(HOST_OS_LINUX)
 #define _XOPEN_SOURCE	500
 #include <time.h>
