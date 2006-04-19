@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.44 2006/03/09 07:53:18 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.45 2006/03/09 08:04:12 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -133,7 +133,7 @@ the login shell is csh or tcsh):
 	      - Add an entry for the new release to
                 www/html_src/downloads.html
 		(set the definition for Release tag to $ReleaseTag as
-		defined later)
+		defined later).
 		Move the previous release to the list of earlier releases,
 		and in the process delete its "Overview" URL in the
 		Documentation column.
@@ -153,6 +153,10 @@ the login shell is csh or tcsh):
 	      - If necessary, update www/html_src/snmp.html
 	      - Update the date and release version in
 		www/html_src/status.html
+	      - Edit the following files and remove all temporary notes
+	        about platforms that are supported only in XORP-current:
+	        www/html_src/dowloads.html, html_src/getting_started.html
+		and html_src/status.html
 	      - If necessary, update www/html_src/roadmap.html
 
 ========================================================================
