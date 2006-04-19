@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mfea6.tp,v 1.13 2006/01/27 21:35:34 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mfea6.tp,v 1.14 2006/02/22 02:26:10 pavlin Exp $ */
 
 plumbing {
     mfea6 {
@@ -45,7 +45,7 @@ plumbing {
 
 	targetname {
 	    %user-hidden: "XRL target name";
-	    %help:	short "Set the target name";
+	    %help:	short "XRL target name";
 	    %set:;
 	}
 

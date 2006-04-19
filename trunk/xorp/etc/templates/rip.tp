@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.40 2006/04/19 17:57:12 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.41 2006/04/19 19:48:56 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -86,7 +86,7 @@ protocols {
 
 	targetname {
 	    %user-hidden: "XRL target name";
-	    %help:	short "Set the target name";
+	    %help:	short "XRL target name";
 	    %set:;
 	}
 

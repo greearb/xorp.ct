@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.28 2006/02/22 02:26:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.29 2006/02/22 02:31:29 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -54,7 +54,7 @@ interfaces {
 
     targetname {
 	%user-hidden: "XRL target name";
-	%help:	short "Set the target name";
+	%help:	short "XRL target name";
 	%set:;
     }
 

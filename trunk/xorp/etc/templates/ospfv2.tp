@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.50 2006/03/24 20:02:48 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.51 2006/04/04 04:51:58 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -133,7 +133,7 @@ protocols {
 
 	targetname {
 	    %user-hidden: "XRL target name";
-	    %help:	short "Set the target name";
+	    %help:	short "XRL target name";
 	    %set:;
 	}
 

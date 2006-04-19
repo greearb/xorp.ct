@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ripng.tp,v 1.36 2006/04/19 17:57:12 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ripng.tp,v 1.37 2006/04/19 19:48:56 pavlin Exp $ */
 
 /*
  * RIPng attribute descriptions
@@ -75,7 +75,7 @@ protocols {
 
 	targetname {
 	    %user-hidden: "XRL target name";
-	    %help:	short "Set the target name";
+	    %help:	short "XRL target name";
 	    %set:;
 	}
 

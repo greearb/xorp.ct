@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/static_routes.tp,v 1.36 2006/03/27 07:56:43 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/static_routes.tp,v 1.37 2006/04/04 04:51:58 pavlin Exp $ */
 
 protocols {
     static {
@@ -141,7 +141,7 @@ protocols {
 
 	targetname {
 	    %user-hidden: "XRL target name";
-	    %help:	short "Set the target name";
+	    %help:	short "XRL target name";
 	    %set:;
 	}
 
