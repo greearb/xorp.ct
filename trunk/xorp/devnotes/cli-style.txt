@@ -1,61 +1,82 @@
 #
-# $XORP$
+# $XORP: xorp/devnotes/cli-style.txt,v 1.1 2006/04/19 05:16:23 pavlin Exp $
 #
 
-* Configuration commands (node names) SHOULD be less than 20 symbols  
-  long. The length of configuration command + short help MUST NOT exceed 
-  76 symbols.
+	Provisional XORP CLI coding style
+
+This is a *provisional* attempt to lay down some rules that we can
+adhere to when it comes to adding new CLI configuration statements or
+commands (or modifying existing ones).
+
+Note that each configuration node can have a "short" and a "long" help
+string. In the text below we use the terms "short help string" and
+"long help string" to differenciate between them.
+
+* Each configuration node should have a short help string.
+
+* A configuration node name SHOULD be less than 20 symbols long.
+  The associated short help string SHOULD be less than 56 symbols long.
+  The length of a configuration node name + its short help string
+  MUST NOT exceed 76 symbols.
 
   This is to ensure that the output of possible completions would fit into 
   80 symbols wide terminal. In most of cases it's wrapping that makes the
   output look really bad.
 
-  So, keep the length of node names and short help minimum. Node names are 
-  especially important. If it can be shortened below 20 symbols without 
-  loosing the point, it should be done. If it can't be done, OK, but these
-  cases should be kept minimum. For example:
+  Both node names and short help strings should be concise. Node names
+  are especially important. If it can be shortened below 20 symbols
+  without loosing the point, it should be done. If it can't be done, OK,
+  but these cases should be kept minimum. For example:
 
   restore-original-config-on-shutdown -> restore-system-conf
   enable-ip-router-alert-option-check -> router-alert-check
 
-* No units in node names (sec, msec), this info should be in short help.
-  For example:
+* If a node name is composed of more than one word, use '-' to separate
+  the words. For example:
+
+  multicastcapable -> multicast-capable
+
+* Don't specify the units in the node names (e.g., sec or msec).
+  This info should be in the short help string. For example:
 
   interpacket-delay-msecs  Minimum delay between outbound RIPng packets.
   vs.
   interpacket-delay    Minimum delay between outbound RIPng packets (msec)
 
-* Avoid "Set ...", "Edit ..." etc in short help strings.
+* Avoid "Set ...", "Edit ..." etc in the short help strings.
 
-  Short help string should just describe shortly variables/commands. And 
-  note that it can be logically wrong as well - variables and commands 
-  aren't always set, but sometimes deleted as well. For example:
+  A short help string should just describe the purpose of the particular
+  variable or command. Using "Set" or "Edit" in the short help string
+  can be logically wrong as well - variables and commands aren't always
+  set, but sometimes deleted as well. For example:
 
   horizon    Set the horizon type applied to routes announced on  address.
   vs.
   horizon    Horizon type applied to announced routes
 
-* Short help strings begin with capital letter and don't have dot in the 
-  end.
+* Short help strings begin with capital letter and don't have a dot in
+  the end.
 
   Just to make the look consistent.
 
-* Keep parameters user have to configure minimum.
+* Keep to minimum the number of parameters the user has to configure.
 
-  For example timers with jitter can be described as "some-timer-min" 
-  and "some-timer-max" (as it is in rip(ng)). If user wants to change 
-  timer, he/she has to configure two parameters. But mostly it's just 
-  average value which user wants to change. So, prefer "some-timer" 
-  and "some-jitter" with good default to jitter, better in percents than 
-  in absolute value.
+  For example, a timer with a jitter can be described as
+  "some-timer-min" and "some-timer-max". If the user wants to change
+  the timer value, he/she has to modify both parameters. Usually the
+  user wants to modify only the average value of the timer.
+  In this example, "some-timer" and "some-jitter" should be used instead,
+  where "some-jitter" should have some reasonable default value (in
+  percents rather than in absolute value).
 
-* Commands should describe what they do, not for what they can be used.
-
-  For example there is command in rip(ng):
+* Commands should describe what they do, not what they can be used for.
+  For example, the purpose of the following command is not very clear:
 
   accept-non-rip-requests  Answer RIP requests made from non-RIP processes
 
-  It's not clear at all what it does. Better use following command and 
-  help and describe for what it can be used in documentation: 
+  It is better use following command and help string to describe it:
 
-  source-port-check    Answer RIPng requests made only from RIPng port
+  source-port-check    Answer RIP requests made only from RIP port
+
+  Additional details about the command can be provided in the user
+  documentation.
