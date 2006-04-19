@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.38 2006/04/04 04:51:58 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.39 2006/04/12 17:59:43 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -24,7 +24,7 @@ protocols {
 		    triggered-update-max-secs:	u32	=   5;
 		    table-announce-min-secs:	u32	=  25;
 		    table-announce-max-secs:	u32	=  35;
-		    table-request-secs:		u32	=   1;
+		    table-request-secs:		u32	=  30;
 		    interpacket-delay-msecs:	u32	=  50;
 		    authentication {
 			type:			txt;	/* %deprecated */
