@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.129 2006/04/17 23:27:18 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.130 2006/04/20 01:47:11 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -180,9 +180,8 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     _help_o["help"] = "Provide help with commands";
     _help_o["quit"] = "Quit this command session";
 
-
     _help_c["commit"] = "Commit the current set of changes";
-    _help_c["create"] = "Create a sub-element";
+    _help_c["create"] = "Alias for the \"set\" command (obsoleted)";
     _help_c["delete"] = "Delete a configuration element";
     _help_c["edit"] = "Edit a sub-element";
     _help_c["exit"] = "Exit from this configuration level";
@@ -194,7 +193,7 @@ RouterCLI::RouterCLI(XorpShellBase& xorpsh, CliNode& cli_node,
     _help_c["quit"] = "Quit from this level";
     _help_c["run"] = "Run an operational-mode command";
     _help_c["save"] = "Save configuration to a file";
-    _help_c["set"] = "Set the value of a parameter";
+    _help_c["set"] = "Set the value of a parameter or create a new element";
     _help_c["show"] = "Show the configuration (default values may be suppressed)";
     _help_c["show -all"] = "Show the configuration (all values displayed)";
     _help_c["top"] = "Exit to top level of configuration";
@@ -269,44 +268,14 @@ Type ? to list currently available commands.";
 When you change the configuration of a XORP router, the changes do not take\n\
 place immediately.  This allows you to make additional related changes and\n\
 then apply all the changes together.  To apply changes to the running\n\
-configuration, the \"commit\" command is used.  Should the be an error, the\n\
-configuration should be rolled back to the previous state.";
+configuration, the \"commit\" command is used.  Should there be an error,\n\
+the configuration should be rolled back to the previous state.";
 
     _help_long_c["create"] = "\
-The \"create\" command allows you to create a new branch of the \n\
-configuration tree.  For example, if the configuration contained:\n\
+The \"create\" command is an alias for the \"set\" command.\n\
+It is obsoleted and will be removed in the future.\n\
 \n\
-    protocols {\n\
-        bgp {\n\
-            peer 10.0.0.1 {\n\
-                as: 65001 \n\
-            }\n\
-        }\n\
-    }\n\
-\n\
-Then typing \"create protocols static\" would create a configuration\n\
-branch for the static routes, and will fill it in with the template \n\
-default values:\n\
-\n\
-    protocols {\n\
-        bgp {\n\
-            peer 10.0.0.1 {\n\
-                as: 65001 \n\
-            }\n\
-        }\n\
->       static {\n\
->           targetname: \"static_routes\"\n\
->           enabled: true\n\
->       }\n\
-    }\n\
-\n\
-Then you can use the command \"edit\" to navigate around the new branch\n\
-of the configuration tree.  use the command \"set\" to change some of the\n\
-values of the new configuration branch:\n\
-    set protocols static enabled false\n\
-would disable the new static routes module.\n\
-\n\
-See also the \"commit\", \"delete\", \"edit\" and \"set\" commands.";
+See the \"set\" command.";
 
     _help_long_c["delete"] ="\
 The \"delete\" command is used to delete a part of the configuration tree.\n\
@@ -322,7 +291,9 @@ will also be deleted.  For example, if the configuration contained:\n\
 \n\
 then typing \"delete protocols bgp\", followed by \"commit\" would cause bgp\n\
 to be removed from the configuration, together with the peer 10.0.0.1, etc.\n\
-In this case this would also cause the BGP routing process to be shut down.";
+In this case this would also cause the BGP routing process to be shut down.\n\
+\n\
+See also the \"edit\" and \"set\" commands.";
 
     _help_long_c["edit"] = "\
 The \"edit\" command allows you to navigate around the configuration tree, so\n\
@@ -374,14 +345,14 @@ The \"exit configuration-mode\" command will cause the login session to \n\
 return to operational mode.  If there are uncommitted changes, the command\n\
 will fail.\n\
 \n\
-See also \"exit\", \"exit discard\".";
+See also the \"exit\" and \"exit discard\" commands.";
 
      _help_long_c["exit discard"] = "\
 The \"exit discard\" command will cause the login session to return\n\
 to operational mode, discarding any changes to the current configuration\n\
 that have not been committed.\n\
 \n\
-See also \"commit\", \"exit configuration-mode\".";
+See also the \"commit\" and \"exit configuration-mode\" commands.";
 
     _help_long_c["help"] = "\
 The \"help\" command is used to provide help on many aspects of the command\n\
@@ -421,7 +392,7 @@ corresponding to a BGP peering session.\n\
 If the current position is at the top level of the configuration, then \n\
 \"quit\" has no effect.\n\
 \n\
-See also \"exit\", \"up\", \"top\".";
+See also the \"exit\", \"up\" and \"top\" commands.";
 
 
     _help_long_c["run"] = "\
@@ -465,7 +436,40 @@ the AS number of the BGP peer from 65001 to 65002.  Only parameters \n\
 command.  New parts of the configuration tree such as a new BGP peer \n\
 are created by directly typing them in configuration mode.\n\
 \n\
-See also \"create\" and \"edit\".";
+The \"set\" command also allows you to create a new branch of the \n\
+configuration tree.  For example, if the configuration contained:\n\
+\n\
+    protocols {\n\
+        bgp {\n\
+            peer 10.0.0.1 {\n\
+                as: 65001 \n\
+            }\n\
+        }\n\
+    }\n\
+\n\
+Then typing \"set protocols static\" would create a configuration\n\
+branch for the static routes, and will fill it in with the template \n\
+default values:\n\
+\n\
+    protocols {\n\
+        bgp {\n\
+            peer 10.0.0.1 {\n\
+                as: 65001 \n\
+            }\n\
+        }\n\
+>       static {\n\
+>           targetname: \"static_routes\"\n\
+>           enabled: true\n\
+>       }\n\
+    }\n\
+\n\
+Then you can use the command \"edit\" to navigate around the new branch\n\
+of the configuration tree.  Use the command \"set\" to change some of the\n\
+values of the new configuration branch:\n\
+    set protocols static enabled false\n\
+would disable the new static routes module.\n\
+\n\
+See also the \"commit\", \"delete\" and \"edit\" commands.";
 
     _help_long_c["show"] = "\
 The \"show\" command will display all or part of the router configuration.\n\
@@ -490,14 +494,14 @@ be highlighted.  For example, if \"show\" displays:\n\
 then this indicates that the peer 10.0.0.1 has been created or changed, \n\
 and the change has not yet been applied to the running router configuration.\n\
 \n\
-See also \"show -all\".";
+See also the \"show -all\" command.";
 
     _help_long_c["show -all"] = "\
 The \"show -all\" command will display all or part of the router configuration.\n\
 It is same as the \"show\" command except that it displays all configuration\n\
 parameters including those that have default values.\n\
 \n\
-See also \"show\".";
+See also the \"show\" command.";
 
     _help_long_c["top"] = "\
 The \"top\" command will cause the current position in the configuration \n\
@@ -517,7 +521,7 @@ of the configuration, outside of the \"protocols\" grouping.  The same \n\
 result could have been obtained by using the \"exit\" command three \n\
 times.\n\
 \n\
-See also \"exit\", \"quit\", \"up\".";
+See also the \"exit\", \"quit\" and \"up\" commands.";
 
     _help_long_c["up"] = "\
 The \"up\" command will cause the current position in the configuration \n\
@@ -538,7 +542,7 @@ corresponding to a BGP peering session.\n\
 If the current position is at the top level of the configuration, then \n\
 \"up\" has no effect.\n\
 \n\
-See also \"exit\", \"quit\", \"top\".";
+See also the \"exit\", \"quit\" and \"top\" commands.";
 
 
     //    _current_config_node = &(config_tree()->root_node());
@@ -1393,38 +1397,7 @@ RouterCLI::add_delete_subtree()
 void
 RouterCLI::add_set_subtree()
 {
-    CommandTree cmd_tree;
-    list<string> cmds;
-
-    cmds.push_back("%set");
-    SlaveConfigTreeNode *current_config_node = config_tree()->find_node(_path);
-    XLOG_ASSERT(current_config_node != NULL);
-    current_config_node->create_command_tree(
-	cmd_tree,
-	cmds,
-	false,	/* include_intermediate_nodes */
-	true,	/* include_children_templates */
-	true,	/* include_leaf_value_nodes */
-	false,	/* include_read_only_nodes */
-	true,	/* include_permanent_nodes */
-	false	/* include_user_hidden_nodes */);
-
-    debug_msg("==========================================================\n");
-    debug_msg("set subtree is:\n\n");
-    debug_msg("%s", cmd_tree.tree_str().c_str());
-    debug_msg("==========================================================\n");
-
-    if (_braces.empty()) {
-	vector<string> vector_path;
-	vector_path.push_back("set");
-	append_list_to_vector(vector_path, _path);
-
-	add_command_subtree(*_set_node, cmd_tree.root_node(),
-			    callback(this, &RouterCLI::set_func),
-			    vector_path, 0,
-			    false, /* can_pipe */
-			    true /* include_allowed_values */);
-    }
+    add_text_entry_commands(_set_node);
 }
 
 void
@@ -2790,156 +2763,6 @@ RouterCLI::delete_func(const string& ,
     apply_path_change();
 
     return (XORP_OK);
-}
-
-int
-RouterCLI::set_func(const string& ,
-		    const string& ,
-		    uint32_t ,
-		    const vector<string>& command_global_name,
-		    const vector<string>& argv)
-{
-    vector<string> vector_path;
-    string response;
-
-    XLOG_ASSERT((command_global_name.size() > 1)
-		&& (command_global_name[0] == "set"));
-    vector<string>::const_iterator iter = command_global_name.begin();
-    ++iter;
-    vector_path.insert(vector_path.end(), iter, command_global_name.end());
-    response = run_set_command(vector_path, argv);
-
-    cli_client().cli_print(response + "\n");
-    apply_path_change();
-
-    return (XORP_OK);
-}
-
-int
-RouterCLI::immediate_set_func(const string& ,
-			      const string& ,
-			      uint32_t ,
-			      const vector<string>& command_global_name,
-			      const vector<string>& argv)
-{
-    vector<string> vector_path;
-    string response;
-
-    vector_path = command_global_name;
-    response = run_set_command(vector_path, argv);
-
-    if (_braces.empty()) {
-	cli_client().cli_print(response + "\n");
-	config_mode_prompt();
-    } else {
-	if (response != "OK")
-	    cli_client().cli_print(response + "\n");
-	text_entry_mode();
-	add_edit_subtree();
-	add_set_subtree();
-	CliCommand* com;
-	com = _cli_node.cli_command_root()->add_command(
-	    "}",
-	    "Complete this configuration level",
-	    false,
-	    callback(this, &RouterCLI::text_entry_func));
-	com->set_global_name(token_line2vector("}"));
-	com->set_can_pipe(false);
-    }
-
-    return (XORP_OK);
-}
-
-string
-RouterCLI::run_set_command(const vector<string>& vector_path,
-			   const vector<string>& argv)
-{
-    string result, error_msg;
-    list<string> path_parts;
-    SlaveConfigTreeNode* ctn;
-    const TemplateTreeNode* ttn;
-    bool create_needed = false;
-    vector<string> argv_copy = argv;
-
-    path_parts.insert(path_parts.end(), vector_path.begin(), vector_path.end());
-
-    ctn = config_tree()->find_node(path_parts);
-    if (ctn == NULL) {
-	//
-	// XXX: Either the path contains a leaf node that should be created
-	// or the path itself includes the value of the leaf node.
-	//
-	list<string> parent_path_parts = path_parts;
-	parent_path_parts.pop_back();
-	ctn = config_tree()->find_node(parent_path_parts);
-	ttn = config_tree()->find_template(path_parts);
-	if (ttn != NULL) {
-	    // XXX: the path contains a leaf node that should be created
-	    create_needed = true;
-	} else {
-	    // XXX: the path itself includes the value of the leaf node
-	    ttn = config_tree()->find_template(parent_path_parts);
-	    string value = path_parts.back();
-	    // Move the value as the first argument
-	    argv_copy.clear();
-	    argv_copy.reserve(argv.size() + 1);
-	    argv_copy.push_back(value);
-	    argv_copy.insert(argv_copy.end(), argv.begin(), argv.end());
-	}
-    } else {
-	XLOG_ASSERT(ctn->is_leaf_value());
-	ttn = ctn->template_tree_node();
-    }
-
-    XLOG_ASSERT(ctn != NULL && ttn != NULL && (! ctn->is_read_only()));
-
-    string value;
-    ConfigOperator node_operator = OP_NONE;
-
-    if (extract_leaf_node_operator_and_value(*ttn, argv_copy, node_operator,
-					     value, error_msg)
-	!= XORP_OK) {
-	result = c_format("ERROR : \"set %s\": %s.",
-			  token_vector2line(vector_path).c_str(),
-			  error_msg.c_str());
-	return result;
-    }
-
-    int myuid = getuid();
-
-    if (create_needed) {
-	string newpath = makepath(path_parts);
-	SlaveConfigTreeNode* newnode;
-
-	newnode = new SlaveConfigTreeNode(path_parts.back(),
-					  newpath, ttn,
-					  ctn,
-					  ConfigNodeId::ZERO(),
-					  myuid,
-					  clientid(),
-					  _verbose);
-	ctn = newnode;
-    }
-
-    if (ctn->set_value(value, myuid, error_msg) != true) {
-	result = c_format("ERROR: invalid value \"%s\": %s\n",
-			  value.c_str(), error_msg.c_str());
-	return result;
-    }
-    if (ctn->set_operator(node_operator, myuid, error_msg) != true) {
-	result = c_format("ERROR: invalid operator value \"%s\": %s\n",
-			  operator_to_str(node_operator).c_str(),
-			  error_msg.c_str());
-	return result;
-    }
-
-    //
-    // We don't execute commands until a commit is received
-    //
-    _changes_made = true;
-
-    result = "OK";
-    return result;
 }
 
 int

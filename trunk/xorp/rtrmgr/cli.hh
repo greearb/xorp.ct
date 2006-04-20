@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.46 2006/03/16 00:05:57 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.47 2006/04/20 01:47:11 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -115,16 +115,6 @@ public:
 		    uint32_t ,
 		    const vector<string>& command_global_name,
 		    const vector<string>& argv);
-    int set_func(const string& ,
-		 const string& ,
-		 uint32_t ,
-		 const vector<string>& command_global_name,
-		 const vector<string>& argv);
-    int immediate_set_func(const string& ,
-			   const string& ,
-			   uint32_t ,
-			   const vector<string>& command_global_name,
-			   const vector<string>& argv);
     int commit_func(const string& ,
 		    const string& ,
 		    uint32_t ,
@@ -240,9 +230,6 @@ private:
 
     void display_config_mode_users() const;
     void display_alerts();
-
-    string run_set_command(const vector<string>& vector_path,
-			   const vector<string>& argv);
 
     bool check_for_rtrmgr_restart();
     void verify_rtrmgr_restart(const XrlError& e, const uint32_t* pid);
