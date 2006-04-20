@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.13 2006/04/12 02:44:53 pavlin Exp $
+% $XORP: xorp/docs/user_manual/cli_intro.tex,v 1.14 2006/04/13 21:19:17 pavlin Exp $
 %
 
 \chapter{Command Structure}
@@ -392,7 +392,8 @@ part of the configuration tree is currently being edited.
 [edit]\\
 user@hostname\# \textbf{?}\\
 Po\=ssible completions:   \=\\
-\>  create          \>Create a sub-element\\
+\>  commit          \>Commit the current set of changes\\
+\>  create          \>Alias for the ``set'' command (obsoleted)\\
 \>  delete          \>Delete a configuration element\\
 \>  edit            \>Edit a sub-element\\
 \>  exit            \>Exit from this configuration level\\
@@ -401,7 +402,7 @@ Po\=ssible completions:   \=\\
 \>  quit            \>Quit from this level\\
 \>  run             \>Run an operational-mode command\\
 \>  save            \>Save configuration to a file\\
-\>  set             \>Set the value of a parameter\\
+\>  set             \>Set the value of a parameter or create a new element\\
 \>  show            \>Show the configuration (default values may be suppressed)\\
 \>  top             \>Exit to top level of configuration\\
 \>  up              \>Exit one level of configuration\\
@@ -606,8 +607,9 @@ file. Finally, the \rtrmgr will delete the temporary file.
 $<$\textit{value}$>$}: set the value of the specified configuration
 node.
 \end{itemize}
-The \emph{set} command is used to set or change the value of a configuration
-option.  The change does not actually take effect immediately - the
+The \emph{set} command can be used to set or change the value of a
+configuration option.  The change does not actually take effect
+immediately - the 
 \emph{commit} command must be used to apply this and any other uncommitted
 changes.
 
@@ -654,15 +656,17 @@ user@hostname\# \textbf{show}\\
 \subsection{Adding New Configuration}
 \begin{itemize}
 
-\item \textbf{create $<$\textit{path to new config node}$>$}
+\item \textbf{set $<$\textit{path to new config node}$>$}
 : create new configuration node.
-\item \textbf{create $<$\textit{path to new config node}$>$ \{}
+\item \textbf{set $<$\textit{path to new config node}$>$ \{}
 : create new configuration node and start editing it.
 
 \end{itemize}
 
-New configuration can be added by the \emph{create} command.
-If we type \emph{create} followed by the path to a new configuration node,
+New configuration can be added by the \emph{set} command.~\footnote{Note that
+prior to the XORP Release-1.3, the \textbf{create} command was used instead to
+add new configuration nodes.}
+If we type \emph{set} followed by the path to a new configuration node,
 the node will be created. All parameters within that node will be assigned
 their default values (if exist). After that the node can be edited with the
 \emph{edit} command.
@@ -693,7 +697,7 @@ user@hostname\# \textbf{show}\\
 \>\}\\
 \\
 \noindent[edit interfaces interface rl0]\\
-user@hostname\# \textbf{create vif rl0b \{}\\
+user@hostname\# \textbf{set vif rl0b \{}\\
 \>\>>\> \textbf{address 10.0.0.1 \{}\\
 \>\>>\>\> \textbf{prefix-length 16}\\
 \>\>>\>\> \textbf{broadcast 10.0.255.255}\\
