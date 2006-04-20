@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.112 2006/04/15 07:10:34 atanu Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.113 2006/04/20 01:49:47 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -38,6 +38,12 @@ Release 1.3 (2006/??/??)
 
     - Addition of a new "exit" operational mode command that is
       equivalent to the "quit" operational mode command.
+
+    - The "create" and "set" configuration commands are merged, so now
+      the new "set" command can be used for setting values and for
+      creating new configuration nodes. For backward compatibility,
+      the obsoleted "create" command is preserved as an alias for the
+      new "set" command, though it may be removed in the future.
 
   LIBXORP:
     - 
