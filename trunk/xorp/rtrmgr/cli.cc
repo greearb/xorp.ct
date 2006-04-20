@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.128 2006/04/13 21:16:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.129 2006/04/17 23:27:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1519,9 +1519,13 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 	    help = "-- No help available --";
 	}
 
-	com = com0->add_command(ttn->segname(),
-				help, false,
-				callback(this, &RouterCLI::text_entry_func));
+	if (ttn->is_tag()) {
+	    com = com0->add_command(ttn->segname(), help, false);
+	} else {
+	    com = com0->add_command(ttn->segname(),
+				    help, false,
+				    callback(this, &RouterCLI::text_entry_func));
+	}
 	if (com == NULL) {
 	    XLOG_FATAL("AI: add_command %s for template failed",
 		       ttn->segname().c_str());
@@ -2538,6 +2542,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
     map<string, CliCommandMatch> children;
     string path;
     list<string> path_segments;
+    const TemplateTreeNode *ttn = NULL;
 
     path = token_vector2line(vector_path);
     XLOG_TRACE(_verbose, "text_entry_children_func: %s\n", path.c_str());
@@ -2553,9 +2558,36 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	newpath = newpath.substr(ix + 1, newpath.size() - ix + 1);
     }
 
-    const TemplateTreeNode *ttn = template_tree()->find_node(path_segments);
     is_executable = true;
     can_pipe = false;
+
+    const ConfigTreeNode* ctn = config_tree()->find_const_node(path_segments);
+    if (ctn != NULL)
+	ttn = ctn->template_tree_node();
+
+    if (ttn != NULL && ttn->is_tag()) {
+	list<ConfigTreeNode*>::const_iterator iter;
+	for (iter = ctn->const_children().begin();
+	     iter != ctn->const_children().end();
+	     ++iter) {
+	    const ConfigTreeNode* ctn_child = *iter;
+	    if (ctn_child->template_tree_node() != NULL)
+		help_string = ctn_child->template_tree_node()->help();
+	    if (help_string == "") {
+		help_string = "-- No help available --";
+	    }
+	    command_name = ctn_child->segname();
+	    bool is_executable_tmp = is_executable;
+	    bool can_pipe_tmp = can_pipe;
+	    CliCommandMatch ccm(command_name, help_string,
+				is_executable_tmp, can_pipe_tmp);
+	    if (ctn_child->is_leaf_value())
+		ccm.set_is_argument_expected(true);
+	    children.insert(make_pair(command_name, ccm));
+	}
+    }
+
+    ttn = template_tree()->find_node(path_segments);
     if (ttn != NULL && (! ttn->is_deprecated()) && (! ttn->is_user_hidden())) {
 	list<TemplateTreeNode*>::const_iterator tti;
 	for (tti = ttn->children().begin(); tti != ttn->children().end(); 
@@ -2586,12 +2618,10 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		command_name = ttn_child->segname();
 		bool is_executable_tmp = is_executable;
 		bool can_pipe_tmp = can_pipe;
-#if 0
 		if (ttn_child->is_tag()) {
 		    is_executable_tmp = false;
 		    can_pipe_tmp = false;
 		}
-#endif
 		CliCommandMatch ccm(command_name, help_string,
 				    is_executable_tmp, can_pipe_tmp);
 		if (ttn_child->is_leaf_value())
@@ -2599,19 +2629,19 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		children.insert(make_pair(command_name, ccm));
 	    }
 	}
-#if 0
+
 	if (ttn->is_tag()) {
 	    is_executable = false;
 	    can_pipe = false;
 	}
-#endif // 0
+
 	if (!ttn->is_tag() && !ttn->children().empty()) {
 	    help_string = "Enter text on multiple lines";
 	    command_name = "{";
 	    CliCommandMatch ccm(command_name, help_string, is_executable,
 				can_pipe);
-		if (ttn->is_leaf_value())
-		    ccm.set_is_argument_expected(true);
+	    if (ttn->is_leaf_value())
+		ccm.set_is_argument_expected(true);
 	    children.insert(make_pair(command_name, ccm));
 	}
 	
@@ -3376,6 +3406,12 @@ RouterCLI::load_done(bool success, string error_msg)
 //
 SlaveConfigTree*
 RouterCLI::config_tree()
+{
+    return _xorpsh.config_tree();
+}
+
+const SlaveConfigTree*
+RouterCLI::config_tree() const
 {
     return _xorpsh.config_tree();
 }
