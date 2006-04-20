@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.52 2006/01/31 03:27:36 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.53 2006/03/16 00:03:43 pavlin Exp $"
 
 
 //
@@ -1308,7 +1308,7 @@ CliClient::command_line_help(const string& line, int word_end,
 			     bool remove_last_input_char)
 {
     CliCommand *curr_cli_command = _current_cli_command;
-    string command_help_string = "";
+    set<string> command_help_strings;
     bool is_found = false;
     
     if (remove_last_input_char)
@@ -1320,12 +1320,17 @@ CliClient::command_line_help(const string& line, int word_end,
 	 ++iter) {
 	CliCommand *tmp_cli_command = *iter;
 	if (tmp_cli_command->find_command_help(line.c_str(), word_end,
-					       command_help_string))
+					       command_help_strings))
 	    is_found = true;
     }
     if (is_found) {
 	cli_print("\nPossible completions:\n");
-	cli_print(command_help_string);
+	set<string>::const_iterator iter;
+	for (iter = command_help_strings.begin();
+	     iter != command_help_strings.end();
+	     ++iter) {
+	    cli_print(*iter);
+	}
     } else {
 	string token_line = string(line, 0, word_end);
 	token_line = strip_empty_spaces(token_line);

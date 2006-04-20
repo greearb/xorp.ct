@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.23 2006/01/28 01:56:27 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.24 2006/03/16 00:03:44 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -27,6 +27,7 @@
 #include <string>
 #include <list>
 #include <map>
+#include <set>
 
 #include "libxorp/callback.hh"
 #include "cli/libtecla/libtecla.h"
@@ -476,7 +477,8 @@ private:
     CliCommand *command_find(const string& token);
     bool is_multi_command_prefix(const string& command_line);
     
-    bool find_command_help(const char *line, int word_end, string& ret_string);
+    bool find_command_help(const char *line, int word_end,
+			   set<string>& help_strings);
     bool allow_cd() { return (_allow_cd); }
     
     

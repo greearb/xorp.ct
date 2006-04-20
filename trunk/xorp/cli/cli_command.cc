@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.26 2006/03/16 00:03:44 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.27 2006/04/12 02:31:28 pavlin Exp $"
 
 
 //
@@ -682,7 +682,7 @@ CliCommand::is_same_command(const string& token)
 
 bool
 CliCommand::find_command_help(const char *line, int word_end,
-			      string& ret_string)
+			      set<string>& help_strings)
 {
     string token, token_line;
     bool ret_value = false;
@@ -723,8 +723,8 @@ CliCommand::find_command_help(const char *line, int word_end,
     
     if ((token.length() == 0) && is_no_space_at_end) {
 	// The last token, and there is no space, so print my help.
-	ret_string += c_format("  %-19s  %s\r\n",
-			       name().c_str(), help().c_str());
+	help_strings.insert(c_format("  %-19s  %s\r\n",
+				     name().c_str(), help().c_str()));
 	return (true);
     }
     
@@ -733,8 +733,8 @@ CliCommand::find_command_help(const char *line, int word_end,
 	&& (! is_argument_expected())) {
 	// The last token, and there is space at the end,
 	// so print the "default" help.
-	ret_string += c_format("  %-19s  %s\r\n",
-			       "<[Enter]>", "Execute this command");
+	help_strings.insert(c_format("  %-19s  %s\r\n",
+				     "<[Enter]>", "Execute this command"));
 	ret_value = true;
     }
     
@@ -747,7 +747,7 @@ CliCommand::find_command_help(const char *line, int word_end,
 	string tmp_token_line = copy_token(token) + token_line;
 	ret_value |= cli_command->find_command_help(tmp_token_line.c_str(),
 						    tmp_token_line.length(),
-						    ret_string);
+						    help_strings);
     }
     
     if (can_pipe() && (cli_command_pipe() != NULL)) {
@@ -756,7 +756,7 @@ CliCommand::find_command_help(const char *line, int word_end,
 	ret_value |= cli_command_pipe()->find_command_help(
 	    tmp_token_line.c_str(),
 	    tmp_token_line.length(),
-	    ret_string);
+	    help_strings);
     }
     
     return (ret_value);
