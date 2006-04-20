@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/cli-style.txt,v 1.1 2006/04/19 05:16:23 pavlin Exp $
+# $XORP: xorp/devnotes/cli-style.txt,v 1.2 2006/04/19 05:59:32 pavlin Exp $
 #
 
 	Provisional XORP CLI coding style
@@ -11,6 +11,10 @@ commands (or modifying existing ones).
 Note that each configuration node can have a "short" and a "long" help
 string. In the text below we use the terms "short help string" and
 "long help string" to differenciate between them.
+
+* Node names should be all lower-case characters. They may include
+  digits, but their usage should be limited, and should never be used as
+  the first symbol.
 
 * Each configuration node should have a short help string.
 
@@ -50,7 +54,7 @@ string. In the text below we use the terms "short help string" and
   can be logically wrong as well - variables and commands aren't always
   set, but sometimes deleted as well. For example:
 
-  horizon    Set the horizon type applied to routes announced on  address.
+  horizon    Set the horizon type applied to routes announced on address.
   vs.
   horizon    Horizon type applied to announced routes
 
@@ -80,3 +84,42 @@ string. In the text below we use the terms "short help string" and
 
   Additional details about the command can be provided in the user
   documentation.
+
+* The short help strings for each module (e.g., a protocol) should begin
+  with "<Module> configuration".
+
+  Example: set protocols ?
+
+  rip                  RIP configuration
+
+* The short help strings should become more precise as additional
+  parameters are specified, and should not provide more information than
+  necessary.
+
+  Example: set protocols rip interface eth0 vif eth0 address 1.2.3.4
+           authentication md5?
+
+  md5                  MD5 authentication key
+
+  Bad example for a help string:
+
+  md5                  RIP MD5 authentication key on this interface/vif/address
+
+* Protocol acronyms in help strings should use common conventions,
+  typically all upper case.
+
+  Example: BGP, RIP, RIPng, VoIP
+
+* The name of an existing command should be changed only after careful
+  considerations. The same applies for deleting a command or moving it
+  to a different part of the configuration tree.
+
+* If a command is changed (renamed, deleted or moved), the original
+  command should be marked as "deprecated" (i.e., by using the
+  "%deprecated" keyword in the rtrmgr template) and kept in the
+  configuration tree for at least three major releases or 18 months
+  (whichever comes later).
+
+  For example, if a command is deprecated in Release-1.5, the deprecated
+  state about that command can be removed in Release-1.8 (assuming there
+  have been at least 18 months between those two releases).
