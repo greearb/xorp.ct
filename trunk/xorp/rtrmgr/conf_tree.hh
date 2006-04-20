@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.30 2006/01/14 00:42:36 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree.hh,v 1.31 2006/03/16 00:05:58 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_HH__
 #define __RTRMGR_CONF_TREE_HH__
@@ -84,6 +84,7 @@ public:
     virtual ConfigTreeNode& root_node() = 0;
     virtual const ConfigTreeNode& const_root_node() const = 0;
     ConfigTreeNode* find_node(const list<string>& path);
+    const ConfigTreeNode* find_const_node(const list<string>& path) const;
     ConfigTreeNode* find_config_module(const string& module_name);
     string show_subtree(bool show_top, const list<string>& path_segments, 
 			bool numbered, bool suppress_default_values) const;

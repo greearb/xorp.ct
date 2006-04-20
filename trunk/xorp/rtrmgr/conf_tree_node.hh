@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.62 2006/03/16 00:05:58 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.63 2006/04/06 00:03:53 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -145,6 +145,7 @@ public:
 			       bool retain_value_changed);
     void retain_common_nodes(const ConfigTreeNode& them);
     ConfigTreeNode* find_node(const list<string>& path);
+    const ConfigTreeNode* find_const_node(const list<string>& path) const;
     string subtree_str() const;
 
     bool expand_variable(const string& varname, string& value,

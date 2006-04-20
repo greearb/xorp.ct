@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.110 2006/03/16 00:05:58 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.111 2006/04/06 00:03:53 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -1176,6 +1176,16 @@ ConfigTreeNode::subtree_str() const
     }
 
     return s;
+}
+
+const ConfigTreeNode*
+ConfigTreeNode::find_const_node(const list<string>& path) const
+{
+    //
+    // We need both const and non-const versions of find_node,
+    // but don't want to write it all twice.
+    //
+    return (const_cast<ConfigTreeNode*>(this))->find_node(path);
 }
 
 ConfigTreeNode*
