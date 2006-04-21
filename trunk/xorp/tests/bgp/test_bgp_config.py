@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.10 2006/04/14 12:03:13 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.11 2006/04/15 07:10:37 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -430,6 +430,54 @@ commit
 
     return True
 
+def conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4(builddir):
+    """
+    Configure three EBGP peerings
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 3
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 1
+up
+
+create peer peer2
+edit peer peer2
+set local-port 10002
+set peer-port 20002
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 2
+up
+
+create peer peer3
+edit peer peer3
+set local-port 10003
+set peer-port 20003
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 4
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+    
 def conf_redist_static(builddir):
     """
     Redistribute static into BGP

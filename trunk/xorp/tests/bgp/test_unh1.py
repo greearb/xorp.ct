@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.16 2006/04/14 22:37:38 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.17 2006/04/15 07:10:37 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -38,6 +38,7 @@ from test_bgp_config import \
      conf_RUT_as2_TR1_as1_TR2_as2, \
      conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3, \
      conf_RUT_as2_TR1_as1_TR2_as3, \
+     conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4, \
      conf_interfaces, \
      conf_tracing_state, \
      conf_set_holdtime, \
@@ -91,6 +92,9 @@ TESTS=[
 
     ['1.13C', 'test1_13_C', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as2', 'conf_interfaces']],
+
+    ['1.15A', 'test1_15_A', True, '',
+     ['conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4', 'conf_interfaces']],
 
     ['3.8A', 'test3_8_A', True, '',
      ['conf_EBGP']],
@@ -514,6 +518,68 @@ def test1_13_C():
     coord("peer1 assert queue 0")
     coord("peer2 assert queue 1")
 
+    return True
+
+def test1_15_A():
+    """
+    ATOMIC_AGGREGATE Attribute
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    delay(2)
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 2 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 4 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    packet1 =  "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.0.0.0/8"
+
+    packet2 =  "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+
+    spacket1 = packet1 % "1"
+    spacket2 = packet2 % "2"
+
+    epacket1 = packet1 % "3,1"
+    epacket2 = packet2 % "3,2"
+
+    coord("peer1 expect %s" % epacket2)
+    coord("peer2 expect %s" % epacket1)
+    coord("peer3 expect %s" % epacket1)
+    coord("peer3 expect %s" % epacket2)
+
+    coord("peer1 send %s" % spacket1)
+    coord("peer2 send %s" % spacket2)
+
+    delay(10)
+
+    coord("peer1 assert queue 0")
+    coord("peer2 assert queue 0")
+    coord("peer3 assert queue 0")
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+    
     return True
 
 def test3_8_A():
