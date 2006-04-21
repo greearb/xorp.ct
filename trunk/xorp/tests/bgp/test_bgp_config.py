@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.11 2006/04/15 07:10:37 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.12 2006/04/21 02:26:26 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -778,6 +778,67 @@ set suppress 2000
 set reuse 800
 set half-life 3
 set max-suppress 5
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_aggregate(builddir):
+    """
+    Configure aggregate
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+create policy
+edit policy
+
+create policy-statement aggregate
+edit policy-statement aggregate
+
+create term 1
+edit term 1
+
+create from
+edit from
+
+set network4 <= 192.0.0.0/8
+
+up
+create then
+edit then
+set aggregate-prefix-len 8
+
+top
+edit policy
+create policy-statement drop-component
+edit policy-statement drop-component
+
+create term 1
+edit term 1
+
+create to
+edit to
+
+set was-aggregated true
+
+up
+create then
+edit then
+
+set reject
+
+top
+edit protocol bgp
+set import aggregate
+set export drop-component
 
 commit
 """

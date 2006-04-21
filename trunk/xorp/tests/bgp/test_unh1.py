@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.17 2006/04/15 07:10:37 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.18 2006/04/21 02:26:26 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -53,7 +53,8 @@ from test_bgp_config import \
      conf_import_origin_change, \
      conf_export_origin_change, \
      conf_preference_TR1, \
-     conf_damping
+     conf_damping, \
+     conf_aggregate
 
 TESTS=[
     # Fields:
@@ -95,6 +96,10 @@ TESTS=[
 
     ['1.15A', 'test1_15_A', True, '',
      ['conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4', 'conf_interfaces']],
+
+    ['1.15B', 'test1_15_B', True, '',
+     ['conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4', 'conf_interfaces',
+      'conf_aggregate']],
 
     ['3.8A', 'test3_8_A', True, '',
      ['conf_EBGP']],
@@ -575,6 +580,81 @@ def test1_15_A():
     coord("peer1 assert queue 0")
     coord("peer2 assert queue 0")
     coord("peer3 assert queue 0")
+
+    coord("peer1 assert established")
+    coord("peer2 assert established")
+    coord("peer3 assert established")
+    
+    return True
+
+def test1_15_B():
+    """
+    ATOMIC_AGGREGATE Attribute
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("target 127.0.0.1 10002")
+    coord("initialise attach peer2")
+
+    coord("target 127.0.0.1 10003")
+    coord("initialise attach peer3")
+
+    delay(2)
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    coord("peer2 establish AS 2 holdtime 0 id 10.0.0.2 keepalive false")
+    coord("peer3 establish AS 4 holdtime 0 id 10.0.0.3 keepalive false")
+    
+    packet1 =  "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.0.0.0/8"
+
+    packet2 =  "packet update \
+    nexthop 127.0.0.2 \
+    origin 0 \
+    aspath %s \
+    med 0 \
+    nlri 192.1.0.0/16"
+
+    spacket1 = packet1 % "1"
+    spacket2 = packet2 % "2"
+
+    #
+    # XXX
+    # This test is not complete the expect packets should check for:
+    # Atomic Aggregate Attribute and Aggregator Attribute AS/3 10.0.0.1
+    #
+
+#    epacket1 = packet1 % "3,1"
+#    epacket2 = packet2 % "3,2"
+
+#    coord("peer1 expect %s" % epacket2)
+#    coord("peer2 expect %s" % epacket1)
+#    coord("peer3 expect %s" % epacket1)
+#    coord("peer3 expect %s" % epacket2)
+
+    coord("peer1 send %s" % spacket1)
+    coord("peer2 send %s" % spacket2)
+
+    delay(10)
+
+    coord("peer1 trie recv lookup 192.1.0.0/8 aspath 3")
+    coord("peer1 trie recv lookup 192.1.0.0/16 not")
+    coord("peer2 trie recv lookup 192.1.0.0/8 aspath 3")
+    coord("peer2 trie recv lookup 192.1.0.0/16 not")
+    coord("peer3 trie recv lookup 192.1.0.0/8 aspath 3")
+    coord("peer3 trie recv lookup 192.1.0.0/16 not")
+
+#    coord("peer1 assert queue 0")
+#    coord("peer2 assert queue 0")
+#    coord("peer3 assert queue 0")
 
     coord("peer1 assert established")
     coord("peer2 assert established")
