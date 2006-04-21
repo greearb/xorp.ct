@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket.hh,v 1.18 2006/03/30 08:32:13 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket.hh,v 1.19 2006/03/31 06:11:45 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_HH__
 #define __FEA_NETLINK_SOCKET_HH__
@@ -119,6 +119,13 @@ public:
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
+     * @param flags the flags argument to the underlying recvfrom(2)
+     * system call.
+     * @param from if not NULL, on return it will be filled in with the source
+     * address of the received message.
+     * @param fromlen it should be initialized to the size of the buffer
+     * associated with @ref from. On return it will be modified to indicate the
+     * actual size of the address stored there.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -128,14 +135,18 @@ public:
     /**
      * Force socket to recvmsg data.
      * 
-     * This usually is performed after writing a senmsg() request that the
+     * This usually is performed after writing a sendmsg() request that the
      * kernel will answer (e.g., after writing a route lookup).
      * Use sparingly, with caution, and at your own risk.
      *
+     * @param flags the flags argument to the underlying recvmsg(2)
+     * system call.
+     * @param only_kernel_messages if true, accept only messages originated
+     * by the kernel.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int force_recvmsg(int flags, string& error_msg);
+    int force_recvmsg(int flags, bool only_kernel_messages, string& error_msg);
 
     /**
      * Set the netlink multicast groups to listen for on the netlink socket.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.36 2006/03/30 08:32:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.37 2006/03/31 06:11:45 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -107,6 +107,35 @@ NetlinkSocket::stop(string& error_msg)
 int
 NetlinkSocket::force_read(string& error_msg)
 {
+    XLOG_UNREACHABLE();
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
+}
+
+int
+NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
+			      socklen_t* fromlen, string& error_msg)
+{
+    UNUSED(flags);
+    UNUSED(from);
+    UNUSED(fromlen);
+
+    XLOG_UNREACHABLE();
+
+    error_msg = "method not supported";
+
+    return (XORP_ERROR);
+}
+
+int
+NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
+			     string& error_msg)
+{
+    UNUSED(flags);
+    UNUSED(only_kernel_messages);
+
     XLOG_UNREACHABLE();
 
     error_msg = "method not supported";
@@ -392,7 +421,8 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 }
 
 int
-NetlinkSocket::force_recvmsg(int flags, string& error_msg)
+NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
+			     string& error_msg)
 {
     vector<uint8_t> message;
     vector<uint8_t> buffer(NLSOCK_BYTES);
@@ -442,6 +472,13 @@ NetlinkSocket::force_recvmsg(int flags, string& error_msg)
 				 strerror(errno));
 	    return (XORP_ERROR);
 	}
+
+	//
+	// If necessary, ignore messages that were not originated by the kernel
+	//
+	if (only_kernel_messages && (snl.nl_pid != 0))
+	    continue;
+
 	if (msg.msg_namelen != sizeof(snl)) {
 	    error_msg = c_format("Netlink socket recvmsg error: "
 				 "sender address length %d instead of %u",
@@ -503,8 +540,8 @@ NetlinkSocket::io_event(XorpFd fd, IoEventType type)
 
     XLOG_ASSERT(fd == _fd);
     XLOG_ASSERT(type == IOT_READ);
-    if (force_read(error_msg) != XORP_OK) {
-	XLOG_ERROR("Error force_read() from netlink socket: %s",
+    if (force_recvmsg(0, true, error_msg) != XORP_OK) {
+	XLOG_ERROR("Error force_recvmsg() from netlink socket: %s",
 		   error_msg.c_str());
     }
 }
@@ -586,7 +623,7 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
     _cache_seqno = seqno;
     _cache_valid = false;
     while (_cache_valid == false) {
-	if (ns.force_read(error_msg) != XORP_OK)
+	if (ns.force_recvmsg(0, true, error_msg) != XORP_OK)
 	    return (XORP_ERROR);
     }
 
