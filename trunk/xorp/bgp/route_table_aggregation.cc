@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.18 2006/02/28 19:22:08 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.19 2006/03/16 00:03:32 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -107,11 +107,12 @@ AggregationTable<A>::add_route(const InternalMessage<A> &rtmsg,
     typename RefTrie<A, const AggregateRoute<A> >::iterator ai;
     ai = _aggregates_table.lookup_node(aggr_net);
     if (ai == _aggregates_table.end()) {
+	LocalData *local_data = _master_plumbing.main().get_local_data();
         const AggregateRoute<A> *new_aggr_route =
 	    new AggregateRoute<A>(aggr_net,
 				  orig_route->aggr_brief_mode(),
-				  rtmsg.origin_peer()->id(),
-				  rtmsg.origin_peer()->my_AS_number());
+				  local_data->get_id(),
+				  local_data->get_as());
 	ai = _aggregates_table.insert(aggr_net, *new_aggr_route);
     }
     AggregateRoute<A> *aggr_route =
