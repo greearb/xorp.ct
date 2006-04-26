@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.21 2006/03/16 00:05:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree_node.cc,v 1.22 2006/04/06 00:03:53 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -68,8 +68,8 @@ MasterConfigTreeNode::create_node(const string& segment, const string& path,
 				  const TemplateTreeNode* ttn, 
 				  ConfigTreeNode* parent_node, 
 				  const ConfigNodeId& node_id,
-				  uint32_t clientid,
 				  uid_t user_id,
+				  uint32_t clientid,
 				  bool verbose)
 {
     UNUSED(clientid);
