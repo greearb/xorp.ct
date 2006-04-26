@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.26 2006/01/23 21:03:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.27 2006/03/16 00:04:54 pavlin Exp $"
 
 
 //
@@ -669,6 +669,9 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    
 	    // The IP fragment flags and offset
 	    {
+#ifndef IP_OFFMASK
+#define IP_OFFMASK 0x1fff	// Mask for fragmenting bits
+#endif
 		unsigned short ip_off_field = ntohs(ip4->ip_off);
 		unsigned short frag_ip_off_flags = ip_off_field & ~IP_OFFMASK;
 		unsigned short frag_ip_off = (ip_off_field & IP_OFFMASK);
