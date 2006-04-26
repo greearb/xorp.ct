@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.17 2005/08/30 23:12:18 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.18 2006/03/16 00:04:54 pavlin Exp $
  */
 
 
@@ -43,7 +43,9 @@
 #include <netinet/ip6.h>
 #endif
 
-#ifdef HAVE_NETINET_PIM_H
+// XXX: _PIM_VT is needed if we want the extra features of <netinet/pim.h>
+#define _PIM_VT 1
+#if defined(HAVE_NETINET_PIM_H) && defined(HAVE_STRUCT_PIM_PIM_VT)
 #include <netinet/pim.h>
 #else
 #include "mrt/include/netinet/pim.h"
