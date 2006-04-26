@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.44 2006/01/23 21:03:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.45 2006/03/16 00:04:44 pavlin Exp $"
 
 
 //
@@ -264,7 +264,9 @@ Mld6igmpVif::start(string& error_msg)
 		      is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
 		      IPvX::ZERO(family()),
 		      dummy_error_msg);
-	_startup_query_count = MAX(robust_count().get() - 1, 0);
+	_startup_query_count = robust_count().get();
+	if (_startup_query_count > 0)
+	    _startup_query_count--;
 	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
@@ -283,7 +285,9 @@ Mld6igmpVif::start(string& error_msg)
 		      scaled_max_resp_time.sec(),
 		      IPvX::ZERO(family()),
 		      dummy_error_msg);
-	_startup_query_count = MAX(robust_count().get() - 1, 0);
+	_startup_query_count = robust_count().get();
+	if (_startup_query_count > 0)
+	    _startup_query_count--;
 	TimeVal startup_query_interval = query_interval().get() / 4;
 	_query_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
