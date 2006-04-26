@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.19 2006/03/16 00:05:47 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.20 2006/03/30 02:21:14 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -314,7 +314,7 @@ ShowRoutesProcessor::startup()
     }
 
     // Create XrlRouter
-    string process = c_format("show_routes<%d>", getpid());
+    string process = c_format("show_routes<%d>", XORP_INT_CAST(getpid()));
     _rtr = new XrlStdRouter(_e, process.c_str(),
 			    _opts.finder_host.c_str(), _opts.finder_port);
 
