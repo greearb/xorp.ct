@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.130 2006/04/20 01:47:11 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.131 2006/04/20 07:49:04 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,6 +20,10 @@
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
+#endif
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
 #endif
 
 #include "rtrmgr_module.h"
@@ -1599,7 +1603,7 @@ RouterCLI::got_config_users(const XrlError& e, const XrlAtomList* users)
 	    XrlAtom a;
 	    a = users->get(i);
 	    try {
-		uint32_t uid = a.uint32();
+		uid_t uid = a.uint32();
 		// Only include me if I'm in the list more than once.
 		if (uid == getuid() && doneme == false)
 		    doneme = true;
