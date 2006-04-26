@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/strptime.c,v 1.11 2006/04/18 05:41:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/strptime.c,v 1.12 2006/04/18 20:10:13 pavlin Exp $"
 
 
 /*
@@ -58,7 +58,19 @@
 #include <strings.h>
 #undef _XOPEN_SOURCE
 
-#include "libxorp/xorp.h"
+#include <string.h>
+
+/*
+ * XXX: don't include "libxorp/xorp.h", because it cannot be compiled
+ * on Solaris 10 if _XOPEN_SOURCE is defined: _XOPEN_SOURCE itself
+ * controls the definition of some other symbols.
+ * Instead, include "config.h" and all other header files that may
+ * be needed.
+ */
+/* #include "libxorp/xorp.h" */
+
+#include "config.h"
+#include "libxorp/utility.h"
 
 #ifndef TM_YEAR_BASE
 #define TM_YEAR_BASE 1900
