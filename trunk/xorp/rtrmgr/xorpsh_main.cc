@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.62 2006/03/16 00:06:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.63 2006/03/28 00:15:26 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -20,6 +20,10 @@
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
 #endif
 
 #ifdef HAVE_PWD_H
@@ -889,7 +893,8 @@ main(int argc, char *argv[])
 
     try {
 	EventLoop eventloop;
-	string xname = "xorpsh" + c_format("-%d-%s", getpid(), hostname);
+	string xname = "xorpsh" + c_format("-%d-%s", XORP_INT_CAST(getpid()),
+					   hostname);
 	XorpShell xorpsh(eventloop, xname, xorp_binary_root_dir(),
 			 template_dir, xrl_targets_dir, verbose);
 	xorpsh.run(commands);
