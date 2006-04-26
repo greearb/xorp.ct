@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.4 2003/10/17 20:39:33 pavlin Exp $
+# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.5 2003/10/17 22:10:25 pavlin Exp $
 #
 
 #
@@ -32,13 +32,13 @@ has_xrl_variable()
     _xrl_variable_xrl_type="$2"
 
     echo "${_xrl_result}" |						\
-	awk -F "${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${_xrl_variable_xrl_type}" '
+	awk -F"${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${_xrl_variable_xrl_type}" '
 # AWK CODE STARTS
 # XXX: do NOT put single quotas in the awk code below, otherwise
 # it may not work!!
 #
 # The code assumes that in the command line there are the following options:
-#	-F "${XRL_VARIABLE_SEPARATOR}"
+#	-F"${XRL_VARIABLE_SEPARATOR}"
 #	to specify the XRL variable separator (e.g, "\&")
 #
 #	-v xrl_variable_xrl_type="${_xrl_variable_xrl_type}"
@@ -91,13 +91,13 @@ get_xrl_variable_value()
     _xrl_variable_xrl_type="$2"
 
     echo "${_xrl_result}" |						\
-	awk -F "${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${_xrl_variable_xrl_type}" '
+	awk -F"${XRL_VARIABLE_SEPARATOR}" -v xrl_variable_xrl_type="${_xrl_variable_xrl_type}" '
 # AWK CODE STARTS
 # XXX: do NOT put single quotas in the awk code below, otherwise
 # it may not work!!
 #
 # Assume that there is in the command line
-#	-F "${XRL_VARIABLE_SEPARATOR}"
+#	-F"${XRL_VARIABLE_SEPARATOR}"
 #	to specify the XRL variable separator (e.g, "\&")
 #
 #	-v xrl_variable_xrl_type="${_xrl_variable_xrl_type}"
@@ -167,11 +167,11 @@ split_xrl_list_values()
 
     # Separate the values with space
     _list_separator=",:${_xrl_list_values_type}="
-    _tmp_result=`echo "${_xrl_variable}" | awk -F "${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'`
+    _tmp_result=`echo "${_xrl_variable}" | awk -F"${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'`
 
     # Get rid of the first value-type prefix
     _list_separator=":${_xrl_list_values_type}="
-    echo "${_tmp_result}" | awk -F "${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i);}}'
+    echo "${_tmp_result}" | awk -F"${_list_separator}" '{for (i = 1; i <= NF; i++) {printf("%s", $i);}}'
 }
 
 #
