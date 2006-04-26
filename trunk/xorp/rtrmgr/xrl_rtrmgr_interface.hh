@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.26 2005/12/24 08:14:00 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.27 2006/03/16 00:06:05 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -199,24 +199,22 @@ private:
     void load_config_done(bool success, string error_msg, string deltas,
 			  string deletions, string filename, uid_t user_id,
 			  string target);
-    UserInstance* find_user_instance(uint32_t user_id,
-				     const string& clientname);
-    string generate_auth_token(const uint32_t& user_id, 
-			       const string& clientname);
+    UserInstance* find_user_instance(uid_t user_id, const string& clientname);
+    string generate_auth_token(uid_t user_id, const string& clientname);
     bool verify_token(const string& token) const;
-    uint32_t get_user_id_from_token(const string& token) const;
+    uid_t get_user_id_from_token(const string& token) const;
     void lock_timeout();
-    void initialize_client_state(uint32_t user_id, UserInstance *user);
-    void send_client_state(uint32_t user_id, UserInstance *user);
+    void initialize_client_state(uid_t user_id, UserInstance *user);
+    void send_client_state(uid_t user_id, UserInstance *user);
     uint32_t allocate_clientid();
     void deallocate_clientid(uint32_t clientid);
 
     XrlRouter& _xrl_router;
-    XrlRtrmgrClientV0p2Client _client_interface;
-    XrlFinderEventNotifierV0p1Client _finder_notifier_interface;
-    multimap<uint32_t, UserInstance*> _users;
-    multimap<uint32_t, UserInstance*> _config_users;
-    set<uint32_t> _clientids;
+    XrlRtrmgrClientV0p2Client		_client_interface;
+    XrlFinderEventNotifierV0p1Client	_finder_notifier_interface;
+    multimap<uid_t, UserInstance*>	_users;
+    multimap<uid_t, UserInstance*>	_config_users;
+    set<uint32_t>	_clientids;
     UserDB&		_userdb;
     MasterConfigTree*	_master_config_tree;
     EventLoop&		_eventloop;

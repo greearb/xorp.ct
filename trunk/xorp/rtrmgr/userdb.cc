@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.16 2005/09/20 15:34:46 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.17 2006/03/16 00:06:04 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -37,7 +37,7 @@
 #include "userdb.hh"
 
 
-User::User(uint32_t user_id, const string& username)
+User::User(uid_t user_id, const string& username)
     : _user_id(user_id),
       _username(username)
 {
@@ -68,7 +68,7 @@ User::add_acl_capability(const string& capname)
     }
 }
 
-UserInstance::UserInstance(uint32_t user_id, const string& username) 
+UserInstance::UserInstance(uid_t user_id, const string& username) 
     : User(user_id, username), _authenticated(false), _config_mode(false),
       _is_a_zombie(false)
 {
@@ -84,7 +84,7 @@ UserDB::UserDB(bool verbose)
 
 UserDB::~UserDB()
 {
-    map<uint32_t, User*>::iterator iter;
+    map<uid_t, User*>::iterator iter;
 
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	delete iter->second;
@@ -96,7 +96,7 @@ UserDB::load_password_file()
 {
 #ifdef HOST_OS_WINDOWS
     string username("Administrator");
-    uint32_t userid = 0;
+    uid_t userid = 0;
     add_user(userid, username, userid);
 #else // ! HOST_OS_WINDOWS
     struct passwd* pwent;
@@ -113,8 +113,7 @@ UserDB::load_password_file()
 }
 
 User* 
-UserDB::add_user(uint32_t user_id, const string& username,
-		 gid_t pw_gid)
+UserDB::add_user(uid_t user_id, const string& username, gid_t pw_gid)
 {
     if (_users.find(user_id) == _users.end()) {
 	User* newuser = new User(user_id, username);
@@ -156,7 +155,7 @@ UserDB::add_user(uint32_t user_id, const string& username,
 }
 
 const User* 
-UserDB::find_user_by_user_id(uint32_t user_id)
+UserDB::find_user_by_user_id(uid_t user_id)
 {
     //
     // XXX: we always reloads the cache on each access to the
@@ -165,7 +164,7 @@ UserDB::find_user_by_user_id(uint32_t user_id)
     //
     load_password_file();
 
-    map<uint32_t,User*>::const_iterator iter = _users.find(user_id);
+    map<uid_t, User*>::const_iterator iter = _users.find(user_id);
 
     if (iter == _users.end())
 	return NULL;
@@ -174,9 +173,9 @@ UserDB::find_user_by_user_id(uint32_t user_id)
 }
 
 void 
-UserDB::remove_user(uint32_t user_id)
+UserDB::remove_user(uid_t user_id)
 {
-    map<uint32_t,User*>::iterator iter = _users.find(user_id);
+    map<uid_t, User*>::iterator iter = _users.find(user_id);
     User* user = iter->second;
 
     _users.erase(iter);
@@ -184,7 +183,7 @@ UserDB::remove_user(uint32_t user_id)
 }
 
 bool
-UserDB::has_capability(uint32_t user_id, const string& capability)
+UserDB::has_capability(uid_t user_id, const string& capability)
 {
     const User* user = find_user_by_user_id(user_id);
 

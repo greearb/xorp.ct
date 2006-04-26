@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.49 2006/01/14 01:35:27 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.50 2006/03/16 00:06:05 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -59,7 +59,7 @@ XrlRtrmgrInterface::XrlRtrmgrInterface(XrlRouter& r, UserDB& userdb,
 
 XrlRtrmgrInterface::~XrlRtrmgrInterface()
 {
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	delete iter->second;
     }
@@ -151,7 +151,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
 #else
     filename = "/tmp/rtrmgr-" + clientname;
     mode_t oldmode = umask(S_IRWXG|S_IRWXO);
-    debug_msg("newmode: %o oldmode: %o\n", S_IRWXG|S_IRWXO, oldmode);
+    debug_msg("newmode: %o oldmode: %o\n", S_IRWXG|S_IRWXO,
+	      XORP_UINT_CAST(oldmode));
 #endif
 
     FILE* file = fopen(filename.c_str(), "w+");
@@ -182,7 +183,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_register_client(
     newuser->set_authenticated(false);
     clientid = allocate_clientid();
     newuser->set_clientid(clientid);
-    _users.insert(pair<uint32_t, UserInstance*>(user_id, newuser));
+    _users.insert(pair<uid_t, UserInstance*>(user_id, newuser));
 
     //
     // Be careful here - if for any reason we fail to create, write to,
@@ -241,7 +242,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_unregister_client(const string& token)
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
 	    _config_users.erase(iter);
@@ -286,7 +287,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_authenticate_client(
 }
 
 void
-XrlRtrmgrInterface::initialize_client_state(uint32_t user_id, 
+XrlRtrmgrInterface::initialize_client_state(uid_t user_id, 
 					    UserInstance *user)
 {
     // We need to register interest via the finder in the XRL target
@@ -331,7 +332,7 @@ XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname)
 }
 
 void
-XrlRtrmgrInterface::send_client_state(uint32_t user_id, UserInstance *user)
+XrlRtrmgrInterface::send_client_state(uid_t user_id, UserInstance *user)
 {
     string client = user->clientname();
 
@@ -388,7 +389,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	error_msg = "You do not have permission for this operation";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -404,7 +405,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     // If he's asking for exclusive, and we've already got config users,
     // or there's already an exclusive user, deny the request.
     //
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     if (exclusive && !_config_users.empty()) {
 	string user_names;
 	for (iter = _config_users.begin();
@@ -428,8 +429,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_enter_config_mode(
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
 	    UserInstance* this_user = iter->second;
-	    _config_users.insert(pair<uint32_t, UserInstance*>
-				 (user_id, this_user));
+	    _config_users.insert(make_pair(user_id, this_user));
 	    if (exclusive) {
 		_exclusive = true;
 		_exclusive_username = this_user->username();
@@ -456,7 +456,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_leave_config_mode(
     }
     XLOG_TRACE(_verbose, "user %u leaving config mode\n",
 	       XORP_UINT_CAST(get_user_id_from_token(token)));
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	if (iter->second->authtoken() == token) {
 	    _config_users.erase(iter);
@@ -486,11 +486,11 @@ XrlRtrmgrInterface::rtrmgr_0_1_get_config_users(
 	    "mode users";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    multimap<uint32_t, UserInstance*>::const_iterator iter;
+    multimap<uid_t, UserInstance*>::const_iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	UserInstance* user = iter->second;
 	if (!user->is_a_zombie()) {
-	    users.append(XrlAtom(user->user_id()));
+	    users.append(XrlAtom(static_cast<uint32_t>(user->user_id())));
 	} else {
 	    XLOG_WARNING("user %u is a zombie\n",
 			 XORP_UINT_CAST(user->user_id()));
@@ -601,7 +601,7 @@ XrlRtrmgrInterface::apply_config_change_done(bool success,
     if (success) {
 	// Send the changes to all the clients, including the client
 	// that originally sent them.
-	multimap<uint32_t, UserInstance*>::iterator iter;
+	multimap<uid_t, UserInstance*>::iterator iter;
 	for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	    string client = iter->second->clientname();
 	    GENERIC_CALLBACK cb2;
@@ -653,7 +653,7 @@ XrlRtrmgrInterface::client_updated(const XrlError& e, uid_t user_id,
 	    // We failed to notify the user instance, so we note that
 	    // they are probably dead.  We can't guarantee that the
 	    // "user" pointer is still valid, so check before using it.
-	    multimap<uint32_t, UserInstance*>::iterator iter;
+	    multimap<uid_t, UserInstance*>::iterator iter;
 	    for (iter = _users.lower_bound(user_id);
 		 iter != _users.end();
 		 iter++) {
@@ -670,7 +670,7 @@ void
 XrlRtrmgrInterface::module_status_changed(const string& modname,
 					  GenericModule::ModuleStatus status)
 {
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _users.begin(); iter != _users.end(); ++iter) {
 	string client = iter->second->clientname();
 	GENERIC_CALLBACK cb2;
@@ -698,7 +698,7 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_config(
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	error_msg = "You do not have permission to lock the configuration";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
@@ -769,12 +769,12 @@ XrlRtrmgrInterface::rtrmgr_0_1_lock_node(
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	error_msg = "You do not have permission to lock the configuration";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    if (user_id == (uint32_t)-1) {
+    if (user_id == (uid_t)-1) {
 	// Shouldn't be possible as we already checked the token
 	XLOG_UNREACHABLE();
     }
@@ -794,8 +794,8 @@ XrlRtrmgrInterface::rtrmgr_0_1_unlock_node(
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
-    if (user_id == (uint32_t)-1) {
+    uid_t user_id = get_user_id_from_token(token);
+    if (user_id == (uid_t)-1) {
 	// Shouldn't be possible as we already checked the token
 	XLOG_UNREACHABLE();
     }
@@ -821,13 +821,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_save_config(// Input values:
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	error_msg = "You do not have permission to save the configuration";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {
-	uint32_t uid = get_user_id_from_token(_lock_holder_token);
+	uid_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = _userdb.find_user_by_user_id(uid)->username();
 	error_msg = c_format("The configuration is currently locked by user %s",
 			     holder.c_str());
@@ -857,13 +857,13 @@ XrlRtrmgrInterface::rtrmgr_0_1_load_config(// Input values:
 	error_msg = "AUTH_FAIL";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
     if (_userdb.has_capability(user_id, "config") == false) {
 	error_msg = "You do not have permission to reload the configuration";
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     if (_config_locked && (token != _lock_holder_token)) {
-	uint32_t uid = get_user_id_from_token(_lock_holder_token);
+	uid_t uid = get_user_id_from_token(_lock_holder_token);
 	string holder = _userdb.find_user_by_user_id(uid)->username();
 	error_msg = c_format("The configuration is currently locked by user %s",
 			     holder.c_str());
@@ -925,10 +925,9 @@ XrlRtrmgrInterface::rtrmgr_0_1_set_config_directory(
 }
 
 UserInstance *
-XrlRtrmgrInterface::find_user_instance(uint32_t user_id, 
-				       const string& clientname)
+XrlRtrmgrInterface::find_user_instance(uid_t user_id, const string& clientname)
 {
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
 
     iter = _users.lower_bound(user_id);
     while (iter != _users.end() && iter->second->user_id() == user_id) {
@@ -942,11 +941,11 @@ XrlRtrmgrInterface::find_user_instance(uint32_t user_id,
 bool
 XrlRtrmgrInterface::verify_token(const string& token) const
 {
-    uint32_t user_id = get_user_id_from_token(token);
+    uid_t user_id = get_user_id_from_token(token);
 
-    if (user_id == (uint32_t)-1)
+    if (user_id == (uid_t)-1)
 	return false;
-    multimap<uint32_t, UserInstance*>::const_iterator iter;
+    multimap<uid_t, UserInstance*>::const_iterator iter;
     iter = _users.lower_bound(user_id);
     while (iter != _users.end() && iter->second->user_id() == user_id) {
 	if (iter->second->authtoken() == token)
@@ -956,15 +955,15 @@ XrlRtrmgrInterface::verify_token(const string& token) const
     return false;
 }
 
-uint32_t
+uid_t
 XrlRtrmgrInterface::get_user_id_from_token(const string& token) const
 {
-    uint32_t user_id;
+    uid_t user_id;
     unsigned int u;
     size_t tlen = token.size();
 
     if (token.size() < 10)
-	return (uint32_t)-1;
+	return (uid_t)-1;
     string uidstr = token.substr(0, 10);
     string authstr = token.substr(10, tlen - 10);
     sscanf(uidstr.c_str(), "%u", &u);
@@ -973,7 +972,7 @@ XrlRtrmgrInterface::get_user_id_from_token(const string& token) const
 }
 
 string
-XrlRtrmgrInterface::generate_auth_token(const uint32_t& user_id, 
+XrlRtrmgrInterface::generate_auth_token(uid_t user_id,
 					const string& clientname)
 {
     string token;
@@ -1020,7 +1019,7 @@ XrlRtrmgrInterface::finder_event_observer_0_1_xrl_target_death(
     XLOG_TRACE(_verbose, "XRL Death: class %s instance %s\n",
 	       target_class.c_str(), target_instance.c_str());
 
-    multimap<uint32_t, UserInstance*>::iterator iter;
+    multimap<uid_t, UserInstance*>::iterator iter;
     for (iter = _config_users.begin(); iter != _config_users.end(); ++iter) {
 	UserInstance* user = iter->second;
 	if (user->clientname() == target_class) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/userdb.hh,v 1.10 2005/09/20 15:34:46 pavlin Exp $
+// $XORP: xorp/rtrmgr/userdb.hh,v 1.11 2006/03/16 00:06:04 pavlin Exp $
 
 #ifndef __RTRMGR_USERDB_HH__
 #define __RTRMGR_USERDB_HH__
@@ -24,15 +24,15 @@
 
 class User {
 public:
-    User(uint32_t user_id, const string& username);
+    User(uid_t user_id, const string& username);
 
     const string& username() const { return _username; }
-    uint32_t user_id() const { return _user_id; }
+    uid_t user_id() const { return _user_id; }
     bool has_acl_capability(const string& capname) const;
     void add_acl_capability(const string& capname);
 
 private:
-    uint32_t	_user_id;
+    uid_t	_user_id;
     string	_username;
     set<string> _capabilities;
 };
@@ -43,7 +43,7 @@ private:
 //
 class UserInstance : public User {
 public:
-    UserInstance(uint32_t user_id, const string& username);
+    UserInstance(uid_t user_id, const string& username);
 
     const string& clientname() const { return _clientname; }
     void set_clientname(const string& clientname) { _clientname = clientname; }
@@ -85,14 +85,14 @@ public:
     UserDB(bool verbose);
     ~UserDB();
 
-    User* add_user(uint32_t user_id, const string& username, gid_t gid);
+    User* add_user(uid_t user_id, const string& username, gid_t gid);
     void load_password_file();
-    const User* find_user_by_user_id(uint32_t user_id);
-    void remove_user(uint32_t user_id);
-    bool has_capability(uint32_t user_id, const string& capability);
+    const User* find_user_by_user_id(uid_t user_id);
+    void remove_user(uid_t user_id);
+    bool has_capability(uid_t user_id, const string& capability);
 
 private:
-    map<uint32_t, User*> _users;
+    map<uid_t, User*> _users;
     bool _verbose;	// Set to true if output is verbose
 };
 
