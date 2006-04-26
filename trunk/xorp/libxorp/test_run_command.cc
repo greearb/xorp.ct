@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.13 2006/01/14 00:23:06 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.14 2006/03/16 00:04:34 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -437,8 +437,38 @@ test_execute_terminate_command()
 	return;
     }
 
-    verbose_assert(true, "Executing and terminating a command");
+    //
+    // Terminate the command and test the termination succeeded
+    //
     run_command.terminate();
+
+    done = false;
+    timeout_timer = eventloop.set_flag_after(TimeVal(10, 0), &done, true);
+    while (!done) {
+	if (is_interrupted || test_run_command.is_done_received()) {
+	    break;
+	}
+	eventloop.run();
+    }
+
+    if (is_interrupted) {
+	verbose_log("Command interrupted by user\n");
+	incr_failures();
+	run_command.terminate();
+	return;
+    }
+
+    bool success = false;
+    do {
+	if (! test_run_command.is_done_received()) {
+	    verbose_log("Command failed, done not received\n");
+	    break;
+	}
+	success = true;
+	break;
+    } while (false);
+
+    verbose_assert(success, "Executing and terminating a command");
 }
 
 /**
