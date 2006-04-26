@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_wrappers_generator.sh,v 1.2 2003/10/16 19:37:07 pavlin Exp $
+# $XORP: xorp/utils/xrl_wrappers_generator.sh,v 1.3 2003/10/16 21:59:20 pavlin Exp $
 #
 
 #
@@ -44,7 +44,7 @@ filter_xrls()
 	echo "Usage: filter_xrls <file.xrls>"
 	exit 1
     fi
-    awk -F "://" '{if ($1 == "finder") {print $0}}' $1
+    awk -F"://" '{if ($1 == "finder") {print $0}}' $1
 }
 
 get_xrl_target_name()
@@ -54,7 +54,7 @@ get_xrl_target_name()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $1}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $1}'
 }
 
 get_xrl_interface_name()
@@ -64,7 +64,7 @@ get_xrl_interface_name()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $2}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $2}'
 }
 
 get_xrl_interface_version()
@@ -74,7 +74,7 @@ get_xrl_interface_version()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $3}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $3}'
 }
 
 get_xrl_method_name()
@@ -84,7 +84,7 @@ get_xrl_method_name()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $4}' | awk -F "?" '{print $1}' | awk -F "->" '{print $1}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $4}' | awk -F"?" '{print $1}' | awk -F"->" '{print $1}'
 }
 
 get_xrl_arguments()
@@ -94,7 +94,7 @@ get_xrl_arguments()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $4}' | awk -F "?" '{print $2}' | awk -F "->" '{print $1}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $4}' | awk -F"?" '{print $2}' | awk -F"->" '{print $1}'
 }
 
 get_xrl_arguments_number()
@@ -104,7 +104,7 @@ get_xrl_arguments_number()
 	exit 1
     fi
 
-    echo $1 | awk -F "&" '{print NF}'
+    echo $1 | awk -F"&" '{print NF}'
 }
 
 get_xrl_split_arguments_list()
@@ -114,7 +114,7 @@ get_xrl_split_arguments_list()
 	exit 1
     fi
 
-    echo $1 | awk -F "&" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'
+    echo $1 | awk -F"&" '{for (i = 1; i <= NF; i++) {printf("%s", $i); if (i < NF) printf(" "); }}'
 }
 
 get_xrl_usage_wrap_arguments_list()
@@ -144,7 +144,7 @@ get_xrl_return_values()
 	exit 1
     fi
 
-    echo $1 | awk -F "://" '{print $2}' | awk -F "/" '{print $4}' | awk -F "?" '{print $2}' | awk -F "->" '{print $2}'
+    echo $1 | awk -F"://" '{print $2}' | awk -F"/" '{print $4}' | awk -F"?" '{print $2}' | awk -F"->" '{print $2}'
 }
 
 generate_wrapper()
