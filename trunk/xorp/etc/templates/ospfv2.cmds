@@ -1,8 +1,8 @@
-/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.8 2006/01/30 19:43:27 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.cmds,v 1.9 2006/03/08 19:23:09 pavlin Exp $ */
 
 show ospf4 {
     %command: "" %help: "Display information about OSPFv2";
-    %module: ospfv2;
+    %module: ospf4;
 }
 
 show ospf4 database {
