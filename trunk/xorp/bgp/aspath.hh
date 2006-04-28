@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/aspath.hh,v 1.24 2005/12/20 13:00:38 atanu Exp $
+// $XORP: xorp/bgp/aspath.hh,v 1.25 2006/03/16 00:03:27 pavlin Exp $
 
 #ifndef __BGP_ASPATH_HH__
 #define __BGP_ASPATH_HH__
@@ -293,6 +293,11 @@ public:
     AsPath(const uint8_t* d, size_t len) throw(CorruptMessage) {
 	decode(d, len); 
     }
+
+    /**
+     * construct an aggregate from two AsPaths
+     */
+    AsPath(const AsPath &asp1, const AsPath &asp2);
 
     /**
      * Copy constructor

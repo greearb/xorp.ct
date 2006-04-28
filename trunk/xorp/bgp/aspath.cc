@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.33 2006/03/16 00:03:27 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.34 2006/04/10 01:19:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -540,6 +540,74 @@ AsPath::decode(const uint8_t *d, size_t l) throw(CorruptMessage)
 	add_segment(s);
 	d += len;
 	l -= len;
+    }
+}
+
+/**
+ * construct a new aggregate AsPath from two AsPaths
+ */
+AsPath::AsPath(const AsPath &asp1, const AsPath &asp2)
+{
+    _num_segments = 0;
+    _path_len = 0;
+
+    size_t curseg;
+    size_t matchelem = 0;
+    bool fullmatch = true;
+
+    for (curseg = 0;
+	curseg < asp1.num_segments() && curseg < asp2.num_segments();
+	curseg++) {
+	if (asp1.segment(curseg).type() != asp2.segment(curseg).type())
+	    break;
+
+	size_t minseglen = min(asp1.segment(curseg).path_length(),
+			       asp2.segment(curseg).path_length());
+
+	for (matchelem = 0; matchelem < minseglen; matchelem++)
+	    if (asp1.segment(curseg).as_num(matchelem) !=
+		asp2.segment(curseg).as_num(matchelem))
+		break;
+
+	if (matchelem) {
+	    AsSegment newseg(asp1.segment(curseg).type());
+	    for (size_t elem = 0; elem < matchelem; elem++)
+		newseg.add_as(asp1.segment(curseg).as_num(elem));
+	    this->add_segment(newseg);
+	}
+
+	if (matchelem < asp1.segment(curseg).path_length() ||
+	    matchelem < asp2.segment(curseg).path_length()) {
+	    fullmatch = false;
+	    break;
+	}
+    }
+
+    if (!fullmatch) {
+	AsSegment new_asset(AS_SET);
+	size_t startelem = matchelem;
+	for (size_t curseg1 = curseg; curseg1 < asp1.num_segments();
+	     curseg1++) {
+	    for (size_t elem = startelem;
+		 elem < asp1.segment(curseg1).path_length(); elem++) {
+		const class AsNum asn = asp1.segment(curseg).as_num(elem);
+		if (!new_asset.contains(asn))
+		    new_asset.add_as(asn);
+		}
+	    startelem = 0;
+	}
+	startelem = matchelem;
+	for (size_t curseg2 = curseg; curseg2 < asp2.num_segments();
+	     curseg2++) {
+	    for (size_t elem = startelem;
+		 elem < asp2.segment(curseg2).path_length(); elem++) {
+		const class AsNum asn = asp2.segment(curseg).as_num(elem);
+		if (!new_asset.contains(asn))
+		    new_asset.add_as(asn);
+		}
+	    startelem = 0;
+	}
+	this->add_segment(new_asset);
     }
 }
 
