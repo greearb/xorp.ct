@@ -98,8 +98,10 @@ These definitions are illustrated in figure \ref{fig:eg-interfaces}.
   \end{center}
   \caption{Example XRL Targets and clients: OSPF, RIB, and CLI.
 OSPF and RIB processes are XRL targets.  OSPF supports XRL interfaces
-``OSPF Configuration/1.0'' and ``Routing Protocol/1.0'': the RIB is a
-client of the former interface and the CLI a client of the latter.
+``OSPF Configuration/1.0'' and ``Routing Protocol/1.0'': the CLI is a
+client of the ``OSPF Configuration/1.0'' interface and the RIB a client
+of the ``Routing Protocol/1.0'' interface.  RIB supports XRL interface
+``Routing Information Base/1.0'': the OSPF is a client of that interface.
 }
   \label{fig:eg-interfaces}
 \end{figure}
