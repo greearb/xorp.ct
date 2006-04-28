@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.20 2006/04/24 17:11:27 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.21 2006/04/28 18:12:46 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -330,7 +330,7 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	    if (comp_pa_list->origin() > _pa_list->origin())
 		_pa_list->replace_origin((OriginType)comp_pa_list->origin());
 
-#if BRIEF_MODE
+#ifdef BRIEF_MODE
 	    /*
 	     * The simplest possible yet seemingly legal option:
 	     * we originate an empty aspath!
@@ -356,7 +356,8 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
     if (med &&
 	!(_pa_list->aspath().num_segments() &&
 	  _pa_list->aspath().segment(0).type() == AS_SET)) {
-	_pa_list->add_path_attribute(MEDAttribute(med));
+	MEDAttribute med_attr(med);
+	_pa_list->add_path_attribute(med_attr);
     }
 
     if (must_set_atomic_aggr) {
