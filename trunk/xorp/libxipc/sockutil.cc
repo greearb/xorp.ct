@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.20 2005/12/21 09:42:56 bms Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.21 2006/03/16 00:04:17 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -123,7 +123,7 @@ get_local_socket_details(XorpFd fd, string& addr, uint16_t& port)
 	}
 	addr = inet_ntoa(haddr);
     }
-    port = htons(sin.sin_port);
+    port = ntohs(sin.sin_port);
 
     return true;
 }
