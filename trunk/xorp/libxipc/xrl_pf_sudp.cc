@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.46 2006/03/16 00:04:23 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.47 2006/04/28 17:00:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -590,7 +590,8 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
 
     if (v_bytes > SUDP_SEND_BUFFER_BYTES) {
 	XLOG_ERROR("Failed to send reply: message too large %d (max %d)",
-		   v_bytes, SUDP_SEND_BUFFER_BYTES);
+		   XORP_INT_CAST(v_bytes),
+		   XORP_INT_CAST(SUDP_SEND_BUFFER_BYTES));
 	return;
     }
 
