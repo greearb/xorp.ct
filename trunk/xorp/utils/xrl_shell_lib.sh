@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.5 2003/10/17 22:10:25 pavlin Exp $
+# $XORP: xorp/utils/xrl_shell_lib.sh,v 1.6 2006/04/26 05:31:08 pavlin Exp $
 #
 
 #
@@ -22,8 +22,6 @@ XRL_VARIABLE_SEPARATOR="\&"
 #
 has_xrl_variable()
 {
-    local _xrl_result _xrl_variable_xrl_type
-
     if [ $# -lt 2 ] ; then
 	echo "Usage: $0 <xrl_result> <xrl_variable:xrl_type>"
 	exit 1
@@ -81,8 +79,6 @@ END {
 #
 get_xrl_variable_value()
 {
-    local _xrl_result _xrl_variable_xrl_type
-
     if [ $# -lt 2 ] ; then
 	echo "Usage: $0 <xrl_result> <xrl_variable:xrl_type>"
 	exit 1
@@ -155,9 +151,6 @@ END {
 #
 split_xrl_list_values()
 {
-    local _xrl_list_variable _xrl_list_values_type _list_separator
-    local _tmp_result
-
     if [ $# -lt 2 ] ; then
 	echo "Usage: $0 <xrl_list_variable> <xrl_list_values_type>"
 	exit 1
@@ -183,9 +176,6 @@ split_xrl_list_values()
 #
 test_xrl_result()
 {
-    local _xrl_result _xrl_variable_xrl_type _test_operator _test_value
-    local _error _xrl_variable_value
-
     if [ $# -lt 4 ] ; then
 	echo "Usage: $0 <xrl_result> <xrl_variable:xrl_type> <test-operator> <test-value>"
 	exit 1
@@ -254,9 +244,6 @@ test_xrl_result()
 #
 print_xrl_result()
 {
-    local _xrl_result _print_xrl_variable_xrl_type _print_xrl_variable_value
-    local _error
-
     if [ $# -lt 1 ] ; then
 	return 0	# Nothing to print
     fi
@@ -320,9 +307,6 @@ print_xrl_result()
 #
 call_xrl_wrapper()
 {
-    local _max_repeat_number _print_list_xrl_variable_xrl_type _xrl
-    local _test_operator _test_value _error _ret_value
-
     if [ $# -lt 1 ] ; then
 	echo "Usage: $0 [-r <max-repeat-number>] [-p <<xrl_variable:xrl_type> | all>] <XRL> [<xrl_variable:xrl_type> <test-operator> <test-value>]"
 	exit 1
