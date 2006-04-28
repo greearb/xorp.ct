@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.19 2006/03/16 00:03:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.20 2006/04/24 17:11:27 zec Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -323,10 +323,14 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	    if (comp_pa_list->med_att() &&
 		med != comp_pa_list->med_att()->med()) {
 		_is_suppressed = true;
+		break;
 	    }
 
-	    // XXX Don't forget origin processing here!  REVISIT!!!
+	    // Origin attr: INCOMPLETE overrides EGP which overrides IGP
+	    if (comp_pa_list->origin() > _pa_list->origin())
+		_pa_list->replace_origin((OriginType)comp_pa_list->origin());
 
+#if BRIEF_MODE
 	    /*
 	     * The simplest possible yet seemingly legal option:
 	     * we originate an empty aspath!
@@ -336,17 +340,24 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 		_pa_list->rehash();
 		must_set_atomic_aggr = true;
 	    }
+#else
+	    _pa_list->replace_AS_path(AsPath(_pa_list->aspath(),
+					     comp_pa_list->aspath()));
+	    _pa_list->rehash();
+#endif
 	}
 
-	/*
-	 * If aggregating a received aggregate, we must propagate the
-	 * atomic aggregate attribute
-	 */
+	// Propagate the ATOMIC AGGREGATE attribute
 	if (comp_pa_list->atomic_aggregate_att())
 	    must_set_atomic_aggr = true;
     }
 
-    // XXX Don't forget to add a MED attr here if needed!  REVISIT!!!
+    // Add a MED attr if needed and allowed to
+    if (med &&
+	!(_pa_list->aspath().num_segments() &&
+	  _pa_list->aspath().segment(0).type() == AS_SET)) {
+	_pa_list->add_path_attribute(MEDAttribute(med));
+    }
 
     if (must_set_atomic_aggr) {
 	AtomicAggAttribute aa_attr;
