@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.58 2006/03/16 00:03:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.59 2006/04/15 07:10:36 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1433,8 +1433,10 @@ XrlBgpTarget::policy_redist4_0_1_add_route4(
 {
     UNUSED(metric);
 
-    if (! unicast)
-	return XrlCmdError::OKAY();
+    //
+    // XXX: Accept the multicast routes, otherwise we cannot originate
+    // NLRI for multicast purpose.
+    //
 
     _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
     return XrlCmdError::OKAY();
@@ -1447,8 +1449,10 @@ XrlBgpTarget::policy_redist4_0_1_delete_route4(
         const bool&     unicast,
         const bool&     multicast)
 {
-    if (! unicast)
-	return XrlCmdError::OKAY();
+    //
+    // XXX: Accept the multicast routes, otherwise we cannot originate
+    // NLRI for multicast purpose.
+    //
 
     _bgp.withdraw_route(network,unicast,multicast);
     return XrlCmdError::OKAY();
@@ -1465,8 +1469,10 @@ XrlBgpTarget::policy_redist6_0_1_add_route6(
 {
     UNUSED(metric);
 
-    if (! unicast)
-	return XrlCmdError::OKAY();
+    //
+    // XXX: Accept the multicast routes, otherwise we cannot originate
+    // NLRI for multicast purpose.
+    //
 
     _bgp.originate_route(network,nexthop,unicast,multicast,policytags);
     return XrlCmdError::OKAY();
@@ -1478,8 +1484,10 @@ XrlBgpTarget::policy_redist6_0_1_delete_route6(
         const bool&     unicast,
         const bool&     multicast)
 {
-    if (! unicast)
-	return XrlCmdError::OKAY();
+    //
+    // XXX: Accept the multicast routes, otherwise we cannot originate
+    // NLRI for multicast purpose.
+    //
 
     _bgp.withdraw_route(network,unicast,multicast);
     return XrlCmdError::OKAY();
