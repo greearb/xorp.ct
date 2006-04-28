@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.45 2005/12/22 12:20:44 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_sudp.cc,v 1.46 2006/03/16 00:04:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -534,7 +534,7 @@ XrlPFSUDPListener::recv(XorpFd fd, IoEventType type)
     if (parse_dispatch_header(rbuf, xuid, content_bytes) == true) {
 	e = dispatch_command(rbuf + rbuf_bytes - content_bytes, response);
 	debug_msg("response \"%s\"\n", response.str().c_str());
-	send_reply(&sockfrom, e, xuid, &response);
+	send_reply(&sockfrom, sockfrom_bytes, e, xuid, &response);
     } else {
 	// XXX log busted header.
     }
@@ -559,6 +559,7 @@ XrlPFSUDPListener::dispatch_command(const char* rbuf, XrlArgs& reply)
 
 void
 XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
+			      socklen_t			ss_len,
 			      const XrlError&		e,
 			      const XUID&		xuid,
 			      const XrlArgs* 	reply_args)
@@ -569,6 +570,8 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
     assert(last < xuid);
     last = xuid;
 #endif
+
+    UNUSED(ss_len);	// XXX: ss_len is used only under certain conditions
 
     string reply;
     if (reply_args != 0) {
@@ -585,29 +588,42 @@ XrlPFSUDPListener::send_reply(struct sockaddr_storage*	ss,
 
     ssize_t v_bytes = v[0].iov_len + v[1].iov_len;
 
-#ifndef HOST_OS_WINDOWS
+    if (v_bytes > SUDP_SEND_BUFFER_BYTES) {
+	XLOG_ERROR("Failed to send reply: message too large %d (max %d)",
+		   v_bytes, SUDP_SEND_BUFFER_BYTES);
+	return;
+    }
+
+    int err = 0;
+    bool is_error = false;
+#ifdef HOST_OS_WINDOWS
+    if (SOCKET_ERROR == WSASendTo(_sock, (LPWSABUF)v, 2, (LPDWORD)&v_bytes,
+				  0, (sockaddr*)ss, ss_len, NULL, NULL)) {
+	err = WSAGetLastError();
+	is_error = true;
+    }
+
+#else // ! HOST_OS_WINDOWS
     msghdr m;
     memset(&m, 0, sizeof(m));
     m.msg_name = (caddr_t)ss;
 #ifdef HAVE_SS_LEN
     m.msg_namelen = ss->ss_len;
 #else
-    m.msg_namelen = sizeof(struct sockaddr_storage);
+    m.msg_namelen = ss_len;
 #endif
     m.msg_iov = v;
     m.msg_iovlen = sizeof(v) / sizeof(v[0]);
 
-    if (v_bytes > SUDP_SEND_BUFFER_BYTES ||
-	v_bytes != sendmsg(_sock, &m, 0))
-#else
-    if (v_bytes > SUDP_SEND_BUFFER_BYTES ||
-    	SOCKET_ERROR == WSASendTo(_sock, (LPWSABUF)v, 2, (LPDWORD)&v_bytes,
-				  0, (sockaddr*)ss, sizeof(*ss), NULL, NULL))
-#endif
-    {
-	int err = comm_get_last_error();
-	debug_msg("Failed to send reply (%d): %s\n", err,
-		  comm_get_error_str(err));
+    if (v_bytes != sendmsg(_sock, &m, 0)) {
+	err = errno;
+	is_error = true;
+    }
+#endif // ! HOST_OS_WINDOWS
+
+    if (is_error) {
+	XLOG_ERROR("Failed to send reply (%d): %s",
+		   err, comm_get_error_str(err));
     }
 }
 

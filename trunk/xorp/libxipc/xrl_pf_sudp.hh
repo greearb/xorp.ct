@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.19 2005/08/18 15:32:41 bms Exp $
+// $XORP: xorp/libxipc/xrl_pf_sudp.hh,v 1.20 2006/03/16 00:04:23 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_SUDP_HH__
 #define __LIBXIPC_XRL_PF_SUDP_HH__
@@ -38,10 +38,11 @@ public:
 private:
     const XrlError dispatch_command(const char* buf, XrlArgs& response);
 
-    void send_reply(struct sockaddr_storage* ss,
-		    const XrlError&  e,
-		    const XUID&	     xuid,
-		    const XrlArgs*   response);
+    void send_reply(struct sockaddr_storage*	ss,
+		    socklen_t			ss_len,
+		    const XrlError&		e,
+		    const XUID&			xuid,
+		    const XrlArgs*		response);
 
     void recv(XorpFd fd, IoEventType type);
 
