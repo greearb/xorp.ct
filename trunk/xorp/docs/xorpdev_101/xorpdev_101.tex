@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.15 2006/03/09 02:17:56 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.16 2006/03/27 00:11:03 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -989,8 +989,8 @@ If we look in {\stt xorp/xrl/interfaces} we find the file {\stt
 rib.xif} which defines the XRLs available on the {\stt rib} interface.
 Listing \ref{lst:rib.xif} shows some extracts from this file.  As
 we've been following through the {\stt add\_route4} XRL, we'll again
-look at that here.  We'll also look at the {\stt lookup\_route4} XRL
-because this is an example of an XRL that returns some data, although
+look at that here.  We'll also look at the {\stt lookup\_route\_by\_dest4}
+XRL because this is an example of an XRL that returns some data, although
 this particular XRL is not actually used by the \SRI process. It is
 also worth noting in passing that the RIB requires a routing protocol
 (such as \SRI) to call {\stt add\_igp\_table4} before sending routes
@@ -1140,8 +1140,8 @@ public:
 	const AddRoute4CB&	cb
     );
 ...
-    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr LookupRout
-e4CB;
+    typedef XorpCallback2<void, const XrlError&, const IPv4*>::RefPtr LookupRo
+uteByDest4CB;
     /**
      *  Send Xrl intended to:
      *
@@ -1157,7 +1157,7 @@ e4CB;
         const IPv4&     addr,
         const bool&     unicast,
         const bool&     multicast,
-        const LookupRoute4CB&   cb
+        const LookupRouteByDest4CB&   cb
     );
 }
 \end{lstlisting}
@@ -1263,25 +1263,26 @@ common that we want to make a request of a target and get back some
 information.  This is quite easy to do, but just requires a different
 callback that can receive the relevant parameters.
 
-In Listing \ref{lst:rib.xif} we saw that the XRL {\stt lookup\_route4}
+In Listing \ref{lst:rib.xif} we saw that the XRL
+{\stt lookup\_route\_by\_dest4}
 returns one value of type {\stt ipv4} called {\stt nexthop}.  XRLs can
 actually return multiple parameters - this is merely a simple
 example.
 
 In Listing \ref{lst:ribxif.hh} we can see that the callback we need to
-suuply to {\stt send\_lookup\_route4()} is of type:\\ {\stt
+suuply to {\stt send\_lookup\_route\_by\_dest4()} is of type:\\ {\stt
 XorpCallback2<void, const XrlError\&, const IPv4*>::RefPtr}\\ This is
 just like the callback we have already seen, except that the method
 the callback will call must take two arguments.  The first must be of
 type {\stt const XrlError\&} and the second must be of type {\stt
 const IPv4*}.  Although \SRI has no such callback method, if it did it
-might look like the function {\stt lookup\_route4\_cb} in Listing
-\ref{lst:lookup}.  The callback itself to be passed into {\stt
-send\_lookup\_route4()} is created in exactly the same way as the one
-we passed into {\stt send\_add\_route4()}.
+might look like the function {\stt lookup\_route\_by\_dest4\_cb} in
+Listing \ref{lst:lookup}.  The callback itself to be passed into {\stt
+send\_lookup\_route\_by\_dest4()} is created in exactly the same way as
+the one we passed into {\stt send\_add\_route4()}.
 
 \begin{lstlisting}[caption={Hypothetical callback for  {\stt
-	send\_lookup\_route4()} \label{lst:lookup} }]{} %
+	send\_lookup\_route\_by\_dest4()} \label{lst:lookup} }]{} %
 void
 XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
                                               const IPv4* nexthop)
