@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.134 2006/04/15 07:10:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.135 2006/04/26 00:03:11 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -740,6 +740,18 @@ BGPPeer::event_openfail()			// EVENTBGPCONNOPENFAIL
 	break;
 
     case STATECONNECT:
+	if (_peerdata->get_delay_open_time() == 0) {
+	    //
+	    // If the DelayOpenTimer is not running, we have to go first
+	    // through STATEIDLE.
+	    // XXX: Instead of checking the configured DelayOpenTime value,
+	    // we should check whether the corresponding timer is indeed
+	    // not running. However, there is no dedicated DelayOpenTimer
+	    // (the _idle_hold timer is reused instead), hence we check
+	    // the corresponding DelayOpenTime configured value.
+	    //
+	    set_state(STATEIDLE, false);
+	}
 	restart_connect_retry_timer();
 	set_state(STATEACTIVE);		// Continue to listen for a connection
 	break;
@@ -795,13 +807,13 @@ BGPPeer::event_connexp()			// EVENTCONNTIMEEXP
     case STATECONNECT:
 	restart_connect_retry_timer();
 	_SocketClient->connect_break();	
-	connect_to_peer(callback(this, &BGPPeer:: connect_to_peer_complete));
+	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
 	break;
 
     case STATEACTIVE:
 	restart_connect_retry_timer();
 	set_state(STATECONNECT);
-	connect_to_peer(callback(this, &BGPPeer:: connect_to_peer_complete));
+	connect_to_peer(callback(this, &BGPPeer::connect_to_peer_complete));
 	break;
 
     /*
