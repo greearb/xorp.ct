@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.34 2006/04/10 01:19:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.35 2006/04/28 17:11:17 zec Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -736,14 +736,17 @@ AsPath::remove_confed_segments()
 {
         debug_msg("Deleting all CONFED Segments\n");
 	const_iterator iter = _segments.begin();
-	while(iter != _segments.end()) {
+	const_iterator next_iter;
+	while (iter != _segments.end()) {
+	    next_iter = iter;
+	    ++next_iter;
 	    if ((*iter).type() == AS_CONFED_SEQUENCE 
 		|| (*iter).type() == AS_CONFED_SET) {
 		_path_len--;
 		_num_segments--;
 		_segments.remove((*iter)); 
 	    } 
-	    ++iter;
+	    iter = next_iter;
 	}
 }
 
