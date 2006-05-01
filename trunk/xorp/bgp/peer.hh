@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.39 2006/02/18 00:07:26 atanu Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.40 2006/03/16 00:03:30 pavlin Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -131,6 +131,11 @@ public:
      * Zero all the stats counters.
      */
     void zero_stats();
+
+    /**
+     * Clear the last error.
+     */
+    void clear_last_error();
 
     /**
      * Replace the old peerdata with a new copy. It is the

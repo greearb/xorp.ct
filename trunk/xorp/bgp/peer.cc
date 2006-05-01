@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.135 2006/04/26 00:03:11 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.136 2006/04/29 08:23:56 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -88,6 +88,13 @@ BGPPeer::zero_stats()
     _established_transitions = 0;
     _mainprocess->eventloop().current_time(_established_time);
     _mainprocess->eventloop().current_time(_in_update_time);
+}
+
+void
+BGPPeer::clear_last_error()
+{
+    _last_error[0] = 0;
+    _last_error[1] = 0;
 }
 
 /*
@@ -1179,11 +1186,33 @@ BGPPeer::event_recvnotify(const NotificationPacket& p)	// EVENTRECNOTMESS
 void
 BGPPeer::generate_open_message(OpenPacket& open)
 {
-    ParameterList::const_iterator
-	pi = _peerdata->parameter_sent_list().begin();
-    while(pi != _peerdata->parameter_sent_list().end()) {
+    uint8_t last_error_code = _last_error[0];
+    uint8_t last_error_subcode = _last_error[1];
+    bool ignore_cap_optional_parameters = false;
+    ParameterList::const_iterator pi;
+
+    if ((last_error_code == OPENMSGERROR)
+	&& (last_error_subcode == UNSUPOPTPAR)) {
+	//
+	// XXX: If the last error was Unsupported Optional Parameter, then
+	// don't include the Capabilities Optional Parameter.
+	//
+	ignore_cap_optional_parameters = true;
+    }
+
+    for (pi = _peerdata->parameter_sent_list().begin();
+	 pi != _peerdata->parameter_sent_list().end();
+	 ++pi) {
+	if (ignore_cap_optional_parameters) {
+	    // XXX: ignore the Capabilities Optional Parameters.
+	    const ref_ptr<const BGPParameter>& ref_par = *pi;
+	    const BGPParameter& par = *ref_par;
+	    const BGPCapParameter* cap_par;
+	    cap_par = dynamic_cast<const BGPCapParameter*>(&par);
+	    if (cap_par != NULL)
+		continue;
+	}
 	open.add_parameter(*pi);
-	pi++;
     }
 }
 

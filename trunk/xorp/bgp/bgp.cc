@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.73 2006/04/14 03:20:01 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.74 2006/04/15 07:10:35 atanu Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1101,6 +1101,11 @@ BGPMain::enable_peer(const Iptuple& iptuple)
 	return false;
     }
 
+    //
+    // XXX: Clear the last error.
+    // TODO: Maybe we should use zero_stats() instead?
+    //
+    peer->clear_last_error();
     peer->event_start();
     start_server(iptuple); // Start a server for this peer.
     peer->set_current_peer_state(true);
