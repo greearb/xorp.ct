@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.21 2006/04/28 18:12:46 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_aggregation.cc,v 1.22 2006/04/28 19:34:32 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -330,21 +330,26 @@ AggregateRoute<A>::reevaluate(AggregationTable<A> *parent)
 	    if (comp_pa_list->origin() > _pa_list->origin())
 		_pa_list->replace_origin((OriginType)comp_pa_list->origin());
 
-#ifdef BRIEF_MODE
-	    /*
-	     * The simplest possible yet seemingly legal option:
-	     * we originate an empty aspath!
-	     */
-	    if (_pa_list->aspath() != comp_pa_list->aspath()) {
-		_pa_list->replace_AS_path(AsPath());
+	    // Update the aggregate AS path using this component route.
+	    if (this->brief_mode()) {
+		/*
+		 * The agggregate will have an empty AS path, in which
+		 * case we also must set the ATOMIC AGGREGATE attribute.
+		 */
+		if (_pa_list->aspath() != comp_pa_list->aspath()) {
+		    _pa_list->replace_AS_path(AsPath());
+		    _pa_list->rehash();
+		    must_set_atomic_aggr = true;
+		}
+	    } else {
+		/*
+		 * Merge the current AS path with the component route's one
+		 * by creating an AS SET for non-matching ASNs.
+		 */
+		_pa_list->replace_AS_path(AsPath(_pa_list->aspath(),
+						 comp_pa_list->aspath()));
 		_pa_list->rehash();
-		must_set_atomic_aggr = true;
 	    }
-#else
-	    _pa_list->replace_AS_path(AsPath(_pa_list->aspath(),
-					     comp_pa_list->aspath()));
-	    _pa_list->rehash();
-#endif
 	}
 
 	// Propagate the ATOMIC AGGREGATE attribute

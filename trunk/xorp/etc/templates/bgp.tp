@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/bgp.tp,v 1.91 2006/04/19 19:59:25 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/bgp.tp,v 1.92 2006/04/29 08:12:21 pavlin Exp $ */
 
 protocols {
     bgp {
@@ -144,6 +144,7 @@ policy {
 		localpref: u32;
 
 		aggregate-prefix-len: u32;
+		aggregate-brief-mode: bool;
 	    }
 	}
     }
@@ -680,7 +681,8 @@ policy {
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=med_remove&type:txt=bool&access:txt=rw&id:u32=20";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=localpref&type:txt=u32&access:txt=rw&id:u32=17";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_prefix_len&type:txt=u32&access:txt=w&id:u32=21";
-    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=22";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=aggregate_brief_mode&type:txt=bool&access:txt=w&id:u32=22";
+    %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=bgp&variable:txt=was_aggregated&type:txt=bool&access:txt=r&id:u32=23";
 
     policy-statement @: txt {
 	term @: txt {
@@ -863,6 +865,11 @@ policy {
 		aggregate-prefix-len {
 		    %help: short "Originate an aggregate route with this prefix length";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aggregate_prefix_len $(<>) $(@);";
+		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
+		}
+		aggregate-brief-mode {
+		    %help: short "Do not generate AS_SETs for aggregate routes";
+		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=aggregate_brief_mode $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=2&order:txt=$(#)&statement:txt=";
 		}
 	    } /* then */

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.26 2006/03/16 00:03:27 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw.cc,v 1.27 2006/04/07 19:22:47 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -261,6 +261,14 @@ BGPVarRW<A>::read_aggregate_prefix_len()
 
 template <class A>
 Element*
+BGPVarRW<A>::read_aggregate_brief_mode()
+{
+    // No-op. Should never be called.
+    return new ElemU32(_aggr_brief_mode);
+}
+
+template <class A>
+Element*
 BGPVarRW<A>::read_was_aggregated()
 {
     if (_aggr_prefix_len == SR_AGGR_EBGP_WAS_AGGREGATED)
@@ -479,6 +487,20 @@ BGPVarRW<A>::write_aggregate_prefix_len(const Element& e)
 
 template <class A>
 void
+BGPVarRW<A>::write_aggregate_brief_mode(const Element& e)
+{
+    const ElemBool& brief_mode = dynamic_cast<const ElemBool&>(e);
+
+    if (!brief_mode.val())
+	return;	
+
+    _aggr_brief_mode = true;
+
+    _route_modify = true;
+}
+
+template <class A>
+void
 BGPVarRW<A>::write_was_aggregated(const Element& e)
 {
     // No-op. Should never be called.
@@ -687,6 +709,10 @@ BGPVarRWCallbacks<A>::BGPVarRWCallbacks()
     init_rw(BGPVarRW<A>::VAR_AGGREGATE_PREFIX_LEN, 
 	    &BGPVarRW<A>::read_aggregate_prefix_len,
 	    &BGPVarRW<A>::write_aggregate_prefix_len);
+
+    init_rw(BGPVarRW<A>::VAR_AGGREGATE_BRIEF_MODE, 
+	    &BGPVarRW<A>::read_aggregate_brief_mode,
+	    &BGPVarRW<A>::write_aggregate_brief_mode);
 
     init_rw(BGPVarRW<A>::VAR_WAS_AGGREGATED, 
 	    &BGPVarRW<A>::read_was_aggregated,

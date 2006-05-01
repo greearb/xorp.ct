@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.16 2005/11/13 22:49:21 zec Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.17 2006/03/16 00:03:27 pavlin Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -47,6 +47,7 @@ public:
         VAR_MED,
         VAR_MED_REMOVE,
         VAR_AGGREGATE_PREFIX_LEN,
+        VAR_AGGREGATE_BRIEF_MODE,
         VAR_WAS_AGGREGATED,
 
 	VAR_BGPMAX // must be last
@@ -128,6 +129,7 @@ public:
     Element* read_med_remove();
 
     Element* read_aggregate_prefix_len();
+    Element* read_aggregate_brief_mode();
     Element* read_was_aggregated();
 
     void write_filter_im(const Element& e);
@@ -141,6 +143,7 @@ public:
     void write_origin(const Element& e);
 
     void write_aggregate_prefix_len(const Element& e);
+    void write_aggregate_brief_mode(const Element& e);
     void write_was_aggregated(const Element& e);
 
     void write_localpref(const Element& e);
