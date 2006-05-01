@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.18 2006/04/21 02:26:26 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.19 2006/04/21 04:00:30 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -54,7 +54,8 @@ from test_bgp_config import \
      conf_export_origin_change, \
      conf_preference_TR1, \
      conf_damping, \
-     conf_aggregate
+     conf_aggregate_brief, \
+     conf_aggregate_asset
 
 TESTS=[
     # Fields:
@@ -99,7 +100,7 @@ TESTS=[
 
     ['1.15B', 'test1_15_B', True, '',
      ['conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4', 'conf_interfaces',
-      'conf_aggregate']],
+      'conf_aggregate_brief']],
 
     ['3.8A', 'test3_8_A', True, '',
      ['conf_EBGP']],

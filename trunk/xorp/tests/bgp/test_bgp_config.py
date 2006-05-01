@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.12 2006/04/21 02:26:26 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.13 2006/04/21 04:00:30 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -787,9 +787,26 @@ commit
 
     return True
 
-def conf_aggregate(builddir):
+
+def conf_aggregate_brief(builddir):
+
+    if not conf_aggregate(builddir, "true"):
+        return False
+
+    return True
+
+
+def conf_aggregate_asset(builddir):
+
+    if not conf_aggregate(builddir, "false"):
+        return False
+
+    return True
+
+
+def conf_aggregate(builddir, brief_mode):
     """
-    Configure aggregate
+    Configure aggregate 
     """
 
     # Configure the xorpsh
@@ -815,6 +832,7 @@ up
 create then
 edit then
 set aggregate-prefix-len 8
+set aggregate-brief-mode %s
 
 top
 edit policy
@@ -841,7 +859,7 @@ set import aggregate
 set export drop-component
 
 commit
-"""
+""" % (brief_mode)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False
