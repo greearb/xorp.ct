@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.64 2006/02/28 02:56:37 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.65 2006/03/16 00:06:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -434,6 +434,8 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 		       map<string, CliCommandMatch>& return_matches) const
 {
     list<string>::const_iterator ci = _command_parts.begin();
+    bool is_last = true;
+
     for (size_t i = 0; i < wordnum; i++) {
 	++ci;
 	if (ci == _command_parts.end())
@@ -453,7 +455,17 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	return;
     }
 
+    //
+    // Get the matching part of the name and test whether it is the last one
+    //
     string match = *ci;
+    ++ci;
+    if (ci == _command_parts.end()) {
+	is_last = true;
+    } else {
+	is_last = false;
+    }
+
     do {
 	if (match[0] == '$') {
 	    XLOG_ASSERT(match[1] == '(');
@@ -463,9 +475,13 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    list<string>::const_iterator vi;
 	    for (vi = var_matches.begin(); vi != var_matches.end(); ++vi) {
 		const string& command_name = *vi;
-		CliCommandMatch ccm(command_name, _help_string,
-				    is_executable(), can_pipe());
-		ccm.set_default_nomore_mode(default_nomore_mode());
+		string help_string = _help_string;
+		if (! is_last)
+		    help_string = "-- No help available --";
+		CliCommandMatch ccm(command_name, help_string,
+				    is_last && is_executable(),
+				    is_last && can_pipe());
+		ccm.set_default_nomore_mode(is_last && default_nomore_mode());
 		return_matches.insert(make_pair(command_name, ccm));
 	    }
 	    break;
@@ -474,9 +490,13 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    // A mandatory argument that is supplied by the user
 	    XLOG_ASSERT(match[match.size() - 1] == '>');
 	    const string& command_name = match;
-	    CliCommandMatch ccm(command_name, _help_string, is_executable(),
-				can_pipe());
-	    ccm.set_default_nomore_mode(default_nomore_mode());
+	    string help_string = _help_string;
+	    if (! is_last)
+		help_string = "-- No help available --";
+	    CliCommandMatch ccm(command_name, help_string,
+				is_last && is_executable(),
+				is_last && can_pipe());
+	    ccm.set_default_nomore_mode(is_last && default_nomore_mode());
 	    CliCommand::TypeMatchCb cb;
 	    cb = callback(this, &OpCommand::type_match);
 	    ccm.set_type_match_cb(cb);
@@ -484,9 +504,13 @@ OpCommand::get_matches(size_t wordnum, SlaveConfigTree* slave_config_tree,
 	    break;
 	}
 	const string& command_name = match;
-	CliCommandMatch ccm(command_name, _help_string, is_executable(),
-			    can_pipe());
-	ccm.set_default_nomore_mode(default_nomore_mode());
+	string help_string = _help_string;
+	if (! is_last)
+	    help_string = "-- No help available --";
+	CliCommandMatch ccm(command_name, help_string,
+			    is_last && is_executable(),
+			    is_last && can_pipe());
+	ccm.set_default_nomore_mode(is_last && default_nomore_mode());
 	return_matches.insert(make_pair(command_name, ccm));
 	break;
     } while (false);
