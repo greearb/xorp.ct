@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.10 2006/03/09 08:29:18 atanu Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.11 2006/04/13 06:36:58 pavlin Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -565,6 +565,9 @@ specified number of times. \\
 \hline
 {\tt aggregate-prefix-len} & {\tt :} & u32 & Originate an aggregate route with
 this prefix length. \\
+\hline
+{\tt aggregate-brief-mode} & {\tt :} & bool & If true omit AS SET generation
+in aggregate route. \\
 \hline
 \end{tabular}
 \caption{\label{policy_bgp_action}BGP specific actions.}
