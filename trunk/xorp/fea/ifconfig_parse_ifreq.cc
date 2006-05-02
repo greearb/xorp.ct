@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.27 2006/03/16 00:03:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.28 2006/04/26 01:42:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,6 +24,9 @@
 
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
+#endif
+#ifdef HAVE_SYS_SOCKIO_H
+#include <sys/sockio.h>
 #endif
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
@@ -230,7 +233,15 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
 	} else {
+#ifndef HOST_OS_SOLARIS
 	    mtu = ifrcopy.ifr_mtu;
+#else
+	    //
+	    // XXX: Solaris supports ioctl(SIOCGIFMTU), but stores the MTU
+	    // in the ifr_metric field instead of ifr_mtu.
+	    //
+	    mtu = ifrcopy.ifr_metric;
+#endif // HOST_OS_SOLARIS
 	}
 	if (is_newlink || (mtu != fi.mtu()))
 	    fi.set_mtu(mtu);
