@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/acifconf.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
 dnl
 
 dnl
@@ -28,12 +28,17 @@ dnl ------------------------------------
 dnl Check for ioctl(SIOCGIFCONF) interface read
 dnl ------------------------------------
 
+dnl XXX: <sys/sockio.h> is needed on Solaris-10
+AC_CHECK_HEADER(sys/sockio.h,
+  [test_sys_sockio_h="#include <sys/sockio.h>"],
+  [test_sys_sockio_h=""])
 AC_MSG_CHECKING(whether the system has ioctl(SIOCGIFCONF) interface read)
 AC_TRY_RUN([
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+${test_sys_sockio_h}
 #include <sys/ioctl.h>
 #include <net/if.h>
 main()
