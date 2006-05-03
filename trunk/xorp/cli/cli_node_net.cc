@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.48 2006/03/16 00:03:45 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.49 2006/04/02 23:18:16 pavlin Exp $"
 
 
 //
@@ -392,7 +392,10 @@ CliClient::start_connection(string& error_msg)
     //
     if (is_output_tty()) {
 	struct termios termios;
-	
+
+	//
+	// Get the parameters associated with the terminal
+	//
 	while (tcgetattr(output_fd(), &termios) != 0) {
 	    if (errno != EINTR) {
 		error_msg = c_format("start_connection(): "
@@ -401,17 +404,32 @@ CliClient::start_connection(string& error_msg)
 		return (XORP_ERROR);
 	    }
 	}
-	
-	// Save state regarding the modified terminal flags
+
+	//
+	// Save state regarding any terminal-related modifications we may do
+	//
 	if (termios.c_lflag & ICANON)
 	    _is_modified_stdio_termios_icanon = true;
 	if (termios.c_lflag & ECHO)
 	    _is_modified_stdio_termios_echo = true;
 	if (termios.c_lflag & ISIG)
 	    _is_modified_stdio_termios_isig = true;
-	
-	// Reset the flags
+	_saved_stdio_termios_vmin = termios.c_cc[VMIN];
+	_saved_stdio_termios_vtime = termios.c_cc[VTIME];
+
+	//
+	// Change the termios:
+	// - Reset the flags.
+	// - Set VMIN and VTIME to values that allow us to read one
+	//   character at a time.
+	//
 	termios.c_lflag &= ~(ICANON | ECHO | ISIG);
+	termios.c_cc[VMIN] = 1;
+	termios.c_cc[VTIME] = 0;
+
+	//
+	// Modify the terminal
+	//
 	while (tcsetattr(output_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
 		error_msg = c_format("start_connection(): "
@@ -571,14 +589,11 @@ CliClient::stop_connection(string& error_msg)
     // Restore the terminal settings
     //
     if (is_output_tty()) {
-	if (! (_is_modified_stdio_termios_icanon
-	       || _is_modified_stdio_termios_echo
-	       || _is_modified_stdio_termios_isig)) {
-	    return (XORP_OK);		// Nothing to restore
-	}
-	
 	struct termios termios;
-	
+
+	//
+	// Get the parameters associated with the terminal
+	//
 	while (tcgetattr(output_fd(), &termios) != 0) {
 	    if (errno != EINTR) {
 		XLOG_ERROR("stop_connection(): tcgetattr() error: %s", 
@@ -586,13 +601,22 @@ CliClient::stop_connection(string& error_msg)
 		return (XORP_ERROR);
 	    }
 	}
-	// Restore the modified terminal flags
+
+	//
+	// Restore the termios changes
+	//
 	if (_is_modified_stdio_termios_icanon)
 	    termios.c_lflag |= ICANON;
 	if (_is_modified_stdio_termios_echo)
 	    termios.c_lflag |= ECHO;
 	if (_is_modified_stdio_termios_isig)
 	    termios.c_lflag |= ISIG;
+	_saved_stdio_termios_vmin = termios.c_cc[VMIN];
+	_saved_stdio_termios_vtime = termios.c_cc[VTIME];
+
+	//
+	// Modify the terminal
+	//
 	while (tcsetattr(output_fd(), TCSADRAIN, &termios) != 0) {
 	    if (errno != EINTR) {
 		error_msg = c_format("stop_connection(): "

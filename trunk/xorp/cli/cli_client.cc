@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.53 2006/03/16 00:03:43 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.54 2006/04/20 00:44:47 pavlin Exp $"
 
 
 //
@@ -93,6 +93,8 @@ CliClient::CliClient(CliNode& init_cli_node, XorpFd input_fd, XorpFd output_fd,
     _is_modified_stdio_termios_icanon = false;
     _is_modified_stdio_termios_echo = false;
     _is_modified_stdio_termios_isig = false;
+    _saved_stdio_termios_vmin = 0;
+    _saved_stdio_termios_vtime = 0;
 
     _executed_cli_command = NULL;
 

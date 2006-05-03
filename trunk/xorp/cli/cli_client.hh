@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.27 2005/12/21 09:42:51 bms Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.28 2006/03/16 00:03:44 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -501,6 +501,13 @@ private:
     bool	_is_modified_stdio_termios_icanon;
     bool	_is_modified_stdio_termios_echo;
     bool	_is_modified_stdio_termios_isig;
+    //
+    // The original VMIN and VTIME members of the termios.c_cc[] array.
+    // TODO: those should have type cc_t, but we are using 'int' instead
+    // to avoid complicated conditional declarations.
+    //
+    int		_saved_stdio_termios_vmin;
+    int		_saved_stdio_termios_vtime;
 
     // The command we are currently executing and its arguments
     CliCommand	*_executed_cli_command;	// The command currently executed
