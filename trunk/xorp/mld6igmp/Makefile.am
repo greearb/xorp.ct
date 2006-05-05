@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/mld6igmp/Makefile.am,v 1.28 2005/02/17 01:03:35 pavlin Exp $
+## $XORP: xorp/mld6igmp/Makefile.am,v 1.29 2005/02/27 20:49:06 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -82,8 +82,6 @@ libmld6igmp_la_SOURCES += mld6igmp_node_cli.hh
 libmld6igmp_la_SOURCES += mld6igmp_vif.hh
 libmld6igmp_la_SOURCES += xrl_mld6igmp_node.hh
 
-libmld6igmp_la_SOURCES += igmp_proto.cc
-libmld6igmp_la_SOURCES += mld6_proto.cc
 libmld6igmp_la_SOURCES += mld6igmp_config.cc
 libmld6igmp_la_SOURCES += mld6igmp_member_query.cc
 libmld6igmp_la_SOURCES += mld6igmp_node.cc

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.21 2006/01/23 21:03:39 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.22 2006/03/16 00:04:44 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -331,88 +331,49 @@ private:
     //
     // Not-so handy private functions that should go somewhere else
     //
+    // Functions for sending protocol messages
     int		mld6igmp_send(const IPvX& src, const IPvX& dst,
 			      uint8_t message_type, int max_resp_time,
 			      const IPvX& group_address, string& error_msg);
-    int		igmp_process(const IPvX& src, const IPvX& dst,
-			     int ip_ttl, int ip_tos, bool is_router_alert,
-			     buffer_t *buffer, string& error_msg);
-    int		mld6_process(const IPvX& src, const IPvX& dst,
-			     int ip_ttl, int ip_tos, bool is_router_alert,
-			     buffer_t *buffer, string& error_msg);
-    
-    int		igmp_membership_query_recv(const IPvX& src,
-					   const IPvX& dst,
-					   uint8_t message_type,
-					   int igmp_max_resp_time,
-					   const IPvX& group_address,
-					   buffer_t *buffer);
-    int		igmp_membership_report_recv(const IPvX& src,
-					    const IPvX& dst,
-					    uint8_t message_type,
-					    int igmp_max_resp_time,
-					    const IPvX& group_address,
-					    buffer_t *buffer);
-    int		igmp_leave_group_recv(const IPvX& src,
-				      const IPvX& dst,
-				      uint8_t message_type,
-				      int igmp_max_resp_time,
-				      const IPvX& group_address,
-				      buffer_t *buffer);
-    int		igmp_dvmrp_ask_neighbors_recv(const IPvX& src,
-					      const IPvX& dst,
-					      uint8_t message_type,
-					      int igmp_max_resp_time,
-					      const IPvX& group_address,
-					      buffer_t *buffer);
-    int		igmp_dvmrp_ask_neighbors2_recv(const IPvX& src,
+
+    // MLD/IGMP control messages recv functions
+    int		mld6igmp_membership_query_recv(const IPvX& src,
 					       const IPvX& dst,
 					       uint8_t message_type,
 					       int igmp_max_resp_time,
 					       const IPvX& group_address,
 					       buffer_t *buffer);
-    int		igmp_dvmrp_info_request_recv(const IPvX& src,
-					     const IPvX& dst,
-					     uint8_t message_type,
-					     int igmp_max_resp_time,
-					     const IPvX& group_address,
-					     buffer_t *buffer);
-    int		igmp_mtrace_recv(const IPvX& src,
-				 const IPvX& dst,
-				 uint8_t message_type,
-				 int igmp_max_resp_time,
-				 const IPvX& group_address,
-				 buffer_t *buffer);
+    int		mld6igmp_membership_report_recv(const IPvX& src,
+						const IPvX& dst,
+						uint8_t message_type,
+						int igmp_max_resp_time,
+						const IPvX& group_address,
+						buffer_t *buffer);
+    int		mld6igmp_leave_group_recv(const IPvX& src,
+					  const IPvX& dst,
+					  uint8_t message_type,
+					  int igmp_max_resp_time,
+					  const IPvX& group_address,
+					  buffer_t *buffer);
     int		igmp_v1_config_consistency_check(const IPvX& src,
 						 const IPvX& dst,
 						 uint8_t message_type,
 						 int igmp_message_version);
-    
-    int		mld6_listener_query_recv(const IPvX& src,
-					 const IPvX& dst,
-					 uint8_t mld6_message_type,
-					 int mld6_max_resp_time,
-					 const IPvX& group_address,
-					 buffer_t *buffer);
-    int		mld6_listener_report_recv(const IPvX& src,
-					  const IPvX& dst,
-					  uint8_t mld6_message_type,
-					  int mld6_max_resp_time,
-					  const IPvX& group_address,
-					  buffer_t *buffer);
-    int		mld6_listener_done_recv(const IPvX& src,
-					const IPvX& dst,
-					uint8_t mld6_message_type,
-					int mld6_max_resp_time,
-					const IPvX& group_address,
-					buffer_t *buffer);
-    int		mld6_mtrace_recv(const IPvX& src,
+
+    // MLD/IGMP control messages process functions
+    int		mld6igmp_process(const IPvX& src,
 				 const IPvX& dst,
-				 uint8_t mld6_message_type,
-				 int mld6_max_resp_time,
-				 const IPvX& group_address,
-				 buffer_t *buffer);
-    
+				 int ip_ttl,
+				 int ip_tos,
+				 bool is_router_alert,
+				 buffer_t *buffer,
+				 string& error_msg);
+
+    // MLD/IGMP uniform interface for protocol-related constants
+    size_t	mld6igmp_constant_minlen() const;
+    uint32_t	mld6igmp_constant_timer_scale() const;
+    uint8_t	mld6igmp_constant_membership_query() const;
+
     void	other_querier_timer_timeout();
     
     void	query_timer_timeout();

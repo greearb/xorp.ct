@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.45 2006/03/16 00:04:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.46 2006/04/26 01:44:22 pavlin Exp $"
 
 
 //
@@ -76,11 +76,15 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     
     //
     // TODO: when more things become classes, most of this init should go away
+    //
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
     _proto_flags = 0;
     _startup_query_count = 0;
 
+    //
     // Set the protocol version
+    //
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
 	_query_interval.set(TimeVal(IGMP_QUERY_INTERVAL, 0));
@@ -89,6 +93,8 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_response_interval.set(TimeVal(IGMP_QUERY_RESPONSE_INTERVAL, 0));
 	_robust_count = IGMP_ROBUSTNESS_VARIABLE;
     }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
+
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	set_proto_version_default(MLD_VERSION_DEFAULT);
@@ -98,7 +104,8 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_response_interval.set(TimeVal(MLD_QUERY_RESPONSE_INTERVAL, 0));
 	_robust_count = MLD_ROBUSTNESS_VARIABLE;
     }
-#endif
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+
     set_proto_version(proto_version_default());
 }
 
@@ -139,11 +146,13 @@ Mld6igmpVif::~Mld6igmpVif()
 int
 Mld6igmpVif::set_proto_version(int proto_version)
 {
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	if ((proto_version < IGMP_VERSION_MIN)
 	    || (proto_version > IGMP_VERSION_MAX))
 	return (XORP_ERROR);
     }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
     
 #ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
@@ -254,47 +263,22 @@ Mld6igmpVif::start(string& error_msg)
     //
     // Query all members on startup
     //
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
-    if (proto_is_igmp()) {
-	TimeVal scaled_max_resp_time =
-	    (query_response_interval().get() * IGMP_TIMER_SCALE);
-	mld6igmp_send(primary_addr(),
-		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		      IGMP_MEMBERSHIP_QUERY,
-		      is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
-		      IPvX::ZERO(family()),
-		      dummy_error_msg);
-	_startup_query_count = robust_count().get();
-	if (_startup_query_count > 0)
-	    _startup_query_count--;
-	TimeVal startup_query_interval = query_interval().get() / 4;
-	_query_timer =
-	    mld6igmp_node().eventloop().new_oneoff_after(
-		startup_query_interval,
-		callback(this, &Mld6igmpVif::query_timer_timeout));
-    }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
-
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-    if (proto_is_mld6()) {
-	TimeVal scaled_max_resp_time =
-	    (query_response_interval().get() * MLD_TIMER_SCALE);
-	mld6igmp_send(primary_addr(),
-		      IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		      MLD_LISTENER_QUERY,
-		      scaled_max_resp_time.sec(),
-		      IPvX::ZERO(family()),
-		      dummy_error_msg);
-	_startup_query_count = robust_count().get();
-	if (_startup_query_count > 0)
-	    _startup_query_count--;
-	TimeVal startup_query_interval = query_interval().get() / 4;
-	_query_timer =
-	    mld6igmp_node().eventloop().new_oneoff_after(
-		startup_query_interval,
-		callback(this, &Mld6igmpVif::query_timer_timeout));
-    }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
+    uint32_t timer_scale = mld6igmp_constant_timer_scale();
+    TimeVal scaled_max_resp_time =
+	(query_response_interval().get() * timer_scale);
+    mld6igmp_send(primary_addr(),
+		  IPvX::MULTICAST_ALL_SYSTEMS(family()),
+		  mld6igmp_constant_membership_query(),
+		  is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
+		  IPvX::ZERO(family()),
+		  dummy_error_msg);
+    _startup_query_count = robust_count().get();
+    if (_startup_query_count > 0)
+	_startup_query_count--;
+    TimeVal startup_query_interval = query_interval().get() / 4;
+    _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
+	startup_query_interval,
+	callback(this, &Mld6igmpVif::query_timer_timeout));
 
     XLOG_INFO("Interface started: %s%s",
 	      this->str().c_str(), flags_string().c_str());
@@ -543,25 +527,406 @@ Mld6igmpVif::mld6igmp_recv(const IPvX& src,
 	return (XORP_ERROR);
     }
     
-    do {
-	if (proto_is_igmp()) {
-	    ret_value = igmp_process(src, dst, ip_ttl, ip_tos,
-				     is_router_alert, buffer, error_msg);
-	    break;
-	}
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-	if (proto_is_mld6()) {
-	    ret_value = mld6_process(src, dst, ip_ttl, ip_tos,
-				     is_router_alert, buffer, error_msg);
-	    break;
-	}
-#endif
-	XLOG_UNREACHABLE();
-	ret_value = XORP_ERROR;
-	break;
-    } while (false);
+    ret_value = mld6igmp_process(src, dst, ip_ttl, ip_tos, is_router_alert,
+				 buffer, error_msg);
     
     return (ret_value);
+}
+
+/**
+ * Mld6igmpVif::mld6igmp_process:
+ * @src: The message source address.
+ * @dst: The message destination address.
+ * @ip_ttl: The IP TTL of the message. If it has a negative value,
+ * it should be ignored.
+ * @ip_tos: The IP TOS of the message. If it has a negative value,
+ * it should be ignored.
+ * @is_router_alert: True if the received IP packet had the Router Alert
+ * IP option set.
+ * @buffer: The buffer with the message.
+ * @error_msg: The error message (if error).
+ * 
+ * Process MLD or IGMP message and pass the control to the type-specific
+ * functions.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_process(const IPvX& src,
+			      const IPvX& dst,
+			      int ip_ttl,
+			      int ip_tos,
+			      bool is_router_alert,
+			      buffer_t *buffer,
+			      string& error_msg)
+{
+#if defined(HAVE_IPV4_MULTICAST_ROUTING) || defined(HAVE_IPV6_MULTICAST_ROUTING)
+    uint8_t message_type;
+    int max_resp_time;
+    IPvX group_address(family());
+    uint16_t cksum;
+    bool check_router_alert_option = false;
+    bool check_src_linklocal_unicast = false;
+    bool check_dst_multicast = false;
+    bool check_group_nodelocal_multicast = false;
+    
+    //
+    // Message length check.
+    //
+    if (BUFFER_DATA_SIZE(buffer) < mld6igmp_constant_minlen()) {
+	error_msg = c_format("RX packet from %s to %s on vif %s: "
+			     "too short data field (%u octets)",
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     XORP_UINT_CAST(BUFFER_DATA_SIZE(buffer)));
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    //
+    // Checksum verification.
+    //
+    cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    // Add the checksum for the IPv6 pseudo-header
+    if (proto_is_mld6()) {
+	struct pseudo_header {
+	    struct in6_addr in6_src;
+	    struct in6_addr in6_dst;
+	    uint32_t pkt_len;
+	    uint32_t next_header;
+	} pseudo_header;
+	
+	src.copy_out(pseudo_header.in6_src);
+	dst.copy_out(pseudo_header.in6_dst);
+	pseudo_header.pkt_len = ntohl(BUFFER_DATA_SIZE(buffer));
+	pseudo_header.next_header = htonl(IPPROTO_ICMPV6);
+	
+	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
+	cksum = INET_CKSUM_ADD(cksum, cksum2);
+    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+    if (cksum) {
+	error_msg = c_format("RX packet from %s to %s on vif %s: "
+			     "checksum error",
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    
+    //
+    // Protocol version check.
+    //
+    // XXX: MLD and IGMP messages do not have an explicit field for protocol
+    // version. Protocol version check is performed later, per (some) message
+    // type.
+    //
+    
+    //
+    // Get the message type and the max. resp. time.
+    //
+    // Note that in case of IGMP the max. resp. time is the `igmp_code' field
+    // in `struct igmp'.
+    //
+    if (proto_is_igmp()) {
+	BUFFER_GET_OCTET(message_type, buffer);
+	BUFFER_GET_OCTET(max_resp_time, buffer);
+	BUFFER_GET_SKIP(2, buffer);		// The checksum
+	BUFFER_GET_IPVX(family(), group_address, buffer);
+    }
+    if (proto_is_mld6()) {
+	BUFFER_GET_OCTET(message_type, buffer);
+	BUFFER_GET_SKIP(1, buffer);		// The `Code' field: unused
+	BUFFER_GET_SKIP(2, buffer);		// The `Checksum' field
+	BUFFER_GET_HOST_16(max_resp_time, buffer);
+	BUFFER_GET_SKIP(2, buffer);		// The `Reserved' field
+	BUFFER_GET_IPVX(family(), group_address, buffer);
+    }
+
+    XLOG_TRACE(mld6igmp_node().is_log_trace(),
+	       "RX %s from %s to %s on vif %s",
+	       proto_message_type2ascii(message_type),
+	       cstring(src), cstring(dst),
+	       name().c_str());
+
+    //
+    // Assign various flags what needs to be checked, based on the
+    // message type:
+    //  - check_router_alert_option
+    //  - check_src_linklocal_unicast
+    //  - check_dst_multicast
+    //  - check_group_nodelocal_multicast
+    //
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+    if (proto_is_igmp()) {
+	switch (message_type) {
+	case IGMP_MEMBERSHIP_QUERY:
+	case IGMP_V1_MEMBERSHIP_REPORT:
+	case IGMP_V2_MEMBERSHIP_REPORT:
+	case IGMP_V2_LEAVE_GROUP:
+	    if (_ip_router_alert_option_check.get())
+		check_router_alert_option = true;
+	    check_src_linklocal_unicast = false;	// Not needed for IPv4
+	    check_dst_multicast = true;
+	    check_group_nodelocal_multicast = false;	// Not needed for IPv4
+	    break;
+	case IGMP_DVMRP:
+	case IGMP_MTRACE:
+	    // TODO: Assign the flags as appropriate
+	    break;
+	default:
+	    break;
+	}
+    }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6()) {
+	switch (message_type) {
+	case MLD_LISTENER_QUERY:
+	case MLD_LISTENER_REPORT:
+	case MLD_LISTENER_DONE:
+	    check_router_alert_option = true;
+	    check_src_linklocal_unicast = true;
+	    check_dst_multicast = true;
+	    check_group_nodelocal_multicast = true;
+	    break;
+	case MLD_MTRACE:
+	    // TODO: Assign the flags as appropriate
+	    break;
+	default:
+	    break;
+	}
+    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+
+    //
+    // IP Router Alert option check.
+    //
+    if (check_router_alert_option && (! is_router_alert)) {
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "missing IP Router Alert option",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    //
+    // TODO: check the TTL and TOS if we are running in secure mode
+    //
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+#if 0
+    if (ip_ttl != MINTTL) {
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "ip_ttl = %d instead of %d",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     ip_ttl, MINTTL);
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+#endif // 0
+    
+    //
+    // Source address check.
+    //
+    if (! src.is_unicast()) {
+	//
+	// Source address must always be unicast.
+	// The kernel should have checked that, but just in case...
+	//
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "source must be unicast",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+    if (src.af() != family()) {
+	// Invalid source address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid source address family "
+		     "(received %d expected %d)",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     src.af(), family());
+    }
+    if (check_src_linklocal_unicast && (! src.is_linklocal_unicast())) {
+	// The source address is not link-local
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "source is not a link-local address",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Destination address check.
+    //
+    if (dst.af() != family()) {
+	// Invalid destination address family
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "invalid destination address family "
+		     "(received %d expected %d)",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     dst.af(), family());
+    }
+    if (check_dst_multicast && (! dst.is_multicast())) {
+	// The destination address is not multicast
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "destination must be multicast. "
+			     "Packet ignored.",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Inner multicast address scope check.
+    //
+    if (check_group_nodelocal_multicast
+	&& group_address.is_nodelocal_multicast()) {
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "invalid node-local scope of inner "
+			     "multicast address: %s",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     cstring(group_address));
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Origin router neighbor check.
+    //
+    // XXX: in IGMP and MLD we don't need such check
+    
+    //
+    // Process each message, based on its type.
+    //
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+    if (proto_is_igmp()) {
+	switch (message_type) {
+	case IGMP_MEMBERSHIP_QUERY:
+	    mld6igmp_membership_query_recv(src, dst,
+					   message_type, max_resp_time,
+					   group_address, buffer);
+	    break;
+	case IGMP_V1_MEMBERSHIP_REPORT:
+	case IGMP_V2_MEMBERSHIP_REPORT:
+	    mld6igmp_membership_report_recv(src, dst,
+					    message_type, max_resp_time,
+					    group_address, buffer);
+	    break;
+	case IGMP_V2_LEAVE_GROUP:
+	    mld6igmp_leave_group_recv(src, dst,
+				      message_type, max_resp_time,
+				      group_address, buffer);
+	    break;
+	case IGMP_DVMRP:
+	{
+	    //
+	    // XXX: We care only about the DVMRP messages that are used
+	    // by mrinfo.
+	    //
+	    // XXX: the older purpose of the 'igmp_code' field
+	    int igmp_code = max_resp_time;
+	    switch (igmp_code) {
+	    case DVMRP_ASK_NEIGHBORS:
+		// Some old DVMRP messages from mrinfo(?).
+		// TODO: not implemented yet.
+		// TODO: do we really need this message implemented?
+		break;
+	    case DVMRP_ASK_NEIGHBORS2:
+		// Used for mrinfo support.
+		// XXX: not implemented yet.
+		break;
+	    case DVMRP_INFO_REQUEST:
+		// Information request (TODO: used by mrinfo?)
+		// TODO: not implemented yet.
+		break;
+	    default:
+		// XXX: We don't care about the rest of the DVMRP_* messages
+		break;
+	    }
+	}
+	case IGMP_MTRACE:
+	    // TODO: is this the new message sent by 'mtrace'?
+	    // TODO: not implemented yet.
+	    break;
+	default:
+	    // XXX: We don't care about the rest of the messages
+	    break;
+	}
+    }
+#endif // HAVE_IPV4_MULTICAST_ROUTING
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6()) {
+	switch (message_type) {
+	case MLD_LISTENER_QUERY:
+	    mld6igmp_membership_query_recv(src, dst,
+					   message_type, max_resp_time,
+					   group_address, buffer);
+	    break;
+	case MLD_LISTENER_REPORT:
+	    mld6igmp_membership_report_recv(src, dst,
+					    message_type, max_resp_time,
+					    group_address, buffer);
+	    break;
+	case MLD_LISTENER_DONE:
+	    mld6igmp_leave_group_recv(src, dst,
+				      message_type, max_resp_time,
+				      group_address, buffer);
+	    break;
+	case MLD_MTRACE:
+	    // TODO: is this the new message sent by 'mtrace'?
+	    // TODO: not implemented yet.
+	    break;
+	default:
+	    break;
+	}
+    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+
+    return (XORP_OK);
+
+ rcvlen_error:
+    XLOG_UNREACHABLE();
+    error_msg = c_format("RX packet from %s to %s on vif %s: "
+			 "some fields are too short",
+			 cstring(src), cstring(dst),
+			 name().c_str());
+    XLOG_WARNING("%s", error_msg.c_str());
+    return (XORP_ERROR);
+
+#else // ! (HAVE_IPV4_MULTICAST_ROUTING || HAVE_IPV6_MULTICAST_ROUTING)
+
+    XLOG_WARNING("The system does not support multicast routing");
+
+    UNUSED(src);
+    UNUSED(dst);
+    UNUSED(ip_ttl);
+    UNUSED(ip_tos);
+    UNUSED(is_router_alert);
+    UNUSED(buffer);
+    UNUSED(error_msg);
+
+    return (XORP_ERROR);
+#endif // ! (HAVE_IPV4_MULTICAST_ROUTING || HAVE_IPV6_MULTICAST_ROUTING)
 }
 
 /**
@@ -800,6 +1165,57 @@ Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
     }
     
     return (XORP_OK);
+}
+
+size_t
+Mld6igmpVif::mld6igmp_constant_minlen() const
+{
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+    if (proto_is_igmp())
+	return (IGMP_MINLEN);
+#endif
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6())
+	return (MLD_MINLEN);
+#endif
+
+    XLOG_UNREACHABLE();
+    return (0);
+}
+
+uint32_t
+Mld6igmpVif::mld6igmp_constant_timer_scale() const
+{
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+    if (proto_is_igmp())
+	return (IGMP_TIMER_SCALE);
+#endif
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6())
+	return (MLD_TIMER_SCALE);
+#endif
+
+    XLOG_UNREACHABLE();
+    return (0);
+}
+
+uint8_t
+Mld6igmpVif::mld6igmp_constant_membership_query() const
+{
+#ifdef HAVE_IPV4_MULTICAST_ROUTING
+    if (proto_is_igmp())
+	return (IGMP_MEMBERSHIP_QUERY);
+#endif
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6())
+	return (MLD_LISTENER_QUERY);
+#endif
+
+    XLOG_UNREACHABLE();
+    return (0);
 }
 
 // TODO: temporary here. Should go to the Vif class after the Vif
