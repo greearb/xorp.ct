@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.46 2006/04/26 01:44:22 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.47 2006/05/05 23:19:50 pavlin Exp $"
 
 
 //
@@ -561,8 +561,8 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 			      string& error_msg)
 {
 #if defined(HAVE_IPV4_MULTICAST_ROUTING) || defined(HAVE_IPV6_MULTICAST_ROUTING)
-    uint8_t message_type;
-    int max_resp_time;
+    uint8_t message_type = 0;
+    int max_resp_time = 0;
     IPvX group_address(family());
     uint16_t cksum;
     bool check_router_alert_option = false;
