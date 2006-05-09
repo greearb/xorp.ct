@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.13 2006/03/16 00:03:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.14 2006/03/29 22:41:23 atanu Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
@@ -70,7 +70,7 @@ test_multiprotocol_reach_ipv4(TestInfo& /*info*/)
     mpreach.add_nlri(IPNet<IPv4>("128.16.0.0/16"));
     mpreach.encode();
 
-    assert(68 == mpreach.wire_size());
+    assert(52 == mpreach.wire_size());
 
     MPReachNLRIAttribute<IPv4> recv(mpreach.data());
 
