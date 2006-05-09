@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.79 2006/04/07 19:38:22 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.80 2006/04/07 20:04:47 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -738,7 +738,7 @@ MPReachNLRIAttribute<IPv4>::encode()
     const_iterator i;
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
 	len += 1;
-	len += (i->prefix_len() + 3) / 4;
+	len += (i->prefix_len() + 7) / 8;
     }
 
     uint8_t *d = set_header(len);
@@ -758,7 +758,7 @@ MPReachNLRIAttribute<IPv4>::encode()
     *d++ = 0;	// Number of SNPAs
 
     for (i = _nlri.begin(); i != _nlri.end(); i++) {
-	int bytes = (i->prefix_len() + 3) / 4;
+	int bytes = (i->prefix_len() + 7) / 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv4::addr_size()];
 	i->masked_addr().copy_out(buf);
@@ -1017,7 +1017,7 @@ MPReachNLRIAttribute<IPv4>::MPReachNLRIAttribute(const uint8_t* d)
     */
     while(data < end) {
 	uint8_t prefix_length = *data++;
-	size_t bytes = (prefix_length + 3) / 4;
+	size_t bytes = (prefix_length + 7) / 8;
 	if (bytes > IPv4::addr_size())
 	    xorp_throw(CorruptMessage,
 		       c_format("prefix length too long %d", prefix_length),
@@ -1115,7 +1115,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     const_iterator i;
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
 	len += 1;
-	len += (i->prefix_len() + 3) / 4;
+	len += (i->prefix_len() + 7) / 8;
     }
 
     uint8_t *d = set_header(len);
@@ -1129,7 +1129,7 @@ MPUNReachNLRIAttribute<IPv4>::encode()
     *d++ = _safi;		// SAFIs
     
     for (i = _withdrawn.begin(); i != _withdrawn.end(); i++) {
-	int bytes = (i->prefix_len() + 3) / 4;
+	int bytes = (i->prefix_len() + 7) / 8;
 	debug_msg("encode %s bytes = %d\n", i->str().c_str(), bytes);
 	uint8_t buf[IPv4::addr_size()];
 	i->masked_addr().copy_out(buf);
