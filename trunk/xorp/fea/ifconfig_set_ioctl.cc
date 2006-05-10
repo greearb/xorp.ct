@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.41 2006/03/16 00:03:56 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_ioctl.cc,v 1.42 2006/04/02 00:25:14 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -175,7 +175,7 @@ IfConfigSetIoctl::is_discard_emulated(const IfTreeInterface& i) const
 {
     UNUSED(i);
 
-#if defined(HOST_OS_BSDI) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_MACOSX) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
+#if defined(HOST_OS_BSDI) || defined(HOST_OS_FREEBSD) || defined(HOST_OS_MACOSX) || defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD) || defined(HOST_OS_DRAGONFLYBSD)
     return (true);
 #else
     return (false);

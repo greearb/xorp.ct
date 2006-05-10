@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.21 2006/03/16 00:04:17 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.22 2006/04/28 06:48:46 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -390,7 +390,7 @@ get_preferred_ipv4_addr()
 static uint32_t
 if_count()
 {
-#ifdef HOST_OS_FREEBSD
+#if defined(HOST_OS_FREEBSD) || defined(HOST_OS_DRAGONFLYBSD)
     int cnt, error;
     size_t cntlen = sizeof(cnt);
     error = sysctlbyname("net.link.generic.system.ifcount",
