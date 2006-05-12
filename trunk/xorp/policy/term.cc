@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.17 2006/04/04 04:56:39 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.18 2006/04/04 05:09:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -53,6 +53,16 @@ Term::~Term()
 	     ++iter) {
 	    delete iter->second;
 	}
+    }
+}
+
+void
+Term::set_term_end()
+{
+    uint32_t i;
+
+    for (i = 0; i < LAST_BLOCK; i++) {
+	set_block_end(i);
     }
 }
 
@@ -183,6 +193,81 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
     throw term_syntax_error("Want to delete an empty position: " 
 			    + order.str());
 #endif // 0
+}
+
+void
+Term::set_block_end(uint32_t block)
+{
+    if (block >= LAST_BLOCK) {
+	throw term_syntax_error("Unknown block: " + to_str(block));
+    }
+
+    Nodes& conf_block = *_block_nodes[block];
+
+    //
+    // Add all remaining entries that are out of order
+    //
+    while (! _out_of_order_nodes[block].empty()) {
+	list<pair<ConfigNodeId, Node*> >::iterator iter;
+	pair<Nodes::iterator, bool> res;
+
+	//
+	// Try to add as much as possible out-of-order entries
+	//
+	while (true) {
+	    bool entry_added = false;
+	    for (iter = _out_of_order_nodes[block].begin();
+		 iter != _out_of_order_nodes[block].end();
+		 ++iter) {
+		res = conf_block.insert(iter->first, iter->second);
+		if (res.second == true) {
+		    // Entry added successfully
+		    entry_added = true;
+		    _out_of_order_nodes[block].erase(iter);
+		    break;
+		}
+	    }
+	    if (! entry_added)
+		break;
+	}
+
+	//
+	// If there are any remaining entries, then add the first at the
+	// end of the block. After that try to add the remaining entries
+	// in the proper order.
+	//
+	// XXX: Note that we need this mechanism in case there were some
+	// holes in the order of received entries. E.g., if the rtrmgr
+	// template file contained leaf nodes without XRLs, those nodes
+	// will have a node ID that may place them in the middle of the
+	// ordered set of leaf nodes. Such nodes won't be received, hence
+	// we need this mechanism to add the nodes after the hole.
+	// However, this mechanism may still add some of the nodes in
+	// the wrong order. For example, lets say the original configuration
+	// contained the following nodes, and that (H) was a leaf node
+	// without an XRL:
+	//    A B C (H) E F G
+	// We will correctly order the nodes as "A B C E F G".
+	// However, lets say a new node D is added to the configuration:
+	//   A B C (H) D E F G
+	// When node D is received, it will look like an out-of-order node,
+	// and this algorithm will add it to the end. I.e., the result
+	// will be "A B C E F G D".
+	// Fortunately, this appears to be an issue only for leaf nodes
+	// (to be more specific, only for nodes that are not multi-value
+	// nodes), which, arguably, should not need node IDs.
+	// At least, in case of the policy manager, the order of the
+	// statements inside a policy block shouldn't matter.
+	//
+	if (! _out_of_order_nodes[block].empty()) {
+	    iter = _out_of_order_nodes[block].begin();
+	    // XXX: we ignore the return result, because we should fail
+	    // to insert only if the node was added already.
+	    conf_block.insert_out_of_order(iter->first, iter->second);
+	    _out_of_order_nodes[block].erase(iter);
+	    break;
+	}
+    }
 }
 
 list<pair<ConfigNodeId, Node*> >::iterator

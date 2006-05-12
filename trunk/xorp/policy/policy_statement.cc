@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.7 2005/10/02 18:19:15 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.8 2006/03/16 00:04:59 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -162,6 +162,37 @@ PolicyStatement::delete_term(const string& name)
 
     delete t;
     return true;
+}
+
+void
+PolicyStatement::set_policy_end()
+{
+    TermContainer::iterator i;
+
+    for (i = _terms.begin(); i != _terms.end(); ++i) {
+	Term* term = i->second;
+	term->set_term_end();
+    }
+
+    //
+    // XXX: The multi-value term nodes should not have holes, hence
+    // print a warning if there are remaining out of order terms.
+    //
+    if (! _out_of_order_terms.empty()) {
+	// Create a list with the term names
+	string term_names;
+	list<pair<ConfigNodeId, Term*> >::iterator list_iter;
+	for (list_iter = _out_of_order_terms.begin();
+	     list_iter != _out_of_order_terms.end();
+	     ++list_iter) {
+	    Term* term = (*list_iter).second;
+	    if (list_iter != _out_of_order_terms.begin())
+		term_names += ", ";
+	    term_names += term->name();
+	}
+	XLOG_WARNING("Found out-of-order term(s) inside policy %s: %s",
+		     name().c_str(), term_names.c_str());
+    }
 }
 
 const string& 

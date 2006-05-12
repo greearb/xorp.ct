@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.6 2005/10/02 18:19:15 pavlin Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.7 2006/03/16 00:04:59 pavlin Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
@@ -84,6 +84,11 @@ public:
      * @param name name of term to delete.
      */
     bool delete_term(const string& name);
+
+    /**
+     * Perform operations at the end of the policy.
+     */
+    void set_policy_end();
 
     /**
      * @return name of policy.

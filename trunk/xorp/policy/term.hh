@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.10 2005/10/02 18:19:15 pavlin Exp $
+// $XORP: xorp/policy/term.hh,v 1.11 2006/03/16 00:05:01 pavlin Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -67,6 +67,11 @@ public:
     const string& name() const { return _name; }
     
     /**
+     * Perform operations at the end of the term.
+     */
+    void set_term_end();
+
+    /**
      * Updates the source/dest/action block of a term.
      *
      * @param block the block to update (0:source, 1:dest, 2:action).
@@ -83,6 +88,14 @@ public:
      * @param order node ID with position of term.
      */
     void del_block(const uint32_t& block, const ConfigNodeId& order);
+
+    /**
+     * Perform operations at the end of the block.
+     *
+     * @param block the block to perform operations on
+     * (0:source, 1:dest, 2:action).
+     */
+    void set_block_end(uint32_t block);
 
     /**
      * Visitor implementation.
