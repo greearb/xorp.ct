@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.4 2005/10/27 21:00:42 bms Exp $"
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.5 2006/03/16 00:04:13 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -317,6 +317,7 @@ test_config_node_id_map()
     ConfigNodeId config_node_id1("3 0");
     ConfigNodeId config_node_id2("2 3");
     ConfigNodeId config_node_id3("1 2");
+    ConfigNodeId config_node_id_out_of_order("50 60");
     ConfigNodeId config_node_id_unknown("10 20");
     ConfigNodeIdMap<uint32_t> node_id_map;
     ConfigNodeIdMap<uint32_t>::iterator iter;
@@ -332,16 +333,25 @@ test_config_node_id_map()
 		   "insert(config_node_id2)");
     verbose_assert(node_id_map.insert(config_node_id3, foo++).second == true,
 		   "insert(config_node_id3)");
+    verbose_assert(node_id_map.insert_out_of_order(config_node_id_out_of_order,
+						   foo++).second == true,
+		   "insert(config_node_id_out_of_order)");
     test_string = config_node_id1.str() + ", " + config_node_id2.str() + ", "
-	+ config_node_id3.str();
+	+ config_node_id3.str() + ", " + config_node_id_out_of_order.str(); 
     verbose_match(node_id_map.str(), test_string);
+
+    //
+    // Try to reinsert an element with the same node ID. This should fail.
+    //
+    verbose_assert(node_id_map.insert(config_node_id3, foo++).second == false,
+		   "insert(config_node_id3)");
 
     // Test for an unknown element
     verbose_assert(node_id_map.find(config_node_id_unknown)
 		   == node_id_map.end(), "find(config_node_id_unknown)");
 
     // Test the elements
-    verbose_assert(node_id_map.size() == 3, "size(3)");
+    verbose_assert(node_id_map.size() == 4, "size(4)");
     verbose_assert(node_id_map.empty() == false, "empty()");
     iter = node_id_map.begin();
     verbose_match(iter->first.str(), config_node_id1.str());
@@ -355,17 +365,22 @@ test_config_node_id_map()
     verbose_match(iter->first.str(), config_node_id3.str());
     verbose_assert(node_id_map.find(config_node_id3) == iter,
 		   "find(config_node_id3)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id_out_of_order.str());
+    verbose_assert(node_id_map.find(config_node_id_out_of_order) == iter,
+		   "find(config_node_id_out_of_order)");
 
     // Erase the first element by using an interator
     iter = node_id_map.begin();
     node_id_map.erase(iter);
 
     // Test the remaining elements
-    verbose_assert(node_id_map.size() == 2, "size(2)");
+    verbose_assert(node_id_map.size() == 3, "size(3)");
     verbose_assert(node_id_map.empty() == false, "empty()");
     verbose_assert(node_id_map.find(config_node_id1) == node_id_map.end(),
 		   "find(config_node_id1)");
-    test_string = config_node_id2.str() + ", " + config_node_id3.str();
+    test_string = config_node_id2.str() + ", " + config_node_id3.str() + ", "
+	+ config_node_id_out_of_order.str();
     verbose_match(node_id_map.str(), test_string);
     iter = node_id_map.begin();
     verbose_match(iter->first.str(), config_node_id2.str());
@@ -375,22 +390,31 @@ test_config_node_id_map()
     verbose_match(iter->first.str(), config_node_id3.str());
     verbose_assert(node_id_map.find(config_node_id3) == iter,
 		   "find(config_node_id3)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id_out_of_order.str());
+    verbose_assert(node_id_map.find(config_node_id_out_of_order) == iter,
+		   "find(config_node_id_out_of_order)");
 
     // Erase the new first element by using a node ID
     iter = node_id_map.begin();
     node_id_map.erase(iter->first);
 
     // Test the remaining elements
-    verbose_assert(node_id_map.size() == 1, "size(1)");
+    verbose_assert(node_id_map.size() == 2, "size(2)");
     verbose_assert(node_id_map.empty() == false, "empty()");
     verbose_assert(node_id_map.find(config_node_id2) == node_id_map.end(),
 		   "find(config_node_id2)");
-    test_string = config_node_id3.str();
+    test_string = config_node_id3.str() + ", "
+	+ config_node_id_out_of_order.str();
     verbose_match(node_id_map.str(), test_string);
     iter = node_id_map.begin();
     verbose_match(iter->first.str(), config_node_id3.str());
     verbose_assert(node_id_map.find(config_node_id3) == iter,
 		   "find(config_node_id3)");
+    ++iter;
+    verbose_match(iter->first.str(), config_node_id_out_of_order.str());
+    verbose_assert(node_id_map.find(config_node_id_out_of_order) == iter,
+		   "find(config_node_id_out_of_order)");
 
     // Remove all elements
     node_id_map.clear();
@@ -398,6 +422,9 @@ test_config_node_id_map()
     verbose_assert(node_id_map.empty() == true, "empty()");
     verbose_assert(node_id_map.find(config_node_id3) == node_id_map.end(),
 		   "find(config_node_id3)");
+    verbose_assert(node_id_map.find(config_node_id_out_of_order)
+		   == node_id_map.end(),
+		   "find(config_node_id_out_of_order)");
 }
 
 int

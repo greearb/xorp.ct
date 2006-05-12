@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/config_node_id.hh,v 1.5 2005/12/01 23:28:09 pavlin Exp $
+// $XORP: xorp/libproto/config_node_id.hh,v 1.6 2006/03/16 00:04:12 pavlin Exp $
 
 
 #ifndef __LIBPROTO_CONFIG_NODE_ID_HH__
@@ -265,7 +265,25 @@ public:
      * of the container.
      */
     inline pair<iterator, bool> insert(const ConfigNodeId& node_id,
-				       const V& v);
+				       const V& v) {
+	return (insert_impl(node_id, v, false));
+    }
+
+    /**
+     * Insert a new element that might be out-of-order.
+     * 
+     * @param node_id the node ID of the element to insert.
+     * @param v the value of the element to insert.
+     * @return true a pair of two values: iterator and a boolean flag.
+     * If the boolean flag is true, the element was inserted successfully,
+     * and the iterator points to the new element. If the boolean flag is
+     * false, then there is an element with the same node ID, and the
+     * iterator points to that element.
+     */
+    inline pair<iterator, bool> insert_out_of_order(
+	const ConfigNodeId& node_id, const V& v) {
+	return (insert_impl(node_id, v, true));
+    }
 
     /**
      * Remove an existing element.
@@ -310,6 +328,27 @@ public:
     bool empty() const { return (size() == 0); }
 
 private:
+    /**
+     * Insert a new element.
+     * 
+     * @param node_id the node ID of the element to insert.
+     * @param v the value of the element to insert.
+     * @param ignore_missing_previous_element if true, and the
+     * previous element is not found, then insert the element at the
+     * end of the container. If this flag is false and the previous element
+     * is not found, then don't insert the element, but return an error.
+     * @return true a pair of two values: iterator and a boolean flag.
+     * If the boolean flag is true, the element was inserted successfully,
+     * and the iterator points to the new element. If the boolean flag is
+     * false, then either there is an element with the same node ID, and the
+     * iterator points to that element, or the element could not be inserted
+     * because of invalid node ID and the iterator points to @ref end()
+     * of the container.
+     */
+    inline pair<iterator, bool> insert_impl(const ConfigNodeId& node_id,
+					    const V& v,
+					    bool ignore_missing_previous_element);
+
     typedef map<ConfigNodeId::UniqueNodeId, iterator> NodeId2IterMap;
 
     NodeId2IterMap	_node_id2iter;		// The node ID to iterator map
@@ -418,7 +457,8 @@ ConfigNodeIdMap<V>::find(const ConfigNodeId& node_id) const
 
 template <typename V>
 inline pair<typename ConfigNodeIdMap<V>::iterator, bool>
-ConfigNodeIdMap<V>::insert(const ConfigNodeId& node_id, const V& v)
+ConfigNodeIdMap<V>::insert_impl(const ConfigNodeId& node_id, const V& v,
+				bool ignore_missing_previous_element)
 {
     typename NodeId2IterMap::iterator node_id_iter;
     typename ValuesList::iterator values_iter;
@@ -439,14 +479,22 @@ ConfigNodeIdMap<V>::insert(const ConfigNodeId& node_id, const V& v)
 	    break;
 	}
 	if (_values_list.size() == 0) {
-	    // Error: no other elements found
-	    return (make_pair(_values_list.end(), false));
+	    if (! ignore_missing_previous_element) {
+		// Error: no other elements found
+		return (make_pair(_values_list.end(), false));
+	    }
+	    values_iter = _values_list.end();
+	    break;
 	}
 	// Find the iterator to the previous element
 	node_id_iter = _node_id2iter.find(node_id.position());
 	if (node_id_iter == _node_id2iter.end()) {
-	    // Error: the previous element is not found
-	    return (make_pair(_values_list.end(), false));
+	    if (! ignore_missing_previous_element) {
+		// Error: the previous element is not found
+		return (make_pair(_values_list.end(), false));
+	    }
+	    values_iter = _values_list.end();
+	    break;
 	}
 	values_iter = node_id_iter->second;
 	// XXX: increment the iterator to point to the insert position
