@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.55 2006/04/14 22:24:14 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.56 2006/04/18 17:51:05 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -107,7 +107,7 @@ gmake check
     A newer compiler such as the following should be used instead:
     - gcc34 (GCC) 3.4.2 20040827 (prerelease) [FreeBSD]
 
-  * FreeBSD-6.1 (BETA3)
+  * FreeBSD-6.1
     - The code compiles with the default compiler, and the internal tests
       appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518
