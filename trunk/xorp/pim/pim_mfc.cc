@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.31 2005/08/30 23:50:15 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mfc.cc,v 1.32 2006/03/16 00:04:51 pavlin Exp $"
 
 //
 // PIM Multicast Forwarding Cache handling
@@ -465,7 +465,8 @@ PimMfc::update_mfc(uint32_t new_iif_vif_index, const Mifset& new_olist,
     if ((pim_mre_sg != NULL)
 	&& (! pim_mre_sg->is_spt())
 	&& (pim_mre_sg->rpf_interface_s() != pim_mre_sg->rpf_interface_rp())
-	&& (pim_mre_sg->was_switch_to_spt_desired_sg())) {
+	&& (pim_mre_sg->was_switch_to_spt_desired_sg()
+	    || pim_mre_sg->is_join_desired_sg())) {
 	if (pim_mre_sg->rpf_interface_s() != Vif::VIF_INDEX_INVALID)
 	    new_olist_disable_wrongvif.reset(pim_mre_sg->rpf_interface_s());
     }
