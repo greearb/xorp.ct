@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.114 2006/04/20 08:05:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.115 2006/05/12 02:58:39 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -98,7 +98,7 @@ Release 1.3 (2006/??/??)
     - 
 
   PIM-SM:
-    - 
+    - Bug fix related to the SPT switch (the bug is *BSD specific).
 
   FIB2MRIB:
     - 
