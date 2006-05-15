@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.12 2006/03/25 03:48:44 pavlin Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.13 2006/05/15 20:22:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -101,7 +101,7 @@ AuthHandlerBase::set_error(const string& error_msg)
 // NullAuthHandler implementation
 
 const char*
-NullAuthHandler::name() const
+NullAuthHandler::effective_name() const
 {
     return auth_type_name();
 }
@@ -166,7 +166,7 @@ NullAuthHandler::authenticate_outbound(vector<uint8_t>& pkt)
 // Plaintext handler implementation
 
 const char*
-PlaintextAuthHandler::name() const
+PlaintextAuthHandler::effective_name() const
 {
     return auth_type_name();
 }
@@ -388,13 +388,13 @@ MD5AuthHandler::MD5AuthHandler(EventLoop& eventloop)
 }
 
 const char*
-MD5AuthHandler::name() const
+MD5AuthHandler::effective_name() const
 {
     //
     // XXX: if no valid keys, then don't use any authentication
     //
     if (_valid_key_chain.empty()) {
-	return (_null_handler.name());
+	return (_null_handler.effective_name());
     }
 
     return auth_type_name();

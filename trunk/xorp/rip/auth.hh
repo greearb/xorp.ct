@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.18 2006/03/24 03:03:57 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.19 2006/03/25 09:36:24 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -43,9 +43,9 @@ public:
     virtual ~AuthHandlerBase();
 
     /**
-     * Get name of authentication scheme.
+     * Get the effective name of the authentication scheme.
      */
-    virtual const char* name() const = 0;
+    virtual const char* effective_name() const = 0;
 
     /**
      * Reset the authentication state.
@@ -135,9 +135,9 @@ private:
 class NullAuthHandler : public AuthHandlerBase {
 public:
     /**
-     * Get name of authentication scheme.
+     * Get the effective name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.
@@ -213,9 +213,9 @@ public:
 class PlaintextAuthHandler : public AuthHandlerBase {
 public:
     /**
-     * Get name of authentication scheme.
+     * Get the effective name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.
@@ -458,9 +458,9 @@ public:
     MD5AuthHandler(EventLoop& eventloop);
 
     /**
-     * Get name of authentication scheme.
+     * Get the effective name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/auth.hh,v 1.8 2006/03/24 03:16:55 pavlin Exp $
+// $XORP: xorp/ospf/auth.hh,v 1.9 2006/03/24 08:20:08 pavlin Exp $
 
 #ifndef __OSPF_AUTH_HH__
 #define __OSPF_AUTH_HH__
@@ -40,11 +40,11 @@ class AuthHandlerBase {
     virtual ~AuthHandlerBase();
 
     /**
-     * Get the name of the authentication scheme.
+     * Get the effective name of the authentication scheme.
      *
      * @return the name of the authentication scheme.
      */
-    virtual const char* name() const = 0;
+    virtual const char* effective_name() const = 0;
 
     /**
      * Reset the authentication state.
@@ -109,11 +109,11 @@ public:
     static const OspfTypes::AuType AUTH_TYPE = OspfTypes::NULL_AUTHENTICATION;
 
     /**
-     * Get the name of the authentication scheme.
+     * Get the effective name of the authentication scheme.
      *
      * @return the name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.
@@ -165,11 +165,11 @@ class PlaintextAuthHandler : public AuthHandlerBase {
     static const OspfTypes::AuType AUTH_TYPE = OspfTypes::SIMPLE_PASSWORD;
 
     /**
-     * Get the name of the authentication scheme.
+     * Get the effective name of the authentication scheme.
      *
      * @return the name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.
@@ -404,11 +404,11 @@ public:
     MD5AuthHandler(EventLoop& eventloop);
 
     /**
-     * Get the name of the authentication scheme.
+     * Get the effective name of the authentication scheme.
      *
      * @return the name of the authentication scheme.
      */
-    const char* name() const;
+    const char* effective_name() const;
 
     /**
      * Get the method-specific name of the authentication scheme.
