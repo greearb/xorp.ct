@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.11 2006/03/24 08:20:08 pavlin Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.12 2006/03/25 03:48:44 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -794,7 +794,9 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
     PlaintextAuthHandler* plaintext_ah = NULL;
 
     XLOG_ASSERT(_auth_handler != NULL);
-    if (_auth_handler->name() != PlaintextAuthHandler::auth_type_name()) {
+
+    plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
+    if (plaintext_ah == NULL) {
 	set_method(PlaintextAuthHandler::auth_type_name());
     }
     plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
@@ -808,9 +810,12 @@ Auth::set_simple_authentication_key(const string& password, string& error_msg)
 bool
 Auth::delete_simple_authentication_key(string& error_msg)
 {
+    PlaintextAuthHandler* plaintext_ah = NULL;
+    
     XLOG_ASSERT(_auth_handler != NULL);
 
-    if (_auth_handler->name() != PlaintextAuthHandler::auth_type_name()) {
+    plaintext_ah = dynamic_cast<PlaintextAuthHandler*>(_auth_handler);
+    if (plaintext_ah != NULL) {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -846,9 +851,9 @@ Auth::set_md5_authentication_key(uint8_t key_id, const string& password,
     MD5AuthHandler* md5_ah = NULL;
 
     XLOG_ASSERT(_auth_handler != NULL);
-    if (_auth_handler->name() == MD5AuthHandler::auth_type_name()) {
-	md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
-	XLOG_ASSERT(md5_ah != NULL);
+
+    md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
+    if (md5_ah != NULL) {
 	if (md5_ah->add_key(key_id, password, start_timeval, end_timeval,
 			    max_time_drift, error_msg) != true) {
 	    error_msg = c_format("MD5 key add failed: %s", error_msg.c_str());
@@ -878,7 +883,8 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
 
     XLOG_ASSERT(_auth_handler != NULL);
 
-    if (_auth_handler->name() != MD5AuthHandler::auth_type_name()) {
+    md5_ah = dynamic_cast<MD5AuthHandler*>(_auth_handler);
+    if (md5_ah != NULL) {
 	//
 	// XXX: Here we should return a mismatch error.
 	// However, if we are adding both a simple password and MD5 handlers,
@@ -895,10 +901,6 @@ Auth::delete_md5_authentication_key(uint8_t key_id, string& error_msg)
 #endif
     }
 
-    //
-    // Find the MD5 authentication handler to modify
-    //
-    md5_ah = dynamic_cast<MD5AuthHandler *>(_auth_handler);
     XLOG_ASSERT(md5_ah != NULL);
 
     //
