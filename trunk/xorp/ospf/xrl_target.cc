@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.35 2006/03/24 20:02:48 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.36 2006/03/28 03:06:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,8 @@
 #include "xrl_target.hh"
 
 static int
-decode_time_string(const string& time_string, TimeVal& timeval)
+decode_time_string(EventLoop& eventloop, const string& time_string,
+		   TimeVal& timeval)
 {
     const char* s;
     const char* format = "%Y-%m-%d.%H:%M";
@@ -52,7 +53,16 @@ decode_time_string(const string& time_string, TimeVal& timeval)
 	return (XORP_OK);
     }
 
-    memset(&tm, 0, sizeof(tm));
+    //
+    // Initialize the parsed result with the current time, because
+    // strptime(3) would not set/modify the unspecified members of the
+    // time format (e.g, the timezone and the summer time flag).
+    //
+    TimeVal now;
+    eventloop.current_time(now);
+    time_t local_time = now.secs();
+    const struct tm* local_tm = localtime(&local_time);
+    memcpy(&tm, local_tm, sizeof(tm));
 
     s = xorp_strptime(time_string.c_str(), format, &tm);
     if ((s == NULL) || (*s != '\0')) {
@@ -737,13 +747,16 @@ XrlOspfV2Target::ospfv2_0_1_set_md5_authentication_key(
     // Decode the start and end time
     //
     if (! start_time.empty()) {
-	if (decode_time_string(start_time, start_timeval) != XORP_OK) {
+	if (decode_time_string(_ospf.get_eventloop(), start_time,
+			       start_timeval)
+	    != XORP_OK) {
 	    error_msg = c_format("Invalid start time: %s", start_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
     }
     if (! end_time.empty()) {
-	if (decode_time_string(end_time, end_timeval) != XORP_OK) {
+	if (decode_time_string(_ospf.get_eventloop(), end_time, end_timeval)
+	    != XORP_OK) {
 	    error_msg = c_format("Invalid end time: %s", end_time.c_str());
 	    return XrlCmdError::COMMAND_FAILED(error_msg);
 	}
