@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.22 2006/03/16 00:04:44 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.23 2006/05/05 23:19:51 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -281,20 +281,58 @@ public:
      */
     int delete_protocol(xorp_module_id module_id,
 			const string& module_instance_name);
-    
+
+    /**
+     * Notify the interested parties that there is membership change among
+     * the local members.
+     *
+     * @param source the source address of the (S,G) entry that has changed.
+     * In case of group-specific membership, it could be IPvX::ZERO().
+     * @param group the group address of the (S,G) entry that has changed.
+     * @param action_jp the membership change: @ref ACTION_JOIN
+     * or @ref ACTION_PRUNE.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     **/
+    int		join_prune_notify_routing(const IPvX& source,
+					  const IPvX& group,
+					  action_jp_t action_jp) const;
+    /**
+     * Get a reference to the list of all groups with members.
+     *
+     * @return a reference to the list of all groups with members.
+     */
+    list<MemberQuery *>& members() { return _members; }
+
+    //
+    // Functions for sending protocol messages
+    //
+
+    /**
+     * Send MLD or IGMP message.
+     *
+     * @param src the message source address.
+     * @param dst the message destination address.
+     * @param message_type the MLD or IGMP type of the message.
+     * @param max_resp_time the "Maximum Response Delay" or "Max Resp Time"
+     * field in the MLD or IGMP headers respectively (in the particular
+     * protocol resolution).
+     * @param group_address the "Multicast Address" or "Group Address" field
+     * in the MLD or IGMP headers respectively.
+     * @error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     **/
+    int		mld6igmp_send(const IPvX& src, const IPvX& dst,
+			      uint8_t message_type, int max_resp_time,
+			      const IPvX& group_address, string& error_msg);
+
 private:
-    friend class MemberQuery;
-    
     //
     // Private functions
     //
     bool	is_igmpv1_mode() const;	// XXX: applies only to IGMP
     const char	*proto_message_type2ascii(uint8_t message_type) const;
     buffer_t	*buffer_send_prepare();
-    int		join_prune_notify_routing(const IPvX& source,
-					  const IPvX& group,
-					  action_jp_t action_jp) const;
-    
+
     //
     // Private state
     //
@@ -331,11 +369,6 @@ private:
     //
     // Not-so handy private functions that should go somewhere else
     //
-    // Functions for sending protocol messages
-    int		mld6igmp_send(const IPvX& src, const IPvX& dst,
-			      uint8_t message_type, int max_resp_time,
-			      const IPvX& group_address, string& error_msg);
-
     // MLD/IGMP control messages recv functions
     int		mld6igmp_membership_query_recv(const IPvX& src,
 					       const IPvX& dst,

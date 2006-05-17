@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.15 2006/01/23 21:03:39 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.16 2006/03/16 00:04:43 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -123,11 +123,11 @@ MemberQuery::member_query_timer_timeout()
     
     // Remove the entry 
     list<MemberQuery *>::iterator iter;
-    for (iter = mld6igmp_vif()._members.begin();
-	 iter != mld6igmp_vif()._members.end();
+    for (iter = mld6igmp_vif().members().begin();
+	 iter != mld6igmp_vif().members().end();
 	 ++iter) {
 	if (*iter == this) {
-	    mld6igmp_vif()._members.erase(iter);
+	    mld6igmp_vif().members().erase(iter);
 	    delete this;
 	    return;
 	}

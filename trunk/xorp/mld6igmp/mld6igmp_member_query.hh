@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.6 2005/03/25 02:53:54 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.7 2006/03/16 00:04:43 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
 #define __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
@@ -86,12 +86,42 @@ public:
     uint32_t	timeout_sec()	const;
     
     /**
-     * Get the address of the host who last reported as member.
+     * Get the address of the host that last reported as member.
      * 
-     * @return the address of the host who last reported as member.
+     * @return the address of the host that last reported as member.
      */
     const IPvX& last_reported_host() const { return (_last_reported_host); }
-    
+
+    /**
+     * Set the address of the host that last reported as member.
+     *
+     * @param v the address of the host that last reported as member.
+     */
+    void set_last_reported_host(const IPvX& v) { _last_reported_host = v; }
+
+    /**
+     * Get a refererence to the timer to query for host members.
+     *
+     * @return a reference to the timer to query for host members.
+     */
+    XorpTimer& member_query_timer() { return _member_query_timer; }
+
+    /**
+     * Get a refererence to the Last Member Query timer.
+     *
+     * @return a reference to the Last Member Query timer.
+     */
+    XorpTimer& last_member_query_timer() { return _last_member_query_timer; }
+
+    /**
+     * Get a reference to the IGMP Version 1 Members Present timer.
+     *
+     * Note: this applies only for IGMP.
+     *
+     * @return a reference to the IGMP Version 1 Members Present timer.
+     */
+    XorpTimer& igmpv1_host_present_timer() { return _igmpv1_host_present_timer; }
+
     /**
      * Timeout: expire a multicast group entry.
      */
@@ -103,13 +133,11 @@ public:
     void last_member_query_timer_timeout();
     
 private:
-    friend class Mld6igmpVif;
-    
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_source;		// The source address (MLDv2 or IGMPv3)
     IPvX	_group;			// The multicast group address
-    IPvX	_last_reported_host;	// The host who last reported as member
-    XorpTimer	_member_query_timer;	// Timer to query for hosts members
+    IPvX	_last_reported_host;	// The host that last reported as member
+    XorpTimer	_member_query_timer;	// Timer to query for host members
     XorpTimer	_last_member_query_timer;   // Timer to expire this entry
     XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD
 };
