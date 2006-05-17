@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.24 2006/05/17 22:07:19 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.25 2006/05/17 23:21:50 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -335,12 +335,28 @@ private:
     const char	*proto_message_type2ascii(uint8_t message_type) const;
     buffer_t	*buffer_send_prepare();
 
+    /**
+     * Test whether I am the querier for this vif.
+     *
+     * @return true if I am the querier for this vif, otherwise false.
+     */
+    bool	i_am_querier() const;
+
+    /**
+     * Set the state whether I am the querier for this vif.
+     *
+     * @param v if true, then I am the querier for this vif.
+     */
+    void	set_i_am_querier(bool v);
+
     //
     // Private state
     //
     Mld6igmpNode& _mld6igmp_node;	// The MLD6IGMP node I belong to
     buffer_t	*_buffer_send;		// Buffer for sending messages
-#define MLD6IGMP_VIF_QUERIER  0x00000001U // I am the querier
+    enum {
+	MLD6IGMP_VIF_QUERIER	= 1 << 0 // I am the querier
+    };
     uint32_t	_proto_flags;		// Various flags (MLD6IGMP_VIF_*)
     IPvX	_primary_addr;		// The primary address on this vif
     IPvX	_querier_addr;		// IP address of the current querier

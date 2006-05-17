@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.48 2006/05/07 01:19:30 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.49 2006/05/17 23:21:49 pavlin Exp $"
 
 
 //
@@ -233,7 +233,7 @@ Mld6igmpVif::start(string& error_msg)
 
     // On startup, assume I am the MLD6IGMP Querier
     set_querier_addr(primary_addr());
-    _proto_flags |= MLD6IGMP_VIF_QUERIER;
+    set_i_am_querier(true);
     
     //
     // Start the vif with the kernel
@@ -323,7 +323,7 @@ Mld6igmpVif::stop(string& error_msg)
 	ret_value = XORP_ERROR;
     }
     
-    _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+    set_i_am_querier(false);
     set_querier_addr(IPvX::ZERO(family()));		// XXX: ANY
     _other_querier_timer.unschedule();
     _query_timer.unschedule();
@@ -954,7 +954,7 @@ Mld6igmpVif::update_primary_address(string& error_msg)
 	if (primary_addr() == querier_addr()) {
 	    // Reset the querier address
 	    set_querier_addr(IPvX::ZERO(family()));
-	    _proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+	    set_i_am_querier(false);
 	    i_was_querier = true;
 	}
 	set_primary_addr(IPvX::ZERO(family()));
@@ -1005,7 +1005,7 @@ Mld6igmpVif::update_primary_address(string& error_msg)
     if (i_was_querier) {
 	// Assume again that I am the MLD6IGMP Querier
 	set_querier_addr(primary_addr());
-	_proto_flags |= MLD6IGMP_VIF_QUERIER;
+	set_i_am_querier(true);
     }
 
     return (XORP_OK);
@@ -1165,6 +1165,24 @@ Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
     }
     
     return (XORP_OK);
+}
+
+bool
+Mld6igmpVif::i_am_querier() const
+{
+    if (_proto_flags & MLD6IGMP_VIF_QUERIER)
+	return (true);
+    else
+	return (false);
+}
+
+void
+Mld6igmpVif::set_i_am_querier(bool v)
+{
+    if (v)
+	_proto_flags |= MLD6IGMP_VIF_QUERIER;
+    else
+	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
 }
 
 size_t

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.22 2006/05/17 22:07:19 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.23 2006/05/17 23:21:49 pavlin Exp $"
 
 
 //
@@ -114,7 +114,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	// Eventually a new querier
 	_query_timer.unschedule();
 	set_querier_addr(src);
-	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+	set_i_am_querier(false);
 	TimeVal other_querier_present_interval =
 	    static_cast<int>(robust_count().get()) * query_interval().get()
 	    + query_response_interval().get() / 2;
@@ -139,9 +139,9 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
     // Response Delay specified in the message, it sets the address's timer
     // to that latter value."
     //
-    if ( (!group_address.is_zero())
+    if ( (! group_address.is_zero())
 	 && (max_resp_time != 0)
-	 && !(_proto_flags & MLD6IGMP_VIF_QUERIER)) {
+	 && (! i_am_querier())) {
 	// Find if we already have an entry for this group
 	
 	map<IPvX, MemberQuery *>::iterator iter;
@@ -338,7 +338,7 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 		return (XORP_OK);
 	    }
 	}
-	if (_proto_flags & MLD6IGMP_VIF_QUERIER) {
+	if (i_am_querier()) {
 	    // "Last Member Query Count" / "Last Listener Query Count"
 	    uint32_t query_count = robust_count().get();
 
@@ -394,7 +394,7 @@ Mld6igmpVif::other_querier_timer_timeout()
     }
     
     set_querier_addr(primary_addr());
-    _proto_flags |= MLD6IGMP_VIF_QUERIER;
+    set_i_am_querier(true);
 
     //
     // Now I am the querier. Send a general membership query.
@@ -428,7 +428,7 @@ Mld6igmpVif::query_timer_timeout()
     UNUSED(interval);
     UNUSED(dummy_error_msg);
 
-    if (! (_proto_flags & MLD6IGMP_VIF_QUERIER))
+    if (! i_am_querier())
 	return;		// I am not the querier anymore. Ignore.
 
     //
