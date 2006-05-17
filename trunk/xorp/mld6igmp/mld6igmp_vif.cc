@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.47 2006/05/05 23:19:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.48 2006/05/07 01:19:30 pavlin Exp $"
 
 
 //
@@ -123,9 +123,9 @@ Mld6igmpVif::~Mld6igmpVif()
     stop(error_msg);
     
     // Remove all members entries
-    list<MemberQuery *>::iterator iter;
+    map<IPvX, MemberQuery *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query = *iter;
+	MemberQuery *member_query = iter->second;
 	join_prune_notify_routing(member_query->source(),
 				  member_query->group(), ACTION_PRUNE);
 	delete member_query;
@@ -331,9 +331,9 @@ Mld6igmpVif::stop(string& error_msg)
     _startup_query_count = 0;
     
     // Remove all members entries
-    list<MemberQuery *>::iterator iter;
+    map<IPvX, MemberQuery *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query = *iter;
+	MemberQuery *member_query = iter->second;
 	join_prune_notify_routing(member_query->source(),
 				  member_query->group(), ACTION_PRUNE);
 	delete member_query;

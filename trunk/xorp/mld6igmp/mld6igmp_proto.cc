@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.21 2006/05/06 07:11:32 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.22 2006/05/17 22:07:19 pavlin Exp $"
 
 
 //
@@ -144,13 +144,13 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	 && !(_proto_flags & MLD6IGMP_VIF_QUERIER)) {
 	// Find if we already have an entry for this group
 	
-	list<MemberQuery *>::iterator iter;
-	for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	    MemberQuery *member_query = *iter;
-	    if (group_address != member_query->group())
-		continue;
-	    
+	map<IPvX, MemberQuery *>::iterator iter;
+	iter = _members.find(group_address);
+	if (iter != _members.end()) {
+	    //
 	    // Group found
+	    //
+	    MemberQuery *member_query = iter->second;
 	    uint32_t sec, usec;
 	    uint32_t timer_scale = mld6igmp_constant_timer_scale();
 	    TimeVal received_resp_tv;
@@ -170,8 +170,6 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 			callback(member_query,
 				 &MemberQuery::member_query_timer_timeout));
 	    }
-	    
-	    break;
 	}
     }
 
@@ -221,16 +219,13 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     }
     
     // Find if we already have an entry for this group
-    list<MemberQuery *>::iterator iter;
-    for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query_tmp = *iter;
-	if (group_address == member_query_tmp->group()) {
-	    // Group found
-	    // TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
-	    member_query = member_query_tmp;
-	    member_query->last_member_query_timer().unschedule();
-	    break;
-	}
+    map<IPvX, MemberQuery *>::iterator iter;
+    iter = _members.find(group_address);
+    if (iter != _members.end()) {
+	// Group found
+	// TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
+	member_query = iter->second;
+	member_query->last_member_query_timer().unschedule();
     }
     
     if (member_query != NULL) {
@@ -239,7 +234,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	// A new group
 	member_query = new MemberQuery(*this, source_address, group_address);
 	member_query->set_last_reported_host(src);
-	_members.push_back(member_query);
+	_members.insert(make_pair(group_address, member_query));
 	// notify routing (+)    
 	join_prune_notify_routing(member_query->source(),
 				  member_query->group(),
@@ -327,13 +322,13 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     }
     
     // Find if this group already has an entry
-    list<MemberQuery *>::iterator iter;
-    for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query = *iter;
-	if (group_address != member_query->group())
-	    continue;
-
+    map<IPvX, MemberQuery *>::iterator iter;
+    iter = _members.find(group_address);
+    if (iter != _members.end()) {
+	//
 	// Group found
+	//
+	MemberQuery *member_query = iter->second;
 	if (proto_is_igmp()) {
 	    if (member_query->igmpv1_host_present_timer().scheduled()) {
 		//

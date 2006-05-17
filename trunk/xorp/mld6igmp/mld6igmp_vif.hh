@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.23 2006/05/05 23:19:51 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.24 2006/05/17 22:07:19 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -23,7 +23,7 @@
 //
 
 
-#include <list>
+#include <map>
 #include <utility>
 
 #include "libxorp/config_param.hh"
@@ -184,14 +184,23 @@ public:
     void	set_querier_addr(const IPvX& v) { _querier_addr = v;	}
 
     /**
-     * Get the list with the multicast membership
+     * Get the map with the multicast membership
      * information (@ref MemberQuery).
      * 
-     * @return the list with the multicast membership
+     * @return the map with the multicast membership
      * information (@ref MemberQuery).
      */
-    const list<MemberQuery *>& members() const { return (_members); }
-    
+    map<IPvX, MemberQuery *>& members() { return (_members); }
+
+    /**
+     * Get the map with the multicast membership
+     * information (@ref MemberQuery).
+     * 
+     * @return the map with the multicast membership
+     * information (@ref MemberQuery).
+     */
+    const map<IPvX, MemberQuery *>& members() const { return (_members); }
+
     /**
      * Test if the protocol is Source-Specific Multicast (e.g., IGMPv3
      * or MLDv2).
@@ -296,13 +305,6 @@ public:
     int		join_prune_notify_routing(const IPvX& source,
 					  const IPvX& group,
 					  action_jp_t action_jp) const;
-    /**
-     * Get a reference to the list of all groups with members.
-     *
-     * @return a reference to the list of all groups with members.
-     */
-    list<MemberQuery *>& members() { return _members; }
-
     //
     // Functions for sending protocol messages
     //
@@ -348,7 +350,7 @@ private:
 						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
-    list<MemberQuery *> _members;	// List of all groups with members
+    map<IPvX, MemberQuery *> _members;	// Map of all groups with members
 
     //
     // Misc configuration parameters

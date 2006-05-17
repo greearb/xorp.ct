@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.21 2005/08/18 15:35:30 bms Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.22 2006/03/16 00:04:44 pavlin Exp $"
 
 
 //
@@ -350,11 +350,11 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	list<MemberQuery *>::const_iterator iter;
+	map<IPvX, MemberQuery *>::const_iterator iter;
 	for (iter = mld6igmp_vif->members().begin();
 	     iter != mld6igmp_vif->members().end();
 	     ++iter) {
-	    MemberQuery *member_query = *iter;
+	    MemberQuery *member_query = iter->second;
 	    // Test if we should print this entry
 	    bool do_print = true;
 	    if (groups.size()) {
