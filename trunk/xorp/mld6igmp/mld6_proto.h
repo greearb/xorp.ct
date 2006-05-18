@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.9 2005/10/30 21:27:58 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.10 2006/03/16 00:04:43 pavlin Exp $
  */
 
 
@@ -47,7 +47,7 @@
 #define MLD_VERSION_DEFAULT			MLD_V1
 
 /*
- * MLD-related missing definitions
+ * MLDv1-related missing definitions
  *
  * Note that on newer systems all MLD-related definitions use
  * mld_xxx and MLD_XXX instead of mld6_xxx and MLD6_XXX.
@@ -92,14 +92,6 @@
 #  endif
 #endif
 
-#ifndef MLDV2_LISTENER_REPORT
-#  ifdef MLD6V2_LISTENER_REPORT
-#    define MLDV2_LISTENER_REPORT	MLD6V2_LISTENER_REPORT
-#  else
-#    define MLDV2_LISTENER_REPORT	143
-#  endif
-#endif
-
 #ifndef MLD_MINLEN
 #  ifdef HAVE_MLD_HDR
 #    define MLD_MINLEN			(sizeof(struct mld_hdr))
@@ -108,6 +100,44 @@
 #  endif
 #endif
 
+/*
+ * MLDv2-related missing definitions
+ */
+#ifndef MLDV2_LISTENER_REPORT
+#  ifdef MLD6V2_LISTENER_REPORT
+#    define MLDV2_LISTENER_REPORT	MLD6V2_LISTENER_REPORT
+#  else
+#    define MLDV2_LISTENER_REPORT	143
+#  endif
+#endif
+
+#ifndef MLD_MODE_IS_INCLUDE
+#  define MLD_MODE_IS_INCLUDE		1
+#endif
+
+#ifndef MLD_MODE_IS_EXCLUDE
+#  define MLD_MODE_IS_EXCLUDE		2
+#endif
+
+#ifndef MLD_CHANGE_TO_INCLUDE_MODE
+#  define MLD_CHANGE_TO_INCLUDE_MODE	3
+#endif
+
+#ifndef MLD_CHANGE_TO_EXCLUDE_MODE
+#  define MLD_CHANGE_TO_EXCLUDE_MODE	4
+#endif
+
+#ifndef MLD_ALLOW_NEW_SOURCES
+#  define MLD_ALLOW_NEW_SOURCES		5
+#endif
+
+#ifndef MLD_BLOCK_OLD_SOURCES
+#  define MLD_BLOCK_OLD_SOURCES		6
+#endif
+
+#ifndef MLD_V2_QUERY_MINLEN
+#  define MLD_V2_QUERY_MINLEN		28
+#endif
 
 /*
  * Constans for Multicast Listener Discovery protocol for IPv6.
