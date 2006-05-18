@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.8 2005/08/18 15:35:30 bms Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.9 2006/03/16 00:04:43 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -105,33 +105,98 @@
 #define DVMRP_INFO_NEIGHBORS	2	/* neighbors2 data		     */
 
 /*
- * Backward-compatibility definitions
+ * IGMPv1,v2-related missing definitions
  */
-#if defined(HOST_OS_NETBSD) || defined(HOST_OS_OPENBSD)
 #ifndef IGMP_MEMBERSHIP_QUERY
-#define IGMP_MEMBERSHIP_QUERY		IGMP_HOST_MEMBERSHIP_QUERY
+#  ifdef IGMP_HOST_MEMBERSHIP_QUERY
+#    define IGMP_MEMBERSHIP_QUERY	IGMP_HOST_MEMBERSHIP_QUERY
+#  else
+#    define IGMP_MEMBERSHIP_QUERY	0x11
+#  endif
 #endif
+
 #ifndef IGMP_V1_MEMBERSHIP_REPORT
-#define IGMP_V1_MEMBERSHIP_REPORT	IGMP_v1_HOST_MEMBERSHIP_REPORT
+#  ifdef IGMP_v1_HOST_MEMBERSHIP_REPORT
+#    define IGMP_V1_MEMBERSHIP_REPORT	IGMP_v1_HOST_MEMBERSHIP_REPORT
+#  else
+#    define IGMP_V1_MEMBERSHIP_REPORT	0x12
+#  endif
 #endif
+
 #ifndef IGMP_V2_MEMBERSHIP_REPORT
-#define IGMP_V2_MEMBERSHIP_REPORT	IGMP_v2_HOST_MEMBERSHIP_REPORT
+#  ifdef IGMP_v2_HOST_MEMBERSHIP_REPORT
+#    define IGMP_V2_MEMBERSHIP_REPORT	IGMP_v2_HOST_MEMBERSHIP_REPORT
+#  else
+#    define IGMP_V2_MEMBERSHIP_REPORT	0x16
+#  endif
 #endif
+
 #ifndef IGMP_V2_LEAVE_GROUP
-#define IGMP_V2_LEAVE_GROUP		IGMP_HOST_LEAVE_MESSAGE
+#  ifdef IGMP_HOST_LEAVE_MESSAGE
+#    define IGMP_V2_LEAVE_GROUP		IGMP_HOST_LEAVE_MESSAGE
+#  else
+#    define IGMP_V2_LEAVE_GROUP		0x17
+#  endif
 #endif
+
 #ifndef IGMP_MTRACE_RESP
-#define IGMP_MTRACE_RESP		IGMP_MTRACE_REPLY
+#  ifdef IGMP_MTRACE_REPLY
+#    define IGMP_MTRACE_RESP		IGMP_MTRACE_REPLY
+#  else
+#    define IGMP_MTRACE_RESP		0x1e
+#  endif
 #endif
+
 #ifndef IGMP_MTRACE
-#define IGMP_MTRACE			IGMP_MTRACE_QUERY
+#  ifdef IGMP_MTRACE_QUERY
+#    define IGMP_MTRACE			IGMP_MTRACE_QUERY
+#  else
+#    define IGMP_MTRACE			0x1f
+#  endif
 #endif
+
+#ifndef IGMP_MINLEN
+#  define IGMP_MINLEN			8
+#endif
+
+/*
+ * IGMPv3-related missing definitions
+ */
 #ifndef IGMP_V3_MEMBERSHIP_REPORT
 #  ifdef IGMP_v3_HOST_MEMBERSHIP_REPORT
 #    define IGMP_V3_MEMBERSHIP_REPORT	IGMP_v3_HOST_MEMBERSHIP_REPORT
+#  else
+#    define IGMP_V3_MEMBERSHIP_REPORT	0x22
 #  endif
 #endif
-#endif /* HOST_OS_NETBSD || HOST_OS_OPENBSD */
+
+#ifndef IGMP_MODE_IS_INCLUDE
+#  define IGMP_MODE_IS_INCLUDE		1
+#endif
+
+#ifndef IGMP_MODE_IS_EXCLUDE
+#  define IGMP_MODE_IS_EXCLUDE		2
+#endif
+
+#ifndef IGMP_CHANGE_TO_INCLUDE_MODE
+#  define IGMP_CHANGE_TO_INCLUDE_MODE	3
+#endif
+
+#ifndef IGMP_CHANGE_TO_EXCLUDE_MODE
+#  define IGMP_CHANGE_TO_EXCLUDE_MODE	4
+#endif
+
+#ifndef IGMP_ALLOW_NEW_SOURCES
+#  define IGMP_ALLOW_NEW_SOURCES	5
+#endif
+
+#ifndef IGMP_BLOCK_OLD_SOURCES
+#  define IGMP_BLOCK_OLD_SOURCES	6
+#endif
+
+#ifndef IGMP_V3_QUERY_MINLEN
+#  define IGMP_V3_QUERY_MINLEN		12
+#endif
 
 /*
  * Structures, typedefs and macros
