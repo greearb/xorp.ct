@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/filter.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
+// $XORP: xorp/policy/common/filter.hh,v 1.3 2006/03/16 00:05:18 pavlin Exp $
 
 #ifndef __POLICY_COMMON_FILTER_HH__
 #define __POLICY_COMMON_FILTER_HH__
@@ -29,7 +29,7 @@ namespace filter {
  * IMPORT: deals with import filtering. Incoming routes from other routers and
  * possibly the rib.
  *
- * EXPORT_SOURCE_MATCH: a filter which tags routes that need to be
+ * EXPORT_SOURCEMATCH: a filter which tags routes that need to be
  * redistributed. This filter only modifies policytags.
  *
  * EXPORT: Filters outgoing routes from the routing protocols to other routers
