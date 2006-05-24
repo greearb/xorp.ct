@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_client.cc,v 1.54 2006/04/20 00:44:47 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_client.cc,v 1.55 2006/05/03 00:10:03 pavlin Exp $"
 
 
 //
@@ -1657,7 +1657,8 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
     int ret_value = 1;
     CliClient *cli_client = reinterpret_cast<CliClient*>(data);
     CliCommand *curr_cli_command = cli_client->_current_cli_command;
-    list<CliCommand *> cli_command_match_list, type_list, no_type_list;
+    list<CliCommand *> cli_command_match_list;
+    set<string> type_names, no_type_names;
     
     if (cpl == NULL)
 	return (1);
@@ -1694,12 +1695,12 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	 ++iter) {
 	CliCommand *tmp_cli_command = *iter;
 	if (tmp_cli_command->has_type_match_cb())
-	    type_list.push_back(tmp_cli_command);
+	    type_names.insert(tmp_cli_command->name());
 	else
-	    no_type_list.push_back(tmp_cli_command);
+	    no_type_names.insert(tmp_cli_command->name());
     }
 
-    if (no_type_list.size() > 1) {
+    if (no_type_names.size() > 1) {
 	// Prepare and print the initial message(s)
 	string token_line = string(line, word_end);
 	string token;
@@ -1715,7 +1716,7 @@ CliClient::command_completion_func(WordCompletion *cpl, void *data,
 	cli_client->cli_print(c_format("\n`%s' is ambiguous.", token.c_str()));
 	cli_client->cli_print("\nPossible completions:");
     } else {
-	if (type_list.size() > 0) {
+	if (type_names.size() > 0) {
 	    cli_client->command_line_help(line, word_end, false);
 	}
     }
