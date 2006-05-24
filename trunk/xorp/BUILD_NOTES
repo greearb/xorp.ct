@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.56 2006/04/18 17:51:05 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.57 2006/05/12 02:58:39 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -276,12 +276,22 @@ gmake check
     - gcc version 4.0.1 (Apple Computer, Inc. build 5250)
     - The code compiles, and the internal tests appear to succeed.
 
-3.7 Windows Server 2003 (Service Pack 1) (32-bit, x86)
-======================================================
+3.7 Microsoft Windows
+=====================
 
   * All:
-    - XORP is only supported on Windows Server 2003 SP1, and is
-      targeted for 32-bit x86 systems.
+    - We encourage users to try XORP on newer, unsupported versions of
+      Windows and report their results to the development team.
+
+    - 64-bit versions of Windows are known not to support MinGW, and are
+      therefore not currently supported by XORP.
+
+    - For instructions how to build the XORP Installer for Windows
+      see xorp/contrib/win32/installer/README.
+
+  * Windows Server 2003 (Service Pack 1) (32-bit, x86):
+    - XORP is only supported on Windows Server 2003, and is targeted for
+      32-bit x86 systems.
 
     - If a Win32 support patch is shipped for your release, please apply
       it before filing bug reports with the core team.
@@ -307,8 +317,8 @@ gmake check
 
       Certain patches must be manually applied to the MinGW toolchain before
       attempting to build XORP, as we use API functions which are present in
-      Microsoft's Platform SDK but which are not yet present in the system
-      headers which ship with MinGW as of January 2006.
+      the Windows SDK but which are not yet present in the system headers
+      which ship with MinGW as of May 2006.
 
       These may be found in the xorp/contrib/win32 directory.
 
@@ -324,11 +334,14 @@ gmake check
       * make && make install
 
       Lastly, apply the mingw.patch within /usr/include. If this patch
-      does not apply cleanly, you may need to edit unistd.h manually. We
-      find that this file changes between MinGW releases and often needs
-      manual attention. If this is the case please make a note of the
+      does not apply cleanly, you may need to edit unistd.h manually to
+      remove any references to getopt(), ftruncate(), or off_t.
+
+      We find that this file changes between MinGW releases and often
+      needs manual attention. If this is the case please make a note of the
       MinGW toolchain components you are using and contact the XORP
-      development team with this information.
+      development team with this information. We hope that this requirement
+      will go away in future.
 
     - We recommend that you install MinGW, MSYS, and the required GNU/Win32
       ports under the path C:\MinGW\, in that order.
@@ -353,8 +366,8 @@ gmake check
        * msysDTK-1.0.0
        * w32api-3.5
 
-    - Make sure that aliases exist for mingw32-make.exe as make.exe and
-      gmake.exe. We find it easier just to make copies.
+    - Make sure that symbolic links or copies of mingw32-make.exe as
+      make.exe and gmake.exe respectively in your MinGW path.
 
     - You must install the following GNU/Win32 ports:-
 
@@ -395,16 +408,35 @@ gmake check
       Win32 command prompt. If run from within any other kind of shell,
       it may not work.
 
-  * For instructions how to build the XORP Installer for Windows
-    see xorp/contrib/win32/installer/README.
+  * Windows Vista Beta 2 (Build 5381) (32-bit, x86):
 
-3.8 Windows 'Longhorn' Server
-=============================
+    - The binary snapshots for Windows Server 2003 are known to run on
+      this operating system, but are not officially supported [yet].
 
-  * All:
-    - This operating system is not currently supported for building XORP.
-    - The results of trying to run XORP compiled for Windows Server 2003 SP1
-      (32-bit x86) are currently undefined.
+    - XORP is known to compile on this operating system, but is currently
+      unsupported, with the following caveats as they apply to the
+      instructions given for building under Windows Server 2003:
+
+      * It is highly recommended that 'User Account Control' be disabled
+        when installing MinGW/MSYS, if not logged in as Administrator.
+      * MinGW and MSYS must be installed in separate directories in order
+        to work.
+      * As such, MSYSROOT must be set to point to the MSYS root directory,
+        and links/copies of sh.exe and bash.exe made in the MinGW tree.
+      * The GnuWin32 utilities should be installed in the MinGW tree.
+      * The latest bleeding-edge MinGW toolchain is in use (g++ 3.4.5).
+      * The use of w32api-3.7 is recommended. A new XORP support patch
+        has been added to the XORP repository for this toolchain.
+      * It is necessary to manually install the include files and import
+        libraries for w32api-3.7, as install.exe fails to operate correctly.
+      * ActiveState Python is known to install correctly; the open source
+        Python will not.
+
+      The following points only apply to the use of the XORP tinderbox:
+      * CopSSH does not install under Vista.
+      * SSH for Windows does not install under Vista.
+      * Subsystem for UNIX Applications (SUA), as an alternative means of
+        running sshd, is not ready as of this writing.
 
 4. Known problems
 =================
