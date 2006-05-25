@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_node.hh,v 1.59 2006/01/23 21:03:41 pavlin Exp $
+// $XORP: xorp/pim/pim_node.hh,v 1.60 2006/03/16 00:04:53 pavlin Exp $
 
 
 #ifndef __PIM_PIM_NODE_HH__
@@ -740,7 +740,16 @@ public:
      * otherwise reset it.
      */
     void	set_pim_vifs_dr(uint32_t vif_index, bool v);
-    
+
+    /**
+     * Find the RPF virtual interface for a given destination address.
+     * 
+     * @param dst_addr the destination address to lookup.
+     * @return the RPF virtual interface (@ref PimVif) toward @ref dst_addr
+     * if found, otherwise NULL.
+     */
+    PimVif	*pim_vif_rpf_find(const IPvX& dst_addr);
+
     /**
      * Find the RPF PIM neighbor for a given destination address.
      * 

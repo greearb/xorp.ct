@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.76 2006/01/23 21:03:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.77 2006/03/16 00:04:53 pavlin Exp $"
 
 
 //
@@ -1473,6 +1473,36 @@ PimNode::set_pim_vifs_dr(uint32_t vif_index, bool v)
 	pim_vifs_dr().reset(vif_index);
     
     pim_mrt().add_task_i_am_dr(vif_index);
+}
+
+/**
+ * PimNode::pim_vif_rpf_find:
+ * @dst_addr: The address of the destination to search for.
+ * 
+ * Find the RPF virtual interface for a destination address.
+ * 
+ * Return value: The #PimVif entry for the RPF virtual interface to @dst_addr
+ * if found, otherwise %NULL.
+ **/
+PimVif *
+PimNode::pim_vif_rpf_find(const IPvX& dst_addr)
+{
+    Mrib *mrib;
+    PimVif *pim_vif;
+
+    //
+    // Do the MRIB lookup
+    //
+    mrib = pim_mrib_table().find(dst_addr);
+    if (mrib == NULL)
+	return (NULL);
+
+    //
+    // Find the vif toward the destination address
+    //
+    pim_vif = vif_find_by_vif_index(mrib->next_hop_vif_index());
+
+    return (pim_vif);
 }
 
 /**
