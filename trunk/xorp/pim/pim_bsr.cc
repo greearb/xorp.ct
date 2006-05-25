@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.45 2006/01/23 21:03:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_bsr.cc,v 1.46 2006/03/16 00:04:50 pavlin Exp $"
 
 
 //
@@ -158,7 +158,7 @@ PimBsr::start()
 int
 PimBsr::stop()
 {
-    PimVif *pim_vif_up = NULL;
+    PimVif* pim_vif;
     string dummy_error_msg;
 
     if (is_down())
@@ -170,22 +170,7 @@ PimBsr::stop()
     //
     // Perform misc. PIM-specific stop operations
     //
-    
-    //
-    // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-    // messages. Note that the PIM Register vif is excluded.
-    //
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
-	pim_vif_up = pim_node().vif_find_by_vif_index(i);
-	if (pim_vif_up == NULL)
-	    continue;
-	if (pim_vif_up->is_pim_register())
-	    continue;
-	if (pim_vif_up->is_up())
-	    break;
-	pim_vif_up = NULL;
-    }
-    
+
     //
     // Send Bootstrap message with lowest priority
     // and Cand-RP-Adv message with holdtime of zero
@@ -228,17 +213,23 @@ PimBsr::stop()
 		       == BsrZone::STATE_ACCEPT_PREFERRED))) {
 		break;
 	    }
-	    
+
+	    //
+	    // Find the RPF vif toward the BSR
+	    //
+	    pim_vif = pim_node().pim_vif_rpf_find(active_bsr_zone->bsr_addr());
+	    if ((pim_vif == NULL) || (! pim_vif->is_up())) {
+		XLOG_ERROR("Cannot send Cand-RP Adv message to %s: "
+			   "cannot find the RPF vif",
+			   cstring(active_bsr_zone->bsr_addr()));
+		break;
+	    }
+
 	    //
 	    // Send Cand-RP-Adv messages with holdtime of zero
 	    //
-	    if (pim_vif_up == NULL) {
-		XLOG_ERROR("Cannot send Cand-RP Adv message: "
-			   "cannot find a vif that is UP and running");
-		break;
-	    }
 	    config_bsr_zone->set_is_cancel(true);
-	    pim_vif_up->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(),
+	    pim_vif->pim_cand_rp_adv_send(active_bsr_zone->bsr_addr(),
 					     *config_bsr_zone);
 	    config_bsr_zone->set_is_cancel(false);
 	} while (false);
@@ -264,7 +255,7 @@ PimBsr::stop()
 	    active_bsr_zone->new_fragment_tag();
 	    active_bsr_zone->set_is_cancel(true);
 	    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
-		PimVif *pim_vif = pim_node().vif_find_by_vif_index(i);
+		pim_vif = pim_node().vif_find_by_vif_index(i);
 		if (pim_vif == NULL)
 		    continue;
 		pim_vif->pim_bootstrap_send(IPvX::PIM_ROUTERS(pim_vif->family()),
@@ -1264,26 +1255,7 @@ PimBsr::send_test_cand_rp_adv()
 	    }
 	}
     }
-    
-    //
-    // Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-    // messages. Note that the PIM Register vif is excluded.
-    //
-    for (uint32_t i = 0; i < pim_node().maxvifs(); i++) {
-	pim_vif = pim_node().vif_find_by_vif_index(i);
-	if (pim_vif == NULL)
-	    continue;
-	if (pim_vif->is_pim_register())
-	    continue;	
-	if (! pim_vif->is_up())
-	    continue;
-	break;	// Found
-    }
-    if (pim_vif == NULL) {
-	ret_value = XORP_ERROR;
-	goto ret_label;
-    }
-    
+
     //
     // Send the Cand-RP-Adv messages
     //
@@ -1291,6 +1263,16 @@ PimBsr::send_test_cand_rp_adv()
 	 iter_zone != _test_bsr_zone_list.end();
 	 ++iter_zone) {
 	BsrZone *bsr_zone = *iter_zone;
+
+	//
+	// Find the RPF vif toward the BSR
+	//
+	pim_vif = pim_node().pim_vif_rpf_find(bsr_zone->bsr_addr());
+	if ((pim_vif == NULL) || (! pim_vif->is_up())) {
+	    ret_value = XORP_ERROR;
+	    goto ret_label;
+	}
+
 	if (pim_vif->pim_cand_rp_adv_send(bsr_zone->bsr_addr(), *bsr_zone)
 	    < 0) {
 	    ret_value = XORP_ERROR;
@@ -2521,24 +2503,15 @@ BsrZone::candidate_rp_advertise_timer_timeout()
 		   == BsrZone::STATE_ACCEPT_PREFERRED))) {
 	    break;
 	}
-	
+
 	//
-	// Find the first vif that is UP, and use it to unicast the Cand-RP-Adv
-	// messages. Note that the PIM Register vif is excluded.
+	// Find the RPF vif toward the BSR
 	//
-	for (uint32_t i = 0; i < pim_bsr().pim_node().maxvifs(); i++) {
-	    pim_vif = pim_bsr().pim_node().vif_find_by_vif_index(i);
-	    if (pim_vif == NULL)
-		continue;
-	    if (pim_vif->is_pim_register())
-		continue;
-	    if (! pim_vif->is_up())
-		continue;
-	    break;	// Found
-	}
-	if (pim_vif == NULL) {
-	    XLOG_ERROR("Cannot send periodic Cand-RP Adv message: "
-		       "cannot find a vif that is UP and running");
+	pim_vif = pim_bsr().pim_node().pim_vif_rpf_find(active_bsr_zone->bsr_addr());
+	if ((pim_vif == NULL) || (! pim_vif->is_up())) {
+	    XLOG_ERROR("Cannot send Cand-RP Adv message to %s: "
+		       "cannot find the RPF vif",
+		       cstring(active_bsr_zone->bsr_addr()));
 	    break;
 	}
 	
