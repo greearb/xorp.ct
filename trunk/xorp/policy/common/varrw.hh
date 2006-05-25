@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.7 2005/10/02 22:21:55 abittau Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.8 2006/03/16 00:05:21 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -88,8 +88,9 @@ public:
      *
      * All pointers to elements [by write] may become invalid after a sync.
      *
+     * @return the number of pending writes that have been performed.
      */
-    virtual void sync() = 0;
+    virtual size_t sync() = 0;
 
     /**
      * Disable generating trace strings / output.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.5 2005/10/02 22:21:50 abittau Exp $"
+#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.6 2006/03/16 00:05:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,7 +70,9 @@ SemanticVarRW::set_protocol(const string& proto) {
     _protocol = proto;
 }
 
-void
+size_t
 SemanticVarRW::sync() {
     policy_utils::clear_container(_trash);
+
+    return (0);
 }

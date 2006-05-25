@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/semantic_varrw.hh,v 1.3 2005/10/02 22:21:51 abittau Exp $
+// $XORP: xorp/policy/semantic_varrw.hh,v 1.4 2006/03/16 00:05:00 pavlin Exp $
 
 #ifndef __POLICY_SEMANTIC_VARRW_HH__
 #define __POLICY_SEMANTIC_VARRW_HH__
@@ -80,8 +80,10 @@ public:
      * VarRW sync interface.
      *
      * Does garbage collection.
+     *
+     * @return the number of pending writes that have been performed.
      */
-    void sync();
+    size_t sync();
 
     /**
      * Change the protocol being simulated.

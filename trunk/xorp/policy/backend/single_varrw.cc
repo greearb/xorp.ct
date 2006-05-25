@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.10 2005/10/11 23:37:27 bms Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.11 2006/03/16 00:05:11 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -82,9 +82,10 @@ SingleVarRW::write(const Id& id, const Element& e) {
     _modified[id] = true;
 }
 
-void
+size_t
 SingleVarRW::sync() {
     bool first = true;
+    size_t var_written = 0;
 
     // it's faster doing it this way rather than STL set if VAR_MAX is small...
     for (unsigned i = 0; i < VAR_MAX; i++) {
@@ -101,6 +102,7 @@ SingleVarRW::sync() {
 	XLOG_ASSERT(e);
 	single_write(i,*e);
 	_modified[i] = false;
+	var_written++;
     }
     
     // done commiting [so the derived class may sync]
@@ -113,6 +115,8 @@ SingleVarRW::sync() {
     for (unsigned i = 0; i < _trashc; i++)
         delete _trash[i];
     _trashc = 0;
+
+    return (var_written);
 }
 
 void

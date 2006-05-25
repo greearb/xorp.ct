@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.6 2005/10/02 22:21:53 abittau Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.7 2006/03/16 00:05:12 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -68,8 +68,10 @@ public:
      * afterwards.a
      *
      * trash is also emptied upon completion.
+     *
+     * @return the number of pending writes that have been performed.
      */
-    void sync();
+    size_t sync();
 
     // XXX: be smart: register callback for element writing
     /**

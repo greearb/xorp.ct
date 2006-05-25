@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/test/file_varrw.hh,v 1.3 2005/10/02 22:21:56 abittau Exp $
+// $XORP: xorp/policy/test/file_varrw.hh,v 1.4 2006/03/16 00:05:24 pavlin Exp $
 
 #ifndef __POLICY_TEST_FILE_VARRW_HH__
 #define __POLICY_TEST_FILE_VARRW_HH__
@@ -38,7 +38,7 @@ public:
     const Element& read(const Id&);
     void write(const Id&, const Element&);
 
-    void sync();
+    size_t sync();
 
     void printVars();
     

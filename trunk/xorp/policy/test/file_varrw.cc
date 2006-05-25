@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.5 2005/10/02 22:21:56 abittau Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.6 2006/03/16 00:05:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -126,13 +126,19 @@ FileVarRW::write(const Id& id, const Element& e) {
     _map[id] = &e;
 }
 
-void
+size_t
 FileVarRW::sync() {
+    size_t var_written = 0;
+
     cout << "FileVarRW SYNC" << endl;
-    for(Map::iterator i = _map.begin(); i != _map.end(); ++i)
+    for(Map::iterator i = _map.begin(); i != _map.end(); ++i) {
 	cout << (*i).first << ": " << ((*i).second)->str() << endl;
+	var_written++;
+    }
 
     clear_trash();
+
+    return (var_written);
 }
 
 void
