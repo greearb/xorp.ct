@@ -80,10 +80,8 @@ public:
      * VarRW sync interface.
      *
      * Does garbage collection.
-     *
-     * @return the number of pending writes that have been performed.
      */
-    size_t sync();
+    void sync();
 
     /**
      * Change the protocol being simulated.

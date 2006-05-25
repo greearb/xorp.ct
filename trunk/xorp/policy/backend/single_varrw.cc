@@ -82,10 +82,9 @@ SingleVarRW::write(const Id& id, const Element& e) {
     _modified[id] = true;
 }
 
-size_t
+void
 SingleVarRW::sync() {
     bool first = true;
-    size_t var_written = 0;
 
     // it's faster doing it this way rather than STL set if VAR_MAX is small...
     for (unsigned i = 0; i < VAR_MAX; i++) {
@@ -102,7 +101,6 @@ SingleVarRW::sync() {
 	XLOG_ASSERT(e);
 	single_write(i,*e);
 	_modified[i] = false;
-	var_written++;
     }
     
     // done commiting [so the derived class may sync]
@@ -115,8 +113,6 @@ SingleVarRW::sync() {
     for (unsigned i = 0; i < _trashc; i++)
         delete _trash[i];
     _trashc = 0;
-
-    return (var_written);
 }
 
 void

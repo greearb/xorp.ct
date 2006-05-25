@@ -77,17 +77,10 @@ IvExec::run(VarRW* varrw, ostream* os)
     if(_os)
 	*_os << "Outcome of whole filter: " << fa2str(ret) << endl;
 
-    //
-    // XXX: All varrw syncronization must have happen right after
-    // each term, so the sync here must be a no-op.
-    //
-    XLOG_ASSERT(_varrw->sync() == 0);
-
-    //
-    // Perform garbage collection, because varrw may hold pointers
-    // to trash elements.
-    //
+    // important because varrw may hold pointers to trash elements
+    _varrw->sync();
     clear_trash();
+
     
     return ret;
 }
@@ -150,12 +143,6 @@ IvExec::runTerm(TermInstr& ti)
     if(_os)
 	*_os << "Outcome of term: " << fa2str(_fa) << endl;
 
-    //
-    // XXX: Synchronize the variables, in case a policy term action has written
-    // the value of a variable, and then another term uses the value of
-    // that variable.
-    //
-    _varrw->sync();
     return _fa;
 }
 

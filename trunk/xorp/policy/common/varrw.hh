@@ -88,9 +88,8 @@ public:
      *
      * All pointers to elements [by write] may become invalid after a sync.
      *
-     * @return the number of pending writes that have been performed.
      */
-    virtual size_t sync() = 0;
+    virtual void sync() = 0;
 
     /**
      * Disable generating trace strings / output.

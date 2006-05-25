@@ -126,19 +126,13 @@ FileVarRW::write(const Id& id, const Element& e) {
     _map[id] = &e;
 }
 
-size_t
+void
 FileVarRW::sync() {
-    size_t var_written = 0;
-
     cout << "FileVarRW SYNC" << endl;
-    for(Map::iterator i = _map.begin(); i != _map.end(); ++i) {
+    for(Map::iterator i = _map.begin(); i != _map.end(); ++i)
 	cout << (*i).first << ": " << ((*i).second)->str() << endl;
-	var_written++;
-    }
 
     clear_trash();
-
-    return (var_written);
 }
 
 void

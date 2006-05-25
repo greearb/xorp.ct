@@ -38,7 +38,7 @@ public:
     const Element& read(const Id&);
     void write(const Id&, const Element&);
 
-    size_t sync();
+    void sync();
 
     void printVars();
     

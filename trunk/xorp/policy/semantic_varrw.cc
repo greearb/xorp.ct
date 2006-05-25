@@ -70,9 +70,7 @@ SemanticVarRW::set_protocol(const string& proto) {
     _protocol = proto;
 }
 
-size_t
+void
 SemanticVarRW::sync() {
     policy_utils::clear_container(_trash);
-
-    return (0);
 }

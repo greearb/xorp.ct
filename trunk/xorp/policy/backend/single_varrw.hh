@@ -68,10 +68,8 @@ public:
      * afterwards.a
      *
      * trash is also emptied upon completion.
-     *
-     * @return the number of pending writes that have been performed.
      */
-    size_t sync();
+    void sync();
 
     // XXX: be smart: register callback for element writing
     /**
