@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.7 2006/03/06 01:54:34 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.8 2006/03/16 00:05:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -123,7 +123,7 @@ PolicyConnectedTable<A>::lookup_route(const IPNet<A>& net) const
     i = _route_table.lookup_node(net);
 
     // check if we have route [we should have same routes as origin table].
-    if (i == _route_table.end());
+    if (i == _route_table.end())
 	return _parent->lookup_route(net); // should return null probably
     
     return i.payload();
