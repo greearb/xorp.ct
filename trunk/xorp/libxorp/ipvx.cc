@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.17 2005/07/29 20:06:31 bms Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.18 2006/03/16 00:04:30 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -533,7 +533,7 @@ IPvX::ip_version() const throw (InvalidFamily)
 	return (IPv6::ip_version());
     xorp_throw(InvalidFamily, _af);
 
-    return ((size_t)-1);
+    return ((uint32_t)-1);
 }
 
 /**
