@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.25 2005/12/22 12:18:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_click.cc,v 1.26 2006/03/16 00:03:51 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -111,8 +111,9 @@ FtiConfigEntrySetClick::add_entry4(const Fte4& fte)
 {
     bool ret_value;
 
-    if (fte.is_connected_route())
-	;	// XXX: accept directly-connected routes
+    if (fte.is_connected_route()) {
+	// XXX: accept directly-connected routes
+    }
 
     FteX ftex(fte);
     
@@ -138,8 +139,9 @@ FtiConfigEntrySetClick::delete_entry4(const Fte4& fte)
 {
     bool ret_value;
 
-    if (fte.is_connected_route())
-	;	// XXX: accept directly-connected routes
+    if (fte.is_connected_route()) {
+	// XXX: accept directly-connected routes
+    }
 
     FteX ftex(fte);
     
@@ -163,8 +165,9 @@ FtiConfigEntrySetClick::add_entry6(const Fte6& fte)
 {
     bool ret_value;
 
-    if (fte.is_connected_route())
-	;	// XXX: accept directly-connected routes
+    if (fte.is_connected_route()) {
+	// XXX: accept directly-connected routes
+    }
 
     FteX ftex(fte);
     
@@ -190,8 +193,9 @@ FtiConfigEntrySetClick::delete_entry6(const Fte6& fte)
 {
     bool ret_value;
 
-    if (fte.is_connected_route())
-	;	// XXX: accept directly-connected routes
+    if (fte.is_connected_route()) {
+	// XXX: accept directly-connected routes
+    }
 
     FteX ftex(fte);
     
