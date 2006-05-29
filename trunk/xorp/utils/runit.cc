@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.16 2006/04/03 20:10:40 bms Exp $"
+#ident "$XORP: xorp/utils/runit.cc,v 1.17 2006/04/03 21:13:49 bms Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -123,7 +123,7 @@ tokenize(const string& str,
  * @return Return the process id of the new process.
  */
 PID_T
-xorp_spawn(const string& process, const char *output = "")
+xorp_spawn(const string& process, const char *output = NULL)
 {
 #ifdef HOST_OS_WINDOWS
     HANDLE houtput;
@@ -133,7 +133,7 @@ xorp_spawn(const string& process, const char *output = "")
 
     GetStartupInfoA(&si);
 
-    if (output != "") {
+    if (output != NULL) {
 	houtput = CreateFileA(output,
 			     FILE_READ_DATA | FILE_WRITE_DATA,
 			     FILE_SHARE_READ,
@@ -226,7 +226,7 @@ xorp_spawn(const string& process, const char *output = "")
     switch (pid = fork()) {
     case 0:
 	{
-	    if (output != "") {
+	    if (output != NULL) {
 		close(0);
 		close(1);
 // 		close(2);
@@ -495,7 +495,7 @@ usage(const char *myname)
 int
 main(int argc, char *argv[])
 {
-    const char *silent = "";
+    const char *silent = NULL;
     const char *output = DEVNULL;
     const char *command = 0;
 
@@ -506,7 +506,7 @@ main(int argc, char *argv[])
 	    silent = DEVNULL;
 	    break;
 	case 'v':	// All the output from the sub processes.
-	    output = "";
+	    output = NULL;
 	    break;
 	case 'c':	// The main script.
 	    command = optarg;
@@ -614,7 +614,7 @@ main(int argc, char *argv[])
 #endif /* !HOST_OS_WINDOWS */
 
 	    wait_command_pid = xorp_spawn(commands[i]._wait_command.c_str(),
-				     output);
+					  output);
 
 #ifdef HOST_OS_WINDOWS
 	    WaitForSingleObject((HANDLE)wait_command_pid, INFINITE);
