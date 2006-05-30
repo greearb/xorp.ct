@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.57 2006/05/12 02:58:39 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.58 2006/05/24 18:40:40 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -433,10 +433,12 @@ gmake check
         Python will not.
 
       The following points only apply to the use of the XORP tinderbox:
-      * CopSSH does not install under Vista.
-      * SSH for Windows does not install under Vista.
+      * A copy or link of sh.exe as bash.exe must be made for the BGP
+        regression tests to run.
+      * CopSSH does not install under Vista or Longhorn.
+      * SSH for Windows does not install under Vista or Longhorn.
       * Subsystem for UNIX Applications (SUA), as an alternative means of
-        running sshd, is not ready as of this writing.
+        running sshd, is not ready as of this writing for Vista or Longhorn.
 
 4. Known problems
 =================
