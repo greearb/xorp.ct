@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.58 2006/05/24 18:40:40 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.59 2006/05/30 15:15:34 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -107,10 +107,18 @@ gmake check
     A newer compiler such as the following should be used instead:
     - gcc34 (GCC) 3.4.2 20040827 (prerelease) [FreeBSD]
 
-  * FreeBSD-6.1
+  * FreeBSD-6.1 on i386
     - The code compiles with the default compiler, and the internal tests
       appear to succeed:
       gcc (GCC) 3.4.4 [FreeBSD] 20050518
+
+  * FreeBSD-6.1 on amd64
+    - The utils/flower_malloc/test_flower_malloc.sh test fails.
+    - The SNMP support inside the "mibs" directory fails to compile.
+    - The rest of code compiles with the following compilers, and the internal
+      tests appear to succeed:
+      gcc (GCC) 3.4.4 [FreeBSD] 20050518 (default)
+      gcc42 (GCC) 4.2.0 20060218 (experimental)
 
 3.3. NetBSD
 ===========
