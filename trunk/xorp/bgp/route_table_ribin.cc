@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.42 2005/09/28 17:31:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.43 2006/03/16 00:03:35 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -434,6 +434,14 @@ template<class A>
 void
 RibInTable<A>::push_next_changed_nexthop()
 {
+    if (_nexthop_push_active == false) {
+	//
+	// XXX: No more nexthops to push, probably because routes have
+	// been just deleted.
+	//
+	return;
+    }
+
     XLOG_ASSERT(_peer_is_up);
 
     const ChainedSubnetRoute<A>* chained_rt, *first_rt;
