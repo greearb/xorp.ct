@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.10 2006/03/16 00:04:43 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.11 2006/05/18 06:30:35 pavlin Exp $
  */
 
 
@@ -137,6 +137,34 @@
 
 #ifndef MLD_V2_QUERY_MINLEN
 #  define MLD_V2_QUERY_MINLEN		28
+#endif
+
+#ifndef MLD_HOST_MRC_EXP
+#  define MLD_HOST_MRC_EXP(x)		(((x) >> 12) & 0x0007)
+#endif
+
+#ifndef MLD_HOST_MRC_MANT
+#  define MLD_HOST_MRC_MANT(x)		((x) & 0x0fff)
+#endif
+
+#ifndef MLD_QQIC_EXP
+#  define MLD_QQIC_EXP(x)		(((x) >> 4) & 0x07)
+#endif
+
+#ifndef MLD_QQIC_MANT
+#  define MLD_QQIC_MANT(x)		((x) & 0x0f)
+#endif
+
+#ifndef MLD_QRESV
+#  define MLD_QRESV(x)			(((x) >> 4) & 0x0f)
+#endif
+
+#ifndef MLD_SFLAG
+#  define MLD_SFLAG(x)			(((x) >> 3) & 0x01)
+#endif
+
+#ifndef MLD_QRV
+#  define MLD_QRV(x)			((x) & 0x07)
 #endif
 
 /*
