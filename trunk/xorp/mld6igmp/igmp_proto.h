@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.9 2006/03/16 00:04:43 pavlin Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.10 2006/05/18 06:26:08 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -196,6 +196,26 @@
 
 #ifndef IGMP_V3_QUERY_MINLEN
 #  define IGMP_V3_QUERY_MINLEN		12
+#endif
+
+#ifndef IGMP_EXP
+#  define IGMP_EXP(x)			(((x) >> 4) & 0x07)
+#endif
+
+#ifndef IGMP_MANT
+#  define IGMP_MANT(x)			((x) & 0x0f)
+#endif
+
+#ifndef IGMP_QRESV
+#  define GMP_QRESV(x)			(((x) >> 4) & 0x0f)
+#endif
+
+#ifndef IGMP_SFLAG
+#  define IGMP_SFLAG(x)			(((x) >> 3) & 0x01)
+#endif
+
+#ifndef IGMP_QRV
+#  define IGMP_QRV(x)			((x) & 0x07)
 #endif
 
 /*
