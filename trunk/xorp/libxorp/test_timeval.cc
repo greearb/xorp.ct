@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.6 2006/03/16 00:04:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.7 2006/03/29 09:12:03 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -156,16 +156,29 @@ test_timeval_operators()
 {
     TimeVal t(100, 100);
     TimeVal mt = -t;
+    TimeVal half_t(50, 50);
 
     //
-    // Test adding time values
+    // Addition Operator
     //
-    verbose_assert(t + mt == TimeVal::ZERO(), "time addition");
+    verbose_assert(t + mt == TimeVal::ZERO(), "operator+");
 
     //
-    // Test subtraction and multiplication
+    // Substraction Operator
     //
-    verbose_assert(t - mt == 2 * t, "time subtraction and multiplication");
+    verbose_assert(t - half_t == half_t, "operator-");
+
+    //
+    // Multiplication Operator
+    //
+    verbose_assert(half_t * 2 == t, "operator*");
+    verbose_assert(half_t * 2.0 == t, "operator* (double float)");
+
+    //
+    // Division Operator
+    //
+    verbose_assert(t / 2 == half_t, "operator/");
+    verbose_assert(t / 2.0 == half_t, "operator/ (double float)");
 }
 
 static void
