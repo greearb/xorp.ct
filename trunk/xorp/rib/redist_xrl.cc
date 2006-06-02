@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.24 2006/03/30 02:21:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.25 2006/06/02 15:12:06 zec Exp $"
 
 #include <list>
 #include <string>
@@ -508,8 +508,7 @@ RedistXrlOutput<A>::start_next_task()
 	RedistXrlTask<A>* t = _taskq.front();
 	if (t->dispatch(_xrl_router, _profile) == false) {
 	    // This should never happen under normal circumstances.
-	    XLOG_ASSERT(_inflight == 0);
-	    XLOG_ASSERT(_inflight >= HI_WATER);
+	    XLOG_ASSERT(_inflight > 0);
 	    _flow_controlled = true;
 	    return;
 	} else {
@@ -580,7 +579,6 @@ class CommitTransaction : public RedistXrlTask<A> {
 public:
     CommitTransaction(RedistTransactionXrlOutput<A>* parent)
 	: RedistXrlTask<A>(parent) {
-//fprintf(stderr, "committrans size=%d\n", parent->transaction_size());
 	parent->reset_transaction_size();
     }
     virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
@@ -1024,7 +1022,6 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::start_running_tasks()
 {
-    // At start we expect a start transaction followed by an add or delete
     this->start_next_task();
 }
 
