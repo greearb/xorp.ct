@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.9 2006/01/04 05:55:27 pavlin Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.10 2006/03/16 00:05:30 pavlin Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -72,16 +72,13 @@ public:
 public:
     static const uint32_t HI_WATER	 = 100;
     static const uint32_t LO_WATER	 =   5;
-    static const uint32_t MAX_RETRIES	 =  20;
-    static const uint32_t RETRY_PAUSE_MS = 100;
 
 protected:
     virtual void start_running_tasks();
     void start_next_task();
 
-    inline void 	incr_task_count();
-    inline void 	decr_task_count();
-    inline uint32_t	task_count() const;
+    inline void 	incr_inflight();
+    inline void 	decr_inflight();
 
     inline void		enqueue_task(Task* task);
     inline void		dequeue_task(Task* task);
@@ -94,10 +91,13 @@ protected:
     IPNet<A>	_network_prefix;
     string	_cookie;
 
-    TaskQueue	_tasks;
-    uint32_t	_n_tasks;
-};
+    TaskQueue	_taskq;
+    uint32_t	_queued;
+    uint32_t	_inflight;
 
+    bool	_flow_controlled;
+    bool	_callback_pending;
+};
 
 /**
  * Route Redistributor output that sends route add and deletes to
@@ -126,6 +126,8 @@ public:
     void finishing_route_dump();
 
     void task_completed(Task* task);
+
+    inline void set_callback_pending(bool v);
 
     inline uint32_t tid() const;
     inline void set_tid(uint32_t v);
@@ -173,6 +175,28 @@ RedistXrlOutput<A>::cookie() const
 
 
 // ----------------------------------------------------------------------------
+// Protected RedistXrlOutput inline methods
+
+template <typename A>
+void
+RedistXrlOutput<A>::incr_inflight()
+{
+    if (_inflight == HI_WATER - 1)
+	_flow_controlled = true;
+    _inflight++;
+}
+
+template <typename A>
+void
+RedistXrlOutput<A>::decr_inflight()
+{
+    if (_flow_controlled && _inflight < LO_WATER)
+	_flow_controlled = false;
+    _inflight--;
+}
+
+
+// ----------------------------------------------------------------------------
 // Inline RedistrTransactionXrlOutput methods
 
 template <typename A>
@@ -187,6 +211,13 @@ inline void
 RedistTransactionXrlOutput<A>::set_tid(uint32_t v)
 {
     _tid = v;
+}
+
+template <typename A>
+inline void
+RedistTransactionXrlOutput<A>::set_callback_pending(bool v)
+{
+    this->_callback_pending = v;
 }
 
 template <typename A>
