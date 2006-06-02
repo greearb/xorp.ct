@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.118 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.119 2006/04/15 07:44:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -95,7 +95,8 @@ PeerManager<A>::check_area_type(OspfTypes::AreaID area,
 template <typename A>
 bool
 PeerManager<A>::create_area_router(OspfTypes::AreaID area,
-				   OspfTypes::AreaType area_type)
+				   OspfTypes::AreaType area_type,
+				   bool permissive)
 {
     debug_msg("Area %s Type %s\n", pr_id(area).c_str(), 
 	      pp_area_type(area_type).c_str());
@@ -103,6 +104,8 @@ PeerManager<A>::create_area_router(OspfTypes::AreaID area,
     // Check this area doesn't already exist.
     if (0 != _areas.count(area)) {
 	XLOG_WARNING("Area %s already exists\n", pr_id(area).c_str());
+	if (permissive)
+	    return true;
 	return false;
     }
 

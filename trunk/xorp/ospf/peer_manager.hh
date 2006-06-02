@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.73 2006/03/24 08:20:09 pavlin Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.74 2006/03/28 03:06:55 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -66,9 +66,13 @@ class PeerManager {
 
     /**
      * Create an area router.
+     * @param area
+     * @param area_type
+     * @param permissive if true won't fail if the area already exists.
      */
     bool create_area_router(OspfTypes::AreaID area,
-			    OspfTypes::AreaType area_type);
+			    OspfTypes::AreaType area_type,
+			    bool permissive = true);
 
     AreaRouter<A> *get_area_router(OspfTypes::AreaID area);
 
