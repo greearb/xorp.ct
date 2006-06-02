@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.8 2006/03/16 00:05:38 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_conn.cc,v 1.9 2006/05/29 04:37:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -109,8 +109,12 @@ PolicyConnectedTable<A>::delete_route(const IPRouteEntry<A>* route,
     RouteTable<A>* next = this->next_table();
     XLOG_ASSERT(next);
 
+    // make a copy so we may modify it (e.g., by setting its policy tags)
+    IPRouteEntry<A> route_copy(*route);
+    do_filtering(route_copy); 
+
     // propagate the delete
-    return next->delete_route(route, this);
+    return next->delete_route(&route_copy, this);
 }
 
 template <class A>
