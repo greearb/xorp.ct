@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.10 2005/03/25 02:53:31 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_args.cc,v 1.11 2006/03/16 00:04:20 pavlin Exp $"
 
 #include <string.h>
 #include <stdio.h>
@@ -48,8 +48,8 @@ XrlArgs::get(const XrlAtom& dataless) const throw (XrlAtomNotFound)
 {
     const_iterator p;
     for (p = _args.begin(); p != _args.end(); ++p) {
-	if (p->name() == dataless.name() &&
-	    p->type() == dataless.type()) {
+	if (p->type() == dataless.type() &&
+	    p->name() == dataless.name()) {
 	    return *p;
 	}
     }
@@ -62,8 +62,8 @@ XrlArgs::remove(const XrlAtom& dataless) throw (XrlAtomNotFound)
 {
     iterator p;
     for (p = _args.begin(); p != _args.end(); ++p) {
-	if (p->name() == dataless.name() &&
-	    p->type() == dataless.type()) {
+	if (p->type() == dataless.type() &&
+	    p->name() == dataless.name()) {
 	    _args.erase(p);
 	    return;
 	    }
