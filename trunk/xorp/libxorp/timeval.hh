@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.26 2006/03/25 01:04:25 bms Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.27 2006/05/05 20:27:13 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -302,6 +302,16 @@ public:
     inline TimeVal operator/(int n) const;
 
     /**
+     * Division Operator for unsigned integer operand
+     *
+     * @param n the unsigned integer value used in dividing the value of this
+     * object with.
+     * @return the TimeVal value of dividing the value of this object
+     * by @ref n.
+     */
+    inline TimeVal operator/(unsigned int n) const;
+
+    /**
      * Division Operator for double-float operand
      *
      * @param d the double-float value used in dividing the value of this
@@ -488,6 +498,12 @@ inline TimeVal
 TimeVal::operator/(int n) const
 {
     return TimeVal(_sec / n, ((_sec % n) * ONE_MILLION + _usec) / n);
+}
+
+inline TimeVal
+TimeVal::operator/(unsigned int n) const
+{
+    return (*this)/(static_cast<int>(n));
 }
 
 inline TimeVal
