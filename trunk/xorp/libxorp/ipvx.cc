@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.19 2006/05/29 03:23:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.20 2006/06/06 00:29:57 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -600,4 +600,4 @@ IPVX_CONSTANT_ACCESSOR(OSPFIGP_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(OSPFIGP_DESIGNATED_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(RIP2_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(PIM_ROUTERS);
-IPVX_CONSTANT_ACCESSOR(IGMPV3_MLDV2_ROUTERS);
+IPVX_CONSTANT_ACCESSOR(SSM_ROUTERS);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.20 2006/03/16 00:04:29 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.21 2006/06/06 00:29:56 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -310,4 +310,4 @@ const IPv4 IPv4Constants::ospfigp_routers(IPv4(htonl_literal(0xe0000005U)));
 const IPv4 IPv4Constants::ospfigp_designated_routers(IPv4(htonl_literal(0xe0000006U)));
 const IPv4 IPv4Constants::rip2_routers(IPv4(htonl_literal(0xe0000009U)));
 const IPv4 IPv4Constants::pim_routers(IPv4(htonl_literal(0xe000000dU)));
-const IPv4 IPv4Constants::igmpv3_mldv2_routers(IPv4(htonl_literal(0xe0000016U)));
+const IPv4 IPv4Constants::ssm_routers(IPv4(htonl_literal(0xe0000016U)));

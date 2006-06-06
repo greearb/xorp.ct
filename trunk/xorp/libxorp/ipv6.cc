@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.21 2006/03/16 00:04:30 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.22 2006/06/06 00:29:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -467,4 +467,4 @@ const IPv6 IPv6Constants::ospfigp_routers("FF02::5");
 const IPv6 IPv6Constants::ospfigp_designated_routers("FF02::6");
 const IPv6 IPv6Constants::rip2_routers("FF02::9");
 const IPv6 IPv6Constants::pim_routers("FF02::D");
-const IPv6 IPv6Constants::igmpv3_mldv2_routers("FF02::16");
+const IPv6 IPv6Constants::ssm_routers("FF02::16");

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.19 2006/04/05 07:15:51 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.20 2006/06/06 00:29:57 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1098,10 +1098,10 @@ test_ipvx_address_const()
     verbose_assert(IPvX::PIM_ROUTERS(AF_INET6) == IPvX("ff02::d"),
 		   "PIM_ROUTERS()");
 
-    verbose_assert(IPvX::IGMPV3_MLDV2_ROUTERS(AF_INET) == IPvX("224.0.0.22"),
-		   "IGMPV3_MLDV2_ROUTERS()");
-    verbose_assert(IPvX::IGMPV3_MLDV2_ROUTERS(AF_INET6) == IPvX("ff02::16"),
-		   "IGMPV3_MLDV2_ROUTERS()");
+    verbose_assert(IPvX::SSM_ROUTERS(AF_INET) == IPvX("224.0.0.22"),
+		   "SSM_ROUTERS()");
+    verbose_assert(IPvX::SSM_ROUTERS(AF_INET6) == IPvX("ff02::16"),
+		   "SSM_ROUTERS()");
 }
 
 /**

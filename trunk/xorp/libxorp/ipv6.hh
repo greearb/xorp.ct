@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.26 2006/04/05 07:15:51 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.27 2006/06/06 00:29:57 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -569,7 +569,7 @@ public:
     inline static const IPv6& OSPFIGP_DESIGNATED_ROUTERS(int af = AF_INET6);
     inline static const IPv6& RIP2_ROUTERS(int af = AF_INET6);
     inline static const IPv6& PIM_ROUTERS(int af = AF_INET6);
-    inline static const IPv6& IGMPV3_MLDV2_ROUTERS(int af = AF_INET6);
+    inline static const IPv6& SSM_ROUTERS(int af = AF_INET6);
 
     /**
      * Number of bits in address as a constant.
@@ -629,7 +629,7 @@ struct IPv6Constants {
 	ospfigp_designated_routers,
 	rip2_routers,
 	pim_routers,
-	igmpv3_mldv2_routers;
+	ssm_routers;
 };
 
 inline const IPv6& IPv6::ZERO(int) {
@@ -680,8 +680,8 @@ inline const IPv6& IPv6::PIM_ROUTERS(int) {
     return IPv6Constants::pim_routers;
 }
 
-inline const IPv6& IPv6::IGMPV3_MLDV2_ROUTERS(int) {
-    return IPv6Constants::igmpv3_mldv2_routers;
+inline const IPv6& IPv6::SSM_ROUTERS(int) {
+    return IPv6Constants::ssm_routers;
 }
 
 inline IPv6 IPv6::operator~() const {

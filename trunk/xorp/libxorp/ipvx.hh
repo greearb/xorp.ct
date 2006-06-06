@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.20 2006/04/05 07:15:51 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.21 2006/06/06 00:29:57 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -647,7 +647,7 @@ public:
 	throw (InvalidFamily);
     static const IPvX& PIM_ROUTERS(int family)
 	throw (InvalidFamily);
-    static const IPvX& IGMPV3_MLDV2_ROUTERS(int family)
+    static const IPvX& SSM_ROUTERS(int family)
 	throw (InvalidFamily);
 
 private:
