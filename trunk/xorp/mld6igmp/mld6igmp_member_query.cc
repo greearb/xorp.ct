@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.17 2006/05/17 22:07:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.18 2006/05/17 23:21:49 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -57,17 +57,14 @@
 /**
  * MemberQuery::MemberQuery:
  * @mld6igmp_vif: The vif interface this entry belongs to.
- * @source: The entry source address. It could be NULL for (*,G) entries.
  * @group: The entry group address.
  * 
  * Create a (S,G) or (*,G) entry used by IGMP or MLD to query host members.
  * 
  * Return value: 
  **/
-MemberQuery::MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& source,
-			 const IPvX& group)
+MemberQuery::MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& group)
     : _mld6igmp_vif(mld6igmp_vif),
-      _source(source),
       _group(group)
 {
     
@@ -84,7 +81,7 @@ MemberQuery::~MemberQuery()
     // TODO: Notify routing (-)
     // TODO: ??? Maybe not the right place, or this should
     // be the only place to use ACTION_PRUNE notification??
-    // join_prune_notify_routing(source(), group(), ACTION_PRUNE);
+    // join_prune_notify_routing(IPvX::ZERO(family()), group(), ACTION_PRUNE);
 }
 
 /**
@@ -117,7 +114,7 @@ MemberQuery::member_query_timer_timeout()
 	_igmpv1_host_present_timer.unschedule();
     
     // notify routing (-)
-    mld6igmp_vif().join_prune_notify_routing(source(),
+    mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
 					     group(),
 					     ACTION_PRUNE);
     

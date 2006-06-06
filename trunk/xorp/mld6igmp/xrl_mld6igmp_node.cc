@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.52 2006/03/16 00:04:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.53 2006/05/17 23:21:50 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2776,7 +2776,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 	send_add_membership(xrl_sender_name.c_str(),
 			    src_module_id,
 			    mld6igmp_vif->vif_index(),
-			    member_query->source(),
+			    IPvX::ZERO(family()),
 			    member_query->group());
     }
     
@@ -2850,7 +2850,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 	send_add_membership(xrl_sender_name.c_str(),
 			    src_module_id,
 			    mld6igmp_vif->vif_index(),
-			    member_query->source(),
+			    IPvX::ZERO(family()),
 			    member_query->group());
     }
     

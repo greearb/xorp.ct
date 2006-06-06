@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.25 2006/05/17 23:21:50 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.26 2006/05/17 23:53:24 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -315,7 +315,7 @@ public:
      * @param src the message source address.
      * @param dst the message destination address.
      * @param message_type the MLD or IGMP type of the message.
-     * @param max_resp_time the "Maximum Response Delay" or "Max Resp Time"
+     * @param max_resp_code the "Maximum Response Code" or "Max Resp Code"
      * field in the MLD or IGMP headers respectively (in the particular
      * protocol resolution).
      * @param group_address the "Multicast Address" or "Group Address" field
@@ -324,7 +324,7 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int		mld6igmp_send(const IPvX& src, const IPvX& dst,
-			      uint8_t message_type, int max_resp_time,
+			      uint8_t message_type, uint16_t max_resp_code,
 			      const IPvX& group_address, string& error_msg);
 
 private:
@@ -391,25 +391,35 @@ private:
     int		mld6igmp_membership_query_recv(const IPvX& src,
 					       const IPvX& dst,
 					       uint8_t message_type,
-					       int igmp_max_resp_time,
+					       uint16_t max_resp_code,
 					       const IPvX& group_address,
 					       buffer_t *buffer);
+    int		mld6igmp_ssm_membership_query_recv(const IPvX& src,
+						   const IPvX& dst,
+						   uint8_t message_type,
+						   uint16_t max_resp_code,
+						   const IPvX& group_address,
+						   buffer_t *buffer);
     int		mld6igmp_membership_report_recv(const IPvX& src,
 						const IPvX& dst,
 						uint8_t message_type,
-						int igmp_max_resp_time,
+						uint16_t max_resp_code,
 						const IPvX& group_address,
 						buffer_t *buffer);
     int		mld6igmp_leave_group_recv(const IPvX& src,
 					  const IPvX& dst,
 					  uint8_t message_type,
-					  int igmp_max_resp_time,
+					  uint16_t max_resp_code,
 					  const IPvX& group_address,
 					  buffer_t *buffer);
-    int		igmp_v1_config_consistency_check(const IPvX& src,
-						 const IPvX& dst,
-						 uint8_t message_type,
-						 int igmp_message_version);
+    int		mld6igmp_ssm_membership_report_recv(const IPvX& src,
+						    const IPvX& dst,
+						    uint8_t message_type,
+						    buffer_t *buffer);
+    int		mld6igmp_version_consistency_check(const IPvX& src,
+						   const IPvX& dst,
+						   uint8_t message_type,
+						   int message_version);
 
     // MLD/IGMP control messages process functions
     int		mld6igmp_process(const IPvX& src,
@@ -426,8 +436,18 @@ private:
     uint8_t	mld6igmp_constant_membership_query() const;
 
     void	other_querier_timer_timeout();
-    
     void	query_timer_timeout();
+
+    void	decode_exp_time_code8(uint8_t code, TimeVal& timeval,
+				      uint32_t timer_scale);
+    void	decode_exp_time_code16(uint16_t code, TimeVal& timeval,
+				       uint32_t timer_scale);
+    void	encode_exp_time_code8(const TimeVal& timeval,
+				      uint8_t& code,
+				      uint32_t timer_scale);
+    void	encode_exp_time_code16(const TimeVal& timeval,
+				       uint16_t& code,
+				       uint32_t timer_scale);
 };
 
 //

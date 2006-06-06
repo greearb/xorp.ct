@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.49 2006/05/17 23:21:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.50 2006/05/17 23:53:24 pavlin Exp $"
 
 
 //
@@ -126,7 +126,7 @@ Mld6igmpVif::~Mld6igmpVif()
     map<IPvX, MemberQuery *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
 	MemberQuery *member_query = iter->second;
-	join_prune_notify_routing(member_query->source(),
+	join_prune_notify_routing(IPvX::ZERO(family()),
 				  member_query->group(), ACTION_PRUNE);
 	delete member_query;
     }
@@ -181,9 +181,9 @@ bool
 Mld6igmpVif::proto_is_ssm() const
 {
     if (proto_is_igmp())
-	return (proto_version() >= 3);
+	return (proto_version() >= IGMP_V3);
     if (proto_is_mld6())
-	return (proto_version() >= 2);
+	return (proto_version() >= MLD_V2);
     
     return (false);
 }
@@ -200,8 +200,6 @@ int
 Mld6igmpVif::start(string& error_msg)
 {
     string dummy_error_msg;
-    
-    UNUSED(dummy_error_msg);
 
     if (! is_enabled())
 	return (XORP_OK);
@@ -245,19 +243,24 @@ Mld6igmpVif::start(string& error_msg)
     }
     
     //
-    // Join the appropriate multicast groups: ALL-SYSTEMS and ALL-ROUTERS
+    // Join the appropriate multicast groups: ALL-SYSTEMS, ALL-ROUTERS,
+    // and SSM-ROUTERS.
     //
-    const IPvX group1 = IPvX::MULTICAST_ALL_SYSTEMS(family());
-    const IPvX group2 = IPvX::MULTICAST_ALL_ROUTERS(family());
-    if (mld6igmp_node().join_multicast_group(vif_index(), group1) != XORP_OK) {
-	error_msg = c_format("cannot join group %s on vif %s",
-			     cstring(group1), name().c_str());
-	return (XORP_ERROR);
-    }
-    if (mld6igmp_node().join_multicast_group(vif_index(), group2) != XORP_OK) {
-	error_msg = c_format("cannot join group %s on vif %s",
-			     cstring(group2), name().c_str());
-	return (XORP_ERROR);
+    list<IPvX> groups;
+    list<IPvX>::iterator groups_iter;
+    groups.push_back(IPvX::MULTICAST_ALL_SYSTEMS(family()));
+    groups.push_back(IPvX::MULTICAST_ALL_ROUTERS(family()));
+    groups.push_back(IPvX::SSM_ROUTERS(family()));
+    for (groups_iter = groups.begin();
+	 groups_iter != groups.end();
+	 ++groups_iter) {
+	const IPvX& group = *groups_iter;
+	if (mld6igmp_node().join_multicast_group(vif_index(), group)
+	    != XORP_OK) {
+	    error_msg = c_format("cannot join group %s on vif %s",
+				 cstring(group), name().c_str());
+	    return (XORP_ERROR);
+	}
     }
     
     //
@@ -334,7 +337,7 @@ Mld6igmpVif::stop(string& error_msg)
     map<IPvX, MemberQuery *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
 	MemberQuery *member_query = iter->second;
-	join_prune_notify_routing(member_query->source(),
+	join_prune_notify_routing(IPvX::ZERO(family()),
 				  member_query->group(), ACTION_PRUNE);
 	delete member_query;
     }
@@ -397,9 +400,9 @@ Mld6igmpVif::disable()
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The MLD or IGMP type of the message.
- * @max_resp_time: The "Maximum Response Delay" or "Max Resp Time"
- * field in the MLD or IGMP headers respectively (in the particular protocol
- * resolution).
+ * @max_resp_code: The "Maximum Response Code" or "Max Resp Code"
+ * field in the MLD or IGMP headers respectively (in the particular
+ * protocol resolution).
  * @group_address: The "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
  * @error_msg: The error message (if error).
@@ -412,7 +415,7 @@ int
 Mld6igmpVif::mld6igmp_send(const IPvX& src,
 			   const IPvX& dst,
 			   uint8_t message_type,
-			   int max_resp_time,
+			   uint16_t max_resp_code,
 			   const IPvX& group_address,
 			   string& error_msg)
 {
@@ -431,18 +434,20 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     // Prepare the MLD or IGMP header.
     //
     buffer = buffer_send_prepare();
-    BUFFER_PUT_OCTET(message_type, buffer);	// The message type
-    if (proto_is_igmp())
-	BUFFER_PUT_OCTET(max_resp_time, buffer);
-    else
-	BUFFER_PUT_OCTET(0, buffer);		// XXX: Always 0 for MLD
-    BUFFER_PUT_HOST_16(0, buffer);		// Zero the checksum field
-    
-    if (proto_is_mld6()) {
-	BUFFER_PUT_HOST_16(max_resp_time, buffer);
-	BUFFER_PUT_HOST_16(0, buffer);		// Reserved
+    if (proto_is_igmp()) {
+	BUFFER_PUT_OCTET(message_type, buffer);	// The message type
+	BUFFER_PUT_OCTET(max_resp_code, buffer);
+	BUFFER_PUT_HOST_16(0, buffer);		// Zero the checksum field
+	BUFFER_PUT_IPVX(group_address, buffer);
     }
-    BUFFER_PUT_IPVX(group_address, buffer);
+    if (proto_is_mld6()) {
+	BUFFER_PUT_OCTET(message_type, buffer);	// The message type
+	BUFFER_PUT_OCTET(0, buffer);		// XXX: Always 0 for MLD
+	BUFFER_PUT_HOST_16(0, buffer);		// Zero the checksum field
+	BUFFER_PUT_HOST_16(max_resp_code, buffer);
+	BUFFER_PUT_HOST_16(0, buffer);		// Reserved
+	BUFFER_PUT_IPVX(group_address, buffer);
+    }
 
     //
     // Compute the checksum
@@ -562,13 +567,14 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 {
 #if defined(HAVE_IPV4_MULTICAST_ROUTING) || defined(HAVE_IPV6_MULTICAST_ROUTING)
     uint8_t message_type = 0;
-    int max_resp_time = 0;
+    uint16_t max_resp_code = 0;
     IPvX group_address(family());
     uint16_t cksum;
     bool check_router_alert_option = false;
     bool check_src_linklocal_unicast = false;
     bool check_dst_multicast = false;
     bool check_group_nodelocal_multicast = false;
+    bool decode_extra_fields = false;
     
     //
     // Message length check.
@@ -624,24 +630,20 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     
     //
-    // Get the message type and the max. resp. time.
+    // Get the message type and the max. resp. time (in case of IGMP).
     //
     // Note that in case of IGMP the max. resp. time is the `igmp_code' field
     // in `struct igmp'.
     //
     if (proto_is_igmp()) {
 	BUFFER_GET_OCTET(message_type, buffer);
-	BUFFER_GET_OCTET(max_resp_time, buffer);
+	BUFFER_GET_OCTET(max_resp_code, buffer);
 	BUFFER_GET_SKIP(2, buffer);		// The checksum
-	BUFFER_GET_IPVX(family(), group_address, buffer);
     }
     if (proto_is_mld6()) {
 	BUFFER_GET_OCTET(message_type, buffer);
 	BUFFER_GET_SKIP(1, buffer);		// The `Code' field: unused
 	BUFFER_GET_SKIP(2, buffer);		// The `Checksum' field
-	BUFFER_GET_HOST_16(max_resp_time, buffer);
-	BUFFER_GET_SKIP(2, buffer);		// The `Reserved' field
-	BUFFER_GET_IPVX(family(), group_address, buffer);
     }
 
     XLOG_TRACE(mld6igmp_node().is_log_trace(),
@@ -657,6 +659,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //  - check_src_linklocal_unicast
     //  - check_dst_multicast
     //  - check_group_nodelocal_multicast
+    //  - decode_extra_fields
     //
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
@@ -665,11 +668,15 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	case IGMP_V1_MEMBERSHIP_REPORT:
 	case IGMP_V2_MEMBERSHIP_REPORT:
 	case IGMP_V2_LEAVE_GROUP:
+	case IGMP_V3_MEMBERSHIP_REPORT:
 	    if (_ip_router_alert_option_check.get())
 		check_router_alert_option = true;
 	    check_src_linklocal_unicast = false;	// Not needed for IPv4
 	    check_dst_multicast = true;
 	    check_group_nodelocal_multicast = false;	// Not needed for IPv4
+	    decode_extra_fields = true;
+	    if (message_type == IGMP_V3_MEMBERSHIP_REPORT)
+		decode_extra_fields = false;
 	    break;
 	case IGMP_DVMRP:
 	case IGMP_MTRACE:
@@ -687,10 +694,14 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	case MLD_LISTENER_QUERY:
 	case MLD_LISTENER_REPORT:
 	case MLD_LISTENER_DONE:
+	case MLDV2_LISTENER_REPORT:
 	    check_router_alert_option = true;
 	    check_src_linklocal_unicast = true;
 	    check_dst_multicast = true;
 	    check_group_nodelocal_multicast = true;
+	    decode_extra_fields = true;
+	    if (message_type == MLDV2_LISTENER_REPORT)
+		decode_extra_fields = false;
 	    break;
 	case MLD_MTRACE:
 	    // TODO: Assign the flags as appropriate
@@ -700,6 +711,21 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	}
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
+
+    //
+    // Decode the extra fields: the max. resp. time (in case of MLD),
+    // and the group address.
+    //
+    if (decode_extra_fields) {
+	if (proto_is_igmp()) {
+	    BUFFER_GET_IPVX(family(), group_address, buffer);
+	}
+	if (proto_is_mld6()) {
+	    BUFFER_GET_HOST_16(max_resp_code, buffer);
+	    BUFFER_GET_SKIP(2, buffer);		// The `Reserved' field
+	    BUFFER_GET_IPVX(family(), group_address, buffer);
+	}
+    }
 
     //
     // IP Router Alert option check.
@@ -822,19 +848,23 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	switch (message_type) {
 	case IGMP_MEMBERSHIP_QUERY:
 	    mld6igmp_membership_query_recv(src, dst,
-					   message_type, max_resp_time,
+					   message_type, max_resp_code,
 					   group_address, buffer);
 	    break;
 	case IGMP_V1_MEMBERSHIP_REPORT:
 	case IGMP_V2_MEMBERSHIP_REPORT:
 	    mld6igmp_membership_report_recv(src, dst,
-					    message_type, max_resp_time,
+					    message_type, max_resp_code,
 					    group_address, buffer);
 	    break;
 	case IGMP_V2_LEAVE_GROUP:
 	    mld6igmp_leave_group_recv(src, dst,
-				      message_type, max_resp_time,
+				      message_type, max_resp_code,
 				      group_address, buffer);
+	    break;
+	case IGMP_V3_MEMBERSHIP_REPORT:
+	    mld6igmp_ssm_membership_report_recv(src, dst, message_type,
+						buffer);
 	    break;
 	case IGMP_DVMRP:
 	{
@@ -843,7 +873,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    // by mrinfo.
 	    //
 	    // XXX: the older purpose of the 'igmp_code' field
-	    int igmp_code = max_resp_time;
+	    uint16_t igmp_code = max_resp_code;
 	    switch (igmp_code) {
 	    case DVMRP_ASK_NEIGHBORS:
 		// Some old DVMRP messages from mrinfo(?).
@@ -868,7 +898,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    // TODO: not implemented yet.
 	    break;
 	default:
-	    // XXX: We don't care about the rest of the messages
+	    // XXX: Unrecognized message types MUST be silently ignored.
 	    break;
 	}
     }
@@ -879,24 +909,29 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	switch (message_type) {
 	case MLD_LISTENER_QUERY:
 	    mld6igmp_membership_query_recv(src, dst,
-					   message_type, max_resp_time,
+					   message_type, max_resp_code,
 					   group_address, buffer);
 	    break;
 	case MLD_LISTENER_REPORT:
 	    mld6igmp_membership_report_recv(src, dst,
-					    message_type, max_resp_time,
+					    message_type, max_resp_code,
 					    group_address, buffer);
 	    break;
 	case MLD_LISTENER_DONE:
 	    mld6igmp_leave_group_recv(src, dst,
-				      message_type, max_resp_time,
+				      message_type, max_resp_code,
 				      group_address, buffer);
+	    break;
+	case MLDV2_LISTENER_REPORT:
+	    mld6igmp_ssm_membership_report_recv(src, dst, message_type,
+						buffer);
 	    break;
 	case MLD_MTRACE:
 	    // TODO: is this the new message sent by 'mtrace'?
 	    // TODO: not implemented yet.
 	    break;
 	default:
+	    // XXX: Unrecognized message types MUST be silently ignored.
 	    break;
 	}
     }

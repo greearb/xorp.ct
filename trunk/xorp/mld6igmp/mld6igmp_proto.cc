@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.23 2006/05/17 23:21:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.24 2006/05/17 23:53:24 pavlin Exp $"
 
 
 //
@@ -62,7 +62,7 @@
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD/IGMP header.
+ * @max_resp_code: The Maximum Response Code from the MLD/IGMP header.
  * @group_address: The Group Address from the MLD/IGMP message.
  * @buffer: The buffer with the rest of the message.
  * 
@@ -75,34 +75,121 @@ int
 Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 					    const IPvX& dst,
 					    uint8_t message_type,
-					    int max_resp_time,
+					    uint16_t max_resp_code,
 					    const IPvX& group_address,
 					    buffer_t *buffer)
 {
+    int message_version = 0;
+
     // Ignore my own queries
     if (mld6igmp_node().is_my_addr(src))
 	return (XORP_ERROR);
 
+    //
+    // Determine the protocol version of the Query message
+    //
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
-	int igmp_message_version = IGMP_V2;
+	//
+	// The IGMP version of a Membership Query message is:
+	// - IGMPv1 Query: length = 8 AND Max Resp Code field is zero
+	// - IGMPv2 Query: length = 8 AND Max Resp Code field is non-zero
+	// - IGMPv3 Query: length >= 12
+	//
+	do {
+	    //
+	    // Note that the Query processing so far has decoded the message
+	    // up to the group address included (i.e., 8 octets), hence
+	    // we add-back the size of the decoded portion.
+	    //
+	    size_t data_size = BUFFER_DATA_SIZE(buffer) + IGMP_MINLEN;
 
-	if (max_resp_time == 0) {
+	    if ((data_size == IGMP_MINLEN) && (max_resp_code == 0)) {
+		message_version = IGMP_V1;
+		break;
+	    }
+	    if ((data_size == IGMP_MINLEN) && (max_resp_code != 0)) {
+		message_version = IGMP_V2;
+		break;
+	    }
+	    if (data_size >= IGMP_V3_QUERY_MINLEN) {
+		message_version = IGMP_V3;
+		break;
+	    }
+
+	    //
+	    // Silently ignore all other Query messages that don't match
+	    // any of the above conditions.
+	    //
+	    return (XORP_ERROR);
+	} while (false);
+	XLOG_ASSERT(message_version > 0);
+
+	if (message_version == IGMP_V1) {
 	    //
 	    // A query from a IGMPv1 router.
 	    // Start a timer that this interface is running in V1 mode.
 	    //
-	    igmp_message_version = IGMP_V1;
 	    // TODO: set the timer for any router or only if I am a querier?
 	    _igmpv1_router_present_timer =
 		mld6igmp_node().eventloop().set_flag_after(
 		    TimeVal(IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT, 0),
 		    &_dummy_flag);
 	}
-	igmp_v1_config_consistency_check(src, dst, message_type,
-					 igmp_message_version);
+
+	//
+	// TODO: XXX: PAVPAVPAV: do appropriate checks if an interface
+	// is running in older version.
+	//
+
+	mld6igmp_version_consistency_check(src, dst, message_type,
+					   message_version);
     }
 #endif // HAVE_IPV4_MULTICAST_ROUTING
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+    if (proto_is_mld6()) {
+	//
+	// The MLD version of a Membership Query message is:
+	// - MLDv1 Query: length = 24
+	// - MLDv2 Query: length >= 28
+	//
+	do {
+	    //
+	    // Note that the Query processing so far has decoded the message
+	    // up to the group address included (i.e., 24 octets), hence
+	    // we add-back the size of the decoded portion.
+	    //
+	    size_t data_size = BUFFER_DATA_SIZE(buffer) + MLD_MINLEN;
+
+	    if (data_size == MLD_MINLEN) {
+		message_version = MLD_V1;
+		break;
+	    }
+	    if (data_size >= MLD_V2_QUERY_MINLEN) {
+		message_version = MLD_V2;
+		break;
+	    }
+
+	    //
+	    // Silently ignore all other Query messages that don't match
+	    // any of the above conditions.
+	    //
+	    return (XORP_ERROR);
+	} while (false);
+	XLOG_ASSERT(message_version > 0);
+
+	//
+	// TODO: XXX: PAVPAVPAV: do appropriate checks if an interface
+	// is running in older version.
+	//
+
+	mld6igmp_version_consistency_check(src, dst, message_type,
+					   message_version);
+    }
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+
+    XLOG_ASSERT(message_version > 0);
     
     //
     // Compare this querier address with my address.
@@ -123,7 +210,18 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 		other_querier_present_interval,
 		callback(this, &Mld6igmpVif::other_querier_timer_timeout));
     }
-    
+
+    //
+    // XXX: if this is IGMPv3 or MLDv2 Query, then process separately
+    // the rest the message.
+    //
+    if ((proto_is_igmp() && (message_version >= IGMP_V3))
+	|| (proto_is_mld6() && (message_version >= MLD_V2))) {
+	mld6igmp_ssm_membership_query_recv(src, dst, message_type,
+					   max_resp_code, group_address,
+					   buffer);
+    }
+
     //
     // From RFC 2236:
     // "When a non-Querier receives a Group-Specific Query message, if its
@@ -140,7 +238,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
     // to that latter value."
     //
     if ( (! group_address.is_zero())
-	 && (max_resp_time != 0)
+	 && (max_resp_code != 0)
 	 && (! i_am_querier())) {
 	// Find if we already have an entry for this group
 	
@@ -151,16 +249,13 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    // Group found
 	    //
 	    MemberQuery *member_query = iter->second;
-	    uint32_t sec, usec;
 	    uint32_t timer_scale = mld6igmp_constant_timer_scale();
 	    TimeVal received_resp_tv;
 	    TimeVal left_resp_tv;
 
 	    // "Last Member Query Count" / "Last Listener Query Count"
-	    sec = (robust_count().get() * max_resp_time) / timer_scale;
-	    usec = (robust_count().get() * max_resp_time) % timer_scale;
-	    usec *= (1000000 / timer_scale); // microseconds
-	    received_resp_tv = TimeVal(sec, usec);
+	    received_resp_tv = TimeVal(robust_count().get() * max_resp_code, 0);
+	    received_resp_tv = received_resp_tv / timer_scale;
 	    member_query->member_query_timer().time_remaining(left_resp_tv);
 	    
 	    if (left_resp_tv > received_resp_tv) {
@@ -181,11 +276,111 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 }
 
 /**
+ * Mld6igmpVif::mld6igmp_ssm_membership_query_recv:
+ * @src: The message source address.
+ * @dst: The message destination address.
+ * @message_type: The message type.
+ * @max_resp_code: The Maximum Response Code from the MLD/IGMP header.
+ * @group_address: The Group Address from the MLD/IGMP message.
+ * @buffer: The buffer with the rest of the message.
+ * 
+ * Receive and process IGMPv3/MLDv2 IGMP_MEMBERSHIP_QUERY/MLD_LISTENER_QUERY
+ * message from another router.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
+						const IPvX& dst,
+						uint8_t message_type,
+						uint16_t max_resp_code,
+						const IPvX& group_address,
+						buffer_t *buffer)
+{
+    bool s_flag = false;
+    uint8_t qrv = 0;
+    uint8_t qqic = 0;
+    uint16_t sources_n = 0;
+    TimeVal max_resp_time, qqi;
+    list<IPvX> source_address_list;
+    string error_msg;
+
+    // TODO: XXX: PAVPAVPAV: this method is unfinished
+    UNUSED(group_address);
+
+    //
+    // Decode the Max Resp Code
+    //
+    if (proto_is_igmp()) {
+	decode_exp_time_code8(max_resp_code, max_resp_time,
+			      mld6igmp_constant_timer_scale());
+    }
+    if (proto_is_mld6()) {
+	decode_exp_time_code16(max_resp_code, max_resp_time,
+			       mld6igmp_constant_timer_scale());
+    }
+
+    //
+    // Decode the rest of the message header
+    //
+    BUFFER_GET_OCTET(qrv, buffer);
+    BUFFER_GET_OCTET(qqic, buffer);
+    BUFFER_GET_HOST_16(sources_n, buffer);
+    if (proto_is_igmp()) {
+	s_flag = IGMP_SFLAG(qrv);
+	qrv = IGMP_QRV(qrv);
+    }
+    if (proto_is_mld6()) {
+	s_flag = MLD_SFLAG(qrv);
+	qrv = MLD_QRV(qrv);
+    }
+    decode_exp_time_code8(qqic, qqi, 1);
+
+    //
+    // Check the remaining size of the message
+    //
+    if (BUFFER_DATA_SIZE(buffer) < sources_n * IPvX::addr_size(family())) {
+	error_msg = c_format("RX %s from %s to %s on vif %s: "
+			     "source addresses array size too short"
+			     "(received %u expected at least %u)",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str(),
+			     XORP_UINT_CAST(BUFFER_DATA_SIZE(buffer)),
+			     XORP_UINT_CAST(sources_n * IPvX::addr_size(family())));
+	XLOG_WARNING("%s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
+
+    //
+    // Decode the array of source addresses
+    //
+    while (sources_n != 0) {
+	IPvX ipvx(family());
+	BUFFER_GET_IPVX(family(), ipvx, buffer);
+	source_address_list.push_back(ipvx);
+	sources_n--;
+    }
+
+    return (XORP_OK);
+
+ rcvlen_error:
+    XLOG_UNREACHABLE();
+    error_msg = c_format("RX %s from %s to %s on vif %s: "
+			 "some fields are too short",
+			 proto_message_type2ascii(message_type),
+			 cstring(src), cstring(dst),
+			 name().c_str());
+    XLOG_WARNING("%s", error_msg.c_str());
+    return (XORP_ERROR);
+}
+
+/**
  * Mld6igmpVif::mld6igmp_membership_report_recv:
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD/IGMP header.
+ * @max_resp_code: The Maximum Response Code from the MLD/IGMP header.
  * @group_address: The Group Address from the MLD/IGMP message.
  * @buffer: The buffer with the rest of the message.
  * 
@@ -199,12 +394,11 @@ int
 Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 					     const IPvX& dst,
 					     uint8_t message_type,
-					     int max_resp_time,
+					     uint16_t max_resp_code,
 					     const IPvX& group_address,
 					     buffer_t *buffer)
 {
     MemberQuery *member_query = NULL;
-    IPvX source_address = IPvX::ZERO(family());		// XXX: ANY
     
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
@@ -232,11 +426,11 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	member_query->set_last_reported_host(src);
     } else {
 	// A new group
-	member_query = new MemberQuery(*this, source_address, group_address);
+	member_query = new MemberQuery(*this, group_address);
 	member_query->set_last_reported_host(src);
 	_members.insert(make_pair(group_address, member_query));
 	// notify routing (+)    
-	join_prune_notify_routing(member_query->source(),
+	join_prune_notify_routing(IPvX::ZERO(family()),
 				  member_query->group(),
 				  ACTION_JOIN);
     }
@@ -251,9 +445,9 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
-	int igmp_message_version = IGMP_V2;
+	int message_version = IGMP_V2;
 	if (message_type == IGMP_V1_MEMBERSHIP_REPORT) {
-	    igmp_message_version = IGMP_V1;
+	    message_version = IGMP_V1;
 	    //
 	    // XXX: start the v1 host timer even if I am not querier.
 	    // The non-querier state diagram in RFC 2236 is incomplete,
@@ -269,7 +463,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     }
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 
-    UNUSED(max_resp_time);
+    UNUSED(max_resp_code);
     UNUSED(buffer);
 
     return (XORP_OK);
@@ -280,7 +474,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The message type.
- * @max_resp_time: The Maximum Response Time from the MLD/IGMP header.
+ * @max_resp_code: The Maximum Response Code from the MLD/IGMP header.
  * @group_address: The Group Address from the MLD/IGMP message.
  * @buffer: The buffer with the rest of the message.
  * 
@@ -293,7 +487,7 @@ int
 Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 				       const IPvX& dst,
 				       uint8_t message_type,
-				       int max_resp_time,
+				       uint16_t max_resp_code,
 				       const IPvX& group_address,
 				       buffer_t *buffer)
 {
@@ -370,10 +564,80 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     }
     
     // Nothing found. Ignore.
-    UNUSED(max_resp_time);
+    UNUSED(max_resp_code);
     UNUSED(buffer);
     
     return (XORP_OK);
+}
+
+/**
+ * Mld6igmpVif::mld6igmp_ssm_membership_report_recv:
+ * @src: The message source address.
+ * @dst: The message destination address.
+ * @message_type: The message type.
+ * @buffer: The buffer with the rest of the message.
+ * 
+ * Receive and process IGMP_V3_MEMBERSHIP_REPORT/MLDV2_LISTENER_REPORT
+ * message from a host.
+ * 
+ * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
+						 const IPvX& dst,
+						 uint8_t message_type,
+						 buffer_t *buffer)
+{
+    uint16_t group_records_n = 0;
+    string error_msg;
+
+    // TODO: XXX: PAVPAVPAV: this method is unfinished
+
+    //
+    // Decode the rest of the message header
+    //
+    BUFFER_GET_SKIP(2, buffer);		// The 'Reserved' field
+    BUFFER_GET_HOST_16(group_records_n, buffer);
+
+    //
+    // Decode the array of group records
+    //
+    while (group_records_n != 0) {
+	uint8_t record_type;
+	uint8_t aux_data_len;
+	uint16_t sources_n;
+	IPvX group_address(family());
+	list<IPvX> source_address_list;
+
+	BUFFER_GET_OCTET(record_type, buffer);
+	BUFFER_GET_OCTET(aux_data_len, buffer);
+	BUFFER_GET_HOST_16(sources_n, buffer);
+	BUFFER_GET_IPVX(family(), group_address, buffer);
+
+	// Decode the array of source addresses
+	while (sources_n != 0) {
+	    IPvX ipvx(family());
+	    BUFFER_GET_IPVX(family(), ipvx, buffer);
+	    source_address_list.push_back(ipvx);
+	    sources_n--;
+	}
+
+	// XXX: Skip the 'Auxiliary Data', because we don't use it
+	BUFFER_GET_SKIP(aux_data_len, buffer);
+
+	group_records_n--;
+    }
+
+    return (XORP_OK);
+
+ rcvlen_error:
+    error_msg = c_format("RX %s from %s to %s on vif %s: "
+			 "some fields are too short",
+			 proto_message_type2ascii(message_type),
+			 cstring(src), cstring(dst),
+			 name().c_str());
+    XLOG_WARNING("%s", error_msg.c_str());
+    return (XORP_ERROR);
 }
 
 /**
@@ -457,14 +721,14 @@ Mld6igmpVif::query_timer_timeout()
 }
 
 /**
- * igmp_v1_config_consistency_check:
+ * mld6igmp_version_consistency_check:
  * @src: The message source address.
  * @dst: The message destination address.
- * @message_type: The type of the IGMP message.
- * @igmp_message_version: The protocol version of the received message:
- * IGMP_V1 or IGMP_V2.
+ * @message_type: The type of the MLD/IGMP message.
+ * @message_version: The protocol version of the received message:
+ * (IGMP_V1, IGMP_V2, IGMP_V3 for IGMP) or (MLD_V1, MLD_V2 for MLD).
  * 
- * Check for IGMP protocol version interface configuration consistency.
+ * Check for MLD/IGMP protocol version interface configuration consistency.
  * For example, if the received message was IGMPv1, a correctly
  * configured local interface must be operating in IGMPv1 mode.
  * Similarly, if the local interface is operating in IGMPv1 mode,
@@ -474,42 +738,191 @@ Mld6igmpVif::query_timer_timeout()
  * Return value: %XORP_OK if consistency, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::igmp_v1_config_consistency_check(const IPvX& src,
-					      const IPvX& dst,
-					      uint8_t message_type,
-					      int igmp_message_version)
+Mld6igmpVif::mld6igmp_version_consistency_check(const IPvX& src,
+						const IPvX& dst,
+						uint8_t message_type,
+						int message_version)
 {
-    if (! proto_is_igmp())
-	return (XORP_OK);
+    if (proto_is_igmp()) {
+	switch (message_version) {
+	case IGMP_V1:
+	    if (! is_igmpv1_mode()) {
+		// TODO: rate-limit the warning
+		XLOG_WARNING("RX %s from %s to %s on vif %s: "
+			     "this interface is not in v1 mode",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+		XLOG_WARNING("Please configure properly all routers on "
+			     "that subnet to use IGMPv1");
+		return (XORP_ERROR);
+	    }
+	    break;
+	default:
+	    if (is_igmpv1_mode()) {
+		// TODO: rate-limit the warning
+		XLOG_WARNING("RX %s(v2+) from %s to %s on vif %s: "
+			     "this interface is not in V1 mode. "
+			     "Please configure properly all routers on "
+			     "that subnet to use IGMPv1.",
+			     proto_message_type2ascii(message_type),
+			     cstring(src), cstring(dst),
+			     name().c_str());
+		return (XORP_ERROR);
+	    }
+	    break;
+	}
 
-    switch (igmp_message_version) {
-    case IGMP_V1:
-	if (! is_igmpv1_mode()) {
-	    // TODO: rate-limit the warning
-	    XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			 "this interface is not in v1 mode",
-			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str());
-	    XLOG_WARNING("Please configure properly all routers on "
-			 "that subnet to use IGMPv1");
-	    return (XORP_ERROR);
-	}
-	break;
-    default:
-	if (is_igmpv1_mode()) {
-	    // TODO: rate-limit the warning
-	    XLOG_WARNING("RX %s(v2+) from %s to %s on vif %s: "
-			 "this interface is not in V1 mode. "
-			 "Please configure properly all routers on "
-			 "that subnet to use IGMPv1.",
-			 proto_message_type2ascii(message_type),
-			 cstring(src), cstring(dst),
-			 name().c_str());
-	    return (XORP_ERROR);
-	}
-	break;
+	return (XORP_OK);
     }
-    
+
+    if (proto_is_mld6()) {
+	return (XORP_OK);
+    }
+
     return (XORP_OK);
+}
+
+void
+Mld6igmpVif::decode_exp_time_code8(uint8_t code, TimeVal& timeval,
+				   uint32_t timer_scale)
+{
+    uint32_t decoded_time = 0;
+
+    //
+    // From RFC 3376 Section 4.1.1, and RFC 3810 Section 5.1.9:
+    //
+    // If Code < 128, Time = Code
+    //
+    // If Code >= 128, Code represents a floating-point value as follows:
+    //
+    //     0 1 2 3 4 5 6 7
+    //    +-+-+-+-+-+-+-+-+
+    //    |1| exp | mant  |
+    //    +-+-+-+-+-+-+-+-+
+    //
+    // Time = (mant | 0x10) << (exp + 3)
+    //
+    if (code < 128) {
+	decoded_time = code;
+    } else {
+	uint8_t mant = code & 0xf;
+	uint8_t exp = (code >> 4) & 0x7;
+	decoded_time = (mant | 0x10) << (exp + 3);
+    }
+
+    timeval = TimeVal(decoded_time, 0);
+    timeval = timeval / timer_scale;
+}
+
+void
+Mld6igmpVif::decode_exp_time_code16(uint16_t code, TimeVal& timeval,
+				    uint32_t timer_scale)
+{
+    uint32_t decoded_time = 0;
+
+    //
+    // From RFC 3810 Section 5.1.9:
+    //
+    // If Code < 32768, Time = Code
+    //
+    // If Code >= 32768, Code represents a floating-point value as follows:
+    //
+    //     0 1 2 3 4 5 6 7 8 9 A B C D E F
+    //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //    |1| exp |          mant         |
+    //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //
+    // Time = (mant | 0x1000) << (exp + 3)
+    //
+    if (code < 32768) {
+	decoded_time = code;
+    } else {
+	uint8_t mant = code & 0xfff;
+	uint8_t exp = (code >> 12) & 0x7;
+	decoded_time = (mant | 0x1000) << (exp + 3);
+    }
+
+    timeval = TimeVal(decoded_time, 0);
+    timeval = timeval / timer_scale;
+}
+
+void
+Mld6igmpVif::encode_exp_time_code8(const TimeVal& timeval,
+				   uint8_t& code,
+				   uint32_t timer_scale)
+{
+    TimeVal scaled_max_resp_time = timeval * timer_scale;
+    uint32_t decoded_time = scaled_max_resp_time.sec();
+
+    code = 0;
+
+    //
+    // From RFC 3376 Section 4.1.1, and RFC 3810 Section 5.1.9:
+    //
+    // If Code < 128, Time = Code
+    //
+    // If Code >= 128, Code represents a floating-point value as follows:
+    //
+    //     0 1 2 3 4 5 6 7
+    //    +-+-+-+-+-+-+-+-+
+    //    |1| exp | mant  |
+    //    +-+-+-+-+-+-+-+-+
+    //
+    // Time = (mant | 0x10) << (exp + 3)
+    //
+    if (decoded_time < 128) {
+	code = decoded_time;
+    } else {
+	uint8_t mant = 0;
+	uint8_t exp = 0;
+
+	// Calculate the "mant" and the "exp"
+	while ((decoded_time >> (exp + 3)) > 0x1f) {
+	    exp++;
+	}
+	mant = (decoded_time >> (exp + 3)) & 0xf;
+
+	code = 0x80 | (exp << 4) | mant;
+    }
+}
+
+void
+Mld6igmpVif::encode_exp_time_code16(const TimeVal& timeval,
+				    uint16_t& code,
+				    uint32_t timer_scale)
+{
+    TimeVal scaled_max_resp_time = timeval * timer_scale;
+    uint32_t decoded_time = scaled_max_resp_time.sec();
+
+    code = 0;
+
+    //
+    // From RFC 3810 Section 5.1.9:
+    //
+    // If Code < 32768, Time = Code
+    //
+    // If Code >= 32768, Code represents a floating-point value as follows:
+    //
+    //     0 1 2 3 4 5 6 7 8 9 A B C D E F
+    //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //    |1| exp |          mant         |
+    //    +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //
+    // Time = (mant | 0x1000) << (exp + 3)
+    //
+    if (decoded_time < 32768) {
+	code = decoded_time;
+    } else {
+	uint8_t mant = 0;
+	uint8_t exp = 0;
+
+	// Calculate the "mant" and the "exp"
+	while ((decoded_time >> (exp + 3)) > 0x1fff) {
+	    exp++;
+	}
+	mant = (decoded_time >> (exp + 3)) & 0xfff;
+
+	code = 0x8000 | (exp << 12) | mant;
+    }
 }

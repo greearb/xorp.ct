@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.7 2006/03/16 00:04:43 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.8 2006/05/17 22:07:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
 #define __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
@@ -43,14 +43,12 @@ class Mld6igmpVif;
 class MemberQuery {
 public:
     /**
-     * Constructor for a given vif, source and group address.
+     * Constructor for a given vif and group address.
      * 
      * @param mld6igmp_vif the interface this entry belongs to.
-     * @param source the source address (used for MLDv2 or IGMPv3).
      * @param group the multicast group address.
      */
-    MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& source,
-		const IPvX& group);
+    MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
     
     /**
      * Destructor
@@ -65,19 +63,12 @@ public:
     Mld6igmpVif& mld6igmp_vif()	const	{ return (_mld6igmp_vif);	}
     
     /**
-     * Get the source address (used for MLDv2 or IGMPv3).
-     * 
-     * @return the source address.
-     */
-    const IPvX&	source()	const	{ return (_source);		}
-    
-    /**
      * Get the multicast group address.
      * 
      * @return the multicast group address.
      */
-    const IPvX&	group() 	const	{ return (_group);		}
-    
+    const IPvX&	group() const		{ return (_group); }
+
     /**
      * Get the number of seconds until time to query for host members.
      * 
@@ -131,10 +122,16 @@ public:
      * Timeout: the last group member has expired or has left the group.
      */
     void last_member_query_timer_timeout();
+
+    /**
+     * Get the address family.
+     *
+     * @return the address family.
+     */
+    int family() const { return _group.af(); }
     
 private:
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
-    IPvX	_source;		// The source address (MLDv2 or IGMPv3)
     IPvX	_group;			// The multicast group address
     IPvX	_last_reported_host;	// The host that last reported as member
     XorpTimer	_member_query_timer;	// Timer to query for host members
