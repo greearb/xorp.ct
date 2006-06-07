@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.26 2006/06/07 00:01:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.27 2006/06/07 20:09:50 pavlin Exp $"
 
 
 //
@@ -88,7 +88,6 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
     //
     // Determine the protocol version of the Query message
     //
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	//
 	// The IGMP version of a Membership Query message is:
@@ -145,9 +144,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	mld6igmp_version_consistency_check(src, dst, message_type,
 					   message_version);
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	//
 	// The MLD version of a Membership Query message is:
@@ -187,7 +184,6 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	mld6igmp_version_consistency_check(src, dst, message_type,
 					   message_version);
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
 
     XLOG_ASSERT(message_version > 0);
     
@@ -267,10 +263,6 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    }
 	}
     }
-
-    UNUSED(dst);
-    UNUSED(message_type);
-    UNUSED(buffer);
     
     return (XORP_OK);
 }
@@ -443,7 +435,6 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	    group_membership_interval,
 	    callback(group_record, &Mld6igmpGroupRecord::member_query_timer_timeout));
 
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	int message_version = IGMP_V2;
 	if (message_type == IGMP_V1_MEMBERSHIP_REPORT) {
@@ -461,7 +452,6 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 		    &_dummy_flag);
 	}
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
 
     UNUSED(max_resp_code);
     UNUSED(buffer);
@@ -688,9 +678,6 @@ Mld6igmpVif::query_timer_timeout()
 {
     TimeVal interval;
     string dummy_error_msg;
-
-    UNUSED(interval);
-    UNUSED(dummy_error_msg);
 
     if (! i_am_querier())
 	return;		// I am not the querier anymore. Ignore.

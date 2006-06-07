@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.52 2006/06/07 00:01:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.53 2006/06/07 20:09:50 pavlin Exp $"
 
 
 //
@@ -84,7 +84,6 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     //
     // Set the protocol version
     //
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
 	_query_interval.set(TimeVal(IGMP_QUERY_INTERVAL, 0));
@@ -93,9 +92,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_response_interval.set(TimeVal(IGMP_QUERY_RESPONSE_INTERVAL, 0));
 	_robust_count = IGMP_ROBUSTNESS_VARIABLE;
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	set_proto_version_default(MLD_VERSION_DEFAULT);
 	_query_interval.set(TimeVal(MLD_QUERY_INTERVAL, 0));
@@ -104,7 +101,6 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_response_interval.set(TimeVal(MLD_QUERY_RESPONSE_INTERVAL, 0));
 	_robust_count = MLD_ROBUSTNESS_VARIABLE;
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
 
     set_proto_version(proto_version_default());
 }
@@ -146,21 +142,17 @@ Mld6igmpVif::~Mld6igmpVif()
 int
 Mld6igmpVif::set_proto_version(int proto_version)
 {
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	if ((proto_version < IGMP_VERSION_MIN)
 	    || (proto_version > IGMP_VERSION_MAX))
 	return (XORP_ERROR);
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
     
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	if ((proto_version < MLD_VERSION_MIN)
 	    || (proto_version > MLD_VERSION_MAX))
 	return (XORP_ERROR);
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
     
     ProtoUnit::set_proto_version(proto_version);
     
@@ -453,7 +445,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     // Compute the checksum
     //
     cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
+#ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
 	struct pseudo_header {
@@ -471,7 +463,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif // HAVE_IPV6
     BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
@@ -565,7 +557,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 			      buffer_t *buffer,
 			      string& error_msg)
 {
-#if defined(HAVE_IPV4_MULTICAST_ROUTING) || defined(HAVE_IPV6_MULTICAST_ROUTING)
     uint8_t message_type = 0;
     uint16_t max_resp_code = 0;
     IPvX group_address(family());
@@ -593,7 +584,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     // Checksum verification.
     //
     cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
+#ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
 	struct pseudo_header {
@@ -611,7 +602,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif // HAVE_IPV6
     if (cksum) {
 	error_msg = c_format("RX packet from %s to %s on vif %s: "
 			     "checksum error",
@@ -661,7 +652,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //  - check_group_nodelocal_multicast
     //  - decode_extra_fields
     //
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	switch (message_type) {
 	case IGMP_MEMBERSHIP_QUERY:
@@ -686,9 +676,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    break;
 	}
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	switch (message_type) {
 	case MLD_LISTENER_QUERY:
@@ -710,7 +698,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    break;
 	}
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
 
     //
     // Decode the extra fields: the max. resp. time (in case of MLD),
@@ -843,7 +830,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // Process each message, based on its type.
     //
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
 	switch (message_type) {
 	case IGMP_MEMBERSHIP_QUERY:
@@ -902,9 +888,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    break;
 	}
     }
-#endif // HAVE_IPV4_MULTICAST_ROUTING
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6()) {
 	switch (message_type) {
 	case MLD_LISTENER_QUERY:
@@ -935,7 +919,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    break;
 	}
     }
-#endif // HAVE_IPV6_MULTICAST_ROUTING
 
     return (XORP_OK);
 
@@ -947,21 +930,6 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 			 name().c_str());
     XLOG_WARNING("%s", error_msg.c_str());
     return (XORP_ERROR);
-
-#else // ! (HAVE_IPV4_MULTICAST_ROUTING || HAVE_IPV6_MULTICAST_ROUTING)
-
-    XLOG_WARNING("The system does not support multicast routing");
-
-    UNUSED(src);
-    UNUSED(dst);
-    UNUSED(ip_ttl);
-    UNUSED(ip_tos);
-    UNUSED(is_router_alert);
-    UNUSED(buffer);
-    UNUSED(error_msg);
-
-    return (XORP_ERROR);
-#endif // ! (HAVE_IPV4_MULTICAST_ROUTING || HAVE_IPV6_MULTICAST_ROUTING)
 }
 
 /**
@@ -1130,18 +1098,11 @@ Mld6igmpVif::is_igmpv1_mode() const
 const char *
 Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 {
-
-    UNUSED(message_type);
-
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
 	return (IGMPTYPE2ASCII(message_type));
-#endif
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLDTYPE2ASCII(message_type));
-#endif
     
     return ("Unknown protocol message");
 }
@@ -1223,15 +1184,11 @@ Mld6igmpVif::set_i_am_querier(bool v)
 size_t
 Mld6igmpVif::mld6igmp_constant_minlen() const
 {
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
 	return (IGMP_MINLEN);
-#endif
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLD_MINLEN);
-#endif
 
     XLOG_UNREACHABLE();
     return (0);
@@ -1240,15 +1197,11 @@ Mld6igmpVif::mld6igmp_constant_minlen() const
 uint32_t
 Mld6igmpVif::mld6igmp_constant_timer_scale() const
 {
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
 	return (IGMP_TIMER_SCALE);
-#endif
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLD_TIMER_SCALE);
-#endif
 
     XLOG_UNREACHABLE();
     return (0);
@@ -1257,15 +1210,11 @@ Mld6igmpVif::mld6igmp_constant_timer_scale() const
 uint8_t
 Mld6igmpVif::mld6igmp_constant_membership_query() const
 {
-#ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp())
 	return (IGMP_MEMBERSHIP_QUERY);
-#endif
 
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
     if (proto_is_mld6())
 	return (MLD_LISTENER_QUERY);
-#endif
 
     XLOG_UNREACHABLE();
     return (0);
