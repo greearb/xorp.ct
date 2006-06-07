@@ -15,9 +15,8 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.11 2006/05/18 06:30:35 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.12 2006/06/01 17:54:26 pavlin Exp $
  */
-
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
 #define __MLD6IGMP_MLD6_PROTO_H__
@@ -27,9 +26,6 @@
  * Multicast Listener Discovery protocol-specific definitions.
  * MLDv1 (RFC 2710)
  */
-
-
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
 
 #ifdef HAVE_NETINET_ICMP6_H
 #include <netinet/icmp6.h>
@@ -229,7 +225,5 @@
 __BEGIN_DECLS
 
 __END_DECLS
-
-#endif /* HAVE_IPV6_MULTICAST_ROUTING */
 
 #endif /* __MPD6IGMP_MLD6_PROTO_H__ */
