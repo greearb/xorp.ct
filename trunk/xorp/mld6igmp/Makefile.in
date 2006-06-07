@@ -119,7 +119,7 @@ test_mld6igmp_SOURCES = test_mld6igmp.cc
 test_mld6igmp_LDADD = $(LDADD) $(top_builddir)/libfeaclient/libfeaclient.la $(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la $(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la $(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la $(top_builddir)/xrl/interfaces/libsocket4userxif.la $(top_builddir)/xrl/interfaces/libsocket4xif.la $(top_builddir)/xrl/interfaces/libsocket6userxif.la $(top_builddir)/xrl/interfaces/libsocket6xif.la $(top_builddir)/xrl/interfaces/libprofileclientxif.la $(top_builddir)/xrl/targets/libsocketserverbase.la $(top_builddir)/libxorp/libxorp.la
 
 # -- Library Sources
-libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_group_record.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh mld6igmp_config.cc mld6igmp_group_record.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
+libmld6igmp_la_SOURCES = mld6igmp_module.h igmp_proto.h mld6_proto.h mld6igmp_group_record.hh mld6igmp_node.hh mld6igmp_node_cli.hh mld6igmp_source_record.hh mld6igmp_vif.hh xrl_mld6igmp_node.hh mld6igmp_config.cc mld6igmp_group_record.cc mld6igmp_node.cc mld6igmp_node_cli.cc mld6igmp_proto.cc mld6igmp_source_record.cc mld6igmp_vif.cc xrl_mld6igmp_node.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = configure_mld6igmp docs xrl_mld6igmp_shell_funcs.sh
@@ -137,7 +137,7 @@ libmld6igmp_la_LDFLAGS =
 libmld6igmp_la_LIBADD =
 am_libmld6igmp_la_OBJECTS = mld6igmp_config.lo mld6igmp_group_record.lo \
 	mld6igmp_node.lo mld6igmp_node_cli.lo mld6igmp_proto.lo \
-	mld6igmp_vif.lo xrl_mld6igmp_node.lo
+	mld6igmp_source_record.lo mld6igmp_vif.lo xrl_mld6igmp_node.lo
 libmld6igmp_la_OBJECTS = $(am_libmld6igmp_la_OBJECTS)
 bin_PROGRAMS = xorp_igmp$(EXEEXT) xorp_mld$(EXEEXT)
 check_PROGRAMS = test_mld6igmp$(EXEEXT)
@@ -249,6 +249,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_node_cli.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_proto.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mld6igmp_source_record.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/mld6igmp_vif.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/test_mld6igmp.Po $(DEPDIR)/xorp_igmp.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_mld.Po \
@@ -348,6 +349,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_node_cli.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_proto.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_source_record.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mld6igmp_vif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_mld6igmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_igmp.Po@am__quote@
