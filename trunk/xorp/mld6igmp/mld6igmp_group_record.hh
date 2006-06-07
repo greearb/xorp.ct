@@ -12,10 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_member_query.hh,v 1.8 2006/05/17 22:07:18 pavlin Exp $
+// $XORP$
 
-#ifndef __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
-#define __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
+#ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
+#define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 
 
 //
@@ -38,9 +38,9 @@
 class Mld6igmpVif;
 
 /**
- * @short A class to store information about multicast membership.
+ * @short A class to store information about multicast group membership.
  */
-class MemberQuery {
+class Mld6igmpGroupRecord {
 public:
     /**
      * Constructor for a given vif and group address.
@@ -48,12 +48,12 @@ public:
      * @param mld6igmp_vif the interface this entry belongs to.
      * @param group the multicast group address.
      */
-    MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
+    Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
     
     /**
      * Destructor
      */
-    ~MemberQuery();
+    ~Mld6igmpGroupRecord();
 
     /**
      * Get the vif this entry belongs to.
@@ -148,4 +148,4 @@ private:
 // Global functions prototypes
 //
 
-#endif // __MLD6IGMP_MLD6IGMP_MEMBER_QUERY_HH__
+#endif // __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__

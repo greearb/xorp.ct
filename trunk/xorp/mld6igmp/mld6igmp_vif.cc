@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.50 2006/05/17 23:53:24 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.51 2006/06/06 23:09:04 pavlin Exp $"
 
 
 //
@@ -123,12 +123,12 @@ Mld6igmpVif::~Mld6igmpVif()
     stop(error_msg);
     
     // Remove all members entries
-    map<IPvX, MemberQuery *>::iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query = iter->second;
+	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
-				  member_query->group(), ACTION_PRUNE);
-	delete member_query;
+				  group_record->group(), ACTION_PRUNE);
+	delete group_record;
     }
     _members.clear();
     
@@ -334,12 +334,12 @@ Mld6igmpVif::stop(string& error_msg)
     _startup_query_count = 0;
     
     // Remove all members entries
-    map<IPvX, MemberQuery *>::iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
     for (iter = _members.begin(); iter != _members.end(); ++iter) {
-	MemberQuery *member_query = iter->second;
+	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
-				  member_query->group(), ACTION_PRUNE);
-	delete member_query;
+				  group_record->group(), ACTION_PRUNE);
+	delete group_record;
     }
     _members.clear();
     

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.18 2006/05/17 23:21:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.19 2006/06/06 23:09:04 pavlin Exp $"
 
 //
 // Multicast group membership information used by
@@ -26,7 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include "mld6igmp_member_query.hh"
+#include "mld6igmp_group_record.hh"
 #include "mld6igmp_node.hh"
 #include "mld6igmp_vif.hh"
 
@@ -55,7 +55,7 @@
 
 
 /**
- * MemberQuery::MemberQuery:
+ * Mld6igmpGroupRecord::Mld6igmpGroupRecord:
  * @mld6igmp_vif: The vif interface this entry belongs to.
  * @group: The entry group address.
  * 
@@ -63,7 +63,8 @@
  * 
  * Return value: 
  **/
-MemberQuery::MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& group)
+Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
+					 const IPvX& group)
     : _mld6igmp_vif(mld6igmp_vif),
       _group(group)
 {
@@ -71,12 +72,12 @@ MemberQuery::MemberQuery(Mld6igmpVif& mld6igmp_vif, const IPvX& group)
 }
 
 /**
- * MemberQuery::~MemberQuery:
+ * Mld6igmpGroupRecord::~Mld6igmpGroupRecord:
  * @: 
  * 
- * MemberQuery destrictor.
+ * Mld6igmpGroupRecord destrictor.
  **/
-MemberQuery::~MemberQuery()
+Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
 {
     // TODO: Notify routing (-)
     // TODO: ??? Maybe not the right place, or this should
@@ -85,14 +86,14 @@ MemberQuery::~MemberQuery()
 }
 
 /**
- * MemberQuery::timeout_sec:
+ * Mld6igmpGroupRecord::timeout_sec:
  * @: 
  * 
  * Get the number of seconds until time to query for host members.
  * Return value: the number of seconds until time to query for host members.
  **/
 uint32_t
-MemberQuery::timeout_sec() const
+Mld6igmpGroupRecord::timeout_sec() const
 {
     TimeVal tv;
     
@@ -102,12 +103,12 @@ MemberQuery::timeout_sec() const
 }
 
 /**
- * MemberQuery::member_query_timer_timeout:
+ * Mld6igmpGroupRecord::member_query_timer_timeout:
  * 
  * Timeout: expire a multicast group entry.
  **/
 void
-MemberQuery::member_query_timer_timeout()
+Mld6igmpGroupRecord::member_query_timer_timeout()
 {
     _last_member_query_timer.unschedule();
     if (mld6igmp_vif().mld6igmp_node().proto_is_igmp())
@@ -119,7 +120,7 @@ MemberQuery::member_query_timer_timeout()
 					     ACTION_PRUNE);
     
     // Remove the entry 
-    map<IPvX, MemberQuery *>::iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
     iter = mld6igmp_vif().members().find(group());
     if (iter != mld6igmp_vif().members().end()) {
 	mld6igmp_vif().members().erase(iter);
@@ -129,7 +130,7 @@ MemberQuery::member_query_timer_timeout()
 }
 
 /**
- * MemberQuery::last_member_query_timer_timeout:
+ * Mld6igmpGroupRecord::last_member_query_timer_timeout:
  * 
  * Timeout: the last group member has expired or has left the group. Quickly
  * query if there are other members for that group.
@@ -137,7 +138,7 @@ MemberQuery::member_query_timer_timeout()
  * and will cancel this timer `last_member_query_timer'.
  **/
 void
-MemberQuery::last_member_query_timer_timeout()
+Mld6igmpGroupRecord::last_member_query_timer_timeout()
 {
     string dummy_error_msg;
 
@@ -162,7 +163,7 @@ MemberQuery::last_member_query_timer_timeout()
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
 		mld6igmp_vif().query_last_member_interval().get(),
-		callback(this, &MemberQuery::last_member_query_timer_timeout));
+		callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
     }
 #endif // HAVE_IPV4_MULTICAST_ROUTING
 
@@ -179,7 +180,7 @@ MemberQuery::last_member_query_timer_timeout()
 	_last_member_query_timer =
 	    mld6igmp_vif().mld6igmp_node().eventloop().new_oneoff_after(
 		mld6igmp_vif().query_last_member_interval().get(),
-		callback(this, &MemberQuery::last_member_query_timer_timeout));
+		callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
     }
 #endif // HAVE_IPV6_MULTICAST_ROUTING
 }

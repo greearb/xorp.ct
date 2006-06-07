@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.24 2006/05/17 23:53:24 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.25 2006/06/06 23:09:04 pavlin Exp $"
 
 
 //
@@ -242,13 +242,13 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	 && (! i_am_querier())) {
 	// Find if we already have an entry for this group
 	
-	map<IPvX, MemberQuery *>::iterator iter;
+	map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
 	iter = _members.find(group_address);
 	if (iter != _members.end()) {
 	    //
 	    // Group found
 	    //
-	    MemberQuery *member_query = iter->second;
+	    Mld6igmpGroupRecord *group_record = iter->second;
 	    uint32_t timer_scale = mld6igmp_constant_timer_scale();
 	    TimeVal received_resp_tv;
 	    TimeVal left_resp_tv;
@@ -256,14 +256,14 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    // "Last Member Query Count" / "Last Listener Query Count"
 	    received_resp_tv = TimeVal(robust_count().get() * max_resp_code, 0);
 	    received_resp_tv = received_resp_tv / timer_scale;
-	    member_query->member_query_timer().time_remaining(left_resp_tv);
+	    group_record->member_query_timer().time_remaining(left_resp_tv);
 	    
 	    if (left_resp_tv > received_resp_tv) {
-		member_query->member_query_timer() =
+		group_record->member_query_timer() =
 		    mld6igmp_node().eventloop().new_oneoff_after(
 			received_resp_tv,
-			callback(member_query,
-				 &MemberQuery::member_query_timer_timeout));
+			callback(group_record,
+				 &Mld6igmpGroupRecord::member_query_timer_timeout));
 	    }
 	}
     }
@@ -398,7 +398,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 					     const IPvX& group_address,
 					     buffer_t *buffer)
 {
-    MemberQuery *member_query = NULL;
+    Mld6igmpGroupRecord *group_record = NULL;
     
     // The group address must be a valid multicast address
     if (! group_address.is_multicast()) {
@@ -413,35 +413,35 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     }
     
     // Find if we already have an entry for this group
-    map<IPvX, MemberQuery *>::iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
     iter = _members.find(group_address);
     if (iter != _members.end()) {
 	// Group found
 	// TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
-	member_query = iter->second;
-	member_query->last_member_query_timer().unschedule();
+	group_record = iter->second;
+	group_record->last_member_query_timer().unschedule();
     }
     
-    if (member_query != NULL) {
-	member_query->set_last_reported_host(src);
+    if (group_record != NULL) {
+	group_record->set_last_reported_host(src);
     } else {
 	// A new group
-	member_query = new MemberQuery(*this, group_address);
-	member_query->set_last_reported_host(src);
-	_members.insert(make_pair(group_address, member_query));
+	group_record = new Mld6igmpGroupRecord(*this, group_address);
+	group_record->set_last_reported_host(src);
+	_members.insert(make_pair(group_address, group_record));
 	// notify routing (+)    
 	join_prune_notify_routing(IPvX::ZERO(family()),
-				  member_query->group(),
+				  group_record->group(),
 				  ACTION_JOIN);
     }
     
     TimeVal group_membership_interval
 	= static_cast<int>(robust_count().get()) * query_interval().get()
 	+ query_response_interval().get();
-    member_query->member_query_timer() =
+    group_record->member_query_timer() =
 	mld6igmp_node().eventloop().new_oneoff_after(
 	    group_membership_interval,
-	    callback(member_query, &MemberQuery::member_query_timer_timeout));
+	    callback(group_record, &Mld6igmpGroupRecord::member_query_timer_timeout));
 
 #ifdef HAVE_IPV4_MULTICAST_ROUTING
     if (proto_is_igmp()) {
@@ -455,7 +455,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	    // Indeed, RFC 3376 (IGMPv3) also doesn't specify that the
 	    // corresponding timer has to be started only for queriers.
 	    //
-	    member_query->igmpv1_host_present_timer() =
+	    group_record->igmpv1_host_present_timer() =
 		mld6igmp_node().eventloop().set_flag_after(
 		    group_membership_interval,
 		    &_dummy_flag);
@@ -516,15 +516,15 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     }
     
     // Find if this group already has an entry
-    map<IPvX, MemberQuery *>::iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
     iter = _members.find(group_address);
     if (iter != _members.end()) {
 	//
 	// Group found
 	//
-	MemberQuery *member_query = iter->second;
+	Mld6igmpGroupRecord *group_record = iter->second;
 	if (proto_is_igmp()) {
-	    if (member_query->igmpv1_host_present_timer().scheduled()) {
+	    if (group_record->igmpv1_host_present_timer().scheduled()) {
 		//
 		// Ignore this 'Leave Group' message because this
 		// group has IGMPv1 hosts members.
@@ -536,11 +536,11 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 	    // "Last Member Query Count" / "Last Listener Query Count"
 	    uint32_t query_count = robust_count().get();
 
-	    member_query->member_query_timer() =
+	    group_record->member_query_timer() =
 		mld6igmp_node().eventloop().new_oneoff_after(
 		    (query_last_member_interval().get() * query_count),
-		    callback(member_query,
-			     &MemberQuery::member_query_timer_timeout));
+		    callback(group_record,
+			     &Mld6igmpGroupRecord::member_query_timer_timeout));
 
 	    //
 	    // Send group-specific query
@@ -549,16 +549,16 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 	    TimeVal scaled_max_resp_time =
 		(query_last_member_interval().get() * timer_scale);
 	    mld6igmp_send(primary_addr(),
-			  member_query->group(),
+			  group_record->group(),
 			  mld6igmp_constant_membership_query(),
 			  scaled_max_resp_time.sec(),
-			  member_query->group(),
+			  group_record->group(),
 			  dummy_error_msg);
-	    member_query->last_member_query_timer() =
+	    group_record->last_member_query_timer() =
 		mld6igmp_node().eventloop().new_oneoff_after(
 		    query_last_member_interval().get(),
-		    callback(member_query,
-			     &MemberQuery::last_member_query_timer_timeout));
+		    callback(group_record,
+			     &Mld6igmpGroupRecord::last_member_query_timer_timeout));
 	}
 	return (XORP_OK);
     }

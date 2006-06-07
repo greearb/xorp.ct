@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.26 2006/05/17 23:53:24 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.27 2006/06/06 23:09:04 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -34,7 +34,7 @@
 #include "igmp_proto.h"
 #include "mld6_proto.h"
 #include "mld6igmp_node.hh"
-#include "mld6igmp_member_query.hh"
+#include "mld6igmp_group_record.hh"
 
 
 //
@@ -44,7 +44,7 @@
 //
 // Structures/classes, typedefs and macros
 //
-class	MemberQuery;
+class Mld6igmpGroupRecord;
 
 /**
  * @short A class for MLD/IGMP-specific virtual interface.
@@ -185,21 +185,21 @@ public:
 
     /**
      * Get the map with the multicast membership
-     * information (@ref MemberQuery).
+     * information (@ref Mld6igmpGroupRecord).
      * 
      * @return the map with the multicast membership
-     * information (@ref MemberQuery).
+     * information (@ref Mld6igmpGroupRecord).
      */
-    map<IPvX, MemberQuery *>& members() { return (_members); }
+    map<IPvX, Mld6igmpGroupRecord *>& members() { return (_members); }
 
     /**
      * Get the map with the multicast membership
-     * information (@ref MemberQuery).
+     * information (@ref Mld6igmpGroupRecord).
      * 
      * @return the map with the multicast membership
-     * information (@ref MemberQuery).
+     * information (@ref Mld6igmpGroupRecord).
      */
-    const map<IPvX, MemberQuery *>& members() const { return (_members); }
+    const map<IPvX, Mld6igmpGroupRecord *>& members() const { return (_members); }
 
     /**
      * Test if the protocol is Source-Specific Multicast (e.g., IGMPv3
@@ -366,7 +366,7 @@ private:
 						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
-    map<IPvX, MemberQuery *> _members;	// Map of all groups with members
+    map<IPvX, Mld6igmpGroupRecord *> _members;	// Map of all group records
 
     //
     // Misc configuration parameters

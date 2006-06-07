@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.53 2006/05/17 23:21:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.54 2006/06/06 23:09:04 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2768,16 +2768,16 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    map<IPvX, MemberQuery *>::const_iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
     for (iter = mld6igmp_vif->members().begin();
 	 iter != mld6igmp_vif->members().end();
 	 ++iter) {
-	const MemberQuery *member_query = iter->second;
+	const Mld6igmpGroupRecord *group_record = iter->second;
 	send_add_membership(xrl_sender_name.c_str(),
 			    src_module_id,
 			    mld6igmp_vif->vif_index(),
 			    IPvX::ZERO(family()),
-			    member_query->group());
+			    group_record->group());
     }
     
     //
@@ -2842,16 +2842,16 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    map<IPvX, MemberQuery *>::const_iterator iter;
+    map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
     for (iter = mld6igmp_vif->members().begin();
 	 iter != mld6igmp_vif->members().end();
 	 ++iter) {
-	const MemberQuery *member_query = iter->second;
+	const Mld6igmpGroupRecord *group_record = iter->second;
 	send_add_membership(xrl_sender_name.c_str(),
 			    src_module_id,
 			    mld6igmp_vif->vif_index(),
 			    IPvX::ZERO(family()),
-			    member_query->group());
+			    group_record->group());
     }
     
     //

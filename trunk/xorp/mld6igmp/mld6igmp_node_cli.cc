@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.23 2006/05/17 23:21:49 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.24 2006/06/06 23:09:04 pavlin Exp $"
 
 
 //
@@ -26,7 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include "mld6igmp_member_query.hh"
+#include "mld6igmp_group_record.hh"
 #include "mld6igmp_node.hh"
 #include "mld6igmp_node_cli.hh"
 #include "mld6igmp_vif.hh"
@@ -350,17 +350,17 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	map<IPvX, MemberQuery *>::const_iterator iter;
+	map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
 	for (iter = mld6igmp_vif->members().begin();
 	     iter != mld6igmp_vif->members().end();
 	     ++iter) {
-	    MemberQuery *member_query = iter->second;
+	    Mld6igmpGroupRecord *group_record = iter->second;
 	    // Test if we should print this entry
 	    bool do_print = true;
 	    if (groups.size()) {
 		do_print = false;
 		for (size_t j = 0; j < groups.size(); j++) {
-		    if (groups[j] == member_query->group()) {
+		    if (groups[j] == group_record->group()) {
 			do_print = true;
 			break;
 		    }
@@ -371,10 +371,10 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	    
 	    cli_print(c_format("%-12s %-15s %-15s %-12s %7d\n",
 			       mld6igmp_vif->name().c_str(),
-			       cstring(member_query->group()),
+			       cstring(group_record->group()),
 			       cstring(IPvX::ZERO(family())),
-			       cstring(member_query->last_reported_host()),
-			       XORP_INT_CAST(member_query->timeout_sec())));
+			       cstring(group_record->last_reported_host()),
+			       XORP_INT_CAST(group_record->timeout_sec())));
 	}
     }
     
