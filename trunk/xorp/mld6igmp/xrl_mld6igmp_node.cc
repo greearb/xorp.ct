@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.54 2006/06/06 23:09:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.55 2006/06/07 00:01:55 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2769,8 +2769,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
     }
     
     map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
-    for (iter = mld6igmp_vif->members().begin();
-	 iter != mld6igmp_vif->members().end();
+    for (iter = mld6igmp_vif->group_records().begin();
+	 iter != mld6igmp_vif->group_records().end();
 	 ++iter) {
 	const Mld6igmpGroupRecord *group_record = iter->second;
 	send_add_membership(xrl_sender_name.c_str(),
@@ -2843,8 +2843,8 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
     }
     
     map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
-    for (iter = mld6igmp_vif->members().begin();
-	 iter != mld6igmp_vif->members().end();
+    for (iter = mld6igmp_vif->group_records().begin();
+	 iter != mld6igmp_vif->group_records().end();
 	 ++iter) {
 	const Mld6igmpGroupRecord *group_record = iter->second;
 	send_add_membership(xrl_sender_name.c_str(),

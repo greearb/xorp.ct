@@ -12,11 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_member_query.cc,v 1.19 2006/06/06 23:09:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.1 2006/06/07 00:01:54 pavlin Exp $"
 
 //
-// Multicast group membership information used by
-// MLDv1 (RFC 2710), IGMPv1 and IGMPv2 (RFC 2236).
+// Multicast group record information used by
+// IGMPv1 and IGMPv2 (RFC 2236), IGMPv3 (RFC 3376), MLDv1 (RFC 2710), and
+// MLDv2 (RFC 3810).
 //
 
 
@@ -59,8 +60,6 @@
  * @mld6igmp_vif: The vif interface this entry belongs to.
  * @group: The entry group address.
  * 
- * Create a (S,G) or (*,G) entry used by IGMP or MLD to query host members.
- * 
  * Return value: 
  **/
 Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
@@ -75,7 +74,7 @@ Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
  * Mld6igmpGroupRecord::~Mld6igmpGroupRecord:
  * @: 
  * 
- * Mld6igmpGroupRecord destrictor.
+ * Mld6igmpGroupRecord destructor.
  **/
 Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
 {
@@ -121,9 +120,9 @@ Mld6igmpGroupRecord::member_query_timer_timeout()
     
     // Remove the entry 
     map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-    iter = mld6igmp_vif().members().find(group());
-    if (iter != mld6igmp_vif().members().end()) {
-	mld6igmp_vif().members().erase(iter);
+    iter = mld6igmp_vif().group_records().find(group());
+    if (iter != mld6igmp_vif().group_records().end()) {
+	mld6igmp_vif().group_records().erase(iter);
 	delete this;
 	return;
     }

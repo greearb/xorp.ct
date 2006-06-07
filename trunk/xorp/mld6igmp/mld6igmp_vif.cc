@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.51 2006/06/06 23:09:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.52 2006/06/07 00:01:55 pavlin Exp $"
 
 
 //
@@ -122,15 +122,15 @@ Mld6igmpVif::~Mld6igmpVif()
 
     stop(error_msg);
     
-    // Remove all members entries
+    // Remove all group records
     map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-    for (iter = _members.begin(); iter != _members.end(); ++iter) {
+    for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
 				  group_record->group(), ACTION_PRUNE);
 	delete group_record;
     }
-    _members.clear();
+    _group_records.clear();
     
     BUFFER_FREE(_buffer_send);
 }
@@ -333,15 +333,15 @@ Mld6igmpVif::stop(string& error_msg)
     _igmpv1_router_present_timer.unschedule();
     _startup_query_count = 0;
     
-    // Remove all members entries
+    // Remove all group records
     map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-    for (iter = _members.begin(); iter != _members.end(); ++iter) {
+    for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
 				  group_record->group(), ACTION_PRUNE);
 	delete group_record;
     }
-    _members.clear();
+    _group_records.clear();
     
     //
     // Stop the vif with the kernel

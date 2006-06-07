@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.25 2006/06/06 23:09:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.26 2006/06/07 00:01:55 pavlin Exp $"
 
 
 //
@@ -243,8 +243,8 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	// Find if we already have an entry for this group
 	
 	map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-	iter = _members.find(group_address);
-	if (iter != _members.end()) {
+	iter = _group_records.find(group_address);
+	if (iter != _group_records.end()) {
 	    //
 	    // Group found
 	    //
@@ -414,8 +414,8 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     
     // Find if we already have an entry for this group
     map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-    iter = _members.find(group_address);
-    if (iter != _members.end()) {
+    iter = _group_records.find(group_address);
+    if (iter != _group_records.end()) {
 	// Group found
 	// TODO: XXX: cancel the g-s rxmt timer?? Not in spec!
 	group_record = iter->second;
@@ -428,7 +428,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	// A new group
 	group_record = new Mld6igmpGroupRecord(*this, group_address);
 	group_record->set_last_reported_host(src);
-	_members.insert(make_pair(group_address, group_record));
+	_group_records.insert(make_pair(group_address, group_record));
 	// notify routing (+)    
 	join_prune_notify_routing(IPvX::ZERO(family()),
 				  group_record->group(),
@@ -517,8 +517,8 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     
     // Find if this group already has an entry
     map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
-    iter = _members.find(group_address);
-    if (iter != _members.end()) {
+    iter = _group_records.find(group_address);
+    if (iter != _group_records.end()) {
 	//
 	// Group found
 	//

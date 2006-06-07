@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.24 2006/06/06 23:09:04 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.25 2006/06/07 00:01:54 pavlin Exp $"
 
 
 //
@@ -226,7 +226,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_interface(const vector<string>& argv)
 			   cstring(mld6igmp_vif->querier_addr()),
 			   querier_timeout_sec_string.c_str(),
 			   mld6igmp_vif->proto_version(),
-			   XORP_UINT_CAST(mld6igmp_vif->members().size())));
+			   XORP_UINT_CAST(mld6igmp_vif->group_records().size())));
     }
     
     return (XORP_OK);
@@ -351,8 +351,8 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	if (mld6igmp_vif == NULL)
 	    continue;
 	map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
-	for (iter = mld6igmp_vif->members().begin();
-	     iter != mld6igmp_vif->members().end();
+	for (iter = mld6igmp_vif->group_records().begin();
+	     iter != mld6igmp_vif->group_records().end();
 	     ++iter) {
 	    Mld6igmpGroupRecord *group_record = iter->second;
 	    // Test if we should print this entry

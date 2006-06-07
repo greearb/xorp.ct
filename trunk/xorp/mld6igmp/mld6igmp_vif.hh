@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.27 2006/06/06 23:09:04 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.28 2006/06/07 00:01:55 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -190,7 +190,7 @@ public:
      * @return the map with the multicast membership
      * information (@ref Mld6igmpGroupRecord).
      */
-    map<IPvX, Mld6igmpGroupRecord *>& members() { return (_members); }
+    map<IPvX, Mld6igmpGroupRecord *>& group_records() { return (_group_records); }
 
     /**
      * Get the map with the multicast membership
@@ -199,7 +199,7 @@ public:
      * @return the map with the multicast membership
      * information (@ref Mld6igmpGroupRecord).
      */
-    const map<IPvX, Mld6igmpGroupRecord *>& members() const { return (_members); }
+    const map<IPvX, Mld6igmpGroupRecord *>& group_records() const { return (_group_records); }
 
     /**
      * Test if the protocol is Source-Specific Multicast (e.g., IGMPv3
@@ -366,7 +366,7 @@ private:
 						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
-    map<IPvX, Mld6igmpGroupRecord *> _members;	// Map of all group records
+    map<IPvX, Mld6igmpGroupRecord *> _group_records; // The group records
 
     //
     // Misc configuration parameters

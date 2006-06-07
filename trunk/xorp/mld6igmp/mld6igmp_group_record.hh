@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.1 2006/06/07 00:01:54 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 
 
 //
-// IGMP and MLD membership definitions.
+// IGMP and MLD group record.
 //
 
 
