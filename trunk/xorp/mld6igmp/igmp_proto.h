@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.10 2006/05/18 06:26:08 pavlin Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.11 2006/06/01 17:54:00 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -137,6 +137,14 @@
 #  else
 #    define IGMP_V2_LEAVE_GROUP		0x17
 #  endif
+#endif
+
+#ifndef IGMP_DVMRP
+#  define IGMP_DVMRP			0x13
+#endif
+
+#ifndef IGMP_PIM
+#  define IGMP_PIM			0x14
 #endif
 
 #ifndef IGMP_MTRACE_RESP
