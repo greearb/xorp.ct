@@ -5070,7 +5070,7 @@ while test "${net_snmp_found}" = "true"; do
 
 for ac_flag in "-DNETSNMP_NO_INLINE"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
+      ac_safe=xr_check_cflag
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5081,9 +5081,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -5125,9 +5122,6 @@ eval "ac_cv_prog_c_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -5149,7 +5143,7 @@ echo "${ECHO_T}no" >&6
 
 	for ac_flag in "-DNETSNMP_NO_INLINE"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=xr_check_cxxflag
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5160,9 +5154,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -5204,9 +5195,6 @@ eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -5230,7 +5218,7 @@ echo "${ECHO_T}no" >&6
 
     # Darwin 7.0.0 / OS X 10.3 on ppc gives ppc and i386 arch flags which
     # the default compiler cannot compile.
-      ac_safe=`echo "${NETSNMPCFLAGS}" | sed 'y%./+- ,%__p___%'`
+      ac_safe=xr_check_cflag
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -5241,9 +5229,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS ${NETSNMPCFLAGS}"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -5285,9 +5270,6 @@ eval "ac_cv_prog_c_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7352,7 +7334,7 @@ if test "${GCC}" = "yes" ; then
 				if test "${enable_debug}" = "yes" ; then
 		for ac_flag in "-g"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
+      ac_safe=xr_check_cflag
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7363,9 +7345,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7407,9 +7386,6 @@ eval "ac_cv_prog_c_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7431,7 +7407,7 @@ echo "${ECHO_T}no" >&6
 
 		for ac_flag in "-g"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=xr_check_cxxflag
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7442,9 +7418,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7486,9 +7459,6 @@ eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7514,7 +7484,7 @@ echo "${ECHO_T}no" >&6
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
 	for ac_flag in $CPARANOIDFLAGS
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
+      ac_safe=xr_check_cflag
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7525,9 +7495,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7569,9 +7536,6 @@ eval "ac_cv_prog_c_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7593,7 +7557,7 @@ echo "${ECHO_T}no" >&6
 
 	for ac_flag in $CXXPARANOIDFLAGS
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=xr_check_cxxflag
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7604,9 +7568,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7648,9 +7609,6 @@ eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7672,7 +7630,7 @@ echo "${ECHO_T}no" >&6
 
 	for ac_flag in "-ftemplate-depth-22"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=xr_check_cxxflag
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7683,9 +7641,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7727,9 +7682,6 @@ eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7753,7 +7705,7 @@ echo "${ECHO_T}no" >&6
 					if test "${enable_compiler_pipe}" == "yes" ; then
 		for ac_flag in "-pipe"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
+      ac_safe=xr_check_cflag
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7764,9 +7716,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7808,9 +7757,6 @@ eval "ac_cv_prog_c_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7832,7 +7778,7 @@ echo "${ECHO_T}no" >&6
 
 		for ac_flag in "-pipe"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=xr_check_cxxflag
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -7843,9 +7789,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
   if test "$cross_compiling" = yes; then
   { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
 echo "$as_me: error: cannot run test program while cross compiling" >&2;}
@@ -7887,9 +7830,6 @@ eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 fi
 rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
 fi
-
-fi
-
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'

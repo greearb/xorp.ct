@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.7 2006/06/09 05:30:55 pavlin Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.8 2006/06/09 06:25:33 pavlin Exp $
 dnl
 
 dnl
@@ -11,13 +11,12 @@ dnl XR_CHECK_CFLAG(COMPILER-FLAG, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 AC_DEFUN([XR_CHECK_CFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
-  ac_safe=`echo "$1" | sed 'y%./+- ,%__p___%'`
+  ac_safe=xr_check_cflag
   AC_LANG_PUSH(C)
   _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $1"
   AC_MSG_CHECKING([whether C compiler supports flag "$1"])
-  AC_CACHE_VAL(ac_cv_prog_c_compiler_$ac_safe,
-    [AC_TRY_RUN([
+  AC_TRY_RUN([
 int
 main(int argc, char **argv)
 {
@@ -26,12 +25,11 @@ main(int argc, char **argv)
 	return (0);
 }
 ],
-      [eval "ac_cv_prog_c_compiler_$ac_safe=yes"
-      dnl AC_MSG_RESULT(yes)
-      ],
-      [eval "ac_cv_prog_c_compiler_$ac_safe=no"
-      dnl AC_MSG_RESULT(no)
-    ])
+    [eval "ac_cv_prog_c_compiler_$ac_safe=yes"
+    dnl AC_MSG_RESULT(yes)
+    ],
+    [eval "ac_cv_prog_c_compiler_$ac_safe=no"
+    dnl AC_MSG_RESULT(no)
   ])
   CFLAGS="$_save_flags"
   AC_LANG_POP(C)
@@ -77,13 +75,12 @@ dnl XR_CHECK_CXXFLAG(COMPILER-FLAG, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 AC_DEFUN([XR_CHECK_CXXFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
-  ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
+  ac_safe=xr_check_cxxflag
   AC_LANG_PUSH(C++)
   _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $1"
   AC_MSG_CHECKING([whether C++ compiler supports flag "$1"])
-  AC_CACHE_VAL(ac_cv_prog_cxx_compiler_$ac_safe,
-    [AC_TRY_RUN([
+  AC_TRY_RUN([
 int
 main(int argc, char **argv)
 {
@@ -92,12 +89,11 @@ main(int argc, char **argv)
 	return (0);
 }
 ],
-      [eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
-      dnl AC_MSG_RESULT(yes)
-      ],
-      [eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
-      dnl AC_MSG_RESULT(no)
-    ])
+    [eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
+    dnl AC_MSG_RESULT(yes)
+    ],
+    [eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
+    dnl AC_MSG_RESULT(no)
   ])
   CXXFLAGS="$_save_flags"
   AC_LANG_POP(C++)
