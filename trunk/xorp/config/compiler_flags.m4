@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.5 2005/08/29 21:24:28 pavlin Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.6 2006/01/17 23:03:40 pavlin Exp $
 dnl
 
 dnl
@@ -11,7 +11,7 @@ dnl XR_CHECK_CFLAG(COMPILER-FLAG, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]])
 dnl
 AC_DEFUN([XR_CHECK_CFLAG],
 [dnl Do the transliteration at runtime so arg 1 can be a shell variable.
-  ac_safe=`echo "$1" | sed 'y%./+- %__p__%'`
+  ac_safe=`echo "$1" | sed 'y%./+- ,%__p___%'`
   AC_LANG_PUSH(C)
   _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $1"

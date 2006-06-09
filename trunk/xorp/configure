@@ -18028,7 +18028,7 @@ if test "${GCC}" = "yes" ; then
 				if test "${enable_debug}" = "yes" ; then
 		for ac_flag in "-g"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -18172,7 +18172,7 @@ echo "${ECHO_T}no" >&6
 	CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
 	for ac_flag in $CPARANOIDFLAGS
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -18384,7 +18384,7 @@ echo "${ECHO_T}no" >&6
 					if test "${enable_compiler_pipe}" == "yes" ; then
 		for ac_flag in "-pipe"
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -18545,7 +18545,7 @@ _ACEOF
 
 								for ac_flag in $CFLAGS_END
   do
-      ac_safe=`echo "$ac_flag" | sed 'y%./+- %__p__%'`
+      ac_safe=`echo "$ac_flag" | sed 'y%./+- ,%__p___%'`
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
