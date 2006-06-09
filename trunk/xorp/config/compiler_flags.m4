@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.6 2006/01/17 23:03:40 pavlin Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.7 2006/06/09 05:30:55 pavlin Exp $
 dnl
 
 dnl
@@ -17,7 +17,7 @@ AC_DEFUN([XR_CHECK_CFLAG],
   CFLAGS="$CFLAGS $1"
   AC_MSG_CHECKING([whether C compiler supports flag "$1"])
   AC_CACHE_VAL(ac_cv_prog_c_compiler_$ac_safe,
-    [AC_COMPILE_IFELSE([
+    [AC_TRY_RUN([
 int
 main(int argc, char **argv)
 {
@@ -83,7 +83,7 @@ AC_DEFUN([XR_CHECK_CXXFLAG],
   CXXFLAGS="$CXXFLAGS $1"
   AC_MSG_CHECKING([whether C++ compiler supports flag "$1"])
   AC_CACHE_VAL(ac_cv_prog_cxx_compiler_$ac_safe,
-    [AC_COMPILE_IFELSE([
+    [AC_TRY_RUN([
 int
 main(int argc, char **argv)
 {

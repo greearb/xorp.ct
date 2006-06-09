@@ -5084,7 +5084,14 @@ echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C"
   if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -5095,13 +5102,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5110,12 +5116,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -5154,7 +5163,14 @@ echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_
   if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -5165,13 +5181,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5180,12 +5195,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -5226,7 +5244,14 @@ echo $ECHO_N "checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"... 
   if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -5237,13 +5262,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5252,12 +5276,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7339,7 +7366,14 @@ echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C"
   if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7350,13 +7384,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7365,12 +7398,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7409,7 +7445,14 @@ echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_
   if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7420,13 +7463,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7435,12 +7477,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7483,7 +7528,14 @@ echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C"
   if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7494,13 +7546,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7509,12 +7560,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7553,7 +7607,14 @@ echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_
   if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7564,13 +7625,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7579,12 +7639,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7623,7 +7686,14 @@ echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_
   if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7634,13 +7704,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7649,12 +7718,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7695,7 +7767,14 @@ echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C"
   if eval "test \"\${ac_cv_prog_c_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7706,13 +7785,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7721,12 +7799,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
@@ -7765,7 +7846,14 @@ echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_
   if eval "test \"\${ac_cv_prog_cxx_compiler_$ac_safe+set}\" = set"; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
+  if test "$cross_compiling" = yes; then
+  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
+echo "$as_me: error: cannot run test program while cross compiling" >&2;}
+   { (exit 1); exit 1; }; }
+else
   cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
 
 int
 main(int argc, char **argv)
@@ -7776,13 +7864,12 @@ main(int argc, char **argv)
 }
 
 _ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
+rm -f conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest.$ac_objext'
+  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7791,12 +7878,15 @@ if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: failed program was:" >&5
+  echo "$as_me: program exited with status $ac_status" >&5
+echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
+( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f conftest.$ac_objext conftest.$ac_ext
+rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
+fi
 
 fi
 
