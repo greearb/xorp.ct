@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.4 2006/06/10 00:13:02 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.5 2006/06/10 05:36:33 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -86,6 +86,9 @@ Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
     // TODO: ??? Maybe not the right place, or this should
     // be the only place to use ACTION_PRUNE notification??
     // join_prune_notify_routing(IPvX::ZERO(family()), group(), ACTION_PRUNE);
+
+    _do_forward_sources.delete_payload_and_clear();
+    _dont_forward_sources.delete_payload_and_clear();
 }
 
 /**
@@ -358,12 +361,20 @@ Mld6igmpGroupRecord::group_timer_timeout()
     // TODO: XXX: PAVPAVPAV: implement it!
 }
 
+/**
+ * Constructor for a given vif.
+ * 
+ * @param mld6igmp_vif the interface this set belongs to.
+ */
 Mld6igmpGroupSet::Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif)
     : _mld6igmp_vif(mld6igmp_vif)
 {
     
 }
 
+/**
+ * Destructor.
+ */
 Mld6igmpGroupSet::~Mld6igmpGroupSet()
 {
     // XXX: don't delete the payload, because it might be used elsewhere

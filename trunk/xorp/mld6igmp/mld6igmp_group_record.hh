@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.3 2006/06/10 00:13:02 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.4 2006/06/10 05:36:33 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -56,7 +56,7 @@ public:
     Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif, const IPvX& group);
     
     /**
-     * Destructor
+     * Destructor.
      */
     ~Mld6igmpGroupRecord();
 
@@ -240,7 +240,7 @@ public:
     Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif);
     
     /**
-     * Destructor
+     * Destructor.
      */
     ~Mld6igmpGroupSet();
 

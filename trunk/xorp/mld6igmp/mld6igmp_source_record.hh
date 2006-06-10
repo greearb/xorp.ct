@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.2 2006/06/10 00:15:30 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.3 2006/06/10 05:32:15 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -57,7 +57,7 @@ public:
 			 const IPvX& source);
     
     /**
-     * Destructor
+     * Destructor.
      */
     ~Mld6igmpSourceRecord();
 
@@ -111,14 +111,14 @@ private:
 class Mld6igmpSourceSet : public map<IPvX, Mld6igmpSourceRecord *> {
 public:
     /**
-     * Constructor for a given group record
+     * Constructor for a given group record.
      *
      * @param group_record the group record this set belongs to.
      */
     Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record);
 
     /**
-     * Destructor
+     * Destructor.
      */
     ~Mld6igmpSourceSet();
 

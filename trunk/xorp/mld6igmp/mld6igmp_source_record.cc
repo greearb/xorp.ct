@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.2 2006/06/10 00:15:30 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.3 2006/06/10 05:32:15 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -112,12 +112,20 @@ Mld6igmpSourceRecord::source_timer_timeout()
     // TODO: XXX: PAVPAVPAV: implement it!
 }
 
+/**
+ * Constructor for a given group record.
+ *
+ * @param group_record the group record this set belongs to.
+ */
 Mld6igmpSourceSet::Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record)
     : _group_record(group_record)
 {
 
 }
 
+/**
+ * Destructor.
+ */
 Mld6igmpSourceSet::~Mld6igmpSourceSet()
 {
     // XXX: don't delete the payload, because it might be used elsewhere
