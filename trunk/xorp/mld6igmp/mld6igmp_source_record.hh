@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.1 2006/06/07 05:36:34 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.2 2006/06/10 00:15:30 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -38,6 +38,7 @@
 // Structures/classes, typedefs and macros
 //
 
+class EventLoop;
 class Mld6igmpGroupRecord;
 
 /**
@@ -80,8 +81,25 @@ public:
      * @return the address family.
      */
     int family() const { return _source.af(); }
-    
+
+    /**
+     * Set the source timer.
+     *
+     * @param timeval the timeout interval of the source timer.
+     */
+    void set_source_timer(const TimeVal& timeval);
+
+    /**
+     * Cancel the source timer.
+     */
+    void cancel_source_timer();
+
 private:
+    /**
+     * Timeout: the source timer has expired.
+     */
+    void source_timer_timeout();
+
     Mld6igmpGroupRecord& _group_record;	// The group record we belong to
     IPvX	_source;		// The source address
     XorpTimer	_source_timer;		// The source timer
@@ -108,6 +126,14 @@ public:
      * Delete the payload of the set, and clear the set itself.
      */
     void delete_payload_and_clear();
+
+    /**
+     * Assignment operator for sets.
+     *
+     * @param other the right-hand operand.
+     * @return the assigned set.
+     */
+    Mld6igmpSourceSet& operator=(const Mld6igmpSourceSet& other);
 
     /**
      * UNION operator for sets.
@@ -165,6 +191,35 @@ public:
      * the right-hand set have been removed).
      */
     Mld6igmpSourceSet operator-(const set<IPvX>& other);
+
+    /**
+     * Set the source timer for a set of source addresses.
+     *
+     * @param sources the set of source addresses whose source timer will
+     * be set.
+     * @param timeval the timeout interval of the source timer.
+     */
+    void set_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
+
+    /**
+     * Set the source timer for all source addresses.
+     *
+     * @param timeval the timeout interval of the source timer.
+     */
+    void set_source_timer(const TimeVal& timeval);
+
+    /**
+     * Cancel the source timer for a set of source addresses.
+     *
+     * @param sources the set of source addresses whose source timer will
+     * be canceled.
+     */
+    void cancel_source_timer(const set<IPvX>& sources);
+
+    /**
+     * Cancel the source timer for all source addresses.
+     */
+    void cancel_source_timer();
 
 private:
     Mld6igmpGroupRecord& _group_record;	// The group record this set belongs to

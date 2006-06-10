@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.1 2006/06/07 05:36:34 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.2 2006/06/10 00:15:30 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -28,7 +28,7 @@
 
 #include "mld6igmp_source_record.hh"
 #include "mld6igmp_group_record.hh"
-
+#include "mld6igmp_vif.hh"
 
 
 //
@@ -79,6 +79,39 @@ Mld6igmpSourceRecord::~Mld6igmpSourceRecord()
 
 }
 
+/**
+ * Set the source timer.
+ *
+ * @param timeval the timeout interval of the source timer.
+ */
+void
+Mld6igmpSourceRecord::set_source_timer(const TimeVal& timeval)
+{
+    EventLoop& eventloop = _group_record.eventloop();
+
+    _source_timer = eventloop.new_oneoff_after(
+	timeval,
+	callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
+}
+
+/**
+ * Cancel the source timer.
+ */
+void
+Mld6igmpSourceRecord::cancel_source_timer()
+{
+    _source_timer.unschedule();
+}
+
+/**
+ * Timeout: the source timer has expired.
+ */
+void
+Mld6igmpSourceRecord::source_timer_timeout()
+{
+    // TODO: XXX: PAVPAVPAV: implement it!
+}
+
 Mld6igmpSourceSet::Mld6igmpSourceSet(Mld6igmpGroupRecord& group_record)
     : _group_record(group_record)
 {
@@ -110,6 +143,31 @@ Mld6igmpSourceSet::delete_payload_and_clear()
     // Clear the set itself
     //
     this->clear();
+}
+
+/**
+ * Assignment operator for sets.
+ *
+ * @param other the right-hand operand.
+ * @return the assigned set.
+ */
+Mld6igmpSourceSet&
+Mld6igmpSourceSet::operator=(const Mld6igmpSourceSet& other)
+{
+    Mld6igmpSourceSet::const_iterator iter;
+
+    XLOG_ASSERT(&_group_record == &(other._group_record));
+
+    this->clear();
+
+    //
+    // Copy the payload of the set
+    //
+    for (iter = other.begin(); iter != other.end(); ++iter) {
+	insert(make_pair(iter->first, iter->second));
+    }
+
+    return (*this);
 }
 
 /**
@@ -266,4 +324,80 @@ Mld6igmpSourceSet::operator-(const set<IPvX>& other)
     }
 
     return (result);
+}
+
+/**
+ * Set the source timer for a set of source addresses.
+ *
+ * @param sources the set of source addresses whose source timer will
+ * be set.
+ * @param timeval the timeout interval of the source timer.
+ */
+void
+Mld6igmpSourceSet::set_source_timer(const set<IPvX>& sources,
+				    const TimeVal& timeval)
+{
+    set<IPvX>::const_iterator iter;
+    Mld6igmpSourceSet::iterator record_iter;
+
+    for (iter = sources.begin(); iter != sources.end(); ++iter) {
+	const IPvX& ipvx = *iter;
+	record_iter = this->find(ipvx);
+	if (record_iter != this->end()) {
+	    Mld6igmpSourceRecord* source_record = record_iter->second;
+	    source_record->set_source_timer(timeval);
+	}
+    }
+}
+
+/**
+ * Set the source timer for all source addresses.
+ *
+ * @param timeval the timeout interval of the source timer.
+ */
+void
+Mld6igmpSourceSet::set_source_timer(const TimeVal& timeval)
+{
+    Mld6igmpSourceSet::iterator iter;
+
+    for (iter = this->begin(); iter != this->end(); ++iter) {
+	Mld6igmpSourceRecord* source_record = iter->second;
+	source_record->set_source_timer(timeval);
+    }
+}
+
+/**
+ * Cancel the source timer for a set of source addresses.
+ *
+ * @param sources the set of source addresses whose source timer will
+ * be canceled.
+ */
+void
+Mld6igmpSourceSet::cancel_source_timer(const set<IPvX>& sources)
+{
+    set<IPvX>::const_iterator iter;
+    Mld6igmpSourceSet::iterator record_iter;
+
+    for (iter = sources.begin(); iter != sources.end(); ++iter) {
+	const IPvX& ipvx = *iter;
+	record_iter = this->find(ipvx);
+	if (record_iter != this->end()) {
+	    Mld6igmpSourceRecord* source_record = record_iter->second;
+	    source_record->cancel_source_timer();
+	}
+    }
+}
+
+/**
+ * Cancel the source timer for all source addresses.
+ */
+void
+Mld6igmpSourceSet::cancel_source_timer()
+{
+    Mld6igmpSourceSet::iterator iter;
+
+    for (iter = this->begin(); iter != this->end(); ++iter) {
+	Mld6igmpSourceRecord* source_record = iter->second;
+	source_record->cancel_source_timer();
+    }
 }
