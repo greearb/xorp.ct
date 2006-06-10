@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.12 2006/06/01 17:54:26 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.13 2006/06/07 22:38:38 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -24,7 +24,7 @@
 
 /*
  * Multicast Listener Discovery protocol-specific definitions.
- * MLDv1 (RFC 2710)
+ * MLDv1 (RFC 2710), and MLDv2 (RFC 3810).
  */
 
 #ifdef HAVE_NETINET_ICMP6_H
