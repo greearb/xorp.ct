@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.53 2006/06/07 20:09:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.54 2006/06/07 22:56:45 pavlin Exp $"
 
 
 //
@@ -63,13 +63,19 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     : ProtoUnit(mld6igmp_node.family(), mld6igmp_node.module_id()),
       Vif(vif),
       _mld6igmp_node(mld6igmp_node),
+      _proto_flags(0),
       _primary_addr(IPvX::ZERO(mld6igmp_node.family())),
       _querier_addr(IPvX::ZERO(mld6igmp_node.family())),
+      _startup_query_count(0),
+      _group_records(*this),
       _ip_router_alert_option_check(false),
-      _query_interval(TimeVal(0, 0)),
+      _query_interval(TimeVal(0, 0),
+		      callback(this, &Mld6igmpVif::set_query_interval_cb)),
       _query_last_member_interval(TimeVal(0, 0)),
-      _query_response_interval(TimeVal(0, 0)),
-      _robust_count(0),
+      _query_response_interval(TimeVal(0, 0),
+			       callback(this, &Mld6igmpVif::set_query_response_interval_cb)),
+      _robust_count(0, callback(this, &Mld6igmpVif::set_robust_count_cb)),
+      _group_membership_interval(TimeVal(0, 0)),
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
@@ -78,8 +84,6 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     // TODO: when more things become classes, most of this init should go away
     //
     _buffer_send = BUFFER_MALLOC(BUF_SIZE_DEFAULT);
-    _proto_flags = 0;
-    _startup_query_count = 0;
 
     //
     // Set the protocol version
@@ -90,7 +94,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_last_member_interval.set(
 	    TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0));
 	_query_response_interval.set(TimeVal(IGMP_QUERY_RESPONSE_INTERVAL, 0));
-	_robust_count = IGMP_ROBUSTNESS_VARIABLE;
+	_robust_count.set(IGMP_ROBUSTNESS_VARIABLE);
     }
 
     if (proto_is_mld6()) {
@@ -99,7 +103,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
 	_query_last_member_interval.set(
 	    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0));
 	_query_response_interval.set(TimeVal(MLD_QUERY_RESPONSE_INTERVAL, 0));
-	_robust_count = MLD_ROBUSTNESS_VARIABLE;
+	_robust_count.set(MLD_ROBUSTNESS_VARIABLE);
     }
 
     set_proto_version(proto_version_default());
@@ -118,15 +122,14 @@ Mld6igmpVif::~Mld6igmpVif()
 
     stop(error_msg);
     
-    // Remove all group records
-    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+    // Notify routing and remove all group records
+    Mld6igmpGroupSet::iterator iter;
     for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
 				  group_record->group(), ACTION_PRUNE);
-	delete group_record;
     }
-    _group_records.clear();
+    _group_records.delete_payload_and_clear();
     
     BUFFER_FREE(_buffer_send);
 }
@@ -325,15 +328,14 @@ Mld6igmpVif::stop(string& error_msg)
     _igmpv1_router_present_timer.unschedule();
     _startup_query_count = 0;
     
-    // Remove all group records
-    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+    // Notify routing and remove all group records
+    Mld6igmpGroupSet::iterator iter;
     for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
 	join_prune_notify_routing(IPvX::ZERO(family()),
 				  group_record->group(), ACTION_PRUNE);
-	delete group_record;
     }
-    _group_records.clear();
+    _group_records.delete_payload_and_clear();
     
     //
     // Stop the vif with the kernel

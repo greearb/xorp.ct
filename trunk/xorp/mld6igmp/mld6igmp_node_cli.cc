@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.25 2006/06/07 00:01:54 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.26 2006/06/07 20:09:50 pavlin Exp $"
 
 
 //
@@ -350,7 +350,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
+	Mld6igmpGroupSet::const_iterator iter;
 	for (iter = mld6igmp_vif->group_records().begin();
 	     iter != mld6igmp_vif->group_records().end();
 	     ++iter) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.55 2006/06/07 00:01:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.56 2006/06/07 20:09:50 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2768,7 +2768,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol4(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
+    Mld6igmpGroupSet::const_iterator iter;
     for (iter = mld6igmp_vif->group_records().begin();
 	 iter != mld6igmp_vif->group_records().end();
 	 ++iter) {
@@ -2842,7 +2842,7 @@ XrlMld6igmpNode::mld6igmp_0_1_add_protocol6(
 	return XrlCmdError::COMMAND_FAILED(error_msg);
     }
     
-    map<IPvX, Mld6igmpGroupRecord *>::const_iterator iter;
+    Mld6igmpGroupSet::const_iterator iter;
     for (iter = mld6igmp_vif->group_records().begin();
 	 iter != mld6igmp_vif->group_records().end();
 	 ++iter) {

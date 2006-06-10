@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.28 2006/06/07 00:01:55 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.29 2006/06/07 20:09:50 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -23,7 +23,6 @@
 //
 
 
-#include <map>
 #include <utility>
 
 #include "libxorp/config_param.hh"
@@ -44,7 +43,6 @@
 //
 // Structures/classes, typedefs and macros
 //
-class Mld6igmpGroupRecord;
 
 /**
  * @short A class for MLD/IGMP-specific virtual interface.
@@ -184,22 +182,22 @@ public:
     void	set_querier_addr(const IPvX& v) { _querier_addr = v;	}
 
     /**
-     * Get the map with the multicast membership
-     * information (@ref Mld6igmpGroupRecord).
+     * Get the set with the multicast group records information
+     * (@ref Mld6igmpGroupSet).
      * 
-     * @return the map with the multicast membership
-     * information (@ref Mld6igmpGroupRecord).
+     * @return the set with the multicast group records information
+     * (@ref Mld6igmpGroupSet).
      */
-    map<IPvX, Mld6igmpGroupRecord *>& group_records() { return (_group_records); }
+    Mld6igmpGroupSet& group_records() { return (_group_records); }
 
     /**
-     * Get the map with the multicast membership
-     * information (@ref Mld6igmpGroupRecord).
+     * Get the const set with the multicast group records information
+     * (@ref Mld6igmpGroupSet).
      * 
-     * @return the map with the multicast membership
-     * information (@ref Mld6igmpGroupRecord).
+     * @return the const set with the multicast group records information
+     * (@ref Mld6igmpGroupSet).
      */
-    const map<IPvX, Mld6igmpGroupRecord *>& group_records() const { return (_group_records); }
+    const Mld6igmpGroupSet& group_records() const { return (_group_records); }
 
     /**
      * Test if the protocol is Source-Specific Multicast (e.g., IGMPv3
@@ -253,6 +251,16 @@ public:
      * @return a reference to the Robustness Variable count.
      */
     ConfigParam<uint32_t>& robust_count() { return (_robust_count); }
+
+    /**
+     * Obtain a reference to the Group Membership Interval.
+     *
+     * Note that it is not directly configurable, but may be tuned by
+     * changing the values of the parameters it depends on.
+     *
+     * @return a reference to the Group Membership Interval.
+     */
+    const TimeVal& group_membership_interval() const { return (_group_membership_interval); }
 
     //
     // Add/delete routing protocols that need to be notified for membership
@@ -350,6 +358,14 @@ private:
     void	set_i_am_querier(bool v);
 
     //
+    // Callbacks for configuration and non-configurable parameters
+    //
+    void	set_query_interval_cb(TimeVal v);
+    void	set_query_response_interval_cb(TimeVal v);
+    void	set_robust_count_cb(uint32_t v);
+    void	recalculate_group_membership_interval();
+
+    //
     // Private state
     //
     Mld6igmpNode& _mld6igmp_node;	// The MLD6IGMP node I belong to
@@ -366,7 +382,7 @@ private:
 						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
-    map<IPvX, Mld6igmpGroupRecord *> _group_records; // The group records
+    Mld6igmpGroupSet _group_records;	// The group records
 
     //
     // Misc configuration parameters
@@ -376,7 +392,12 @@ private:
     ConfigParam<TimeVal> _query_last_member_interval;	// The Last Member Query Interval
     ConfigParam<TimeVal> _query_response_interval;	// The Query Response Interval
     ConfigParam<uint32_t> _robust_count;	// The Robustness Variable count
-    
+
+    //
+    // Other parameters that are not directly configurable
+    //
+    TimeVal	_group_membership_interval;	// The Group Membership Interval
+
     //
     // Misc. other state
     //

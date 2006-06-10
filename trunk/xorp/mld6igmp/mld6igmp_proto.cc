@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.27 2006/06/07 20:09:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.28 2006/06/07 22:56:45 pavlin Exp $"
 
 
 //
@@ -32,6 +32,8 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
+
+#include <set>
 
 #include "mld6igmp_vif.hh"
 
@@ -238,7 +240,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	 && (! i_am_querier())) {
 	// Find if we already have an entry for this group
 	
-	map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+	Mld6igmpGroupSet::iterator iter;
 	iter = _group_records.find(group_address);
 	if (iter != _group_records.end()) {
 	    //
@@ -405,7 +407,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     }
     
     // Find if we already have an entry for this group
-    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+    Mld6igmpGroupSet::iterator iter;
     iter = _group_records.find(group_address);
     if (iter != _group_records.end()) {
 	// Group found
@@ -427,12 +429,9 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 				  ACTION_JOIN);
     }
     
-    TimeVal group_membership_interval
-	= static_cast<int>(robust_count().get()) * query_interval().get()
-	+ query_response_interval().get();
     group_record->member_query_timer() =
 	mld6igmp_node().eventloop().new_oneoff_after(
-	    group_membership_interval,
+	    group_membership_interval(),
 	    callback(group_record, &Mld6igmpGroupRecord::member_query_timer_timeout));
 
     if (proto_is_igmp()) {
@@ -448,7 +447,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	    //
 	    group_record->igmpv1_host_present_timer() =
 		mld6igmp_node().eventloop().set_flag_after(
-		    group_membership_interval,
+		    group_membership_interval(),
 		    &_dummy_flag);
 	}
     }
@@ -506,7 +505,7 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     }
     
     // Find if this group already has an entry
-    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+    Mld6igmpGroupSet::iterator iter;
     iter = _group_records.find(group_address);
     if (iter != _group_records.end()) {
 	//
@@ -580,8 +579,15 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
 {
     uint16_t group_records_n = 0;
     string error_msg;
-
-    // TODO: XXX: PAVPAVPAV: this method is unfinished
+    typedef pair<IPvX, set<IPvX> > gs_record;	// XXX: a handy typedef
+    list<gs_record> mode_is_include_groups;
+    list<gs_record> mode_is_exclude_groups;
+    list<gs_record> change_to_include_mode_groups;
+    list<gs_record> change_to_exclude_mode_groups;
+    list<gs_record> allow_new_sources_groups;
+    list<gs_record> block_old_sources_groups;
+    list<gs_record>::iterator gs_iter;
+    set<IPvX>::iterator sources_iter;
 
     //
     // Decode the rest of the message header
@@ -597,7 +603,8 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
 	uint8_t aux_data_len;
 	uint16_t sources_n;
 	IPvX group_address(family());
-	list<IPvX> source_address_list;
+	set<IPvX> source_addresses;
+	list<gs_record>* gs_record_ptr = NULL;
 
 	BUFFER_GET_OCTET(record_type, buffer);
 	BUFFER_GET_OCTET(aux_data_len, buffer);
@@ -608,14 +615,114 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
 	while (sources_n != 0) {
 	    IPvX ipvx(family());
 	    BUFFER_GET_IPVX(family(), ipvx, buffer);
-	    source_address_list.push_back(ipvx);
+	    source_addresses.insert(ipvx);
 	    sources_n--;
 	}
 
 	// XXX: Skip the 'Auxiliary Data', because we don't use it
 	BUFFER_GET_SKIP(aux_data_len, buffer);
 
+	//
+	// Select the appropriate set, and add the group and the sources to it
+	//
+	if (proto_is_igmp()) {
+	    switch (record_type) {
+	    case IGMP_MODE_IS_INCLUDE:
+		gs_record_ptr = &mode_is_include_groups;
+		break;
+	    case IGMP_MODE_IS_EXCLUDE:
+		gs_record_ptr = &mode_is_exclude_groups;
+		break;
+	    case IGMP_CHANGE_TO_INCLUDE_MODE:
+		gs_record_ptr = &change_to_include_mode_groups;
+		break;
+	    case IGMP_CHANGE_TO_EXCLUDE_MODE:
+		gs_record_ptr = &change_to_exclude_mode_groups;
+		break;
+	    case IGMP_ALLOW_NEW_SOURCES:
+		gs_record_ptr = &allow_new_sources_groups;
+		break;
+	    case IGMP_BLOCK_OLD_SOURCES:
+		gs_record_ptr = &block_old_sources_groups;
+		break;
+	    default:
+		break;
+	    }
+	}
+	if (proto_is_mld6()) {
+	    switch (record_type) {
+	    case MLD_MODE_IS_INCLUDE:
+		gs_record_ptr = &mode_is_include_groups;
+		break;
+	    case MLD_MODE_IS_EXCLUDE:
+		gs_record_ptr = &mode_is_exclude_groups;
+		break;
+	    case MLD_CHANGE_TO_INCLUDE_MODE:
+		gs_record_ptr = &change_to_include_mode_groups;
+		break;
+	    case MLD_CHANGE_TO_EXCLUDE_MODE:
+		gs_record_ptr = &change_to_exclude_mode_groups;
+		break;
+	    case MLD_ALLOW_NEW_SOURCES:
+		gs_record_ptr = &allow_new_sources_groups;
+		break;
+	    case MLD_BLOCK_OLD_SOURCES:
+		gs_record_ptr = &block_old_sources_groups;
+		break;
+	    default:
+		break;
+	    }
+	}
+	if (gs_record_ptr != NULL) {
+	    gs_record_ptr->push_back(make_pair(group_address,
+					       source_addresses));
+	} else {
+	    error_msg = c_format("RX %s from %s to %s on vif %s: "
+				 "unrecognized record type %d (ignored)",
+				 proto_message_type2ascii(message_type),
+				 cstring(src), cstring(dst),
+				 name().c_str(),
+				 record_type);
+	    XLOG_WARNING("%s", error_msg.c_str());
+	}
+
 	group_records_n--;
+    }
+
+    //
+    // Process the records
+    //
+    for (gs_iter = mode_is_include_groups.begin();
+	 gs_iter != mode_is_include_groups.end();
+	 ++gs_iter) {
+	group_records().mode_is_include(gs_iter->first, gs_iter->second);
+    }
+    for (gs_iter = mode_is_exclude_groups.begin();
+	 gs_iter != mode_is_exclude_groups.end();
+	 ++gs_iter) {
+	group_records().mode_is_exclude(gs_iter->first, gs_iter->second);
+    }
+    for (gs_iter = change_to_include_mode_groups.begin();
+	 gs_iter != change_to_include_mode_groups.end();
+	 ++gs_iter) {
+	group_records().change_to_include_mode(gs_iter->first,
+					       gs_iter->second);
+    }
+    for (gs_iter = change_to_exclude_mode_groups.begin();
+	 gs_iter != change_to_exclude_mode_groups.end();
+	 ++gs_iter) {
+	group_records().change_to_exclude_mode(gs_iter->first,
+					       gs_iter->second);
+    }
+    for (gs_iter = allow_new_sources_groups.begin();
+	 gs_iter != allow_new_sources_groups.end();
+	 ++gs_iter) {
+	group_records().allow_new_sources(gs_iter->first, gs_iter->second);
+    }
+    for (gs_iter = block_old_sources_groups.begin();
+	 gs_iter != block_old_sources_groups.end();
+	 ++gs_iter) {
+	group_records().block_old_sources(gs_iter->first, gs_iter->second);
     }
 
     return (XORP_OK);
@@ -768,6 +875,34 @@ Mld6igmpVif::mld6igmp_version_consistency_check(const IPvX& src,
     }
 
     return (XORP_OK);
+}
+
+void
+Mld6igmpVif::set_query_interval_cb(TimeVal v)
+{
+    UNUSED(v);
+    recalculate_group_membership_interval();
+}
+
+void
+Mld6igmpVif::set_query_response_interval_cb(TimeVal v)
+{
+    UNUSED(v);
+    recalculate_group_membership_interval();
+}
+
+void
+Mld6igmpVif::set_robust_count_cb(uint32_t v)
+{
+    UNUSED(v);
+    recalculate_group_membership_interval();
+}
+
+void
+Mld6igmpVif::recalculate_group_membership_interval()
+{
+    _group_membership_interval = query_interval().get() * robust_count().get()
+	+ query_response_interval().get();
 }
 
 void
