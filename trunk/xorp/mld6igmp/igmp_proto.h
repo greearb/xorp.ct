@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.11 2006/06/01 17:54:00 pavlin Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.12 2006/06/08 07:13:20 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -23,8 +23,8 @@
 
 
 /*
- * Internet Group Management Protocol protocol-specific definitions.
- * IGMPv1 and IGMPv2 (RFC 2236)
+ * Internet Group Management Protocol protocol-specific definitions:
+ * IGMPv1 and IGMPv2 (RFC 2236), and IGMPv3 (RFC 3376).
  */
 
 #ifdef HAVE_NETINET_IGMP_H
