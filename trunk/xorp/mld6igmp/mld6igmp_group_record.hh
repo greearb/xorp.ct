@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.1 2006/06/07 00:01:54 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.2 2006/06/07 20:09:50 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -23,8 +23,13 @@
 //
 
 
+#include <map>
+#include <set>
+
 #include "libxorp/ipvx.hh"
 #include "libxorp/timer.hh"
+
+#include "mld6igmp_source_record.hh"
 
 
 //
@@ -68,6 +73,72 @@ public:
      * @return the multicast group address.
      */
     const IPvX&	group() const		{ return (_group); }
+
+    /**
+     * Test whether the filter mode is INCLUDE.
+     *
+     * @return true if the filter mode is INCLUDE.
+     */
+    bool is_include_mode() const	{ return (_is_include_mode); }
+
+    /**
+     * Test whether the filter mode is EXCLUDE.
+     *
+     * @return true if the filter mode is EXCLUDE.
+     */
+    bool is_exclude_mode() const	{ return (! _is_include_mode); }
+
+    /**
+     * Set the filter mode to INCLUDE.
+     */
+    void set_include_mode()		{ _is_include_mode = true; }
+
+    /**
+     * Set the filter mode to EXCLUDE.
+     */
+    void set_exclude_mode()		{ _is_include_mode = false; }
+
+    /**
+     * Process MODE_IS_INCLUDE record.
+     *
+     * @param sources the source addresses.
+     */
+    void mode_is_include(const set<IPvX>& sources);
+
+    /**
+     * Process MODE_IS_EXCLUDE record.
+     *
+     * @param sources the source addresses.
+     */
+    void mode_is_exclude(const set<IPvX>& sources);
+
+    /**
+     * Process CHANGE_TO_INCLUDE_MODE record.
+     *
+     * @param sources the source addresses.
+     */
+    void change_to_include_mode(const set<IPvX>& sources);
+
+    /**
+     * Process CHANGE_TO_EXCLUDE_MODE record.
+     *
+     * @param sources the source addresses.
+     */
+    void change_to_exclude_mode(const set<IPvX>& sources);
+
+    /**
+     * Process ALLOW_NEW_SOURCES record.
+     *
+     * @param sources the source addresses.
+     */
+    void allow_new_sources(const set<IPvX>& sources);
+
+    /**
+     * Process BLOCK_OLD_SOURCES record.
+     *
+     * @param sources the source addresses.
+     */
+    void block_old_sources(const set<IPvX>& sources);
 
     /**
      * Get the number of seconds until time to query for host members.
@@ -133,12 +204,90 @@ public:
 private:
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
+    bool	_is_include_mode;	// Flag for INCLUDE/EXCLUDE filter mode
+    Mld6igmpSourceSet _do_forward_sources;	// Sources to forward
+    Mld6igmpSourceSet _dont_forward_sources;	// Sources not to forward
+
     IPvX	_last_reported_host;	// The host that last reported as member
     XorpTimer	_member_query_timer;	// Timer to query for host members
     XorpTimer	_last_member_query_timer;   // Timer to expire this entry
     XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD
+    XorpTimer	_group_timer;		// Group timer for filter mode switch
 };
 
+/**
+ * @short A class to store information about a set of multicast groups.
+ */
+class Mld6igmpGroupSet : public map<IPvX, Mld6igmpGroupRecord *> {
+public:
+    /**
+     * Constructor for a given vif.
+     * 
+     * @param mld6igmp_vif the interface this set belongs to.
+     */
+    Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif);
+    
+    /**
+     * Destructor
+     */
+    ~Mld6igmpGroupSet();
+
+    /**
+     * Delete the payload of the set, and clear the set itself.
+     */
+    void delete_payload_and_clear();
+
+    /**
+     * Process MODE_IS_INCLUDE record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void mode_is_include(const IPvX& group, const set<IPvX>& sources);
+
+    /**
+     * Process MODE_IS_EXCLUDE record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void mode_is_exclude(const IPvX& group, const set<IPvX>& sources);
+
+    /**
+     * Process CHANGE_TO_INCLUDE_MODE record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void change_to_include_mode(const IPvX& group, const set<IPvX>& sources);
+
+    /**
+     * Process CHANGE_TO_EXCLUDE_MODE record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void change_to_exclude_mode(const IPvX& group, const set<IPvX>& sources);
+
+    /**
+     * Process ALLOW_NEW_SOURCES record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void allow_new_sources(const IPvX& group, const set<IPvX>& sources);
+
+    /**
+     * Process BLOCK_OLD_SOURCES record.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     */
+    void block_old_sources(const IPvX& group, const set<IPvX>& sources);
+
+private:
+    Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to
+};
 
 //
 // Global variables

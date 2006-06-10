@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.2 2006/06/07 20:09:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.3 2006/06/07 22:56:45 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -65,7 +65,11 @@
 Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
 					 const IPvX& group)
     : _mld6igmp_vif(mld6igmp_vif),
-      _group(group)
+      _group(group),
+      _is_include_mode(false),
+      _do_forward_sources(*this),
+      _dont_forward_sources(*this),
+      _last_reported_host(IPvX::ZERO(family()))
 {
     
 }
@@ -82,6 +86,86 @@ Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
     // TODO: ??? Maybe not the right place, or this should
     // be the only place to use ACTION_PRUNE notification??
     // join_prune_notify_routing(IPvX::ZERO(family()), group(), ACTION_PRUNE);
+}
+
+/**
+ * Process MODE_IS_INCLUDE record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::mode_is_include(const set<IPvX>& sources)
+{
+    set<IPvX>::const_iterator iter;
+
+    if (is_include_mode()) {
+	// New Router State: INCLUDE (A + B)
+	// Actions: (B) = GMI
+	// _do_forward_sources.
+	
+	return;
+    }
+
+
+    if (is_exclude_mode()) {
+	return;
+    }
+    UNUSED(sources);
+}
+
+/**
+ * Process MODE_IS_EXCLUDE record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
+{
+    UNUSED(sources);
+}
+
+/**
+ * Process CHANGE_TO_INCLUDE_MODE record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::change_to_include_mode(const set<IPvX>& sources)
+{
+    UNUSED(sources);
+}
+
+/**
+ * Process CHANGE_TO_EXCLUDE_MODE record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::change_to_exclude_mode(const set<IPvX>& sources)
+{
+    UNUSED(sources);
+}
+
+/**
+ * Process ALLOW_NEW_SOURCES record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::allow_new_sources(const set<IPvX>& sources)
+{
+    UNUSED(sources);
+}
+
+/**
+ * Process BLOCK_OLD_SOURCES record.
+ *
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupRecord::block_old_sources(const set<IPvX>& sources)
+{
+    UNUSED(sources);
 }
 
 /**
@@ -119,7 +203,7 @@ Mld6igmpGroupRecord::member_query_timer_timeout()
 					     ACTION_PRUNE);
     
     // Remove the entry 
-    map<IPvX, Mld6igmpGroupRecord *>::iterator iter;
+    Mld6igmpGroupSet::iterator iter;
     iter = mld6igmp_vif().group_records().find(group());
     if (iter != mld6igmp_vif().group_records().end()) {
 	mld6igmp_vif().group_records().erase(iter);
@@ -176,4 +260,185 @@ Mld6igmpGroupRecord::last_member_query_timer_timeout()
 		mld6igmp_vif().query_last_member_interval().get(),
 		callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
     }
+}
+
+Mld6igmpGroupSet::Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif)
+    : _mld6igmp_vif(mld6igmp_vif)
+{
+    
+}
+
+Mld6igmpGroupSet::~Mld6igmpGroupSet()
+{
+    // XXX: don't delete the payload, because it might be used elsewhere
+}
+
+/**
+ * Delete the payload of the set, and clear the set itself.
+ */
+void
+Mld6igmpGroupSet::delete_payload_and_clear()
+{
+    Mld6igmpGroupSet::iterator iter;
+
+    //
+    // Delete the payload of the set
+    //
+    for (iter = this->begin(); iter != this->end(); ++iter) {
+	Mld6igmpGroupRecord* group_record = iter->second;
+	delete group_record;
+    }
+
+    //
+    // Clear the set itself
+    //
+    this->clear();
+}
+
+/**
+ * Process MODE_IS_INCLUDE record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::mode_is_include(const IPvX& group, const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->mode_is_include(sources);
+}
+
+/**
+ * Process MODE_IS_EXCLUDE record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::mode_is_exclude(const IPvX& group, const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->mode_is_exclude(sources);
+}
+
+/**
+ * Process CHANGE_TO_INCLUDE_MODE record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::change_to_include_mode(const IPvX& group,
+					 const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->change_to_include_mode(sources);
+}
+
+/**
+ * Process CHANGE_TO_EXCLUDE_MODE record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::change_to_exclude_mode(const IPvX& group,
+					 const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->change_to_exclude_mode(sources);
+}
+
+/**
+ * Process ALLOW_NEW_SOURCES record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::allow_new_sources(const IPvX& group,
+				    const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->allow_new_sources(sources);
+}
+
+/**
+ * Process BLOCK_OLD_SOURCES record.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ */
+void
+Mld6igmpGroupSet::block_old_sources(const IPvX& group,
+				    const set<IPvX>& sources)
+{
+    Mld6igmpGroupSet::iterator iter;
+    Mld6igmpGroupRecord* group_record = NULL;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	group_record = iter->second;
+    } else {
+	group_record = new Mld6igmpGroupRecord(_mld6igmp_vif, group);
+	this->insert(make_pair(group, group_record));
+    }
+    XLOG_ASSERT(group_record != NULL);
+
+    group_record->block_old_sources(sources);
 }
