@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.2 2006/06/07 20:09:50 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.3 2006/06/10 00:13:02 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -75,6 +75,13 @@ public:
     const IPvX&	group() const		{ return (_group); }
 
     /**
+     * Get the corresponding event loop.
+     *
+     * @return the corresponding event loop.
+     */
+    EventLoop& eventloop();
+
+    /**
      * Test whether the filter mode is INCLUDE.
      *
      * @return true if the filter mode is INCLUDE.
@@ -99,42 +106,42 @@ public:
     void set_exclude_mode()		{ _is_include_mode = false; }
 
     /**
-     * Process MODE_IS_INCLUDE record.
+     * Process MODE_IS_INCLUDE report.
      *
      * @param sources the source addresses.
      */
     void mode_is_include(const set<IPvX>& sources);
 
     /**
-     * Process MODE_IS_EXCLUDE record.
+     * Process MODE_IS_EXCLUDE report.
      *
      * @param sources the source addresses.
      */
     void mode_is_exclude(const set<IPvX>& sources);
 
     /**
-     * Process CHANGE_TO_INCLUDE_MODE record.
+     * Process CHANGE_TO_INCLUDE_MODE report.
      *
      * @param sources the source addresses.
      */
     void change_to_include_mode(const set<IPvX>& sources);
 
     /**
-     * Process CHANGE_TO_EXCLUDE_MODE record.
+     * Process CHANGE_TO_EXCLUDE_MODE report.
      *
      * @param sources the source addresses.
      */
     void change_to_exclude_mode(const set<IPvX>& sources);
 
     /**
-     * Process ALLOW_NEW_SOURCES record.
+     * Process ALLOW_NEW_SOURCES report.
      *
      * @param sources the source addresses.
      */
     void allow_new_sources(const set<IPvX>& sources);
 
     /**
-     * Process BLOCK_OLD_SOURCES record.
+     * Process BLOCK_OLD_SOURCES report.
      *
      * @param sources the source addresses.
      */
@@ -200,8 +207,13 @@ public:
      * @return the address family.
      */
     int family() const { return _group.af(); }
-    
+
 private:
+    /**
+     * Timeout: the group timer has expired.
+     */
+    void group_timer_timeout();
+
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
     bool	_is_include_mode;	// Flag for INCLUDE/EXCLUDE filter mode
@@ -238,7 +250,7 @@ public:
     void delete_payload_and_clear();
 
     /**
-     * Process MODE_IS_INCLUDE record.
+     * Process MODE_IS_INCLUDE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
@@ -246,7 +258,7 @@ public:
     void mode_is_include(const IPvX& group, const set<IPvX>& sources);
 
     /**
-     * Process MODE_IS_EXCLUDE record.
+     * Process MODE_IS_EXCLUDE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
@@ -254,7 +266,7 @@ public:
     void mode_is_exclude(const IPvX& group, const set<IPvX>& sources);
 
     /**
-     * Process CHANGE_TO_INCLUDE_MODE record.
+     * Process CHANGE_TO_INCLUDE_MODE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
@@ -262,7 +274,7 @@ public:
     void change_to_include_mode(const IPvX& group, const set<IPvX>& sources);
 
     /**
-     * Process CHANGE_TO_EXCLUDE_MODE record.
+     * Process CHANGE_TO_EXCLUDE_MODE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
@@ -270,7 +282,7 @@ public:
     void change_to_exclude_mode(const IPvX& group, const set<IPvX>& sources);
 
     /**
-     * Process ALLOW_NEW_SOURCES record.
+     * Process ALLOW_NEW_SOURCES report.
      *
      * @param group the group address.
      * @param sources the source addresses.
@@ -278,7 +290,7 @@ public:
     void allow_new_sources(const IPvX& group, const set<IPvX>& sources);
 
     /**
-     * Process BLOCK_OLD_SOURCES record.
+     * Process BLOCK_OLD_SOURCES report.
      *
      * @param group the group address.
      * @param sources the source addresses.
