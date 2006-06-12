@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.8 2006/06/12 17:24:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.9 2006/06/12 18:50:40 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -501,14 +501,10 @@ Mld6igmpGroupRecord::member_query_timer_timeout()
 					     group(),
 					     ACTION_PRUNE);
     
-    // Remove the entry 
-    Mld6igmpGroupSet::iterator iter;
-    iter = mld6igmp_vif().group_records().find(group());
-    if (iter != mld6igmp_vif().group_records().end()) {
-	mld6igmp_vif().group_records().erase(iter);
-	delete this;
-	return;
-    }
+    // Delete the group record and return immediately
+    mld6igmp_vif().group_records().erase(group());
+    delete this;
+    return;
 }
 
 /**
@@ -566,16 +562,32 @@ void
 Mld6igmpGroupRecord::group_timer_timeout()
 {
     if (is_include_mode()) {
-	// XXX: The Group Timer shouldn't be running in INCLUDE mode.
+	// XXX: Nothing to do when in INCLUDE mode.
 	return;
     }
 
     if (is_exclude_mode()) {
-	// Transition to INCLUDE mode
-	set_include_mode();
-
 	// Delete the source records with zero timers
 	_dont_forward_sources.delete_payload_and_clear();
+
+	// notify routing (-)
+	mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
+						 group(),
+						 ACTION_PRUNE);
+
+	if (! _do_forward_sources.empty()) {
+	    // Transition to INCLUDE mode
+	    set_include_mode();
+	    return;
+	}
+
+	//
+	// No sources with running source timers.
+	// Delete the group record and return immediately.
+	//
+	mld6igmp_vif().group_records().erase(group());
+	delete this;
+	return;
     }
 }
 
