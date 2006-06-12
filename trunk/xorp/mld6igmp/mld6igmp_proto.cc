@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.29 2006/06/10 00:20:59 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.30 2006/06/11 20:24:13 pavlin Exp $"
 
 
 //
@@ -694,34 +694,38 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
     for (gs_iter = mode_is_include_groups.begin();
 	 gs_iter != mode_is_include_groups.end();
 	 ++gs_iter) {
-	group_records().mode_is_include(gs_iter->first, gs_iter->second);
+	group_records().process_mode_is_include(gs_iter->first,
+						gs_iter->second);
     }
     for (gs_iter = mode_is_exclude_groups.begin();
 	 gs_iter != mode_is_exclude_groups.end();
 	 ++gs_iter) {
-	group_records().mode_is_exclude(gs_iter->first, gs_iter->second);
+	group_records().process_mode_is_exclude(gs_iter->first,
+						gs_iter->second);
     }
     for (gs_iter = change_to_include_mode_groups.begin();
 	 gs_iter != change_to_include_mode_groups.end();
 	 ++gs_iter) {
-	group_records().change_to_include_mode(gs_iter->first,
-					       gs_iter->second);
+	group_records().process_change_to_include_mode(gs_iter->first,
+						       gs_iter->second);
     }
     for (gs_iter = change_to_exclude_mode_groups.begin();
 	 gs_iter != change_to_exclude_mode_groups.end();
 	 ++gs_iter) {
-	group_records().change_to_exclude_mode(gs_iter->first,
-					       gs_iter->second);
+	group_records().process_change_to_exclude_mode(gs_iter->first,
+						       gs_iter->second);
     }
     for (gs_iter = allow_new_sources_groups.begin();
 	 gs_iter != allow_new_sources_groups.end();
 	 ++gs_iter) {
-	group_records().allow_new_sources(gs_iter->first, gs_iter->second);
+	group_records().process_allow_new_sources(gs_iter->first,
+						  gs_iter->second);
     }
     for (gs_iter = block_old_sources_groups.begin();
 	 gs_iter != block_old_sources_groups.end();
 	 ++gs_iter) {
-	group_records().block_old_sources(gs_iter->first, gs_iter->second);
+	group_records().process_block_old_sources(gs_iter->first,
+						  gs_iter->second);
     }
 
     return (XORP_OK);

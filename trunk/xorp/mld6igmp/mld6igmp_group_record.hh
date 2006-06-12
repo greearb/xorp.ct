@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.4 2006/06/10 05:36:33 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.5 2006/06/10 05:46:01 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -110,42 +110,42 @@ public:
      *
      * @param sources the source addresses.
      */
-    void mode_is_include(const set<IPvX>& sources);
+    void process_mode_is_include(const set<IPvX>& sources);
 
     /**
      * Process MODE_IS_EXCLUDE report.
      *
      * @param sources the source addresses.
      */
-    void mode_is_exclude(const set<IPvX>& sources);
+    void process_mode_is_exclude(const set<IPvX>& sources);
 
     /**
      * Process CHANGE_TO_INCLUDE_MODE report.
      *
      * @param sources the source addresses.
      */
-    void change_to_include_mode(const set<IPvX>& sources);
+    void process_change_to_include_mode(const set<IPvX>& sources);
 
     /**
      * Process CHANGE_TO_EXCLUDE_MODE report.
      *
      * @param sources the source addresses.
      */
-    void change_to_exclude_mode(const set<IPvX>& sources);
+    void process_change_to_exclude_mode(const set<IPvX>& sources);
 
     /**
      * Process ALLOW_NEW_SOURCES report.
      *
      * @param sources the source addresses.
      */
-    void allow_new_sources(const set<IPvX>& sources);
+    void process_allow_new_sources(const set<IPvX>& sources);
 
     /**
      * Process BLOCK_OLD_SOURCES report.
      *
      * @param sources the source addresses.
      */
-    void block_old_sources(const set<IPvX>& sources);
+    void process_block_old_sources(const set<IPvX>& sources);
 
     /**
      * Get the number of seconds until time to query for host members.
@@ -255,7 +255,7 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void mode_is_include(const IPvX& group, const set<IPvX>& sources);
+    void process_mode_is_include(const IPvX& group, const set<IPvX>& sources);
 
     /**
      * Process MODE_IS_EXCLUDE report.
@@ -263,7 +263,7 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void mode_is_exclude(const IPvX& group, const set<IPvX>& sources);
+    void process_mode_is_exclude(const IPvX& group, const set<IPvX>& sources);
 
     /**
      * Process CHANGE_TO_INCLUDE_MODE report.
@@ -271,7 +271,8 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void change_to_include_mode(const IPvX& group, const set<IPvX>& sources);
+    void process_change_to_include_mode(const IPvX& group,
+					const set<IPvX>& sources);
 
     /**
      * Process CHANGE_TO_EXCLUDE_MODE report.
@@ -279,7 +280,8 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void change_to_exclude_mode(const IPvX& group, const set<IPvX>& sources);
+    void process_change_to_exclude_mode(const IPvX& group,
+					const set<IPvX>& sources);
 
     /**
      * Process ALLOW_NEW_SOURCES report.
@@ -287,7 +289,8 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void allow_new_sources(const IPvX& group, const set<IPvX>& sources);
+    void process_allow_new_sources(const IPvX& group,
+				   const set<IPvX>& sources);
 
     /**
      * Process BLOCK_OLD_SOURCES report.
@@ -295,7 +298,8 @@ public:
      * @param group the group address.
      * @param sources the source addresses.
      */
-    void block_old_sources(const IPvX& group, const set<IPvX>& sources);
+    void process_block_old_sources(const IPvX& group,
+				   const set<IPvX>& sources);
 
 private:
     Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.6 2006/06/10 05:46:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.7 2006/06/12 05:13:05 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -108,7 +108,7 @@ Mld6igmpGroupRecord::eventloop()
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::mode_is_include(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -158,7 +158,7 @@ Mld6igmpGroupRecord::mode_is_include(const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -230,7 +230,7 @@ Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::change_to_include_mode(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -288,7 +288,7 @@ Mld6igmpGroupRecord::change_to_include_mode(const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::change_to_exclude_mode(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -366,7 +366,7 @@ Mld6igmpGroupRecord::change_to_exclude_mode(const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::allow_new_sources(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -416,7 +416,7 @@ Mld6igmpGroupRecord::allow_new_sources(const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::block_old_sources(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
@@ -616,7 +616,8 @@ Mld6igmpGroupSet::delete_payload_and_clear()
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::mode_is_include(const IPvX& group, const set<IPvX>& sources)
+Mld6igmpGroupSet::process_mode_is_include(const IPvX& group,
+					  const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -630,7 +631,7 @@ Mld6igmpGroupSet::mode_is_include(const IPvX& group, const set<IPvX>& sources)
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->mode_is_include(sources);
+    group_record->process_mode_is_include(sources);
 }
 
 /**
@@ -640,7 +641,8 @@ Mld6igmpGroupSet::mode_is_include(const IPvX& group, const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::mode_is_exclude(const IPvX& group, const set<IPvX>& sources)
+Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
+					  const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -654,7 +656,7 @@ Mld6igmpGroupSet::mode_is_exclude(const IPvX& group, const set<IPvX>& sources)
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->mode_is_exclude(sources);
+    group_record->process_mode_is_exclude(sources);
 }
 
 /**
@@ -664,8 +666,8 @@ Mld6igmpGroupSet::mode_is_exclude(const IPvX& group, const set<IPvX>& sources)
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::change_to_include_mode(const IPvX& group,
-					 const set<IPvX>& sources)
+Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
+						 const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -679,7 +681,7 @@ Mld6igmpGroupSet::change_to_include_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->change_to_include_mode(sources);
+    group_record->process_change_to_include_mode(sources);
 }
 
 /**
@@ -689,8 +691,8 @@ Mld6igmpGroupSet::change_to_include_mode(const IPvX& group,
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::change_to_exclude_mode(const IPvX& group,
-					 const set<IPvX>& sources)
+Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
+						 const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -704,7 +706,7 @@ Mld6igmpGroupSet::change_to_exclude_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->change_to_exclude_mode(sources);
+    group_record->process_change_to_exclude_mode(sources);
 }
 
 /**
@@ -714,8 +716,8 @@ Mld6igmpGroupSet::change_to_exclude_mode(const IPvX& group,
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::allow_new_sources(const IPvX& group,
-				    const set<IPvX>& sources)
+Mld6igmpGroupSet::process_allow_new_sources(const IPvX& group,
+					    const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -729,7 +731,7 @@ Mld6igmpGroupSet::allow_new_sources(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->allow_new_sources(sources);
+    group_record->process_allow_new_sources(sources);
 }
 
 /**
@@ -739,8 +741,8 @@ Mld6igmpGroupSet::allow_new_sources(const IPvX& group,
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupSet::block_old_sources(const IPvX& group,
-				    const set<IPvX>& sources)
+Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
+					    const set<IPvX>& sources)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -754,5 +756,5 @@ Mld6igmpGroupSet::block_old_sources(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->block_old_sources(sources);
+    group_record->process_block_old_sources(sources);
 }
