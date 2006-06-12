@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.7 2006/06/12 05:13:05 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.8 2006/06/12 17:24:18 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -565,7 +565,18 @@ Mld6igmpGroupRecord::last_member_query_timer_timeout()
 void
 Mld6igmpGroupRecord::group_timer_timeout()
 {
-    // TODO: XXX: PAVPAVPAV: implement it!
+    if (is_include_mode()) {
+	// XXX: The Group Timer shouldn't be running in INCLUDE mode.
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	// Transition to INCLUDE mode
+	set_include_mode();
+
+	// Delete the source records with zero timers
+	_dont_forward_sources.delete_payload_and_clear();
+    }
 }
 
 /**
