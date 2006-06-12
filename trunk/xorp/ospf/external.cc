@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.21 2006/03/07 01:43:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.22 2006/03/16 00:04:49 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -227,6 +227,13 @@ External<A>::announce(IPNet<A> net, A nexthop, uint32_t metric,
 
     bool ebit = true;
     uint32_t tag = 0;
+
+    /**
+     * If the nexthop address is not configured for OSPF then it won't
+     * be reachable, so set the nexthop to zero.
+     */
+    if (!_ospf.get_peer_manager().configured_network(nexthop))
+	nexthop = A::ZERO();
 
     if (!do_filtering(net, nexthop, metric, ebit, tag, policytags))
 	return true;

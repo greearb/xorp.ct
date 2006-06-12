@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.119 2006/04/15 07:44:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.120 2006/06/02 02:21:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -652,6 +652,21 @@ PeerManager<A>::push_lsas(const PeerID peerid)
     }
 
     return _peers[peerid]->push_lsas();    
+}
+
+template <typename A>
+bool
+PeerManager<A>::configured_network(const A address) const
+{
+    typename map<PeerID, PeerOut<A> *>::const_iterator i;
+    for(i = _peers.begin(); i != _peers.end(); i++) {
+	IPNet<A> net((*i).second->get_interface_address(),
+		     (*i).second->get_interface_prefix_length());
+	if (net.contains(address)) 
+	    return true;
+    }
+
+    return false;
 }
 
 template <typename A>

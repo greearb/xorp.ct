@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.74 2006/03/28 03:06:55 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.75 2006/06/02 02:21:55 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -241,6 +241,16 @@ class PeerManager {
      */
     bool push_lsas(const PeerID peerid);
 
+    /*
+     * Does this address fall into a configured OSPF network making it
+     * a valid nexthop address.
+     *
+     * @param address under test
+     *
+     * @return true if this address falls into a configured OSPF network.
+     */
+    bool configured_network(const A address) const;
+    
     /*
      * Is this one of the routers interface addresses, used to try and
      * detect self-originated LSAs.
