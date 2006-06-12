@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.5 2006/06/10 05:36:33 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.6 2006/06/10 05:46:01 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -115,13 +115,15 @@ Mld6igmpGroupRecord::mode_is_include(const set<IPvX>& sources)
 	// New Router State: INCLUDE (A + B)
 	// Actions: (B) = GMI
 	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
 	set_include_mode();
 
-	_do_forward_sources = _do_forward_sources + sources;	// (A + B)
+	_do_forward_sources = a + b;			// (A + B)
 
-	_do_forward_sources.set_source_timer(sources, gmi);	// (B) = GMI
+	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
 	
 	return;
     }
@@ -131,17 +133,20 @@ Mld6igmpGroupRecord::mode_is_include(const set<IPvX>& sources)
 	// New Router State: EXCLUDE (X + A, Y - A)
 	// Actions: (A) = GMI
 	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
 	set_exclude_mode();
 
-	// XXX: 's' below is used to transfer (Y * A) from (Y) to (X)
-	Mld6igmpSourceSet s = _dont_forward_sources * sources;
-	_do_forward_sources = _do_forward_sources + s;
-	_do_forward_sources = _do_forward_sources + sources;	// (X + A)
-	_dont_forward_sources = _dont_forward_sources - sources; // (Y - A)
+	// XXX: first transfer (Y * A) from (Y) to (X)
+	Mld6igmpSourceSet y_and_a = y * a;
+	_do_forward_sources = x + y_and_a;
+	_do_forward_sources = x + a;			// (X + A)
+	_dont_forward_sources = y - a;			// (Y - A)
 
-	_do_forward_sources.set_source_timer(sources, gmi);	// (A) = GMI
+	_do_forward_sources.set_source_timer(a, gmi);	// (A) = GMI
 
 	return;
     }
@@ -162,18 +167,19 @@ Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
 	//          Delete (A - B)
 	//          Group Timer = GMI
 	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
 	set_exclude_mode();
 
-	Mld6igmpSourceSet d = _do_forward_sources - sources;	// A - B
-	_dont_forward_sources = _dont_forward_sources + sources; // B
-	// B - A (below)
-	_dont_forward_sources = _dont_forward_sources - _do_forward_sources;
-	_do_forward_sources = _do_forward_sources * sources;	// A * B
+	Mld6igmpSourceSet a_minus_b = a - b;			// A - B
+	_dont_forward_sources = _dont_forward_sources + b;	// B
+	_dont_forward_sources = _dont_forward_sources - a;	// B - A
+	_do_forward_sources = a * b;				// A * B
 
 	_dont_forward_sources.cancel_source_timer();		// (B - A) = 0
-	d.delete_payload_and_clear();				// Delete (A-B)
+	a_minus_b.delete_payload_and_clear();			// Delete (A-B)
 	_group_timer = eventloop().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
@@ -189,25 +195,27 @@ Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
 	//          Delete (Y - A)
 	//          Group Timer = GMI
 	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
 	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
 
 	set_exclude_mode();
 
-	Mld6igmpSourceSet d1 = _do_forward_sources - sources;	// X - A
-	Mld6igmpSourceSet d2 = _dont_forward_sources - sources;	// Y - A
-	Mld6igmpSourceSet x = _do_forward_sources;		// X
-	// XXX: The (X * A) statement below is needed to preserve the original
-	// timers.
-	_do_forward_sources = _do_forward_sources * sources;	// X * A
-	_do_forward_sources = _do_forward_sources + sources;	// A
-	// A - Y (below)
-	_do_forward_sources = _do_forward_sources - _dont_forward_sources;
-	_dont_forward_sources = _dont_forward_sources - sources; // Y * A
-	Mld6igmpSourceSet a_x_y = _do_forward_sources - x;	// A - X - Y
+	Mld6igmpSourceSet x_minus_a = x - a;			// X - A
+	Mld6igmpSourceSet y_minus_a = y - a;			// Y - A
+	// XXX: The (X * A) below is needed to preserve the original timers
+	_do_forward_sources = x * a;				// X * A
+	_do_forward_sources = _do_forward_sources + a;		// A
+	_do_forward_sources = _do_forward_sources - y;		// A - Y
+	_dont_forward_sources = y * a;				// Y * A
+	Mld6igmpSourceSet a_minus_x_minus_y(*this);
+	a_minus_x_minus_y = _do_forward_sources - x_copy;	// A - X - Y
 
-	a_x_y.set_source_timer(gmi);			// (A - X - Y) = GMI
-	d1.delete_payload_and_clear();			// Delete (X - A)
-	d2.delete_payload_and_clear();			// Delete (Y - A)
+	a_minus_x_minus_y.set_source_timer(gmi);	// (A - X - Y) = GMI
+	x_minus_a.delete_payload_and_clear();		// Delete (X - A)
+	y_minus_a.delete_payload_and_clear();		// Delete (Y - A)
 	_group_timer = eventloop().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
@@ -224,7 +232,54 @@ Mld6igmpGroupRecord::mode_is_exclude(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::change_to_include_mode(const set<IPvX>& sources)
 {
-    UNUSED(sources);
+    if (is_include_mode()) {
+	//
+	// New Router State: INCLUDE (A + B)
+	// Actions: (B) = GMI
+	//          Send Q(G, A - B)
+	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+
+	set_include_mode();
+
+	Mld6igmpSourceSet a_minus_b = a - b;		// A - B
+	_do_forward_sources = a + b;			// A + B
+
+	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
+	// TODO: XXX: PAVPAVPAV: Send Q(G, A - B) with a_minus_b
+
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	//
+	// New Router State: EXCLUDE (X + A, Y - A)
+	// Actions: (A) = GMI
+	//          Send Q(G, X - A)
+	//          Send Q(G)
+	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+
+	set_exclude_mode();
+
+	Mld6igmpSourceSet x_minus_a = x - a;		// X - A
+	// XXX: first transfer (Y * A) from (Y) to (X)
+	Mld6igmpSourceSet y_and_a = y * a;
+	_do_forward_sources = x + y_and_a;
+	_do_forward_sources = x + a;			// X + A
+	_dont_forward_sources = y - a;			// Y - A
+
+	_do_forward_sources.set_source_timer(a, gmi);	// (A) = GMI
+	// TODO: XXX: PAVPAVPAV: Send Q(G, X - A) with x_minus_a
+	// TODO: XXX: PAVPAVPAV: Send Q(G)
+
+	return;
+    }
 }
 
 /**
@@ -235,7 +290,74 @@ Mld6igmpGroupRecord::change_to_include_mode(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::change_to_exclude_mode(const set<IPvX>& sources)
 {
-    UNUSED(sources);
+    if (is_include_mode()) {
+	//
+	// New Router State: EXCLUDE (A * B, B - A)
+	// Actions: (B - A) = 0
+	//          Delete (A - B)
+	//          Send Q(G, A * B)
+	//          Group Timer = GMI
+	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+
+	set_exclude_mode();
+
+	Mld6igmpSourceSet a_minus_b = a - b;			// A - B
+	_dont_forward_sources = _dont_forward_sources + b;	// B
+	_dont_forward_sources = _dont_forward_sources - a;	// B - A
+	_do_forward_sources = a * b;				// A * B
+
+	_dont_forward_sources.cancel_source_timer();		// (B - A) = 0
+	a_minus_b.delete_payload_and_clear();			// Delete (A-B)
+	_group_timer = eventloop().new_oneoff_after(
+	    gmi,
+	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
+	// TODO: XXX: PAVPAVPAV: Send Q(G, A * B) with _do_forward_sources
+
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	//
+	// New Router State: EXCLUDE (A - Y, Y * A)
+	// Actions: (A - X - Y) = Group Timer
+	//          Delete (X - A)
+	//          Delete (Y - A)
+	//          Send Q(G, A - Y)
+	//          Group Timer = GMI
+	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+	TimeVal gt;
+	_group_timer.time_remaining(gt);
+
+	set_exclude_mode();
+
+	Mld6igmpSourceSet x_minus_a = x - a;			// X - A
+	Mld6igmpSourceSet y_minus_a = y - a;			// Y - A
+	// XXX: The (X * A) below is needed to preserve the original timers
+	_do_forward_sources = x * a;				// X * A
+	_do_forward_sources = _do_forward_sources + a;		// A
+	_do_forward_sources = _do_forward_sources - y;		// A - Y
+	_dont_forward_sources = y * a;				// Y * A
+	Mld6igmpSourceSet a_minus_x_minus_y(*this);
+	a_minus_x_minus_y = _do_forward_sources - x_copy;	// A - X - Y
+
+	a_minus_x_minus_y.set_source_timer(gt);	// (A - X - Y) = Group Timer
+	x_minus_a.delete_payload_and_clear();		// Delete (X - A)
+	y_minus_a.delete_payload_and_clear();		// Delete (Y - A)
+	_group_timer = eventloop().new_oneoff_after(
+	    gmi,
+	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
+	// TODO: XXX: PAVPAVPAV: Send Q(G, A - Y) with _do_forward_sources
+
+	return;
+    }
 }
 
 /**
@@ -246,7 +368,46 @@ Mld6igmpGroupRecord::change_to_exclude_mode(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::allow_new_sources(const set<IPvX>& sources)
 {
-    UNUSED(sources);
+    if (is_include_mode()) {
+	//
+	// New Router State: INCLUDE (A + B)
+	// Actions: (B) = GMI
+	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+
+	set_include_mode();
+
+	_do_forward_sources = a + b;			// A + B
+
+	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
+
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	//
+	// New Router State: EXCLUDE (X + A, Y - A)
+	// Actions: (A) = GMI
+	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
+	TimeVal gmi = _mld6igmp_vif.group_membership_interval();
+
+	set_exclude_mode();
+
+	// XXX: first transfer (Y * A) from (Y) to (X)
+	Mld6igmpSourceSet y_and_a = y * a;
+	_do_forward_sources = x + y_and_a;
+	_do_forward_sources = x + a;			// X + A
+	_dont_forward_sources = y - a;			// Y - A
+
+	_do_forward_sources.set_source_timer(a, gmi);   // (A) = GMI
+
+	return;
+    }
 }
 
 /**
@@ -257,7 +418,53 @@ Mld6igmpGroupRecord::allow_new_sources(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::block_old_sources(const set<IPvX>& sources)
 {
-    UNUSED(sources);
+    if (is_include_mode()) {
+	//
+	// New Router State: INCLUDE (A)
+	// Actions: Send Q(G, A * B)
+	//
+	Mld6igmpSourceSet& a = _do_forward_sources;
+	const set<IPvX>& b = sources;
+
+	set_include_mode();
+
+	Mld6igmpSourceSet a_and_b = a * b;
+
+	// TODO: XXX: PAVPAVPAV: Send Q(G, A * B) with a_and_b
+
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	//
+	// New Router State: EXCLUDE (X + (A - Y), Y)
+	// Actions: (A - X - Y) = Group Timer
+	//          Send Q(G, A - Y)
+	//
+	Mld6igmpSourceSet& x = _do_forward_sources;
+	Mld6igmpSourceSet x_copy = x;
+	Mld6igmpSourceSet& y = _dont_forward_sources;
+	const set<IPvX>& a = sources;
+	TimeVal gt;
+	_group_timer.time_remaining(gt);
+
+	set_exclude_mode();
+
+	Mld6igmpSourceSet a_minus_y(*this);
+	a_minus_y = a_minus_y + a;			// A
+	a_minus_y = a_minus_y - y;			// A - Y
+	_do_forward_sources = x + a_minus_y;		// X + (A - Y)
+
+	Mld6igmpSourceSet a_minus_x_minus_y = _do_forward_sources; // (X+(A-Y))
+	a_minus_x_minus_y = a_minus_x_minus_y - x_copy;	// A - X - Y
+	a_minus_x_minus_y = a_minus_x_minus_y - y;	// A - X - Y
+	Mld6igmpSourceSet y_minus_a = y - a;		// Y - A
+
+	a_minus_x_minus_y.set_source_timer(gt);	// (A - X - Y) = Group Timer
+	// TODO: XXX: PAVPAVPAV: Send Q(G, A - Y) with a_minus_y
+
+	return;
+    }
 }
 
 /**
