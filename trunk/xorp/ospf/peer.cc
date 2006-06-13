@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.236 2006/03/24 08:20:08 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.237 2006/03/28 03:06:54 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1693,6 +1693,16 @@ Peer<A>::stop_hello_timer()
 
 template <typename A>
 void
+Peer<A>::restart_hello_timer()
+{
+    if (_hello_timer.scheduled()) {
+	stop_hello_timer();
+	start_hello_timer();
+    }
+}
+
+template <typename A>
+void
 Peer<A>::start_wait_timer()
 {
     _wait_timer = _ospf.get_eventloop().
@@ -2660,6 +2670,8 @@ bool
 Peer<A>::set_hello_interval(uint16_t hello_interval)
 {
     _hello_packet.set_hello_interval(hello_interval);
+
+    restart_hello_timer();
 
     return true;
 }

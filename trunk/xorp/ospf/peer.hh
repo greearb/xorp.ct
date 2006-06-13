@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.124 2006/03/24 08:20:09 pavlin Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.125 2006/03/28 03:06:55 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -1149,8 +1149,21 @@ class Peer {
      */
     void get_attached_routers(list<OspfTypes::RouterID>& routers);
 
+    /**
+     * Unconditionally start the hello timer running.
+     */
     void start_hello_timer();
+
+    /**
+     * Unconditionally stop the hello timer running.
+     */
     void stop_hello_timer();
+
+    /**
+     * If the hello timer is already running, then stop and start the
+     * timer. Required when the timer value is changed interactively.
+     */
+    void restart_hello_timer();
 
     void start_wait_timer();
     void stop_wait_timer();
