@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.54 2006/06/07 22:56:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.55 2006/06/10 00:20:59 pavlin Exp $"
 
 
 //
@@ -126,8 +126,10 @@ Mld6igmpVif::~Mld6igmpVif()
     Mld6igmpGroupSet::iterator iter;
     for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
-	join_prune_notify_routing(IPvX::ZERO(family()),
-				  group_record->group(), ACTION_PRUNE);
+	if (group_record->is_exclude_mode()) {
+	    join_prune_notify_routing(IPvX::ZERO(family()),
+				      group_record->group(), ACTION_PRUNE);
+	}
     }
     _group_records.delete_payload_and_clear();
     
@@ -332,8 +334,10 @@ Mld6igmpVif::stop(string& error_msg)
     Mld6igmpGroupSet::iterator iter;
     for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
 	Mld6igmpGroupRecord *group_record = iter->second;
-	join_prune_notify_routing(IPvX::ZERO(family()),
-				  group_record->group(), ACTION_PRUNE);
+	if (group_record->is_exclude_mode()) {
+	    join_prune_notify_routing(IPvX::ZERO(family()),
+				      group_record->group(), ACTION_PRUNE);
+	}
     }
     _group_records.delete_payload_and_clear();
     

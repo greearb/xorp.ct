@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.9 2006/06/12 18:50:40 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.10 2006/06/12 23:57:20 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -82,11 +82,6 @@ Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
  **/
 Mld6igmpGroupRecord::~Mld6igmpGroupRecord()
 {
-    // TODO: Notify routing (-)
-    // TODO: ??? Maybe not the right place, or this should
-    // be the only place to use ACTION_PRUNE notification??
-    // join_prune_notify_routing(IPvX::ZERO(family()), group(), ACTION_PRUNE);
-
     _do_forward_sources.delete_payload_and_clear();
     _dont_forward_sources.delete_payload_and_clear();
 }
@@ -497,9 +492,11 @@ Mld6igmpGroupRecord::member_query_timer_timeout()
 	_igmpv1_host_present_timer.unschedule();
     
     // notify routing (-)
-    mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
-					     group(),
-					     ACTION_PRUNE);
+    if (is_exclude_mode()) {
+	mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
+						 group(),
+						 ACTION_PRUNE);
+    }
     
     // Delete the group record and return immediately
     mld6igmp_vif().group_records().erase(group());

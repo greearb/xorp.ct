@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.30 2006/06/11 20:24:13 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.31 2006/06/12 17:24:18 pavlin Exp $"
 
 
 //
@@ -423,10 +423,12 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	group_record = new Mld6igmpGroupRecord(*this, group_address);
 	group_record->set_last_reported_host(src);
 	_group_records.insert(make_pair(group_address, group_record));
-	// notify routing (+)    
-	join_prune_notify_routing(IPvX::ZERO(family()),
-				  group_record->group(),
-				  ACTION_JOIN);
+	// notify routing (+)
+	if (group_record->is_exclude_mode()) {
+	    join_prune_notify_routing(IPvX::ZERO(family()),
+				      group_record->group(),
+				      ACTION_JOIN);
+	}
     }
     
     group_record->member_query_timer() =
