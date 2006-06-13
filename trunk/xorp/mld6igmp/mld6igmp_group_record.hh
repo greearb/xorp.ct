@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.5 2006/06/10 05:46:01 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.6 2006/06/12 17:24:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -146,6 +146,13 @@ public:
      * @param sources the source addresses.
      */
     void process_block_old_sources(const set<IPvX>& sources);
+
+    /**
+     * Take the appropriate actions for a source that has expired.
+     *
+     * @param source_record the source record that has expired.
+     */
+    void source_expired(Mld6igmpSourceRecord* source_record);
 
     /**
      * Get the number of seconds until time to query for host members.

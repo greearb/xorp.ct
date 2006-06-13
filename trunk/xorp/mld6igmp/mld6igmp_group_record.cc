@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.10 2006/06/12 23:57:20 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.11 2006/06/13 00:05:25 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -458,6 +458,50 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	a_minus_x_minus_y.set_source_timer(gt);	// (A - X - Y) = Group Timer
 	// TODO: XXX: PAVPAVPAV: Send Q(G, A - Y) with a_minus_y
 
+	return;
+    }
+}
+
+/**
+ * Take the appropriate actions for a source that has expired.
+ *
+ * @param source_record the source record that has expired.
+ */
+void
+Mld6igmpGroupRecord::source_expired(Mld6igmpSourceRecord* source_record)
+{
+    Mld6igmpSourceSet::iterator iter;
+
+    // Erase the source record from the appropriate source set
+    iter = _do_forward_sources.find(source_record->source());
+    XLOG_ASSERT(iter != _do_forward_sources.end());
+    _do_forward_sources.erase(iter);
+
+    if (is_include_mode()) {
+	// notify routing (-)
+	mld6igmp_vif().join_prune_notify_routing(source_record->source(),
+						 group(),
+						 ACTION_PRUNE);
+	// Delete the source record
+	delete source_record;
+
+	// If no more source records, then delete the group record
+	if (_do_forward_sources.empty() && _dont_forward_sources.empty()) {
+	    mld6igmp_vif().group_records().erase(group());
+	    delete this;
+	}
+	return;
+    }
+
+    if (is_exclude_mode()) {
+	// notify routing (-)
+	mld6igmp_vif().join_prune_notify_routing(source_record->source(),
+						 group(),
+						 ACTION_PRUNE);
+
+	// Do not remove record, but add it to the appropriate set
+	_dont_forward_sources.insert(make_pair(source_record->source(),
+					       source_record));
 	return;
     }
 }
