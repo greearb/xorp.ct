@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.31 2006/06/12 17:24:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.32 2006/06/13 00:05:26 pavlin Exp $"
 
 
 //
@@ -296,7 +296,7 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
     uint8_t qqic = 0;
     uint16_t sources_n = 0;
     TimeVal max_resp_time, qqi;
-    list<IPvX> source_address_list;
+    set<IPvX> sources;
     string error_msg;
 
     // TODO: XXX: PAVPAVPAV: this method is unfinished
@@ -352,7 +352,7 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
     while (sources_n != 0) {
 	IPvX ipvx(family());
 	BUFFER_GET_IPVX(family(), ipvx, buffer);
-	source_address_list.push_back(ipvx);
+	sources.insert(ipvx);
 	sources_n--;
     }
 
@@ -525,7 +525,7 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 	}
 	if (i_am_querier()) {
 	    // "Last Member Query Count" / "Last Listener Query Count"
-	    uint32_t query_count = robust_count().get();
+	    uint32_t query_count = last_member_query_count();
 
 	    group_record->member_query_timer() =
 		mld6igmp_node().eventloop().new_oneoff_after(
@@ -536,15 +536,12 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 	    //
 	    // Send group-specific query
 	    //
-	    uint32_t timer_scale = mld6igmp_constant_timer_scale();
-	    TimeVal scaled_max_resp_time =
-		(query_last_member_interval().get() * timer_scale);
-	    mld6igmp_send(primary_addr(),
-			  group_record->group(),
-			  mld6igmp_constant_membership_query(),
-			  scaled_max_resp_time.sec(),
-			  group_record->group(),
-			  dummy_error_msg);
+	    TimeVal max_resp_time = query_last_member_interval().get();
+	    mld6igmp_query_send(primary_addr(),
+				group_record->group(),
+				max_resp_time,
+				group_record->group(),
+				dummy_error_msg);
 	    group_record->last_member_query_timer() =
 		mld6igmp_node().eventloop().new_oneoff_after(
 		    query_last_member_interval().get(),
@@ -765,15 +762,12 @@ Mld6igmpVif::other_querier_timer_timeout()
     //
     // Now I am the querier. Send a general membership query.
     //
-    uint32_t timer_scale = mld6igmp_constant_timer_scale();
-    TimeVal scaled_max_resp_time =
-	(query_response_interval().get() * timer_scale);
-    mld6igmp_send(primary_addr(),
-		  IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		  mld6igmp_constant_membership_query(),
-		  is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
-		  IPvX::ZERO(family()),			// XXX: ANY
-		  dummy_error_msg);
+    TimeVal max_resp_time = query_response_interval().get();
+    mld6igmp_query_send(primary_addr(),
+			IPvX::MULTICAST_ALL_SYSTEMS(family()),
+			max_resp_time,
+			IPvX::ZERO(family()),			// XXX: ANY
+			dummy_error_msg);
     _startup_query_count = 0;		// XXX: not a startup case
     _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
 	query_interval().get(),
@@ -797,16 +791,12 @@ Mld6igmpVif::query_timer_timeout()
     //
     // Send a general membership query
     //
-    uint32_t timer_scale = mld6igmp_constant_timer_scale();
-    TimeVal scaled_max_resp_time =
-	(query_response_interval().get() * timer_scale);
-
-    mld6igmp_send(primary_addr(),
-		  IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		  mld6igmp_constant_membership_query(),
-		  is_igmpv1_mode() ? 0: scaled_max_resp_time.sec(),
-		  IPvX::ZERO(family()),			// XXX: ANY
-		  dummy_error_msg);
+    TimeVal max_resp_time = query_response_interval().get();
+    mld6igmp_query_send(primary_addr(),
+			IPvX::MULTICAST_ALL_SYSTEMS(family()),
+			max_resp_time,
+			IPvX::ZERO(family()),			// XXX: ANY
+			dummy_error_msg);
     if (_startup_query_count > 0)
 	_startup_query_count--;
     if (_startup_query_count > 0)
@@ -890,6 +880,13 @@ Mld6igmpVif::set_query_interval_cb(TimeVal v)
 }
 
 void
+Mld6igmpVif::set_query_last_member_interval_cb(TimeVal v)
+{
+    UNUSED(v);
+    recalculate_last_member_query_time();
+}
+
+void
 Mld6igmpVif::set_query_response_interval_cb(TimeVal v)
 {
     UNUSED(v);
@@ -908,6 +905,13 @@ Mld6igmpVif::recalculate_group_membership_interval()
 {
     _group_membership_interval = query_interval().get() * robust_count().get()
 	+ query_response_interval().get();
+}
+
+void
+Mld6igmpVif::recalculate_last_member_query_time()
+{
+    _last_member_query_time = query_last_member_interval().get()
+	* last_member_query_count();
 }
 
 void
