@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.55 2006/06/10 00:20:59 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.56 2006/06/13 00:05:26 pavlin Exp $"
 
 
 //
@@ -71,11 +71,13 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _ip_router_alert_option_check(false),
       _query_interval(TimeVal(0, 0),
 		      callback(this, &Mld6igmpVif::set_query_interval_cb)),
-      _query_last_member_interval(TimeVal(0, 0)),
+      _query_last_member_interval(TimeVal(0, 0),
+				  callback(this, &Mld6igmpVif::set_query_last_member_interval_cb)),
       _query_response_interval(TimeVal(0, 0),
 			       callback(this, &Mld6igmpVif::set_query_response_interval_cb)),
       _robust_count(0, callback(this, &Mld6igmpVif::set_robust_count_cb)),
       _group_membership_interval(TimeVal(0, 0)),
+      _last_member_query_time(TimeVal(0, 0)),
       _dummy_flag(false)
 {
     XLOG_ASSERT(proto_is_igmp() || proto_is_mld6());
@@ -263,15 +265,12 @@ Mld6igmpVif::start(string& error_msg)
     //
     // Query all members on startup
     //
-    uint32_t timer_scale = mld6igmp_constant_timer_scale();
-    TimeVal scaled_max_resp_time =
-	(query_response_interval().get() * timer_scale);
-    mld6igmp_send(primary_addr(),
-		  IPvX::MULTICAST_ALL_SYSTEMS(family()),
-		  mld6igmp_constant_membership_query(),
-		  is_igmpv1_mode() ? 0 : scaled_max_resp_time.sec(),
-		  IPvX::ZERO(family()),
-		  dummy_error_msg);
+    TimeVal max_resp_time = query_response_interval().get();
+    mld6igmp_query_send(primary_addr(),
+			IPvX::MULTICAST_ALL_SYSTEMS(family()),
+			max_resp_time,
+			IPvX::ZERO(family()),
+			dummy_error_msg);
     _startup_query_count = robust_count().get();
     if (_startup_query_count > 0)
 	_startup_query_count--;
@@ -495,6 +494,35 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 			 cstring(dst));
     XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
+}
+
+/**
+ * Send MLD or IGMP Query message.
+ *
+ * @param src the message source address.
+ * @param dst the message destination address.
+ * @param max_resp_time the maximum response time.
+ * @param group_address the "Multicast Address" or "Group Address" field
+ * in the MLD or IGMP headers respectively.
+ * @error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_query_send(const IPvX& src, const IPvX& dst,
+				 const TimeVal& max_resp_time,
+				 const IPvX& group_address,
+				 string& error_msg)
+{
+    uint32_t timer_scale = mld6igmp_constant_timer_scale();
+    TimeVal scaled_max_resp_time = max_resp_time * timer_scale;
+    
+    if (is_igmpv1_mode())
+	scaled_max_resp_time = TimeVal::ZERO();
+
+    return (mld6igmp_send(src, dst,
+			  mld6igmp_constant_membership_query(),
+			  scaled_max_resp_time.sec(),
+			  group_address, error_msg));
 }
 
 /**

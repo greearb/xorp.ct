@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.29 2006/06/07 20:09:50 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.30 2006/06/10 00:20:59 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -253,6 +253,19 @@ public:
     ConfigParam<uint32_t>& robust_count() { return (_robust_count); }
 
     /**
+     * Get the Last Member Query Count value.
+     *
+     * Note: According to the IGMP/MLD spec, the default value for the
+     * Last Member Query Count is the Robustness Variable.
+     * Hence, the Last Member Query Count itself should be configurable.
+     * For simplicity (and for consistency with other router vendors), it
+     * is always same as the Robustness Variable.
+     *
+     * @return the value of the Last Member Query Count.
+     */
+    uint32_t last_member_query_count() const { return (_robust_count.get()); }
+
+    /**
      * Obtain a reference to the Group Membership Interval.
      *
      * Note that it is not directly configurable, but may be tuned by
@@ -261,6 +274,16 @@ public:
      * @return a reference to the Group Membership Interval.
      */
     const TimeVal& group_membership_interval() const { return (_group_membership_interval); }
+
+    /**
+     * Obtain a reference to the Last Member Query Time.
+     *
+     * Note that it is not directly configurable, but may be tuned by
+     * changing the values of the parameters it depends on.
+     *
+     * @return a reference to the Last Member Query Time.
+     */
+    const TimeVal& last_member_query_time() const { return (_last_member_query_time); }
 
     //
     // Add/delete routing protocols that need to be notified for membership
@@ -335,6 +358,22 @@ public:
 			      uint8_t message_type, uint16_t max_resp_code,
 			      const IPvX& group_address, string& error_msg);
 
+    /**
+     * Send MLD or IGMP Query message.
+     *
+     * @param src the message source address.
+     * @param dst the message destination address.
+     * @param max_resp_time the maximum response time.
+     * @param group_address the "Multicast Address" or "Group Address" field
+     * in the MLD or IGMP headers respectively.
+     * @error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     **/
+    int		mld6igmp_query_send(const IPvX& src, const IPvX& dst,
+				    const TimeVal& max_resp_time,
+				    const IPvX& group_address,
+				    string& error_msg);
+
 private:
     //
     // Private functions
@@ -361,9 +400,11 @@ private:
     // Callbacks for configuration and non-configurable parameters
     //
     void	set_query_interval_cb(TimeVal v);
+    void	set_query_last_member_interval_cb(TimeVal v);
     void	set_query_response_interval_cb(TimeVal v);
     void	set_robust_count_cb(uint32_t v);
     void	recalculate_group_membership_interval();
+    void	recalculate_last_member_query_time();
 
     //
     // Private state
@@ -397,6 +438,7 @@ private:
     // Other parameters that are not directly configurable
     //
     TimeVal	_group_membership_interval;	// The Group Membership Interval
+    TimeVal	_last_member_query_time;	// The Last Member Query Time
 
     //
     // Misc. other state
