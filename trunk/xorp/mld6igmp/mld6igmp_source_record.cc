@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.4 2006/06/10 05:46:01 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.5 2006/06/13 06:09:44 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -101,6 +101,29 @@ void
 Mld6igmpSourceRecord::cancel_source_timer()
 {
     _source_timer.unschedule();
+}
+
+/**
+ * Lower the source timer.
+ *
+ * @param timeval the timeout interval the source timer should be
+ * lowered to.
+ */
+void
+Mld6igmpSourceRecord::lower_source_timer(const TimeVal& timeval)
+{
+    EventLoop& eventloop = _group_record.eventloop();
+    TimeVal timeval_remaining;
+
+    //
+    // Lower the source timer
+    //
+    _source_timer.time_remaining(timeval_remaining);
+    if (timeval < timeval_remaining) {
+	_source_timer = eventloop.new_oneoff_after(
+	    timeval,
+	    callback(this, &Mld6igmpSourceRecord::source_timer_timeout));
+    }
 }
 
 /**
@@ -407,5 +430,29 @@ Mld6igmpSourceSet::cancel_source_timer()
     for (iter = this->begin(); iter != this->end(); ++iter) {
 	Mld6igmpSourceRecord* source_record = iter->second;
 	source_record->cancel_source_timer();
+    }
+}
+
+/**
+ * Lower the source timer for a set of sources.
+ *
+ * @param sources the source addresses.
+ * @param timeval the timeout interval the source timer should be
+ * lowered to.
+ */
+void
+Mld6igmpSourceSet::lower_source_timer(const set<IPvX>& sources,
+				      const TimeVal& timeval)
+{
+    set<IPvX>::const_iterator iter;
+    Mld6igmpSourceSet::iterator record_iter;
+
+    for (iter = sources.begin(); iter != sources.end(); ++iter) {
+	const IPvX& ipvx = *iter;
+	record_iter = this->find(ipvx);
+	if (record_iter != this->end()) {
+	    Mld6igmpSourceRecord* source_record = record_iter->second;
+	    source_record->lower_source_timer(timeval);
+	}
     }
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.6 2006/06/12 17:24:18 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.7 2006/06/13 06:09:44 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -146,6 +146,15 @@ public:
      * @param sources the source addresses.
      */
     void process_block_old_sources(const set<IPvX>& sources);
+
+    /**
+     * Lower the group timer and the source timers for a set of sources.
+     *
+     * @param sources the source addresses.
+     * @param timeval the timeout interval the timers should be lowered to.
+     */
+    void lower_group_source_timers(const set<IPvX>& sources,
+				   const TimeVal& timeval);
 
     /**
      * Take the appropriate actions for a source that has expired.
@@ -307,6 +316,16 @@ public:
      */
     void process_block_old_sources(const IPvX& group,
 				   const set<IPvX>& sources);
+
+    /**
+     * Lower the group timer and the source timers for a set of sources.
+     *
+     * @param group the group address.
+     * @param sources the source addresses.
+     * @param timeval the timeout interval the timers should be lowered to.
+     */
+    void lower_group_source_timers(const IPvX& group, const set<IPvX>& sources,
+				   const TimeVal& timeval);
 
 private:
     Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to

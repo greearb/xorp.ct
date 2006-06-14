@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.3 2006/06/10 05:32:15 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.4 2006/06/10 05:46:01 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -93,6 +93,14 @@ public:
      * Cancel the source timer.
      */
     void cancel_source_timer();
+
+    /**
+     * Lower the source timer.
+     *
+     * @param timeval the timeout interval the source timer should be
+     * lowered to.
+     */
+    void lower_source_timer(const TimeVal& timeval);
 
 private:
     /**
@@ -220,6 +228,15 @@ public:
      * Cancel the source timer for all source addresses.
      */
     void cancel_source_timer();
+
+    /**
+     * Lower the source timer for a set of sources.
+     *
+     * @param sources the source addresses.
+     * @param timeval the timeout interval the source timer should be
+     * lowered to.
+     */
+    void lower_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
 
 private:
     Mld6igmpGroupRecord& _group_record;	// The group record this set belongs to

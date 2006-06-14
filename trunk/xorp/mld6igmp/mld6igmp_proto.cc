@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.33 2006/06/14 05:04:59 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.34 2006/06/14 05:14:55 pavlin Exp $"
 
 
 //
@@ -299,9 +299,6 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
     set<IPvX> sources;
     string error_msg;
 
-    // TODO: XXX: PAVPAVPAV: this method is unfinished
-    UNUSED(group_address);
-
     //
     // Decode the Max Resp Code
     //
@@ -354,6 +351,14 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
 	BUFFER_GET_IPVX(family(), ipvx, buffer);
 	sources.insert(ipvx);
 	sources_n--;
+    }
+
+    //
+    // Lower the group and source timers
+    //
+    if (! s_flag) {
+	_group_records.lower_group_source_timers(group_address, sources,
+						 last_member_query_time());
     }
 
     return (XORP_OK);

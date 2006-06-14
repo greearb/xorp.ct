@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.12 2006/06/13 06:09:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.13 2006/06/14 04:58:46 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -463,6 +463,34 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 }
 
 /**
+ * Lower the group timer and the source timers for a set of sources.
+ *
+ * @param sources the source addresses.
+ * @param timeval the timeout interval the timers should be lowered to.
+ */
+void
+Mld6igmpGroupRecord::lower_group_source_timers(const set<IPvX>& sources,
+					       const TimeVal& timeval)
+{
+    TimeVal timeval_remaining;
+
+    //
+    // Lower the group timer
+    //
+    _group_timer.time_remaining(timeval_remaining);
+    if (timeval < timeval_remaining) {
+	_group_timer = eventloop().new_oneoff_after(
+	    timeval,
+	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
+    }
+
+    //
+    // Lower the source timers
+    //
+    _do_forward_sources.lower_source_timer(sources, timeval);
+}
+
+/**
  * Take the appropriate actions for a source that has expired.
  *
  * @param source_record the source record that has expired.
@@ -802,4 +830,25 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_block_old_sources(sources);
+}
+
+/**
+ * Lower the group timer and the source timers for a set of sources.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ * @param timeval the timeout interval the timers should be lowered to.
+ */
+void
+Mld6igmpGroupSet::lower_group_source_timers(const IPvX& group,
+					    const set<IPvX>& sources,
+					    const TimeVal& timeval)
+{
+    Mld6igmpGroupSet::iterator iter;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	Mld6igmpGroupRecord* group_record = iter->second;
+	group_record->lower_group_source_timers(sources, timeval);
+    }
 }
