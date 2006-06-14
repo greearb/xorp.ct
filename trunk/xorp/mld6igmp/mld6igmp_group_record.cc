@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.11 2006/06/13 00:05:25 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.12 2006/06/13 06:09:43 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -559,41 +559,22 @@ Mld6igmpGroupRecord::member_query_timer_timeout()
 void
 Mld6igmpGroupRecord::last_member_query_timer_timeout()
 {
+    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
     string dummy_error_msg;
 
     //
     // XXX: The spec says that we shouldn't care if we changed
     // from a Querier to a non-Querier. Hence, send the group-specific
-    // query (see the bottom part of Section 4.)
+    // query (see the bottom part of Section 3.)
     //
-    if (mld6igmp_vif().proto_is_igmp()) {
-	// TODO: XXX: ignore the fact that now there may be IGMPv1 routers?
-	TimeVal scaled_max_resp_time =
-	    mld6igmp_vif().query_last_member_interval().get() * IGMP_TIMER_SCALE;
-	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
-				     group(),
-				     IGMP_MEMBERSHIP_QUERY,
-				     scaled_max_resp_time.sec(),
-				     group(),
-				     dummy_error_msg);
-	_last_member_query_timer = eventloop().new_oneoff_after(
-	    mld6igmp_vif().query_last_member_interval().get(),
-	    callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
-    }
-
-    if (mld6igmp_vif().proto_is_mld6()) {
-	TimeVal scaled_max_resp_time =
-	    mld6igmp_vif().query_last_member_interval().get() * MLD_TIMER_SCALE;
-	mld6igmp_vif().mld6igmp_send(mld6igmp_vif().primary_addr(),
-				     group(),
-				     MLD_LISTENER_QUERY,
-				     scaled_max_resp_time.sec(),
-				     group(),
-				     dummy_error_msg);
-	_last_member_query_timer = eventloop().new_oneoff_after(
-	    mld6igmp_vif().query_last_member_interval().get(),
-	    callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
-    }
+    mld6igmp_vif().mld6igmp_query_send(mld6igmp_vif().primary_addr(),
+				       group(),
+				       max_resp_time,
+				       group(),
+				       dummy_error_msg);
+    _last_member_query_timer = eventloop().new_oneoff_after(
+	mld6igmp_vif().query_last_member_interval().get(),
+	callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
 }
 
 /**
