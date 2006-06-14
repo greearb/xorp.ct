@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.32 2006/06/13 00:05:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.33 2006/06/14 05:04:59 pavlin Exp $"
 
 
 //
@@ -898,6 +898,14 @@ Mld6igmpVif::set_robust_count_cb(uint32_t v)
 {
     UNUSED(v);
     recalculate_group_membership_interval();
+    recalculate_last_member_query_count();
+}
+
+void
+Mld6igmpVif::recalculate_last_member_query_count()
+{
+    _last_member_query_count = robust_count().get();
+    recalculate_last_member_query_time();
 }
 
 void

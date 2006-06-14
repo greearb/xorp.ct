@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.30 2006/06/10 00:20:59 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.31 2006/06/14 04:55:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -263,7 +263,7 @@ public:
      *
      * @return the value of the Last Member Query Count.
      */
-    uint32_t last_member_query_count() const { return (_robust_count.get()); }
+    uint32_t last_member_query_count() const { return (_last_member_query_count); }
 
     /**
      * Obtain a reference to the Group Membership Interval.
@@ -403,6 +403,7 @@ private:
     void	set_query_last_member_interval_cb(TimeVal v);
     void	set_query_response_interval_cb(TimeVal v);
     void	set_robust_count_cb(uint32_t v);
+    void	recalculate_last_member_query_count();
     void	recalculate_group_membership_interval();
     void	recalculate_last_member_query_time();
 
@@ -437,6 +438,7 @@ private:
     //
     // Other parameters that are not directly configurable
     //
+    uint32_t	_last_member_query_count;	// The Last Member Query Count
     TimeVal	_group_membership_interval;	// The Group Membership Interval
     TimeVal	_last_member_query_time;	// The Last Member Query Time
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.56 2006/06/13 00:05:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.57 2006/06/14 04:55:18 pavlin Exp $"
 
 
 //
@@ -76,6 +76,7 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _query_response_interval(TimeVal(0, 0),
 			       callback(this, &Mld6igmpVif::set_query_response_interval_cb)),
       _robust_count(0, callback(this, &Mld6igmpVif::set_robust_count_cb)),
+      _last_member_query_count(0),
       _group_membership_interval(TimeVal(0, 0)),
       _last_member_query_time(TimeVal(0, 0)),
       _dummy_flag(false)
