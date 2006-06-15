@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.19 2006/04/21 04:00:30 atanu Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.20 2006/05/01 17:56:54 zec Exp $
 
 #
 # The tests in this file are based on the:
@@ -35,6 +35,7 @@ from test_bgp_config import \
      conf_EBGP, \
      conf_EBGP_EBGP, \
      conf_EBGP_IBGP_IBGP, \
+     conf_RUT_as2_TR1_as1, \
      conf_RUT_as2_TR1_as1_TR2_as2, \
      conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3, \
      conf_RUT_as2_TR1_as1_TR2_as3, \
@@ -47,6 +48,7 @@ from test_bgp_config import \
      conf_redist_static_incomplete, \
      conf_redist_static_no_export, \
      conf_redist_static_med, \
+     conf_multiprotocol, \
      conf_add_static_route4, \
      conf_import_med_change, \
      conf_export_med_change, \
@@ -108,6 +110,10 @@ TESTS=[
     ['4.6A', 'test4_6_A', True, '',
      ['conf_EBGP_EBGP', 'conf_interfaces',
       'conf_redist_static_no_export']],
+
+    ['4.8A', 'test4_8_A', True, '',
+     ['conf_RUT_as2_TR1_as1', 'conf_interfaces',
+      'conf_redist_static', 'conf_multiprotocol']],
 
     ['4.11A', 'test4_11_A', True, '',
      ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
@@ -742,6 +748,45 @@ def test4_6_A():
 
     coord("peer1 assert queue 0")
     coord("peer2 assert queue 0")
+
+    return True
+
+def test4_8_A():
+    """
+    Verify correct operation of the multiprotocol extension
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
+    
+    delay(2)
+
+    coord("peer1 assert established");
+
+    delay(2)
+
+#    packet = "packet update \
+#    nexthop 127.0.0.1 \
+#    origin 0 \
+#    aspath 65000 \
+#    med 0 \
+#    nlri 172.16.0.0/16 \
+#    community NO_EXPORT"
+
+#    coord("peer1 expect %s" % packet)
+
+    if not conf_add_static_route4(builddir(1), "16.0.0.0/4"):
+        return False
+
+    delay(10)
+
+    coord("peer1 assert established")
+
+    coord("peer1 assert queue 0")
 
     return True
 
