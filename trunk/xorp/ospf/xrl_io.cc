@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.30 2006/02/28 02:07:16 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.31 2006/03/28 03:06:55 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -129,6 +129,8 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
     // Copy the payload
     vector<uint8_t> payload(len);
     memcpy(&payload[0], data, len);
+    XrlAtomList ext_headers_type;
+    XrlAtomList ext_headers_payload;
 
     XrlRawPacket6V0p1Client fea_client(&_xrl_router);
     success = fea_client.send_send(
@@ -141,6 +143,8 @@ XrlIO<IPv6>::send(const string& interface, const string& vif,
 	-1,		// XXX: let the FEA set it
 	-1,		// XXX: let the FEA set it
 	get_ip_router_alert(),
+	ext_headers_type,
+	ext_headers_payload,
 	payload,
 	callback(this, &XrlIO::send_cb, interface, vif));
 

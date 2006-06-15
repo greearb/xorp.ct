@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.36 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.37 2006/05/15 18:58:57 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -220,8 +220,13 @@ XrlOspfV3Target::raw_packet6_client_0_1_recv(
     const int32_t&	ip_ttl,
     const int32_t&	ip_tos,
     const bool&		ip_router_alert,
+    const XrlAtomList&	ext_headers_type,
+    const XrlAtomList&	ext_headers_payload,
     const vector<uint8_t>& payload)
 {
+    UNUSED(ext_headers_type);
+    UNUSED(ext_headers_payload);
+
     _xrl_io_ipv6.recv(if_name,
 		      vif_name,
 		      src_address,
