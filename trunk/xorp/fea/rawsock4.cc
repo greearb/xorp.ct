@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock4.cc,v 1.15 2005/09/07 20:15:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock4.cc,v 1.16 2006/03/16 00:04:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -118,6 +118,10 @@ FilterRawSocket4::proto_socket_write(const string&	if_name,
 				     const vector<uint8_t>& payload,
 				     string&		error_msg)
 {
+    // XXX: The extention headers are not used in IPv4
+    vector<uint8_t> ext_headers_type;
+    vector<vector<uint8_t> > ext_headers_payload;
+
     return (RawSocket4::proto_socket_write(if_name,
 					   vif_name,
 					   IPvX(src_address),
@@ -125,6 +129,8 @@ FilterRawSocket4::proto_socket_write(const string&	if_name,
 					   ip_ttl,
 					   ip_tos,
 					   ip_router_alert,
+					   ext_headers_type,
+					   ext_headers_payload,
 					   payload,
 					   error_msg));
 }
@@ -137,9 +143,15 @@ FilterRawSocket4::process_recv_data(const string&	if_name,
 				    int32_t		ip_ttl,
 				    int32_t		ip_tos,
 				    bool		ip_router_alert,
+				    const vector<uint8_t>& ext_headers_type,
+				    const vector<vector<uint8_t> >& ext_headers_payload,
 				    const vector<uint8_t>& payload)
 {
     struct IPv4HeaderInfo header;
+
+    // XXX: The extention headers are not used in IPv4
+    UNUSED(ext_headers_type);
+    UNUSED(ext_headers_payload);
 
     XLOG_ASSERT(src_address.is_ipv4());
     XLOG_ASSERT(dst_address.is_ipv4());

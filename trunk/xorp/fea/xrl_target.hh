@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.57 2006/03/26 08:05:03 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.58 2006/03/30 02:21:13 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -1196,6 +1196,13 @@ public:
      *  @param ip_router_alert if true, then add the IP Router Alert option to
      *  the IP packet.
      *
+     *  @param ext_headers_type a list of u32 integers with the types of the
+     *  optional extention headers.
+     *
+     *  @param ext_headers_payload a list of payload data, one for each
+     *  optional extention header. The number of entries must match
+     *  ext_headers_type.
+     *
      *  @param payload the payload, everything after the IP header and options.
      */
     XrlCmdError raw_packet6_0_1_send(
@@ -1208,6 +1215,8 @@ public:
 	const int32_t&	ip_ttl,
 	const int32_t&	ip_tos,
 	const bool&	ip_router_alert,
+	const XrlAtomList&	ext_headers_type,
+	const XrlAtomList&	ext_headers_payload,
 	const vector<uint8_t>&	payload);
 
     /**

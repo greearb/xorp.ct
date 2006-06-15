@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock4.hh,v 1.14 2005/12/01 22:24:19 pavlin Exp $
+// $XORP: xorp/fea/rawsock4.hh,v 1.15 2006/03/16 00:04:01 pavlin Exp $
 
 #ifndef __FEA_RAWSOCK4_HH__
 #define __FEA_RAWSOCK4_HH__
@@ -255,6 +255,8 @@ protected:
 				  int32_t		ip_ttl,
 				  int32_t		ip_tos,
 				  bool			ip_router_alert,
+				  const vector<uint8_t>& ext_headers_type,
+				  const vector<vector<uint8_t> >& ext_headers_payload,
 				  const vector<uint8_t>& payload);
 
 private:

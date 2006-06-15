@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.20 2006/03/29 17:42:35 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.21 2006/04/03 06:15:45 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -453,6 +453,44 @@ RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	    return (XORP_ERROR);
 	}
 #endif // ! IPV6_RECVHOPOPTS
+
+	//
+	// Routing header options
+	//
+#ifdef IPV6_RECVRTHDR
+	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVRTHDR,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_RECVRTHDR, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#else
+	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RTHDR,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_RTHDR, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // ! IPV6_RECVRTHDR
+
+	//
+	// Destination options
+	//
+#ifdef IPV6_RECVDSTOPTS
+	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_RECVDSTOPTS,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_RECVDSTOPTS, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#else
+	if (setsockopt(_proto_socket_in, IPPROTO_IPV6, IPV6_DSTOPTS,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    error_msg = c_format("setsockopt(IPV6_DSTOPTS, %u) failed: %s",
+				 bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // ! IPV6_RECVDSTOPTS
     }
     break;
 #endif // HAVE_IPV6
@@ -1118,6 +1156,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     int32_t	ip_tos = -1;
     bool	is_router_alert = false; // Router Alert option received
     uint32_t	pif_index = 0;
+    vector<uint8_t> ext_headers_type;
+    vector<vector<uint8_t> > ext_headers_payload;
 
     UNUSED(fd);
     UNUSED(type);
@@ -1549,6 +1589,34 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		ip_tos = int_val;
 		break;
 #endif // IPV6_TCLASS
+#ifdef IPV6_RTHDR
+	    case IPV6_RTHDR:
+	    {
+		vector<uint8_t> opt_payload(cmsgp->cmsg_len);
+		uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
+
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_rthdr)))
+		    continue;
+		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
+		ext_headers_type.push_back(cmsgp->cmsg_type);
+		ext_headers_payload.push_back(opt_payload);
+		break;
+	    }
+#endif // IPV6_RTHDR
+#ifdef IPV6_DSTOPTS
+	    case IPV6_DSTOPTS:
+	    {
+		vector<uint8_t> opt_payload(cmsgp->cmsg_len);
+		uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
+
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_dest)))
+		    continue;
+		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
+		ext_headers_type.push_back(cmsgp->cmsg_type);
+		ext_headers_payload.push_back(opt_payload);
+		break;
+	    }
+#endif // IPV6_DSTOPTS
 	    default:
 		break;
 	    }
@@ -1649,6 +1717,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		      iftree_vif->vifname(),
 		      src_address, dst_address, ip_ttl, ip_tos,
 		      is_router_alert,
+		      ext_headers_type,
+		      ext_headers_payload,
 		      payload);
 
     return;			// OK
@@ -1662,6 +1732,8 @@ RawSocket::proto_socket_write(const string& if_name,
 			      int32_t ip_ttl,
 			      int32_t ip_tos,
 			      bool is_router_alert,
+			      const vector<uint8_t>& ext_headers_type,
+			      const vector<vector<uint8_t> >& ext_headers_payload,
 			      const vector<uint8_t>& payload,
 			      string& error_msg)
 {
@@ -1676,6 +1748,8 @@ RawSocket::proto_socket_write(const string& if_name,
     const IfTreeVif* iftree_vif = NULL;
 
     UNUSED(int_val);
+
+    XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 
     find_interface_vif_by_name(if_name, vif_name, iftree_if, iftree_vif);
     
@@ -1966,6 +2040,12 @@ RawSocket::proto_socket_write(const string& if_name,
 #endif
 	// Space for IPV6_HOPLIMIT
 	ctllen += CMSG_SPACE(sizeof(int));
+
+	// Space for the Extension headers
+	for (size_t i = 0; i < ext_headers_type.size(); i++) {
+	    ctllen += CMSG_SPACE(ext_headers_payload[i].size());
+	}
+
 	XLOG_ASSERT(ctllen <= CMSG_BUF_SIZE);   // XXX
 	
 	//
@@ -2071,6 +2151,18 @@ RawSocket::proto_socket_write(const string& if_name,
 	*(int *)(CMSG_DATA(cmsgp)) = int_val;
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 #endif // IPV6_TCLASS
+
+	//
+	// Set the Extension headers
+	//
+	for (size_t i = 0; i < ext_headers_type.size(); i++) {
+	    cmsgp->cmsg_len = CMSG_LEN(ext_headers_payload[i].size());
+	    cmsgp->cmsg_level = IPPROTO_IPV6;
+	    cmsgp->cmsg_type = ext_headers_type[i];
+	    uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
+	    memcpy(data, &ext_headers_payload[0], cmsgp->cmsg_len);
+	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
+	}
 	
 	//
 	// Now hook the data

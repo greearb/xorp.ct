@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.17 2006/03/16 00:04:02 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.18 2006/03/22 02:23:33 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -271,6 +271,8 @@ protected:
 			   int32_t		ip_ttl,
 			   int32_t		ip_tos,
 			   bool			ip_router_alert,
+			   const vector<uint8_t>& ext_headers_type,
+			   const vector<vector<uint8_t> >& ext_headers_payload,
 			   const vector<uint8_t>& payload)
     {
 	UNUSED(if_name);
@@ -280,6 +282,8 @@ protected:
 	UNUSED(ip_ttl);
 	UNUSED(ip_tos);
 	UNUSED(ip_router_alert);
+	UNUSED(ext_headers_type);
+	UNUSED(ext_headers_payload);
 
 	if (payload.size() < sizeof(IcmpEchoHeader)) {
 	    verbose_log("Ignoring small ICMP packet (payload = %u bytes).\n",

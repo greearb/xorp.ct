@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.8 2005/09/21 04:58:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.9 2006/03/16 00:04:04 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -111,6 +111,18 @@ public:
 	}
 
 	//
+	// Create the extention headers info
+	//
+	XLOG_ASSERT(header.ext_headers_type.size()
+		    == header.ext_headers_payload.size());
+	XrlAtomList ext_headers_type_list, ext_headers_payload_list;
+	size_t i;
+	for (i = 0; i < header.ext_headers_type.size(); i++) {
+	    ext_headers_type_list.append(XrlAtom(header.ext_headers_type[i]));
+	    ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
+	}
+
+	//
 	// Instantiate client sending interface
 	//
 	XrlRawPacket6ClientV0p1Client cl(&_rsm.router());
@@ -129,6 +141,8 @@ public:
 		     header.ip_ttl,
 		     header.ip_tos,
 		     header.ip_router_alert,
+		     ext_headers_type_list,
+		     ext_headers_payload_list,
 		     payload,
 		     callback(&_rsm,
 			      &XrlRawSocket6Manager::xrl_send_recv_cb,
@@ -238,6 +252,8 @@ XrlRawSocket6Manager::send(const string&	if_name,
 			   int32_t		ip_ttl,
 			   int32_t		ip_tos,
 			   bool			ip_router_alert,
+			   const vector<uint8_t>& ext_headers_type,
+			   const vector<vector<uint8_t> >& ext_headers_payload,
 			   const vector<uint8_t>& payload)
 {
     string error_msg;
@@ -259,6 +275,8 @@ XrlRawSocket6Manager::send(const string&	if_name,
 			       ip_ttl,
 			       ip_tos,
 			       ip_router_alert,
+			       ext_headers_type,
+			       ext_headers_payload,
 			       payload,
 			       error_msg)
 	!= XORP_OK) {

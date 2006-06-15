@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.80 2006/03/26 08:05:03 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.81 2006/03/30 02:21:13 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2416,16 +2416,49 @@ XrlFeaTarget::raw_packet6_0_1_send(
     const int32_t&	ip_ttl,
     const int32_t&	ip_tos,
     const bool&		ip_router_alert,
+    const XrlAtomList&	ext_headers_type,
+    const XrlAtomList&	ext_headers_payload,
     const vector<uint8_t>&	payload)
 {
+    string error_msg;
+
     if (! have_ipv6())
 	return XrlCmdError::COMMAND_FAILED("IPv6 is not available");
 
     if (_xrsm6 == 0) {
 	return XrlCmdError::COMMAND_FAILED(XRL_RAW_SOCKET6_NULL);
     }
+
+    // Decompose the external headers info
+    if (ext_headers_type.size() != ext_headers_payload.size()) {
+	error_msg = c_format("External headers mismatch: %u type(s) "
+			     "and %u payload(s)",
+			     XORP_UINT_CAST(ext_headers_type.size()),
+			     XORP_UINT_CAST(ext_headers_payload.size()));
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    size_t i;
+    size_t ext_headers_size = ext_headers_type.size();
+    vector<uint8_t> ext_headers_type_vector(ext_headers_size);
+    vector<vector<uint8_t> > ext_headers_payload_vector(ext_headers_size);
+    for (i = 0; i < ext_headers_size; i++) {
+	const XrlAtom& atom_type = ext_headers_type.get(i);
+	const XrlAtom& atom_payload = ext_headers_payload.get(i);
+	if (atom_type.type() != xrlatom_uint32) {
+	    error_msg = c_format("Element inside ext_headers_type isn't uint32");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	if (atom_payload.type() != xrlatom_binary) {
+	    error_msg = c_format("Element inside ext_headers_payload isn't binary");
+	    return XrlCmdError::COMMAND_FAILED(error_msg);
+	}
+	ext_headers_type_vector[i] = atom_type.uint32();
+	ext_headers_payload_vector[i] = atom_payload.binary();
+    }
+
     return _xrsm6->send(if_name, vif_name, src_address, dst_address,
 			ip_protocol, ip_ttl, ip_tos, ip_router_alert,
+			ext_headers_type_vector, ext_headers_payload_vector,
 			payload);
 }
 
