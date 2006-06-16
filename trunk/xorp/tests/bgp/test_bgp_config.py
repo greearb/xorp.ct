@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.14 2006/05/01 17:56:54 zec Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.15 2006/06/15 22:04:50 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -173,34 +173,6 @@ set local-as 65000
 
 create peer peer1
 edit peer peer1
-set local-port 10001
-set peer-port 20001
-set next-hop 127.0.0.1
-set local-ip 127.0.0.1
-set as 65001
-commit
-"""
-
-    if not xorpsh(builddir, xorpsh_commands):
-        return False
-
-    return True
-
-def conf_EBGP(builddir):
-    """
-    Configure ONE EBGP peering
-    """
-
-    # Configure the xorpsh
-    xorpsh_commands = \
-"""configure
-load empty.boot
-create protocol bgp
-edit protocol bgp
-set bgp-id 1.2.3.4
-set local-as 65000
-create peer 127.0.0.1
-edit peer 127.0.0.1
 set local-port 10001
 set peer-port 20001
 set next-hop 127.0.0.1
