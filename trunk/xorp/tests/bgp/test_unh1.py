@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_unh1.py,v 1.20 2006/05/01 17:56:54 zec Exp $
+# $XORP: xorp/tests/bgp/test_unh1.py,v 1.21 2006/06/15 22:04:50 atanu Exp $
 
 #
 # The tests in this file are based on the:
@@ -24,40 +24,12 @@
 #
 
 import sys
-import os
-import time
-import getopt
 sys.path.append("..")
-from test_call_xrl import call_xrl
+from test_main import test_main
+from test_main import coord
+from test_main import delay
 from test_builddir import builddir
-from test_bgp_config import \
-     conf_IBGP, \
-     conf_EBGP, \
-     conf_EBGP_EBGP, \
-     conf_EBGP_IBGP_IBGP, \
-     conf_RUT_as2_TR1_as1, \
-     conf_RUT_as2_TR1_as1_TR2_as2, \
-     conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3, \
-     conf_RUT_as2_TR1_as1_TR2_as3, \
-     conf_RUT_as3_TR1_as1_TR2_as2_TR3_as4, \
-     conf_interfaces, \
-     conf_tracing_state, \
-     conf_set_holdtime, \
-     conf_set_prefix_limit, \
-     conf_redist_static, \
-     conf_redist_static_incomplete, \
-     conf_redist_static_no_export, \
-     conf_redist_static_med, \
-     conf_multiprotocol, \
-     conf_add_static_route4, \
-     conf_import_med_change, \
-     conf_export_med_change, \
-     conf_import_origin_change, \
-     conf_export_origin_change, \
-     conf_preference_TR1, \
-     conf_damping, \
-     conf_aggregate_brief, \
-     conf_aggregate_asset
+import test_bgp_config as config
 
 TESTS=[
     # Fields:
@@ -66,7 +38,7 @@ TESTS=[
     # 2: True if this test works.
     # 3: Optional Configuration String
     # 4: Optional Configuration Functions
-    # NOTE: One of field 4 or 5 must be set and the other must be empty.
+    # NOTE: One of field 3 or 4 must be set and the other must be empty.
     ['1.1A', 'test1_1_A', True, '',
      ['conf_IBGP']],
 
@@ -127,94 +99,7 @@ TESTS=[
      ['conf_RUT_as2_TR1_as1_TR2_as3', 'conf_interfaces',
       'conf_damping']],
 
-    # Move these tests to a separate policy test script.
-#    ['test_import_med1', 'test_policy_med1', False, '',
-#     ['conf_RUT_as2_TR1_as1_TR2_as2_TR3_as3', 'conf_interfaces',
-#      'conf_import_med_change']],
-
-    ['test_export_med1', 'test_policy_med1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
-      'conf_export_med_change']],
-
-    ['test_import_origin1', 'test_policy_origin1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
-      'conf_import_origin_change']],
-
-    ['test_export_origin1', 'test_policy_origin1', True, '',
-     ['conf_RUT_as2_TR1_as1_TR2_as1_TR3_as3', 'conf_interfaces',
-      'conf_export_origin_change']],
     ]
-
-def delay(seconds):
-    """
-    Sleep for the number of seconds specified and provide some feedback
-    """
-
-    print "Sleeping for %d seconds" % seconds
-    os.system("date")
-
-    columns = 80
-
-    slept = 0
-
-    if seconds < columns:
-        bars = columns / seconds
-        for i in range(seconds):
-            for b in range(bars):
-                sys.stdout.write('-')
-                sys.stdout.flush()
-            time.sleep(1)
-            slept += 1
-    else:
-        delay = seconds / columns
-        remainder = seconds % columns
-        for i in range(columns):
-            sys.stdout.write('-')
-            sys.stdout.flush()
-            if 0 != remainder:
-                snooze = delay + 1
-                remainder -= 1
-            else:
-                snooze = delay
-            time.sleep(snooze)
-            slept += snooze
-
-    print
-
-    os.system("date")
-
-    if slept != seconds:
-        raise Exception, 'Delay was too short should have been %s was %s' % \
-              (seconds, slept)
-
-def coord(command):
-    """
-    Send a command to the coordinator
-    """
-
-    print command
-    status, message = call_xrl(builddir(1), "finder://coord/coord/0.1/command?command:txt=%s" % command)
-    if 0 != status:
-        raise Exception, message
-
-    # Wait up to five seconds for this command to complete
-    for i in range(5):
-        if pending() == False:
-            return
-        delay(1)
-
-    print >> sys.stderr, "Still pending"
-
-def pending():
-    """
-    Check the previous command has completed
-    """
-
-    status, message = call_xrl(builddir(1), "finder://coord/coord/0.1/pending")
-    if message == "pending:bool=false\n":
-        return False
-    else:
-        return True
 
 def test1_1_A():
     """
@@ -259,7 +144,7 @@ def test1_4_C():
 
     # Try and set the holdtime to 2 seconds which is illegal.
     try:
-        if not conf_set_holdtime(builddir(1), "127.0.0.1", 2):
+        if not config.conf_set_holdtime(builddir(1), "127.0.0.1", 2):
             return True
     except Exception, (ErrorMessage):
         print ErrorMessage
@@ -272,9 +157,8 @@ def test1_6_B():
     Cease notification message
     """
 
-
     # Set the prefix limit to 3
-    conf_set_prefix_limit(builddir(1), "127.0.0.1", 3)
+    config.conf_set_prefix_limit(builddir(1), "peer1", 3)
 
     coord("reset")
     coord("target 127.0.0.1 10001")
@@ -347,7 +231,7 @@ def test1_10_C():
     med 0 nlri \
     172.16.0.0/16" % incomplete)
 
-    if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
+    if not config.conf_add_static_route4(builddir(1), "172.16.0.0/16"):
         return False
 
     delay(10)
@@ -391,7 +275,7 @@ def test1_12_AB():
     coord("peer1 expect %s" % (packet % "aspath 2 med 0"))
     coord("peer2 expect %s" % (packet % "aspath empty localpref 100"))
 
-    if not conf_add_static_route4(builddir(1), "172.16.0.0/16", "127.0.0.2"):
+    if not config.conf_add_static_route4(builddir(1), "172.16.0.0/16", "127.0.0.2"):
         return False
 
     delay(10)
@@ -437,7 +321,7 @@ def test1_13_A():
     coord("peer1 expect %s" % packet1)
     coord("peer2 expect %s" % packet2)
 
-    if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
+    if not config.conf_add_static_route4(builddir(1), "172.16.0.0/16"):
         return False
 
     delay(10)
@@ -738,7 +622,7 @@ def test4_6_A():
     coord("peer1 expect %s" % packet)
     coord("peer2 expect %s" % packet)
 
-    if not conf_add_static_route4(builddir(1), "172.16.0.0/16"):
+    if not config.conf_add_static_route4(builddir(1), "172.16.0.0/16"):
         return False
 
     delay(10)
@@ -779,7 +663,7 @@ def test4_8_A():
 
 #    coord("peer1 expect %s" % packet)
 
-    if not conf_add_static_route4(builddir(1), "16.0.0.0/4"):
+    if not config.conf_add_static_route4(builddir(1), "16.0.0.0/4"):
         return False
 
     delay(10)
@@ -1043,228 +927,8 @@ def test4_12():
 
     return True
 
-def test_policy_med1():
-    """
-    Introduce a med of 0 and expect a med of 2 at the peers.
-    Allows the testing of import and export policies to change the med.
-    """
+test_main(TESTS, 'test_bgp_config', 'test_unh1')
 
-    coord("reset")
-
-    coord("target 127.0.0.1 10001")
-    coord("initialise attach peer1")
-
-    coord("target 127.0.0.1 10002")
-    coord("initialise attach peer2")
-
-    coord("target 127.0.0.1 10003")
-    coord("initialise attach peer3")
-
-    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
-    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
-    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
-    
-    delay(2)
-
-    coord("peer1 assert established");
-    coord("peer2 assert established");
-    coord("peer3 assert established");
-
-    delay(2)
-
-    packet = "packet update \
-    nexthop %s \
-    origin 0 \
-    aspath %s \
-    med %s \
-    nlri 192.1.0.0/16"
-
-    spacket = packet % ("127.0.0.2", "1", "0")
-    # The nexthop is not re-written as it is on a common subnet.
-    epacket = packet % ("127.0.0.2", "2,1", "42")
-    
-    coord("peer1 expect %s" % epacket)
-    coord("peer2 expect %s" % epacket)
-    coord("peer3 expect %s" % epacket)
-
-    delay(2)
-
-    coord("peer2 send %s" % spacket)
-
-    delay(10)
-
-    coord("peer1 assert established")
-    coord("peer2 assert established")
-    coord("peer3 assert established")
-
-    coord("peer1 assert queue 1")
-    coord("peer2 assert queue 1")
-    coord("peer3 assert queue 0")
-
-    return True
-
-def test_policy_origin1():
-    """
-    Introduce an origin of 0 and expect and origin of 2 at the peers.
-    Allows the testing of import and export policies to change the origin.
-    """
-
-    coord("reset")
-
-    coord("target 127.0.0.1 10001")
-    coord("initialise attach peer1")
-
-    coord("target 127.0.0.1 10002")
-    coord("initialise attach peer2")
-
-    coord("target 127.0.0.1 10003")
-    coord("initialise attach peer3")
-
-    coord("peer1 establish AS 1 holdtime 0 id 10.0.0.1 keepalive false")
-    coord("peer2 establish AS 1 holdtime 0 id 10.0.0.2 keepalive false")
-    coord("peer3 establish AS 3 holdtime 0 id 10.0.0.3 keepalive false")
-    
-    delay(2)
-
-    coord("peer1 assert established");
-    coord("peer2 assert established");
-    coord("peer3 assert established");
-
-    delay(2)
-
-    packet = "packet update \
-    nexthop %s \
-    origin %s \
-    aspath %s \
-    med 0 \
-    nlri 192.1.0.0/16"
-
-    spacket = packet % ("127.0.0.2", "0", "1")
-    # The nexthop is not re-written as it is on a common subnet.
-    epacket = packet % ("127.0.0.2", "2", "2,1")
-    
-    coord("peer1 expect %s" % epacket)
-    coord("peer2 expect %s" % epacket)
-    coord("peer3 expect %s" % epacket)
-
-    delay(2)
-
-    coord("peer2 send %s" % spacket)
-
-    delay(10)
-
-    coord("peer1 assert established")
-    coord("peer2 assert established")
-    coord("peer3 assert established")
-
-    coord("peer1 assert queue 1")
-    coord("peer2 assert queue 1")
-    coord("peer3 assert queue 0")
-
-    return True
-
-def run_test(test, single, configure):
-    """
-    Run the provided test
-    """
-
-    bdir = builddir(1)
-
-    # First find the test if it exists
-    test_func = ''
-    conf_funcs = []
-    for i in TESTS:
-        if test == i[0]:
-            test_func = i[1]
-            if i[3] != '' and i[4] != '':
-                print "Both fields should not be set"
-                return False
-            if i[3] != '':
-                conf_funcs.append("UNKNOWN")
-                test_func +=  '(bdir,conf)'
-            if i[4] != '':
-                print "debug", i[4][0]
-                for f in i[4]:
-                    conf_funcs.append(f + '(bdir)')
-                test_func +=  '()'
-
-    if not single:
-        print "------ START PROGRAMS ------"
-
-    print conf_funcs
-
-    try: 
-        if configure:
-            for i in conf_funcs:
-                if not eval(i):
-                    print i, "FAILED"
-                    return False
-        if not eval(test_func):
-            print test, "FAILED"
-            return False
-        else:
-            print test, "SUCCEEDED"
-    except Exception, (ErrorMessage):
-        print ErrorMessage
-        print test, "FAILED"
-        return False
-
-    return True
-    
-def main():
-    def usage():
-        us = \
-"usage: %s [-h|--help] [-t|--test] [-b|--bad] [-s|--single] [-c|--configure]"
-        print us % sys.argv[0]
-        
-
-    try:
-        opts, args = getopt.getopt(sys.argv[1:], "h:t:bsc", \
-                                   ["help", \
-                                    "test=", \
-                                    "bad", \
-                                    "single", \
-                                    "configure", \
-                                    ])
-    except getopt.GetoptError:
-        usage()
-        sys.exit(1)
-
-
-    bad = False
-    single = False
-    configure = True
-    tests = []
-    for o, a in opts:
-	if o in ("-h", "--help"):
-	    usage()
-	    sys.exit()
-        if o in ("-t", "--test"):
-            tests.append(a)
-        if o in ("-b", "--bad"):
-            bad = True
-        if o in ("-s", "--single"):
-            single = True
-            configure = False
-        if o in ("-c", "--configure"):
-            configure = True
-
-    if not tests:
-        for i in TESTS:
-            if bad != i[2]:
-                tests.append(i[0])
-
-    print tests
-
-    for i in tests:
-        if not run_test(i, single, configure):
-            print "Test: " + i + " FAILED"
-            sys.exit(-1)
-            
-    sys.exit(0)
-
-main()
-    
 # Local Variables:
 # mode: python
 # py-indent-offset: 4
