@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_xorpsh.py,v 1.2 2006/04/07 20:16:26 atanu Exp $
+# $XORP: xorp/tests/test_xorpsh.py,v 1.3 2006/04/10 18:56:15 atanu Exp $
 
 import popen2
 
@@ -32,6 +32,7 @@ def xorpsh(builddir, command, templates = '../templates'):
     error_responses = ["ERROR", "unknown command", "syntax error",
                        "Commit Failed"]
 
+    output = ""
     while 1:
         line = process.fromchild.readline()
         if not line:
@@ -40,9 +41,10 @@ def xorpsh(builddir, command, templates = '../templates'):
             if line.startswith(i):
                 raise Exception, line
         print line,
+        output += line
     status = process.wait()
 
     if 0 == status:
-        return True
+        return True, output
     else:
-        return False
+        return False, output
