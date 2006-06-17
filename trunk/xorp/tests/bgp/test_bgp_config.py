@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.15 2006/06/15 22:04:50 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.16 2006/06/16 00:19:54 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -178,6 +178,35 @@ set peer-port 20001
 set next-hop 127.0.0.1
 set local-ip 127.0.0.1
 set as 65001
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_bug_360(builddir):
+    """
+    Configure ONE EBGP peering
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""configure
+load empty.boot
+create protocol bgp
+edit protocol bgp
+set bgp-id 1.2.3.4
+set local-as 65001
+
+create peer peer1
+edit peer peer1
+set local-port 10001
+set peer-port 20001
+set next-hop 127.0.0.1
+set local-ip 127.0.0.1
+set as 75
 commit
 """
 
@@ -899,6 +928,24 @@ def conf_multiprotocol(builddir):
 
     return True
 
+def show_bgp_routes(builddir):
+    """
+    Return the output of the show bgp routes command.
+    """
+
+    xorpsh_commands = \
+"""
+show bgp routes
+"""
+
+    result, output = xorpsh(builddir, xorpsh_commands)
+
+    if not result:
+        return False, output
+
+    return True, output
+    
+    
 # Local Variables:
 # mode: python
 # py-indent-offset: 4
