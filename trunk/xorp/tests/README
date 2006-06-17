@@ -1,5 +1,5 @@
 #
-# $XORP$
+# $XORP: xorp/tests/README,v 1.1 2006/04/07 05:13:08 atanu Exp $
 #
 
 THE CODE IN THIS DIRECTORY IS EXPERIMENTAL AND STILL UNDER DEVELOPMENT.
@@ -9,6 +9,8 @@ protocols and should allow the testing of protocols interactions and
 policy.
 
 Before running the tests:
+0) The tests assume that the bgp/harness binaries have been compiled,
+'gmake check' in the bgp subdirectory will build the binaries.
 1) Run "./install_templates.sh" this will take a copy of the template
 files and modify them for use with the tests. For example one modification
 is to substitute the FEA for the dummy FEA.
