@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.165 2006/04/03 04:00:31 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.166 2006/04/03 05:17:56 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.165 2006/04/03 04:00:31 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.166 2006/04/03 05:17:56 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -680,17 +680,24 @@ dnl XXX: This is a hack. Look for getopt in unistd.h by grepping for it.
 dnl If it's not there, then look for the getopt.h header file.
 dnl This assumes that the system's getopt declaration comes before the GNU one,
 dnl if getopt.h is being picked up from a GNU C library include directory.
-dnl This replaces the old NEED_GETOPT check which wasn't used.
 dnl
-AC_EGREP_HEADER(getopt, unistd.h, xr_cv_unistd_getopt=yes)
-if test "${xr_cv_unistd_getopt}" = "yes"
+dnl For Windows, we always force HAVE_GETOPT_H to be defined so that it
+dnl gets included.
+dnl
+if test ! "${_USING_WINDOWS}"
 then
+ AC_EGREP_HEADER(getopt, unistd.h, xr_cv_unistd_getopt=yes)
+ if test "${xr_cv_unistd_getopt}" = "yes"
+ then
     AC_DEFINE(HAVE_DECL_GETOPT, 1,
 	      [Define to 1 if system getopt() is in unistd.h])
-else
+ else
     AC_CHECK_HEADERS([getopt.h])
+ fi
+else
+    AC_DEFINE(HAVE_GETOPT_H, 1,
+	      [Define to 1 if you have the <getopt.h> header file.])
 fi
-
 
 dnl ---------------------------------------------------------------------------
 dnl Check for library functions
