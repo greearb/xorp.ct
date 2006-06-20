@@ -11457,6 +11457,26 @@ fi
 
 if test ! "${_USING_WINDOWS}"
 then
+ cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <unistd.h>
+
+_ACEOF
+if (eval "$ac_cpp conftest.$ac_ext") 2>&5 |
+  egrep "getopt" >/dev/null 2>&1; then
+  xr_cv_unistd_getopt=yes
+fi
+rm -f conftest*
+
+ if test "${xr_cv_unistd_getopt}" = "yes"
+ then
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_DECL_GETOPT 1
+_ACEOF
+
+ else
 
 for ac_header in getopt.h
 do
@@ -11571,6 +11591,7 @@ fi
 
 done
 
+ fi
 else
 
 cat >>confdefs.h <<\_ACEOF

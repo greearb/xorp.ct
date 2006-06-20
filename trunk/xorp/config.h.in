@@ -51,6 +51,9 @@
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H
 
+/* Define to 1 if system getopt() is in unistd.h */
+#undef HAVE_DECL_GETOPT
+
 /* Define to 1 if you have the `ether_aton' function. */
 #undef HAVE_ETHER_ATON
 
