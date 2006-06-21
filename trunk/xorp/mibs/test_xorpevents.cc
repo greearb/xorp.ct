@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.15 2005/08/18 21:12:11 pavlin Exp $"
+#ident "$XORP: xorp/mibs/test_xorpevents.cc,v 1.16 2006/03/16 00:04:42 pavlin Exp $"
 
 
 #include <set>
@@ -318,9 +318,9 @@ run_test_1()
     ptcb1 = callback(timer_callback1);
     ptcb2 = callback(timer_callback2);
     ptcb3 = callback(timer_callback3);
-    xt1 = e1.new_periodic (period_ms, ptcb1);
-    xt2 = e2.new_periodic (period_ms/2, ptcb2);
-    xt3 = e3.new_periodic (period_ms/3, ptcb3);
+    xt1 = e1.new_periodic_ms(period_ms, ptcb1);
+    xt2 = e2.new_periodic_ms(period_ms/2, ptcb2);
+    xt3 = e3.new_periodic_ms(period_ms/3, ptcb3);
     bool finito = false;
     const int test1_loops = 10;
     cb1_counter = cb2_counter = cb3_counter = 0;

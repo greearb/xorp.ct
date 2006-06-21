@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.11 2005/08/18 15:45:52 bms Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.12 2006/03/16 00:04:02 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -214,9 +214,10 @@ public:
     void
     start_sending(IPv4 host, uint16_t port, uint32_t bytes, uint32_t ipg_ms)
     {
-	_t_snd = _e.new_periodic(ipg_ms, callback(this,
-						  &TestSocket4UDP::send_data,
-						  host, port, bytes));
+	_t_snd = _e.new_periodic_ms(ipg_ms,
+				    callback(this,
+					     &TestSocket4UDP::send_data,
+					     host, port, bytes));
     }
 
     /**
@@ -551,7 +552,7 @@ test_main(IPv4 finder_host, uint16_t finder_port)
     bool eflag(false);		// Error flag set by timed events
 
     if (verbose())
-	ev.push_back(e.new_periodic(100, callback(ticker)));
+	ev.push_back(e.new_periodic_ms(100, callback(ticker)));
 
     //
     // Create Socket server.

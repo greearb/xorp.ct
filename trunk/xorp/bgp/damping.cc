@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/bgp/damping.cc,v 1.6 2006/04/26 03:14:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -100,7 +100,8 @@ Damping::init()
     }
 
     // Start the timer to incement the tick
-    _tick_tock = _eventloop.new_periodic(1000, callback(this, &Damping::tick));
+    _tick_tock = _eventloop.new_periodic_ms(1000,
+					    callback(this, &Damping::tick));
 }
 
 void

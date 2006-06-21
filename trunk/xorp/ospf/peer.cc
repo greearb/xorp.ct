@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.237 2006/03/28 03:06:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.238 2006/06/13 20:54:20 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1671,8 +1671,8 @@ Peer<A>::start_hello_timer()
 
     // Schedule one for the future.
     _hello_timer = _ospf.get_eventloop().
-	new_periodic(_hello_packet.get_hello_interval() * 1000,
-		     callback(this, &Peer<A>::send_hello_packet));
+	new_periodic_ms(_hello_packet.get_hello_interval() * 1000,
+			callback(this, &Peer<A>::send_hello_packet));
 
     // Send one immediately.
     send_hello_packet();
@@ -3048,8 +3048,8 @@ Neighbour<A>::start_rxmt_timer(RxmtCallback rcb, bool immediate,
 					     comment).c_str());
 
     _rxmt_timer = _ospf.get_eventloop().
- 	new_periodic(_peer.get_rxmt_interval() * 1000,
-		     callback(_rxmt_wrapper, &RxmtWrapper::doit));
+ 	new_periodic_ms(_peer.get_rxmt_interval() * 1000,
+			callback(_rxmt_wrapper, &RxmtWrapper::doit));
 
     // Send one immediately. Do this last so all state is set.
     if (immediate)

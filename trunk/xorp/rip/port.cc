@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.58 2006/03/25 09:42:58 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.59 2006/05/15 21:10:24 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -287,9 +287,9 @@ Port<A>::start_request_table_timer()
 	_rt_timer.unschedule();
 	return;
     }
-    _rt_timer = e.new_periodic(constants().table_request_period_secs() * 1000,
-			       callback(this,
-					&Port<A>::request_table_timeout));
+    _rt_timer = e.new_periodic_ms(
+	constants().table_request_period_secs() * 1000,
+	callback(this, &Port<A>::request_table_timeout));
 }
 
 template <typename A>
@@ -354,8 +354,8 @@ Port<A>::start_peer_gc_timer()
     // Set peer garbage collection timeout to 180 seconds since for RIP
     // MIB we need to keep track of quiescent peers for this long.
     EventLoop& e = _pm.eventloop();
-    _gc_timer = e.new_periodic(180 * 1000,
-			       callback(this, &Port<A>::peer_gc_timeout));
+    _gc_timer = e.new_periodic_ms(180 * 1000,
+				  callback(this, &Port<A>::peer_gc_timeout));
 }
 
 template <typename A>

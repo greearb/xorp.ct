@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.49 2006/01/04 05:55:27 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.50 2006/03/16 00:05:32 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -52,7 +52,7 @@ RibManager::RibManager(EventLoop& eventloop, XrlStdRouter& xrl_std_router,
     _urib6.initialize(_register_server);
     _mrib6.initialize(_register_server);
     PeriodicTimerCallback cb = callback(this, &RibManager::status_updater);
-    _status_update_timer = _eventloop.new_periodic(1000, cb);
+    _status_update_timer = _eventloop.new_periodic_ms(1000, cb);
     initialize_profiling_variables(_profile);
 }
 

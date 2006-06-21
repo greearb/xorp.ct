@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.8 2005/03/25 02:54:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.9 2006/03/16 00:05:50 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -133,8 +133,8 @@ RouteRedistributor<A>::withdraw_routes()
 {
     if (_wtimer.scheduled() == false) {
 	EventLoop& e = _route_db.eventloop();
-	_wtimer = e.new_periodic(5,
-			callback(this, &RouteRedistributor::withdraw_batch));
+	_wtimer = e.new_periodic_ms(5,
+				    callback(this, &RouteRedistributor::withdraw_batch));
     }
 }
 

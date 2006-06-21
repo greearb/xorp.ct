@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.26 2005/08/04 10:20:41 bms Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.27 2006/03/16 00:04:36 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -247,7 +247,7 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
+    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb);
 
     /**
      * Create a XorpTimer to set a flag.

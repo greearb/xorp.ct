@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.15 2005/03/25 02:53:29 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_inproc.cc,v 1.16 2006/03/16 00:04:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -146,7 +146,7 @@ run_test()
 
     trace("listener address: %s\n", listener.address());
 
-    XorpTimer dp = eventloop.new_periodic(500, callback(&print_twirl));
+    XorpTimer dp = eventloop.new_periodic_ms(500, callback(&print_twirl));
     assert(dp.scheduled());
 
     trace("Testing XRLPFInProc\n");

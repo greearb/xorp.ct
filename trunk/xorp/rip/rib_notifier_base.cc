@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/rib_notifier_base.cc,v 1.6 2005/03/25 02:54:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/rib_notifier_base.cc,v 1.7 2006/03/16 00:05:50 pavlin Exp $"
 
 #include "rib_notifier_base.hh"
 
@@ -38,8 +38,8 @@ template <typename A>
 void
 RibNotifierBase<A>::start_polling()
 {
-    _t = _e.new_periodic(_poll_ms,
-			 callback(this, &RibNotifierBase<A>::poll_updates));
+    _t = _e.new_periodic_ms(_poll_ms,
+			    callback(this, &RibNotifierBase<A>::poll_updates));
 }
 
 template <typename A>

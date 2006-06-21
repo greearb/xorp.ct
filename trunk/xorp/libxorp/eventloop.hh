@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.17 2005/12/21 09:42:57 bms Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.18 2006/03/16 00:04:28 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -91,7 +91,7 @@ public:
 
     	// Add a Xorp EventLoop
 	EventLoop e;
-	XorpTimer wakeywakey = e.new_periodic(100, callback(wakeup_hook, 1));
+	XorpTimer wakeywakey = e.new_periodic_ms(100, callback(wakeup_hook, 1));
 
 	// Program's main loop
 	for(;;) {
@@ -161,7 +161,7 @@ public:
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer new_periodic(int ms, const PeriodicTimerCallback& pcb);
+    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb);
 
     /**
      * Add a flag setting timer to the EventLoop.
@@ -321,9 +321,9 @@ EventLoop::new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb)
 }
 
 inline XorpTimer
-EventLoop::new_periodic(int period_ms, const PeriodicTimerCallback& pcb)
+EventLoop::new_periodic_ms(int period_ms, const PeriodicTimerCallback& pcb)
 {
-    return _timer_list.new_periodic(period_ms, pcb);
+    return _timer_list.new_periodic_ms(period_ms, pcb);
 }
 
 inline XorpTimer

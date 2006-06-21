@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.10 2005/03/25 02:53:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.11 2006/03/16 00:03:49 pavlin Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -181,7 +181,7 @@ void demo_main()
     DemoFeaIfmgrClientTarget client(rtr, cout);
 
     send_register(&client);
-    XorpTimer r = e.new_periodic(5000, callback(send_register, &client));
+    XorpTimer r = e.new_periodic_ms(5000, callback(send_register, &client));
 
     for (;;) {
 	e.run();

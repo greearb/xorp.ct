@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder.cc,v 1.20 2005/03/25 02:53:25 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder.cc,v 1.21 2006/03/16 00:04:14 pavlin Exp $"
 
 #include <set>
 
@@ -773,7 +773,7 @@ Finder::fill_targets_xrl_list(const string& target,
 void
 Finder::start_hello_timer()
 {
-    _hello = _e.new_periodic(1000, callback(this, &Finder::send_hello));
+    _hello = _e.new_periodic_ms(1000, callback(this, &Finder::send_hello));
 }
 
 bool

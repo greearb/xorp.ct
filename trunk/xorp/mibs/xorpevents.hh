@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mibs/xorpevents.hh,v 1.14 2005/08/18 21:15:36 pavlin Exp $
+// $XORP: xorp/mibs/xorpevents.hh,v 1.15 2006/03/16 00:04:43 pavlin Exp $
 
 #ifndef __MIBS_XORPEVENTS_HH__
 #define __MIBS_XORPEVENTS_HH__
@@ -56,7 +56,7 @@ public:
      * Now use 'e' anywhere you would use an event loop in Xorp modules,
      * for instance:
     <pre>
-     * XorpTimer xt = e.new_periodic(100, callback);
+     * XorpTimer xt = e.new_periodic_ms(100, callback);
     </pre>
      *
      * NOTE:  typically you would never need to call e.run().  If you do, you

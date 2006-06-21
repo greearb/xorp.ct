@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.74 2006/04/15 07:10:35 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.75 2006/05/01 09:17:10 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -781,7 +781,7 @@ BGPMain::main_loop()
 
 #if defined(DEBUG_MAXIMUM_DELAY)
     static XorpTimer t = eventloop().
-	new_periodic(1000, callback(check_callback_duration));
+	new_periodic_ms(1000, callback(check_callback_duration));
 #endif
     while ( run() ) {
 #if defined(DEBUG_MAXIMUM_DELAY)

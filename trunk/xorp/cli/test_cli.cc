@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/test_cli.cc,v 1.40 2005/12/14 00:52:40 pavlin Exp $"
+#ident "$XORP: xorp/cli/test_cli.cc,v 1.41 2006/03/16 00:03:46 pavlin Exp $"
 
 
 //
@@ -202,9 +202,15 @@ cli_main(const string& finder_hostname, uint16_t finder_port,
     // cli_node6.start();
 
     // Test timer
-    XorpTimer wakeywakey = eventloop.new_periodic(1000, callback(wakeup_hook));
-    XorpTimer wakeywakey2 = eventloop.new_periodic(5000, callback(wakeup_hook2, 3, 5));
-    XorpTimer wakeywakey3 = eventloop.new_periodic(2000, callback(f, &Foo::print));
+    XorpTimer wakeywakey = eventloop.new_periodic_ms(
+	1000,
+	callback(wakeup_hook));
+    XorpTimer wakeywakey2 = eventloop.new_periodic_ms(
+	5000,
+	callback(wakeup_hook2, 3, 5));
+    XorpTimer wakeywakey3 = eventloop.new_periodic_ms(
+	2000,
+	callback(f, &Foo::print));
 
     //
     // Main loop

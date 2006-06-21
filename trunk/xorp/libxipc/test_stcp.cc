@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.18 2005/08/18 15:32:39 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_stcp.cc,v 1.19 2006/03/16 00:04:18 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -200,11 +200,11 @@ run_test()
 
     tracef("listener address: %s\n", listener.address());
 
-    XorpTimer dp = eventloop.new_periodic(500, callback(&print_twirl));
+    XorpTimer dp = eventloop.new_periodic_ms(500, callback(&print_twirl));
 
     bool run_tests = true;
-    XorpTimer rt = eventloop.new_periodic(5 * KEEPALIVE_MS / 4,
-					  callback(&toggle_flag, &run_tests));
+    XorpTimer rt = eventloop.new_periodic_ms(5 * KEEPALIVE_MS / 4,
+					     callback(&toggle_flag, &run_tests));
 
     tracef("Testing XrlPFSTCP\n");
     bool stop = false;

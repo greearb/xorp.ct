@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.20 2006/03/30 02:21:14 pavlin Exp $"
+#ident "$XORP: xorp/rib/tools/show_routes.cc,v 1.21 2006/04/26 03:12:45 pavlin Exp $"
 
 #include "rib/rib_module.h"
 
@@ -326,9 +326,9 @@ ShowRoutesProcessor::startup()
 
     // Start timer to poll whether XrlRouter becomes ready or fails so
     // we can continue processing.
-    _t = _e.new_periodic(250,
-			 callback(this,
-				  &ShowRoutesProcessor::poll_ready_failed));
+    _t = _e.new_periodic_ms(250,
+			    callback(this,
+				     &ShowRoutesProcessor::poll_ready_failed));
     set_status(SERVICE_STARTING);
     return true;
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.15 2005/09/02 19:32:01 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_route_walk.cc,v 1.16 2006/03/16 00:05:53 pavlin Exp $"
 
 #include <set>
 
@@ -217,12 +217,12 @@ public:
 	XorpTimer t;
 	for (int i = 0; i < 2; i++) {
 	    verbose_log("Starting full route walk %d\n", i);
-	    t = _e.new_periodic(1,
-				callback(this,
-					 &RouteWalkTester<A>::walk_routes,
-					 &rw, false,
-					 &routes_done,
-					 static_cast<uint32_t>(97u)));
+	    t = _e.new_periodic_ms(1,
+				   callback(this,
+					    &RouteWalkTester<A>::walk_routes,
+					    &rw, false,
+					    &routes_done,
+					    static_cast<uint32_t>(97u)));
 	    while (t.scheduled()) {
 		_e.run();
 		if (routes_done > n_routes) {
@@ -252,12 +252,12 @@ public:
 	verbose_log("Starting walk as routes are deleted.\n");
 	rw.reset();
 	routes_done = 0;
-	t = _e.new_periodic(30,
-			    callback(this,
-				     &RouteWalkTester<A>::walk_routes,
-				     &rw, true,
-				     &routes_done,
-				     static_cast<uint32_t>(10u)));
+	t = _e.new_periodic_ms(30,
+			       callback(this,
+					&RouteWalkTester<A>::walk_routes,
+					&rw, true,
+					&routes_done,
+					static_cast<uint32_t>(10u)));
 	while (t.scheduled()) {
 	    _e.run();
 	    if (routes_done > n_routes) {

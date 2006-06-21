@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/test_redist.cc,v 1.10 2006/03/16 00:05:41 pavlin Exp $"
+#ident "$XORP: xorp/rib/test_redist.cc,v 1.11 2006/03/28 08:56:16 pavlin Exp $"
 
 #include <set>
 
@@ -300,7 +300,8 @@ test_deterministic()
 
     // Each route added causes the output block. This timer unblocks the output
     // once per second.
-    XorpTimer u = e.new_periodic(1000, callback(&unblock_output<IPv4>, output));
+    XorpTimer u = e.new_periodic_ms(1000,
+				    callback(&unblock_output<IPv4>, output));
     // After 1 second the last route added is 10.3.0.0
     //
     // Add one route after this

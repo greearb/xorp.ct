@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.12 2005/08/18 15:28:42 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.13 2006/03/16 00:04:35 pavlin Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -169,7 +169,7 @@ run_test()
     show_stopper = e.new_oneoff_after_ms(500, callback(some_foo));
     assert(show_stopper.scheduled());
 
-    XorpTimer zzz = e.new_periodic(3, callback(print_dot));
+    XorpTimer zzz = e.new_periodic_ms(3, callback(print_dot));
     assert(zzz.scheduled());
 
     while(show_stopper.scheduled()) {

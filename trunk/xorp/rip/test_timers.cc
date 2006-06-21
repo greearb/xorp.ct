@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_timers.cc,v 1.17 2005/09/02 19:32:01 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_timers.cc,v 1.18 2006/03/16 00:05:53 pavlin Exp $"
 
 #include <set>
 
@@ -225,7 +225,7 @@ test_main()
 
     XorpTimer twirl;
     if (verbose())
-	twirl = e.new_periodic(250, callback(print_twirl));
+	twirl = e.new_periodic_ms(250, callback(print_twirl));
 
     bool timeout = false;
     XorpTimer t = e.set_flag_after_ms(1000 * timeout_secs, &timeout);

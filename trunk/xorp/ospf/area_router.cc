@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/area_router.cc,v 1.208 2006/03/11 03:01:24 pavlin Exp $"
+#ident "$XORP: xorp/ospf/area_router.cc,v 1.209 2006/03/16 00:04:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -2052,7 +2052,7 @@ AreaRouter<A>::max_sequence_number_reached(Lsa::LsaRef lsar)
 
     if (_reincarnate.empty())
 	_reincarnate_timer = _ospf.get_eventloop().
-	    new_periodic(1000, callback(this, &AreaRouter<A>::reincarnate));
+	    new_periodic_ms(1000, callback(this, &AreaRouter<A>::reincarnate));
 	
     _reincarnate.push_back(lsar);
 }

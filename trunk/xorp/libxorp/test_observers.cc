@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.7 2005/08/30 01:33:13 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_observers.cc,v 1.8 2006/03/16 00:04:34 pavlin Exp $"
 
 //
 // test program to the Observer classes for TimerList and SelectorList
@@ -142,7 +142,7 @@ void run_test()
     show_stopper = e.new_oneoff_after_ms(500, callback(some_foo));
     assert(show_stopper.scheduled());
 
-    XorpTimer zzz = e.new_periodic(30, callback(print_dot));
+    XorpTimer zzz = e.new_periodic_ms(30, callback(print_dot));
     assert(zzz.scheduled());
 
     XorpFd fd[2];

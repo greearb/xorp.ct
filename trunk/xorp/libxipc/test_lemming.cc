@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.15 2005/08/18 15:32:39 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_lemming.cc,v 1.16 2006/03/16 00:04:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -78,7 +78,7 @@ public:
 	_r.add_handler("ping", callback(this, &Lemming::ping));
 	_r.add_handler("jump", callback(this, &Lemming::jump));
 	_registered = false;
-	_rtimer = e.new_periodic(200, callback(this, &Lemming::login));
+	_rtimer = e.new_periodic_ms(200, callback(this, &Lemming::login));
     }
 
     ~Lemming()
@@ -141,7 +141,7 @@ public:
     Pinger(EventLoop& e) : _r(e, "pinger")
     {
 	_r.add_handler("register", callback(this, &Pinger::set_who));
-	_ptimer = e.new_periodic(20, callback(this, &Pinger::send_ping));
+	_ptimer = e.new_periodic_ms(20, callback(this, &Pinger::send_ping));
     }
 
     const XrlCmdError
@@ -214,8 +214,8 @@ lemming_main()
 						    callback(&snuff_flag,
 							     &run));
 
-    XorpTimer frt = e.new_periodic(18 * 1000,
-				   callback(&toggle_finder, &e, &pfs));
+    XorpTimer frt = e.new_periodic_ms(18 * 1000,
+				      callback(&toggle_finder, &e, &pfs));
 
     while (run && pfs) {
 	bool life = true;

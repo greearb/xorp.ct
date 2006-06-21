@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.9 2006/02/10 03:47:31 pavlin Exp $"
+#ident "$XORP: xorp/rip/tools/rip_announcer.cc,v 1.10 2006/03/16 00:05:56 pavlin Exp $"
 
 #include <vector>
 #include <fstream>
@@ -101,8 +101,8 @@ static void
 fake_peer(XorpFd fd, uint32_t period, vector<RipRoute<IPv4> >& my_routes)
 {
     EventLoop e;
-    XorpTimer t = e.new_periodic(period * 1000,
-				 callback(announce_routes, fd, &my_routes));
+    XorpTimer t = e.new_periodic_ms(period * 1000,
+				    callback(announce_routes, fd, &my_routes));
 
     announce_routes(fd, &my_routes);
     while (t.scheduled()) {

@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.29 2005/12/22 11:53:40 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.30 2006/03/16 00:04:35 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -313,10 +313,10 @@ TimerList::new_oneoff_after_ms(int ms, const OneoffTimerCallback& cb)
 }
 
 XorpTimer
-TimerList::new_periodic(int interval, const PeriodicTimerCallback& cb)
+TimerList::new_periodic_ms(int ms, const PeriodicTimerCallback& cb)
 {
-    TimerNode* n = new PeriodicTimerNode2(this, cb, interval);
-    n->schedule_after_ms(interval);
+    TimerNode* n = new PeriodicTimerNode2(this, cb, ms);
+    n->schedule_after_ms(ms);
     return XorpTimer(n);
 }
 
