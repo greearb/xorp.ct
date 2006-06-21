@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.60 2006/05/31 21:32:19 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.61 2006/06/20 19:42:21 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -327,6 +327,9 @@ gmake check
       attempting to build XORP, as we use API functions which are present in
       the Windows SDK but which are not yet present in the system headers
       which ship with MinGW as of May 2006.
+
+      You MAY need to bracket references to off_t in MinGW's <unistd.h>
+      header with '#if 0'.
 
       The patch may be found in the xorp/contrib/win32 directory.
 
