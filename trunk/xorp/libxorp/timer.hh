@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.27 2006/03/16 00:04:36 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.28 2006/06/21 23:36:34 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -123,12 +123,21 @@ public:
 
     /**
      * Schedule the @ref XorpTimer object.
+     *
      * @param ms milliseconds from the current time.
      */
     void schedule_after_ms(int ms);
 
     /**
      * Reschedule the @ref XorpTimer object.
+     *
+     * @param wait time from the most recent expiry.
+     */
+    void reschedule_after(const TimeVal& wait);
+
+    /**
+     * Reschedule the @ref XorpTimer object.
+     *
      * @param ms milliseconds from the most recent expiry.
      */
     void reschedule_after_ms(int ms);
@@ -237,6 +246,18 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb);
+
+    /**
+     * Create a XorpTimer that will invoke a callback periodically.
+     *
+     * @param wait the period when the timer expires.
+     * @param pcb user callback object that is invoked when timer expires.
+     * If the callback returns false the periodic XorpTimer is unscheduled.
+     *
+     * @return the @ref XorpTimer created.
+     */
+    XorpTimer new_periodic(const TimeVal& wait,
+			   const PeriodicTimerCallback& pcb);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.
@@ -432,7 +453,7 @@ protected:
     void schedule_at(const TimeVal&);
     void schedule_after(const TimeVal& wait);
     void schedule_after_ms(int x_ms);
-    void reschedule_after_ms(int x_ms);
+    void reschedule_after(const TimeVal& wait);
     void unschedule();
     virtual void expire(XorpTimer&, void*);
 
@@ -533,10 +554,18 @@ XorpTimer::schedule_now()
 }
 
 inline void
-XorpTimer::reschedule_after_ms(int x_ms)
+XorpTimer::reschedule_after(const TimeVal& wait)
 {
     assert(_node);
-    _node->reschedule_after_ms(x_ms);
+    _node->reschedule_after(wait);
+}
+
+inline void
+XorpTimer::reschedule_after_ms(int ms)
+{
+    assert(_node);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    _node->reschedule_after(wait);
 }
 
 inline void

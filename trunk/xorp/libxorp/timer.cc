@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.30 2006/03/16 00:04:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.31 2006/06/21 23:36:34 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -42,7 +42,7 @@
 // callback.  TimerNode's that are not scheduled are not part of the
 // TimerList, but remain "associated" with their originating list so
 // can be rescheduled by calling TimerNode methods (eg
-// reschedule_after_ms()).
+// reschedule_after()).
 //
 // User applications deal with XorpTimer objects that are pointers to
 // TimerNodes.  There is some magic with XorpTimer objects: they enforce
@@ -149,14 +149,12 @@ TimerNode::schedule_after_ms(int ms)
 }
 
 void
-TimerNode::reschedule_after_ms(int ms)
+TimerNode::reschedule_after(const TimeVal& wait)
 {
     assert(_list);
     unschedule();
 
-    TimeVal interval(ms / 1000, (ms % 1000) * 1000);
-
-    _expires = _expires + interval;
+    _expires = _expires + wait;
     _list->schedule_node(this);
 }
 
@@ -180,17 +178,18 @@ private:
 
 class PeriodicTimerNode2 : public TimerNode {
 public:
-    PeriodicTimerNode2(TimerList *l, const PeriodicTimerCallback& cb, int ms)
+    PeriodicTimerNode2(TimerList *l, const PeriodicTimerCallback& cb,
+		       const TimeVal& period)
 	: TimerNode(l, callback(this, &PeriodicTimerNode2::expire, (void*)0)),
-		    _cb(cb), _period_ms(ms) { }
+		    _cb(cb), _period(period) { }
 
 private:
     PeriodicTimerCallback _cb;
-    int _period_ms;
+    TimeVal _period;
 
     void expire(XorpTimer& t, void*) {
 	if (_cb->dispatch())
-	    t.reschedule_after_ms(_period_ms);
+	    t.reschedule_after(_period);
     }
 };
 
@@ -313,10 +312,20 @@ TimerList::new_oneoff_after_ms(int ms, const OneoffTimerCallback& cb)
 }
 
 XorpTimer
+TimerList::new_periodic(const TimeVal& wait,
+			const PeriodicTimerCallback& cb)
+{
+    TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
+    n->schedule_after(wait);
+    return XorpTimer(n);
+}
+
+XorpTimer
 TimerList::new_periodic_ms(int ms, const PeriodicTimerCallback& cb)
 {
-    TimerNode* n = new PeriodicTimerNode2(this, cb, ms);
-    n->schedule_after_ms(ms);
+    TimeVal wait(ms / 1000, (ms % 1000) * 1000);
+    TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
+    n->schedule_after(wait);
     return XorpTimer(n);
 }
 

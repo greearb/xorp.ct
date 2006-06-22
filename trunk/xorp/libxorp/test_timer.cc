@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.13 2006/03/16 00:04:35 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.14 2006/06/21 23:36:34 pavlin Exp $"
 
 //
 // demo program to test timers and event loops (and show
@@ -56,7 +56,7 @@ test_many(EventLoop& e)
     }
     fprintf(stderr, "++ move deadline of 1/3 of them by 5s\n");
     for (i=0; i<N ; i += 3) {
-	a[i].reschedule_after_ms(5000) ;
+	a[i].reschedule_after(TimeVal(5, 0)) ;
     }
     fprintf(stderr, "++ create 100K timers which never fire because\n"
 	"they go out of scope and are automatically deleted\n");
