@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.8 2006/06/14 06:02:26 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.9 2006/06/22 15:58:56 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -249,14 +249,15 @@ public:
     void last_member_query_timer_timeout();
 
     /**
-     * Schedule periodic SSM Group-Specific Query retransmission.
+     * Schedule periodic SSM Group-Specific or Group-and-Source-Specific Query
+     * retransmission.
+     *
+     * If the sources list is empty, we schedule Group-Specific Query,
+     * otherwise we schedule Group-and-Source-Specific Query.
+     *
+     * @param sources the source addresses.
      */
-    void schedule_periodic_ssm_group_query();
-
-    /**
-     * Schedule periodic SSM Group-and-Source-Specific Query retransmission.
-     */
-    void schedule_periodic_ssm_group_source_query(const set<IPvX>& sources);
+    void schedule_periodic_ssm_group_query(const set<IPvX>& sources);
 
     /**
      * Get the address family.
@@ -272,19 +273,12 @@ private:
     void group_timer_timeout();
 
     /**
-     * Periodic timeout: time to send the next SSM Group-Specific Query.
+     * Periodic timeout: time to send the next SSM Group-Specific and
+     * Group-and-Source-Specific Queryies.
      *
      * @return true if the timer should be scheduled again, otherwise false.
      */
     bool ssm_group_query_periodic_timeout();
-
-    /**
-     * Periodic timeout: time to send the next SSM Group-and-Source-Specific
-     * Query.
-     *
-     * @return true if the timer should be scheduled again, otherwise false.
-     */
-    bool ssm_group_source_query_periodic_timeout();
 
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
@@ -300,7 +294,6 @@ private:
     XorpTimer	_group_timer;		// Group timer for filter mode switch
     XorpTimer	_ssm_group_query_timer;	// Timer for SSM Group-Specific Query
     size_t	_ssm_query_retransmission_count; // Count for periodic Query
-    XorpTimer	_ssm_group_source_query_timer; // Timer for SSM Group-and-Source-Specific Query
 };
 
 /**

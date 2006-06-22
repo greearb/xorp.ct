@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.58 2006/06/14 05:14:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.59 2006/06/22 15:58:56 pavlin Exp $"
 
 
 //
@@ -601,7 +601,7 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& src,
     // Schedule the periodic Group-Specific Query
     //
     if (ret_value == XORP_OK)
-	group_record->schedule_periodic_ssm_group_query();
+	group_record->schedule_periodic_ssm_group_query(no_sources);
 
     return (ret_value);
 }
@@ -686,7 +686,7 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& src,
     // Schedule the periodic group and source specific Query
     //
     if (ret_value == XORP_OK)
-	group_record->schedule_periodic_ssm_group_source_query(selected_sources);
+	group_record->schedule_periodic_ssm_group_query(selected_sources);
 
     return (ret_value);
 

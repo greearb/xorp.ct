@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.14 2006/06/14 06:02:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.15 2006/06/22 15:58:56 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -712,36 +712,20 @@ Mld6igmpGroupRecord::group_timer_timeout()
 }
 
 /**
- * Schedule periodic SSM Group-Specific Query retransmission.
+ * Schedule periodic SSM Group-Specific or Group-and-Source-Specific Query
+ * retransmission.
+ *
+ * If the sources list is empty, we schedule Group-Specific Query,
+ * otherwise we schedule Group-and-Source-Specific Query.
+ *
+ * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::schedule_periodic_ssm_group_query()
-{
-    if (_mld6igmp_vif.last_member_query_count() == 0)
-	return;
-    if (_mld6igmp_vif.query_last_member_interval().get() == TimeVal::ZERO())
-	return;
-
-    // Set the count for query retransmissions
-    _ssm_query_retransmission_count =
-	_mld6igmp_vif.last_member_query_count() - 1;
-
-    // Set the periodic timer for SSM Group-Specific Query
-    _ssm_group_query_timer = eventloop().new_periodic(
-	_mld6igmp_vif.query_last_member_interval().get(),
-	callback(this, &Mld6igmpGroupRecord::ssm_group_query_periodic_timeout));
-}
-
-/**
- * Schedule periodic SSM Group-and-Source-Specific Query retransmission.
- */
-void
-Mld6igmpGroupRecord::schedule_periodic_ssm_group_source_query(
+Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
     const set<IPvX>& sources)
 {
-    set<IPvX>::const_iterator ipvx_iter;
     Mld6igmpSourceSet::iterator source_iter;
-    size_t count;
+    size_t count = _mld6igmp_vif.last_member_query_count() - 1;
 
     //
     // Reset the count for query retransmission for all "don't forward" sources
@@ -753,94 +737,99 @@ Mld6igmpGroupRecord::schedule_periodic_ssm_group_source_query(
 	source_record->set_ssm_query_retransmission_count(0);
     }
 
-    if (sources.empty())
-	return;
     if (_mld6igmp_vif.last_member_query_count() == 0)
 	return;
     if (_mld6igmp_vif.query_last_member_interval().get() == TimeVal::ZERO())
 	return;
-    
+
     //
-    // Set the count for query retransmissions for the sources
+    // Set the count for query retransmissions
     //
-    count = _mld6igmp_vif.last_member_query_count() - 1;
-    for (ipvx_iter = sources.begin();
-	 ipvx_iter != sources.end();
-	 ++ipvx_iter) {
-	const IPvX& ipvx = *ipvx_iter;
-	Mld6igmpSourceRecord* source_record = find_do_forward_source(ipvx);
-	if (source_record == NULL)
-	    continue;
-	source_record->set_ssm_query_retransmission_count(count);
+    if (sources.empty()) {
+	//
+	// Set the count for Group-Specific Query retransmission
+	//
+	_ssm_query_retransmission_count = count;
+    } else {
+	//
+	// Set the count for Group-and-Source-Specific Query retransmission
+	//
+	set<IPvX>::const_iterator ipvx_iter;
+	for (ipvx_iter = sources.begin();
+	     ipvx_iter != sources.end();
+	     ++ipvx_iter) {
+	    const IPvX& ipvx = *ipvx_iter;
+	    Mld6igmpSourceRecord* source_record = find_do_forward_source(ipvx);
+	    if (source_record == NULL)
+		continue;
+	    source_record->set_ssm_query_retransmission_count(count);
+	}
     }
 
-    // Set the periodic timer for SSM Group-and-Source-Specific Query
-    _ssm_group_source_query_timer = eventloop().new_periodic(
-	_mld6igmp_vif.query_last_member_interval().get(),
-	callback(this, &Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout));
+    //
+    // Set the periodic timer for SSM Group-Specific and
+    // Group-and-Source-Specific Queries.
+    //
+    // Note that we set the timer only if it wasn't running already.
+    //
+    if (! _ssm_group_query_timer.scheduled()) {
+	_ssm_group_query_timer = eventloop().new_periodic(
+	    _mld6igmp_vif.query_last_member_interval().get(),
+	    callback(this, &Mld6igmpGroupRecord::ssm_group_query_periodic_timeout));
+    }
 }
 
 /**
- * Periodic timeout: time to send the next SSM Group-Specific Query.
+ * Periodic timeout: time to send the next SSM Group-Specific and
+ * Group-and-Source-Specific Queryies.
  *
  * @return true if the timer should be scheduled again, otherwise false.
  */
 bool
 Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
 {
-    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
     string dummy_error_msg;
-    set<IPvX> no_sources;		// XXX: empty set
     bool s_flag = false;
-
-    if (_ssm_query_retransmission_count == 0) {
-	return (false);			// No more queries to send
-    }
-    _ssm_query_retransmission_count--;
-
-    //
-    // Calculate the "Suppress Router-Side Processing" bit
-    //
-    TimeVal timeval_remaining;
-    group_timer().time_remaining(timeval_remaining);
-    if (timeval_remaining > _mld6igmp_vif.last_member_query_time())
-	s_flag = true;
-
-    //
-    // Send the message
-    //
-    //
-    // XXX: The IGMPv3/MLDv2 spec doesn't say what to do if we changed
-    // from a Querier to a non-Querier.
-    // However, the IGMPv2 spec says that Querier to non-Querier transitions
-    // are to be ignored (see the bottom part of Section 3 of RFC 2236).
-    // Hence, for this reason and for robustness purpose we unconditionally
-    // send the Query message.
-    //
-    _mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
-					  group(),
-					  max_resp_time,
-					  group(),
-					  no_sources,
-					  s_flag,
-					  dummy_error_msg);
-
-    return (true);		// Schedule the next timeout
-}
-
-/**
- * Periodic timeout: time to send the next SSM Group-and-Source-Specific Query.
- *
- * @return true if the timer should be scheduled again, otherwise false.
- */
-bool
-Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout()
-{
-    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
-    string dummy_error_msg;
+    set<IPvX> no_sources;		// XXX: empty set
     set<IPvX> sources_with_s_flag;
     set<IPvX> sources_without_s_flag;
     Mld6igmpSourceSet::iterator source_iter;
+    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
+    bool do_send_group_query = true;
+
+    //
+    // XXX: The IGMPv3/MLDv2 spec doesn't say what to do here if we changed
+    // from a Querier to a non-Querier.
+    // However, the IGMPv2 spec says that Querier to non-Querier transitions
+    // are to be ignored (see the bottom part of Section 3 of RFC 2236).
+    // Hence, for this reason and for robustness purpose we send the Query
+    // messages without taking into account any Querier to non-Querier
+    // transitions.
+    //
+
+    //
+    // Send the Group-Specific Query message
+    //
+    if (_ssm_query_retransmission_count == 0) {
+	do_send_group_query = false;	// No more queries to send
+    } else {
+	_ssm_query_retransmission_count--;
+	//
+	// Calculate the group-specific "Suppress Router-Side Processing" bit
+	//
+	TimeVal timeval_remaining;
+	group_timer().time_remaining(timeval_remaining);
+	if (timeval_remaining > _mld6igmp_vif.last_member_query_time())
+	    s_flag = true;
+
+	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
+					      group(),
+					      max_resp_time,
+					      group(),
+					      no_sources,
+					      s_flag,
+					      dummy_error_msg);
+    }
 
     //
     // Select all the sources that should be queried, and add them to
@@ -868,22 +857,19 @@ Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout()
 	    sources_without_s_flag.insert(source_record->source());
     }
 
-    if (sources_with_s_flag.empty() && sources_without_s_flag.empty()) {
-	return (false);			// No more queries to send
-    }
-
     //
-    // Send the messages
+    // Send the Group-and-Source-Specific Query messages
     //
-    //
-    // XXX: The IGMPv3/MLDv2 spec doesn't say what to do if we changed
-    // from a Querier to a non-Querier.
-    // However, the IGMPv2 spec says that Querier to non-Querier transitions
-    // are to be ignored (see the bottom part of Section 3 of RFC 2236).
-    // Hence, for this reason and for robustness purpose we unconditionally
-    // send the Query message.
-    //
-    if (! sources_with_s_flag.empty()) {
+    if ((! sources_with_s_flag.empty()) && (! do_send_group_query)) {
+	//
+	// According to RFC 3376, Section 6.6.3.2:
+	// "If a group specific query is scheduled to be transmitted at the
+	// same time as a group and source specific query for the same group,
+	// then transmission of the group and source specific message with the
+	// "Suppress Router-Side Processing" bit set may be suppressed."
+	//
+	// The corresponding text from RFC 3810, Section 7.6.3.2 is similar.
+	//
 	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
 					      group(),
 					      max_resp_time,
@@ -902,9 +888,14 @@ Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout()
 					      dummy_error_msg);
     }
 
+    if (sources_with_s_flag.empty()
+	&& sources_without_s_flag.empty()
+	&& (! do_send_group_query)) {
+	return (false);			// No more queries to send
+    }
+
     return (true);		// Schedule the next timeout
 }
-
 /**
  * Constructor for a given vif.
  * 
