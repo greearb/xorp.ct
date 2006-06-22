@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.59 2006/06/22 15:58:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.60 2006/06/22 18:57:29 pavlin Exp $"
 
 
 //
@@ -553,21 +553,18 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
 /**
  * Send MLDv2 or IGMPv3 Group-Specific Query message.
  *
- * @param src the message source address.
- * @param dst the message destination address.
- * @param max_resp_time the maximum response time.
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
  * @error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& src,
-					   const IPvX& dst,
-					   const TimeVal& max_resp_time,
-					   const IPvX& group_address,
+Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
 					   string& error_msg)
 {
+    const IPvX& src = primary_addr();
+    const IPvX& dst = group_address;
+    const TimeVal& max_resp_time = query_last_member_interval().get();
     Mld6igmpGroupSet::iterator group_iter;
     set<IPvX> no_sources;		// XXX: empty set
     int ret_value;
@@ -603,15 +600,20 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& src,
     if (ret_value == XORP_OK)
 	group_record->schedule_periodic_ssm_group_query(no_sources);
 
+    //
+    // Print the error message if there was an error
+    //
+    if (ret_value != XORP_OK) {
+	XLOG_ERROR("Error sending Group-Specific query for %s: %s",
+		   cstring(group_address), error_msg.c_str());
+    }
+
     return (ret_value);
 }
 
 /**
  * Send MLDv2 or IGMPv3 Group-and-Source-Specific Query message.
  *
- * @param src the message source address.
- * @param dst the message destination address.
- * @param max_resp_time the maximum response time.
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
  * @param sources the set of source addresses.
@@ -619,13 +621,13 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& src,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& src,
-						  const IPvX& dst,
-						  const TimeVal& max_resp_time,
-						  const IPvX& group_address,
+Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
 						  const set<IPvX>& sources,
 						  string& error_msg)
 {
+    const IPvX& src = primary_addr();
+    const IPvX& dst = group_address;
+    const TimeVal& max_resp_time = query_last_member_interval().get();
     set<IPvX> selected_sources;
     set<IPvX>::const_iterator source_iter;
     Mld6igmpGroupSet::iterator group_iter;
@@ -687,6 +689,14 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& src,
     //
     if (ret_value == XORP_OK)
 	group_record->schedule_periodic_ssm_group_query(selected_sources);
+
+    //
+    // Print the error message if there was an error
+    //
+    if (ret_value != XORP_OK) {
+	XLOG_ERROR("Error sending Group-and-Source-Specific query for %s: %s",
+		   cstring(group_address), error_msg.c_str());
+    }
 
     return (ret_value);
 

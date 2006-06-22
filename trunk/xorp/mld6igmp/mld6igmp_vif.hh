@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.32 2006/06/14 05:14:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.33 2006/06/22 15:58:56 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -364,36 +364,24 @@ public:
     /**
      * Send MLDv2 or IGMPv3 Group-Specific Query message.
      *
-     * @param src the message source address.
-     * @param dst the message destination address.
-     * @param max_resp_time the maximum response time.
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
-    int mld6igmp_ssm_group_query_send(const IPvX& src,
-				      const IPvX& dst,
-				      const TimeVal& max_resp_time,
-				      const IPvX& group_address,
+    int mld6igmp_ssm_group_query_send(const IPvX& group_address,
 				      string& error_msg);
 
     /**
      * Send MLDv2 or IGMPv3 Group-and-Source-Specific Query message.
      *
-     * @param src the message source address.
-     * @param dst the message destination address.
-     * @param max_resp_time the maximum response time.
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
      * @param sources the set of source addresses.
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
-    int mld6igmp_ssm_group_source_query_send(const IPvX& src,
-					     const IPvX& dst,
-					     const TimeVal& max_resp_time,
-					     const IPvX& group_address,
+    int mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
 					     const set<IPvX>& sources,
 					     string& error_msg);
 
