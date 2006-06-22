@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.25 2006/06/02 15:12:06 zec Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.26 2006/06/02 16:57:18 zec Exp $"
 
 #include <list>
 #include <string>
@@ -129,6 +129,18 @@ public:
     void dispatch_complete(const XrlError& xe);
 };
 
+
+template <typename A>
+class Pause : public RedistXrlTask<A>
+{
+public:
+    Pause(RedistXrlOutput<A>* parent, uint32_t ms);
+    virtual bool dispatch(XrlRouter&  xrl_router, Profile& profile);
+    void expire();
+private:
+    XorpTimer _t;
+    uint32_t  _p_ms;
+};
 
 
 // ----------------------------------------------------------------------------
@@ -401,6 +413,33 @@ FinishingRouteDump<A>::dispatch_complete(const XrlError& xe)
 
 
 // ----------------------------------------------------------------------------
+// Pause implementation
+
+template <typename A>
+Pause<A>::Pause(RedistXrlOutput<A>* parent, uint32_t ms)
+    : RedistXrlTask<A>(parent), _p_ms(ms)
+{
+}
+
+template <typename A>
+bool
+Pause<A>::dispatch(XrlRouter& xrl_router, Profile&)
+{
+    this->incr_dispatch_attempts();
+    EventLoop& e = xrl_router.eventloop();
+    _t = e.new_oneoff_after_ms(_p_ms, callback(this, &Pause<A>::expire));
+    return true;
+}
+
+template <typename A>
+void
+Pause<A>::expire()
+{
+    this->signal_complete_ok();
+}
+
+
+// ----------------------------------------------------------------------------
 // RedistXrlOutput implementation
 
 template <typename A>
@@ -450,7 +489,7 @@ RedistXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
     
     enqueue_task(new AddRoute<A>(this, ipr));
     if (_queued == 1)
-	start_running_tasks();
+	start_next_task();
 }
 
 template <typename A>
@@ -466,7 +505,7 @@ RedistXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 
     enqueue_task(new DeleteRoute<A>(this, ipr));
     if (_queued == 1)
-	start_running_tasks();
+	start_next_task();
 }
 
 template <typename A>
@@ -475,7 +514,7 @@ RedistXrlOutput<A>::starting_route_dump()
 {
     enqueue_task(new StartingRouteDump<A>(this));
     if (_queued == 1)
-	start_running_tasks();
+	start_next_task();
 }
 
 template <typename A>
@@ -484,15 +523,7 @@ RedistXrlOutput<A>::finishing_route_dump()
 {
     enqueue_task(new FinishingRouteDump<A>(this));
     if (_queued == 1)
-	start_running_tasks();
-}
-
-template <typename A>
-void
-RedistXrlOutput<A>::start_running_tasks()
-{
-    XLOG_ASSERT(_queued == 1);
-    start_next_task();
+	start_next_task();
 }
 
 template <typename A>
@@ -507,8 +538,17 @@ RedistXrlOutput<A>::start_next_task()
     while (_queued && !_flow_controlled && !_callback_pending) {
 	RedistXrlTask<A>* t = _taskq.front();
 	if (t->dispatch(_xrl_router, _profile) == false) {
-	    // This should never happen under normal circumstances.
-	    XLOG_ASSERT(_inflight > 0);
+	    // Dispatch of task failed.  XrlRouter is presumeably
+	    // backlogged.
+	    XLOG_WARNING("Dispatch failed, %d XRLs inflight", _inflight);
+	    if (_inflight == 0) {
+		// Insert a delay and dispatch that to cause later
+		// attempt at failing task.
+		// This should never happen under normal circumstances!
+		t = new Pause<A>(this, RETRY_PAUSE_MS);
+		t->dispatch(_xrl_router, _profile);
+		incr_inflight();
+	    }
 	    _flow_controlled = true;
 	    return;
 	} else {
@@ -525,7 +565,9 @@ RedistXrlOutput<A>::task_completed(RedistXrlTask<A>* task)
 {
     delete task;
     decr_inflight();
-    start_next_task();
+
+    if (this->_queued != 0)
+        this->start_next_task();
 }
 
 template <typename A>
@@ -974,7 +1016,7 @@ RedistTransactionXrlOutput<A>::add_route(const IPRouteEntry<A>& ipr)
 
     enqueue_task(new AddTransactionRoute<A>(this, ipr));
     if (no_running_tasks)
-	start_running_tasks();
+	this->start_next_task();
 }
 
 template <typename A>
@@ -1003,7 +1045,7 @@ RedistTransactionXrlOutput<A>::delete_route(const IPRouteEntry<A>& ipr)
 
     enqueue_task(new DeleteTransactionRoute<A>(this, ipr));
     if (no_running_tasks)
-	start_running_tasks();
+	this->start_next_task();
 }
 
 template <typename A>
@@ -1016,13 +1058,6 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::finishing_route_dump()
 {
-}
-
-template <typename A>
-void
-RedistTransactionXrlOutput<A>::start_running_tasks()
-{
-    this->start_next_task();
 }
 
 template <typename A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.10 2006/03/16 00:05:30 pavlin Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.11 2006/06/02 15:12:06 zec Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -72,9 +72,9 @@ public:
 public:
     static const uint32_t HI_WATER	 = 100;
     static const uint32_t LO_WATER	 =   5;
+    static const uint32_t RETRY_PAUSE_MS =  10;
 
 protected:
-    virtual void start_running_tasks();
     void start_next_task();
 
     inline void 	incr_inflight();
@@ -144,9 +144,6 @@ public:
     inline void incr_transaction_size() { _transaction_size++; }
 
     static const size_t MAX_TRANSACTION_SIZE	 = 100;
-
-protected:
-    void start_running_tasks();
 
 protected:
     uint32_t	_tid;			// Send-in-progress transaction ID
