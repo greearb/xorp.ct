@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.59 2006/05/15 21:10:24 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.60 2006/06/21 23:36:37 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -190,10 +190,9 @@ Port<A>::unsolicited_response_timeout()
     //
     // Reschedule this callback in next interval
     //
-    uint32_t ms = 1000 *
-	range_random(constants().unsolicited_response_min_secs(),
-		     constants().unsolicited_response_max_secs());
-    _ur_timer.reschedule_after_ms(ms);
+    uint32_t sec = range_random(constants().unsolicited_response_min_secs(),
+				constants().unsolicited_response_max_secs());
+    _ur_timer.reschedule_after(TimeVal(sec, 0));
 }
 
 template <typename A>
@@ -222,10 +221,9 @@ Port<A>::triggered_update_timeout()
     }
 
  reschedule:
-    uint32_t ms = 1000 *
-	range_random(constants().triggered_update_min_wait_secs(),
-		     constants().triggered_update_max_wait_secs());
-    _tu_timer.reschedule_after_ms(ms);
+    uint32_t sec = range_random(constants().triggered_update_min_wait_secs(),
+				constants().triggered_update_max_wait_secs());
+    _tu_timer.reschedule_after(TimeVal(sec, 0));
 
 }
 
