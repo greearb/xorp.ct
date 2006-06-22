@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.6 2006/06/14 06:02:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.7 2006/06/22 15:58:56 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -456,4 +456,26 @@ Mld6igmpSourceSet::lower_source_timer(const set<IPvX>& sources,
 	    source_record->lower_source_timer(timeval);
 	}
     }
+}
+
+/**
+ * Extract the set of source addresses.
+ *
+ * @return the set with the source addresses.
+ */
+set<IPvX>
+Mld6igmpSourceSet::extract_source_addresses() const
+{
+    set<IPvX> sources;
+    Mld6igmpSourceSet::const_iterator record_iter;
+
+    for (record_iter = this->begin();
+	 record_iter != this->end();
+	 ++record_iter) {
+	const Mld6igmpSourceRecord* source_record = record_iter->second;
+	const IPvX& ipvx = source_record->source();
+	sources.insert(ipvx);
+    }
+
+    return (sources);
 }

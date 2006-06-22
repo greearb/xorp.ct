@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.5 2006/06/14 06:02:26 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.6 2006/06/22 15:58:56 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -263,6 +263,13 @@ public:
      * lowered to.
      */
     void lower_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
+
+    /**
+     * Extract the set of source addresses.
+     *
+     * @return the set with the source addresses.
+     */
+    set<IPvX> extract_source_addresses() const;
 
 private:
     Mld6igmpGroupRecord& _group_record;	// The group record this set belongs to
