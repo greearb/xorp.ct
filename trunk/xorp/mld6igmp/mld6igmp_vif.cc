@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.57 2006/06/14 04:55:18 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.58 2006/06/14 05:14:55 pavlin Exp $"
 
 
 //
@@ -403,6 +403,7 @@ Mld6igmpVif::disable()
  * protocol resolution).
  * @group_address: The "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
+ * @buffer: The buffer with the rest of the message.
  * @error_msg: The error message (if error).
  * 
  * Send MLD or IGMP message.
@@ -415,11 +416,12 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 			   uint8_t message_type,
 			   uint16_t max_resp_code,
 			   const IPvX& group_address,
+			   buffer_t *buffer,
 			   string& error_msg)
 {
     uint16_t cksum;
-    buffer_t *buffer;
     int ret_value;
+    size_t datalen;
     
     if (! (is_up() || is_pending_down())) {
 	error_msg = c_format("vif %s is not UP", name().c_str());
@@ -431,7 +433,11 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     //
     // Prepare the MLD or IGMP header.
     //
-    buffer = buffer_send_prepare();
+    // Point the buffer to the protocol header
+    datalen = BUFFER_DATA_SIZE(buffer);
+    if (datalen > 0) {
+	BUFFER_RESET_TAIL(buffer);
+    }
     if (proto_is_igmp()) {
 	BUFFER_PUT_OCTET(message_type, buffer);	// The message type
 	BUFFER_PUT_OCTET(max_resp_code, buffer);
@@ -445,6 +451,11 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 	BUFFER_PUT_HOST_16(max_resp_code, buffer);
 	BUFFER_PUT_HOST_16(0, buffer);		// Reserved
 	BUFFER_PUT_IPVX(group_address, buffer);
+    }
+    // Restore the buffer to include the data
+    if (datalen > 0) {
+	BUFFER_RESET_TAIL(buffer);
+	BUFFER_PUT_SKIP(datalen, buffer);
     }
 
     //
@@ -509,21 +520,290 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_query_send(const IPvX& src, const IPvX& dst,
+Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
+				 const IPvX& dst,
 				 const TimeVal& max_resp_time,
 				 const IPvX& group_address,
 				 string& error_msg)
 {
+    buffer_t *buffer = buffer_send_prepare();
     uint32_t timer_scale = mld6igmp_constant_timer_scale();
     TimeVal scaled_max_resp_time = max_resp_time * timer_scale;
     
     if (is_igmpv1_mode())
 	scaled_max_resp_time = TimeVal::ZERO();
 
+    // XXX: skip the space for the Query header
+    BUFFER_PUT_SKIP(mld6igmp_constant_minlen(), buffer);
+
+    //
+    // Send the message
+    //
     return (mld6igmp_send(src, dst,
 			  mld6igmp_constant_membership_query(),
 			  scaled_max_resp_time.sec(),
-			  group_address, error_msg));
+			  group_address, buffer, error_msg));
+
+ buflen_error:
+    XLOG_UNREACHABLE();
+    XLOG_ERROR("INTERNAL mld6igmp_query_send() ERROR: buffer size too small");
+    return (XORP_ERROR);
+}
+
+/**
+ * Send MLDv2 or IGMPv3 Group-Specific Query message.
+ *
+ * @param src the message source address.
+ * @param dst the message destination address.
+ * @param max_resp_time the maximum response time.
+ * @param group_address the "Multicast Address" or "Group Address" field
+ * in the MLD or IGMP headers respectively.
+ * @error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& src,
+					   const IPvX& dst,
+					   const TimeVal& max_resp_time,
+					   const IPvX& group_address,
+					   string& error_msg)
+{
+    Mld6igmpGroupSet::iterator group_iter;
+    set<IPvX> no_sources;		// XXX: empty set
+    int ret_value;
+
+    //
+    // Only the Querier should originate Query messages
+    //
+    if (! i_am_querier())
+	return (XORP_OK);
+
+    // Find the group record
+    group_iter = _group_records.find(group_address);
+    if (group_iter == _group_records.end())
+	return (XORP_ERROR);		// No such group
+    Mld6igmpGroupRecord* group_record = group_iter->second;
+
+    //
+    // Lower the group timer
+    //
+    _group_records.lower_group_timer(group_address, last_member_query_time());
+
+    //
+    // Send the message
+    //
+    ret_value = mld6igmp_ssm_query_send(src, dst, max_resp_time, group_address,
+					no_sources,
+					false,	// XXX: reset the s_flag 
+					error_msg);
+
+    //
+    // Schedule the periodic Group-Specific Query
+    //
+    if (ret_value == XORP_OK)
+	group_record->schedule_periodic_ssm_group_query();
+
+    return (ret_value);
+}
+
+/**
+ * Send MLDv2 or IGMPv3 Group-and-Source-Specific Query message.
+ *
+ * @param src the message source address.
+ * @param dst the message destination address.
+ * @param max_resp_time the maximum response time.
+ * @param group_address the "Multicast Address" or "Group Address" field
+ * in the MLD or IGMP headers respectively.
+ * @param sources the set of source addresses.
+ * @error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& src,
+						  const IPvX& dst,
+						  const TimeVal& max_resp_time,
+						  const IPvX& group_address,
+						  const set<IPvX>& sources,
+						  string& error_msg)
+{
+    set<IPvX> selected_sources;
+    set<IPvX>::const_iterator source_iter;
+    Mld6igmpGroupSet::iterator group_iter;
+    int ret_value;
+
+    //
+    // Only the Querier should originate Query messages
+    //
+    if (! i_am_querier())
+	return (XORP_OK);
+
+    if (sources.empty())
+	return (XORP_OK);		// No sources to query
+
+    // Find the group record
+    group_iter = _group_records.find(group_address);
+    if (group_iter == _group_records.end())
+	return (XORP_ERROR);		// No such group
+    Mld6igmpGroupRecord* group_record = group_iter->second;
+
+    //
+    // Select only the sources with source timer larger than the
+    // Last Member Query Time.
+    //
+    for (source_iter = sources.begin();
+	 source_iter != sources.end();
+	 ++source_iter) {
+	const IPvX& ipvx = *source_iter;
+	Mld6igmpSourceRecord* source_record;
+	source_record = group_record->find_do_forward_source(ipvx);
+	if (source_record == NULL)
+	    continue;
+
+	TimeVal timeval_remaining;
+	source_record->source_timer().time_remaining(timeval_remaining);
+	if (timeval_remaining <= last_member_query_time())
+	    continue;
+	selected_sources.insert(ipvx);
+    }
+    if (selected_sources.empty())
+	return (XORP_OK);		// No selected sources to query
+
+    //
+    // Lower the source timer
+    //
+    group_record->lower_source_timer(selected_sources,
+				     last_member_query_time());
+
+    //
+    // Send the message
+    //
+    ret_value = mld6igmp_ssm_query_send(src, dst, max_resp_time, group_address,
+					selected_sources,
+					false,	// XXX: reset the s_flag 
+					error_msg);
+
+    //
+    // Schedule the periodic group and source specific Query
+    //
+    if (ret_value == XORP_OK)
+	group_record->schedule_periodic_ssm_group_source_query(selected_sources);
+
+    return (ret_value);
+
+}
+
+/**
+ * Send MLDv2 or IGMPv3 Query message.
+ *
+ * @param src the message source address.
+ * @param dst the message destination address.
+ * @param max_resp_time the maximum response time.
+ * @param group_address the "Multicast Address" or "Group Address" field
+ * in the MLD or IGMP headers respectively.
+ * @param sources the set of source addresses.
+ * @param s_flag the "Suppress Router-Side Processing" bit.
+ * @error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ **/
+int
+Mld6igmpVif::mld6igmp_ssm_query_send(const IPvX& src,
+				     const IPvX& dst,
+				     const TimeVal& max_resp_time,
+				     const IPvX& group_address,
+				     const set<IPvX>& sources,
+				     bool s_flag,
+				     string& error_msg)
+{
+    buffer_t *buffer;
+    uint32_t timer_scale = mld6igmp_constant_timer_scale();
+    TimeVal scaled_max_resp_time = max_resp_time * timer_scale;
+    set<IPvX>::const_iterator source_iter;
+    uint8_t qrv, qqic;
+    size_t max_sources_n;
+    size_t mtu = 0;
+
+    if (is_igmpv1_mode())
+	scaled_max_resp_time = TimeVal::ZERO();
+
+    //
+    // Lower the group and source timers (if necessary)
+    //
+    if (! s_flag) {
+	if (sources.empty()) {
+	    // XXX: Q(G) Query
+	    _group_records.lower_group_timer(group_address,
+					     last_member_query_time());
+	} else {
+	    // XXX: Q(G, A) Query
+	    _group_records.lower_source_timer(group_address, sources,
+					      last_member_query_time());
+	}
+    }
+
+    //
+    // Prepare the data after the Query header
+    //
+    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    // | Resv  |S| QRV |     QQIC      |     Number of Sources (N)     |
+    // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+    //
+    qrv = 0;
+    if (robust_count().get() <= 0x7)
+	qrv = robust_count().get();
+    if (s_flag)
+	qrv |= 0x8;
+    qqic = 0;
+    encode_exp_time_code8(query_interval().get(), qqic, 1);
+
+    //
+    // Calculate the maximum number of sources
+    //
+    max_sources_n = sources.size();
+    // TODO: XXX: PAVPAVPAV: obtain the MTU from the FEA interface tree
+    // and use it instead of the 0xffff below.
+    if (proto_is_igmp()) {
+	mtu = 0xffff			// IPv4 max packet size
+	    - (0xf << 2)		// IPv4 max header size
+	    - 4				// IPv4 Router Alert option
+	    - IGMP_V3_QUERY_MINLEN;	// IGMPv3 Query pre-source fields
+    }
+    if (proto_is_mld6()) {
+	mtu = 0xffff	// IPv6 max payload size (jumbo payload excluded)
+	    - 8		// IPv6 Hop-by-hop Ext. Header with Router Alert option
+	    - MLD_V2_QUERY_MINLEN;	// MLDv2 Query pre-source fields
+    }
+    max_sources_n = min(max_sources_n, mtu / IPvX::addr_size(family()));
+
+    //
+    // Insert the data
+    //
+    buffer = buffer_send_prepare();
+    BUFFER_PUT_SKIP(mld6igmp_constant_minlen(), buffer);
+    BUFFER_PUT_OCTET(qrv, buffer);
+    BUFFER_PUT_OCTET(qqic, buffer);
+    BUFFER_PUT_HOST_16(max_sources_n, buffer);
+    source_iter = sources.begin();
+    while (max_sources_n > 0) {
+	const IPvX& ipvx = *source_iter;
+	BUFFER_PUT_IPVX(ipvx, buffer);
+	++source_iter;
+	max_sources_n--;
+    }
+    
+    //
+    // Send the message
+    //
+    return (mld6igmp_send(src, dst,
+			  mld6igmp_constant_membership_query(),
+			  scaled_max_resp_time.sec(),
+			  group_address, buffer, error_msg));
+
+ buflen_error:
+    XLOG_UNREACHABLE();
+    XLOG_ERROR("INTERNAL mld6igmp_ssm_query_send() ERROR: "
+	       "buffer size too small");
+
+    return (XORP_ERROR);
 }
 
 /**

@@ -12,12 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.13 2006/06/14 04:58:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.14 2006/06/14 06:02:26 pavlin Exp $"
 
 //
 // Multicast group record information used by
-// IGMPv1 and IGMPv2 (RFC 2236), IGMPv3 (RFC 3376), MLDv1 (RFC 2710), and
-// MLDv2 (RFC 3810).
+// IGMPv1 and IGMPv2 (RFC 2236), IGMPv3 (RFC 3376),
+// MLDv1 (RFC 2710), and MLDv2 (RFC 3810).
 //
 
 
@@ -69,7 +69,8 @@ Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
       _is_include_mode(false),
       _do_forward_sources(*this),
       _dont_forward_sources(*this),
-      _last_reported_host(IPvX::ZERO(family()))
+      _last_reported_host(IPvX::ZERO(family())),
+      _ssm_query_retransmission_count(0)
 {
     
 }
@@ -98,6 +99,42 @@ Mld6igmpGroupRecord::eventloop()
 }
 
 /**
+ * Find a source that should be forwarded.
+ *
+ * @param source the source address.
+ * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+ * if found, otherwise NULL.
+ */
+Mld6igmpSourceRecord*
+Mld6igmpGroupRecord::find_do_forward_source(const IPvX& source)
+{
+    Mld6igmpSourceSet::iterator iter = _do_forward_sources.find(source);
+
+    if (iter != _do_forward_sources.end())
+	return iter->second;
+
+    return (NULL);
+}
+
+/**
+ * Find a source that should not be forwarded.
+ *
+ * @param source the source address.
+ * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+ * if found, otherwise NULL.
+ */
+Mld6igmpSourceRecord*
+Mld6igmpGroupRecord::find_dont_forward_source(const IPvX& source)
+{
+    Mld6igmpSourceSet::iterator iter = _dont_forward_sources.find(source);
+
+    if (iter != _dont_forward_sources.end())
+	return iter->second;
+
+    return (NULL);
+}
+
+/**
  * Process MODE_IS_INCLUDE report.
  *
  * @param sources the source addresses.
@@ -107,6 +144,8 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: IS_IN (B)
 	// New Router State: INCLUDE (A + B)
 	// Actions: (B) = GMI
 	//
@@ -125,6 +164,8 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: IS_IN (A)
 	// New Router State: EXCLUDE (X + A, Y - A)
 	// Actions: (A) = GMI
 	//
@@ -157,6 +198,8 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: IS_EX (B)
 	// New Router State: EXCLUDE (A * B, B - A)
 	// Actions: (B - A) = 0
 	//          Delete (A - B)
@@ -184,6 +227,8 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: IS_EX (A)
 	// New Router State: EXCLUDE (A - Y, Y * A)
 	// Actions: (A - X - Y) = GMI
 	//          Delete (X - A)
@@ -229,6 +274,8 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: TO_IN (B)
 	// New Router State: INCLUDE (A + B)
 	// Actions: (B) = GMI
 	//          Send Q(G, A - B)
@@ -250,6 +297,8 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: TO_IN (A)
 	// New Router State: EXCLUDE (X + A, Y - A)
 	// Actions: (A) = GMI
 	//          Send Q(G, X - A)
@@ -287,6 +336,8 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: TO_EX (B)
 	// New Router State: EXCLUDE (A * B, B - A)
 	// Actions: (B - A) = 0
 	//          Delete (A - B)
@@ -316,6 +367,8 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: TO_EX (A)
 	// New Router State: EXCLUDE (A - Y, Y * A)
 	// Actions: (A - X - Y) = Group Timer
 	//          Delete (X - A)
@@ -365,6 +418,8 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: ALLOW (B)
 	// New Router State: INCLUDE (A + B)
 	// Actions: (B) = GMI
 	//
@@ -383,6 +438,8 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: ALLOW (A)
 	// New Router State: EXCLUDE (X + A, Y - A)
 	// Actions: (A) = GMI
 	//
@@ -415,6 +472,8 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 {
     if (is_include_mode()) {
 	//
+	// Router State: INCLUDE (A)
+	// Report Received: BLOCK (B)
 	// New Router State: INCLUDE (A)
 	// Actions: Send Q(G, A * B)
 	//
@@ -432,6 +491,8 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 
     if (is_exclude_mode()) {
 	//
+	// Router State: EXCLUDE (X, Y)
+	// Report Received: BLOCK (A)
 	// New Router State: EXCLUDE (X + (A - Y), Y)
 	// Actions: (A - X - Y) = Group Timer
 	//          Send Q(G, A - Y)
@@ -463,14 +524,12 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 }
 
 /**
- * Lower the group timer and the source timers for a set of sources.
+ * Lower the group timer.
  *
- * @param sources the source addresses.
- * @param timeval the timeout interval the timers should be lowered to.
+ * @param timeval the timeout interval the timer should be lowered to.
  */
 void
-Mld6igmpGroupRecord::lower_group_source_timers(const set<IPvX>& sources,
-					       const TimeVal& timeval)
+Mld6igmpGroupRecord::lower_group_timer(const TimeVal& timeval)
 {
     TimeVal timeval_remaining;
 
@@ -483,9 +542,20 @@ Mld6igmpGroupRecord::lower_group_source_timers(const set<IPvX>& sources,
 	    timeval,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
     }
+}
 
+/**
+ * Lower the source timer for a set of sources.
+ *
+ * @param sources the source addresses.
+ * @param timeval the timeout interval the timer should be lowered to.
+ */
+void
+Mld6igmpGroupRecord::lower_source_timer(const set<IPvX>& sources,
+					 const TimeVal& timeval)
+{
     //
-    // Lower the source timers
+    // Lower the source timer
     //
     _do_forward_sources.lower_source_timer(sources, timeval);
 }
@@ -591,9 +661,9 @@ Mld6igmpGroupRecord::last_member_query_timer_timeout()
     string dummy_error_msg;
 
     //
-    // XXX: The spec says that we shouldn't care if we changed
-    // from a Querier to a non-Querier. Hence, send the group-specific
-    // query (see the bottom part of Section 3.)
+    // XXX: The RFC 2236 spec says that we shouldn't care if we changed
+    // from a Querier to a non-Querier. Hence, send the Group-Specific Query
+    // (see the bottom part of Section 3.)
     //
     mld6igmp_vif().mld6igmp_query_send(mld6igmp_vif().primary_addr(),
 				       group(),
@@ -639,6 +709,200 @@ Mld6igmpGroupRecord::group_timer_timeout()
 	delete this;
 	return;
     }
+}
+
+/**
+ * Schedule periodic SSM Group-Specific Query retransmission.
+ */
+void
+Mld6igmpGroupRecord::schedule_periodic_ssm_group_query()
+{
+    if (_mld6igmp_vif.last_member_query_count() == 0)
+	return;
+    if (_mld6igmp_vif.query_last_member_interval().get() == TimeVal::ZERO())
+	return;
+
+    // Set the count for query retransmissions
+    _ssm_query_retransmission_count =
+	_mld6igmp_vif.last_member_query_count() - 1;
+
+    // Set the periodic timer for SSM Group-Specific Query
+    _ssm_group_query_timer = eventloop().new_periodic(
+	_mld6igmp_vif.query_last_member_interval().get(),
+	callback(this, &Mld6igmpGroupRecord::ssm_group_query_periodic_timeout));
+}
+
+/**
+ * Schedule periodic SSM Group-and-Source-Specific Query retransmission.
+ */
+void
+Mld6igmpGroupRecord::schedule_periodic_ssm_group_source_query(
+    const set<IPvX>& sources)
+{
+    set<IPvX>::const_iterator ipvx_iter;
+    Mld6igmpSourceSet::iterator source_iter;
+    size_t count;
+
+    //
+    // Reset the count for query retransmission for all "don't forward" sources
+    //
+    for (source_iter = _dont_forward_sources.begin();
+	 source_iter != _dont_forward_sources.end();
+	 ++source_iter) {
+	Mld6igmpSourceRecord* source_record = source_iter->second;
+	source_record->set_ssm_query_retransmission_count(0);
+    }
+
+    if (sources.empty())
+	return;
+    if (_mld6igmp_vif.last_member_query_count() == 0)
+	return;
+    if (_mld6igmp_vif.query_last_member_interval().get() == TimeVal::ZERO())
+	return;
+    
+    //
+    // Set the count for query retransmissions for the sources
+    //
+    count = _mld6igmp_vif.last_member_query_count() - 1;
+    for (ipvx_iter = sources.begin();
+	 ipvx_iter != sources.end();
+	 ++ipvx_iter) {
+	const IPvX& ipvx = *ipvx_iter;
+	Mld6igmpSourceRecord* source_record = find_do_forward_source(ipvx);
+	if (source_record == NULL)
+	    continue;
+	source_record->set_ssm_query_retransmission_count(count);
+    }
+
+    // Set the periodic timer for SSM Group-and-Source-Specific Query
+    _ssm_group_source_query_timer = eventloop().new_periodic(
+	_mld6igmp_vif.query_last_member_interval().get(),
+	callback(this, &Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout));
+}
+
+/**
+ * Periodic timeout: time to send the next SSM Group-Specific Query.
+ *
+ * @return true if the timer should be scheduled again, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
+{
+    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
+    string dummy_error_msg;
+    set<IPvX> no_sources;		// XXX: empty set
+    bool s_flag = false;
+
+    if (_ssm_query_retransmission_count == 0) {
+	return (false);			// No more queries to send
+    }
+    _ssm_query_retransmission_count--;
+
+    //
+    // Calculate the "Suppress Router-Side Processing" bit
+    //
+    TimeVal timeval_remaining;
+    group_timer().time_remaining(timeval_remaining);
+    if (timeval_remaining > _mld6igmp_vif.last_member_query_time())
+	s_flag = true;
+
+    //
+    // Send the message
+    //
+    //
+    // XXX: The IGMPv3/MLDv2 spec doesn't say what to do if we changed
+    // from a Querier to a non-Querier.
+    // However, the IGMPv2 spec says that Querier to non-Querier transitions
+    // are to be ignored (see the bottom part of Section 3 of RFC 2236).
+    // Hence, for this reason and for robustness purpose we unconditionally
+    // send the Query message.
+    //
+    _mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
+					  group(),
+					  max_resp_time,
+					  group(),
+					  no_sources,
+					  s_flag,
+					  dummy_error_msg);
+
+    return (true);		// Schedule the next timeout
+}
+
+/**
+ * Periodic timeout: time to send the next SSM Group-and-Source-Specific Query.
+ *
+ * @return true if the timer should be scheduled again, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::ssm_group_source_query_periodic_timeout()
+{
+    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
+    string dummy_error_msg;
+    set<IPvX> sources_with_s_flag;
+    set<IPvX> sources_without_s_flag;
+    Mld6igmpSourceSet::iterator source_iter;
+
+    //
+    // Select all the sources that should be queried, and add them to
+    // the appropriate set.
+    //
+    for (source_iter = _do_forward_sources.begin();
+	 source_iter != _do_forward_sources.end();
+	 ++source_iter) {
+	Mld6igmpSourceRecord* source_record = source_iter->second;
+	size_t count = source_record->ssm_query_retransmission_count();
+	bool s_flag = false;
+	if (count == 0)
+	    continue;
+	source_record->set_ssm_query_retransmission_count(count - 1);
+	//
+	// Calculate the "Suppress Router-Side Processing" bit
+	//
+	TimeVal timeval_remaining;
+	source_record->source_timer().time_remaining(timeval_remaining);
+	if (timeval_remaining > _mld6igmp_vif.last_member_query_time())
+	    s_flag = true;
+	if (s_flag)
+	    sources_with_s_flag.insert(source_record->source());
+	else
+	    sources_without_s_flag.insert(source_record->source());
+    }
+
+    if (sources_with_s_flag.empty() && sources_without_s_flag.empty()) {
+	return (false);			// No more queries to send
+    }
+
+    //
+    // Send the messages
+    //
+    //
+    // XXX: The IGMPv3/MLDv2 spec doesn't say what to do if we changed
+    // from a Querier to a non-Querier.
+    // However, the IGMPv2 spec says that Querier to non-Querier transitions
+    // are to be ignored (see the bottom part of Section 3 of RFC 2236).
+    // Hence, for this reason and for robustness purpose we unconditionally
+    // send the Query message.
+    //
+    if (! sources_with_s_flag.empty()) {
+	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
+					      group(),
+					      max_resp_time,
+					      group(),
+					      sources_with_s_flag,
+					      true,	// XXX: set the s_flag
+					      dummy_error_msg);
+    }
+    if (! sources_without_s_flag.empty()) {
+	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
+					      group(),
+					      max_resp_time,
+					      group(),
+					      sources_without_s_flag,
+					      false,   // XXX: reset the s_flag
+					      dummy_error_msg);
+    }
+
+    return (true);		// Schedule the next timeout
 }
 
 /**
@@ -833,22 +1097,41 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
 }
 
 /**
- * Lower the group timer and the source timers for a set of sources.
+ * Lower the group timer.
  *
  * @param group the group address.
- * @param sources the source addresses.
- * @param timeval the timeout interval the timers should be lowered to.
+ * @param timeval the timeout interval the timer should be lowered to.
  */
 void
-Mld6igmpGroupSet::lower_group_source_timers(const IPvX& group,
-					    const set<IPvX>& sources,
-					    const TimeVal& timeval)
+Mld6igmpGroupSet::lower_group_timer(const IPvX& group,
+				    const TimeVal& timeval)
 {
     Mld6igmpGroupSet::iterator iter;
 
     iter = this->find(group);
     if (iter != this->end()) {
 	Mld6igmpGroupRecord* group_record = iter->second;
-	group_record->lower_group_source_timers(sources, timeval);
+	group_record->lower_group_timer(timeval);
+    }
+}
+
+/**
+ * Lower the source timer for a set of sources.
+ *
+ * @param group the group address.
+ * @param sources the source addresses.
+ * @param timeval the timeout interval the timer should be lowered to.
+ */
+void
+Mld6igmpGroupSet::lower_source_timer(const IPvX& group,
+				     const set<IPvX>& sources,
+				     const TimeVal& timeval)
+{
+    Mld6igmpGroupSet::iterator iter;
+
+    iter = this->find(group);
+    if (iter != this->end()) {
+	Mld6igmpGroupRecord* group_record = iter->second;
+	group_record->lower_source_timer(sources, timeval);
     }
 }

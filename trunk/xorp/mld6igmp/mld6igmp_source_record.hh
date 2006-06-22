@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.4 2006/06/10 05:46:01 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.5 2006/06/14 06:02:26 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -102,6 +102,31 @@ public:
      */
     void lower_source_timer(const TimeVal& timeval);
 
+    /**
+     * Get a reference to the source timer.
+     * 
+     * @return a reference to the source timer.
+     */
+    XorpTimer& source_timer() { return _source_timer; }
+
+    /**
+     * Get the SSM Query retransmission count.
+     *
+     * @return the SSM Query retransmission count.
+     */
+    size_t ssm_query_retransmission_count() const {
+	return _ssm_query_retransmission_count;
+    }
+
+    /**
+     * Set the SSM Query retransmission count.
+     *
+     * @param v the value to set.
+     */
+    void set_ssm_query_retransmission_count(size_t v) {
+	_ssm_query_retransmission_count = v;
+    }
+
 private:
     /**
      * Timeout: the source timer has expired.
@@ -111,6 +136,7 @@ private:
     Mld6igmpGroupRecord& _group_record;	// The group record we belong to
     IPvX	_source;		// The source address
     XorpTimer	_source_timer;		// The source timer
+    size_t	_ssm_query_retransmission_count; // Count for periodic Query
 };
 
 /**

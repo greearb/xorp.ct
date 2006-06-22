@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.7 2006/06/13 06:09:44 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.8 2006/06/14 06:02:26 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -106,6 +106,24 @@ public:
     void set_exclude_mode()		{ _is_include_mode = false; }
 
     /**
+     * Find a source that should be forwarded.
+     *
+     * @param source the source address.
+     * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+     * if found, otherwise NULL.
+     */
+    Mld6igmpSourceRecord* find_do_forward_source(const IPvX& source);
+
+    /**
+     * Find a source that should not be forwarded.
+     *
+     * @param source the source address.
+     * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+     * if found, otherwise NULL.
+     */
+    Mld6igmpSourceRecord* find_dont_forward_source(const IPvX& source);
+
+    /**
      * Process MODE_IS_INCLUDE report.
      *
      * @param sources the source addresses.
@@ -148,13 +166,19 @@ public:
     void process_block_old_sources(const set<IPvX>& sources);
 
     /**
-     * Lower the group timer and the source timers for a set of sources.
+     * Lower the group timer.
+     *
+     * @param timeval the timeout interval the timer should be lowered to.
+     */
+    void lower_group_timer(const TimeVal& timeval);
+
+    /**
+     * Lower the source timer for a set of sources.
      *
      * @param sources the source addresses.
-     * @param timeval the timeout interval the timers should be lowered to.
+     * @param timeval the timeout interval the timer should be lowered to.
      */
-    void lower_group_source_timers(const set<IPvX>& sources,
-				   const TimeVal& timeval);
+    void lower_source_timer(const set<IPvX>& sources, const TimeVal& timeval);
 
     /**
      * Take the appropriate actions for a source that has expired.
@@ -208,6 +232,13 @@ public:
     XorpTimer& igmpv1_host_present_timer() { return _igmpv1_host_present_timer; }
 
     /**
+     * Get a refererence to the group timer.
+     *
+     * @return a reference to the group timer.
+     */
+    XorpTimer& group_timer() { return _group_timer; }
+
+    /**
      * Timeout: expire a multicast group entry.
      */
     void member_query_timer_timeout();
@@ -216,6 +247,16 @@ public:
      * Timeout: the last group member has expired or has left the group.
      */
     void last_member_query_timer_timeout();
+
+    /**
+     * Schedule periodic SSM Group-Specific Query retransmission.
+     */
+    void schedule_periodic_ssm_group_query();
+
+    /**
+     * Schedule periodic SSM Group-and-Source-Specific Query retransmission.
+     */
+    void schedule_periodic_ssm_group_source_query(const set<IPvX>& sources);
 
     /**
      * Get the address family.
@@ -230,6 +271,21 @@ private:
      */
     void group_timer_timeout();
 
+    /**
+     * Periodic timeout: time to send the next SSM Group-Specific Query.
+     *
+     * @return true if the timer should be scheduled again, otherwise false.
+     */
+    bool ssm_group_query_periodic_timeout();
+
+    /**
+     * Periodic timeout: time to send the next SSM Group-and-Source-Specific
+     * Query.
+     *
+     * @return true if the timer should be scheduled again, otherwise false.
+     */
+    bool ssm_group_source_query_periodic_timeout();
+
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
     bool	_is_include_mode;	// Flag for INCLUDE/EXCLUDE filter mode
@@ -240,7 +296,11 @@ private:
     XorpTimer	_member_query_timer;	// Timer to query for host members
     XorpTimer	_last_member_query_timer;   // Timer to expire this entry
     XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD
+
     XorpTimer	_group_timer;		// Group timer for filter mode switch
+    XorpTimer	_ssm_group_query_timer;	// Timer for SSM Group-Specific Query
+    size_t	_ssm_query_retransmission_count; // Count for periodic Query
+    XorpTimer	_ssm_group_source_query_timer; // Timer for SSM Group-and-Source-Specific Query
 };
 
 /**
@@ -318,14 +378,22 @@ public:
 				   const set<IPvX>& sources);
 
     /**
-     * Lower the group timer and the source timers for a set of sources.
+     * Lower the group timer.
+     *
+     * @param group the group address.
+     * @param timeval the timeout interval the timer should be lowered to.
+     */
+    void lower_group_timer(const IPvX& group, const TimeVal& timeval);
+
+    /**
+     * Lower the source timer for a set of sources.
      *
      * @param group the group address.
      * @param sources the source addresses.
-     * @param timeval the timeout interval the timers should be lowered to.
+     * @param timeval the timeout interval the timer should be lowered to.
      */
-    void lower_group_source_timers(const IPvX& group, const set<IPvX>& sources,
-				   const TimeVal& timeval);
+    void lower_source_timer(const IPvX& group, const set<IPvX>& sources,
+			    const TimeVal& timeval);
 
 private:
     Mld6igmpVif& _mld6igmp_vif;		// The interface this set belongs to
