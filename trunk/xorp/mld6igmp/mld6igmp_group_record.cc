@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.15 2006/06/22 15:58:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.16 2006/06/22 18:57:28 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -272,6 +272,8 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 {
+    string dummy_error_msg;
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -290,7 +292,12 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	_do_forward_sources = a + b;			// A + B
 
 	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
-	// TODO: XXX: PAVPAVPAV: Send Q(G, A - B) with a_minus_b
+
+	// Send Q(G, A - B) with a_minus_b
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    a_minus_b.extract_source_addresses(),
+	    dummy_error_msg);
 
 	return;
     }
@@ -319,8 +326,17 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	_dont_forward_sources = y - a;			// Y - A
 
 	_do_forward_sources.set_source_timer(a, gmi);	// (A) = GMI
-	// TODO: XXX: PAVPAVPAV: Send Q(G, X - A) with x_minus_a
-	// TODO: XXX: PAVPAVPAV: Send Q(G)
+
+	// Send Q(G, X - A) with x_minus_a
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    x_minus_a.extract_source_addresses(),
+	    dummy_error_msg);
+
+	// Send Q(G)
+	_mld6igmp_vif.mld6igmp_ssm_group_query_send(
+	    group(),
+	    dummy_error_msg);
 
 	return;
     }
@@ -334,6 +350,8 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 {
+    string dummy_error_msg;
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -360,7 +378,12 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	_group_timer = eventloop().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
-	// TODO: XXX: PAVPAVPAV: Send Q(G, A * B) with _do_forward_sources
+
+	// Send Q(G, A * B) with _do_forward_sources
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    _do_forward_sources.extract_source_addresses(),
+	    dummy_error_msg);
 
 	return;
     }
@@ -402,7 +425,12 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	_group_timer = eventloop().new_oneoff_after(
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
-	// TODO: XXX: PAVPAVPAV: Send Q(G, A - Y) with _do_forward_sources
+
+	// Send Q(G, A - Y) with _do_forward_sources
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    _do_forward_sources.extract_source_addresses(),
+	    dummy_error_msg);
 
 	return;
     }
@@ -470,6 +498,8 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 {
+    string dummy_error_msg;
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -484,7 +514,11 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 
 	Mld6igmpSourceSet a_and_b = a * b;
 
-	// TODO: XXX: PAVPAVPAV: Send Q(G, A * B) with a_and_b
+	// Send Q(G, A * B) with a_and_b
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    a_and_b.extract_source_addresses(),
+	    dummy_error_msg);
 
 	return;
     }
@@ -517,7 +551,12 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	Mld6igmpSourceSet y_minus_a = y - a;		// Y - A
 
 	a_minus_x_minus_y.set_source_timer(gt);	// (A - X - Y) = Group Timer
-	// TODO: XXX: PAVPAVPAV: Send Q(G, A - Y) with a_minus_y
+
+	// Send Q(G, A - Y) with a_minus_y
+	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	    group(),
+	    a_minus_y.extract_source_addresses(),
+	    dummy_error_msg);
 
 	return;
     }
