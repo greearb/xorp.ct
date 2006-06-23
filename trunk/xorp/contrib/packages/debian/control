@@ -9,13 +9,13 @@ Package: xorp
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}
 Description: eXtensible Open Router Platform
- XORP is an opensource routing platform. He speaks ospf,
- bgp, igmp and rip with its network neighbors
+ XORP is the eXtensible Open Router Platform. It implements a number of
+ network protocols such as BGP, OSPF, RIP/RIPng, IGMP/MLD and PIM-SM.
 
 Package: xorp-doc
 Architecture: all
-Description: The documentation of XORP router platform
- XORP is an opensource routing platform. He speaks ospf,
- bgp, igmp and rip with its network neighbors. This is
- the documentation of xorp in pdf form. Also available
- at http//www.xorp.org/
+Description: The documentation for XORP router platform
+ XORP is the eXtensible Open Router Platform. It implements a number of
+ network protocols such as BGP, OSPF, RIP/RIPng, IGMP/MLD and PIM-SM.
+ This is the documentation for XORP in PDF format. It is also available
+ from project's WEB site: http//www.xorp.org/

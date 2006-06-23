@@ -1,8 +1,8 @@
-xorp for Debian
+XORP for Debian
 ---------------
 
-This package of xorp has been built with PREFIX=/usr/lib/xorp. 
-This is where xorp store all its files. To be more FHS compliant, we store stuff
-in their normal place, and then symlink them to /usr/lib/xorp
+This package of XORP has been built with PREFIX=/usr/lib/xorp. 
+This is where XORP will store all of its files. To be more FHS compliant,
+we store stuff in their normal place, and then symlink them to /usr/lib/xorp
 
  -- Benjamin Sonntag <benjamin@sonntag.fr>, Sun,  4 Jun 2006 21:02:31 +0200

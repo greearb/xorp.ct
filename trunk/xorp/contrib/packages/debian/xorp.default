@@ -20,4 +20,3 @@ RUN="no"
 # -b <file> Specify boot file
 
 DAEMON_OPTS=" -b /etc/xorp/config.boot "
-

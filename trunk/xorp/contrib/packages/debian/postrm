@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # postrm script for xorp
 #
 # see: dh_installdeb(1)

@@ -1,18 +1,12 @@
-This is xorp, maintained by Benjamin Sonntag <benjamin@sonntag.fr> 
-on Sun,  4 Jun 2006 21:02:31 +0200.
-
-The original source can always be found at:
-	http://www.xorp.org/releases/
-
 #
-# $XORP: xorp/LICENSE,v 1.5 2005/03/25 02:52:38 pavlin Exp $
+# $XORP: xorp/contrib/packages/debian/copyright,v 1.1 2006/06/23 23:00:43 pavlin Exp $
 #
 
 Portions of this software have one or more of the following copyrights, and
 are subject to the license below. The relevant source files are clearly
 marked; they refer to this file using the phrase ``the XORP LICENSE file''.
 
-Copyright (c) 2001-2005 International Computer Science Institute
+Copyright (c) 2001-2006 International Computer Science Institute
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the "Software"),
@@ -36,6 +30,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-
-
-

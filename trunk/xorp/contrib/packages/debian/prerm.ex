@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 # prerm script for xorp
 #
 # see: dh_installdeb(1)
@@ -34,5 +34,3 @@ esac
 #DEBHELPER#
 
 exit 0
-
-
