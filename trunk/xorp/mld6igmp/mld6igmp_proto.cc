@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.35 2006/06/14 06:02:26 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.36 2006/06/22 15:58:56 pavlin Exp $"
 
 
 //
@@ -201,7 +201,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	set_querier_addr(src);
 	set_i_am_querier(false);
 	TimeVal other_querier_present_interval =
-	    static_cast<int>(robust_count().get()) * query_interval().get()
+	    effective_query_interval() * effective_robustness_variable()
 	    + query_response_interval().get() / 2;
 	_other_querier_timer =
 	    mld6igmp_node().eventloop().new_oneoff_after(
@@ -253,7 +253,7 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    TimeVal left_resp_tv;
 
 	    // "Last Member Query Count" / "Last Listener Query Count"
-	    received_resp_tv = TimeVal(robust_count().get() * max_resp_code, 0);
+	    received_resp_tv = TimeVal(effective_robustness_variable() * max_resp_code, 0);
 	    received_resp_tv = received_resp_tv / timer_scale;
 	    group_record->member_query_timer().time_remaining(left_resp_tv);
 	    
@@ -352,6 +352,22 @@ Mld6igmpVif::mld6igmp_ssm_membership_query_recv(const IPvX& src,
 	BUFFER_GET_IPVX(family(), ipvx, buffer);
 	sources.insert(ipvx);
 	sources_n--;
+    }
+
+    //
+    // Adopt the Querier's Robustness Variable and Query Interval
+    //
+    if (! i_am_querier()) {
+	if (qrv != 0) {
+	    set_effective_robustness_variable(qrv);
+	} else {
+	    set_effective_robustness_variable(configured_robust_count().get());
+	}
+	if (qqi != TimeVal::ZERO()) {
+	    set_effective_query_interval(qqi);
+	} else {
+	    set_effective_query_interval(configured_query_interval().get());
+	}
     }
 
     //
@@ -786,7 +802,7 @@ Mld6igmpVif::other_querier_timer_timeout()
 			dummy_error_msg);
     _startup_query_count = 0;		// XXX: not a startup case
     _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
-	query_interval().get(),
+	effective_query_interval(),
 	callback(this, &Mld6igmpVif::query_timer_timeout));
 }
 
@@ -815,10 +831,12 @@ Mld6igmpVif::query_timer_timeout()
 			dummy_error_msg);
     if (_startup_query_count > 0)
 	_startup_query_count--;
-    if (_startup_query_count > 0)
-	interval = query_interval().get() / 4; // "Startup Query Interval"
-    else
-	interval = query_interval().get();
+    if (_startup_query_count > 0) {
+	// "Startup Query Interval"
+	interval = effective_query_interval() / 4;
+    } else {
+	interval = effective_query_interval();
+    }
 
     _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
 	interval,
@@ -889,9 +907,21 @@ Mld6igmpVif::mld6igmp_version_consistency_check(const IPvX& src,
 }
 
 void
-Mld6igmpVif::set_query_interval_cb(TimeVal v)
+Mld6igmpVif::set_configured_query_interval_cb(TimeVal v)
 {
-    UNUSED(v);
+    set_effective_query_interval(v);
+}
+
+void
+Mld6igmpVif::set_effective_query_interval(const TimeVal& v)
+{
+    _effective_query_interval = v;
+    recalculate_effective_query_interval();
+}
+
+void
+Mld6igmpVif::recalculate_effective_query_interval()
+{
     recalculate_group_membership_interval();
 }
 
@@ -910,9 +940,21 @@ Mld6igmpVif::set_query_response_interval_cb(TimeVal v)
 }
 
 void
-Mld6igmpVif::set_robust_count_cb(uint32_t v)
+Mld6igmpVif::set_configured_robust_count_cb(uint32_t v)
 {
-    UNUSED(v);
+    set_effective_robustness_variable(v);
+}
+
+void
+Mld6igmpVif::set_effective_robustness_variable(uint32_t v)
+{
+    _effective_robustness_variable = v;
+    recalculate_effective_robustness_variable();
+}
+
+void
+Mld6igmpVif::recalculate_effective_robustness_variable()
+{
     recalculate_group_membership_interval();
     recalculate_last_member_query_count();
 }
@@ -920,14 +962,15 @@ Mld6igmpVif::set_robust_count_cb(uint32_t v)
 void
 Mld6igmpVif::recalculate_last_member_query_count()
 {
-    _last_member_query_count = robust_count().get();
+    _last_member_query_count = effective_robustness_variable();
     recalculate_last_member_query_time();
 }
 
 void
 Mld6igmpVif::recalculate_group_membership_interval()
 {
-    _group_membership_interval = query_interval().get() * robust_count().get()
+    _group_membership_interval =
+	effective_query_interval() * effective_robustness_variable()
 	+ query_response_interval().get();
 }
 

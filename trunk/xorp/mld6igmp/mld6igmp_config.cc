@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.11 2005/11/02 02:19:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.12 2006/03/16 00:04:43 pavlin Exp $"
 
 
 //
@@ -307,7 +307,7 @@ Mld6igmpNode::get_vif_query_interval(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    interval = mld6igmp_vif->query_interval().get();
+    interval = mld6igmp_vif->configured_query_interval().get();
     
     return (XORP_OK);
 }
@@ -331,7 +331,7 @@ Mld6igmpNode::set_vif_query_interval(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    mld6igmp_vif->query_interval().set(interval);
+    mld6igmp_vif->configured_query_interval().set(interval);
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -357,7 +357,7 @@ Mld6igmpNode::reset_vif_query_interval(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    mld6igmp_vif->query_interval().reset();
+    mld6igmp_vif->configured_query_interval().reset();
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -523,7 +523,7 @@ Mld6igmpNode::get_vif_robust_count(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    robust_count = mld6igmp_vif->robust_count().get();
+    robust_count = mld6igmp_vif->configured_robust_count().get();
     
     return (XORP_OK);
 }
@@ -547,7 +547,7 @@ Mld6igmpNode::set_vif_robust_count(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    mld6igmp_vif->robust_count().set(robust_count);
+    mld6igmp_vif->configured_robust_count().set(robust_count);
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);
@@ -573,7 +573,7 @@ Mld6igmpNode::reset_vif_robust_count(const string& vif_name,
 	return (XORP_ERROR);
     }
     
-    mld6igmp_vif->robust_count().reset();
+    mld6igmp_vif->configured_robust_count().reset();
     
     if (end_config(error_msg) != XORP_OK)
 	return (XORP_ERROR);

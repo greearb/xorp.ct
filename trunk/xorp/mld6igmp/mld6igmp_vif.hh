@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.33 2006/06/22 15:58:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.34 2006/06/22 19:35:17 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -226,11 +226,31 @@ public:
     ConfigParam<bool>& ip_router_alert_option_check() { return (_ip_router_alert_option_check); }
     
     /**
-     * Optain a reference to the Query Interval.
+     * Optain a reference to the configured Query Interval.
      *
-     * @return a reference to the Query Interval.
+     * @return a reference to the configured Query Interval.
      */
-    ConfigParam<TimeVal>& query_interval() { return (_query_interval); }
+    ConfigParam<TimeVal>& configured_query_interval() { return (_configured_query_interval); }
+
+    /**
+     * Get the effective Query Interval value.
+     *
+     * Note that this value may be modified by reconfiguring the router,
+     * or by the Query message from the current Querier.
+     *
+     * @return the value of the effective Query Interval.
+     */
+    const TimeVal& effective_query_interval() const { return (_effective_query_interval); }
+
+    /**
+     * Set the effective Query Interval.
+     *
+     * Note that this value may be modified by reconfiguring the router,
+     * or by the Query message from the current Querier.
+     *
+     * @param v the value of the effective Query Interval.
+     */
+    void set_effective_query_interval(const TimeVal& v);
 
     /**
      * Optain a reference to the Last Member Query Interval.
@@ -247,11 +267,31 @@ public:
     ConfigParam<TimeVal>& query_response_interval() { return (_query_response_interval); }
 
     /**
-     * Optain a reference to the Robustness Variable count.
+     * Optain a reference to the configured Robustness Variable count.
      *
-     * @return a reference to the Robustness Variable count.
+     * @return a reference to the configured Robustness Variable count.
      */
-    ConfigParam<uint32_t>& robust_count() { return (_robust_count); }
+    ConfigParam<uint32_t>& configured_robust_count() { return (_configured_robust_count); }
+
+    /**
+     * Get the effective Robustness Variable value.
+     *
+     * Note that this value may be modified by reconfiguring the router,
+     * or by the Query messages from the current Querier.
+     *
+     * @return the value of the effective Robustness Variable.
+     */
+    uint32_t effective_robustness_variable() const { return (_effective_robustness_variable); }
+
+    /**
+     * Set the effective Robustness Variable.
+     *
+     * Note that this value may be modified by reconfiguring the router,
+     * or by the Query messages from the current Querier.
+     *
+     * @param v the value of the effective Robustness Variable.
+     */
+    void set_effective_robustness_variable(uint32_t v);
 
     /**
      * Get the Last Member Query Count value.
@@ -446,10 +486,12 @@ private:
     //
     // Callbacks for configuration and non-configurable parameters
     //
-    void	set_query_interval_cb(TimeVal v);
+    void	set_configured_query_interval_cb(TimeVal v);
     void	set_query_last_member_interval_cb(TimeVal v);
     void	set_query_response_interval_cb(TimeVal v);
-    void	set_robust_count_cb(uint32_t v);
+    void	set_configured_robust_count_cb(uint32_t v);
+    void	recalculate_effective_query_interval();
+    void	recalculate_effective_robustness_variable();
     void	recalculate_last_member_query_count();
     void	recalculate_group_membership_interval();
     void	recalculate_last_member_query_time();
@@ -477,10 +519,12 @@ private:
     // Misc configuration parameters
     //
     ConfigParam<bool> _ip_router_alert_option_check; // The IP Router Alert option check flag
-    ConfigParam<TimeVal> _query_interval;	// The Query Interval
+    ConfigParam<TimeVal> _configured_query_interval;	// The configured Query Interval
+    TimeVal	_effective_query_interval;	// The effective Query Interval
     ConfigParam<TimeVal> _query_last_member_interval;	// The Last Member Query Interval
     ConfigParam<TimeVal> _query_response_interval;	// The Query Response Interval
-    ConfigParam<uint32_t> _robust_count;	// The Robustness Variable count
+    ConfigParam<uint32_t> _configured_robust_count;	// The configured Robustness Variable count
+    uint32_t	_effective_robustness_variable;	// The effective Robustness Variable
 
     //
     // Other parameters that are not directly configurable

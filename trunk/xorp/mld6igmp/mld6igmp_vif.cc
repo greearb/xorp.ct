@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.60 2006/06/22 18:57:29 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.61 2006/06/22 19:35:17 pavlin Exp $"
 
 
 //
@@ -69,13 +69,20 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
       _startup_query_count(0),
       _group_records(*this),
       _ip_router_alert_option_check(false),
-      _query_interval(TimeVal(0, 0),
-		      callback(this, &Mld6igmpVif::set_query_interval_cb)),
-      _query_last_member_interval(TimeVal(0, 0),
-				  callback(this, &Mld6igmpVif::set_query_last_member_interval_cb)),
-      _query_response_interval(TimeVal(0, 0),
-			       callback(this, &Mld6igmpVif::set_query_response_interval_cb)),
-      _robust_count(0, callback(this, &Mld6igmpVif::set_robust_count_cb)),
+      _configured_query_interval(
+	  TimeVal(0, 0),
+	  callback(this, &Mld6igmpVif::set_configured_query_interval_cb)),
+      _effective_query_interval(TimeVal(0, 0)),
+      _query_last_member_interval(
+	  TimeVal(0, 0),
+	  callback(this, &Mld6igmpVif::set_query_last_member_interval_cb)),
+      _query_response_interval(
+	  TimeVal(0, 0),
+	  callback(this, &Mld6igmpVif::set_query_response_interval_cb)),
+      _configured_robust_count(
+	  0,
+	  callback(this, &Mld6igmpVif::set_configured_robust_count_cb)),
+      _effective_robustness_variable(0),
       _last_member_query_count(0),
       _group_membership_interval(TimeVal(0, 0)),
       _last_member_query_time(TimeVal(0, 0)),
@@ -93,20 +100,20 @@ Mld6igmpVif::Mld6igmpVif(Mld6igmpNode& mld6igmp_node, const Vif& vif)
     //
     if (proto_is_igmp()) {
 	set_proto_version_default(IGMP_VERSION_DEFAULT);
-	_query_interval.set(TimeVal(IGMP_QUERY_INTERVAL, 0));
+	_configured_query_interval.set(TimeVal(IGMP_QUERY_INTERVAL, 0));
 	_query_last_member_interval.set(
 	    TimeVal(IGMP_LAST_MEMBER_QUERY_INTERVAL, 0));
 	_query_response_interval.set(TimeVal(IGMP_QUERY_RESPONSE_INTERVAL, 0));
-	_robust_count.set(IGMP_ROBUSTNESS_VARIABLE);
+	_configured_robust_count.set(IGMP_ROBUSTNESS_VARIABLE);
     }
 
     if (proto_is_mld6()) {
 	set_proto_version_default(MLD_VERSION_DEFAULT);
-	_query_interval.set(TimeVal(MLD_QUERY_INTERVAL, 0));
+	_configured_query_interval.set(TimeVal(MLD_QUERY_INTERVAL, 0));
 	_query_last_member_interval.set(
 	    TimeVal(MLD_LAST_LISTENER_QUERY_INTERVAL, 0));
 	_query_response_interval.set(TimeVal(MLD_QUERY_RESPONSE_INTERVAL, 0));
-	_robust_count.set(MLD_ROBUSTNESS_VARIABLE);
+	_configured_robust_count.set(MLD_ROBUSTNESS_VARIABLE);
     }
 
     set_proto_version(proto_version_default());
@@ -272,10 +279,10 @@ Mld6igmpVif::start(string& error_msg)
 			max_resp_time,
 			IPvX::ZERO(family()),
 			dummy_error_msg);
-    _startup_query_count = robust_count().get();
+    _startup_query_count = effective_robustness_variable();
     if (_startup_query_count > 0)
 	_startup_query_count--;
-    TimeVal startup_query_interval = query_interval().get() / 4;
+    TimeVal startup_query_interval = effective_query_interval() / 4;
     _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
 	startup_query_interval,
 	callback(this, &Mld6igmpVif::query_timer_timeout));
@@ -758,12 +765,12 @@ Mld6igmpVif::mld6igmp_ssm_query_send(const IPvX& src,
     // +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
     //
     qrv = 0;
-    if (robust_count().get() <= 0x7)
-	qrv = robust_count().get();
+    if (effective_robustness_variable() <= 0x7)
+	qrv = effective_robustness_variable();
     if (s_flag)
 	qrv |= 0x8;
     qqic = 0;
-    encode_exp_time_code8(query_interval().get(), qqic, 1);
+    encode_exp_time_code8(effective_query_interval(), qqic, 1);
 
     //
     // Calculate the maximum number of sources
@@ -1500,10 +1507,14 @@ Mld6igmpVif::i_am_querier() const
 void
 Mld6igmpVif::set_i_am_querier(bool v)
 {
-    if (v)
+    if (v) {
 	_proto_flags |= MLD6IGMP_VIF_QUERIER;
-    else
+	// XXX: restore the default Query Interval and Robustness Variable
+	set_effective_robustness_variable(configured_robust_count().get());
+	set_effective_query_interval(configured_query_interval().get());
+    } else {
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
+    }
 }
 
 size_t
