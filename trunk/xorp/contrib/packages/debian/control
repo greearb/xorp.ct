@@ -1,0 +1,21 @@
+Source: xorp
+Section: net
+Priority: optional
+Maintainer: Benjamin Sonntag <benjamin@sonntag.fr>
+Build-Depends: debhelper (>= 4.0.0), autotools-dev, libssl-dev, tetex-bin, tetex-extra
+Standards-Version: 3.7.2.0
+
+Package: xorp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: eXtensible Open Router Platform
+ XORP is an opensource routing platform. He speaks ospf,
+ bgp, igmp and rip with its network neighbors
+
+Package: xorp-doc
+Architecture: all
+Description: The documentation of XORP router platform
+ XORP is an opensource routing platform. He speaks ospf,
+ bgp, igmp and rip with its network neighbors. This is
+ the documentation of xorp in pdf form. Also available
+ at http//www.xorp.org/
