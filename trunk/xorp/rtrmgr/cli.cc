@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.131 2006/04/20 07:49:04 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.132 2006/04/26 04:29:08 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -2220,6 +2220,7 @@ RouterCLI::text_entry_func(const string& ,
 		// TODO: we really ought to check the allow commands here
 		string cand_types;
 		string errhelp;
+		string allowed_value_error_msg;
 		list<TemplateTreeNode*>::const_iterator tti;
 		for (tti = ttn->children().begin();
 		     tti != ttn->children().end();
@@ -2230,6 +2231,13 @@ RouterCLI::text_entry_func(const string& ,
 		    // XXX: ignore user-hidden subtrees
 		    if ((*tti)->is_user_hidden())
 			continue;
+		    if (! (*tti)->check_allowed_value(value, errhelp)) {
+			if (! allowed_value_error_msg.empty())
+			    allowed_value_error_msg += " ";
+			allowed_value_error_msg += errhelp;
+			errhelp = "";
+			continue;
+		    }
 		    if ((*tti)->type_match(value, errhelp)) {
 			data_ttn = (*tti);
 			break;
@@ -2245,12 +2253,16 @@ RouterCLI::text_entry_func(const string& ,
 					      ttn->typestr().c_str());
 		    }
 		    error_msg = c_format("ERROR: argument \"%s\" "
-					 "is not a valid %s",
-					 value.c_str(),
-					 cand_types.c_str());
-		    if (!errhelp.empty())
-			error_msg += ": " + errhelp;
-		    error_msg += ".\n"; 
+					 "is not valid.",
+					 value.c_str());
+		    if (! allowed_value_error_msg.empty()) {
+			error_msg += " " + allowed_value_error_msg;
+		    }
+		    if (! cand_types.empty()) {
+			error_msg += c_format(" Allowed type(s): %s.",
+					      cand_types.c_str());
+		    }
+		    error_msg += "\n"; 
 		    cli_client().cli_print(error_msg);
 		    goto cleanup;
 		}
@@ -2527,7 +2539,7 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
     string newpath = path;
     while (! newpath.empty()) {
 	string::size_type ix = newpath.find(' ');
-	if (ix == string::npos){
+	if (ix == string::npos) {
 	    path_segments.push_back(newpath);
 	    break;
 	}
@@ -2581,27 +2593,27 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 		help_string = "-- No help available --";
 	    }
 	    if (ttn_child->segname() == "@") {
-		string encoded_typestr = ttn_child->encoded_typestr();
-		command_name = encoded_typestr;
-		CliCommandMatch ccm(command_name, help_string, is_executable,
-				    can_pipe);
-		CliCommand::TypeMatchCb cb;
-		cb = callback(ttn_child, &TemplateTreeNode::type_match);
-		ccm.set_type_match_cb(cb);
-		if (ttn_child->is_leaf_value())
-		    ccm.set_is_argument_expected(true);
-		children.insert(make_pair(command_name, ccm));
+		if (ttn_child->allowed_values().empty()
+		    && ttn_child->allowed_ranges().empty()) {
+		    string encoded_typestr = ttn_child->encoded_typestr();
+		    command_name = encoded_typestr;
+		    CliCommandMatch ccm(command_name, help_string,
+					is_executable, can_pipe);
+		    CliCommand::TypeMatchCb cb;
+		    cb = callback(ttn_child, &TemplateTreeNode::type_match);
+		    ccm.set_type_match_cb(cb);
+		    if (ttn_child->is_leaf_value())
+			ccm.set_is_argument_expected(true);
+		    children.insert(make_pair(command_name, ccm));
+		} else {
+		    add_allowed_values_and_ranges(ttn_child, is_executable,
+						  can_pipe, children);
+		}
 	    } else {
 		command_name = ttn_child->segname();
-		bool is_executable_tmp = is_executable;
-		bool can_pipe_tmp = can_pipe;
-		if (ttn_child->is_tag()) {
-		    is_executable_tmp = false;
-		    can_pipe_tmp = false;
-		}
 		CliCommandMatch ccm(command_name, help_string,
-				    is_executable_tmp, can_pipe_tmp);
-		if (ttn_child->is_leaf_value())
+				    is_executable, can_pipe);
+		if (ttn_child->is_leaf_value() || ttn_child->is_tag())
 		    ccm.set_is_argument_expected(true);
 		children.insert(make_pair(command_name, ccm));
 	    }
@@ -2641,49 +2653,64 @@ RouterCLI::text_entry_children_func(const vector<string>& vector_path) const
 	}
 
 	//
-	// Add the command-line completion for the allowed values
+	// Add the command-line completion for the allowed values and ranges
 	//
-	map<string, string>::const_iterator values_iter;
-	for (values_iter = ttn->allowed_values().begin();
-	     values_iter != ttn->allowed_values().end();
-	     ++values_iter) {
-	    const string& cmd_name = values_iter->first;
-	    string help_string = values_iter->second;
-	    if (help_string == "") {
-		help_string = "-- No help available --";
-	    }
-	    CliCommandMatch ccm(cmd_name, help_string,
-				is_executable, can_pipe);
-	    ccm.set_is_command_argument(true);
-	    children.insert(make_pair(cmd_name, ccm));
-	}
-
-	//
-	// Add the command-line completion for the allowed ranges
-	//
-	map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
-	for (ranges_iter = ttn->allowed_ranges().begin();
-	     ranges_iter != ttn->allowed_ranges().end();
-	     ++ranges_iter) {
-	    const pair<int64_t, int64_t>& range = ranges_iter->first;
-	    ostringstream ost;
-	    ost << "[" << range.first << ".." << range.second << "]";
-	    string cmd_name = ost.str();
-	    string help_string = ranges_iter->second;
-	    if (help_string == "") {
-		help_string = "-- No help available --";
-	    }
-	    CliCommandMatch ccm(cmd_name, help_string,
-				is_executable, can_pipe);
-	    CliCommand::TypeMatchCb cb;
-	    cb = callback(ttn, &TemplateTreeNode::type_match);
-	    ccm.set_type_match_cb(cb);
-	    ccm.set_is_command_argument(true);
-	    children.insert(make_pair(cmd_name, ccm));
+	if (ttn->segname() != "@") {
+	    add_allowed_values_and_ranges(ttn, is_executable, can_pipe,
+					  children);
 	}
     }
 
     return children;
+}
+
+void
+RouterCLI::add_allowed_values_and_ranges(
+    const TemplateTreeNode* ttn,
+    bool is_executable, bool can_pipe,
+    map<string, CliCommandMatch>& children) const
+{
+    //
+    // Add the command-line completion for the allowed values
+    //
+    map<string, string>::const_iterator values_iter;
+    for (values_iter = ttn->allowed_values().begin();
+	 values_iter != ttn->allowed_values().end();
+	 ++values_iter) {
+	const string& cmd_name = values_iter->first;
+	string help_string = values_iter->second;
+	if (help_string == "") {
+	    help_string = "-- No help available --";
+	}
+	CliCommandMatch ccm(cmd_name, help_string,
+			    is_executable, can_pipe);
+	ccm.set_is_command_argument(true);
+	children.insert(make_pair(cmd_name, ccm));
+    }
+
+    //
+    // Add the command-line completion for the allowed ranges
+    //
+    map<pair<int64_t, int64_t>, string>::const_iterator ranges_iter;
+    for (ranges_iter = ttn->allowed_ranges().begin();
+	 ranges_iter != ttn->allowed_ranges().end();
+	 ++ranges_iter) {
+	const pair<int64_t, int64_t>& range = ranges_iter->first;
+	ostringstream ost;
+	ost << "[" << range.first << ".." << range.second << "]";
+	string cmd_name = ost.str();
+	string help_string = ranges_iter->second;
+	if (help_string == "") {
+	    help_string = "-- No help available --";
+	}
+	CliCommandMatch ccm(cmd_name, help_string,
+			    is_executable, can_pipe);
+	CliCommand::TypeMatchCb cb;
+	cb = callback(ttn, &TemplateTreeNode::type_match);
+	ccm.set_type_match_cb(cb);
+	ccm.set_is_command_argument(true);
+	children.insert(make_pair(cmd_name, ccm));
+    }
 }
 
 int
