@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.33 2006/01/23 21:03:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mrt_mfc.cc,v 1.34 2006/03/16 00:04:53 pavlin Exp $"
 
 //
 // PIM Multicast Routing Table MFC-related implementation.
@@ -148,7 +148,7 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
     //
     
     //
-    // Send a PIM Register to the RP
+    // Check the interface toward the directly-connected source
     //
     pim_vif = pim_node().vif_find_by_vif_index(vif_index);
     if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
@@ -158,6 +158,20 @@ PimMrt::signal_message_wholepkt_recv(const string& src_module_instance_name,
 		     src_module_instance_name.c_str(),
 		     vif_index, cstring(src), cstring(dst),
 		     XORP_UINT_CAST(rcvlen));
+	return (XORP_ERROR);
+    }
+
+    //
+    // Send a PIM Register to the RP using the RPF vif toward it
+    //
+    pim_vif = pim_node().pim_vif_rpf_find(*rp_addr_ptr);
+    if (! ((pim_vif != NULL) && (pim_vif->is_up()))) {
+	XLOG_WARNING("RX WHOLEPKT signal from %s: vif_index = %d "
+		     "src = %s dst = %s len = %u: "
+		     "no RPF interface toward the RP (%s)",
+		     src_module_instance_name.c_str(),
+		     vif_index, cstring(src), cstring(dst),
+		     XORP_UINT_CAST(rcvlen), cstring(*rp_addr_ptr));
 	return (XORP_ERROR);
     }
 
