@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.16 2006/06/16 00:19:54 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_config.py,v 1.17 2006/06/17 03:12:37 atanu Exp $
 
 import sys
 sys.path.append("..")
@@ -510,20 +510,28 @@ commit
 
     return True
     
-def conf_redist_static(builddir):
+def conf_redist_static(builddir, create_static = True):
     """
     Redistribute static into BGP
     """
+
+    if create_static:
+        create_static_command = \
+"""
+create protocols static
+edit protocols static
+
+top
+"""
+    else:
+        create_static_command = ''
 
     # Configure the xorpsh
     xorpsh_commands = \
 """
 configure
 
-create protocols static
-edit protocols static
-
-top
+%s
 
 create policy
 edit policy
@@ -544,7 +552,7 @@ edit protocols bgp
 set export static
 
 commit
-"""
+""" % (create_static_command)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False
@@ -898,6 +906,27 @@ commit
 
     return True
 
+def conf_create_protocol_static(builddir):
+    """
+    Create the static protocol
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+create protocols static
+
+commit
+"""
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+
 def conf_add_static_route4(builddir, net, next_hop = "127.0.0.1"):
     """
     Add a static route
@@ -915,6 +944,26 @@ set next-hop %s
 
 commit
 """ % (net, net, next_hop)
+
+    if not xorpsh(builddir, xorpsh_commands):
+        return False
+
+    return True
+
+def conf_delete_static_route4(builddir, net, next_hop = "127.0.0.1"):
+    """
+    Delete a static route
+    """
+
+    # Configure the xorpsh
+    xorpsh_commands = \
+"""
+configure
+
+delete protocols static route %s
+
+commit
+""" % (net)
 
     if not xorpsh(builddir, xorpsh_commands):
         return False

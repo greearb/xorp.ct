@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.1 2006/06/17 03:12:37 atanu Exp $
 
 # Tests used to investigate bug reports.
 
@@ -36,6 +36,8 @@ TESTS=[
     ['test_bug_360', 'test_bug_360', True, '',
      ['conf_bug_360', 'conf_interfaces',
       'conf_redist_static']],
+    ['test_bug_639', 'test_bug_639', False, '',
+     ['conf_EBGP', 'conf_interfaces', 'conf_create_protocol_static']],
     ]
 
 def test_bug_360():
@@ -134,6 +136,51 @@ def test_bug_360():
             print '<@' + output + '@>'
             return False
     
+    return True
+
+def test_bug_639():
+    """
+    http://www.xorp.org/bugzilla/show_bug.cgi?id=639
+    BGP and STATIC install the same route, this route also resolved
+    the nexthop. The introduction of the policy to redistribute static
+    triggers the problem in the RIB. This emulates the order of events
+    when the router is being configured and a peering comes up.
+    """
+
+    coord("reset")
+
+    coord("target 127.0.0.1 10001")
+    coord("initialise attach peer1")
+
+    coord("peer1 establish AS 65001 holdtime 0 id 1.2.3.4 keepalive false")
+    
+    delay(2)
+
+    coord("peer1 assert established");
+
+    incomplete = "2"
+    
+    packet = "packet update \
+    nexthop %s \
+    origin " + incomplete + "\
+    aspath 65001 \
+    med 0 \
+    nlri %s"
+
+    if not config.conf_add_static_route4(builddir(1), "192.168.0.0/16"):
+        return False
+
+    delay(2)
+
+    coord("peer1 send %s" % (packet % ("192.168.0.1", "192.168.0.0/16")))
+
+    if not config.conf_redist_static(builddir(1), False):
+        return False
+
+    delay(5)
+
+    coord("peer1 assert established");
+
     return True
 
 test_main(TESTS, 'test_bgp_config', 'test_bgp_reports1')
