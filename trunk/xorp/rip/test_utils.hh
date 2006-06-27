@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/test_utils.hh,v 1.7 2005/08/18 15:41:28 bms Exp $
+// $XORP: xorp/rip/test_utils.hh,v 1.8 2006/03/16 00:05:53 pavlin Exp $
 
 #ifndef __RIP_TEST_UTILS_HH__
 #define __RIP_TEST_UTILS_HH__
@@ -125,7 +125,7 @@ struct RouteInjector : public unary_function<A,void>
 
     void operator() (const IPNet<A>& net)
     {
-	if (_r.update_route(net, _m, _c, 0, _p, PolicyTags()) == true)
+	if (_r.update_route(net, _m, _c, 0, _p, PolicyTags(), false) == true)
 	    _injected++;
 	else
 	    fprintf(stderr, "Failed to update %s\n", net.str().c_str());

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.27 2006/01/25 05:01:34 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.28 2006/03/16 00:05:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -37,6 +37,7 @@
 #include "route_db.hh"
 #include "update_queue.hh"
 #include "rip_varrw.hh"
+#include "peer.hh"
 
 // ----------------------------------------------------------------------------
 // NetCmp
@@ -78,6 +79,34 @@ RouteDB<A>::~RouteDB()
 }
 
 template <typename A>
+bool
+RouteDB<A>::insert_peer(Peer<A>* peer)
+{
+    typename set<Peer<A>* >::iterator iter;
+
+    iter = _peers.find(peer);
+    if (iter != _peers.end())
+	return (false);
+
+    _peers.insert(peer);
+    return (true);
+}
+
+template <typename A>
+bool
+RouteDB<A>::erase_peer(Peer<A>* peer)
+{
+    typename set<Peer<A>* >::iterator iter;
+
+    iter = _peers.find(peer);
+    if (iter == _peers.end())
+	return (false);
+
+    _peers.erase(iter);
+    return (true);
+}
+
+template <typename A>
 void
 RouteDB<A>::delete_route(Route* r)
 {
@@ -105,7 +134,7 @@ RouteDB<A>::delete_route(Route* r)
 		  r->net().str().c_str());
 
         update_route(r->net(), r->nexthop(), r->cost(), r->tag(), _rib_origin,
-		     r->policytags());
+		     r->policytags(), false);
     }
 }
 
@@ -127,7 +156,7 @@ void
 RouteDB<A>::expire_route(Route* r)
 {
     if (false == update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
-			      r->origin(), r->policytags())) {
+			      r->origin(), r->policytags(), false)) {
 	XLOG_ERROR("Expire route failed.");
     }
 }
@@ -170,7 +199,7 @@ RouteDB<A>::do_filtering(Route* r)
 
 	return true;
     } catch(const PolicyException& e) {
-	XLOG_FATAL("PolicyException: %s",e.str().c_str());
+	XLOG_FATAL("PolicyException: %s", e.str().c_str());
 	XLOG_UNFINISHED();
     }
 }
@@ -182,7 +211,8 @@ RouteDB<A>::update_route(const Net&	    net,
 			 uint32_t	    cost,
 			 uint32_t	    tag,
 			 RouteOrigin*	    o,
-			 const PolicyTags&  policytags)
+			 const PolicyTags&  policytags,
+			 bool		    is_policy_push)
 {
     if (tag > 0xffff) {
 	// Ingress sanity checks should take care of this
@@ -215,8 +245,7 @@ RouteDB<A>::update_route(const Net&	    net,
 	// Create route if necessary
 	r = o->find_route(net);
 	if (r == 0) {
-	    r = new Route(net, nexthop, cost, o, tag);
-	    r->set_policytags(policytags);
+	    r = new Route(net, nexthop, cost, o, tag, policytags);
 
 	    set_expiry_timer(r);
 	    bool ok(_routes.insert(typename
@@ -270,7 +299,15 @@ RouteDB<A>::update_route(const Net&	    net,
 	if (cost == RIP_INFINITY) {
 	    set_deletion_timer(r);
 	} else {
-	    set_expiry_timer(r);
+	    if (is_policy_push && !updated) {
+		//
+		// XXX: The same route was pushed because of policy
+		// reconfiguration, hence we don't need to update its
+		// expiry timer.
+		//
+	    } else {
+		set_expiry_timer(r);
+	    }
 	}
 	
 	bool was_filtered = r->filtered();
@@ -289,8 +326,15 @@ RouteDB<A>::update_route(const Net&	    net,
 		return false;
 	    } else {
 		if (cost != RIP_INFINITY) {
-		    expire_route(r);
-		    return true;
+		    //
+		    // XXX: Advertise the filtered route with INFINITY metric.
+		    // If the filtered route should not be advertised with
+		    // such metric, then remove the "set_cost()" statement
+		    // below, and add "return true;" at the end of this block.
+		    //
+		    r->set_cost(RIP_INFINITY);
+		    set_deletion_timer(r);
+		    updated = true;
 		}    
 //		delete_route(r);
 	    }
@@ -524,32 +568,20 @@ RouteWalker<A>::reset()
     _pos = _route_db.routes().begin();
 }
 
-
-/*
- * XXX: ok... we need to delete all the routes we got... as we
- * do not store original routes.
- * all we can do is re-add rib routes.
- * and wait for "real rip peers" to readvertise...
- * we can probably send out a request to get the advertisements though...
- */
 template <typename A>
 void
 RouteDB<A>::push_routes()
 {
     debug_msg("[RIP] Push routes\n");
 
-    for (typename RouteContainer::iterator i = _routes.begin();
-	i != _routes.end(); ++i) {
-	Route* r = (*i).second.get();
-
-	debug_msg("[RIP] route: %s, filtered: %d\n",
-		  r->net().str().c_str(), r->filtered());
-
-	if (!r->filtered())
-	    expire_route(r);
-
-//	delete_route(r);
-    }	
+    //
+    // Push the original routes from all peers
+    //
+    for (typename set<Peer<A>* >::iterator i = _peers.begin();
+	 i != _peers.end(); ++i) {
+	Peer<A>* peer = *i;
+	peer->push_routes();
+    }
 
     // XXX may have got RIB route adds because of delete_route
     // flush is probably not necessary...
@@ -564,7 +596,7 @@ RouteDB<A>::push_routes()
 	debug_msg("[RIP] Pushing RIB route %s\n", r->net().str().c_str());
 	
 	update_route(r->net(), r->nexthop(), r->cost(), r->tag(),
-		     _rib_origin, r->policytags());
+		     _rib_origin, r->policytags(), true);
     }
 }
 

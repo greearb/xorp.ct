@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.21 2005/08/18 15:41:27 bms Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.22 2006/03/16 00:05:51 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
@@ -39,6 +39,9 @@ class PacketRouteEntry;
 
 template <typename A>
 class RouteWalker;
+
+template <typename A>
+class Peer;
 
 /**
  * @short A network comparitor class for the purposes of ordering
@@ -78,6 +81,23 @@ public:
     ~RouteDB();
 
     /**
+     * Insert a peer to the database.
+     *
+     * @param peer the peer to insert.
+     * @return true if this is a new peer, otherwise false.
+     */
+    bool insert_peer(Peer<A>* peer);
+
+    /**
+     * Erase a peer from the database.
+     *
+     * @param peer the peer to erase.
+     * @return true if this is an existing peer that was erased, otherwise
+     * false.
+     */
+    bool erase_peer(Peer<A>* peer);
+
+    /**
      * Update Route Entry in database for specified route.
      *
      * If the route does not exist or the values provided differ from the
@@ -90,6 +110,8 @@ public:
      * @param tag the corresponding route tag.
      * @param origin the route originator proposing update.
      * @param policytags the policytags of this route.
+     * @param is_policy_push if true, this route update is triggered
+     * by policy reconfiguration.
      * @return true if an update occurs, false otherwise.
      */
     bool update_route(const Net&	net,
@@ -97,7 +119,9 @@ public:
 		      uint32_t		cost,
 		      uint32_t		tag,
 		      RouteOrigin*	origin,
-		      const PolicyTags& policytags);
+		      const PolicyTags& policytags,
+		      bool		is_policy_push);
+
     /**
      * A copy of RIB routes need to be kept, as they are not advertised
      * periodically. If a RIB route gets replaced with a better route from
@@ -193,6 +217,7 @@ protected:
     RouteContainer	_routes;
     UpdateQueue<A>*	_uq;
     PolicyFilters&	_policy_filters;
+    set<Peer<A>* >	_peers;
 
 
     //

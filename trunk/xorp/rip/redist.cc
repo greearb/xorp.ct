@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/redist.cc,v 1.9 2006/03/16 00:05:50 pavlin Exp $"
+#ident "$XORP: xorp/rip/redist.cc,v 1.10 2006/06/21 23:36:37 pavlin Exp $"
 
 #include "rip_module.h"
 #include "libxorp/xlog.h"
@@ -74,7 +74,7 @@ RouteRedistributor<A>::add_route(const Net&  net, const Addr& nexthop,
 {
     _route_db.add_rib_route(net, nexthop, _cost, _tag, _rt_origin, policytags);
     return _route_db.update_route(net, nexthop, _cost, _tag, _rt_origin,
-				  policytags);
+				  policytags, false);
 }
 
 template <typename A>
@@ -87,7 +87,7 @@ RouteRedistributor<A>::add_route(const Net&  	net,
 {
     _route_db.add_rib_route(net, nexthop, cost, tag, _rt_origin, policytags);
     return _route_db.update_route(net, nexthop, cost, tag, _rt_origin,
-				  policytags);
+				  policytags, false);
 }
 
 template <typename A>
@@ -96,7 +96,7 @@ RouteRedistributor<A>::expire_route(const Net& net)
 {
     _route_db.delete_rib_route(net);
     return _route_db.update_route(net, A::ZERO(), RIP_INFINITY,
-				  _tag, _rt_origin, PolicyTags());
+				  _tag, _rt_origin, PolicyTags(), false);
 }
 
 template <typename A>
@@ -162,7 +162,7 @@ RouteRedistributor<A>::withdraw_batch()
 	if (r->origin() == _rt_origin) {
 	    _route_db.update_route(r->net(), r->nexthop(),
 				   RIP_INFINITY, r->tag(),
-				   _rt_origin, r->policytags());
+				   _rt_origin, r->policytags(), false);
 	}
 	r = _wdrawer->next_route();
 

@@ -12,24 +12,123 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/peer.cc,v 1.4 2005/03/25 02:54:27 pavlin Exp $"
+#ident "$XORP: xorp/rip/peer.cc,v 1.5 2006/03/16 00:05:49 pavlin Exp $"
 
 #include "peer.hh"
 #include "port.hh"
+#include "system.hh"
 
-template<typename A>
+template <typename A>
+uint32_t
+PeerRoutes<A>::expiry_secs() const
+{
+    return _peer.expiry_secs();
+}
+
+template <typename A>
+uint32_t
+PeerRoutes<A>::deletion_secs() const
+{
+    return _peer.deletion_secs();
+}
+
+template <typename A>
+Peer<A>::Peer(RipPort& p, const Addr& addr)
+    : RouteEntryOrigin<A>(false), _port(p), _addr(addr),
+      _peer_routes(*this)
+{
+    RouteDB<A>& rdb = _port.port_manager().system().route_db();
+    rdb.insert_peer(this);
+}
+
+template <typename A>
+Peer<A>::~Peer()
+{
+    RouteDB<A>& rdb = _port.port_manager().system().route_db();
+    rdb.erase_peer(this);
+
+    //
+    // XXX: explicitly remove all peer routes, because we don't use them
+    // as an indication whether the peer has expired.
+    //
+    _peer_routes.clear();
+}
+
+template <typename A>
 uint32_t
 Peer<A>::expiry_secs() const
 {
     return port().constants().expiry_secs();
 }
 
-template<typename A>
+template <typename A>
 uint32_t
 Peer<A>::deletion_secs() const
 {
     return port().constants().deletion_secs();
 }
+
+template <typename A>
+bool
+Peer<A>::update_route(const IPNet<A>&	net,
+		      const A&		nexthop,
+		      uint32_t		cost,
+		      uint32_t		tag,
+		      const PolicyTags& policytags)
+{
+    Route* route = _peer_routes.find_route(net);
+    if (route == NULL) {
+	RouteEntryOrigin<A>* origin = &_peer_routes;
+	route = new Route(net, nexthop, cost, origin, tag, policytags);
+    }
+    set_expiry_timer(route);
+
+    RouteDB<A>& rdb = _port.port_manager().system().route_db();
+    return (rdb.update_route(net, nexthop, cost, tag, this, policytags,
+			     false));
+}
+
+template <typename A>
+void
+Peer<A>::push_routes()
+{
+    RouteDB<A>& rdb = _port.port_manager().system().route_db();
+    vector<const RouteEntry<A>*> routes;
+
+    if (! port().enabled())
+	return;			// XXX: push routes only for enabled ports
+
+    _peer_routes.dump_routes(routes);
+    typename vector<const RouteEntry<A>*>::const_iterator ri;
+    for (ri = routes.begin(); ri != routes.end(); ++ri) {
+	const RouteEntry<A>* r = *ri;
+	rdb.update_route(r->net(), r->nexthop(), r->cost(), r->tag(),
+			 this, r->policytags(), true);
+    }
+}
+
+template <typename A>
+void
+Peer<A>::set_expiry_timer(Route* route)
+{
+    XorpTimer t;
+    uint32_t secs = expiry_secs();
+    EventLoop& eventloop = _port.port_manager().eventloop();
+
+    if (secs) {
+        t = eventloop.new_oneoff_after_ms(secs * 1000,
+					  callback(this, &Peer<A>::expire_route, route));
+    }
+    route->set_timer(t);
+}
+
+template <typename A>
+void
+Peer<A>::expire_route(Route* route)
+{
+    delete route;
+}
+
 
 
 // ----------------------------------------------------------------------------

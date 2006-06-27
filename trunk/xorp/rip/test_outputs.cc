@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.24 2005/10/13 11:15:22 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.25 2006/03/16 00:05:53 pavlin Exp $"
 
 #include <set>
 
@@ -532,7 +532,8 @@ public:
 	for (typename set<IPNet<A> >::const_iterator n = _tpn.begin();
 	     n != _tpn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.test_peer();
-	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags()) == false) {
+	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags(),
+				 false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());
 		return 1;
@@ -543,7 +544,8 @@ public:
 	for (typename set<IPNet<A> >::const_iterator n = this->_opn.begin();
 	     n != this->_opn.end(); n++) {
 	    RouteEntryOrigin<A>* reo = _pm.other_peer();
-	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags()) == false) {
+	    if (rdb.update_route(*n, A::ZERO(), 5u, 0u, reo, PolicyTags(),
+				 false) == false) {
 		verbose_log("Failed to add route for %s\n",
 			    n->str().c_str());
 		return 1;

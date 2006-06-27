@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.60 2006/06/21 23:36:37 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.61 2006/06/22 00:17:28 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -588,8 +588,6 @@ template <typename A>
 void
 Port<A>::kill_peer_routes()
 {
-    RouteDB<Addr>& rdb = _pm.system().route_db();
-
 #ifdef INSTANTIATE_IPV4
     // Reset the authentication handler
     PortAFSpecState<IPv4>& pss = af_state();
@@ -605,8 +603,8 @@ Port<A>::kill_peer_routes()
 	typename vector<const RouteEntry<A>*>::const_iterator ri;
 	for (ri = routes.begin(); ri != routes.end(); ++ri) {
 	    const RouteEntry<A>* r = *ri;
-	    rdb.update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
-			     p, r->policytags());
+	    p->update_route(r->net(), r->nexthop(), RIP_INFINITY, r->tag(),
+			    r->policytags());
 	}
 	pli++;
     }
@@ -926,8 +924,6 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	p->counters().incr_update_packets_recv();
     }
 
-    RouteDB<Addr>& rdb = _pm.system().route_db();
-
     for (uint32_t i = 0; i < n_entries; i++) {
 	if (entries[i].addr_family() != AF_INET) {
 	    record_bad_route("bad address family", src_addr, src_port, p);
@@ -1086,7 +1082,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	//
 	uint16_t tag = entries[i].tag();
 
-	rdb.update_route(net, nh, metric, tag, p, PolicyTags());
+	p->update_route(net, nh, metric, tag, PolicyTags());
     }
 }
 
@@ -1112,8 +1108,6 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	p->counters().incr_packets_recv();
 	p->counters().incr_update_packets_recv();
     }
-
-    RouteDB<Addr>& rdb = _pm.system().route_db();
 
     // ALL_ONES is used as a magic value to indicate no nexthop has been set.
     IPv6 nh = IPv6::ALL_ONES();
@@ -1236,7 +1230,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	//
 	uint16_t tag = entries[i].tag();
 
-	rdb.update_route(net, nh, metric, tag, p, PolicyTags());
+	p->update_route(net, nh, metric, tag, PolicyTags());
     }
 
 }

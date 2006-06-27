@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_entry.cc,v 1.12 2006/01/25 05:10:33 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_entry.cc,v 1.13 2006/03/16 00:05:51 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -227,6 +227,19 @@ uint32_t
 RouteEntryOrigin<A>::route_count() const
 {
     return static_cast<uint32_t>(_rtstore->routes.size());
+}
+
+template <typename A>
+void
+RouteEntryOrigin<A>::clear()
+{
+    typename RouteEntryStore::Container::iterator
+	i = _rtstore->routes.begin();
+    while (i != _rtstore->routes.end()) {
+	Route* r = i->second;
+	delete r;
+	i = _rtstore->routes.begin();
+    }
 }
 
 template <typename A>

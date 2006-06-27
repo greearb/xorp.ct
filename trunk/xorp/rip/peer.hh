@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/peer.hh,v 1.8 2006/01/25 05:10:33 pavlin Exp $
+// $XORP: xorp/rip/peer.hh,v 1.9 2006/03/16 00:05:49 pavlin Exp $
 
 #ifndef __RIP_PEER_HH__
 #define __RIP_PEER_HH__
@@ -99,6 +99,27 @@ protected:
     uint32_t _bad_auth_packets;
 };
 
+// Forward declaration of Peer class
+template <typename A> class Peer;
+
+/**
+ * @short RIP Peer Routes
+ *
+ * A class for storing the original routes received from a Peer host.
+ * Those routes are used to push them whenever the routing policy is modified.
+ */
+template <typename A>
+class PeerRoutes : public RouteEntryOrigin<A> {
+public:
+    PeerRoutes(Peer<A>& peer) : RouteEntryOrigin<A>(false), _peer(peer) {}
+
+private:
+    uint32_t expiry_secs() const;
+    uint32_t deletion_secs() const;
+
+    Peer<A>&	_peer;		// The corresponding peer
+};
+
 
 // Forward declaration of Port class
 template <typename A>
@@ -113,17 +134,20 @@ class Port;
  * the Peer instance.  The Peer class just acts as a container of
  * information about the Peer host, such as the number of packets sent,
  * the time of last update, etc.
+ * It also contains the original routes as received from the Peer host.
+ * Those routes are used to push them whenever the routing policy is modified.
  */
 template <typename A>
 class Peer : public RouteEntryOrigin<A>
 {
 public:
-    typedef A Addr;
-    typedef Port<A> RipPort;
+    typedef A			Addr;
+    typedef Port<A>		RipPort;
+    typedef RouteEntry<A>	Route;
 
 public:
-    Peer(RipPort& p, const Addr& addr)
-	: RouteEntryOrigin<A>(false), _port(p), _addr(addr) {}
+    Peer(RipPort& p, const Addr& addr);
+    ~Peer();
 
     /**
      * Get address of Peer.
@@ -146,7 +170,7 @@ public:
     inline RipPort& port()				{ return _port; }
 
     /**
-     * Get port associatd with Peer.
+     * Get port associated with Peer.
      */
     inline const RipPort& port() const			{ return _port; }
 
@@ -160,15 +184,43 @@ public:
      */
     inline const TimeVal& last_active() const	     { return _last_active; }
 
+    /**
+     * Update Route Entry in database for specified route.
+     *
+     * @param net the network route being updated.
+     * @param nexthop the corresponding nexthop address.
+     * @param cost the corresponding metric value as received from the
+     *	      route originator.
+     * @param tag the corresponding route tag.
+     * @param policytags the policytags of this route.
+     * @return true if an update occurs, false otherwise.
+     */
+    bool update_route(const IPNet<A>&	net,
+		      const A&		nexthop,
+		      uint32_t		cost,
+		      uint32_t		tag,
+		      const PolicyTags& policytags);
+
+    /**
+     * Push routes through the system.
+     *
+     * This is needed to apply the policy filters for re-filtering.
+     */
+    void push_routes();
+
     uint32_t expiry_secs() const;
 
     uint32_t deletion_secs() const;
 
 protected:
+    void set_expiry_timer(Route* route);
+    void expire_route(Route* route);
+
     RipPort&		_port;
     Addr		_addr;
     PeerCounters	_counters;
     TimeVal		_last_active;
+    PeerRoutes<A>	_peer_routes;
 };
 
 
@@ -181,7 +233,7 @@ struct peer_has_address {
     peer_has_address(const A& addr) : _a(addr) {}
 
     inline bool
-    operator() (const Peer<A>& p) const{ return p.address() == _a; }
+    operator() (const Peer<A>& p) const { return p.address() == _a; }
 
     inline bool
     operator() (const Peer<A>* p) const { return p->address() == _a; }
