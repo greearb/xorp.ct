@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.18 2005/12/20 08:30:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib1.sh,v 1.19 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -527,7 +527,37 @@ test9()
     coord peer1 assert established
 }
 
-TESTS_NOT_FIXED=''
+test10()
+{
+    if [ ${RIB_CONFIGURED:-""} == "" ]
+    then
+	return
+    fi
+
+    echo "TEST10 - Nexthop resolver crashes if queuing a 0.0.0.0/0 nlri"
+    reset_ebgp
+
+    coord peer1 establish AS $PEER2_AS holdtime 0 id 192.150.187.100
+    sleep 2
+
+    PACKET1="packet update
+	origin 2
+	aspath 65009
+	nexthop 128.16.0.1
+	nlri 0.0.0.0/0
+	nlri 20.20.20.20/24"
+
+    # Lets get it to resolve.
+    add_route4 connected true false 128.16.0.0/16 172.16.1.2 1
+
+    coord peer1 send $PACKET1
+
+    sleep 2
+
+    coord peer1 assert established
+}
+
+TESTS_NOT_FIXED='test10'
 TESTS='test1 test1_ipv6 test2 test3 test4 test5 test6 test7 test8 test9'
 
 # Include command line
