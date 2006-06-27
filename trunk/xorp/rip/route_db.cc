@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.28 2006/03/16 00:05:51 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.29 2006/06/27 21:50:48 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -288,6 +288,7 @@ RouteDB<A>::update_route(const Net&	    net,
 
     // XXX: this whole section of code is too entangled.
     if (r->origin() == o) {
+	uint16_t orig_cost = r->cost();
 	
 	updated |= r->set_nexthop(new_route->nexthop());
 	updated |= r->set_tag(new_route->tag());
@@ -297,7 +298,14 @@ RouteDB<A>::update_route(const Net&	    net,
 	delete new_route;
 
 	if (cost == RIP_INFINITY) {
-	    set_deletion_timer(r);
+	    if ((orig_cost == RIP_INFINITY) && r->timer().scheduled()) {
+		//
+		// XXX: The deletion process is started only when the
+		// metric is set the first time to infinity.
+		//
+	    } else {
+		set_deletion_timer(r);
+	    }
 	} else {
 	    if (is_policy_push && !updated) {
 		//
@@ -358,6 +366,16 @@ RouteDB<A>::update_route(const Net&	    net,
 
 	    //
 	    // Same cost routes
+	    //
+
+	    if (new_route->cost() == RIP_INFINITY) {
+		//
+		// XXX: Don't update routes if both the old and the new
+		// costs are infinity.
+		//
+		break;
+	    }
+
 	    //
 	    // If the existing route is showing signs of timing out, it
 	    // may be better to switch to an equally-good alternative route
