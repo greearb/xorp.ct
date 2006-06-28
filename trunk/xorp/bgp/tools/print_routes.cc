@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.15 2005/03/25 02:52:55 pavlin Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.16 2006/03/16 00:03:42 pavlin Exp $"
 
 #include "print_routes.hh"
 
@@ -120,20 +120,29 @@ PrintRoutes<A>::get_route_list_start_done(const XrlError& e,
 	return;
     }
     _prev_no_bgp = false;
-    printf("Status Codes: * valid route, > best route\n");
-    printf("Origin Codes: i IGP, e EGP, ? incomplete\n\n");
-    printf(
-"   Prefix                Nexthop                    Peer            AS Path\n"
-);
-    printf(
-"   ------                -------                    ----            -------\n"
-);
+
+    switch(_verbose) {
+    case SUMMARY:
+    case NORMAL:
+	printf("Status Codes: * valid route, > best route\n");
+	printf("Origin Codes: i IGP, e EGP, ? incomplete\n\n");
+	printf("   Prefix                Nexthop                    "
+	       "Peer            AS Path\n");
+	printf("   ------                -------                    "
+	       "----            -------\n");
+	break;
+    case DETAIL:
+	break;
+    }
+
     _token = *token;
-    for (int i = 0; i < MAX_REQUESTS; i++) {
+    for (uint32_t i = 0; i < MAX_REQUESTS; i++) {
 	_active_requests++;
 	get_route_list_next();
     }
 }
+
+// See RFC 1657 (BGP MIB) for full definitions of return values.
 
 template <typename A>
 void
@@ -153,10 +162,6 @@ PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
 					 const bool* /*unicast*/,
 					 const bool* /*multicast*/)
 {
-    UNUSED(med);
-    UNUSED(localpref);
-    UNUSED(atomic_agg);
-    UNUSED(aggregator);
     UNUSED(calc_localpref);
     UNUSED(attr_unknown);
     UNUSED(aspath);
@@ -168,40 +173,108 @@ PrintRoutes<A>::get_route_list_next_done(const XrlError& e,
     }
     _count++;
 
-    //XXX this should be used to indicate a route is valid
-    printf("*");
-
     uint8_t best = (*best_and_origin)>>16;
-    switch (best) {
-    case 1:
-	printf(" ");
-	break;
-    case 2:
-	printf(">");
-	break;
-    default:
-	printf("?");
-    }
+    uint8_t origin = (*best_and_origin)&255;
 
     AsPath asp((const uint8_t*)(&((*aspath)[0])), aspath->size());
 
-    printf(" %-20s  %-25s  %-12s  %s ", net->str().c_str(),
-	   nexthop->str().c_str(),
-	   peer_id->str().c_str(),
-	   asp.short_str().c_str());
-    uint8_t origin = (*best_and_origin)&255;
-    switch (origin) {
-    case IGP:
-	printf("i\n");
+    switch(_verbose) {
+    case SUMMARY:
+    case NORMAL:
+	//XXX this should be used to indicate a route is valid
+	printf("*");
+
+	switch (best) {
+	case 1:
+	    printf(" ");
+	    break;
+	case 2:
+	    printf(">");
+	    break;
+	default:
+	    printf("?");
+	}
+
+	printf(" %-20s  %-25s  %-12s  %s ", net->str().c_str(),
+	       nexthop->str().c_str(),
+	       peer_id->str().c_str(),
+	       asp.short_str().c_str());
+
+	switch (origin) {
+	case IGP:
+	    printf("i\n");
+	    break;
+	case EGP:
+	    printf("e\n");
+	    break;
+	case INCOMPLETE:
+	    printf("?\n");
+	    break;
+	default:
+	    printf ("BAD ORIGIN\n");
+	    break;
+	}
 	break;
-    case EGP:
-	printf("e\n");
-	break;
-    case INCOMPLETE:
-	printf("?\n");
-	break;
-    default:
-	printf ("BAD ORIGIN\n");
+    case DETAIL:
+	printf("%s\n", cstring(*net));
+	printf("\tFrom peer: %s\n", cstring(*peer_id));
+	printf("\tRoute: ");
+	switch (best) {
+	case 1:
+	    printf("Not Used\n");
+	    break;
+	case 2:
+	    printf("Winner\n");
+	    break;
+	default:
+	    printf("UNKNOWN\n");
+	}
+
+	printf("\tOrigin: ");
+	switch (origin) {
+	case IGP:
+	    printf("IGP\n");
+	    break;
+	case EGP:
+	    printf("EGP\n");
+	    break;
+	case INCOMPLETE:
+	    printf("INCOMPLETE\n");
+	    break;
+	default:
+	    printf("BAD ORIGIN\n");
+	    break;
+	}
+
+	printf("\tAS Path: %s\n", asp.short_str().c_str());
+	printf("\tNexthop: %s\n", cstring(*nexthop));
+	if (INVALID != *med)
+	    printf("\tMultiple Exit Discriminator: %d\n", *med);
+	if (INVALID != *localpref)
+	    printf("\tLocal Preference: %d\n", *localpref);
+	if (2 == *atomic_agg)
+	    printf("\tAtomic Aggregate: Less Specific Route Selected\n");
+#if	0
+	printf("\tAtomic Aggregate: ");
+	switch (*atomic_agg) {
+	case 1:
+	    printf("Less Specific Route Not Selected\n");
+	    break;
+	case 2:
+	    printf("Less Specific Route Selected\n");
+	    break;
+	default:
+	    printf("UNKNOWN\n");
+	    break;
+	}
+#endif
+	if (!aggregator->empty()) {
+	    XLOG_ASSERT(6 == aggregator->size());
+	    A agg(&((*aggregator)[0]));
+	    AsNum asnum(&((*aggregator)[4]));
+	    
+	    printf("\tAggregator: %s %s\n", cstring(agg), cstring(asnum));
+	}
 	break;
     }
 
