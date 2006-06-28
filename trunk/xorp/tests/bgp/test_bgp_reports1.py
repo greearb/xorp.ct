@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.1 2006/06/17 03:12:37 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.2 2006/06/26 18:47:38 atanu Exp $
 
 # Tests used to investigate bug reports.
 
@@ -36,7 +36,7 @@ TESTS=[
     ['test_bug_360', 'test_bug_360', True, '',
      ['conf_bug_360', 'conf_interfaces',
       'conf_redist_static']],
-    ['test_bug_639', 'test_bug_639', False, '',
+    ['test_bug_639', 'test_bug_639', True, '',
      ['conf_EBGP', 'conf_interfaces', 'conf_create_protocol_static']],
     ]
 
