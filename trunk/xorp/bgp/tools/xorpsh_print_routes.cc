@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.11 2005/08/18 15:58:11 bms Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.12 2006/03/16 00:03:43 pavlin Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -99,18 +99,24 @@ int main(int argc, char **argv)
     }
     int counter = 4;
     if (argc > 3) {
-	if (strcmp(argv[3], "ipv4") == 0)
+	if (strcmp(argv[3], "ipv4") == 0) {
 	    ipv4 = true;
-	if (strcmp(argv[3], "ipv6") == 0)
+	    counter++;
+	}
+	if (strcmp(argv[3], "ipv6") == 0) {
 	    ipv6 = true;
-	counter++;
+	    counter++;
+	}
     }
     if (argc > 4) {
-	if (strcmp(argv[4], "unicast") == 0)
+	if (strcmp(argv[4], "unicast") == 0) {
 	    unicast = true;
-	if (strcmp(argv[4], "multicast") == 0)
+	    counter++;
+	}
+	if (strcmp(argv[4], "multicast") == 0) {
 	    multicast = true;
-	counter++;
+	    counter++;
+	}
     }
     if (argc == counter) {
 	if (strcmp(argv[counter - 1], "summary")==0) {
