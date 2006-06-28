@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/tests/README,v 1.1 2006/04/07 05:13:08 atanu Exp $
+# $XORP: xorp/tests/README,v 1.2 2006/06/17 03:02:24 atanu Exp $
 #
 
 THE CODE IN THIS DIRECTORY IS EXPERIMENTAL AND STILL UNDER DEVELOPMENT.
@@ -14,6 +14,8 @@ Before running the tests:
 1) Run "./install_templates.sh" this will take a copy of the template
 files and modify them for use with the tests. For example one modification
 is to substitute the FEA for the dummy FEA.
+Note that this script uses the ed(1) text editor. If "ed" is not installed
+by default (e.g., Fedora Core 5), it must be installed first.
 2) Edit "test_builddir.py" and set the "BUILDDIR" variable to the top
 of your build tree.
 3) As root start the rtrmgr and test harness by running
