@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.27 2005/11/05 01:44:20 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.28 2006/03/16 00:05:36 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -394,14 +394,8 @@ ExtIntTable<A>::resolve_unresolved_nexthops(const IPRouteEntry<A>& nexthop_route
 	    _ip_unresolved_table.erase(unresolved_route->net());
 	    delete unresolved_entry;
 
-	    // Instantiate a route for it in the resolved_route table
-	    const ResolvedIPRouteEntry<A>* resolved_route;
-	    resolved_route = resolve_and_store_route(*unresolved_route,
-						     &nexthop_route);
-
-	    // Propagate to downsteam tables
-	    if (this->next_table() != NULL)
-		this->next_table()->add_route(*resolved_route, this);
+	    // Reinstantiate the resolved route
+	    add_route(*unresolved_route, _ext_table);
 
 	    rpair = nextpair;
 	} else {
