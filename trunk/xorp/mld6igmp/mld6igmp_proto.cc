@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.36 2006/06/22 15:58:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.37 2006/06/23 00:18:23 pavlin Exp $"
 
 
 //
@@ -125,18 +125,6 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	    return (XORP_ERROR);
 	} while (false);
 	XLOG_ASSERT(message_version > 0);
-
-	if (message_version == IGMP_V1) {
-	    //
-	    // A query from a IGMPv1 router.
-	    // Start a timer that this interface is running in V1 mode.
-	    //
-	    // TODO: set the timer for any router or only if I am a querier?
-	    _igmpv1_router_present_timer =
-		mld6igmp_node().eventloop().set_flag_after(
-		    TimeVal(IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT, 0),
-		    &_dummy_flag);
-	}
 
 	//
 	// TODO: XXX: PAVPAVPAV: do appropriate checks if an interface

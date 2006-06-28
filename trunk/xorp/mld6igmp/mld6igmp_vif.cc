@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.61 2006/06/22 19:35:17 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.62 2006/06/23 00:18:23 pavlin Exp $"
 
 
 //
@@ -334,7 +334,6 @@ Mld6igmpVif::stop(string& error_msg)
     set_querier_addr(IPvX::ZERO(family()));		// XXX: ANY
     _other_querier_timer.unschedule();
     _query_timer.unschedule();
-    _igmpv1_router_present_timer.unschedule();
     _startup_query_count = 0;
     
     // Notify routing and remove all group records
@@ -1406,7 +1405,7 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
  * @: 
  * 
  * Tests if the interface is running in IGMPv1 mode.
- * XXX: applies only to IGMP, and not to MLD.
+ * XXX: Applies only to IGMP.
  * 
  * Return value: true if the interface is running in IGMPv1 mode,
  * otherwise false.
@@ -1414,9 +1413,71 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 bool
 Mld6igmpVif::is_igmpv1_mode() const
 {
-    return (proto_is_igmp()
-	    && ((proto_version() == IGMP_V1)
-		|| _igmpv1_router_present_timer.scheduled()));
+    return (proto_is_igmp() && (proto_version() == IGMP_V1));
+}
+
+/**
+ * Mld6igmpVif::is_igmpv2_mode:
+ * @: 
+ * 
+ * Tests if the interface is running in IGMPv2 mode.
+ * XXX: Applies only to IGMP.
+ * 
+ * Return value: true if the interface is running in IGMPv2 mode,
+ * otherwise false.
+ **/
+bool
+Mld6igmpVif::is_igmpv2_mode() const
+{
+    return (proto_is_igmp() && (proto_version() == IGMP_V2));
+}
+
+/**
+ * Mld6igmpVif::is_igmpv3_mode:
+ * @: 
+ * 
+ * Tests if the interface is running in IGMPv3 mode.
+ * XXX: Applies only to IGMP.
+ * 
+ * Return value: true if the interface is running in IGMPv3 mode,
+ * otherwise false.
+ **/
+bool
+Mld6igmpVif::is_igmpv3_mode() const
+{
+    return (proto_is_igmp() && (proto_version() == IGMP_V3));
+}
+
+/**
+ * Mld6igmpVif::is_mldv1_mode:
+ * @: 
+ * 
+ * Tests if the interface is running in MLDv1 mode.
+ * XXX: Applies only to MLD.
+ * 
+ * Return value: true if the interface is running in MLDv1 mode,
+ * otherwise false.
+ **/
+bool
+Mld6igmpVif::is_mldv1_mode() const
+{
+    return (proto_is_mld6() && (proto_version() == MLD_V1));
+}
+
+/**
+ * Mld6igmpVif::is_mldv2_mode:
+ * @: 
+ * 
+ * Tests if the interface is running in MLDv2 mode.
+ * XXX: Applies only to MLD.
+ * 
+ * Return value: true if the interface is running in MLDv2 mode,
+ * otherwise false.
+ **/
+bool
+Mld6igmpVif::is_mldv2_mode() const
+{
+    return (proto_is_mld6() && (proto_version() == MLD_V2));
 }
 
 /**

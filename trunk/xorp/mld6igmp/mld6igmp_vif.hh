@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.34 2006/06/22 19:35:17 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.35 2006/06/23 00:18:23 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -466,6 +466,10 @@ private:
     // Private functions
     //
     bool	is_igmpv1_mode() const;	// XXX: applies only to IGMP
+    bool	is_igmpv2_mode() const;	// XXX: applies only to IGMP
+    bool	is_igmpv3_mode() const;	// XXX: applies only to IGMP
+    bool	is_mldv1_mode() const;	// XXX: applies only to MLD
+    bool	is_mldv2_mode() const;	// XXX: applies only to MLD
     const char	*proto_message_type2ascii(uint8_t message_type) const;
     buffer_t	*buffer_send_prepare();
 
@@ -509,8 +513,6 @@ private:
     IPvX	_querier_addr;		// IP address of the current querier
     XorpTimer	_other_querier_timer;	// To timeout the (other) 'querier'
     XorpTimer	_query_timer;		// Timer to send queries
-    XorpTimer	_igmpv1_router_present_timer;	// IPGPv1 router present timer
-						// XXX: does not apply to MLD
     uint8_t	_startup_query_count;	// Number of queries to send quickly
 					// during startup
     Mld6igmpGroupSet _group_records;	// The group records
