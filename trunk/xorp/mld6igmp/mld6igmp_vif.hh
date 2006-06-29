@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.35 2006/06/23 00:18:23 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.36 2006/06/28 08:50:13 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -61,7 +61,7 @@ public:
     /**
      * Destructor
      */
-    virtual ~Mld6igmpVif();
+    virtual	~Mld6igmpVif();
 
     /**
      * Set the current protocol version.
@@ -250,7 +250,7 @@ public:
      *
      * @param v the value of the effective Query Interval.
      */
-    void set_effective_query_interval(const TimeVal& v);
+    void	set_effective_query_interval(const TimeVal& v);
 
     /**
      * Optain a reference to the Last Member Query Interval.
@@ -281,7 +281,7 @@ public:
      *
      * @return the value of the effective Robustness Variable.
      */
-    uint32_t effective_robustness_variable() const { return (_effective_robustness_variable); }
+    uint32_t	effective_robustness_variable() const { return (_effective_robustness_variable); }
 
     /**
      * Set the effective Robustness Variable.
@@ -291,7 +291,7 @@ public:
      *
      * @param v the value of the effective Robustness Variable.
      */
-    void set_effective_robustness_variable(uint32_t v);
+    void	set_effective_robustness_variable(uint32_t v);
 
     /**
      * Get the Last Member Query Count value.
@@ -304,7 +304,7 @@ public:
      *
      * @return the value of the Last Member Query Count.
      */
-    uint32_t last_member_query_count() const { return (_last_member_query_count); }
+    uint32_t	last_member_query_count() const { return (_last_member_query_count); }
 
     /**
      * Obtain a reference to the Group Membership Interval.
@@ -344,8 +344,8 @@ public:
      * protocol to add.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_protocol(xorp_module_id module_id,
-		     const string& module_instance_name);
+    int		add_protocol(xorp_module_id module_id,
+			     const string& module_instance_name);
     
     /**
      * Delete a protocol that needs to be notified about multicast membership
@@ -360,8 +360,8 @@ public:
      * protocol to delete.
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int delete_protocol(xorp_module_id module_id,
-			const string& module_instance_name);
+    int		delete_protocol(xorp_module_id module_id,
+				const string& module_instance_name);
 
     /**
      * Notify the interested parties that there is membership change among
@@ -373,7 +373,7 @@ public:
      * @param action_jp the membership change: @ref ACTION_JOIN
      * or @ref ACTION_PRUNE.
      * @return XORP_OK on success, otherwise XORP_ERROR.
-     **/
+     */
     int		join_prune_notify_routing(const IPvX& source,
 					  const IPvX& group,
 					  action_jp_t action_jp) const;
@@ -421,9 +421,9 @@ public:
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
-    int mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
-					     const set<IPvX>& sources,
-					     string& error_msg);
+    int		mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
+						     const set<IPvX>& sources,
+						     string& error_msg);
 
     /**
      * Send MLD or IGMP Query message.
@@ -461,16 +461,64 @@ public:
 					bool s_flag,
 					string& error_msg);
 
+    /**
+     * Test if the interface is running in IGMPv1 mode.
+     *
+     * @return true if the interface is running in IGMPv1 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv1_mode() const;
+
+    /**
+     * Test if the interface is running in IGMPv2 mode.
+     *
+     * @return true if the interface is running in IGMPv2 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv2_mode() const;
+
+    /**
+     * Test if the interface is running in IGMPv3 mode.
+     *
+     * @return true if the interface is running in IGMPv3 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv3_mode() const;
+
+    /**
+     * Test if the interface is running in MLDv1 mode.
+     *
+     * @return true if the interface is running in MLDv1 mode,
+     * otherwise false.
+     */
+    bool	is_mldv1_mode() const;
+
+    /**
+     * Test if the interface is running in MLDv2 mode.
+     *
+     * @return true if the interface is running in MLDv2 mode,
+     * otherwise false.
+     */
+    bool	is_mldv2_mode() const;
+
 private:
     //
     // Private functions
     //
-    bool	is_igmpv1_mode() const;	// XXX: applies only to IGMP
-    bool	is_igmpv2_mode() const;	// XXX: applies only to IGMP
-    bool	is_igmpv3_mode() const;	// XXX: applies only to IGMP
-    bool	is_mldv1_mode() const;	// XXX: applies only to MLD
-    bool	is_mldv2_mode() const;	// XXX: applies only to MLD
+
+    /**
+     * Return the ASCII text description of the protocol message.
+     *
+     * @param message_type the protocol message type.
+     * @return the ASCII text descrpition of the protocol message.
+     */
     const char	*proto_message_type2ascii(uint8_t message_type) const;
+
+    /**
+     * Reset and prepare the buffer for sending data.
+     *
+     * @return the prepared buffer.
+     */
     buffer_t	*buffer_send_prepare();
 
     /**
