@@ -1,5 +1,4 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
-// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2006 International Computer Science Institute
 //
@@ -13,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.6 2006/03/16 00:03:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_rtsock.cc,v 1.13 2006/03/16 00:03:53 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -24,39 +23,28 @@
 #include "fticonfig.hh"
 #include "fticonfig_table_set.hh"
 
-#ifdef HAVE_WINDOWS_H
-#include <windows.h>
-#endif
-
-#include "libxorp/win_io.h"
 
 //
 // Set whole-table information into the unicast forwarding table.
 //
-// The mechanism to set the information is the IP Helper API for
-// Windows (IPHLPAPI.DLL).
+// The mechanism to set the information is Router Manager V2.
 //
 
 
-FtiConfigTableSetIPHelper::FtiConfigTableSetIPHelper(FtiConfig& ftic)
+FtiConfigTableSetRtmV2::FtiConfigTableSetRtmV2(FtiConfig& ftic)
     : FtiConfigTableSet(ftic)
 {
 #ifdef HOST_OS_WINDOWS
     register_ftic_primary();
-
-    if (WinSupport::is_rras_running()) {
-	XLOG_WARNING("Windows Routing and Remote Access Service is running.\n"
-		     "Some change operations through IP Helper may not work.");
-    }
 #endif
 }
 
-FtiConfigTableSetIPHelper::~FtiConfigTableSetIPHelper()
+FtiConfigTableSetRtmV2::~FtiConfigTableSetRtmV2()
 {
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the IP Helper mechanism to set "
+	XLOG_ERROR("Cannot stop the Router Manager V2 mechanism to set "
 		   "whole forwarding table from the underlying "
 		   "system: %s",
 		   error_msg.c_str());
@@ -64,7 +52,7 @@ FtiConfigTableSetIPHelper::~FtiConfigTableSetIPHelper()
 }
 
 int
-FtiConfigTableSetIPHelper::start(string& error_msg)
+FtiConfigTableSetRtmV2::start(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -86,7 +74,7 @@ FtiConfigTableSetIPHelper::start(string& error_msg)
 }
 
 int
-FtiConfigTableSetIPHelper::stop(string& error_msg)
+FtiConfigTableSetRtmV2::stop(string& error_msg)
 {
     UNUSED(error_msg);
 
@@ -107,7 +95,7 @@ FtiConfigTableSetIPHelper::stop(string& error_msg)
 }
 
 bool
-FtiConfigTableSetIPHelper::set_table4(const list<Fte4>& fte_list)
+FtiConfigTableSetRtmV2::set_table4(const list<Fte4>& fte_list)
 {
     list<Fte4>::const_iterator iter;
 
@@ -121,7 +109,7 @@ FtiConfigTableSetIPHelper::set_table4(const list<Fte4>& fte_list)
 }
 
 bool
-FtiConfigTableSetIPHelper::delete_all_entries4()
+FtiConfigTableSetRtmV2::delete_all_entries4()
 {
     list<Fte4> fte_list;
     list<Fte4>::const_iterator iter;
@@ -140,7 +128,7 @@ FtiConfigTableSetIPHelper::delete_all_entries4()
 }
 
 bool
-FtiConfigTableSetIPHelper::set_table6(const list<Fte6>& fte_list)
+FtiConfigTableSetRtmV2::set_table6(const list<Fte6>& fte_list)
 {
     list<Fte6>::const_iterator iter;
     
@@ -154,7 +142,7 @@ FtiConfigTableSetIPHelper::set_table6(const list<Fte6>& fte_list)
 }
     
 bool
-FtiConfigTableSetIPHelper::delete_all_entries6()
+FtiConfigTableSetRtmV2::delete_all_entries6()
 {
     list<Fte6> fte_list;
     list<Fte6>::const_iterator iter;

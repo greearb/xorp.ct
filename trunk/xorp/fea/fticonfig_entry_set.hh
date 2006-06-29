@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.21 2006/03/16 00:03:51 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_set.hh,v 1.22 2006/03/30 08:32:11 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_SET_HH__
 #define __FEA_FTICONFIG_ENTRY_SET_HH__
@@ -28,6 +28,7 @@
 #include "click_socket.hh"
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
+#include "win_rtm_pipe.hh"
 
 class FtiConfig;
 
@@ -538,6 +539,72 @@ public:
     virtual bool delete_entry6(const Fte6& fte);
 
 private:
+    bool add_entry(const FteX& fte);
+    bool delete_entry(const FteX& fte);
+};
+
+class FtiConfigEntrySetRtmV2 : public FtiConfigEntrySet {
+public:
+    FtiConfigEntrySetRtmV2(FtiConfig& ftic);
+    virtual ~FtiConfigEntrySetRtmV2();
+
+    /**
+     * Start operation.
+     *
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+
+    /**
+     * Stop operation.
+     *
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Add a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry4(const Fte4& fte);
+
+    /**
+     * Delete a single routing entry. Must be with a configuration interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry4(const Fte4& fte);
+
+    /**
+     * Add a single routing entry. Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to add.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool add_entry6(const Fte6& fte);
+
+    /**
+     * Delete a single routing entry.  Must be within a configuration
+     * interval.
+     *
+     * @param fte the entry to delete. Only destination and netmask are used.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_entry6(const Fte6& fte);
+
+private:
+    WinRtmPipe*		_rs4;
+    WinRtmPipe*		_rs6;
     bool add_entry(const FteX& fte);
     bool delete_entry(const FteX& fte);
 };

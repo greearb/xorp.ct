@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.15 2005/10/27 19:49:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.16 2006/03/16 00:03:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,6 +22,9 @@
 
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
+#ifdef HOST_OS_WINDOWS
+#include "win_rtsock.h"
 #endif
 
 #include "fticonfig.hh"
@@ -39,7 +42,7 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-#ifndef HAVE_ROUTING_SOCKETS
+#if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
 FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
 				    size_t , FtiFibMsgSet)
@@ -74,8 +77,10 @@ FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
 	    continue;
 
 	if (filter & FtiFibMsg::GETS) {
+#ifdef RTM_GET
 	    if ((rtm->rtm_type == RTM_GET) && (rtm->rtm_flags & RTF_UP))
 		filter_match = true;
+#endif
 	}
 
 	// Upcalls may not be supported in some BSD derived implementations.

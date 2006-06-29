@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.11 2005/08/18 15:45:44 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.12 2006/03/16 00:03:50 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,6 +22,9 @@
 
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>
+#endif
+#ifdef HOST_OS_WINDOWS
+#include "win_rtsock.h"
 #endif
 
 #include "fticonfig.hh"
@@ -39,7 +42,7 @@
 // Reading route(4) manual page is a good start for understanding this
 //
 
-#ifndef HAVE_ROUTING_SOCKETS
+#if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
 FtiConfigEntryGet::parse_buffer_rtm(FteX& , const uint8_t* , size_t ,
 				    FtiFibMsgSet)
@@ -74,9 +77,11 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const uint8_t* buf,
 
 	// Caller wants route gets to be parsed.
 	if (filter & FtiFibMsg::GETS) {
+#ifdef RTM_GET
 	    if ((rtm->rtm_type == RTM_GET) &&
 	        (rtm->rtm_flags & RTF_UP))
 		filter_match = true;
+#endif
 	}
 
 	// Caller wants route resolves to be parsed.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.15 2006/03/16 00:03:50 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_observer.hh,v 1.16 2006/03/30 08:32:11 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
 #define __FEA_FTICONFIG_ENTRY_OBSERVER_HH__
@@ -209,4 +209,29 @@ public:
     virtual void receive_data(const uint8_t* data, size_t nbytes);
 };
 
+class FtiConfigEntryObserverRtmV2 : public FtiConfigEntryObserver {
+public:
+    FtiConfigEntryObserverRtmV2(FtiConfig& ftic);
+    virtual ~FtiConfigEntryObserverRtmV2();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+    
+private:
+
+};
+    
 #endif // __FEA_FTICONFIG_ENTRY_OBSERVER_HH__

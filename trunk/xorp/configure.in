@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.167 2006/06/20 11:58:19 bms Exp $
+dnl $XORP: xorp/configure.in,v 1.169 2006/06/20 17:02:56 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.167 2006/06/20 11:58:19 bms Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.169 2006/06/20 17:02:56 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -909,7 +909,7 @@ dnl Win32/64 specific flags go here.
 dnl
 if test "${_USING_WINDOWS}" = "1"; then
 	LDFLAGS="${LDFLAGS} -mconsole"
-	LIBS="${LIBS} -lws2_32 -liphlpapi -ladvapi32"
+	LIBS="${LIBS} -lws2_32 -liphlpapi -lmprapi -ladvapi32"
 fi
 
 dnl

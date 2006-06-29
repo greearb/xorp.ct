@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/win_io.h,v 1.4 2005/12/22 11:48:06 pavlin Exp $
+ * $XORP: xorp/libxorp/win_io.h,v 1.5 2006/03/16 00:04:38 pavlin Exp $
  */
 
 #ifndef __LIBXORP_WIN_IO_H__
@@ -30,7 +30,9 @@ extern "C" {
 int win_strerror_r(DWORD errnum, char *strerrbuf, size_t buflen);
 char *win_strerror(DWORD errnum);
 
-#define WINIO_ERROR_HASINPUT (-2)	/* Data is ready to be read */
+#define WINIO_ERROR_IOERROR	(-1)	/* An I/O error on the pipe */
+#define WINIO_ERROR_HASINPUT	(-2)	/* Data is ready to be read */
+#define WINIO_ERROR_DISCONNECT	(-3)	/* The pipe was disconnected */
 
 ssize_t	win_con_read(HANDLE h, void *buf, size_t bufsize);
 ssize_t	win_pipe_read(HANDLE h, void *buf, size_t bufsize);

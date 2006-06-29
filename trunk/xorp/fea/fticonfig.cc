@@ -1,4 +1,5 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2006 International Computer Science Institute
 //
@@ -12,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.49 2006/03/22 00:41:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.50 2006/04/03 04:04:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -48,6 +49,7 @@
 
 #ifdef HOST_OS_WINDOWS
 #include "libxorp/win_io.h"
+#include "win_rtsock.h"
 #endif
 
 #define PROC_LINUX_FILE_FORWARDING_V4 "/proc/sys/net/ipv4/ip_forward"
@@ -85,16 +87,19 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
       _ftic_entry_get_rtsock(*this),
       _ftic_entry_get_netlink(*this),
       _ftic_entry_get_iphelper(*this),
+      //_ftic_entry_get_rtmv2(*this),
       _ftic_entry_get_click(*this),
       _ftic_entry_set_dummy(*this),
       _ftic_entry_set_rtsock(*this),
       _ftic_entry_set_netlink(*this),
       _ftic_entry_set_iphelper(*this),
+      _ftic_entry_set_rtmv2(*this),
       _ftic_entry_set_click(*this),
       _ftic_entry_observer_dummy(*this),
       _ftic_entry_observer_rtsock(*this),
       _ftic_entry_observer_netlink(*this),
       _ftic_entry_observer_iphelper(*this),
+      //_ftic_entry_observer_rtmv2(*this),
       _ftic_table_get_dummy(*this),
       _ftic_table_get_sysctl(*this),
       _ftic_table_get_netlink(*this),
@@ -104,11 +109,13 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
       _ftic_table_set_rtsock(*this),
       _ftic_table_set_netlink(*this),
       _ftic_table_set_iphelper(*this),
+      //_ftic_table_set_rtmv2(*this),
       _ftic_table_set_click(*this),
       _ftic_table_observer_dummy(*this),
       _ftic_table_observer_rtsock(*this),
       _ftic_table_observer_netlink(*this),
       _ftic_table_observer_iphelper(*this),
+      _ftic_table_observer_rtmv2(*this),
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
@@ -1946,21 +1953,31 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
     }
 #elif defined(HOST_OS_WINDOWS)
     if (enable) {
+	if (WinSupport::is_rras_running()) {
+	    XLOG_WARNING(
+"RRAS is running; ignoring request to enable IPv4 forwarding.");
+	    return (XORP_OK);
+	}
 	HANDLE hFwd;
 	DWORD result = EnableRouter(&hFwd, &_overlapped);
 	if (result != ERROR_IO_PENDING) {
 	    error_msg = c_format("Error '%s' from EnableRouter",
 				 win_strerror(GetLastError()));
 	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
+	    return (XORP_OK);	// XXX: This error is non-fatal.
 	}
 	++_enablecnt;
     } else {
+	if (WinSupport::is_rras_running()) {
+	    XLOG_WARNING(
+"RRAS is running; ignoring request to disable IPv4 forwarding.");
+	    return (XORP_OK);
+	}
 	if (_enablecnt == 0) {
-	    error_msg = c_format("UnableRouter() called without any previous "
+	    error_msg = c_format("UnenableRouter() called without any previous "
 				 "call to EnableRouter()");
 	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
+	    return (XORP_OK);	// XXX: This error is non-fatal.
 	}
 
 	DWORD result = UnenableRouter(&_overlapped, NULL);
@@ -1968,7 +1985,7 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	    error_msg = c_format("Error '%s' from UnenableRouter",
 				 win_strerror(GetLastError()));
 	    XLOG_ERROR("%s", error_msg.c_str());
-	    return (XORP_ERROR);
+	    return (XORP_OK);	// XXX: This error is non-fatal.
 	}
 	--_enablecnt;
     }

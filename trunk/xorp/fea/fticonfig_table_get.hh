@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.21 2006/03/16 00:03:51 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.22 2006/03/30 08:32:11 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -325,6 +325,51 @@ class FtiConfigTableGetIPHelper : public FtiConfigTableGet {
 public:
     FtiConfigTableGetIPHelper(FtiConfig& ftic);
     virtual ~FtiConfigTableGetIPHelper();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool get_table4(list<Fte4>& fte_list);
+
+    /**
+     * Obtain the unicast forwarding table.
+     *
+     * @param fte_list the return-by-reference list with all entries in
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool get_table6(list<Fte6>& fte_list);
+
+private:
+    bool get_table(int family, list<FteX>& fte_list);
+};
+
+class FtiConfigTableGetRtmV2 : public FtiConfigTableGet {
+public:
+    FtiConfigTableGetRtmV2(FtiConfig& ftic);
+    virtual ~FtiConfigTableGetRtmV2();
 
     /**
      * Start operation.

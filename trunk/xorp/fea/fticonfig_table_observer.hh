@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.16 2006/03/16 00:03:52 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.17 2006/03/30 08:32:11 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 
 #include "netlink_socket.hh"
 #include "routing_socket.hh"
+#include "win_rtm_pipe.hh"
 
 
 class FtiConfig;
@@ -164,6 +165,57 @@ public:
     
 private:
     
+};
+
+
+class FtiConfigTableObserverRtmV2 : public FtiConfigTableObserver {
+public:
+    FtiConfigTableObserverRtmV2(FtiConfig& ftic);
+    virtual ~FtiConfigTableObserverRtmV2();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+    
+    /**
+     * Receive data from the underlying system.
+     * 
+     * @param data the buffer with the received data.
+     * @param nbytes the number of bytes in the data buffer @ref data.
+     */
+    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    
+private:
+    class RtmV2Observer : public WinRtmPipeObserver {
+    public:
+    	RtmV2Observer(WinRtmPipe& rs, int af,
+		      FtiConfigTableObserverRtmV2& rtmo)
+	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
+    	virtual ~RtmV2Observer() {}
+	void rtsock_data(const uint8_t* data, size_t nbytes) {
+	    _rtmo.receive_data(data, nbytes);
+	}
+    private:
+	int _af;
+    	FtiConfigTableObserverRtmV2& _rtmo;
+    };
+private:
+    WinRtmPipe*		_rs4;
+    RtmV2Observer*	_rso4;
+    WinRtmPipe*		_rs6;
+    RtmV2Observer*	_rso6;
 };
 
 class FtiConfigTableObserverNetlink : public FtiConfigTableObserver,

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.9 2006/03/17 21:02:26 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.10 2006/03/17 21:55:48 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -202,10 +202,11 @@ WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
     // than an IOT_EXCEPTION event on a Windows object handle because
     // there is no way of telling why an object was signalled --
     // they are 'special'.
-    if (fd.is_pipe() || fd.is_console())
-	XLOG_ASSERT(type == IOT_READ);
-    else
+    if (fd.is_pipe() || fd.is_console()) {
+	XLOG_ASSERT(type == IOT_READ || type == IOT_DISCONNECT);
+    } else {
 	XLOG_ASSERT(type == IOT_EXCEPTION);
+    }
 
     // Check that we haven't exceeded the handle limit.
     if (_handles.size() == MAXIMUM_WAIT_OBJECTS) {
@@ -343,7 +344,7 @@ bool
 WinDispatcher::remove_handle_cb(XorpFd& fd, IoEventType type)
 {
     if (fd.is_pipe()) {
-	XLOG_ASSERT(type == IOT_READ);
+	XLOG_ASSERT(type == IOT_READ || type == IOT_DISCONNECT);
 	for (vector<HANDLE>::iterator ii = _polled_pipes.begin();
 	    ii != _polled_pipes.end(); ++ii) {
 	    if (*ii == fd) {
@@ -482,10 +483,23 @@ WinDispatcher::dispatch_pipe_reads()
 	ii != _polled_pipes.end(); ii++) {
 	result = win_pipe_read(*ii, NULL, 0);
 	if (result == WINIO_ERROR_HASINPUT) {
+	    //
+	    // Polled pipes *must* have a read handler.
+	    //
 	    IoEventMap::iterator jj =
 _callback_map.find(IoEventTuple(*ii, IOT_READ));
 	    XLOG_ASSERT(jj != _callback_map.end());
 	    jj->second->dispatch(*ii, IOT_READ);
+	} else if (result == WINIO_ERROR_DISCONNECT) {
+	    //
+	    // Polled pipes may optionally have a disconnection handler.
+	    // This is used by the FEA.
+	    //
+	    IoEventMap::iterator jj =
+_callback_map.find(IoEventTuple(*ii, IOT_DISCONNECT));
+	    if (jj != _callback_map.end()) {
+		jj->second->dispatch(*ii, IOT_DISCONNECT);
+	    }
 	}
     }
 }

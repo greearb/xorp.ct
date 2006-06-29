@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fea.cc,v 1.55 2006/03/16 00:03:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/fea.cc,v 1.56 2006/04/03 06:35:33 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -128,6 +128,25 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     //
     NexthopPortMapper nexthop_port_mapper;
 
+#ifdef HOST_OS_WINDOWS
+    //
+    // Load support code for Windows Router Manager V2, if it
+    // is detected as running and/or configured.
+    //
+    if (WinSupport::is_rras_running()) {
+	WinSupport::add_protocol_to_registry(AF_INET);
+#if 0
+	WinSupport::add_protocol_to_registry(AF_INET6);
+#endif
+	WinSupport::restart_rras();
+	WinSupport::add_protocol_to_rras(AF_INET);
+#if 0
+	WinSupport::add_protocol_to_rras(AF_INET6);
+#endif
+	TimerList::system_sleep(TimeVal(2,0));
+    }
+#endif // HOST_OS_WINDOWS
+
     //
     // Interface Configurator and reporters
     //
@@ -169,11 +188,16 @@ fea_main(const string& finder_hostname, uint16_t finder_port)
     // FtiConfig
     //
 #ifdef HOST_OS_WINDOWS
-    // XXX: This is an evil, evil, evil, EVIL hack.
-    FtiConfig fticonfig(eventloop, profile, ifconfig.live_config(), nexthop_port_mapper);
-#else
-    FtiConfig fticonfig(eventloop, profile, ifm.iftree(), nexthop_port_mapper);
-#endif
+    //
+    // XXX: Windows FtiConfig needs to see the *live* ifconfig tree.
+    //
+    FtiConfig fticonfig(eventloop, profile, ifconfig.live_config(),
+			nexthop_port_mapper);
+#else // ! HOST_OS_WINDOWS
+    FtiConfig fticonfig(eventloop, profile, ifm.iftree(),
+			nexthop_port_mapper);
+#endif // HOST_OS_WINDOWS
+
     if (is_dummy)
 	fticonfig.set_dummy();
     if (fticonfig.start(error_msg) != XORP_OK) {

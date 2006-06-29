@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.37 2006/03/16 00:03:49 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.38 2006/03/22 00:41:10 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -35,6 +35,7 @@ typedef unsigned long FtiFibMsgSet;
 #include "fticonfig_table_set.hh"
 #include "fticonfig_table_observer.hh"
 #include "iftree.hh"
+#include "win_support.hh"
 
 class EventLoop;
 class FtiConfigEntryGet;
@@ -588,6 +589,7 @@ private:
     FtiConfigEntryGetRtsock	_ftic_entry_get_rtsock;
     FtiConfigEntryGetNetlink	_ftic_entry_get_netlink;
     FtiConfigEntryGetIPHelper	_ftic_entry_get_iphelper;
+    //FtiConfigEntryGetRtmV2	_ftic_entry_get_rtmv2;
 
     //
     // The secondary mechanisms to get single-entry information
@@ -608,6 +610,7 @@ private:
     FtiConfigEntrySetRtsock	_ftic_entry_set_rtsock;
     FtiConfigEntrySetNetlink	_ftic_entry_set_netlink;
     FtiConfigEntrySetIPHelper	_ftic_entry_set_iphelper;
+    FtiConfigEntrySetRtmV2	_ftic_entry_set_rtmv2;
 
     //
     // The secondary mechanisms to set single-entry information
@@ -631,6 +634,7 @@ private:
     FtiConfigEntryObserverRtsock	_ftic_entry_observer_rtsock;
     FtiConfigEntryObserverNetlink	_ftic_entry_observer_netlink;
     FtiConfigEntryObserverIPHelper	_ftic_entry_observer_iphelper;
+    //FtiConfigEntryObserverRtmV2		_ftic_entry_observer_rtmv2;
 
     //
     // The primary mechanisms to get the whole table information
@@ -663,6 +667,7 @@ private:
     FtiConfigTableSetRtsock	_ftic_table_set_rtsock;
     FtiConfigTableSetNetlink	_ftic_table_set_netlink;
     FtiConfigTableSetIPHelper	_ftic_table_set_iphelper;
+    //FtiConfigTableSetRtmV2	_ftic_table_set_rtmv2;
 
     //
     // The secondary mechanisms to set the whole table information
@@ -686,6 +691,7 @@ private:
     FtiConfigTableObserverRtsock	_ftic_table_observer_rtsock;
     FtiConfigTableObserverNetlink	_ftic_table_observer_netlink;
     FtiConfigTableObserverIPHelper	_ftic_table_observer_iphelper;
+    FtiConfigTableObserverRtmV2		_ftic_table_observer_rtmv2;
     
     //
     // Original state from the underlying system before the FEA was started
@@ -719,5 +725,15 @@ private:
 namespace FtiFibMsg {
 	const unsigned long	UPDATES = 0x1, GETS = 0x2, RESOLVES = 0x4;
 };
+
+#ifdef HOST_OS_WINDOWS
+//
+// Helper functions for managing the Remote Access service.
+//
+bool is_rras_running(void);
+int add_protocol_to_rras(int family);
+int add_protocol_to_registry(int family);
+int restart_rras(void);
+#endif // HOST_OS_WINDOWS
 
 #endif	// __FEA_FTICONFIG_HH__

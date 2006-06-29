@@ -15,7 +15,7 @@
  *
  */
 
-#ident "$XORP: xorp/libxorp/win_io.c,v 1.5 2006/03/01 13:03:17 bms Exp $"
+#ident "$XORP: xorp/libxorp/win_io.c,v 1.6 2006/03/16 00:04:38 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -226,8 +226,10 @@ win_con_read(HANDLE h, void *buf, size_t bufsize)
     result = PeekConsoleInputA(h, inr, sizeof(inr)/sizeof(inr[0]),
 			       &nevents);
     if (result == FALSE) {
+#if 0
 	fprintf(stderr, "PeekConsoleInputA() error: %s\n",
 		win_strerror(GetLastError()));
+#endif
         return (-1);
     }
 
@@ -272,13 +274,22 @@ win_con_read(HANDLE h, void *buf, size_t bufsize)
  * If the handle passed to this function is not a Windows pipe handle, the
  * results are undefined.
  *
+ * XXX: This function is designed to work with byte-mode pipes. Because
+ * a message-mode pipe may be opened in byte-mode for read, we rely on
+ * the client consuming all data as it becomes available, i.e. we do not
+ * make a distinction between byte-mode and message-mode pipes. This only
+ * applies to the client side of code which connects to a *named* pipe
+ * and uses this function to read from it.
+ *
  * @param h Windows pipe handle.
  * @param buf pointer to an input buffer where input is to be stored.
  * @param bufsize size of the input buffer.
- * @return the number of bytes read; 0 if the function would have blocked
- * waiting for input; -1 if any other error occurred.
- * -2 if there is data waiting but the function was called with invalid
- * buf and bufsize arguments.
+ * @return the number of bytes read, or an error code;
+ *   0 if the function would have blocked waiting for input;
+ *  -1 if a general I/O error occurred;
+ *  -2 if there is data waiting but the function was called with invalid
+ *     buf and bufsize arguments;
+ *  -3 if the pipe was disconnected or broken.
  */
 ssize_t
 win_pipe_read(HANDLE h, void *buf, size_t bufsize)
@@ -289,15 +300,20 @@ win_pipe_read(HANDLE h, void *buf, size_t bufsize)
 
     result = PeekNamedPipe(h, NULL, 0, NULL, &nbytesavail, NULL);
     if (result == FALSE) {
-	fprintf(stderr, "PeekNamedPipe() error: %s\n",
-		win_strerror(GetLastError()));
-	return (-1);
+	result = GetLastError();
+#if 0
+	fprintf(stderr, "PeekNamedPipe() error: %s\n", win_strerror(result));
+#endif
+	if (result == ERROR_BROKEN_PIPE ||
+	    result == ERROR_PIPE_NOT_CONNECTED)
+	    return (WINIO_ERROR_DISCONNECT);
+	return (WINIO_ERROR_IOERROR);
     }
 
     if (buf == NULL || bufsize == 0) {
 	if (nbytesavail > 0)
 	    return (WINIO_ERROR_HASINPUT);
-	return (-1);
+	return (WINIO_ERROR_IOERROR);
     }
 
     nbytesread = 0;
@@ -307,9 +323,11 @@ win_pipe_read(HANDLE h, void *buf, size_t bufsize)
 	    nbytesavail = bufsize;
 	result = ReadFile(h, buf, nbytesavail, &dwbytesread, NULL);
 	if (result == FALSE) {
+#if 0
 	    fprintf(stderr, "ReadFile() error: %s\n",
 		    win_strerror(GetLastError()));
-	    return (-1);
+#endif
+	    return (WINIO_ERROR_IOERROR);
 	}
 	nbytesread = (ssize_t)dwbytesread;
     }

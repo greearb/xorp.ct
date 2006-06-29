@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.9 2006/03/30 15:23:09 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.10 2006/03/30 19:23:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -212,6 +212,23 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
     ipfwdrow.dwForwardIfIndex = ii->second.pif_index();
     ipfwdrow.dwForwardProto = PROTO_IP_NETMGMT;
     ipfwdrow.dwForwardType = MIB_IPROUTE_TYPE_OTHER;
+    //
+    // The following fields *must* be filled out if RRAS is running.
+    // XXX: Should obtain interface metric and use that; we use a hard
+    // coded metric of 20 because other values do not work.
+    //
+    ipfwdrow.dwForwardAge = INFINITE;
+    ipfwdrow.dwForwardMetric1 = 20;
+#if 0
+    // Filling out the fields in this way doesn't work;
+    // seems we must set a valid metric for the first metric field
+    ipfwdrow.dwForwardMetric1 = ipfwdrow.dwForwardMetric2 =
+	ipfwdrow.dwForwardMetric3 = ipfwdrow.dwForwardMetric4 =
+	ipfwdrow.dwForwardMetric5 = MIB_IPROUTE_METRIC_UNUSED;
+#endif
+#if 1
+    XLOG_INFO("ipfwdrow: %08lx/%08lx pol %lu nh %08lx index %lu t %lu p %lu a %lu as %lu metrics %lu %lu %lu %lu %lu", ipfwdrow.dwForwardDest, ipfwdrow.dwForwardMask, ipfwdrow.dwForwardPolicy, ipfwdrow.dwForwardNextHop, ipfwdrow.dwForwardIfIndex, ipfwdrow.dwForwardType, ipfwdrow.dwForwardProto, ipfwdrow.dwForwardAge, ipfwdrow.dwForwardNextHopAS, ipfwdrow.dwForwardMetric1, ipfwdrow.dwForwardMetric2, ipfwdrow.dwForwardMetric3, ipfwdrow.dwForwardMetric4, ipfwdrow.dwForwardMetric5);
+#endif
 
     if (is_existing) {
         result = SetIpForwardEntry(&ipfwdrow);

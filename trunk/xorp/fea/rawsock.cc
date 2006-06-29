@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.21 2006/04/03 06:15:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.22 2006/06/15 06:04:35 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -142,8 +142,15 @@ typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
 				       LPWSAOVERLAPPED,
 				       LPWSAOVERLAPPED_COMPLETION_ROUTINE);
 
+typedef INT (WINAPI * LPFN_WSASENDMSG)(SOCKET, LPWSAMSG, DWORD, LPDWORD,
+				       LPWSAOVERLAPPED,
+				       LPWSAOVERLAPPED_COMPLETION_ROUTINE);
+
 #define WSAID_WSARECVMSG \
 	{ 0xf689d7c8,0x6f1f,0x436b,{0x8a,0x53,0xe5,0x4f,0xe3,0x51,0xc3,0x22} }
+
+#define WSAID_WSASENDMSG \
+	{ 0xa441e712,0x754f,0x43ca,{0x84,0xa7,0x0d,0xee,0x44,0xcf,0x60,0x6d} }
 
 #else // ! __MINGW32__
 
@@ -158,7 +165,9 @@ typedef INT (WINAPI * LPFN_WSARECVMSG)(SOCKET, LPWSAMSG, LPDWORD,
 #ifdef HAVE_IPV6
 
 static const GUID guidWSARecvMsg = WSAID_WSARECVMSG;
+static const GUID guidWSASendMsg = WSAID_WSASENDMSG;
 static LPFN_WSARECVMSG lpWSARecvMsg = NULL;
+static LPFN_WSASENDMSG lpWSASendMsg = NULL; // Windows Longhorn and up
 
 #endif // HAVE_IPV6
 
@@ -958,6 +967,25 @@ RawSocket::open_proto_sockets(string& error_msg)
 		lpWSARecvMsg = NULL;
 	    }
 	}
+
+	// Obtain the pointer to the extension function WSASendMsg() if needed
+	// XXX: Only available on Windows Longhorn.
+	if (lpWSASendMsg == NULL) {
+	    int result;
+	    DWORD nbytes;
+
+	    result = WSAIoctl(_proto_socket_in,
+			      SIO_GET_EXTENSION_FUNCTION_POINTER,
+			      const_cast<GUID *>(&guidWSASendMsg),
+			      sizeof(guidWSASendMsg),
+			      &lpWSASendMsg, sizeof(lpWSASendMsg), &nbytes,
+			      NULL, NULL);
+	    if (result == SOCKET_ERROR) {
+		XLOG_ERROR("Cannot obtain WSASendMsg function pointer; "
+			   "unable to send raw IPv6 traffic.");
+		lpWSASendMsg = NULL;
+	    }
+	}
     }
     break;
 #endif // HAVE_IPV6
@@ -1125,8 +1153,9 @@ RawSocket::close_proto_sockets(string& error_msg)
 	    break;
 #ifdef HAVE_IPV6
 	case AF_INET6:
-	    // Reset the pointer to the extension function WSARecvMsg()
+	    // Reset the pointer to the WSARecvMsg()/WSASendMsg() functions.
 	    lpWSARecvMsg = NULL;
+	    lpWSASendMsg = NULL;
 	    break;
 #endif // HAVE_IPV6
 	default:
@@ -2222,6 +2251,8 @@ RawSocket::proto_socket_write(const string& if_name,
     }
 
 #else // HOST_OS_WINDOWS
+
+    // XXX: We may use WSASendMsg() on Longhorn to support IPv6.
 
     ret = XORP_OK;
     switch (family()) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.31 2006/03/16 00:04:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.32 2006/04/03 06:21:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,6 +44,9 @@
 #ifdef HAVE_NETINET6_IN6_VAR_H
 #include <netinet6/in6_var.h>
 #endif
+#ifdef HOST_OS_WINDOWS
+#include "win_rtsock.h"
+#endif
 
 #include "kernel_utils.hh"
 #include "routing_socket_utils.hh"
@@ -53,7 +56,7 @@
 // (e.g., obtained by routing sockets or by sysctl(3) mechanism).
 //
 
-#ifdef HAVE_ROUTING_SOCKETS
+#if defined(HOST_OS_WINDOWS) || defined(HAVE_ROUTING_SOCKETS)
 
 /**
  * @param m message type from routing socket message
@@ -149,7 +152,15 @@ next_sa(const struct sockaddr* sa)
 {
     const size_t min_size = sizeof(u_long);
     size_t sa_size = min_size;
-    
+
+#ifdef HOST_OS_WINDOWS
+    /*
+     * XXX: XORP's modified BSD-style routing socket interface
+     * to Router Manager V2 in Windows Longhorn always uses
+     * a fixed sockaddr size of sockaddr_storage.
+     */
+    sa_size = sizeof(struct sockaddr_storage);
+#else // !HOST_OS_WINDOWS 
 #ifdef HAVE_SA_LEN
     sa_size = sa->sa_len ? round_up(sa->sa_len, min_size) : min_size;
 #else // ! HAVE_SA_LEN
@@ -167,6 +178,7 @@ next_sa(const struct sockaddr* sa)
 	break;
     }
 #endif // ! HAVE_SA_LEN
+#endif // HOST_OS_WINDOWS
     
     const uint8_t* p = reinterpret_cast<const uint8_t*>(sa) + sa_size;
     return reinterpret_cast<const struct sockaddr*>(p);
@@ -182,9 +194,12 @@ RtmUtils::get_rta_sockaddr(uint32_t amask, const struct sockaddr* sock,
 	if (amask & (1 << i)) {
 #ifdef HAVE_SA_LEN
 	    sa_len = sock->sa_len;
-#endif
 	    debug_msg("\tPresent 0x%02x af %d size %u\n",
-		      1 << i, sock->sa_family, XORP_UINT_CAST(sa_len));
+		      1 << i, sock->sa_family,
+		      XORP_UINT_CAST(sa_len));
+#else
+	    UNUSED(sa_len);
+#endif
 	    rti_info[i] = sock;
 	    sock = next_sa(sock);
 	} else {
@@ -209,6 +224,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	IPv4 netmask(sin->sin_addr);
 	return (netmask.mask_len());
     }
+#ifndef HOST_OS_WINDOWS // XXX not yet for windows
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -218,6 +234,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
+#endif
     default:
 	XLOG_FATAL("Invalid address family %d", family);
     }
@@ -260,6 +277,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	}
     }
     
+#ifndef HOST_OS_WINDOWS	// Not yet for Windows
 #ifdef HAVE_IPV6
     case AF_INET6:
     {
@@ -273,6 +291,7 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
+#endif
     
     default:
 	XLOG_FATAL("Invalid address family %d", family);
@@ -300,7 +319,9 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     if ((rtm->rtm_type == RTM_ADD)
 	|| (rtm->rtm_type == RTM_DELETE)
 	|| (rtm->rtm_type == RTM_CHANGE)
+#ifdef RTM_GET
 	|| (rtm->rtm_type == RTM_GET)
+#endif
 #ifdef RTM_MISS
 	|| (rtm->rtm_type == RTM_MISS)
 #endif
@@ -365,6 +386,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 
     //
     // Get the next-hop router address
+    // XXX: Windows does not include the 'gateway'.
     //
     if ( (sa = rti_info[RTAX_GATEWAY]) != NULL) {
 	if (sa->sa_family == family) {
@@ -404,16 +426,18 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     
     //
     // Test whether we installed this route
+    // XXX: Windows does not set this flag currently.
     //
     if (rtm->rtm_flags & RTF_PROTO1)
 	xorp_route = true;
 
     //
     // Test whether this route is a discard route.
-    // BSD kernels do not implement a software discard interface,
+    // Older BSD kernels do not implement a software discard interface,
     // so map this back to a reference to the FEA's notion of one.
     //
     // XXX: Currently RTF_REJECT is assumed to mean the same thing.
+    // XXX: Windows does not currently support blackhole/reject routes.
     //
     if (rtm->rtm_flags & (RTF_BLACKHOLE|RTF_REJECT)) {
 	//
@@ -445,6 +469,9 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     //
     // Get the interface name and index
     //
+#ifdef HOST_OS_WINDOWS
+    // XXX: TODO: Windows ifindex-to-friendlyname lookup.
+#else
     if (lookup_ifindex && (sa = rti_info[RTAX_IFP]) != NULL) {
 	if (sa->sa_family != AF_LINK) {
 	    // TODO: verify whether this is really an error.
@@ -472,6 +499,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	    if_name = string(name);
 	}
     }
+#endif
 
     //
     // TODO: define default routing metric and admin distance instead of 0xffff

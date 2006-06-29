@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.16 2005/08/18 15:45:45 bms Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.17 2006/03/16 00:03:53 pavlin Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -232,7 +232,6 @@ public:
 private:
     
 };
-
 class FtiConfigTableSetRtsock : public FtiConfigTableSet {
 public:
     FtiConfigTableSetRtsock(FtiConfig& ftic);
@@ -292,6 +291,7 @@ public:
     
 private:
     
+
 };
 
 class FtiConfigTableSetNetlink : public FtiConfigTableSet {
@@ -473,6 +473,66 @@ public:
      * @return true on success, otherwise false.
      */
     virtual bool delete_all_entries6();
+};
+
+class FtiConfigTableSetRtmV2 : public FtiConfigTableSet {
+public:
+    FtiConfigTableSetRtmV2(FtiConfig& ftic);
+    virtual ~FtiConfigTableSetRtmV2();
+
+    /**
+     * Start operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int start(string& error_msg);
+    
+    /**
+     * Stop operation.
+     * 
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    virtual int stop(string& error_msg);
+    
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table4(const list<Fte4>& fte_list);
+
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries4();
+
+    /**
+     * Set the unicast forwarding table.
+     *
+     * @param fte_list the list with all entries to install into
+     * the unicast forwarding table.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool set_table6(const list<Fte6>& fte_list);
+    
+    /**
+     * Delete all entries in the routing table. Must be within a
+     * configuration interval.
+     *
+     * @return true on success, otherwise false.
+     */
+    virtual bool delete_all_entries6();
+    
+private:
 };
 
 #endif // __FEA_FTICONFIG_TABLE_SET_HH__
