@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.38 2006/03/22 00:41:10 pavlin Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.39 2006/06/29 11:03:53 bms Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -725,15 +725,5 @@ private:
 namespace FtiFibMsg {
 	const unsigned long	UPDATES = 0x1, GETS = 0x2, RESOLVES = 0x4;
 };
-
-#ifdef HOST_OS_WINDOWS
-//
-// Helper functions for managing the Remote Access service.
-//
-bool is_rras_running(void);
-int add_protocol_to_rras(int family);
-int add_protocol_to_registry(int family);
-int restart_rras(void);
-#endif // HOST_OS_WINDOWS
 
 #endif	// __FEA_FTICONFIG_HH__
