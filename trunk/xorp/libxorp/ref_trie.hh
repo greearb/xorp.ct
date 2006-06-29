@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.24 2005/04/14 10:06:40 atanu Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.25 2006/03/16 00:04:32 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -510,7 +510,7 @@ public:
 
     inline void force_valid() const
     {
-	if (_cur && _cur->deleted())
+	while (_cur && _cur->deleted())
 	    next();
     }
 
@@ -760,7 +760,7 @@ public:
 
     inline void force_valid() const
     {
-	if (_cur && _cur->deleted())
+	while (_cur && _cur->deleted())
 	    next();
     }
 
