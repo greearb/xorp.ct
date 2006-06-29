@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.62 2006/06/23 00:18:23 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.63 2006/06/28 08:50:14 pavlin Exp $"
 
 
 //
@@ -1401,15 +1401,10 @@ Mld6igmpVif::delete_protocol(xorp_module_id module_id,
 }
 
 /**
- * Mld6igmpVif::is_igmpv1_mode:
- * @: 
- * 
- * Tests if the interface is running in IGMPv1 mode.
- * XXX: Applies only to IGMP.
- * 
- * Return value: true if the interface is running in IGMPv1 mode,
- * otherwise false.
- **/
+ * Test if the interface is running in IGMPv1 mode.
+ *
+ * @return true if the interface is running in IGMPv1 mode, otherwise false.
+ */
 bool
 Mld6igmpVif::is_igmpv1_mode() const
 {
@@ -1417,15 +1412,10 @@ Mld6igmpVif::is_igmpv1_mode() const
 }
 
 /**
- * Mld6igmpVif::is_igmpv2_mode:
- * @: 
- * 
- * Tests if the interface is running in IGMPv2 mode.
- * XXX: Applies only to IGMP.
- * 
- * Return value: true if the interface is running in IGMPv2 mode,
- * otherwise false.
- **/
+ * Test if the interface is running in IGMPv2 mode.
+ *
+ * @return true if the interface is running in IGMPv2 mode, otherwise false.
+ */
 bool
 Mld6igmpVif::is_igmpv2_mode() const
 {
@@ -1433,15 +1423,10 @@ Mld6igmpVif::is_igmpv2_mode() const
 }
 
 /**
- * Mld6igmpVif::is_igmpv3_mode:
- * @: 
- * 
- * Tests if the interface is running in IGMPv3 mode.
- * XXX: Applies only to IGMP.
- * 
- * Return value: true if the interface is running in IGMPv3 mode,
- * otherwise false.
- **/
+ * Test if the interface is running in IGMPv3 mode.
+ *
+ * @return true if the interface is running in IGMPv3 mode, otherwise false.
+ */
 bool
 Mld6igmpVif::is_igmpv3_mode() const
 {
@@ -1449,15 +1434,10 @@ Mld6igmpVif::is_igmpv3_mode() const
 }
 
 /**
- * Mld6igmpVif::is_mldv1_mode:
- * @: 
- * 
- * Tests if the interface is running in MLDv1 mode.
- * XXX: Applies only to MLD.
- * 
- * Return value: true if the interface is running in MLDv1 mode,
- * otherwise false.
- **/
+ * Test if the interface is running in MLDv1 mode.
+ *
+ * @return true if the interface is running in MLDv1 mode, otherwise false.
+ */
 bool
 Mld6igmpVif::is_mldv1_mode() const
 {
@@ -1465,15 +1445,10 @@ Mld6igmpVif::is_mldv1_mode() const
 }
 
 /**
- * Mld6igmpVif::is_mldv2_mode:
- * @: 
- * 
- * Tests if the interface is running in MLDv2 mode.
- * XXX: Applies only to MLD.
- * 
- * Return value: true if the interface is running in MLDv2 mode,
- * otherwise false.
- **/
+ * Test if the interface is running in MLDv2 mode.
+ *
+ * @return true if the interface is running in MLDv2 mode, otherwise false.
+ */
 bool
 Mld6igmpVif::is_mldv2_mode() const
 {
@@ -1481,13 +1456,11 @@ Mld6igmpVif::is_mldv2_mode() const
 }
 
 /**
- * Mld6igmpVif::proto_message_type2ascii:
- * @message_type: The protocol message type.
- * 
  * Return the ASCII text description of the protocol message.
- * 
- * Return value: The ASCII text descrpition of the protocol message.
- **/
+ *
+ * @param message_type the protocol message type.
+ * @return the ASCII text descrpition of the protocol message.
+ */
 const char *
 Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 {
@@ -1501,13 +1474,10 @@ Mld6igmpVif::proto_message_type2ascii(uint8_t message_type) const
 }
 
 /**
- * Mld6igmpVif::buffer_send_prepare:
- * @: 
- * 
  * Reset and prepare the buffer for sending data.
- * 
- * Return value: The prepared buffer.
- **/
+ *
+ * @return the prepared buffer.
+ */
 buffer_t *
 Mld6igmpVif::buffer_send_prepare()
 {
@@ -1517,17 +1487,16 @@ Mld6igmpVif::buffer_send_prepare()
 }
 
 /**
- * Mld6igmpVif::join_prune_notify_routing:
- * @source: The source address of the (S,G) entry that has changed.
- * In case of group-specific membership, it could be NULL.
- * @group: The group address of the (S,G) entry that has changed.
- * @action_jp: The membership change: %ACTION_JOIN or %ACTION_PRUNE.
- * 
  * Notify the interested parties that there is membership change among
  * the local members.
- * 
- * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
- **/
+ *
+ * @param source the source address of the (S,G) entry that has changed.
+ * In case of group-specific membership, it could be IPvX::ZERO().
+ * @param group the group address of the (S,G) entry that has changed.
+ * @param action_jp the membership change: @ref ACTION_JOIN
+ * or @ref ACTION_PRUNE.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
 int
 Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
 				       const IPvX& group,
