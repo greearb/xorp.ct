@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.13 2006/06/07 22:38:38 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.14 2006/06/10 00:10:12 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -39,7 +39,7 @@
 #define MLD_V1					1
 #define MLD_V2					2
 #define MLD_VERSION_MIN				MLD_V1
-#define MLD_VERSION_MAX				MLD_V1
+#define MLD_VERSION_MAX				MLD_V2
 #define MLD_VERSION_DEFAULT			MLD_V1
 
 /*

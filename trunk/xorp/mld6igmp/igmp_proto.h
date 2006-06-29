@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.12 2006/06/08 07:13:20 pavlin Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.13 2006/06/10 00:09:52 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -40,7 +40,7 @@
 #define IGMP_V2					2
 #define IGMP_V3					3
 #define IGMP_VERSION_MIN			IGMP_V1
-#define IGMP_VERSION_MAX			IGMP_V2
+#define IGMP_VERSION_MAX			IGMP_V3
 #define IGMP_VERSION_DEFAULT			IGMP_V2
 
 /*
