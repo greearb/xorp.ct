@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.13 2006/06/10 00:09:52 pavlin Exp $
+ * $XORP: xorp/mld6igmp/igmp_proto.h,v 1.14 2006/06/29 03:27:13 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_IGMP_PROTO_H__
@@ -64,6 +64,9 @@
 #define	IGMP_LAST_MEMBER_QUERY_INTERVAL		1
 #define	IGMP_LAST_MEMBER_QUERY_COUNT		IGMP_ROBUSTNESS_VARIABLE
 #define IGMP_VERSION1_ROUTER_PRESENT_TIMEOUT	400
+#define IGMP_OLDER_VERSION_HOST_PRESENT_INTERVAL (IGMP_ROBUSTNESS_VARIABLE    \
+						* IGMP_QUERY_INTERVAL	      \
+						+ IGMP_QUERY_RESPONSE_INTERVAL)
 #ifndef IGMP_TIMER_SCALE
 /* the igmp code field is in 10th of seconds */
 #define IGMP_TIMER_SCALE			10

@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.14 2006/06/10 00:10:12 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.15 2006/06/29 03:27:13 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -182,6 +182,9 @@
 #define	MLD_STARTUP_QUERY_COUNT			MLD_ROBUSTNESS_VARIABLE
 #define	MLD_LAST_LISTENER_QUERY_INTERVAL	1
 #define	MLD_LAST_LISTENER_QUERY_COUNT		MLD_ROBUSTNESS_VARIABLE
+#define MLD_OLDER_VERSION_HOST_PRESENT_INTERVAL (MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+						+ MLD_QUERY_RESPONSE_INTERVAL)
 #ifndef MLD_TIMER_SCALE
 /* the MLD max. response delay is in 1000th of seconds */
 #define MLD_TIMER_SCALE				1000
