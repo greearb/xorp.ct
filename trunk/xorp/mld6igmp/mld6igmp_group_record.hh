@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.9 2006/06/22 15:58:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.10 2006/06/22 18:57:28 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -268,9 +268,44 @@ public:
 
 private:
     /**
+     * Test if the group is running in IGMPv1 mode.
+     *
+     * @return true if the group is running in IGMPv1 mode, otherwise false.
+     */
+    bool	is_igmpv1_mode() const;
+
+    /**
+     * Test if the group is running in IGMPv2 mode.
+     *
+     * @return true if the group is running in IGMPv2 mode, otherwise false.
+     */
+    bool	is_igmpv2_mode() const;
+
+    /**
+     * Test if the group is running in IGMPv3 mode.
+     *
+     * @return true if the group is running in IGMPv3 mode, otherwise false.
+     */
+    bool	is_igmpv3_mode() const;
+
+    /**
+     * Test if the group is running in MLDv1 mode.
+     *
+     * @return true if the group is running in MLDv1 mode, otherwise false.
+     */
+    bool	is_mldv1_mode() const;
+
+    /**
+     * Test if the group is running in MLDv2 mode.
+     *
+     * @return true if the group is running in MLDv2 mode, otherwise false.
+     */
+    bool	is_mldv2_mode() const;
+
+    /**
      * Timeout: the group timer has expired.
      */
-    void group_timer_timeout();
+    void	group_timer_timeout();
 
     /**
      * Periodic timeout: time to send the next SSM Group-Specific and
@@ -289,7 +324,10 @@ private:
     IPvX	_last_reported_host;	// The host that last reported as member
     XorpTimer	_member_query_timer;	// Timer to query for host members
     XorpTimer	_last_member_query_timer;   // Timer to expire this entry
-    XorpTimer	_igmpv1_host_present_timer; // XXX: does not apply to MLD
+
+    // Timers indicating that hosts running older protocol version are present
+    XorpTimer	_igmpv1_host_present_timer;
+    XorpTimer	_igmpv2_mldv1_host_present_timer;
 
     XorpTimer	_group_timer;		// Group timer for filter mode switch
     XorpTimer	_ssm_group_query_timer;	// Timer for SSM Group-Specific Query

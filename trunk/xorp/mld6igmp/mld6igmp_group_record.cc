@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.16 2006/06/22 18:57:28 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.17 2006/06/22 19:35:58 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -935,6 +935,92 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
 
     return (true);		// Schedule the next timeout
 }
+
+/**
+ * Test if the group is running in IGMPv1 mode.
+ *
+ * @return true if the group is running in IGMPv1 mode, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_igmpv1_mode() const
+{
+    if (! _mld6igmp_vif.proto_is_igmp())
+	return (false);
+
+    if (_mld6igmp_vif.is_igmpv1_mode())
+	return (true);		// XXX: explicitly configured in IGMPv1 mode
+
+    return (_igmpv1_host_present_timer.scheduled());
+}
+
+/**
+ * Test if the group is running in IGMPv2 mode.
+ *
+ * @return true if the group is running in IGMPv2 mode, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_igmpv2_mode() const
+{
+    if (! _mld6igmp_vif.proto_is_igmp())
+	return (false);
+
+    if (is_igmpv1_mode())
+	return (false);
+
+    return (_igmpv2_mldv1_host_present_timer.scheduled());
+}
+
+/**
+ * Test if the group is running in IGMPv3 mode.
+ *
+ * @return true if the group is running in IGMPv3 mode, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_igmpv3_mode() const
+{
+    if (! _mld6igmp_vif.proto_is_igmp())
+	return (false);
+
+    if (is_igmpv1_mode() || is_igmpv2_mode())
+	return (false);
+
+    return (true);
+}
+
+/**
+ * Test if the group is running in MLDv1 mode.
+ *
+ * @return true if the group is running in MLDv1 mode, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_mldv1_mode() const
+{
+    if (! _mld6igmp_vif.proto_is_mld6())
+	return (false);
+
+    if (_mld6igmp_vif.is_mldv1_mode())
+	return (true);		// XXX: explicitly configured in MLDv1 mode
+
+    return (_igmpv2_mldv1_host_present_timer.scheduled());
+}
+
+/**
+ * Test if the group is running in MLDv2 mode.
+ *
+ * @return true if the group is running in MLDv2 mode, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_mldv2_mode() const
+{
+    if (! _mld6igmp_vif.proto_is_mld6())
+	return (false);
+
+    if (is_mldv1_mode())
+	return (false);
+
+    return (true);
+}
+
 /**
  * Constructor for a given vif.
  * 
