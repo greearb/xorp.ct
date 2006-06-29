@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.10 2006/03/17 21:55:48 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.11 2006/06/29 11:03:56 bms Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -486,8 +486,8 @@ WinDispatcher::dispatch_pipe_reads()
 	    //
 	    // Polled pipes *must* have a read handler.
 	    //
-	    IoEventMap::iterator jj =
-_callback_map.find(IoEventTuple(*ii, IOT_READ));
+	    IoEventMap::iterator jj = _callback_map.find(
+		IoEventTuple(*ii, IOT_READ));
 	    XLOG_ASSERT(jj != _callback_map.end());
 	    jj->second->dispatch(*ii, IOT_READ);
 	} else if (result == WINIO_ERROR_DISCONNECT) {
@@ -495,8 +495,8 @@ _callback_map.find(IoEventTuple(*ii, IOT_READ));
 	    // Polled pipes may optionally have a disconnection handler.
 	    // This is used by the FEA.
 	    //
-	    IoEventMap::iterator jj =
-_callback_map.find(IoEventTuple(*ii, IOT_DISCONNECT));
+	    IoEventMap::iterator jj = _callback_map.find(
+		IoEventTuple(*ii, IOT_DISCONNECT));
 	    if (jj != _callback_map.end()) {
 		jj->second->dispatch(*ii, IOT_DISCONNECT);
 	    }
