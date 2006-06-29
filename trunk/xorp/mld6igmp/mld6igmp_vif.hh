@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.36 2006/06/28 08:50:13 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.37 2006/06/29 03:30:15 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -622,10 +622,10 @@ private:
 						    const IPvX& dst,
 						    uint8_t message_type,
 						    buffer_t *buffer);
-    int		mld6igmp_version_consistency_check(const IPvX& src,
-						   const IPvX& dst,
-						   uint8_t message_type,
-						   int message_version);
+    int		mld6igmp_query_version_consistency_check(const IPvX& src,
+							 const IPvX& dst,
+							 uint8_t message_type,
+							 int message_version);
 
     // MLD/IGMP control messages process functions
     int		mld6igmp_process(const IPvX& src,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.37 2006/06/23 00:18:23 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.38 2006/06/28 08:50:14 pavlin Exp $"
 
 
 //
@@ -127,12 +127,15 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	XLOG_ASSERT(message_version > 0);
 
 	//
-	// TODO: XXX: PAVPAVPAV: do appropriate checks if an interface
-	// is running in older version.
+	// Query version consistency check.
+	// If there is mismatch, then drop the message.
+	// See RFC 3376 Section 7.3.1, and RFC 3810 Section 8.3.1.
 	//
-
-	mld6igmp_version_consistency_check(src, dst, message_type,
-					   message_version);
+	if (mld6igmp_query_version_consistency_check(src, dst, message_type,
+						     message_version)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
     }
 
     if (proto_is_mld6()) {
@@ -167,12 +170,15 @@ Mld6igmpVif::mld6igmp_membership_query_recv(const IPvX& src,
 	XLOG_ASSERT(message_version > 0);
 
 	//
-	// TODO: XXX: PAVPAVPAV: do appropriate checks if an interface
-	// is running in older version.
+	// Query version consistency check.
+	// If there is mismatch, then drop the message.
+	// See RFC 3376 Section 7.3.1, and RFC 3810 Section 8.3.1.
 	//
-
-	mld6igmp_version_consistency_check(src, dst, message_type,
-					   message_version);
+	if (mld6igmp_query_version_consistency_check(src, dst, message_type,
+						     message_version)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
     }
 
     XLOG_ASSERT(message_version > 0);
@@ -832,15 +838,15 @@ Mld6igmpVif::query_timer_timeout()
 }
 
 /**
- * mld6igmp_version_consistency_check:
+ * mld6igmp_query_version_consistency_check:
  * @src: The message source address.
  * @dst: The message destination address.
  * @message_type: The type of the MLD/IGMP message.
- * @message_version: The protocol version of the received message:
+ * @message_version: The protocol version of the received Query message:
  * (IGMP_V1, IGMP_V2, IGMP_V3 for IGMP) or (MLD_V1, MLD_V2 for MLD).
  * 
  * Check for MLD/IGMP protocol version interface configuration consistency.
- * For example, if the received message was IGMPv1, a correctly
+ * For example, if the received Query message was IGMPv1, a correctly
  * configured local interface must be operating in IGMPv1 mode.
  * Similarly, if the local interface is operating in IGMPv1 mode,
  * all other neighbor routers (for that interface) must be
@@ -849,46 +855,33 @@ Mld6igmpVif::query_timer_timeout()
  * Return value: %XORP_OK if consistency, otherwise %XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_version_consistency_check(const IPvX& src,
-						const IPvX& dst,
-						uint8_t message_type,
-						int message_version)
+Mld6igmpVif::mld6igmp_query_version_consistency_check(const IPvX& src,
+						      const IPvX& dst,
+						      uint8_t message_type,
+						      int message_version)
 {
-    if (proto_is_igmp()) {
-	switch (message_version) {
-	case IGMP_V1:
-	    if (! is_igmpv1_mode()) {
-		// TODO: rate-limit the warning
-		XLOG_WARNING("RX %s from %s to %s on vif %s: "
-			     "this interface is not in v1 mode",
-			     proto_message_type2ascii(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str());
-		XLOG_WARNING("Please configure properly all routers on "
-			     "that subnet to use IGMPv1");
-		return (XORP_ERROR);
-	    }
-	    break;
-	default:
-	    if (is_igmpv1_mode()) {
-		// TODO: rate-limit the warning
-		XLOG_WARNING("RX %s(v2+) from %s to %s on vif %s: "
-			     "this interface is not in V1 mode. "
-			     "Please configure properly all routers on "
-			     "that subnet to use IGMPv1.",
-			     proto_message_type2ascii(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str());
-		return (XORP_ERROR);
-	    }
-	    break;
-	}
+    string proto_name, mode_config, mode_received;
 
-	return (XORP_OK);
-    }
+    if (proto_is_igmp())
+	proto_name = "IGMP";
+    if (proto_is_mld6())
+	proto_name = "MLD";
+    mode_config = c_format("%sv%u", proto_name.c_str(), proto_version());
+    mode_received = c_format("%sv%u", proto_name.c_str(), message_version);
 
-    if (proto_is_mld6()) {
-	return (XORP_OK);
+    if (message_version != proto_version()) {
+	// TODO: rate-limit the warning
+	XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		     "this interface is in %s mode, but received %s message",
+		     proto_message_type2ascii(message_type),
+		     cstring(src), cstring(dst),
+		     name().c_str(),
+		     mode_config.c_str(),
+		     mode_received.c_str());
+	XLOG_WARNING("Please configure properly all routers on "
+		     "that subnet to use same %s version",
+		     proto_name.c_str());
+	return (XORP_ERROR);
     }
 
     return (XORP_OK);
