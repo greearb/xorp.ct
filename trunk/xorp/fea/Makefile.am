@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.64 2005/10/16 07:10:34 pavlin Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.65 2006/06/29 11:03:53 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -234,14 +234,14 @@ libfea_la_SOURCES	+= fticonfig_entry_get_click.cc
 libfea_la_SOURCES	+= fticonfig_entry_get_dummy.cc
 libfea_la_SOURCES	+= fticonfig_entry_get_iphelper.cc
 libfea_la_SOURCES	+= fticonfig_entry_get_netlink.cc
-libfea_la_SOURCES	+= fticonfig_entry_get_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_entry_get_rtmv2.cc
+libfea_la_SOURCES	+= fticonfig_entry_get_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_entry_observer.cc
 libfea_la_SOURCES	+= fticonfig_entry_observer_dummy.cc
 libfea_la_SOURCES	+= fticonfig_entry_observer_iphelper.cc
 libfea_la_SOURCES	+= fticonfig_entry_observer_netlink.cc
-libfea_la_SOURCES	+= fticonfig_entry_observer_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_entry_observer_rtmv2.cc
+libfea_la_SOURCES	+= fticonfig_entry_observer_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_entry_parse_nlm.cc
 libfea_la_SOURCES	+= fticonfig_entry_parse_rtm.cc
 libfea_la_SOURCES	+= fticonfig_entry_set.cc
@@ -249,8 +249,8 @@ libfea_la_SOURCES	+= fticonfig_entry_set_click.cc
 libfea_la_SOURCES	+= fticonfig_entry_set_dummy.cc
 libfea_la_SOURCES	+= fticonfig_entry_set_iphelper.cc
 libfea_la_SOURCES	+= fticonfig_entry_set_netlink.cc
-libfea_la_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_entry_set_rtmv2.cc
+libfea_la_SOURCES	+= fticonfig_entry_set_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_table_get.cc
 libfea_la_SOURCES	+= fticonfig_table_get_click.cc
 libfea_la_SOURCES	+= fticonfig_table_get_dummy.cc
@@ -261,8 +261,8 @@ libfea_la_SOURCES	+= fticonfig_table_observer.cc
 libfea_la_SOURCES	+= fticonfig_table_observer_dummy.cc
 libfea_la_SOURCES	+= fticonfig_table_observer_iphelper.cc
 libfea_la_SOURCES	+= fticonfig_table_observer_netlink.cc
-libfea_la_SOURCES	+= fticonfig_table_observer_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_table_observer_rtmv2.cc
+libfea_la_SOURCES	+= fticonfig_table_observer_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_table_parse_nlm.cc
 libfea_la_SOURCES	+= fticonfig_table_parse_rtm.cc
 libfea_la_SOURCES	+= fticonfig_table_set.cc
@@ -270,8 +270,8 @@ libfea_la_SOURCES	+= fticonfig_table_set_click.cc
 libfea_la_SOURCES	+= fticonfig_table_set_dummy.cc
 libfea_la_SOURCES	+= fticonfig_table_set_iphelper.cc
 libfea_la_SOURCES	+= fticonfig_table_set_netlink.cc
-libfea_la_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_la_SOURCES	+= fticonfig_table_set_rtmv2.cc
+libfea_la_SOURCES	+= fticonfig_table_set_rtsock.cc
 libfea_la_SOURCES	+= ifconfig.cc
 libfea_la_SOURCES	+= ifconfig_addr_table.cc
 libfea_la_SOURCES	+= ifconfig_get.cc
