@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.29 2006/03/30 09:06:25 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.30 2006/03/31 23:50:37 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -142,7 +142,7 @@
       
   MLD/IGMP:
     - If MLD/IGMP is started on Linux with a relatively large number of
-      interfaces (e.g., on the order of 20), then it may fail with the
+      interfaces (e.g., on the order of 10), then it may fail with the
       following error:
 
         [ 2004/06/14 12:58:56  ERROR test_pim:16548 MFEA +666
