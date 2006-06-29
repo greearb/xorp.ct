@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.15 2006/06/29 03:27:13 pavlin Exp $
+ * $XORP: xorp/mld6igmp/mld6_proto.h,v 1.16 2006/06/29 07:20:48 pavlin Exp $
  */
 
 #ifndef __MLD6IGMP_MLD6_PROTO_H__
@@ -41,6 +41,33 @@
 #define MLD_VERSION_MIN				MLD_V1
 #define MLD_VERSION_MAX				MLD_V2
 #define MLD_VERSION_DEFAULT			MLD_V1
+
+/*
+ * Constans for Multicast Listener Discovery protocol for IPv6.
+ * All intervals are in seconds.
+ * XXX: Several of these, especially the robustness variable, should be
+ * variables and not constants.
+ */
+#define	MLD_ROBUSTNESS_VARIABLE			2
+#define	MLD_QUERY_INTERVAL			125
+#define	MLD_QUERY_RESPONSE_INTERVAL		10
+#define	MLD_MULTICAST_LISTENER_INTERVAL		(MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+						+ MLD_QUERY_RESPONSE_INTERVAL)
+#define	MLD_OTHER_QUERIER_PRESENT_INTERVAL	(MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+					+ MLD_QUERY_RESPONSE_INTERVAL / 2)
+#define	MLD_STARTUP_QUERY_INTERVAL		(MLD_QUERY_INTERVAL / 4)
+#define	MLD_STARTUP_QUERY_COUNT			MLD_ROBUSTNESS_VARIABLE
+#define	MLD_LAST_LISTENER_QUERY_INTERVAL	1
+#define	MLD_LAST_LISTENER_QUERY_COUNT		MLD_ROBUSTNESS_VARIABLE
+#define MLD_OLDER_VERSION_HOST_PRESENT_INTERVAL (MLD_ROBUSTNESS_VARIABLE      \
+						* MLD_QUERY_INTERVAL	      \
+						+ MLD_QUERY_RESPONSE_INTERVAL)
+#ifndef MLD_TIMER_SCALE
+/* the MLD max. response delay is in 1000th of seconds */
+#define MLD_TIMER_SCALE				1000
+#endif
 
 /*
  * MLDv1-related missing definitions
@@ -161,33 +188,6 @@
 
 #ifndef MLD_QRV
 #  define MLD_QRV(x)			((x) & 0x07)
-#endif
-
-/*
- * Constans for Multicast Listener Discovery protocol for IPv6.
- * All intervals are in seconds.
- * XXX: Several of these, especially the robustness variable, should be
- * variables and not constants.
- */
-#define	MLD_ROBUSTNESS_VARIABLE			2
-#define	MLD_QUERY_INTERVAL			125
-#define	MLD_QUERY_RESPONSE_INTERVAL		10
-#define	MLD_MULTICAST_LISTENER_INTERVAL		(MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-						+ MLD_QUERY_RESPONSE_INTERVAL)
-#define	MLD_OTHER_QUERIER_PRESENT_INTERVAL	(MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-					+ MLD_QUERY_RESPONSE_INTERVAL / 2)
-#define	MLD_STARTUP_QUERY_INTERVAL		(MLD_QUERY_INTERVAL / 4)
-#define	MLD_STARTUP_QUERY_COUNT			MLD_ROBUSTNESS_VARIABLE
-#define	MLD_LAST_LISTENER_QUERY_INTERVAL	1
-#define	MLD_LAST_LISTENER_QUERY_COUNT		MLD_ROBUSTNESS_VARIABLE
-#define MLD_OLDER_VERSION_HOST_PRESENT_INTERVAL (MLD_ROBUSTNESS_VARIABLE      \
-						* MLD_QUERY_INTERVAL	      \
-						+ MLD_QUERY_RESPONSE_INTERVAL)
-#ifndef MLD_TIMER_SCALE
-/* the MLD max. response delay is in 1000th of seconds */
-#define MLD_TIMER_SCALE				1000
 #endif
 
 /*
