@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.50 2006/04/03 04:04:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.51 2006/06/29 11:03:53 bms Exp $"
 
 #include "fea_module.h"
 
@@ -1954,8 +1954,8 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 #elif defined(HOST_OS_WINDOWS)
     if (enable) {
 	if (WinSupport::is_rras_running()) {
-	    XLOG_WARNING(
-"RRAS is running; ignoring request to enable IPv4 forwarding.");
+	    XLOG_WARNING("RRAS is running; ignoring request to enable "
+			 "IPv4 forwarding.");
 	    return (XORP_OK);
 	}
 	HANDLE hFwd;
@@ -1969,8 +1969,8 @@ FtiConfig::set_unicast_forwarding_enabled4(bool v, string& error_msg)
 	++_enablecnt;
     } else {
 	if (WinSupport::is_rras_running()) {
-	    XLOG_WARNING(
-"RRAS is running; ignoring request to disable IPv4 forwarding.");
+	    XLOG_WARNING("RRAS is running; ignoring request to disable "
+			 "IPv4 forwarding.");
 	    return (XORP_OK);
 	}
 	if (_enablecnt == 0) {
