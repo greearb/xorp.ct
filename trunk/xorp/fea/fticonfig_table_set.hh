@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.17 2006/03/16 00:03:53 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_set.hh,v 1.18 2006/06/29 11:03:54 bms Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_SET_HH__
 #define __FEA_FTICONFIG_TABLE_SET_HH__
@@ -232,6 +232,7 @@ public:
 private:
     
 };
+
 class FtiConfigTableSetRtsock : public FtiConfigTableSet {
 public:
     FtiConfigTableSetRtsock(FtiConfig& ftic);
@@ -291,7 +292,6 @@ public:
     
 private:
     
-
 };
 
 class FtiConfigTableSetNetlink : public FtiConfigTableSet {
