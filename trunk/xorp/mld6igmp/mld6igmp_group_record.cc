@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.18 2006/06/29 03:36:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.19 2006/06/30 07:55:46 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -108,12 +108,7 @@ Mld6igmpGroupRecord::eventloop()
 Mld6igmpSourceRecord*
 Mld6igmpGroupRecord::find_do_forward_source(const IPvX& source)
 {
-    Mld6igmpSourceSet::iterator iter = _do_forward_sources.find(source);
-
-    if (iter != _do_forward_sources.end())
-	return iter->second;
-
-    return (NULL);
+    return (_do_forward_sources.find_source_record(source));
 }
 
 /**
@@ -126,12 +121,7 @@ Mld6igmpGroupRecord::find_do_forward_source(const IPvX& source)
 Mld6igmpSourceRecord*
 Mld6igmpGroupRecord::find_dont_forward_source(const IPvX& source)
 {
-    Mld6igmpSourceSet::iterator iter = _dont_forward_sources.find(source);
-
-    if (iter != _dont_forward_sources.end())
-	return iter->second;
-
-    return (NULL);
+    return (_dont_forward_sources.find_source_record(source));
 }
 
 /**
@@ -1092,6 +1082,24 @@ Mld6igmpGroupSet::Mld6igmpGroupSet(Mld6igmpVif& mld6igmp_vif)
 Mld6igmpGroupSet::~Mld6igmpGroupSet()
 {
     // XXX: don't delete the payload, because it might be used elsewhere
+}
+
+/**
+ * Find a group record.
+ *
+ * @param group the group address.
+ * @return the corresponding group record (@ref Mld6igmpGroupRecord)
+ * if found, otherwise NULL.
+ */
+Mld6igmpGroupRecord*
+Mld6igmpGroupSet::find_group_record(const IPvX& group)
+{
+    Mld6igmpGroupSet::iterator iter = this->find(group);
+
+    if (iter != this->end())
+	return (iter->second);
+
+    return (NULL);
 }
 
 /**

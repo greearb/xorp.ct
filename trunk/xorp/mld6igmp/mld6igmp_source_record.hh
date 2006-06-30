@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.6 2006/06/22 15:58:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.7 2006/06/22 19:32:25 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -155,6 +155,15 @@ public:
      * Destructor.
      */
     ~Mld6igmpSourceSet();
+
+    /**
+     * Find a source record.
+     *
+     * @param source the source address.
+     * @return the corresponding source record (@ref Mld6igmpSourceRecord)
+     * if found, otherwise NULL.
+     */
+    Mld6igmpSourceRecord* find_source_record(const IPvX& source);
 
     /**
      * Delete the payload of the set, and clear the set itself.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.11 2006/06/29 03:36:00 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.12 2006/06/30 07:55:46 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -298,7 +298,7 @@ public:
      *
      * @return the address family.
      */
-    int family() const { return _group.af(); }
+    int		family() const { return _group.af(); }
 
 private:
     /**
@@ -317,7 +317,7 @@ private:
      *
      * @return true if the timer should be scheduled again, otherwise false.
      */
-    bool ssm_group_query_periodic_timeout();
+    bool	ssm_group_query_periodic_timeout();
 
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
@@ -354,6 +354,15 @@ public:
      * Destructor.
      */
     ~Mld6igmpGroupSet();
+
+    /**
+     * Find a group record.
+     *
+     * @param group the group address.
+     * @return the corresponding group record (@ref Mld6igmpGroupRecord)
+     * if found, otherwise NULL.
+     */
+    Mld6igmpGroupRecord* find_group_record(const IPvX& group);
 
     /**
      * Delete the payload of the set, and clear the set itself.
