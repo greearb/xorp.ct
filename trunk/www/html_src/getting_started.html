@@ -713,7 +713,7 @@ protocols {
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
 	    disable: false
-	    interval-sec: 100
+	    interval: 100
 	    bytes: 102400
 	}
 
@@ -780,7 +780,7 @@ protocols {
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
 	    disable: false
-	    interval-sec: 100
+	    interval: 100
 	    bytes: 102400
 	}
 
@@ -799,6 +799,8 @@ instead of "disable".
 "cand-bsr-by-vif-addr", "cand-rp-by-vif-addr",
 "hello-period" and "hello-triggered-delay" statements appeared after XORP
 Release-1.1.
+<P><U>Note</U>: Prior to XORP Release-1.3, the "interval-sec" statement
+was used instead of "interval".
 
 <P>
 A number of parameters have default values, therefore
@@ -883,7 +885,7 @@ don't know what "hash-mask-len" is used for, don't modify it!
 The "switch-to-spt-threshold" section can be used to specify the
 multicast data bandwidth threshold used by the last-hop PIM-SM routers
 and the RPs to initiate shortest-path switch toward the multicast source.
-Parameter "interval-sec" is used to specify the periodic measurement interval;
+Parameter "interval" is used to specify the periodic measurement interval;
 parameter "bytes" is used to specify the threshold in number of bytes
 within the measurement interval. It is recommended that the measurement
 interval is not too small, and should be on the order of tens of seconds.
