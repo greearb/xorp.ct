@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/pa_backend_pf.hh,v 1.1 2006/06/30 12:29:43 bms Exp $
 
 #ifndef __FEA_PA_BACKEND_PF_HH__
 #define __FEA_PA_BACKEND_PF_HH__
@@ -69,8 +69,9 @@ protected:
 	Snapshot4(PaPfBackend& parent, uint8_t ruleset)
 	    throw(PaInvalidSnapshotException);
 
-	PaPfBackend*	_parent;
-	uint8_t		_ruleset;
+	PaPfBackend*	    _parent;
+	int		    _nrules;
+	struct pfioc_rule*  _rulebuf;
     };
 
     // Types used for directly manipulating kernel rule tables.

@@ -1,4 +1,4 @@
-// -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+// -*- c-basic-offset: 6; tab-width: 8; indent-tabs-mode: t -*-
 // vim:set sts=4 ts=8:
 
 // Copyright (c) 2001-2006 International Computer Science Institute
@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/pa_backend_pf.cc,v 1.1 2006/06/30 12:29:43 bms Exp $"
 
 #include "fea_module.h"
 
@@ -186,19 +186,54 @@ PaPfBackend::create_snapshot4()
 #ifndef HAVE_PACKETFILTER_PF
     return (NULL);
 #else
-    // XXX: Create a snapshot of the current PF rule set.
+
+    struct pfioc_rule pr;
+    struct pfioc_rule *ppr;
+    struct pfioc_rule *ppvec;
+    int i;
+
+    // Get a ticket and find out how many rules there are.
+    memset(&pr, 0, sizeof(pr));
+    if (0 < ioctl(_fd, DIOCGETRULES, &pr)) {
+	XLOG_ERROR("Cannot snapshot PF rule state: DIOCGETRULES: %s",
+		    strerror(errno));
+	return (NULL);
+    }
+
+    // XXX: deal with pr.nr == 0 by creating an empty snapshot.
+    if (pr.nr == 0) {
+	PaPfBackend::Snapshot4* snap = new PaPfBackend::Snapshot4(*this);
+	return (snap);
+    }
+
+    ppvec = calloc(pr.nr, sizeof(*ppvec));
+    if (ppvec == NULL) {
+	XLOG_ERROR("Cannot allocate PF rule state: calloc: %s",
+		    strerror(errno));
+	return (NULL);
+    }
+
+    ppr = ppvec;
+    for (i = 0; i < pr.nr; i++) {
+	memset(ppr, 0, sizeof(*ppr));
+	ppr->ticket = pr.ticket;
+	if (0 < ioctl(_fd, DIOCGETRULE, ppr)) {
+	    XLOG_ERROR("Cannot snapshot PF rule state: DIOCGETRULE: %s",
+			strerror(errno));
+	    break;
+	}
+	ppr++;
+    }
+
+    if (i != pr.nr) {
+	free(ppvec);
+	return (NULL);
+    }
+
+    // Create a snapshot of the current PF rule set.
     // Use a private constructor.
-    PaPfBackend::Snapshot4* snap = new PaPfBackend::Snapshot4(*this);
-
-/*
-     DIOCGETRULES struct pfioc_rule *pr
-             Get a ticket for subsequent DIOCGETRULE calls and the number nr
-             of rules in the active ruleset.
-
-     DIOCGETRULE struct pfioc_rule *pr
-             Get a rule by its number nr using the ticket obtained through a
-             preceding DIOCGETRULES call.
-*/
+    PaPfBackend::Snapshot4* snap = new PaPfBackend::Snapshot4(*this,
+							      pr.nr, ppr);
 
     return (snap);
 #endif
@@ -217,9 +252,24 @@ PaPfBackend::restore_snapshot4(const PaBackend::Snapshot4Base* snap4)
 	dynamic_cast<const PaPfBackend::Snapshot4*>(snap4);
     XLOG_ASSERT(dsnap4 != NULL);
 
-    // XXX: Add the pf-specific code to restore a snapshot here.
+    // Begin a pf transaction.
+    u_int32_t ticket = start_transaction();
+    if (ticket == -1)
+	return (false);
 
-    return (true);
+    // Push the rules back.
+    struct pfioc_rule *ppr = dsnap4._rulebuf;
+    for (i = 0; i < dsnap4._nrules; i++) {
+	if (0 < ioctl(_fd, DIOCADDRULE, ppr)) {
+	    XLOG_ERROR("Failed to add rule to a PF firewall "
+		       "transaction: %s", strerror(errno));
+	    return (false);
+	}
+	ppr++;
+    }
+
+    // Commit.
+    return (commit_transaction(ticket));
 #endif
 }
 
@@ -384,30 +434,43 @@ PaPfBackend::transcribe_and_add_rule4(const PaEntry4& entry, u_int32_t ticket)
 PaPfBackend::Snapshot4::Snapshot4(const PaBackend::Snapshot4Base& snap4)
     throw(PaInvalidSnapshotException)
     : PaBackend::Snapshot4Base(snap4),
-      _parent(NULL),
-      _ruleset(RESERVED_RULESET)
+      _parent(NULL), _nrules(0), _rulebuf(NULL)
 {
     throw PaInvalidSnapshotException();
 }
 
-// May be copied or assigned from own class.
+// May be copied or assigned from own class, but
+// requires deep copy of rule buffer.
 PaPfBackend::Snapshot4::Snapshot4(const PaPfBackend::Snapshot4& snap4)
     throw(PaInvalidSnapshotException)
     : PaBackend::Snapshot4Base(snap4),
-      _parent(snap4._parent), _ruleset(snap4._ruleset)
+      _parent(snap4._parent), _nrules(snap4._nrules)
 {
+    if (snap4._rulebuf == NULL) {
+	_rulebuf = NULL;
+    } else {
+	struct pfioc_rule *ppr = calloc(_nrules, sizeof(*ppr));
+	if (ppr == NULL)
+	    throw PaInvalidSnapshotException();
+	memcpy(ppr, snap4._rulebuf, (_nrules * sizeof(*ppr)));
+    }
 }
 
-// This constructor is marked private and used internally.
-PaPfBackend::Snapshot4::Snapshot4(PaPfBackend& parent, uint8_t ruleset)
+// This constructor is marked private and used internally
+// by the parent class.
+PaPfBackend::Snapshot4::Snapshot4(PaPfBackend& parent, int nrules,
+				  struct pfioc_rule *rulebuf)
     throw(PaInvalidSnapshotException)
     : PaBackend::Snapshot4Base(),
-      _parent(&parent), _ruleset(ruleset)
+      _parent(&parent), _nrules(nrules), _rulebuf(rulebuf)
 {
 }
 
+// Deep free.
 PaPfBackend::Snapshot4::~Snapshot4()
 {
+    if (_rulebuf != NULL)
+	free(_rulebuf);
 }
 
 /* ------------------------------------------------------------------------- */
