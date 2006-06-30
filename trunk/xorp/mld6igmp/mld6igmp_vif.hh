@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.39 2006/06/30 07:55:46 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.40 2006/06/30 19:39:31 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -443,33 +443,18 @@ public:
      * @param max_resp_time the maximum response time.
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
+     * @param sources the set of source addresses (for IGMPv3 or MLDv2 only).
+     * @param s_flag the "Suppress Router-Side Processing" bit (for IGMPv3
+     * or MLDv2 only; in all other cases it should be set to false).
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int		mld6igmp_query_send(const IPvX& src, const IPvX& dst,
 				    const TimeVal& max_resp_time,
 				    const IPvX& group_address,
+				    const set<IPvX>& sources,
+				    bool s_flag,
 				    string& error_msg);
-
-    /**
-     * Send MLDv2 or IGMPv3 Query message.
-     *
-     * @param src the message source address.
-     * @param dst the message destination address.
-     * @param max_resp_time the maximum response time.
-     * @param group_address the "Multicast Address" or "Group Address" field
-     * in the MLD or IGMP headers respectively.
-     * @param sources the set of source addresses.
-     * @param s_flag the "Suppress Router-Side Processing" bit.
-     * @error_msg the error message (if error).
-     * @return XORP_OK on success, otherwise XORP_ERROR.
-     **/
-    int		mld6igmp_ssm_query_send(const IPvX& src, const IPvX& dst,
-					const TimeVal& max_resp_time,
-					const IPvX& group_address,
-					const set<IPvX>& sources,
-					bool s_flag,
-					string& error_msg);
 
     /**
      * Test if the interface is running in IGMPv1 mode.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.39 2006/06/29 04:35:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.40 2006/06/30 07:55:46 pavlin Exp $"
 
 
 //
@@ -577,10 +577,13 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
 	// Send Group-Specific Query
 	//
 	TimeVal max_resp_time = query_last_member_interval().get();
+	set<IPvX> no_sources;		// XXX: empty set
 	mld6igmp_query_send(primary_addr(),
 			    group_record->group(),
 			    max_resp_time,
 			    group_record->group(),
+			    no_sources,
+			    false,
 			    dummy_error_msg);
 	group_record->last_member_query_timer() =
 	    mld6igmp_node().eventloop().new_oneoff_after(
@@ -800,10 +803,13 @@ Mld6igmpVif::other_querier_timer_timeout()
     // Now I am the querier. Send a general membership query.
     //
     TimeVal max_resp_time = query_response_interval().get();
+    set<IPvX> no_sources;		// XXX: empty set
     mld6igmp_query_send(primary_addr(),
 			IPvX::MULTICAST_ALL_SYSTEMS(family()),
 			max_resp_time,
 			IPvX::ZERO(family()),			// XXX: ANY
+			no_sources,
+			false,
 			dummy_error_msg);
     _startup_query_count = 0;		// XXX: not a startup case
     _query_timer = mld6igmp_node().eventloop().new_oneoff_after(
@@ -829,10 +835,13 @@ Mld6igmpVif::query_timer_timeout()
     // Send a general membership query
     //
     TimeVal max_resp_time = query_response_interval().get();
+    set<IPvX> no_sources;		// XXX: empty set
     mld6igmp_query_send(primary_addr(),
 			IPvX::MULTICAST_ALL_SYSTEMS(family()),
 			max_resp_time,
 			IPvX::ZERO(family()),			// XXX: ANY
+			no_sources,
+			false,
 			dummy_error_msg);
     if (_startup_query_count > 0)
 	_startup_query_count--;

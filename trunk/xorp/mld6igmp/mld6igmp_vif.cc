@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.65 2006/06/30 07:55:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.66 2006/06/30 19:39:31 pavlin Exp $"
 
 
 //
@@ -275,10 +275,13 @@ Mld6igmpVif::start(string& error_msg)
     // Query all members on startup
     //
     TimeVal max_resp_time = query_response_interval().get();
+    set<IPvX> no_sources;		// XXX: empty set
     mld6igmp_query_send(primary_addr(),
 			IPvX::MULTICAST_ALL_SYSTEMS(family()),
 			max_resp_time,
 			IPvX::ZERO(family()),
+			no_sources,
+			false,
 			dummy_error_msg);
     _startup_query_count = effective_robustness_variable();
     if (_startup_query_count > 0)
@@ -516,48 +519,6 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 }
 
 /**
- * Send MLD or IGMP Query message.
- *
- * @param src the message source address.
- * @param dst the message destination address.
- * @param max_resp_time the maximum response time.
- * @param group_address the "Multicast Address" or "Group Address" field
- * in the MLD or IGMP headers respectively.
- * @error_msg the error message (if error).
- * @return XORP_OK on success, otherwise XORP_ERROR.
- **/
-int
-Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
-				 const IPvX& dst,
-				 const TimeVal& max_resp_time,
-				 const IPvX& group_address,
-				 string& error_msg)
-{
-    buffer_t *buffer = buffer_send_prepare();
-    uint32_t timer_scale = mld6igmp_constant_timer_scale();
-    TimeVal scaled_max_resp_time = max_resp_time * timer_scale;
-    
-    if (is_igmpv1_mode())
-	scaled_max_resp_time = TimeVal::ZERO();
-
-    // XXX: skip the space for the Query header
-    BUFFER_PUT_SKIP(mld6igmp_constant_minlen(), buffer);
-
-    //
-    // Send the message
-    //
-    return (mld6igmp_send(src, dst,
-			  mld6igmp_constant_membership_query(),
-			  scaled_max_resp_time.sec(),
-			  group_address, buffer, error_msg));
-
- buflen_error:
-    XLOG_UNREACHABLE();
-    XLOG_ERROR("INTERNAL mld6igmp_query_send() ERROR: buffer size too small");
-    return (XORP_ERROR);
-}
-
-/**
  * Send MLDv2 or IGMPv3 Group-Specific Query message.
  *
  * @param group_address the "Multicast Address" or "Group Address" field
@@ -572,7 +533,7 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
     const IPvX& src = primary_addr();
     const IPvX& dst = group_address;
     const TimeVal& max_resp_time = query_last_member_interval().get();
-    Mld6igmpGroupSet::iterator group_iter;
+    Mld6igmpGroupRecord* group_record = NULL;
     set<IPvX> no_sources;		// XXX: empty set
     int ret_value;
 
@@ -583,10 +544,9 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
 	return (XORP_OK);
 
     // Find the group record
-    group_iter = _group_records.find(group_address);
-    if (group_iter == _group_records.end())
+    group_record = _group_records.find_group_record(group_address);
+    if (group_record == NULL)
 	return (XORP_ERROR);		// No such group
-    Mld6igmpGroupRecord* group_record = group_iter->second;
 
     //
     // Lower the group timer
@@ -596,10 +556,10 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
     //
     // Send the message
     //
-    ret_value = mld6igmp_ssm_query_send(src, dst, max_resp_time, group_address,
-					no_sources,
-					false,	// XXX: reset the s_flag 
-					error_msg);
+    ret_value = mld6igmp_query_send(src, dst, max_resp_time, group_address,
+				    no_sources,
+				    false,	// XXX: reset the s_flag 
+				    error_msg);
 
     //
     // Schedule the periodic Group-Specific Query
@@ -635,9 +595,9 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
     const IPvX& src = primary_addr();
     const IPvX& dst = group_address;
     const TimeVal& max_resp_time = query_last_member_interval().get();
+    Mld6igmpGroupRecord* group_record = NULL;
     set<IPvX> selected_sources;
     set<IPvX>::const_iterator source_iter;
-    Mld6igmpGroupSet::iterator group_iter;
     int ret_value;
 
     //
@@ -650,10 +610,9 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
 	return (XORP_OK);		// No sources to query
 
     // Find the group record
-    group_iter = _group_records.find(group_address);
-    if (group_iter == _group_records.end())
+    group_record = _group_records.find_group_record(group_address);
+    if (group_record == NULL)
 	return (XORP_ERROR);		// No such group
-    Mld6igmpGroupRecord* group_record = group_iter->second;
 
     //
     // Select only the sources with source timer larger than the
@@ -686,10 +645,10 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
     //
     // Send the message
     //
-    ret_value = mld6igmp_ssm_query_send(src, dst, max_resp_time, group_address,
-					selected_sources,
-					false,	// XXX: reset the s_flag 
-					error_msg);
+    ret_value = mld6igmp_query_send(src, dst, max_resp_time, group_address,
+				    selected_sources,
+				    false,	// XXX: reset the s_flag 
+				    error_msg);
 
     //
     // Schedule the periodic group and source specific Query
@@ -710,26 +669,27 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
 }
 
 /**
- * Send MLDv2 or IGMPv3 Query message.
+ * Send MLD or IGMP Query message.
  *
  * @param src the message source address.
  * @param dst the message destination address.
  * @param max_resp_time the maximum response time.
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
- * @param sources the set of source addresses.
- * @param s_flag the "Suppress Router-Side Processing" bit.
+ * @param sources the set of source addresses (for IGMPv3 or MLDv2 only).
+ * @param s_flag the "Suppress Router-Side Processing" bit (for IGMPv3
+ * or MLDv2 only; in all other cases it should be set to false).
  * @error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_ssm_query_send(const IPvX& src,
-				     const IPvX& dst,
-				     const TimeVal& max_resp_time,
-				     const IPvX& group_address,
-				     const set<IPvX>& sources,
-				     bool s_flag,
-				     string& error_msg)
+Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
+				 const IPvX& dst,
+				 const TimeVal& max_resp_time,
+				 const IPvX& group_address,
+				 const set<IPvX>& sources,
+				 bool s_flag,
+				 string& error_msg)
 {
     buffer_t *buffer;
     uint32_t timer_scale = mld6igmp_constant_timer_scale();
@@ -740,8 +700,29 @@ Mld6igmpVif::mld6igmp_ssm_query_send(const IPvX& src,
     size_t mtu = 0;
     Mld6igmpGroupRecord* group_record = NULL;
 
+    //
+    // Only the Querier should originate Query messages
+    //
+    if (! i_am_querier())
+	return (XORP_OK);
+
     // Find the group record
     group_record = _group_records.find_group_record(group_address);
+
+    //
+    // Check protocol version and Query message matching
+    //
+    do {
+	if (sources.empty())
+	    break;
+
+	// IGMPv3/MLDv2 Query(G, A) message
+	if (is_igmpv3_mode(group_record) || is_mldv2_mode(group_record))
+	    break;
+
+	// XXX: Query(G, A) messages are not allowed in this mode
+	return (XORP_ERROR);	
+    } while (false);
 
     // If IGMPv1, then set the Max Response Time to zero
     if (is_igmpv1_mode(group_record))
@@ -828,7 +809,7 @@ Mld6igmpVif::mld6igmp_ssm_query_send(const IPvX& src,
 
  buflen_error:
     XLOG_UNREACHABLE();
-    XLOG_ERROR("INTERNAL mld6igmp_ssm_query_send() ERROR: "
+    XLOG_ERROR("INTERNAL mld6igmp_query_send() ERROR: "
 	       "buffer size too small");
 
     return (XORP_ERROR);

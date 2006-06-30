@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.19 2006/06/30 07:55:46 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.20 2006/06/30 19:35:28 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -694,10 +694,13 @@ Mld6igmpGroupRecord::last_member_query_timer_timeout()
     // from a Querier to a non-Querier. Hence, send the Group-Specific Query
     // (see the bottom part of Section 3.)
     //
+    set<IPvX> no_sources;		// XXX: empty set
     mld6igmp_vif().mld6igmp_query_send(mld6igmp_vif().primary_addr(),
 				       group(),
 				       max_resp_time,
 				       group(),
+				       no_sources,
+				       false,
 				       dummy_error_msg);
     _last_member_query_timer = eventloop().new_oneoff_after(
 	mld6igmp_vif().query_last_member_interval().get(),
@@ -851,13 +854,13 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
 	if (timeval_remaining > _mld6igmp_vif.last_member_query_time())
 	    s_flag = true;
 
-	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
-					      group(),
-					      max_resp_time,
-					      group(),
-					      no_sources,
-					      s_flag,
-					      dummy_error_msg);
+	_mld6igmp_vif.mld6igmp_query_send(mld6igmp_vif().primary_addr(),
+					  group(),
+					  max_resp_time,
+					  group(),
+					  no_sources,
+					  s_flag,
+					  dummy_error_msg);
     }
 
     //
@@ -899,22 +902,22 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
 	//
 	// The corresponding text from RFC 3810, Section 7.6.3.2 is similar.
 	//
-	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
-					      group(),
-					      max_resp_time,
-					      group(),
-					      sources_with_s_flag,
-					      true,	// XXX: set the s_flag
-					      dummy_error_msg);
+	_mld6igmp_vif.mld6igmp_query_send(mld6igmp_vif().primary_addr(),
+					  group(),
+					  max_resp_time,
+					  group(),
+					  sources_with_s_flag,
+					  true,		// XXX: set the s_flag
+					  dummy_error_msg);
     }
     if (! sources_without_s_flag.empty()) {
-	_mld6igmp_vif.mld6igmp_ssm_query_send(mld6igmp_vif().primary_addr(),
-					      group(),
-					      max_resp_time,
-					      group(),
-					      sources_without_s_flag,
-					      false,   // XXX: reset the s_flag
-					      dummy_error_msg);
+	_mld6igmp_vif.mld6igmp_query_send(mld6igmp_vif().primary_addr(),
+					  group(),
+					  max_resp_time,
+					  group(),
+					  sources_without_s_flag,
+					  false,       // XXX: reset the s_flag
+					  dummy_error_msg);
     }
 
     if (sources_with_s_flag.empty()
