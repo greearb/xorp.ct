@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.37 2006/06/29 03:30:15 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.38 2006/06/29 04:35:06 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -326,6 +326,16 @@ public:
      */
     const TimeVal& last_member_query_time() const { return (_last_member_query_time); }
 
+    /**
+     * Obtain a reference to the Older Version Host Present Interval.
+     *
+     * Note that it is not directly configurable, but may be tuned by
+     * changing the values of the parameters it depends on.
+     *
+     * @return a reference to the Older Version Host Present Interval.
+     */
+    const TimeVal& older_version_host_present_interval() const { return (_older_version_host_present_interval); }
+
     //
     // Add/delete routing protocols that need to be notified for membership
     // changes.
@@ -547,6 +557,7 @@ private:
     void	recalculate_last_member_query_count();
     void	recalculate_group_membership_interval();
     void	recalculate_last_member_query_time();
+    void	recalculate_older_version_host_present_interval();
 
     //
     // Private state
@@ -582,6 +593,7 @@ private:
     uint32_t	_last_member_query_count;	// The Last Member Query Count
     TimeVal	_group_membership_interval;	// The Group Membership Interval
     TimeVal	_last_member_query_time;	// The Last Member Query Time
+    TimeVal	_older_version_host_present_interval;	// The Older Version Host Present Interval
 
     //
     // Misc. other state

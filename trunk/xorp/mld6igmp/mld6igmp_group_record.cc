@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.17 2006/06/22 19:35:58 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.18 2006/06/29 03:36:00 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -934,6 +934,60 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
     }
 
     return (true);		// Schedule the next timeout
+}
+
+/**
+ * Record that an older Membership report message has been received.
+ *
+ * @param message_version the corresponding protocol version of the
+ * received message.
+ */
+void
+Mld6igmpGroupRecord::received_older_membership_report(int message_version)
+{
+    TimeVal timeval = _mld6igmp_vif.older_version_host_present_interval();
+
+    if (_mld6igmp_vif.proto_is_igmp()) {
+	switch (message_version) {
+	case IGMP_V1:
+	    if (_mld6igmp_vif.is_igmpv2_mode()) {
+		//
+		// XXX: The value specified in RFC 2236 is different from
+		// the value specified in RFC 3376.
+		//
+		timeval = _mld6igmp_vif.group_membership_interval();
+	    }
+	    _igmpv1_host_present_timer = eventloop().new_oneoff_after(
+		timeval,
+		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
+	    break;
+	case IGMP_V2:
+	    _igmpv2_mldv1_host_present_timer = eventloop().new_oneoff_after(
+		timeval,
+		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
+	    break;
+	default:
+	    break;
+	}
+    }
+
+    if (_mld6igmp_vif.proto_is_mld6()) {
+	switch (message_version) {
+	case MLD_V1:
+	    _igmpv2_mldv1_host_present_timer = eventloop().new_oneoff_after(
+		timeval,
+		callback(this, &Mld6igmpGroupRecord::older_version_host_present_timer_timeout));
+	    break;
+	default:
+	    break;
+	}
+    }
+}
+
+void
+Mld6igmpGroupRecord::older_version_host_present_timer_timeout()
+{
+    // XXX: nothing to do
 }
 
 /**

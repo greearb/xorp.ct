@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.10 2006/06/22 18:57:28 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.11 2006/06/29 03:36:00 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -223,15 +223,6 @@ public:
     XorpTimer& last_member_query_timer() { return _last_member_query_timer; }
 
     /**
-     * Get a reference to the IGMP Version 1 Members Present timer.
-     *
-     * Note: this applies only for IGMP.
-     *
-     * @return a reference to the IGMP Version 1 Members Present timer.
-     */
-    XorpTimer& igmpv1_host_present_timer() { return _igmpv1_host_present_timer; }
-
-    /**
      * Get a refererence to the group timer.
      *
      * @return a reference to the group timer.
@@ -260,13 +251,13 @@ public:
     void schedule_periodic_ssm_group_query(const set<IPvX>& sources);
 
     /**
-     * Get the address family.
+     * Record that an older Membership report message has been received.
      *
-     * @return the address family.
+     * @param message_version the corresponding protocol version of the
+     * received message.
      */
-    int family() const { return _group.af(); }
+    void received_older_membership_report(int message_version);
 
-private:
     /**
      * Test if the group is running in IGMPv1 mode.
      *
@@ -301,6 +292,19 @@ private:
      * @return true if the group is running in MLDv2 mode, otherwise false.
      */
     bool	is_mldv2_mode() const;
+
+    /**
+     * Get the address family.
+     *
+     * @return the address family.
+     */
+    int family() const { return _group.af(); }
+
+private:
+    /**
+     * Timeout: one of the older version host present timers has expired.
+     */
+    void	older_version_host_present_timer_timeout();
 
     /**
      * Timeout: the group timer has expired.

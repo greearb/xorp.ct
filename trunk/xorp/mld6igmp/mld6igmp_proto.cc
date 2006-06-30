@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.38 2006/06/28 08:50:14 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.39 2006/06/29 04:35:06 pavlin Exp $"
 
 
 //
@@ -439,12 +439,9 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	group_record->last_member_query_timer().unschedule();
     }
     
-    if (group_record != NULL) {
-	group_record->set_last_reported_host(src);
-    } else {
+    if (group_record == NULL) {
 	// A new group
 	group_record = new Mld6igmpGroupRecord(*this, group_address);
-	group_record->set_last_reported_host(src);
 	_group_records.insert(make_pair(group_address, group_record));
 	// notify routing (+)
 	if (group_record->is_exclude_mode()) {
@@ -453,29 +450,45 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 				      ACTION_JOIN);
 	}
     }
-    
+    group_record->set_last_reported_host(src);
+
     group_record->member_query_timer() =
 	mld6igmp_node().eventloop().new_oneoff_after(
 	    group_membership_interval(),
 	    callback(group_record, &Mld6igmpGroupRecord::member_query_timer_timeout));
 
+    int message_version = 0;
     if (proto_is_igmp()) {
-	int message_version = IGMP_V2;
-	if (message_type == IGMP_V1_MEMBERSHIP_REPORT) {
+	switch (message_type) {
+	case IGMP_V1_MEMBERSHIP_REPORT:
 	    message_version = IGMP_V1;
-	    //
-	    // XXX: start the v1 host timer even if I am not querier.
-	    // The non-querier state diagram in RFC 2236 is incomplete,
-	    // and inconsistent with the text in Section 5.
-	    // Indeed, RFC 3376 (IGMPv3) also doesn't specify that the
-	    // corresponding timer has to be started only for queriers.
-	    //
-	    group_record->igmpv1_host_present_timer() =
-		mld6igmp_node().eventloop().set_flag_after(
-		    group_membership_interval(),
-		    &_dummy_flag);
+	    break;
+	case IGMP_V2_MEMBERSHIP_REPORT:
+	    message_version = IGMP_V2;
+	    break;
+	case IGMP_V3_MEMBERSHIP_REPORT:
+	    message_version = IGMP_V3;
+	    break;
+	default:
+	    message_version = IGMP_V2;
+	    break;
 	}
     }
+    if (proto_is_mld6()) {
+	switch (message_type) {
+	case MLD_LISTENER_REPORT:
+	    message_version = MLD_V1;
+	    break;
+	case MLDV2_LISTENER_REPORT:
+	    message_version = MLD_V2;
+	    break;
+	default:
+	    message_version = MLD_V1;
+	    break;
+	}
+    }
+    XLOG_ASSERT(message_version > 0);
+    group_record->received_older_membership_report(message_version);
 
     UNUSED(max_resp_code);
     UNUSED(buffer);
@@ -543,14 +556,12 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     // Group found
     //
     Mld6igmpGroupRecord *group_record = iter->second;
-    if (proto_is_igmp()) {
-	if (group_record->igmpv1_host_present_timer().scheduled()) {
-	    //
-	    // Ignore this 'Leave Group' message because this
-	    // group has IGMPv1 hosts members.
-	    //
-	    return (XORP_OK);
-	}
+    if (group_record->is_igmpv1_mode()) {
+	//
+	// Ignore this 'Leave Group' message because this
+	// group has IGMPv1 hosts members.
+	//
+	return (XORP_OK);
     }
     if (i_am_querier()) {
 	// "Last Member Query Count" / "Last Listener Query Count"
@@ -904,6 +915,7 @@ void
 Mld6igmpVif::recalculate_effective_query_interval()
 {
     recalculate_group_membership_interval();
+    recalculate_older_version_host_present_interval();
 }
 
 void
@@ -918,6 +930,7 @@ Mld6igmpVif::set_query_response_interval_cb(TimeVal v)
 {
     UNUSED(v);
     recalculate_group_membership_interval();
+    recalculate_older_version_host_present_interval();
 }
 
 void
@@ -938,6 +951,7 @@ Mld6igmpVif::recalculate_effective_robustness_variable()
 {
     recalculate_group_membership_interval();
     recalculate_last_member_query_count();
+    recalculate_older_version_host_present_interval();
 }
 
 void
@@ -960,6 +974,14 @@ Mld6igmpVif::recalculate_last_member_query_time()
 {
     _last_member_query_time = query_last_member_interval().get()
 	* last_member_query_count();
+}
+
+void
+Mld6igmpVif::recalculate_older_version_host_present_interval()
+{
+    _older_version_host_present_interval =
+	effective_query_interval() * effective_robustness_variable()
+	+ query_response_interval().get();
 }
 
 void
