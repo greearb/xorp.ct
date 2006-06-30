@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.38 2006/06/29 04:35:06 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.39 2006/06/30 07:55:46 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -510,6 +510,61 @@ public:
      * otherwise false.
      */
     bool	is_mldv2_mode() const;
+
+    /**
+     * Test if a group is running in IGMPv1 mode.
+     *
+     * Note that if @ref group_record is NULL, then we test whether the
+     * interface itself is running in IGMPv1 mode.
+     * @param group_record the group record to test.
+     * @return true if the group is running in IGMPv1 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv1_mode(const Mld6igmpGroupRecord* group_record) const;
+
+    /**
+     * Test if a group is running in IGMPv2 mode.
+     *
+     * Note that if @ref group_record is NULL, then we test whether the
+     * interface itself is running in IGMPv2 mode.
+     * @param group_record the group record to test.
+     * @return true if the group is running in IGMPv2 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv2_mode(const Mld6igmpGroupRecord* group_record) const;
+
+    /**
+     * Test if a group is running in IGMPv3 mode.
+     *
+     * Note that if @ref group_record is NULL, then we test whether the
+     * interface itself is running in IGMPv3 mode.
+     * @param group_record the group record to test.
+     * @return true if the group is running in IGMPv3 mode,
+     * otherwise false.
+     */
+    bool	is_igmpv3_mode(const Mld6igmpGroupRecord* group_record) const;
+
+    /**
+     * Test if a group is running in MLDv1 mode.
+     *
+     * Note that if @ref group_record is NULL, then we test whether the
+     * interface itself is running in MLDv1 mode.
+     * @param group_record the group record to test.
+     * @return true if the group is running in MLDv1 mode,
+     * otherwise false.
+     */
+    bool	is_mldv1_mode(const Mld6igmpGroupRecord* group_record) const;
+
+    /**
+     * Test if a group is running in MLDv2 mode.
+     *
+     * Note that if @ref group_record is NULL, then we test whether the
+     * interface itself is running in MLDv2 mode.
+     * @param group_record the group record to test.
+     * @return true if the group is running in MLDv2 mode,
+     * otherwise false.
+     */
+    bool	is_mldv2_mode(const Mld6igmpGroupRecord* group_record) const;
 
 private:
     //
