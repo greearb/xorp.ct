@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.23 2005/12/20 22:02:17 pavlin Exp $
+% $XORP: xorp/docs/user_manual/pimsm.tex,v 1.24 2006/03/09 06:38:33 pavlin Exp $
 %
 
 \chapter{PIM Sparse-Mode}
@@ -482,7 +482,7 @@ protocols \{\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>disable: {\it bool}\\
-\>\>\>interval-sec: {\it uint(3..2147483647)}\\
+\>\>\>interval: {\it uint(3..2147483647)}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
 \\
@@ -560,7 +560,7 @@ protocols \{\\
 \\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>disable: {\it bool}\\
-\>\>\>interval-sec: {\it uint(3..2147483647)}\\
+\>\>\>interval: {\it uint(3..2147483647)}\\
 \>\>\>bytes: {\it uint}\\
 \>\>\}\\
 \\
@@ -835,14 +835,16 @@ protocols \{\\
   path tree is disabled~\footnote{Note
   that prior to XORP Release-1.1, the {\tt enable} flag was used instead of
   {\tt disable}.}.  The default is false.
-\item{\tt interval-sec}: this specifies the measurement interval in
+\item{\tt interval}: this specifies the measurement interval in
   seconds for measuring the bitrate of traffic from a  multicast
-  sender.  The measurement interval should normally not be set too
+  sender~\footnote{Note that prior to XORP Release-1.3, the
+  {\tt interval-sec} statement was used instead of {\tt interval}.}.
+  The measurement interval should normally not be set too
   small - values greater than ten seconds are recommended.
   It takes the form of a non-negative integer in the interval
   [3, 2147483647] and its default value is 100 seconds.
 \item{\tt bytes}: this specifies the maximum number of bytes from a
-  multicast sender that can be received in {\stt interval-sec}
+  multicast sender that can be received in {\stt interval}
   seconds.  If this threshold is exceeded, the router will attempt to
   switch to the shortest-path tree from that multicast sender.
   If the shortest-path switch should happen right after the first packet
@@ -947,7 +949,7 @@ protocols \{\\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
 \>\>\>disable: false\\
-\>\>\>interval-sec: 100\\
+\>\>\>interval: 100\\
 \>\>\>bytes: 102400\\
 \>\>\}\\
 \\
@@ -1026,7 +1028,7 @@ protocols \{\\
 \>\>switch-to-spt-threshold \{\\
 \>\>\>/* approx. 1K bytes/s (10Kbps) threshold */\\
 \>\>\>disable: false\\
-\>\>\>interval-sec: 100\\
+\>\>\>interval: 100\\
 \>\>\>bytes: 102400\\
 \>\>\}\\
 \\

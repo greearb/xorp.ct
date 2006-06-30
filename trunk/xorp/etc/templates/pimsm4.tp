@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.30 2006/02/22 02:26:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/pimsm4.tp,v 1.31 2006/04/19 19:59:26 pavlin Exp $ */
 
 protocols {
     pimsm4 {
@@ -56,7 +56,7 @@ protocols {
 	switch-to-spt-threshold {
 	    disable:			toggle = false;
 	    enabled:			bool;		/* %deprecated */
-	    interval-sec:		u32 = 100;
+	    interval:			u32 = 100;
 	    bytes:			u32 = 0;
 	}
 
@@ -305,8 +305,8 @@ protocols {
 
 	switch-to-spt-threshold {
 	    %help:	short "Configure the shortest-path switch threshold";
-	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
-	    %update: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval-sec)&bytes:u32=$(@.bytes)";
+	    %activate: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval)&bytes:u32=$(@.bytes)";
+	    %update: xrl "$(pimsm4.targetname)/pim/0.1/set_switch_to_spt_threshold?is_enabled:bool=`~$(@.disable)`&interval_sec:u32=$(@.interval)&bytes:u32=$(@.bytes)";
 	    %delete: xrl "$(pimsm4.targetname)/pim/0.1/reset_switch_to_spt_threshold";
 
 	    disable {
@@ -320,14 +320,14 @@ protocols {
 		%set:;
 	    }
 
-	    interval-sec {
-		%help:	short "Configure the frequency of measuring the bandwidth threshold (in seconds)";
-		%allow-range: $(@) "3" "2147483647" %help: "The frequency of measuring the bandwidth threshold (in seconds)";
+	    interval {
+		%help:	short "The frequency of measuring the bandwidth threshold (sec)";
+		%allow-range: $(@) "3" "2147483647" %help: "The frequency of measuring the bandwidth threshold (sec)";
 		%set:;
 	    }
 
 	    bytes {
-		%help:	short "Configure the bandwidth threshold (in bytes) per interval-sec";
+		%help:	short "The bandwidth threshold (in bytes) per interval";
 		%set:;
 	    }
 	}

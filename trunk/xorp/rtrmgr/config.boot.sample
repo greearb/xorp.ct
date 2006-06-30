@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.39 2006/03/24 20:02:48 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.40 2006/03/27 07:56:43 pavlin Exp $ */
 
 
 interfaces {
@@ -515,7 +515,7 @@ protocols {
 	switch-to-spt-threshold {
 	    /* approx. 1K bytes/s (10Kbps) threshold */
 	    disable: false
-	    interval-sec: 100
+	    interval: 100
 	    bytes: 102400
 	}
 
@@ -579,7 +579,7 @@ protocols {
 
 	switch-to-spt-threshold {
 	    disable: false
-	    interval-sec: 100
+	    interval: 100
 	    bytes: 102400
 	}
 
