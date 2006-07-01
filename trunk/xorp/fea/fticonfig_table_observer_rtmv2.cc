@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/fticonfig_table_observer_rtmv2.cc,v 1.1 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -105,12 +105,10 @@ FtiConfigTableObserverRtmV2::start(string& error_msg)
 int
 FtiConfigTableObserverRtmV2::stop(string& error_msg)
 {
-    int result;
+    int result = XORP_OK;
 
     if (! _is_running)
 	return (result);
-
-    result = XORP_OK;
 
     if (_rs4 == NULL || _rs4->stop(error_msg) < 0)
 	result = XORP_ERROR;
