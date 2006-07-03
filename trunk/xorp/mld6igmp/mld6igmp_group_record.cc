@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.23 2006/07/03 02:47:35 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.24 2006/07/03 04:25:10 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -1434,7 +1434,7 @@ Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    if (_mld6igmp_vif.is_igmpv1(group_record)) {
+    if (_mld6igmp_vif.is_igmpv1_mode(group_record)) {
 	//
 	// XXX: Ignore CHANGE_TO_INCLUDE_MODE messages when in
 	// IGMPv1 mode.
@@ -1474,9 +1474,9 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    if (_mld6igmp_vif.is_igmpv1(group_record)
-	|| _mld6igmp_vif.is_igmpv2(group_record)
-	|| _mld6igmp_vif.is_mldv1(group_record)) {
+    if (_mld6igmp_vif.is_igmpv1_mode(group_record)
+	|| _mld6igmp_vif.is_igmpv2_mode(group_record)
+	|| _mld6igmp_vif.is_mldv1_mode(group_record)) {
 	//
 	// XXX: Ignore the source list in the CHANGE_TO_EXCLUDE_MODE
 	// messages when in IGMPv1, IGMPv2, or MLDv1 mode.
@@ -1551,9 +1551,9 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    if (_mld6igmp_vif.is_igmpv1(group_record)
-	|| _mld6igmp_vif.is_igmpv2(group_record)
-	|| _mld6igmp_vif.is_mldv1(group_record)) {
+    if (_mld6igmp_vif.is_igmpv1_mode(group_record)
+	|| _mld6igmp_vif.is_igmpv2_mode(group_record)
+	|| _mld6igmp_vif.is_mldv1_mode(group_record)) {
 	//
 	// XXX: Ignore BLOCK_OLD_SOURCES messages when in
 	// IGMPv1, IGMPv2, or MLDv1 mode.
