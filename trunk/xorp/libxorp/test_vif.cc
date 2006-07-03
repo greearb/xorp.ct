@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.10 2005/07/29 20:06:33 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_vif.cc,v 1.11 2006/03/16 00:04:35 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -424,6 +424,12 @@ test_vif_methods()
     verbose_assert(vif1.is_underlying_vif_up(), "is_underlying_vif_up()");
     vif1.set_underlying_vif_up(false);
     verbose_assert(! vif1.is_underlying_vif_up(), "is_underlying_vif_up()");
+
+    //
+    // Test the MTU.
+    //
+    vif1.set_mtu(2000);
+    verbose_assert(vif1.mtu() == 2000, "mtu()");
     
     //
     // Get the default list of all addresses for this vif.
@@ -597,7 +603,7 @@ test_vif_manipulate_address()
     // Convert this Vif from binary form to presentation format.
     //
     verbose_match(vif1.str(),
-		  "Vif[vif1] pif_index: 0 vif_index: 0 addr: 11.11.11.11 subnet: 11.11.11.0/24 broadcast: 11.11.11.255 peer: 0.0.0.0 addr: 22.22.22.22 subnet: 22.22.22.0/24 broadcast: 22.22.22.255 peer: 0.0.0.0 addr: 33.33.33.33 subnet: 0.0.0.0/0 broadcast: 0.0.0.0 peer: 33.33.33.44 Flags: P2P");
+		  "Vif[vif1] pif_index: 0 vif_index: 0 addr: 11.11.11.11 subnet: 11.11.11.0/24 broadcast: 11.11.11.255 peer: 0.0.0.0 addr: 22.22.22.22 subnet: 22.22.22.0/24 broadcast: 22.22.22.255 peer: 0.0.0.0 addr: 33.33.33.33 subnet: 0.0.0.0/0 broadcast: 0.0.0.0 peer: 33.33.33.44 Flags: P2P MTU: 0");
 }
 
 /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib.hh,v 1.34 2005/11/02 01:33:14 pavlin Exp $
+// $XORP: xorp/rib/rib.hh,v 1.35 2006/03/16 00:05:32 pavlin Exp $
 
 #ifndef __RIB_RIB_HH__
 #define __RIB_RIB_HH__
@@ -192,14 +192,16 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param mtu the MTU of the vif.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int set_vif_flags(const string& vifname,
 			      bool is_p2p,
 			      bool is_loopback,
 			      bool is_multicast,
 			      bool is_broadcast,
-			      bool is_up);
+			      bool is_up,
+			      uint32_t mtu);
 
     /**
      * Add an address and subnet to a existing VIF. Each VIF may have

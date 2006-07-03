@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.49 2006/01/23 21:03:38 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_mfea_node.cc,v 1.50 2006/03/16 00:04:03 pavlin Exp $"
 
 #include "mfea_module.h"
 
@@ -741,7 +741,7 @@ XrlMfeaNode::mfea_client_client_send_recv_kernel_signal_message_cb(
  * of the message.
  * @param vif_name the name of the vif to add.
  * @param vif_index the vif index of the vif to add.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
@@ -769,7 +769,7 @@ XrlMfeaNode::send_add_config_vif(const string& dst_module_instance_name,
  * @param dst_module_id the module ID of the protocol-destination
  * of the message.
  * @param vif_name the name of the vif to delete.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
@@ -799,7 +799,7 @@ XrlMfeaNode::send_delete_config_vif(const string& dst_module_instance_name,
  * @param subnet the subnet address to add.
  * @param broadcast the broadcast address to add.
  * @param peer the peer address to add.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
@@ -854,7 +854,7 @@ XrlMfeaNode::send_add_config_vif_addr(const string& dst_module_instance_name,
  * of the message.
  * @param vif_name the name of the vif.
  * @param addr the address to delete.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
@@ -905,7 +905,8 @@ XrlMfeaNode::send_delete_config_vif_addr(const string& dst_module_instance_name,
  * @param is_multicast true if the vif is multicast capable.
  * @param is_broadcast true if the vif is broadcast capable.
  * @param is_up true if the underlying vif is UP.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @param mtu the MTU of the vif.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
@@ -916,7 +917,8 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 				       bool is_loopback,
 				       bool is_multicast,
 				       bool is_broadcast,
-				       bool is_up)
+				       bool is_up,
+				       uint32_t mtu)
 {
     if (! _is_finder_alive)
 	return(XORP_ERROR);	// The Finder is dead
@@ -930,6 +932,7 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
 	is_multicast,
 	is_broadcast,
 	is_up,
+	mtu,
 	callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     
     return (XORP_OK);
@@ -943,7 +946,7 @@ XrlMfeaNode::send_set_config_vif_flags(const string& dst_module_instance_name,
  * instance-destination of the message.
  * @param dst_module_id the module ID of the protocol-destination
  * of the message.
- * @return  XORP_OK on success, otherwise XORP_ERROR.
+ * @return XORP_OK on success, otherwise XORP_ERROR.
  */
 int
 XrlMfeaNode::send_set_config_all_vifs_done(const string& dst_module_instance_name,
@@ -1840,6 +1843,7 @@ XrlMfeaNode::mfea_0_1_add_protocol4(
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_underlying_vif_up(),
+	    mfea_vif->mtu(),
 	    callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     }
     
@@ -1929,6 +1933,7 @@ XrlMfeaNode::mfea_0_1_add_protocol6(
 	    mfea_vif->is_multicast_capable(),
 	    mfea_vif->is_broadcast_capable(),
 	    mfea_vif->is_underlying_vif_up(),
+	    mfea_vif->mtu(),
 	    callback(this, &XrlMfeaNode::mfea_client_client_send_set_vif_flags_cb));
     }
     

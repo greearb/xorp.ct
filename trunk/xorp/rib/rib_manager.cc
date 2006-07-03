@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib_manager.cc,v 1.50 2006/03/16 00:05:32 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib_manager.cc,v 1.51 2006/06/21 23:36:36 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -210,10 +210,10 @@ template <typename A>
 static int
 set_rib_vif_flags(RIB<A>& rib, const string& vifname, bool is_p2p,
 		  bool is_loopback, bool is_multicast, bool is_broadcast,
-		  bool is_up, string& err)
+		  bool is_up, uint32_t mtu, string& err)
 {
     int result = rib.set_vif_flags(vifname, is_p2p, is_loopback, is_multicast,
-				   is_broadcast, is_up);
+				   is_broadcast, is_up, mtu);
     if (result != XORP_OK) {
 	err = c_format("Failed to add flags for VIF \"%s\" to %s",
 			vifname.c_str(), rib.name().c_str());
@@ -228,16 +228,17 @@ RibManager::set_vif_flags(const string& vifname,
 			  bool is_multicast,
 			  bool is_broadcast,
 			  bool is_up,
+			  uint32_t mtu,
 			  string& err)
 {
     if (set_rib_vif_flags(_urib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, err) != XORP_OK ||
+			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_mrib4, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, err) != XORP_OK ||
+			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_urib6, vifname, is_p2p, is_loopback, is_multicast,
-			  is_broadcast, is_up, err) != XORP_OK ||
+			  is_broadcast, is_up, mtu, err) != XORP_OK ||
 	set_rib_vif_flags(_mrib6, vifname, is_up, is_loopback, is_multicast,
-			  is_broadcast, is_up, err) != XORP_OK) {
+			  is_broadcast, is_up, mtu, err) != XORP_OK) {
 	return XORP_ERROR;
     }
     return XORP_OK;

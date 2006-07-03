@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.27 2006/01/23 21:03:39 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_node.hh,v 1.28 2006/03/16 00:04:44 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_NODE_HH__
 #define __MLD6IGMP_MLD6IGMP_NODE_HH__
@@ -167,13 +167,14 @@ public:
      * @param is_multicast true if the vif is multicast-capable.
      * @param is_broadcast true if the vif is broadcast-capable.
      * @param is_up true if the vif is UP and running.
+     * @param mtu the MTU of the vif.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_vif_flags(const string& vif_name,
 			      bool is_pim_register, bool is_p2p,
 			      bool is_loopback, bool is_multicast,
-			      bool is_broadcast, bool is_up,
+			      bool is_broadcast, bool is_up, uint32_t mtu,
 			      string& error_msg);
     
     /**
@@ -541,7 +542,7 @@ public:
      * Complete the set of vif configuration changes.
      * 
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_all_vifs_done(string& error_msg);
 

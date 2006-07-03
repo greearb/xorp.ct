@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.18 2005/08/31 22:39:30 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node_cli.cc,v 1.19 2006/03/16 00:03:58 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) CLI implementation
@@ -390,6 +390,9 @@ MfeaNodeCli::cli_show_mfea_interface(const vector<string>& argv)
 		vif_flags += " ";
 	    vif_flags += "KERN_UP";
 	}
+	if (vif_flags.size())
+	    vif_flags += " ";
+	vif_flags += c_format("MTU: %u", XORP_UINT_CAST(mfea_vif->mtu()));
 	
 	//
 	// Print the interface

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.62 2006/03/16 00:03:58 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.63 2006/03/19 23:29:14 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -475,6 +475,7 @@ MfeaNode::updates_made()
 				 ifmgr_vif.multicast_capable(),
 				 ifmgr_vif.broadcast_capable(),
 				 is_up,
+				 ifmgr_iface.mtu_bytes(),
 				 error_msg);
 	
 	    //

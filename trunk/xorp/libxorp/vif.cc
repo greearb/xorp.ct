@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/vif.cc,v 1.16 2005/03/25 02:53:49 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/vif.cc,v 1.17 2006/03/16 00:04:37 pavlin Exp $"
 
 #include <functional>
 #include <string>
@@ -92,6 +92,7 @@ Vif::Vif(const string& vifname, const string& ifname)
     set_multicast_capable(false);
     set_broadcast_capable(false);
     set_underlying_vif_up(false);
+    set_mtu(0);
 }
 
 //
@@ -111,6 +112,7 @@ Vif::Vif(const Vif& vif)
     set_multicast_capable(vif.is_multicast_capable());
     set_broadcast_capable(vif.is_broadcast_capable());
     set_underlying_vif_up(vif.is_underlying_vif_up());
+    set_mtu(vif.mtu());
 }
 
 //
@@ -163,6 +165,7 @@ Vif::str() const
 	r += " DISCARD";
     if (is_underlying_vif_up())
 	r += " UNDERLYING_VIF_UP";
+    r += c_format(" MTU: %u", XORP_UINT_CAST(mtu()));
     
     return r;
 }
@@ -180,7 +183,8 @@ Vif::operator==(const Vif& other) const
 	    && (is_discard() == other.is_discard())
 	    && (is_multicast_capable() == other.is_multicast_capable())
 	    && (is_broadcast_capable() == other.is_broadcast_capable())
-	    && (is_underlying_vif_up() == other.is_underlying_vif_up()));
+	    && (is_underlying_vif_up() == other.is_underlying_vif_up())
+	    && (mtu() == other.mtu()));
 }
 
 const IPvX *

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/xrl_target.cc,v 1.56 2006/01/04 05:55:27 pavlin Exp $"
+#ident "$XORP: xorp/rib/xrl_target.cc,v 1.57 2006/03/16 00:05:43 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -903,6 +903,7 @@ XrlRibTarget::rib_0_1_new_vif(const string& name)
     v.set_multicast_capable(true);
     v.set_broadcast_capable(true);
     v.set_underlying_vif_up(true);
+    v.set_mtu(1500);
 
     // XXX probably want something more selective (eg rib selector)
     if (_urib4.new_vif(name, v) != XORP_OK) {

@@ -11,7 +11,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.93 2006/01/23 21:03:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/xrl_pim_node.cc,v 1.94 2006/03/30 02:21:13 pavlin Exp $"
 
 #include "pim_module.h"
 
@@ -3153,7 +3153,8 @@ XrlPimNode::mfea_client_0_1_set_vif_flags(
     const bool&		is_loopback, 
     const bool&		is_multicast, 
     const bool&		is_broadcast, 
-    const bool&		is_up) 
+    const bool&		is_up,
+    const uint32_t&	mtu) 
 {
     string error_msg;
     
@@ -3164,6 +3165,7 @@ XrlPimNode::mfea_client_0_1_set_vif_flags(
 				      is_multicast,
 				      is_broadcast,
 				      is_up,
+				      mtu,
 				      error_msg)
 	    != XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

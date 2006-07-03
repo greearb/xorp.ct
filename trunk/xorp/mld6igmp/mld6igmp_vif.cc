@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.68 2006/07/03 06:49:23 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.69 2006/07/03 21:49:45 pavlin Exp $"
 
 
 //
@@ -523,7 +523,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
  *
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
- * @error_msg the error message (if error).
+ * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
@@ -584,7 +584,7 @@ Mld6igmpVif::mld6igmp_group_query_send(const IPvX& group_address,
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
  * @param sources the set of source addresses.
- * @error_msg the error message (if error).
+ * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
@@ -679,7 +679,7 @@ Mld6igmpVif::mld6igmp_group_source_query_send(const IPvX& group_address,
  * @param sources the set of source addresses (for IGMPv3 or MLDv2 only).
  * @param s_flag the "Suppress Router-Side Processing" bit (for IGMPv3
  * or MLDv2 only; in all other cases it should be set to false).
- * @error_msg the error message (if error).
+ * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int

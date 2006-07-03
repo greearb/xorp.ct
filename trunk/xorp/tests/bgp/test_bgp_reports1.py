@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.2 2006/06/26 18:47:38 atanu Exp $
+# $XORP: xorp/tests/bgp/test_bgp_reports1.py,v 1.3 2006/06/28 15:41:07 atanu Exp $
 
 # Tests used to investigate bug reports.
 
@@ -147,6 +147,11 @@ def test_bug_639():
     when the router is being configured and a peering comes up.
     """
 
+    if not config.conf_redist_static(builddir(1), False):
+        return False
+
+    delay(2)
+
     coord("reset")
 
     coord("target 127.0.0.1 10001")
@@ -172,12 +177,10 @@ def test_bug_639():
 
     delay(2)
 
-    coord("peer1 send %s" % (packet % ("192.168.0.1", "192.168.0.0/16")))
+    coord("peer1 send %s" % (packet % ("127.0.0.1", "192.168.0.0/16")))
 
-    if not config.conf_redist_static(builddir(1), False):
-        return False
-
-    delay(5)
+    print 'FOO1: waiting for 50 seconds...';
+    delay(50)
 
     coord("peer1 assert established");
 

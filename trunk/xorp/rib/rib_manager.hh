@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rib_manager.hh,v 1.33 2006/01/04 05:55:27 pavlin Exp $
+// $XORP: xorp/rib/rib_manager.hh,v 1.34 2006/03/16 00:05:33 pavlin Exp $
 
 #ifndef __RIB_RIB_MANAGER_HH__
 #define __RIB_RIB_MANAGER_HH__
@@ -131,10 +131,11 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
+     * @param mtu the MTU of the vif.
      * @param err reference to string in which to store the
      * human-readable error message in case anything goes wrong.  Used
      * for debugging purposes.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_vif_flags(const string& vifname,
 			      bool is_p2p,
@@ -142,6 +143,7 @@ public:
 			      bool is_multicast,
 			      bool is_broadcast,
 			      bool is_up,
+			      uint32_t mtu,
 			      string& err);
 
     /**

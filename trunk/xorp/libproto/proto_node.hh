@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/proto_node.hh,v 1.34 2006/01/23 21:03:39 pavlin Exp $
+// $XORP: xorp/libproto/proto_node.hh,v 1.35 2006/03/16 00:04:12 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PROTO_NODE_HH__
@@ -422,7 +422,7 @@ public:
      * 
      * Note that it may change the node status.
      * 
-     * @error_msg: The error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		start_config(string& error_msg);
@@ -432,7 +432,7 @@ public:
      * 
      * Note that it may change the node status.
      * 
-     * @error_msg: The error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		end_config(string& error_msg);
@@ -449,8 +449,8 @@ public:
      * Add a configured vif.
      * 
      * @param vif the vif with the information to add.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const Vif& vif, string& error_msg);
     
@@ -459,8 +459,8 @@ public:
      * 
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const string& vif_name, uint32_t vif_index,
 			       string& error_msg);
@@ -469,8 +469,8 @@ public:
      * Delete a configured vif.
      * 
      * @param vif_name the name of the vif to delete.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif(const string& vif_name, string& error_msg);
 
@@ -482,8 +482,8 @@ public:
      * @param subnet the subnet address to add.
      * @param broadcast the broadcast address to add.
      * @param peer the peer address to add.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif_addr(const string& vif_name,
 				    const IPvX& addr,
@@ -497,8 +497,8 @@ public:
      * 
      * @param vif_name the name of the vif.
      * @param addr the address to delete.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif_addr(const string& vif_name,
 				       const IPvX& addr,
@@ -509,8 +509,8 @@ public:
      * 
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
 				     uint32_t pif_index,
@@ -526,8 +526,9 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
-     * @error_msg: The error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param mtu the MTU of the vif.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_vif_flags(const string& vif_name,
 				     bool is_pim_register,
@@ -536,6 +537,7 @@ public:
 				     bool is_multicast,
 				     bool is_broadcast,
 				     bool is_up,
+				     uint32_t mtu,
 				     string& error_msg);
 
     /**
@@ -1065,6 +1067,7 @@ ProtoNode<V>::add_config_vif(const Vif& vif, string& error_msg)
 			     vif.is_multicast_capable(),
 			     vif.is_broadcast_capable(),
 			     vif.is_underlying_vif_up(),
+			     vif.mtu(),
 			     error_msg) < 0) {
 	string dummy_error_msg;
 	delete_config_vif(vif.name(), dummy_error_msg);
@@ -1248,6 +1251,7 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
 				   bool is_multicast,
 				   bool is_broadcast,
 				   bool is_up,
+				   uint32_t mtu,
 				   string& error_msg)
 {
     map<string, Vif>::iterator iter;
@@ -1272,6 +1276,7 @@ ProtoNode<V>::set_config_vif_flags(const string& vif_name,
     vif->set_multicast_capable(is_multicast);
     vif->set_broadcast_capable(is_broadcast);
     vif->set_underlying_vif_up(is_up);
+    vif->set_mtu(mtu);
     
     return (XORP_OK);
 }

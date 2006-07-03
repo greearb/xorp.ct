@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.5 2003/06/01 02:09:58 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/mfea_client.xif,v 1.6 2005/01/28 03:34:21 pavlin Exp $ */
 
 /*
  * Multicast Forwarding Engine Abstraction client XRL interface.
@@ -56,11 +56,12 @@ interface mfea_client/0.1 {
 	 * @param is_multicast true if the vif is multicast-capable.
 	 * @param is_broadcast true if the vif is broadcast-capable.
 	 * @param is_up true if the vif is UP and running.
+	 * @param mtu the MTU of the vif.
 	 */
 	set_vif_flags	? vif_name:txt					\
 			& is_pim_register:bool & is_p2p:bool		\
 			& is_loopback:bool & is_multicast:bool		\
-			& is_broadcast:bool & is_up:bool
+			& is_broadcast:bool & is_up:bool & mtu:u32
 	
 	/**
 	 * Complete all transactions with vif information.

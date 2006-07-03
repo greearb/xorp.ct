@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/vifmanager.cc,v 1.41 2005/11/02 01:33:15 pavlin Exp $"
+#ident "$XORP: xorp/rib/vifmanager.cc,v 1.42 2006/03/16 00:05:42 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -375,6 +375,7 @@ VifManager::updates_made()
 						ifmgr_vif.multicast_capable(),
 						ifmgr_vif.broadcast_capable(),
 						is_up,
+						ifmgr_iface.mtu_bytes(),
 						error_msg)
 		    != XORP_OK) {
 		    XLOG_ERROR("Cannot update the flags for vif %s: %s",
@@ -387,6 +388,7 @@ VifManager::updates_made()
 		vif.set_multicast_capable(ifmgr_vif.multicast_capable());
 		vif.set_broadcast_capable(ifmgr_vif.broadcast_capable());
 		vif.set_underlying_vif_up(is_up);
+		vif.set_mtu(ifmgr_iface.mtu_bytes());
 	    }
 
 	    //

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.12 2005/08/18 15:28:42 bms Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.13 2006/03/16 00:04:37 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -278,42 +278,42 @@ public:
     /**
      * Test if this vif is a PIM Register interface.
      * 
-     * return true if this vif is a PIM Register interface, otherwise false.
+     * @return true if this vif is a PIM Register interface, otherwise false.
      */
     bool	is_pim_register()	const	{ return _is_pim_register; }
     
     /**
      * Test if this vif is a point-to-point interface.
      * 
-     * return true if this vif is a point-to-point interface, otherwise false.
+     * @return true if this vif is a point-to-point interface, otherwise false.
      */
     bool	is_p2p()		const	{ return _is_p2p; }
     
     /**
      * Test if this vif is a loopback interface.
      * 
-     * return true if this vif is a loopback interface, otherwise false.
+     * @return true if this vif is a loopback interface, otherwise false.
      */
     bool	is_loopback()		const	{ return _is_loopback; }
     
     /**
      * Test if this vif is a discard interface.
      * 
-     * return true if this vif is a discard interface, otherwise false.
+     * @return true if this vif is a discard interface, otherwise false.
      */
     bool	is_discard()		const	{ return _is_discard; }
     
     /**
      * Test if this vif is multicast capable.
      * 
-     * return true if this vif is multicast capable, otherwise false.
+     * @return true if this vif is multicast capable, otherwise false.
      */
     bool	is_multicast_capable() const { return _is_multicast_capable; }
     
     /**
      * Test if this vif is broadcast capable.
      * 
-     * return true if this vif is broadcast capable, otherwise false.
+     * @return true if this vif is broadcast capable, otherwise false.
      */
     bool	is_broadcast_capable() const { return _is_broadcast_capable; }
     
@@ -324,11 +324,18 @@ public:
      * inside the kernel, or the MFEA interface which a PIM interface
      * matches to.
      * 
-     * return true if the underlying vif is UP (when applicable), otherwise
+     * @return true if the underlying vif is UP (when applicable), otherwise
      * false.
      */
     bool	is_underlying_vif_up() const { return _is_underlying_vif_up; }
-    
+
+    /**
+     * Get the MTU of the vif.
+     *
+     * @return the MTU of the vif.
+     */
+    uint32_t	mtu() const { return _mtu; }
+
     /**
      * Set/reset the vif as a PIM Register interface.
      * 
@@ -388,6 +395,13 @@ public:
      * otherwise the underlying vif status is set to DOWN.
      */
     void	set_underlying_vif_up(bool v)	{ _is_underlying_vif_up = v; }
+
+    /**
+     * Set the MTU of the vif.
+     *
+     * @param v the MTU of the vif.
+     */
+    void	set_mtu(uint32_t v) { _mtu = v; }
 
     /**
      * Get the list of all addresses for this vif.
@@ -511,6 +525,7 @@ private:
     bool	_is_multicast_capable;	// Multicast-capable interface
     bool	_is_broadcast_capable;	// Broadcast-capable interface
     bool	_is_underlying_vif_up;	// True if underlying vif is up
+    uint32_t	_mtu;			// The MTU of the vif
     
     list<VifAddr> _addr_list;		// The list of addresses for this vif
 };

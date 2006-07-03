@@ -12,9 +12,10 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/tests/test_builddir.py,v 1.1 2006/04/07 05:13:08 atanu Exp $
+# $XORP: xorp/tests/test_builddir.py,v 1.2 2006/05/01 16:49:06 zec Exp $
 
-BUILDDIR='../'
+# BUILDDIR='../'
+BUILDDIR='/scratch/possum/u1/pavlin/xorp/xorp-gcc34/'
 
 def builddir(depth = 0):
     """
@@ -26,7 +27,8 @@ def builddir(depth = 0):
     for i in range(depth):
         bdir += '../'
 
-    return bdir + BUILDDIR
+    # return bdir + BUILDDIR
+    return BUILDDIR
 
 # Local Variables:
 # mode: python

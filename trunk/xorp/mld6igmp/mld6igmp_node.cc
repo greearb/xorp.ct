@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.48 2006/03/16 00:04:44 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node.cc,v 1.49 2006/06/22 15:58:56 pavlin Exp $"
 
 
 //
@@ -452,7 +452,7 @@ int
 Mld6igmpNode::set_vif_flags(const string& vif_name,
 			    bool is_pim_register, bool is_p2p,
 			    bool is_loopback, bool is_multicast,
-			    bool is_broadcast, bool is_up,
+			    bool is_broadcast, bool is_up, uint32_t mtu,
 			    string& error_msg)
 {
     bool is_changed = false;
@@ -487,6 +487,10 @@ Mld6igmpNode::set_vif_flags(const string& vif_name,
     }
     if (mld6igmp_vif->is_underlying_vif_up() != is_up) {
 	mld6igmp_vif->set_underlying_vif_up(is_up);
+	is_changed = true;
+    }
+    if (mld6igmp_vif->mtu() != mtu) {
+	mld6igmp_vif->set_mtu(mtu);
 	is_changed = true;
     }
     

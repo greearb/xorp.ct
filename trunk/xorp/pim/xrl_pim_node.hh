@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/xrl_pim_node.hh,v 1.65 2006/03/16 00:04:56 pavlin Exp $
+// $XORP: xorp/pim/xrl_pim_node.hh,v 1.66 2006/03/30 02:21:14 pavlin Exp $
 
 #ifndef __PIM_XRL_PIM_NODE_HH__
 #define __PIM_XRL_PIM_NODE_HH__
@@ -281,6 +281,8 @@ protected:
      *  @param is_broadcast true if the vif is broadcast-capable.
      *  
      *  @param is_up true if the vif is UP and running.
+     *
+     *  @param mtu the MTU of the vif.
      */
     XrlCmdError mfea_client_0_1_set_vif_flags(
 	// Input values, 
@@ -290,7 +292,8 @@ protected:
 	const bool&	is_loopback, 
 	const bool&	is_multicast, 
 	const bool&	is_broadcast, 
-	const bool&	is_up);
+	const bool&	is_up,
+	const uint32_t&	mtu);
 
     /**
      *  Complete all transactions with vif information.

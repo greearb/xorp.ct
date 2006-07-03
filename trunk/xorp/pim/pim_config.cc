@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_config.cc,v 1.45 2006/01/23 21:03:40 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_config.cc,v 1.46 2006/03/16 00:04:51 pavlin Exp $"
 
 
 //
@@ -82,7 +82,7 @@ PimNode::set_config_all_vifs_done(string& error_msg)
 	set_vif_flags(vif->name(), vif->is_pim_register(), vif->is_p2p(),
 		      vif->is_loopback(), vif->is_multicast_capable(),
 		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
-		      err);
+		      vif->mtu(), err);
 	
 	//
 	// Delete vif addresses that don't exist anymore

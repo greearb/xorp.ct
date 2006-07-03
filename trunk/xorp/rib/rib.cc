@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.59 2005/11/05 04:48:15 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.60 2006/03/16 00:05:31 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -539,7 +539,8 @@ RIB<A>::set_vif_flags(const string& vifname,
 		      bool is_loopback,
 		      bool is_multicast,
 		      bool is_broadcast,
-		      bool is_up)
+		      bool is_up,
+		      uint32_t mtu)
 {
     map<string, Vif>::iterator vi = _vifs.find(vifname);
     if (vi == _vifs.end()) {
@@ -556,6 +557,7 @@ RIB<A>::set_vif_flags(const string& vifname,
     vif.set_multicast_capable(is_multicast);
     vif.set_broadcast_capable(is_broadcast);
     vif.set_underlying_vif_up(is_up);
+    vif.set_mtu(mtu);
 
     if (old_is_up == is_up)
 	return XORP_OK;

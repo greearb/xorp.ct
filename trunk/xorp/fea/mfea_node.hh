@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_node.hh,v 1.34 2006/03/16 00:03:58 pavlin Exp $
+// $XORP: xorp/fea/mfea_node.hh,v 1.35 2006/03/19 23:29:14 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_NODE_HH__
@@ -180,7 +180,7 @@ public:
      *
      * @param vif the vif with the information to add.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int add_config_vif(const Vif& vif, string& error_msg);
     
@@ -190,7 +190,7 @@ public:
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif(const string& vif_name,
 			       uint32_t vif_index,
@@ -201,7 +201,7 @@ public:
      * 
      * @param vif_name the name of the vif to delete.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif(const string& vif_name,
 				  string& error_msg);
@@ -215,7 +215,7 @@ public:
      * @param broadcast the broadcast address to add.
      * @param peer the peer address to add.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		add_config_vif_addr(const string& vif_name,
 				    const IPvX& addr,
@@ -230,7 +230,7 @@ public:
      * @param vif_name the name of the vif.
      * @param addr the address to delete.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		delete_config_vif_addr(const string& vif_name,
 				       const IPvX& addr,
@@ -242,7 +242,7 @@ public:
      * @param vif_name the name of the vif.
      * @param pif_index the physical interface index.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_pif_index(const string& vif_name,
 				     uint32_t pif_index,
@@ -258,8 +258,9 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
+     * @param mtu the MTU of the vif.
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_vif_flags(const string& vif_name,
 				     bool is_pim_register,
@@ -268,13 +269,14 @@ public:
 				     bool is_multicast,
 				     bool is_broadcast,
 				     bool is_up,
+				     uint32_t mtu,
 				     string& error_msg);
     
     /**
      * Complete the set of vif configuration changes.
      * 
      * @param error_msg the error message (if error).
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		set_config_all_vifs_done(string& error_msg);
     
@@ -287,7 +289,7 @@ public:
      * of the message.
      * @param vif_name the name of the vif to add.
      * @param vif_index the vif index of the vif to add.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_add_config_vif(const string& dst_module_instance_name,
 				    xorp_module_id dst_module_id,
@@ -302,7 +304,7 @@ public:
      * @param dst_module_id the module ID of the protocol-destination
      * of the message.
      * @param vif_name the name of the vif to delete.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_delete_config_vif(const string& dst_module_instance_name,
 				       xorp_module_id dst_module_id,
@@ -320,7 +322,7 @@ public:
      * @param subnet the subnet address to add.
      * @param broadcast the broadcast address to add.
      * @param peer the peer address to add.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_add_config_vif_addr(const string& dst_module_instance_name,
 					 xorp_module_id dst_module_id,
@@ -339,7 +341,7 @@ public:
      * of the message.
      * @param vif_name the name of the vif.
      * @param addr the address to delete.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_delete_config_vif_addr(const string& dst_module_instance_name,
 					    xorp_module_id dst_module_id,
@@ -360,7 +362,8 @@ public:
      * @param is_multicast true if the vif is multicast capable.
      * @param is_broadcast true if the vif is broadcast capable.
      * @param is_up true if the underlying vif is UP.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @param mtu the MTU of the vif.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_set_config_vif_flags(const string& dst_module_instance_name,
 					  xorp_module_id dst_module_id,
@@ -370,7 +373,8 @@ public:
 					  bool is_loopback,
 					  bool is_multicast,
 					  bool is_broadcast,
-					  bool is_up) = 0;
+					  bool is_up,
+					  uint32_t mtu) = 0;
     
     /**
      * Send a message to a client to complete the set of vif configuration
@@ -380,7 +384,7 @@ public:
      * instance-destination of the message.
      * @param dst_module_id the module ID of the protocol-destination
      * of the message.
-     * @return  XORP_OK on success, otherwise XORP_ERROR.
+     * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     virtual int	send_set_config_all_vifs_done(const string& dst_module_instance_name,
 					      xorp_module_id dst_module_id) = 0;

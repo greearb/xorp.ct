@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.77 2006/03/16 00:04:53 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.78 2006/05/25 00:38:21 pavlin Exp $"
 
 
 //
@@ -514,7 +514,7 @@ int
 PimNode::set_vif_flags(const string& vif_name,
 		       bool is_pim_register, bool is_p2p,
 		       bool is_loopback, bool is_multicast,
-		       bool is_broadcast, bool is_up,
+		       bool is_broadcast, bool is_up, uint32_t mtu,
 		       string& error_msg)
 {
     bool is_changed = false;
@@ -549,6 +549,10 @@ PimNode::set_vif_flags(const string& vif_name,
     }
     if (pim_vif->is_underlying_vif_up() != is_up) {
 	pim_vif->set_underlying_vif_up(is_up);
+	is_changed = true;
+    }
+    if (pim_vif->mtu() != mtu) {
+	pim_vif->set_mtu(mtu);
 	is_changed = true;
     }
     

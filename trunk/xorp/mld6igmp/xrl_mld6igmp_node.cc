@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.56 2006/06/07 20:09:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/xrl_mld6igmp_node.cc,v 1.57 2006/06/10 00:20:59 pavlin Exp $"
 
 #include "mld6igmp_module.h"
 
@@ -2026,7 +2026,8 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
     const bool&		is_loopback, 
     const bool&		is_multicast, 
     const bool&		is_broadcast, 
-    const bool&		is_up)
+    const bool&		is_up,
+    const uint32_t&	mtu)
 {
     string error_msg;
     
@@ -2037,6 +2038,7 @@ XrlMld6igmpNode::mfea_client_0_1_set_vif_flags(
 					   is_multicast,
 					   is_broadcast,
 					   is_up,
+					   mtu,
 					   error_msg)
 	!= XORP_OK) {
 	return XrlCmdError::COMMAND_FAILED(error_msg);

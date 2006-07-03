@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.12 2006/03/16 00:04:43 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.13 2006/06/23 00:18:23 pavlin Exp $"
 
 
 //
@@ -78,6 +78,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 	set_vif_flags(vif->name(), vif->is_pim_register(), vif->is_p2p(),
 		      vif->is_loopback(), vif->is_multicast_capable(),
 		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
+		      vif->mtu(),
 		      err);
 
 	//
