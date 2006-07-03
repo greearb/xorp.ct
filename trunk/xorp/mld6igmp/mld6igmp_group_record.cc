@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.22 2006/07/03 00:50:06 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.23 2006/07/03 02:47:35 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -1434,7 +1434,14 @@ Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_change_to_include_mode(sources);
+    if (_mld6igmp_vif.is_igmpv1(group_record)) {
+	//
+	// XXX: Ignore CHANGE_TO_INCLUDE_MODE messages when in
+	// IGMPv1 mode.
+	//
+    } else {
+	group_record->process_change_to_include_mode(sources);
+    }
 
     //
     // If the group record is not used anymore, then delete it
@@ -1467,7 +1474,18 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_change_to_exclude_mode(sources);
+    if (_mld6igmp_vif.is_igmpv1(group_record)
+	|| _mld6igmp_vif.is_igmpv2(group_record)
+	|| _mld6igmp_vif.is_mldv1(group_record)) {
+	//
+	// XXX: Ignore the source list in the CHANGE_TO_EXCLUDE_MODE
+	// messages when in IGMPv1, IGMPv2, or MLDv1 mode.
+	//
+	set<IPvX> no_sources;		// XXX: empty set
+	group_record->process_change_to_exclude_mode(no_sources);
+    } else {
+	group_record->process_change_to_exclude_mode(sources);
+    }
 
     //
     // If the group record is not used anymore, then delete it
@@ -1533,7 +1551,16 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_block_old_sources(sources);
+    if (_mld6igmp_vif.is_igmpv1(group_record)
+	|| _mld6igmp_vif.is_igmpv2(group_record)
+	|| _mld6igmp_vif.is_mldv1(group_record)) {
+	//
+	// XXX: Ignore BLOCK_OLD_SOURCES messages when in
+	// IGMPv1, IGMPv2, or MLDv1 mode.
+	//
+    } else {
+	group_record->process_block_old_sources(sources);
+    }
 
     //
     // If the group record is not used anymore, then delete it
