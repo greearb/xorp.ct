@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/mld.tp,v 1.18 2006/02/22 02:26:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/mld.tp,v 1.19 2006/04/19 19:59:26 pavlin Exp $ */
 
 protocols {
     mld {
@@ -85,7 +85,7 @@ protocols {
 
 		version {
 		    %help:	short "Set the MLD protocol version";
-		    %allow-range: $(@) "1" "1" %help: "The MLD protocol version";
+		    %allow-range: $(@) "1" "2" %help: "The MLD protocol version";
 		    %create:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %set:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(@)";
 		    %delete:	xrl "$(mld.targetname)/mld6igmp/0.1/set_vif_proto_version?vif_name:txt=$(vif.@)&proto_version:u32=$(DEFAULT)";
