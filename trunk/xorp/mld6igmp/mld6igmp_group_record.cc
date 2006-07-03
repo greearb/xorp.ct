@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.21 2006/06/30 23:57:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.22 2006/07/03 00:50:06 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -739,63 +739,6 @@ Mld6igmpGroupRecord::timeout_sec() const
     _group_timer.time_remaining(tv);
     
     return (tv.sec());
-}
-
-/**
- * Mld6igmpGroupRecord::member_query_timer_timeout:
- * 
- * Timeout: expire a multicast group entry.
- **/
-void
-Mld6igmpGroupRecord::member_query_timer_timeout()
-{
-    _last_member_query_timer.unschedule();
-    if (mld6igmp_vif().mld6igmp_node().proto_is_igmp())
-	_igmpv1_host_present_timer.unschedule();
-    
-    // notify routing (-)
-    if (is_exclude_mode()) {
-	mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
-						 group(),
-						 ACTION_PRUNE);
-    }
-    
-    // Delete the group record and return immediately
-    mld6igmp_vif().group_records().erase(group());
-    delete this;
-    return;
-}
-
-/**
- * Mld6igmpGroupRecord::last_member_query_timer_timeout:
- * 
- * Timeout: the last group member has expired or has left the group. Quickly
- * query if there are other members for that group.
- * XXX: a different timer (member_query_timer) will stop the process
- * and will cancel this timer `last_member_query_timer'.
- **/
-void
-Mld6igmpGroupRecord::last_member_query_timer_timeout()
-{
-    TimeVal max_resp_time = mld6igmp_vif().query_last_member_interval().get();
-    string dummy_error_msg;
-
-    //
-    // XXX: The RFC 2236 spec says that we shouldn't care if we changed
-    // from a Querier to a non-Querier. Hence, send the Group-Specific Query
-    // (see the bottom part of Section 3.)
-    //
-    set<IPvX> no_sources;		// XXX: empty set
-    mld6igmp_vif().mld6igmp_query_send(mld6igmp_vif().primary_addr(),
-				       group(),
-				       max_resp_time,
-				       group(),
-				       no_sources,
-				       false,
-				       dummy_error_msg);
-    _last_member_query_timer = eventloop().new_oneoff_after(
-	mld6igmp_vif().query_last_member_interval().get(),
-	callback(this, &Mld6igmpGroupRecord::last_member_query_timer_timeout));
 }
 
 /**
