@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.40 2006/06/30 19:39:31 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.41 2006/06/30 23:57:45 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -412,15 +412,15 @@ public:
 			      string& error_msg);
 
     /**
-     * Send MLDv2 or IGMPv3 Group-Specific Query message.
+     * Send Group-Specific Query message.
      *
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
-    int mld6igmp_ssm_group_query_send(const IPvX& group_address,
-				      string& error_msg);
+    int mld6igmp_group_query_send(const IPvX& group_address,
+				  string& error_msg);
 
     /**
      * Send MLDv2 or IGMPv3 Group-and-Source-Specific Query message.
@@ -431,9 +431,9 @@ public:
      * @error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
-    int		mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
-						     const set<IPvX>& sources,
-						     string& error_msg);
+    int		mld6igmp_group_source_query_send(const IPvX& group_address,
+						 const set<IPvX>& sources,
+						 string& error_msg);
 
     /**
      * Send MLD or IGMP Query message.

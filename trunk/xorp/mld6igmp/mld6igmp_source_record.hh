@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.7 2006/06/22 19:32:25 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.8 2006/06/30 19:35:28 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -110,21 +110,21 @@ public:
     XorpTimer& source_timer() { return _source_timer; }
 
     /**
-     * Get the SSM Query retransmission count.
+     * Get the Query retransmission count.
      *
-     * @return the SSM Query retransmission count.
+     * @return the Query retransmission count.
      */
-    size_t ssm_query_retransmission_count() const {
-	return _ssm_query_retransmission_count;
+    size_t query_retransmission_count() const {
+	return _query_retransmission_count;
     }
 
     /**
-     * Set the SSM Query retransmission count.
+     * Set the Query retransmission count.
      *
      * @param v the value to set.
      */
-    void set_ssm_query_retransmission_count(size_t v) {
-	_ssm_query_retransmission_count = v;
+    void set_query_retransmission_count(size_t v) {
+	_query_retransmission_count = v;
     }
 
 private:
@@ -136,7 +136,7 @@ private:
     Mld6igmpGroupRecord& _group_record;	// The group record we belong to
     IPvX	_source;		// The source address
     XorpTimer	_source_timer;		// The source timer
-    size_t	_ssm_query_retransmission_count; // Count for periodic Query
+    size_t	_query_retransmission_count; // Count for periodic Queries
 };
 
 /**

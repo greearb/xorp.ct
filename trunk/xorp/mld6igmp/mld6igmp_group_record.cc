@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.24 2006/07/03 04:25:10 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.25 2006/07/03 06:55:31 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -70,7 +70,7 @@ Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
       _do_forward_sources(*this),
       _dont_forward_sources(*this),
       _last_reported_host(IPvX::ZERO(family())),
-      _ssm_query_retransmission_count(0)
+      _query_retransmission_count(0)
 {
     
 }
@@ -340,7 +340,7 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
 
 	// Send Q(G, A - B) with a_minus_b
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    a_minus_b.extract_source_addresses(),
 	    dummy_error_msg);
@@ -377,15 +377,13 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	_do_forward_sources.set_source_timer(a, gmi);	// (A) = GMI
 
 	// Send Q(G, X - A) with x_minus_a
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    x_minus_a.extract_source_addresses(),
 	    dummy_error_msg);
 
 	// Send Q(G)
-	_mld6igmp_vif.mld6igmp_ssm_group_query_send(
-	    group(),
-	    dummy_error_msg);
+	_mld6igmp_vif.mld6igmp_group_query_send(group(), dummy_error_msg);
 
 	calculate_forwarding_changes(old_is_include_mode,
 				     old_do_forward_sources,
@@ -435,7 +433,7 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
 	// Send Q(G, A * B) with _do_forward_sources
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    _do_forward_sources.extract_source_addresses(),
 	    dummy_error_msg);
@@ -485,7 +483,7 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
 	// Send Q(G, A - Y) with _do_forward_sources
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    _do_forward_sources.extract_source_addresses(),
 	    dummy_error_msg);
@@ -589,7 +587,7 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	Mld6igmpSourceSet a_and_b = a * b;
 
 	// Send Q(G, A * B) with a_and_b
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    a_and_b.extract_source_addresses(),
 	    dummy_error_msg);
@@ -630,7 +628,7 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	a_minus_x_minus_y.set_source_timer(gt);	// (A - X - Y) = Group Timer
 
 	// Send Q(G, A - Y) with a_minus_y
-	_mld6igmp_vif.mld6igmp_ssm_group_source_query_send(
+	_mld6igmp_vif.mld6igmp_group_source_query_send(
 	    group(),
 	    a_minus_y.extract_source_addresses(),
 	    dummy_error_msg);
@@ -778,7 +776,7 @@ Mld6igmpGroupRecord::group_timer_timeout()
 }
 
 /**
- * Schedule periodic SSM Group-Specific or Group-and-Source-Specific Query
+ * Schedule periodic Group-Specific and Group-and-Source-Specific Query
  * retransmission.
  *
  * If the sources list is empty, we schedule Group-Specific Query,
@@ -787,8 +785,7 @@ Mld6igmpGroupRecord::group_timer_timeout()
  * @param sources the source addresses.
  */
 void
-Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
-    const set<IPvX>& sources)
+Mld6igmpGroupRecord::schedule_periodic_group_query(const set<IPvX>& sources)
 {
     Mld6igmpSourceSet::iterator source_iter;
     size_t count = _mld6igmp_vif.last_member_query_count() - 1;
@@ -800,7 +797,7 @@ Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
 	 source_iter != _dont_forward_sources.end();
 	 ++source_iter) {
 	Mld6igmpSourceRecord* source_record = source_iter->second;
-	source_record->set_ssm_query_retransmission_count(0);
+	source_record->set_query_retransmission_count(0);
     }
 
     if (_mld6igmp_vif.last_member_query_count() == 0)
@@ -815,7 +812,7 @@ Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
 	//
 	// Set the count for Group-Specific Query retransmission
 	//
-	_ssm_query_retransmission_count = count;
+	_query_retransmission_count = count;
     } else {
 	//
 	// Set the count for Group-and-Source-Specific Query retransmission
@@ -828,7 +825,7 @@ Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
 	    Mld6igmpSourceRecord* source_record = find_do_forward_source(ipvx);
 	    if (source_record == NULL)
 		continue;
-	    source_record->set_ssm_query_retransmission_count(count);
+	    source_record->set_query_retransmission_count(count);
 	}
     }
 
@@ -838,21 +835,21 @@ Mld6igmpGroupRecord::schedule_periodic_ssm_group_query(
     //
     // Note that we set the timer only if it wasn't running already.
     //
-    if (! _ssm_group_query_timer.scheduled()) {
-	_ssm_group_query_timer = eventloop().new_periodic(
+    if (! _group_query_timer.scheduled()) {
+	_group_query_timer = eventloop().new_periodic(
 	    _mld6igmp_vif.query_last_member_interval().get(),
-	    callback(this, &Mld6igmpGroupRecord::ssm_group_query_periodic_timeout));
+	    callback(this, &Mld6igmpGroupRecord::group_query_periodic_timeout));
     }
 }
 
 /**
- * Periodic timeout: time to send the next SSM Group-Specific and
- * Group-and-Source-Specific Queryies.
+ * Periodic timeout: time to send the next Group-Specific and
+ * Group-and-Source-Specific Queries.
  *
  * @return true if the timer should be scheduled again, otherwise false.
  */
 bool
-Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
+Mld6igmpGroupRecord::group_query_periodic_timeout()
 {
     string dummy_error_msg;
     bool s_flag = false;
@@ -876,10 +873,10 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
     //
     // Send the Group-Specific Query message
     //
-    if (_ssm_query_retransmission_count == 0) {
+    if (_query_retransmission_count == 0) {
 	do_send_group_query = false;	// No more queries to send
     } else {
-	_ssm_query_retransmission_count--;
+	_query_retransmission_count--;
 	//
 	// Calculate the group-specific "Suppress Router-Side Processing" bit
 	//
@@ -905,11 +902,11 @@ Mld6igmpGroupRecord::ssm_group_query_periodic_timeout()
 	 source_iter != _do_forward_sources.end();
 	 ++source_iter) {
 	Mld6igmpSourceRecord* source_record = source_iter->second;
-	size_t count = source_record->ssm_query_retransmission_count();
+	size_t count = source_record->query_retransmission_count();
 	bool s_flag = false;
 	if (count == 0)
 	    continue;
-	source_record->set_ssm_query_retransmission_count(count - 1);
+	source_record->set_query_retransmission_count(count - 1);
 	//
 	// Calculate the "Suppress Router-Side Processing" bit
 	//

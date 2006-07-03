@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.14 2006/07/03 00:50:06 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.15 2006/07/03 02:47:35 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -223,7 +223,7 @@ public:
     XorpTimer& group_timer() { return _group_timer; }
 
     /**
-     * Schedule periodic SSM Group-Specific or Group-and-Source-Specific Query
+     * Schedule periodic Group-Specific and Group-and-Source-Specific Query
      * retransmission.
      *
      * If the sources list is empty, we schedule Group-Specific Query,
@@ -231,7 +231,7 @@ public:
      *
      * @param sources the source addresses.
      */
-    void schedule_periodic_ssm_group_query(const set<IPvX>& sources);
+    void schedule_periodic_group_query(const set<IPvX>& sources);
 
     /**
      * Record that an older Membership report message has been received.
@@ -307,12 +307,12 @@ private:
     void	group_timer_timeout();
 
     /**
-     * Periodic timeout: time to send the next SSM Group-Specific and
-     * Group-and-Source-Specific Queryies.
+     * Periodic timeout: time to send the next Group-Specific and
+     * Group-and-Source-Specific Queries.
      *
      * @return true if the timer should be scheduled again, otherwise false.
      */
-    bool	ssm_group_query_periodic_timeout();
+    bool	group_query_periodic_timeout();
 
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
@@ -327,8 +327,8 @@ private:
     XorpTimer	_igmpv2_mldv1_host_present_timer;
 
     XorpTimer	_group_timer;		// Group timer for filter mode switch
-    XorpTimer	_ssm_group_query_timer;	// Timer for SSM Group-Specific Query
-    size_t	_ssm_query_retransmission_count; // Count for periodic Query
+    XorpTimer	_group_query_timer;	// Timer for periodic Queries
+    size_t	_query_retransmission_count; // Count for periodic Queries
 };
 
 /**

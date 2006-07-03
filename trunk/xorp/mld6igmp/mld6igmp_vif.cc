@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.67 2006/06/30 23:57:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.68 2006/07/03 06:49:23 pavlin Exp $"
 
 
 //
@@ -519,7 +519,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 }
 
 /**
- * Send MLDv2 or IGMPv3 Group-Specific Query message.
+ * Send Group-Specific Query message.
  *
  * @param group_address the "Multicast Address" or "Group Address" field
  * in the MLD or IGMP headers respectively.
@@ -527,8 +527,8 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
-					   string& error_msg)
+Mld6igmpVif::mld6igmp_group_query_send(const IPvX& group_address,
+				       string& error_msg)
 {
     const IPvX& src = primary_addr();
     const IPvX& dst = group_address;
@@ -565,7 +565,7 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
     // Schedule the periodic Group-Specific Query
     //
     if (ret_value == XORP_OK)
-	group_record->schedule_periodic_ssm_group_query(no_sources);
+	group_record->schedule_periodic_group_query(no_sources);
 
     //
     // Print the error message if there was an error
@@ -588,9 +588,9 @@ Mld6igmpVif::mld6igmp_ssm_group_query_send(const IPvX& group_address,
  * @return XORP_OK on success, otherwise XORP_ERROR.
  **/
 int
-Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
-						  const set<IPvX>& sources,
-						  string& error_msg)
+Mld6igmpVif::mld6igmp_group_source_query_send(const IPvX& group_address,
+					      const set<IPvX>& sources,
+					      string& error_msg)
 {
     const IPvX& src = primary_addr();
     const IPvX& dst = group_address;
@@ -651,10 +651,10 @@ Mld6igmpVif::mld6igmp_ssm_group_source_query_send(const IPvX& group_address,
 				    error_msg);
 
     //
-    // Schedule the periodic group and source specific Query
+    // Schedule the periodic Group-and-Source-Specific Query
     //
     if (ret_value == XORP_OK)
-	group_record->schedule_periodic_ssm_group_query(selected_sources);
+	group_record->schedule_periodic_group_query(selected_sources);
 
     //
     // Print the error message if there was an error

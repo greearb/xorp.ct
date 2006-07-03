@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.8 2006/06/22 19:32:25 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.9 2006/06/30 19:35:28 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -64,7 +64,7 @@ Mld6igmpSourceRecord::Mld6igmpSourceRecord(Mld6igmpGroupRecord& group_record,
 					   const IPvX& source)
     : _group_record(group_record),
       _source(source),
-      _ssm_query_retransmission_count(0)
+      _query_retransmission_count(0)
 {
     
 }
