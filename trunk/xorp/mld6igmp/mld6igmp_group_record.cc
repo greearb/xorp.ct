@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.20 2006/06/30 19:35:28 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.21 2006/06/30 23:57:45 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -66,7 +66,7 @@ Mld6igmpGroupRecord::Mld6igmpGroupRecord(Mld6igmpVif& mld6igmp_vif,
 					 const IPvX& group)
     : _mld6igmp_vif(mld6igmp_vif),
       _group(group),
-      _is_include_mode(false),
+      _is_include_mode(true),
       _do_forward_sources(*this),
       _dont_forward_sources(*this),
       _last_reported_host(IPvX::ZERO(family())),
@@ -125,6 +125,39 @@ Mld6igmpGroupRecord::find_dont_forward_source(const IPvX& source)
 }
 
 /**
+ * Test whether the entry is unused.
+ *
+ * @return true if the entry is unused, otherwise false.
+ */
+bool
+Mld6igmpGroupRecord::is_unused() const
+{
+    if (is_include_mode()) {
+	if (_do_forward_sources.empty()) {
+	    XLOG_ASSERT(_dont_forward_sources.empty());
+	    return (true);
+	}
+	return (false);
+    }
+
+    if (is_exclude_mode()) {
+	//
+	// XXX: the group timer must be running in EXCLUDE mode,
+	// otherwise there must have been transition to INCLUDE mode.
+	//
+	if (_group_timer.scheduled())
+	    return (false);
+	XLOG_ASSERT(_do_forward_sources.empty());
+	XLOG_ASSERT(_dont_forward_sources.empty());
+	return (true);
+    }
+
+    XLOG_UNREACHABLE();
+
+    return (true);
+}
+
+/**
  * Process MODE_IS_INCLUDE report.
  *
  * @param sources the source addresses.
@@ -132,6 +165,10 @@ Mld6igmpGroupRecord::find_dont_forward_source(const IPvX& source)
 void
 Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -148,7 +185,10 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 	_do_forward_sources = a + b;			// (A + B)
 
 	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
-	
+
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -174,6 +214,9 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 
 	_do_forward_sources.set_source_timer(a, gmi);	// (A) = GMI
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -186,6 +229,10 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -212,6 +259,9 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -250,6 +300,9 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 	    gmi,
 	    callback(this, &Mld6igmpGroupRecord::group_timer_timeout));
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -262,6 +315,9 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
 
     if (is_include_mode()) {
@@ -289,6 +345,9 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	    a_minus_b.extract_source_addresses(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -328,6 +387,9 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 	    group(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -340,6 +402,9 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
 
     if (is_include_mode()) {
@@ -375,6 +440,9 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	    _do_forward_sources.extract_source_addresses(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -422,6 +490,9 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 	    _do_forward_sources.extract_source_addresses(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -434,6 +505,10 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
     if (is_include_mode()) {
 	//
 	// Router State: INCLUDE (A)
@@ -451,6 +526,9 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 
 	_do_forward_sources.set_source_timer(b, gmi);	// (B) = GMI
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -476,6 +554,9 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 
 	_do_forward_sources.set_source_timer(a, gmi);   // (A) = GMI
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -488,6 +569,9 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
 void
 Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 {
+    bool old_is_include_mode = is_include_mode();
+    set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
 
     if (is_include_mode()) {
@@ -510,6 +594,9 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	    a_and_b.extract_source_addresses(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 
@@ -548,6 +635,9 @@ Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
 	    a_minus_y.extract_source_addresses(),
 	    dummy_error_msg);
 
+	calculate_forwarding_changes(old_is_include_mode,
+				     old_do_forward_sources,
+				     old_dont_forward_sources);
 	return;
     }
 }
@@ -613,7 +703,8 @@ Mld6igmpGroupRecord::source_expired(Mld6igmpSourceRecord* source_record)
 	delete source_record;
 
 	// If no more source records, then delete the group record
-	if (_do_forward_sources.empty() && _dont_forward_sources.empty()) {
+	if (_do_forward_sources.empty()) {
+	    XLOG_ASSERT(_dont_forward_sources.empty());
 	    mld6igmp_vif().group_records().erase(group());
 	    delete this;
 	}
@@ -645,7 +736,7 @@ Mld6igmpGroupRecord::timeout_sec() const
 {
     TimeVal tv;
     
-    _member_query_timer.time_remaining(tv);
+    _group_timer.time_remaining(tv);
     
     return (tv.sec());
 }
@@ -1069,6 +1160,191 @@ Mld6igmpGroupRecord::is_mldv2_mode() const
 }
 
 /**
+ * Calculate the forwarding changes and notify the interested parties.
+ *
+ * @param old_is_include mode if true, the old filter mode was INCLUDE,
+ * otherwise was EXCLUDE.
+ * @param old_do_forward_sources the old set of sources to forward.
+ * @param old_dont_forward_sources the old set of sources not to forward.
+ */
+void
+Mld6igmpGroupRecord::calculate_forwarding_changes(
+    bool old_is_include_mode,
+    const set<IPvX>& old_do_forward_sources,
+    const set<IPvX>& old_dont_forward_sources) const
+{
+    bool new_is_include_mode = is_include_mode();
+    set<IPvX> new_do_forward_sources = _do_forward_sources.extract_source_addresses();
+    set<IPvX> new_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+    set<IPvX>::const_iterator iter;
+
+    if (old_is_include_mode) {
+	if (new_is_include_mode) {
+	    // INCLUDE -> INCLUDE
+	    XLOG_ASSERT(old_dont_forward_sources.empty());
+	    XLOG_ASSERT(new_dont_forward_sources.empty());
+
+	    // Join all new sources that are to be forwarded
+	    for (iter = new_do_forward_sources.begin();
+		 iter != new_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_do_forward_sources.find(ipvx)
+		    == old_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
+
+	    // Prune all old sources that were forwarded
+	    for (iter = old_do_forward_sources.begin();
+		 iter != old_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (new_do_forward_sources.find(ipvx)
+		    == new_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_PRUNE);
+		}
+	    }
+	}
+
+	if (! new_is_include_mode) {
+	    // INCLUDE -> EXCLUDE
+	    XLOG_ASSERT(old_dont_forward_sources.empty());
+
+	    // Prune the old sources that were forwarded
+	    for (iter = old_do_forward_sources.begin();
+		 iter != old_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (new_do_forward_sources.find(ipvx)
+		    == new_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_PRUNE);
+		}
+	    }
+
+	    // Join the group itself
+	    mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
+						     group(),
+						     ACTION_JOIN);
+
+	    // Join all new sources that are to be forwarded
+	    for (iter = new_do_forward_sources.begin();
+		 iter != new_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_do_forward_sources.find(ipvx)
+		    == old_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
+
+	    // Prune all new sources that are not to be forwarded
+	    for (iter = new_dont_forward_sources.begin();
+		 iter != new_dont_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_dont_forward_sources.find(ipvx)
+		    == old_dont_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_PRUNE);
+		}
+	    }
+	}
+    }
+
+    if (! old_is_include_mode) {
+	if (new_is_include_mode) {
+	    // EXCLUDE -> INCLUDE
+	    XLOG_ASSERT(new_dont_forward_sources.empty());
+
+	    // Prune the group itself
+	    mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
+						     group(),
+						     ACTION_PRUNE);
+
+	    // Join all new sources that are to be forwarded
+	    for (iter = new_do_forward_sources.begin();
+		 iter != new_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_do_forward_sources.find(ipvx)
+		    == old_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
+	}
+
+	if (! new_is_include_mode) {
+	    // EXCLUDE -> EXCLUDE
+
+	    // Join all new sources that are to be forwarded
+	    for (iter = new_do_forward_sources.begin();
+		 iter != new_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_do_forward_sources.find(ipvx)
+		    == old_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
+
+	    // Prune all old sources that were forwarded
+	    for (iter = old_do_forward_sources.begin();
+		 iter != old_do_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (new_do_forward_sources.find(ipvx)
+		    == new_do_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_PRUNE);
+		}
+	    }
+
+	    // Join all old sources that were not to be forwarded
+	    for (iter = old_dont_forward_sources.begin();
+		 iter != old_dont_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (new_dont_forward_sources.find(ipvx)
+		    == new_dont_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
+
+	    // Prune all new sources that are not to be forwarded
+	    for (iter = new_dont_forward_sources.begin();
+		 iter != new_dont_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (old_dont_forward_sources.find(ipvx)
+		    == old_dont_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_PRUNE);
+		}
+	    }
+	}
+    }
+}
+
+
+/**
  * Constructor for a given vif.
  * 
  * @param mld6igmp_vif the interface this set belongs to.
@@ -1150,6 +1426,14 @@ Mld6igmpGroupSet::process_mode_is_include(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_mode_is_include(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**
@@ -1175,6 +1459,14 @@ Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_mode_is_exclude(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**
@@ -1200,6 +1492,14 @@ Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_change_to_include_mode(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**
@@ -1225,6 +1525,14 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_change_to_exclude_mode(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**
@@ -1250,6 +1558,14 @@ Mld6igmpGroupSet::process_allow_new_sources(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_allow_new_sources(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**
@@ -1275,6 +1591,14 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
     XLOG_ASSERT(group_record != NULL);
 
     group_record->process_block_old_sources(sources);
+
+    //
+    // If the group record is not used anymore, then delete it
+    //
+    if (group_record->is_unused()) {
+	this->erase(group);
+	delete group_record;
+    }
 }
 
 /**

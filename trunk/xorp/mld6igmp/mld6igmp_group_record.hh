@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.12 2006/06/30 07:55:46 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.13 2006/06/30 19:35:28 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -104,6 +104,13 @@ public:
      * Set the filter mode to EXCLUDE.
      */
     void set_exclude_mode()		{ _is_include_mode = false; }
+
+    /**
+     * Test whether the entry is unused.
+     *
+     * @return true if the entry is unused, otherwise false.
+     */
+    bool is_unused() const;
 
     /**
      * Find a source that should be forwarded.
@@ -301,6 +308,18 @@ public:
     int		family() const { return _group.af(); }
 
 private:
+    /**
+     * Calculate the forwarding changes and notify the interested parties.
+     *
+     * @param old_is_include mode if true, the old filter mode was INCLUDE,
+     * otherwise was EXCLUDE.
+     * @param old_do_forward_sources the old set of sources to forward.
+     * @param old_dont_forward_sources the old set of sources not to forward.
+     */
+    void calculate_forwarding_changes(bool old_is_include_mode,
+				      const set<IPvX>& old_do_forward_sources,
+				      const set<IPvX>& old_dont_forward_sources) const;
+
     /**
      * Timeout: one of the older version host present timers has expired.
      */
