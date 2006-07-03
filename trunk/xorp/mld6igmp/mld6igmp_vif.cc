@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.66 2006/06/30 19:39:31 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.67 2006/06/30 23:57:45 pavlin Exp $"
 
 
 //
@@ -724,10 +724,6 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
 	return (XORP_ERROR);	
     } while (false);
 
-    // If IGMPv1, then set the Max Response Time to zero
-    if (is_igmpv1_mode(group_record))
-	scaled_max_resp_time = TimeVal::ZERO();
-
     //
     // Lower the group and source timers (if necessary)
     //
@@ -778,6 +774,17 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
     max_sources_n = min(max_sources_n, mtu / IPvX::addr_size(family()));
 
     //
+    // XXX: According to RFC 3810 (MLDv2), Section 8.3.2, the Querier
+    // continues to send MLDv2 queries, regardless of its Multicast Address
+    // Compatibility Mode.
+    //
+    // Interestingly, RFC 3376 (IGMPv3) does not include this statement.
+    // According to the following email, the need for this statement has been
+    // discovered too late to be included in RFC 3376:
+    // http://www1.ietf.org/mail-archive/web/ssm/current/msg00084.html
+    //
+
+    //
     // Prepare the buffer
     //
     buffer = buffer_send_prepare();
@@ -786,7 +793,11 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
     //
     // Insert the data (for IGMPv3 and MLDv2 only)
     //
-    if (is_igmpv3_mode(group_record) || is_mldv2_mode(group_record)) {
+    if (is_igmpv3_mode() || is_mldv2_mode()) {
+	//
+	// XXX: Note that we consider only the interface mode, but ignore
+	// the Multicast Address Compatibility Mode.
+	//
 	BUFFER_PUT_OCTET(qrv, buffer);
 	BUFFER_PUT_OCTET(qqic, buffer);
 	BUFFER_PUT_HOST_16(max_sources_n, buffer);
@@ -797,8 +808,15 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
 	    ++source_iter;
 	    max_sources_n--;
 	}
+    } else {
+	//
+	// If IGMPv1 Multicast Address Compatibility Mode, then set the
+	// Max Response Time to zero.
+	//
+	if (is_igmpv1_mode(group_record))
+	    scaled_max_resp_time = TimeVal::ZERO();
     }
-    
+
     //
     // Send the message
     //
