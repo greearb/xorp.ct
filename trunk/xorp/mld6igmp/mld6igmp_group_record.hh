@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.16 2006/07/03 21:49:45 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.17 2006/07/04 01:04:56 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -129,6 +129,20 @@ public:
      * if found, otherwise NULL.
      */
     Mld6igmpSourceRecord* find_dont_forward_source(const IPvX& source);
+
+    /**
+     * Get a reference to the set of sources to forward.
+     *
+     * @return a reference to the set of sources to forward.
+     */
+    const Mld6igmpSourceSet& do_forward_sources() const { return (_do_forward_sources); }
+
+    /**
+     * Get a reference to the set of sources not to forward.
+     *
+     * @return a reference to the set of sources not to forward.
+     */
+    const Mld6igmpSourceSet& dont_forward_sources() const { return (_dont_forward_sources); }
 
     /**
      * Process MODE_IS_INCLUDE report.
