@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.26 2006/06/07 20:09:50 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.27 2006/06/10 00:20:59 pavlin Exp $"
 
 
 //
@@ -343,18 +343,22 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	}
     }
     
-    cli_print(c_format("%-12s %-15s %-15s %-12s %7s\n",
+    cli_print(c_format("%-12s %-15s %-15s %-12s %7s %1s %5s\n",
 		       "Interface", "Group", "Source",
-		       "LastReported", "Timeout"));
+		       "LastReported", "Timeout", "V", "State"));
     for (uint32_t i = 0; i < mld6igmp_node().maxvifs(); i++) {
 	const Mld6igmpVif *mld6igmp_vif = mld6igmp_node().vif_find_by_vif_index(i);
 	if (mld6igmp_vif == NULL)
 	    continue;
-	Mld6igmpGroupSet::const_iterator iter;
-	for (iter = mld6igmp_vif->group_records().begin();
-	     iter != mld6igmp_vif->group_records().end();
-	     ++iter) {
-	    Mld6igmpGroupRecord *group_record = iter->second;
+	Mld6igmpGroupSet::const_iterator group_iter;
+	for (group_iter = mld6igmp_vif->group_records().begin();
+	     group_iter != mld6igmp_vif->group_records().end();
+	     ++group_iter) {
+	    const Mld6igmpGroupRecord *group_record = group_iter->second;
+	    Mld6igmpSourceSet::const_iterator source_iter;
+	    int version = 0;
+	    string state;
+
 	    // Test if we should print this entry
 	    bool do_print = true;
 	    if (groups.size()) {
@@ -368,13 +372,86 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 	    }
 	    if (! do_print)
 		continue;
-	    
-	    cli_print(c_format("%-12s %-15s %-15s %-12s %7d\n",
+
+	    // Calcuate the group entry version
+	    do {
+		version = 0;
+		if (mld6igmp_vif->is_igmpv1_mode(group_record)) {
+		    version = 1;
+		    break;
+		}
+		if (mld6igmp_vif->is_igmpv2_mode(group_record)) {
+		    version = 2;
+		    break;
+		}
+		if (mld6igmp_vif->is_igmpv3_mode(group_record)) {
+		    version = 3;
+		    break;
+		}
+		if (mld6igmp_vif->is_mldv1_mode(group_record)) {
+		    version = 1;
+		    break;
+		}
+		if (mld6igmp_vif->is_mldv2_mode(group_record)) {
+		    version = 2;
+		    break;
+		}
+		break;
+	    } while (false);
+	    XLOG_ASSERT(version > 0);
+
+	    //
+	    // The state:
+	    // - "I" = INCLUDE (for group entry)
+	    // - "E" = EXCLUDE (for group entry)
+	    // - "F" = Forward (for source entry)
+	    // - "D" = Don't forward (for source entry)
+	    //
+
+	    // The group state
+	    if (group_record->is_include_mode())
+		state = "I";
+	    if (group_record->is_exclude_mode())
+		state = "E";
+
+	    // Print the group-specific output
+	    cli_print(c_format("%-12s %-15s %-15s %-12s %7d %1d %5s\n",
 			       mld6igmp_vif->name().c_str(),
 			       cstring(group_record->group()),
 			       cstring(IPvX::ZERO(family())),
 			       cstring(group_record->last_reported_host()),
-			       XORP_INT_CAST(group_record->timeout_sec())));
+			       XORP_INT_CAST(group_record->timeout_sec()),
+			       version, state.c_str()));
+
+	    // Print the sources to forward
+	    state = "F";
+	    for (source_iter = group_record->do_forward_sources().begin();
+		 source_iter != group_record->do_forward_sources().end();
+		 ++source_iter) {
+		const Mld6igmpSourceRecord *source_record = source_iter->second;
+		cli_print(c_format("%-12s %-15s %-15s %-12s %7d %1d %5s\n",
+				   mld6igmp_vif->name().c_str(),
+				   cstring(group_record->group()),
+				   cstring(source_record->source()),
+				   cstring(group_record->last_reported_host()),
+				   XORP_INT_CAST(group_record->timeout_sec()),
+				   version, state.c_str()));
+	    }
+
+	    // Print the sources not to forward
+	    state = "D";
+	    for (source_iter = group_record->dont_forward_sources().begin();
+		 source_iter != group_record->dont_forward_sources().end();
+		 ++source_iter) {
+		const Mld6igmpSourceRecord *source_record = source_iter->second;
+		cli_print(c_format("%-12s %-15s %-15s %-12s %7d %1d %5s\n",
+				   mld6igmp_vif->name().c_str(),
+				   cstring(group_record->group()),
+				   cstring(source_record->source()),
+				   cstring(group_record->last_reported_host()),
+				   XORP_INT_CAST(group_record->timeout_sec()),
+				   version, state.c_str()));
+	    }
 	}
     }
     
