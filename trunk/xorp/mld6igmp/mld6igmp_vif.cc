@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.69 2006/07/03 21:49:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.70 2006/07/03 23:33:38 pavlin Exp $"
 
 
 //
@@ -697,7 +697,7 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
     set<IPvX>::const_iterator source_iter;
     uint8_t qrv, qqic;
     size_t max_sources_n;
-    size_t mtu = 0;
+    size_t max_payload = 0;
     Mld6igmpGroupRecord* group_record = NULL;
 
     //
@@ -758,20 +758,18 @@ Mld6igmpVif::mld6igmp_query_send(const IPvX& src,
     // Calculate the maximum number of sources
     //
     max_sources_n = sources.size();
-    // TODO: XXX: PAVPAVPAV: obtain the MTU from the FEA interface tree
-    // and use it instead of the 0xffff below.
     if (proto_is_igmp()) {
-	mtu = 0xffff			// IPv4 max packet size
+	max_payload = mtu()		// The MTU of the vif
 	    - (0xf << 2)		// IPv4 max header size
 	    - 4				// IPv4 Router Alert option
 	    - IGMP_V3_QUERY_MINLEN;	// IGMPv3 Query pre-source fields
     }
     if (proto_is_mld6()) {
-	mtu = 0xffff	// IPv6 max payload size (jumbo payload excluded)
+	max_payload = mtu()		// The MTU of the vif
 	    - 8		// IPv6 Hop-by-hop Ext. Header with Router Alert option
 	    - MLD_V2_QUERY_MINLEN;	// MLDv2 Query pre-source fields
     }
-    max_sources_n = min(max_sources_n, mtu / IPvX::addr_size(family()));
+    max_sources_n = min(max_sources_n, max_payload / IPvX::addr_size(family()));
 
     //
     // XXX: According to RFC 3810 (MLDv2), Section 8.3.2, the Querier
