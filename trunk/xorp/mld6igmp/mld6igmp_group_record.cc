@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.25 2006/07/03 06:55:31 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.26 2006/07/03 21:49:45 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -161,13 +161,18 @@ Mld6igmpGroupRecord::is_unused() const
  * Process MODE_IS_INCLUDE report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources,
+					     const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -225,13 +230,18 @@ Mld6igmpGroupRecord::process_mode_is_include(const set<IPvX>& sources)
  * Process MODE_IS_EXCLUDE report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources,
+					     const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -311,14 +321,19 @@ Mld6igmpGroupRecord::process_mode_is_exclude(const set<IPvX>& sources)
  * Process CHANGE_TO_INCLUDE_MODE report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources,
+						    const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -396,14 +411,19 @@ Mld6igmpGroupRecord::process_change_to_include_mode(const set<IPvX>& sources)
  * Process CHANGE_TO_EXCLUDE_MODE report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources,
+						    const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -499,13 +519,18 @@ Mld6igmpGroupRecord::process_change_to_exclude_mode(const set<IPvX>& sources)
  * Process ALLOW_NEW_SOURCES report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources,
+					       const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -563,14 +588,19 @@ Mld6igmpGroupRecord::process_allow_new_sources(const set<IPvX>& sources)
  * Process BLOCK_OLD_SOURCES report.
  *
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
-Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources)
+Mld6igmpGroupRecord::process_block_old_sources(const set<IPvX>& sources,
+					       const IPvX& last_reported_host)
 {
     bool old_is_include_mode = is_include_mode();
     set<IPvX> old_do_forward_sources = _do_forward_sources.extract_source_addresses();
     set<IPvX> old_dont_forward_sources = _dont_forward_sources.extract_source_addresses();
     string dummy_error_msg;
+
+    set_last_reported_host(last_reported_host);
 
     if (is_include_mode()) {
 	//
@@ -1348,10 +1378,13 @@ Mld6igmpGroupSet::delete_payload_and_clear()
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_mode_is_include(const IPvX& group,
-					  const set<IPvX>& sources)
+					  const set<IPvX>& sources,
+					  const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1365,7 +1398,7 @@ Mld6igmpGroupSet::process_mode_is_include(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_mode_is_include(sources);
+    group_record->process_mode_is_include(sources, last_reported_host);
 
     //
     // If the group record is not used anymore, then delete it
@@ -1381,10 +1414,13 @@ Mld6igmpGroupSet::process_mode_is_include(const IPvX& group,
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
-					  const set<IPvX>& sources)
+					  const set<IPvX>& sources,
+					  const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1398,7 +1434,7 @@ Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_mode_is_exclude(sources);
+    group_record->process_mode_is_exclude(sources, last_reported_host);
 
     //
     // If the group record is not used anymore, then delete it
@@ -1414,10 +1450,13 @@ Mld6igmpGroupSet::process_mode_is_exclude(const IPvX& group,
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
-						 const set<IPvX>& sources)
+						 const set<IPvX>& sources,
+						 const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1437,7 +1476,8 @@ Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
 	// IGMPv1 mode.
 	//
     } else {
-	group_record->process_change_to_include_mode(sources);
+	group_record->process_change_to_include_mode(sources,
+						     last_reported_host);
     }
 
     //
@@ -1454,10 +1494,13 @@ Mld6igmpGroupSet::process_change_to_include_mode(const IPvX& group,
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
-						 const set<IPvX>& sources)
+						 const set<IPvX>& sources,
+						 const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1479,9 +1522,11 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
 	// messages when in IGMPv1, IGMPv2, or MLDv1 mode.
 	//
 	set<IPvX> no_sources;		// XXX: empty set
-	group_record->process_change_to_exclude_mode(no_sources);
+	group_record->process_change_to_exclude_mode(no_sources,
+						     last_reported_host);
     } else {
-	group_record->process_change_to_exclude_mode(sources);
+	group_record->process_change_to_exclude_mode(sources,
+						     last_reported_host);
     }
 
     //
@@ -1498,10 +1543,13 @@ Mld6igmpGroupSet::process_change_to_exclude_mode(const IPvX& group,
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_allow_new_sources(const IPvX& group,
-					    const set<IPvX>& sources)
+					    const set<IPvX>& sources,
+					    const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1515,7 +1563,7 @@ Mld6igmpGroupSet::process_allow_new_sources(const IPvX& group,
     }
     XLOG_ASSERT(group_record != NULL);
 
-    group_record->process_allow_new_sources(sources);
+    group_record->process_allow_new_sources(sources, last_reported_host);
 
     //
     // If the group record is not used anymore, then delete it
@@ -1531,10 +1579,13 @@ Mld6igmpGroupSet::process_allow_new_sources(const IPvX& group,
  *
  * @param group the group address.
  * @param sources the source addresses.
+ * @param last_reported_host the address of the host that last reported
+ * as member.
  */
 void
 Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
-					    const set<IPvX>& sources)
+					    const set<IPvX>& sources,
+					    const IPvX& last_reported_host)
 {
     Mld6igmpGroupSet::iterator iter;
     Mld6igmpGroupRecord* group_record = NULL;
@@ -1556,7 +1607,7 @@ Mld6igmpGroupSet::process_block_old_sources(const IPvX& group,
 	// IGMPv1, IGMPv2, or MLDv1 mode.
 	//
     } else {
-	group_record->process_block_old_sources(sources);
+	group_record->process_block_old_sources(sources, last_reported_host);
     }
 
     //

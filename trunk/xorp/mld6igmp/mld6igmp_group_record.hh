@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.15 2006/07/03 02:47:35 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.16 2006/07/03 21:49:45 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -134,43 +134,61 @@ public:
      * Process MODE_IS_INCLUDE report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_mode_is_include(const set<IPvX>& sources);
+    void process_mode_is_include(const set<IPvX>& sources,
+				 const IPvX& last_reported_host);
 
     /**
      * Process MODE_IS_EXCLUDE report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_mode_is_exclude(const set<IPvX>& sources);
+    void process_mode_is_exclude(const set<IPvX>& sources,
+				 const IPvX& last_reported_host);
 
     /**
      * Process CHANGE_TO_INCLUDE_MODE report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_change_to_include_mode(const set<IPvX>& sources);
+    void process_change_to_include_mode(const set<IPvX>& sources,
+					const IPvX& last_reported_host);
 
     /**
      * Process CHANGE_TO_EXCLUDE_MODE report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_change_to_exclude_mode(const set<IPvX>& sources);
+    void process_change_to_exclude_mode(const set<IPvX>& sources,
+					const IPvX& last_reported_host);
 
     /**
      * Process ALLOW_NEW_SOURCES report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_allow_new_sources(const set<IPvX>& sources);
+    void process_allow_new_sources(const set<IPvX>& sources,
+				   const IPvX& last_reported_host);
 
     /**
      * Process BLOCK_OLD_SOURCES report.
      *
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_block_old_sources(const set<IPvX>& sources);
+    void process_block_old_sources(const set<IPvX>& sources,
+				   const IPvX& last_reported_host);
 
     /**
      * Lower the group timer.
@@ -207,13 +225,6 @@ public:
      * @return the address of the host that last reported as member.
      */
     const IPvX& last_reported_host() const { return (_last_reported_host); }
-
-    /**
-     * Set the address of the host that last reported as member.
-     *
-     * @param v the address of the host that last reported as member.
-     */
-    void set_last_reported_host(const IPvX& v) { _last_reported_host = v; }
 
     /**
      * Get a refererence to the group timer.
@@ -314,6 +325,13 @@ private:
      */
     bool	group_query_periodic_timeout();
 
+    /**
+     * Set the address of the host that last reported as member.
+     *
+     * @param v the address of the host that last reported as member.
+     */
+    void set_last_reported_host(const IPvX& v) { _last_reported_host = v; }
+
     Mld6igmpVif& _mld6igmp_vif;		// The interface this entry belongs to
     IPvX	_group;			// The multicast group address
     bool	_is_include_mode;	// Flag for INCLUDE/EXCLUDE filter mode
@@ -367,52 +385,70 @@ public:
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_mode_is_include(const IPvX& group, const set<IPvX>& sources);
+    void process_mode_is_include(const IPvX& group, const set<IPvX>& sources,
+				 const IPvX& last_reported_host);
 
     /**
      * Process MODE_IS_EXCLUDE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
-    void process_mode_is_exclude(const IPvX& group, const set<IPvX>& sources);
+    void process_mode_is_exclude(const IPvX& group, const set<IPvX>& sources,
+				 const IPvX& last_reported_host);
 
     /**
      * Process CHANGE_TO_INCLUDE_MODE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
     void process_change_to_include_mode(const IPvX& group,
-					const set<IPvX>& sources);
+					const set<IPvX>& sources,
+					const IPvX& last_reported_host);
 
     /**
      * Process CHANGE_TO_EXCLUDE_MODE report.
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
     void process_change_to_exclude_mode(const IPvX& group,
-					const set<IPvX>& sources);
+					const set<IPvX>& sources,
+					const IPvX& last_reported_host);
 
     /**
      * Process ALLOW_NEW_SOURCES report.
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
     void process_allow_new_sources(const IPvX& group,
-				   const set<IPvX>& sources);
+				   const set<IPvX>& sources,
+				   const IPvX& last_reported_host);
 
     /**
      * Process BLOCK_OLD_SOURCES report.
      *
      * @param group the group address.
      * @param sources the source addresses.
+     * @param last_reported_host the address of the host that last reported
+     * as member.
      */
     void process_block_old_sources(const IPvX& group,
-				   const set<IPvX>& sources);
+				   const set<IPvX>& sources,
+				   const IPvX& last_reported_host);
 
     /**
      * Lower the group timer.

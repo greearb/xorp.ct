@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.41 2006/06/30 23:57:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.42 2006/07/03 02:47:35 pavlin Exp $"
 
 
 //
@@ -412,14 +412,7 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
     }
 
     set<IPvX> no_sources;		// XXX: empty set
-    group_records().process_mode_is_exclude(group_address, no_sources);
-
-    //
-    // Update various state
-    //
-    group_record = _group_records.find_group_record(group_address);
-    XLOG_ASSERT(group_record != NULL);
-    group_record->set_last_reported_host(src);
+    group_records().process_mode_is_exclude(group_address, no_sources, src);
 
     //
     // Check whether an older Membership report has been received
@@ -455,6 +448,8 @@ Mld6igmpVif::mld6igmp_membership_report_recv(const IPvX& src,
 	}
     }
     XLOG_ASSERT(message_version > 0);
+    group_record = _group_records.find_group_record(group_address);
+    XLOG_ASSERT(group_record != NULL);
     group_record->received_older_membership_report(message_version);
 
     UNUSED(max_resp_code);
@@ -521,7 +516,8 @@ Mld6igmpVif::mld6igmp_leave_group_recv(const IPvX& src,
     }
 
     set<IPvX> no_sources;		// XXX: empty set
-    group_records().process_change_to_include_mode(group_address, no_sources);
+    group_records().process_change_to_include_mode(group_address, no_sources,
+						   src);
     return (XORP_OK);
 
     UNUSED(max_resp_code);
@@ -666,37 +662,43 @@ Mld6igmpVif::mld6igmp_ssm_membership_report_recv(const IPvX& src,
 	 gs_iter != mode_is_include_groups.end();
 	 ++gs_iter) {
 	group_records().process_mode_is_include(gs_iter->first,
-						gs_iter->second);
+						gs_iter->second,
+						src);
     }
     for (gs_iter = mode_is_exclude_groups.begin();
 	 gs_iter != mode_is_exclude_groups.end();
 	 ++gs_iter) {
 	group_records().process_mode_is_exclude(gs_iter->first,
-						gs_iter->second);
+						gs_iter->second,
+						src);
     }
     for (gs_iter = change_to_include_mode_groups.begin();
 	 gs_iter != change_to_include_mode_groups.end();
 	 ++gs_iter) {
 	group_records().process_change_to_include_mode(gs_iter->first,
-						       gs_iter->second);
+						       gs_iter->second,
+						       src);
     }
     for (gs_iter = change_to_exclude_mode_groups.begin();
 	 gs_iter != change_to_exclude_mode_groups.end();
 	 ++gs_iter) {
 	group_records().process_change_to_exclude_mode(gs_iter->first,
-						       gs_iter->second);
+						       gs_iter->second,
+						       src);
     }
     for (gs_iter = allow_new_sources_groups.begin();
 	 gs_iter != allow_new_sources_groups.end();
 	 ++gs_iter) {
 	group_records().process_allow_new_sources(gs_iter->first,
-						  gs_iter->second);
+						  gs_iter->second,
+						  src);
     }
     for (gs_iter = block_old_sources_groups.begin();
 	 gs_iter != block_old_sources_groups.end();
 	 ++gs_iter) {
 	group_records().process_block_old_sources(gs_iter->first,
-						  gs_iter->second);
+						  gs_iter->second,
+						  src);
     }
 
     return (XORP_OK);
