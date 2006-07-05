@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/README,v 1.42 2006/05/01 00:56:25 pavlin Exp $
+# $XORP: xorp/README,v 1.43 2006/05/31 21:35:47 pavlin Exp $
 #
 
 		XORP: eXtensible Open Router Platform
@@ -105,14 +105,16 @@ Currently, XORP implements the following protocols:
    - RFC 3101 (The OSPF Not-So-Stubby Area (NSSA) Option)
 
   * PIM-SM:
-    - draft-ietf-pim-sm-v2-new-11.{ps,txt} (without SSM).
+    - draft-ietf-pim-sm-v2-new-11.{ps,txt}
     - draft-ietf-pim-sm-bsr-03.{ps,txt}
 
-  * IGMP v1 and v2:
-    - RFC 2236
+  * IGMP v1, v2, and v3:
+    - RFC 2236 (Internet Group Management Protocol, Version 2)
+    - RFC 3376 (Internet Group Management Protocol, Version 3)
 
-  * MLD v1:
-    - RFC 2710
+  * MLD v1 and v2:
+    - RFC 2710 (Multicast Listener Discovery (MLD) for IPv6)
+    - RFC 3810 (Multicast Listener Discovery Version 2 (MLDv2) for IPv6)
 
 For description of the changes in each release, see ${XORP}/RELEASE_NOTES.
 
