@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.16 2005/03/25 02:53:52 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.17 2006/03/16 00:04:41 pavlin Exp $"
 
 
 #include <stack>
@@ -126,7 +126,7 @@ int bgp4PathAttrTable_get_value(netsnmp_request_info *,
 static void local_route_table_update()
 {
     BgpMib& bgp_mib = BgpMib::the_instance();
-
+    IPNet<IPv4> net;
 
     switch (update.status) {
 	case UpdateManager::RESTING:
@@ -135,7 +135,7 @@ static void local_route_table_update()
 		"updating local bgp4PathAttrTable...\n"));
 	    DEBUGMSGTL((BgpMib::the_instance().name(),
 		"local table size: %d\n", CONTAINER_SIZE(cb.container)));
-	    bgp_mib.send_get_v4_route_list_start("bgp", true, false,
+	    bgp_mib.send_get_v4_route_list_start("bgp", net, true, false,
 			     callback(get_v4_route_list_start_done));
 	    break;
 	}

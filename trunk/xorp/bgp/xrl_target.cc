@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.59 2006/04/15 07:10:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.60 2006/04/28 23:18:25 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1141,6 +1141,7 @@ XrlBgpTarget::bgp_0_2_register_rib(
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 	// Input values,
+	const IPv4Net&	/*net*/,
 	const bool&	unicast,
 	const bool&	multicast,
 	// Output values, 
@@ -1158,6 +1159,7 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v6_route_list_start(
 	// Input values,
+        const IPv6Net&	/*net*/,
 	const bool&	unicast,
 	const bool&	multicast,
 	// Output values, 
