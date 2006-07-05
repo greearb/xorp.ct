@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.16 2005/03/24 03:41:57 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.17 2005/06/01 00:47:36 pavlin Exp $
 #
 
 * Implement RFC 3590 "Source Address Selection for the
@@ -43,13 +43,7 @@
 * The return XrlCmdError values in mld6igmp_proto_access.hh are probably
   bogus.
 
-* Mld6igmpVif->_proto_flags setting with MLD6IGMP_VIF_QUERIER bitset
-  should be done by a member function.
-
 * Initialize/setup mld6igmp_vif::vif_index() and vif_name();
-
-* All the JOIN/PRUNE routing notification should happen when
-  MemberQuery is deleted?
 
 * Instead of using Join/Prune in the context of IGMP/MLD6, use
   Join/Leave instead?
