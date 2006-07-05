@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.16 2005/11/29 01:48:38 pavlin Exp $
+% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.17 2006/03/09 01:27:23 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -59,7 +59,8 @@ Version 1.2}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Overview}
 
-This document provides an overview of the XORP MLD/IGMP~\cite{MLD-V1,IGMP-V2}
+This document provides an overview of the
+XORP MLD/IGMP~\cite{MLD-V1,MLD-V2,IGMP-V1,IGMP-V2,IGMP-V3}
 Routing Daemon. It is intended to provide a starting point for software
 developers who wish to modify this software.
 
@@ -76,15 +77,17 @@ optimize the implementation. Only if it turns out that there are
 performance issues with MLD/IGMP, we would try to optimize those parts of the
 implementation that should prove to be a bottleneck.
 
-Currently (March 2006), the MLD and IGMP implementation is based
-on the specification in the following documents:
+The MLD and IGMP implementation is based on the specification in the
+ following documents:
 
 \begin{itemize}
-  \item RFC 2710: Multicast Listener Discovery for IPv6, Version 1
-  \item RFC 2236: Internet Group Management Protocol, Version 2
+  \item{\bf RFC 1112}: Host extensions for IP multicasting.
+  \item{\bf RFC 2236}: Internet Group Management Protocol, Version 2
+  \item{\bf RFC 3376}: Internet Group Management Protocol, Version 3
+  \item{\bf RFC 2710}: Multicast Listener Discovery (MLD) for IPv6.
+  \item{\bf RFC 3810}: Multicast Listener Discovery Version 2 (MLDv2) for IPv6.
 \end{itemize}
 
-In the future there will be support for MLDv2 and IGMPv3.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Acronyms}
@@ -219,13 +222,13 @@ the following files:
 \end{itemize}
 
 Mld6igmpVif contains state such as group membership information about
-local members (a list of objects of class MemberQuery), and information
+local members (a set of objects of class Mld6igmpGroupRecord that contains
+sets of objects of class Mld6igmpSourceRecord), and information
 about the current MLD/IGMP querier. Also, all 
 the MLD/IGMP-specific methods for parsing or constructing MLD/IGMP control
 messages when a MLD/IGMP packet is received or sent are implemented as
 methods in Mld6igmpVif. The parsing or construction of each message type is
-implemented in files \verb=mld6_proto.cc= and \verb=igmp_proto.cc=
-for MLD and IGMP respectively.
+implemented in file \verb=mld6igmp_proto.cc=.
 
 By default, each Mld6igmpVif is disabled; therefore, on startup it must
 be enabled explicitly.
@@ -271,6 +274,9 @@ configuration is used to configure the following units:
   \item April 13, 2005: Bump-up the version to 1.1, and the date.
 
   \item March 8, 2006: Bump-up the version to 1.2, and the date.
+
+  \item July 4, 2006 Updated to include information about the IGMPv3/MLDv2
+  implementation.
 
 \end{itemize}
 
