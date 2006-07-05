@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mld6igmp/README,v 1.15 2005/01/13 23:22:16 pavlin Exp $
+# $XORP: xorp/mld6igmp/README,v 1.16 2006/03/08 02:24:24 pavlin Exp $
 #
 
 Multicast Listener Discovery/Internet Group Management Protocol
@@ -128,5 +128,8 @@ Status
 The MLD/IGMP implementation is based on the specification in the
 following documents:
 
- * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
+ * RFC 1112: Host extensions for IP multicasting.
  * RFC 2236: Internet Group Management Protocol, Version 2
+ * RFC 3376: Internet Group Management Protocol, Version 3
+ * RFC 2710: Multicast Listener Discovery for IPv6, Version 1
+ * RFC 3810: Multicast Listener Discovery Version 2 (MLDv2) for IPv6
