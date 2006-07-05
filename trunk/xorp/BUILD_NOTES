@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.61 2006/06/20 19:42:21 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.62 2006/06/21 09:46:10 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -93,7 +93,7 @@ gmake check
     - The utils/flower_malloc/test_flower_malloc.sh test fails.
     - Multicast routing doesn't work because of a broken "struct igmpmsg"
       definition inside <netinet/ip_mroute.h>.
-      The fix (already in the FreeBSD CVS repository) is to replace
+      The fix (already in FreeBSD-6.1) is to replace
       u_long with uint32_t inside the body of "struct igmpmsg", and
       then recompile both the FreeBSD kernel and XORP.
     - The SNMP support inside the "mibs" directory fails to compile.
