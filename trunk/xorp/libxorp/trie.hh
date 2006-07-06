@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/trie.hh,v 1.22 2005/03/25 02:53:49 pavlin Exp $
+// $XORP: xorp/libxorp/trie.hh,v 1.23 2006/03/16 00:04:36 pavlin Exp $
 
 #ifndef __LIBXORP_TRIE_HH__
 #define __LIBXORP_TRIE_HH__
@@ -334,7 +334,7 @@ public:
 	Node * n = _cur;
 	while (n->get_parent() && _root.contains(n->get_parent()->k()))
 	    n = n->get_parent();
-	_cur =  _cur->leftmost();
+	_cur =  n->leftmost();
 	return this;
     }
 
