@@ -14,8 +14,7 @@
 
 # $XORP: xorp/tests/test_builddir.py,v 1.2 2006/05/01 16:49:06 zec Exp $
 
-# BUILDDIR='../'
-BUILDDIR='/scratch/possum/u1/pavlin/xorp/xorp-gcc34/'
+BUILDDIR='../'
 
 def builddir(depth = 0):
     """
@@ -27,8 +26,7 @@ def builddir(depth = 0):
     for i in range(depth):
         bdir += '../'
 
-    # return bdir + BUILDDIR
-    return BUILDDIR
+    return bdir + BUILDDIR
 
 # Local Variables:
 # mode: python

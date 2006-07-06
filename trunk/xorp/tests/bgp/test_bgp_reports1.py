@@ -147,11 +147,6 @@ def test_bug_639():
     when the router is being configured and a peering comes up.
     """
 
-    if not config.conf_redist_static(builddir(1), False):
-        return False
-
-    delay(2)
-
     coord("reset")
 
     coord("target 127.0.0.1 10001")
@@ -177,10 +172,12 @@ def test_bug_639():
 
     delay(2)
 
-    coord("peer1 send %s" % (packet % ("127.0.0.1", "192.168.0.0/16")))
+    coord("peer1 send %s" % (packet % ("192.168.0.1", "192.168.0.0/16")))
 
-    print 'FOO1: waiting for 50 seconds...';
-    delay(50)
+    if not config.conf_redist_static(builddir(1), False):
+        return False
+
+    delay(5)
 
     coord("peer1 assert established");
 
