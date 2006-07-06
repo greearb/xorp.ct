@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.72 2006/07/06 08:18:07 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.73 2006/07/06 09:15:00 pavlin Exp $"
 
 
 //
@@ -1019,7 +1019,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 		check_router_alert_option = true;
 	    check_src_linklocal_unicast = false;	// Not needed for IPv4
 	    check_dst_multicast = true;
-	    if ((message_type == IGMP_MEMBERSHIP_QUERY) && is_igmpv3_mode())
+	    if (is_igmpv3_mode())
 		check_dst_multicast = false;		// XXX: disable
 	    check_group_nodelocal_multicast = false;	// Not needed for IPv4
 	    decode_extra_fields = true;
@@ -1044,7 +1044,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    check_router_alert_option = true;
 	    check_src_linklocal_unicast = true;
 	    check_dst_multicast = true;
-	    if ((message_type == MLD_LISTENER_QUERY) && is_mldv2_mode())
+	    if (is_mldv2_mode())
 		check_dst_multicast = false;		// XXX: disable
 	    check_group_nodelocal_multicast = true;
 	    decode_extra_fields = true;
