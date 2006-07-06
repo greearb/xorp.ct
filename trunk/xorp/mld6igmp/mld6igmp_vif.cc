@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.73 2006/07/06 09:15:00 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.74 2006/07/06 21:33:40 pavlin Exp $"
 
 
 //
@@ -132,16 +132,6 @@ Mld6igmpVif::~Mld6igmpVif()
     string error_msg;
 
     stop(error_msg);
-    
-    // Notify routing and remove all group records
-    Mld6igmpGroupSet::iterator iter;
-    for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
-	Mld6igmpGroupRecord *group_record = iter->second;
-	if (group_record->is_exclude_mode()) {
-	    join_prune_notify_routing(IPvX::ZERO(family()),
-				      group_record->group(), ACTION_PRUNE);
-	}
-    }
     _group_records.delete_payload_and_clear();
     
     BUFFER_FREE(_buffer_send);
@@ -357,9 +347,19 @@ Mld6igmpVif::stop(string& error_msg)
     _startup_query_count = 0;
     
     // Notify routing and remove all group records
-    Mld6igmpGroupSet::iterator iter;
-    for (iter = _group_records.begin(); iter != _group_records.end(); ++iter) {
-	Mld6igmpGroupRecord *group_record = iter->second;
+    Mld6igmpGroupSet::const_iterator group_iter;
+    for (group_iter = _group_records.begin();
+	 group_iter != _group_records.end(); ++group_iter) {
+	const Mld6igmpGroupRecord *group_record = group_iter->second;
+	Mld6igmpSourceSet::const_iterator source_iter;
+	for (source_iter = group_record->do_forward_sources().begin();
+	     source_iter != group_record->do_forward_sources().end();
+	     ++source_iter) {
+	    const Mld6igmpSourceRecord *source_record = source_iter->second;
+	    join_prune_notify_routing(source_record->source(),
+				      group_record->group(),
+				      ACTION_PRUNE);
+	}
 	if (group_record->is_exclude_mode()) {
 	    join_prune_notify_routing(IPvX::ZERO(family()),
 				      group_record->group(), ACTION_PRUNE);
