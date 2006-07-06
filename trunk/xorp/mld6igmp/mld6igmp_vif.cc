@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.70 2006/07/03 23:33:38 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.71 2006/07/04 00:10:26 pavlin Exp $"
 
 
 //
@@ -160,14 +160,30 @@ Mld6igmpVif::set_proto_version(int proto_version)
 {
     if (proto_is_igmp()) {
 	if ((proto_version < IGMP_VERSION_MIN)
-	    || (proto_version > IGMP_VERSION_MAX))
-	return (XORP_ERROR);
+	    || (proto_version > IGMP_VERSION_MAX)) {
+	    return (XORP_ERROR);
+	}
+	if (proto_version < IGMP_V3) {
+	    //
+	    // XXX: Restore the variables that might have been adopted from
+	    // the Querier.
+	    //
+	    restore_effective_variables();
+	}
     }
     
     if (proto_is_mld6()) {
 	if ((proto_version < MLD_VERSION_MIN)
-	    || (proto_version > MLD_VERSION_MAX))
-	return (XORP_ERROR);
+	    || (proto_version > MLD_VERSION_MAX)) {
+	    return (XORP_ERROR);
+	}
+	if (proto_version < IGMP_V3) {
+	    //
+	    // XXX: Restore the variables that might have been adopted from
+	    // the Querier.
+	    //
+	    restore_effective_variables();
+	}
     }
     
     ProtoUnit::set_proto_version(proto_version);
@@ -1638,9 +1654,11 @@ Mld6igmpVif::set_i_am_querier(bool v)
 {
     if (v) {
 	_proto_flags |= MLD6IGMP_VIF_QUERIER;
-	// XXX: restore the default Query Interval and Robustness Variable
-	set_effective_robustness_variable(configured_robust_count().get());
-	set_effective_query_interval(configured_query_interval().get());
+	//
+	// XXX: Restore the variables that might have been adopted from
+	// the Querier.
+	//
+	restore_effective_variables();
     } else {
 	_proto_flags &= ~MLD6IGMP_VIF_QUERIER;
     }

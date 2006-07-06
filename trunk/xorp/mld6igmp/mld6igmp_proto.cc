@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.42 2006/07/03 02:47:35 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.43 2006/07/04 01:04:56 pavlin Exp $"
 
 
 //
@@ -925,6 +925,14 @@ Mld6igmpVif::recalculate_older_version_host_present_interval()
     _older_version_host_present_interval =
 	effective_query_interval() * effective_robustness_variable()
 	+ query_response_interval().get();
+}
+
+void
+Mld6igmpVif::restore_effective_variables()
+{
+    // Restore the default Query Interval and Robustness Variable
+    set_effective_robustness_variable(configured_robust_count().get());
+    set_effective_query_interval(configured_query_interval().get());
 }
 
 void

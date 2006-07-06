@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.41 2006/06/30 23:57:45 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.42 2006/07/03 21:49:46 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -598,6 +598,7 @@ private:
     void	recalculate_group_membership_interval();
     void	recalculate_last_member_query_time();
     void	recalculate_older_version_host_present_interval();
+    void	restore_effective_variables();
 
     //
     // Private state
