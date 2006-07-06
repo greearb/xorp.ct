@@ -21,6 +21,7 @@ add_egp_table ibgp
 add_igp_table ospf
 add_igp_table static
 add_igp_table connected
+add_igp_table rip
 #
 #redistribute enable ospf ebgp
 #
@@ -413,3 +414,11 @@ route verify ip 1.2.3.1 de0 10.0.0.3 10
 route delete ebgp 1.2.3.0/24
 route verify miss 1.2.3.1 lo0 0.0.0.0 0
 #
+
+#--------------------------------------------------------------
+#test case for adding and deleting non-resolved EGP routes
+#
+route add rip 10.20.30.0/24 10.0.0.2 2
+route add ebgp 10.20.30.0/24 9.9.9.9 0
+route delete ebgp 10.20.30.0/24
+route add ebgp 10.20.30.0/24 9.9.9.9 0
