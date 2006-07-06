@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.30 2006/03/31 23:50:37 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.31 2006/06/29 05:38:35 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -193,6 +193,31 @@
       instead of:
 
         route add -net <target> <GRE interface name>
+
+    - If PIM-SM is configured to run over a large number of interfaces
+      (e.g., more than 31 VLANs), it might fail with the following error:
+
+      [ 2006/07/04 11:56:23  ERROR xorp_fea:28353 MFEA +967 mfea_mrouter.cc
+      add_multicast_vif ]
+      setsockopt(MRT_ADD_VIF, vif eth0.4) failed: Too many open files in system
+
+      The reason for that error is that by default majority of the UNIX
+      kernels cannot support more than 32 interfaces enabled for multicast
+      forwarding (one interface is always used as the internal PIM Register
+      virtual interface).
+
+      The solution is to increase the MAXVIFS limit in the kernel
+      (typically defined in the "netinet/ip_mroute.h" (BSD) or the
+      "include/linux/mroute.h" (Linux) kernel file), and recompile the
+      kernel. It should be increased also in the corresponding system
+      header file as well: <netinet/ip_mroute.h> or <linux/mroute.h>.
+      After that XORP should be recompiled to take into account the
+      MAXVIFS increase. If modifying the system header files is not
+      acceptable, then the following should be added toward the end of
+      file "xorp/mrt/max_vifs.h" before recompiling XORP:
+
+      #undef MAX_VIFS
+      #define MAX_VIFS 50
 
   FIB2MRIB:
     - No known issues.
