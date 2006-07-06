@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.28 2006/03/16 00:05:36 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_extint.cc,v 1.29 2006/06/28 05:05:43 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -125,18 +125,16 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
     } else if (caller == _ext_table) {
 	// The new route comes from the EGP table
 	debug_msg("route comes from EGP\n");
-	const IPRouteEntry<A>* found;
-	found = lookup_route_in_igp_parent(route.net());
+	IPNextHop<A>* rt_nexthop;
+	const IPRouteEntry<A>* found = lookup_route_in_igp_parent(route.net());
+
 	if (found != NULL) {
 	    if (found->admin_distance() < route.admin_distance()) {
 		// The admin distance of the existing IGP route is better
 		return XORP_ERROR;
-	    } else {
-		if (this->next_table() != NULL)
-		    this->next_table()->delete_route(found, this);
 	    }
 	}
-	IPNextHop<A>* rt_nexthop;
+
 	rt_nexthop = reinterpret_cast<IPNextHop<A>* >(route.nexthop());
 	A nexthop_addr = rt_nexthop->addr();
 	const IPRouteEntry<A>* nexthop_route;
@@ -155,6 +153,13 @@ ExtIntTable<A>::add_route(const IPRouteEntry<A>& route, RouteTable<A>* caller)
 	    unresolved_route->set_backlink(backlink);
 	    return XORP_ERROR;
 	} else {
+	    // The EGP route is resolvable
+	    if (found != NULL) {
+		// Delete the IGP route that has worse admin distance
+		if (this->next_table() != NULL)
+		    this->next_table()->delete_route(found, this);
+	    }
+
 	    Vif* vif = nexthop_route->vif();
 	    if ((vif != NULL)
 		&& (vif->is_same_subnet(IPvXNet(nexthop_route->net()))
