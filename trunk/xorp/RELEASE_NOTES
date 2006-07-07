@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.119 2006/07/05 04:09:58 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.120 2006/07/05 04:19:59 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -84,6 +84,14 @@ Release 1.3 (2006/??/??)
       sockets.
 
     - Linux-related netlink socket code refactoring and bug fix.
+
+    - Bug fix in obtaining the incoming interface for raw packets
+      (in case of *BSD).
+
+    - Bug fix in parsing the ancillary data from recvmsg().
+
+    - Accept zeroed source addresses of raw packets, because of
+      protocols like IGMPv3.
 
   RIB:
     - Several bug fixes and improvements.
