@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.74 2006/07/06 21:33:40 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.75 2006/07/06 22:44:57 pavlin Exp $"
 
 
 //
@@ -919,6 +919,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     uint16_t cksum;
     bool check_router_alert_option = false;
     bool check_src_linklocal_unicast = false;
+    bool allow_src_zero_address = false;
     bool check_dst_multicast = false;
     bool check_group_nodelocal_multicast = false;
     bool decode_extra_fields = false;
@@ -1004,6 +1005,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     // message type:
     //  - check_router_alert_option
     //  - check_src_linklocal_unicast
+    //  - allow_src_zero_address
     //  - check_dst_multicast
     //  - check_group_nodelocal_multicast
     //  - decode_extra_fields
@@ -1018,6 +1020,13 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    if (_ip_router_alert_option_check.get())
 		check_router_alert_option = true;
 	    check_src_linklocal_unicast = false;	// Not needed for IPv4
+	    if (is_igmpv3_mode()) {
+		if ((message_type == IGMP_V1_MEMBERSHIP_REPORT)
+		    || (message_type == IGMP_V2_MEMBERSHIP_REPORT)
+		    || (message_type == IGMP_V3_MEMBERSHIP_REPORT)) {
+		    allow_src_zero_address = true;	// True only for IGMPv3
+		}
+	    }
 	    check_dst_multicast = true;
 	    if (is_igmpv3_mode())
 		check_dst_multicast = false;		// XXX: disable
@@ -1043,6 +1052,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	case MLDV2_LISTENER_REPORT:
 	    check_router_alert_option = true;
 	    check_src_linklocal_unicast = true;
+	    allow_src_zero_address = false;		// Always false for MLD
 	    check_dst_multicast = true;
 	    if (is_mldv2_mode())
 		check_dst_multicast = false;		// XXX: disable
@@ -1130,15 +1140,20 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 		     name().c_str(),
 		     src.af(), family());
     }
-    if (check_src_linklocal_unicast && (! src.is_linklocal_unicast())) {
-	// The source address is not link-local
-	error_msg = c_format("RX %s from %s to %s on vif %s: "
-			     "source is not a link-local address",
-			     proto_message_type2ascii(message_type),
-			     cstring(src), cstring(dst),
-			     name().c_str());
-	XLOG_WARNING("%s", error_msg.c_str());
-	return (XORP_ERROR);
+    if (check_src_linklocal_unicast) {
+	if (src.is_linklocal_unicast()
+	    || (allow_src_zero_address && src.is_zero())) {
+	    // The source address is link-local or (allowed) zero address
+	} else {
+	    // The source address is not link-local
+	    error_msg = c_format("RX %s from %s to %s on vif %s: "
+				 "source is not a link-local address",
+				 proto_message_type2ascii(message_type),
+				 cstring(src), cstring(dst),
+				 name().c_str());
+	    XLOG_WARNING("%s", error_msg.c_str());
+	    return (XORP_ERROR);
+	}
     }
 
     //
