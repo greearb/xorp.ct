@@ -1,7 +1,19 @@
-/* vim:set sts=4 ts=8: */
-
-/*
- * XORP's AF_ROUTE look-a-like for Windows.
+/* -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
+ * vim:set sts=4 ts=8:
+ *
+ * Copyright (c) 2001-2006 International Computer Science Institute
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a
+ * copy of this software and associated documentation files (the "Software")
+ * to deal in the Software without restriction, subject to the conditions
+ * listed in the XORP LICENSE file. These conditions include: you must
+ * preserve this copyright notice, and you cannot mention the copyright
+ * holders in advertising related to the Software without their permission.
+ * The Software is provided WITHOUT ANY WARRANTY, EXPRESS OR IMPLIED. This
+ * notice is a summary of the XORP LICENSE file; the license in that file is
+ * legally binding.
+ *
+ * $XORP$
  */
 
 /*-
@@ -36,8 +48,8 @@
  * $FreeBSD: src/sys/net/route.h,v 1.63.2.1 2006/04/04 20:07:23 andre Exp $
  */
 
-#ifndef _NET_ROUTE_H_
-#define _NET_ROUTE_H_
+#ifndef _BSDROUTE_H_
+#define _BSDROUTE_H_
 
 #ifdef  __cplusplus
 extern "C" {
@@ -231,7 +243,8 @@ struct if_announcemsghdr {
 /*
  * XXX: Most of the fields in the original BSD if_data
  * structure can't be obtained on Windows from the
- * RTMv2 interface status callback,
+ * RTMv2 interface status callback, therefore this
+ * structure is very minimal.
  */
 struct if_data {
     BYTE    ifi_link_state;
@@ -261,4 +274,4 @@ struct ifa_msghdr {
 }
 #endif
 
-#endif /* _NET_ROUTE_H_ */
+#endif /* _BSDROUTE_H_ */
