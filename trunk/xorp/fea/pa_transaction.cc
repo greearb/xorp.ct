@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.9 2006/03/16 00:04:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/pa_transaction.cc,v 1.10 2006/03/27 01:04:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -147,11 +147,21 @@ PaTransactionManager::set_backend(const char* name)
 #endif
 
 #ifdef notyet
-#ifdef HAVE_PACKETFILTER_IPTABLES
-	} else if (strcmp(name, "iptables") == 0) {
-	    nbp = new PaIptablesBackend();
+#ifdef HAVE_PACKETFILTER_NF
+	// Linux Netfilter, also known as 'iptables'.
+	} else if ((strcmp(name, "netfilter") == 0) ||
+		   (strcmp(name, "iptables") == 0)) {
+	    nbp = new PaNfBackend();
 #endif
 #endif
+
+#ifdef notyet
+#ifdef HAVE_PACKETFILTER_PF
+	} else if (strcmp(name, "pf") == 0) {
+	    nbp = new PaPfBackend();
+#endif
+#endif
+
 	} else {
 	    return false;
 	}
