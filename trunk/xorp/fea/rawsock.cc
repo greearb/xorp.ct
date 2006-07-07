@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.22 2006/06/15 06:04:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.23 2006/06/29 11:03:55 bms Exp $"
 
 //
 // Raw socket support.
@@ -373,7 +373,18 @@ RawSocket::enable_recv_pktinfo(bool is_enabled, string& error_msg)
 	//
 	// Interface index
 	//
+#ifdef IP_RECVIF
+	// XXX: BSD
+	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_RECVIF,
+		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
+	    XLOG_ERROR("setsockopt(IP_RECVIF, %u) failed: %s",
+		       bool_flag, strerror(errno));
+	    return (XORP_ERROR);
+	}
+#endif // IP_RECVIF
+
 #ifdef IP_PKTINFO
+	// XXX: Linux
 	if (setsockopt(_proto_socket_in, IPPROTO_IP, IP_PKTINFO,
 		       XORP_SOCKOPT_CAST(&bool_flag), sizeof(bool_flag)) < 0) {
 	    XLOG_ERROR("setsockopt(IP_PKTINFO, %u) failed: %s",
@@ -1460,7 +1471,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    case IP_RECVIF:
 	    {
 		struct sockaddr_dl *sdl = NULL;
-		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct sockaddr_dl)))
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct sockaddr_dl)))
 		    continue;
 		sdl = reinterpret_cast<struct sockaddr_dl *>(CMSG_DATA(cmsgp));
 		pif_index = sdl->sdl_index;
@@ -1472,7 +1483,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    case IP_PKTINFO:
 	    {
 		struct in_pktinfo *inp = NULL;
-		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in_pktinfo)))
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in_pktinfo)))
 		    continue;
 		inp = reinterpret_cast<struct in_pktinfo *>(CMSG_DATA(cmsgp));
 		pif_index = inp->ipi_ifindex;
@@ -1547,14 +1558,14 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		continue;
 	    switch (cmsgp->cmsg_type) {
 	    case IPV6_PKTINFO:
-		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(struct in6_pktinfo)))
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in6_pktinfo)))
 		    continue;
 		pi = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
 		pif_index = pi->ipi6_ifindex;
 		dst_address.copy_in(pi->ipi6_addr);
 		break;
 	    case IPV6_HOPLIMIT:
-		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(int)))
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = *((int *)CMSG_DATA(cmsgp));
 		ip_ttl = int_val;
@@ -1612,7 +1623,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		break;
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
-		if (cmsgp->cmsg_len != CMSG_LEN(sizeof(int)))
+		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = *((int *)CMSG_DATA(cmsgp));
 		ip_tos = int_val;
@@ -1663,7 +1674,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
     
     // Various checks
-    if (! src_address.is_unicast()) {
+    if (! (src_address.is_unicast() || src_address.is_zero())) {
+	// XXX: Accept zero source addresses because of protocols like IGMPv3
 	XLOG_ERROR("proto_socket_read() failed: "
 		   "invalid unicast sender address: %s", cstring(src_address));
 	return;			// Error
