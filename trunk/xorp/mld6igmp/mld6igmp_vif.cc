@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.75 2006/07/06 22:44:57 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.76 2006/07/07 08:41:21 pavlin Exp $"
 
 
 //
@@ -352,6 +352,7 @@ Mld6igmpVif::stop(string& error_msg)
 	 group_iter != _group_records.end(); ++group_iter) {
 	const Mld6igmpGroupRecord *group_record = group_iter->second;
 	Mld6igmpSourceSet::const_iterator source_iter;
+	// Clear the state for all included sources
 	for (source_iter = group_record->do_forward_sources().begin();
 	     source_iter != group_record->do_forward_sources().end();
 	     ++source_iter) {
@@ -359,6 +360,15 @@ Mld6igmpVif::stop(string& error_msg)
 	    join_prune_notify_routing(source_record->source(),
 				      group_record->group(),
 				      ACTION_PRUNE);
+	}
+	// Clear the state for all excluded sources
+	for (source_iter = group_record->dont_forward_sources().begin();
+	     source_iter != group_record->dont_forward_sources().end();
+	     ++source_iter) {
+	    const Mld6igmpSourceRecord *source_record = source_iter->second;
+	    join_prune_notify_routing(source_record->source(),
+				      group_record->group(),
+				      ACTION_JOIN);
 	}
 	if (group_record->is_exclude_mode()) {
 	    join_prune_notify_routing(IPvX::ZERO(family()),
@@ -1636,6 +1646,11 @@ Mld6igmpVif::join_prune_notify_routing(const IPvX& source,
 				       const IPvX& group,
 				       action_jp_t action_jp) const
 {
+    XLOG_TRACE(mld6igmp_node().is_log_trace(),
+	       "Notify routing %s membership for (%s, %s) on vif %s",
+	       (action_jp == ACTION_JOIN)? "add" : "delete",
+	       cstring(source), cstring(group), name().c_str());
+
     vector<pair<xorp_module_id, string> >::const_iterator iter;
     for (iter = _notify_routing_protocols.begin();
 	 iter != _notify_routing_protocols.end();
