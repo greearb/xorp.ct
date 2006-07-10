@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.9 2006/06/30 19:35:28 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_source_record.cc,v 1.10 2006/07/03 21:49:45 pavlin Exp $"
 
 //
 // Multicast source record information used by IGMPv3 (RFC 3376) and
@@ -134,6 +134,21 @@ void
 Mld6igmpSourceRecord::source_timer_timeout()
 {
     _group_record.source_expired(this);
+}
+
+/**
+ * Get the number of seconds until the source timer expires.
+ * 
+ * @return the number of seconds until the source timer expires.
+ */
+uint32_t
+Mld6igmpSourceRecord::timeout_sec() const
+{
+    TimeVal tv;
+    
+    _source_timer.time_remaining(tv);
+    
+    return (tv.sec());
 }
 
 /**

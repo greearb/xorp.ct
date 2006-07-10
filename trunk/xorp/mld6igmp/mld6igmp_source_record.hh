@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.8 2006/06/30 19:35:28 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_source_record.hh,v 1.9 2006/07/03 21:49:45 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_SOURCE_RECORD_HH__
@@ -108,6 +108,13 @@ public:
      * @return a reference to the source timer.
      */
     XorpTimer& source_timer() { return _source_timer; }
+
+    /**
+     * Get the number of seconds until the source timer expires.
+     * 
+     * @return the number of seconds until the source timer expires.
+     */
+    uint32_t	timeout_sec()	const;
 
     /**
      * Get the Query retransmission count.
