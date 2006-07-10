@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.17 2006/07/04 01:04:56 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_group_record.hh,v 1.18 2006/07/04 03:07:32 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
 #define __MLD6IGMP_MLD6IGMP_GROUP_RECORD_HH__
@@ -227,9 +227,9 @@ public:
     void source_expired(Mld6igmpSourceRecord* source_record);
 
     /**
-     * Get the number of seconds until time to query for host members.
+     * Get the number of seconds until the group timer expires.
      * 
-     * @return the number of seconds until time to query for host members.
+     * @return the number of seconds until the group timer expires.
      */
     uint32_t	timeout_sec()	const;
     

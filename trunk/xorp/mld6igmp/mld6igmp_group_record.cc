@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.27 2006/07/04 01:04:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.28 2006/07/10 08:20:40 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -761,12 +761,10 @@ Mld6igmpGroupRecord::source_expired(Mld6igmpSourceRecord* source_record)
 }
 
 /**
- * Mld6igmpGroupRecord::timeout_sec:
- * @: 
+ * Get the number of seconds until the group timer expires.
  * 
- * Get the number of seconds until time to query for host members.
- * Return value: the number of seconds until time to query for host members.
- **/
+ * @return the number of seconds until the group timer expires.
+ */
 uint32_t
 Mld6igmpGroupRecord::timeout_sec() const
 {
