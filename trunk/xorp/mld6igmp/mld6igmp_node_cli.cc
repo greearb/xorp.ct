@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.27 2006/06/10 00:20:59 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_node_cli.cc,v 1.28 2006/07/04 03:10:17 pavlin Exp $"
 
 
 //
@@ -434,7 +434,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 				   cstring(group_record->group()),
 				   cstring(source_record->source()),
 				   cstring(group_record->last_reported_host()),
-				   XORP_INT_CAST(group_record->timeout_sec()),
+				   XORP_INT_CAST(source_record->timeout_sec()),
 				   version, state.c_str()));
 	    }
 
@@ -449,7 +449,7 @@ Mld6igmpNodeCli::cli_show_mld6igmp_group(const vector<string>& argv)
 				   cstring(group_record->group()),
 				   cstring(source_record->source()),
 				   cstring(group_record->last_reported_host()),
-				   XORP_INT_CAST(group_record->timeout_sec()),
+				   XORP_INT_CAST(source_record->timeout_sec()),
 				   version, state.c_str()));
 	    }
 	}
