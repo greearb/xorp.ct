@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.26 2006/07/03 21:49:45 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_group_record.cc,v 1.27 2006/07/04 01:04:56 pavlin Exp $"
 
 //
 // Multicast group record information used by
@@ -741,6 +741,14 @@ Mld6igmpGroupRecord::source_expired(Mld6igmpSourceRecord* source_record)
 
     if (is_exclude_mode()) {
 	// notify routing (-)
+	//
+	// XXX: Note that we send a PRUNE twice: the first one to remove the
+	// original JOIN for the source, and the second one to create
+	// PRUNE state for the source.
+	//
+	mld6igmp_vif().join_prune_notify_routing(source_record->source(),
+						 group(),
+						 ACTION_PRUNE);
 	mld6igmp_vif().join_prune_notify_routing(source_record->source(),
 						 group(),
 						 ACTION_PRUNE);
@@ -781,6 +789,17 @@ Mld6igmpGroupRecord::group_timer_timeout()
     }
 
     if (is_exclude_mode()) {
+	// Clear the state for all excluded sources
+	Mld6igmpSourceSet::const_iterator source_iter;
+	for (source_iter = this->dont_forward_sources().begin();
+	     source_iter != this->dont_forward_sources().end();
+	     ++source_iter) {
+	    const Mld6igmpSourceRecord *source_record = source_iter->second;
+	    mld6igmp_vif().join_prune_notify_routing(source_record->source(),
+						     this->group(),
+						     ACTION_JOIN);
+	}
+
 	// Delete the source records with zero timers
 	_dont_forward_sources.delete_payload_and_clear();
 
@@ -1235,6 +1254,19 @@ Mld6igmpGroupRecord::calculate_forwarding_changes(
 	if (new_is_include_mode) {
 	    // EXCLUDE -> INCLUDE
 	    XLOG_ASSERT(new_dont_forward_sources.empty());
+
+	    // Join all old sources that were not to be forwarded
+	    for (iter = old_dont_forward_sources.begin();
+		 iter != old_dont_forward_sources.end();
+		 ++iter) {
+		const IPvX& ipvx = *iter;
+		if (new_dont_forward_sources.find(ipvx)
+		    == new_dont_forward_sources.end()) {
+		    mld6igmp_vif().join_prune_notify_routing(ipvx,
+							     group(),
+							     ACTION_JOIN);
+		}
+	    }
 
 	    // Prune the group itself
 	    mld6igmp_vif().join_prune_notify_routing(IPvX::ZERO(family()),
