@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.78 2006/05/25 00:38:21 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.79 2006/07/03 23:33:39 pavlin Exp $"
 
 
 //
@@ -1282,6 +1282,10 @@ PimNode::add_membership(uint32_t vif_index, const IPvX& source,
     uint32_t lookup_flags = 0;
     uint32_t create_flags = 0;
     PimVif *pim_vif = NULL;
+    bool is_ssm = false;
+
+    if (source != IPvX::ZERO(family()))
+	is_ssm = true;
     
     //
     // Check the arguments: the vif, source and group addresses.
@@ -1302,7 +1306,7 @@ PimNode::add_membership(uint32_t vif_index, const IPvX& source,
 	return (XORP_ERROR);
     
     if (group.is_linklocal_multicast() || group.is_nodelocal_multicast())
-	return (XORP_OK);		// XXX: don't route link or node-local groups
+	return (XORP_OK);	// XXX: don't route link or node-local groups
     
     XLOG_TRACE(is_log_trace(), "Add membership for (%s, %s) on vif %s",
 	       cstring(source), cstring(group), pim_vif->name().c_str());
@@ -1310,9 +1314,10 @@ PimNode::add_membership(uint32_t vif_index, const IPvX& source,
     //
     // Setup the MRE lookup and create flags
     //
-    lookup_flags |= PIM_MRE_WC;
-    if (source != IPvX::ZERO(family()))
+    if (is_ssm)
 	lookup_flags |= PIM_MRE_SG;
+    else
+	lookup_flags |= PIM_MRE_WC;
     create_flags = lookup_flags;
     
     PimMre *pim_mre = pim_mrt().pim_mre_find(source, group, lookup_flags,
@@ -1322,11 +1327,27 @@ PimNode::add_membership(uint32_t vif_index, const IPvX& source,
 	return (XORP_ERROR);
     
     //
-    // Add to the local membership state
+    // Modify to the local membership state
     //
-    pim_mre->set_local_receiver_include(pim_vif->vif_index(), true);
-    // TODO: figure-out what to do for (S,G) Join:
-    // remove from local_receiver_exclude or something else?
+    if (is_ssm) {
+	//
+	// (S, G) Join
+	//
+	// XXX: If the source was excluded, then don't exclude it anymore.
+	// Otherwise, include the source.
+	//
+	XLOG_ASSERT(pim_mre->is_sg());
+	if (pim_mre->local_receiver_exclude_sg().test(vif_index)) {
+	    pim_mre->set_local_receiver_exclude(vif_index, false);
+	} else {
+	    pim_mre->set_local_receiver_include(vif_index, true);
+	}
+    } else {
+	//
+	// (*,G) Join
+	//
+	pim_mre->set_local_receiver_include(vif_index, true);
+    }
     
     return (XORP_OK);
 }
@@ -1350,6 +1371,10 @@ PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
     uint32_t lookup_flags = 0;
     uint32_t create_flags = 0;
     PimVif *pim_vif = NULL;
+    bool is_ssm = false;
+
+    if (source != IPvX::ZERO(family()))
+	is_ssm = true;
     
     //
     // Check the arguments: the vif, source and group addresses.
@@ -1371,7 +1396,7 @@ PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
 	return (XORP_ERROR);
     
     if (group.is_linklocal_multicast() || group.is_nodelocal_multicast())
-	return (XORP_OK);		// XXX: don't route link or node-local groups
+	return (XORP_OK);	// XXX: don't route link or node-local groups
     
     XLOG_TRACE(is_log_trace(), "Delete membership for (%s, %s) on vif %s",
 	       cstring(source), cstring(group), pim_vif->name().c_str());
@@ -1379,10 +1404,13 @@ PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
     //
     // Setup the MRE lookup and create flags
     //
-    lookup_flags |= PIM_MRE_WC;
-    if (source != IPvX::ZERO(family()))
+    if (is_ssm) {
 	lookup_flags |= PIM_MRE_SG;
-    create_flags = 0;
+	create_flags = lookup_flags;	// XXX: create an entry for (S,G) Prune
+    } else {
+	lookup_flags |= PIM_MRE_WC;
+	create_flags = 0;
+    }
     
     PimMre *pim_mre = pim_mrt().pim_mre_find(source, group, lookup_flags,
 					     create_flags);
@@ -1391,15 +1419,27 @@ PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
 	return (XORP_ERROR);
     
     //
-    // Delete from the local membership state
+    // Modify the local membership state
     //
-    pim_mre->set_local_receiver_include(pim_vif->vif_index(), false);
-    // TODO: XXX: PAVPAVPAV: figure-out what to do for (S,G) Leave:
-    // remove from local_receiver_include or add to local_receiver_exclude
-    // or something else?
-    
-    // pim_mrt().remove(pim_mre);
-    // delete pim_mre;
+    if (is_ssm) {
+	//
+	// (S, G) Prune
+	//
+	// XXX: If the source was included, then don't include it anymore.
+	// Otherwise, exclude the source.
+	//
+	XLOG_ASSERT(pim_mre->is_sg());
+	if (pim_mre->local_receiver_include_sg().test(vif_index)) {
+	    pim_mre->set_local_receiver_include(vif_index, false);
+	} else {
+	    pim_mre->set_local_receiver_exclude(vif_index, true);
+	}
+    } else {
+	//
+	// (*,G) Prune
+	//
+	pim_mre->set_local_receiver_include(vif_index, false);
+    }
     
     return (XORP_OK);
 }
