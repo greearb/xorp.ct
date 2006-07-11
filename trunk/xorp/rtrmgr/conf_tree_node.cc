@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.111 2006/04/06 00:03:53 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/conf_tree_node.cc,v 1.112 2006/04/20 01:39:20 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "rtrmgr_module.h"
@@ -369,14 +369,21 @@ ConfigTreeNode::set_operator(ConfigOperator op, uid_t user_id,
 	    return false;
     }
 
+    set_operator_without_verification(op, user_id);
+
+    return true;
+}
+
+void
+ConfigTreeNode::set_operator_without_verification(ConfigOperator op,
+						  uid_t user_id)
+{
     if (_operator != op) {
 	_operator = op;
 	_value_committed = false;
 	_user_id = user_id;
 	TimerList::system_gettimeofday(&_modification_time);
     }
-
-    return true;
 }
 
 bool

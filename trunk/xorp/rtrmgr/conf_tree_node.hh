@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.63 2006/04/06 00:03:53 pavlin Exp $
+// $XORP: xorp/rtrmgr/conf_tree_node.hh,v 1.64 2006/04/20 01:39:20 pavlin Exp $
 
 #ifndef __RTRMGR_CONF_TREE_NODE_HH__
 #define __RTRMGR_CONF_TREE_NODE_HH__
@@ -79,6 +79,7 @@ public:
     bool set_value(const string& value, uid_t user_id, string& error_msg);
     void set_value_without_verification(const string& value, uid_t user_id);
     bool set_operator(ConfigOperator op, uid_t user_id, string& error_msg);
+    void set_operator_without_verification(ConfigOperator op, uid_t user_id);
     void mark_subtree_as_committed();
     void mark_subtree_as_uncommitted();
 
