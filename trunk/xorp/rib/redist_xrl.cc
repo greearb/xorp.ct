@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.26 2006/06/02 16:57:18 zec Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.27 2006/06/22 17:02:46 zec Exp $"
 
 #include <list>
 #include <string>
@@ -465,7 +465,10 @@ RedistXrlOutput<A>::~RedistXrlOutput()
 	delete _taskq.front();
 	_taskq.pop_front();
     }
-    _queued = 0;
+    while (_flyingq.empty() == false) {
+	delete _flyingq.front();
+	_flyingq.pop_front();
+    }
 }
 
 template <typename A>
@@ -553,6 +556,7 @@ RedistXrlOutput<A>::start_next_task()
 	    return;
 	} else {
 	    incr_inflight();
+	    _flyingq.push_back(t);
 	    _taskq.pop_front();
 	    _queued--;
 	}
@@ -563,8 +567,14 @@ template <typename A>
 void
 RedistXrlOutput<A>::task_completed(RedistXrlTask<A>* task)
 {
-    delete task;
+    if (task == _flyingq.front())
+	_flyingq.pop_front();
+    else {
+	XLOG_WARNING("task != _flyingq.front()");
+	_flyingq.remove(task);
+    }
     decr_inflight();
+    delete task;
 
     if (this->_queued != 0)
         this->start_next_task();
@@ -574,8 +584,14 @@ template <typename A>
 void
 RedistXrlOutput<A>::task_failed_fatally(RedistXrlTask<A>* task)
 {
-    delete task;
+    if (task == _flyingq.front())
+	_flyingq.pop_front();
+    else {
+	XLOG_WARNING("task != _flyingq.front()");
+	_flyingq.remove(task);
+    }
     decr_inflight();
+    delete task;
     this->announce_fatal_error();
 }
 
@@ -1064,8 +1080,14 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::task_completed(Task* task)
 {
-    delete task;
+    if (task == _flyingq.front())
+	_flyingq.pop_front();
+    else {
+	XLOG_WARNING("task != _flyingq.front()");
+	_flyingq.remove(task);
+    }
     this->decr_inflight();
+    delete task;
 
     if (this->_queued != 0) {
         this->start_next_task();

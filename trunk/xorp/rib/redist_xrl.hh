@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/redist_xrl.hh,v 1.11 2006/06/02 15:12:06 zec Exp $
+// $XORP: xorp/rib/redist_xrl.hh,v 1.12 2006/06/22 17:02:46 zec Exp $
 
 #ifndef __RIB_REDIST_XRL_HH__
 #define __RIB_REDIST_XRL_HH__
@@ -93,6 +93,8 @@ protected:
 
     TaskQueue	_taskq;
     uint32_t	_queued;
+
+    TaskQueue	_flyingq;
     uint32_t	_inflight;
 
     bool	_flow_controlled;
