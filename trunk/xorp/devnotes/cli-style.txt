@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/cli-style.txt,v 1.2 2006/04/19 05:59:32 pavlin Exp $
+# $XORP: xorp/devnotes/cli-style.txt,v 1.3 2006/04/20 23:58:31 pavlin Exp $
 #
 
 	Provisional XORP CLI coding style
@@ -109,6 +109,29 @@ string. In the text below we use the terms "short help string" and
   typically all upper case.
 
   Example: BGP, RIP, RIPng, VoIP
+
+* All timer-related configuration statements should follow common
+  convention:
+
+  - All configuration statements that represent periodic events should
+    be named "foo-interval".
+
+  - All configuration statements that represent expiration timeout
+    events should be named "foo-timeout".
+
+  - All configuration statements that represent lag/delay in events
+    should be named "foo-delay".
+
+  - All configuration statements that represent absolute time should be
+    named "foo-time".
+
+  In special cases a timer-related configuration statement might not
+  follow the above convention, but there should be good justification
+  for that (e.g., consistency with other router vendors, etc).
+
+* In general, the naming convention of other router vendors should be
+  used as a guideline when choosing the name of a configuration
+  statement, unless there are good reasons to choose a different name.
 
 * The name of an existing command should be changed only after careful
   considerations. The same applies for deleting a command or moving it
