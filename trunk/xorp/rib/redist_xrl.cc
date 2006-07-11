@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.27 2006/06/22 17:02:46 zec Exp $"
+#ident "$XORP: xorp/rib/redist_xrl.cc,v 1.28 2006/07/11 21:22:50 zec Exp $"
 
 #include <list>
 #include <string>
@@ -1080,11 +1080,11 @@ template <typename A>
 void
 RedistTransactionXrlOutput<A>::task_completed(Task* task)
 {
-    if (task == _flyingq.front())
-	_flyingq.pop_front();
+    if (task == this->_flyingq.front())
+	this->_flyingq.pop_front();
     else {
-	XLOG_WARNING("task != _flyingq.front()");
-	_flyingq.remove(task);
+	XLOG_WARNING("task != this->_flyingq.front()");
+	this->_flyingq.remove(task);
     }
     this->decr_inflight();
     delete task;
