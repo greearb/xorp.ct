@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/rip.tp,v 1.42 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/rip.tp,v 1.43 2006/07/12 07:25:48 pavlin Exp $ */
 
 /*
  * RIP attribute descriptions
@@ -95,8 +95,11 @@ protocols {
 	}
 
 	interface @ {
+	    %help:	short "Interface in RIP domain";
 	    vif @ {
+		%help:	short "Vif in RIP domain";
 		address @ {
+		    %help: short "Address on vif used for RIP";
 		    %create: xrl "$(rip.targetname)/rip/0.1/add_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
 		    %delete: xrl "$(rip.targetname)/rip/0.1/remove_rip_address?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)";
 		    %activate: xrl "$(rip.targetname)/rip/0.1/set_rip_address_enabled?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(address.@)&enabled:bool=`~$(@.disable)`";
