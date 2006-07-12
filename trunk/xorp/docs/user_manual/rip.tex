@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.16 2006/03/09 06:43:19 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.17 2006/03/26 05:33:42 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -232,7 +232,7 @@ protocols \{\\
 \item{\tt table-request-secs}: When a RIP router has no neighbors on a
   vif/address, it may periodically send a request for a route update
   in case a neighbor appears.  This timer determines how often such a
-  request is re-sent. The default value is 1 second.
+  request is re-sent. The default value is 30 seconds.
   If the timer's value is 0, then the periodic requests are not send.
 \item{\tt interpacket-delay-msecs}: This specifies the default delay
   between back-to-back RIP packets when an update is sent that
