@@ -402,7 +402,7 @@ XrlRipngTarget::ripng_0_1_interpacket_delay_milliseconds(
 						uint32_t&	t
 						)
 {
-    return _ct->ripx_0_1_set_interpacket_delay_milliseconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_interpacket_delay_milliseconds(ifn, vifn, a, t);
 }
 
 XrlCmdError
