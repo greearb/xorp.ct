@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.8 2005/08/18 15:58:11 bms Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes_main.cc,v 1.9 2006/03/16 00:03:43 pavlin Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -25,11 +25,12 @@
 void usage()
 {
     fprintf(stderr,
-	    "Usage: print_routes [-4 -6 -u -m -s -v]"
+	    "Usage: print_routes [-4 -6 -u -m -s -v -p <prefix>]"
 	    " [-l <lines>]" 
 	    " [-i <repeat_interval>]\n"
 	    "-4 IPv4\n"
 	    "-6 IPv6\n"
+	    "-p <prefix>\n"
 	    "-u Unicast\n"
 	    "-m Multicast\n"
 	    "-s summary output\n"
@@ -50,6 +51,7 @@ int main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
+    string prefix;
     bool ipv4, ipv6, unicast, multicast;
     ipv4 = ipv6 = unicast = multicast = false;
     int lines = -1;
@@ -58,13 +60,16 @@ int main(int argc, char **argv)
     PrintRoutes<IPv6>::detail_t verbose_ipv6 = PrintRoutes<IPv6>::NORMAL;
     int c;
     int interval = -1;
-    while ((c = getopt(argc, argv, "46umvi:l:")) != -1) {
+    while ((c = getopt(argc, argv, "46p:umvi:l:")) != -1) {
 	switch (c) {
 	case '4':
 	    ipv4 = true;
 	    break;
 	case '6':
 	    ipv6 = true;
+	    break;
+	case 'p':
+	    prefix = optarg;
 	    break;
 	case 'u':
 	    unicast = true;
@@ -99,12 +104,24 @@ int main(int argc, char **argv)
 	unicast = true;
 
     try {
-	if (ipv4)
-	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, unicast,
-					    multicast, lines);
-	if (ipv6)
-	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, unicast,
-					    multicast, lines);
+	if (ipv4) {
+	    IPNet<IPv4> net;
+	    if ("" != prefix) {
+		IPNet<IPv4> subnet(prefix.c_str());
+		net = subnet;
+	    }
+	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, net,
+					    unicast, multicast, lines);
+	}
+	if (ipv6) {
+	    IPNet<IPv6> net;
+	    if ("" != prefix) {
+		IPNet<IPv6> subnet(prefix.c_str());
+		net = subnet;
+	    }
+	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, net,
+					    unicast, multicast, lines);
+	}
 	    
     } catch(...) {
 	xorp_catch_standard_exceptions();

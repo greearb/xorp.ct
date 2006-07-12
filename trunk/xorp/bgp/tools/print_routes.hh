@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.17 2006/06/28 15:31:19 atanu Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.18 2006/06/28 15:50:44 atanu Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
@@ -42,9 +42,9 @@ public:
     static const uint32_t MAX_REQUESTS = 100;
     static const int32_t INVALID = -1;
     enum detail_t {SUMMARY, NORMAL, DETAIL};
-    PrintRoutes(detail_t verbose, int interval, bool unicast, bool multicast,
-		int lines = -1);
-    void get_route_list_start(bool unicast, bool multicast);
+    PrintRoutes(detail_t verbose, int interval, IPNet<A> net, bool unicast,
+		bool multicast,	int lines = -1);
+    void get_route_list_start(IPNet<A> net, bool unicast, bool multicast);
     void get_route_list_start_done(const XrlError& e,
 				   const uint32_t* token);
     void get_route_list_next();

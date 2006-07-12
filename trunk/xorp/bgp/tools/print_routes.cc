@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.17 2006/06/28 15:31:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/tools/print_routes.cc,v 1.18 2006/07/05 22:46:56 atanu Exp $"
 
 #include "print_routes.hh"
 
@@ -21,20 +21,20 @@
 
 template <>
 void
-PrintRoutes<IPv4>::get_route_list_start(bool unicast, bool multicast)
+PrintRoutes<IPv4>::get_route_list_start(IPNet<IPv4> net, bool unicast,
+					bool multicast)
 {
     _active_requests = 0;
-    IPNet<IPv4> net;
     send_get_v4_route_list_start("bgp", net, unicast, multicast,
 		 callback(this, &PrintRoutes::get_route_list_start_done));
 }
 
 template <>
 void
-PrintRoutes<IPv6>::get_route_list_start(bool unicast, bool multicast)
+PrintRoutes<IPv6>::get_route_list_start(IPNet<IPv6> net, bool unicast,
+					bool multicast)
 {
     _active_requests = 0;
-    IPNet<IPv6> net;
     send_get_v6_route_list_start("bgp", net, unicast, multicast,
 		 callback(this, &PrintRoutes::get_route_list_start_done));
 }
@@ -59,8 +59,8 @@ PrintRoutes<IPv6>::get_route_list_next()
 // Common PrintRoutes implementation
 
 template <typename A>
-PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, bool unicast,
-			    bool multicast, int lines)
+PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, IPNet<A> net,
+			    bool unicast, bool multicast, int lines)
     : XrlBgpV0p2Client(&_xrl_rtr),
       _xrl_rtr(_eventloop, "print_routes"), _verbose(verbose),
       _unicast(unicast), _multicast(multicast), _lines(lines)
@@ -85,7 +85,7 @@ PrintRoutes<A>::PrintRoutes(detail_t verbose, int interval, bool unicast,
 	_done = false;
 	_token = 0;
 	_count = 0;
-	get_route_list_start(_unicast, _multicast);
+	get_route_list_start(net, _unicast, _multicast);
 	while (_done == false || _active_requests > 0) {
 	    _eventloop.run();
 	    if (_lines == static_cast<int>(_count)) {

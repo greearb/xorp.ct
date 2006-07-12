@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.12 2006/03/16 00:03:43 pavlin Exp $"
+#ident "$XORP: xorp/bgp/tools/xorpsh_print_routes.cc,v 1.13 2006/06/28 15:24:30 atanu Exp $"
 
 #include "print_routes.hh"
 #include "bgp/aspath.hh"
@@ -26,7 +26,7 @@ void usage()
 {
     fprintf(stderr,
 	    "Usage: [ -l <lines> ] xorpsh_print_routes show bgp routes "
-	    "[ipv4|ipv6] [unicast|multicast] [summary|detail]\n"
+	    "[ipv4|ipv6] [unicast|multicast] [summary|detail] [x.x.x.x/n]\n"
 	    "where summary enables brief output.\n");
 }
 
@@ -44,6 +44,8 @@ int main(int argc, char **argv)
     xlog_add_default_output();
     xlog_start();
 
+    IPNet<IPv4> net_ipv4;
+    IPNet<IPv6> net_ipv6;
     bool ipv4, ipv6, unicast, multicast;
     ipv4 = ipv6 = unicast = multicast = false;
 
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-    if ((argc < 3) || (argc > 6)) {
+    if ((argc < 3) || (argc > 7)) {
 	usage();
 	return -1;
     }
@@ -118,16 +120,30 @@ int main(int argc, char **argv)
 	    counter++;
 	}
     }
-    if (argc == counter) {
+    if (argc >= counter) {
 	if (strcmp(argv[counter - 1], "summary")==0) {
 	    verbose_ipv4 = PrintRoutes<IPv4>::SUMMARY;
 	    verbose_ipv6 = PrintRoutes<IPv6>::SUMMARY;
+	    counter++;
 	} else if (strcmp(argv[counter - 1], "detail")==0) {
 	    verbose_ipv4 = PrintRoutes<IPv4>::DETAIL;
 	    verbose_ipv6 = PrintRoutes<IPv6>::DETAIL;
-	} else {
-	    usage();
-	    return -1;
+	    counter++;
+	}
+    }
+    if (argc == counter) {
+	try {
+		IPNet<IPv4> subnet(argv[counter - 1]);
+		net_ipv4 = subnet;
+	} catch(...) {
+	    try {
+		IPNet<IPv6> subnet(argv[counter - 1]);
+		net_ipv6 = subnet;
+	    } catch(...) {
+		// xorp_catch_standard_exceptions();
+		usage();
+		return -1;
+	    }
 	}
     }
 
@@ -138,12 +154,14 @@ int main(int argc, char **argv)
 	unicast = true;
 
     try {
-	if (ipv4)
-	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval,
+	if (ipv4) {
+	    PrintRoutes<IPv4> route_printer(verbose_ipv4, interval, net_ipv4,
 					    unicast, multicast, lines);
-	if (ipv6)
-	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval,
+	}
+	if (ipv6) {
+	    PrintRoutes<IPv6> route_printer(verbose_ipv6, interval, net_ipv6,
 					    unicast, multicast, lines);
+	}
     } catch(...) {
 	xorp_catch_standard_exceptions();
     }
