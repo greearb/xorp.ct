@@ -339,69 +339,69 @@ rip_rip_advertise_default_route()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_route_expiry_seconds()
+rip_rip_set_route_timeout()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_route_expiry_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_route_timeout <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_route_expiry_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_route_timeout?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_route_expiry_seconds()
+rip_rip_route_timeout()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_route_expiry_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_route_timeout <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/route_expiry_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/route_timeout?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_route_deletion_seconds()
+rip_rip_set_deletion_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_route_deletion_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_deletion_delay <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_route_deletion_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_deletion_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_route_deletion_seconds()
+rip_rip_deletion_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_route_deletion_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_deletion_delay <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/route_deletion_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/deletion_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_table_request_seconds()
+rip_rip_set_request_interval()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_table_request_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_request_interval <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_table_request_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_request_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_table_request_seconds()
+rip_rip_request_interval()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_table_request_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_request_interval <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/table_request_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/request_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
@@ -493,25 +493,25 @@ rip_rip_triggered_update_max_seconds()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_interpacket_delay_milliseconds()
+rip_rip_set_interpacket_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_interpacket_delay_milliseconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_msecs:u32>"
+        echo "Usage: rip_rip_set_interpacket_delay <ifname:txt> <vifname:txt> <addr:ipv4> <t_msecs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_interpacket_delay_milliseconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_msecs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_interpacket_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_msecs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_interpacket_delay_milliseconds()
+rip_rip_interpacket_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_interpacket_delay_milliseconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_interpacket_delay <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/interpacket_delay_milliseconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/interpacket_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 

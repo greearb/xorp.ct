@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.25 2006/03/16 00:05:55 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.26 2006/03/30 02:21:15 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -143,40 +143,40 @@ public:
 						 bool&		advertise);
 
     XrlCmdError
-    ripx_0_1_set_route_expiry_seconds(const string&	ifname,
-				      const string&	vifname,
-				      const A&		addr,
-				      const uint32_t&	t_secs);
+    ripx_0_1_set_route_timeout(const string&	ifname,
+			       const string&	vifname,
+			       const A&		addr,
+			       const uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_route_expiry_seconds(const string&	ifname,
-				  const string&	vifname,
-				  const A&	addr,
-				  uint32_t&	t_secs);
+    ripx_0_1_route_timeout(const string&	ifname,
+			   const string&	vifname,
+			   const A&		addr,
+			   uint32_t&		t_secs);
 
     XrlCmdError
-    ripx_0_1_set_route_deletion_seconds(const string&	ifname,
-					const string&	vifname,
-					const A&	addr,
-					const uint32_t&	t_secs);
+    ripx_0_1_set_deletion_delay(const string&	ifname,
+				const string&	vifname,
+				const A&	addr,
+				const uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_route_deletion_seconds(const string&	ifname,
-				    const string&	vifname,
-				    const A&		addr,
-				    uint32_t&		t_secs);
+    ripx_0_1_deletion_delay(const string&	ifname,
+			    const string&	vifname,
+			    const A&		addr,
+			    uint32_t&		t_secs);
 
     XrlCmdError
-    ripx_0_1_set_table_request_seconds(const string&	ifname,
-				       const string&	vifname,
-				       const A&		addr,
-				       const uint32_t&	t_secs);
+    ripx_0_1_set_request_interval(const string&		ifname,
+				  const string&		vifname,
+				  const A&		addr,
+				  const uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_table_request_seconds(const string&	ifname,
-				   const string&	vifname,
-				   const A&		addr,
-				   uint32_t&		t_secs);
+    ripx_0_1_request_interval(const string&	ifname,
+			      const string&	vifname,
+			      const A&		addr,
+			      uint32_t&		t_secs);
 
     XrlCmdError
     ripx_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
@@ -229,16 +229,16 @@ public:
 					  uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_set_interpacket_delay_milliseconds(const string&	ifname,
-						const string&	vifname,
-						const A&	addr,
-						const uint32_t&	t_msecs);
+    ripx_0_1_set_interpacket_delay(const string&	ifname,
+				   const string&	vifname,
+				   const A&		addr,
+				   const uint32_t&	t_msecs);
 
     XrlCmdError
-    ripx_0_1_interpacket_delay_milliseconds(const string&	ifname,
-					    const string&	vifname,
-					    const A&		addr,
-					    uint32_t&		t_msecs);
+    ripx_0_1_interpacket_delay(const string&	ifname,
+			       const string&	vifname,
+			       const A&		addr,
+			       uint32_t&	t_msecs);
 
     XrlCmdError ripx_0_1_rip_address_status(const string&	ifname,
 					    const string&	vifname,
@@ -742,7 +742,7 @@ XrlRipCommonTarget<A>::ripx_0_1_advertise_default_route(
 // The following pair of macros are used in setting timer constants on
 // RIP ports.
 
-#define PORT_TIMER_SET_HANDLER(field, min_val, max_val, method)		\
+#define PORT_TIMER_SET_HANDLER(field, t, min_val, max_val, method)	\
 do {									\
     pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
     if (pp.first == 0)							\
@@ -764,7 +764,7 @@ do {									\
     return XrlCmdError::OKAY();						\
 } while (0)
 
-#define PORT_TIMER_GET_HANDLER(field)					\
+#define PORT_TIMER_GET_HANDLER(field, t)				\
 do {									\
     pair<Port<A>*, XrlCmdError> pp = find_port(ifname, vifname, addr);	\
     if (pp.first == 0)							\
@@ -777,75 +777,75 @@ do {									\
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_route_expiry_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_route_timeout(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(expiry_secs, 10, 10000, dummy_timer);
+    PORT_TIMER_SET_HANDLER(expiry_secs, t, 10, 10000, dummy_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_route_expiry_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_route_timeout(
 					     const string&	ifname,
 					     const string&	vifname,
 					     const A&		addr,
 					     uint32_t&		t
 					     )
 {
-    PORT_TIMER_GET_HANDLER(expiry_secs);
+    PORT_TIMER_GET_HANDLER(expiry_secs, t);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_route_deletion_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_deletion_delay(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(deletion_secs, 10, 10000, dummy_timer);
+    PORT_TIMER_SET_HANDLER(deletion_secs, t, 10, 10000, dummy_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_route_deletion_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_deletion_delay(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(deletion_secs);
+    PORT_TIMER_GET_HANDLER(deletion_secs, t);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_table_request_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_request_interval(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(table_request_period_secs, 0, 10000,
+    PORT_TIMER_SET_HANDLER(table_request_period_secs, t, 0, 10000,
 			   request_table_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_table_request_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_request_interval(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(table_request_period_secs);
+    PORT_TIMER_GET_HANDLER(table_request_period_secs, t);
 }
 
 template <typename A>
@@ -857,7 +857,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_min_seconds(
 						const uint32_t& t
 						)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, 1, 300, dummy_timer);
+    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, t, 1, 300,
+			   dummy_timer);
 }
 
 template <typename A>
@@ -869,7 +870,7 @@ XrlRipCommonTarget<A>::ripx_0_1_unsolicited_response_min_seconds(
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(unsolicited_response_min_secs);
+    PORT_TIMER_GET_HANDLER(unsolicited_response_min_secs, t);
 }
 
 template <typename A>
@@ -881,7 +882,8 @@ XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_max_seconds(
 						const uint32_t& t
 						)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, 1, 600, dummy_timer);
+    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, t, 1, 600,
+			   dummy_timer);
 }
 
 template <typename A>
@@ -893,7 +895,7 @@ XrlRipCommonTarget<A>::ripx_0_1_unsolicited_response_max_seconds(
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(unsolicited_response_max_secs);
+    PORT_TIMER_GET_HANDLER(unsolicited_response_max_secs, t);
 }
 
 template <typename A>
@@ -905,7 +907,7 @@ XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_min_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, 1, 10000,
+    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, t, 1, 10000,
 			   dummy_timer);
 }
 
@@ -918,7 +920,7 @@ XrlRipCommonTarget<A>::ripx_0_1_triggered_update_min_seconds(
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(triggered_update_min_wait_secs);
+    PORT_TIMER_GET_HANDLER(triggered_update_min_wait_secs, t);
 }
 
 template <typename A>
@@ -930,7 +932,7 @@ XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_max_seconds(
 						const uint32_t&	t
 						)
 {
-    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, 1, 10000,
+    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, t, 1, 10000,
 			   dummy_timer);
 }
 
@@ -943,31 +945,32 @@ XrlRipCommonTarget<A>::ripx_0_1_triggered_update_max_seconds(
 						uint32_t&	t
 						)
 {
-    PORT_TIMER_GET_HANDLER(triggered_update_max_wait_secs);
+    PORT_TIMER_GET_HANDLER(triggered_update_max_wait_secs, t);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_interpacket_delay_milliseconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_interpacket_delay(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						const uint32_t&	t
+						const uint32_t&	t_msecs
 						)
 {
-    PORT_TIMER_SET_HANDLER(interpacket_delay_ms, 10, 10000, dummy_timer);
+    PORT_TIMER_SET_HANDLER(interpacket_delay_ms, t_msecs, 10, 10000,
+			   dummy_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_interpacket_delay_milliseconds(
+XrlRipCommonTarget<A>::ripx_0_1_interpacket_delay(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						uint32_t&	t
+						uint32_t&	t_msecs
 						)
 {
-    PORT_TIMER_GET_HANDLER(interpacket_delay_ms);
+    PORT_TIMER_GET_HANDLER(interpacket_delay_ms, t_msecs);
 }
 
 template <typename A>

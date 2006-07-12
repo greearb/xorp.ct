@@ -240,59 +240,57 @@ XrlRipngTarget::ripng_0_1_advertise_default_route(const string&	ifn,
 
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_set_route_expiry_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv6&	a,
-						const uint32_t&	t
-						)
+XrlRipngTarget::ripng_0_1_set_route_timeout(const string&	ifn,
+					    const string&	vifn,
+					    const IPv6&		a,
+					    const uint32_t&	t)
 {
-    return _ct->ripx_0_1_set_route_expiry_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_route_timeout(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_route_expiry_seconds(const string&	ifn,
+XrlRipngTarget::ripng_0_1_route_timeout(const string&	ifn,
+					const string&	vifn,
+					const IPv6&	a,
+					uint32_t&	t)
+{
+    return _ct->ripx_0_1_route_timeout(ifn, vifn, a, t);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_deletion_delay(const string&	ifn,
+					     const string&	vifn,
+					     const IPv6&	a,
+					     const uint32_t&	t)
+{
+    return _ct->ripx_0_1_set_deletion_delay(ifn, vifn, a, t);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_deletion_delay(const string&	ifn,
+					 const string&	vifn,
+					 const IPv6&	a,
+					 uint32_t&	t)
+{
+    return _ct->ripx_0_1_deletion_delay(ifn, vifn, a, t);
+}
+
+XrlCmdError
+XrlRipngTarget::ripng_0_1_set_request_interval(const string&	ifn,
 					       const string&	vifn,
 					       const IPv6&	a,
-					       uint32_t&	t)
+					       const uint32_t&	t)
 {
-    return _ct->ripx_0_1_route_expiry_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_request_interval(ifn, vifn, a, t);
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_set_route_deletion_seconds(const string&	ifn,
-						     const string&	vifn,
-						     const IPv6&	a,
-						     const uint32_t&	t)
+XrlRipngTarget::ripng_0_1_request_interval(const string&	ifn,
+					   const string&	vifn,
+					   const IPv6&		a,
+					   uint32_t&		t)
 {
-    return _ct->ripx_0_1_set_route_deletion_seconds(ifn, vifn, a, t);
-}
-
-XrlCmdError
-XrlRipngTarget::ripng_0_1_route_deletion_seconds(const string&	ifn,
-						 const string&	vifn,
-						 const IPv6&	a,
-						 uint32_t&	t)
-{
-    return _ct->ripx_0_1_route_deletion_seconds(ifn, vifn, a, t);
-}
-
-XrlCmdError
-XrlRipngTarget::ripng_0_1_set_table_request_seconds(const string&	ifn,
-						    const string&	vifn,
-						    const IPv6&		a,
-						    const uint32_t&	t)
-{
-    return _ct->ripx_0_1_set_table_request_seconds(ifn, vifn, a, t);
-}
-
-XrlCmdError
-XrlRipngTarget::ripng_0_1_table_request_seconds(const string&	ifn,
-						const string&	vifn,
-						const IPv6&	a,
-						uint32_t&	t)
-{
-    return _ct->ripx_0_1_table_request_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_request_interval(ifn, vifn, a, t);
 }
 
 XrlCmdError
@@ -384,25 +382,21 @@ XrlRipngTarget::ripng_0_1_triggered_update_max_seconds(
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_set_interpacket_delay_milliseconds(
-						const string&	ifn,
+XrlRipngTarget::ripng_0_1_set_interpacket_delay(const string&	ifn,
 						const string&	vifn,
 						const IPv6&	a,
-						const uint32_t&	t
-						)
+						const uint32_t&	t_msecs)
 {
-    return _ct->ripx_0_1_set_interpacket_delay_milliseconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_interpacket_delay(ifn, vifn, a, t_msecs);
 }
 
 XrlCmdError
-XrlRipngTarget::ripng_0_1_interpacket_delay_milliseconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv6&	a,
-						uint32_t&	t
-						)
+XrlRipngTarget::ripng_0_1_interpacket_delay(const string&	ifn,
+					    const string&	vifn,
+					    const IPv6&		a,
+					    uint32_t&		t_msecs)
 {
-    return _ct->ripx_0_1_interpacket_delay_milliseconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_interpacket_delay(ifn, vifn, a, t_msecs);
 }
 
 XrlCmdError

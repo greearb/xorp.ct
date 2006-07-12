@@ -139,7 +139,7 @@ interface ripng/0.1 {
      * Set period that routes associated with reception address will
      * expire in the absence of updates.
      */
-    set_route_expiry_seconds	? ifname:txt				\
+    set_route_timeout		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				& t_secs:u32
@@ -148,7 +148,7 @@ interface ripng/0.1 {
      * Get period that routes associated with reception address will
      * expire in the absence of updates.
      */
-    route_expiry_seconds	? ifname:txt				\
+    route_timeout		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				-> t_secs:u32
@@ -157,7 +157,7 @@ interface ripng/0.1 {
      * Set period that routes associated with reception address will be
      * deleted after they've expired.
      */
-    set_route_deletion_seconds	? ifname:txt				\
+    set_deletion_delay		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				& t_secs:u32
@@ -166,7 +166,7 @@ interface ripng/0.1 {
      * Get period that routes associated with reception address will be
      * deleted after they've expired.
      */
-     route_deletion_seconds	? ifname:txt				\
+     deletion_delay		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				-> t_secs:u32
@@ -175,7 +175,7 @@ interface ripng/0.1 {
      * Set period that route table requests should be sent from address
      * when no peers are associated with it.
      */
-    set_table_request_seconds	? ifname:txt				\
+    set_request_interval	? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				& t_secs:u32
@@ -184,7 +184,7 @@ interface ripng/0.1 {
      * Set period that route table requests should be sent from address
      * when no peers are associated with it.
      */
-    table_request_seconds	? ifname:txt				\
+    request_interval		? ifname:txt				\
 				& vifname:txt				\
 				& addr:ipv6				\
 				-> t_secs:u32
@@ -260,7 +260,7 @@ interface ripng/0.1 {
      * Set the inter-packet delay between the output of packets from
      * address.
      */
-    set_interpacket_delay_milliseconds	? ifname:txt			\
+    set_interpacket_delay		? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv6			\
 					& t_msecs:u32
@@ -269,7 +269,7 @@ interface ripng/0.1 {
      * Get the inter-packet delay between the output of packets from
      * address.
      */
-    interpacket_delay_milliseconds	? ifname:txt			\
+    interpacket_delay			? ifname:txt			\
 					& vifname:txt			\
 					& addr:ipv6			\
 					-> t_msecs:u32

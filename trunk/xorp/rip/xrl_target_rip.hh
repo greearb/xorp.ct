@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.20 2006/03/16 00:05:55 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.21 2006/03/30 02:21:15 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -140,40 +140,40 @@ public:
 						bool&		advertise);
 
     XrlCmdError
-    rip_0_1_set_route_expiry_seconds(const string&	ifname,
-				     const string&	vifname,
-				     const IPv4&	addr,
-				     const uint32_t&	t_secs);
+    rip_0_1_set_route_timeout(const string&	ifname,
+			      const string&	vifname,
+			      const IPv4&	addr,
+			      const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_route_expiry_seconds(const string&	ifname,
-				 const string&	vifname,
-				 const IPv4&	addr,
-				 uint32_t&	t_secs);
+    rip_0_1_route_timeout(const string&	ifname,
+			  const string&	vifname,
+			  const IPv4&	addr,
+			  uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_set_route_deletion_seconds(const string&	ifname,
-				       const string&	vifname,
-				       const IPv4&	addr,
-				       const uint32_t&	t_secs);
+    rip_0_1_set_deletion_delay(const string&	ifname,
+			       const string&	vifname,
+			       const IPv4&	addr,
+			       const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_route_deletion_seconds(const string&	ifname,
-				   const string&	vifname,
-				   const IPv4&		addr,
-				   uint32_t&		t_secs);
+    rip_0_1_deletion_delay(const string&	ifname,
+			   const string&	vifname,
+			   const IPv4&		addr,
+			   uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_table_request_seconds(const string&	ifname,
-				      const string&	vifname,
-				      const IPv4&	addr,
-				      const uint32_t&	t_secs);
+    rip_0_1_set_request_interval(const string&		ifname,
+				 const string&		vifname,
+				 const IPv4&		addr,
+				 const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_table_request_seconds(const string&		ifname,
-				  const string&		vifname,
-				  const IPv4&		addr,
-				  uint32_t&		t_secs);
+    rip_0_1_request_interval(const string&	ifname,
+			     const string&	vifname,
+			     const IPv4&	addr,
+			     uint32_t&		t_secs);
 
     XrlCmdError
     rip_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
@@ -224,16 +224,16 @@ public:
 					 uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_set_interpacket_delay_milliseconds(const string&	ifname,
-					       const string&	vifname,
-					       const IPv4&	addr,
-					       const uint32_t&	t_msecs);
+    rip_0_1_set_interpacket_delay(const string&		ifname,
+				  const string&		vifname,
+				  const IPv4&		addr,
+				  const uint32_t&	t_msecs);
 
     XrlCmdError
-    rip_0_1_interpacket_delay_milliseconds(const string&	ifname,
-					   const string&	vifname,
-					   const IPv4&		addr,
-					   uint32_t&		t_msecs);
+    rip_0_1_interpacket_delay(const string&	ifname,
+			      const string&	vifname,
+			      const IPv4&	addr,
+			      uint32_t&		t_msecs);
 
     XrlCmdError rip_0_1_set_simple_authentication_key(
 	// Input values,

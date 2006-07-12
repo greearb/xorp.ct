@@ -339,69 +339,69 @@ ripng_ripng_advertise_default_route()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_route_expiry_seconds()
+ripng_ripng_set_route_timeout()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_route_expiry_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_route_timeout <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_route_expiry_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_route_timeout?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_route_expiry_seconds()
+ripng_ripng_route_timeout()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_route_expiry_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_route_timeout <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/route_expiry_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/route_timeout?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_route_deletion_seconds()
+ripng_ripng_set_deletion_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_route_deletion_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_deletion_delay <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_route_deletion_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_deletion_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_route_deletion_seconds()
+ripng_ripng_deletion_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_route_deletion_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_deletion_delay <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/route_deletion_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/deletion_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_table_request_seconds()
+ripng_ripng_set_request_interval()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_table_request_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_request_interval <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_table_request_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_request_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_table_request_seconds()
+ripng_ripng_request_interval()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_table_request_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_request_interval <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/table_request_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/request_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
@@ -493,25 +493,25 @@ ripng_ripng_triggered_update_max_seconds()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_interpacket_delay_milliseconds()
+ripng_ripng_set_interpacket_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_interpacket_delay_milliseconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_msecs:u32>"
+        echo "Usage: ripng_ripng_set_interpacket_delay <ifname:txt> <vifname:txt> <addr:ipv6> <t_msecs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_interpacket_delay_milliseconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_msecs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_interpacket_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_msecs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_interpacket_delay_milliseconds()
+ripng_ripng_interpacket_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_interpacket_delay_milliseconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_interpacket_delay <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/interpacket_delay_milliseconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/interpacket_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
