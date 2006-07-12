@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.121 2006/07/07 08:47:01 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.122 2006/07/12 07:28:32 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -46,6 +46,18 @@ Release 1.3 (2006/??/??)
       route-deletion-secs -> deletion-delay
       table-request-secs -> request-interval
       interpacket-delay-msecs -> interpacket-delay
+
+    - The "version" statement for configuring an IGMP interface/vif
+      allows values in the range [1-3]. Previously, the allowed range
+      was [1-2].
+
+    - The "version" statement for configuring a MLD interface/vif allows
+      values in the range [1-3]. Previously, the allowed range was [1-1].
+
+    - The following statement for configuring PIM-SM (pimsm4 and pimsm6)
+      has been renamed:
+
+      interval-sec -> interval
 
     - If a "then" policy block contains "accept" or "reject" statement,
       now all statements inside the "then" block are evaluated
