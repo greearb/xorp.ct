@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/plumbing.hh,v 1.38 2006/04/14 05:57:59 atanu Exp $
+// $XORP: xorp/bgp/plumbing.hh,v 1.39 2006/04/15 07:10:36 atanu Exp $
 
 #ifndef __BGP_PLUMBING_HH__
 #define __BGP_PLUMBING_HH__
@@ -79,7 +79,7 @@ public:
      * can be passed through.
      */
     NextHopResolver<A>& next_hop_resolver() {return _next_hop_resolver;}
-    uint32_t create_route_table_reader();
+    uint32_t create_route_table_reader(const IPNet<A>& prefix);
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<A>*& route, 
 			 IPv4& peer_id);
@@ -203,7 +203,8 @@ public:
 	return _plumbing_ipv6;
     }
 
-    template <typename A> uint32_t create_route_table_reader(A dummy);
+    template <typename A> uint32_t
+    create_route_table_reader(const IPNet<A>& prefix);
 
     bool read_next_route(uint32_t token, 
 			 const SubnetRoute<IPv4>*& route, 

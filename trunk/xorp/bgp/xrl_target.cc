@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.60 2006/04/28 23:18:25 pavlin Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.61 2006/07/05 22:46:56 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1141,7 +1141,7 @@ XrlBgpTarget::bgp_0_2_register_rib(
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 	// Input values,
-	const IPv4Net&	/*net*/,
+	const IPv4Net& prefix,
 	const bool&	unicast,
 	const bool&	multicast,
 	// Output values, 
@@ -1149,7 +1149,7 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 {
     debug_msg("\n");
 
-    if (_bgp.get_route_list_start<IPv4>(token, unicast, multicast)) {
+    if (_bgp.get_route_list_start<IPv4>(token, prefix, unicast, multicast)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED();
@@ -1159,13 +1159,13 @@ XrlBgpTarget::bgp_0_2_get_v4_route_list_start(
 XrlCmdError
 XrlBgpTarget::bgp_0_2_get_v6_route_list_start(
 	// Input values,
-        const IPv6Net&	/*net*/,
+        const IPv6Net& prefix,
 	const bool&	unicast,
 	const bool&	multicast,
 	// Output values, 
 	uint32_t& token)
 {
-    if (_bgp.get_route_list_start<IPv6>(token, unicast, multicast)) {
+    if (_bgp.get_route_list_start<IPv6>(token, prefix, unicast, multicast)) {
 	return XrlCmdError::OKAY();
     } else {
 	return XrlCmdError::COMMAND_FAILED();

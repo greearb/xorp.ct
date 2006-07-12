@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.7 2005/03/25 02:52:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_reader.cc,v 1.8 2006/03/16 00:03:35 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xlog.h"
@@ -83,7 +83,8 @@ ReaderIxTuple<A>::is_consistent() const {
 }
 
 template <class A>
-RouteTableReader<A>::RouteTableReader(const list <RibInTable<A>*>& ribins) 
+RouteTableReader<A>::RouteTableReader(const list <RibInTable<A>*>& ribins,
+				      const IPNet<A>& /*prefix*/)
 {
     typename list <RibInTable<A>*>::const_iterator i;
     for(i = ribins.begin(); i != ribins.end(); i++) {

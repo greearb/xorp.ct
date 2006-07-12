@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.92 2006/04/14 18:49:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.93 2006/04/15 07:10:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -228,16 +228,16 @@ BGPPlumbing::get_prefix_count(const PeerHandler *peer_handler)
 
 template<>
 uint32_t 
-BGPPlumbing::create_route_table_reader<IPv4>(IPv4 /*dummy*/) 
+BGPPlumbing::create_route_table_reader<IPv4>(const IPNet<IPv4>& prefix)
 {
-    return plumbing_ipv4().create_route_table_reader();
+    return plumbing_ipv4().create_route_table_reader(prefix);
 }
 
 template<>
 uint32_t 
-BGPPlumbing::create_route_table_reader<IPv6>(IPv6 /*dummy*/)
+BGPPlumbing::create_route_table_reader<IPv6>(const IPNet<IPv6>& prefix)
 {
-    return plumbing_ipv6().create_route_table_reader();
+    return plumbing_ipv6().create_route_table_reader(prefix);
 }
 
 bool 
@@ -1283,7 +1283,7 @@ BGPPlumbingAF<A>::ribin_list() const
 
 template <class A>
 uint32_t 
-BGPPlumbingAF<A>::create_route_table_reader()
+BGPPlumbingAF<A>::create_route_table_reader(const IPNet<A>& prefix)
 {
     //Generate a new token that can't clash with any in use, even if
     //the space wraps.
@@ -1293,7 +1293,8 @@ BGPPlumbingAF<A>::create_route_table_reader()
 	_max_reader_token++;
     }
 
-    RouteTableReader<A> *new_reader = new RouteTableReader<A>(ribin_list());
+    RouteTableReader<A> *new_reader = new RouteTableReader<A>(ribin_list(),
+							      prefix);
     _route_table_readers[_max_reader_token] = new_reader;
     return _max_reader_token;
 }

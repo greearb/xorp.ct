@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.75 2006/05/01 09:17:10 pavlin Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.76 2006/06/21 23:36:32 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1838,14 +1838,14 @@ BGPMain::withdraw_route(const IPv6Net& nlri, const bool& unicast,
 }
 
 template <> 
-BGPMain::RoutingTableToken& 
+BGPMain::RoutingTableToken<IPv4>& 
 BGPMain::get_token_table<IPv4>()
 {
     return _table_ipv4;
 }
 
 template <>
-BGPMain::RoutingTableToken&
+BGPMain::RoutingTableToken<IPv6>&
 BGPMain::get_token_table<IPv6>()
 {
     return _table_ipv6;

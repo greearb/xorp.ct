@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_reader.hh,v 1.8 2005/08/18 15:58:07 bms Exp $
+// $XORP: xorp/bgp/route_table_reader.hh,v 1.9 2006/03/16 00:03:35 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_READER_HH__
 #define __BGP_ROUTE_TABLE_READER_HH__
@@ -60,7 +60,8 @@ template <class A>
 class RouteTableReader {
 public:
     typedef typename BgpTrie<A>::iterator trie_iterator;
-    RouteTableReader(const list <RibInTable<A>*>& ribins);
+    RouteTableReader(const list <RibInTable<A>*>& ribins,
+		     const IPNet<A>& prefix);
     bool get_next(const SubnetRoute<A>*& route, IPv4& peer_id);
 private:
     set <ReaderIxTuple<A>*> _peer_readers;

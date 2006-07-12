@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp.hh,v 1.60 2006/04/14 03:20:01 pavlin Exp $
+// $XORP: xorp/bgp/bgp.hh,v 1.61 2006/04/15 07:10:35 atanu Exp $
 
 #ifndef __BGP_MAIN_HH__
 #define __BGP_MAIN_HH__
@@ -675,8 +675,9 @@ public:
 
     template <typename A>
     bool get_route_list_start(uint32_t& token,
-			       const bool& unicast,
-			       const bool& multicast);
+			      const IPNet<A>& prefix,
+			      const bool& unicast,
+			      const bool& multicast);
 
     template <typename A>
     bool get_route_list_next(
@@ -950,25 +951,28 @@ private:
 
     /**
      * Token generator to map between unicast and multicast.
-     *
      */
-    struct RoutingTableToken {
+    template <typename A>
+    class RoutingTableToken {
+    public:
 	RoutingTableToken() : _last(0)
 	{}
 
-	uint32_t create(uint32_t& internal_token, const bool& unicast,
-			const bool& multicast) {
+	uint32_t create(uint32_t& internal_token, const IPNet<A>& prefix,
+			const bool& unicast, const bool& multicast) {
 
 	    while(_tokens.find(_last) != _tokens.end())
 		_last++;
 		
-	    _tokens[_last] = WhichTable(internal_token, unicast, multicast);
+	    _tokens[_last] = WhichTable(internal_token, prefix,
+					unicast, multicast);
 
 	    return _last;
 	}
 	
-	bool lookup(uint32_t& token, bool& unicast, bool& multicast) {
-	    map <uint32_t, WhichTable>::iterator i;
+	bool lookup(uint32_t& token, IPNet<A>& prefix,
+		    bool& unicast, bool& multicast) {
+	    typename map <uint32_t, WhichTable>::iterator i;
 
 	    i = _tokens.find(token);
 	    if (i == _tokens.end())
@@ -977,6 +981,7 @@ private:
 	    WhichTable t = i->second;
 
 	    token = t._token;
+	    prefix = t._prefix;
 	    unicast = t._unicast;
 	    multicast = t._multicast;
 
@@ -990,10 +995,13 @@ private:
     private:
 	struct WhichTable {
 	    WhichTable() {}
-	    WhichTable(uint32_t token, bool unicast, bool multicast)
-		: _token(token), _unicast(unicast), _multicast(multicast)
+	    WhichTable(uint32_t token, IPNet<A> prefix,
+		       bool unicast, bool multicast)
+		: _token(token), _prefix(prefix),
+		  _unicast(unicast), _multicast(multicast)
 							       {}
 	    uint32_t _token;
+	    IPNet<A> _prefix;
 	    bool _unicast;
 	    bool _multicast;
 	};
@@ -1002,10 +1010,10 @@ private:
 	uint32_t _last;
     };
 
-    template <typename A> RoutingTableToken& get_token_table();
+    template <typename A> RoutingTableToken<A>& get_token_table();
 
-    RoutingTableToken _table_ipv4;
-    RoutingTableToken _table_ipv6;
+    RoutingTableToken<IPv4> _table_ipv4;
+    RoutingTableToken<IPv6> _table_ipv6;
 
     XrlBgpTarget *_xrl_target;
     RibIpcHandler *_rib_ipc_handler;
@@ -1034,21 +1042,20 @@ private:
 template <typename A>
 bool
 BGPMain::get_route_list_start(uint32_t& token,
-				 const bool& unicast,
-				 const bool& multicast)
+			      const IPNet<A>& prefix,
+			      const bool& unicast,
+			      const bool& multicast)
 {
-    A dummy;
-
     if (unicast) {
-	token = _plumbing_unicast->create_route_table_reader(dummy);
+	token = _plumbing_unicast->create_route_table_reader(prefix);
     } else if (multicast) {
-	token = _plumbing_multicast->create_route_table_reader(dummy);
+	token = _plumbing_multicast->create_route_table_reader(prefix);
     } else {
 	XLOG_ERROR("Must specify at least one of unicast or multicast");
 	return false;
     }
 
-    token = get_token_table<A>().create(token, unicast, multicast);
+    token = get_token_table<A>().create(token, prefix, unicast, multicast);
 
     return true;
 }
@@ -1139,13 +1146,13 @@ BGPMain::get_route_list_next(
 			      bool& unicast_global,
 			      bool& multicast_global)
 {
+    IPNet<A> prefix;
     bool unicast, multicast;
     uint32_t internal_token, global_token;
     internal_token = global_token = token;
 
-    A dummy;
-
-    if (!get_token_table<A>().lookup(internal_token, unicast, multicast))
+    if (!get_token_table<A>().lookup(internal_token, prefix,
+				     unicast, multicast))
 	return false;
 
     const SubnetRoute<A>* route;
@@ -1170,9 +1177,9 @@ BGPMain::get_route_list_next(
 	get_token_table<A>().erase(global_token);
 	if (multicast) {
 	    internal_token =
-		_plumbing_multicast->create_route_table_reader(dummy);
+		_plumbing_multicast->create_route_table_reader(prefix);
 	    global_token = get_token_table<A>().
-		create(internal_token, false, true);
+		create(internal_token, prefix, false, true);
 	}
     }
     if (multicast) {
