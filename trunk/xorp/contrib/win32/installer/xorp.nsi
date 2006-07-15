@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.3 2006/03/08 19:44:25 bms Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.4 2006/03/16 20:30:37 bms Exp $
  */
 
 !include LogicLib.nsh
@@ -18,7 +18,7 @@
 !define DO_SPLASH
 
 !define PRODUCT_NAME		"XORP (Debug)"
-!define PRODUCT_VERSION		"1.2"
+!define PRODUCT_VERSION		"1.3-RC1"
 !define PRODUCT_URL		"http://www.xorp.org/"
 !define PRODUCT_HELP_URL	"mailto:feedback@xorp.org"
 !define PRODUCT_PUBLISHER	"ICIR"
@@ -45,7 +45,7 @@
 !define DLLDIR		"C:\MinGW\bin"
 
 # XXX: Set this to the Windows-style path of your source build directory.
-!define SRCDIR		"C:\cvs\xorp"
+!define SRCDIR		"U:\xorp"
 
 # XXX
 !define TMPDIR		"C:\windows\temp"
@@ -138,7 +138,7 @@ Section "-Base"
   File /oname=BUGS.txt ${SRCDIR}\BUGS
   File /oname=BUILD_NOTES.txt ${SRCDIR}\BUILD_NOTES
   File /oname=ERRATA.txt ${SRCDIR}\ERRATA
-  File /oname=LICENSE.txt ${SRCDIR}\LICENSE               
+  File /oname=LICENSE.txt ${SRCDIR}\LICENSE
   File /oname=README.txt ${SRCDIR}\README
   File /oname=RELEASE_NOTES.txt ${SRCDIR}\RELEASE_NOTES
   File /oname=TODO.txt ${SRCDIR}\TODO
