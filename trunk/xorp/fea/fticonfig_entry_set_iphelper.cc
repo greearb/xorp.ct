@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.10 2006/03/30 19:23:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_iphelper.cc,v 1.11 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -226,7 +226,7 @@ FtiConfigEntrySetIPHelper::add_entry(const FteX& fte)
 	ipfwdrow.dwForwardMetric3 = ipfwdrow.dwForwardMetric4 =
 	ipfwdrow.dwForwardMetric5 = MIB_IPROUTE_METRIC_UNUSED;
 #endif
-#if 1
+#if 0 // XXX: Not enough arguments in debug_msg for this debugging message:
     XLOG_INFO("ipfwdrow: %08lx/%08lx pol %lu nh %08lx index %lu t %lu p %lu a %lu as %lu metrics %lu %lu %lu %lu %lu", ipfwdrow.dwForwardDest, ipfwdrow.dwForwardMask, ipfwdrow.dwForwardPolicy, ipfwdrow.dwForwardNextHop, ipfwdrow.dwForwardIfIndex, ipfwdrow.dwForwardType, ipfwdrow.dwForwardProto, ipfwdrow.dwForwardAge, ipfwdrow.dwForwardNextHopAS, ipfwdrow.dwForwardMetric1, ipfwdrow.dwForwardMetric2, ipfwdrow.dwForwardMetric3, ipfwdrow.dwForwardMetric4, ipfwdrow.dwForwardMetric5);
 #endif
 
