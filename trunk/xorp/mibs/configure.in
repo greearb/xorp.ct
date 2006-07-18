@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.13 2006/02/18 01:34:39 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.14 2006/03/08 02:23:22 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.13 2006/02/18 01:34:39 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.14 2006/03/08 02:23:22 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -546,42 +546,6 @@ AC_LANG_CPLUSPLUS
 dnl ---------------------------------------------------------------------------
 dnl Check for system services
 dnl ---------------------------------------------------------------------------
-
-dnl-----------------------------
-dnl Check for IPv6
-dnl-----------------------------
-ipv6=no
-AC_MSG_CHECKING(whether the system has IPv6 stack)
-if test "${enable_ipv6}" = "no"; then
-  AC_MSG_RESULT(disabled)
-else
-  AC_LANG_SAVE
-  AC_LANG_C
-  AC_TRY_RUN([ /* AF_INET6 available check */
-#include <stdlib.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-main()
-{
- if (socket(AF_INET6, SOCK_STREAM, 0) < 0)
-   return (1);
- else
-   return (0);
-}
-],
-  [AC_MSG_RESULT(yes)
-   ipv6=yes],
-  [AC_MSG_RESULT(no)],
-  [AC_MSG_RESULT(no)])
-  AC_LANG_RESTORE
-fi
-
-dnl
-dnl Misc. IPv6-specific checks
-dnl
-if test "${ipv6}" = "yes"; then
-  builtin(include, ../config/acipv6.m4)
-fi
 
 
 dnl ---------------------------------------------------------------------------
