@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acifconf.m4,v 1.1 2005/05/05 19:38:31 bms Exp $
+dnl $XORP: xorp/config/acifconf.m4,v 1.2 2006/05/02 01:45:07 pavlin Exp $
 dnl
 
 dnl
@@ -33,7 +33,7 @@ AC_CHECK_HEADER(sys/sockio.h,
   [test_sys_sockio_h="#include <sys/sockio.h>"],
   [test_sys_sockio_h=""])
 AC_MSG_CHECKING(whether the system has ioctl(SIOCGIFCONF) interface read)
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -41,7 +41,8 @@ AC_TRY_RUN([
 ${test_sys_sockio_h}
 #include <sys/ioctl.h>
 #include <net/if.h>
-main()
+],
+[
 {
     int sock, lastlen;
     struct ifconf ifconf;
@@ -75,7 +76,6 @@ main()
   [AC_DEFINE(HAVE_IOCTL_SIOCGIFCONF, 1,
 	[Define to 1 if you have ioctl(SIOCGIFCONF) interface read method])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 
 dnl ------------------------------------
@@ -83,14 +83,14 @@ dnl Check for sysctl(NET_RT_IFLIST) interface read
 dnl ------------------------------------
 
 AC_MSG_CHECKING(whether the system has sysctl(NET_RT_IFLIST) interface read)
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>
-
-main()
+],
+[
 {
     size_t buflen;
     /* Interface list and routing table dump MIBs */
@@ -105,7 +105,6 @@ main()
   [AC_DEFINE(HAVE_SYSCTL_NET_RT_IFLIST, 1,
 	[Define to 1 if you have sysctl(NET_RT_IFLIST) interface read method])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 
 dnl ------------------------------------
@@ -113,14 +112,14 @@ dnl Check for sysctl(NET_RT_DUMP) routing table read
 dnl ------------------------------------
 
 AC_MSG_CHECKING(whether the system has sysctl(NET_RT_DUMP) routing table read)
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #include <sys/socket.h>
-
-main()
+],
+[
 {
     size_t buflen;
     /* Interface list and routing table dump MIBs */
@@ -135,10 +134,8 @@ main()
   [AC_DEFINE(HAVE_SYSCTL_NET_RT_DUMP, 1,
 	[Define to 1 if you have sysctl(NET_RT_DUMP) routing table read method])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 
 
 AC_LANG_POP(C)
-
 AC_CACHE_SAVE

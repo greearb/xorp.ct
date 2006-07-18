@@ -5081,30 +5081,46 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5113,15 +5129,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -5154,30 +5167,46 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5186,15 +5215,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -5229,30 +5255,46 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS ${NETSNMPCFLAGS}"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"${NETSNMPCFLAGS}\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -5261,15 +5303,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7345,30 +7384,46 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7377,15 +7432,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7418,30 +7470,46 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7450,15 +7518,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7495,30 +7560,46 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7527,15 +7608,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7568,30 +7646,46 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7600,15 +7694,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7641,30 +7732,46 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7673,15 +7780,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7716,30 +7820,46 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   CFLAGS="$CFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7748,15 +7868,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_c_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_c_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
@@ -7789,30 +7906,46 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   CXXFLAGS="$CXXFLAGS $ac_flag"
   echo "$as_me:$LINENO: checking whether C++ compiler supports flag \"$ac_flag\"" >&5
 echo $ECHO_N "checking whether C++ compiler supports flag \"$ac_flag\"... $ECHO_C" >&6
-  if test "$cross_compiling" = yes; then
-  { { echo "$as_me:$LINENO: error: cannot run test program while cross compiling" >&5
-echo "$as_me: error: cannot run test program while cross compiling" >&2;}
-   { (exit 1); exit 1; }; }
-else
   cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 #include "confdefs.h"
 
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+
+#ifdef F77_DUMMY_MAIN
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int F77_DUMMY_MAIN() { return 1; }
+#endif
 int
-main(int argc, char **argv)
+main ()
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+
+{
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
 
+  ;
+  return 0;
+}
 _ACEOF
-rm -f conftest$ac_exeext
+rm -f conftest.$ac_objext conftest$ac_exeext
 if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   (eval $ac_link) 2>&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && { ac_try='./conftest$ac_exeext'
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
   { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
   (eval $ac_try) 2>&5
   ac_status=$?
@@ -7821,15 +7954,12 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   eval "ac_cv_prog_cxx_compiler_$ac_safe=yes"
 
 else
-  echo "$as_me: program exited with status $ac_status" >&5
-echo "$as_me: failed program was:" >&5
+  echo "$as_me: failed program was:" >&5
 cat conftest.$ac_ext >&5
-( exit $ac_status )
 eval "ac_cv_prog_cxx_compiler_$ac_safe=no"
 
 fi
-rm -f core core.* *.core conftest$ac_exeext conftest.$ac_objext conftest.$ac_ext
-fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
   CXXFLAGS="$_save_flags"
   ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'

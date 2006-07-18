@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.2 2005/08/18 15:21:57 bms Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.3 2006/04/03 04:19:39 pavlin Exp $
 dnl
 
 dnl
@@ -158,14 +158,15 @@ dnl Check for RFC2367 compliant key sockets (PF_KEY_V2)
 dnl ---------------------------------------------------
 
 AC_MSG_CHECKING(whether the system has key sockets (PF_KEY_V2))
-AC_TRY_RUN([
+AC_TRY_COMPILE([
 #include <stdlib.h>
 #include <errno.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <net/route.h>
 #include <net/pfkeyv2.h>
-main()
+],
+[
 {
   int sock;
 
@@ -176,9 +177,8 @@ main()
 }
 ],
   [AC_DEFINE(HAVE_KEY_SOCKETS, 1,
-[Define to 1 if you have RFC2367 key sockets (PF_KEY_V2)])
+	[Define to 1 if you have RFC2367 key sockets (PF_KEY_V2)])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)],
   [AC_MSG_RESULT(no)])
 
 

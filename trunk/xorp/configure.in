@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.169 2006/06/20 17:02:56 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.170 2006/06/29 11:03:51 bms Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.2], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.169 2006/06/20 17:02:56 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.170 2006/06/29 11:03:51 bms Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -719,9 +719,16 @@ dnl ---------------------------------------------------------------------------
 dnl Check whether the system has va_copy()
 AC_LANG_PUSH(C)
 AC_MSG_CHECKING(whether the build environment has va_copy() support)
-AC_TRY_RUN([
+AC_TRY_LINK([
 #include <stdio.h>
 #include <stdarg.h>
+
+/*
+ * XXX: If we are using the autoconf macros to test-compile or test-link,
+ * the main body we are trying to compile/link is automatically wrapped
+ * within "main() { ... }", hence we have to move the foo() function to the
+ * section with the header files.
+ */
 void
 foo(const char *format, ...)
 {
@@ -731,8 +738,8 @@ foo(const char *format, ...)
     va_copy(ap_copy, ap);
     va_end(ap);
 }
-int
-main()
+],
+[
 {
     foo("%s %s", "my_foo", "my_bar");
     return (0);
@@ -741,7 +748,7 @@ main()
   [AC_DEFINE(HAVE_VA_COPY, 1,
 	[Define to 1 if the host has va_copy() support in the build environment])
    AC_MSG_RESULT(yes)],
-  [AC_MSG_RESULT(no)])
+ [AC_MSG_RESULT(no)])
 AC_LANG_POP(C)
 
 dnl ---------------------------------------------------------------------------
