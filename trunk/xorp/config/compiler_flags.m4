@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/compiler_flags.m4,v 1.8 2006/06/09 06:25:33 pavlin Exp $
+dnl $XORP: xorp/config/compiler_flags.m4,v 1.9 2006/06/09 06:39:08 pavlin Exp $
 dnl
 
 dnl
@@ -16,11 +16,19 @@ AC_DEFUN([XR_CHECK_CFLAG],
   _save_flags="$CFLAGS"
   CFLAGS="$CFLAGS $1"
   AC_MSG_CHECKING([whether C compiler supports flag "$1"])
-  AC_TRY_RUN([
-int
-main(int argc, char **argv)
+  AC_TRY_LINK([
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+],
+[
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
@@ -80,11 +88,19 @@ AC_DEFUN([XR_CHECK_CXXFLAG],
   _save_flags="$CXXFLAGS"
   CXXFLAGS="$CXXFLAGS $1"
   AC_MSG_CHECKING([whether C++ compiler supports flag "$1"])
-  AC_TRY_RUN([
-int
-main(int argc, char **argv)
+  AC_TRY_LINK([
+/*
+ * XXX: Here we have to add a prototype for main(), otherwise
+ * testing for the -Wstrict-prototypes C compiler fiag might fail on
+ * compilers like gcc-3.4.
+ */
+int main(void);
+],
+[
 {
-	if (sizeof(argc) + sizeof(argv) == 0)
+	int foo = 0;
+	int bar = 0;
+	if (sizeof(foo) + sizeof(bar) == 0)
 		return (1);
 	return (0);
 }
