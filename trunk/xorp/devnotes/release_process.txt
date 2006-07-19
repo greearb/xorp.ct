@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.46 2006/04/19 18:22:20 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.47 2006/07/19 04:10:06 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -340,7 +340,8 @@ the login shell is csh or tcsh):
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
- # See xorp/contrib/win32/installer/README for instructions.
+ # See xorp/devnotes/windows-release-process.txt and
+ # xorp/contrib/win32/installer/README for instructions.
 
 ========================================================================
 2500.	TASK: Copy the tarballs to the web server
@@ -379,20 +380,22 @@ the login shell is csh or tcsh):
 2600.	TASK: Update the links in the web server to the current release
 	WHO:  Release manager
 	WHEN: Release time
+	MISC: Should be omitted for a release candidate.
 	COMMANDS:
  # Commands continue from the previous task
  cd ..
  rm current; ln -s $ReleaseVersion current
 
 ========================================================================
-2625.	TASK: Calculate the MD5 checksums
+2625.	TASK: Calculate the MD5 checksums and the LiveCD size
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
  # Commands continue from the previous task
- cd current
+ cd $ReleaseVersion
  md5 LiveCD.iso.gz
  md5 xorp-$ReleaseVersion.tar.gz
+ ls -lAFgh LiveCD.iso.gz
 
 ========================================================================
 2650.	TASK: Update the Web pages with the MD5 checksums calculated above
@@ -455,6 +458,8 @@ the login shell is csh or tcsh):
 	      and/or xorp-users@xorp.org about the new release 
 	WHO:  XORP project leader
 	WHEN: Right after the release
+	MISC: If this is a release candidate, then send the email
+              only to xorp-hackers@xorp.org and xorp-users@xorp.org
 
 ========================================================================
 2920.	TASK: Add a Bugzilla "Version" entry for the new version.
@@ -465,12 +470,14 @@ the login shell is csh or tcsh):
 	      - "Edit product: XORP"
 	      - "Edit versions:" (at the bottom of the page)
 	      - "Edit version ...: Add a new version"
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2950.	TASK: Update the FreshMeat XORP entry:
                http://freshmeat.net/projects/xorp/
 	WHO:  Release manager
 	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
@@ -482,6 +489,7 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 	MISC: Note that currently there is no XORP port entry for FreeBSD,
 	      hence this task applies once the entry has been created.
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2960.	TASK: Contact the NetBSD maintainer of net/xorp to update the
@@ -492,9 +500,9 @@ the login shell is csh or tcsh):
 	      If the maintainer's email address is generic, then the following
 	      form can be used to submit the request:
 	      http://www.netbsd.org/cgi-bin/sendpr.cgi?gndb=netbsd
-
 	WHO:  Release manager
 	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2965.	TASK: Contact the OpenBSD maintainer of net/xorp to update the
@@ -504,6 +512,7 @@ the login shell is csh or tcsh):
 	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
 	WHO:  Release manager
 	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2970.	TASK: Update the LinuxLinks XORP entry (if necessary):
@@ -511,6 +520,7 @@ the login shell is csh or tcsh):
 	       http://www.linuxlinks.com/portal/cgi-bin/modify.cgi
 	WHO:  Release manager
 	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 3000.	TASK: Start the XORP tinderbox crontab job (only if it was
