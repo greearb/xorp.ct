@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.45 2006/03/09 08:04:12 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.46 2006/04/19 18:22:20 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -51,8 +51,9 @@ the login shell is csh or tcsh):
 0500.	TASK: Update the documentation in xorp/docs
 	WHO:  Everyone
 	WHEN: 7 days - 1 day before the release date
-	MISC: After a document is reviewed, bump-up Version in the
-	      front-page to correspond to the new release version.
+	MISC: - After a document is reviewed, bump-up Version in the
+	        front-page to correspond to the new release version.
+              - Can be omitted for a release candidate.
 	COMMANDS:
  # Commands to verify the Version.
  cd xorp/docs
@@ -130,29 +131,43 @@ the login shell is csh or tcsh):
 	MISC: - Update the documentation index Web page in
 		www/html_src/design_docs.html
 		by modifying the documents version, date and URLs.
+                This can be omitted for a release candidate.
 	      - Add an entry for the new release to
                 www/html_src/downloads.html
 		(set the definition for Release tag to $ReleaseTag as
-		defined later).
+		defined later in this document).
 		Move the previous release to the list of earlier releases,
 		and in the process delete its "Overview" URL in the
 		Documentation column.
 		Also, update the status on that page.
+                However, if the new entry is a release candidate,
+                uncomment and update the "Release Candidate" section, but
+                keep the original "Latest Release" section.
 	      - Update www/html_src/getting_started.html with information
 		about supported operating systems, compilers, and XORP
 		configuration.
+                This can be omitted for a release candidate.
 	      - Update www/html_src/index.html
 		Modify all references to the most recent version and
 		its release date, etc.
+                However, if the new entry is a release candidate,
+                uncomment and update the "Release Candidate" section, but
+                keep the original "Latest Release" section.
 	      - If necessary, update www/html_src/license.html with a new
 		copyright year.
-	      - If necessary, update www/html_src/livecd.html
-                E.g., update the XORP Version used in the LiveCD, if necessary.
+	      - Update www/html_src/livecd.html with information about the
+                XORP Version used in the LiveCD.
+                However, if the new entry is a release candidate,
+                uncomment and update the "Release Candidate" section, but
+                keep the original "Latest Release" section.
 	      - Add a news item to news.html
 	      - If necessary, update www/html_src/porting.html
+                This can be omitted for a release candidate.
 	      - If necessary, update www/html_src/snmp.html
+                This can be omitted for a release candidate.
 	      - Update the date and release version in
 		www/html_src/status.html
+                This can be omitted for a release candidate.
 	      - Edit the following files and remove all temporary notes
 	        about platforms that are supported only in XORP-current:
 	        www/html_src/dowloads.html, html_src/getting_started.html
@@ -214,6 +229,7 @@ the login shell is csh or tcsh):
 	      xorp/docs to be set to the release date
 	WHO:  Release manager
 	WHEN: 1 day before the release date
+	MISC: - Can be omitted for a release candidate.
  # Commands to verify the date.
  cd xorp/docs
  egrep '\\date' */*.tex
