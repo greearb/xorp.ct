@@ -1,7 +1,7 @@
 #!/bin/sh -
 
 #
-# $XORP: other/LiveCD/livecd.sh,v 1.14 2006/03/09 20:51:11 pavlin Exp $
+# $XORP: other/LiveCD/livecd.sh,v 1.15 2006/03/16 00:09:00 pavlin Exp $
 #
 
 # Copyright (c) 2004-2006 International Computer Science Institute
@@ -399,7 +399,7 @@ build_xorp() {
     cd $XORPSRCDIR || aviso
     dialog --title "XORP LiveCD" --infobox "Running XORP configure..." 5 60
     echo "running configure" >> $LIVEDIR/log
-    ./configure >> $LIVEDIR/log || aviso
+    ./configure --enable-optimize --disable-debug >> $LIVEDIR/log || aviso
     dialog --title "XORP LiveCD" --infobox "Running gmake..." 5 60
     echo "running gmake" >> $LIVEDIR/log
     gmake >> $LIVEDIR/log || aviso
