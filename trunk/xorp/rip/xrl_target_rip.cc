@@ -333,89 +333,75 @@ XrlRipTarget::rip_0_1_request_interval(const string&	ifn,
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_unsolicited_response_min_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						const uint32_t& t
-						)
+XrlRipTarget::rip_0_1_set_update_interval(const string&	ifn,
+					  const string&	vifn,
+					  const IPv4&	a,
+					  const uint32_t& t_secs)
 {
-    return _ct->ripx_0_1_set_unsolicited_response_min_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_update_interval(ifn, vifn, a, t_secs);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_unsolicited_response_min_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_update_interval(const string&	ifn,
+				      const string&	vifn,
+				      const IPv4&	a,
+				      uint32_t&		t_secs)
 {
-    return _ct->ripx_0_1_unsolicited_response_min_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_update_interval(ifn, vifn, a, t_secs);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_unsolicited_response_max_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						const uint32_t& t
-						)
+XrlRipTarget::rip_0_1_set_update_jitter(const string&	ifn,
+					const string&	vifn,
+					const IPv4&	a,
+					const uint32_t& t_jitter)
 {
-    return _ct->ripx_0_1_set_unsolicited_response_max_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_update_jitter(ifn, vifn, a, t_jitter);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_unsolicited_response_max_seconds(const string&	ifn,
-						       const string&	vifn,
-						       const IPv4&	a,
-						       uint32_t&	t)
+XrlRipTarget::rip_0_1_update_jitter(const string&	ifn,
+				    const string&	vifn,
+				    const IPv4&		a,
+				    uint32_t&		t_jitter)
 {
-    return _ct->ripx_0_1_unsolicited_response_max_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_update_jitter(ifn, vifn, a, t_jitter);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_triggered_update_min_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						const uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_set_triggered_update_delay(const string&	ifn,
+						 const string&	vifn,
+						 const IPv4&	a,
+						 const uint32_t& t_secs)
 {
-    return _ct->ripx_0_1_set_triggered_update_min_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_triggered_update_delay(ifn, vifn, a, t_secs);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_triggered_update_min_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_triggered_update_delay(const string&	ifn,
+					     const string&	vifn,
+					     const IPv4&	a,
+					     uint32_t&		t_secs)
 {
-    return _ct->ripx_0_1_triggered_update_min_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_triggered_update_delay(ifn, vifn, a, t_secs);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_set_triggered_update_max_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						const uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_set_triggered_update_jitter(const string&	ifn,
+						  const string&	vifn,
+						  const IPv4&	a,
+						  const uint32_t& t_jitter)
 {
-    return _ct->ripx_0_1_set_triggered_update_max_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_set_triggered_update_jitter(ifn, vifn, a, t_jitter);
 }
 
 XrlCmdError
-XrlRipTarget::rip_0_1_triggered_update_max_seconds(
-						const string&	ifn,
-						const string&	vifn,
-						const IPv4&	a,
-						uint32_t&	t
-						)
+XrlRipTarget::rip_0_1_triggered_update_jitter(const string&	ifn,
+					      const string&	vifn,
+					      const IPv4&	a,
+					      uint32_t&		t_jitter)
 {
-    return _ct->ripx_0_1_triggered_update_max_seconds(ifn, vifn, a, t);
+    return _ct->ripx_0_1_triggered_update_jitter(ifn, vifn, a, t_jitter);
 }
 
 XrlCmdError

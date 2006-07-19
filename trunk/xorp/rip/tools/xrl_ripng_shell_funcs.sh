@@ -405,91 +405,91 @@ ripng_ripng_request_interval()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_unsolicited_response_min_seconds()
+ripng_ripng_set_update_interval()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_unsolicited_response_min_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_update_interval <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_unsolicited_response_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_update_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_unsolicited_response_min_seconds()
+ripng_ripng_update_interval()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_unsolicited_response_min_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_update_interval <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/unsolicited_response_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/update_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_unsolicited_response_max_seconds()
+ripng_ripng_set_update_jitter()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_unsolicited_response_max_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_update_jitter <ifname:txt> <vifname:txt> <addr:ipv6> <t_jitter:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_unsolicited_response_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_jitter:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_unsolicited_response_max_seconds()
+ripng_ripng_update_jitter()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_unsolicited_response_max_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_update_jitter <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/unsolicited_response_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_triggered_update_min_seconds()
+ripng_ripng_set_triggered_update_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_triggered_update_min_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_triggered_update_delay <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_triggered_update_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_triggered_update_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_triggered_update_min_seconds()
+ripng_ripng_triggered_update_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_triggered_update_min_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_triggered_update_delay <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/triggered_update_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/triggered_update_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_set_triggered_update_max_seconds()
+ripng_ripng_set_triggered_update_jitter()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: ripng_ripng_set_triggered_update_max_seconds <ifname:txt> <vifname:txt> <addr:ipv6> <t_secs:u32>"
+        echo "Usage: ripng_ripng_set_triggered_update_jitter <ifname:txt> <vifname:txt> <addr:ipv6> <t_jitter:u32>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/set_triggered_update_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_secs:u32=$4"
+    XRL="finder://ripng/ripng/0.1/set_triggered_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3&t_jitter:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-ripng_ripng_triggered_update_max_seconds()
+ripng_ripng_triggered_update_jitter()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: ripng_ripng_triggered_update_max_seconds <ifname:txt> <vifname:txt> <addr:ipv6>"
+        echo "Usage: ripng_ripng_triggered_update_jitter <ifname:txt> <vifname:txt> <addr:ipv6>"
         exit 1
     fi
 
-    XRL="finder://ripng/ripng/0.1/triggered_update_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
+    XRL="finder://ripng/ripng/0.1/triggered_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv6=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 

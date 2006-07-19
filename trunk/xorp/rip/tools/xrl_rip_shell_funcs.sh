@@ -405,91 +405,91 @@ rip_rip_request_interval()
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_unsolicited_response_min_seconds()
+rip_rip_set_update_interval()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_unsolicited_response_min_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_update_interval <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_unsolicited_response_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_update_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_unsolicited_response_min_seconds()
+rip_rip_update_interval()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_unsolicited_response_min_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_update_interval <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/unsolicited_response_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/update_interval?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_unsolicited_response_max_seconds()
+rip_rip_set_update_jitter()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_unsolicited_response_max_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_update_jitter <ifname:txt> <vifname:txt> <addr:ipv4> <t_jitter:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_unsolicited_response_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_jitter:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_unsolicited_response_max_seconds()
+rip_rip_update_jitter()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_unsolicited_response_max_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_update_jitter <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/unsolicited_response_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_triggered_update_min_seconds()
+rip_rip_set_triggered_update_delay()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_triggered_update_min_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_triggered_update_delay <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_triggered_update_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_triggered_update_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_triggered_update_min_seconds()
+rip_rip_triggered_update_delay()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_triggered_update_min_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_triggered_update_delay <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/triggered_update_min_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/triggered_update_delay?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_set_triggered_update_max_seconds()
+rip_rip_set_triggered_update_jitter()
 {
     if [ $# -ne 4 ] ; then
-        echo "Usage: rip_rip_set_triggered_update_max_seconds <ifname:txt> <vifname:txt> <addr:ipv4> <t_secs:u32>"
+        echo "Usage: rip_rip_set_triggered_update_jitter <ifname:txt> <vifname:txt> <addr:ipv4> <t_jitter:u32>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/set_triggered_update_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_secs:u32=$4"
+    XRL="finder://rip/rip/0.1/set_triggered_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3&t_jitter:u32=$4"
     call_xrl_wrapper -p all "${XRL}"
 }
 
-rip_rip_triggered_update_max_seconds()
+rip_rip_triggered_update_jitter()
 {
     if [ $# -ne 3 ] ; then
-        echo "Usage: rip_rip_triggered_update_max_seconds <ifname:txt> <vifname:txt> <addr:ipv4>"
+        echo "Usage: rip_rip_triggered_update_jitter <ifname:txt> <vifname:txt> <addr:ipv4>"
         exit 1
     fi
 
-    XRL="finder://rip/rip/0.1/triggered_update_max_seconds?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
+    XRL="finder://rip/rip/0.1/triggered_update_jitter?ifname:txt=$1&vifname:txt=$2&addr:ipv4=$3"
     call_xrl_wrapper -p all "${XRL}"
 }
 

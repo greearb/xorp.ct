@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_common.hh,v 1.26 2006/03/30 02:21:15 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_common.hh,v 1.27 2006/07/12 07:25:48 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_COMMON_HH__
 #define __RIP_XRL_TARGET_COMMON_HH__
@@ -179,54 +179,52 @@ public:
 			      uint32_t&		t_secs);
 
     XrlCmdError
-    ripx_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
-						  const string&	vifname,
-						  const A&	addr,
-						  const uint32_t& t_secs);
+    ripx_0_1_set_update_interval(const string&	ifname,
+				 const string&	vifname,
+				 const A&	addr,
+				 const uint32_t& t_secs);
 
     XrlCmdError
-    ripx_0_1_unsolicited_response_min_seconds(const string&	ifname,
-					      const string&	vifname,
-					      const A&		addr,
-					      uint32_t&		t_secs);
+    ripx_0_1_update_interval(const string&	ifname,
+			     const string&	vifname,
+			     const A&		addr,
+			     uint32_t&		t_secs);
 
     XrlCmdError
-    ripx_0_1_set_unsolicited_response_max_seconds(
-					const string&	ifname,
+    ripx_0_1_set_update_jitter(const string&	ifname,
+			       const string&	vifname,
+			       const A&	addr,
+			       const uint32_t&	t_jitter);
+
+    XrlCmdError
+    ripx_0_1_update_jitter(const string&	ifname,
+			   const string&	vifname,
+			   const A&		addr,
+			   uint32_t&		t_secs);
+
+    XrlCmdError
+    ripx_0_1_set_triggered_update_delay(const string&	ifname,
 					const string&	vifname,
 					const A&	addr,
-					const uint32_t&	t_secs
-					);
+					const uint32_t&	t_secs);
 
     XrlCmdError
-    ripx_0_1_unsolicited_response_max_seconds(const string&	ifname,
-					      const string&	vifname,
-					      const A&		addr,
-					      uint32_t&		t_secs);
+    ripx_0_1_triggered_update_delay(const string&	ifname,
+				    const string&	vifname,
+				    const A&		addr,
+				    uint32_t&		t_secs);
 
     XrlCmdError
-    ripx_0_1_set_triggered_update_min_seconds(const string&	ifname,
-					      const string&	vifname,
-					      const A&		addr,
-					      const uint32_t&	t_secs);
+    ripx_0_1_set_triggered_update_jitter(const string&	ifname,
+					 const string&	vifname,
+					 const A&	addr,
+					 const uint32_t& t_secs);
 
     XrlCmdError
-    ripx_0_1_triggered_update_min_seconds(const string&	ifname,
-					  const string&	vifname,
-					  const A&	addr,
-					  uint32_t&	t_secs);
-
-    XrlCmdError
-    ripx_0_1_set_triggered_update_max_seconds(const string&	ifname,
-					      const string&	vifname,
-					      const A&		addr,
-					      const uint32_t&	t_secs);
-
-    XrlCmdError
-    ripx_0_1_triggered_update_max_seconds(const string&	ifname,
-					  const string&	vifname,
-					  const A&	addr,
-					  uint32_t&	t_secs);
+    ripx_0_1_triggered_update_jitter(const string&	ifname,
+				     const string&	vifname,
+				     const A&		addr,
+				     uint32_t&		t_secs);
 
     XrlCmdError
     ripx_0_1_set_interpacket_delay(const string&	ifname,
@@ -850,102 +848,90 @@ XrlRipCommonTarget<A>::ripx_0_1_request_interval(
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_min_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_update_interval(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						const uint32_t& t
+						const uint32_t& t_secs
 						)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_min_secs, t, 1, 300,
+    PORT_TIMER_SET_HANDLER(update_interval, t_secs, 1, 600, dummy_timer);
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_update_interval(const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						uint32_t&	t_secs)
+{
+    PORT_TIMER_GET_HANDLER(update_interval, t_secs);
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_update_jitter(const string&	ifname,
+						  const string&	vifname,
+						  const A&	addr,
+						  const uint32_t& t_jitter)
+{
+    PORT_TIMER_SET_HANDLER(update_jitter, t_jitter, 0, 100, dummy_timer);
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_update_jitter(const string&	ifname,
+					      const string&	vifname,
+					      const A&		addr,
+					      uint32_t&		t_jitter)
+{
+    PORT_TIMER_GET_HANDLER(update_jitter, t_jitter);
+}
+
+template <typename A>
+XrlCmdError
+XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_delay(
+						const string&	ifname,
+						const string&	vifname,
+						const A&	addr,
+						const uint32_t&	t_secs)
+{
+    PORT_TIMER_SET_HANDLER(triggered_update_delay, t_secs, 1, 10000,
 			   dummy_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_unsolicited_response_min_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_triggered_update_delay(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						uint32_t&	t
-						)
+						uint32_t&	t_secs)
 {
-    PORT_TIMER_GET_HANDLER(unsolicited_response_min_secs, t);
+    PORT_TIMER_GET_HANDLER(triggered_update_delay, t_secs);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_unsolicited_response_max_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_jitter(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						const uint32_t& t
-						)
+						const uint32_t&	t_jitter)
 {
-    PORT_TIMER_SET_HANDLER(unsolicited_response_max_secs, t, 1, 600,
+    PORT_TIMER_SET_HANDLER(triggered_update_jitter, t_jitter, 0, 100,
 			   dummy_timer);
 }
 
 template <typename A>
 XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_unsolicited_response_max_seconds(
+XrlRipCommonTarget<A>::ripx_0_1_triggered_update_jitter(
 						const string&	ifname,
 						const string&	vifname,
 						const A&	addr,
-						uint32_t&	t
-						)
+						uint32_t&	t_jitter)
 {
-    PORT_TIMER_GET_HANDLER(unsolicited_response_max_secs, t);
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_min_seconds(
-						const string&	ifname,
-						const string&	vifname,
-						const A&	addr,
-						const uint32_t&	t
-						)
-{
-    PORT_TIMER_SET_HANDLER(triggered_update_min_wait_secs, t, 1, 10000,
-			   dummy_timer);
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_triggered_update_min_seconds(
-						const string&	ifname,
-						const string&	vifname,
-						const A&	addr,
-						uint32_t&	t
-						)
-{
-    PORT_TIMER_GET_HANDLER(triggered_update_min_wait_secs, t);
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_set_triggered_update_max_seconds(
-						const string&	ifname,
-						const string&	vifname,
-						const A&	addr,
-						const uint32_t&	t
-						)
-{
-    PORT_TIMER_SET_HANDLER(triggered_update_max_wait_secs, t, 1, 10000,
-			   dummy_timer);
-}
-
-template <typename A>
-XrlCmdError
-XrlRipCommonTarget<A>::ripx_0_1_triggered_update_max_seconds(
-						const string&	ifname,
-						const string&	vifname,
-						const A&	addr,
-						uint32_t&	t
-						)
-{
-    PORT_TIMER_GET_HANDLER(triggered_update_max_wait_secs, t);
+    PORT_TIMER_GET_HANDLER(triggered_update_jitter, t_jitter);
 }
 
 template <typename A>

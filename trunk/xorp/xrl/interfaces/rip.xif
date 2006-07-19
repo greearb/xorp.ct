@@ -190,71 +190,74 @@ interface rip/0.1 {
 				-> t_secs:u32
 
     /**
-     * Set minimum period between the unsolicited sending of the routing
+     * Set period between the unsolicited sending of the routing
      * table from address.
      */
-    set_unsolicited_response_min_seconds  ? ifname:txt			\
-					  & vifname:txt			\
-					  & addr:ipv4			\
-					  & t_secs:u32
+    set_update_interval		? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_secs:u32
+
     /**
-     * Get minimum period between the unsolicited sending of the routing
+     * Get period between the unsolicited sending of the routing
      * table from address.
      */
-    unsolicited_response_min_seconds	? ifname:txt			\
-					& vifname:txt			\
-					& addr:ipv4			\
-					-> t_secs:u32
+    update_interval		? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_secs:u32
 
     /**
-     * Set maximum period between the unsolicited sending of the routing
-     * table from address.
+     * Set jitter between the unsolicited sending of the routing
+     * table from address (in percents of the period).
      */
-    set_unsolicited_response_max_seconds	? ifname:txt		\
-						& vifname:txt		\
-						& addr:ipv4		\
-						& t_secs:u32
+    set_update_jitter		? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_jitter:u32
 
     /**
-     * Get maximum period between the unsolicited sending of the routing
-     * table from address.
+     * Get jitter between the unsolicited sending of the routing
+     * table from address (in percents of the period).
      */
-    unsolicited_response_max_seconds  ?	ifname:txt			\
-					& vifname:txt			\
-					& addr:ipv4			\
-					-> t_secs:u32
+    update_jitter		? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_jitter:u32
 
     /**
-     * Set minimum period between sending triggered updates from address.
+     * Set period between sending triggered updates from address.
      */
-    set_triggered_update_min_seconds	? ifname:txt			\
-					& vifname:txt			\
-					& addr:ipv4			\
-					& t_secs:u32
+    set_triggered_update_delay	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_secs:u32
 
     /**
-     * Get minimum period between sending triggered updates from address.
+     * Get period between sending triggered updates from address.
      */
-    triggered_update_min_seconds	? ifname:txt			\
-					& vifname:txt			\
-					& addr:ipv4			\
-					-> t_secs:u32
+    triggered_update_delay	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_secs:u32
 
     /**
-     * Set maximum period between sending triggered updates from address.
+     * Set jitter between sending triggered updates from address
+     * (in percents of the period).
      */
-    set_triggered_update_max_seconds  ? ifname:txt			\
-				      & vifname:txt			\
-				      & addr:ipv4			\
-				      & t_secs:u32
+    set_triggered_update_jitter	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				& t_jitter:u32
 
     /**
-     * Get maximum period between sending triggered updates from address.
+     * Get jitter between sending triggered updates from address
+     * (in percents of the period).
      */
-    triggered_update_max_seconds  ? ifname:txt			\
-				      & vifname:txt			\
-				      & addr:ipv4			\
-				      -> t_secs:u32
+    triggered_update_jitter	? ifname:txt				\
+				& vifname:txt				\
+				& addr:ipv4				\
+				-> t_jitter:u32
 
     /**
      * Set the inter-packet delay between the output of packets from

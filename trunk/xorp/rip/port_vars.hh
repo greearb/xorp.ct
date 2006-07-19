@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port_vars.hh,v 1.9 2006/01/03 01:31:50 pavlin Exp $
+// $XORP: xorp/rip/port_vars.hh,v 1.10 2006/03/16 00:05:50 pavlin Exp $
 
 #ifndef __RIP_PORT_VARS_HH__
 #define __RIP_PORT_VARS_HH__
@@ -210,56 +210,59 @@ public:
     inline uint32_t table_request_period_secs() const;
 
     /**
-     * Set minimum unsolicitied response time.
-     * @param t minimum unsolicited response time in seconds.
+     * Set unsolicitied response time.
+     * @param t_secs unsolicited response time in seconds.
      * @return true on success.
      */
-    inline bool set_unsolicited_response_min_secs(uint32_t t);
+    inline bool set_update_interval(uint32_t t_secs);
 
     /**
-     * Get minimum unsolicitied response time.
-     * @return minimum unsolicited response time in seconds.
+     * Get unsolicitied response time.
+     * @return unsolicited response time in seconds.
      */
-    inline uint32_t unsolicited_response_min_secs();
+    inline uint32_t update_interval();
 
     /**
-     * Set maximum unsolicitied response time.
-     * @param t maximum unsolicited response time in seconds.
+     * Set unsolicitied response time jitter.
+     * @param t_jitter unsolicited response time jitter
+     * (in percents of the time period).
      * @return true on success.
      */
-    inline bool set_unsolicited_response_max_secs(uint32_t t);
+    inline bool set_update_jitter(uint32_t t_jitter);
 
     /**
-     * Get maximum unsolicitied response time.
-     * @return maximum unsolicited response time in seconds.
+     * Get unsolicitied response time jitter.
+     * @return unsolicited response time jitter
+     * (in percents of the time period).
      */
-    inline uint32_t unsolicited_response_max_secs();
+    inline uint32_t update_jitter();
 
     /**
-     * Set the lower bound of the triggered update interval.
-     * @param t the lower bound of the triggered update interval in seconds.
+     * Set the triggered update delay.
+     * @param t_secs the triggered update delay in seconds.
      * @return true on success.
      */
-    inline bool set_triggered_update_min_wait_secs(uint32_t t);
+    inline bool set_triggered_update_delay(uint32_t t_secs);
 
     /**
-     * Get the lower bound of the triggered update interval.
-     * @return the lower bound of the triggered update interval in seconds.
+     * Get the triggered update delay.
+     * @return the triggered update delay in seconds.
      */
-    inline uint32_t triggered_update_min_wait_secs() const;
+    inline uint32_t triggered_update_delay() const;
 
     /**
-     * Set the upper bound of the triggered update interval.
-     * @param t the upper bound of the triggered update interval in seconds.
+     * Set the triggered update jitter.
+     * @param t_jitter the triggered update jitter
+     * (in percents of the time delay).
      * @return true on success.
      */
-    inline bool set_triggered_update_max_wait_secs(uint32_t t);
+    inline bool set_triggered_update_jitter(uint32_t t_jitter);
 
     /**
-     * Get the upper bound of the triggered update interval.
-     * @return the upper bound of the triggered update interval in seconds.
+     * Get the triggered update jitter.
+     * @return the triggered update jitter (in percents of the time delay).
      */
-    inline uint32_t triggered_update_max_wait_secs() const;
+    inline uint32_t triggered_update_jitter() const;
 
     /**
      * Set the interpacket packet delay.
@@ -296,10 +299,10 @@ protected:
     uint32_t _expiry_secs;
     uint32_t _deletion_secs;
     uint32_t _table_request_secs;
-    uint32_t _unsolicited_response_min_secs;
-    uint32_t _unsolicited_response_max_secs;
-    uint32_t _triggered_update_min_wait_secs;
-    uint32_t _triggered_update_max_wait_secs;
+    uint32_t _update_interval;
+    uint32_t _update_jitter;
+    uint32_t _triggered_update_delay;
+    uint32_t _triggered_update_jitter;
     uint32_t _interpacket_msecs;
     uint32_t _interquery_msecs;
 };
@@ -312,10 +315,10 @@ PortTimerConstants::PortTimerConstants()
     : _expiry_secs(DEFAULT_EXPIRY_SECS),
       _deletion_secs(DEFAULT_DELETION_SECS),
       _table_request_secs(DEFAULT_TABLE_REQUEST_SECS),
-      _unsolicited_response_min_secs(DEFAULT_UNSOLICITED_RESPONSE_SECS - DEFAULT_VARIATION_UNSOLICITED_RESPONSE_SECS),
-      _unsolicited_response_max_secs(DEFAULT_UNSOLICITED_RESPONSE_SECS + DEFAULT_VARIATION_UNSOLICITED_RESPONSE_SECS),
-      _triggered_update_min_wait_secs(DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS),
-      _triggered_update_max_wait_secs(DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS),
+      _update_interval(DEFAULT_UPDATE_INTERVAL),
+      _update_jitter(DEFAULT_UPDATE_JITTER),
+      _triggered_update_delay(DEFAULT_TRIGGERED_UPDATE_DELAY),
+      _triggered_update_jitter(DEFAULT_TRIGGERED_UPDATE_JITTER),
       _interpacket_msecs(DEFAULT_INTERPACKET_DELAY_MS),
       _interquery_msecs(DEFAULT_INTERQUERY_GAP_MS)
 {
@@ -352,29 +355,31 @@ PortTimerConstants::deletion_secs() const
 }
 
 inline bool
-PortTimerConstants::set_unsolicited_response_min_secs(uint32_t t)
+PortTimerConstants::set_update_interval(uint32_t t_secs)
 {
-    _unsolicited_response_min_secs = t;
+    _update_interval = t_secs;
     return true;
 }
 
 inline uint32_t
-PortTimerConstants::unsolicited_response_min_secs()
+PortTimerConstants::update_interval()
 {
-    return _unsolicited_response_min_secs;
+    return _update_interval;
 }
 
 inline bool
-PortTimerConstants::set_unsolicited_response_max_secs(uint32_t t)
+PortTimerConstants::set_update_jitter(uint32_t t_jitter)
 {
-    _unsolicited_response_max_secs = t;
+    if (t_jitter > 100)
+	return false;
+    _update_jitter = t_jitter;
     return true;
 }
 
 inline uint32_t
-PortTimerConstants::unsolicited_response_max_secs()
+PortTimerConstants::update_jitter()
 {
-    return _unsolicited_response_max_secs;
+    return _update_jitter;
 }
 
 inline bool
@@ -395,31 +400,31 @@ PortTimerConstants::table_request_period_secs() const
 }
 
 inline bool
-PortTimerConstants::set_triggered_update_min_wait_secs(uint32_t t)
+PortTimerConstants::set_triggered_update_delay(uint32_t t_secs)
 {
-    _triggered_update_min_wait_secs = t;
+    _triggered_update_delay = t_secs;
     return true;
 }
 
 inline uint32_t
-PortTimerConstants::triggered_update_min_wait_secs() const
+PortTimerConstants::triggered_update_delay() const
 {
-    return _triggered_update_min_wait_secs;
+    return _triggered_update_delay;
 }
 
 inline bool
-PortTimerConstants::set_triggered_update_max_wait_secs(uint32_t t)
+PortTimerConstants::set_triggered_update_jitter(uint32_t t_jitter)
 {
-    if (t < triggered_update_min_wait_secs())
+    if (t_jitter > 100)
 	return false;
-    _triggered_update_max_wait_secs = t;
+    _triggered_update_jitter = t_jitter;
     return true;
 }
 
 inline uint32_t
-PortTimerConstants::triggered_update_max_wait_secs() const
+PortTimerConstants::triggered_update_jitter() const
 {
-    return _triggered_update_max_wait_secs;
+    return _triggered_update_jitter;
 }
 
 inline bool

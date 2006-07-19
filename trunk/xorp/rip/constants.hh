@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/constants.hh,v 1.16 2005/06/21 18:11:08 pavlin Exp $
+// $XORP: xorp/rip/constants.hh,v 1.17 2006/03/16 00:05:48 pavlin Exp $
 
 #ifndef __RIP_CONSTANTS_HH__
 #define __RIP_CONSTANTS_HH__
@@ -22,14 +22,14 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv6net.hh"
 
-static const uint32_t DEFAULT_UNSOLICITED_RESPONSE_SECS = 30;
-static const uint32_t DEFAULT_VARIATION_UNSOLICITED_RESPONSE_SECS = 5;
+static const uint32_t DEFAULT_UPDATE_INTERVAL = 30;
+static const uint32_t DEFAULT_UPDATE_JITTER = 16;
 
 static const uint32_t DEFAULT_EXPIRY_SECS = 180;
 static const uint32_t DEFAULT_DELETION_SECS = 120;
 
-static const uint32_t DEFAULT_TRIGGERED_UPDATE_MIN_WAIT_SECS = 1;
-static const uint32_t DEFAULT_TRIGGERED_UPDATE_MAX_WAIT_SECS = 5;
+static const uint32_t DEFAULT_TRIGGERED_UPDATE_DELAY = 3;
+static const uint32_t DEFAULT_TRIGGERED_UPDATE_JITTER = 66;
 
 static const uint32_t DEFAULT_TABLE_REQUEST_SECS = 1;
 

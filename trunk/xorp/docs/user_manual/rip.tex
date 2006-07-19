@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/rip.tex,v 1.18 2006/07/12 00:19:09 pavlin Exp $
+% $XORP: xorp/docs/user_manual/rip.tex,v 1.19 2006/07/12 07:25:47 pavlin Exp $
 %
 
 \chapter{RIP and RIPng}
@@ -107,10 +107,10 @@ protocols \{\\
 \>\>\>\>\>accept-default-route: {\it bool}\\
 \>\>\>\>\>route-timeout: {\it uint}\\
 \>\>\>\>\>deletion-delay: {\it uint}\\
-\>\>\>\>\>triggered-update-min-secs: {\it uint}\\
-\>\>\>\>\>triggered-update-max-secs: {\it uint}\\
-\>\>\>\>\>table-announce-min-secs: {\it uint}\\
-\>\>\>\>\>table-announce-max-secs: {\it uint}\\
+\>\>\>\>\>triggered-delay: {\it uint}\\
+\>\>\>\>\>triggered-jitter: {\it uint(0..100)}\\
+\>\>\>\>\>update-interval: {\it uint}\\
+\>\>\>\>\>update-jitter: {\it uint(0..100)}\\
 \>\>\>\>\>request-interval: {\it uint}\\
 \>\>\>\>\>interpacket-delay: {\it uint}\\
 \>\>\>\>\>authentication \{\\
@@ -209,30 +209,42 @@ protocols \{\\
   determines how long the router maintains expired routes after their
   metric has reached infinity. The default is 120 seconds, and should
   not normally need to be changed.  
-\item{\tt triggered-update-min-secs}: When a router receives a
+\item{\tt triggered-delay}: When a router receives a
   modified route from a neighbor, it does not have to wait until the
   next periodic update to tell the other neighbors, but instead sends
-  a triggered update.  After a triggered update is sent, a timer is
-  set for a random interval between {\stt triggered-update-min-secs}
-  and {\stt triggered-update-max-secs}.  If other changes occur that
+  a triggered update~\footnote{Note that prior
+  to XORP Release-1.3, the {\tt triggered-update-min-secs} and
+  {\tt triggered-update-max-secs} statements were used
+  instead of {\tt triggered-delay} and {\tt triggered-jitter}.}.
+  After a triggered update is sent, a timer is
+  set for a random interval between
+  {\stt (triggered-delay - triggered-delay * triggered-jitter / 100)} and
+  {\stt (triggered-delay + triggered-delay * triggered-jitter / 100)}.
+  If other changes occur that
   would trigger updates before the timer expires, a single update is
   triggered when the timer expires.  The default value of {\stt
-  triggered-update-min-secs} is 1 second, and should not normally need
+  triggered-delay} is 3 second, and should not normally need
   to be changed.
-\item{\tt triggered-update-max-secs}: See {\stt
-  triggered-update-min-secs} for details.  The default is 5 seconds,
+\item{\tt triggered-jitter}: See {\stt
+  triggered-delay} for details.  The default is 66 percents
+  (\ie {\stt triggered-delay} would be in the interval [1..5] seconds),
   and should not normally need to be changed.
-\item{\tt table-announce-min-secs}: A RIP router will typically tell
-  its neighbors its entire routing table every 30 seconds.  To avoid
+\item{\tt update-interval}: A RIP router will typically tell
+  its neighbors its entire routing table every 30 seconds~\footnote{Note that
+  prior to XORP Release-1.3, the {\tt table-announce-min-secs} and
+  {\tt table-announce-max-secs} statements were used
+  instead of {\tt update-interval} and {\tt update-jitter}.}.  To avoid
   self-synchronization of routing updates, the precise time interval
   between telling each neighbor about routing updates is randomly
-  jittered, with the delay chosen uniformly at random between {\stt
-  table-announce-min-secs} and {\stt table-announce-max-secs}.  The
-  default for {\stt table-announce-min-secs} is 25 seconds, and should
+  jittered, with the delay chosen uniformly at random between
+  {\stt (update-interval - update-interval * update-jitter / 100)} and
+  {\stt (update-interval + update-interval * update-jitter / 100)}.  The
+  default for {\stt update-interval} is 30 seconds, and should
   not normally need to be changed.
-\item{\tt table-announce-max-secs}: See {\stt table-announce-min-secs}
-  for details.  The default is 35 seconds, and should not normally
-  need to be changed.
+\item{\tt update-jitter}: See {\stt update-interval}
+  for details.  The default is 16 percents,
+  (\ie {\stt update-jitter} would be in the interval [25..35] seconds),
+  and should not normally need to be changed.
 \item{\tt request-interval}: When a RIP router has no neighbors on a
   vif/address, it may periodically send a request for a route update
   in case a neighbor appears~\footnote{Note that prior to XORP

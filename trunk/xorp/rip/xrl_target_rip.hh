@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_target_rip.hh,v 1.21 2006/03/30 02:21:15 pavlin Exp $
+// $XORP: xorp/rip/xrl_target_rip.hh,v 1.22 2006/07/12 07:25:48 pavlin Exp $
 
 #ifndef __RIP_XRL_TARGET_RIP_HH__
 #define __RIP_XRL_TARGET_RIP_HH__
@@ -176,52 +176,52 @@ public:
 			     uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_unsolicited_response_min_seconds(const string&	ifname,
-						 const string&	vifname,
-						 const IPv4&	addr,
-						 const uint32_t& t_secs);
+    rip_0_1_set_update_interval(const string&	ifname,
+				const string&	vifname,
+				const IPv4&	addr,
+				const uint32_t& t_secs);
 
     XrlCmdError
-    rip_0_1_unsolicited_response_min_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	addr,
-					     uint32_t&		t_secs);
+    rip_0_1_update_interval(const string&	ifname,
+			    const string&	vifname,
+			    const IPv4&		addr,
+			    uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_unsolicited_response_max_seconds(const string&	ifname,
-						 const string&	vifname,
-						 const IPv4&	addr,
-						 const uint32_t& t_secs);
+    rip_0_1_set_update_jitter(const string&	ifname,
+			      const string&	vifname,
+			      const IPv4&	addr,
+			      const uint32_t&	t_jitter);
 
     XrlCmdError
-    rip_0_1_unsolicited_response_max_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	addr,
-					     uint32_t&		t_secs);
+    rip_0_1_update_jitter(const string&		ifname,
+			  const string&		vifname,
+			  const IPv4&		addr,
+			  uint32_t&		t_jitter);
 
     XrlCmdError
-    rip_0_1_set_triggered_update_min_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	addr,
-					     const uint32_t&	t_secs);
+    rip_0_1_set_triggered_update_delay(const string&	ifname,
+				       const string&	vifname,
+				       const IPv4&	addr,
+				       const uint32_t&	t_secs);
 
     XrlCmdError
-    rip_0_1_triggered_update_min_seconds(const string&	ifname,
-					 const string&	vifname,
-					 const IPv4&	addr,
-					 uint32_t&	t_secs);
+    rip_0_1_triggered_update_delay(const string&	ifname,
+				   const string&	vifname,
+				   const IPv4&		addr,
+				   uint32_t&		t_secs);
 
     XrlCmdError
-    rip_0_1_set_triggered_update_max_seconds(const string&	ifname,
-					     const string&	vifname,
-					     const IPv4&	addr,
-					     const uint32_t&	t_secs);
+    rip_0_1_set_triggered_update_jitter(const string&	ifname,
+					const string&	vifname,
+					const IPv4&	addr,
+					const uint32_t&	t_jitter);
 
     XrlCmdError
-    rip_0_1_triggered_update_max_seconds(const string&	ifname,
-					 const string&	vifname,
-					 const IPv4&	addr,
-					 uint32_t&	t_secs);
+    rip_0_1_triggered_update_jitter(const string&	ifname,
+				    const string&	vifname,
+				    const IPv4&		addr,
+				    uint32_t&		t_jitter);
 
     XrlCmdError
     rip_0_1_set_interpacket_delay(const string&		ifname,

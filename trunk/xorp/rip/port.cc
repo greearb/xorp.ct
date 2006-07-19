@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.61 2006/06/22 00:17:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.62 2006/06/27 21:50:48 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -190,9 +190,9 @@ Port<A>::unsolicited_response_timeout()
     //
     // Reschedule this callback in next interval
     //
-    uint32_t sec = range_random(constants().unsolicited_response_min_secs(),
-				constants().unsolicited_response_max_secs());
-    _ur_timer.reschedule_after(TimeVal(sec, 0));
+    TimeVal interval = TimeVal(constants().update_interval(), 0);
+    double factor = constants().update_jitter() / 100.0;
+    _ur_timer.reschedule_after(positive_random_uniform(interval, factor));
 }
 
 template <typename A>
@@ -221,9 +221,9 @@ Port<A>::triggered_update_timeout()
     }
 
  reschedule:
-    uint32_t sec = range_random(constants().triggered_update_min_wait_secs(),
-				constants().triggered_update_max_wait_secs());
-    _tu_timer.reschedule_after(TimeVal(sec, 0));
+    TimeVal delay = TimeVal(constants().triggered_update_delay(), 0);
+    double factor = constants().triggered_update_jitter() / 100.0;
+    _tu_timer.reschedule_after(positive_random_uniform(delay, factor));
 
 }
 
@@ -238,26 +238,23 @@ Port<A>::start_output_processing()
     _tu_out = new OutputUpdates<A>(e, *this, *_packet_queue, rdb);
 
     // Schedule triggered update process
-    uint32_t ms;
-    ms = 1000 * range_random(constants().unsolicited_response_min_secs(),
-			     constants().unsolicited_response_max_secs());
+    TimeVal interval = TimeVal(constants().update_interval(), 0);
+    double factor = constants().update_jitter() / 100.0;
     _ur_timer =
-	e.new_oneoff_after_ms(ms,
-			      callback(this,
-				       &Port<A>::unsolicited_response_timeout)
-			      );
+	e.new_oneoff_after(positive_random_uniform(interval, factor),
+			   callback(this,
+				    &Port<A>::unsolicited_response_timeout));
 
     // Create unsolicited response (table dump) output process
     _ur_out = new OutputTable<A>(e, *this, *_packet_queue, rdb);
 
     // Schedule unsolicited output process
-    ms = 1000 * range_random(constants().triggered_update_min_wait_secs(),
-			     constants().triggered_update_max_wait_secs());
+    TimeVal delay = TimeVal(constants().triggered_update_delay(), 0);
+    factor = constants().triggered_update_jitter() / 100.0;
     _tu_timer =
-	e.new_oneoff_after_ms(ms,
-			      callback(this,
-				       &Port<A>::triggered_update_timeout)
-			      );
+	e.new_oneoff_after(positive_random_uniform(delay, factor),
+			   callback(this,
+				    &Port<A>::triggered_update_timeout));
 }
 
 template <typename A>
