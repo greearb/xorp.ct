@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: other/LiveCD/files/rc.live,v 1.6 2006/03/16 00:09:01 pavlin Exp $
+# $XORP: other/LiveCD/files/rc.live,v 1.7 2006/07/19 20:25:48 pavlin Exp $
 #
 
 # Copyright (c) 2004-2006 International Computer Science Institute
@@ -112,7 +112,7 @@ tar -xzpf /mfs/local_etc.tgz -C / >/dev/null 2>&1
 
 
 echo "Generating /usr/local/xorp under MFS"
-echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
+# echo "(umount /usr/local/xorp to reveal a version with debugging enabled)"
 #
 # XXX: Increase the XORP partition size if it is too small.
 # E.g., 1024*2*80 = 163840 = 80MB partition
