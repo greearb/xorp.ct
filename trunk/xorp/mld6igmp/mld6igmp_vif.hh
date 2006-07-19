@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.42 2006/07/03 21:49:46 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.43 2006/07/06 08:18:07 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -403,7 +403,7 @@ public:
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
      * @param buffer the buffer with the rest of the message.
-     * @error_msg the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int		mld6igmp_send(const IPvX& src, const IPvX& dst,
@@ -416,7 +416,7 @@ public:
      *
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
-     * @error_msg the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int mld6igmp_group_query_send(const IPvX& group_address,
@@ -428,7 +428,7 @@ public:
      * @param group_address the "Multicast Address" or "Group Address" field
      * in the MLD or IGMP headers respectively.
      * @param sources the set of source addresses.
-     * @error_msg the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int		mld6igmp_group_source_query_send(const IPvX& group_address,
@@ -446,7 +446,7 @@ public:
      * @param sources the set of source addresses (for IGMPv3 or MLDv2 only).
      * @param s_flag the "Suppress Router-Side Processing" bit (for IGMPv3
      * or MLDv2 only; in all other cases it should be set to false).
-     * @error_msg the error message (if error).
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      **/
     int		mld6igmp_query_send(const IPvX& src, const IPvX& dst,
