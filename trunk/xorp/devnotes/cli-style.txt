@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/cli-style.txt,v 1.3 2006/04/20 23:58:31 pavlin Exp $
+# $XORP: xorp/devnotes/cli-style.txt,v 1.4 2006/07/11 23:52:25 pavlin Exp $
 #
 
 	Provisional XORP CLI coding style
@@ -70,8 +70,12 @@ string. In the text below we use the terms "short help string" and
   the timer value, he/she has to modify both parameters. Usually the
   user wants to modify only the average value of the timer.
   In this example, "some-timer" and "some-jitter" should be used instead,
-  where "some-jitter" should have some reasonable default value (in
-  percents rather than in absolute value).
+  where "some-jitter" should have some reasonable default value.
+
+  In most cases it is better to use percents rather than absolute value
+  as jitter. Such decision should be done on case by case by taking into
+  account the number of parameters that need to be modified under normal
+  circumstances.
 
 * Commands should describe what they do, not what they can be used for.
   For example, the purpose of the following command is not very clear:
