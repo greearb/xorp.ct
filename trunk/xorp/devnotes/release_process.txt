@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.47 2006/07/19 04:10:06 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.48 2006/07/19 05:10:58 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -369,12 +369,14 @@ the login shell is csh or tcsh):
  mv docs-$ReleaseVersion docs
 
 ========================================================================
-2550.	TASK: Copy the LiveCD ISO image to the web server
+2550.	TASK: Copy the LiveCD ISO image and the Windows binary to the web
+              server
 	WHO:  Release manager
 	WHEN: Release time
 	COMMANDS:
  # Commands continue from the previous task
  scp -p foo:~/live/cd/location/LiveCD.iso.gz .
+ scp -p bar:~/windows/binary/location/xorp-$ReleaseVersion-setup.exe .
 
 ========================================================================
 2600.	TASK: Update the links in the web server to the current release
@@ -395,6 +397,7 @@ the login shell is csh or tcsh):
  cd $ReleaseVersion
  md5 LiveCD.iso.gz
  md5 xorp-$ReleaseVersion.tar.gz
+ md5 xorp-$ReleaseVersion-setup.exe
  ls -lAFgh LiveCD.iso.gz
 
 ========================================================================
@@ -405,6 +408,8 @@ the login shell is csh or tcsh):
 		checksum, and the LiveCD size.
 	      - Update www/html_src/download.html with the MD5 checksum
 		of the XORP source code tarball.
+	      - Update www/html_src/download.html with the MD5 checksum
+		of the Windows binary.
 
 ========================================================================
 2675.	TASK: Regenerate the Web pages in www
