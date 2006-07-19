@@ -1,0 +1,17 @@
+Source: kdoc
+Build-Depends: debhelper, automake, perl5
+Section: devel
+Priority: optional
+Maintainer: Ivan E. Moore II <rkrusty@debian.org>
+Standards-Version: 3.5.0
+
+Package: kdoc
+Architecture: all
+Section: devel
+Depends: ${perl:Depends}
+Description: C++ and IDL Source Documentation System 
+ KDOC creates cross-referenced documentation for C++ 
+ and CORBA IDL libraries directly from the source. 
+ Documentation can be embedded in special doccomments 
+ in the source.
+  

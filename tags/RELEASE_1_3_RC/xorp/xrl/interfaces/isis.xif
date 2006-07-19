@@ -1,0 +1,161 @@
+/* $XORP: xorp/xrl/interfaces/isis.xif,v 1.1 2003/07/18 01:59:15 atanu Exp $ */
+
+/*
+** IS-IS protocol XRL interface.
+*/
+
+interface isis/0.1 {
+	/**
+	 * Set the system ID 
+	 *
+	 * @param id our IS-IS ID. Typically a router interface address.
+         *
+	 */
+	set_system_id ? id:ipv4
+
+	/**
+         * Get the system ID
+	 */
+	get_system_id -> id:ipv4
+
+	/**
+	 * Add an area address.
+	 *
+	 * @param addr area address.
+	 */
+	add_area_address ? addr:u32
+
+	/**
+         * Delete an area address
+	 *
+	 * @param addr area address.
+	 */
+	delete_area_address ? addr:u32
+
+	/**
+	 * Configure an interface for IS-IS
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param level The value can be 1 or 2, this defines the level
+	 *              being addressed
+	 * @param enable If true enable IS-IS, if false disable IS-IS.
+         * @param passive If true don't run the protocol machinery, but send 
+         *                HELLO and Link State Packets.
+	 * @param metric Metric to be added to the LSP for this interface.
+	 * @param hello_interval How frequently in seconds to send a hello.
+	 * @param hold_time_multiplier Multiply the peers hello interval by
+         *        this value in order to calculate when the adjacency is
+	 *        considered lost.
+	 * @param priority Used when selecting the designated router.
+	 */
+	configure_interface ? ifname:txt \
+			      vif:txt \
+		              level:u32 \
+		              enable:bool \
+			      passive:bool \
+		              metric:u32 \
+			      hello_interval:u32 \
+			      hold_time_multiplier:u32 \
+	                      prioriy:u32      
+
+	/**
+	 * Add interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. Don't expect this to work if the interface/vif pair
+	 * has not been configured.
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	add_interface_address_v4 ? ifname:txt \
+			      vif:txt \
+		              address:ipv4 
+
+	/**
+	 * Delete interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. 
+	 *	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	delete_interface_address_v4 ? ifname:txt \
+			      vif:txt \
+		              address:ipv4 
+
+	/**
+	 * Add interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. Don't expect this to work if the interface/vif pair
+	 * has not been configured.
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	add_interface_address_v6 ? ifname:txt \
+			      vif:txt \
+		              address:ipv6
+
+	/**
+	 * Delete interface address
+	 *
+	 * Interface addresses that will be advertised by the
+	 * LSPs. 
+	 *
+	 * @param ifname Interface name.
+	 * @param ifname vif Vif name.
+	 * @param address Interface address
+	 */
+	 delete_interface_address_v6 ? ifname:txt \
+			      vif:txt \
+		              address:ipv6
+
+	/*
+	 * Add reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v4 ? address:ipv4net
+		
+	/*
+	 * Delete reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v4 ? address:ipv4net
+
+	/*
+	 * Add reachability information.
+	 *
+	 * @param network
+	 */
+        add_nlri_v6 ? address:ipv6net
+		
+	/*
+	 * Delete reachability information.
+	 *
+	 * @param network
+	 */
+         add_nlri_v6 ? address:ipv6net
+
+	/**
+         * Interpacket Gap.
+	 *
+	 * @param gap Minimal time between packets in milliseconds.
+	 */
+   	interpacket_gap ? gap:u32
+
+	/**
+         * Set the overload bit in the transmitted LSP.
+	 *
+	 * @param enable 
+	 */
+	configure_overload ? enable:bool
+}

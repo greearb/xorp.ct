@@ -1,0 +1,62 @@
+# You might want to change the next 2 lines, the rest should be ok
+%define qtdir /usr/lib/qt-2.1.0
+Prefix: /opt/kde2
+
+Name: kdoc
+Icon: kde-icon.xpm
+Summary: Documentation tools for the K Desktop Environment (KDE) 2.0.
+Version: @VERSION@
+Release: 1
+Epoch: 1
+Source: ftp://ftp.kde.org/pub/kde/stable/%{version}/distribution/tar/generic/source/kdoc-%{version}.tar.bz2
+Group: Documentation
+BuildRoot: /var/tmp/%{name}-buildroot
+Copyright: GPL
+BuildArch: noarch
+
+%description
+Documentation tools for the K Desktop Environment 2.0.
+
+%prep
+rm -rf $RPM_BUILD_ROOT
+
+%setup -q -n %{name}
+make -f Makefile.cvs
+
+%build
+export KDEDIR=%{prefix} QTDIR=%{qtdir}
+CXXFLAGS="$RPM_OPT_FLAGS -I%{prefix}/include/kde" ./configure \
+	--prefix=%{prefix}
+make CXXFLAGS="$RPM_OPT_FLAGS -DNO_DEBUG -DNDEBUG"
+
+%install
+make install DESTDIR=$RPM_BUILD_ROOT
+
+cd $RPM_BUILD_ROOT
+find . -type d | sed '1,3d;s,^\.,\%attr(-\,root\,root) \%dir ,' > \
+	$RPM_BUILD_DIR/file.list.%{name}
+perl -pi -e "s|\%attr\(-,root,root\) \%dir %{prefix}/man/man1||" $RPM_BUILD_DIR/file.list.%{name}
+perl -pi -e "s|\%attr\(-,root,root\) \%dir %{prefix}/man||" $RPM_BUILD_DIR/file.list.%{name}
+perl -pi -e "s|\%attr\(-,root,root\) \%dir %{prefix}/bin||" $RPM_BUILD_DIR/file.list.%{name}
+perl -pi -e "s|\%attr\(-,root,root\) \%dir %{prefix}/lib$||" $RPM_BUILD_DIR/file.list.%{name}
+
+find . -type f | sed -e 's,^\.,\%attr(-\,root\,root) ,' \
+	-e '/\/config\//s|^|%config|' >> \
+	$RPM_BUILD_DIR/file.list.%{name}
+
+find . -type l | sed 's,^\.,\%attr(-\,root\,root) ,' >> \
+	$RPM_BUILD_DIR/file.list.%{name}
+
+sed -e "s,%{prefix}/man/.*,&*,g" $RPM_BUILD_DIR/file.list.%{name} >$RPM_BUILD_DIR/file.list.%{name}.new
+mv -f $RPM_BUILD_DIR/file.list.%{name}.new $RPM_BUILD_DIR/file.list.%{name}
+
+echo "%docdir %{prefix}/doc/kde" >> $RPM_BUILD_DIR/file.list.%{name}
+
+%clean
+rm -rf $RPM_BUILD_ROOT $RPM_BUILD_DIR/file.list.%{name}
+
+%files -f ../file.list.%{name}
+
+%changelog
+* Thu May 11 2000 Bernhard Rosenkraenzer <bero@redhat.com>
+- initial

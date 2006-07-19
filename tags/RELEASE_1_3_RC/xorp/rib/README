@@ -1,0 +1,38 @@
+#
+# $XORP: xorp/rib/README,v 1.2 2003/06/06 08:45:39 pavlin Exp $
+#
+
+		    RIB: Routing Information Base.
+
+The RIB acts as an exchange area for routes associated with different
+routing protocols.  Each routing process can add, remove, query, and
+register interest in routes.  The RIB arbitrates over the best
+available route according the administrative distance associated with
+the routing protocol that registered a particular route.  In addition,
+the RIB propagates routes down to the Forwarding Engine Abstraction.
+
+Configuration
+=============
+
+This serves as the plumbing between all the different unicast routing
+protocols that may be running on a router.
+
+Startup
+=======
+
+The RIB depends on the finder and should be started by the Router
+Manager process.
+
+Documentation
+=============
+
+The RIB design architecture and code structure are described in:
+	${XORP}/docs/rib/
+
+The programming documentation is in:
+	${XORP}/docs/kdoc/html/rib/
+
+Status
+======
+
+Tests run.

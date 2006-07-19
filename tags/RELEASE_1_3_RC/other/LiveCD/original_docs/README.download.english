@@ -1,0 +1,33 @@
+ _____ _   _  ____ ____  ____  ____  ____      /(        )`
+|  ___| | | |/ ___/ ___||  _ \| __ )|  _ \     \ \___   / |
+| |_  | | | | |  _\___ \| |_) |  _ \| |_) |    /- _  `-/  '
+|  _| | |_| | |_| |___) |  __/| |_) |  _ <    (/\/ \ \   /\
+|_|    \___/ \____|____/|_|   |____/|_| \_\   / /   | `    \
+                                              O O   ) /    |
+-------------------------------------------   `-^--'`<     '
+                                             (_.)  _  )   /
+                                              `.___/`    /
+ Brazilian Group of FreeBSD Users               `-----' /
+      http://www.fugspbr.org       <----.     __ / __   \
+          FreeBSD LiveCD           <----|====O)))==) \) /====
+            24/june/2002             <----'    `--' `.__,' \
+
+Downloads and Distribution
+==========================
+
+The FreeBSD LiveCD follows the BSD license agreement.
+
+You will find the FreeBSD LiveCD available in two flavors:
+
+LiveCD-[version_number].tgz
+
+and
+
+LiveCD-[version_number]_ISO[FreeBSD_version].ISO
+
+As the names indicate, que .tgz file is a package that contains the
+FreeBSD LiveCD scripts, that will allow you to create the ISO image 
+and run your LiveCD system.
+
+The ISO file is a READY TO RUN LiveCD image featuring the indicated FreeBSD
+version, all set for you to record your CD and use it. Burn it and go ! :)

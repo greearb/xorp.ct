@@ -1,0 +1,27 @@
+#!/bin/sh
+
+#
+# $XORP: xorp/utils/ndbg,v 1.3 2002/12/09 11:13:07 pavlin Exp $
+#
+
+#
+# Execute a command and strip out the preamble from XORP debug_msg
+# and XLOG_* statements that are generated.
+# To some minds this makes debugging harder, to others it's cleaner.
+#
+# Example usage:
+#	ndbg rib
+#
+# To strip the preamble of an existing log file:
+#	ndbg cat logfile
+#
+# Note: output trails sed buffering, typically 1 line.
+#
+
+if [ $# -ne 0 ] ; then
+#
+# Preamble begins with an opening brace '[' and ends with ']'.  Careful to
+# only filter lines beginning with preamble.
+#
+   $* 2>&1 | sed -e '/^\[/ s/\[[^]]*\] //'
+fi

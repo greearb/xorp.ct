@@ -1,0 +1,35 @@
+/* $XORP: xorp/etc/templates/mfea6.cmds,v 1.4 2004/06/02 02:38:41 pavlin Exp $ */
+
+show mfea6 {
+    %command: "" %help: HELP;
+    %module: mfea6;
+    %tag: HELP "Display information about IPv6 MFEA";
+}
+
+show mfea6 dataflow {
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
+    %module: mfea6;
+    %tag: HELP "Display information about MFEA IPv6 dataflow filters";
+}
+
+show mfea6 interface {
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
+    %module: mfea6;
+    %tag: HELP "Display information about MFEA IPv6 interfaces";
+}
+
+show mfea6 interface address {
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
+    %module: mfea6;
+    %tag: HELP "Display information about addresses of MFEA IPv6 interfaces";
+}
+
+/*
+ * Commented-out, because when we run everything through the rtrmgr,
+ * the MFEA is not used to get the routes from the kernel.
+show mfea6 mrib {
+    %command: "cli/tools/send_cli_processor_xrl -t MFEA_6 $0" %help: HELP;
+    %module: mfea6;
+    %tag: HELP "Display MRIB IPv6 information inside MFEA";
+}
+*/
