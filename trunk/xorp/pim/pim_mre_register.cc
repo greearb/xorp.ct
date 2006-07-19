@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.23 2006/01/23 21:03:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_mre_register.cc,v 1.24 2006/03/16 00:04:52 pavlin Exp $"
 
 //
 // PIM Multicast Routing Entry Register handling
@@ -315,7 +315,7 @@ PimMre::receive_register_stop()
     remove_register_tunnel();
     // Set Register-Stop Timer
     register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
-    register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
+    register_stop_tv = random_uniform(register_stop_tv, 0.5);
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =
@@ -330,7 +330,7 @@ PimMre::receive_register_stop()
     set_register_prune_state();
     // Set Register-Stop Timer
     register_stop_tv = TimeVal(PIM_REGISTER_SUPPRESSION_TIME_DEFAULT, 0);
-    register_stop_tv = positive_random_uniform(register_stop_tv, 0.5);
+    register_stop_tv = random_uniform(register_stop_tv, 0.5);
     register_probe_tv = TimeVal(PIM_REGISTER_PROBE_TIME_DEFAULT, 0);
     register_stop_tv -= register_probe_tv;
     register_stop_timer() =

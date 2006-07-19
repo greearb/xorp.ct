@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timeval.hh,v 1.27 2006/05/05 20:27:13 pavlin Exp $
+// $XORP: xorp/libxorp/timeval.hh,v 1.28 2006/06/02 18:07:58 pavlin Exp $
 
 #ifndef __LIBXORP_TIMEVAL_HH__
 #define __LIBXORP_TIMEVAL_HH__
@@ -597,7 +597,7 @@ random_uniform(const TimeVal& upper)
  * @return value chosen from uniform random distribution.
  */
 inline TimeVal
-positive_random_uniform(const TimeVal& center, const double& factor)
+random_uniform(const TimeVal& center, const double& factor)
 {
     TimeVal l = max(center - center * factor, TimeVal::ZERO());
     TimeVal u = center + center * factor;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.62 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.63 2006/07/19 00:43:38 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -192,7 +192,7 @@ Port<A>::unsolicited_response_timeout()
     //
     TimeVal interval = TimeVal(constants().update_interval(), 0);
     double factor = constants().update_jitter() / 100.0;
-    _ur_timer.reschedule_after(positive_random_uniform(interval, factor));
+    _ur_timer.reschedule_after(random_uniform(interval, factor));
 }
 
 template <typename A>
@@ -223,7 +223,7 @@ Port<A>::triggered_update_timeout()
  reschedule:
     TimeVal delay = TimeVal(constants().triggered_update_delay(), 0);
     double factor = constants().triggered_update_jitter() / 100.0;
-    _tu_timer.reschedule_after(positive_random_uniform(delay, factor));
+    _tu_timer.reschedule_after(random_uniform(delay, factor));
 
 }
 
@@ -241,7 +241,7 @@ Port<A>::start_output_processing()
     TimeVal interval = TimeVal(constants().update_interval(), 0);
     double factor = constants().update_jitter() / 100.0;
     _ur_timer =
-	e.new_oneoff_after(positive_random_uniform(interval, factor),
+	e.new_oneoff_after(random_uniform(interval, factor),
 			   callback(this,
 				    &Port<A>::unsolicited_response_timeout));
 
@@ -252,7 +252,7 @@ Port<A>::start_output_processing()
     TimeVal delay = TimeVal(constants().triggered_update_delay(), 0);
     factor = constants().triggered_update_jitter() / 100.0;
     _tu_timer =
-	e.new_oneoff_after(positive_random_uniform(delay, factor),
+	e.new_oneoff_after(random_uniform(delay, factor),
 			   callback(this,
 				    &Port<A>::triggered_update_timeout));
 }
