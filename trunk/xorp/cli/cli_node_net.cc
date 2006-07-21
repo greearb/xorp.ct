@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.49 2006/04/02 23:18:16 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.50 2006/05/03 00:10:03 pavlin Exp $"
 
 
 //
@@ -497,6 +497,21 @@ CliClient::start_connection(string& error_msg)
 #endif
     }
 
+    //
+    // Change the input and output streams for libtecla
+    //
+    // Note that it must happen before gl_terminal_size(),
+    // because gl_change_terminal() resets internally the terminal
+    // size to its default value.
+    //
+    if (gl_change_terminal(_gl, _input_fd_file, _output_fd_file,
+			   term_name.c_str())
+	!= 0) {
+	error_msg = c_format("Cannot change the I/O streams");
+	_gl = del_GetLine(_gl);
+	return (XORP_ERROR);
+    }
+
 #ifdef HAVE_TERMIOS_H
     // Get the terminal size
     if (is_output_tty()) {
@@ -537,15 +552,6 @@ CliClient::start_connection(string& error_msg)
 	}
     }
 #endif // HAVE_TERMIOS_H
-
-    // Change the input and output streams for libtecla
-    if (gl_change_terminal(_gl, _input_fd_file, _output_fd_file,
-			   term_name.c_str())
-	!= 0) {
-	error_msg = c_format("Cannot change the I/O streams");
-	_gl = del_GetLine(_gl);
-	return (XORP_ERROR);
-    }
 
     // Add the command completion hook
     if (gl_customize_completion(_gl, this, command_completion_func) != 0) {
