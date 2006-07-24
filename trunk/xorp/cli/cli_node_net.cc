@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.50 2006/05/03 00:10:03 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.51 2006/07/21 00:56:22 pavlin Exp $"
 
 
 //
@@ -85,6 +85,23 @@
 // Local functions prototypes
 //
 
+static set<CliClient *> local_cli_clients_;
+
+#ifndef HOST_OS_WINDOWS
+static void
+sigwinch_handler(int signo)
+{
+    XLOG_ASSERT(signo == SIGWINCH);
+
+    set<CliClient *>::iterator iter;
+    for (iter = local_cli_clients_.begin();
+	 iter != local_cli_clients_.end();
+	 ++iter) {
+	CliClient *cli_client = *iter;
+	cli_client->terminal_resized();
+    }
+}
+#endif // ! HOST_OS_WINDOWS
 
 /**
  * CliNode::sock_serv_open:
@@ -383,6 +400,12 @@ CliClient::start_connection(string& error_msg)
 	send(input_fd(), will_transmit_binary_cmd, sizeof(will_transmit_binary_cmd), 0);
     }
 #endif
+
+#ifndef HOST_OS_WINDOWS
+    if (! is_network()) {
+	signal(SIGWINCH, sigwinch_handler);
+    }
+#endif
     
 #ifdef HAVE_TERMIOS_H
     //
@@ -512,46 +535,8 @@ CliClient::start_connection(string& error_msg)
 	return (XORP_ERROR);
     }
 
-#ifdef HAVE_TERMIOS_H
-    // Get the terminal size
-    if (is_output_tty()) {
-	struct winsize window_size;
-
-	if (ioctl(output_fd(), TIOCGWINSZ, &window_size) < 0) {
-	    XLOG_ERROR("Cannot get window size (ioctl(TIOCGWINSZ) failed): %s",
-		       strerror(errno));
-	} else {
-	    // Set the window width and height
-	    uint16_t new_window_width, new_window_height;
-
-	    new_window_width = window_size.ws_col;
-	    new_window_height = window_size.ws_row;
-
-	    if (new_window_width > 0) {
-		set_window_width(new_window_width);
-	    } else {
-		cli_print(c_format("Invalid window width (%u); "
-				   "window width unchanged (%u)\n",
-				   new_window_width,
-				   XORP_UINT_CAST(window_width())));
-	    }
-	    if (new_window_height > 0) {
-		set_window_height(new_window_height);
-	    } else {
-		cli_print(c_format("Invalid window height (%u); "
-				   "window height unchanged (%u)\n",
-				   new_window_height,
-				   XORP_UINT_CAST(window_height())));
-	    }
-
-	    gl_terminal_size(gl(), window_width(), window_height());
-	    debug_msg("Client window size changed to width = %u "
-		      "height = %u\n",
-		      XORP_UINT_CAST(window_width()),
-		      XORP_UINT_CAST(window_height()));
-	}
-    }
-#endif // HAVE_TERMIOS_H
+    // Update the terminal size
+    update_terminal_size();
 
     // Add the command completion hook
     if (gl_customize_completion(_gl, this, command_completion_func) != 0) {
@@ -570,6 +555,9 @@ CliClient::start_connection(string& error_msg)
     // Bind Ctrl-W to delete the word before the cursor, because
     // the default libtecla behavior is to delete the whole line.
     gl_configure_getline(_gl, "bind ^W backward-delete-word", NULL, NULL);
+
+    // Add ourselves to the local set of clients
+    local_cli_clients_.insert(this);
 
     // Print the welcome message
     char hostname[MAXHOSTNAMELEN];
@@ -590,6 +578,9 @@ CliClient::start_connection(string& error_msg)
 int
 CliClient::stop_connection(string& error_msg)
 {
+    // Delete ourselves from the local set of clients
+    local_cli_clients_.erase(this);
+
 #ifdef HAVE_TERMIOS_H
     //
     // Restore the terminal settings
@@ -636,6 +627,57 @@ CliClient::stop_connection(string& error_msg)
 
     error_msg = "";
     return (XORP_OK);
+}
+
+void
+CliClient::terminal_resized()
+{
+    update_terminal_size();
+}
+
+void
+CliClient::update_terminal_size()
+{
+#ifdef HAVE_TERMIOS_H
+    // Get the terminal size
+    if (is_output_tty()) {
+	struct winsize window_size;
+
+	if (ioctl(output_fd(), TIOCGWINSZ, &window_size) < 0) {
+	    XLOG_ERROR("Cannot get window size (ioctl(TIOCGWINSZ) failed): %s",
+		       strerror(errno));
+	} else {
+	    // Set the window width and height
+	    uint16_t new_window_width, new_window_height;
+
+	    new_window_width = window_size.ws_col;
+	    new_window_height = window_size.ws_row;
+
+	    if (new_window_width > 0) {
+		set_window_width(new_window_width);
+	    } else {
+		cli_print(c_format("Invalid window width (%u); "
+				   "window width unchanged (%u)\n",
+				   new_window_width,
+				   XORP_UINT_CAST(window_width())));
+	    }
+	    if (new_window_height > 0) {
+		set_window_height(new_window_height);
+	    } else {
+		cli_print(c_format("Invalid window height (%u); "
+				   "window height unchanged (%u)\n",
+				   new_window_height,
+				   XORP_UINT_CAST(window_height())));
+	    }
+
+	    gl_terminal_size(gl(), window_width(), window_height());
+	    debug_msg("Client window size changed to width = %u "
+		      "height = %u\n",
+		      XORP_UINT_CAST(window_width()),
+		      XORP_UINT_CAST(window_height()));
+	}
+    }
+#endif // HAVE_TERMIOS_H
 }
 
 //

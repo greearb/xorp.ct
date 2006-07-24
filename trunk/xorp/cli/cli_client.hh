@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_client.hh,v 1.28 2006/03/16 00:03:44 pavlin Exp $
+// $XORP: xorp/cli/cli_client.hh,v 1.29 2006/05/03 00:10:03 pavlin Exp $
 
 
 #ifndef __CLI_CLI_CLIENT_HH__
@@ -370,6 +370,11 @@ public:
      * @param cli_prompt the current CLI prompt to set.
      */
     void	set_current_cli_prompt(const string& cli_prompt);
+
+    /**
+     * Update the terminal-related information after it has been resized.
+     */
+    void	terminal_resized();
     
 private:
     friend class CliPipe;
@@ -394,7 +399,9 @@ private:
     void	set_telnet_will(bool v) { _telnet_will = v; }
     bool	telnet_binary() { return (_telnet_binary); }
     void	set_telnet_binary(bool v) { _telnet_binary = v; }
-    
+
+    void	update_terminal_size();
+
     size_t	window_width() { return ((size_t)_window_width); }
     void	set_window_width(uint16_t v) { _window_width = v; }
     size_t	window_height() { return ((size_t)_window_height); }
