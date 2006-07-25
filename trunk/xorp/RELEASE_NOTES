@@ -1,12 +1,12 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.125 2006/07/19 02:02:39 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.126 2006/07/24 23:49:52 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
 
 This file contains XORP release notes (most recent releases first).
 
-Release 1.3-RC (2006/07/19)
+Release 1.3 (2006/??/??)
 =========================
   ALL:
     - Numerous improvements, bug fixes and cleanup.
@@ -130,6 +130,9 @@ Release 1.3-RC (2006/07/19)
 
     - Accept zeroed source addresses of raw packets, because of
       protocols like IGMPv3.
+
+    - Bug fix in restoring kernel routes that were automatically removed
+      when the MAC address or MTU on an interface is modified.
 
   RIB:
     - Several bug fixes and improvements.
