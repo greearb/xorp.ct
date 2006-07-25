@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig.cc,v 1.49 2005/10/17 11:14:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig.cc,v 1.50 2006/03/16 00:03:53 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -756,7 +756,7 @@ IfConfig::report_updates_completed(bool is_system_interfaces_reportee)
 }
 
 void
-IfConfig::report_updates(const IfTree& it, bool is_system_interfaces_reportee)
+IfConfig::report_updates(IfTree& it, bool is_system_interfaces_reportee)
 {
     bool updated = false;
 
@@ -792,9 +792,57 @@ IfConfig::report_updates(const IfTree& it, bool is_system_interfaces_reportee)
 	    }
 	}
     }
-
     if (updated) {
-	// End if updates
+	// Complete the update
+	report_updates_completed(is_system_interfaces_reportee);
+    }
+
+    //
+    // Walk again and flip the enable flag for the corresponding interfaces.
+    //
+    // First, disable all interfaces that were flipped, and are still enabled,
+    // and report the changes.
+    // Then, enable those interfaces and report again the changes.
+    // The main idea is to inform all interested parties about the fact
+    // that an interface was disabled and enabled internally during the
+    // process of writing the information to the kernel.
+    //
+    // Disable all flipped interfaces
+    updated = false;
+    for (IfTree::IfMap::iterator ii = it.ifs().begin();
+	 ii != it.ifs().end(); ++ii) {
+	IfTreeInterface& interface = ii->second;
+	if (! interface.flipped())
+	    continue;
+	if (! interface.enabled()) {
+	    interface.set_flipped(false);
+	    continue;
+	}
+	interface.set_enabled(false);
+	updated |= report_update(interface, is_system_interfaces_reportee);
+    }
+    if (updated) {
+	// Complete the update
+	report_updates_completed(is_system_interfaces_reportee);
+    }
+
+    // Enable all flipped interfaces
+    updated = false;
+    for (IfTree::IfMap::iterator ii = it.ifs().begin();
+	 ii != it.ifs().end(); ++ii) {
+	IfTreeInterface& interface = ii->second;
+
+	if (! interface.flipped())
+	    continue;
+	interface.set_flipped(false);
+	if (interface.enabled()) {
+	    continue;
+	}
+	interface.set_enabled(true);
+	updated |= report_update(interface, is_system_interfaces_reportee);
+    }
+    if (updated) {
+	// Complete the update
 	report_updates_completed(is_system_interfaces_reportee);
     }
 }

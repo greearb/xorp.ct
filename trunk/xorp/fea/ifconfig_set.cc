@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.36 2005/11/01 17:49:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set.cc,v 1.37 2006/03/16 00:03:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -246,7 +246,7 @@ IfConfigSet::push_interface_begin(const IfTreeInterface& i)
 }
 
 void
-IfConfigSet::push_interface_end(const IfTreeInterface& i)
+IfConfigSet::push_interface_end(IfTreeInterface& i)
 {
     string error_msg;
     uint32_t if_index = ifc().get_insert_ifindex(i.ifname());
@@ -345,6 +345,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	if (was_disabled) {
 	    config_interface(i.ifname(), if_index, new_flags, true,
 			     deleted, error_msg);
+	    i.set_flipped(true);	// XXX: the interface was flipped
 	}
 
 	break;
@@ -421,6 +422,7 @@ IfConfigSet::push_interface_end(const IfTreeInterface& i)
 	if (was_disabled) {
 	    config_interface(i.ifname(), if_index, new_flags, true,
 			     deleted, error_msg);
+	    i.set_flipped(true);	// XXX: the interface was flipped
 	}
 
 	break;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_set.hh,v 1.41 2006/03/27 01:12:58 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_set.hh,v 1.42 2006/03/30 08:32:12 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_SET_HH__
 #define __FEA_IFCONFIG_SET_HH__
@@ -243,7 +243,7 @@ private:
     void push_iftree_begin();
     void push_iftree_end();
     void push_interface_begin(const IfTreeInterface& i);
-    void push_interface_end(const IfTreeInterface& i);
+    void push_interface_end(IfTreeInterface& i);
     void push_vif_begin(const IfTreeInterface& i, const IfTreeVif& v);
     void push_vif_end(const IfTreeInterface& i, const IfTreeVif& v);
     void push_vif_address(const IfTreeInterface& i, const IfTreeVif& v,

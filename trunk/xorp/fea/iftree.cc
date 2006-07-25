@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/iftree.cc,v 1.34 2005/12/22 11:39:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/iftree.cc,v 1.35 2006/03/16 00:03:57 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -307,6 +307,9 @@ IfTree::str() const
  *   is not marked as deleted in the local tree.
  * - If an item from the local tree is in the other tree,
  *   its state is copied from the other tree to the local tree.
+ *   However, if an item from the local tree is marked as "flipped",
+ *   it will be set in the local tree even if it is not set in the other
+ *   tree.
  * - If an item from the other tree is not in the local tree, we do NOT
  *   copy it to the local tree.
  *
@@ -320,12 +323,14 @@ IfTree::align_with(const IfTree& other)
     for (ii = ifs().begin(); ii != ifs().end(); ++ii) {
 	const string& ifname = ii->second.ifname();
 	IfTree::IfMap::const_iterator oi = other.get_if(ifname);
+	bool flipped = ii->second.flipped();
 
 	if (! ii->second.enabled()) {
 	    if ((oi != other.ifs().end())
 		&& (! ii->second.is_same_state(oi->second))) {
 		ii->second.copy_state(oi->second);
 		ii->second.set_enabled(false);
+		ii->second.set_flipped(flipped);
 	    }
 	    continue;
 	}
@@ -340,8 +345,10 @@ IfTree::align_with(const IfTree& other)
 		ii->second.mark(DELETED);
 	    continue;
 	} else {
-	    if (! ii->second.is_same_state(oi->second))
+	    if (! ii->second.is_same_state(oi->second)) {
 		ii->second.copy_state(oi->second);
+		ii->second.set_flipped(flipped);
+	    }
 	}
 
 	IfTreeInterface::VifMap::iterator vi;
@@ -682,7 +689,7 @@ IfTree::track_live_config_state(const IfTree& other)
 IfTreeInterface::IfTreeInterface(const string& ifname)
     : IfTreeItem(), _ifname(ifname), _pif_index(0),
       _enabled(false), _discard(false), _is_discard_emulated(false),
-      _mtu(0), _no_carrier(false), _if_flags(0)
+      _mtu(0), _no_carrier(false), _flipped(false), _if_flags(0)
 {}
 
 bool
@@ -733,12 +740,13 @@ IfTreeInterface::str() const
 {
     return c_format("Interface %s { enabled := %s } "
 		    "{ mtu := %u } { mac := %s } {no_carrier = %s} "
-		    "{ flags := %u }",
+		    "{ flipped := %s } { flags := %u }",
 		    _ifname.c_str(),
 		    true_false(_enabled),
 		    XORP_UINT_CAST(_mtu),
 		    _mac.str().c_str(),
 		    true_false(_no_carrier),
+		    true_false(_flipped),
 		    XORP_UINT_CAST(_if_flags))
 	+ string(" ")
 	+ IfTreeItem::str();

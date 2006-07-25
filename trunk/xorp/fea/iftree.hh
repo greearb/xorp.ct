@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/iftree.hh,v 1.35 2005/12/22 11:39:52 pavlin Exp $
+// $XORP: xorp/fea/iftree.hh,v 1.36 2006/03/16 00:03:57 pavlin Exp $
 
 #ifndef __FEA_IFTREE_HH__
 #define __FEA_IFTREE_HH__
@@ -206,6 +206,9 @@ public:
      *   is not marked as deleted in the local tree.
      * - If an item from the local tree is in the other tree,
      *   its state is copied from the other tree to the local tree.
+     *   However, if an item from the local tree is marked as "flipped",
+     *   it will be set in the local tree even if it is not set in the other
+     *   tree.
      * - If an item from the other tree is not in the local tree, we do NOT
      *   copy it to the local tree.
      *
@@ -329,6 +332,24 @@ public:
     }
 
     /**
+     * Get the flipped flag.
+     *
+     * This flag indicates the interface's enable/disable status
+     * has been flipped (i.e., first disabled, and then enabled).
+     *
+     * @return true if the interface has been flipped, otherwise false.
+     */
+    inline bool flipped() const		{ return _flipped; }
+
+    /**
+     * Set the value of the flipped flag.
+     *
+     * @param v if true, then the flipped flag is enabled, otherwise is
+     * disabled.
+     */
+    inline void set_flipped(bool v)	{ _flipped = v; mark(CHANGED); }
+
+    /**
      * Get the system-specific interface flags.
      *
      * Typically, this value is read from the underlying system, and is
@@ -370,6 +391,7 @@ public:
 	set_mtu(o.mtu());
 	set_mac(o.mac());
 	set_no_carrier(o.no_carrier());
+	set_flipped(o.flipped());
 	set_if_flags(o.if_flags());
     }
 
@@ -386,6 +408,7 @@ public:
 		&& (mtu() == o.mtu())
 		&& (mac() == o.mac())
 		&& (no_carrier() == o.no_carrier())
+		&& (flipped() == o.flipped())
 		&& (if_flags() == o.if_flags()));
     }
 
@@ -402,6 +425,7 @@ protected:
     uint32_t 	 _mtu;
     Mac 	 _mac;
     bool	 _no_carrier;
+    bool	 _flipped;	// If true, interface -> down, then -> up
     uint32_t	 _if_flags;	// The system-specific interface flags
     VifMap	 _vifs;
 };
