@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.55 2006/04/03 06:12:42 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.56 2006/07/07 08:32:47 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1550,6 +1550,9 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		    is_router_alert = true;
 		    break;
 		}
+		if (option_len == 0)
+		    break;	// XXX: a guard against bogus option_len value
+
 		test_ip_options_len -= option_len;
 		option_p += option_len;
 	    }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.23 2006/06/29 11:03:55 bms Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.24 2006/07/07 08:32:47 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1515,6 +1515,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		    is_router_alert = true;
 		    break;
 		}
+		if (option_len == 0)
+		    break;	// XXX: a guard against bogus option_len value
+
 		test_ip_options_len -= option_len;
 		option_p += option_len;
 	    }
