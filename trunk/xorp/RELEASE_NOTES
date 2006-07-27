@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.126 2006/07/24 23:49:52 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.127 2006/07/25 10:06:18 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -133,6 +133,9 @@ Release 1.3 (2006/??/??)
 
     - Bug fix in restoring kernel routes that were automatically removed
       when the MAC address or MTU on an interface is modified.
+
+    - Bug fix in processing IPv4 raw packets if they contain an IP option
+      with a bogus option length.
 
   RIB:
     - Several bug fixes and improvements.
