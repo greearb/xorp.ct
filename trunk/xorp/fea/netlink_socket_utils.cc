@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.26 2005/08/18 15:45:50 bms Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.27 2006/03/16 00:03:59 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -165,8 +165,8 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 {
     const struct rtattr *rtattr;
     const struct rtattr *rta_array[RTA_MAX + 1];
-    int if_index;
-    bool ignore_ifindex = false;
+    int if_index = 0;		// XXX: initialized with an invalid value
+    bool lookup_ifindex = true;
     string if_name;
     int family = fte.nexthop().af();
     bool is_deleted = false;
@@ -217,7 +217,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 
 	if_name = pi->ifname();		// XXX: ifname == vifname
 	// XXX: Do we need to change nexthop_addr?
-	ignore_ifindex = true;
+	lookup_ifindex = false;
     }
 
     if (rtmsg->rtm_type == RTN_UNREACHABLE) {
@@ -275,20 +275,20 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 	xorp_route = true;
 
     //
-    // Get the interface index
+    // Get the interface name and index
     //
-    if (rta_array[RTA_OIF] != NULL) {
-	if_index = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF]));
-    } else {
-	XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
-	return false;
-    }
-    
-    //
-    // Get the interface name
-    //
-    if (!ignore_ifindex) {
+    if (lookup_ifindex) {
 	const char* name = NULL;
+
+	// Get the interface index
+	if (rta_array[RTA_OIF] != NULL) {
+	    if_index = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF]));
+	} else {
+	    XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
+	    return false;
+	}
+
+	// Get the interface name
 #ifdef HAVE_IF_INDEXTONAME
 	char name_buf[IF_NAMESIZE];
 	name = if_indextoname(if_index, name_buf);
