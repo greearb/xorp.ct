@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/pim/pim_vif.hh,v 1.38 2006/01/23 21:03:42 pavlin Exp $
+// $XORP: xorp/pim/pim_vif.hh,v 1.39 2006/03/16 00:04:55 pavlin Exp $
 
 
 #ifndef __PIM_PIM_VIF_HH__
@@ -381,11 +381,13 @@ public:
      * @param dst the destination address of the pseudo-header.
      * @param len the upper-layer packet length of the pseudo-header
      * (in host-order).
+     * @param protocol the upper-layer protocol number.
      * @return the checksum of the IPv6 "pseudo-header".
      */
     uint16_t	calculate_ipv6_pseudo_header_checksum(const IPvX& src,
 						      const IPvX& dst,
-						      size_t len);
+						      size_t len,
+						      uint8_t protocol);
     buffer_t	*buffer_send_prepare();
     buffer_t	*buffer_send_prepare(buffer_t *buffer);
 

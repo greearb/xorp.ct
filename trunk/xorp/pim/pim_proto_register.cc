@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.27 2006/03/16 00:04:54 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.28 2006/04/26 04:18:09 pavlin Exp $"
 
 
 //
@@ -155,7 +155,8 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		cksum = INET_CKSUM(&pim_header, sizeof(pim_header));
 		cksum2 = calculate_ipv6_pseudo_header_checksum(inner_src,
 							       inner_dst,
-							       sizeof(struct pim));
+							       sizeof(struct pim),
+							       IPPROTO_PIM);
 		cksum = INET_CKSUM_ADD(cksum, cksum2);
 		if (cksum != 0) {
 		    XLOG_WARNING("RX %s%s from %s to %s: "
@@ -825,7 +826,8 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	cksum = INET_CKSUM(&pim_header, sizeof(pim_header));	// XXX: no-op
 	cksum2 = calculate_ipv6_pseudo_header_checksum(source_addr,
 						       group_addr,
-						       sizeof(struct pim));
+						       sizeof(struct pim),
+						       IPPROTO_PIM);
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
 	pim_header.pim_cksum = cksum;
 	

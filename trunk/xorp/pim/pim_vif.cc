@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.59 2006/01/23 21:03:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.60 2006/03/16 00:04:55 pavlin Exp $"
 
 
 //
@@ -676,7 +676,8 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
 	    ph_len = PIM_REGISTER_HEADER_LENGTH;
 	else
 	    ph_len = BUFFER_DATA_SIZE(buffer);
-	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
+						       IPPROTO_PIM);
     }
     
     // XXX: The checksum for PIM_REGISTER excludes the encapsulated data packet
@@ -904,7 +905,8 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	    ph_len = PIM_REGISTER_HEADER_LENGTH;
 	else
 	    ph_len = BUFFER_DATA_SIZE(buffer);
-	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
+						       IPPROTO_PIM);
     }
     
     switch (message_type) {
@@ -1580,6 +1582,7 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
  * @dst: the destination address of the pseudo-header.
  * @len: the upper-layer packet length of the pseudo-header
  * (in host-order).
+ * @protocol: the upper-layer protocol number.
  * 
  * Calculate the checksum of an IPv6 "pseudo-header" as described
  * in RFC 2460.
@@ -1588,7 +1591,7 @@ PimVif::update_primary_and_domain_wide_address(string& error_msg)
  **/
 uint16_t
 PimVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src, const IPvX& dst,
-					      size_t len)
+					      size_t len, uint8_t protocol)
 {
     struct ip6_pseudo_hdr {
 	struct in6_addr	ip6_src;	// Source address
@@ -1604,7 +1607,7 @@ PimVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src, const IPvX& dst,
     ip6_pseudo_header.ph_zero[0] = 0;
     ip6_pseudo_header.ph_zero[1] = 0;
     ip6_pseudo_header.ph_zero[2] = 0;
-    ip6_pseudo_header.ph_next = IPPROTO_PIM;
+    ip6_pseudo_header.ph_next = protocol;
     
     uint16_t cksum = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
     
