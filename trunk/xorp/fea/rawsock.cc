@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.24 2006/07/07 08:32:47 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.25 2006/07/27 21:43:35 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1290,7 +1290,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     }
 #endif // HOST_OS_WINDOWS
     
-    // Check if it is a signal from the kernel to the user-level
+    // Check whether this is a signal from the kernel to the user-level
     switch (_ip_protocol) {
     case IPPROTO_IGMP:
     {
@@ -1325,7 +1325,6 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 #ifdef HAVE_IPV6
     case IPPROTO_ICMPV6:
     {
-#ifndef HAVE_IPV6_MULTICAST_ROUTING
 	if (nbytes < (ssize_t)sizeof(struct icmp6_hdr)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
@@ -1333,19 +1332,15 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 			 XORP_UINT_CAST(sizeof(struct icmp6_hdr)));
 	    return;		// Error
 	}
-#else
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
 	struct mrt6msg *mrt6msg;
-	
-	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
-	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
-	    && (nbytes < (ssize_t)MLD_MINLEN)) {
-	    XLOG_WARNING("proto_socket_read() failed: "
-			 "kernel signal or packet size %d is smaller than minimum size %u",
-			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
-					    (size_t)MLD_MINLEN)));
-	    return;		// Error
+
+	if (nbytes < (ssize_t)sizeof(*mrt6msg)) {
+	    // Not a kernel signal
+	    break;
 	}
+
+	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
