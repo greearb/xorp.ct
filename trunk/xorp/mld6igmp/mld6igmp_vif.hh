@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.43 2006/07/06 08:18:07 pavlin Exp $
+// $XORP: xorp/mld6igmp/mld6igmp_vif.hh,v 1.44 2006/07/19 01:13:18 pavlin Exp $
 
 #ifndef __MLD6IGMP_MLD6IGMP_VIF_HH__
 #define __MLD6IGMP_MLD6IGMP_VIF_HH__
@@ -570,6 +570,22 @@ private:
      * @return the prepared buffer.
      */
     buffer_t	*buffer_send_prepare();
+
+    /**
+     * Calculate the checksum of an IPv6 "pseudo-header" as described
+     * in RFC 2460.
+     * 
+     * @param src the source address of the pseudo-header.
+     * @param dst the destination address of the pseudo-header.
+     * @param len the upper-layer packet length of the pseudo-header
+     * (in host-order).
+     * @param protocol the upper-layer protocol number.
+     * @return the checksum of the IPv6 "pseudo-header".
+     */
+    uint16_t	calculate_ipv6_pseudo_header_checksum(const IPvX& src,
+						      const IPvX& dst,
+						      size_t len,
+						      uint8_t protocol);
 
     /**
      * Test whether I am the querier for this vif.

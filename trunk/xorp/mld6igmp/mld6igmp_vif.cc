@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.76 2006/07/07 08:41:21 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.77 2006/07/10 08:18:55 pavlin Exp $"
 
 
 //
@@ -501,19 +501,10 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 #ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
-	struct pseudo_header {
-	    struct in6_addr in6_src;
-	    struct in6_addr in6_dst;
-	    uint32_t pkt_len;
-	    uint32_t next_header;
-	} pseudo_header;
-	
-	src.copy_out(pseudo_header.in6_src);
-	dst.copy_out(pseudo_header.in6_dst);
-	pseudo_header.pkt_len = ntohl(BUFFER_DATA_SIZE(buffer));
-	pseudo_header.next_header = htonl(IPPROTO_ICMPV6);
-	
-	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
+	uint16_t cksum2;
+	size_t ph_len = BUFFER_DATA_SIZE(buffer);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
+						       IPPROTO_ICMPV6);
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
 #endif // HAVE_IPV6
@@ -954,19 +945,10 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 #ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
-	struct pseudo_header {
-	    struct in6_addr in6_src;
-	    struct in6_addr in6_dst;
-	    uint32_t pkt_len;
-	    uint32_t next_header;
-	} pseudo_header;
-	
-	src.copy_out(pseudo_header.in6_src);
-	dst.copy_out(pseudo_header.in6_dst);
-	pseudo_header.pkt_len = ntohl(BUFFER_DATA_SIZE(buffer));
-	pseudo_header.next_header = htonl(IPPROTO_ICMPV6);
-	
-	uint16_t cksum2 = INET_CKSUM(&pseudo_header, sizeof(pseudo_header));
+	uint16_t cksum2;
+	size_t ph_len = BUFFER_DATA_SIZE(buffer);
+	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
+						       IPPROTO_ICMPV6);
 	cksum = INET_CKSUM_ADD(cksum, cksum2);
     }
 #endif // HAVE_IPV6
@@ -1628,6 +1610,44 @@ Mld6igmpVif::buffer_send_prepare()
     BUFFER_RESET(_buffer_send);
     
     return (_buffer_send);
+}
+
+/**
+ * Calculate the checksum of an IPv6 "pseudo-header" as described
+ * in RFC 2460.
+ * 
+ * @param src the source address of the pseudo-header.
+ * @param dst the destination address of the pseudo-header.
+ * @param len the upper-layer packet length of the pseudo-header
+ * (in host-order).
+ * @param protocol the upper-layer protocol number.
+ * @return the checksum of the IPv6 "pseudo-header".
+ */
+uint16_t
+Mld6igmpVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src,
+						   const IPvX& dst,
+						   size_t len,
+						   uint8_t protocol)
+{
+    struct ip6_pseudo_hdr {
+	struct in6_addr	ip6_src;	// Source address
+	struct in6_addr	ip6_dst;	// Destination address
+	uint32_t	ph_len;		// Upper-layer packet length
+	uint8_t		ph_zero[3];	// Zero
+	uint8_t		ph_next;	// Upper-layer protocol number
+    } ip6_pseudo_header;	// TODO: may need __attribute__((__packed__))
+    
+    src.copy_out(ip6_pseudo_header.ip6_src);
+    dst.copy_out(ip6_pseudo_header.ip6_dst);
+    ip6_pseudo_header.ph_len = htonl(len);
+    ip6_pseudo_header.ph_zero[0] = 0;
+    ip6_pseudo_header.ph_zero[1] = 0;
+    ip6_pseudo_header.ph_zero[2] = 0;
+    ip6_pseudo_header.ph_next = protocol;
+    
+    uint16_t cksum = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+    
+    return (cksum);
 }
 
 /**
