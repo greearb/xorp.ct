@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.10 2005/10/23 20:41:38 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.11 2006/03/16 00:04:59 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -169,6 +169,12 @@ PolicyTarget::birth(const string& tclass, const string& /* tinstance */)
 void
 PolicyTarget::death(const string& tclass, const string& /* tinstance */)
 {
+    list<string> no_policy;
+
+    // Remove the "import" and "export" dependencies for the protocol
+    _conf.update_imports(tclass, no_policy);
+    _conf.update_exports(tclass, no_policy);
+
     _process_watch.death(tclass);
 }
 
