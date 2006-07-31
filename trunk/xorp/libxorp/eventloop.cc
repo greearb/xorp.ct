@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.13 2005/12/21 09:42:57 bms Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.14 2006/03/16 00:04:28 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -108,5 +108,15 @@ EventLoop::remove_ioevent_cb(XorpFd fd, IoEventType type)
 #else
     _selector_list.remove_ioevent_cb(fd, type);
     return true;
+#endif
+}
+
+size_t
+EventLoop::descriptor_count() const
+{
+#ifdef HOST_OS_WINDOWS
+    return _win_dispatcher.descriptor_count();
+#else
+    return _selector_list.descriptor_count();
 #endif
 }
