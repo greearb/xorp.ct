@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.8 2006/03/16 00:04:37 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.9 2006/03/17 20:57:00 bms Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -179,6 +179,13 @@ public:
      */
     void wait_and_dispatch(int ms);
 
+    /**
+     * Get the count of the descriptors that have been added.
+     *
+     * @return the count of the descriptors that have been added.
+     */
+    size_t descriptor_count() const { return _descriptor_count; }
+
 protected:
     void dispatch_sockevent(HANDLE hevent, XorpFd fd);
 
@@ -202,6 +209,7 @@ private:
     EventSocketMap	_event_socket_map;  // Event -> Socket
     vector<HANDLE>	_handles;	    // All Win32 handles pending wait
     vector<HANDLE>	_polled_pipes;	    // Pipe handles pending poll
+    size_t		_descriptor_count;  // Count for socket/event handlers
 };
 
 #endif // HOST_OS_WINDOWS

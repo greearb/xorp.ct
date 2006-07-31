@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.11 2006/06/29 11:03:56 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.12 2006/06/29 19:05:47 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -79,7 +79,8 @@ _ioe2wsa(const IoEventType ioevent)
 }
 
 WinDispatcher::WinDispatcher(ClockBase* clock)
-  : _clock(clock)
+    : _clock(clock),
+      _descriptor_count(0)
 {
     // Avoid introducing a circular dependency upon libcomm by calling
     // WSAStartup() and WSACleanup() ourselves. It's safe for the same
@@ -173,6 +174,9 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 	pair <EventSocketMap::iterator, bool> q =
 	    _event_socket_map.insert(std::make_pair(hevent, fd));
 	XLOG_ASSERT(q.second == true);
+
+	// Increment the descriptor count only if this is a new entry
+	_descriptor_count++;
     }
 
     XLOG_ASSERT(hevent != WSA_INVALID_EVENT);
@@ -231,6 +235,8 @@ WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
     } else {
 	_handles.push_back(fd);
     }
+
+    _descriptor_count++;
 
     return true;
 }
@@ -306,6 +312,9 @@ WinDispatcher::remove_socket_cb(XorpFd& fd, IoEventType type)
 	XLOG_ASSERT(jj != _event_socket_map.end());
 	_socket_event_map.erase(ii);
 	_event_socket_map.erase(jj);
+
+	// Decrement the descriptor count only if the entry was purged
+	_descriptor_count--;
     }
 
     //
@@ -350,6 +359,7 @@ WinDispatcher::remove_handle_cb(XorpFd& fd, IoEventType type)
 	    if (*ii == fd) {
 		ii = _polled_pipes.erase(ii);
 		_callback_map.erase(IoEventTuple(fd, type));
+		_descriptor_count--;
 		return true;
 	    }
 	}
@@ -364,6 +374,7 @@ WinDispatcher::remove_handle_cb(XorpFd& fd, IoEventType type)
 	    if (*ii == fd) {
 		ii = _handles.erase(ii);
 		_callback_map.erase(IoEventTuple(fd, type));
+		_descriptor_count--;
 		return true;
 	    }
 	}
