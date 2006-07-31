@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.17 2005/12/21 09:42:57 bms Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.18 2006/03/16 00:04:32 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -161,7 +161,12 @@ public:
      */
     int	wait_and_dispatch(int millisecs);
 
-    inline size_t descriptor_count() const { return _descriptor_count; }
+    /**
+     * Get the count of the descriptors that have been added.
+     *
+     * @return the count of the descriptors that have been added.
+     */
+    size_t descriptor_count() const { return _descriptor_count; }
 
     /**
      * Get a copy of the current list of monitored file descriptors in
