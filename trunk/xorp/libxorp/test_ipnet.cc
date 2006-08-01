@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.11 2005/08/18 15:28:41 bms Exp $"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.12 2006/03/16 00:04:33 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -116,6 +116,52 @@ v4_less_than_test()
 }
 
 static bool
+v4_is_unicast_test()
+{
+    IPv4Net uni("128.16.0.0/24"); /* regular unicast */
+    IPv4Net multi("224.0.0.0/24"); /* multicast, not valid */
+    IPv4Net odd1("128.0.0.0/1"); /* not valid, includes multicast addresses */
+                                 /* we return true anyway - see
+				    comments in ipnet.hh */
+    IPv4Net odd2("192.0.0.0/2"); /* not valid, includes multicast addresses */
+                                 /* we return true anyway - see
+				    comments in ipnet.hh */
+    IPv4Net odd3("0.0.0.0/1"); /* only unicast, should be valid */
+    IPv4Net odd4("128.0.0.0/2"); /* only unicast, should be valid */
+    IPv4Net deflt("0.0.0.0/0"); /* default route, is valid */
+    if (!uni.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", uni.str().c_str());
+	return false;
+    }
+    if (multi.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", multi.str().c_str());
+	return false;
+    }
+    if (!odd1.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", odd1.str().c_str());
+	return false;
+    }
+    if (!odd2.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", odd2.str().c_str());
+	return false;
+    }
+    if (!odd3.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", odd3.str().c_str());
+	return false;
+    }
+    if (!odd4.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", odd4.str().c_str());
+	return false;
+    }
+    if (!deflt.is_unicast()) {
+	verbose_log("%s failed is_unicast test.\n", deflt.str().c_str());
+	return false;
+    }
+    verbose_log("Passed is_unicast test.\n");
+    return true;
+}
+
+static bool
 v4_overlap_test()
 {
     // Address that overlap with netmask
@@ -150,7 +196,8 @@ test_ipv4net_okay()
 {
     return (v4_serialization_test() == true) &
 	(v4_less_than_test() == true) &
-	(v4_overlap_test() == true);
+	(v4_overlap_test() == true) &
+	(v4_is_unicast_test() == true);
 }
 
 // ----------------------------------------------------------------------------

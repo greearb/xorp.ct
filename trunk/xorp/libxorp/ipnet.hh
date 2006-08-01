@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.22 2006/03/16 00:04:29 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.23 2006/04/05 08:12:52 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -303,6 +303,38 @@ public:
     bool is_multicast() const {
 	return (ip_multicast_base_prefix().contains(*this));
     }
+
+ 
+    /**
+     * Test if this subnet is a unicast prefix. Note that unicast
+     * prefixes include the default route such as 0.0.0.0/0 in IPv4 or
+     * the v6 equivalent.
+     *
+     * @return true if this subnet is a unicast prefix.
+     */
+    bool is_unicast() const {
+
+	// Some corner cases: 
+	// 0.0.0.0/0  - this is the default route, and should return true.
+	//
+	// 0.0.0.0/1  - this is a valid unicast route and should return true
+	//
+	// 128.0.0.0/1 - this overlaps the multicast range, and
+	//   technically should return false.  We return true here,
+	//   because we don't want to accidentally reject routes that
+	//   mind be thought of as valid, but the behaviour could
+	//   probably be changed to be more strictly correct if needed.
+	//
+        // 224.0.0.0/8 - this is a multicast route, and returns false.
+
+	if (masked_addr().is_zero()) {
+	    // it's the default route, or a valid unicast route
+	    return true;
+	}
+	return masked_addr().is_unicast();
+    }
+
+ 
 
     /**
      * Get the highest address within this subnet.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.42 2006/04/14 21:11:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/peer_handler.cc,v 1.43 2006/04/15 07:10:35 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -118,7 +118,7 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	BGPUpdateAttribList::const_iterator ni4;
 	ni4 = p->nlri_list().begin();
 	while (ni4 != p->nlri_list().end()) {
-	    if (!ni4->net().masked_addr().is_unicast()) {
+	    if (!ni4->net().is_unicast()) {
 		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
 			   cstring(ni4->net()), cstring(*p));
 		++ni4;
@@ -144,7 +144,7 @@ PeerHandler::add<IPv4>(const UpdatePacket *p,
 	list<IPNet<IPv4> >::const_iterator ni;
 	ni = mpreach->nlri_list().begin();
 	while (ni != mpreach->nlri_list().end()) {
-	    if (!ni->masked_addr().is_unicast()) {
+	    if (!ni->is_unicast()) {
 		XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
 			   cstring(*ni), cstring(*p));
 		++ni;
@@ -215,7 +215,7 @@ PeerHandler::add<IPv6>(const UpdatePacket *p,
     list<IPNet<IPv6> >::const_iterator ni;
     ni = mpreach->nlri_list().begin();
     while (ni != mpreach->nlri_list().end()) {
-	if (!ni->masked_addr().is_unicast()) {
+	if (!ni->is_unicast()) {
 	    XLOG_ERROR("NLRI <%s> is not semantically correct ignoring.%s",
 		       cstring(*ni), cstring(*p));
 	    ++ni;
