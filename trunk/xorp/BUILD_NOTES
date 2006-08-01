@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.63 2006/07/05 03:17:57 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.64 2006/07/27 21:48:12 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -294,6 +294,12 @@ gmake check
 
     - For instructions how to build the XORP Installer for Windows
       see xorp/contrib/win32/installer/README.
+
+    - STOP PRESS: The very latest MinGW-current as of 31st July 2006 will
+      require that you remove the -Wmissing-declarations warning flag
+      from XORP's configure script, due to the new way that MSVCRT inline
+      functions are dealt with in the system headers. No other workaround
+      is known at this time.
 
   * Windows Server 2003 (Service Pack 1) (32-bit, x86):
     - XORP is only supported on Windows Server 2003, and is targeted for
