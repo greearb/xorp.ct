@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/cli/TODO,v 1.7 2004/06/22 01:32:25 pavlin Exp $
+# $XORP: xorp/cli/TODO,v 1.8 2005/03/24 02:10:24 pavlin Exp $
 #
 
 * Update libtecla to the lastest version (currently, 1.6, while
@@ -25,7 +25,7 @@
 * Don't return any error if a command with exactly same help, etc
   was installed already. (??)
 
-* Add output paging for <TAB> generated help
+* Add output paging for <TAB> generated help.
 
 * Change cli_command->server_name() and friends to 'processor_name'
 
@@ -39,19 +39,19 @@
   When printing error with cli_command->name(), use '' around the command
   name to make it clear where the command is.
 
-* Implement the missing pipe filters
+* Implement the missing pipe filters.
 
 * Add support for \" escaping of a quotation.
 
 * Parse the pipe commands and return error if the (number of) arguments
-  do not match
+  do not match.
 
-* Change/fix pop_token() to return an error when no pair of quotations found
+* Change/fix pop_token() to return an error when no pair of quotations found.
 
 * Check if the cli_client->_buffer_line magic indeed works if the
   very last cli_printf() doesn't have '\n' at the end.
 
-* Commbine the "Enter" help message to be defined at a single place
+* Commbine the "Enter" help message to be defined at a single place.
 
 * Help messages for following commands are not same as in Juniper:
   -  "| compare rollback"

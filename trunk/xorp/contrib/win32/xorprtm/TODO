@@ -1,3 +1,6 @@
+#
+# $XORP$
+#
 
 Clean up the code.
  Push header inclusion down to individual files.

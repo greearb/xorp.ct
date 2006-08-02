@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/rtrmgr/TODO,v 1.28 2005/02/10 04:12:14 pavlin Exp $
+# $XORP: xorp/rtrmgr/TODO,v 1.29 2005/03/12 05:27:46 pavlin Exp $
 #
 
 Urgent
@@ -7,8 +7,8 @@ Urgent
 
 Configure Mode
 
- - There are lots of hard-coded values in master_conf_tree.cc
- - Implement node locking in MasterConfigTree
+ - There are lots of hard-coded values in master_conf_tree.cc.
+ - Implement node locking in MasterConfigTree.
  - Use node locking to prevent two users editing the same node.
  - Templates need %delete commands adding.
  - Can't delete leaf nodes.

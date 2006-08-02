@@ -1,9 +1,9 @@
 #
-# $XORP: xorp/mld6igmp/TODO,v 1.17 2005/06/01 00:47:36 pavlin Exp $
+# $XORP: xorp/mld6igmp/TODO,v 1.18 2006/07/05 03:12:58 pavlin Exp $
 #
 
 * Implement RFC 3590 "Source Address Selection for the
-  Multicast Listener Discovery (MLD) Protocol"
+  Multicast Listener Discovery (MLD) Protocol".
 
 * Implement an MLD/IGMP "proxy" where the Join/Leave messages
   from one interface are forwarded on another interface.
@@ -43,7 +43,7 @@
 * The return XrlCmdError values in mld6igmp_proto_access.hh are probably
   bogus.
 
-* Initialize/setup mld6igmp_vif::vif_index() and vif_name();
+* Initialize/setup mld6igmp_vif::vif_index() and vif_name().
 
 * Instead of using Join/Prune in the context of IGMP/MLD6, use
   Join/Leave instead?

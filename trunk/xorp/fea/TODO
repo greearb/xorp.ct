@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/fea/TODO,v 1.30 2005/03/24 03:07:06 pavlin Exp $
+# $XORP: xorp/fea/TODO,v 1.31 2005/06/16 19:40:02 pavlin Exp $
 #
 
 * Remove the old FEA ifmgr interface (e.g. fea_ifmgr_client/0.1
@@ -70,14 +70,14 @@
 * The IPv4 raw packet input in case of OpenBSD has changed between versions.
   E.g., if (defined(__OpenBSD__) && (OpenBSD < 200311))
   then the processing should be same as FreeBSD and NetBSD.
-  In other words, newer OpenBSD behave differently.
+  In other words, newer OpenBSD behaves differently.
 
 * When start/stop multicast routing, call start_pim/stop_pim XRL as well.
 
 * Implement following methods and their friends:
   - set_allow_kernel_signal_messages(bool v)
 
-* Set the pif_index for MfeaVif
+* Set the pif_index for MfeaVif.
 
 * In MfeaDfe::is_valid(), the min threshold value must be defined
   somewhere else, and it should be consistent with
@@ -92,15 +92,15 @@
 
 * Rename "functions" with "methods" in classes inside *.hh
   (e.g., "Private functions". Same for all *.hh in other directories:
-  mrt, cli, mld6igmp, pim, libproto
+  mrt, cli, mld6igmp, pim, libproto.
 
 * Use start_pim() and stop_pim() as appropriate.
 
-* If a protocol deletes itself from the MFEA, make sure that all
-  the groups it has joined will be left.
+* If a protocol deletes itself from the MFEA, make sure that the
+  multicast leave operation will be performed for all groups it has joined.
 
 * Fix all messages like the one below to print a more explicit information
-  where the error happened. Apply same for CLI, MLD6IGMP, PIM
+  where the error happened. Apply same for CLI, MLD6IGMP, PIM:
     if (is_invalid_family) {
 	// Invalid address family
 	reason = c_format("Received protocol message with invalid "
@@ -123,9 +123,9 @@
 * A single ProtoComm should be able to handle more than one protocol modules.
 
 * 'int proto' (e.g. IPPROTO_IGMP, etc) should be renamed to 'proto_number'
-   or sth. like that
+   or somethinf like that.
 
-* Use if_nametoindex(3) when available
+* Use if_nametoindex(3) when available.
 
 * Take care of scope_id for IPv6:
 		struct sockaddr_in6 addr;
@@ -143,10 +143,10 @@
   IGMP or ICMP6 is closed too (??).
 
 * When sending a request using ProtoComm, make sure we are using the
-  right socket (e.g., IOCTL, etc)
+  right socket (e.g., IOCTL, etc).
 
 * In function headers, make sure that constants have % in front.
-  E.g.: %XORP_OK %XORP_ERROR 
+  E.g.: %XORP_OK %XORP_ERROR.
 
 * Send email to KAME. In the mean time detect the problem in configure.in
 #ifdef GET_TIME
@@ -173,15 +173,15 @@
 
 * Optional items:
 
- * Paranoid checking for top-level snapshot state.
+ - Paranoid checking for top-level snapshot state.
 
- * If we desire the ability to flush a transaction in progress, we
+ - If we desire the ability to flush a transaction in progress, we
    must add a back-reference to the transaction ID to each
    operation because of how the base classes in libxorp are laid out.
 
- * Only snapshot a given table in pre_commit() if the operations in
+ - Only snapshot a given table in pre_commit() if the operations in
    the transaction would actually change such tables.
 
- * IPv6 support.
+ - IPv6 support.
 
- * Fixup comments.
+ - Fixup comments.
