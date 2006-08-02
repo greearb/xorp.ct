@@ -1,0 +1,100 @@
+drawtool(
+    picture(
+        picture(
+            text(10,"Origin",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,128,561)
+            rectangle(204,721,284,785 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+            )
+        picture(
+            text(10,"Merge",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,192,529)
+            rectangle(332,657,412,721 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+            )
+        picture(
+            text(10,"ExtInt",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,264,513)
+            rectangle(476,625,556,689 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :fillbg -1 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,56,-32)
+        picture(
+            text(10,"Register",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,320,489)
+            rectangle(588,577,684,641 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,64,-8)
+        rectangle(748,529,844,593 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,0,0,0.5,74,191.5)
+        picture(
+            text(10,"Origin",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,128,561)
+            rectangle(204,721,284,785 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,0,-160)
+        picture(
+            text(10,"Origin",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,128,561)
+            rectangle(204,721,284,785 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,0,-120)
+        picture(
+            text(10,"Origin",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,128,561)
+            rectangle(204,721,284,785 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,0,-40)
+        picture(
+            text(10,"Origin",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,128,561)
+            rectangle(204,721,284,785 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,0,-80)
+        picture(
+            text(10,"Merge",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,192,529)
+            rectangle(332,657,412,721 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,64,-24)
+        picture(
+            text(10,"Merge",
+                "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,192,529)
+            rectangle(332,657,412,721 :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :nonepat :transform 0.5,-0,-0,0.5,18,175.5)
+             :transform 1,0,0,1,0,-96)
+        arrowline(284,737,332,705 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(284,673,332,673 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(412,673,460,657 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(540,625,588,609 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(668,593,716,593 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(812,593,860,593 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(956,593,1020,593 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(140,753,204,753 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(140,673,204,673 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(140,593,204,593 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(140,513,204,513 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(140,433,204,433 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(284,593,460,625 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(412,497,588,577 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(284,513,332,513 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(284,449,332,481 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        text(10,"RIP",
+            "routes" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,80,569)
+        text(10,"OSPF",
+            "routes" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,80,529)
+        text(10,"static",
+            "routes" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,80,489)
+        text(10,"IBGP",
+            "routes" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,80,449)
+        text(10,"EBGP",
+            "routes" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,80,409)
+        arrowline(700,449,748,561 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        arrowline(780,561,828,449 :arrowscale 2 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.5,-0,-0,0.5,18,175.5)
+        text(10,"To FEA" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,520,489)
+        text(10,"Registration",
+            "of interest",
+            "from routing",
+            "protocols" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,328,393)
+        text(10,"Notifications",
+            "of change to",
+            "routing protocols" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,416,393)
+        arrowline(423,428,580,396 :arrowscale 4 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.197186,-0,-0,0.197186,412.711,376.231)
+        arrowline(422,426,579,347 :arrowscale 4 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.197186,-0,-0,0.197186,412.711,376.231)
+        text(10,"To other",
+            "Rib Clients" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,529,463)
+        arrowline(292,250,292,404 :arrowscale 4 :tail :fillbg -1 :brush 65535,0 :fgcolor "Black",0,0,0 :bgcolor "White",1,1,1 :graypat 0 :transform 0.197186,-0,-0,0.197186,412.711,376.231)
+        text(10,"Register Rib",
+            "Clients" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,450,423)
+        text(10,"Redist",
+            "Table" :fillbg 0 :fgcolor "Black",0,0,0 :font "-adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1","Helvetica",10 :transform 1,0,0,1,456,481)
+         :transform 1,0,0,1,0,0)
+)
