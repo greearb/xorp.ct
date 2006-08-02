@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/bgp/TODO,v 1.16 2006/02/17 20:00:38 atanu Exp $
+# $XORP: xorp/bgp/TODO,v 1.17 2006/03/09 07:11:22 atanu Exp $
 #
 
 ------------------------------ TODO -----------------------------
@@ -49,10 +49,6 @@ will no longer be required.
 37) The header file timer_const.hh is not used, it should be used or deleted.
 
 -- added 2005-09-23 by AG
-
-38) Route Flap Damping needs regression tests.
-
--- 2005-12-05 by AG
 
 ------------------------------ DONE -----------------------------
 1) Holdtimers in from milliseconds to seconds in config files. Plus
@@ -175,6 +171,10 @@ to 1. Now that XRLs are pipelined this value should be increased. Its
 too close to the 1.1-RC to make this change now.
 
 -- added 2005-03-10 by AG
+
+38) Route Flap Damping needs regression tests.
+
+-- 2005-12-05 by AG
 
 ------------------------------ TESTING --------------------------
 
