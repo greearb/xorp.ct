@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.18 2006/07/05 03:06:28 pavlin Exp $
+% $XORP: xorp/docs/mld6igmp/mld6igmp_arch.tex,v 1.19 2006/07/05 03:38:51 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,9 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +28,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -38,14 +41,14 @@
 
 \title{XORP MLD/IGMP Daemon \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
 
@@ -206,7 +209,7 @@ routing.
 
 Typically, from developer's point of view, all interaction with Mld6igmpNode
 would be through Mld6igmpNode~\footnote{For simplicity, currently
-(March 2006) there are few occasions when XrlMld6igmpNode uses
+(August 2006) there are few occasions when XrlMld6igmpNode uses
 direct access to Mld6igmpVif.}.
 
 The public interface for Mld6igmpVif contains the methods to manipulate a
@@ -237,7 +240,7 @@ be enabled explicitly.
 \subsection{Mld6igmpConfig Description}
 
 Mld6igmpConfig handles the MLD/IGMP-specific
-configuration~\footnote{Currently (March 2006), Mld6igmpConfig is not
+configuration~\footnote{Currently (August 2006), Mld6igmpConfig is not
 implemented; rather, all state is kept inside Mld6igmpNode instead.}. This
 configuration is used to configure the following units:
 
@@ -262,20 +265,22 @@ configuration is used to configure the following units:
   \item March 10, 2003: Updated to match XORP version 0.2 release code;
   cleanup.
 
-  \item June 9, 2003: Bump-up the version to 0.3, and the date.
+  \item June 9, 2003: Updated the version to 0.3, and the date.
 
-  \item August 28, 2003: Bump-up the version to 0.4, and the date.
+  \item August 28, 2003: Updated the version to 0.4, and the date.
 
-  \item November 6, 2003: Bump-up the version to 0.5, and the date.
+  \item November 6, 2003: Updated the version to 0.5, and the date.
 
-  \item July 8, 2004: Bump-up the version to 1.0, and the date.
+  \item July 8, 2004: Updated the version to 1.0, and the date.
 
-  \item April 13, 2005: Bump-up the version to 1.1, and the date.
+  \item April 13, 2005: Updated the version to 1.1, and the date.
 
-  \item March 8, 2006: Bump-up the version to 1.2, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
 
   \item July 4, 2006 Updated to include information about the IGMPv3/MLDv2
   implementation.
+
+  \item August 2, 2006: Updated the version to 1.3, and the date.
 
 \end{itemize}
 
