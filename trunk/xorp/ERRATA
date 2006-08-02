@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.31 2006/06/29 05:38:35 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.32 2006/07/06 20:23:16 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -185,8 +185,8 @@
       point-to-point links. Furthermore, even on numbered point-to-point
       links the next-hop information in the routing entries should use
       an IP address instead of an interface name. For example,
-      if there is a GRE tunnel on Linux and if we want to add a route
-      that uses that tunnel, we should use a command like:
+      if there is a GRE tunnel on Linux, then use the following command
+      to add a route that uses that tunnel:
 
         route add -net <target> gw <IP address of other side of GRE tunnel>
 

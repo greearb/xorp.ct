@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.48 2006/07/19 05:10:58 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.49 2006/07/19 22:53:03 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -51,8 +51,8 @@ the login shell is csh or tcsh):
 0500.	TASK: Update the documentation in xorp/docs
 	WHO:  Everyone
 	WHEN: 7 days - 1 day before the release date
-	MISC: - After a document is reviewed, bump-up Version in the
-	        front-page to correspond to the new release version.
+	MISC: - After a document is reviewed, update the Version in the
+	        front page to correspond to the new release version.
               - Can be omitted for a release candidate.
 	COMMANDS:
  # Commands to verify the Version.
@@ -69,16 +69,16 @@ the login shell is csh or tcsh):
 		code
 
 ========================================================================
-0720.	TASK: Bump-up the XORP_MODULE_VERSION in all foo_module.h files
-	      (NOTE: for the time being, do not do it yet, until we
-	      have a better idea about the particular purpose, if any,
-	      of XORP_MODULE_VERSION).
+0720.	TASK: Update XORP_MODULE_VERSION in all foo_module.h files
 	WHO:  Release manager
 	WHEN: 1 day before the release date
+        MISC: For the time being, do not do this, until we
+	      have a better idea about the particular purpose, if any,
+	      of XORP_MODULE_VERSION.
 
 ========================================================================
 0730.	TASK: Add a new year to the copyright license (only if
-	      necessary) 
+	      necessary)
 	WHO:  Release manager
 	WHEN: 1 day before the release date
 	MISC: All files in xorp/
@@ -94,7 +94,7 @@ the login shell is csh or tcsh):
 		script.
 
 ========================================================================
-0750.	TASK: Bump-up the release version number
+0750.	TASK: Update the release version number
 	WHO:  Release manager
 	WHEN: 1 day before the release date
 	COMMANDS:
@@ -107,7 +107,7 @@ the login shell is csh or tcsh):
         xorp/mibs/configure.in
  cd xorp
  ./bootstrap
- cvs commit -m "Prepare XORP for release: bump-up version number"
+ cvs commit -m "Prepare XORP for release: update the version number"
 
 ========================================================================
 0800.	TASK: Prune old entries in xorp/foo/TODO files
@@ -169,7 +169,7 @@ the login shell is csh or tcsh):
 		www/html_src/status.html
                 This can be omitted for a release candidate.
 	      - Edit the following files and remove all temporary notes
-	        about platforms that are supported only in XORP-current:
+	        about platforms that are supported only in XORP-WIP:
 	        www/html_src/dowloads.html, html_src/getting_started.html
 		and html_src/status.html
 	      - If necessary, update www/html_src/roadmap.html
