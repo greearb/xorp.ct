@@ -100,8 +100,7 @@ on all recent versions of FreeBSD, on most versions of Linux with a 2.4.x or
 2.6.x kernel.
 
 <P>
-XORP also appears to work on DragonFlyBSD (only with XORP-current), NetBSD,
-OpenBSD,
+XORP also appears to work on DragonFlyBSD, NetBSD, OpenBSD,
 MacOS X (10.2 or later), and on Windows Server 2003, but if you want to
 use it for multicast routing make sure that the kernel has the
 appropriate support (not available for MacOS X and Windows at this
@@ -115,18 +114,18 @@ interested in porting XORP to a new platform.
 XORP is written in C++.  We've endeavoured to comply as far as
 possible with the ANSI standards, but currently XORP has only been
 compiled with variants of gcc.  XORP is known to compile on gcc
-2.95.x, 2.96, 3.2.x, 3.3.x, and pre-releases of 3.4.
+2.95.x, 2.96, 3.2.x, 3.3.x, 3.4.x, and experimental releases of 4.2.0.
 
 <P>
 We run a tinderbox that checks daily that XORP still compiles and
-passes its unit tests with 2.95.4, 3.3.4, and 3.4-prerelease.  The aim
+passes its unit tests with 2.95.4, 3.3.4, and 3.4.6.  The aim
 is that you should always be able to check out a current source
 snapshot from CVS, compile it, and have it pass all the internal
 validation tests.  We don't always succeed, but failures identified by
 the tinderbox are always fixed very rapidly.
 
 <P>
-To compile XORP requires nearly 1.3GB of free disk space, and up to an
+To compile XORP requires nearly 1.4GB of free disk space, and up to an
 hour depending on your CPU speed and the version of the compiler
 you're using.  Much of this is spent compiling the validation tests,
 which are always built by default.
@@ -162,8 +161,9 @@ XORP source directory.
 <a name="validating"></a><h2>Validating a XORP Compilation</h2>
 <P>
 Assuming the compilation completed without errors, you should now
-validate that the build actually runs correctly.  In the top-level
-directory, type:
+validate that the build actually runs correctly.  First, make sure that
+"bash" and "python" are installed.  Then type the following in the
+top-level directory:
 <PRE>
 # gmake check
 </PRE>
@@ -979,7 +979,7 @@ instead of "disable".
 <hr noshade>
 <div id="feedback">
 <p><em>Document id $XORP: www/scripts/XorpOrgGenerator.py,v 1.13 2006/03/18 20:11:55 atanu Exp $.
-<br>Generated on 29/Jun/2006 at 17:43:09.</em>
+<br>Generated on 02/Aug/2006 at 02:00:25.</em>
 <em>Feedback, comments, flames to feedback&#64;xorp&#46;org</em>
 </div> <!-- end of div id="feedback" -->
 </div> <!-- end of div id="main" -->
