@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.23 2005/11/29 01:48:41 pavlin Exp $
+% $XORP: xorp/docs/snmp/snmp_overview.tex,v 1.24 2006/03/09 02:00:23 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,9 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +28,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -38,23 +41,20 @@
 
 \title{XORP SNMP Agent \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
-
-\thispagestyle{empty}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-
 
 The SNMP standards \cite{STD0062} define the protocol used to communicate
 between SNMP managers and agents, as well as the structure of the management
@@ -64,7 +64,7 @@ modules, and how those modules are loaded/unloaded at runtime.  Also, a MIB
 development framework is presented, which provides unified process to those
 writing new MIB modules for XORP.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The SNMP agent}
 
 XORP uses the extensible SNMP agent included in the Net-SNMP package
@@ -86,19 +86,21 @@ the part of the code that instantiates the objects declared in the MIB
 definition file.  Thus a MIB module consists of:
 
 \begin{description}
-    \item[MIB module definition file] This file is written in ASN.1 language,
-    and is typically published as an RFC.
-    \item[MIB module source code] One or more source files that implement the
-    data access routines that allow the SNMP agent to read or modify XORP's
-    configuration settings. 
+
+  \item[MIB module definition file] This file is written in ASN.1 language,
+  and is typically published as an RFC.
+
+  \item[MIB module source code] One or more source files that implement the
+  data access routines that allow the SNMP agent to read or modify XORP's
+  configuration settings. 
+
 \end{description} 
 
-The oldest version of Net-SNMP that was tested with XORP is 5.0.6.  If an older version is detected by our \texttt{configure} script, XORP MIB modules will not be built.
+The oldest version of Net-SNMP that was tested with XORP is 5.0.6.  If an
+older version is detected by our \texttt{configure} script, XORP MIB modules
+will not be built.
 
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Dynamically loadable MIB modules}
 \label{sec:MIB_module_format}
 
@@ -120,9 +122,9 @@ $ net-snmp-config --snmpd-module-list
 There are three methods for loading/unloading MIB modules:  
 
 \begin{enumerate}
-\item Using the dlmod directive in snmpd.conf 
-\item Sending SNMP set requests to the agent
-\item Using XORP's IPC methods (XRLs)
+  \item Using the dlmod directive in snmpd.conf 
+  \item Sending SNMP set requests to the agent
+  \item Using XORP's IPC methods (XRLs)
 \end{enumerate}
 
 The first option can only be used to load modules at startup.  This is what the
@@ -176,8 +178,8 @@ UCD-DLMOD-MIB::dlmodStatus.2 = INTEGER: loaded(1)
 \end{verbatim}
 
 So far we've seen how to load MIBs when the agent is started, and at runtime
-using SNMP requests.  But XORP processes communicate to each other via XRLs, and
-it would be much more convenient for a process to be able to use the same
+using SNMP requests.  But XORP processes communicate to each other via XRLs,
+and it would be much more convenient for a process to be able to use the same
 mechanism to communicate with the SNMP agent.  For this reason each MIB module
 should implement an Xrl target.  The module \texttt{xorp\_if\_mib\_module}
 implements an XRL interface that allows loading and unloading MIBs.  These are
@@ -197,9 +199,8 @@ configure XORP to run distributed across multiple hosts but with one
 master SNMP agent.  
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Connecting Net-SNMP with XORP}
-
 
 We have written a special MIB module (\texttt{xorp\_if\_mib\_module}) that
 coordinates the communication between \texttt{snmpd} and XORP processes.  This
@@ -238,11 +239,8 @@ Figure \ref{fig:xorp-if-diag} illustrates the functionality implemented by
   \label{fig:xorp-if-diag}
 \end{figure}
 
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Modifying XORP's configuration from within a MIB module}
-
 
 MIB modules use XORP's IPC library \cite{xorp:xrl} to communicate to XORP
 processes.  Each MIB module has the responsibility to pull the relevant
@@ -269,8 +267,7 @@ change XORP configuration.
   \label{fig:mib-class-diag}
 \end{figure}
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{A reference implementation of a MIB module}
 
 So far we've talked Net-SNMP configuration.  In this section we'll cover
@@ -280,7 +277,9 @@ files in xorp/mibs/bgp4\_mib\_1657*.  What follows is a description the tools
 and process followed to implement this module.  You should refer to the
 kdoc documentation as well as the source itself for more details.   
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{The textual MIB definition file}
+
 The first step to write a MIB module should be writing or getting the ASN.1 MIB
 definition file.  If you are implementing an existing protocol, chances are
 that there is already a published RFC with the MIB definition for it.  In this
@@ -290,27 +289,31 @@ xorp/mibs/textual/BGP4-MIB.txt.
 
 You will also have to  make your textual MIB file accessible to the Net-SNMP
 tools.  See the \texttt{mibs} and \texttt{mibdirs} directives in the man page
-snmp.conf(5).  One way to do this is to copy our MIB onto the default directory,
-and then set the MIBS environment variable:
+snmp.conf(5).  One way to do this is to copy our MIB onto the default
+directory, and then set the MIBS environment variable:
 
 \begin{verbatim}
 $ cp BGP4-MIB.txt /usr/local/share/snmp/mibs
 $ export MIBS=+BGP4-MIB
 \end{verbatim}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Net-SNMP handlers}
 
 Net-SNMP 5.x.x uses handlers to process SNMP requests.  When a MIB module is
 loaded, it registers one or more handlers (callbacks) on a given OID in the OID
-tree.  When a request arrives for that OID subtree, the registered handlers are called in sequence until the request is fully processed.  There are multiple pre-written handlers (helpers, in Net-SNMP nomenclature) that deal with certain parts of the processing.  
+tree.  When a request arrives for that OID subtree, the registered handlers
+are called in sequence until the request is fully processed.  There are
+multiple pre-written handlers (helpers, in Net-SNMP nomenclature) that deal
+with certain parts of the processing.
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Using mib2c}
 
-Net-SNMP provides what is usually termed as ''MIB compiler'' (\texttt{mib2c}), a
-tool that will read MIB ASN.1 definition files and generate C code templates to
-ease the development of handlers.  \texttt{mib2c} takes a configuration file as
-a parameter that will determine which helper handlers to use. 
+Net-SNMP provides what is usually termed as ''MIB compiler'' (\texttt{mib2c}),
+a tool that will read MIB ASN.1 definition files and generate C code templates
+to ease the development of handlers.  \texttt{mib2c} takes a configuration
+file as a parameter that will determine which helper handlers to use.
 
 The MIB compiler is not installed by default with Net-SNMP.  If you have
 Net-SNMP installed in your system and you invoke \texttt{mib2c} you'll probably
@@ -360,7 +363,7 @@ Note that although there are other conf files, only the two presented in this
 section can be used with XORP's asynchronous architecture.  You can find
 details on those files by omitting the -c option when invoking \texttt{mib2c}. 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Using delegated requests}
   
 The asynchronous nature of XORP communications prevents handlers from
@@ -378,6 +381,7 @@ example uses the function \texttt{netsnmp\_handler\_check\_cache()} which you
 will see that it's not used in our code.  The reason is that it is incompatible
 with the code generated by mib2c.iterate.conf}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Caching tables inside the agent}
 
 SNMP is layered on a connectionless protocol (UDP).  This means that no state
@@ -404,6 +408,7 @@ The configuration file used to generate the code for cached tables is
 There are plans to include caching built in inside Net-SNMP.  When that
 happens, this strategy may not longer be necessary. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Launching Net-SNMP via the router manager}
 
 You can have the rtrmgr process start the SNMP agent.  In order to do that, you
@@ -416,7 +421,6 @@ See \texttt{\$\{XORP\}/etc/templates/snmp.tp} for definition of the SNMP
 configuration tree.
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -425,19 +429,19 @@ configuration tree.
 
 \begin{itemize}
 
-  \item March 14, 2003: Created.
+  \item June 9, 2003: Initial version 0.3 completed.
 
-  \item May 30, 2003: Version 0.3 released.
+  \item August 28, 2003: Updated to match XORP release 0.4.
 
-  \item August 28, 2003: Version 0.4 released.
+  \item November 6, 2003: Updated the version to 0.5, and the date.
 
-  \item November 6, 2003: Version 0.5 released.
+  \item July 8, 2004: Updated the version to 1.0, and the date.
 
-  \item July 8, 2004: Version 1.0 released.
+  \item April 13, 2005: Updated the version to 1.1, and the date.
 
-  \item April 13, 2005: Bump-up the version to 1.1, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
 
-  \item March 8, 2006: Bump-up the version to 1.2, and the date.
+  \item August 2, 2006: Updated the version to 1.3, and the date.
 
 \end{itemize}
 
