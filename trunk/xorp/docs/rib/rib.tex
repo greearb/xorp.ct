@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/rib/rib.tex,v 1.19 2005/11/29 01:48:40 pavlin Exp $
+% $XORP: xorp/docs/rib/rib.tex,v 1.20 2006/03/09 01:45:29 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,9 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +28,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -38,18 +41,21 @@
 
 \title{XORP Routing Information Base (RIB) Process \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
+
 This document provides an overview of the XORP Routing Information
 Base (RIB) process.  It is intended to provide a starting point for
 software developers wishing to understand or modify this software.
@@ -60,6 +66,7 @@ propagated on to the forwarding engine.  The RIB performs the following
 tasks:
 
 \begin{itemize}
+
   \item Stores routes provided by the routing protocols running on a XORP
   router.
 
@@ -125,6 +132,7 @@ These routes then flow though the tree structure from left to right,
 until they reach the RedistTable, where they are propagated to the
 Forwarding Engine Abstraction (FEA) process.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Plumbing}
 
 The RIB plumbing code dynamically creates and maintains the tree of
@@ -135,6 +143,7 @@ into the RIB tree at an appropriate location.  Similarly, if a routing
 protocol deregisters with the RIB, the relevant OriginTable and
 additional tables will be deleted and the RIB tree simplified again.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{OriginTable}
 
 The OriginTable accepts {\tt route\_add} requests from a single routing
@@ -147,6 +156,7 @@ routes for directly connected interfaces.  It gets its information
 via the VifManager from the Forwarding Engine Abstraction (FEA)
 process.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{MergeTable}
 
 A MergeTable has two upstream (parent) tables and one downstream
@@ -171,6 +181,7 @@ When a MergeTable receives a {\tt lookup\_route} request from
 downstream, it sends the request on to both parents.  The better of
 the two answers is sent in response.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{ExtIntTable}
 
 ExtIntTable functions very similarly to the MergeTable, but there is
@@ -194,6 +205,7 @@ cause it to resolve.
 
 Each RIB only contains a single ExtIntTable.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{RegisterTable}
 
 RegisterTable takes registrations from routing protocols for routing
@@ -231,6 +243,7 @@ for 1.0.1.0/24, then this would cause the registration covering
 
 Each RIB only contains a single RegisterTable.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{RedistTable}
 
 The purpose of a RedistTable is to redistribute the routes from any RIB
@@ -249,10 +262,12 @@ ResistTables are used also for redistributing the final routes to the
 FEA and other interested processes. Both the unicast and multicast RIBs
 have a RedistTable at the end (see Figure~\ref{fig:rib_overview}).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{XRL Interface}
 
 The RIB supports the following XRLs.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Routing Protocol Registration}
 
 \begin{verbatim}
@@ -293,6 +308,7 @@ class and instance associated with the target.
 protocol will insert routes into the unicast RIB or the multicast RIB
 or both.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Adding and Deleting Routes}
 
 \begin{verbatim}
@@ -355,6 +371,7 @@ the OriginTable for that protocol is an error, as is sending a {\tt
 replace\_route} or {\tt delete\_route} for a route that is not in the
 OriginTable for that protocol.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Route Lookup}
 
 \begin{verbatim}
@@ -371,6 +388,7 @@ specific destination.
 or all zeros otherwise.  It is an error for the unicast and multicast
 fields to both be true or both false.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{VIF Management (test interface)}
 
 \begin{verbatim}
@@ -383,7 +401,8 @@ These XRLs can be used to inform the RIB about directly connected
 (virtual) interfaces.  The use of these XRLs is intended only for
 testing purposes - the RIB normally learns of VIFs directly from the
 FEA process.
- 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Route Redistribution}
 
 \begin{verbatim}
@@ -412,8 +431,10 @@ transaction-based route redistribution (\ie where there is
 {\tt start\_transaction} and {\tt commit\_transaction} around each block
 of add/delete routes).
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Registration of Interest in Routes}
 \label{reg}
+
 \begin{verbatim}
 register_interest4 ? target:txt & addr:ipv4 
         -> resolves:bool & base_addr:ipv4 & prefix_len:u32 & 
@@ -469,4 +490,44 @@ information associated with the specified subnet is no longer correct.
 The registration with the RIB is no longer valid, and the routing
 protocol must re-register with the RIB to find out what happened.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Modification History}
+
+\begin{itemize}
+
+  \item December 11, 2002: Initial version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP release 0.2.
+
+  \item June 9, 2003: Updated to match XORP release 0.3: described the new
+  RibClient registration mechanism.
+
+  \item August 28, 2003: Updated the version to 0.4, and the date.
+
+  \item November 6, 2003: Updated the version to 0.5, and the date.
+
+  \item July 8, 2004: Updated to match XORP release 1.0: replaced ExportTable
+  with RedistTable, and fixed the XRLs specification.
+
+  \item April 13, 2005: Updated to match XORP release 1.1: fixed the XRL names
+  and added description for the add\_interface\_route and
+  replace\_interface\_route XRLs.
+
+  \item March 8, 2006: Updated the version to 1.2, and the date.
+
+  \item August 2, 2006: Added ``Modification History'' appendix.
+  Updated the version to 1.3, and the date.
+
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     BIBLIOGRAPHY
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\bibliography{../tex/xorp}
+\bibliographystyle{plain}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
