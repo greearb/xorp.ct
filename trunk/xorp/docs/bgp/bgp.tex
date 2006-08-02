@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/bgp/bgp.tex,v 1.21 2006/08/02 12:39:46 mjh Exp $
+% $XORP: xorp/docs/bgp/bgp.tex,v 1.22 2006/08/02 13:33:29 mjh Exp $
 %
 
 \documentclass[11pt]{article}
@@ -78,9 +78,9 @@ performing a specialized task.  Figure \ref{overview} gives the
 general overview of classes involved in the core of the BGP process,
 but excludes the classes involved in handling peerings with peer
 routers and some of the more specialized stages in the plumbing.
-Figure 2 expands on the plumbing to include all the plumbing stages in
-the current version of BGP, and broadly groups them according to
-whether or not they modify or store routes.
+Figure \ref{plumbing} expands on the plumbing to include all the
+plumbing stages in the current version of BGP, and broadly groups them
+according to whether or not they modify or store routes.
 
 \begin{figure}[htb]
 \centerline{\includegraphics[width=1.0\textwidth]{figs/overview}}
@@ -326,10 +326,9 @@ causing one of three things to happen:
 The same guidelines apply as with FilterTables concerning the Changed flag.
 
 The PolicyTable class forms a part of the complete XORP policy routing
-framework, which is described in much more detail in the paper
-``Decoupling Policy from Protocols'', available from the XORP web
-site.  This also describes the distinct roles played by each of the
-three PolicyTable stages in the BGP pipeline.
+framework. This framework is described in much more detail in
+\cite{bittau:unpublished2006:xorp_policy}, including the distinct roles
+played by each of the three PolicyTable stages in the BGP pipeline.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{CacheTable Class}
