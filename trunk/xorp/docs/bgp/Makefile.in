@@ -116,7 +116,7 @@ SUFFIXES = .tex .bbl .dvi .ps .pdf .fig .ps .eps
 DOCS = bgp
 
 # -- Document Sources
-bgp_LATEX = bgp.tex
+bgp_LATEX = ../tex/xorp.bib bgp.tex
 bgp_FIGURES = figs/del_table.ps				\
 			  figs/dump_table.ps				\
 			  figs/overview.ps
