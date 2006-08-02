@@ -1,5 +1,5 @@
 %!PS-Adobe-2.0 EPSF-1.2
-%%Creator: idraw
+%%Creator: unidraw
 %%DocumentFonts: Helvetica
 %%Pages: 1
 %%BoundingBox: 159 450 498 611
@@ -210,6 +210,7 @@ end
 /Circ {
 newpath
 0 360 arc
+closepath
 patternNone not { ifill } if
 brushNone not { istroke } if
 } def
@@ -241,6 +242,7 @@ newpath
 translate
 scale
 0 0 1 0 360 arc
+closepath
 patternNone not { ifill } if
 brushNone not { istroke } if
 end
@@ -360,7 +362,7 @@ grestore
 gsave
 fgred fggreen fgblue setrgbcolor
 /fontDict printFont printSize scalefont dup setfont def
-/descender fontDict begin 0 [FontBBox] 1 get FontMatrix end
+/descender fontDict begin 0 /FontBBox load 1 get FontMatrix end
 transform exch pop def
 /vertoffset 1 printSize sub descender sub def {
 0 vertoffset moveto show
@@ -490,7 +492,7 @@ exch dup 3 1 roll 1 0 0 -1 0 6 -1 roll matrix astore
 
 %%EndProlog
 
-%I Idraw 10 Grid 8 8 
+%I Idraw 13 Grid 8 8 
 
 %%Page: 1 1
 
@@ -503,6 +505,15 @@ Begin
 %I t
 [ 0.956649 0 0 0.956649 0 0 ] concat
 /originalCTM matrix currentmatrix def
+
+Begin %I Pict
+%I b u
+%I cfg u
+%I cbg u
+%I f u
+%I p u
+%I t
+[ 1 0 0 1 0 0 ] concat
 
 Begin %I Pict
 %I b u
@@ -1083,6 +1094,8 @@ Begin %I Line
 1007 816 1039 816 Line
 %I 2
 End
+
+End %I eop
 
 End %I eop
 
