@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.23 2005/10/16 07:10:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.24 2006/03/16 00:03:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -57,7 +57,7 @@ IfConfigGetProcLinux::~IfConfigGetProcLinux()
     string error_msg;
 
     if (stop(error_msg) != XORP_OK) {
-	XLOG_ERROR("Cannot stop the Lunux's /proc mechanism to get "
+	XLOG_ERROR("Cannot stop the Linux's /proc mechanism to get "
 		   "information about network interfaces from the underlying "
 		   "system: %s",
 		   error_msg.c_str());
