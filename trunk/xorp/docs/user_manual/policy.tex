@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.11 2006/04/13 06:36:58 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.12 2006/05/01 17:03:06 zec Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -203,6 +203,8 @@ Note that if the {\tt then} block contains an {\tt accept} or {\tt reject}
 action, all other actions within the {\tt then} block will be executed
 regardless whether in the configuration they are placed before or after
 the {\tt accept} or {\tt reject} statements.
+
+\newpage
 
 \section{Sets}
 Many times it is useful to match against a set of values.  For example it is
@@ -682,6 +684,7 @@ process would have a modified MED.  As a consequence, it is also possible that
 the advertised routes will have a MED of 42, even though it is used as an import
 policy.
 
+\newpage
 Here is a more complicated example:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
