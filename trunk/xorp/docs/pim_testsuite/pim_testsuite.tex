@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.39 2005/11/29 01:48:39 pavlin Exp $
+% $XORP: xorp/docs/pim_testsuite/pim_testsuite.tex,v 1.40 2006/03/09 01:41:36 pavlin Exp $
 %
 
 \documentclass[11pt]{report}
@@ -16,6 +16,9 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +28,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -38,14 +41,14 @@
 
 \title{XORP PIM-SM Test Suite \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project                                   \\
          International Computer Science Institute       \\
          Berkeley, CA 94704, USA                        \\
          {\it http://www.xorp.org/}			\\
          {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
 
@@ -64,7 +67,7 @@ Version 0.1 completed	& December 5, 2002 & \verb=draft-ietf-pim-sm-v2-new-05.{ps
 Version 0.2 completed	& March 10, 2003 & \verb=draft-ietf-pim-sm-v2-new-05.{ps,txt}= \\
 			&		   & \verb=draft-ietf-pim-sm-bsr-03.{ps,txt}= \\
 Version 0.3		& June 9, 2003	   & No changes. \\
-Version 0.4		& August 28, 2003  & Modify the ``show pim join''
+Version 0.4		& August 28, 2003  & Modified the ``show pim join''
 			sample CLI optput information \\
 			&		   & to reflect current code. Added
 			text to ``Possible Problems'' in \\
@@ -73,10 +76,11 @@ Version 0.4		& August 28, 2003  & Modify the ``show pim join''
 			&		   & the PIM-SM protocol
 			specification. \\
 Version 0.5		& November 6, 2003 & Added ``last page''. \\
-Version 1.0		& July 8, 2004 & Cleanup some of the PIM
+Version 1.0		& July 8, 2004 & Cleaned some of the PIM
 			terminology. \\
 Version 1.1		& April 13, 2005	& No changes. \\
 Version 1.2		& March 8, 2006		& No changes. \\
+Version 1.3		& August 2, 2006	& No changes. \\
 \end{tabular}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
