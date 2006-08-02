@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.36 2006/03/08 23:54:48 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.37 2006/08/01 20:09:56 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -366,6 +366,7 @@ Immediate and deferred errors are exclusive.  If the \xt dispatching
 an XRL got an immediate error, it will not receive a callback
 indicating a deferred error.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Standard Dispatch XRL Error Values}
 
 The standard XRL return values are returned to the requesting \xt by
@@ -373,82 +374,72 @@ the dispatching \xt.  When any of these values are returned, the XRL
 communication has been successful.
 
 \begin{description}
-\item [OKAY] \
-XRL dispatch successful.  Additional parameters in
-XRL callback contain return values.
-
-\item [COMMAND\_FAILED] \
-XRL reached dispatcher, but could not be
-dispatched. The reason for failure may be specified in the note
-associated with the XrlError object.
-
-\item [BAD\_ARGS] \
-XRL reached dispatcher, but argument types did not match those
-expected by the dispatcher.
-
+  \item [OKAY] XRL dispatch successful.  Additional parameters in
+	XRL callback contain return values.
+  \item [COMMAND\_FAILED] XRL reached dispatcher, but could not be
+	dispatched. The reason for failure may be specified in the note
+	associated with the XrlError object.
+  \item [BAD\_ARGS] XRL reached dispatcher, but argument types did not match
+	those expected by the dispatcher.
 \end{description}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Finder XRL Error Values}
 
 \begin{description}
-\item [NO\_FINDER] \
-This error occurs when an \xt cannot communicate
-with the \finder. This always indicates a serious problem with the
-router, as the \finder should always be present. The application
-SHOULD treat this error as fatal.
+  \item [NO\_FINDER] This error occurs when an \xt cannot communicate
+	with the \finder. This always indicates a serious problem with the
+	router, as the \finder should always be present. The application
+	SHOULD treat this error as fatal.
+  \item [RESOLVE\_FAILED] This error occurs when a \xt process tries to
+	resolve an XRL the \finder has no result for.  This may be because the
+	target specified in the XRL does not exist or exists, but is still in
+	the process of registering the XRL it exports.
 
-\item [RESOLVE\_FAILED] \
-This error occurs when a \xt process tries to
-resolve an XRL the \finder has no result for.  This may be because the
-target specified in the XRL does not exist or exists, but is still in
-the process of registering the XRL it exports.
+	RESOLVE\_FAILED errors may happen because of a benign cause, namely
+	that processes started up in a less than perfect order, so a target's
+	user has initialized before the target itself. Applications SHOULD
+	handle this type of transient RESOLVE\_FAILED error with a
+	retransmission strategy.  Applications may avoid this error by using
+	the Finder event observer interface to detect when the particular
+	target becomes ready.
 
-RESOLVE\_FAILED errors may happen because of a benign cause, namely
-that processes started up in a less than perfect order, so a target's
-user has initialized before the target itself. Applications SHOULD
-handle this type of transient RESOLVE\_FAILED error with a
-retransmission strategy.  Applications may avoid this error by using
-the Finder event observer interface to detect when the particular
-target becomes ready.
-
-\item [NO\_SUCH\_METHOD] \
-This error occurs when the named \xt is running and has registered
-it's XRLs, but it does not support the method named in the XRL.
-NO\_SUCH\_METHOD generally indicates a version mismatch between two
-processes. This error may be considered fatal, or (for example) the
-application might react by trying to access an older version of the
-interface. The application can expect, however, that NO\_SUCH\_METHOD
-errors are not transient: If an XRL access gets a NO\_SUCH\_METHOD
-error, then that XRL will always result in a NO\_SUCH\_METHOD error,
-at least until the target process restarts.
-
+  \item [NO\_SUCH\_METHOD] This error occurs when the named \xt is running and
+	has registered 
+	it's XRLs, but it does not support the method named in the XRL.
+	NO\_SUCH\_METHOD generally indicates a version mismatch between two
+	processes. This error may be considered fatal, or (for example) the
+	application might react by trying to access an older version of the
+	interface. The application can expect, however, that NO\_SUCH\_METHOD
+	errors are not transient: If an XRL access gets a NO\_SUCH\_METHOD
+	error, then that XRL will always result in a NO\_SUCH\_METHOD error,
+	at least until the target process restarts.
 \end{description}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Transport and Internal Xrl Error Values}
 
 \begin{description}
-
-\item [SEND\_FAILED] The underlying XRL transport mechanism has failed.
-For example, the TCP connection has been reset, or a UDP connection gets a
-port-unreachable message. The expectation is that no further communication
-with the specific endpoint will succeed.
-
-\item [SEND\_FAILED\_TRANSIENT] This error occurs when the XRL library
-temporarily cannot send a particular XRL. Usually, this will be because of
-congestion or a slow receiver: the kernel has run out of buffer space. Note
-that the XRL library performs some buffering itself, to ensure that XRL
-requests are either completely transmitted or not transmitted at all.
-\emph{Note: The XRL library does not yet implement this error.}
-
-\item [REPLY\_TIMED\_OUT] -- The target did not reply within a
-transport-protocol-specific period of time. Possible reasons include
-network congestion, peer failure, network interface failure, and so on. As
-in all network communications, when a timeout occurs we don't know if the
-last unacknowledged XRL request was received and processed by the peer.
-This error occurs in unreliable transmit only.
-
+  \item [SEND\_FAILED] The underlying XRL transport mechanism has failed.
+	For example, the TCP connection has been reset, or a UDP connection
+	gets a port-unreachable message. The expectation is that no further
+	communication with the specific endpoint will succeed.
+  \item [SEND\_FAILED\_TRANSIENT] This error occurs when the XRL library
+	temporarily cannot send a particular XRL. Usually, this will be
+	because of congestion or a slow receiver: the kernel has run out of
+	buffer space. Note that the XRL library performs some buffering
+	itself, to ensure that XRL requests are either completely transmitted
+	or not transmitted at all.
+	\emph{Note: The XRL library does not yet implement this error.}
+  \item [REPLY\_TIMED\_OUT] -- The target did not reply within a
+	transport-protocol-specific period of time. Possible reasons include
+	network congestion, peer failure, network interface failure, and so
+	on. As in all network communications, when a timeout occurs we don't
+	know if the last unacknowledged XRL request was received and processed
+	by the peer. This error occurs in unreliable transmit only.
 \end{description}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Handling XRL Errors}
 
 XRLs may be directed to a class of target or a particular instance of
@@ -510,6 +501,7 @@ request can be outstanding at a time.
 It is useful for us to categorize XRL interfaces along these two axes:
 reliable/unreliable and pipelined/non-pipelined. 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Unreliable, Non-pipelined}
 
 If an XRL send failure occurs, the sending application MAY choose to
@@ -521,6 +513,7 @@ the application chooses to re-send the XRL, the interface MUST be written
 in such a way that the receipt of a duplicate request will not damage the
 system. (XXX Isn't this true anyway? Network duplicates?)
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Reliable, Non-pipelined}
 
 If a SEND\_FAILED\_TRANSIENT error occurs, the sending application MAY
@@ -534,6 +527,7 @@ died.
 
 REPLY\_TIMED\_OUT cannot happen on reliable interfaces.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Unreliable, Pipelined}
 
 The same issues apply as with unreliable, non-pipelined, but the
@@ -545,6 +539,7 @@ REPLY\_TIMED\_OUT, but the application must only do so if it is
 certain that the re-ordering caused by retransmission will not be a
 problem.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Reliable, Pipelined}
 
 The XRL library ensures that pipelined messages sent to a reliable target
