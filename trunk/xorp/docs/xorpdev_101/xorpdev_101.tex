@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.16 2006/03/27 00:11:03 pavlin Exp $
+% $XORP$
 %
 
 \documentclass[11pt]{article}
@@ -16,35 +16,20 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
-\usepackage{alltt}
+\usepackage{rotating}
+\usepackage{moreverb}
 \usepackage{listings}
-%\usepackage{stmaryrd}
+\usepackage{alltt}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
-%% Configure listings
-\lstloadlanguages{C++,C}
-\lstset{
-    tabsize=8
-  , basicstyle=\ttfamily\small
-  , commentstyle=\color{gray}
-  , flexiblecolumns=false
-  , frame=TBLR
-  , language=C++
-  , stringstyle=\ttfamily
-  , showstringspaces=false
-}
 
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \newcommand{\etc}{\emph{etc.}\xspace}
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
-
-\newcommand{\stt}{\tt\small}
-\newcommand{\SR}{{\tt\small static\_routes}\xspace}
-\newcommand{\SRI}{{\it static\_routes}\xspace}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -57,19 +42,45 @@
 
 \title{An Introduction to Writing a XORP Process \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project					\\
+	 International Computer Science Institute	\\
+	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
 
-\thispagestyle{empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local definitions
+%
+\newcommand{\stt}{\tt\small}
+\newcommand{\SR}{{\tt\small static\_routes}\xspace}
+\newcommand{\SRI}{{\it static\_routes}\xspace}
+
+% Configure listings
+\lstloadlanguages{C++,C}
+\lstset{
+    tabsize=8
+  , basicstyle=\ttfamily\small
+  , commentstyle=\color{gray}
+  , flexiblecolumns=false
+  , frame=TBLR
+  , language=C++
+  , stringstyle=\ttfamily
+  , showstringspaces=false
+}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \tableofcontents
 
 \newpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
@@ -84,12 +95,14 @@ us feedback as to how much help this document is; what really helped,
 what's missing, and what isn't explained properly.
 
 We'll assume that you have copies of four other XORP design documents:
+
 \begin{itemize}
-\item XORP Design Overview\cite{xorp:design_arch}
-\item XORP Libxorp Library Overview\cite{xorp:libxorp}
-\item XORP Inter-Process Communication Library Overview\cite{xorp:xrl}
-\item XRL Interfaces: Specifications and Tools\cite{xorp:xrl_interfaces}
+  \item XORP Design Overview\cite{xorp:design_arch}
+  \item XORP Libxorp Library Overview\cite{xorp:libxorp}
+  \item XORP Inter-Process Communication Library Overview\cite{xorp:xrl}
+  \item XRL Interfaces: Specifications and Tools\cite{xorp:xrl_interfaces}
 \end{itemize}
+
 These are available from the XORP web server.  You should probably
 have read these through quickly so you're aware what additional
 information is available before reading this document further.  It's
@@ -98,7 +111,7 @@ recommended to read them in the order above.
 We will assume you are familiar with what an XRL request is, the
 overall structure of the processes on a XORP router, and with C++.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Overview}
 
 In this document we'll work through by example the structure of a
@@ -124,15 +137,16 @@ We'll walk through the main pieces of static\_routes in the following
 order:
 
 \begin{itemize}
-\item The XRL interface of static\_routes.
-\item Implementing the XRL interface of static\_routes.
-\item The main loop of static routes.
-\item Calling XRLs on the RIB.
+  \item The XRL interface of static\_routes.
+  \item Implementing the XRL interface of static\_routes.
+  \item The main loop of static routes.
+  \item Calling XRLs on the RIB.
 \end{itemize}
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The XRL Interface of {\it static\_routes}}
 
 XRL interfaces are defined by a {\stt.xif} file (pronounced {\it dot-ziff}).
@@ -221,20 +235,28 @@ definition can be used by more than one process, hence the duplication
 in a process as simple as \SRI.
 
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Using the {\tt static\_routes} XRL Interface}
 
 Now we have seen how the XRLs comprising the static\_routes interface
 are defined, we shall examine how processes actually use them.  For
 any particular interface, there are two types of user:
+
 \begin{itemize}
-\item The process that calls the XRLs and gets back responses.  This
-is called the XRL {\it caller}.
-\item The process on which the XRL is called, and which generates
-responses.  This is called the XRL {\it target}.
+
+  \item The process that calls the XRLs and gets back responses.  This
+  is called the XRL {\it caller}.
+
+  \item The process on which the XRL is called, and which generates
+  responses.  This is called the XRL {\it target}.
+
 \end{itemize}
+
 XORP provides scripts which can generate C++ code to make life much
 easier for both these parties.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Generating stub code for the caller}
 
 If we examine the file {\stt Makefile.am} (the automake Makefile) in
@@ -338,7 +360,9 @@ public:
 
 }
 \end{lstlisting}
+
 \newpage
+
 The constructor for {\stt XrlStaticRoutesV0p1Client} takes a pointer to
 an {\stt XrlSender} as its parameter.  Typically this is actually an
 {\stt XrlRouter} - we'll come to this in more detail later.
@@ -402,6 +426,8 @@ it suffices to say that a callback must be created and passed into
 {\stt add\_route4()} XRL is returned to the right place.
 
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Generating stub code for the target}
 
 The other side to the XRL story is how the XRL target implements the
@@ -485,6 +511,7 @@ static\_routes\_0\_1\_add\_route4()} that actually does what we want when
 this XRL is called.
 
 \newpage
+
 \begin{lstlisting}[caption={Contents of {\stt
 	xorp/xrl/targets/static\_routes.tgt} %
                                      \label{lst:sr.tgt} } ]{}
@@ -550,6 +577,7 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 \end{lstlisting}
 
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/targets/static\_routes\_base.hh}%
                                      \label{lst:sr.base} } ]{}
 class XrlStaticRoutesTargetBase {
@@ -602,6 +630,7 @@ protected:
 \end{lstlisting}
 
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xrl\_static\_routes\_node.hh} %
                                      \label{lst:srn.hh} } ]{}
 class XrlStaticRoutesNode : public StaticRoutesNode,
@@ -670,6 +699,7 @@ static\_routes\_0\_1\_add\_route4()} method from the stub compiler
 which was a pure virtual method in the base class.
 
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xrl\_static\_routes\_node.cc} %
                                      \label{lst:srn.cc} } ]{}
 ...
@@ -759,6 +789,8 @@ COMMAND\_FAILED} is returned, the return parameter values are not
 passed up to the caller application.
 
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The Main Loop}
 \label{main}
 
@@ -793,21 +825,29 @@ is very simple. It must define \verb=XORP_MODULE_NAME= and
 
 Then we include the functionality from
 {\stt libxorp} that we'll need:
+
 \begin{itemize}
-\item {\stt libxorp/xorp.h}: generic headers that should always be included.
-\item {\stt libxorp/xlog.h}: XORP logging functionality.  The convention is to
-  use XLOG macros to log warnings and error messages, so we can
+
+  \item {\stt libxorp/xorp.h}: generic headers that should always be included.
+  \item {\stt libxorp/xlog.h}: XORP logging functionality.  The convention is
+  to use XLOG macros to log warnings and error messages, so we can
   redefine how logging if implemented in future without re-writing
   the code that uses logging. See Section~\ref{xlog} for more information
   about the XLOG facility.
-\item {\stt libxorp/debug.h}: XORP debugging functionality.
-\item {\stt libxorp/callback.hh}: XORP callback templates, needed to pass a
+
+  \item {\stt libxorp/debug.h}: XORP debugging functionality.
+
+  \item {\stt libxorp/callback.hh}: XORP callback templates, needed to pass a
   handle into event handling code to be called later when an event
   occurs.
-\item {\stt libxorp/eventloop.hh}: the main XORP eventloop.
-\item {\stt libxorp/exceptions.hh}: standard exceptions for standard stuff -
+
+  \item {\stt libxorp/eventloop.hh}: the main XORP eventloop.
+
+  \item {\stt libxorp/exceptions.hh}: standard exceptions for standard stuff -
   useful as a debugging aid.
+
 \end{itemize}
+
 Finally we include the definition of the class that implements the \SR
 XRL interface target class we just defined.
 
@@ -865,6 +905,7 @@ register our existence with the Finder.  Thus we call {\stt
 wait\_until\_xrl\_router\_is\_ready()}.
 
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xorp\_static\_routes.cc} %
                                      \label{lst:srn.main} } ]{}
 //
@@ -972,6 +1013,8 @@ first we'll know about it is when {\stt
   XrlStaticRoutesNode::static\_routes\_0\_1\_add\_route4()} is executed.
 
 \newpage
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Calling XRLs on the RIB}
 \label{rib}
 
@@ -1052,6 +1095,7 @@ response from our XRL request.
 
 
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/interfaces/rib.xif} %
                                      \label{lst:rib.xif} } ]{}
 interface rib/0.1 {
@@ -1105,7 +1149,9 @@ interface rib/0.1 {
 		-> nexthop:ipv4
 }
 \end{lstlisting}
+
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/xrl/interfaces/rib\_xif.hh} %
                                      \label{lst:ribxif.hh} } ]{}
 class XrlRibV0p1Client {
@@ -1161,7 +1207,9 @@ uteByDest4CB;
     );
 }
 \end{lstlisting}
+
 \newpage
+
 \begin{lstlisting}[caption={Extracts from {\stt xorp/static\_routes/xrl\_static\_routes\_node.cc} %
                                      \label{lst:sr.send} } ]{}
 void
@@ -1237,9 +1285,12 @@ XrlStaticRoutesNode::send_rib_route_change_cb(const XrlError& xrl_error)
 
 
 \end{lstlisting}
+
 \newpage
-\noindent We actually create the callback using the call:\\ {\stt callback(this,
-\&XrlStaticRoutesNode::send\_rib\_route\_change\_cb)}\\ In the context of
+
+\noindent We actually create the callback using the call:\\
+{\stt callback(this, \&XrlStaticRoutesNode::send\_rib\_route\_change\_cb)}\\
+In the context of 
 Listing \ref{lst:sr.send}, {\stt this} refers to a pointer to the
 current instance of {\stt XrlStaticRoutesNode}.  So, what this
 callback does is to wrap a pointer to the method {\stt
@@ -1255,6 +1306,7 @@ whether the XRL call was actually successful or not.
 If the return error code is {\stt OKAY} we send the next route change.
 Otherwise, we take different actions based on the error type.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Returning values in XRLs}
 
 Because the \SRI process is so simple, none of the XRLs it calls
@@ -1296,6 +1348,7 @@ XrlStaticRoutesNode::lookup_route_by_dest4_cb(const XrlError& xrl_error,
 
 \newpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The XLOG Logging Facility}
 \label{xlog}
 
@@ -1306,25 +1359,25 @@ simultaneously. Below is a description of how to use the log utility.
 \begin{itemize}
 
   \item The xlog utility assumes that \verb=XORP_MODULE_NAME= is defined
-   (per module). To do so, you must have in your directory a file like
-   ``foo\_module.h'', and inside it should contain something like:
+  (per module). To do so, you must have in your directory a file like
+  ``foo\_module.h'', and inside it should contain something like:
 
 \begin{verbatim}
 #define XORP_MODULE_NAME "BGP"
 \end{verbatim}
 
-   This file then has to be included by each *.c and *.cc file,
-   and MUST be the first of the included local files.
+  This file then has to be included by each *.c and *.cc file,
+  and MUST be the first of the included local files.
 
   \item Before using the xlog utility, a program MUST initialize it
-   first (think of this as the xlog constructor):
+  first (think of this as the xlog constructor):
 
 \begin{verbatim}
 int xlog_init(const char *process_name, const char *preamble_message);
 \end{verbatim}
 
-   Further, if a program tries to use xlog without initializing it
-   first, the program will exit.
+  Further, if a program tries to use xlog without initializing it
+  first, the program will exit.
 
   \item To add output streams, you MUST use one of the following (or both):
 
@@ -1339,8 +1392,8 @@ int xlog_add_default_output(void);
 xlog_set_verbose(xlog_verbose_t verbose_level);
 \end{verbatim}
 
-   where ``verbose\_level'' is one of the following (\verb=XLOG_VERBOSE_MAX=
-   excluded):
+  where ``verbose\_level'' is one of the following (\verb=XLOG_VERBOSE_MAX=
+  excluded):
 
 \begin{verbatim}
 typedef enum {
@@ -1351,14 +1404,14 @@ typedef enum {
 } xlog_verbose_t;
 \end{verbatim}
 
-   Default value is \verb=XLOG_VERBOSE_LOW= (least details).
-   Larger value for ``verbose\_level'' adds more details to the
-   preamble message (e.g., file name, line number, etc, about the place
-   where the log message was initiated).
+  Default value is \verb=XLOG_VERBOSE_LOW= (least details).
+  Larger value for ``verbose\_level'' adds more details to the
+  preamble message (e.g., file name, line number, etc, about the place
+  where the log message was initiated).
 
-   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL= (see
-   below) cannot be changed and is always set to the most verbose level
-   (\verb=XLOG_VERBOSE_HIGH=).
+  Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL= (see
+  below) cannot be changed and is always set to the most verbose level
+  (\verb=XLOG_VERBOSE_HIGH=).
 
   \item To change the verbosity of a particular message type, use:
 
@@ -1367,8 +1420,8 @@ void xlog_level_set_verbose(xlog_level_t log_level,
 	xlog_verbose_t verbose_level);
 \end{verbatim}
 
-where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MAX=
-excluded):
+  where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MAX=
+  excluded):
 
 \begin{verbatim}
 typedef enum {
@@ -1381,16 +1434,15 @@ typedef enum {
 } xlog_level_t;
 \end{verbatim}
 
-   Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL=
-   cannot be changed and is always set to the most verbose level
-   (\verb=XLOG_VERBOSE_HIGH=).
+  Note that the verbosity level of message type \verb=XLOG_LEVEL_FATAL=
+  cannot be changed and is always set to the most verbose level
+  (\verb=XLOG_VERBOSE_HIGH=).
 
   \item To start the xlog utility, you MUST use:
 
 \begin{verbatim}
 int xlog_start(void);
 \end{verbatim}
-
 
   \item To enable or disable a particular message type, use:
 
@@ -1399,8 +1451,8 @@ int xlog_enable(xlog_level_t log_level);
 int xlog_disable(xlog_level_t log_level);
 \end{verbatim}
 
-	By default, all levels are enabled.
-	Note that \verb=XLOG_LEVEL_FATAL= cannot be disabled.
+  By default, all levels are enabled.
+  Note that \verb=XLOG_LEVEL_FATAL= cannot be disabled.
 
   \item To stop the logging, use:
 
@@ -1408,7 +1460,7 @@ int xlog_disable(xlog_level_t log_level);
 int xlog_stop(void);
 \end{verbatim}
 
-	Later you can restart it again by \verb=xlog_start()=
+  Later you can restart it again by \verb=xlog_start()=
 
   \item To gracefully exit the xlog utility, use
 
@@ -1416,7 +1468,8 @@ int xlog_stop(void);
 int     xlog_exit(void);
 \end{verbatim}
 
-	(think of this as the xlog destructor).
+  (think of this as the xlog destructor).
+
 \end{itemize}
 
 Listing \ref{lst:xlog.main} contains an example of using the XLOG facility.
@@ -1486,7 +1539,7 @@ specified by \verb=format=:
 
   \item \verb=XLOG_UNREACHABLE()=
   \newline
-   A marker that can be used to indicate code that should never be executed.
+  A marker that can be used to indicate code that should never be executed.
 
   \item \verb=XLOG_UNFINISHED()=
   \newline
@@ -1497,6 +1550,7 @@ specified by \verb=format=:
 
 \newpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{The {\it rtrmgr} Template Files}
 \label{rtrmgr_templates}
 
@@ -1507,6 +1561,7 @@ For the time being, the developer can check the ``XORP Router Manager Process
 file {\stt xorp/etc/templates/static\_routes.tp} as an example.
 
 \newpage
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     APPENDIX
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -1515,12 +1570,15 @@ file {\stt xorp/etc/templates/static\_routes.tp} as an example.
 
 \begin{itemize}
 
-  \item July 19, 2004: Version 1.0.
+  \item July 19, 2004: Initial version 1.0 completed.
 
-  \item April 13, 2005: Added the XLOG logging facility section. Updated
-  to match version 1.1.
+  \item April 13, 2005: Updated to match XORP release 1.1.
+   Added the XLOG logging facility section.
 
-  \item March 8, 2006: Bump-up the version to 1.2, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
+
+  \item August 2, 2006: Updated to match XORP release 1.3: the XRL-related
+  sample code is modified to match the original code.
 
 \end{itemize}
 
