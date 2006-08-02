@@ -1,27 +1,58 @@
+%
+% $XORP: xorp/docs/fea/fea.tex,v 1.18 2006/08/02 00:28:48 pavlin Exp $
+%
+
 \documentclass[11pt]{article}
-\usepackage{times}
-\usepackage{amsmath}
-\usepackage{graphicx}
-\usepackage{rotating}
+
+%\usepackage[dvips]{changebar}
+
+\usepackage{subfigure}
 \usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{rotating}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
 
-\newcommand{\eg}{\emph{e.g.\/}} % e.g.
-\newcommand{\ie}{\emph{i.e.\/}} % i.e.
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+\newcommand{\comment}[1]{}
 
-\title{
-XORP Inter-Process Communication Library Overview \\
-\vspace{1ex} Version 1.2
-}
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
+\begin{document}
+
+\title{XORP Inter-Process Communication Library Overview \\
+\vspace{1ex}
+Version 1.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
-\begin{document}
 \maketitle
+
+\thispagestyle{empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
 
 Extensibility and robustness are key goals of the eXtensible Open
@@ -39,8 +70,10 @@ capable of working with multiple transport protocols between remote
 hosts and can leverage existing IPC mechanisms within a single
 host. This document discusses aspects of the design and the directions
 it may take in future.
+
 \end{abstract}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 Robustness and extensibility are two of the goals of the XORP project.
@@ -62,26 +95,18 @@ through these protocols, for instance SNMP or HTTP.
 The lofty goals of XORP's Inter-Process Communication (XIPC) scheme are:
 
 \begin{itemize}
-
-\item to provide all of the IPC communication mechanisms that a router is
-likely to need, \eg sockets, ioctl's, System V messages, shared memory.
-
-\item to provide a consistent and transparent interface irrespective
-of the underlying transport mechanism used.
-
-\item to transparently select the appropriate IPC mechanism when
-alternatives exist.
-
-\item to provide an asynchronous interface.
-
-\item to be efficient.
-
-\item to potentially wrapper communication with non-XORP processes,
-\eg HTTP and SNMP servers.
-
-\item to be renderable in human readable form so XORP processes can
-read and write commands from configuration files.
-
+  \item to provide all of the IPC communication mechanisms that a router is
+	likely to need, \eg sockets, ioctl's, System V messages, shared memory.
+  \item to provide a consistent and transparent interface irrespective
+	of the underlying transport mechanism used.
+  \item to transparently select the appropriate IPC mechanism when
+	alternatives exist.
+  \item to provide an asynchronous interface.
+  \item to be efficient.
+  \item to potentially wrapper communication with non-XORP processes,
+	\eg HTTP and SNMP servers.
+  \item to be renderable in human readable form so XORP processes can
+	read and write commands from configuration files.
 \end{itemize}
 
 The XIPC goals are realized through XORP Resource Locators (XRLs) and
@@ -110,6 +135,7 @@ the XIPC library.  This document provides an overview of the XIPC
 library and is the recommended starting point before using the
 library.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{XORP Resource Locators (XRL's)}
 
 The mechanism we've settled on for IPC within XORP processes is mediated
@@ -138,6 +164,7 @@ modify the interface number and method name.
 The resolved forms of XRLs are typically maintained in a client side
 cache so the Finder need not be consulted for each XRL dispatch.
 
+%%%%%%%%%%%%%%%%%%%%%
 \clearpage
 \begin{sidewaysfigure}
 (a) Unresolved form:
@@ -182,6 +209,7 @@ Protocol Family
 \end{sidewaysfigure}
 \clearpage
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{XRL Targets and the Finder}
 
 An {\em XRL Target} is an entity that is capable of dispatching XRLs.
@@ -261,39 +289,53 @@ the communication protocol used to communicate with the Finder for
 this purpose.  The details of this communication will be expanded upon
 later on [XXX in a later edit to this document].
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Components of XRL Framework}
 
 \begin{description}
-\item [XRL] an inter-process call that is transparent to the
-underlying transport method.
-
-\item [Finder] the process that co-ordinates the resolution of target
-names into a parseable form to find the XRL Protocol Family Listener.
-
-\item [XRL Router] an object responsible for sending and receiving
-XRLs.  They manage all the underlying interactions and are the
-interface that users are expected to use for XRL interactions.
-% TODO: the above description of [XRL Router] is unclear.
-
-\item [Finder Client] an object associated with an XRL Router that
-manages the communication with the Finder.
-
-\item [XRL Protocol Family] a supported transport mechanism for the
-invoked XRL.
-
-\item [XRL Protocol Family Sender] an entity that dispatches XRL
-requests and handles responses.  Senders are created based on Finder
-lookup's of the appropriate communication mechanism.
-
-\item [XRL Protocol Family Listener] an entity that listens for
-incoming requests, dispatches the necessary hook, and sends the
-responses.  When Listeners are created they register the appropriate
-mapping with the Finder so that corresponding Senders can be
-instantiated to talk with them.
-
+  \item [XRL] an inter-process call that is transparent to the
+	underlying transport method.
+  \item [Finder] the process that co-ordinates the resolution of target
+	names into a parseable form to find the XRL Protocol Family Listener.
+  \item [XRL Router] an object responsible for sending and receiving
+	XRLs.  They manage all the underlying interactions and are the
+	interface that users are expected to use for XRL interactions.
+	% TODO: the above description of [XRL Router] is unclear.
+  \item [Finder Client] an object associated with an XRL Router that
+	manages the communication with the Finder.
+  \item [XRL Protocol Family] a supported transport mechanism for the
+	invoked XRL.
+  \item [XRL Protocol Family Sender] an entity that dispatches XRL
+	requests and handles responses.  Senders are created based on Finder
+	lookup's of the appropriate communication mechanism.
+  \item [XRL Protocol Family Listener] an entity that listens for
+	incoming requests, dispatches the necessary hook, and sends the
+	responses.  When Listeners are created they register the appropriate
+	mapping with the Finder so that corresponding Senders can be
+	instantiated to talk with them.
 \end{description}
 
 The kdoc documentation provides details of the particular classes.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Modification History}
+
+\begin{itemize}
+  \item December 11, 2002: Version 0.1 completed.
+  \item March 10, 2003: Minor changes. Updated the version to 0.2, and the
+	date.
+  \item June 9, 2003: Updated the version to 0.3, and the date.
+  \item August 28, 2003: Updated the version to 0.4, and the date.
+  \item November 6, 2003: Updated the version to 0.5, and the date.
+  \item July 8, 2004: Updated the version to 1.0, and the date.
+  \item April 13, 2005: Updated the version to 1.1, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
+  \item August 2, 2006: Added ``Modification History'' appendix.
+	Updated the version to 1.3, and the date.
+\end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
