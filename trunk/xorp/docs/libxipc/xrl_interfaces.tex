@@ -1,17 +1,67 @@
+%
+% $XORP: xorp/docs/libxipc/libxipc_overview.tex,v 1.16 2006/08/02 00:42:39 pavlin Exp $
+%
+
 \documentclass[11pt]{article}
-\usepackage{times}
-\usepackage{graphicx}
-\usepackage{amsmath}
+
+%\usepackage[dvips]{changebar}
+
 \usepackage{subfigure}
-\usepackage{moreverb}
-\usepackage{color}
-\usepackage{listings}
 \usepackage{fullpage}
+\usepackage{setspace}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{xspace}
+\usepackage{color}
+\usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+%\usepackage[dvipdf]{graphics}
+%\usepackage[dvips]{graphicx}
+%\usepackage{xorp}
 
-\newcommand{\eg}{\emph{e.g.\/}} % e.g.
-\newcommand{\ie}{\emph{i.e.\/}} % i.e.
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\newcommand{\etc}{\emph{etc.}\xspace}
+\newcommand{\ie}{\emph{i.e.,}\xspace}
+\newcommand{\eg}{\emph{e.g.,}\xspace}
+%\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
+%\newcommand{\comment}[1]{}
 
-%% Configure listings
+% Changebar stuff
+% \newenvironment{colorcode}{\color{blue}}{}
+% \renewcommand{\cbstart}{\begin{colorcode}}
+% \renewcommand{\cbend}{\end{colorcode}}
+
+% \pagestyle{empty}
+
+\begin{document}
+
+\title{XRL Interfaces: Specifications and Tools \\
+\vspace{1ex}
+Version 1.3}
+\author{ XORP Project					\\
+	 International Computer Science Institute	\\
+	 Berkeley, CA 94704, USA			\\
+         {\it http://www.xorp.org/}			\\
+	 {\it feedback@xorp.org}
+}
+\date{August 2, 2006}
+
+\maketitle
+
+\thispagestyle{empty}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% Local definitions
+%
+\newcommand{\clntgen}{{\sf clnt-gen}~}
+\newcommand{\tgtgen}{{\sf tgt-gen}~}
+
+% Configure listings
 \lstloadlanguages{C++,C}
 \lstset{
     tabsize=8
@@ -24,27 +74,9 @@
   , showstringspaces=false
 }
 
-%% Commands
-\newcommand{\clntgen}{{\sf clnt-gen}~}
-\newcommand{\tgtgen}{{\sf tgt-gen}~}
-
-\title{
-XRL Interfaces: Specifications and Tools \\
-\vspace{1ex} Version 1.2
-}
-\author{ XORP Project					\\
-	 International Computer Science Institute	\\
-	 Berkeley, CA 94704, USA			\\
-         {\it http://www.xorp.org/}			\\
-	 {\it feedback@xorp.org}
-}
-\date{March 8, 2006}
-
-\begin{document}
-
-\maketitle
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \begin{abstract}
+
 XORP Resource Locators are the XORP projects preferred means for
 inter-process communication.  A description of the XRL's can be found
 in \cite{xorp:xrl}.  This document describes an important aspect of the XRL
@@ -52,8 +84,10 @@ world: the specification of XRL Interfaces and Targets.  Following
 these specifications this document then describes tools that generate
 XRL marshalling and unmarshalling routines and assist in common case
 XRL handling.
+
 \end{abstract}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
 
 Up until the interface specification language and tools described
@@ -65,6 +99,7 @@ language embeds versioning information which can be used to maintain
 backwards compatibility as interface develop and minimize conflicts
 following revisions.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Terminology}
 
 We define an \emph{XRL Target} as something that XRL requests can be
@@ -106,8 +141,10 @@ of the ``Routing Protocol/1.0'' interface.  RIB supports XRL interface
   \label{fig:eg-interfaces}
 \end{figure}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Interface and Target Specifications}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Interface Specifications}
 
 An interface is declared using the \textbf{interface} keyword and a
@@ -148,6 +185,7 @@ By convention, XRL Interfaces are specified in \texttt{.xif} files and these
 are located in the \\
 \texttt{xorp/xrl/interfaces} directory.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Target Specifications}
 
 XRL Targets are declared in \textit{.tgt} files using:
@@ -168,6 +206,7 @@ can be found in the \texttt{xorp/xrl/targets} directory.
   specification.\label{lst:eg-target}}]%
 {../../xrl/targets/test.tgt}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Tools}
 
 We use XRL Interface and XRL Target specifications to generate code
@@ -176,6 +215,7 @@ have written two scripts: \clntgen and \tgtgen that
 generate C++ header files and libraries and also produce a list of
 XRL's for each XRL Target.
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\clntgen : XRL Interface Client Generator}
 
 \clntgen parses Xrl Interface specifications and generates a header
@@ -239,6 +279,7 @@ public:
 };
 \end{lstlisting}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{\tgtgen : XRL Target Generator}
 
 \tgtgen takes an XRL target specification and generates list of XRL's
@@ -281,9 +322,31 @@ arguments are just reference arguments.
                 {../../xrl/targets/test_base.hh}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%     APPENDIX
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\appendix
+\section{Modification History}
+
+\begin{itemize}
+  \item December 11, 2002: Version 0.1 completed.
+  \item March 10, 2003: Minor changes. Updated the version to 0.2, and the
+	date.
+  \item June 9, 2003: Updated the version to 0.3, and the date.
+  \item August 28, 2003: Updated the version to 0.4, and the date.
+  \item November 6, 2003: Updated the version to 0.5, and the date.
+  \item July 8, 2004: Updated the version to 1.0, and the date.
+  \item April 13, 2005: Updated the version to 1.1, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
+  \item August 2, 2006: Updated sample XRL-related code to match the current
+	code. Added ``Modification History'' appendix.
+	Updated the version to 1.3, and the date.
+\end{itemize}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %     BIBLIOGRAPHY
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \bibliography{../tex/xorp}
 \bibliographystyle{plain}
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \end{document}
