@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.49 2006/07/19 22:53:03 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.50 2006/08/02 09:35:23 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -379,7 +379,18 @@ the login shell is csh or tcsh):
  scp -p bar:~/windows/binary/location/xorp-$ReleaseVersion-setup.exe .
 
 ========================================================================
-2600.	TASK: Update the links in the web server to the current release
+2600.	TASK: Calculate the MD5 checksums and the LiveCD size
+	WHO:  Release manager
+	WHEN: Release time
+	COMMANDS:
+ # Commands continue from the previous task
+ md5 LiveCD.iso.gz
+ md5 xorp-$ReleaseVersion.tar.gz
+ md5 xorp-$ReleaseVersion-setup.exe
+ ls -lAFgh LiveCD.iso.gz
+
+========================================================================
+2625.	TASK: Update the links in the web server to the current release
 	WHO:  Release manager
 	WHEN: Release time
 	MISC: Should be omitted for a release candidate.
@@ -389,19 +400,7 @@ the login shell is csh or tcsh):
  rm current; ln -s $ReleaseVersion current
 
 ========================================================================
-2625.	TASK: Calculate the MD5 checksums and the LiveCD size
-	WHO:  Release manager
-	WHEN: Release time
-	COMMANDS:
- # Commands continue from the previous task
- cd $ReleaseVersion
- md5 LiveCD.iso.gz
- md5 xorp-$ReleaseVersion.tar.gz
- md5 xorp-$ReleaseVersion-setup.exe
- ls -lAFgh LiveCD.iso.gz
-
-========================================================================
-2650.	TASK: Update the Web pages with the MD5 checksums calculated above
+2650.	TASK: Update the Web pages with the MD5 checksums calculated earlier
 	WHO:  Release manager
 	WHEN: Release time
 	MISC: - Update www/html_src/livecd.html with the LiveCD MD5
