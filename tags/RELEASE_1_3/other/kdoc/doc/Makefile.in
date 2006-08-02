@@ -1,0 +1,48 @@
+prefix=@prefix@
+Version = @Version@
+mandir=@mandir@
+htmldir=@htmldir@
+install=@INSTALL@
+sources=@top_srcdir@/src
+
+MANPAGES = kdoc.1 makekdedoc.1 qt2kdoc.1
+MAINDOC = @srcdir@/index.docbook @top_srcdir@/README
+
+all: ${MANPAGES}
+
+install:
+	${install} -d $(DESTDIR)${mandir}/man1
+	for file in ${MANPAGES}; do \
+		${install} -m 644 $$file $(DESTDIR)${mandir}/man1; \
+	done
+
+	${install} -d ${DESTDIR}${htmldir}
+	${install} -m 644 ${MAINDOC} ${DESTDIR}${htmldir}
+	for file in ${MAINDOC}; do \
+		${install} -m 644 $$file $(DESTDIR)${htmldir}; \
+	done
+
+
+kdoc.1: @srcdir@/kdoc.pod @top_srcdir@/Version
+	pod2man --center "KDOC Documentation System" --release "${Version}" \
+		@srcdir@/kdoc.pod > kdoc.1.local && mv kdoc.1.local kdoc.1
+
+makekdedoc.1: ${sources}/makekdedoc @top_srcdir@/Version
+	pod2man --center "KDOC Documentation System" --release "${Version}" \
+		${sources}/makekdedoc > makekdedoc.1.local \
+		&& mv makekdedoc.1.local makekdedoc.1
+
+qt2kdoc.1: ${sources}/qt2kdoc @top_srcdir@/Version
+	pod2man --center "KDOC Documentation System" --release "${Version}" \
+		${sources}/qt2kdoc > qt2kdoc.1.local \
+		&& mv qt2kdoc.1.local qt2kdoc.1
+
+clean:
+	rm -rf kdoc.1 makekdedoc.1 qt2kdoc.1
+
+# This needs to be improved, obviously
+htmldoc: @srcdir@/index.docbook
+	-rm -rf html; mkdir html; (cd html && jade -d \
+        /usr/lib/sgml/stylesheet/dsssl/docbook/nwalsh/html/docbook.dsl -t sgml \
+	../$< )
+

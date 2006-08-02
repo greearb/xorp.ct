@@ -1,0 +1,587 @@
+\documentclass{article}
+\usepackage{url}
+\title{Routing policy filters\\design v0.01}
+\author{ab $<$a.bittau@cs.ucl.ac.uk$>$}
+
+
+\begin{document}
+\maketitle
+
+\section{Introduction}
+When dealing with routing policies, the life-time of a route and the stages
+which is goes through in order to be accepted must be considered. It is
+important to understand at which stages policy filtering may be applied and the
+consequences which result in choosing a particular stage rather than a different
+one. Routes being advertised also need the same consideration.
+
+\section{Imported routes}
+The flow of routes from the protocols into the RIB (import) may be summarized in
+three main steps. In each step, the route is in a different state:
+\begin{description}
+\item[originated] The routing protocol just learned about this route. It is
+fresh and with its original content, just as it was advertised. This state
+relates to BGP's RibIn Table for example.
+\item[accepted] The routing protocol accepts the route as its own best route for
+the particular destination. The route is now ready to be introduced into the RIB.
+This state relates to right after BGP's Decision Table.
+\item[winner] This is the route that ``won''(out of the accepted ones) for a
+particular destination. Winning is controlled by the administrative distance of
+protocols. It is the route actually used for forwarding.  This state is right
+after the RIB's ExtInt table. These routes are communicated to the FEA in order
+to be installed in the kernel.
+\end{description}
+
+\begin{figure}
+\setlength{\unitlength}{1mm}
+\begin{picture}(115,70)
+%\put(0,0){\framebox(115,70){}} 
+
+% top labels
+\put(0,65){{\em Originated}}
+\put(20,66){\vector(1,0){17}}
+\put(40,65){{\em Accepted}}
+\put(57,66){\vector(1,0){35}}
+\put(95,65){{\em Winner}}
+
+% Define routing protocols
+\newsavebox{\protocol}
+\savebox{\protocol}{
+% incoming arrows
+\multiput(0,5)(0,2){3}{\vector(1,0){15}}
+% decision box
+\put(15,2){\framebox(15,10){Decision}}
+% %protocol boundary
+\put(5,0){\dashbox(35,22)[t]{Routing protocol}}
+% labels
+\put(6,1){{\em pre}}
+\put(31,1){{\em post}}
+}
+
+
+% Draw two routing protocols and outgoing lines
+\multiput(0,0)(0,30){2}{\usebox{\protocol}}
+\put(30,7){\vector(2,1){30}}
+\put(30,37){\vector(2,-1){30}}
+
+
+% rib decision box and outgoing
+\put(60,17){\framebox(15,10){Decision}}
+\put(75,22){\vector(1,0){15}}
+% winner box
+\put(90,17){\framebox(15,10){{\em Winner}}}
+% rib boundary
+\put(50,7){\dashbox(60,30)[t]{RIB}}
+% labels
+\put(51,8){{\em pre}}
+\put(76,8){{\em post}}
+
+
+\end{picture}
+\caption{\label{inrouteflow}Flow of imported routes}
+\end{figure}
+Figure~\ref{inrouteflow} illustrates the stages routes need to go through in
+order to become winners. The routing protocols and the RIB are similar in terms
+of functionality --- they both take in multiple routes and make a {\em decision}
+regarding which route is best, and output that single route. The decision in
+routing protocols is local, i.e. the route is confronted against other routes
+originated by the same protocol. On the other hand, the decision made by the
+RIB is global as all routes from all routing protocols are confronted. This
+explains why being accepted by a routing protocol does not necessarily mean that
+the route is the best overall, and thus the winner.
+
+The decision process will eliminate some of the known routes, and it is not
+policy based. Two additional states may be defined in order to aid discussions
+about policy filter placement:
+\begin{description}
+\item[pre-decision] This state is just before the route enters a decision stage.
+For example, it relates to the originated state.
+\item[post-decision] This state is right after a decision has been made. For
+example, when a route is accepted.
+\end{description}
+
+
+\subsection{Import policies}
+The location of where a policy filter is placed has various implications. When
+matching import policies, attributes of the protocol itself are normally
+considered. This suggests that import filters should be placed somewhere within
+the routing protocol, as the RIB does not have enough information about protocol
+specific fields.
+
+There are now two locations where a filter may be placed: pre or post decision.
+Placing a filter in pre-decision gives the user more control as all incoming
+routes may be matched and not only the accepted ones. However, this additional
+control may lead to inefficiency if policies are bogus. Consider a policy which
+rejects a route which would have been accepted among the other ones.  This may
+result in the use of a non optimal route.
+
+Another example of where the location of filtering is critical is the following.
+Consider two routes A and B for the same destination X, where A would have been
+accepted in the absence of policies. Suppose the policy specifies to reject all
+routes which match A. If the filter was placed in pre-decision, B would be the
+only route for X and would be accepted. Conversely, placing the filter in
+post-decision will reject the route and the RIB will not know how to reach X
+(when it probably should).
+
+Import policy matching and execution may, in all cases, be achieved in routing
+protocols at the pre-decision state. Doing so, gives the policy the most control
+and trust. It also ensures that the decision will be based on routes which have
+already been filtered (and possibly modified).
+
+
+
+
+
+
+\section{Exported routes}
+The life-time of exported routes may be summarized in two main states:
+\begin{description}
+\item[winners] The definition is the same as for imported routes. Only winner
+(``best'') routes are considered for possible advertisement.
+\item[ready] This is the final state of the route, just before the advertisement
+is sent to the network. The route is in fact a complete advertisement packet of
+the specific protocol used for the export.
+\end{description}
+
+\begin{figure}
+\setlength{\unitlength}{1mm}
+\begin{center}
+\begin{picture}(80,55)
+%\put(0,0){\framebox(80,55){}} 
+
+%winner routes
+\put(5,20){\framebox(15,10){{\em Winners}}}
+\put(0,15){\dashbox(25,20)[t]{RIB}}
+\put(20,25){\vector(2,1){30}}
+\put(20,25){\vector(2,-1){30}}
+
+% Define routing protocols
+\newsavebox{\protocolexp}
+\savebox{\protocolexp}{
+% ready box
+\put(10,2){\framebox(15,10){{\em Ready}}}
+% %protocol boundary
+\put(0,0){\dashbox(35,20)[t]{Routing protocol}}
+}
+
+% routing protocols
+\multiput(40,2)(0,30){2}{\usebox{\protocolexp}}
+\multiput(65,9)(0,30){2}{\vector(1,0){15}}
+
+\end{picture}
+\end{center}
+\caption{\label{expflow}Flow of exported routes}
+\end{figure}
+
+
+
+
+
+Figure~\ref{expflow} illustrates how routes exit the RIB until they become
+complete advertisements and sent off to the network. 
+
+
+\subsection{Export policies}
+Matching export policies is less trivial as it is based on both source and
+destination.  The only place where destination information is available, is in
+the routing protocol at the {\em ready} state. This is also the best place to
+execute the policy actions as it may involve changing protocol specific
+attributes. 
+
+However, export policies are matched according to their source as well, with the
+additional constraint that routes must be winners. Protocol specific source
+matching may be achieved in the protocol post-decision stage of
+figure~\ref{inrouteflow}, as protocol specific fields are known there. However, the
+route may lose in the RIB and never become a winner. If the route does become a
+winner, it will be forwarded to the relevant routing protocols for
+advertisement.
+
+Export policy matching should occur in three logical steps. First the policy
+must match its source at the post-decision stage of the originating routing
+protocol. Next, the route must win and be forwarded to the requested protocols,
+which is accomplished at the post-decision stage of the RIB. Finally, the route
+is matched according to its destination at the ready stage of the exporting
+protocol. At this point, the appropriate action may take place.
+
+If the source and destination protocols are the same in an export policy, then
+there is no redistribution involvement in the RIB. Routes flow across the
+routing protocol directly.
+
+
+
+
+
+\section{Policy filter pipeline}
+Import policy filtering is atomic as all matching and action execution is done
+in a single stage. Conversely, export policy filtering is spread out across
+various stages a route goes through. Figure~\ref{filters} illustrates how the
+matching may be achieved. The diagram is simplified, as matching should occur
+internally to the protocols and the RIB, and not just before or after. The
+positions drawn should reflect the pre/post decision stages inside the protocols
+and the RIB, except for position 4 which reflects the {\em ready} state.
+\begin{figure}
+\setlength{\unitlength}{1mm}
+\begin{picture}(120,70)
+%\put(0,0){\framebox(120,70){}} 
+
+% incoming lines
+\newsavebox{\arrows}
+\savebox{\arrows}{
+\multiput(0,2)(0,2){3}{\vector(1,0){15}}
+\multiput(0,22)(0,2){3}{\vector(1,0){15}}
+}
+\put(0,0){\usebox{\arrows}}
+
+% bypass line
+\put(40,3){same protocol}
+\put(30,2){\vector(1,0){55}}
+
+
+% routing protocols
+\newsavebox{\proto}
+\savebox{\proto}{
+\multiput(0,0)(0,20){2}{\framebox(15,10){\parbox{15mm}{\begin{center}Routing\\Protocol\end{center}}}}
+}
+\put(15,0){\usebox{\proto}}
+% outgoing lines
+\put(30,5){\vector(2,1){20}}
+\put(30,25){\vector(2,-1){20}}
+% rib
+\put(50,10){\framebox(15,10){RIB}}
+% outgoing
+\put(65,15){\vector(2,1){20}}
+\put(65,15){\vector(2,-1){20}}
+
+
+%out proto and arrows
+\put(85,0){\usebox{\proto}}
+\put(100,0){\usebox{\arrows}}
+
+
+% import match+action
+\put(5,65){\parbox[t]{30mm}{Import\\match\\action}}
+\put(7,1){\dashbox(5,50)[t]{1}}
+
+% export source match
+\put(30,65){\parbox[t]{30mm}{Export\\source match}}
+\put(32,1){\dashbox(5,50)[t]{2}}
+
+% export redistribution
+\put(65,65){\parbox[t]{30mm}{Export\\redistribution\\winning routes}}
+\put(67,6){\dashbox(5,45)[t]{3}}
+
+% export destination match and action
+\put(100,65){\parbox[t]{30mm}{Export\\dest match\\action}}
+\put(102,1){\dashbox(5,50)[t]{4}}
+
+\end{picture}
+\caption{\label{filters}Location of policy filter elements. Note that routes
+exported using the same protocol of their origin, bypass the RIB and the position
+3 filter.}
+\end{figure}
+
+Import policies are completely evaluated before export policies. All export
+policy matching is performed at later stages. This implies routes may have been
+modified by the import policies, making it impossible for export policies to
+match against original routes. This is a safe decision as the RIB itself will
+only use the possibly modified routes, thus the information being exported is
+coherent. The following example illustrates the concept:
+\begin{verbatim}
+policy-statement in {
+   source {
+      protocol rip;
+   }
+   action {
+      modify metric=3;
+      accept;
+   }
+}
+policy-statement out {
+   term rip {
+      source {
+         protocol rip;
+         metric 10;
+      }
+      action {
+         accept;
+      }
+   }
+   term default {
+      action {
+         reject;
+      }
+   }
+}
+protocols {
+   rip {
+      import in;
+   }
+   bgp {
+      export out;
+   }
+}
+\end{verbatim}
+In this example, BGP will never advertise a route. Many advertisements from RIP
+with metric 10 may have reached the router, but all RIP routes matched at
+position 2 of figure~\ref{filters} will have a modified metric of 3, thus
+failing the match.
+
+
+
+
+\section{Policy framework support}
+Various elements need to be added in order to support policy based filtering.
+As figure~\ref{filters} indicates, most of the matching and filtering (positions
+1,2,4) occurs within routing protocols. The RIB will only redistribute routes to
+specific protocols (position 3).
+
+
+
+\subsection{Policy tags}
+In order to support policies, the concept of {\em policy tags} is introduced.
+Each policy is assigned a unique identifier. The policy tag is a set of zero or
+more policy identifiers. All routes will have this extra tag field which will
+effectively associate them with policies.
+
+Consider the following statement:
+\begin{verbatim}
+protocol bgp {
+   export policy-A policy-B policy-C;
+}
+\end{verbatim}
+For simplicity suppose these three policies were assigned identifiers A, B and C
+respectively. The first phase is to match BGP routes to those policies. If a
+match is successful, the appropriate id is inserted in the tag set. 
+
+
+\subsection{Routing protocols}
+A specific interface must be implemented by a routing protocol for it to support
+policy filtering. The protocol must be able to:
+\begin{description}
+\item[read] Have the ability to read a value from a route. This will enable the
+filter to match route attributes.
+\item[write] Be able to modify attributes of the route, including protocol
+specific fields. This also includes the ability to add and remove policy tags.
+\end{description}
+
+
+\subsection{RIB}
+The RIB will support route redistribution as it is the bridge between different
+routing protocols. It may be achieved by allowing protocols to register interest
+on routes based on specific tag sets. All routes with a specific tags will be
+forwarded to specific routing protocols. In the RIB, the tag set of a route will
+reflect the source match of export policies, which is enough information to
+identify the export protocols bound to those particular policies. Multiple
+protocols may export based on the same policy and the RIB will forward the
+routes to all those protocols.
+
+\section{Policy framework interaction}
+The policy process is the manager of all policy decision. However, most of the
+work is done within routing protocols. Matching is achieved as a collaboration
+between the policy filters and the protocols. Actions are entirely performed
+within protocols. The policy process is the entity which manages policy filters
+and enables route redistribution.
+
+\subsection{Import policies}
+Each routing protocol will have, internally, a policy filter. This generic
+filter will read needed route values via a {\em reader}. All the complex
+matching is achieved by the generic filter and implementing a protocol specific
+reader should require little thought and skill, which allows new protocols to be
+added with ease. A protocol specific {\em writer} may also be invoked by the
+filter in order to accomplish possible route modification actions. The read and
+write interface is currently implemented as one.
+
+
+The main policy process will send protocol specific import policies to the
+specific filters. These filters will have enough information to match routes and
+execute the appropriate actions. Figure~\ref{infilter} illustrates a pre-decision
+import filter and the main components it interacts with.
+
+\begin{figure}
+\setlength{\unitlength}{1mm}
+\begin{center}
+\begin{picture}(85,50)
+%\put(0,0){\framebox(85,50){}}
+
+
+\put(0,34){\framebox(15,10){Policy}}
+\put(15,34){\line(2,-1){15}}
+
+% incoming arrows
+\multiput(20,20)(0,2){3}{\vector(1,0){10}}
+
+% filter components
+\put(30,32){\framebox(15,10){Reader}}
+\put(37,27){\line(0,1){5}}
+\put(30,17){\framebox(15,10){Filter}}
+\put(37,17){\line(0,-1){5}}
+\put(30,2){\framebox(15,10){Writer}}
+
+% filtered routes
+\multiput(45,21)(0,2){2}{\vector(1,0){15}}
+
+% decision
+\put(60,17){\framebox(15,10){Decision}}
+
+% only 1 winner =D
+\put(75,22){\vector(1,0){10}}
+
+% routing protocol boundary
+\put(25,0){\dashbox(55,45)[tr]{Routing protocol}}
+
+\end{picture}
+\caption{\label{infilter}Import policy filter}
+\end{center}
+\end{figure}
+
+
+\subsection{Export policies}
+Export policies interact with routing protocols in two stages as shown in
+figure~\ref{filters}. Filters applied in those positions resemble import
+filters in structure, but with some differences. 
+
+An export policy may be split up in two parts: the source match, and the
+destination match and actions. The first part is matched in position 2 of
+figure~\ref{filters}. When matched, it is assigned the appropriate policy tags.
+To complete the match, the next part of the policy is matched in position 4 and
+the specified actions may take place.
+
+To get from position 2 to 4, we rely on the RIB doing correct route
+redistribution. This is accomplished by the policy process, which registers the
+interest export protocols have in respect to specific tag sets. The RIB will
+forward all routes with specific tags to interested export protocols.
+
+Consider the following configuration:
+\begin{verbatim}
+policy-statement x {
+   source {
+      protocol rip;
+      metric == 2;
+   }
+   dest {
+      protocol bgp;
+      localpref == 100;
+   }
+   actions {
+      accept;
+   }
+}
+
+protocol bgp {
+   export x;
+}
+\end{verbatim}
+Logically, this may be split up into:
+\begin{verbatim}
+policy-statement UNIQUEID_Z {
+   source {
+      protocol rip;
+      metric == 2;
+   }
+   actions {
+      modify policytags += UNIQUEID_Z;
+   }
+}
+
+policy-statement x {
+   source {
+      policytags <= UNIQUEID_Z; /* implicit set of one element */
+   }
+   dest {
+      protocol bgp;
+      localpref == 666;
+   }
+   actions {
+      accept;
+   }
+}
+\end{verbatim}
+After the split is done, policy UNIQUEID\_Z is sent to the filter in position 2
+of RIP. The filter is just like an import filter but is post-decision.  In
+reality however this is considered an export filter as it performs the source
+match of exported routes.
+
+Policy x is then sent to the filter in position 4 of BGP. This filter is
+identical to the import filter. However it is not post/pre-decision but it
+rather is ``post-ready'' as it is applied after the advertisement is formed and
+ready.
+
+The only step left is passing all routes which contain tag UNIQUEID\_Z to
+position 4 (route redistribution). The policy process manages this as described
+earlier.
+
+
+\begin{figure}
+\setlength{\unitlength}{1mm}
+\begin{picture}(120,60)
+%\put(0,0){\framebox(120,60){}}
+%policy at top
+\put(53,50){\framebox(15,10){Policy}}
+\put(60,50){\line(-3,-1){30}}
+\put(60,50){\line(1,-2){11.5}}
+\put(60,50){\line(5,-1){50}}
+
+
+% bottom incoming, outgoing routes
+\multiput(0,4)(0,4){3}{\vector(1,0){2}}
+\put(117,8){\vector(1,0){3}}
+% ditto for top
+\multiput(0,32)(0,2){3}{\vector(1,0){4}}
+\put(115,34){\vector(1,0){4}}
+
+% incoming rt protocols
+\put(4,30){\framebox(15,10){Decision}}
+\put(19,34){\vector(1,0){5}}
+\put(24,30){\framebox(10,10){Filter}}
+\put(2,25){\dashbox(34,20)[bl]{Routing protocol}}
+
+\put(2,0){\framebox(34,20){Routing protocol}}
+
+\put(34,34){\vector(1,-1){8}}
+\put(36,12){\vector(1,1){6}}
+
+% rib
+\put(42,17){\framebox(15,10){Decision}}
+\put(57,22){\vector(1,0){5}}
+\put(62,17){\framebox(15,10)[c]{\parbox{15mm}{\begin{center}Redist\\table\end{center}}}}
+\put(40,12){\dashbox(39,20)[b]{RIB}}
+
+\put(77,22){\vector(1,1){8}}
+\put(77,22){\vector(1,-1){6}}
+
+% exporting rt protocols
+\put(85,30){\framebox(15,10){Ready}}
+\put(100,34){\vector(1,0){5}}
+\put(105,30){\framebox(10,10){Filter}}
+\put(83,25){\dashbox(34,20)[b]{Routing protocol}}
+
+
+\put(83,0){\framebox(34,20){Routing protocol}}
+
+\end{picture}
+\caption{\label{outfilter}Export policy filter}
+\end{figure}
+Figure~\ref{outfilter} summarizes how all components interact to achieve policy
+based filtering on export routes. Although the filter is spread out in various
+locations it is a single logical filter, just like the import filter.
+
+A consideration to make is that even routes which do not pass through the RIB
+may be matched in export policies. For example, consider BGP communicating to
+BGP directly without storing the information in the RIB for some reason
+(internal protocol communication). Since the matching is done entirely inside
+the protocol, filtering may be applied. The RIB is merely used for route
+redistribution.
+
+
+\section{Conclusion}
+Routing protocols will need to implement an interface that allows attribute
+reading and writing. Also, all routes must have an extra attribute for the
+policy tag set. This will enable policy based filtering to be implemented. 
+
+The policy framework may be relatively decoupled from the other components.
+Keeping the interface protocols must implement simple is crucial as every single
+protocol will have to re-implement it. Also, that is where most interaction
+between policies and the rest of the components occur. 
+
+The RIB will only need to support the extra tag field per route. 
+
+\end{document}

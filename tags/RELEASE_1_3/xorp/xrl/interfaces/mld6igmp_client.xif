@@ -1,0 +1,31 @@
+/* $XORP: xorp/xrl/interfaces/mld6igmp_client.xif,v 1.1.1.1 2002/12/11 23:56:17 hodson Exp $ */
+
+/*
+ * Multicast Listener Discovery/Internet Group Management Protocol
+ * client XRL interface.
+ */
+
+
+interface mld6igmp_client/0.1 {
+	/**
+	 * Add/delete membership information.
+	 *
+	 * @param xrl_sender_name the XRL name of the originator of this XRL.
+	 * @param vif_name the name of the new vif.
+	 * @param vif_index the index of the new vif.
+	 * @param source the source address that has been joined/left.
+	 * @param group the group address that has been joined/left.
+	 */
+	add_membership4		? xrl_sender_name:txt			\
+				& vif_name:txt & vif_index:u32		\
+				& source:ipv4 & group:ipv4
+	add_membership6		? xrl_sender_name:txt			\
+				& vif_name:txt & vif_index:u32		\
+				& source:ipv6 & group:ipv6
+	delete_membership4	? xrl_sender_name:txt			\
+				& vif_name:txt & vif_index:u32		\
+				& source:ipv4 & group:ipv4
+	delete_membership6	? xrl_sender_name:txt			\
+				& vif_name:txt & vif_index:u32		\
+				& source:ipv6 & group:ipv6
+}

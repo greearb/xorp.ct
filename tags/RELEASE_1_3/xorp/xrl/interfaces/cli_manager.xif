@@ -1,0 +1,94 @@
+/* $XORP: xorp/xrl/interfaces/cli_manager.xif,v 1.3 2003/03/25 01:21:48 pavlin Exp $ */
+
+/*
+ * CLI manager XRL interface.
+ */
+
+
+interface cli_manager/0.1 {
+	/**
+	 * Enable/disable/start/stop the CLI.
+	 *
+	 * @param enable if true, then enable the CLI, otherwise
+	 * disable it.
+	 */
+	enable_cli	? enable:bool
+	start_cli
+	stop_cli
+
+	/**
+	 * Add a subnet address to the list of subnet addresses enabled
+	 * for CLI access.
+	 * This method can be called more than once to add a number of
+	 * subnet addresses.
+	 *
+	 * @param subnet_addr the subnet address to add.
+	 */
+	add_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	add_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
+
+	/**
+	 * Delete a subnet address from the list of subnet addresses enabled
+	 * for CLI access.
+	 *
+	 * @param subnet_addr the subnet address to delete.
+	 */
+	delete_enable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	delete_enable_cli_access_from_subnet6	? subnet_addr:ipv6net
+
+	/**
+	 * Add a subnet address to the list of subnet addresses disabled
+	 * for CLI access.
+	 * This method can be called more than once to add a number of
+	 * subnet addresses.
+	 *
+	 * @param subnet_addr the subnet address to add.
+	 */
+	add_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	add_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
+
+	/**
+	 * Delete a subnet address from the list of subnet addresses disabled
+	 * for CLI access.
+	 *
+	 * @param subnet_addr the subnet address to delete.
+	 */
+	delete_disable_cli_access_from_subnet4	? subnet_addr:ipv4net
+	delete_disable_cli_access_from_subnet6	? subnet_addr:ipv6net
+
+	/**
+	 * Add a CLI command to the CLI manager
+	 *
+	 * @param processor_name the name of the module that will process
+	 * that command.
+	 * @param command_name the name of the command to add.
+	 * @param command_help the help for the command to add.
+	 * @param is_command_cd if true, this is a command that allows
+	 * "change directory" inside the CLI command-tree.
+	 * @param command_cd_prompt if @param is_command_cd is true,
+	 * the string that will replace the CLI prompt after we
+	 * "cd" to that level of the CLI command-tree.
+	 * @param is_command_processor if true, this is a processing command
+	 * that would be performed by processor_name.
+	 */	
+	add_cli_command		? processor_name:txt			\
+				& command_name:txt			\
+				& command_help:txt			\
+				& is_command_cd:bool			\
+				& command_cd_prompt:txt			\
+				& is_command_processor:bool
+
+	/**
+	 * Delete a CLI command from the CLI manager
+	 *
+	 * @param processor_name the name of the module that sends the request.
+	 * @param command_name the name of the command to delete.
+	 */	
+	delete_cli_command	? processor_name:txt & command_name:txt
+	
+	/*
+	 * TODO: do we want 'add_cli_commands_done' to indicate
+	 * end-of-adding?
+	 */
+	/* add_cli_commands_done ? processor_name:txt */
+}

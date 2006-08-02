@@ -1,0 +1,27 @@
+/* $XORP: xorp/xrl/interfaces/fib2mrib.xif,v 1.1 2004/02/17 23:25:11 pavlin Exp $ */
+
+/*
+ * Fib2mrib XRL interface.
+ */
+
+
+interface fib2mrib/0.1 {
+
+	/**
+	 * Enable/disable/start/stop Fib2mrib.
+	 *
+	 * @param enable if true, then enable Fib2mrib, otherwise
+	 * disable it.
+	 */
+	enable_fib2mrib		? enable:bool
+	start_fib2mrib
+	stop_fib2mrib
+
+	/**
+	 * Enable/disable the Fib2mrib trace log for all operations.
+	 *
+	 * @param enable if true, then enable the trace log, otherwise
+	 * disable it.
+	 */
+	enable_log_trace_all	? enable:bool
+}

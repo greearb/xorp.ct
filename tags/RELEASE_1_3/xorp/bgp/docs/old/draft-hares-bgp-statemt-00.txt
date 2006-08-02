@@ -1,0 +1,569 @@
+
+
+                                                                        
+   Internet Draft                                              S. Hares 
+   Document: draft-hares-bgp-statemt-00.txt                       NextHop 
+                                                          Technologies, 
+                                                                   Inc. 
+   Expires: August 2002                                   February 2002 
+ 
+                                     
+   BGP-4 Finite State Machine Table 
+    
+ 
+   Status of this Memo 
+    
+    
+   This document is an Internet-Draft and is in full conformance 
+   with all provisions of Section 10 of RFC2026. 
+    
+   Internet-Drafts are working documents of the Internet Engineering 
+   Task Force (IETF), its areas, and its working groups.  Note that      
+   other groups may also distribute working documents as Internet-
+   Drafts. 
+    
+   Internet-Drafts are draft documents valid for a maximum of six 
+   months and may be updated, replaced, or obsoleted by other documents 
+   at any time.  It is inappropriate to use Internet-Drafts as 
+   reference material or to cite them other than as "work in progress." 
+    
+   The list of current Internet-Drafts can be accessed at 
+        http://www.ietf.org/ietf/1id-abstracts.txt 
+   The list of Internet-Draft Shadow Directories can be accessed at 
+        http://www.ietf.org/shadow.html. 
+ 
+ 
+ 
+Abstract 
+         
+        This document describes the BGP-4 Finite State Machine in detail.
+	This Finite State machine (FSM) describes how the 27 events
+	operate on the 6 states described in the BGP-4 standard.   
+	These 27 events include administrative events, timer events,
+	TCP connectivity events and BGP message events. 
+
+        This document is standards track to accompany the BGP-4 [1] standard
+	as a standard document.  This description augments the BGP-4 FSM
+	description (section 8 of BGP-4 draft).
+ 
+           
+                   Table of Contents 
+      
+        Abstract     .........................................1 
+        1.0 BGP FSM Table Overview........................... 2 
+        2.0 BGP FSM Table    .................................4 
+        3.0 Actions in state table............................5 
+        Security Considerations...............................8 
+        References............................................9
+        Author's Addresses.................................   9
+
+
+
+    
+   Hares         Informational - Expires August 2002                1 
+
+
+
+
+   BGP-4 Finite State Machine                           February 2002 
+    
+    
+    
+1.0 BGP FSM Table Overview 
+
+       
+      The table below gives the BGP State machine in table format.  There 
+      are 6 states in the state table:  Idle, Connect, Open Sent, Active, 
+      Open Confirm, and Established.  The states are listed as columns in 
+      the table. 
+       
+      Each row of the table focuses on the state transitions when a single 
+      event occurs.  The event is listed as the row header 
+       
+      In each box of the table, the first entry in the box is the new 
+      state.  The second entry is the set of actions.   Each action is 
+      either specified (such as Ignore) or it given a Letter (such as B) 
+      that is described at the end of the table. 
+       
+      For example, if an manual start event occurs in the Idle state, the 
+      local system performs the actions listed under ôAö and goes to the 
+      Connect state.   The actions under the letter A are:  
+       
+      Action A 
+       
+      1) Initialize all BGP resources 
+      2) ConnectRetryCnt set to 0 
+      3) Start Connect retry timer with initial value 
+      4) Initiate transport connection to BGP peer 
+      5) Listen for connection set-up by remote BGP peer 
+       
+    
+      If the bgp persistent peer oscillation protection is not enabled, 
+      the following events will not occur in this state machine: 
+            
+           Event6: Automatic start with bgp flap stop on 
+           Event8: Idle Hold timer expires 
+        
+      Symbols within the Table: 
+       
+       (opt) - denotes an optional event    
+    
+       Collision Detect -  Indicates the checks based on section 6.8 of 
+                           the bgp-4 draft which lists the rules for 
+                           detecting a collision of BGP connections.  
+                           After these rules have been followed, if this 
+                           connection is to be dumped then the "dumped" 
+                           function is followed".  If this connection is 
+                           not to be dumped, then the Keep clause is 
+                           followed.  
+    
+       
+       
+                             
+   Hares         Informational - Expires August 2002                2
+
+
+
+   BGP-4 Finite State Machine                           February 2002 
+
+2.0 BGP FSM Table  
+
+ 
+ 
+ 2.1 Part A - administrative events
+    
+ # Event      Idle      Connect Active    Open     Open    Estab 
+                                           sent    Confirm   lished 
+ -------------------------------------------------------------------
+ 1 Manual    Connect    Connect  Active/  Open     Open     Estab 
+     Start     /A        /Ignore  Ignore  Sent    Confirm/  lished/ 
+                                          /Ignore Ignore      Ignore 
+  -------------------------------------------------------------------
+ 2 Manual    Idle /     Idle/   Idle/    Idle/     Idle/   Idle / 
+     Stop      Ignore    Z       Z         S        S         C 
+ -------------------------------------------------------------------
+ 3 AutoStart Connect/   Connect Active/   Open     Open     Estab-   
+    (opt)     F         /Ignore Ignore     Sent /  Confirm/  lished /
+                                          Ignore   Ignore    Ignore
+ ------------------------------------------------------------------- 
+ 4 Manual    Active/   Connect/ Active/   Open     Open     Estab-  
+     start &   B        Ignore  Ignore     Sent /  Confirm   lished / 
+     passive                               Ignore  /Ignore  Ignore 
+     (opt) 
+ -------------------------------------------------------------------
+ 5 Auto      Active/   Connect Active/   Open     Open     Estab- 
+     Start &   B        /Ignore Ignore     Sent/   Confirm/  lished/ 
+     passive                              Ignore   Ignore    Ignore 
+     (opt) 
+ -------------------------------------------------------------------
+ 6 Auto      See bgp   Connect Active/   Open     Open     Estab 
+    start &   backoff   /ignore ignore     Sent/   Confirm/  lished/ 
+    bgp flap  draft                       Ignore   ignore   Ignore 
+    stop on       
+    (opt) 
+    [note 1]
+ ------------------------------------------------------------------- 
+ 7 Auto stop Idle/     Idle /  Idle /    Idle /   Idle/    Idle/  
+     (opt)    Ignore     D       D          C       C        C 
+     
+  -------------------------------------------------------------------   
+ 
+2.2 Part B - Timer Events
+ 
+ # Event      Idle      Connect Active    Open     Open    Estab 
+                                           sent    Confirm   lished 
+ -------------------------------------------------------------------
+ 8 Idle Hold See bgp   Idle /  Idle /    Idle /    Idle /  Idle /  
+    timer     peer flap  D       D         E          E      E 
+    expires   damp                                              
+    Opt)      draft 
+ -------------------------------------------------------------------
+ 9 Connect   Idle/     Connect/ Connect   Idle /   Idle /   Idle/  
+    Retry      V         X       /F        E        E        E  
+    timer                                              
+    expires 
+ -------------------------------------------------------------------
+ 10 Hold      Idle /    Idle /  Idle /    Idle /   Idle /   Idle / 
+    Timer      V         D       D          K       K        M   
+    expires                                                     
+ -------------------------------------------------------------------
+ 11 Keep-     Idle /    Idle  / Idle /    Idle /   Open     Establish
+    alive      V         D       D         E       Confirm/ ed/  
+    Timer                                          Q           Q 
+    expires 
+ -------------------------------------------------------------------
+
+                 
+  Hares         Informational - Expires August 2002                3     
+
+
+   BGP-4 Finite State Machine                           February 2002 
+
+ 2.3 Part C - TCP connection events
+
+ -------------------------------------------------------------------    
+ # Event      Idle      Connect Active    Open     Open    Estab 
+                                           sent    Confirm   lished  
+ ------------------------------------------------------------------- 
+   
+ 12 TCP       Idle/     Open    Open    Collision Collision Collision 
+    connect    V        sent/   Sent/   detect    detect    detect 
+    succeeds             H        H                          
+                                          Dump:    Dump:    Dump: 
+                                           Idle/    Idle/    Idle/ 
+                                            R        R        R 
+                                                             
+                                          Keep:    Keep:    Keep: 
+                                          OpenSent Open     Estab- 
+                                          / Ignore Confirm/ lished/
+                                                   Ignore   Ignore 
+ -------------------------------------------------------------------
+ 13 TCP dis û Idle/     Idle/   Idle /    Active / Idle /   Idle / 
+    connect    V         D       Y         O        Y        T 
+ -------------------------------------------------------------------
+ 14 TCP       Idle/     Active/ Idle/     Idle/    Idle /   Idle / 
+    connect    V         G       Y         E        E        C 
+    fails                           
+ -------------------------------------------------------------------
+ 15 TCP       Idle/     Idle/   Active/  Collision Collision                                                             Collision 
+    connect    V         D       Ignore   detect   detect   detect 
+    succeeds                                                 
+    and                                   Dump:    Dump:    Dump: 
+    passive                                Idle/    Idle/    Idle/ 
+    (opt)                                   R        R        R 
+                                                             
+                                          Keep:    Keep:    Keep: 
+                                          OpenSent Open     Estab- 
+                                           /Ignore Confirm/                                                              Lished / 
+                                                   Ignore   Ignore
+ ------------------------------------------------------------------- 
+ 16 Rcv TCP   Idle/     Open    Open      Idle /   Idle /   Idle /  
+    Connect    V         Sent/   Sent/     E        E        E 
+    unconfig              H      H                              
+    Peers OK  
+    (opt) 
+ -------------------------------------------------------------------
+ 17 Rcv TCP   Idle/     Idle/   Active/   Idle /   Idle /   Idle /  
+    connect    V         D       L         E        E        E 
+    unconfig                                                    
+    peers                                                       
+    disallow 
+    (opt) 
+ -------------------------------------------------------------------
+
+  Hares         Informational - Expires August 2002                4     
+
+
+   BGP-4 Finite State Machine                           February 2002 
+
+ 2.4 Part D - BGP message and administrative events
+     
+    
+ 18 BGPOpen   Idle/     Idle/   Idle/     Open     Idle/    Idle / 
+               V         D         D      Confirm/  E        E 
+
+ -------------------------------------------------------------------
+
+                                          N 
+ 19 BGP Open  Idle/     Idle /  Open      Open     Idle /   Idle /  
+    and        V         D      Confirm/  Confirm/                                                      E        E 
+    passive                      H         H 
+    (opt) 
+ -------------------------------------------------------------------
+
+ 20 BGPHeader Idle/     Idle/   Idle /    Idle/    Idle /   Idle / 
+    err        V          D      D          I       I        E 
+ -------------------------------------------------------------------
+
+ 21 OpenMsg   Idle/     Idle/   Idle/     Idle/    Idle /   Idle /  
+     err       V          D      D         J        E       E 
+ -------------------------------------------------------------------
+                                                       
+ 22 Open      Idle/     Idle/   Idle/     Idle/    Idle/    Idle / 
+    collision  V         D       D         R        R         
+    dump                           
+ -------------------------------------------------------------------
+ 
+ 23 Notify    Idle/     Idle/   Idle/     Idle/    Idle/    Idle/   
+    with       V         D       D         Y        Y         
+    version                         
+    error 
+ -------------------------------------------------------------------
+
+ 24 Notifi-   Idle/     Idle/   Idle/     Idle/    Idle/    Idle/ 
+    cation     V         D       D         Y        Y        T 
+    Received                                  
+ -------------------------------------------------------------------
+
+ 25 Keepalive Idle/     Idle/   Idle/     Idle/    Estab    Estab 
+    message    V         D       D         E        lished/  lished/ 
+ -------------------------------------------------------------------
+                                                   P        P 
+ 26 Update    Idle/     Idle/   Idle/     Idle/    Idle/    Estab 
+    message    V         D       D         E        E        lished/ 
+ -------------------------------------------------------------------
+                                                            W   
+ 27 Update    Idle/     Idle/   Idle/     Idle/    Idle/    Idle / 
+    message    V         D       D         E        E        U 
+ -------------------------------------------------------------------
+
+
+  Hares         Informational - Expires August 2002                5     
+
+
+  BGP-4 Finite State Machine                           February 2002 
+
+
+3.0 Actions in state table 
+    
+   Action A 
+    
+        1) Initialize all BGP resources 
+        2) ConnectRetryCnt set to 0 
+        3) Start Connect retry timer with initial value 
+        4) Initiate transport connection to the BGP peer 
+        5) Listen for connection set-up by the remote BGP peer 
+    
+   Action B 
+    
+        1) Initialize all BGP resources 
+        2) ConnectRetryCnt set to 0 
+        3) Start connect retry timer with initial value 
+        4) Listen for connection set-up by remote BGP peer 
+     
+   Action C 
+        1) Set Administrative stop in MIB code reason 
+        2) Send Notification with Cease 
+        3) Connect retry timer reset (set to zero) 
+        4) Release all BGP resources 
+        5) Drop TCP connection 
+        6) Increment the ConnectRetryCnt by 1 
+        7) BGP peer oscillation damping process [2] 
+    
+   Action D 
+        1) Set FSM error in MIB reason code 
+        2) Connect retry timer reset (set to zero) 
+        3) Release all BGP resources 
+        4) Drop TCP connection 
+        5) Increment the connect retry count by 1 
+        6) BGP peer oscillation damping process [2] 
+    
+   Action E 
+        1) Set FSM error in MIB reason code  
+        2) Send Notification with FSM error 
+        3) Connect retry timer reset (set to zero) 
+        4) Drop TCP connection 
+        5) Release all BGP resources 
+        6) Increment the ConnectRetryCnt by 1 
+        7) BGP peer oscillation damping process [2] 
+ 
+   Action F 
+        1) Restart ConnectRetry timer (with initial value) 
+        2) Initiates a transport connection to the other bgp peer  
+           (TCP connection) 
+        3) Listen for remote transport connection that may be initiated   
+           by the remote BGP peer (TCP connection) 
+    
+   Action G 
+        1) Restart ConnectRetry timer (with initial value) 
+        2) Listen for BGP peer connection 
+
+
+  Hares         Informational - Expires August 2002                6     
+
+
+   BGP-4 Finite State Machine                           February 2002 
+    
+   Action H 
+        1) Clear ConnectRetry timer (clear to zero) 
+        2) Complete BGP initialization 
+        3) Send Open message 
+	4) Hold timer set to Large value (4 minutes)
+   Action I
+
+        1) Set BGP Header error in MIB reason code
+        2) Send Notification with BGP Header Error	
+        3) Connect retry timer reset (set to zero)
+        4) Drop TCP connection
+        5) Release all BGP resources
+        6) Increment the ConnectRetryCnt by 1
+        7) BGP peer oscillation damping process [2]
+
+   Action J
+        1) Set Open message error in MIB reason code
+        2) Send Notification with Open message error
+        3) Connect retry timer reset (set to zero)
+        4) Release all BGP resources
+        5) Drop TCP connection
+        6) Increment the ConnectRetryCnt by 1
+        7) BGP peer oscillation damping process [2]
+
+   Action K
+       1) Set Hold Timer expired in MIB Reason code
+       2) Send Notification with Hold timer expired
+       3) Connect retry timer reset (set to zero)
+       4) Drop the TCP connection
+       5) Release all BGP resources
+       6) Increment ConnectRetryCnt by 1
+       7) BGP peer oscillation damping process [2]
+
+  Action L
+       1) Reject TCP connection
+
+
+  Action M
+      1) Set Hold Timer expired in MIB reason code 
+      2) Send notification with Hold timer expired
+      3) Delete Routes
+      4) Connect retry timer reset (set to zero)
+      5) Release all BGP resources
+      6) Drop TCP connection
+      7) Increment the ConnectRetryCnt by 1
+      8) BGP peer oscillation damping process [2]
+
+  Action N
+      1)  Send KEEPALIVE message
+      2a) If negotiated Hold time value is non-zero,  
+          - Set Keepalive timer
+          - Hold timer reset to negotiated Hold time value  
+          [section 4.2 of bgp-4 draft [1]]
+      2b) If negotiated Hold time value is zero,	
+          - Reset Keepalive timer
+          - Reset Hold timer
+      3) If value of Autonomous System field is the same as the local 
+         Autonomous system number, set the connection is an internal 
+         connection; otherwise it is ôexternalö.  (This impacts  
+         Update processing)
+
+  Action O
+
+      1) Close BGP connection
+      2) Restart ConnectRetry Timer
+      3) Continue listening for BGP connection
+
+  Hares         Informational - Expires August 2002                7     
+
+
+   BGP-4 Finite State Machine                           February 2002 
+    
+
+  Action P
+      1) Restart Hold timer
+
+  Action Q
+      1) Send Keepalive message
+      2) Restart KEEPALIVE timer
+
+  Action R
+     If collision detected (section 6.8) and this bgp session is 
+     the session to be dumped,
+      1) Set call collision cease in MIB reason code
+      2) Send Notification with a CEASE
+      3) Connect retry timer reset (set to zero)
+      4) Release all BGP resources
+      5) Drop TCP connection
+      6) Increment the ConnectRetryCnt by 1
+      7) BGP peer oscillation damping process [2]
+
+  Action S
+       1) Set Administrative down in MIB reason code
+       2) Send Notification with Cease
+       3) Drop TCP connection
+       4) Release all BGP resources
+       5) set ConnectRetryCnt to 0
+       6) Connect retry timer reset (set to zero)
+
+
+   Action T
+       1) Set appropriate code in MIB reason code
+        - either Notification or TCP disconnect or TCP Failure
+       2) Delete routes
+       3) Connect retry timer reset (set to zero)
+       4) Release all BGP resources
+       5) Drop TCP connection
+       6) Increment the ConnectRetryCnt by 1
+       7) BGP peer oscillation damping process [2]
+
+  Action U
+       1) Set the MIB FSM info to Update error
+       2) Send notification with Update error 
+       3) Delete routes
+       4) Connect retry timer reset (set to zero)
+       5) Release all BGP resources
+       6) Drop TCP connection
+       7) Increment ConnectRetryCnt by 1
+       8) BGP peer oscillation damping process [2]
+
+  Action V
+       1) FSM Error in MIB reason code
+
+  Action W
+       1) Process update packet
+       2) Restart Hold timer
+
+  Action X
+       1) Set Notification received in MIB code
+       2) Drop TCP connection
+       3) Restart ConnectRetry timer (with initial value)
+       4) Start TCP connection
+       5) Listen for TCP connection
+
+   Action Y
+       1) Set TCP disconnect in MIB reason code
+       2) Connect retry timer reset (set to zero)
+       3) Release all  BGP resources
+       4) Drop TCP connection
+       5) Increment ConnectRetryCnt by 1
+       6) BGP peer oscillation damping process [2]
+
+   Action Z
+       1) Set Manual disconnect in MIB reason code
+       2) Drop TCP connection
+       3) Release all BGP resources
+       4) Set connect retry count to zero
+       5) Clear connect retry 
+
+
+  Hares         Informational - Expires August 2002                8     
+
+
+   BGP-4 Finite State Machine                           February 2002 
+    
+
+Security Considerations 
+   Security concerns for BGP-4 are addressed in the BGP-4 
+   specification, and accompanying specifications on TCP MD5 [3] and 
+   IP Security[4].  No additional considerations need to be made for 
+   the BGP-4 state machine description. 
+ 
+    
+
+ 
+   [1] "A Border Gateway Protocol 4 (BGP-4)" Y. Rekhter, T. Li Editors 
+        http://www.ietf.org/internet-drafts/draft-ietf-idr-bgp4-17.txt 
+         
+         
+   [2] "BGP Peer Oscillations Backoff Mechanisms" 
+        draft-skh-bgp-backoff-00.txt "BGP backoff 
+    
+   [3] "Protection of BGP Sessions via the TCP MD5 Signature Option" 
+        A. Heffernan, rfc2385.txt 
+    
+   [4] Securing BGPv4 using Ipsec", D. Ward,  
+        draft-ward-bgp-ipsec-00.txt 
+    
+ 
+    
+References 
+ 
+    
+   Susan Hares 
+   NextHop Technologies, Inc 
+   825 Victors Way              Phone:  1-734-222-1610 
+   Ann Arbor, MI USA            Email:  skh@nexthop.com 
+    
+    
+    
+Author's Addresses 
+     
+   Hares         Informational - Expires August 2002                9
