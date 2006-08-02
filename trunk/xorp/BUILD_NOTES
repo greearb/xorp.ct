@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.65 2006/08/01 21:17:40 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.66 2006/08/02 08:38:35 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -295,10 +295,13 @@ gmake check
     - For instructions how to build the XORP Installer for Windows
       see xorp/contrib/win32/installer/README.
 
-    - STOP PRESS: The very latest MinGW-current as of 31st July 2006 will
-      require that you remove the -Wmissing-declarations warning flag
-      from XORP's configure script, due to the new way that MSVCRT inline
-      functions are dealt with in the system headers. No other workaround
+    - NOTE WELL: If you are trying to build XORP with MinGW-current as of
+      31st July 2006, you will need to manually remove the
+      -Wmissing-declarations and -Wmissing-prototypes warning flags from
+      the CPARANOIDFLAGS variable in XORP's configure script in order
+      to build XORP without interruption.
+      This is due to the new way that MSVCRT inline functions are dealt
+      with in the mingw-runtime system headers. No other workaround
       is known at this time.
 
   * Windows Server 2003 (Service Pack 1) (32-bit, x86):
