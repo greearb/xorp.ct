@@ -1,3 +1,7 @@
+#
+# $XORP$
+#
+
 This is XORPRTM; a loadable protocol DLL for Microsoft's Routing and
 Remote Access Service. XORPRTM implements a named pipe server with
 asynchronous I/O which translates Router Manager V2 events into

@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/pim/README,v 1.29 2005/04/27 02:47:05 pavlin Exp $
+# $XORP: xorp/pim/README,v 1.30 2006/03/08 02:24:24 pavlin Exp $
 #
 
 Protocol Independent Multicast-Sparse Mode (PIM-SM) Implementation
@@ -28,9 +28,10 @@ http://www.xorp.org/releases/current/docs/user_manual/user_manual.pdf
 To use PIM-SM, you must have PIM-capable kernel. Currently, the
 following systems are known to have PIM-SM kernel support:
 
- - IPv4: FreeBSD-4.9, FreeBSD-5.2 (and later), DragonFlyBSD,
+ - IPv4: DragonFlyBSD, FreeBSD-4.9, FreeBSD-5.2 (and later),
    NetBSD-3.0 (and later), OpenBSD-2.7 (and later), Linux:
-   For FreeBSD and DragonFlyBSD kernel, the following options are required:
+
+   For DragonFlyBSD or FreeBSD kernel, the following options are required:
 options		MROUTING		# Multicast routing
 options		PIM			# PIM multicast routing
 
@@ -38,7 +39,7 @@ options		PIM			# PIM multicast routing
 options         MROUTING        # IP multicast routing
 options         PIM             # Protocol Independent Multicast
 
-   For OpenBSD, the following options are required:
+   For OpenBSD kernel, the following options are required:
 option          MROUTING        # Multicast router
 option          PIM             # Protocol Independent Multicast
 
@@ -47,7 +48,7 @@ CONFIG_IP_MULTICAST=y
 CONFIG_IP_MROUTE=y
 CONFIG_IP_PIMSM_V2=y
 
- - IPv6: FreeBSD, NetBSD, OpenBSD, DragonFlyBSD
+ - IPv6: DragonFlyBSD, FreeBSD, NetBSD, OpenBSD:
    No kernel options are required.
 
 Debugging with Stand-alone PIM
@@ -186,7 +187,7 @@ the BGP testing framework.
 Status
 ======
 
-Currently (March 2006), the PIM-SM implementation is based
+Currently (August 2006), the PIM-SM implementation is based
 on the specification in the following documents:
 
  * draft-ietf-pim-sm-v2-new-11.{ps,txt} (The core PIM-SM specification).
