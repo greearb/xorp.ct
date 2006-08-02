@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.17 2005/11/29 01:48:38 pavlin Exp $
+% $XORP: xorp/docs/multicast/multicast_arch.tex,v 1.18 2006/03/09 01:30:58 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,9 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +28,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -38,14 +41,14 @@
 
 \title{XORP Multicast Routing Design Architecture \\
 \vspace{1ex}
-Version 1.2}
+Version 1.3}
 \author{ XORP Project					\\
 	 International Computer Science Institute	\\
 	 Berkeley, CA 94704, USA			\\
          {\it http://www.xorp.org/}			\\
 	 {\it feedback@xorp.org}
 }
-\date{March 8, 2006}
+\date{August 2, 2006}
 
 \maketitle
 
@@ -302,8 +305,8 @@ performance, the PIM encapsulation should be done in the kernel, and
 then we need a signaling mechanism between the kernel and the user
 process managing the kernel multicast forwarding entries. That mechanism
 would deal with installing the appropriate information needed by kernel-level
-Register encapsulation. Currently (March 2006), only recent releases
-of FreeBSD, NetBSD, OpenBSD and DragonFlyBSD do support such
+Register encapsulation. Currently (August 2006), only recent releases
+of DragonFlyBSD, FreeBSD, NetBSD, and OpenBSD do support such
 kernel-level encapsulation.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -345,7 +348,7 @@ membership for group 224.0.1.20 on interface vif0''.
 Note that control packets used for multicast debugging such as MRINFO or
 multicast traceroute use IGMP as the network protocol. Hence, if such
 messages are received by the MLD/IGMP module, the appropriate
-information should be sent to the PIM module. Currently (March 2006),
+information should be sent to the PIM module. Currently (August 2006),
 the handling of such messages is not implemented yet.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -405,26 +408,29 @@ as URIB or MRIB entries to the RIB module.
   \item March 10, 2003: Updated to match XORP version 0.2 release code;
   cleanup.
 
-  \item June 9, 2003: Updated to match XORP version 0.3 release code
-  (changes related to the MFEA--FEA merging).
+  \item June 9, 2003: Updated to match XORP version 0.3 release code:
+  changes related to the MFEA--FEA merging.
 
-  \item August 28, 2003: Bump-up the version to 0.4, and the date;
-  minor edits.
+  \item August 28, 2003: Minor cleanup.
+  Updated the version to 0.4, and the date.
 
-  \item November 6, 2003: Bump-up the version to 0.5, and the date;
-  minor edits.
+  \item November 6, 2003: Minor cleanup.
+  Updated the version to 0.5, and the date.
 
-  \item July 8, 2004: Status updated; added information about the FIB2MRIB
-  and StaticRoutes modules. Bump-up the version to 1.0, and the date.
+  \item July 8, 2004: Status updated: added information about the FIB2MRIB
+  and StaticRoutes modules.
+  Updated the version to 1.0, and the date.
 
-  \item January 27, 2005: Remove MFEA+MRIB-related text, because the MFEA
+  \item January 27, 2005: Removed MFEA+MRIB-related text, because the MFEA
   does not deal with the MRIB information anymore.
 
-  \item April 13, 2005: Bump-up the version to 1.1, and the date.
-  Update the list of the OS-es that support kernel-level PIM Register
-  encapsulation.
+  \item April 13, 2005: Updated the list of the OS-es that support
+  kernel-level PIM Register encapsulation.
+  Updated the version to 1.1, and the date.
 
-  \item March 8, 2006: Bump-up the version to 1.2, and the date.
+  \item March 8, 2006: Updated the version to 1.2, and the date.
+
+  \item August 2, 2006: Updated the version to 1.3, and the date.
 
 \end{itemize}
 
