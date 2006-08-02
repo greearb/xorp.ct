@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/fea/fea.tex,v 1.17 2006/03/09 00:18:08 pavlin Exp $
+% $XORP: xorp/docs/fea/fea.tex,v 1.18 2006/08/02 00:28:48 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,11 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +30,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -48,8 +53,6 @@ Version 1.3}
 \date{August 2, 2006}
 
 \maketitle
-
-\thispagestyle{empty}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -434,24 +437,32 @@ of the FEA that contains plug-ins to access the forwarding plane by
 using the following mechanisms:
 
 \begin{itemize}
+
   \item {\it getifaddrs(3)}, {\it sysctl(3)}, {\it ioctl(3)}, {\it Linux
-	netlink(7) sockets}, {\it Linux /proc} and {\it Windows IP Helper
-	API} to obtain interface-specific information.
+  netlink(7) sockets}, {\it Linux /proc} and {\it Windows IP Helper
+  API} to obtain interface-specific information.
+
   \item {\it ioctl(3)}, {\it Linux netlink(7) sockets} and {\it Windows
-	IP Helper API} to set interface-specific information.
+  IP Helper API} to set interface-specific information.
+
   \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} for
-	observing changes in the interface-specific information.
+  observing changes in the interface-specific information.
+
   \item {\it BSD routing sockets}, {\it Linux netlink(7) sockets} and
-	{\it Windows IP Helper API} to lookup a single forwarding entry in
-	the forwarding plane.
+  {\it Windows IP Helper API} to lookup a single forwarding entry in
+  the forwarding plane.
+
   \item {\it sysctl(3)}, {\it Linux netlink(7) sockets} and {\it Windows
-	IP Helper API} to obtain the whole forwarding table from the
-	forwarding plane.
+  IP Helper API} to obtain the whole forwarding table from the
+  forwarding plane.
+
   \item {\it BSD routing sockets}, {\it Linux netlink(7) sockets} and
-	{\it Windows IP Helper API} to set a single forwarding entry or the
-	whole table in the forwarding plane.
+  {\it Windows IP Helper API} to set a single forwarding entry or the
+  whole table in the forwarding plane.
+
   \item {\it BSD routing sockets} and {\it Linux netlink(7) sockets} to
-	observe changes in the forwarding table.
+  observe changes in the forwarding table.
+
 \end{itemize}
 
 In other words, currently (August 2006) the {\tt fea} supports DragonFlyBSD,
@@ -480,28 +491,36 @@ Any contributions or bug fixes are welcome.
 \section{Modification History}
 
 \begin{itemize}
-  \item December 11, 2002: Version 0.1 completed.
-  \item March 10, 2003: Minor changes. Updated the version to 0.2, and the
-	date.
-  \item June 9, 2003: Updated to match the reality after the MFEA->FEA
-	merging. Updated the version to 0.3, and the date.
-  \item August 28, 2003: Added ``Linux /proc'' to the list of implemented
-	mechanisms for reading network interface information.
-	Updated the version to 0.4, and the date.
-  \item November 6, 2003: Updated the FEA status.
-	Updated the version to 0.5, and the date.
-  \item July 8, 2004: Updated the status: now there is support for
-        TCP/UDP socket I/O interface, support for libfeaclient XRL interface,
-        and support for FIB observer interface.
-	Updated the version to 1.0, and the date.
-  \item April 13, 2005: Updated the status for the raw sockets interface and
-	for Click. Updated the version to 1.1, and the date.
-  \item March 8, 2006: Updated the status: now the FEA supports Windows Server
-	2003, and the raw sockets interface is in use.
-	Updated the version to 1.2, and the date.
-  \item August 2, 2006: Added ``Modification History'' appendix.
-        Added DragonFlyBSD to the list of supported OS-es.
-	Updated the version to 1.3, and the date.
+
+  \item December 11, 2002: Initial version 0.1 completed.
+
+  \item March 10, 2003: Minor changes.
+  Updated the version to 0.2, and the date.
+
+  \item June 9, 2003: Updated to match XORP release 0.3: changes related
+  to the MFEA->FEA merging.
+
+  \item August 28, 2003: Updated to match XORP release 0.4: added ``Linux
+  /proc'' to the list of implemented mechanisms for reading network interface
+  information.
+
+  \item November 6, 2003: Updated to match XORP release 0.5: updated the FEA
+  status.
+
+  \item July 8, 2004: Updated to match XORP release 1.0: now there is
+  support for TCP/UDP socket I/O interface, support for libfeaclient XRL
+  interface, and support for FIB observer interface.
+
+  \item April 13, 2005: Updated to match XORP release 1.1: updated the status
+  for the raw sockets interface and for Click.
+
+  \item March 8, 2006: Updated to match XORP release 1.2: now the FEA supports
+  Windows Server 2003, and the raw sockets interface is in use.
+
+  \item August 2, 2006: Updated to match XORP release 1.3: added DragonFlyBSD
+  to the list of supported OS-es.
+  Added ``Modification History'' appendix.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

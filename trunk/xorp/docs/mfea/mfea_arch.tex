@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.21 2006/03/09 01:23:29 pavlin Exp $
+% $XORP: xorp/docs/mfea/mfea_arch.tex,v 1.22 2006/08/02 01:44:53 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -19,6 +19,8 @@
 \usepackage{rotating}
 \usepackage{moreverb}
 \usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -52,8 +54,6 @@ Version 1.3}
 
 \maketitle
 
-\thispagestyle{empty}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
@@ -83,8 +83,8 @@ Currently (August 2006), the MFEA supports abstraction for
 the following systems:
 
 \begin{itemize}
-  \item \{DragonFly,Free,Net,Open\}BSD OS
-  \item Linux OS
+  \item DragonFlyBSD, FreeBSD, NetBSD, and OpenBSD
+  \item Linux
 \end{itemize}
 
 In the future, the MFEA will support simulation environment, and
@@ -417,12 +417,11 @@ operation when MfeaNode is stopped.
 
 \begin{itemize}
 
-  \item December 11, 2002: Version 0.1 completed.
+  \item December 11, 2002: Initial version 0.1 completed.
 
-  \item March 10, 2003: Updated to match XORP version 0.2 release code;
-  cleanup.
+  \item March 10, 2003: Updated to match XORP release 0.2.
 
-  \item June 9, 2003: Updated to match XORP version 0.3 release code:
+  \item June 9, 2003: Updated to match XORP release 0.3:
   changes related to the MFEA--FEA merging, and refactoring of
   some of the MFEA internals.
 
@@ -430,12 +429,12 @@ operation when MfeaNode is stopped.
 
   \item November 6, 2003: Updated the version to 0.5, and the date.
 
-  \item July 8, 2004: Updated to match XORP version 1.0 release code.
+  \item July 8, 2004: Updated to match XORP release 1.0.
 
   \item January 27, 2005: Removed MRIB-related text, because the MFEA
   does not deal with the MRIB information anymore.
 
-  \item April 13, 2005: Updated to match XORP version 1.1 release code.
+  \item April 13, 2005: Updated to match XORP release 1.1.
 
   \item March 8, 2006: Updated the version to 1.2, and the date.
 

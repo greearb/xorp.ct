@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.38 2006/08/02 00:05:13 pavlin Exp $
+% $XORP: xorp/docs/design_arch/error_handling.tex,v 1.39 2006/08/02 00:29:09 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,11 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +30,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 \newcommand{\xorp} {{\em XORP}\@\xspace}
 \newcommand{\module} {{\em module}\@\xspace}
@@ -59,8 +64,6 @@ Version 1.3}
 \date{August 2, 2006}
 
 \maketitle
-
-\thispagestyle{empty}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -374,69 +377,80 @@ the dispatching \xt.  When any of these values are returned, the XRL
 communication has been successful.
 
 \begin{description}
+
   \item [OKAY] XRL dispatch successful.  Additional parameters in
-	XRL callback contain return values.
+  XRL callback contain return values.
+
   \item [COMMAND\_FAILED] XRL reached dispatcher, but could not be
-	dispatched. The reason for failure may be specified in the note
-	associated with the XrlError object.
+  dispatched. The reason for failure may be specified in the note
+  associated with the XrlError object.
+
   \item [BAD\_ARGS] XRL reached dispatcher, but argument types did not match
-	those expected by the dispatcher.
+  those expected by the dispatcher.
+
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Finder XRL Error Values}
 
 \begin{description}
-  \item [NO\_FINDER] This error occurs when an \xt cannot communicate
-	with the \finder. This always indicates a serious problem with the
-	router, as the \finder should always be present. The application
-	SHOULD treat this error as fatal.
-  \item [RESOLVE\_FAILED] This error occurs when a \xt process tries to
-	resolve an XRL the \finder has no result for.  This may be because the
-	target specified in the XRL does not exist or exists, but is still in
-	the process of registering the XRL it exports.
 
-	RESOLVE\_FAILED errors may happen because of a benign cause, namely
-	that processes started up in a less than perfect order, so a target's
-	user has initialized before the target itself. Applications SHOULD
-	handle this type of transient RESOLVE\_FAILED error with a
-	retransmission strategy.  Applications may avoid this error by using
-	the Finder event observer interface to detect when the particular
-	target becomes ready.
+  \item [NO\_FINDER] This error occurs when an \xt cannot communicate
+  with the \finder. This always indicates a serious problem with the
+  router, as the \finder should always be present. The application
+  SHOULD treat this error as fatal.
+
+  \item [RESOLVE\_FAILED] This error occurs when a \xt process tries to
+  resolve an XRL the \finder has no result for.  This may be because the
+  target specified in the XRL does not exist or exists, but is still in
+  the process of registering the XRL it exports.
+
+  RESOLVE\_FAILED errors may happen because of a benign cause, namely
+  that processes started up in a less than perfect order, so a target's
+  user has initialized before the target itself. Applications SHOULD
+  handle this type of transient RESOLVE\_FAILED error with a
+  retransmission strategy.  Applications may avoid this error by using
+  the Finder event observer interface to detect when the particular
+  target becomes ready.
 
   \item [NO\_SUCH\_METHOD] This error occurs when the named \xt is running and
-	has registered 
-	it's XRLs, but it does not support the method named in the XRL.
-	NO\_SUCH\_METHOD generally indicates a version mismatch between two
-	processes. This error may be considered fatal, or (for example) the
-	application might react by trying to access an older version of the
-	interface. The application can expect, however, that NO\_SUCH\_METHOD
-	errors are not transient: If an XRL access gets a NO\_SUCH\_METHOD
-	error, then that XRL will always result in a NO\_SUCH\_METHOD error,
-	at least until the target process restarts.
+  has registered 
+  it's XRLs, but it does not support the method named in the XRL.
+  NO\_SUCH\_METHOD generally indicates a version mismatch between two
+  processes. This error may be considered fatal, or (for example) the
+  application might react by trying to access an older version of the
+  interface. The application can expect, however, that NO\_SUCH\_METHOD
+  errors are not transient: If an XRL access gets a NO\_SUCH\_METHOD
+  error, then that XRL will always result in a NO\_SUCH\_METHOD error,
+  at least until the target process restarts.
+
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection*{Transport and Internal Xrl Error Values}
 
 \begin{description}
+
   \item [SEND\_FAILED] The underlying XRL transport mechanism has failed.
-	For example, the TCP connection has been reset, or a UDP connection
-	gets a port-unreachable message. The expectation is that no further
-	communication with the specific endpoint will succeed.
+  For example, the TCP connection has been reset, or a UDP connection
+  gets a port-unreachable message. The expectation is that no further
+  communication with the specific endpoint will succeed.
+
   \item [SEND\_FAILED\_TRANSIENT] This error occurs when the XRL library
-	temporarily cannot send a particular XRL. Usually, this will be
-	because of congestion or a slow receiver: the kernel has run out of
-	buffer space. Note that the XRL library performs some buffering
-	itself, to ensure that XRL requests are either completely transmitted
-	or not transmitted at all.
-	\emph{Note: The XRL library does not yet implement this error.}
+  temporarily cannot send a particular XRL. Usually, this will be
+  because of congestion or a slow receiver: the kernel has run out of
+  buffer space. Note that the XRL library performs some buffering
+  itself, to ensure that XRL requests are either completely transmitted
+  or not transmitted at all.
+  \emph{Note: The XRL library does not yet implement this error.}
+
   \item [REPLY\_TIMED\_OUT] -- The target did not reply within a
-	transport-protocol-specific period of time. Possible reasons include
-	network congestion, peer failure, network interface failure, and so
-	on. As in all network communications, when a timeout occurs we don't
-	know if the last unacknowledged XRL request was received and processed
-	by the peer. This error occurs in unreliable transmit only.
+  transport-protocol-specific period of time. Possible reasons include
+  network congestion, peer failure, network interface failure, and so
+  on. As in all network communications, when a timeout occurs we don't
+  know if the last unacknowledged XRL request was received and processed
+  by the peer. This error occurs in unreliable transmit only.
+
 \end{description}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -657,15 +671,23 @@ successfully installed all the routes in the kernel.
 \section{Modification History}
 
 \begin{itemize}
-  \item June 9, 2003: Version 0.3 completed.
+
+  \item June 9, 2003: Initial version 0.3 completed.
+
   \item August 28, 2003: Updated the version to 0.4, and the date.
+
   \item November 6, 2003: Updated the version to 0.5, and the date.
+
   \item July 8, 2004: Updated the version to 1.0, and the date.
+
   \item April 13, 2005: Updated the version to 1.1, and the date.
+
   \item March 8, 2006: Added a footnote about the policy manager process.
-	Updated the version to 1.2, and the date.
+  Updated the version to 1.2, and the date.
+
   \item August 2, 2006: Added ``Modification History'' appendix.
-	Updated the version to 1.3, and the date.
+  Updated the version to 1.3, and the date.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

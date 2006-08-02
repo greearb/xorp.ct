@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/bgp/bgp.tex,v 1.18 2006/08/02 00:06:59 pavlin Exp $
+% $XORP: xorp/docs/bgp/bgp.tex,v 1.19 2006/08/02 00:25:09 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,11 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +30,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -48,8 +53,6 @@ Version 1.3}
 \date{August 2, 2006}
 
 \maketitle
-
-\thispagestyle{empty}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -113,10 +116,14 @@ Update messages to send to that peer.
 A BGP Update Message consists of three parts:
 
 \begin{itemize}
+
   \item A list of withdrawn route subnets (route prefixes).
+
   \item Path Attribute information for announced routes.
+
   \item A list of subnets (route prefixes) that are being announced.
-	The Path Attribute information applies to all these subnets.
+  The Path Attribute information applies to all these subnets.
+
 \end{itemize}
 
 The PeerHandler splits an incoming update message up, and constructs a
@@ -163,26 +170,31 @@ as an {\tt add\_route}.
 The RibIn serves several additional purposes:
 
 \begin{itemize}
+
   \item It can answer {\tt lookup\_route} requests from downstream.
+
   \item When a new peer comes up, a route dump is initiated so that the
-	new peer learns all the feasible routes that we know.  The RibIn
-	can perform this dump as part of a background task, so as to
-	allow further updates while the dump is taking place.
+  new peer learns all the feasible routes that we know.  The RibIn
+  can perform this dump as part of a background task, so as to
+  allow further updates while the dump is taking place.
+
   \item When the peer associated with the RibIn goes down, a process to
-	delete all the routes learned from this peer is started.  This
-	is done by transferring the RibIn's entire routing table to a
-	new RouteTable called a DeletionTable that is plumbed in
-	directly after the RibIn. The DeletionTable handles the deletion
-	of the routes as a background task, leaving the RibIn ready to
-	cope immediately if the peer comes back up again.
+  delete all the routes learned from this peer is started.  This
+  is done by transferring the RibIn's entire routing table to a
+  new RouteTable called a DeletionTable that is plumbed in
+  directly after the RibIn. The DeletionTable handles the deletion
+  of the routes as a background task, leaving the RibIn ready to
+  cope immediately if the peer comes back up again.
+
   \item When the routing information in the XORP RIB changes, the change
-	of IGP metric can change which routes should win the decision
-	process.
-	The RibIn can be told that the routing information associated
-	with the indirect nexthop in a BGP route has changed, and it can
-	initiate a background task that re-sends all the relevant routes
-	downstream as {\tt replace\_route} messages, so that the
-	DecisionTable can make its choice again.
+  of IGP metric can change which routes should win the decision
+  process.
+  The RibIn can be told that the routing information associated
+  with the indirect nexthop in a BGP route has changed, and it can
+  initiate a background task that re-sends all the relevant routes
+  downstream as {\tt replace\_route} messages, so that the
+  DecisionTable can make its choice again.
+
 \end{itemize}
 
 The RibIn does not do significant sanity checking on its inputs - it
@@ -208,31 +220,40 @@ travels from parent to child.
 A FilterTable can hold many filters.  Current filters include:
 
 \begin{itemize}
+
   \item {\bf SimpleASFilter:}  Drops routes that contain the configured
-	AS in their AS Path.
+  AS in their AS Path.
+
   \item {\bf ASPrependFilter:} Prepends the configured AS number to the
-	AS Path of all routes that pass through the filter.
+  AS Path of all routes that pass through the filter.
+
   \item {\bf NexthopRewriteFilter:} Changes the NextHop attribute of all
-	routes that pass through the filter to the specified value.
+  routes that pass through the filter to the specified value.
+
   \item {\bf IBGPLoopFilter:} Drops all routes that we heard through
-	IBGP.  This is primarily useful as an outbound filter to an IBGP peer.
+  IBGP.  This is primarily useful as an outbound filter to an IBGP peer.
+
   \item {\bf LocalPrefInsertionFilter:} Inserts the configured value as
-	the BGP Local Preference attribute in all routes that pass through the
-	filter.  Typically used on input from an EBGP peer, before
-	route-specific filters.
+  the BGP Local Preference attribute in all routes that pass through the
+  filter.  Typically used on input from an EBGP peer, before
+  route-specific filters.
+
   \item {\bf LocalPrefRemovalFilter:} Removes the BGP Local Preference
-	attribute from all routes that pass through the filter.  Typically
-	used on output to an EBGP peer.
+  attribute from all routes that pass through the filter.  Typically
+  used on output to an EBGP peer.
+
   \item {\bf MEDInsertionFilter:} Adds a Multi-exit Descriminator
-	attribute based on the routes IGP metric to each route that passes
-	through the filter.  Typically used on output to an EBGP peer.  Note
-	that the MED to be inserted will have been added to the route by the
-	DecisionTable, so MEDInsertionFilter cannot be used as an input-branch
-	filter.
+  attribute based on the routes IGP metric to each route that passes
+  through the filter.  Typically used on output to an EBGP peer.  Note
+  that the MED to be inserted will have been added to the route by the
+  DecisionTable, so MEDInsertionFilter cannot be used as an input-branch
+  filter.
+
   \item {\bf MEDRemovalFilter:} Removes the  Multi-exit Descriminator
-	attribute from all routes that pass through the filter.  Typically
-	used just before a MEDInsertionFilter to remove the MED received from
-	the previous AS.
+  attribute from all routes that pass through the filter.  Typically
+  used just before a MEDInsertionFilter to remove the MED received from
+  the previous AS.
+
 \end{itemize}
 
 Note that filters are not just for operator configured filtering -
@@ -243,10 +264,14 @@ parent containing a subnet route.  All the configured filters will be
 applied in order to the route.  One of three things may happen:
 
 \begin{itemize}
+
   \item The route may be dropped by a filter.
+
   \item The route may pass through all filters unchanged.
+
   \item One or more filters may modify the route.  This is done by
-	creating a new copy of the route.
+  creating a new copy of the route.
+
 \end{itemize}
 
 In the last case, the modified route will have the Changed flag set
@@ -322,10 +347,13 @@ information related to the BGP NextHop.
 A complication comes with {\tt lookup\_route}:
 
 \begin{itemize}
+
   \item if the lookup matches an {\tt add\_route} in the NhLookupTable queue,
-	the NhLookupTable must return ``lookup unsuccessful''.
+  the NhLookupTable must return ``lookup unsuccessful''.
+
   \item if the lookup matches a {\tt replace\_route} entry in the
-	NhLookupTable's queue, the old answer must be given.
+  NhLookupTable's queue, the old answer must be given.
+
 \end{itemize}
 
 In general, the behaviour should be as if the queued updates had not
@@ -344,26 +372,32 @@ When DecisionTable receives an {\tt add\_route} from one input branch,
 it queries the other peers input branches using {\tt lookup\_route}.
 
 \begin{itemize}
+
   \item If none of the other branches returns an answer, then the route is a
-	new one, and can be passed on downstream so long as the BGP NextHop is
-	resolvable.
+  new one, and can be passed on downstream so long as the BGP NextHop is
+  resolvable.
+
   \item If one or more of the other branches returns an
-	answer, one of these answers will have been the previous winner.  The
-	new route is compared against the previous winner - if it is better
-	then a {\tt replace\_route} message is propagated downstream.  If it
-	is worse, then no further action is taken.
+  answer, one of these answers will have been the previous winner.  The
+  new route is compared against the previous winner - if it is better
+  then a {\tt replace\_route} message is propagated downstream.  If it
+  is worse, then no further action is taken.
+
 \end{itemize}
 
 When DecisionTable receives a {\tt delete\_route} from one input
 branch, it queries the other peers' input branches in the same way:
 
 \begin{itemize}
+
   \item If none of the other branches returns an answer, the the {\tt
-	delete\_route} can be passed on downstream so long as the BGP NextHop
-	was previously resolvable.
+  delete\_route} can be passed on downstream so long as the BGP NextHop
+  was previously resolvable.
+
   \item If one or more of the other branches returns an
-	answer, one of these answers will be the new winner.  The routes are
-	compared, and a {\tt replace\_route} will be sent downstream.
+  answer, one of these answers will be the new winner.  The routes are
+  compared, and a {\tt replace\_route} will be sent downstream.
+
 \end{itemize}
 
 The processing for {\tt replace\_route} is similar to that for {\tt
@@ -483,18 +517,22 @@ single-threaded.  However, certain simple events can cause BGP to
 perform a great deal of work.  For example:
 
 \begin{itemize}
+
   \item When a peering goes down, all the routes in the RibIn associated
-	with that peer must be deleted, which either results in Withdraws
-	being sent to all remaining peers, or Updates being sent to indicate
-	an alternative path is now the winner.  As there can be many thousands
-	of routes in a RibIn, this process can take some time.
+  with that peer must be deleted, which either results in Withdraws
+  being sent to all remaining peers, or Updates being sent to indicate
+  an alternative path is now the winner.  As there can be many thousands
+  of routes in a RibIn, this process can take some time.
+
   \item When a new peering comes up, all the winning routes must be sent
-	to that peer.  This can also take some time.
+  to that peer.  This can also take some time.
+
   \item When the IGP information related to a BGP nexthop changes, all
-	the routes that specify this nexthop must be re-evaluated to see if
-	the change affects the choice of route.  In BGP it is fairly common
-	for a very large number of routes to share the same BGP nexthop, so
-	this re-evaluation can take some time.
+  the routes that specify this nexthop must be re-evaluated to see if
+  the change affects the choice of route.  In BGP it is fairly common
+  for a very large number of routes to share the same BGP nexthop, so
+  this re-evaluation can take some time.
+
 \end{itemize}
 
 The XORP BGP process cannot simply process such events to completion -
@@ -620,21 +658,29 @@ state related to the current state of that particular route dump.  The
 DumpIterator contains the following state:
 
 \begin{itemize}
+
   \item A list of the remaining peers to dump, initialized at the start
-	of the dump.  Peers are removed from this list when the dump of the
-	routes received from that peer is complete, or when the peer does down
-	during the dump.  Peers are never added to this list during the dump.
+  of the dump.  Peers are removed from this list when the dump of the
+  routes received from that peer is complete, or when the peer does down
+  during the dump.  Peers are never added to this list during the dump.
+
   \item A list of the peers that went down before we'd finished dumping
-	them.  Along with each peer is stored enough state to know how far
-	we'd got though the route dump from that peer before it went down.
+  them.  Along with each peer is stored enough state to know how far
+  we'd got though the route dump from that peer before it went down.
+
   \item The current peer whose routes are being dumped.
+
   \item A trie iterator pointing to the next RibIn trie entry to be dumped
-	on the current peer (we call this the Route Iterator)
+  on the current peer (we call this the Route Iterator).
+
   \item The last subnet dumped from the current peer.
+
   \item A flag that indicates whether the Route Iterator is currently
-	valid.
+  valid.
+
   \item The last GenID seen.  The GenID of the RibIn is incremented each
-	time the peering comes up.
+  time the peering comes up.
+
 \end{itemize}
 
 At startup the DumpTable initialized the list of remaining peers in
@@ -685,16 +731,21 @@ In general, a route
 change needs to be propagated downstream if:
 
 \begin{itemize}
+
   \item It comes from a peer that is not in our remaining peers list.
+
   \item It comes from the peer currently being dumped, but its route is
-	before the location of the route in the DumpIterator.
+  before the location of the route in the DumpIterator.
+
   \item It comes from a peer that went down, and its subnet is before the
-	subnet we had reached while dumping that peer's RibIn when the peer
-	went down.
+  subnet we had reached while dumping that peer's RibIn when the peer
+  went down.
+
   \item It comes from a peer that went down, and the RibIn GenID later
-	than that peers GenID was when it went down.  This would happen
-	because the peering has since come back up, and is now injecting new
-	routes.
+  than that peers GenID was when it went down.  This would happen
+  because the peering has since come back up, and is now injecting new
+  routes.
+
 \end{itemize}
 
 When all the routes in the RibIn of a particular peer have been
@@ -717,17 +768,26 @@ DumpIterators, so this does not cause any problem.
 \section{Modification History}
 
 \begin{itemize}
-  \item December 11, 2002: Version 0.1 completed.
-  \item March 10, 2003: Updated to match XORP version 0.2 release code;
-	cleanup.
+
+  \item December 11, 2002: Initial version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP release 0.2.
+
   \item June 9, 2003: Updated the version to 0.3, and the date.
+
   \item August 28, 2003: Updated the version to 0.4, and the date.
+
   \item November 6, 2003: Updated the version to 0.5, and the date.
+
   \item July 8, 2004: Updated the version to 1.0, and the date.
+
   \item April 13, 2005: Updated the version to 1.1, and the date.
+
   \item March 8, 2006: Updated the version to 1.2, and the date.
+
   \item August 2, 2006: Added ``Modification History'' appendix.
-	Updated the version to 1.3, and the date.
+  Updated the version to 1.3, and the date.
+
 \end{itemize}
 
 

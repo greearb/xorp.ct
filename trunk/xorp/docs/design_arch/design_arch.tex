@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.22 2006/08/02 00:04:30 pavlin Exp $
+% $XORP: xorp/docs/design_arch/design_arch.tex,v 1.23 2006/08/02 00:29:09 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -16,6 +16,11 @@
 \usepackage{xspace}
 \usepackage{color}
 \usepackage{amsmath}
+\usepackage{rotating}
+\usepackage{moreverb}
+\usepackage{listings}
+\usepackage{alltt}
+\usepackage{stmaryrd}
 %\usepackage[dvipdf]{graphics}
 %\usepackage[dvips]{graphicx}
 %\usepackage{xorp}
@@ -25,7 +30,7 @@
 \newcommand{\ie}{\emph{i.e.,}\xspace}
 \newcommand{\eg}{\emph{e.g.,}\xspace}
 %\newcommand{\comment}[1]{{\color{gray}[\textsf{#1}]}}
-\newcommand{\comment}[1]{}
+%\newcommand{\comment}[1]{}
 
 % Changebar stuff
 % \newenvironment{colorcode}{\color{blue}}{}
@@ -48,8 +53,6 @@ Version 1.3}
 \date{August 2, 2006}
 
 \maketitle
-
-\thispagestyle{empty}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -92,12 +95,16 @@ However, given the flexibility of the XORP architecture, in the future
 we should not be limited to edge-router scenarios or PC hardware.  For
 example:
 \begin{itemize}
+
   \item We can easily imagine using multiple PCs as forwarding engines,
-	with a single control element. This would allow greater port density.
+  with a single control element. This would allow greater port density.
+
   \item Another useful target would be a PC with a number of network
-	processors (\eg Intel IXP1200) doing the bulk of the forwarding.
+  processors (\eg Intel IXP1200) doing the bulk of the forwarding.
+
   \item Finally, in the long run, the code base might be run the
-	control processor of high-performance ASIC-based routers.
+  control processor of high-performance ASIC-based routers.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -406,23 +413,32 @@ the system, etc.  Currently only unicast routing policies are supported.
 \section{Modification History}
 
 \begin{itemize}
-  \item December 11, 2002: Version 0.1 completed.
-  \item March 10, 2003: Updated to match XORP version 0.2 release code;
-	cleanup.
-  \item June 9, 2003: Updated to match XORP version 0.3 release code.
-  \item August 28, 2003: Added SNMP to the set of implemented
-	items. Updated the version to 0.4, and the date.
-  \item November 6, 2003: Updated the BGP status: now it supports
-	IPv6. Updated the version to 0.5, and the date.
-  \item July 8, 2004: Updated the status: now there is support for RIP and
-	RIPng. Updated the version to 1.0, and the date.
-  \item April 13, 2005: Updated the status: now there is support for
-	Click forwarding path, etc. Updated the version to 1.1, and the date.
-  \item March 8, 2006: Updated the status: now XORP has its own OSPF
-	implementation, there is policy support, and support for Windows
-	forwarding path. Updated the version to 1.2, and the date.
-  \item August 2, 2006: Update the status: now XORP implements IGMPv3
-	and MLDv2. Updated the version to 1.3, and the date.
+
+  \item December 11, 2002: Initial version 0.1 completed.
+
+  \item March 10, 2003: Updated to match XORP release 0.2.
+
+  \item June 9, 2003: Updated to match XORP release 0.3.
+
+  \item August 28, 2003: Updated to match XORP release 0.4: SNMP
+  is implemented.
+
+  \item November 6, 2003: Updated to match XORP release 0.5: BGP
+  supports IPv6.
+
+  \item July 8, 2004: Updated to match XORP release 1.0: RIP and RIPng
+  are implemented.
+
+  \item April 13, 2005: Updated to match XORP release 1.1: there is
+  support for Click forwarding path.
+
+  \item March 8, 2006: Updated to match XORP release 1.2: OSPF is
+  implemented, there is policy support, and support for Windows
+  forwarding path.
+
+  \item August 2, 2006: Updated to match XORP release 1.3: IGMPv3 and
+  MLDv2 are implemented.
+
 \end{itemize}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
