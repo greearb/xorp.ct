@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/bgp/bgp.tex,v 1.19 2006/08/02 00:25:09 pavlin Exp $
+% $XORP: xorp/docs/bgp/bgp.tex,v 1.20 2006/08/02 05:43:31 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -76,7 +76,11 @@ router implementations.
 We implement BGP as a connected pipeline of ``routing tables'', each
 performing a specialized task.  Figure \ref{overview} gives the
 general overview of classes involved in the core of the BGP process,
-but excludes the classes involved in handling peerings with peers.
+but excludes the classes involved in handling peerings with peer
+routers and some of the more specialized stages in the plumbing.
+Figure 2 expands on the plumbing to include all the plumbing stages in
+the current version of BGP, and broadly groups them according to
+whether or not they modify or store routes.
 
 \begin{figure}[htb]
 \centerline{\includegraphics[width=1.0\textwidth]{figs/overview}}
@@ -84,14 +88,20 @@ but excludes the classes involved in handling peerings with peers.
 \caption{\label{overview}Overview of BGP process}
 \end{figure}
 
+\begin{figure}[htb]
+\centerline{\includegraphics[width=1.0\textwidth]{figs/bgp-pipeline}}
+\vspace{.05in}
+\caption{\label{plumbing}More detail of BGP Plumbing}
+\end{figure}
+
 Route information flows from left to right in this figure.  Typically
 an Update or Withdraw message arrives from a BGP peer, is split up
 into separate {\tt add\_route} or {\tt delete\_route} commands by the
 PeerHandler, and then the update flows through the tables towards the
 DecisionTable.  If the route is better than the best alternative, then
-it passes through the DecisionTable, and is then fanned out to all the
-output branches except the one it arrived un.  The outgoing
-PeerHandler then sends the route on to the corresponding BGP peer.
+it passes through the DecisionTable, and is fanned out to all the
+output branches except the one it arrived on.  The outgoing
+PeerHandler then sends the route to the corresponding BGP peer.
 
 There is one input branch and one corresponding output branch for each
 BGP peer, plus one branch that handles routes sent to BGP from the
