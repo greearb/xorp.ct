@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.52 2006/08/03 04:32:19 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.53 2006/08/03 04:55:26 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -454,6 +454,17 @@ the login shell is csh or tcsh):
 	 # http://www.htmlhelp.com/tools/validator/
 
 ========================================================================
+2770.	TASK: Add a Bugzilla "Version" entry for the new version.
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: Login to the XORP Bugzilla site, and then click on
+	      - "Edit products" (at the bottom of the page)
+	      - "Edit product: XORP"
+	      - "Edit versions:" (at the bottom of the page)
+	      - "Edit version ...: Add a new version"
+	MISC: Should be omitted for a release candidate.
+
+========================================================================
 2800.	TASK: Send email to xorp-dev@xorp.org that the release process has
 	      completed.
 	WHO:  Release manager
@@ -466,17 +477,6 @@ the login shell is csh or tcsh):
 	WHEN: Right after the release
 	MISC: If this is a release candidate, then send the email
               only to xorp-hackers@xorp.org and xorp-users@xorp.org
-
-========================================================================
-2920.	TASK: Add a Bugzilla "Version" entry for the new version.
-	WHO:  Release manager
-	WHEN: Right after the release
-	MISC: Login to the XORP Bugzilla site, and then click on
-	      - "Edit products" (at the bottom of the page)
-	      - "Edit product: XORP"
-	      - "Edit versions:" (at the bottom of the page)
-	      - "Edit version ...: Add a new version"
-	MISC: Should be omitted for a release candidate.
 
 ========================================================================
 2950.	TASK: Update the FreshMeat XORP entry:
@@ -532,12 +532,53 @@ the login shell is csh or tcsh):
 
 ========================================================================
 3000.	TASK: Start the XORP tinderbox crontab job (only if it was
-	      stopped earlier) 
+	      stopped earlier)
 	WHO:  XORP tinderbox manager
 	WHEN: Right after the release
 
 ========================================================================
-3100.	TASK: Jupiter
+3100.	TASK: Prepare the release notes inside xorp/RELEASE_NOTES for
+	      the next release.
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
+	COMMANDS:
+ # Edit xorp/RELEASE_NOTES:
+ # - Copy the release notes from the last release to the top of the file,
+ #   update the version and the date (if known).
+ # - Delete all particular items for each section, but keep the section
+ #   entries.
+ # - The new version should have "-WIP" (Work-In-Progress) as a suffix.
+ #   If the exact release date is not known, then use "?" or "??" for the
+ #   unknown parts of the date.
+ # - For example, if the next release would be 1.4, then the release and
+ #   the date might look like:
+ #      Release 1.4-WIP (2006/??/??)
+
+========================================================================
+3200.	TASK: Update the "Work In Progress" version number
+	WHO:  Release manager
+	WHEN: Right after the release
+	MISC: Should be omitted for a release candidate.
+	MISC: The version name should have "-WIP" (Work-In-Progress)
+	      as a suffix. For example, if the next release would be 1.4,
+	      then the version would be "1.4-WIP".
+	COMMANDS:
+ # Edit xorp/README
+ # Edit xorp/RELEASE_NOTES (or verify that it contains the right version)
+ # Edit xorp/VERSION
+ # Edit all relevant configure.in (the second argument to AC_INIT() if
+ # exists, and the second argument to AM_INIT_AUTOMAKE()):
+        xorp/configure.in
+        xorp/mibs/configure.in
+ # Edit xorp/contrib/win32/installer/xorp.nsi and update PRODUCT_VERSION
+
+ cd xorp
+ ./bootstrap
+ cvs commit -m "Updated the Work In Progress version number"
+
+========================================================================
+3300.	TASK: Jupiter
 	WHO:  Everyone
 	WHEN: Right after the release
 
