@@ -70,7 +70,12 @@
 #include <limits.h>
 #include <unistd.h>
 
-#define BACKTRACE_DEPTH 4
+/*
+ * XXX: If BACKTRACE_DEPTH is larger than 2, then the program coredumps
+ * on amd64 + FreeBSD-6.1.
+ * If it is larger than 4, the program coredumps on i386 + FreeBSD-4.10.
+ */
+#define BACKTRACE_DEPTH 2
 #define HASH_TABLE_SIZE 343051  /* prime, max 31 bits */
 #define ADMIN_DATA_SIZE 2 * sizeof(uint32_t)
 
