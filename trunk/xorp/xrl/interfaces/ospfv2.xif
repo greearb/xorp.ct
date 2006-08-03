@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.20 2006/03/24 08:20:09 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.21 2006/03/24 20:02:49 pavlin Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -329,15 +329,15 @@ interface ospfv2/0.1 {
     /**
      * Get a list of all the configured areas.
      *
-     * @return area_ids list of value area_ids.  Each id is a u32.
+     * Return a list of u32 type values. Each value is an area ID.
      */
     get_area_list -> areas:list
 
     /**
      * Get the list of neighbours.
      *
-     * @return a list of u32s that are an internal identifier that can be used
-     *         with the get neighbour info call.
+     * Return a list of u32 type values. Each value is an internal
+     * identifier that can be used with the get_neighbour_info XRL.
      */
     get_neighbour_list -> areas:list
 
