@@ -1,7 +1,7 @@
 /*
  * Nullsoft Installer Script for XORP/Win32
  *
- * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.7 2006/08/02 22:20:04 bms Exp $
+ * $XORP: xorp/contrib/win32/installer/xorp.nsi,v 1.8 2006/08/03 04:59:28 pavlin Exp $
  */
 
 !include LogicLib.nsh
@@ -18,7 +18,7 @@
 !define DO_SPLASH
 
 !define PRODUCT_NAME		"XORP"
-!define PRODUCT_VERSION		"1.3"
+!define PRODUCT_VERSION		"1.4-WIP"
 !define PRODUCT_URL		"http://www.xorp.org/"
 !define PRODUCT_HELP_URL	"mailto:feedback@xorp.org"
 !define PRODUCT_PUBLISHER	"ICSI"
