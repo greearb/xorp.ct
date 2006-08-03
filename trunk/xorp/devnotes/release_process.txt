@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/release_process.txt,v 1.50 2006/08/02 09:35:23 pavlin Exp $
+# $XORP: xorp/devnotes/release_process.txt,v 1.51 2006/08/02 23:48:15 pavlin Exp $
 #
 
 This file contains information related to the XORP software release process.
@@ -478,7 +478,7 @@ the login shell is csh or tcsh):
 
 ========================================================================
 2950.	TASK: Update the FreshMeat XORP entry:
-               http://freshmeat.net/projects/xorp/
+	      http://freshmeat.net/projects/xorp/
 	WHO:  Release manager
 	WHEN: Right after the release
 	MISC: Should be omitted for a release candidate.
@@ -486,9 +486,9 @@ the login shell is csh or tcsh):
 ========================================================================
 2955.	TASK: Contact the FreeBSD maintainer of net/xorp to update the
 	      entry:
-	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/
+	        http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/xorp/
 	      The maintainer's email address is available from the Makefile:
-	       http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/Makefile
+	        http://www.freebsd.org/cgi/cvsweb.cgi/ports/net/xorp/Makefile
 	WHO:  Release manager
 	WHEN: Right after the release
 	MISC: Note that currently there is no XORP port entry for FreeBSD,
@@ -498,12 +498,12 @@ the login shell is csh or tcsh):
 ========================================================================
 2960.	TASK: Contact the NetBSD maintainer of net/xorp to update the
 	      entry:
-	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/
+	        http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/
 	      The maintainer's email address is available from the Makefile:
-	       http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/Makefile
+	        http://cvsweb.netbsd.org/bsdweb.cgi/pkgsrc/net/xorp/Makefile
 	      If the maintainer's email address is generic, then the following
 	      form can be used to submit the request:
-	      http://www.netbsd.org/cgi-bin/sendpr.cgi?gndb=netbsd
+	        http://www.netbsd.org/cgi-bin/sendpr.cgi?gndb=netbsd
 	WHO:  Release manager
 	WHEN: Right after the release
 	MISC: Should be omitted for a release candidate.
@@ -511,9 +511,11 @@ the login shell is csh or tcsh):
 ========================================================================
 2965.	TASK: Contact the OpenBSD maintainer of net/xorp to update the
 	      entry:
-	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
+	        http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/
 	      The maintainer's email address is available from the Makefile:
-	       http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
+	        http://www.openbsd.org/cgi-bin/cvsweb/ports/net/xorp/Makefile
+	      If the maintainer does not reply, then send an email to
+	        ports@openbsd.org
 	WHO:  Release manager
 	WHEN: Right after the release
 	MISC: Should be omitted for a release candidate.
@@ -537,3 +539,4 @@ the login shell is csh or tcsh):
 	WHO:  Everyone
 	WHEN: Right after the release
 
+========================================================================
