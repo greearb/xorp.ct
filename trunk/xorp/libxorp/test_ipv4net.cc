@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.17 2006/08/04 07:10:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.18 2006/08/04 18:13:28 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -336,6 +336,12 @@ test_ipv4net_address_type(TestInfo& test_info)
     IPv4Net ipnet_multicast1("224.0.0.0/4");	// Multicast
     IPv4Net ipnet_multicast2("224.0.0.0/24");	// Multicast
     IPv4Net ipnet_multicast3("224.0.1.0/24");	// Multicast
+    IPv4Net ipnet_class_a1("0.0.0.0/1");	// Class A
+    IPv4Net ipnet_class_a2("12.34.0.0/16");	// Class A
+    IPv4Net ipnet_class_b1("128.0.0.0/2");	// Class B
+    IPv4Net ipnet_class_b2("130.2.3.0/24");	// Class B
+    IPv4Net ipnet_class_c1("192.0.0.0/3");	// Class C
+    IPv4Net ipnet_class_c2("192.2.3.4/32");	// Class C
     IPv4Net ipnet_experimental1("240.0.0.0/4");	// Experimental
     IPv4Net ipnet_experimental2("240.0.1.0/16"); // Experimental
     IPv4Net ipnet_odd1("128.0.0.0/1");		// Odd: includes multicast
@@ -353,6 +359,12 @@ test_ipv4net_address_type(TestInfo& test_info)
     verbose_assert(ipnet_multicast1.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_multicast2.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_multicast3.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_class_a1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_class_a2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_class_b1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_class_b2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_class_c1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_class_c2.is_unicast() == true, "is_unicast()");
     verbose_assert(ipnet_experimental1.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_experimental2.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_odd1.is_unicast() == false, "is_unicast()");
@@ -370,6 +382,12 @@ test_ipv4net_address_type(TestInfo& test_info)
     verbose_assert(ipnet_multicast1.is_multicast() == true, "is_multicast()");
     verbose_assert(ipnet_multicast2.is_multicast() == true, "is_multicast()");
     verbose_assert(ipnet_multicast3.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_class_a1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_class_a2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_class_b1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_class_b2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_class_c1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_class_c2.is_multicast() == false, "is_multicast()");
     verbose_assert(ipnet_experimental1.is_multicast() == false,
 		   "is_multicast()");
     verbose_assert(ipnet_experimental2.is_multicast() == false,
@@ -397,6 +415,18 @@ test_ipv4net_address_type(TestInfo& test_info)
     verbose_assert(ipnet_multicast2.is_experimental() == false,
 		   "is_experimental()");
     verbose_assert(ipnet_multicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_a1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_a2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_b1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_b2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_c1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_class_c2.is_experimental() == false,
 		   "is_experimental()");
     verbose_assert(ipnet_experimental1.is_experimental() == true,
 		   "is_experimental()");
@@ -532,6 +562,21 @@ test_ipv4net_address_const(TestInfo& test_info)
     // Return the subnet containing all multicast addresses.
     //
     verbose_match(IPv4Net::ip_multicast_base_prefix().str(), "224.0.0.0/4");
+
+    //
+    // Return the subnet containing all Class A addresses.
+    //
+    verbose_match(IPv4Net::ip_class_a_base_prefix().str(), "0.0.0.0/1");
+
+    //
+    // Return the subnet containing all Class B addresses.
+    //
+    verbose_match(IPv4Net::ip_class_b_base_prefix().str(), "128.0.0.0/2");
+
+    //
+    // Return the subnet containing all Class C addresses.
+    //
+    verbose_match(IPv4Net::ip_class_c_base_prefix().str(), "192.0.0.0/3");
     
     //
     // Return the subnet containing all experimental addresses.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.14 2006/08/04 07:10:28 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.15 2006/08/04 18:13:27 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -236,7 +236,67 @@ public:
     }
 
     /**
-     * Return the subnet containing all IPv4 experimental Class-E addresses
+     * Return the subnet containing all IPv4 Class A addresses
+     * (0.0.0.0/1).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPvXNet my_prefix = IPvXNet::ip_class_a_base_prefix(my_family);
+     *
+     * @param family the address family.
+     * @return the Class A base prefix address for address
+     * family of @ref family.
+     */
+    inline static IPvXNet ip_class_a_base_prefix(int family)
+	throw (InvalidFamily)
+    {
+	return IPvXNet(IPvX::CLASS_A_BASE(family),
+		       IPvX::ip_class_a_base_address_mask_len(family));
+    }
+
+    /**
+     * Return the subnet containing all IPv4 Class B addresses
+     * (128.0.0.0/2).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPvXNet my_prefix = IPvXNet::ip_class_b_base_prefix(my_family);
+     *
+     * @param family the address family.
+     * @return the Class B base prefix address for address
+     * family of @ref family.
+     */
+    inline static IPvXNet ip_class_b_base_prefix(int family)
+	throw (InvalidFamily)
+    {
+	return IPvXNet(IPvX::CLASS_B_BASE(family),
+		       IPvX::ip_class_b_base_address_mask_len(family));
+    }
+
+    /**
+     * Return the subnet containing all IPv4 Class C addresses
+     * (192.0.0.0/3).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPvXNet my_prefix = IPvXNet::ip_class_c_base_prefix(my_family);
+     *
+     * @param family the address family.
+     * @return the Class C base prefix address for address
+     * family of @ref family.
+     */
+    inline static IPvXNet ip_class_c_base_prefix(int family)
+	throw (InvalidFamily)
+    {
+	return IPvXNet(IPvX::CLASS_C_BASE(family),
+		       IPvX::ip_class_c_base_address_mask_len(family));
+    }
+
+    /**
+     * Return the subnet containing all IPv4 experimental Class E addresses
      * (240.0.0.0/4).
      *
      * This method applies only for IPv4.
@@ -265,7 +325,55 @@ public:
     }
 
     /**
-     * Test if this subnet is within the IPv4 experimental Class-E
+     * Test if this subnet is within the IPv4 Class A
+     * address range (0.0.0.0/1).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if this subnet is within the IPv4 Class A address
+     * range.
+     */
+    bool is_class_a() const {
+	if (is_ipv4()) {
+	    return (ip_class_a_base_prefix(_masked_addr.af()).contains(*this));
+	}
+	return (false);
+    }
+
+    /**
+     * Test if this subnet is within the IPv4 Class B
+     * address range (128.0.0.0/2).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if this subnet is within the IPv4 Class B address
+     * range.
+     */
+    bool is_class_b() const {
+	if (is_ipv4()) {
+	    return (ip_class_b_base_prefix(_masked_addr.af()).contains(*this));
+	}
+	return (false);
+    }
+
+    /**
+     * Test if this subnet is within the IPv4 Class C
+     * address range (192.0.0.0/3).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if this subnet is within the IPv4 Class C address
+     * range.
+     */
+    bool is_class_c() const {
+	if (is_ipv4()) {
+	    return (ip_class_c_base_prefix(_masked_addr.af()).contains(*this));
+	}
+	return (false);
+    }
+
+    /**
+     * Test if this subnet is within the IPv4 experimental Class E
      * address range (240.0.0.0/4).
      *
      * This method applies only for IPv4, and always returns false for IPv6.

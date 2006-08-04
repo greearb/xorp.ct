@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.2 2006/08/04 17:04:01 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.3 2006/08/04 18:13:27 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipnet.hh"
@@ -23,8 +23,44 @@
 //
 
 //
-// XXX: method IPNet<A>::ip_experimental_base_prefix() applies only for IPv4,
-// hence we don't provide IPv6 specialized version.
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+const IPNet<IPv4>
+IPNet<IPv4>::ip_class_a_base_prefix()
+{
+    return IPNet(IPv4::CLASS_A_BASE(),
+		 IPv4::ip_class_a_base_address_mask_len());
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+const IPNet<IPv4>
+IPNet<IPv4>::ip_class_b_base_prefix()
+{
+    return IPNet(IPv4::CLASS_B_BASE(),
+		 IPv4::ip_class_b_base_address_mask_len());
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+const IPNet<IPv4>
+IPNet<IPv4>::ip_class_c_base_prefix()
+{
+    return IPNet(IPv4::CLASS_C_BASE(),
+		 IPv4::ip_class_c_base_address_mask_len());
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
 //
 template <>
 const IPNet<IPv4>
@@ -35,8 +71,41 @@ IPNet<IPv4>::ip_experimental_base_prefix()
 }
 
 //
-// XXX: method IPNet<A>::is_experimental() applies only for IPv4,
-// hence we don't provide IPv6 specialized version.
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+bool
+IPNet<IPv4>::is_class_a() const
+{
+    return (ip_class_a_base_prefix().contains(*this));
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+bool
+IPNet<IPv4>::is_class_b() const
+{
+    return (ip_class_b_base_prefix().contains(*this));
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
+//
+template <>
+bool
+IPNet<IPv4>::is_class_c() const
+{
+    return (ip_class_c_base_prefix().contains(*this));
+}
+
+//
+// XXX: This method applies only for IPv4, hence we don't provide IPv6
+// specialized version.
 //
 template <>
 bool

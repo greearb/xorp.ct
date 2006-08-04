@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.28 2006/08/04 17:32:32 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.29 2006/08/04 18:13:27 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -312,7 +312,49 @@ public:
     }
 
     /**
-     * Return the subnet containing all IPv4 experimental Class-E addresses
+     * Return the subnet containing all IPv4 Class A addresses
+     * (0.0.0.0/1).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPv4Net my_prefix = IPv4Net::ip_class_a_base_prefix();
+     *   IPv4Net my_prefix = ipv4net.ip_class_a_base_prefix();
+     *
+     * @return the subnet containing Class A addresses.
+     */
+    static const IPNet<A> ip_class_a_base_prefix();
+
+    /**
+     * Return the subnet containing all IPv4 Class B addresses
+     * (128.0.0.0/2).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPv4Net my_prefix = IPv4Net::ip_class_b_base_prefix();
+     *   IPv4Net my_prefix = ipv4net.ip_class_b_base_prefix();
+     *
+     * @return the subnet containing Class B addresses.
+     */
+    static const IPNet<A> ip_class_b_base_prefix();
+
+    /**
+     * Return the subnet containing all IPv4 Class C addresses
+     * (192.0.0.0/3).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPv4Net my_prefix = IPv4Net::ip_class_c_base_prefix();
+     *   IPv4Net my_prefix = ipv4net.ip_class_c_base_prefix();
+     *
+     * @return the subnet containing Class C addresses.
+     */
+    static const IPNet<A> ip_class_c_base_prefix();
+
+    /**
+     * Return the subnet containing all IPv4 experimental Class E addresses
      * (240.0.0.0/4).
      *
      * This method applies only for IPv4.
@@ -335,7 +377,40 @@ public:
     }
 
     /**
-     * Test if this subnet is within the IPv4 experimental Class-E
+     * Test if this subnet is within the IPv4 Class A
+     * address range (0.0.0.0/1).
+     *
+     * This method applies only for IPv4.
+     *
+     * @return true if this subnet is within the IPv4 Class A address
+     * range.
+     */
+    bool is_class_a() const;
+
+    /**
+     * Test if this subnet is within the IPv4 Class B
+     * address range (128.0.0.0/2).
+     *
+     * This method applies only for IPv4.
+     *
+     * @return true if this subnet is within the IPv4 Class B address
+     * range.
+     */
+    bool is_class_b() const;
+
+    /**
+     * Test if this subnet is within the IPv4 Class C
+     * address range (192.0.0.0/3).
+     *
+     * This method applies only for IPv4.
+     *
+     * @return true if this subnet is within the IPv4 Class C address
+     * range.
+     */
+    bool is_class_c() const;
+
+    /**
+     * Test if this subnet is within the IPv4 experimental Class E
      * address range (240.0.0.0/4).
      *
      * This method applies only for IPv4.
