@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.1 2006/08/04 08:50:50 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipnet.hh"
@@ -21,6 +21,18 @@
 // Storage for defining specialized class methods for the IPNet<A> template
 // class.
 //
+
+//
+// XXX: method IPNet<A>::ip_experimental_base_prefix() applies only for IPv4,
+// hence we don't provide IPv6 specialized version.
+//
+template <>
+const IPNet<IPv4>
+IPNet<IPv4>::ip_experimental_base_prefix()
+{
+    return IPNet(IPv4::EXPERIMENTAL_BASE(),
+		 IPv4::ip_experimental_base_address_mask_len());
+}
 
 template <>
 bool
