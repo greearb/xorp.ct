@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.27 2006/06/06 00:29:57 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.28 2006/06/06 01:40:24 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -389,6 +389,14 @@ public:
     bool is_multicast() const;
 
     /**
+     * Test if this address belongs to the IPv4 experimental Class-E
+     * address space (240.0.0.0/4).
+     *
+     * @return true if the address is a valid experimental address.
+     */
+    bool is_experimental() const;
+
+    /**
      * Test if this address is a valid link-local unicast address.
      *
      * @return true if the address is a valid unicast address,
@@ -464,6 +472,22 @@ public:
 #define IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4	4
 	return (IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4);
 #undef IP_MULTICAST_BASE_ADDRESS_MASK_LEN_IPV4
+    }
+
+    /**
+     * Get the mask length for the experimental base address.
+     *
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPv4::ip_experimental_base_address_mask_len(); OK
+     *   uint32_t my_len = ipv4.ip_experimental_base_address_mask_len();  OK
+     *
+     * @return the experimental base address mask length for family AF_INET.
+     */
+    static uint32_t ip_experimental_base_address_mask_len() {
+#define IP_EXPERIMENTAL_BASE_ADDRESS_MASK_LEN_IPV4	4
+	return (IP_EXPERIMENTAL_BASE_ADDRESS_MASK_LEN_IPV4);
+#undef IP_EXPERIMENTAL_BASE_ADDRESS_MASK_LEN_IPV4
     }
 
     /**
@@ -580,6 +604,7 @@ public:
     inline static const IPv4& RIP2_ROUTERS(int af = AF_INET);
     inline static const IPv4& PIM_ROUTERS(int af = AF_INET);
     inline static const IPv4& SSM_ROUTERS(int af = AF_INET);
+    inline static const IPv4& EXPERIMENTAL_BASE(int af = AF_INET);
 
     /**
      * Number of bits in address as a constant.
@@ -626,7 +651,8 @@ struct IPv4Constants {
 	ospfigp_designated_routers,
 	rip2_routers,
 	pim_routers,
-	ssm_routers;
+	ssm_routers,
+	experimental_base;
 };
 
 inline const IPv4& IPv4::ZERO(int) {
@@ -679,6 +705,10 @@ inline const IPv4& IPv4::PIM_ROUTERS(int) {
 
 inline const IPv4& IPv4::SSM_ROUTERS(int) {
     return IPv4Constants::ssm_routers;
+}
+
+inline const IPv4& IPv4::EXPERIMENTAL_BASE(int) {
+    return IPv4Constants::experimental_base;
 }
 
 #endif // __LIBXORP_IPV4_HH__
