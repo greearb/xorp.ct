@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.15 2006/04/05 07:47:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.16 2006/04/05 08:02:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -327,14 +327,55 @@ test_ipv4net_address_type(TestInfo& test_info)
 {
     UNUSED(test_info);
 
-    IPv4Net ipnet_a("12.34.0.0/16");
+    IPv4Net ipnet_default("0.0.0.0/0");		// Default route: unicast
+    IPv4Net ipnet_unicast1("0.0.0.0/1");	// Unicast
+    IPv4Net ipnet_unicast2("12.34.0.0/16");	// Unicast
+    IPv4Net ipnet_unicast3("128.0.0.0/2");	// Unicast
+    IPv4Net ipnet_unicast4("128.16.0.0/24");	// Unicast
+    IPv4Net ipnet_unicast5("192.0.0.0/3");	// Unicast
+    IPv4Net ipnet_multicast1("224.0.0.0/4");	// Multicast
+    IPv4Net ipnet_multicast2("224.0.0.0/24");	// Multicast
+    IPv4Net ipnet_multicast3("224.0.1.0/24");	// Multicast
+    IPv4Net ipnet_experimental1("240.0.0.0/4");	// Experimental
+    IPv4Net ipnet_experimental2("240.0.1.0/16"); // Experimental
+    IPv4Net ipnet_odd1("128.0.0.0/1");		// Odd: includes multicast
+    IPv4Net ipnet_odd2("192.0.0.0/2");		// Odd: includes multicast
+
+    //
+    // Test if a subnet is within the unicast address range.
+    //
+    verbose_assert(ipnet_default.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast4.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast5.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_multicast1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_multicast2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_multicast3.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_experimental1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_experimental2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_odd1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_odd2.is_unicast() == false, "is_unicast()");
     
     //
-    // Test if this subnet is within the multicast address range.
+    // Test if a subnet is within the multicast address range.
     //
-    IPv4Net ipnet1("224.0.1.0/24");
-    verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_default.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast4.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast5.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_multicast1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_multicast2.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_multicast3.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_experimental1.is_multicast() == false,
+		   "is_multicast()");
+    verbose_assert(ipnet_experimental2.is_multicast() == false,
+		   "is_multicast()");
+    verbose_assert(ipnet_odd1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_odd2.is_multicast() == false, "is_multicast()");
 
     return (! failures());
 }
@@ -465,11 +506,9 @@ test_ipv4net_address_const(TestInfo& test_info)
     verbose_match(IPv4Net::ip_multicast_base_prefix().str(), "224.0.0.0/4");
     
     //
-    // Test if this subnet is within the multicast address range.
+    // Return the subnet containing all experimental addresses.
     //
-    IPv4Net ipnet1("224.0.1.0/24");
-    verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
+    verbose_match(IPv4Net::ip_experimental_base_prefix().str(), "240.0.0.0/4");
 
     return (! failures());
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.12 2005/03/25 02:53:42 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.13 2006/03/16 00:04:30 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -196,6 +196,26 @@ public:
      * @return the address family of this subnet (AF_INET or AF_INET6).
      */
     inline int af() const { return masked_addr().af(); }
+
+    /**
+     * Test if this subnet is a unicast prefix.
+     *
+     * In case of IPv4 all prefixes that fall within the Class A, Class B or
+     * Class C address space are unicast.
+     * In case of IPv6 all prefixes that don't contain the multicast
+     * address space are unicast.
+     * Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
+     * is also considered an unicast prefix.
+     *
+     * @return true if this subnet is a unicast prefix.
+     */
+    bool is_unicast() const {
+	if (is_ipv4()) {
+	    return (get_ipv4net().is_unicast());
+	} else {
+	    return (get_ipv6net().is_unicast());
+	}
+    }
 
     /**
      * Get the multicast base subnet.

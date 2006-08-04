@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.23 2006/04/05 08:12:52 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.24 2006/08/01 22:21:39 mjh Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -22,6 +22,8 @@
 #include "c_format.hh"
 #include "range.hh"
 #include "utils.hh"
+#include "ipv4.hh"
+#include "ipv6.hh"
 
 /**
  * @short A template class for subnets
@@ -281,6 +283,35 @@ public:
     inline A netmask() const { return _masked_addr.make_prefix(_prefix_len); }
 
     /**
+     * Test if this subnet is a unicast prefix.
+     *
+     * In case of IPv4 all prefixes that fall within the Class A, Class B or
+     * Class C address space are unicast.
+     * In case of IPv6 all prefixes that don't contain the multicast
+     * address space are unicast.
+     * Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
+     * is also considered an unicast prefix.
+     *
+     * @return true if this subnet is a unicast prefix.
+     */
+    bool is_unicast() const;
+
+    /**
+     * Return the subnet containing all experimental IPv4 addresses.
+     *
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix(); OK
+     *   IPv4Net my_prefix = ipv4net.ip_experimental_base_prefix();  OK
+     *
+     * @return the subnet containing experimental addresses.
+     */
+    static const IPNet<IPv4> ip_experimental_base_prefix() {
+	return IPNet(IPv4::EXPERIMENTAL_BASE(),
+		     IPv4::ip_experimental_base_address_mask_len());
+    }
+
+    /**
      * Return the subnet containing all multicast addresses.
      *
      * Note that this is a static function and can be used without
@@ -303,38 +334,6 @@ public:
     bool is_multicast() const {
 	return (ip_multicast_base_prefix().contains(*this));
     }
-
- 
-    /**
-     * Test if this subnet is a unicast prefix. Note that unicast
-     * prefixes include the default route such as 0.0.0.0/0 in IPv4 or
-     * the v6 equivalent.
-     *
-     * @return true if this subnet is a unicast prefix.
-     */
-    bool is_unicast() const {
-
-	// Some corner cases: 
-	// 0.0.0.0/0  - this is the default route, and should return true.
-	//
-	// 0.0.0.0/1  - this is a valid unicast route and should return true
-	//
-	// 128.0.0.0/1 - this overlaps the multicast range, and
-	//   technically should return false.  We return true here,
-	//   because we don't want to accidentally reject routes that
-	//   mind be thought of as valid, but the behaviour could
-	//   probably be changed to be more strictly correct if needed.
-	//
-        // 224.0.0.0/8 - this is a multicast route, and returns false.
-
-	if (masked_addr().is_zero()) {
-	    // it's the default route, or a valid unicast route
-	    return true;
-	}
-	return masked_addr().is_unicast();
-    }
-
- 
 
     /**
      * Get the highest address within this subnet.
@@ -526,6 +525,60 @@ IPNet<A>::overlap(const IPNet<A>& other) const
     if (done > p)
 	done = p;
     return done;
+}
+
+template <> 
+bool
+IPNet<IPv4>::is_unicast() const
+{
+    //
+    // In case of IPv4 all prefixes that fall within the Class A, Class B or
+    // Class C address space are unicast.
+    // Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
+    // is also considered an unicast prefix.
+    //
+    if (prefix_len() == 0) {
+	// The default route or a valid unicast route
+	return (true);
+    }
+
+    IPNet<IPv4> base_prefix = ip_multicast_base_prefix();
+    if (this->contains(base_prefix))
+	return (false);
+    if (base_prefix.contains(*this))
+	return (false);
+
+    base_prefix = ip_experimental_base_prefix();
+    if (this->contains(base_prefix))
+	return (false);
+    if (base_prefix.contains(*this))
+	return (false);
+
+    return (true);
+}
+
+template <> 
+bool
+IPNet<IPv6>::is_unicast() const
+{
+    //
+    // In case of IPv6 all prefixes that don't contain the multicast
+    // address space are unicast.
+    // Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
+    // is also considered an unicast prefix.
+    //
+    if (prefix_len() == 0) {
+	// The default route or a valid unicast route
+	return (true);
+    }
+
+    IPNet<IPv6> base_prefix = ip_multicast_base_prefix();
+    if (this->contains(base_prefix))
+	return (false);
+    if (base_prefix.contains(*this))
+	return (false);
+
+    return (true);
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.12 2006/04/05 07:47:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.13 2006/04/05 08:02:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -333,14 +333,35 @@ test_ipv6net_address_type(TestInfo& test_info)
 {
     UNUSED(test_info);
 
-    IPv6Net ipnet_a("1234:5678::/32");
-    
+    IPv6Net ipnet_default("::/0");		// Default route: unicast
+    IPv6Net ipnet_unicast1("::/1");		// Unicast
+    IPv6Net ipnet_unicast2("1234:5678::/32");	// Unicast
+    IPv6Net ipnet_multicast1("ff00::/8");	// Multicast
+    IPv6Net ipnet_multicast2("ff00:1::/32");	// Multicast
+    IPv6Net ipnet_odd1("8000::/1");		// Odd: includes multicast
+    IPv6Net ipnet_odd2("fe00::/7");		// Odd: includes multicast
+
     //
-    // Test if this subnet is within the multicast address range.
+    // Test if a subnet is within the unicast address range.
     //
-    IPv6Net ipnet1("ff00:1::/32");
-    verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_default.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_unicast2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ipnet_multicast1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_multicast2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_odd1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ipnet_odd2.is_unicast() == false, "is_unicast()");
+
+    //
+    // Test if a subnet is within the multicast address range.
+    //
+    verbose_assert(ipnet_default.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_unicast2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_multicast1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_multicast2.is_multicast() == true, "is_multicast()");
+    verbose_assert(ipnet_odd1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ipnet_odd2.is_multicast() == false, "is_multicast()");
 
     return (! failures());
 }
@@ -470,13 +491,6 @@ test_ipv6net_address_const(TestInfo& test_info)
     //
     verbose_match(IPv6Net::ip_multicast_base_prefix().str(), "ff00::/8");
     
-    //
-    // Test if this subnet is within the multicast address range.
-    //
-    IPv6Net ipnet1("ffff:1:2::/48");
-    verbose_assert(ipnet_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
-
     return (! failures());
 }
 
