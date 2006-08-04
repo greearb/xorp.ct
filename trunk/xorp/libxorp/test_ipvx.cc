@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.20 2006/06/06 00:29:57 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.21 2006/06/06 01:40:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -944,6 +944,11 @@ test_ipvx_address_type()
 
     verbose_assert(IPvX("ff00::1").is_multicast(), "is_multicast()");
 
+    //
+    // Test if this address is a valid experimental address.
+    //
+    // XXX: This test applies only for IPv4.
+    verbose_assert(IPvX("240.1.2.3").is_experimental(), "is_experimental()");
 
     //
     // Test if this address is a valid link-local unicast address.
@@ -1017,6 +1022,13 @@ test_ipvx_address_const()
 
     verbose_assert(IPvX::ip_multicast_base_address_mask_len(AF_INET6) == 8,
 		   "ip_multicast_base_address_mask_len()");
+
+    //
+    // Test the mask length for the experimental base address.
+    //
+    // XXX: This test applies only for IPv4.
+    verbose_assert(IPvX::ip_experimental_base_address_mask_len(AF_INET) == 4,
+		   "ip_experimental_base_address_mask_len()");
 
     //
     // Test the address family.
@@ -1102,6 +1114,10 @@ test_ipvx_address_const()
 		   "SSM_ROUTERS()");
     verbose_assert(IPvX::SSM_ROUTERS(AF_INET6) == IPvX("ff02::16"),
 		   "SSM_ROUTERS()");
+
+    // XXX: This test applies only for IPv4.
+    verbose_assert(IPvX::EXPERIMENTAL_BASE(AF_INET) == IPvX("240.0.0.0"),
+		   "EXPERIMENTAL_BASE()");
 }
 
 /**

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.20 2006/06/06 00:29:57 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.21 2006/06/06 01:40:24 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -490,6 +490,14 @@ IPvX::is_multicast() const
 }
 
 bool
+IPvX::is_experimental() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().is_experimental();
+    return (false);		// XXX: this method applies only for IPv4
+}
+
+bool
 IPvX::is_linklocal_unicast() const
 {
     if (_af == AF_INET)
@@ -573,6 +581,17 @@ IPvX::ip_multicast_base_address_mask_len(int family) throw (InvalidFamily)
     return ((uint32_t)-1);
 }
 
+uint32_t
+IPvX::ip_experimental_base_address_mask_len(int family) throw (InvalidFamily)
+{
+    if (family == AF_INET)
+	return (IPv4::ip_experimental_base_address_mask_len());
+    // XXX: this method applies only for IPv4
+
+    xorp_throw(InvalidFamily, family);
+    return ((uint32_t)-1);
+}
+
 //
 // IPvX "Constants"
 //
@@ -583,6 +602,26 @@ const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
     static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */	      \
     if (family == AF_INET)						      \
 	return c4_##name;						      \
+    if (family == AF_INET6)						      \
+	return c6_##name;						      \
+    xorp_throw(InvalidFamily, family);					      \
+}
+
+// IPvX "Constant" that applies only for IPv4
+#define IPVX_CONSTANT_ACCESSOR_IPV4(name)				      \
+const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
+{									      \
+    static const IPvX c4_##name (IPv4::name());	/* IPv4 constant */	      \
+    if (family == AF_INET)						      \
+	return c4_##name;						      \
+    xorp_throw(InvalidFamily, family);					      \
+}
+
+// IPvX "Constant" that applies only for IPv6
+#define IPVX_CONSTANT_ACCESSOR_IPV6(name)				      \
+const IPvX& IPvX::name(int family) throw (InvalidFamily)		      \
+{									      \
+    static const IPvX c6_##name (IPv6::name());	/* IPv6 constant */	      \
     if (family == AF_INET6)						      \
 	return c6_##name;						      \
     xorp_throw(InvalidFamily, family);					      \
@@ -601,3 +640,4 @@ IPVX_CONSTANT_ACCESSOR(OSPFIGP_DESIGNATED_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(RIP2_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(PIM_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(SSM_ROUTERS);
+IPVX_CONSTANT_ACCESSOR_IPV4(EXPERIMENTAL_BASE);

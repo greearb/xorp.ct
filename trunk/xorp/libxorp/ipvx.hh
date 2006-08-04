@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.21 2006/06/06 00:29:57 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.22 2006/06/06 01:40:24 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -377,6 +377,16 @@ public:
     bool is_multicast() const;
 
     /**
+     * Test if this address belongs to the IPv4 experimental Class-E
+     * address space (240.0.0.0/4).
+     *
+     * Note that it applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if the address is a valid experimental address.
+     */
+    bool is_experimental() const;
+
+    /**
      * Test if this address is a valid link-local unicast address.
      *
      * @return true if the address is a valid unicast address,
@@ -487,6 +497,36 @@ public:
      */
     uint32_t ip_multicast_base_address_mask_len() const {
 	return IPvX::ip_multicast_base_address_mask_len(_af);
+    }
+
+    /**
+     * Get the mask length for the experimental base address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPvX::ip_experimental_base_address_mask_len(my_family);
+     *
+     * @param family the address family.
+     * @return the experimental base address mask length for an address of
+     * address family of @ref family.
+     */
+    static uint32_t ip_experimental_base_address_mask_len(int family)
+	throw (InvalidFamily);
+
+    /**
+     * Get the mask length for the experimental base address for this address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is not a static function, hence it has to be used with
+     * a particular object. Example:
+     *   size_t my_len = ipvx.ip_experimental_base_address_mask_len();
+     *
+     * @param family the address family.
+     * @return the experimental base address mask length for this IPvX address.
+     */
+    uint32_t ip_experimental_base_address_mask_len() const throw (InvalidFamily) {
+	return IPvX::ip_experimental_base_address_mask_len(_af);
     }
 
     /**
@@ -648,6 +688,8 @@ public:
     static const IPvX& PIM_ROUTERS(int family)
 	throw (InvalidFamily);
     static const IPvX& SSM_ROUTERS(int family)
+	throw (InvalidFamily);
+    static const IPvX& EXPERIMENTAL_BASE(int family)
 	throw (InvalidFamily);
 
 private:

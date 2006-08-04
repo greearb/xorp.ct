@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.26 2006/08/04 08:50:50 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.27 2006/08/04 17:04:01 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -299,7 +299,7 @@ public:
     /**
      * Return the subnet containing all experimental IPv4 addresses.
      *
-     * This applies only for IPv4.
+     * This method applies only for IPv4.
      * Note that this is a static function and can be used without
      * a particular object. Example:
      *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix(); OK
