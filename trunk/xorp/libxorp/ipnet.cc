@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.3 2006/08/04 18:13:27 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.4 2006/08/04 23:19:51 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipnet.hh"
@@ -129,19 +129,13 @@ IPNet<IPv4>::is_unicast() const
 	return (true);
     }
 
-    IPNet<IPv4> base_prefix = ip_multicast_base_prefix();
-    if (this->contains(base_prefix))
-	return (false);
-    if (base_prefix.contains(*this))
-	return (false);
+    if (ip_class_a_base_prefix().contains(*this)
+	|| ip_class_b_base_prefix().contains(*this)
+	|| ip_class_c_base_prefix().contains(*this)) {
+	return (true);
+    }
 
-    base_prefix = ip_experimental_base_prefix();
-    if (this->contains(base_prefix))
-	return (false);
-    if (base_prefix.contains(*this))
-	return (false);
-
-    return (true);
+    return (false);
 }
 
 template <>
