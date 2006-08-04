@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.20 2006/06/06 00:29:57 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv6.cc,v 1.21 2006/06/06 01:40:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -524,51 +524,95 @@ test_ipv6_operators()
 void
 test_ipv6_address_type()
 {
+    IPv6 ip6_zero("::");			// Zero, not unicast
+    IPv6 ip6_unicast1("::1");			// Unicast
+    IPv6 ip6_unicast2("2000::1");		// Unicast
+    IPv6 ip6_unicast3("feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"); // Unicast
+    IPv6 ip6_multicast1("ff00::");		// Multicast
+    IPv6 ip6_multicast2("ffff::2:3:4");		// Multicast
+    IPv6 ip6_multicast3("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");// Multicast
     //
-    // Test if this address is numerically zero.
-    //
-    verbose_assert(IPv6("::").is_zero(), "is_zero()");
+    IPv6 ip6_unicast_linklocal1("fe80::2");	// Link-local unicast
+    IPv6 ip6_multicast_nodelocal1("ff01::1");	// Node-local multicast
+    IPv6 ip6_multicast_linklocal1("ff02::2");	// Link-local multicast
+    IPv6 ip6_loopback1("::1");			// Loopback
 
     //
-    // Test if this address is a valid unicast address.
+    // Test if an address is numerically zero.
     //
-    verbose_assert(IPv6("fe80::1234:5678").is_unicast(), "is_unicast()");
+    verbose_assert(ip6_zero.is_zero() == true, "is_zero()");
+    verbose_assert(ip6_unicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_unicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_unicast3.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast3.is_zero() == false, "is_zero()");
 
     //
-    // Test if this address is a valid multicast address.
+    // Test if an address is a valid unicast address.
     //
-    verbose_assert(IPv6("ff00::1").is_multicast(), "is_multicast()");
+    verbose_assert(ip6_zero.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_unicast1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_unicast2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_unicast3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_multicast1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_multicast2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_multicast3.is_unicast() == false, "is_unicast()");
 
     //
-    // Test if this address is a valid link-local unicast address.
+    // Test if an address is a valid multicast address.
     //
-    verbose_assert(IPv6("fe80::2").is_linklocal_unicast(),
+    verbose_assert(ip6_zero.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_multicast1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip6_multicast2.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip6_multicast3.is_multicast() == true, "is_multicast()");
+
+    //
+    // Test if an address is a valid link-local unicast address.
+    //
+    verbose_assert(ip6_unicast_linklocal1.is_linklocal_unicast() == true,
 		   "is_linklocal_unicast()");
-    verbose_assert(IPv6("ff02::2").is_linklocal_unicast() == false,
+    verbose_assert(ip6_unicast1.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip6_unicast2.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip6_unicast3.is_linklocal_unicast() == false,
 		   "is_linklocal_unicast()");
 
     //
-    // Test if this address is a valid node-local multicast address.
+    // Test if an address is a valid node-local multicast address.
     //
-    verbose_assert(IPv6("ff01::1").is_nodelocal_multicast(),
-		       "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast_nodelocal1.is_nodelocal_multicast() == true,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast1.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast2.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast3.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
 
     //
-    // Test if this address is a valid link-local multicast address.
+    // Test if an address is a valid link-local multicast address.
     //
-    verbose_assert(IPv6("ff02::2").is_linklocal_multicast(),
-		       "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast_linklocal1.is_linklocal_multicast() == true,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast1.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast2.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast3.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
 
     //
-    // Test if this address is a valid loopback address.
+    // Test if an address is a valid loopback address.
     //
-    verbose_assert(IPv6("0::1").is_loopback(), "is_loopback()");
-
-    //
-    // Test if this address is a valid loopback address.
-    //
-    verbose_assert(IPv6("1::0").is_loopback() == false, "is_loopback()");
-
+    verbose_assert(ip6_loopback1.is_loopback() == true, "is_loopback()");
+    verbose_assert(ip6_zero.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip6_unicast2.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip6_unicast3.is_loopback() == false, "is_loopback()");
 }
 
 /**
