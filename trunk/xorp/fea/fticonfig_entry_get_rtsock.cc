@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.31 2006/03/16 00:03:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtsock.cc,v 1.32 2006/04/03 04:31:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -352,8 +352,7 @@ FtiConfigEntryGetRtsock::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     } while (false);
 
     // Check that the destination address is valid    
-    if (! (dst.masked_addr().is_unicast()
-	   || (dst == IPvXNet(IPvX::ZERO(dst.af()), 0)))) {
+    if (! dst.is_unicast()) {
 	return false;
     }
 
