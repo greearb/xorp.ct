@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.15 2006/04/05 08:02:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvxnet.cc,v 1.16 2006/08/04 07:10:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -567,6 +567,37 @@ test_ipvxnet_address_type(TestInfo& test_info)
     verbose_assert(ipnet6_odd1.is_multicast() == false, "is_multicast()");
     verbose_assert(ipnet6_odd2.is_multicast() == false, "is_multicast()");
 
+    //
+    // Test if a subnet is within the experimental address range: IPv4.
+    //
+    // XXX: This test applies only for IPv4.
+    verbose_assert(ipnet4_default.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_unicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_unicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_unicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_unicast4.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_unicast5.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_multicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_multicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_multicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_experimental1.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ipnet4_experimental2.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ipnet4_odd1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet4_odd2.is_experimental() == false,
+		   "is_experimental()");
+
     return (! failures());
 }
 
@@ -774,18 +805,11 @@ test_ipvxnet_address_const(TestInfo& test_info)
 		  "ff00::/8");
 
     //
-    // Test if this subnet is within the multicast address range: IPv4.
+    // Return the subnet containing all experimental addresses.
     //
-    IPvXNet ipnet1("224.0.1.0/24");
-    verbose_assert(ipnet4_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet1.is_multicast() == true, "is_multicast()");
-    
-    //
-    // Test if this subnet is within the multicast address range: IPv6.
-    //
-    IPvXNet ipnet2("ffff:1:2::/48");
-    verbose_assert(ipnet6_a.is_multicast() == false, "is_multicast()");
-    verbose_assert(ipnet2.is_multicast() == true, "is_multicast()");
+    // XXX: This test applies only for IPv4.
+    verbose_match(IPvXNet::ip_experimental_base_prefix(AF_INET).str(),
+		  "240.0.0.0/4");
 
     return (! failures());
 }

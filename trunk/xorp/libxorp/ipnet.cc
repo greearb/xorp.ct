@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.1 2006/08/04 08:50:50 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipnet.cc,v 1.2 2006/08/04 17:04:01 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipnet.hh"
@@ -32,6 +32,17 @@ IPNet<IPv4>::ip_experimental_base_prefix()
 {
     return IPNet(IPv4::EXPERIMENTAL_BASE(),
 		 IPv4::ip_experimental_base_address_mask_len());
+}
+
+//
+// XXX: method IPNet<A>::is_experimental() applies only for IPv4,
+// hence we don't provide IPv6 specialized version.
+//
+template <>
+bool
+IPNet<IPv4>::is_experimental() const
+{
+    return (ip_experimental_base_prefix().contains(*this));
 }
 
 template <>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.16 2006/04/05 08:02:25 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4net.cc,v 1.17 2006/08/04 07:10:28 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -357,7 +357,7 @@ test_ipv4net_address_type(TestInfo& test_info)
     verbose_assert(ipnet_experimental2.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_odd1.is_unicast() == false, "is_unicast()");
     verbose_assert(ipnet_odd2.is_unicast() == false, "is_unicast()");
-    
+
     //
     // Test if a subnet is within the multicast address range.
     //
@@ -376,6 +376,34 @@ test_ipv4net_address_type(TestInfo& test_info)
 		   "is_multicast()");
     verbose_assert(ipnet_odd1.is_multicast() == false, "is_multicast()");
     verbose_assert(ipnet_odd2.is_multicast() == false, "is_multicast()");
+
+    //
+    // Test if a subnet is within the experimental address range.
+    //
+    verbose_assert(ipnet_default.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_unicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_unicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_unicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_unicast4.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_unicast5.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_multicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_multicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_multicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ipnet_experimental1.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ipnet_experimental2.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ipnet_odd1.is_experimental() == false, "is_experimental()");
+    verbose_assert(ipnet_odd2.is_experimental() == false, "is_experimental()");
 
     return (! failures());
 }

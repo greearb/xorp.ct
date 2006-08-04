@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.27 2006/08/04 17:04:01 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.28 2006/08/04 17:32:32 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -297,25 +297,12 @@ public:
     bool is_unicast() const;
 
     /**
-     * Return the subnet containing all experimental IPv4 addresses.
-     *
-     * This method applies only for IPv4.
-     * Note that this is a static function and can be used without
-     * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix(); OK
-     *   IPv4Net my_prefix = ipv4net.ip_experimental_base_prefix();  OK
-     *
-     * @return the subnet containing experimental addresses.
-     */
-    static const IPNet<IPv4> ip_experimental_base_prefix();
-
-    /**
      * Return the subnet containing all multicast addresses.
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   IPv4Net my_prefix = IPv4Net::ip_multicast_base_prefix(); OK
-     *   IPv4Net my_prefix = ipv4net.ip_multicast_base_prefix();  OK
+     *   IPv4Net my_prefix = IPv4Net::ip_multicast_base_prefix();
+     *   IPv4Net my_prefix = ipv4net.ip_multicast_base_prefix();
      *
      * @return the subnet containing multicast addresses.
      */
@@ -325,6 +312,20 @@ public:
     }
 
     /**
+     * Return the subnet containing all IPv4 experimental Class-E addresses
+     * (240.0.0.0/4).
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPv4Net my_prefix = IPv4Net::ip_experimental_base_prefix();
+     *   IPv4Net my_prefix = ipv4net.ip_experimental_base_prefix();
+     *
+     * @return the subnet containing experimental addresses.
+     */
+    static const IPNet<A> ip_experimental_base_prefix();
+
+    /**
      * Test if this subnet is within the multicast address range.
      *
      * @return true if this subnet is within the multicast address range.
@@ -332,6 +333,17 @@ public:
     bool is_multicast() const {
 	return (ip_multicast_base_prefix().contains(*this));
     }
+
+    /**
+     * Test if this subnet is within the IPv4 experimental Class-E
+     * address range (240.0.0.0/4).
+     *
+     * This method applies only for IPv4.
+     *
+     * @return true if this subnet is within the IPv4 experimental address
+     * range.
+     */
+    bool is_experimental() const;
 
     /**
      * Get the highest address within this subnet.

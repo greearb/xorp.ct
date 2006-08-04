@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.13 2006/03/16 00:04:30 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.14 2006/08/04 07:10:28 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -218,7 +218,7 @@ public:
     }
 
     /**
-     * Get the multicast base subnet.
+     * Return the subnet containing all multicast addresses.
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
@@ -236,12 +236,48 @@ public:
     }
 
     /**
-     * Test if this subnet is a valid multicast prefix address.
+     * Return the subnet containing all IPv4 experimental Class-E addresses
+     * (240.0.0.0/4).
      *
-     * @return true if this is a valid multicast prefix address.
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   IPvXNet my_prefix = IPvXNet::ip_experimental_base_prefix(my_family);
+     *
+     * @param family the address family.
+     * @return the experimental base prefix address for address
+     * family of @ref family.
+     */
+    inline static IPvXNet ip_experimental_base_prefix(int family)
+	throw (InvalidFamily)
+    {
+	return IPvXNet(IPvX::EXPERIMENTAL_BASE(family),
+		       IPvX::ip_experimental_base_address_mask_len(family));
+    }
+
+    /**
+     * Test if this subnet is within the multicast address range.
+     *
+     * @return true if this subnet is within the multicast address range.
      */
     bool is_multicast() const {
 	return (ip_multicast_base_prefix(_masked_addr.af()).contains(*this));
+    }
+
+    /**
+     * Test if this subnet is within the IPv4 experimental Class-E
+     * address range (240.0.0.0/4).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if this subnet is within the IPv4 experimental address
+     * range.
+     */
+    bool is_experimental() const {
+	if (is_ipv4()) {
+	    return (ip_experimental_base_prefix(_masked_addr.af()).contains(*this));
+	}
+	return (false);
     }
 };
 
