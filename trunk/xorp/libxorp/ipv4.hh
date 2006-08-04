@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.28 2006/06/06 01:40:24 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.29 2006/08/04 07:04:32 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -377,6 +377,8 @@ public:
     /**
      * Test if this address is a valid unicast address.
      *
+     * Note that the numerically zero address is excluded.
+     *
      * @return true if the address is a valid unicast address.
      */
     bool is_unicast() const;
@@ -387,6 +389,30 @@ public:
      * @return true if the address is a valid multicast address.
      */
     bool is_multicast() const;
+
+    /**
+     * Test if this address belongs to the IPv4 Class-A
+     * address space (0.0.0.0/1).
+     *
+     * @return true if the address is a valid Class-A address.
+     */
+    bool is_class_a() const;
+
+    /**
+     * Test if this address belongs to the IPv4 Class-B
+     * address space (128.0.0.0/2).
+     *
+     * @return true if the address is a valid Class-B address.
+     */
+    bool is_class_b() const;
+
+    /**
+     * Test if this address belongs to the IPv4 Class-C
+     * address space (192.0.0.0/3).
+     *
+     * @return true if the address is a valid Class-C address.
+     */
+    bool is_class_c() const;
 
     /**
      * Test if this address belongs to the IPv4 experimental Class-E
@@ -434,8 +460,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_size = IPv4::addr_size();			OK
-     *   size_t my_size = ipv4.addr_size();			OK
+     *   size_t my_size = IPv4::addr_size();
+     *   size_t my_size = ipv4.addr_size();
      *
      * @return address size in number of octets.
      */
@@ -449,8 +475,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   uint32_t my_bitlen = IPv4::addr_bitlen();		OK
-     *   uint32_t my_bitlen = ipv4.addr_bitlen();		OK
+     *   uint32_t my_bitlen = IPv4::addr_bitlen();
+     *   uint32_t my_bitlen = ipv4.addr_bitlen();
      *
      * @return address size in number of bits.
      */
@@ -463,8 +489,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   uint32_t my_len = IPv4::ip_multicast_base_address_mask_len();	OK
-     *   uint32_t my_len = ipv4.ip_multicast_base_address_mask_len();	OK
+     *   uint32_t my_len = IPv4::ip_multicast_base_address_mask_len();
+     *   uint32_t my_len = ipv4.ip_multicast_base_address_mask_len();
      *
      * @return the multicast base address mask length for family AF_INET.
      */
@@ -475,12 +501,60 @@ public:
     }
 
     /**
+     * Get the mask length for the Class A base address.
+     *
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPv4::ip_class_a_base_address_mask_len();
+     *   uint32_t my_len = ipv4.ip_class_a_base_address_mask_len();
+     *
+     * @return the Class A base address mask length for family AF_INET.
+     */
+    static uint32_t ip_class_a_base_address_mask_len() {
+#define IP_CLASS_A_BASE_ADDRESS_MASK_LEN_IPV4		1
+	return (IP_CLASS_A_BASE_ADDRESS_MASK_LEN_IPV4);
+#undef IP_CLASS_A_BASE_ADDRESS_MASK_LEN_IPV4
+    }
+
+    /**
+     * Get the mask length for the Class B base address.
+     *
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPv4::ip_class_b_base_address_mask_len();
+     *   uint32_t my_len = ipv4.ip_class_b_base_address_mask_len();
+     *
+     * @return the Class B base address mask length for family AF_INET.
+     */
+    static uint32_t ip_class_b_base_address_mask_len() {
+#define IP_CLASS_B_BASE_ADDRESS_MASK_LEN_IPV4		2
+	return (IP_CLASS_B_BASE_ADDRESS_MASK_LEN_IPV4);
+#undef IP_CLASS_B_BASE_ADDRESS_MASK_LEN_IPV4
+    }
+
+    /**
+     * Get the mask length for the Class C base address.
+     *
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPv4::ip_class_c_base_address_mask_len();
+     *   uint32_t my_len = ipv4.ip_class_c_base_address_mask_len();
+     *
+     * @return the Class C base address mask length for family AF_INET.
+     */
+    static uint32_t ip_class_c_base_address_mask_len() {
+#define IP_CLASS_C_BASE_ADDRESS_MASK_LEN_IPV4		3
+	return (IP_CLASS_C_BASE_ADDRESS_MASK_LEN_IPV4);
+#undef IP_CLASS_C_BASE_ADDRESS_MASK_LEN_IPV4
+    }
+
+    /**
      * Get the mask length for the experimental base address.
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   uint32_t my_len = IPv4::ip_experimental_base_address_mask_len(); OK
-     *   uint32_t my_len = ipv4.ip_experimental_base_address_mask_len();  OK
+     *   uint32_t my_len = IPv4::ip_experimental_base_address_mask_len();
+     *   uint32_t my_len = ipv4.ip_experimental_base_address_mask_len();
      *
      * @return the experimental base address mask length for family AF_INET.
      */
@@ -604,6 +678,9 @@ public:
     inline static const IPv4& RIP2_ROUTERS(int af = AF_INET);
     inline static const IPv4& PIM_ROUTERS(int af = AF_INET);
     inline static const IPv4& SSM_ROUTERS(int af = AF_INET);
+    inline static const IPv4& CLASS_A_BASE(int af = AF_INET);
+    inline static const IPv4& CLASS_B_BASE(int af = AF_INET);
+    inline static const IPv4& CLASS_C_BASE(int af = AF_INET);
     inline static const IPv4& EXPERIMENTAL_BASE(int af = AF_INET);
 
     /**
@@ -652,6 +729,9 @@ struct IPv4Constants {
 	rip2_routers,
 	pim_routers,
 	ssm_routers,
+	class_a_base,
+	class_b_base,
+	class_c_base,
 	experimental_base;
 };
 
@@ -705,6 +785,18 @@ inline const IPv4& IPv4::PIM_ROUTERS(int) {
 
 inline const IPv4& IPv4::SSM_ROUTERS(int) {
     return IPv4Constants::ssm_routers;
+}
+
+inline const IPv4& IPv4::CLASS_A_BASE(int) {
+    return IPv4Constants::class_a_base;
+}
+
+inline const IPv4& IPv4::CLASS_B_BASE(int) {
+    return IPv4Constants::class_b_base;
+}
+
+inline const IPv4& IPv4::CLASS_C_BASE(int) {
+    return IPv4Constants::class_c_base;
 }
 
 inline const IPv4& IPv4::EXPERIMENTAL_BASE(int) {

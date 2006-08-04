@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.22 2006/06/06 01:40:24 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.23 2006/08/04 17:32:32 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -377,10 +377,40 @@ public:
     bool is_multicast() const;
 
     /**
+     * Test if this address belongs to the IPv4 Class-A
+     * address space (0.0.0.0/1).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if the address is a valid Class-A address.
+     */
+    bool is_class_a() const;
+
+    /**
+     * Test if this address belongs to the IPv4 Class-B
+     * address space (128.0.0.0/2).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if the address is a valid Class-B address.
+     */
+    bool is_class_b() const;
+
+    /**
+     * Test if this address belongs to the IPv4 Class-C
+     * address space (192.0.0.0/3).
+     *
+     * This method applies only for IPv4, and always returns false for IPv6.
+     *
+     * @return true if the address is a valid Class-C address.
+     */
+    bool is_class_c() const;
+
+    /**
      * Test if this address belongs to the IPv4 experimental Class-E
      * address space (240.0.0.0/4).
      *
-     * Note that it applies only for IPv4, and always returns false for IPv6.
+     * This method applies only for IPv4, and always returns false for IPv6.
      *
      * @return true if the address is a valid experimental address.
      */
@@ -497,6 +527,96 @@ public:
      */
     uint32_t ip_multicast_base_address_mask_len() const {
 	return IPvX::ip_multicast_base_address_mask_len(_af);
+    }
+
+    /**
+     * Get the mask length for the Class A base address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPvX::ip_class_a_base_address_mask_len(my_family);
+     *
+     * @param family the address family.
+     * @return the Class A base address mask length for an address of
+     * address family of @ref family.
+     */
+    static uint32_t ip_class_a_base_address_mask_len(int family)
+	throw (InvalidFamily);
+
+    /**
+     * Get the mask length for the Class A base address for this address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is not a static function, hence it has to be used with
+     * a particular object. Example:
+     *   size_t my_len = ipvx.ip_class_a_base_address_mask_len();
+     *
+     * @param family the address family.
+     * @return the Class A base address mask length for this IPvX address.
+     */
+    uint32_t ip_class_a_base_address_mask_len() const throw (InvalidFamily) {
+	return IPvX::ip_class_a_base_address_mask_len(_af);
+    }
+
+    /**
+     * Get the mask length for the Class B base address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPvX::ip_class_b_base_address_mask_len(my_family);
+     *
+     * @param family the address family.
+     * @return the Class B base address mask length for an address of
+     * address family of @ref family.
+     */
+    static uint32_t ip_class_b_base_address_mask_len(int family)
+	throw (InvalidFamily);
+
+    /**
+     * Get the mask length for the Class B base address for this address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is not a static function, hence it has to be used with
+     * a particular object. Example:
+     *   size_t my_len = ipvx.ip_class_b_base_address_mask_len();
+     *
+     * @param family the address family.
+     * @return the Class B base address mask length for this IPvX address.
+     */
+    uint32_t ip_class_b_base_address_mask_len() const throw (InvalidFamily) {
+	return IPvX::ip_class_b_base_address_mask_len(_af);
+    }
+
+    /**
+     * Get the mask length for the Class C base address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is a static function and can be used without
+     * a particular object. Example:
+     *   uint32_t my_len = IPvX::ip_class_c_base_address_mask_len(my_family);
+     *
+     * @param family the address family.
+     * @return the Class C base address mask length for an address of
+     * address family of @ref family.
+     */
+    static uint32_t ip_class_c_base_address_mask_len(int family)
+	throw (InvalidFamily);
+
+    /**
+     * Get the mask length for the Class C base address for this address.
+     *
+     * This method applies only for IPv4.
+     * Note that this is not a static function, hence it has to be used with
+     * a particular object. Example:
+     *   size_t my_len = ipvx.ip_class_c_base_address_mask_len();
+     *
+     * @param family the address family.
+     * @return the Class C base address mask length for this IPvX address.
+     */
+    uint32_t ip_class_c_base_address_mask_len() const throw (InvalidFamily) {
+	return IPvX::ip_class_c_base_address_mask_len(_af);
     }
 
     /**
@@ -688,6 +808,12 @@ public:
     static const IPvX& PIM_ROUTERS(int family)
 	throw (InvalidFamily);
     static const IPvX& SSM_ROUTERS(int family)
+	throw (InvalidFamily);
+    static const IPvX& CLASS_A_BASE(int family)
+	throw (InvalidFamily);
+    static const IPvX& CLASS_B_BASE(int family)
+	throw (InvalidFamily);
+    static const IPvX& CLASS_C_BASE(int family)
 	throw (InvalidFamily);
     static const IPvX& EXPERIMENTAL_BASE(int family)
 	throw (InvalidFamily);

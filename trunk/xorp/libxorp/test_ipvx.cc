@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.21 2006/06/06 01:40:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.22 2006/08/04 17:32:32 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -923,74 +923,348 @@ test_ipvx_operators()
 void
 test_ipvx_address_type()
 {
+    IPvX ip4_zero("0.0.0.0");			// Zero, not unicast
+    IPvX ip4_unicast1("0.0.0.1");		// Unicast
+    IPvX ip4_unicast2("1.2.3.4");		// Unicast
+    IPvX ip4_unicast3("223.255.255.255");	// Unicast
+    IPvX ip4_class_a1("0.0.0.0");		// Class A
+    IPvX ip4_class_a2("12.34.56.78");		// Class A
+    IPvX ip4_class_a3("127.255.255.255");	// Class A
+    IPvX ip4_class_b1("128.0.0.0");		// Class B
+    IPvX ip4_class_b2("128.2.3.4");		// Class B
+    IPvX ip4_class_b3("191.255.255.255");	// Class B
+    IPvX ip4_class_c1("192.0.0.0");		// Class C
+    IPvX ip4_class_c2("192.2.3.4");		// Class C
+    IPvX ip4_class_c3("223.255.255.255");	// Class C
+    IPvX ip4_multicast1("224.0.0.0");		// Multicast
+    IPvX ip4_multicast2("224.2.3.4");		// Multicast
+    IPvX ip4_multicast3("239.255.255.255");	// Multicast
+    IPvX ip4_experimental1("240.0.0.0");	// Experimental
+    IPvX ip4_experimental2("240.2.3.4");	// Experimental
+    IPvX ip4_experimental3("255.255.255.255");	// Experimental
     //
-    // Test if this address is numerically zero.
+    IPvX ip4_multicast_linklocal1("224.0.0.1");	// Link-local multicast
+    IPvX ip4_loopback1("127.0.0.1");		// Loopback
+    IPvX ip4_loopback2("127.255.255.255");	// Loopback
     //
-    verbose_assert(IPvX("0.0.0.0").is_zero(), "is_zero()");
+    IPvX ip6_zero("::");			// Zero, not unicast
+    IPvX ip6_unicast1("::1");			// Unicast
+    IPvX ip6_unicast2("2000::1");		// Unicast
+    IPvX ip6_unicast3("feff:ffff:ffff:ffff:ffff:ffff:ffff:ffff"); // Unicast
+    IPvX ip6_multicast1("ff00::");		// Multicast
+    IPvX ip6_multicast2("ffff::2:3:4");		// Multicast
+    IPvX ip6_multicast3("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");// Multicast
+    //
+    IPvX ip6_unicast_linklocal1("fe80::2");	// Link-local unicast
+    IPvX ip6_multicast_nodelocal1("ff01::1");	// Node-local multicast
+    IPvX ip6_multicast_linklocal1("ff02::2");	// Link-local multicast
+    IPvX ip6_loopback1("::1");			// Loopback
 
-    verbose_assert(IPvX("::").is_zero(), "is_zero()");
+    //
+    // Test if an address is numerically zero: IPv4
+    //
+    verbose_assert(ip4_zero.is_zero() == true, "is_zero()");
+    verbose_assert(ip4_unicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_unicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_unicast3.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_a1.is_zero() == true, "is_zero()");
+    verbose_assert(ip4_class_a2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_a3.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_b1.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_b2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_b3.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_c1.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_c2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_class_c3.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_multicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_multicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_multicast3.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_experimental1.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_experimental2.is_zero() == false, "is_zero()");
+    verbose_assert(ip4_experimental3.is_zero() == false, "is_zero()");
 
     //
-    // Test if this address is a valid unicast address.
+    // Test if an address is numerically zero: IPv6
     //
-    verbose_assert(IPvX("12.34.56.78").is_unicast(), "is_unicast()");
-
-    verbose_assert(IPvX("fe80::1234:5678").is_unicast(), "is_unicast()");
-
-    //
-    // Test if this address is a valid multicast address.
-    //
-    verbose_assert(IPvX("224.1.2.3").is_multicast(), "is_multicast()");
-
-    verbose_assert(IPvX("ff00::1").is_multicast(), "is_multicast()");
+    verbose_assert(ip6_zero.is_zero() == true, "is_zero()");
+    verbose_assert(ip6_unicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_unicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_unicast3.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast1.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast2.is_zero() == false, "is_zero()");
+    verbose_assert(ip6_multicast3.is_zero() == false, "is_zero()");
 
     //
-    // Test if this address is a valid experimental address.
+    // Test if an address is a valid unicast address: IPv4
+    //
+    verbose_assert(ip4_zero.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_unicast1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_unicast2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_unicast3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_a1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_class_a2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_a3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_b1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_b2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_b3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_c1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_c2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_class_c3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip4_multicast1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_multicast2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_multicast3.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_experimental1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_experimental2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip4_experimental3.is_unicast() == false, "is_unicast()");
+
+    //
+    // Test if an address is a valid unicast address: IPv6
+    //
+    verbose_assert(ip6_zero.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_unicast1.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_unicast2.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_unicast3.is_unicast() == true, "is_unicast()");
+    verbose_assert(ip6_multicast1.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_multicast2.is_unicast() == false, "is_unicast()");
+    verbose_assert(ip6_multicast3.is_unicast() == false, "is_unicast()");
+
+    //
+    // Test if an address is a valid multicast address: IPv4
+    //
+    verbose_assert(ip4_zero.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_unicast1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_unicast2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_unicast3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_a1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_a2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_a3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_b1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_b2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_b3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_c1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_c2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_class_c3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip4_multicast1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip4_multicast2.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip4_multicast3.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip4_experimental1.is_multicast() == false,
+		   "is_multicast()");
+    verbose_assert(ip4_experimental2.is_multicast() == false,
+		   "is_multicast()");
+    verbose_assert(ip4_experimental3.is_multicast() == false,
+		   "is_multicast()");
+
+    //
+    // Test if an address is a valid multicast address: IPv6
+    //
+    verbose_assert(ip6_zero.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast1.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast2.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_unicast3.is_multicast() == false, "is_multicast()");
+    verbose_assert(ip6_multicast1.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip6_multicast2.is_multicast() == true, "is_multicast()");
+    verbose_assert(ip6_multicast3.is_multicast() == true, "is_multicast()");
+
+    //
+    // Test if an address is a valid Class A address: IPv4
     //
     // XXX: This test applies only for IPv4.
-    verbose_assert(IPvX("240.1.2.3").is_experimental(), "is_experimental()");
+    verbose_assert(ip4_zero.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_unicast1.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_unicast2.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_unicast3.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_a1.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_class_a2.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_class_a3.is_class_a() == true, "is_class_a()");
+    verbose_assert(ip4_class_b1.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_b2.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_b3.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_c1.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_c2.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_class_c3.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_multicast1.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_multicast2.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_multicast3.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_experimental1.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_experimental2.is_class_a() == false, "is_class_a()");
+    verbose_assert(ip4_experimental3.is_class_a() == false, "is_class_a()");
 
     //
-    // Test if this address is a valid link-local unicast address.
+    // Test if an address is a valid Class B address: IPv4
     //
-    verbose_assert(IPvX("12.34.56.78").is_linklocal_unicast() == false,
-		       "is_linklocal_unicast()");
+    // XXX: This test applies only for IPv4.
+    verbose_assert(ip4_zero.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_unicast1.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_unicast2.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_unicast3.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_a1.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_a2.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_a3.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_b1.is_class_b() == true, "is_class_b()");
+    verbose_assert(ip4_class_b2.is_class_b() == true, "is_class_b()");
+    verbose_assert(ip4_class_b3.is_class_b() == true, "is_class_b()");
+    verbose_assert(ip4_class_c1.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_c2.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_class_c3.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_multicast1.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_multicast2.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_multicast3.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_experimental1.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_experimental2.is_class_b() == false, "is_class_b()");
+    verbose_assert(ip4_experimental3.is_class_b() == false, "is_class_b()");
 
-    verbose_assert(IPvX("fe80::2").is_linklocal_unicast(),
+    //
+    // Test if an address is a valid Class C address: IPv4
+    //
+    // XXX: This test applies only for IPv4.
+    verbose_assert(ip4_zero.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_unicast1.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_unicast2.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_unicast3.is_class_c() == true, "is_class_c()");
+    verbose_assert(ip4_class_a1.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_a2.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_a3.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_b1.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_b2.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_b3.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_class_c1.is_class_c() == true, "is_class_c()");
+    verbose_assert(ip4_class_c2.is_class_c() == true, "is_class_c()");
+    verbose_assert(ip4_class_c3.is_class_c() == true, "is_class_c()");
+    verbose_assert(ip4_multicast1.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_multicast2.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_multicast3.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_experimental1.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_experimental2.is_class_c() == false, "is_class_c()");
+    verbose_assert(ip4_experimental3.is_class_c() == false, "is_class_c()");
+
+    //
+    // Test if an address is a valid experimental address: IPv4
+    //
+    // XXX: This test applies only for IPv4.
+    verbose_assert(ip4_zero.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_unicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_unicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_unicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_a1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_a2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_a3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_b1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_b2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_b3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_c1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_c2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_class_c3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_multicast1.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_multicast2.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_multicast3.is_experimental() == false,
+		   "is_experimental()");
+    verbose_assert(ip4_experimental1.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ip4_experimental2.is_experimental() == true,
+		   "is_experimental()");
+    verbose_assert(ip4_experimental3.is_experimental() == true,
+		   "is_experimental()");
+
+    //
+    // Test if an address is a valid link-local unicast address: IPv4
+    //
+    verbose_assert(ip4_zero.is_linklocal_unicast() == false,
 		   "is_linklocal_unicast()");
-    verbose_assert(IPvX("ff02::2").is_linklocal_unicast() == false,
+    verbose_assert(ip4_unicast1.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip4_unicast2.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip4_unicast3.is_linklocal_unicast() == false,
 		   "is_linklocal_unicast()");
 
     //
-    // Test if this address is a valid node-local multicast address.
+    // Test if an address is a valid link-local unicast address: IPv6
     //
-    verbose_assert(IPvX("224.0.0.1").is_nodelocal_multicast() == false,
-		       "is_nodelocal_multicast()");
-
-    verbose_assert(IPvX("ff01::1").is_nodelocal_multicast(),
-		       "is_nodelocal_multicast()");
-
-    //
-    // Test if this address is a valid link-local multicast address.
-    //
-    verbose_assert(IPvX("224.0.0.2").is_linklocal_multicast(),
-		       "is_linklocal_multicast()");
-
-    verbose_assert(IPvX("ff02::2").is_linklocal_multicast(),
-		       "is_linklocal_multicast()");
+    verbose_assert(ip6_unicast_linklocal1.is_linklocal_unicast() == true,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip6_unicast1.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip6_unicast2.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
+    verbose_assert(ip6_unicast3.is_linklocal_unicast() == false,
+		   "is_linklocal_unicast()");
 
     //
-    // Test if this address is a valid loopback address.
+    // Test if an address is a valid node-local multicast address: IPv4
     //
-    verbose_assert(IPvX("127.255.0.1").is_loopback(), "is_loopback()");
-    verbose_assert(IPvX("0::1").is_loopback(), "is_loopback()");
+    verbose_assert(ip4_multicast1.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip4_multicast2.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip4_multicast3.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
 
     //
-    // Test if this address is a valid loopback address.
+    // Test if an address is a valid node-local multicast address: IPv6
     //
-    verbose_assert(IPvX("126.255.0.127").is_loopback() == false,
-		   "is_loopback()");
-    verbose_assert(IPvX("1::0").is_loopback() == false, "is_loopback()");
+    verbose_assert(ip6_multicast_nodelocal1.is_nodelocal_multicast() == true,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast1.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast2.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast3.is_nodelocal_multicast() == false,
+		   "is_nodelocal_multicast()");
+
+    //
+    // Test if an address is a valid link-local multicast address: IPv4
+    //
+    verbose_assert(ip4_multicast_linklocal1.is_linklocal_multicast() == true,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip4_multicast2.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip4_multicast3.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+
+    //
+    // Test if an address is a valid link-local multicast address: IPv6
+    //
+    verbose_assert(ip6_multicast_linklocal1.is_linklocal_multicast() == true,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast1.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast2.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+    verbose_assert(ip6_multicast3.is_linklocal_multicast() == false,
+		   "is_linklocal_multicast()");
+
+    //
+    // Test if an address is a valid loopback address: IPv4
+    //
+    verbose_assert(ip4_loopback1.is_loopback() == true, "is_loopback()");
+    verbose_assert(ip4_loopback2.is_loopback() == true, "is_loopback()");
+    verbose_assert(ip4_zero.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip4_unicast1.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip4_unicast2.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip4_unicast3.is_loopback() == false, "is_loopback()");
+
+    //
+    // Test if an address is a valid loopback address: IPv6
+    //
+    verbose_assert(ip6_loopback1.is_loopback() == true, "is_loopback()");
+    verbose_assert(ip6_zero.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip6_unicast2.is_loopback() == false, "is_loopback()");
+    verbose_assert(ip6_unicast3.is_loopback() == false, "is_loopback()");
 
 }
 

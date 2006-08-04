@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.21 2006/06/06 01:40:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.22 2006/08/04 17:32:32 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -490,6 +490,30 @@ IPvX::is_multicast() const
 }
 
 bool
+IPvX::is_class_a() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().is_class_a();
+    return (false);		// XXX: this method applies only for IPv4
+}
+
+bool
+IPvX::is_class_b() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().is_class_b();
+    return (false);		// XXX: this method applies only for IPv4
+}
+
+bool
+IPvX::is_class_c() const
+{
+    if (_af == AF_INET)
+	return get_ipv4().is_class_c();
+    return (false);		// XXX: this method applies only for IPv4
+}
+
+bool
 IPvX::is_experimental() const
 {
     if (_af == AF_INET)
@@ -582,6 +606,39 @@ IPvX::ip_multicast_base_address_mask_len(int family) throw (InvalidFamily)
 }
 
 uint32_t
+IPvX::ip_class_a_base_address_mask_len(int family) throw (InvalidFamily)
+{
+    if (family == AF_INET)
+	return (IPv4::ip_class_a_base_address_mask_len());
+    // XXX: this method applies only for IPv4
+
+    xorp_throw(InvalidFamily, family);
+    return ((uint32_t)-1);
+}
+
+uint32_t
+IPvX::ip_class_b_base_address_mask_len(int family) throw (InvalidFamily)
+{
+    if (family == AF_INET)
+	return (IPv4::ip_class_b_base_address_mask_len());
+    // XXX: this method applies only for IPv4
+
+    xorp_throw(InvalidFamily, family);
+    return ((uint32_t)-1);
+}
+
+uint32_t
+IPvX::ip_class_c_base_address_mask_len(int family) throw (InvalidFamily)
+{
+    if (family == AF_INET)
+	return (IPv4::ip_class_c_base_address_mask_len());
+    // XXX: this method applies only for IPv4
+
+    xorp_throw(InvalidFamily, family);
+    return ((uint32_t)-1);
+}
+
+uint32_t
 IPvX::ip_experimental_base_address_mask_len(int family) throw (InvalidFamily)
 {
     if (family == AF_INET)
@@ -640,4 +697,7 @@ IPVX_CONSTANT_ACCESSOR(OSPFIGP_DESIGNATED_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(RIP2_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(PIM_ROUTERS);
 IPVX_CONSTANT_ACCESSOR(SSM_ROUTERS);
+IPVX_CONSTANT_ACCESSOR_IPV4(CLASS_A_BASE);
+IPVX_CONSTANT_ACCESSOR_IPV4(CLASS_B_BASE);
+IPVX_CONSTANT_ACCESSOR_IPV4(CLASS_C_BASE);
 IPVX_CONSTANT_ACCESSOR_IPV4(EXPERIMENTAL_BASE);

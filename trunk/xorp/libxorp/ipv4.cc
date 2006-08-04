@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.22 2006/06/06 01:40:24 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.23 2006/08/04 07:04:32 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -248,7 +248,7 @@ IPv4::is_unicast() const
 
     return (! (IN_MULTICAST(addr4)
 	       || IN_EXPERIMENTAL(addr4)
-	       || (addr4 & 0xff000000U) == 0));
+	       || (addr4 == 0)));
 }
 
 bool
@@ -257,6 +257,30 @@ IPv4::is_multicast() const
     uint32_t addr4 = ntohl(_addr);
 
     return (IN_MULTICAST(addr4));
+}
+
+bool
+IPv4::is_class_a() const
+{
+    uint32_t addr4 = ntohl(_addr);
+
+    return (IN_CLASSA(addr4));
+}
+
+bool
+IPv4::is_class_b() const
+{
+    uint32_t addr4 = ntohl(_addr);
+
+    return (IN_CLASSB(addr4));
+}
+
+bool
+IPv4::is_class_c() const
+{
+    uint32_t addr4 = ntohl(_addr);
+
+    return (IN_CLASSC(addr4));
 }
 
 bool
@@ -319,4 +343,7 @@ const IPv4 IPv4Constants::ospfigp_designated_routers(IPv4(htonl_literal(0xe00000
 const IPv4 IPv4Constants::rip2_routers(IPv4(htonl_literal(0xe0000009U)));
 const IPv4 IPv4Constants::pim_routers(IPv4(htonl_literal(0xe000000dU)));
 const IPv4 IPv4Constants::ssm_routers(IPv4(htonl_literal(0xe0000016U)));
+const IPv4 IPv4Constants::class_a_base(IPv4(htonl_literal(0x00000000U)));
+const IPv4 IPv4Constants::class_b_base(IPv4(htonl_literal(0x80000000U)));
+const IPv4 IPv4Constants::class_c_base(IPv4(htonl_literal(0xc0000000U)));
 const IPv4 IPv4Constants::experimental_base(IPv4(htonl_literal(0xf0000000U)));
