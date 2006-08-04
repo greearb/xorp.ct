@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.24 2006/08/01 22:21:39 mjh Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.25 2006/08/04 07:10:28 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -525,60 +525,6 @@ IPNet<A>::overlap(const IPNet<A>& other) const
     if (done > p)
 	done = p;
     return done;
-}
-
-template <> 
-bool
-IPNet<IPv4>::is_unicast() const
-{
-    //
-    // In case of IPv4 all prefixes that fall within the Class A, Class B or
-    // Class C address space are unicast.
-    // Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
-    // is also considered an unicast prefix.
-    //
-    if (prefix_len() == 0) {
-	// The default route or a valid unicast route
-	return (true);
-    }
-
-    IPNet<IPv4> base_prefix = ip_multicast_base_prefix();
-    if (this->contains(base_prefix))
-	return (false);
-    if (base_prefix.contains(*this))
-	return (false);
-
-    base_prefix = ip_experimental_base_prefix();
-    if (this->contains(base_prefix))
-	return (false);
-    if (base_prefix.contains(*this))
-	return (false);
-
-    return (true);
-}
-
-template <> 
-bool
-IPNet<IPv6>::is_unicast() const
-{
-    //
-    // In case of IPv6 all prefixes that don't contain the multicast
-    // address space are unicast.
-    // Note that the default route (0.0.0.0/0 for IPv4 or ::/0 for IPv6)
-    // is also considered an unicast prefix.
-    //
-    if (prefix_len() == 0) {
-	// The default route or a valid unicast route
-	return (true);
-    }
-
-    IPNet<IPv6> base_prefix = ip_multicast_base_prefix();
-    if (this->contains(base_prefix))
-	return (false);
-    if (base_prefix.contains(*this))
-	return (false);
-
-    return (true);
 }
 
 /**
