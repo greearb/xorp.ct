@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv6.hh,v 1.27 2006/06/06 00:29:57 pavlin Exp $
+// $XORP: xorp/libxorp/ipv6.hh,v 1.28 2006/06/06 01:40:24 pavlin Exp $
 
 #ifndef __LIBXORP_IPV6_HH__
 #define __LIBXORP_IPV6_HH__
@@ -367,6 +367,8 @@ public:
     /**
      * Test if this address is a valid unicast address.
      *
+     * Note that the numerically zero address is excluded.
+     *
      * @return true if the address is a valid unicast address.
      */
     bool is_unicast() const;
@@ -414,8 +416,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_size = IPv6::addr_size();			OK
-     *   size_t my_size = ipv6.addr_size();			OK
+     *   size_t my_size = IPv6::addr_size();
+     *   size_t my_size = ipv6.addr_size();
      *
      * @return address size in number of octets.
      */
@@ -429,8 +431,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   uint32_t my_bitlen = IPv6::addr_bitlen();		OK
-     *   uint32_t my_bitlen = ipv6.addr_bitlen();		OK
+     *   uint32_t my_bitlen = IPv6::addr_bitlen();
+     *   uint32_t my_bitlen = ipv6.addr_bitlen();
      *
      * @return address size in number of bits.
      */
@@ -443,8 +445,8 @@ public:
      *
      * Note that this is a static function and can be used without
      * a particular object. Example:
-     *   size_t my_len = IPv6::ip_multicast_base_address_mask_len();	OK
-     *   size_t my_len = ipv6.ip_multicast_base_address_mask_len();	OK
+     *   size_t my_len = IPv6::ip_multicast_base_address_mask_len();
+     *   size_t my_len = ipv6.ip_multicast_base_address_mask_len();
      *
      * @return the multicast base address mask_len for family AF_INET6.
      */
