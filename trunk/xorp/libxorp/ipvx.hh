@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvx.hh,v 1.23 2006/08/04 17:32:32 pavlin Exp $
+// $XORP: xorp/libxorp/ipvx.hh,v 1.24 2006/08/04 22:50:26 pavlin Exp $
 
 #ifndef __LIBXORP_IPVX_HH__
 #define __LIBXORP_IPVX_HH__
@@ -377,37 +377,37 @@ public:
     bool is_multicast() const;
 
     /**
-     * Test if this address belongs to the IPv4 Class-A
+     * Test if this address belongs to the IPv4 Class A
      * address space (0.0.0.0/1).
      *
      * This method applies only for IPv4, and always returns false for IPv6.
      *
-     * @return true if the address is a valid Class-A address.
+     * @return true if the address is a valid Class A address.
      */
     bool is_class_a() const;
 
     /**
-     * Test if this address belongs to the IPv4 Class-B
+     * Test if this address belongs to the IPv4 Class B
      * address space (128.0.0.0/2).
      *
      * This method applies only for IPv4, and always returns false for IPv6.
      *
-     * @return true if the address is a valid Class-B address.
+     * @return true if the address is a valid Class B address.
      */
     bool is_class_b() const;
 
     /**
-     * Test if this address belongs to the IPv4 Class-C
+     * Test if this address belongs to the IPv4 Class C
      * address space (192.0.0.0/3).
      *
      * This method applies only for IPv4, and always returns false for IPv6.
      *
-     * @return true if the address is a valid Class-C address.
+     * @return true if the address is a valid Class C address.
      */
     bool is_class_c() const;
 
     /**
-     * Test if this address belongs to the IPv4 experimental Class-E
+     * Test if this address belongs to the IPv4 experimental Class E
      * address space (240.0.0.0/4).
      *
      * This method applies only for IPv4, and always returns false for IPv6.
