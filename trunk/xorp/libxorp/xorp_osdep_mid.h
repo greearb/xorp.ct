@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.4 2005/12/21 09:42:58 bms Exp $
+ * $XORP: xorp/libxorp/xorp_osdep_mid.h,v 1.5 2006/03/16 00:04:38 pavlin Exp $
  */
 
 #ifndef __LIBXORP_XORP_OSDEP_MID_H__
@@ -46,7 +46,11 @@ extern "C" {
 #endif
 
 #ifndef IPPROTO_PIM
-#define IPPROTO_PIM 103
+#define IPPROTO_PIM	103
+#endif
+
+#ifndef IN_EXPERIMENTAL
+#define	IN_EXPERIMENTAL(i)	(((uint32_t)(i) & 0xf0000000) == 0xf0000000)
 #endif
 
 #ifndef IN_BADCLASS
