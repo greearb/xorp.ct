@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.130 2006/08/02 22:15:19 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.131 2006/08/03 19:08:38 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -12,7 +12,8 @@ Release 1.4-WIP (2006/??/??)
     - 
 
   CONFIGURATION:
-    - 
+    - Allow static routes to have "nexthop4" and "nexthop6" policy
+      matching conditions in the "from" block.
 
   LIBXORP:
     - 
@@ -51,7 +52,8 @@ Release 1.4-WIP (2006/??/??)
     - 
 
   STATIC_ROUTES:
-    - 
+    - Bug fix related to declaring some of the policy matching
+      conditions in the "from" block.
 
   MLD/IGMP:
     - 
