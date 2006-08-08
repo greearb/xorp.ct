@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.14 2006/08/08 22:15:16 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.15 2006/08/08 22:25:21 pavlin Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -577,14 +577,102 @@ in aggregate route. \\
 
 \section{Static Routes}
 Static routes support policy and may be used as a source for route
-redistribution.  The only extra attribute which may be matched on a static route
-is {\tt metric} which takes an integer as an argument.  It matches the metric of
-the route.  The {\tt static\_routes.tp} template file specifies the route
-attributes specific to static routes.
-
-\section{RIP}
-RIP supports policy and may be used as a source and target for route
 redistribution.
+Table~\ref{policy_static_match} summarizes the match conditions specific to
+static routes.
+These are also specified in the {\tt static\_routes.tp} template file.
+Note that the static routes can match only the {\tt from}
+block, because then can only be exported.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|p{7cm}|}
+\hline
+Variable & Operator & Argument type & Semantics \\
+\hline
+\hline
+{\tt nexthop4} & {\tt :} & ipv4range & Matches if the IPv4 next-hop of
+the route lies within the specified range.\\
+
+\hline
+{\tt nexthop6} & {\tt :} & ipv6range & Matches if the IPv6 next-hop of
+the route lies within the specified range.\\
+
+\hline
+{\tt metric} & {\tt :} & u32 & Matches the metric of a route.\\
+\hline
+
+\end{tabular}
+\caption{\label{policy_static_match}Static routes specific match conditions.}
+\end{table}
+
+
+\section{RIP and RIPng}
+
+RIP and RIPng support policy and route redistribution.  Each of
+them can be used both as a source for redistribution
+(RIP/RIPng-to-something) and as a target (something-to-RIP/RIPng). The
+following sections summarize which aspects of 
+RIP and RIPng routes may be matched and what actions may be taken. These
+are also specified in the {\tt rip.tp} and {\tt ripng.tp} template files.
+
+\subsection{Match Conditions}
+
+Table~\ref{policy_rip_match} summarizes the match conditions specific to
+RIP and RIPng.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|p{7cm}|}
+\hline
+Variable & Operator & Argument type & Semantics \\
+\hline
+\hline
+{\tt nexthop4} & {\tt :} & ipv4range & Matches if the IPv4 next-hop of
+the route lies within the specified range (RIP only).\\
+
+\hline
+{\tt nexthop4} & {\tt :} & ipv6range & Matches if the IPv6 next-hop of
+the route lies within the specified range (RIPng only).\\
+
+\hline
+{\tt metric} & {\tt :} & u32 & Matches the metric of a route.\\
+
+\hline
+{\tt tag} & {\tt :} & u32range & Matches the route tag field in a route. \\
+\hline
+
+\end{tabular}
+\caption{\label{policy_rip_match}RIP and RIPng specific match conditions.}
+\end{table}
+
+\subsection{Actions}
+
+Table~\ref{policy_rip_action} summarizes the actions specific to RIP and
+RIPng.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{|l|c|c|p{7cm}|}
+\hline
+Variable & Operator & Argument type & Semantics \\
+\hline
+\hline
+{\tt nexthop4} & {\tt :} & ipv4 & Replaces the IPv4 nexthop (RIP only).\\
+
+\hline
+{\tt nexthop6} & {\tt :} & ipv6 & Replaces the IPv6 nexthop (RIPng only).\\
+
+\hline
+{\tt metric} & {\tt :} & u32 & Sets the metric. \\
+
+\hline
+{\tt tag} & {\tt :} & u32 & Sets the route tag field. \\
+\hline
+
+\end{tabular}
+\caption{\label{policy_rip_action}RIP and RIPng specific actions.}
+\end{table}
 
 \section{OSPF}
 OSPF supports policy and route redistribution.  It can be used both as
@@ -594,7 +682,9 @@ OSPF routes may be matched and what actions may be taken. These are
 also specified in the {\tt ospfv2.tp} template file.
 
 \subsection{Match Conditions}
-Table~\ref{policy_ospf_match} summarizes the match conditions specific to OSPF.
+Table~\ref{policy_ospf_match} summarizes the match conditions specific to
+OSPF.
+
 \begin{table}[h]
 \centering
 \begin{tabular}{|l|c|c|p{7cm}|}
@@ -622,6 +712,7 @@ lies within the specified range.\\
 
 \subsection{Actions}
 Table~\ref{policy_ospf_action} summarizes the actions specific to OSPF.
+
 \begin{table}[h]
 \centering
 \begin{tabular}{|l|c|c|p{7cm}|}
