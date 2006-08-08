@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.32 2005/12/21 09:42:57 bms Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.33 2006/03/16 00:04:32 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -232,6 +232,8 @@ SelectorList::add_ioevent_cb(XorpFd		   fd,
 void
 SelectorList::remove_ioevent_cb(XorpFd fd, IoEventType type)
 {
+    bool found = false;
+
     if (fd < 0 || fd >= (int)_selector_entries.size()) {
 	XLOG_ERROR("Attempting to remove fd = %d that is outside range of "
 		   "file descriptors 0..%u", (int)fd,
@@ -243,11 +245,17 @@ SelectorList::remove_ioevent_cb(XorpFd fd, IoEventType type)
 
     for (int i = 0; i < SEL_MAX_IDX; i++) {
 	if (mask & (1 << i) && FD_ISSET(fd, &_fds[i])) {
+	    found = true;
 	    FD_CLR(fd, &_fds[i]);
 	    if (_observer)
 		_observer->notify_removed(fd, ((SelectorMask) (1 << i)));
 	}
     }
+    if (! found) {
+	// XXX: no event that needs to be removed has been found
+	return;
+    }
+
     _selector_entries[fd].clear(mask);
     if (_selector_entries[fd].is_empty()) {
 	assert(FD_ISSET(fd, &_fds[SEL_RD_IDX]) == 0);
