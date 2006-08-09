@@ -3425,7 +3425,7 @@ _ACEOF
 
   SHARED_EXT=".so.${MAJOR_VER}"
   SHARED_ALT=".so"
-  LINK_SHARED='ld -G -M $$(srcdir)/libtecla.map -o $$@ -h $$(@F) -z defs -i $$(LIB_OBJECTS) $$(LIBS) -lc'
+  LINK_SHARED='$${LD} -G -M $$(srcdir)/libtecla.map -o $$@ -h $$(@F) -z defs -i $$(LIB_OBJECTS) $$(LIBS) -lc'
   SHARED_CFLAGS="-Kpic"
   case $CC in
   */cc|cc) SHARED_CFLAGS="$SHARED_CFLAGS -xstrconst" ;;
@@ -3447,7 +3447,7 @@ if test "${tecla_cv_gnu_ld_script+set}" = set; then
 else
 
     if (echo 'void dummy(void) {return;}' > dummy.c; $CC -c -fpic dummy.c; \
-         ld -o dummy.so dummy.o -shared --version-script=$srcdir/libtecla.map) 1>&2 2>/dev/null; then
+         $LD -o dummy.so dummy.o -shared --version-script=$srcdir/libtecla.map) 1>&2 2>/dev/null; then
       tecla_cv_gnu_ld_script=yes
     else
       tecla_cv_gnu_ld_script=no
@@ -3463,13 +3463,13 @@ echo "${ECHO_T}$tecla_cv_gnu_ld_script" >&6
     VERSION_OPT=''
   fi
 
-  LINK_SHARED='ld -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
+  LINK_SHARED='$${LD} -o $$@ -soname libtecla$$(SUFFIX).so.'${MAJOR_VER}' -shared '$VERSION_OPT' $$(LIB_OBJECTS) $$(LIBS) -lc'
   SHARED_CFLAGS="-fpic"
   ;;
 *hpux*)
   SHARED_EXT=".${MAJOR_VER}"
   SHARED_ALT=".sl"
-  LINK_SHARED='ld -b +h $$(@F) +k +vshlibunsats -o $$@ -c libtecla.map.opt $$(LIB_OBJECTS) $$(LIBS) -lc'
+  LINK_SHARED='$${LD} -b +h $$(@F) +k +vshlibunsats -o $$@ -c libtecla.map.opt $$(LIB_OBJECTS) $$(LIBS) -lc'
   SHARED_CFLAGS="+z"
   ;;
 *dec-osf*)
