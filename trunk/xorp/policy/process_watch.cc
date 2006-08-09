@@ -13,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/process_watch.cc,v 1.5 2006/03/16 00:04:59 pavlin Exp $"
+#ident "$XORP: xorp/policy/process_watch.cc,v 1.6 2006/03/17 23:53:01 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "policy_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
+
 #include "process_watch.hh"
 
 ProcessWatch::ProcessWatch(XrlStdRouter& rtr, ProtocolMap& pmap) :

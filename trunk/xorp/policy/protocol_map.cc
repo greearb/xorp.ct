@@ -13,14 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/protocol_map.cc,v 1.1 2005/10/23 20:49:19 abittau Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/protocol_map.cc,v 1.2 2006/03/16 00:05:00 pavlin Exp $"
 
 #include "policy_module.h"
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "protocol_map.hh"
 
 ProtocolMap::ProtocolMap()

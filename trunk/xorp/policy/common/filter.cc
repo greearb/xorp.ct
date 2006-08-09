@@ -12,7 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/filter.cc,v 1.2 2005/03/25 02:54:16 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/filter.cc,v 1.3 2006/03/16 00:05:18 pavlin Exp $"
+
+#include "libxorp/xorp.h"
 
 #include "filter.hh"
 

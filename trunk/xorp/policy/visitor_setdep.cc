@@ -13,15 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.5 2005/08/04 15:26:56 bms Exp $"
+#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.6 2006/03/16 00:05:03 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "policy_module.h"
-#include "visitor_setdep.hh"
+#include "libxorp/xorp.h"
+
 #include <vector>
-#include <string>
+
+#include "visitor_setdep.hh"
 
 VisitorSetDep::VisitorSetDep(SetMap& setmap) : _setmap(setmap) 
 {

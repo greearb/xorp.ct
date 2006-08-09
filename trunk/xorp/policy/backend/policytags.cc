@@ -13,11 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.6 2005/10/02 22:21:52 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.7 2006/03/16 00:05:10 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #include "policytags.hh"
 #include "policy/common/elem_set.hh"

@@ -13,13 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.8 2006/03/16 00:05:00 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.9 2006/04/06 00:27:57 pavlin Exp $"
 
 #include "policy_module.h"
+#include "libxorp/xorp.h"
+
 #include "source_match_code_generator.hh"
 
 SourceMatchCodeGenerator::SourceMatchCodeGenerator(uint32_t tagstart,

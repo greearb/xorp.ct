@@ -13,11 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/operator.cc,v 1.1 2005/10/02 22:21:55 abittau Exp $"
+#ident "$XORP: xorp/policy/common/operator.cc,v 1.2 2006/03/16 00:05:18 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #include "operator.hh"
 
