@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.15 2006/03/16 00:03:28 pavlin Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.16 2006/04/04 09:41:38 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -43,12 +43,9 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
       _local_port(local_port),
       _peer_port(peer_port)
 {
-    _local_sock = reinterpret_cast<struct sockaddr *>(_local_buffer);
-    _local_sock_len = sizeof(_local_buffer);
-    _bind_sock = reinterpret_cast<struct sockaddr *>(_bind_buffer);
-    _bind_sock_len = sizeof(_bind_buffer);
-    _peer_sock = reinterpret_cast<struct sockaddr *>(_peer_buffer);
-    _peer_sock_len = sizeof(_peer_buffer);
+    _local_sock_len = sizeof(_local_sock);
+    _bind_sock_len = sizeof(_bind_sock);
+    _peer_sock_len = sizeof(_peer_sock);
 
     fill_address(local_interface, local_port, _local_sock, _local_sock_len,
 		 _local_address);
@@ -59,7 +56,7 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
 		 _peer_address);
 
     //  Test for an address family mismatch
-    if (_local_sock->sa_family != _peer_sock->sa_family)
+    if (_local_sock.ss_family != _peer_sock.ss_family)
 	xorp_throw(AddressFamilyMismatch,
 		   c_format("mismatch %s %s",local_interface, peer_interface));
 }
@@ -86,16 +83,13 @@ Iptuple::copy(const Iptuple& rhs)
     _local_interface = rhs._local_interface;
     _peer_interface = rhs._peer_interface;
 
-    memcpy(_local_buffer, rhs._local_buffer, Socket::SOCKET_BUFFER_SIZE);
-    _local_sock = reinterpret_cast<struct sockaddr *>(_local_buffer);
+    memcpy(&_local_sock, &rhs._local_sock, sizeof(_local_sock));
     _local_sock_len = rhs._local_sock_len;
 
-    memcpy(_bind_buffer, rhs._bind_buffer, Socket::SOCKET_BUFFER_SIZE);
-    _bind_sock = reinterpret_cast<struct sockaddr *>(_bind_buffer);
+    memcpy(&_bind_sock, &rhs._bind_sock, sizeof(_bind_sock));
     _bind_sock_len = rhs._bind_sock_len;
 
-    memcpy(_peer_buffer, rhs._peer_buffer, Socket::SOCKET_BUFFER_SIZE);
-    _peer_sock = reinterpret_cast<struct sockaddr *>(_peer_buffer);
+    memcpy(&_peer_sock, &rhs._peer_sock, sizeof(_peer_sock));
     _peer_sock_len = rhs._peer_sock_len;
     
     _local_address = rhs._local_address;
@@ -124,7 +118,7 @@ Iptuple::operator==(const Iptuple& rhs) const
 */
 void
 Iptuple::fill_address(const char *interface, uint16_t local_port,
-		      struct sockaddr *sin, size_t& len,
+		      struct sockaddr_storage& ss, size_t& len,
 		      string& numeric_interface)
     throw(UnresolvableHost)
 {
@@ -158,8 +152,8 @@ Iptuple::fill_address(const char *interface, uint16_t local_port,
     debug_msg("addrlen %u len %u\n", XORP_UINT_CAST(res0->ai_addrlen),
 	XORP_UINT_CAST(len));
     XLOG_ASSERT(res0->ai_addrlen <= len);
-    memcpy(sin, res0->ai_addr, res0->ai_addrlen);
-    debug_msg("family %d\n", sin->sa_family);
+    memcpy(&ss, res0->ai_addr, res0->ai_addrlen);
+    debug_msg("family %d\n", ss.ss_family);
 
     len = res0->ai_addrlen;
 
@@ -184,7 +178,7 @@ const struct sockaddr *
 Iptuple::get_local_socket(size_t& len) const
 {
     len = _local_sock_len;
-    return _local_sock;
+    return reinterpret_cast<const struct sockaddr *>(&_local_sock);
 }
 
 string
@@ -203,14 +197,14 @@ const struct sockaddr *
 Iptuple::get_bind_socket(size_t& len) const
 {
     len = _bind_sock_len;
-    return _bind_sock;
+    return reinterpret_cast<const struct sockaddr *>(&_bind_sock);
 }
 
 const struct sockaddr *
 Iptuple::get_peer_socket(size_t& len) const
 {
     len = _peer_sock_len;
-    return _peer_sock;
+    return reinterpret_cast<const struct sockaddr *>(&_peer_sock);
 }
 
 string

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/iptuple.hh,v 1.8 2005/07/08 23:16:38 pavlin Exp $
+// $XORP: xorp/bgp/iptuple.hh,v 1.9 2006/03/16 00:03:28 pavlin Exp $
 
 #ifndef __BGP_IPTUPLE_HH__
 #define __BGP_IPTUPLE_HH__
@@ -83,26 +83,24 @@ public:
 private:
     void
     fill_address(const char *interface, uint16_t local_port,
-		 struct sockaddr *sin, size_t& len, string& interface_numeric)
+		 struct sockaddr_storage& ss, size_t& len,
+		 string& interface_numeric)
 	throw(UnresolvableHost);
 
     string _local_interface;	// String representation only for debugging.
     string _peer_interface;	// String representation only for debugging.
 
     // For listen().
-    char _local_buffer[SOCKET_BUFFER_SIZE];
-    struct sockaddr *_local_sock;// Local socket
-    size_t _local_sock_len;	// Length of local socket
+    struct sockaddr_storage	_local_sock;	 // Local socket
+    size_t			_local_sock_len; // Length of local socket
 
     // For bind() before connect.
-    char _bind_buffer[SOCKET_BUFFER_SIZE];
-    struct sockaddr *_bind_sock;// Bind socket
-    size_t _bind_sock_len;	// Length of bind socket
+    struct sockaddr_storage	_bind_sock;	// Bind socket
+    size_t			_bind_sock_len;	// Length of bind socket
 
     // For connect().
-    char _peer_buffer[SOCKET_BUFFER_SIZE];
-    struct sockaddr *_peer_sock;	// Peer socket
-    size_t _peer_sock_len;	// Length of peer socket
+    struct sockaddr_storage	_peer_sock;	// Peer socket
+    size_t			_peer_sock_len;	// Length of peer socket
 
     string _local_address;	// Local address in numeric form
     string _peer_address;	// Peer address in numeric form
