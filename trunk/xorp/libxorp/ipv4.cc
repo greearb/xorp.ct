@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.23 2006/08/04 07:04:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.24 2006/08/04 22:50:26 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -247,7 +247,7 @@ IPv4::is_unicast() const
     uint32_t addr4 = ntohl(_addr);
 
     return (! (IN_MULTICAST(addr4)
-	       || IN_EXPERIMENTAL(addr4)
+	       || IN_BADCLASS(addr4)
 	       || (addr4 == 0)));
 }
 
@@ -288,7 +288,13 @@ IPv4::is_experimental() const
 {
     uint32_t addr4 = ntohl(_addr);
 
-    return (IN_EXPERIMENTAL(addr4));
+    //
+    // XXX: We use IN_BADCLASS() instead of IN_EXPERIMENTAL(), because
+    // the definition of IN_EXPERIMENTAL() is broken in Linux's <netinet/in.h>
+    // (it covers all addresses that start with 0xe0000000, which includes
+    // multicast as well).
+    //
+    return (IN_BADCLASS(addr4));
 }
 
 // XXX: in IPv4 there is no link-local unicast scope, therefore
