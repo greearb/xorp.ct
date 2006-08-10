@@ -13,10 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.29 2006/02/15 00:10:44 pavlin Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.30 2006/03/28 03:06:54 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
+
+#include "libproto/packet.hh"
 
 /**
  * All packet decode routines must inherit from this interface.
@@ -760,74 +762,5 @@ class Options {
      OspfTypes::Version _version;
      uint32_t _options;
 };
-
-inline
-uint16_t
-extract_16(const uint8_t *ptr)
-{
-    uint16_t val;
-    val = ptr[0];
-    val <<= 8;
-    val |= ptr[1];
-
-    return val;
-}
-
-inline
-void
-embed_16(uint8_t *ptr, uint16_t val)
-{
-    ptr[0] = (val >> 8) & 0xff;
-    ptr[1] = val & 0xff;
-}
-
-inline
-uint32_t
-extract_24(const uint8_t *ptr)
-{
-    uint32_t val;
-    val = ptr[0];
-    val <<= 8;
-    val |= ptr[1];
-    val <<= 8;
-    val |= ptr[2];
-
-    return val;
-}
-
-inline
-void
-embed_24(uint8_t *ptr, uint32_t val)
-{
-    ptr[0] = (val >> 16) & 0xff;
-    ptr[1] = (val >> 8) & 0xff;
-    ptr[2] = val & 0xff;
-}
-
-inline
-uint32_t
-extract_32(const uint8_t *ptr)
-{
-    uint32_t val;
-    val = ptr[0];
-    val <<= 8;
-    val |= ptr[1];
-    val <<= 8;
-    val |= ptr[2];
-    val <<= 8;
-    val |= ptr[3];
-
-    return val;
-}
-
-inline
-void
-embed_32(uint8_t *ptr, uint32_t val)
-{
-    ptr[0] = (val >> 24) & 0xff;
-    ptr[1] = (val >> 16) & 0xff;
-    ptr[2] = (val >> 8) & 0xff;
-    ptr[3] = val & 0xff;
-}
 
 #endif // __OSPF_PACKET_HH__
