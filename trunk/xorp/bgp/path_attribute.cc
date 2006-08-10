@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.80 2006/04/07 20:04:47 atanu Exp $"
+#ident "$XORP: xorp/bgp/path_attribute.cc,v 1.81 2006/05/09 02:56:28 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1592,7 +1592,7 @@ PathAttributeList<A>::PathAttributeList()
 {
     debug_msg("%p\n", this);
 
-    memset(_hash, 0, 16);
+    memset(_hash, 0, sizeof(_hash));
 }
 
 template<class A>
@@ -1672,13 +1672,13 @@ PathAttributeList<A>::add_path_attribute(PathAttribute *a)
 	for (i = begin(); i != end(); i++)
 	    if ( *(*i) > *a) {
 		insert(i, a);
-		memset(_hash, 0, 16);
+		memset(_hash, 0, sizeof(_hash));
 		return;
 	    }
     }
     // list empty, or tail insertion:
     push_back(a);
-    memset(_hash, 0, 16);
+    memset(_hash, 0, sizeof(_hash));
 }
 
 template<class A>
@@ -1721,7 +1721,7 @@ operator< (const PathAttributeList<A> &him) const
     if (him.size() < size())
         return false;
 
-    //    return (memcmp(_hash, him.hash(), 16) < 0);
+    //    return (memcmp(_hash, him.hash(), sizeof(_hash)) < 0);
     const_iterator my_i = begin();
     const_iterator his_i = him.begin();
     for (;;) {
@@ -1755,7 +1755,7 @@ operator == (const PathAttributeList<A> &him) const
     debug_msg("PathAttributeList operator== %p %p\n", this, &him);
     assert_rehash();
     him.assert_rehash();
-    return (memcmp(_hash, him.hash(), 16) == 0);
+    return (memcmp(_hash, him.hash(), sizeof(_hash)) == 0);
 }
 
 template<class A>
@@ -1792,7 +1792,7 @@ PathAttributeList<A>::replace_attribute(PathAttribute* new_att)
 	    delete (*i);
 	    erase(i);
 	    debug_msg("After: \n%s\n", str().c_str());
-	    memset(_hash, 0, 16);
+	    memset(_hash, 0, sizeof(_hash));
 	    return;
 	}
     XLOG_UNREACHABLE();
@@ -1837,7 +1837,7 @@ PathAttributeList<A>::remove_attribute_by_type(PathAttType type)
 	if ((*i)->type() == type) {
 	    delete *i;
 	    erase(i);
-	    memset(_hash, 0, 16);
+	    memset(_hash, 0, sizeof(_hash));
 	    return;
 	}
     }
@@ -1854,7 +1854,7 @@ PathAttributeList<A>::remove_attribute_by_pointer(PathAttribute *p)
 	if ((*i) == p) {
 	    delete *i;
 	    erase(i);
-	    memset(_hash, 0, 16);
+	    memset(_hash, 0, sizeof(_hash));
 	    return;
 	}
     }
@@ -1878,7 +1878,7 @@ PathAttributeList<A>::process_unknown_attributes()
 		delete *tmp;
 		erase(tmp);
 	    }
-	    memset(_hash, 0, 16);
+	    memset(_hash, 0, sizeof(_hash));
 	}
     }
 }
@@ -1975,10 +1975,13 @@ void
 PathAttributeList<A>::assert_rehash() const
 {
 #ifdef PARANOID
-    const uint32_t *i = (const uint32_t *)_hash;
-    if (i[0] || i[1] || i[2] || i[3])
-	return;
-    XLOG_FATAL("Missing rehash - attempted to use modified PathAttributeList without first calling rehash()\n");
+    size_t i;
+    for (i = 0; i < sizeof(_hash); i++) {
+	if (_hash[i])
+	    return;
+    }
+    XLOG_FATAL("Missing rehash - attempted to use modified PathAttributeList "
+	       "without first calling rehash()");
 #endif
 }
 
