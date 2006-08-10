@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.39 2006/08/10 18:35:23 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.40 2006/08/10 21:07:13 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -691,9 +691,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
     if(_bgp_bytes < BGPPacket::COMMON_HEADER_LEN) {
 	get = BGPPacket::COMMON_HEADER_LEN - _bgp_bytes;
     } else {
-	const fixed_header *header =
-	    reinterpret_cast<const struct fixed_header *>(_bgp_buf);
-	u_short length = ntohs(header->length);
+	uint16_t length = extract_16(_bgp_buf + BGPPacket::LENGTH_OFFSET);
 	get = length - _bgp_bytes;
     }
 
@@ -722,9 +720,7 @@ TestPeer::receive(XorpFd fd, IoEventType type)
     _bgp_bytes += len;
 
     if (_bgp_bytes >= BGPPacket::COMMON_HEADER_LEN) {
-	const fixed_header *header =
-	    reinterpret_cast<const struct fixed_header *>(_bgp_buf);
-	u_short length = ntohs(header->length);
+	uint16_t length = extract_16(_bgp_buf + BGPPacket::LENGTH_OFFSET);
 	if (length < BGPPacket::MINPACKETSIZE || length > sizeof(_bgp_buf)) {
 	    string error = c_format("Illegal length value %d", length);
 	    XLOG_ERROR("%s", error.c_str());

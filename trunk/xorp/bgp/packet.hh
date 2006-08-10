@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.38 2006/03/16 00:03:29 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.39 2006/08/10 21:07:11 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -22,6 +22,8 @@
 #endif
 
 #include "libxorp/xorp.h"
+
+#include "libproto/packet.hh"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -99,15 +101,6 @@ enum Notify {
     CEASE = 6			// Cease
 };
 
-//
-// The BGP common header (on the wire)
-//
-struct fixed_header {
-    uint8_t	marker[16];		// normally all bits are ones.
-    uint16_t	length;			// this is in network format 
-    uint8_t	type;			// enum BgpPacketType
-};
-
 /**
  * The main container for BGP messages (packets) which are sent
  * back and forth.
@@ -171,7 +164,7 @@ protected:
      * sure that it has the correct size, otherwise the routine will
      * allocate it with new uint8_t[len].
      * It is responsibility of the caller to dispose of the buffer.
-     * Note that this routine will only copy the fixed_header part.
+     * Note that this routine will only copy the BGP common header part.
      * The derived-class methods are in charge of filling up any
      * additional data past it.
      */

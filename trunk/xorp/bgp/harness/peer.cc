@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.75 2006/04/07 20:14:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.76 2006/08/10 09:50:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -731,9 +731,8 @@ Peer::send_dump_callback(const XrlError& error, FILE *fp,
     const uint8_t *buf;
 
     while(0 != (buf = mrtd_traffic_file_read(fp, len))) {
-	const fixed_header *header = 
-	    reinterpret_cast<const struct fixed_header *>(buf);
-	if(MESSAGETYPEUPDATE == header->type) {
+	uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
+	if(MESSAGETYPEUPDATE == type) {
 	    /*
 	    ** Save the update message in the sent trie.
 	    */
@@ -1462,14 +1461,13 @@ Peer::datain(const bool& status, const TimeVal& tv,
     for(size_t i = 0; i < length; i++)
 	buf[i] = data[i];
 
-    const fixed_header *header = 
-	reinterpret_cast<const struct fixed_header *>(buf);
+    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
 
     if (!_traffic_recv.is_empty())
 	_traffic_recv->dispatch(buf, length, tv);
 
     try {
-	switch(header->type) {
+	switch(type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
@@ -1531,7 +1529,7 @@ Peer::datain(const bool& status, const TimeVal& tv,
 	    /*
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
-	    XLOG_ERROR("Unknown packet type %d", header->type);
+	    XLOG_ERROR("Unknown packet type %d", type);
 	}
     } catch(CorruptMessage c) {
 	/*

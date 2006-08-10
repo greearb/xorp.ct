@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.41 2006/08/10 18:35:22 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.42 2006/08/10 21:07:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -279,9 +279,7 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
     case AsyncFileReader::DATA:
 	XLOG_ASSERT(offset <= buf_bytes);
 	if (offset == buf_bytes) {		// message complete so far
-	    const fixed_header *header =
-		reinterpret_cast<const struct fixed_header *>(buf);
-	    size_t fh_length = ntohs(header->length);
+	    size_t fh_length = extract_16(buf + BGPPacket::LENGTH_OFFSET);
 
 	    if (fh_length < BGPPacket::MINPACKETSIZE
 		|| fh_length > sizeof(_read_buf)) {

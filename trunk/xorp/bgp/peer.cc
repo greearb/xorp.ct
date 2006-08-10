@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.138 2006/08/10 09:50:50 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.139 2006/08/10 21:07:12 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -103,8 +103,8 @@ BGPPeer::clear_last_error()
 
 /*
  * This call is dispatched by the reader after making sure that
- * we have a packet with at least a fixed_header and whose
- * length matches the one in the fixed_header.
+ * we have a packet with at least a BGP common header and whose
+ * length matches the one in that header.
  * Our job now is to decode the message and dispatch it to the
  * state machine.
  */
@@ -229,9 +229,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
     */
     XLOG_ASSERT(0 != buf);
 
-    const fixed_header *header =
-	reinterpret_cast<const struct fixed_header *>(buf);
-
+    const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
     try {
 
 	/*
@@ -239,11 +238,11 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	** anything of interest.
 	*/
 	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			&header->marker[0], BGPPacket::MARKER_SIZE)) {
+			marker, BGPPacket::MARKER_SIZE)) {
 	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
 	}
 	
-	switch (header->type) {
+	switch (type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
@@ -312,9 +311,9 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
 	    XLOG_ERROR("%s Unknown packet type %d",
-		       this->str().c_str(), header->type);
+		       this->str().c_str(), type);
 	    notify_peer_of_error(MSGHEADERERR, BADMESSTYPE,
-				 const_cast<uint8_t *>(&header->type),1);
+				 buf + BGPPacket::TYPE_OFFSET, 1);
 // 	    event_tranfatal();
 	    TIMESPENT_CHECK();
 	    return false;
@@ -2591,20 +2590,19 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
     */
     XLOG_ASSERT(0 != buf);
 
-    const fixed_header *header =
-	reinterpret_cast<const struct fixed_header *>(buf);
-
+    const uint8_t* marker = buf + BGPPacket::MARKER_OFFSET;
+    uint8_t type = extract_8(buf + BGPPacket::TYPE_OFFSET);
     try {
 	/*
 	** Check the Marker, total waste of time as it never contains
 	** anything of interest.
 	*/
 	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			&header->marker[0], BGPPacket::MARKER_SIZE)) {
+			marker, BGPPacket::MARKER_SIZE)) {
 	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
 	}
 	
-	switch (header->type) {
+	switch (type) {
 	case MESSAGETYPEOPEN: {
 	    debug_msg("OPEN Packet RECEIVED\n");
 	    OpenPacket pac(buf, length);
@@ -2672,10 +2670,9 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	    ** Send a notification to the peer. This is a bad message type.
 	    */
 	    XLOG_ERROR("%s Unknown packet type %d",
-		       this->str().c_str(), header->type);
+		       this->str().c_str(), type);
 	    notify_peer_of_error_accept(MSGHEADERERR, BADMESSTYPE,
-					const_cast<uint8_t *>(&header->type),
-					1);
+					buf + BGPPacket::TYPE_OFFSET, 1);
 // 	    event_tranfatal_accept();
 	    TIMESPENT_CHECK();
 	    debug_msg("Returning false\n");
