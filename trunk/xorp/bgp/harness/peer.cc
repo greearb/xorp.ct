@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.74 2006/04/04 09:43:23 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.75 2006/04/07 20:14:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,6 +33,8 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/utils.hh"
+
+#include "libproto/packet.hh"
 
 #include "bgp/local_data.hh"
 #include "bgp/packet.hh"
@@ -1011,11 +1013,11 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     ptr = &viewbuf[0];
 
     // View number
-    *reinterpret_cast<uint16_t *>(ptr) = 0;
+    embed_16(ptr, 0);
     ptr += 2;
 
     // Sequence number
-    *reinterpret_cast<uint16_t *>(ptr) = htons(sequence);
+    embed_16(ptr, sequence);
     ptr += 2;
 
     // Prefix
@@ -1031,19 +1033,19 @@ mrtd_routview_dump(const  UpdatePacket* p, const IPNet<A>& net,
     ptr += 1;
 
     // Uptime
-    *reinterpret_cast<uint32_t *>(ptr) = htonl(tv.sec());
+    embed_32(ptr, tv.sec());
     ptr += 4;
 
     // Peer address
-    *reinterpret_cast<uint32_t *>(ptr) = 0;
+    embed_32(ptr, 0);
     ptr += 4;
 
     // Peer AS
-    *reinterpret_cast<uint16_t *>(ptr) = 0;
+    embed_16(ptr, 0);
     ptr += 2;
 
     // Attribute length
-    *reinterpret_cast<uint16_t *>(ptr) = htons(length);
+    embed_16(ptr, length);
     ptr += 2;
 
     XLOG_ASSERT(ptr == &viewbuf[sizeof(viewbuf)]);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.136 2006/04/29 08:23:56 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.137 2006/05/01 09:17:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -28,9 +28,13 @@
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
-#include "xrl/interfaces/bgp_mib_traps_xif.hh"
 #include "libxorp/timespent.hh"
+
 #include "libcomm/comm_api.h"
+
+#include "libproto/packet.hh"
+
+#include "xrl/interfaces/bgp_mib_traps_xif.hh"
 
 #include "peer.hh"
 #include "bgp.hh"
@@ -1274,7 +1278,7 @@ BGPPeer::check_open_packet(const OpenPacket *p) throw(CorruptMessage)
 {
     if (p->Version() != BGPVERSION) {
 	static uint8_t data[2];
-	*reinterpret_cast<uint16_t *>(&data[0]) = htons(BGPVERSION);
+	embed_16(data, BGPVERSION);
 	xorp_throw(CorruptMessage,
 		   c_format("Unsupported BGPVERSION %d", p->Version()),
 		   OPENMSGERROR, UNSUPVERNUM, &data[0], sizeof(data));
