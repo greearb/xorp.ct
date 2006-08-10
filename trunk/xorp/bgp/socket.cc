@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.39 2006/03/16 00:03:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.40 2006/04/04 09:41:04 bms Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -95,10 +95,10 @@ Socket::create_socket(const struct sockaddr *sin, int is_blocking)
 
 void
 Socket::init_sockaddr(string addr, uint16_t local_port,
-		      struct sockaddr *sin, size_t& len)
+		      struct sockaddr_storage& ss, size_t& len)
 {
-    debug_msg("addr %s port %u len = %u\n", addr.c_str(), 
-	XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
+    debug_msg("addr %s port %u len = %u\n", addr.c_str(),
+	      XORP_UINT_CAST(local_port), XORP_UINT_CAST(len));
 
     string port = c_format("%d", local_port);
 
@@ -120,9 +120,9 @@ Socket::init_sockaddr(string addr, uint16_t local_port,
 		   error_string);
     }
 
-    XLOG_ASSERT(res0->ai_addrlen <= len);
-    memcpy(sin,res0->ai_addr, res0->ai_addrlen);
-
+    XLOG_ASSERT(res0->ai_addrlen <= sizeof(ss));
+    memset(&ss, 0, sizeof(ss));
+    memcpy(&ss, res0->ai_addr, res0->ai_addrlen);
     len = res0->ai_addrlen;
 
     freeaddrinfo(res0);
@@ -209,9 +209,9 @@ void
 SocketClient::connected(XorpFd s)
 {
 #ifdef	DEBUG_PEERNAME
-    char socket_buffer[SOCKET_BUFFER_SIZE];
-    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(socket_buffer);
-    socklen_t len = sizeof(socket_buffer);
+    sockaddr_storage ss;
+    struct sockaddr *sin = reinterpret_cast<struct sockaddr *>(ss);
+    socklen_t len = sizeof(ss);
     if (-1 == getpeername(s, sin, &len))
 	XLOG_FATAL("getpeername failed: %s", strerror(errno));
     char hostname[1024];

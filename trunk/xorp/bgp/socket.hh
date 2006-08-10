@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.16 2005/09/23 17:02:55 atanu Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.17 2006/03/16 00:03:35 pavlin Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -61,11 +61,6 @@
 
 class Socket {
 public:
-#ifdef	SOCK_MAXADDRLEN
-    static const int SOCKET_BUFFER_SIZE = SOCK_MAXADDRLEN;
-#else
-    static const int SOCKET_BUFFER_SIZE = 1024;
-#endif
     static const int MAX_LISTEN_QUEUE = 5;
 
     Socket(const Iptuple& iptuple, EventLoop& e);
@@ -79,7 +74,7 @@ public:
      * uses it.
      */
     static void init_sockaddr(string addr, uint16_t local_port,
-			      struct sockaddr *sin, size_t& len);
+			      struct sockaddr_storage& ss, size_t& len);
 
     //    void set_eventloop(EventLoop *evt) {_eventloop = evt;}
     EventLoop& eventloop() {return _eventloop;}

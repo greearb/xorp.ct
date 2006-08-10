@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.37 2006/04/07 06:06:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.38 2006/04/10 19:34:33 bms Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -324,9 +324,8 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	return false;
     }
 
-    char buf[Socket::SOCKET_BUFFER_SIZE];
-    struct sockaddr *peer = reinterpret_cast<struct sockaddr *>(buf);
-    size_t len = sizeof(buf);
+    struct sockaddr_storage peer;
+    size_t len = sizeof(peer);
     try {
 	Socket::init_sockaddr(host, port, peer, len);
     } catch(UnresolvableHost e) {
@@ -334,7 +333,7 @@ TestPeer::connect(const string& host, const uint32_t& port,
 	return false;
     }
 
-    XorpFd s = comm_sock_open(peer->sa_family, SOCK_STREAM, 0,
+    XorpFd s = comm_sock_open(peer.ss_family, SOCK_STREAM, 0,
 			      COMM_SOCK_NONBLOCKING);
     if (!s.is_valid()) {
 	error_string = c_format("comm_sock_open failed: %s\n",
@@ -344,7 +343,8 @@ TestPeer::connect(const string& host, const uint32_t& port,
 
     // XXX
     int in_progress = 0;
-    (void)comm_sock_connect(s, peer, COMM_SOCK_NONBLOCKING, &in_progress);
+    (void)comm_sock_connect(s, reinterpret_cast<struct sockaddr *>(&peer),
+			    COMM_SOCK_NONBLOCKING, &in_progress);
 
    /*
    ** If there is a coordinator then add an I/O event callback.
@@ -392,10 +392,8 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-
-    char buf[Socket::SOCKET_BUFFER_SIZE];
-    struct sockaddr *local = reinterpret_cast<struct sockaddr *>(buf);
-    size_t len = sizeof(buf);
+    struct sockaddr_storage local;
+    size_t len = sizeof(local);
     try {
 	Socket::init_sockaddr(host, port, local, len);
     } catch(UnresolvableHost e) {
@@ -403,7 +401,8 @@ TestPeer::listen(const string& host, const uint32_t& port,
 	return false;
     }
 
-    XorpFd s = comm_bind_tcp(local, COMM_SOCK_NONBLOCKING);
+    XorpFd s = comm_bind_tcp(reinterpret_cast<struct sockaddr *>(&local),
+			     COMM_SOCK_NONBLOCKING);
     if (!s.is_valid()) {
 	error_string = c_format("comm_bind_tcp() failed: %s\n",
 				comm_get_last_error_str());
@@ -444,9 +443,8 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    char buf[Socket::SOCKET_BUFFER_SIZE];
-    struct sockaddr *local = reinterpret_cast<struct sockaddr *>(buf);
-    size_t len = sizeof(buf);
+    struct sockaddr_storage local;
+    size_t len = sizeof(local);
     try {
 	Socket::init_sockaddr(host, port, local, len);
     } catch(UnresolvableHost e) {
@@ -454,7 +452,7 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    XorpFd s = comm_sock_open(local->sa_family, SOCK_STREAM, 0,
+    XorpFd s = comm_sock_open(local.ss_family, SOCK_STREAM, 0,
 			      COMM_SOCK_NONBLOCKING);
     if (!s.is_valid()) {
 	error_string = c_format("comm_sock_open failed: %s",
@@ -468,7 +466,8 @@ TestPeer::bind(const string& host, const uint32_t& port,
 	return false;
     }
 
-    if (comm_sock_bind(s, local) != XORP_OK) {
+    if (comm_sock_bind(s, reinterpret_cast<struct sockaddr *>(&local))
+	!= XORP_OK) {
 	comm_sock_close(s);
 	error_string = c_format("comm_sock_bind failed: %s",
 				comm_get_last_error_str());
