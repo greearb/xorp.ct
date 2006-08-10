@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/iptuple.hh,v 1.9 2006/03/16 00:03:28 pavlin Exp $
+// $XORP: xorp/bgp/iptuple.hh,v 1.10 2006/08/09 16:16:02 pavlin Exp $
 
 #ifndef __BGP_IPTUPLE_HH__
 #define __BGP_IPTUPLE_HH__
@@ -52,12 +52,6 @@ public:
  */
 class Iptuple {
 public:
-#ifdef	SOCK_MAXADDRLEN
-    static const int SOCKET_BUFFER_SIZE = SOCK_MAXADDRLEN;
-#else
-    static const int SOCKET_BUFFER_SIZE = 1024;
-#endif
-
     Iptuple();
     Iptuple(const char *local_interface, uint16_t local_port,
 	    const char *peer_interface, uint16_t peer_port)
