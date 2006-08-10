@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/parameter.cc,v 1.30 2005/11/14 11:38:43 mjh Exp $"
+#ident "$XORP: xorp/bgp/parameter.cc,v 1.31 2006/03/16 00:03:30 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -25,6 +25,8 @@
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+
+#include "libproto/packet.hh"
 
 #include "packet.hh"
 
@@ -423,13 +425,13 @@ BGP4ByteASCapability::decode()
     XLOG_ASSERT(_type == PARAMTYPECAP);	// See comment in:
 					// BGPRefreshCapability::decode()
 
-    _length = *(_data+1) + 2; // includes 2 byte header
+    _length = extract_8(_data + 1) + 2;	// includes 2 byte header
 
-    _cap_code = static_cast<CapType>(*(_data+2));
+    _cap_code = static_cast<CapType>(*(_data + 2));
     XLOG_ASSERT(_cap_code == CAPABILITY4BYTEAS);
 
-    _cap_length = *(_data+3);
-    _as4 = ntohl((uint32_t &)*(_data+4));
+    _cap_length = extract_8(_data + 3);
+    _as4 = extract_32(_data + 4);
 }
 
 void

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.26 2005/12/13 06:24:07 atanu Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.27 2006/03/16 00:03:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -22,6 +22,8 @@
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+
+#include "libproto/packet.hh"
 
 #include "packet.hh"
 #define DEBUG_BGPNotificationPacket
@@ -176,12 +178,13 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 	    s += c_format("Connection Not Synchronized(%d)", CONNNOTSYNC);
 	    break;
 	case BADMESSLEN:
-	    if (error_data != NULL)
+	    if (error_data != NULL) {
 		s += c_format("Bad Message Length(%d) - field: %d",
-			      BADMESSLEN, ntohs((uint16_t &)*error_data));
-	    else
+			      BADMESSLEN, extract_16(error_data));
+	    } else {
 		s += c_format("Bad Message Length(%d) - "
 			      "NO ERROR DATA SUPPLIED", BADMESSLEN);
+	    }
 	    break;
 	case BADMESSTYPE:
 	    if (error_data != NULL)
@@ -197,13 +200,14 @@ NotificationPacket::pretty_print_error_code(const int error, const int subcode,
 	s += c_format("OPEN Message Error(%d): ", OPENMSGERROR);
 	switch (subcode) {
 	case UNSUPVERNUM:
-	    if (error_data != NULL)
+	    if (error_data != NULL) {
 		s += c_format("Unsupported Version Number(%d) - "
 			      "Min supported Version is %d",
-			      UNSUPVERNUM, ntohs((uint16_t &)*error_data));
-	    else
+			      UNSUPVERNUM, extract_16(error_data));
+	    } else {
 		s += c_format("Unsupported Version Number(%d) - "
 			      "NO ERROR DATA SUPPLIED", UNSUPVERNUM);
+	    }
 	    break;
 	case BADASPEER:
 	    s += c_format("Bad Peer AS(%d)", BADASPEER);

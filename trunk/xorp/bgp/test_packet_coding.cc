@@ -12,13 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.14 2006/03/29 22:41:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.15 2006/05/09 22:02:40 pavlin Exp $"
 
 #include "bgp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/test_main.hh"
+
+#include "libproto/packet.hh"
+
 #include "packet.hh"
 #include "path_attribute.hh"
 
@@ -139,8 +143,8 @@ test_simple_open_packet(TestInfo& /*info*/)
     assert(len == MINOPENPACKET);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    uint16_t plen = extract_16(skip);
     assert(plen == MINOPENPACKET);
     skip+=2;
     uint8_t type = *skip;
@@ -199,8 +203,8 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
     assert(len == MINOPENPACKET + 8 + 4);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    uint16_t plen = extract_16(skip);
     // +8 for the multiprotocol parameter.
     // +4 for the refresh parameter.
     assert(plen == MINOPENPACKET + 8 + 4);
@@ -246,8 +250,8 @@ test_keepalive_packet(TestInfo& /*info*/)
     assert(len == BGP_COMMON_HEADER_LEN);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;	// skip marker
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    uint16_t plen = extract_16(skip);
     assert(plen == BGP_COMMON_HEADER_LEN);
     skip+=2;
     uint8_t type = *skip;
@@ -295,8 +299,8 @@ test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec,
 	assert(len == MINNOTIFICATIONPACKET + l);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;
+    uint16_t plen = extract_16(skip);
     if (d==NULL)
 	assert(plen == MINNOTIFICATIONPACKET);
     else
@@ -354,8 +358,8 @@ test_withdraw_packet(TestInfo& info)
     assert(len == 31);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;
+    uint16_t plen = extract_16(skip);
     assert(plen == 31);
     skip+=2;
     uint8_t type = *skip;
@@ -487,8 +491,8 @@ test_announce_packet(TestInfo& info)
     assert(len == 110);
 
     //check the common header
-    const uint8_t *skip = buf+MARKER_SIZE;
-    uint16_t plen = htons(*((const uint16_t*)skip));
+    const uint8_t *skip = buf + MARKER_SIZE;
+    uint16_t plen = extract_16(skip);
     assert(plen == 110);
     skip+=2;
     uint8_t type = *skip;
