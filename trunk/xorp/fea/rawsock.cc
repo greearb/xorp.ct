@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.25 2006/07/27 21:43:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.26 2006/07/28 00:29:06 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1636,7 +1636,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_rthdr)))
 		    continue;
 		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
-		ext_headers_type.push_back(cmsgp->cmsg_type);
+		// XXX: Use the protocol number instead of message type
+		ext_headers_type.push_back(IPPROTO_ROUTING);
 		ext_headers_payload.push_back(opt_payload);
 		break;
 	    }
@@ -1650,7 +1651,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_dest)))
 		    continue;
 		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
-		ext_headers_type.push_back(cmsgp->cmsg_type);
+		// XXX: Use the protocol number instead of message type
+		ext_headers_type.push_back(IPPROTO_DSTOPTS);
 		ext_headers_payload.push_back(opt_payload);
 		break;
 	    }
@@ -2082,6 +2084,16 @@ RawSocket::proto_socket_write(const string& if_name,
 
 	// Space for the Extension headers
 	for (size_t i = 0; i < ext_headers_type.size(); i++) {
+	    // Ignore the types that are not supported
+	    switch (ext_headers_type[i]) {
+	    case IPPROTO_ROUTING:
+		break;
+	    case IPPROTO_DSTOPTS:
+		break;
+	    default:
+		continue;	// XXX: all other types are not supported
+		break;
+	    }
 	    ctllen += CMSG_SPACE(ext_headers_payload[i].size());
 	}
 
@@ -2195,11 +2207,28 @@ RawSocket::proto_socket_write(const string& if_name,
 	// Set the Extension headers
 	//
 	for (size_t i = 0; i < ext_headers_type.size(); i++) {
-	    cmsgp->cmsg_len = CMSG_LEN(ext_headers_payload[i].size());
+	    uint8_t header_type = 0;
+
+	    // Translate protocol number (header type) to message type
+	    switch (ext_headers_type[i]) {
+	    case IPPROTO_ROUTING:
+		header_type = IPV6_RTHDR;
+		break;
+	    case IPPROTO_DSTOPTS:
+		header_type = IPV6_DSTOPTS;
+		break;
+	    default:
+		continue;	// XXX: all other types are not supported
+		break;
+	    }
+
+	    // Set the header
+	    const vector<uint8_t>& opt_payload(ext_headers_payload[i]);
+	    cmsgp->cmsg_len = CMSG_LEN(opt_payload.size());
 	    cmsgp->cmsg_level = IPPROTO_IPV6;
-	    cmsgp->cmsg_type = ext_headers_type[i];
+	    cmsgp->cmsg_type = header_type;
 	    uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
-	    memcpy(data, &ext_headers_payload[0], cmsgp->cmsg_len);
+	    memcpy(data, &opt_payload[0], opt_payload.size());
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	}
 	
