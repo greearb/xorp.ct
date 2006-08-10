@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.13 2005/08/18 15:33:38 bms Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.14 2005/09/23 19:10:41 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -29,6 +29,7 @@ test_spt_SOURCES	 = test_spt.cc
 libproto_la_SOURCES	 = libproto_module.h
 
 libproto_la_SOURCES	+= config_node_id.hh
+libproto_la_SOURCES	+= packet.hh
 libproto_la_SOURCES	+= proto_node.hh
 libproto_la_SOURCES	+= proto_node_cli.hh
 libproto_la_SOURCES	+= proto_register.hh
@@ -52,4 +53,3 @@ EXTRA_DIST		 = spt_graph1
 ##
 
 INCLUDES =	-I$(top_srcdir)
-

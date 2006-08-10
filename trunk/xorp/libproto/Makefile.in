@@ -107,7 +107,7 @@ test_config_node_id_SOURCES = test_config_node_id.cc
 test_spt_SOURCES = test_spt.cc
 
 # -- Library Sources
-libproto_la_SOURCES = libproto_module.h config_node_id.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
+libproto_la_SOURCES = libproto_module.h config_node_id.hh packet.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = spt_graph1
