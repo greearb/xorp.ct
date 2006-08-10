@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.15 2006/05/09 22:02:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_packet_coding.cc,v 1.16 2006/08/10 09:37:27 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -140,13 +140,13 @@ test_simple_open_packet(TestInfo& /*info*/)
     buf = openpacket.encode(len);
 
     //open packets with no parameters have a fixed length of 29 bytes
-    assert(len == MINOPENPACKET);
+    assert(len == BGPPacket::MINOPENPACKET);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;		// skip marker
     uint16_t plen = extract_16(skip);
-    assert(plen == MINOPENPACKET);
-    skip+=2;
+    assert(plen == BGPPacket::MINOPENPACKET);
+    skip += 2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEOPEN);
     skip++;
@@ -200,15 +200,15 @@ test_open_packet_with_capabilities(TestInfo& /*info*/)
     //open packets with no parameters have a fixed length of 29 bytes
     // +8 for the multiprotocol parameter.
     // +4 for the refresh parameter.
-    assert(len == MINOPENPACKET + 8 + 4);
+    assert(len == BGPPacket::MINOPENPACKET + 8 + 4);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;		// skip marker
     uint16_t plen = extract_16(skip);
     // +8 for the multiprotocol parameter.
     // +4 for the refresh parameter.
-    assert(plen == MINOPENPACKET + 8 + 4);
-    skip+=2;
+    assert(plen == BGPPacket::MINOPENPACKET + 8 + 4);
+    skip += 2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEOPEN);
     skip++;
@@ -247,12 +247,12 @@ test_keepalive_packet(TestInfo& /*info*/)
     buf = keepalivepacket.encode(len);
 
     //keepalive packets with no parameters have a fixed length of 19 bytes
-    assert(len == BGP_COMMON_HEADER_LEN);
+    assert(len == BGPPacket::COMMON_HEADER_LEN);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;	// skip marker
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;		// skip marker
     uint16_t plen = extract_16(skip);
-    assert(plen == BGP_COMMON_HEADER_LEN);
+    assert(plen == BGPPacket::COMMON_HEADER_LEN);
     skip+=2;
     uint8_t type = *skip;
     assert(type == MESSAGETYPEKEEPALIVE);
@@ -294,17 +294,17 @@ test_notification_packets(TestInfo& info, const uint8_t *d, uint8_t ec,
     //notification packets have a length of 21 bytes plus the length
     //of the error data
     if (d==NULL)
-	assert(len == MINNOTIFICATIONPACKET);
+	assert(len == BGPPacket::MINNOTIFICATIONPACKET);
     else
-	assert(len == MINNOTIFICATIONPACKET + l);
+	assert(len == BGPPacket::MINNOTIFICATIONPACKET + l);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;
     uint16_t plen = extract_16(skip);
-    if (d==NULL)
-	assert(plen == MINNOTIFICATIONPACKET);
+    if (d == NULL)
+	assert(plen == BGPPacket::MINNOTIFICATIONPACKET);
     else
-	assert(plen == MINNOTIFICATIONPACKET + l);
+	assert(plen == BGPPacket::MINNOTIFICATIONPACKET + l);
 
     skip+=2;
     uint8_t type = *skip;
@@ -358,7 +358,7 @@ test_withdraw_packet(TestInfo& info)
     assert(len == 31);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;
     uint16_t plen = extract_16(skip);
     assert(plen == 31);
     skip+=2;
@@ -491,7 +491,7 @@ test_announce_packet(TestInfo& info)
     assert(len == 110);
 
     //check the common header
-    const uint8_t *skip = buf + MARKER_SIZE;
+    const uint8_t *skip = buf + BGPPacket::MARKER_SIZE;
     uint16_t plen = extract_16(skip);
     assert(plen == 110);
     skip+=2;

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.137 2006/05/01 09:17:10 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.138 2006/08/10 09:50:50 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -127,7 +127,8 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	break;
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
-	notify_peer_of_error(MSGHEADERERR, BADMESSLEN, buf + MARKER_SIZE, 2);
+	notify_peer_of_error(MSGHEADERERR, BADMESSLEN,
+			     buf + BGPPacket::MARKER_SIZE, 2);
 // 	event_tranfatal();
 	TIMESPENT_CHECK();
 	return false;
@@ -238,7 +239,7 @@ BGPPeer::get_message(BGPPacket::Status status, const uint8_t *buf,
 	** anything of interest.
 	*/
 	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			&header->marker[0], MARKER_SIZE)) {
+			&header->marker[0], BGPPacket::MARKER_SIZE)) {
 	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
 	}
 	
@@ -2571,7 +2572,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 
     case BGPPacket::ILLEGAL_MESSAGE_LENGTH:
 	notify_peer_of_error_accept(MSGHEADERERR, BADMESSLEN,
-				    buf + MARKER_SIZE, 2);
+				    buf + BGPPacket::MARKER_SIZE, 2);
 // 	event_tranfatal_accept();
 	TIMESPENT_CHECK();
 	debug_msg("Returning false\n");
@@ -2599,7 +2600,7 @@ AcceptSession::get_message_accept(BGPPacket::Status status,
 	** anything of interest.
 	*/
 	if (0 != memcmp(const_cast<uint8_t *>(&BGPPacket::Marker[0]),
-			&header->marker[0], MARKER_SIZE)) {
+			&header->marker[0], BGPPacket::MARKER_SIZE)) {
 	    xorp_throw(CorruptMessage,"Bad Marker", MSGHEADERERR, CONNNOTSYNC);
 	}
 	

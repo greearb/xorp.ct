@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/open_packet.cc,v 1.25 2005/12/10 00:59:11 atanu Exp $"
+#ident "$XORP: xorp/bgp/open_packet.cc,v 1.26 2006/03/16 00:03:29 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -43,21 +43,21 @@ OpenPacket::encode(size_t& len, uint8_t *d) const
 {
     if (d != 0) {	// have a buffer, check length
 	// XXX this should become an exception
-        XLOG_ASSERT(len >= MINOPENPACKET + _OptParmLen);
+        XLOG_ASSERT(len >= BGPPacket::MINOPENPACKET + _OptParmLen);
     }
-    len = MINOPENPACKET + _OptParmLen;
+    len = BGPPacket::MINOPENPACKET + _OptParmLen;
     d = basic_encode(len, d);
 
-    d[BGP_COMMON_HEADER_LEN] = _Version;
-    _as.copy_out(d + BGP_COMMON_HEADER_LEN + 1);
+    d[BGPPacket::COMMON_HEADER_LEN] = _Version;
+    _as.copy_out(d + BGPPacket::COMMON_HEADER_LEN + 1);
 
-    d[BGP_COMMON_HEADER_LEN + 3] = (_HoldTime >> 8) & 0xff;
-    d[BGP_COMMON_HEADER_LEN + 4] = _HoldTime & 0xff;
-    _id.copy_out(d + BGP_COMMON_HEADER_LEN + 5);
-    d[BGP_COMMON_HEADER_LEN + 9] = _OptParmLen;
+    d[BGPPacket::COMMON_HEADER_LEN + 3] = (_HoldTime >> 8) & 0xff;
+    d[BGPPacket::COMMON_HEADER_LEN + 4] = _HoldTime & 0xff;
+    _id.copy_out(d + BGPPacket::COMMON_HEADER_LEN + 5);
+    d[BGPPacket::COMMON_HEADER_LEN + 9] = _OptParmLen;
 
     if (!_parameter_list.empty())  {
-	size_t i = MINOPENPACKET;
+	size_t i = BGPPacket::MINOPENPACKET;
 	ParameterList::const_iterator pi = _parameter_list.begin();
 	while(pi != _parameter_list.end()) {
 	    XLOG_ASSERT(i + (*pi)->length() <= len);
@@ -81,15 +81,15 @@ OpenPacket::OpenPacket(const uint8_t *d, uint16_t l)
 
     size_t i, myOptParmLen, remaining;
 
-    if (l < MINOPENPACKET) {
+    if (l < BGPPacket::MINOPENPACKET) {
 	debug_msg("Open message too short\n");
 	xorp_throw(CorruptMessage, "Open message too short",
-		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
+		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
     }
     remaining = l;
 
-    d += BGP_COMMON_HEADER_LEN;	// skip common header
-    remaining -= BGP_COMMON_HEADER_LEN;
+    d += BGPPacket::COMMON_HEADER_LEN;		// skip common header
+    remaining -= BGPPacket::COMMON_HEADER_LEN;
 
     _Version = d[0];
 

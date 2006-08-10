@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.37 2005/12/12 23:33:19 atanu Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.38 2006/03/16 00:03:29 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
@@ -99,30 +99,14 @@ enum Notify {
     CEASE = 6			// Cease
 };
 
-#define	MARKER_SIZE		16
-/**
- * Overlay for the BGP common header (on the wire)
- */
+//
+// The BGP common header (on the wire)
+//
 struct fixed_header {
-    uint8_t	marker[MARKER_SIZE];	// normally all bits are ones.
+    uint8_t	marker[16];		// normally all bits are ones.
     uint16_t	length;			// this is in network format 
     uint8_t	type;			// enum BgpPacketType
 };
-
-// size of fixed_header
-const size_t BGP_COMMON_HEADER_LEN = 19;
-
-/* 
- * Various min and max packet size, accounting for the basic
- * information in the packet itself
- */
-const size_t MINPACKETSIZE = BGP_COMMON_HEADER_LEN;
-const size_t MAXPACKETSIZE = 4096;
-
-const size_t MINOPENPACKET = BGP_COMMON_HEADER_LEN + 10;
-const size_t MINUPDATEPACKET = BGP_COMMON_HEADER_LEN + 2 + 2;
-const size_t MINKEEPALIVEPACKET = BGP_COMMON_HEADER_LEN;
-const size_t MINNOTIFICATIONPACKET = BGP_COMMON_HEADER_LEN + 2;
 
 /**
  * The main container for BGP messages (packets) which are sent
@@ -131,7 +115,6 @@ const size_t MINNOTIFICATIONPACKET = BGP_COMMON_HEADER_LEN + 2;
  * This base class only contains the standard fields (length, type)
  * leaving other information to be stored in the derived objects.
  */
-
 class BGPPacket {
 public:
     /**
@@ -142,6 +125,35 @@ public:
 	ILLEGAL_MESSAGE_LENGTH,
 	CONNECTION_CLOSED,
     };
+
+    //
+    // The BGP common header (on the wire)
+    //
+    // struct fixed_header {
+    //     uint8_t	marker[MARKER_SIZE];	// normally all bits are ones.
+    //     uint16_t	length;			// this is in network format 
+    //     uint8_t	type;			// enum BgpPacketType
+    // };
+    //
+
+    // Various header-related constants
+    static const size_t MARKER_SIZE = 16;
+    static const size_t COMMON_HEADER_LEN = MARKER_SIZE
+				+ sizeof(uint16_t) + sizeof(uint8_t);
+    static const size_t MARKER_OFFSET = 0;
+    static const size_t LENGTH_OFFSET = MARKER_SIZE;
+    static const size_t TYPE_OFFSET = LENGTH_OFFSET + sizeof(uint16_t);
+
+    // 
+    // Various min and max packet size, accounting for the basic
+    // information in the packet itself.
+    //
+    static const size_t MINPACKETSIZE = COMMON_HEADER_LEN;
+    static const size_t MAXPACKETSIZE = 4096;
+    static const size_t MINOPENPACKET = COMMON_HEADER_LEN + 10;
+    static const size_t MINUPDATEPACKET = COMMON_HEADER_LEN + 2 + 2;
+    static const size_t MINKEEPALIVEPACKET = COMMON_HEADER_LEN;
+    static const size_t MINNOTIFICATIONPACKET = COMMON_HEADER_LEN + 2;
 
     // The default marker.
     static const uint8_t Marker[MARKER_SIZE];
@@ -329,11 +341,13 @@ public:
      */
     KeepAlivePacket(const uint8_t *buf, uint16_t l)
 		throw(CorruptMessage) {
-	if (l != MINKEEPALIVEPACKET)
+	if (l != BGPPacket::MINKEEPALIVEPACKET)
 	    xorp_throw(CorruptMessage,
-		c_format("KeepAlivePacket length %d instead of %u",
-			 l, XORP_UINT_CAST(MINKEEPALIVEPACKET)),
-		       MSGHEADERERR, BADMESSLEN, buf + MARKER_SIZE, 2);
+		       c_format("KeepAlivePacket length %d instead of %u",
+				l,
+				XORP_UINT_CAST(BGPPacket::MINKEEPALIVEPACKET)),
+		       MSGHEADERERR, BADMESSLEN, buf + BGPPacket::MARKER_SIZE,
+		       2);
 
 	_Type = MESSAGETYPEKEEPALIVE;
     }
@@ -343,7 +357,7 @@ public:
     }
     ~KeepAlivePacket()					{}
     const uint8_t *encode(size_t &len, uint8_t *buf = 0) const {
-	len = MINKEEPALIVEPACKET;
+	len = BGPPacket::MINKEEPALIVEPACKET;
 	return basic_encode(len, buf);
     }
     virtual string str() const		{ return "Keepalive Packet\n"; }

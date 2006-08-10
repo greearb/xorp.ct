@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_packet.cc,v 1.39 2005/12/11 04:48:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_packet.cc,v 1.40 2006/03/16 00:03:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -108,12 +108,13 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     for (pai = pa_list().begin() ; pai != pa_list().end(); ++pai)
 	pa_len += (*pai)->wire_size();
 
-    size_t desired_len = MINUPDATEPACKET + wr_len + pa_len + nlri_len;
+    size_t desired_len = BGPPacket::MINUPDATEPACKET + wr_len + pa_len
+	+ nlri_len;
     if (d != 0)		// XXX have a buffer, check length
 	assert(len >= desired_len);	// XXX should throw an exception
     len = desired_len;
 
-    if (len > MAXPACKETSIZE)	// XXX
+    if (len > BGPPacket::MAXPACKETSIZE)		// XXX
 	XLOG_FATAL("Attempt to encode a packet that is too big");
 
     debug_msg("Path Att: %u Withdrawn Routes: %u Net Reach: %u length: %u\n",
@@ -124,12 +125,12 @@ UpdatePacket::encode(size_t &len, uint8_t *d) const
     d = basic_encode(len, d);	// allocate buffer and fill header
 
     // fill withdraw list length (bytes)
-    d[BGP_COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
-    d[BGP_COMMON_HEADER_LEN + 1] = wr_len & 0xff;
+    d[BGPPacket::COMMON_HEADER_LEN] = (wr_len >> 8) & 0xff;
+    d[BGPPacket::COMMON_HEADER_LEN + 1] = wr_len & 0xff;
 
     // fill withdraw list
-    i = BGP_COMMON_HEADER_LEN + 2;
-    wr_list().encode(wr_len, d+i);
+    i = BGPPacket::COMMON_HEADER_LEN + 2;
+    wr_list().encode(wr_len, d + i);
     i += wr_len;
 
     // fill pathattribute length (bytes)
@@ -153,29 +154,29 @@ UpdatePacket::UpdatePacket(const uint8_t *d, uint16_t l)
 {
     debug_msg("UpdatePacket constructor called\n");
     _Type = MESSAGETYPEUPDATE;
-    if (l < MINUPDATEPACKET)
+    if (l < BGPPacket::MINUPDATEPACKET)
 	xorp_throw(CorruptMessage,
 		   c_format("Update Message too short %d", l),
-		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
-    d += BGP_COMMON_HEADER_LEN;	// move past header
+		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
+    d += BGPPacket::COMMON_HEADER_LEN;		// move past header
     size_t wr_len = (d[0] << 8) + d[1];		// withdrawn length
 
-    if (MINUPDATEPACKET + wr_len > l)
+    if (BGPPacket::MINUPDATEPACKET + wr_len > l)
 	xorp_throw(CorruptMessage,
 		   c_format("Unreachable routes length is bogus %u > %u",
 			    XORP_UINT_CAST(wr_len),
-			    XORP_UINT_CAST(l - MINUPDATEPACKET)),
+			    XORP_UINT_CAST(l - BGPPacket::MINUPDATEPACKET)),
 		   UPDATEMSGERR, MALATTRLIST);
     
     size_t pa_len = (d[wr_len+2] << 8) + d[wr_len+3];	// pathatt length
-    if (MINUPDATEPACKET + pa_len + wr_len > l)
+    if (BGPPacket::MINUPDATEPACKET + pa_len + wr_len > l)
 	xorp_throw(CorruptMessage,
 		   c_format("Pathattr length is bogus %u > %u",
 			    XORP_UINT_CAST(pa_len),
-			    XORP_UINT_CAST(l - wr_len - MINUPDATEPACKET)),
+			    XORP_UINT_CAST(l - wr_len - BGPPacket::MINUPDATEPACKET)),
 		UPDATEMSGERR, MALATTRLIST);
 
-    size_t nlri_len = l - MINUPDATEPACKET - pa_len - wr_len;
+    size_t nlri_len = l - BGPPacket::MINUPDATEPACKET - pa_len - wr_len;
 
     // Start of decoding of withdrawn routes.
     d += 2;	// point to the routes.

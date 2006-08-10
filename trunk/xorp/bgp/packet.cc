@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/packet.cc,v 1.13 2005/10/12 22:32:53 mjh Exp $"
+#ident "$XORP: xorp/bgp/packet.cc,v 1.14 2006/03/16 00:03:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -23,7 +23,7 @@
 
 /* **************** BGPPacket *********************** */
 
-const uint8_t BGPPacket::Marker[MARKER_SIZE] = {
+const uint8_t BGPPacket::Marker[BGPPacket::MARKER_SIZE] = {
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
     0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff
 };
@@ -33,10 +33,10 @@ BGPPacket::basic_encode(size_t len, uint8_t *buf) const
 {
     if (buf == 0)
 	buf = new uint8_t[len];
-    XLOG_ASSERT(len >= MARKER_SIZE + 3);
-    memcpy(buf, Marker, MARKER_SIZE);
-    buf[MARKER_SIZE] = (len >> 8) & 0xff;
-    buf[MARKER_SIZE+1] = len & 0xff;
-    buf[MARKER_SIZE+2] = _Type;
+    XLOG_ASSERT(len >= BGPPacket::MARKER_SIZE + 3);
+    memcpy(buf, Marker, BGPPacket::MARKER_SIZE);
+    buf[BGPPacket::MARKER_SIZE] = (len >> 8) & 0xff;
+    buf[BGPPacket::MARKER_SIZE + 1] = len & 0xff;
+    buf[BGPPacket::MARKER_SIZE + 2] = _Type;
     return buf;
 }

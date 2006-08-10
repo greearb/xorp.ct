@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/harness/test_peer.hh,v 1.13 2005/08/18 15:58:10 bms Exp $
+// $XORP: xorp/bgp/harness/test_peer.hh,v 1.14 2006/03/16 00:03:42 pavlin Exp $
 
 #ifndef __BGP_HARNESS_TEST_PEER_HH__
 #define __BGP_HARNESS_TEST_PEER_HH__
@@ -86,12 +86,12 @@ private:
 	string error;
     };
     queue <Queued> _xrl_queue;
-    static const int FLYING_LIMIT = 100;// XRL's allowed in flight at
-					 // one time.
+    static const int FLYING_LIMIT = 100;	// XRL's allowed in flight at
+						// one time.
     int _flying;
 
     size_t _bgp_bytes;
-    uint8_t _bgp_buf[MAXPACKETSIZE]; // Maximum allowed BGP message
+    uint8_t _bgp_buf[BGPPacket::MAXPACKETSIZE];	// Maximum allowed BGP message
 };
 
 class XrlTestPeerTarget : XrlTestPeerTargetBase {

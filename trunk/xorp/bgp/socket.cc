@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.40 2006/04/04 09:41:04 bms Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.41 2006/08/10 18:35:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -256,7 +256,7 @@ SocketClient::async_read_start(size_t cnt, size_t offset)
  * Handler for reading incoming data on a BGP connection.
  *
  * When a packet first comes in, we read the default amount of data,
- * which is MINPACKETSIZE (i.e. the minimum size of a BGP message).
+ * which is BGPPacket::MINPACKETSIZE (i.e. the minimum size of a BGP message).
  * This callback is then invoked a first time, and it can check the
  * actual message length. If more bytes are needed, we call again
  * async_read_start with the desired length (instructing it to skip
@@ -283,7 +283,8 @@ SocketClient::async_read_message(AsyncFileWriter::Event ev,
 		reinterpret_cast<const struct fixed_header *>(buf);
 	    size_t fh_length = ntohs(header->length);
 
-	    if (fh_length < MINPACKETSIZE || fh_length > sizeof(_read_buf)) {
+	    if (fh_length < BGPPacket::MINPACKETSIZE
+		|| fh_length > sizeof(_read_buf)) {
 		XLOG_ERROR("Illegal length value %u",
 			   XORP_UINT_CAST(fh_length));
 		if (!_callback->dispatch(BGPPacket::ILLEGAL_MESSAGE_LENGTH,

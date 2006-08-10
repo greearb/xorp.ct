@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.38 2006/04/10 19:34:33 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.39 2006/08/10 18:35:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -187,7 +187,7 @@ XrlTestPeerTarget::test_peer_0_1_send(const vector<uint8_t>& data)
 {
     debug_msg("\n");
 
-    if(_trace && MESSAGETYPEOPEN == data[BGP_COMMON_HEADER_LEN - 1]) {
+    if(_trace && MESSAGETYPEOPEN == data[BGPPacket::COMMON_HEADER_LEN - 1]) {
 	printf("send() - open\n");
     }
 
@@ -688,8 +688,8 @@ TestPeer::receive(XorpFd fd, IoEventType type)
     ** Now doing BGP packetisation.
     */
     int get;
-    if(_bgp_bytes < BGP_COMMON_HEADER_LEN) {
-	get = BGP_COMMON_HEADER_LEN - _bgp_bytes;
+    if(_bgp_bytes < BGPPacket::COMMON_HEADER_LEN) {
+	get = BGPPacket::COMMON_HEADER_LEN - _bgp_bytes;
     } else {
 	const fixed_header *header =
 	    reinterpret_cast<const struct fixed_header *>(_bgp_buf);
@@ -721,11 +721,11 @@ TestPeer::receive(XorpFd fd, IoEventType type)
 
     _bgp_bytes += len;
 
-    if (_bgp_bytes >= BGP_COMMON_HEADER_LEN) {
+    if (_bgp_bytes >= BGPPacket::COMMON_HEADER_LEN) {
 	const fixed_header *header =
 	    reinterpret_cast<const struct fixed_header *>(_bgp_buf);
 	u_short length = ntohs(header->length);
-	if(length < MINPACKETSIZE || length > sizeof(_bgp_buf)) {
+	if (length < BGPPacket::MINPACKETSIZE || length > sizeof(_bgp_buf)) {
 	    string error = c_format("Illegal length value %d", length);
 	    XLOG_ERROR("%s", error.c_str());
 	    datain(ERROR, _bgp_buf, _bgp_bytes, error);

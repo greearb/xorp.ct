@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/socket.hh,v 1.17 2006/03/16 00:03:35 pavlin Exp $
+// $XORP: xorp/bgp/socket.hh,v 1.18 2006/08/10 18:35:22 pavlin Exp $
 
 #ifndef __BGP_SOCKET_HH__
 #define __BGP_SOCKET_HH__
@@ -271,7 +271,8 @@ private:
 			      const size_t offset,
 			      SendCompleteCallback cb);
 
-    void async_read_start(size_t cnt = BGP_COMMON_HEADER_LEN,size_t ofset = 0);
+    void async_read_start(size_t cnt = BGPPacket::COMMON_HEADER_LEN,
+			  size_t ofset = 0);
     void async_read_message(AsyncFileWriter::Event ev,
 			   const uint8_t *buf,
 			   const size_t buf_bytes,
@@ -285,7 +286,7 @@ private:
     bool _connecting;
     bool _md5sig;
 
-    uint8_t _read_buf[MAXPACKETSIZE]; // Maximum allowed BGP message
+    uint8_t _read_buf[BGPPacket::MAXPACKETSIZE]; // Maximum allowed BGP message
 };
 
 class SocketServer : public Socket {

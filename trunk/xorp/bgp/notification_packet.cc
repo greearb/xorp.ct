@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.27 2006/03/16 00:03:29 pavlin Exp $"
+#ident "$XORP: xorp/bgp/notification_packet.cc,v 1.28 2006/08/10 09:37:27 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -43,7 +43,7 @@ NotificationPacket::NotificationPacket(uint8_t		ec,
     if (ed == 0)
 	elen = 0;
     // elen is the length of the error_data to carry
-    _Length = MINNOTIFICATIONPACKET + elen;
+    _Length = BGPPacket::MINNOTIFICATIONPACKET + elen;
 
     _Type = MESSAGETYPENOTIFICATION;
     _error_code = ec;
@@ -62,17 +62,17 @@ NotificationPacket::NotificationPacket(const uint8_t *d, uint16_t l)
     throw(CorruptMessage)
 {
     debug_msg("Data %p len %d\n", d, l);
-    if (l < MINNOTIFICATIONPACKET)
+    if (l < BGPPacket::MINNOTIFICATIONPACKET)
 	xorp_throw(CorruptMessage,
 		   c_format("Notification message too short %d", l),
-		   MSGHEADERERR, BADMESSLEN, d + MARKER_SIZE, 2);
+		   MSGHEADERERR, BADMESSLEN, d + BGPPacket::MARKER_SIZE, 2);
 
     _Length = l;
     _Type = MESSAGETYPENOTIFICATION;
-    d += BGP_COMMON_HEADER_LEN;	// skip header
+    d += BGPPacket::COMMON_HEADER_LEN;		// skip header
     _error_code = d[0];
     _error_subcode = d[1];
-    int error_data_len = _Length - MINNOTIFICATIONPACKET;
+    int error_data_len = _Length - BGPPacket::MINNOTIFICATIONPACKET;
     if (error_data_len > 0) {
 	uint8_t *ed = new uint8_t[error_data_len];
 	memcpy(ed, d + 2, error_data_len);
@@ -95,11 +95,11 @@ NotificationPacket::encode(size_t& len, uint8_t *buf) const
 
     // allocate buffer, set length, fill up header
     buf = basic_encode(len, buf);
-    buf[BGP_COMMON_HEADER_LEN] = _error_code;
-    buf[BGP_COMMON_HEADER_LEN+1] = _error_subcode;
+    buf[BGPPacket::COMMON_HEADER_LEN] = _error_code;
+    buf[BGPPacket::COMMON_HEADER_LEN + 1] = _error_subcode;
     if (_error_data != 0)
-	memcpy(buf + MINNOTIFICATIONPACKET, _error_data,
-		len - MINNOTIFICATIONPACKET);
+	memcpy(buf + BGPPacket::MINNOTIFICATIONPACKET, _error_data,
+		len - BGPPacket::MINNOTIFICATIONPACKET);
     return buf;
 }
 
@@ -300,7 +300,7 @@ NotificationPacket::str() const
 {
     return "Notification Packet: " +
 	pretty_print_error_code(_error_code, _error_subcode, _error_data,
-				_Length - MINNOTIFICATIONPACKET) +
+				_Length - BGPPacket::MINNOTIFICATIONPACKET) +
 	"\n";
 }
 
@@ -320,7 +320,7 @@ NotificationPacket::operator==(const NotificationPacket& him ) const
 	return false;
 
     if (0 != memcmp(_error_data, him.error_data(),
-		   _Length - MINNOTIFICATIONPACKET))
+		   _Length - BGPPacket::MINNOTIFICATIONPACKET))
 	return false;
 
     return true;
