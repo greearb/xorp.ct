@@ -12,15 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_task.cc,v 1.1 2006/08/10 22:07:28 mjh Exp $"
+#ident "$XORP: xorp/libxorp/test_task.cc,v 1.2 2006/08/11 05:59:07 pavlin Exp $"
 
 //
-// demo program to test tasks and event loops
+// Demo program to test tasks and event loops.
 //
-
-#include <stdio.h>
 
 #include "libxorp_module.h"
+#include "libxorp/xorp.h"
 
 #include "libxorp/timer.hh"
 #include "libxorp/task.hh"
@@ -31,7 +30,7 @@
 
 class TestTask {
 public:
-    TestTask(EventLoop &e)
+    TestTask(EventLoop& e)
 	: _eventloop(e) {}
 
     bool test_weights() {
@@ -46,71 +45,65 @@ public:
 	}
 	_t1.unschedule();
 	_t2.unschedule();
-	assert(!_eventloop.events_pending());
-	//printf("%d %d\n", _counter1, _counter2);
+	XLOG_ASSERT(_eventloop.events_pending() == false);
+	debug_msg("counter1 = %d counter2 = %d\n", _counter1, _counter2);
 	return (_counter1 == 10 && _counter2 == 20);
     }
 
     bool test_priority1() {
 	_counter1 = 0;
 	_counter2 = 0;
-	_t1 = _eventloop.new_task(callback(this, &TestTask::handler1),
-				  3, 1);
-	_t2 = _eventloop.new_task(callback(this, &TestTask::handler2),
-				  4, 1);
+	_t1 = _eventloop.new_task(callback(this, &TestTask::handler1), 3, 1);
+	_t2 = _eventloop.new_task(callback(this, &TestTask::handler2), 4, 1);
 	for (int i = 0; i < 10; i++) {
-	    //printf("run\n");
 	    _eventloop.run();
 	}
 	_t1.unschedule();
 	_t2.unschedule();
-	assert(!_eventloop.events_pending());
-	//printf("%d %d\n", _counter1, _counter2);
+	XLOG_ASSERT(_eventloop.events_pending() == false);
+	debug_msg("counter1 = %d counter2 = %d\n", _counter1, _counter2);
 	return (_counter1 == 10 && _counter2 == 0);
     }
 
     bool test_priority2() {
 	_counter1 = 0;
 	_counter2 = 0;
-	_t1 = _eventloop.new_task(callback(this, &TestTask::handler1b),
-				  3, 1);
-	_t2 = _eventloop.new_task(callback(this, &TestTask::handler2),
-				  4, 1);
+	_t1 = _eventloop.new_task(callback(this, &TestTask::handler1b), 3, 1);
+	_t2 = _eventloop.new_task(callback(this, &TestTask::handler2), 4, 1);
 	for (int i = 0; i < 15; i++) {
-	    //printf("run\n");
 	    _eventloop.run();
 	}
-	assert(!_t1.scheduled());
+	XLOG_ASSERT(_t1.scheduled() == false);
 	_t2.unschedule();
-	assert(!_eventloop.events_pending());
-	//printf("%d %d\n", _counter1, _counter2);
+	XLOG_ASSERT(_eventloop.events_pending() == false);
+	debug_msg("counter1 = %d counter2 = %d\n", _counter1, _counter2);
 	return (_counter1 == 10 && _counter2 == 5);
     }
 
     bool handler1() {
-	//printf("h1\n");
 	_counter1++;
 	return true;
     }
 
     bool handler2() {
-	//printf("h2\n");
 	_counter2++;
 	return true;
     }
 
     bool handler1b() {
-	//printf("h1b\n");
 	_counter1++;
 	if (_counter1 < 10)
 	    return true;
 	else
 	    return false;
     }
+
 private:
     EventLoop& _eventloop;
-    XorpTask _t1, _t2;
-    int _counter1, _counter2;
+    XorpTask _t1;
+    XorpTask _t2;
+    int _counter1;
+    int _counter2;
 };
 
 static void
@@ -139,9 +132,9 @@ run_test()
     }
 }
 
-int main(int /* argc */, const char* argv[])
+int
+main(int /* argc */, const char* argv[])
 {
-
     //
     // Initialize and start xlog
     //
