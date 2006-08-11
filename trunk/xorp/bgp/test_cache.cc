@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_cache.cc,v 1.28 2005/12/06 06:26:36 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_cache.cc,v 1.29 2006/03/16 00:03:35 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -339,7 +339,7 @@ test_cache(TestInfo& /*info*/)
 
     assert(cache_table->route_count() == 2);
     cache_table->flush_cache();
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     assert(cache_table->route_count() == 0);

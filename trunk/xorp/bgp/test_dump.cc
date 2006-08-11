@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_dump.cc,v 1.51 2006/02/17 23:34:54 zec Exp $"
+#ident "$XORP: xorp/bgp/test_dump.cc,v 1.52 2006/03/16 00:03:36 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -317,11 +317,11 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     while (debug_table3->parent()->get_next_message(debug_table3)) {}
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -408,11 +408,11 @@ test_dump(TestInfo& /*info*/)
 
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     while (debug_table3->parent()->get_next_message(debug_table3)) {}
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -525,7 +525,7 @@ test_dump(TestInfo& /*info*/)
     ribin_table2->ribin_peering_went_down();
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -557,7 +557,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table2->genid());
     debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     debug_table1->write_separator();
@@ -617,7 +617,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -631,7 +631,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -655,7 +655,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table2->genid());
     debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -712,7 +712,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -736,7 +736,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table1->genid());
     debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -797,7 +797,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -810,7 +810,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -834,7 +834,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table2->genid());
     debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -902,7 +902,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 1");
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 RECEIVED BY PEER 1");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -926,7 +926,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table2->genid());
     debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -996,7 +996,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT NO CHANGE");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1008,7 +1008,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table2->genid());
     debug_table2->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table2, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1020,7 +1020,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table1->genid());
     debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1093,7 +1093,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1124,7 +1124,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1274,7 +1274,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1305,7 +1305,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT REPLACE 1.0.3.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1416,7 +1416,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT DEL 1.0.2.0/24 RECEIVED BY PEER 2");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1442,7 +1442,7 @@ test_dump(TestInfo& /*info*/)
 				 ribin_table1->genid());
     debug_table1->set_parent(fanout_table);
     fanout_table->dump_entire_table(debug_table1, SAFI_UNICAST, "ribname");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1505,12 +1505,12 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
     debug_table1->write_separator();
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1645,11 +1645,11 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.4.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     debug_table1->write_separator();
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1725,7 +1725,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT (MOVES TO DUMPING NEXT PEER)");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1746,7 +1746,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1823,7 +1823,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("LET EVENT QUEUE DRAIN");
     debug_table1->write_comment("NO ROUTES IN 1st PEER (MOVES TO DUMPING NEXT PEER)");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1844,7 +1844,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.3.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -1936,7 +1936,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2035,7 +2035,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.1.0/24 NOT RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2134,7 +2134,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT DEL 1.0.3.0/24 NOT RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2258,7 +2258,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2347,7 +2347,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_separator();
     debug_table1->write_comment("STEP EVENT LOOP ONCE TO DUMP ONE ROUTE");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2384,7 +2384,7 @@ test_dump(TestInfo& /*info*/)
     debug_table1->write_comment("EXPECT ADD 1.0.2.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("EXPECT ADD 1.0.5.0/24 RECEIVED BY PEER 3");
 
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -2457,7 +2457,7 @@ test_dump(TestInfo& /*info*/)
     fanout_table->dump_entire_table(debug_table3, SAFI_UNICAST, "ribname");
     debug_table1->write_comment("EXPECT ADD 1.0.1.0/24 RECEIVED BY PEER 3");
     debug_table1->write_comment("**ONLY ONE COPY**");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 

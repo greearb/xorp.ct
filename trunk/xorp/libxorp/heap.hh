@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.10 2005/08/04 10:52:14 bms Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.11 2006/03/16 00:04:29 pavlin Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -58,6 +58,7 @@ class HeapBase {
 };
 
 class Heap {
+    friend class TimerList;
 private:
 typedef TimeVal Heap_Key ;
     struct heap_entry {

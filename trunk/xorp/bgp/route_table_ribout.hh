@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribout.hh,v 1.14 2005/03/25 02:52:48 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribout.hh,v 1.15 2006/03/16 00:03:35 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBOUT_HH__
 #define __BGP_ROUTE_TABLE_RIBOUT_HH__
@@ -55,6 +55,7 @@ public:
 
     /* mechanisms to implement flow control in the output plumbing */
     void wakeup();
+    bool pull_next_route();
 
     /* output_no_longer_busy is called asynchronously by the peer
        handler when the state of the output queue goes from busy to
@@ -84,7 +85,7 @@ private:
     PeerHandler *_peer;
     bool _peer_busy;
     bool _peer_is_up;
-    XorpTimer _wakeup_timer;
+    XorpTask _pull_routes_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_RIBOUT_HH__

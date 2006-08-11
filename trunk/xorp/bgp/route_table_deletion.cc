@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.20 2005/03/25 02:52:46 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.21 2006/03/16 00:03:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -206,22 +206,20 @@ DeletionTable<A>::initiate_background_deletion()
     // pushed from the output queue in the RibOut tables.
     this->_next_table->push(this);
 
-    _deletion_timer = eventloop().
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &DeletionTable<A>::delete_next_chain));
+    _deletion_task = eventloop().
+	new_task(callback(this, &DeletionTable<A>::delete_next_chain),
+		 BACKGROUND_PRIORITY, DEFAULT_WEIGHT);
 }
 
 template<class A>
-void
+bool
 DeletionTable<A>::delete_next_chain()
 {
     debug_msg("deleted %d routes in %d chains\n", _deleted, _chains);
     if (_del_sweep == _route_table->pathmap().end()) {
 	unplumb_self();
 	delete this;
-	return;
+	return false;
     }
 
     const ChainedSubnetRoute<A>* chained_rt, *first_rt, *next_rt;
@@ -263,11 +261,7 @@ DeletionTable<A>::delete_next_chain()
 	this->_next_table->push((BGPRouteTable<A>*)this);
     _chains++;
 
-    _deletion_timer = eventloop().
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &DeletionTable<A>::delete_next_chain));
+    return true;
 }
 
 template<class A>

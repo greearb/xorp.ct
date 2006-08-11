@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.46 2006/03/30 00:29:13 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.47 2006/08/04 08:50:50 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -26,6 +26,7 @@ check_PROGRAMS	+= test_ref_ptr
 check_PROGRAMS	+= test_ref_trie
 check_PROGRAMS	+= test_run_command
 check_PROGRAMS	+= test_service
+check_PROGRAMS	+= test_task
 check_PROGRAMS	+= test_test_main
 check_PROGRAMS	+= test_time_slice
 check_PROGRAMS	+= test_timer
@@ -55,6 +56,7 @@ TESTS	+= test_ref_ptr$(EXEEXT)
 TESTS	+= test_ref_trie$(EXEEXT)
 TESTS	+= test_run_command.sh
 TESTS	+= test_service$(EXEEXT)
+TESTS	+= test_task$(EXEEXT)
 TESTS	+= test_test_main$(EXEEXT)
 TESTS	+= test_time_slice$(EXEEXT)
 TESTS	+= test_timer$(EXEEXT)
@@ -90,6 +92,7 @@ test_ref_ptr_SOURCES	= test_ref_ptr.cc
 test_ref_trie_SOURCES	= test_ref_trie.cc
 test_run_command_SOURCES = test_run_command.cc
 test_service_SOURCES	= test_service.cc
+test_task_SOURCES	= test_task.cc
 test_test_main_SOURCES	= test_test_main.cc
 test_time_slice_SOURCES	= test_time_slice.cc
 test_timer_SOURCES	= test_timer.cc
@@ -137,10 +140,14 @@ libxorp_la_SOURCES += popen.hh
 libxorp_la_SOURCES += profile.hh
 libxorp_la_SOURCES += range.hh
 libxorp_la_SOURCES += ref_ptr.hh
+libxorp_la_SOURCES += roundrobin.hh
+libxorp_la_SOURCES += roundrobin.hh
 libxorp_la_SOURCES += run_command.hh
 libxorp_la_SOURCES += safe_callback_obj.hh
 libxorp_la_SOURCES += selector.hh
+libxorp_la_SOURCES += task.hh
 libxorp_la_SOURCES += service.hh
+libxorp_la_SOURCES += task.hh
 libxorp_la_SOURCES += time_slice.hh
 libxorp_la_SOURCES += timespent.hh
 libxorp_la_SOURCES += timer.hh
@@ -181,12 +188,16 @@ libxorp_la_SOURCES += ipvx.cc
 libxorp_la_SOURCES += mac.cc
 libxorp_la_SOURCES += nexthop.cc
 libxorp_la_SOURCES += popen.cc
+libxorp_la_SOURCES += roundrobin.cc
 libxorp_la_SOURCES += profile.cc
 libxorp_la_SOURCES += ref_ptr.cc
+libxorp_la_SOURCES += roundrobin.cc
 libxorp_la_SOURCES += run_command.cc
+libxorp_la_SOURCES += task.cc
 libxorp_la_SOURCES += safe_callback_obj.cc
 libxorp_la_SOURCES += selector.cc
 libxorp_la_SOURCES += service.cc
+libxorp_la_SOURCES += task.cc
 libxorp_la_SOURCES += time_slice.cc
 libxorp_la_SOURCES += timer.cc
 libxorp_la_SOURCES += token.cc

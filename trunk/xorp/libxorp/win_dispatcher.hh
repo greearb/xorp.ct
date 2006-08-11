@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.9 2006/03/17 20:57:00 bms Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.10 2006/07/31 22:39:57 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -26,6 +26,7 @@
 #include "libxorp/xorpfd.hh"
 #include "libxorp/timeval.hh"
 #include "libxorp/ioevents.hh"
+#include "libxorp/priority.hh"
 
 #include <vector>
 #include <map>
@@ -146,7 +147,10 @@ public:
      * triggered.
      * @return true if function succeeds, false otherwise.
      */
-    bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb);
+    bool add_ioevent_cb(XorpFd fd, 
+			IoEventType type, 
+			const IoEventCb& cb,
+			int priority = DEFAULT_PRIORITY);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -157,6 +161,20 @@ public:
      * @return true if function succeeds, false otherwise.
      */
     bool remove_ioevent_cb(XorpFd fd, IoEventType type);
+
+    /**
+     * Find out if any of the selectors are ready
+     *
+     * @return true if any selector is ready
+     */
+    bool ready();
+
+    /**
+     * Find out the highest priority from the ready file descriptors
+     *
+     * @return the priority of the highest priority ready file descriptor.
+     */
+    int get_ready_priority();
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they
@@ -190,8 +208,10 @@ protected:
     void dispatch_sockevent(HANDLE hevent, XorpFd fd);
 
 private:
-    bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
-    bool add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb);
+    bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
+		       int priority);
+    bool add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
+		       int priority);
     void callback_bad_handle();
     void callback_bad_socket(XorpFd& fd);
     bool remove_socket_cb(XorpFd& fd, IoEventType type);

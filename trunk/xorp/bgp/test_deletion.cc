@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.27 2005/12/06 06:26:37 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_deletion.cc,v 1.28 2006/03/16 00:03:36 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -143,7 +143,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -190,7 +190,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -237,7 +237,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -292,7 +292,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -315,7 +315,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -325,7 +325,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
     debug_table->write_separator();
@@ -397,7 +397,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -411,7 +411,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -487,7 +487,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -501,7 +501,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -577,7 +577,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -591,7 +591,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -651,7 +651,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -665,7 +665,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 
@@ -715,7 +715,7 @@ test_deletion(TestInfo& /*info*/)
 
     debug_table->write_separator();
     debug_table->write_comment("LET EVENT QUEUE DRAIN");
-    while (bgpmain.eventloop().timers_pending()) {
+    while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }
 

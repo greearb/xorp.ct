@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.28 2005/06/28 09:30:15 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.29 2006/03/16 00:03:35 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -355,21 +355,28 @@ RibOutTable<A>::push(BGPRouteTable<A> *caller)
     return 0;
 }
 
+template<class A>
+void 
+RibOutTable<A>::wakeup()
+{
+    reschedule_self();
+}
+
 /* value is a tradeoff between not too many calls to timers, and not
    being away from eventloop for too long - probably needs tuning*/
 #define MAX_MSGS_IN_BATCH 10
 
 template<class A>
-void
-RibOutTable<A>::wakeup()
+bool
+RibOutTable<A>::pull_next_route()
 {
     /* don't do anything if we can't sent to the peer handler yet */
     if (_peer_busy == true)
-	return;
+	return false;
 
     /* we're down, so ignore this wakeup */
     if (_peer_is_up == false)
-	return;
+	return false;
 
     for (int msgs = 0; msgs < MAX_MSGS_IN_BATCH; msgs++) {
 	/* only request a limited about of messages, so we don't hog
@@ -383,15 +390,15 @@ RibOutTable<A>::wakeup()
 	if (upstream_queue_exists == false) {
 	    /*the queue upstream has now drained*/
 	    /*there's nothing left to do here*/
-	    return;
+	    return false;
 	}
 	if (_peer_busy == true) {
 	    /*stop requesting messages because the output queue filled
               up again*/
-	    return;
+	    return false;
 	}
     }
-    reschedule_self();
+    return true;
 }
 
 template<class A>
@@ -401,7 +408,7 @@ RibOutTable<A>::output_no_longer_busy()
     debug_msg("%s: output_no_longer_busy\n", this->tablename().c_str());
     debug_msg("%s: _peer_busy true->false\n", this->tablename().c_str());
     _peer_busy = false;
-    wakeup();
+    reschedule_self();
 }
 
 template<class A>
@@ -410,10 +417,11 @@ RibOutTable<A>::reschedule_self()
 {
     /*call back immediately, but after network events or expired
       timers */    
-    if (_wakeup_timer.scheduled())
+    if (_pull_routes_task.scheduled())
 	return;
-    _wakeup_timer = _peer->eventloop().
-	new_oneoff_after_ms(0, callback(this, &RibOutTable<A>::wakeup));
+    _pull_routes_task = _peer->eventloop().
+	new_task(callback(this, &RibOutTable<A>::pull_next_route),
+		 HIGH_PRIORITY, DEFAULT_WEIGHT);
 }
 
 

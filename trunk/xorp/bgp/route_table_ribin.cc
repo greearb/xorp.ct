@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.43 2006/03/16 00:03:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.44 2006/06/01 01:24:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -422,16 +422,17 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
 		  next_route_to_push->str().c_str());
 
 	// _next_table->push((BGPRouteTable<A>*)this);
-	_push_timer = eventloop().
-	    new_oneoff_after_ms(0 /*call back immediately, but after
-				    network events or expired timers */,
-				callback(this,
-					 &RibInTable<A>::push_next_changed_nexthop));
+	_push_task = eventloop().
+	    new_task(/*call back immediately, but after
+		       network events or expired timers */
+		     callback(this,
+			      &RibInTable<A>::push_next_changed_nexthop),
+		     DEFAULT_PRIORITY, DEFAULT_WEIGHT);
     }
 }
 
 template<class A>
-void
+bool
 RibInTable<A>::push_next_changed_nexthop()
 {
     if (_nexthop_push_active == false) {
@@ -439,7 +440,7 @@ RibInTable<A>::push_next_changed_nexthop()
 	// XXX: No more nexthops to push, probably because routes have
 	// been just deleted.
 	//
-	return;
+	return false;
     }
 
     XLOG_ASSERT(_peer_is_up);
@@ -472,13 +473,9 @@ RibInTable<A>::push_next_changed_nexthop()
     next_chain();
 
     if (_nexthop_push_active == false)
-	return;
+	return false;
 
-    _push_timer = eventloop().
-	new_oneoff_after_ms(0 /*call back immediately, but after
-				network events or expired timers */,
-			    callback(this,
-				     &RibInTable<A>::push_next_changed_nexthop));
+    return true;
 }
 
 
@@ -554,7 +551,7 @@ RibInTable<A>::stop_nexthop_push()
     _nexthop_push_active = false;
     _current_changed_nexthop = A::ZERO();
 //     _current_chain = _route_table->pathmap().end();
-    _push_timer.unschedule();
+    _push_task.unschedule();
 }
 
 template<class A>

@@ -10,18 +10,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.28 2006/06/21 23:36:34 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.29 2006/06/22 00:16:22 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
 
 #include <assert.h>
 #include <memory>
+#include <list>
+#include <map>
 
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
 #endif
 
+#include "priorities.hh"
 #include "timeval.hh"
 #include "heap.hh"
 #include "callback.hh"
@@ -108,25 +111,28 @@ public:
     /**
      * Expire the @ref XorpTimer object when the TimerList is next run.
      */
-    void schedule_now();
+    void schedule_now(int priority = DEFAULT_PRIORITY);
 
     /**
      * Schedule the @ref XorpTimer object at a given time.
      */
-    void schedule_at(const TimeVal& when);
+    void schedule_at(const TimeVal& when, 
+		     int priority = DEFAULT_PRIORITY);
 
     /**
      * Schedule the @ref XorpTimer object to expire in @ref wait
      * after the current time.
      */
-    void schedule_after(const TimeVal& wait);
+    void schedule_after(const TimeVal& wait, 
+			int priority = DEFAULT_PRIORITY);
 
     /**
      * Schedule the @ref XorpTimer object.
      *
      * @param ms milliseconds from the current time.
      */
-    void schedule_after_ms(int ms);
+    void schedule_after_ms(int ms, 
+			   int priority = DEFAULT_PRIORITY);
 
     /**
      * Reschedule the @ref XorpTimer object.
@@ -169,6 +175,7 @@ private:
     friend class TimerList;
 };
 
+
 /**
  * @short XorpTimer creation and scheduling entity
  *
@@ -200,7 +207,7 @@ while ( ! timer_list.empty() ) {
  * because no XorpTimer references the underlying element on the TimerList
  * after <code>TimerList::new_oneoff_after_ms()</code> is called.
  */
-class TimerList : public Heap {
+class TimerList {
 public:
     /**
      * @param clock clock object to use to query time.
@@ -224,7 +231,8 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_oneoff_at(const TimeVal& when,
-			    const OneoffTimerCallback& ocb);
+			    const OneoffTimerCallback& ocb,
+			    int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer that will be scheduled once.
@@ -235,7 +243,8 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_oneoff_after(const TimeVal& wait,
-			       const OneoffTimerCallback& ocb);
+			       const OneoffTimerCallback& ocb,
+			       int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer that will be scheduled once.
@@ -245,7 +254,8 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb);
+    XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
+				  int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.
@@ -257,7 +267,8 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_periodic(const TimeVal& wait,
-			   const PeriodicTimerCallback& pcb);
+			   const PeriodicTimerCallback& pcb,
+			   int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.
@@ -268,7 +279,8 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb);
+    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
+			      int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -282,7 +294,8 @@ public:
      */
     XorpTimer set_flag_at(const TimeVal& 	 when,
 			  bool 			*flag_ptr,
-			  bool 			 to_value = true);
+			  bool 			 to_value = true,
+			  int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -296,7 +309,8 @@ public:
      */
     XorpTimer set_flag_after(const TimeVal& 	 wait,
 			     bool 		*flag_ptr,
-			     bool 		 to_value = true);
+			     bool 		 to_value = true,
+			     int priority = DEFAULT_PRIORITY);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -310,7 +324,8 @@ public:
      */
     XorpTimer set_flag_after_ms(int 	ms,
 				bool* 	flag_ptr,
-				bool 	to_value = true);
+				bool 	to_value = true,
+				int priority = DEFAULT_PRIORITY);
 
     /**
      * Custom XorpTimer creation method.  The @ref XorpTimer object created
@@ -351,6 +366,14 @@ public:
      * @return true if there is a XorpTimer awaiting expiry, false otherwise.
      */
     bool get_next_delay(TimeVal& tv) const;
+
+    /**
+     * Get the priority of the highest priority timer that has expired.
+     *
+     * @return the priority of the expired timer, or INFINITE_PRIORITY
+     * if no timer has expired.
+     */
+    int get_expired_priority() const;
 
     /**
      * Read the latest known value from the clock used by @ref
@@ -418,11 +441,21 @@ private:
     inline bool attempt_lock() const		{ return true; }
     inline void release_lock() const		{ /* nothing, for now */ }
 
+
+    // find or create the heap assoicated with this priority level
+    Heap* find_heap(int priority);    
+
+    // expire the highest priority timer
+    bool expire_one(int worst_priority);
+
 private:
     TimerList(const TimerList&);		// not implemented
     TimerList& operator=(const TimerList&);	// not implemented
 
 private:
+    // we need one heap for each priority level
+    map<int,Heap*> _heaplist;
+
     ClockBase* 			_clock;
     TimerListObserverBase* 	_observer;
 #ifdef HOST_OS_WINDOWS
@@ -431,6 +464,7 @@ private:
 
     friend class TimerNode;
     friend class TimerListObserverBase;
+
 };
 
 
@@ -447,12 +481,13 @@ protected:
     TimerNode& operator=(const TimerNode&);
 
     bool scheduled()		const	{ return _pos_in_heap >= 0; }
+    int priority()              const   { return _priority; }
     const TimeVal& expiry()	const	{ return _expires; }
     bool time_remaining(TimeVal& remain) const;
 
-    void schedule_at(const TimeVal&);
-    void schedule_after(const TimeVal& wait);
-    void schedule_after_ms(int x_ms);
+    void schedule_at(const TimeVal&, int priority);
+    void schedule_after(const TimeVal& wait, int priority);
+    void schedule_after_ms(int x_ms, int priority);
     void reschedule_after(const TimeVal& wait);
     void unschedule();
     virtual void expire(XorpTimer&, void*);
@@ -461,6 +496,8 @@ protected:
 
     TimeVal	_expires;	// Expiration time
     BasicTimerCallback _cb;
+
+    int _priority;              // Scheduling priority
 
     TimerList*	_list;		// TimerList this node is associated w.
 
@@ -534,23 +571,23 @@ XorpTimer::time_remaining(TimeVal& remain) const
 }
 
 inline void
-XorpTimer::schedule_at(const TimeVal& t)
+XorpTimer::schedule_at(const TimeVal& t, int priority)
 {
     assert(_node);
-    _node->schedule_at(t);
+    _node->schedule_at(t, priority);
 }
 
 inline void
-XorpTimer::schedule_after_ms(int x_ms)
+XorpTimer::schedule_after_ms(int x_ms, int priority)
 {
     assert(_node);
-    _node->schedule_after_ms(x_ms);
+    _node->schedule_after_ms(x_ms, priority);
 }
 
 inline void
-XorpTimer::schedule_now()
+XorpTimer::schedule_now(int priority)
 {
-    schedule_after_ms(0);
+    schedule_after_ms(0, priority);
 }
 
 inline void

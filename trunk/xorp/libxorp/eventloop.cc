@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.14 2006/03/16 00:04:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.15 2006/07/31 22:43:05 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -80,23 +80,77 @@ EventLoop::run()
 
     _timer_list.advance_time();
     _timer_list.get_next_delay(t);
+
+    int timer_priority = INFINITY_PRIORITY;
+    int selector_priority = INFINITY_PRIORITY;
+    int task_priority = INFINITY_PRIORITY;
+
+    if (t == TimeVal::ZERO()) {
+	timer_priority = _timer_list.get_expired_priority();
+    }
+
 #ifdef HOST_OS_WINDOWS
-    _win_dispatcher.wait_and_dispatch(&t);
+    if (_win_dispatcher.ready())
+	selector_priority = _win_dispatcher.get_ready_priority();
 #else
-    _selector_list.wait_and_dispatch(&t);
+    if (_selector_list.ready()) {
+	selector_priority = _selector_list.get_ready_priority();
+    }
 #endif
-    _timer_list.run();
+
+    if (!_task_list.empty()) {
+	task_priority = _task_list.get_runnable_priority();
+    }
+
+#if 0
+    printf("priorities: %d %d %d\n", 
+	   timer_priority, selector_priority, task_priority);
+#endif
+
+    if ( (timer_priority != INFINITY_PRIORITY)
+	 && (timer_priority <= selector_priority)
+	 && (timer_priority <= task_priority)) {
+
+	// the most important thing to run next is a timer
+	_timer_list.run();
+
+    } else if ( (selector_priority != INFINITY_PRIORITY)
+		&& (selector_priority <= task_priority) ) {
+
+	// the most important thing to run next is a selector
+	_timer_list.run();
+#ifdef HOST_OS_WINDOWS
+	_win_dispatcher.wait_and_dispatch(&t);
+#else
+	_selector_list.wait_and_dispatch(&t);
+#endif
+
+    } else if (task_priority != INFINITY_PRIORITY) {
+
+	// the most important thing to run next is a task
+	_task_list.run();
+
+    } else {
+	// there's nothing immediate to run, so go to sleep until the
+	// next seletor or timer goes off
+#ifdef HOST_OS_WINDOWS
+	_win_dispatcher.wait_and_dispatch(&t);
+#else
+	_selector_list.wait_and_dispatch(&t);
+#endif
+    }
 
     last_ev_run = time(0);
 }
 
 bool
-EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb)
+EventLoop::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
+			  int priority)
 {
 #ifdef HOST_OS_WINDOWS
-    return _win_dispatcher.add_ioevent_cb(fd, type, cb);
+    return _win_dispatcher.add_ioevent_cb(fd, type, cb, priority);
 #else
-    return _selector_list.add_ioevent_cb(fd, type, cb);
+    return _selector_list.add_ioevent_cb(fd, type, cb, priority);
 #endif
 }
 
@@ -119,4 +173,12 @@ EventLoop::descriptor_count() const
 #else
     return _selector_list.descriptor_count();
 #endif
+}
+
+XorpTask
+EventLoop::new_task(const RepeatedTaskCallback& rcb,
+		    int priority,
+		    int weight)
+{
+    return _task_list.new_task(rcb, priority, weight);
 }

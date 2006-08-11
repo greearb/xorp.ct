@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.6 2006/02/17 23:34:54 zec Exp $
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.7 2006/03/16 00:03:34 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
@@ -80,7 +80,7 @@ private:
     /**
      * Do a background route dump
      */
-    void do_background_dump();
+    bool do_background_dump();
 
     /**
      * Check whether a policy push is occuring 
@@ -95,7 +95,7 @@ private:
     bool		_pushing_routes;
     DumpIterator<A>*	_dump_iter;
     EventLoop&		_ev;
-    XorpTimer		_dump_timer;
+    XorpTask		_dump_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_POLICY_SM_HH__

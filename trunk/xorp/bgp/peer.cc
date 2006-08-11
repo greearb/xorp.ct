@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.139 2006/08/10 21:07:12 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.140 2006/08/10 23:14:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1933,7 +1933,6 @@ BGPPeer::clear_stopped_timer()
 
     _timer_stopped.unschedule();
 }
-
 void 
 BGPPeer::start_idle_hold_timer()
 {
@@ -1954,7 +1953,6 @@ BGPPeer::clear_idle_hold_timer()
 
     _idle_hold.unschedule();
 }
-
 bool
 BGPPeer::running_idle_hold_timer() const
 {

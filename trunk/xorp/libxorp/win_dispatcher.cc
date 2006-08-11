@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.12 2006/06/29 19:05:47 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.13 2006/07/31 22:39:57 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -106,8 +106,10 @@ WinDispatcher::~WinDispatcher()
 }
 
 bool
-WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
+WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
+			     int priority)
 {
+    UNUSED(priority); // XXX really should use this
     // XXX: Currently we only support 1 callback per socket/event tuple.
     // Check that the socket does not already have a callback
     // registered for it.
@@ -200,8 +202,10 @@ WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 }
 
 bool
-WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
+WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
+			     int priority)
 {
+    UNUSED(priority); // XXX really should use this
     // You cannot currently register for anything other
     // than an IOT_EXCEPTION event on a Windows object handle because
     // there is no way of telling why an object was signalled --
@@ -242,18 +246,19 @@ WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb)
 }
 
 bool
-WinDispatcher::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb)
+WinDispatcher::add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
+			     int priority)
 {
 debug_msg("Adding event %d to object %s\n", type, fd.str().c_str());
 
     switch (fd.type()) {
     case XorpFd::FDTYPE_SOCKET:
-	return add_socket_cb(fd, type, cb);
+	return add_socket_cb(fd, type, cb, priority);
 	break;
     case XorpFd::FDTYPE_PIPE:
     case XorpFd::FDTYPE_CONSOLE:
     case XorpFd::FDTYPE_PROCESS:
-	return add_handle_cb(fd, type, cb);
+	return add_handle_cb(fd, type, cb, priority);
 	break;
     default:
 	break;
@@ -400,6 +405,37 @@ WinDispatcher::remove_ioevent_cb(XorpFd fd, IoEventType type)
 	break;
     }
     return false;
+}
+
+int get_ready_priority()
+{
+    // XXX  THIS IS COMPLETELY BOGUS
+    return DEFAULT_PRIORITY;
+}
+
+bool ready()
+{
+    DWORD retval;
+
+    // XXX  THIS IS PROBABLY BOGUS
+
+    for (vector<HANDLE>::iterator ii = _polled_pipes.begin();
+	ii != _polled_pipes.end(); ii++) {
+	result = win_pipe_read(*ii, NULL, 0);
+	if (result == WINIO_ERROR_HASINPUT 
+	    || result == WINIO_ERROR_DISCONNECT) {
+	    return true;
+	}
+    }
+    if (_handles.empty()) {
+	return false;
+    }
+    retval = WaitForMultipleObjects(_handles.size(), &_handles[0],
+				    FALSE, 0);
+    if (retval == WAIT_TIMEOUT) {
+	return false;
+    }
+    return true;
 }
 
 void

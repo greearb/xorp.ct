@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.15 2005/12/21 09:42:57 bms Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.16 2006/03/16 00:04:26 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -121,9 +121,10 @@ public:
     inline int		error() const		{ return _last_error; }
 
 protected:
-    AsyncFileOperator(EventLoop& e, XorpFd fd)
+    AsyncFileOperator(EventLoop& e, XorpFd fd, 
+		      int priority = DEFAULT_PRIORITY)
 	: _eventloop(e), _fd(fd), _running(false),
-	  _last_error(0)
+	  _last_error(0), _priority(priority)
     {
 #ifndef HOST_OS_WINDOWS
 	int fl = fcntl(fd, F_GETFL);
@@ -136,6 +137,7 @@ protected:
     XorpFd		_fd;
     bool		_running;
     int			_last_error;
+    int                 _priority;
 };
 
 /**
@@ -147,7 +149,9 @@ public:
      * @param e EventLoop that object should associate itself with.
      * @param fd a file descriptor to read from.
      */
-    AsyncFileReader(EventLoop& e, XorpFd fd) : AsyncFileOperator(e, fd) {}
+    AsyncFileReader(EventLoop& e, XorpFd fd, 
+		    int priority = DEFAULT_PRIORITY) 
+	: AsyncFileOperator(e, fd, priority) {}
     ~AsyncFileReader() { stop(); }
 
     /**
@@ -232,7 +236,8 @@ public:
      * @param coalese the number of buffers to coalese for each write()
      *        system call.
      */
-    AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1);
+    AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1,
+		    int priority = DEFAULT_PRIORITY);
 
     ~AsyncFileWriter();
 

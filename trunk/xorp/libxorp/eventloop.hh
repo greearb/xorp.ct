@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.20 2006/06/22 00:16:22 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.21 2006/07/31 22:43:05 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -24,6 +24,7 @@
 #include "xorpfd.hh"
 #include "clock.hh"
 #include "timer.hh"
+#include "task.hh"
 #include "callback.hh"
 #include "ioevents.hh"
 
@@ -66,7 +67,7 @@ public:
 
      ...
 
-     while(e.timers_pending() || e.descriptor_count() > 0) {
+     while(e.events_pending() || e.descriptor_count() > 0) {
          e.run();
      }
 
@@ -127,7 +128,8 @@ public:
      * scheduled.
      */
     XorpTimer new_oneoff_at(const TimeVal& when,
-			    const OneoffTimerCallback& ocb);
+			    const OneoffTimerCallback& ocb,
+			    int priority = DEFAULT_PRIORITY);
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -138,7 +140,8 @@ public:
      * scheduled.
      */
     XorpTimer new_oneoff_after(const TimeVal& wait,
-			       const OneoffTimerCallback& ocb);
+			       const OneoffTimerCallback& ocb,
+			       int priority = DEFAULT_PRIORITY);
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -148,7 +151,8 @@ public:
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb);
+    XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
+				  int priority = DEFAULT_PRIORITY);
 
     /**
      * Add periodic timer to the EventLoop.
@@ -160,7 +164,8 @@ public:
      * scheduled.
      */
     XorpTimer new_periodic(const TimeVal& wait,
-			   const PeriodicTimerCallback& pcb);
+			   const PeriodicTimerCallback& pcb,
+			   int priority = DEFAULT_PRIORITY);
 
     /**
      * Add periodic timer to the EventLoop.
@@ -171,7 +176,8 @@ public:
      * @return a @ref XorpTimer object that must be assigned to remain
      * scheduled.
      */
-    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb);
+    XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
+			      int priority = DEFAULT_PRIORITY);
 
     /**
      * Add a flag setting timer to the EventLoop.
@@ -231,6 +237,19 @@ public:
      */
     XorpTimer new_timer(const BasicTimerCallback& cb);
 
+    /** 
+     * Create a new task to be scheduled with the timers and filehandlers.
+     *
+     * @param ocb callback object that is invoked when task is run.
+     * @param priority the scheduling priority for the task.  
+     * @param scheduler_class the scheduling class within the priority level.
+     * @return a @ref XorpTask object that must be assigned to remain
+     * scheduled.
+     */
+    XorpTask new_task(const RepeatedTaskCallback& ocb,
+		      int priority,
+		      int weight);
+
     /**
      * Add a file descriptor and callback to be invoked when
      * descriptor is ready for input or output.  An IoEventType
@@ -251,7 +270,8 @@ public:
      * pending.
      * @return true on success, false if any error occurred.
      */
-    bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb);
+    bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
+			int priority = DEFAULT_PRIORITY);
 
     /**
      * Remove callbacks associated with file descriptor.
@@ -267,6 +287,12 @@ public:
      * @return true if any XorpTimers are present on EventLoop's TimerList.
      */
     bool timers_pending() const;
+
+    /**
+     * @return true if any XorpTimers are present on EventLoop's
+     * TimerList or any XorpTasks are present on the TaskList.
+     */
+    bool events_pending() const;
 
     /**
      * @return the number of XorpTimers present on EventLoop's TimerList.
@@ -292,6 +318,7 @@ private:
 private:
     ClockBase*		_clock;
     TimerList		_timer_list;
+    TaskList		_task_list;
 #ifdef HOST_OS_WINDOWS
     WinDispatcher	_win_dispatcher;
 #else
@@ -309,35 +336,40 @@ EventLoop::new_timer(const BasicTimerCallback& cb)
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& ocb)
+EventLoop::new_oneoff_at(const TimeVal& tv, const OneoffTimerCallback& ocb,
+			 int priority)
 {
-    return _timer_list.new_oneoff_at(tv, ocb);
+    return _timer_list.new_oneoff_at(tv, ocb, priority);
 }
 
 inline XorpTimer
 EventLoop::new_oneoff_after(const TimeVal&	       wait,
-			    const OneoffTimerCallback& ocb)
+			    const OneoffTimerCallback& ocb,
+			    int priority)
 {
-    return _timer_list.new_oneoff_after(wait, ocb);
+    return _timer_list.new_oneoff_after(wait, ocb, priority);
 }
 
 inline XorpTimer
-EventLoop::new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb)
+EventLoop::new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
+			       int priority)
 {
-    return _timer_list.new_oneoff_after_ms(ms, ocb);
+    return _timer_list.new_oneoff_after_ms(ms, ocb, priority);
 }
 
 inline XorpTimer
 EventLoop::new_periodic(const TimeVal& wait,
-			const PeriodicTimerCallback& pcb)
+			const PeriodicTimerCallback& pcb,
+			int priority)
 {
-    return _timer_list.new_periodic(wait, pcb);
+    return _timer_list.new_periodic(wait, pcb, priority);
 }
 
 inline XorpTimer
-EventLoop::new_periodic_ms(int period_ms, const PeriodicTimerCallback& pcb)
+EventLoop::new_periodic_ms(int period_ms, const PeriodicTimerCallback& pcb,
+			   int priority)
 {
-    return _timer_list.new_periodic_ms(period_ms, pcb);
+    return _timer_list.new_periodic_ms(period_ms, pcb, priority);
 }
 
 inline XorpTimer
@@ -364,6 +396,12 @@ EventLoop::timers_pending() const
     return !_timer_list.empty();
 }
 
+inline bool
+EventLoop::events_pending() const
+{
+    return ((!_timer_list.empty()) || (!_task_list.empty()));
+}
+
 inline size_t
 EventLoop::timer_list_length() const
 {
@@ -375,6 +413,7 @@ EventLoop::current_time(TimeVal& t) const
 {
     _timer_list.current_time(t);
 }
+
 
 
 #endif // __LIBXORP_EVENTLOOP_HH__

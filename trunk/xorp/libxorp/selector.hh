@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.18 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.19 2006/07/31 22:40:41 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -35,6 +35,8 @@
 
 #include "callback.hh"
 #include "ioevents.hh"
+
+#define DEFAULT_PRIORITY 4
 
 class ClockBase;
 class SelectorList;
@@ -129,7 +131,10 @@ public:
      *
      * @return true if function succeeds, false otherwise.
      */
-     bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb);
+     bool add_ioevent_cb(XorpFd fd, 
+			 IoEventType type, 
+			 const IoEventCb& cb,
+			 int priority = DEFAULT_PRIORITY);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -140,6 +145,20 @@ public:
      * combination of the available @ref SelectorMask values.
      */
     void remove_ioevent_cb(XorpFd fd, IoEventType type = IOT_ANY);
+
+    /**
+     * Find out if any of the selectors are ready
+     *
+     * @return true if any selector is ready
+     */
+    bool ready();
+
+    /**
+     * Find out the highest priority from the ready file descriptors
+     *
+     * @return the priority of the highest priority ready file descriptor.
+     */
+    int get_ready_priority();
 
     /**
      * Wait for a pending I/O events and invoke callbacks when they
@@ -221,10 +240,11 @@ private:
 	IoEventCb	_cb[SEL_MAX_IDX];
 	// Reverse mapping of legacy UNIX event to IoEvent
 	IoEventType	_iot[SEL_MAX_IDX];
+	int             _priority[SEL_MAX_IDX];
 
 	Node();
 	inline bool	add_okay(SelectorMask m,  IoEventType type,
-				 const IoEventCb& cb);
+				 const IoEventCb& cb, int priority);
 	inline int	run_hooks(SelectorMask m, XorpFd fd);
 	inline void	clear(SelectorMask m);
 	inline bool	is_empty();

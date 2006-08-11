@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.20 2005/03/25 02:52:45 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.21 2006/03/16 00:03:32 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -132,7 +132,11 @@ public:
 	    _route_tables.push(route_table);
 
  	    if (empty) {
-		delete_some_nodes();
+		_deleter_task = 
+		    _peer->eventloop().
+		      new_task(callback(this,
+					&DeleteAllNodes<A>::delete_some_nodes),
+					BACKGROUND_PRIORITY, DEFAULT_WEIGHT);
  	    } else {
  		delete this;
  	    }
@@ -143,7 +147,7 @@ public:
      *
      * @return true if there are routes to delete.
      */
-    void delete_some_nodes() {
+    bool delete_some_nodes() {
 	RouteTable *route_table = _route_tables.front();
 	typename RouteTable::iterator current = route_table->begin();
 	for(int i = 0; i < _deletions_per_call; i++) {
@@ -159,15 +163,10 @@ public:
 
 	if (_route_tables.empty()) {
 	    delete this;
-	    return;
+	    return false;
 	}
 
-	_deleter =  _peer->eventloop().
-	    new_oneoff_after_ms(1000,
-				callback(this,
-				       &DeleteAllNodes<A>::delete_some_nodes));
-
-	return;
+	return true;
     }
 
     /**
@@ -178,7 +177,7 @@ public:
     }
 private:
     static RouteTables _route_tables;	// Queue of route tables to delete.
-    XorpTimer _deleter;			// 
+    XorpTask _deleter_task;			// 
     const PeerHandler *_peer;		// Handle to the EventLoop.
     static int _deletions_per_call;	// Number of nodes deleted per call.
 };

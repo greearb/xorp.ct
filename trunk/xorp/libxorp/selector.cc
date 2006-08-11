@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.33 2006/03/16 00:04:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.34 2006/08/08 23:53:26 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -80,7 +80,7 @@ SelectorList::Node::Node()
 
 inline bool
 SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
-			     const IoEventCb& cb)
+			     const IoEventCb& cb, int priority)
 {
     int i;
 
@@ -108,6 +108,7 @@ SelectorList::Node::add_okay(SelectorMask m, IoEventType type,
 	    _mask[i]	= m;
 	    _cb[i]	= IoEventCb(cb);
 	    _iot[i]	= type;
+	    _priority[i] = priority;
 	    return true;
 	}
     }
@@ -159,8 +160,10 @@ SelectorList::Node::clear(SelectorMask zap)
 {
     for (size_t i = 0; i < SEL_MAX_IDX; i++) {
 	_mask[i] &= ~zap;
-	if (_mask[i] == 0)
+	if (_mask[i] == 0) {
 	    _cb[i].release();
+	    _priority[i] = INFINITY_PRIORITY;
+	}
     }
 }
 
@@ -190,7 +193,8 @@ SelectorList::~SelectorList()
 bool
 SelectorList::add_ioevent_cb(XorpFd		   fd,
 			   IoEventType		   type,
-			   const IoEventCb& cb)
+			   const IoEventCb&        cb,
+			   int                     priority)
 {
     SelectorMask mask = map_ioevent_to_selectormask(type);
 
@@ -207,13 +211,19 @@ SelectorList::add_ioevent_cb(XorpFd		   fd,
     bool resize = false;
     if (fd >= _maxfd) {
 	_maxfd = fd;
-	if ((size_t)fd >= _selector_entries.size()) {
+	size_t no_of_entries = _selector_entries.size();
+	if ((size_t)fd >= no_of_entries) {
 	    _selector_entries.resize(fd + 32);
+	    for (size_t j = no_of_entries; j < _selector_entries.size(); j++) {
+		for (int i = 0; i < SEL_MAX_IDX; i++) {
+		    _selector_entries[j]._priority[i] = INFINITY_PRIORITY;
+		}
+	    }
 	    resize = true;
 	}
     }
     bool no_selectors_with_fd = _selector_entries[fd].is_empty();
-    if (_selector_entries[fd].add_okay(mask, type, cb) == false) {
+    if (_selector_entries[fd].add_okay(mask, type, cb, priority) == false) {
 	return false;
     }
     if (no_selectors_with_fd)
@@ -263,6 +273,101 @@ SelectorList::remove_ioevent_cb(XorpFd fd, IoEventType type)
 	assert(FD_ISSET(fd, &_fds[SEL_EX_IDX]) == 0);
 	_descriptor_count--;
     }
+}
+
+bool
+SelectorList::ready()
+{
+    fd_set testfds[SEL_MAX_IDX];
+    int n = 0;
+
+    memcpy(testfds, _fds, sizeof(_fds));
+    struct timeval tv_zero;
+    tv_zero.tv_sec = 0;
+    tv_zero.tv_usec = 0;
+
+    n = ::select(_maxfd + 1,
+		 &testfds[SEL_RD_IDX],
+		 &testfds[SEL_WR_IDX],
+		 &testfds[SEL_EX_IDX],
+		 &tv_zero);
+
+    if (n < 0) {
+	switch (errno) {
+	case EBADF:
+	    callback_bad_descriptors();
+	    break;
+	case EINVAL:
+	    XLOG_FATAL("Bad select argument");
+	    break;
+	case EINTR:
+	    // The system call was interrupted by a signal, hence return
+	    // immediately to the event loop without printing an error.
+	    debug_msg("SelectorList::ready() interrupted by a signal\n");
+	    break;
+	default:
+	    XLOG_ERROR("SelectorList::ready() failed: %s", strerror(errno));
+	    break;
+	}
+	return false;
+    }
+    if (n == 0)
+	return false;
+    else
+	return true;
+}
+
+int
+SelectorList::get_ready_priority()
+{
+    fd_set testfds[SEL_MAX_IDX];
+    int n = 0;
+
+    memcpy(testfds, _fds, sizeof(_fds));
+    struct timeval tv_zero;
+    tv_zero.tv_sec = 0;
+    tv_zero.tv_usec = 0;
+
+    n = ::select(_maxfd + 1,
+		 &testfds[SEL_RD_IDX],
+		 &testfds[SEL_WR_IDX],
+		 &testfds[SEL_EX_IDX],
+		 &tv_zero);
+
+    if (n < 0) {
+	switch (errno) {
+	case EBADF:
+	    callback_bad_descriptors();
+	    break;
+	case EINVAL:
+	    XLOG_FATAL("Bad select argument");
+	    break;
+	case EINTR:
+	    // The system call was interrupted by a signal, hence return
+	    // immediately to the event loop without printing an error.
+	    debug_msg("SelectorList::ready() interrupted by a signal\n");
+	    break;
+	default:
+	    XLOG_ERROR("SelectorList::ready() failed: %s", strerror(errno));
+	    break;
+	}
+	return INFINITY_PRIORITY;
+    }
+    if (n == 0)
+	return INFINITY_PRIORITY;
+
+    int max_priority = INFINITY_PRIORITY;
+
+    for (int fd = 0; fd <= _maxfd; fd++) {
+	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {
+	    if (FD_ISSET(fd, &testfds[sel_idx])) {
+		int p = _selector_entries[fd]._priority[sel_idx];
+		if (p < max_priority)
+		    max_priority = p;
+	    }
+	}
+    }
+    return max_priority;
 }
 
 int

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.24 2006/01/14 00:32:52 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.25 2006/03/16 00:04:25 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -282,7 +282,8 @@ AsyncFileReader::start()
 
     EventLoop& e = _eventloop;
     if (e.add_ioevent_cb(_fd, IOT_READ,
-		       callback(this, &AsyncFileReader::read)) == false) {
+			 callback(this, &AsyncFileReader::read),
+			 _priority) == false) {
 	XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
 	return false;
     }
@@ -296,7 +297,8 @@ AsyncFileReader::start()
 	_disconnect_added = e.add_ioevent_cb(
 	    _fd,
 	    IOT_DISCONNECT,
-	    callback(this, &AsyncFileReader::disconnect));
+	    callback(this, &AsyncFileReader::disconnect),
+	    _priority);
 	if (_disconnect_added == false) {
 	    XLOG_ERROR("AsyncFileReader: Failed to add ioevent callback.");
 	    _eventloop.remove_ioevent_cb(_fd, IOT_READ);
@@ -352,8 +354,9 @@ AsyncFileReader::flush_buffers()
 #define MAX_IOVEC 16
 #endif
 
-AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce)
-    : AsyncFileOperator(e, fd)
+AsyncFileWriter::AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce,
+				 int priority)
+    : AsyncFileOperator(e, fd, priority)
 {
     static const uint32_t max_coalesce = 16;
     _coalesce = (coalesce > MAX_IOVEC) ? MAX_IOVEC : coalesce;
@@ -629,7 +632,8 @@ AsyncFileWriter::start()
 
     EventLoop& e = _eventloop;
     if (e.add_ioevent_cb(_fd, IOT_WRITE,
-			 callback(this, &AsyncFileWriter::write)) == false) {
+			 callback(this, &AsyncFileWriter::write),
+			 _priority) == false) {
 	XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");
 	return false;
     }
@@ -645,7 +649,8 @@ AsyncFileWriter::start()
 	_disconnect_added = e.add_ioevent_cb(
 	    _fd,
 	    IOT_DISCONNECT,
-	    callback(this, &AsyncFileWriter::disconnect));
+	    callback(this, &AsyncFileWriter::disconnect),
+	    _priority);
 #if 0
 	if (_disconnect_added == false) {
 	    XLOG_ERROR("AsyncFileWriter: Failed to add I/O event callback.");

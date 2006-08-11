@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.17 2005/03/25 02:52:46 pavlin Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.18 2006/03/16 00:03:33 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -95,7 +95,7 @@ public:
     uint32_t genid() const {return _genid;}
 private:
     void unplumb_self();
-    void delete_next_chain();
+    bool delete_next_chain();
     EventLoop& eventloop() const {
 	return _peer->eventloop();
     }
@@ -106,7 +106,7 @@ private:
     typename BgpTrie<A>::PathmapType::const_iterator _del_sweep;
 
     int _deleted, _chains;
-    XorpTimer _deletion_timer;
+    XorpTask _deletion_task;
 };
 
 #endif // __BGP_ROUTE_TABLE_DELETION_HH__
