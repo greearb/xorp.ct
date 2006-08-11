@@ -1,4 +1,4 @@
-// Copyright (c) 2006 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.4 2006/08/11 05:59:07 pavlin Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.5 2006/08/11 18:07:19 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -22,26 +22,22 @@
 #include "callback.hh"
 
 
-class XorpTask;
-class TaskNode;
 class TaskList;
+class TaskNode;
+class XorpTask;
 
-//typedef XorpCallback0<void>::RefPtr OneoffTaskCallback;
+// typedef XorpCallback0<void>::RefPtr OneoffTaskCallback;
 typedef XorpCallback0<bool>::RefPtr RepeatedTaskCallback;
 typedef XorpCallback1<void, XorpTask&>::RefPtr BasicTaskCallback;
 
 
 class TaskNode : public RoundRobinObjBase {
-protected:
-    TaskNode(TaskList*, BasicTaskCallback);
+public:
+    TaskNode(TaskList* task_list, BasicTaskCallback cb);
     virtual ~TaskNode();
+
     void add_ref();
     void release_ref();
-
-    // we want this even if it is never called, to override the
-    // default supplied by the compiler.
-    TaskNode(const TaskNode&);	// never called
-    TaskNode& operator=(const TaskNode&);
 
     void schedule(int priority, int weight);
     void reschedule();
@@ -50,25 +46,30 @@ protected:
     int priority()              const   { return _priority; }
     int weight()                const   { return _weight; }
 
-    int		_ref_cnt;	// Number of referring XorpTask objects
-
     virtual void run(XorpTask &) {};     // Implemented by children
+
+private:
+    TaskNode(const TaskNode&);			// not implemented
+    TaskNode& operator=(const TaskNode&);	// not implemented
+
+    TaskList*	_task_list;	// TaskList this node is associated with
     BasicTaskCallback _cb;
-
-    int _priority;              // Scheduling priority
-    int _weight;
-
-    TaskList*	_list;		// TaskList this node is associated w.
-
-    friend class XorpTask;
-    friend class TaskList;
+    int		_ref_cnt;	// Number of referring XorpTask objects
+    int		_priority;	// Scheduling priority
+    int		_weight;	// Scheduling weight
 };
 
 
 class XorpTask {
 public:
+    XorpTask() : _task_node(NULL) {}
+    XorpTask(const XorpTask& xorp_task);
+    XorpTask(TaskNode* task_node);
+    XorpTask(TaskList* task_list, BasicTaskCallback cb);
+    ~XorpTask();
+
     //
-    // Task/Timer priorities. Those are are suggested values.  
+    // Task/Timer priorities. Those are suggested values.
     //
     static const int PRIORITY_HIGHEST		= 0;
     static const int PRIORITY_XRL_KEEPALIVE	= 1;
@@ -79,25 +80,18 @@ public:
     static const int PRIORITY_INFINITY		= 255;
 
     //
-    // Task/Timer weights.
+    // Task/Timer weights. Those are suggested values.
     //
     static const int WEIGHT_DEFAULT		= 1;
 
-    XorpTask() : _node() {}
-    XorpTask(TaskList* tlist, BasicTaskCallback cb);
-    XorpTask(const XorpTask&);
-    ~XorpTask();
-    bool scheduled() const;
+    XorpTask& operator=(const XorpTask& other);
     void schedule(int priority, int weight);
     void reschedule();
     void unschedule();
-    XorpTask& operator=(const XorpTask&);
+    bool scheduled() const;
+
 private:
-    TaskNode* _node;
-
-    XorpTask(TaskNode* n);
-
-    friend class TaskList;
+    TaskNode* _task_node;
 };
 
 
@@ -112,89 +106,94 @@ public:
     /**
      * Create a XorpTask that will be scheduled once.
      *
-     * @param ocb callback object that is invoked when task is run.
+     * @param cb callback object that is invoked when task is run.
      *
      * @return the @ref XorpTask created.
      */
-    XorpTask new_task(const RepeatedTaskCallback& ocb,
+    XorpTask new_task(const RepeatedTaskCallback& cb,
 		      int priority = XorpTask::PRIORITY_DEFAULT,
 		      int weight = XorpTask::WEIGHT_DEFAULT);
 
     /**
      * Get the priority of the highest priority runnable task.
      *
-     * @return the priority (lowest is best)
+     * @return the priority (lowest value is best priority).
      */
     int get_runnable_priority() const;
+
+    void schedule_node(TaskNode* node);
+    void unschedule_node(TaskNode* node);
 
     bool empty() const;
 
 private:
-    void schedule_node(TaskNode *node);
-    void unschedule_node(TaskNode *node);
     RoundRobinQueue* find_round_robin(int priority);
 
     map<int, RoundRobinQueue*> _rr_list;
-
-    friend class TaskNode;
 };
 
 
 // ----------------------------------------------------------------------------
 // inline Task methods
 
-inline XorpTask::XorpTask(TaskList* tlist, BasicTaskCallback cb)
-    : _node(new TaskNode(tlist, cb))
+inline
+XorpTask::XorpTask(TaskList* task_list, BasicTaskCallback cb)
+    : _task_node(new TaskNode(task_list, cb))
 {
-    if (_node)
-	_node->add_ref();
+    if (_task_node != NULL)
+	_task_node->add_ref();
 }
 
-inline XorpTask::XorpTask(const XorpTask& t)
-    : _node(t._node)
+inline
+XorpTask::XorpTask(const XorpTask& xorp_task)
+    : _task_node(xorp_task._task_node)
 {
-  debug_msg("XorpTask copy constructor %p, n=%p\n", this, _node);
-    if (_node)
-	_node->add_ref();
+    debug_msg("XorpTask copy constructor %p, n = %p\n", this, _task_node);
+
+    if (_task_node != NULL)
+	_task_node->add_ref();
 }
 
-inline XorpTask::~XorpTask()
+inline
+XorpTask::~XorpTask()
 {
-  debug_msg("XorpTask destructor %p, n=%p\n", this, _node);
-    if (_node)
-	_node->release_ref();
+    debug_msg("XorpTask destructor %p, n = %p\n", this, _task_node);
+
+    if (_task_node != NULL)
+	_task_node->release_ref();
 }
 
-inline XorpTask::XorpTask(TaskNode* n)
-    : _node(n)
+inline
+XorpTask::XorpTask(TaskNode* task_node)
+    : _task_node(task_node)
 {
-  debug_msg("XorpTask constructor %p, n=%p\n", this, _node);
-    if (_node)
-	_node->add_ref();
+    debug_msg("XorpTask constructor %p, n = %p\n", this, _task_node);
+
+    if (_task_node)
+	_task_node->add_ref();
 }
 
 inline XorpTask&
-XorpTask::operator=(const XorpTask& t)
+XorpTask::operator=(const XorpTask& other)
 {
-    if (t._node)
-	t._node->add_ref();
-    if (_node)
-	_node->release_ref();
-    _node = t._node;
+    if (other._task_node != NULL)
+	other._task_node->add_ref();
+    if (_task_node != NULL)
+	_task_node->release_ref();
+    _task_node = other._task_node;
     return *this;
 }
 
 inline void
 XorpTask::schedule(int priority, int weight)
 {
-    _node->schedule(priority, weight);
+    _task_node->schedule(priority, weight);
 }
 
 inline void
 XorpTask::reschedule()
 {
-    assert(_node);
-    _node->reschedule();
+    _task_node->reschedule();
 }
 
-#endif
+#endif // __LIBXORP_TASK_HH__

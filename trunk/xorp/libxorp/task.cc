@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2006 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,31 +13,36 @@
 // legally binding.
 //
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.2 2006/08/11 05:59:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.3 2006/08/11 18:07:19 pavlin Exp $"
 
+#include "libxorp_module.h"
 #include "xorp.h"
+
+#include "xlog.h"
 #include "task.hh"
+
 
 // ----------------------------------------------------------------------------
 // TaskNode methods
 
-TaskNode::TaskNode(TaskList* l, BasicTaskCallback cb)
-    : _ref_cnt(0), _cb(cb), _list(l)
+TaskNode::TaskNode(TaskList* task_list, BasicTaskCallback cb)
+    : _task_list(task_list), _cb(cb), _ref_cnt(0), _priority(0), _weight(0)
 {
     debug_msg("TaskNode constructor %p\n", this);
 }
 
 TaskNode::~TaskNode()
 {
-    unschedule();
     debug_msg("TaskNode destructor %p\n", this);
+
+    unschedule();
 }
 
 void
 TaskNode::add_ref()
 {
     _ref_cnt++;
-    debug_msg("add_ref on %p, now %d\n", this, _ref_cnt);
+    debug_msg("add_ref on %p, now ref_cnt = %d\n", this, _ref_cnt);
 }
 
 void
@@ -48,113 +53,117 @@ TaskNode::release_ref()
 }
 
 void
-TaskNode::unschedule()
-{
-    if (scheduled())
-	_list->unschedule_node(this);
-}
-
-void
 TaskNode::schedule(int priority, int weight)
 {
-    debug_msg("TaskNode schedule %p p=%d, w=%d\n", this, priority, weight);
-    assert(_list);
+    debug_msg("TaskNode schedule %p p = %d, w = %d\n", this, priority, weight);
+
+    XLOG_ASSERT(_task_list != NULL);
     unschedule();
     _priority = priority;
     _weight = weight;
-    _list->schedule_node(this);
+    _task_list->schedule_node(this);
 }
 
 void
 TaskNode::reschedule()
 {
-    assert(_list);
+    XLOG_ASSERT(_task_list != NULL);
     unschedule();
-    _list->schedule_node(this);
+    _task_list->schedule_node(this);
+}
+
+void
+TaskNode::unschedule()
+{
+    if (scheduled())
+	_task_list->unschedule_node(this);
 }
 
 
 // ----------------------------------------------------------------------------
 // Specialized Tasks.  These are what the XorpTask objects returned by
 // the TaskList XorpTask creation methods (e.g. TaskList::new_oneoff_at(), etc)
-// actually refer to/
+// actually refer to.
 
 #if 0
 class OneoffTaskNode2 : public TaskNode {
 public:
-    OneoffTaskNode2(TaskList *l, const OneoffTaskCallback& cb)
-	: TaskNode (l, callback(this, &OneoffTaskNode2::run)),
-	_cb(cb) {}
-private:
-    OneoffTaskCallback _cb;
+    OneoffTaskNode2(TaskList* task_list, const OneoffTaskCallback& cb)
+	: TaskNode(task_list, callback(this, &OneoffTaskNode2::run)),
+	  _cb(cb) {}
 
+private:
     void run(XorpTask&) {
 	debug_msg("TaskNode::run() %p\n", this);
 	_cb->dispatch();
     }
+
+    OneoffTaskCallback _cb;
 };
-#endif
+#endif // 0
 
 class RepeatedTaskNode2 : public TaskNode {
 public:
-    RepeatedTaskNode2(TaskList *l, const RepeatedTaskCallback& cb)
-	: TaskNode(l, callback(this, &RepeatedTaskNode2::run)),
-		    _cb(cb) { }
+    RepeatedTaskNode2(TaskList* task_list, const RepeatedTaskCallback& cb)
+	: TaskNode(task_list, callback(this, &RepeatedTaskNode2::run)),
+	  _cb(cb) {}
 
 private:
-    RepeatedTaskCallback _cb;
-
-    void run(XorpTask& t) {
-	if (!_cb->dispatch()) {
-	    t.unschedule();
+    void run(XorpTask& xorp_task) {
+	if (! _cb->dispatch()) {
+	    xorp_task.unschedule();
 	}
     }
+
+    RepeatedTaskCallback _cb;
 };
 
 
 // ----------------------------------------------------------------------------
 // XorpTask
 
-bool
-XorpTask::scheduled() const
-{
-    if (_node)
-	return _node->scheduled();
-    else
-	return false;
-}
-
 void
 XorpTask::unschedule()
 {
-    if (_node)
-	_node->unschedule();
+    if (_task_node != NULL)
+	_task_node->unschedule();
+}
+
+bool
+XorpTask::scheduled() const
+{
+    if (_task_node != NULL)
+	return _task_node->scheduled();
+    else
+	return false;
 }
 
 
 // ----------------------------------------------------------------------------
 // TaskList
 
-
 XorpTask
 TaskList::new_task(const RepeatedTaskCallback& cb,
 		   int priority, int weight)
 {
-    debug_msg("new task %p p=%d, w=%d\n", this, priority, weight);
-    TaskNode* n = new RepeatedTaskNode2(this, cb);
-    n->schedule(priority, weight);
-    return XorpTask(n);
+    debug_msg("new task %p p = %d, w = %d\n", this, priority, weight);
+
+    TaskNode* task_node = new RepeatedTaskNode2(this, cb);
+    task_node->schedule(priority, weight);
+    return XorpTask(task_node);
 }
 
-int 
+int
 TaskList::get_runnable_priority() const
 {
     map<int, RoundRobinQueue*>::const_iterator rri;
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
+
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
 	if (rri->second->size() != 0) {
 	    return rri->first;
 	}
     }
+
     return XorpTask::PRIORITY_INFINITY;
 }
 
@@ -163,36 +172,43 @@ TaskList::empty() const
 {
     bool result = true;
     map<int, RoundRobinQueue*>::const_iterator rri;
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
-	if (rri->second->size() != 0)
+
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
+	if (rri->second->size() != 0) {
 	    result = false;
+	    break;
+	}
     }
+
     return result;
 }
 
 void
 TaskList::run()
 {
-    debug_msg("TaskList run()\n");
     map<int, RoundRobinQueue*>::const_iterator rri;
-    for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
-	RoundRobinQueue *rr = rri->second;
+
+    debug_msg("TaskList run()\n");
+
+    for (rri = _rr_list.begin(); rri != _rr_list.end(); ++rri) {
+	RoundRobinQueue* rr = rri->second;
 	if (rr->size() != 0) {
-	    TaskNode *n = static_cast<TaskNode*>(rr->get_next_entry());
-	    debug_msg("node to run: %p\n", n);
-	    XorpTask task(n);
-	    n->run(task);
+	    TaskNode* task_node = static_cast<TaskNode*>(rr->get_next_entry());
+	    debug_msg("node to run: %p\n", task_node);
+	    XorpTask xorp_task(task_node);
+	    task_node->run(xorp_task);
 	    return;
 	}
     }
 }
 
-RoundRobinQueue* 
+RoundRobinQueue*
 TaskList::find_round_robin(int priority)
 {
     map<int, RoundRobinQueue*>::iterator rri = _rr_list.find(priority);
+
     if (rri == _rr_list.end()) {
-	RoundRobinQueue *rr = new RoundRobinQueue();
+	RoundRobinQueue* rr = new RoundRobinQueue();
 	_rr_list[priority] = rr;
 	return rr;
     } else {
@@ -201,21 +217,21 @@ TaskList::find_round_robin(int priority)
 }
 
 void 
-TaskList::schedule_node(TaskNode *n)
+TaskList::schedule_node(TaskNode* task_node)
 {
-    debug_msg("TaskList::schedule_node: n=%p\n", n);
-    RoundRobinObjBase *b = static_cast<RoundRobinObjBase*>(n);
-    RoundRobinQueue *rr = find_round_robin(n->priority());
-    rr->push(b, n->weight());
+    debug_msg("TaskList::schedule_node: n = %p\n", task_node);
+
+    RoundRobinObjBase* obj = static_cast<RoundRobinObjBase*>(task_node);
+    RoundRobinQueue* rr = find_round_robin(task_node->priority());
+    rr->push(obj, task_node->weight());
 }
 
-void 
-TaskList::unschedule_node(TaskNode *n)
+void
+TaskList::unschedule_node(TaskNode* task_node)
 {
-    debug_msg("TaskList::unschedule_node: n=%p\n", n);
-    RoundRobinObjBase *b = static_cast<RoundRobinObjBase*>(n);
-    RoundRobinQueue *rr = find_round_robin(n->priority());
-    rr->pop_obj(b);
+    debug_msg("TaskList::unschedule_node: n = %p\n", task_node);
+
+    RoundRobinObjBase* obj = static_cast<RoundRobinObjBase*>(task_node);
+    RoundRobinQueue* rr = find_round_robin(task_node->priority());
+    rr->pop_obj(obj);
 }
-
-
