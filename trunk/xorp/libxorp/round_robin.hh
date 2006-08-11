@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/round_robin.hh,v 1.1 2006/08/10 22:05:40 mjh Exp $
 
 #ifndef __LIBXORP_ROUND_ROBIN_HH__
 #define __LIBXORP_ROUND_ROBIN_HH__
@@ -67,6 +67,4 @@ private:
     friend class RoundRobinBase;
 };
 
-
-
-#endif
+#endif // __LIBXORP_ROUND_ROBIN_HH__

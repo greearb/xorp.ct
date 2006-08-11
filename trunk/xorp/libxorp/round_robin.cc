@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/round_robin.cc,v 1.1 2006/08/10 22:05:40 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -25,7 +25,7 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 
-#include "roundrobin.hh"
+#include "round_robin.hh"
 
 #include <strings.h>
 

@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/libxorp/task.hh,v 1.1 2006/08/10 22:11:22 mjh Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -18,7 +18,7 @@
 #include <map>
 
 #include "debug.h"
-#include "roundrobin.hh"
+#include "round_robin.hh"
 #include "callback.hh"
 #include "priorities.hh"
 
