@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.13 2006/07/31 22:39:57 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.14 2006/08/11 00:57:43 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -410,7 +410,7 @@ WinDispatcher::remove_ioevent_cb(XorpFd fd, IoEventType type)
 int get_ready_priority()
 {
     // XXX  THIS IS COMPLETELY BOGUS
-    return DEFAULT_PRIORITY;
+    return XorpTask::PRIORITY_DEFAULT;
 }
 
 bool ready()

@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.29 2006/06/22 00:16:22 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.30 2006/08/11 00:57:43 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -24,10 +24,10 @@
 #include <sys/time.h>
 #endif
 
-#include "priorities.hh"
 #include "timeval.hh"
 #include "heap.hh"
 #include "callback.hh"
+#include "task.hh"
 
 class XorpTimer;
 class TimerNode;
@@ -111,20 +111,20 @@ public:
     /**
      * Expire the @ref XorpTimer object when the TimerList is next run.
      */
-    void schedule_now(int priority = DEFAULT_PRIORITY);
+    void schedule_now(int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Schedule the @ref XorpTimer object at a given time.
      */
     void schedule_at(const TimeVal& when, 
-		     int priority = DEFAULT_PRIORITY);
+		     int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Schedule the @ref XorpTimer object to expire in @ref wait
      * after the current time.
      */
     void schedule_after(const TimeVal& wait, 
-			int priority = DEFAULT_PRIORITY);
+			int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Schedule the @ref XorpTimer object.
@@ -132,7 +132,7 @@ public:
      * @param ms milliseconds from the current time.
      */
     void schedule_after_ms(int ms, 
-			   int priority = DEFAULT_PRIORITY);
+			   int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Reschedule the @ref XorpTimer object.
@@ -232,7 +232,7 @@ public:
      */
     XorpTimer new_oneoff_at(const TimeVal& when,
 			    const OneoffTimerCallback& ocb,
-			    int priority = DEFAULT_PRIORITY);
+			    int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer that will be scheduled once.
@@ -244,7 +244,7 @@ public:
      */
     XorpTimer new_oneoff_after(const TimeVal& wait,
 			       const OneoffTimerCallback& ocb,
-			       int priority = DEFAULT_PRIORITY);
+			       int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer that will be scheduled once.
@@ -255,7 +255,7 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
-				  int priority = DEFAULT_PRIORITY);
+				  int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.
@@ -268,7 +268,7 @@ public:
      */
     XorpTimer new_periodic(const TimeVal& wait,
 			   const PeriodicTimerCallback& pcb,
-			   int priority = DEFAULT_PRIORITY);
+			   int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer that will invoke a callback periodically.
@@ -280,7 +280,7 @@ public:
      * @return the @ref XorpTimer created.
      */
     XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
-			      int priority = DEFAULT_PRIORITY);
+			      int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -295,7 +295,7 @@ public:
     XorpTimer set_flag_at(const TimeVal& 	 when,
 			  bool 			*flag_ptr,
 			  bool 			 to_value = true,
-			  int priority = DEFAULT_PRIORITY);
+			  int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -310,7 +310,7 @@ public:
     XorpTimer set_flag_after(const TimeVal& 	 wait,
 			     bool 		*flag_ptr,
 			     bool 		 to_value = true,
-			     int priority = DEFAULT_PRIORITY);
+			     int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Create a XorpTimer to set a flag.
@@ -325,7 +325,7 @@ public:
     XorpTimer set_flag_after_ms(int 	ms,
 				bool* 	flag_ptr,
 				bool 	to_value = true,
-				int priority = DEFAULT_PRIORITY);
+				int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Custom XorpTimer creation method.  The @ref XorpTimer object created

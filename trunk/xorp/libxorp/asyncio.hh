@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.16 2006/03/16 00:04:26 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.17 2006/08/11 00:57:42 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -122,7 +122,7 @@ public:
 
 protected:
     AsyncFileOperator(EventLoop& e, XorpFd fd, 
-		      int priority = DEFAULT_PRIORITY)
+		      int priority = XorpTask::PRIORITY_DEFAULT)
 	: _eventloop(e), _fd(fd), _running(false),
 	  _last_error(0), _priority(priority)
     {
@@ -150,7 +150,7 @@ public:
      * @param fd a file descriptor to read from.
      */
     AsyncFileReader(EventLoop& e, XorpFd fd, 
-		    int priority = DEFAULT_PRIORITY) 
+		    int priority = XorpTask::PRIORITY_DEFAULT)
 	: AsyncFileOperator(e, fd, priority) {}
     ~AsyncFileReader() { stop(); }
 
@@ -237,7 +237,7 @@ public:
      *        system call.
      */
     AsyncFileWriter(EventLoop& e, XorpFd fd, uint32_t coalesce = 1,
-		    int priority = DEFAULT_PRIORITY);
+		    int priority = XorpTask::PRIORITY_DEFAULT);
 
     ~AsyncFileWriter();
 

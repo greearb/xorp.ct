@@ -13,7 +13,7 @@
 // legally binding.
 //
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.1 2006/08/10 22:07:27 mjh Exp $"
 
 #include "xorp.h"
 #include "task.hh"
@@ -155,7 +155,7 @@ TaskList::get_runnable_priority() const
 	    return rri->first;
 	}
     }
-    return INFINITY_PRIORITY;
+    return XorpTask::PRIORITY_INFINITY;
 }
 
 bool

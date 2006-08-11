@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.2 2006/08/11 01:04:19 pavlin Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.3 2006/08/11 01:17:46 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -20,11 +20,7 @@
 #include "debug.h"
 #include "round_robin.hh"
 #include "callback.hh"
-#include "priorities.hh"
 
-
-#define DEFAULT_PRIORITY 4
-#define DEFAULT_WEIGHT 1
 
 class XorpTask;
 class TaskNode;
@@ -71,6 +67,22 @@ protected:
 
 class XorpTask {
 public:
+    //
+    // Task/Timer priorities. Those are are suggested values.  
+    //
+    static const int PRIORITY_HIGHEST		= 0;
+    static const int PRIORITY_XRL_KEEPALIVE	= 1;
+    static const int PRIORITY_HIGH		= 2;
+    static const int PRIORITY_DEFAULT		= 4;
+    static const int PRIORITY_BACKGROUND	= 7;
+    static const int PRIORITY_LOWEST		= 9;
+    static const int PRIORITY_INFINITY		= 255;
+
+    //
+    // Task/Timer weights.
+    //
+    static const int WEIGHT_DEFAULT		= 1;
+
     XorpTask() : _node() {}
     XorpTask(TaskList* tlist, BasicTaskCallback cb);
     XorpTask(const XorpTask&);
@@ -105,8 +117,8 @@ public:
      * @return the @ref XorpTask created.
      */
     XorpTask new_task(const RepeatedTaskCallback& ocb,
-		      int priority = DEFAULT_PRIORITY,
-		      int weight = DEFAULT_WEIGHT);
+		      int priority = XorpTask::PRIORITY_DEFAULT,
+		      int weight = XorpTask::WEIGHT_DEFAULT);
 
     /**
      * Get the priority of the highest priority runnable task.

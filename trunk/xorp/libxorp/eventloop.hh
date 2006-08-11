@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.21 2006/07/31 22:43:05 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.22 2006/08/11 00:57:42 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -129,7 +129,7 @@ public:
      */
     XorpTimer new_oneoff_at(const TimeVal& when,
 			    const OneoffTimerCallback& ocb,
-			    int priority = DEFAULT_PRIORITY);
+			    int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -141,7 +141,7 @@ public:
      */
     XorpTimer new_oneoff_after(const TimeVal& wait,
 			       const OneoffTimerCallback& ocb,
-			       int priority = DEFAULT_PRIORITY);
+			       int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Add a new one-off timer to the EventLoop.
@@ -152,7 +152,7 @@ public:
      * scheduled.
      */
     XorpTimer new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
-				  int priority = DEFAULT_PRIORITY);
+				  int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Add periodic timer to the EventLoop.
@@ -165,7 +165,7 @@ public:
      */
     XorpTimer new_periodic(const TimeVal& wait,
 			   const PeriodicTimerCallback& pcb,
-			   int priority = DEFAULT_PRIORITY);
+			   int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Add periodic timer to the EventLoop.
@@ -177,7 +177,7 @@ public:
      * scheduled.
      */
     XorpTimer new_periodic_ms(int ms, const PeriodicTimerCallback& pcb,
-			      int priority = DEFAULT_PRIORITY);
+			      int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Add a flag setting timer to the EventLoop.
@@ -271,7 +271,7 @@ public:
      * @return true on success, false if any error occurred.
      */
     bool add_ioevent_cb(XorpFd fd, IoEventType type, const IoEventCb& cb,
-			int priority = DEFAULT_PRIORITY);
+			int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Remove callbacks associated with file descriptor.

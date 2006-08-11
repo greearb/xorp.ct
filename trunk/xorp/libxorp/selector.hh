@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.19 2006/07/31 22:40:41 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.20 2006/08/11 00:57:42 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -35,8 +35,7 @@
 
 #include "callback.hh"
 #include "ioevents.hh"
-
-#define DEFAULT_PRIORITY 4
+#include "task.hh"
 
 class ClockBase;
 class SelectorList;
@@ -134,7 +133,7 @@ public:
      bool add_ioevent_cb(XorpFd fd, 
 			 IoEventType type, 
 			 const IoEventCb& cb,
-			 int priority = DEFAULT_PRIORITY);
+			 int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Remove hooks for pending I/O operations.

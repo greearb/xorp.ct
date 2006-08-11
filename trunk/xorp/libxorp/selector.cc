@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.34 2006/08/08 23:53:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.35 2006/08/11 00:57:42 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -162,7 +162,7 @@ SelectorList::Node::clear(SelectorMask zap)
 	_mask[i] &= ~zap;
 	if (_mask[i] == 0) {
 	    _cb[i].release();
-	    _priority[i] = INFINITY_PRIORITY;
+	    _priority[i] = XorpTask::PRIORITY_INFINITY;
 	}
     }
 }
@@ -216,7 +216,7 @@ SelectorList::add_ioevent_cb(XorpFd		   fd,
 	    _selector_entries.resize(fd + 32);
 	    for (size_t j = no_of_entries; j < _selector_entries.size(); j++) {
 		for (int i = 0; i < SEL_MAX_IDX; i++) {
-		    _selector_entries[j]._priority[i] = INFINITY_PRIORITY;
+		    _selector_entries[j]._priority[i] = XorpTask::PRIORITY_INFINITY;
 		}
 	    }
 	    resize = true;
@@ -351,12 +351,12 @@ SelectorList::get_ready_priority()
 	    XLOG_ERROR("SelectorList::ready() failed: %s", strerror(errno));
 	    break;
 	}
-	return INFINITY_PRIORITY;
+	return XorpTask::PRIORITY_INFINITY;
     }
     if (n == 0)
-	return INFINITY_PRIORITY;
+	return XorpTask::PRIORITY_INFINITY;
 
-    int max_priority = INFINITY_PRIORITY;
+    int max_priority = XorpTask::PRIORITY_INFINITY;
 
     for (int fd = 0; fd <= _maxfd; fd++) {
 	for (int sel_idx = 0; sel_idx < SEL_MAX_IDX; sel_idx++) {

@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.32 2006/06/22 00:16:22 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.33 2006/08/11 00:57:43 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -400,7 +400,7 @@ TimerList::get_expired_priority() const
 	    return priority;
 	}
     }
-    return INFINITY_PRIORITY;
+    return XorpTask::PRIORITY_INFINITY;
 }
 
 void

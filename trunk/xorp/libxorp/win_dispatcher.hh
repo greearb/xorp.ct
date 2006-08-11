@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.10 2006/07/31 22:39:57 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.11 2006/08/11 00:57:43 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -150,7 +150,7 @@ public:
     bool add_ioevent_cb(XorpFd fd, 
 			IoEventType type, 
 			const IoEventCb& cb,
-			int priority = DEFAULT_PRIORITY);
+			int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Remove hooks for pending I/O operations.

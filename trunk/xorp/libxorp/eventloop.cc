@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.15 2006/07/31 22:43:05 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.16 2006/08/11 00:57:42 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -81,9 +81,9 @@ EventLoop::run()
     _timer_list.advance_time();
     _timer_list.get_next_delay(t);
 
-    int timer_priority = INFINITY_PRIORITY;
-    int selector_priority = INFINITY_PRIORITY;
-    int task_priority = INFINITY_PRIORITY;
+    int timer_priority = XorpTask::PRIORITY_INFINITY;
+    int selector_priority = XorpTask::PRIORITY_INFINITY;
+    int task_priority = XorpTask::PRIORITY_INFINITY;
 
     if (t == TimeVal::ZERO()) {
 	timer_priority = _timer_list.get_expired_priority();
@@ -107,14 +107,14 @@ EventLoop::run()
 	   timer_priority, selector_priority, task_priority);
 #endif
 
-    if ( (timer_priority != INFINITY_PRIORITY)
+    if ( (timer_priority != XorpTask::PRIORITY_INFINITY)
 	 && (timer_priority <= selector_priority)
 	 && (timer_priority <= task_priority)) {
 
 	// the most important thing to run next is a timer
 	_timer_list.run();
 
-    } else if ( (selector_priority != INFINITY_PRIORITY)
+    } else if ( (selector_priority != XorpTask::PRIORITY_INFINITY)
 		&& (selector_priority <= task_priority) ) {
 
 	// the most important thing to run next is a selector
@@ -125,7 +125,7 @@ EventLoop::run()
 	_selector_list.wait_and_dispatch(&t);
 #endif
 
-    } else if (task_priority != INFINITY_PRIORITY) {
+    } else if (task_priority != XorpTask::PRIORITY_INFINITY) {
 
 	// the most important thing to run next is a task
 	_task_list.run();

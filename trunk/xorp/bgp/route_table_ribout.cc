@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.29 2006/03/16 00:03:35 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribout.cc,v 1.30 2006/08/11 00:57:39 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -421,7 +421,7 @@ RibOutTable<A>::reschedule_self()
 	return;
     _pull_routes_task = _peer->eventloop().
 	new_task(callback(this, &RibOutTable<A>::pull_next_route),
-		 HIGH_PRIORITY, DEFAULT_WEIGHT);
+		 XorpTask::PRIORITY_HIGH, XorpTask::WEIGHT_DEFAULT);
 }
 
 

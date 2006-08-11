@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.47 2006/06/21 23:36:33 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.48 2006/08/11 00:57:41 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -902,7 +902,7 @@ XrlPFSTCPSender::start_keepalives()
 	= _eventloop.new_periodic_ms(
 	      _keepalive_ms,
 	      callback(this, &XrlPFSTCPSender::send_keepalive),
-	      XRL_KEEPALIVE_PRIORITY);
+	      XorpTask::PRIORITY_XRL_KEEPALIVE);
 }
 
 void
@@ -916,7 +916,7 @@ XrlPFSTCPSender::defer_keepalives()
 {
     if (_keepalive_timer.scheduled()) {
 	_keepalive_timer.schedule_after_ms(_keepalive_ms,
-					   XRL_KEEPALIVE_PRIORITY);
+					   XorpTask::PRIORITY_XRL_KEEPALIVE);
     }
 }
 

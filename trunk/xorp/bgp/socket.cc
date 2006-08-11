@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/socket.cc,v 1.43 2006/08/10 23:14:40 pavlin Exp $"
+#ident "$XORP: xorp/bgp/socket.cc,v 1.44 2006/08/11 00:57:39 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME 
@@ -548,7 +548,8 @@ SocketClient::async_add(XorpFd sock)
     XLOG_ASSERT(0 == _async_writer);
     // we use high priority for the file writer so that we don't
     // generally receive data in faster than we can send it back out
-    _async_writer = new AsyncFileWriter(eventloop(), sock, HIGH_PRIORITY);
+    _async_writer = new AsyncFileWriter(eventloop(), sock,
+					XorpTask::PRIORITY_HIGH);
 
     XLOG_ASSERT(0 == _async_reader);
     _async_reader = new AsyncFileReader(eventloop(), sock);

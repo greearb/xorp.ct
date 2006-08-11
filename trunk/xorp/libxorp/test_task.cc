@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timer.cc,v 1.15 2006/06/22 00:16:22 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_task.cc,v 1.1 2006/08/10 22:07:28 mjh Exp $"
 
 //
 // demo program to test tasks and event loops
@@ -38,9 +38,9 @@ public:
 	_counter1 = 0;
 	_counter2 = 0;
 	_t1 = _eventloop.new_task(callback(this, &TestTask::handler1),
-				  DEFAULT_PRIORITY, 1);
+				  XorpTask::PRIORITY_DEFAULT, 1);
 	_t2 = _eventloop.new_task(callback(this, &TestTask::handler2),
-				  DEFAULT_PRIORITY, 2);
+				  XorpTask::PRIORITY_DEFAULT, 2);
 	for (int i = 0; i < 30; i++) {
 	    _eventloop.run();
 	}
