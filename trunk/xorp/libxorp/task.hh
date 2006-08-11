@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.1 2006/08/10 22:11:22 mjh Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.2 2006/08/11 01:04:19 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -72,7 +72,7 @@ protected:
 class XorpTask {
 public:
     XorpTask() : _node() {}
-    XorpTask::XorpTask(TaskList* tlist, BasicTaskCallback cb);
+    XorpTask(TaskList* tlist, BasicTaskCallback cb);
     XorpTask(const XorpTask&);
     ~XorpTask();
     bool scheduled() const;
