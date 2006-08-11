@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2006 International Computer Science Institute
+// Copyright (c) 2001-2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -12,46 +12,48 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/round_robin.hh,v 1.1 2006/08/10 22:05:40 mjh Exp $
+// $XORP: xorp/libxorp/round_robin.hh,v 1.2 2006/08/11 01:04:19 pavlin Exp $
 
 #ifndef __LIBXORP_ROUND_ROBIN_HH__
 #define __LIBXORP_ROUND_ROBIN_HH__
 
-/**
- * Objects stored in the RoundRobin queue should inherit from this class
- */
-
 class RoundRobin;
 
-class RoundRobinBase {
+/**
+ * Objects stored in the RoundRobinQueue should inherit from this class.
+ */
+class RoundRobinObjBase {
 public:
-    RoundRobinBase();
-    inline int weight() const {return _weight;}
-    inline RoundRobinBase *next() const {return _next;}
-    inline RoundRobinBase *prev() const {return _prev;}
-    inline void set_next(RoundRobinBase *next) {_next = next;}
-    inline void set_prev(RoundRobinBase *prev) {_prev = prev;}
+    RoundRobinObjBase();
+
+    int weight() const { return _weight; }
+    void set_weight(int v) { _weight = v; }
+    RoundRobinObjBase* next() const { return _next; }
+    RoundRobinObjBase* prev() const { return _prev; }
+    void set_next(RoundRobinObjBase* next) { _next = next; }
+    void set_prev(RoundRobinObjBase* prev) { _prev = prev; }
     bool scheduled() const;
+
 private:
-    void link(RoundRobin &rr_queue, int weight);
-    void unlink(RoundRobin &rr_queue);
-    
     int _weight;
 
-    RoundRobinBase *_next, *_prev; // links to build a circular list
-
-    friend class RoundRobin;
+    // Links to build a circular list
+    RoundRobinObjBase* _next;
+    RoundRobinObjBase* _prev;
 };
 
-class RoundRobin {
+/**
+ * The Round-robin queue.
+ */
+class RoundRobinQueue {
 public:
-    RoundRobin();
-    void push(RoundRobinBase *p, int weight);
-    void pop_obj(RoundRobinBase *p);
+    RoundRobinQueue();
+    void push(RoundRobinObjBase* obj, int weight);
+    void pop_obj(RoundRobinObjBase* obj);
     void pop();
 
-    RoundRobinBase *get_next_entry();
-    
+    RoundRobinObjBase* get_next_entry();
+
     /**
      * Get the number of elements in the heap.
      *
@@ -60,11 +62,12 @@ public:
     size_t size() const { return _elements; }
 
 private:
-    RoundRobinBase* _next_to_run;
-    int _run_count;  // how many times we've run the current task in a row.
+    void link_object(RoundRobinObjBase* obj, int weight);
+    void unlink_object(RoundRobinObjBase* obj);
+
+    RoundRobinObjBase* _next_to_run;
+    int _run_count;	// How many times we've run the current task in a row
     int _elements;
-    
-    friend class RoundRobinBase;
 };
 
 #endif // __LIBXORP_ROUND_ROBIN_HH__

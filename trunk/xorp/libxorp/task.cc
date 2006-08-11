@@ -13,7 +13,7 @@
 // legally binding.
 //
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.1 2006/08/10 22:07:27 mjh Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.2 2006/08/11 05:59:07 pavlin Exp $"
 
 #include "xorp.h"
 #include "task.hh"
@@ -149,7 +149,7 @@ TaskList::new_task(const RepeatedTaskCallback& cb,
 int 
 TaskList::get_runnable_priority() const
 {
-    map<int,RoundRobin*>::const_iterator rri;
+    map<int, RoundRobinQueue*>::const_iterator rri;
     for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
 	if (rri->second->size() != 0) {
 	    return rri->first;
@@ -162,7 +162,7 @@ bool
 TaskList::empty() const
 {
     bool result = true;
-    map<int,RoundRobin*>::const_iterator rri;
+    map<int, RoundRobinQueue*>::const_iterator rri;
     for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
 	if (rri->second->size() != 0)
 	    result = false;
@@ -174,9 +174,9 @@ void
 TaskList::run()
 {
     debug_msg("TaskList run()\n");
-    map<int,RoundRobin*>::const_iterator rri;
+    map<int, RoundRobinQueue*>::const_iterator rri;
     for (rri = _rr_list.begin(); rri != _rr_list.end(); rri++) {
-	RoundRobin *rr = rri->second;
+	RoundRobinQueue *rr = rri->second;
 	if (rr->size() != 0) {
 	    TaskNode *n = static_cast<TaskNode*>(rr->get_next_entry());
 	    debug_msg("node to run: %p\n", n);
@@ -187,12 +187,12 @@ TaskList::run()
     }
 }
 
-RoundRobin* 
-TaskList::find_roundrobin(int priority)
+RoundRobinQueue* 
+TaskList::find_round_robin(int priority)
 {
-    map<int,RoundRobin*>::iterator rri = _rr_list.find(priority);
+    map<int, RoundRobinQueue*>::iterator rri = _rr_list.find(priority);
     if (rri == _rr_list.end()) {
-	RoundRobin *rr = new RoundRobin();
+	RoundRobinQueue *rr = new RoundRobinQueue();
 	_rr_list[priority] = rr;
 	return rr;
     } else {
@@ -204,8 +204,8 @@ void
 TaskList::schedule_node(TaskNode *n)
 {
     debug_msg("TaskList::schedule_node: n=%p\n", n);
-    RoundRobinBase *b = static_cast<RoundRobinBase*>(n);
-    RoundRobin *rr = find_roundrobin(n->priority());
+    RoundRobinObjBase *b = static_cast<RoundRobinObjBase*>(n);
+    RoundRobinQueue *rr = find_round_robin(n->priority());
     rr->push(b, n->weight());
 }
 
@@ -213,8 +213,8 @@ void
 TaskList::unschedule_node(TaskNode *n)
 {
     debug_msg("TaskList::unschedule_node: n=%p\n", n);
-    RoundRobinBase *b = static_cast<RoundRobinBase*>(n);
-    RoundRobin *rr = find_roundrobin(n->priority());
+    RoundRobinObjBase *b = static_cast<RoundRobinObjBase*>(n);
+    RoundRobinQueue *rr = find_round_robin(n->priority());
     rr->pop_obj(b);
 }
 

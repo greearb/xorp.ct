@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.3 2006/08/11 01:17:46 pavlin Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.4 2006/08/11 05:59:07 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -31,7 +31,7 @@ typedef XorpCallback0<bool>::RefPtr RepeatedTaskCallback;
 typedef XorpCallback1<void, XorpTask&>::RefPtr BasicTaskCallback;
 
 
-class TaskNode : public RoundRobinBase {
+class TaskNode : public RoundRobinObjBase {
 protected:
     TaskNode(TaskList*, BasicTaskCallback);
     virtual ~TaskNode();
@@ -132,9 +132,9 @@ public:
 private:
     void schedule_node(TaskNode *node);
     void unschedule_node(TaskNode *node);
-    RoundRobin* find_roundrobin(int priority);
+    RoundRobinQueue* find_round_robin(int priority);
 
-    map<int,RoundRobin*> _rr_list;
+    map<int, RoundRobinQueue*> _rr_list;
 
     friend class TaskNode;
 };
