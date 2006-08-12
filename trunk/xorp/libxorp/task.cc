@@ -1,6 +1,6 @@
 // -*- c-basic-offset: 4; tab-width: 8; indent-tabs-mode: t -*-
 
-// Copyright (c) 2001-2006 International Computer Science Institute
+// Copyright (c) 2006 International Computer Science Institute
 //
 // Permission is hereby granted, free of charge, to any person obtaining a
 // copy of this software and associated documentation files (the "Software")
@@ -13,7 +13,7 @@
 // legally binding.
 //
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.3 2006/08/11 18:07:19 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.4 2006/08/11 22:12:43 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
