@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.35 2006/08/11 00:57:42 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.36 2006/08/11 05:59:06 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -191,10 +191,10 @@ SelectorList::~SelectorList()
 }
 
 bool
-SelectorList::add_ioevent_cb(XorpFd		   fd,
-			   IoEventType		   type,
-			   const IoEventCb&        cb,
-			   int                     priority)
+SelectorList::add_ioevent_cb(XorpFd		fd,
+			   IoEventType		type,
+			   const IoEventCb&	cb,
+			   int			priority)
 {
     SelectorMask mask = map_ioevent_to_selectormask(type);
 
@@ -211,10 +211,10 @@ SelectorList::add_ioevent_cb(XorpFd		   fd,
     bool resize = false;
     if (fd >= _maxfd) {
 	_maxfd = fd;
-	size_t no_of_entries = _selector_entries.size();
-	if ((size_t)fd >= no_of_entries) {
+	size_t entries_n = _selector_entries.size();
+	if ((size_t)fd >= entries_n) {
 	    _selector_entries.resize(fd + 32);
-	    for (size_t j = no_of_entries; j < _selector_entries.size(); j++) {
+	    for (size_t j = entries_n; j < _selector_entries.size(); j++) {
 		for (int i = 0; i < SEL_MAX_IDX; i++) {
 		    _selector_entries[j]._priority[i] = XorpTask::PRIORITY_INFINITY;
 		}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.17 2006/08/11 00:57:42 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.18 2006/08/11 05:59:06 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -137,7 +137,7 @@ protected:
     XorpFd		_fd;
     bool		_running;
     int			_last_error;
-    int                 _priority;
+    int			_priority;
 };
 
 /**

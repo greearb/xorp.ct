@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.14 2006/08/11 00:57:43 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.15 2006/08/11 05:59:07 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -109,7 +109,8 @@ bool
 WinDispatcher::add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
 			     int priority)
 {
-    UNUSED(priority); // XXX really should use this
+    UNUSED(priority);		// TODO: XXX: we should really use this
+
     // XXX: Currently we only support 1 callback per socket/event tuple.
     // Check that the socket does not already have a callback
     // registered for it.
@@ -205,7 +206,8 @@ bool
 WinDispatcher::add_handle_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
 			     int priority)
 {
-    UNUSED(priority); // XXX really should use this
+    UNUSED(priority);		// TODO: XXX: we should really use this
+
     // You cannot currently register for anything other
     // than an IOT_EXCEPTION event on a Windows object handle because
     // there is no way of telling why an object was signalled --
@@ -407,20 +409,22 @@ WinDispatcher::remove_ioevent_cb(XorpFd fd, IoEventType type)
     return false;
 }
 
-int get_ready_priority()
+int
+WinDispatcher::get_ready_priority()
 {
-    // XXX  THIS IS COMPLETELY BOGUS
+    // TODO: XXX: THIS IS COMPLETELY BOGUS
     return XorpTask::PRIORITY_DEFAULT;
 }
 
-bool ready()
+bool
+WinDispatcher::ready()
 {
     DWORD retval;
 
-    // XXX  THIS IS PROBABLY BOGUS
+    // TODO: XXX: THIS IS PROBABLY BOGUS
 
     for (vector<HANDLE>::iterator ii = _polled_pipes.begin();
-	ii != _polled_pipes.end(); ii++) {
+	ii != _polled_pipes.end(); ++ii) {
 	result = win_pipe_read(*ii, NULL, 0);
 	if (result == WINIO_ERROR_HASINPUT 
 	    || result == WINIO_ERROR_DISCONNECT) {

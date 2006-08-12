@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.11 2006/08/11 00:57:43 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.12 2006/08/11 05:59:07 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -147,10 +147,10 @@ public:
      * triggered.
      * @return true if function succeeds, false otherwise.
      */
-    bool add_ioevent_cb(XorpFd fd, 
-			IoEventType type, 
+    bool add_ioevent_cb(XorpFd		fd, 
+			IoEventType	type, 
 			const IoEventCb& cb,
-			int priority = XorpTask::PRIORITY_DEFAULT);
+			int		priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -163,14 +163,14 @@ public:
     bool remove_ioevent_cb(XorpFd fd, IoEventType type);
 
     /**
-     * Find out if any of the selectors are ready
+     * Find out if any of the selectors are ready.
      *
-     * @return true if any selector is ready
+     * @return true if any selector is ready.
      */
     bool ready();
 
     /**
-     * Find out the highest priority from the ready file descriptors
+     * Find out the highest priority from the ready file descriptors.
      *
      * @return the priority of the highest priority ready file descriptor.
      */

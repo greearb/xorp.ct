@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.33 2006/08/11 00:57:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.34 2006/08/11 05:59:07 pavlin Exp $"
 
 #include "xorp.h"
 #include "timer.hh"
@@ -289,9 +289,9 @@ TimerList::system_sleep(const TimeVal& tv)
 Heap* 
 TimerList::find_heap(int priority)
 {
-    map<int,Heap*>::iterator hi = _heaplist.find(priority);
+    map<int, Heap*>::iterator hi = _heaplist.find(priority);
     if (hi == _heaplist.end()) {
-	Heap *h = new Heap(true);
+	Heap* h = new Heap(true);
 	_heaplist[priority] = h;
 	return h;
     } else {
@@ -331,7 +331,7 @@ TimerList::new_oneoff_after_ms(int ms, const OneoffTimerCallback& cb,
 XorpTimer
 TimerList::new_periodic(const TimeVal& wait,
 			const PeriodicTimerCallback& cb,
-			    int priority)
+			int priority)
 {
     TimerNode* n = new PeriodicTimerNode2(this, cb, wait);
     n->schedule_after(wait, priority);
@@ -388,12 +388,15 @@ TimerList::set_flag_after_ms(int ms, bool *flag_ptr, bool to_value,
 int
 TimerList::get_expired_priority() const
 {
-    // run through in increasing priority until we find a timer to expire
     TimeVal now;
+
     current_time(now);
 
-    map<int,Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); hi++) {
+    //
+    // Run through in increasing priority until we find a timer to expire
+    //
+    map<int, Heap*>::const_iterator hi;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	int priority = hi->first;
 	struct Heap::heap_entry *n = hi->second->top();
 	if (n != 0 && now >= n->key) {
@@ -406,9 +409,11 @@ TimerList::get_expired_priority() const
 void
 TimerList::run()
 {
-    // run through in increasing priority until we find a timer to expire
-    map<int,Heap*>::iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); hi++) {
+    //
+    // Run through in increasing priority until we find a timer to expire
+    //
+    map<int, Heap*>::iterator hi;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	int priority = hi->first;
 	if(expire_one(priority)) {
 	    return;
@@ -416,19 +421,18 @@ TimerList::run()
     }
 }
 
-
 /**
  * Expire one timer. 
  * 
  * The timer we expire is the highest priority (lowest priority
  * number) timer that is less than or equal to the the parameter
- * worst_priority
+ * worst_priority.
  */
 
 bool
 TimerList::expire_one(int worst_priority)
 {
-    static const TimeVal WAY_BACK_GAP(15,0);
+    static const TimeVal WAY_BACK_GAP(15, 0);
 
     TimeVal now;
     
@@ -436,11 +440,11 @@ TimerList::expire_one(int worst_priority)
     current_time(now);
 
     struct Heap::heap_entry *n;
-    map<int,Heap*>::iterator hi;
+    map<int, Heap*>::iterator hi;
     for (hi = _heaplist.begin(); 
-	 hi != _heaplist.end() && hi->first <= worst_priority; 
-	 hi++) {
-	Heap *heap = hi->second;
+	 hi != _heaplist.end() && hi->first <= worst_priority;
+	 ++hi) {
+	Heap* heap = hi->second;
 	while ((n = heap->top()) != 0 && n->key < now) {
 
 	    //
@@ -482,13 +486,15 @@ bool
 TimerList::empty() const
 {
     bool result = true;
+
     acquire_lock();
-    map<int,Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); hi++) {
+    map<int, Heap*>::const_iterator hi;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	if (hi->second->top() != 0)
 	    result = false;
     }
     release_lock();
+
     return result;
 }
 
@@ -496,24 +502,27 @@ size_t
 TimerList::size() const
 {
     size_t result = 0;    
+
     acquire_lock();
-    map<int,Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); hi++) {
+    map<int, Heap*>::const_iterator hi;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	result += hi->second->size();
     }
     release_lock();
+
     return result;
 }
 
 bool
 TimerList::get_next_delay(TimeVal& tv) const
 {
-    struct Heap::heap_entry *t = 0;
+    struct Heap::heap_entry *t = NULL;
+
     acquire_lock();
 
     // find the earliest key
-    map<int,Heap*>::const_iterator hi;
-    for (hi = _heaplist.begin(); hi != _heaplist.end(); hi++) {
+    map<int, Heap*>::const_iterator hi;
+    for (hi = _heaplist.begin(); hi != _heaplist.end(); ++hi) {
 	struct Heap::heap_entry *tmp_t = hi->second->top();
 	if (tmp_t == 0) 
 	    continue;

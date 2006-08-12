@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/selector.hh,v 1.20 2006/08/11 00:57:42 pavlin Exp $
+// $XORP: xorp/libxorp/selector.hh,v 1.21 2006/08/11 05:59:06 pavlin Exp $
 
 #ifndef __LIBXORP_SELECTOR_HH__
 #define __LIBXORP_SELECTOR_HH__
@@ -130,10 +130,10 @@ public:
      *
      * @return true if function succeeds, false otherwise.
      */
-     bool add_ioevent_cb(XorpFd fd, 
-			 IoEventType type, 
+     bool add_ioevent_cb(XorpFd		fd, 
+			 IoEventType	type, 
 			 const IoEventCb& cb,
-			 int priority = XorpTask::PRIORITY_DEFAULT);
+			 int		priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Remove hooks for pending I/O operations.
@@ -146,14 +146,14 @@ public:
     void remove_ioevent_cb(XorpFd fd, IoEventType type = IOT_ANY);
 
     /**
-     * Find out if any of the selectors are ready
+     * Find out if any of the selectors are ready.
      *
-     * @return true if any selector is ready
+     * @return true if any selector is ready.
      */
     bool ready();
 
     /**
-     * Find out the highest priority from the ready file descriptors
+     * Find out the highest priority from the ready file descriptors.
      *
      * @return the priority of the highest priority ready file descriptor.
      */
@@ -239,10 +239,10 @@ private:
 	IoEventCb	_cb[SEL_MAX_IDX];
 	// Reverse mapping of legacy UNIX event to IoEvent
 	IoEventType	_iot[SEL_MAX_IDX];
-	int             _priority[SEL_MAX_IDX];
+	int		_priority[SEL_MAX_IDX];
 
 	Node();
-	inline bool	add_okay(SelectorMask m,  IoEventType type,
+	inline bool	add_okay(SelectorMask m, IoEventType type,
 				 const IoEventCb& cb, int priority);
 	inline int	run_hooks(SelectorMask m, XorpFd fd);
 	inline void	clear(SelectorMask m);

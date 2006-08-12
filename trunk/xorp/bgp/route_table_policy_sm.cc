@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.7 2006/08/11 00:57:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_sm.cc,v 1.8 2006/08/11 05:59:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,10 +56,9 @@ PolicyTableSourceMatch<A>::push_routes(list<const PeerTableInfo<A>*>& peer_list)
 
     debug_msg("[BGP] Push routes\n");
 
-    _dump_task = eventloop().
-	new_task(callback(this,
-			  &PolicyTableSourceMatch<A>::do_background_dump),
-		 XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
+    _dump_task = eventloop().new_task(
+	callback(this, &PolicyTableSourceMatch<A>::do_background_dump),
+	XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
 }
 
 template <class A>

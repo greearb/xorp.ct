@@ -10,7 +10,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/timer.hh,v 1.30 2006/08/11 00:57:43 pavlin Exp $
+// $XORP: xorp/libxorp/timer.hh,v 1.31 2006/08/11 05:59:07 pavlin Exp $
 
 #ifndef __LIBXORP_TIMER_HH__
 #define __LIBXORP_TIMER_HH__
@@ -116,14 +116,14 @@ public:
     /**
      * Schedule the @ref XorpTimer object at a given time.
      */
-    void schedule_at(const TimeVal& when, 
+    void schedule_at(const TimeVal& when,
 		     int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
      * Schedule the @ref XorpTimer object to expire in @ref wait
      * after the current time.
      */
-    void schedule_after(const TimeVal& wait, 
+    void schedule_after(const TimeVal& wait,
 			int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
@@ -131,7 +131,7 @@ public:
      *
      * @param ms milliseconds from the current time.
      */
-    void schedule_after_ms(int ms, 
+    void schedule_after_ms(int ms,
 			   int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
@@ -292,9 +292,9 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_at(const TimeVal& 	 when,
-			  bool 			*flag_ptr,
-			  bool 			 to_value = true,
+    XorpTimer set_flag_at(const TimeVal&	when,
+			  bool*			flag_ptr,
+			  bool			to_value = true,
 			  int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
@@ -307,9 +307,9 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_after(const TimeVal& 	 wait,
-			     bool 		*flag_ptr,
-			     bool 		 to_value = true,
+    XorpTimer set_flag_after(const TimeVal&	wait,
+			     bool*		flag_ptr,
+			     bool		to_value = true,
 			     int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
@@ -322,9 +322,9 @@ public:
      *
      * @return the @ref XorpTimer created.
      */
-    XorpTimer set_flag_after_ms(int 	ms,
-				bool* 	flag_ptr,
-				bool 	to_value = true,
+    XorpTimer set_flag_after_ms(int		ms,
+				bool*		flag_ptr,
+				bool		to_value = true,
 				int priority = XorpTask::PRIORITY_DEFAULT);
 
     /**
@@ -454,7 +454,7 @@ private:
 
 private:
     // we need one heap for each priority level
-    map<int,Heap*> _heaplist;
+    map<int, Heap*>		_heaplist;
 
     ClockBase* 			_clock;
     TimerListObserverBase* 	_observer;
@@ -464,7 +464,6 @@ private:
 
     friend class TimerNode;
     friend class TimerListObserverBase;
-
 };
 
 
@@ -481,7 +480,7 @@ protected:
     TimerNode& operator=(const TimerNode&);
 
     bool scheduled()		const	{ return _pos_in_heap >= 0; }
-    int priority()              const   { return _priority; }
+    int priority()		const	{ return _priority; }
     const TimeVal& expiry()	const	{ return _expires; }
     bool time_remaining(TimeVal& remain) const;
 
@@ -497,7 +496,7 @@ protected:
     TimeVal	_expires;	// Expiration time
     BasicTimerCallback _cb;
 
-    int _priority;              // Scheduling priority
+    int		_priority;	// Scheduling priority
 
     TimerList*	_list;		// TimerList this node is associated w.
 

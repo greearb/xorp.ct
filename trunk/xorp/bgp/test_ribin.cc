@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.33 2006/03/16 00:03:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_ribin.cc,v 1.34 2006/08/11 00:57:40 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -380,9 +380,7 @@ test_ribin(TestInfo& /*info*/)
 
     debug_table->write_comment("NOW DROP THE PEERING");
 
-    printf("about to take peering down\n");
     ribin->ribin_peering_went_down();
-    printf("about to run loop\n");
     while (bgpmain.eventloop().events_pending()) {
 	bgpmain.eventloop().run();
     }

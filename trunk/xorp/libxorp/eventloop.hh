@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.22 2006/08/11 00:57:42 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.23 2006/08/11 05:59:06 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -58,9 +58,11 @@ public:
      * descriptor activity.  This function may block if there are no
      * selectors ready.  It may block forever if there are no timers
      * pending.  The @ref timers_pending method can be used to detect
-     * whether there are timers pending, and the @ref descriptor_count
-     * method can be used to see if there are any select'able file
-     * descriptors.
+     * whether there are timers pending, while the @ref events_pending
+     * method can be used to detect whether there any events pending.
+     * An event can be either timer or task.
+     * The @ref descriptor_count method can be used to see if there are
+     * any select'able file descriptors.
      *
      * <pre>
      EventLoop e;
@@ -246,8 +248,7 @@ public:
      * @return a @ref XorpTask object that must be assigned to remain
      * scheduled.
      */
-    XorpTask new_task(const RepeatedTaskCallback& ocb,
-		      int priority,
+    XorpTask new_task(const RepeatedTaskCallback& ocb, int priority,
 		      int weight);
 
     /**
@@ -358,8 +359,7 @@ EventLoop::new_oneoff_after_ms(int ms, const OneoffTimerCallback& ocb,
 }
 
 inline XorpTimer
-EventLoop::new_periodic(const TimeVal& wait,
-			const PeriodicTimerCallback& pcb,
+EventLoop::new_periodic(const TimeVal& wait, const PeriodicTimerCallback& pcb,
 			int priority)
 {
     return _timer_list.new_periodic(wait, pcb, priority);
@@ -413,7 +413,5 @@ EventLoop::current_time(TimeVal& t) const
 {
     _timer_list.current_time(t);
 }
-
-
 
 #endif // __LIBXORP_EVENTLOOP_HH__

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.16 2006/08/11 00:57:42 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.17 2006/08/11 05:59:06 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -102,10 +102,8 @@ EventLoop::run()
 	task_priority = _task_list.get_runnable_priority();
     }
 
-#if 0
-    printf("priorities: %d %d %d\n", 
-	   timer_priority, selector_priority, task_priority);
-#endif
+    debug_msg("Priorities: timer = %d selector = %d task = %d\n",
+	      timer_priority, selector_priority, task_priority);
 
     if ( (timer_priority != XorpTask::PRIORITY_INFINITY)
 	 && (timer_priority <= selector_priority)
@@ -176,9 +174,7 @@ EventLoop::descriptor_count() const
 }
 
 XorpTask
-EventLoop::new_task(const RepeatedTaskCallback& rcb,
-		    int priority,
-		    int weight)
+EventLoop::new_task(const RepeatedTaskCallback& rcb, int priority, int weight)
 {
     return _task_list.new_task(rcb, priority, weight);
 }

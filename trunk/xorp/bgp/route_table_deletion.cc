@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.22 2006/08/11 00:57:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.23 2006/08/11 05:59:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -206,9 +206,9 @@ DeletionTable<A>::initiate_background_deletion()
     // pushed from the output queue in the RibOut tables.
     this->_next_table->push(this);
 
-    _deletion_task = eventloop().
-	new_task(callback(this, &DeletionTable<A>::delete_next_chain),
-		 XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
+    _deletion_task = eventloop().new_task(
+	callback(this, &DeletionTable<A>::delete_next_chain),
+	XorpTask::PRIORITY_BACKGROUND, XorpTask::WEIGHT_DEFAULT);
 }
 
 template<class A>

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.22 2006/08/11 00:57:38 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.23 2006/08/11 05:59:05 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -133,11 +133,10 @@ public:
 
  	    if (empty) {
 		_deleter_task = 
-		    _peer->eventloop().
-		      new_task(callback(this,
-					&DeleteAllNodes<A>::delete_some_nodes),
-			       XorpTask::PRIORITY_BACKGROUND,
-			       XorpTask::WEIGHT_DEFAULT);
+		    _peer->eventloop().new_task(
+			callback(this, &DeleteAllNodes<A>::delete_some_nodes),
+			XorpTask::PRIORITY_BACKGROUND,
+			XorpTask::WEIGHT_DEFAULT);
  	    } else {
  		delete this;
  	    }
