@@ -1,7 +1,7 @@
 #!/bin/sh
 
 #
-# $XORP: xorp/devnotes/update_copyright.sh,v 1.1 2006/03/15 23:16:22 pavlin Exp $
+# $XORP: xorp/devnotes/update_copyright.sh,v 1.2 2006/03/15 23:35:49 pavlin Exp $
 #
 
 #
@@ -9,8 +9,8 @@
 # It must be run in the top directory of a a fresh checked-out copy
 # of the source code, otherwise it may overwrite something else.
 #
-# Note1: Before running the script you must modify the OLD_STRING and
-# NEW_STRING variables below to match the particular replacement string
+# Note1: Before running the script you must modify the OLD_YEAR and
+# NEW_YEAR variables below to match the particular replacement string
 # with the copyright message.
 #
 # Note2: You should give a heads up before commiting changes
@@ -22,11 +22,19 @@
 
 #
 # XXX: MODIFY THESE AS APPROPRIATE!
-# Note the hack in defining the old string so the script doesn't update itself.
 #
-OLD_STRING="2005"
-OLD_STRING="${OLD_STRING} International Computer Science Institute"
-NEW_STRING="2006 International Computer Science Institute"
+# Note that the string needs to be run twice with different pairs
+# of OLD_YEAR and NEW_YEAR: the first time to update the "X-Y" copyright years,
+# and second time to update the "(c) Y" copyright year.
+#
+# Note the hack in defining the string so the script doesn't update itself.
+#
+#OLD_YEAR="(c) 2006"
+#NEW_YEAR="(c) 2006-2007"
+OLD_YEAR="-2006"
+NEW_YEAR="-2007"
+OLD_STRING="${OLD_YEAR} International Computer Science Institute"
+NEW_STRING="${NEW_YEAR} International Computer Science Institute"
 
 #
 # Internal variables
