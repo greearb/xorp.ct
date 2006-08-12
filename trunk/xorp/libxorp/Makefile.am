@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libxorp/Makefile.am,v 1.49 2006/08/11 01:04:19 pavlin Exp $
+## $XORP: xorp/libxorp/Makefile.am,v 1.50 2006/08/11 01:09:49 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -144,7 +144,6 @@ libxorp_la_SOURCES += round_robin.hh
 libxorp_la_SOURCES += run_command.hh
 libxorp_la_SOURCES += safe_callback_obj.hh
 libxorp_la_SOURCES += selector.hh
-libxorp_la_SOURCES += task.hh
 libxorp_la_SOURCES += service.hh
 libxorp_la_SOURCES += task.hh
 libxorp_la_SOURCES += time_slice.hh
@@ -191,7 +190,6 @@ libxorp_la_SOURCES += profile.cc
 libxorp_la_SOURCES += ref_ptr.cc
 libxorp_la_SOURCES += round_robin.cc
 libxorp_la_SOURCES += run_command.cc
-libxorp_la_SOURCES += task.cc
 libxorp_la_SOURCES += safe_callback_obj.cc
 libxorp_la_SOURCES += selector.cc
 libxorp_la_SOURCES += service.cc
