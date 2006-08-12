@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.12 2006/08/11 05:59:07 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.13 2006/08/12 00:38:36 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -26,7 +26,7 @@
 #include "libxorp/xorpfd.hh"
 #include "libxorp/timeval.hh"
 #include "libxorp/ioevents.hh"
-#include "libxorp/priority.hh"
+#include "libxorp/task.hh"
 
 #include <vector>
 #include <map>
