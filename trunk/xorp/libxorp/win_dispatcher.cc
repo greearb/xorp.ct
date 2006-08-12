@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.15 2006/08/11 05:59:07 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.16 2006/08/12 00:38:36 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -425,7 +425,7 @@ WinDispatcher::ready()
 
     for (vector<HANDLE>::iterator ii = _polled_pipes.begin();
 	ii != _polled_pipes.end(); ++ii) {
-	result = win_pipe_read(*ii, NULL, 0);
+	ssize_t result = win_pipe_read(*ii, NULL, 0);
 	if (result == WINIO_ERROR_HASINPUT 
 	    || result == WINIO_ERROR_DISCONNECT) {
 	    return true;
