@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.23 2006/02/02 19:40:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_sample_config.cc,v 1.24 2006/03/16 00:06:03 pavlin Exp $"
 
 
 #include <signal.h>
@@ -158,7 +158,7 @@ Rtrmgr::run()
 
     mmgr.shutdown();
     while ((mmgr.is_shutdown_completed() != true)
-	   && eventloop.timers_pending()) {
+	   && eventloop.events_pending()) {
 	eventloop.run();
     }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.68 2006/02/02 19:40:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/main_rtrmgr.cc,v 1.69 2006/03/16 00:05:58 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -321,7 +321,7 @@ Rtrmgr::run()
 
 	// Wait until changes due to deleting config have finished
 	// being applied.
-	while (eventloop.timers_pending() && (_mct->commit_in_progress())) {
+	while (eventloop.events_pending() && (_mct->commit_in_progress())) {
 	    eventloop.run();
 	}
 	delete _mct;
@@ -336,7 +336,7 @@ Rtrmgr::run()
 
     // Wait until child processes have terminated
     while ((mmgr.is_shutdown_completed() != true)
-	   && eventloop.timers_pending()) {
+	   && eventloop.events_pending()) {
 	eventloop.run();
     }
 

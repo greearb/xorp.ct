@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.19 2006/02/02 19:40:35 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/test_module_manager.cc,v 1.20 2006/03/16 00:06:03 pavlin Exp $"
 
 
 #include "rtrmgr_module.h"
@@ -101,7 +101,7 @@ Rtrmgr::run()
 	return -1;
     }
 
-    while (eventloop.timers_pending() || waiting == true) {
+    while (eventloop.events_pending() || waiting == true) {
 	printf(".");
 	eventloop.run();
     }
@@ -113,7 +113,7 @@ Rtrmgr::run()
     printf("shutting down\n");
     mmgr.shutdown();
     while ((mmgr.is_shutdown_completed() != true)
-	   && eventloop.timers_pending()) {
+	   && eventloop.events_pending()) {
 	printf(".");
 	eventloop.run();
     }
