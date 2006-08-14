@@ -28,9 +28,13 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.34 2006/08/11 05:59:07 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.35 2006/08/12 00:38:36 pavlin Exp $"
 
+
+#include "libxorp_module.h"
 #include "xorp.h"
+
+#include "xlog.h"
 #include "timer.hh"
 #include "clock.hh"
 
@@ -457,15 +461,9 @@ TimerList::expire_one(int worst_priority)
 	    //
 	    TimeVal tardiness = now - n->key;
 	    if (tardiness > WAY_BACK_GAP) {
-		fprintf(stderr,
-			"========================================"
-			"=======================================\n");
-		fprintf(stderr,
-			"Timer Expiry *much* later than scheduled: "
-			"behind by %s seconds\n", tardiness.str().c_str());
-		fprintf(stderr,
-			"========================================"
-			"=======================================\n");
+		XLOG_WARNING("Timer Expiry *much* later than scheduled: "
+			     "behind by %s seconds",
+			     tardiness.str().c_str());
 	    }
 
 	    TimerNode *t = static_cast<TimerNode *>(n->object);
