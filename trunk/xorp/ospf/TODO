@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ospf/TODO,v 1.67 2006/03/09 07:01:20 atanu Exp $
+# $XORP: xorp/ospf/TODO,v 1.68 2006/03/10 03:33:28 atanu Exp $
 #
 
 TODO
@@ -159,6 +159,9 @@ recomputation should only occur if the other areas are actually
 transit areas. Even better the internal routing entry code could be
 taught about this type of transit derived route.
   
+51) OSPF has its own IP checksum routine switch to using the routine
+in libproto.
+
 Possible issues
 ~~~~~~~~~~~~~~~
 
