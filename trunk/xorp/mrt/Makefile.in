@@ -107,7 +107,7 @@ test_mrt_SOURCES = test_mrt.cc
 test_mrib_SOURCES = test_mrib.cc
 
 # -- Library Sources
-libmrt_la_SOURCES = mrt_module.h buffer.h inet_cksum.h max_vifs.h multicast_defs.h netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh buffer.c inet_cksum.c random.c mifset.cc mrib_table.cc
+libmrt_la_SOURCES = mrt_module.h buffer.h max_vifs.h multicast_defs.h netstream_access.h random.h mifset.hh mrt.hh mrib_table.hh buffer.c random.c mifset.cc mrib_table.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = include
@@ -123,8 +123,7 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libmrt_la_LDFLAGS =
 libmrt_la_LIBADD =
-am_libmrt_la_OBJECTS = buffer.lo inet_cksum.lo random.lo mifset.lo \
-	mrib_table.lo
+am_libmrt_la_OBJECTS = buffer.lo random.lo mifset.lo mrib_table.lo
 libmrt_la_OBJECTS = $(am_libmrt_la_OBJECTS)
 bin_PROGRAMS =
 check_PROGRAMS = test_mrt$(EXEEXT) test_mrib$(EXEEXT)
@@ -147,10 +146,9 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/buffer.Plo $(DEPDIR)/inet_cksum.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/mifset.Plo $(DEPDIR)/mrib_table.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/random.Plo $(DEPDIR)/test_mrib.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_mrt.Po
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/buffer.Plo $(DEPDIR)/mifset.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/mrib_table.Plo $(DEPDIR)/random.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/test_mrib.Po $(DEPDIR)/test_mrt.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -239,7 +237,6 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/buffer.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/inet_cksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mifset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/mrib_table.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/random.Plo@am__quote@

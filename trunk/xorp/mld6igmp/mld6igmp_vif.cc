@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.77 2006/07/10 08:18:55 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.78 2006/07/28 06:23:59 pavlin Exp $"
 
 
 //
@@ -26,7 +26,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include "mrt/inet_cksum.h"
+#include "libproto/checksum.h"
 
 #include "mld6igmp_vif.hh"
 
@@ -497,7 +497,7 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
     //
     // Compute the checksum
     //
-    cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+    cksum = inet_checksum(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
 #ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
@@ -505,10 +505,10 @@ Mld6igmpVif::mld6igmp_send(const IPvX& src,
 	size_t ph_len = BUFFER_DATA_SIZE(buffer);
 	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
 						       IPPROTO_ICMPV6);
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum = inet_checksum_add(cksum, cksum2);
     }
 #endif // HAVE_IPV6
-    BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
+    BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
     
     XLOG_TRACE(mld6igmp_node().is_log_trace(), "TX %s from %s to %s",
 	       proto_message_type2ascii(message_type),
@@ -941,7 +941,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // Checksum verification.
     //
-    cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+    cksum = inet_checksum(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
 #ifdef HAVE_IPV6
     // Add the checksum for the IPv6 pseudo-header
     if (proto_is_mld6()) {
@@ -949,7 +949,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	size_t ph_len = BUFFER_DATA_SIZE(buffer);
 	cksum2 = calculate_ipv6_pseudo_header_checksum(src, dst, ph_len,
 						       IPPROTO_ICMPV6);
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum = inet_checksum_add(cksum, cksum2);
     }
 #endif // HAVE_IPV6
     if (cksum) {
@@ -1645,7 +1645,9 @@ Mld6igmpVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src,
     ip6_pseudo_header.ph_zero[2] = 0;
     ip6_pseudo_header.ph_next = protocol;
     
-    uint16_t cksum = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+    uint16_t cksum = inet_checksum(
+	reinterpret_cast<const uint8_t *>(&ip6_pseudo_header),
+	sizeof(ip6_pseudo_header));
     
     return (cksum);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.60 2006/03/16 00:04:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.61 2006/07/28 06:07:58 pavlin Exp $"
 
 
 //
@@ -26,7 +26,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include "mrt/inet_cksum.h"
+#include "libproto/checksum.h"
+
 #include "mrt/random.h"
 
 #include "pim_node.hh"
@@ -683,16 +684,17 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     // XXX: The checksum for PIM_REGISTER excludes the encapsulated data packet
     switch (message_type) {
     case PIM_REGISTER:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer),
-			   PIM_REGISTER_HEADER_LENGTH);
+	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer),
+			      PIM_REGISTER_HEADER_LENGTH);
 	break;
     default:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
+	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer),
+			      BUFFER_DATA_SIZE(buffer));
 	break;
     }
     
-    cksum = INET_CKSUM_ADD(cksum, cksum2);
-    BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the ckecksum
+    cksum = inet_checksum_add(cksum, cksum2);
+    BUFFER_COPYPUT_INET_CKSUM(cksum, buffer, 2);	// XXX: the checksum
 
     XLOG_TRACE(pim_node().is_log_trace(),
 	       "TX %s from %s to %s on vif %s",
@@ -911,9 +913,9 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
     
     switch (message_type) {
     case PIM_REGISTER:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer),
-			   PIM_REGISTER_HEADER_LENGTH);
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer),
+			      PIM_REGISTER_HEADER_LENGTH);
+	cksum = inet_checksum_add(cksum, cksum2);
 	if (cksum == 0)
 	    break;
 	//
@@ -926,8 +928,9 @@ PimVif::pim_process(const IPvX& src, const IPvX& dst,
 	// FALLTHROUGH
 	
     default:
-	cksum = INET_CKSUM(BUFFER_DATA_HEAD(buffer), BUFFER_DATA_SIZE(buffer));
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum = inet_checksum(BUFFER_DATA_HEAD(buffer),
+			      BUFFER_DATA_SIZE(buffer));
+	cksum = inet_checksum_add(cksum, cksum2);
 
 	if (cksum == 0)
 	    break;
@@ -1609,7 +1612,9 @@ PimVif::calculate_ipv6_pseudo_header_checksum(const IPvX& src, const IPvX& dst,
     ip6_pseudo_header.ph_zero[2] = 0;
     ip6_pseudo_header.ph_next = protocol;
     
-    uint16_t cksum = INET_CKSUM(&ip6_pseudo_header, sizeof(ip6_pseudo_header));
+    uint16_t cksum = inet_checksum(
+	reinterpret_cast<const uint8_t *>(&ip6_pseudo_header),
+	sizeof(ip6_pseudo_header));
     
     return (cksum);
 }

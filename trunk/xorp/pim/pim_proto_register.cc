@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.28 2006/04/26 04:18:09 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.29 2006/07/28 06:07:58 pavlin Exp $"
 
 
 //
@@ -27,7 +27,7 @@
 #include "libxorp/debug.h"
 #include "libxorp/ipvx.hh"
 
-#include "mrt/inet_cksum.h"
+#include "libproto/checksum.h"
 
 #include "pim_mfc.hh"
 #include "pim_node.hh"
@@ -117,7 +117,9 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	    // check the checksum.
 	    //
 	    if (ip4_header.ip_sum != 0) {
-		uint16_t cksum = INET_CKSUM(&ip4_header, sizeof(ip4_header));
+		uint16_t cksum = inet_checksum(
+		    reinterpret_cast<const uint8_t *>(&ip4_header),
+		    sizeof(ip4_header));
 		if (cksum != 0) {
 		    XLOG_WARNING("RX %s%s from %s to %s: "
 				 "inner dummy IP header checksum error",
@@ -152,12 +154,14 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		cp = (uint8_t *)&pim_header;
 		BUFFER_GET_DATA(cp, buffer, sizeof(pim_header));
 		uint16_t cksum, cksum2;
-		cksum = INET_CKSUM(&pim_header, sizeof(pim_header));
+		cksum = inet_checksum(
+		    reinterpret_cast<const uint8_t *>(&pim_header),
+		    sizeof(pim_header));
 		cksum2 = calculate_ipv6_pseudo_header_checksum(inner_src,
 							       inner_dst,
 							       sizeof(struct pim),
 							       IPPROTO_PIM);
-		cksum = INET_CKSUM_ADD(cksum, cksum2);
+		cksum = inet_checksum_add(cksum, cksum2);
 		if (cksum != 0) {
 		    XLOG_WARNING("RX %s%s from %s to %s: "
 				 "inner dummy IP header checksum error",
@@ -634,7 +638,9 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    first_ip->ip_off = htons(ntohs(first_ip->ip_off) | IP_MF);
 	    first_ip->ip_len = htons(first_frag_len);
 	    first_ip->ip_sum = 0;
-	    first_ip->ip_sum = INET_CKSUM(first_ip, first_ip_hl);
+	    first_ip->ip_sum = inet_checksum(
+		reinterpret_cast<const uint8_t *>(first_ip),
+		first_ip_hl);
 	    
 	    // Encapsulate and send the fragment
 	    buffer = buffer_send_prepare();
@@ -685,7 +691,9 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    }
 	    
 	    frag_ip4->ip_sum = 0;
-	    frag_ip4->ip_sum = INET_CKSUM(frag_ip4, frag_ip_hl);
+	    frag_ip4->ip_sum = inet_checksum(
+		reinterpret_cast<const uint8_t *>(frag_ip4),
+		frag_ip_hl);
 	    
 	    // Encapsulate and send the fragment
 	    buffer = buffer_send_prepare();
@@ -782,7 +790,9 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	// you should know that in the future you will get what you deserve :)
 	//
 	ip4_header.ip_sum	= 0;
-	ip4_header.ip_sum	= INET_CKSUM(&ip4_header, sizeof(ip4_header));
+	ip4_header.ip_sum	= inet_checksum(
+	    reinterpret_cast<const uint8_t *>(&ip4_header),
+	    sizeof(ip4_header));
 	
 	BUFFER_PUT_DATA(cp, buffer, sizeof(ip4_header));
 	break;
@@ -823,12 +833,13 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	cp = (uint8_t *)&pim_header;
 	
 	memset(&pim_header, 0, sizeof(pim_header));
-	cksum = INET_CKSUM(&pim_header, sizeof(pim_header));	// XXX: no-op
+	cksum = inet_checksum(reinterpret_cast<const uint8_t *>(&pim_header),
+			      sizeof(pim_header));	// XXX: no-op
 	cksum2 = calculate_ipv6_pseudo_header_checksum(source_addr,
 						       group_addr,
 						       sizeof(struct pim),
 						       IPPROTO_PIM);
-	cksum = INET_CKSUM_ADD(cksum, cksum2);
+	cksum = inet_checksum_add(cksum, cksum2);
 	pim_header.pim_cksum = cksum;
 	
 	BUFFER_PUT_DATA(cp, buffer, sizeof(pim_header));
