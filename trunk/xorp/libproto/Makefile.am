@@ -1,17 +1,19 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.14 2005/09/23 19:10:41 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.15 2006/08/10 09:02:45 pavlin Exp $
 ##
 
 # -- Real Programs
 bin_PROGRAMS	 = 
 
 # -- No-install Programs
-check_PROGRAMS	 = test_config_node_id
+check_PROGRAMS	 = test_checksum
+check_PROGRAMS	+= test_config_node_id
 check_PROGRAMS	+= test_spt
 
 # -- Test Programs
-TESTS		 = test_config_node_id$(EXEEXT)
+TESTS		 = test_checksum$(EXEEXT)
+TESTS		+= test_config_node_id$(EXEEXT)
 TESTS		+= test_spt$(EXEEXT)
 
 # -- No-install Libraries
@@ -22,11 +24,13 @@ LDADD		 = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
+test_checksum_SOURCES	 = test_checksum.cc
 test_config_node_id_SOURCES = test_config_node_id.cc
 test_spt_SOURCES	 = test_spt.cc
 
 # -- Library Sources
 libproto_la_SOURCES	 = libproto_module.h
+libproto_la_SOURCES	+= checksum.h
 
 libproto_la_SOURCES	+= config_node_id.hh
 libproto_la_SOURCES	+= packet.hh
@@ -36,6 +40,8 @@ libproto_la_SOURCES	+= proto_register.hh
 libproto_la_SOURCES	+= proto_state.hh
 libproto_la_SOURCES	+= proto_unit.hh
 libproto_la_SOURCES	+= spt.hh
+
+libproto_la_SOURCES	+= checksum.c
 
 libproto_la_SOURCES	+= proto_node_cli.cc
 libproto_la_SOURCES	+= proto_register.cc

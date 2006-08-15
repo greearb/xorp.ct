@@ -91,10 +91,10 @@ install_sh = @install_sh@
 bin_PROGRAMS = 
 
 # -- No-install Programs
-check_PROGRAMS = test_config_node_id test_spt
+check_PROGRAMS = test_checksum test_config_node_id test_spt
 
 # -- Test Programs
-TESTS = test_config_node_id$(EXEEXT) test_spt$(EXEEXT)
+TESTS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) test_spt$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libproto.la
@@ -103,11 +103,12 @@ noinst_LTLIBRARIES = libproto.la
 LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
+test_checksum_SOURCES = test_checksum.cc
 test_config_node_id_SOURCES = test_config_node_id.cc
 test_spt_SOURCES = test_spt.cc
 
 # -- Library Sources
-libproto_la_SOURCES = libproto_module.h config_node_id.hh packet.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
+libproto_la_SOURCES = libproto_module.h checksum.h config_node_id.hh packet.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh checksum.c proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = spt_graph1
@@ -123,13 +124,20 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libproto_la_LDFLAGS =
 libproto_la_LIBADD =
-am_libproto_la_OBJECTS = proto_node_cli.lo proto_register.lo \
+am_libproto_la_OBJECTS = checksum.lo proto_node_cli.lo proto_register.lo \
 	proto_state.lo proto_unit.lo spt.lo
 libproto_la_OBJECTS = $(am_libproto_la_OBJECTS)
 bin_PROGRAMS =
-check_PROGRAMS = test_config_node_id$(EXEEXT) test_spt$(EXEEXT)
+check_PROGRAMS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) \
+	test_spt$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
+am_test_checksum_OBJECTS = test_checksum.$(OBJEXT)
+test_checksum_OBJECTS = $(am_test_checksum_OBJECTS)
+test_checksum_LDADD = $(LDADD)
+test_checksum_DEPENDENCIES = libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_checksum_LDFLAGS =
 am_test_config_node_id_OBJECTS = test_config_node_id.$(OBJEXT)
 test_config_node_id_OBJECTS = $(am_test_config_node_id_OBJECTS)
 test_config_node_id_LDADD = $(LDADD)
@@ -148,11 +156,21 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/proto_node_cli.Plo \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/checksum.Plo \
+@AMDEP_TRUE@	$(DEPDIR)/proto_node_cli.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_register.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_state.Plo $(DEPDIR)/proto_unit.Plo \
-@AMDEP_TRUE@	$(DEPDIR)/spt.Plo $(DEPDIR)/test_config_node_id.Po \
+@AMDEP_TRUE@	$(DEPDIR)/spt.Plo $(DEPDIR)/test_checksum.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_config_node_id.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_spt.Po
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
+	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+CFLAGS = @CFLAGS@
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS)
 LTCXXCOMPILE = $(LIBTOOL) --mode=compile $(CXX) $(DEFS) \
@@ -162,23 +180,15 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
-CFLAGS = @CFLAGS@
-COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
-	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
-	$(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
-CCLD = $(CC)
-LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(AM_LDFLAGS) $(LDFLAGS) -o $@
-DIST_SOURCES = $(libproto_la_SOURCES) $(test_config_node_id_SOURCES) \
-	$(test_spt_SOURCES)
+DIST_SOURCES = $(libproto_la_SOURCES) $(test_checksum_SOURCES) \
+	$(test_config_node_id_SOURCES) $(test_spt_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(libproto_la_SOURCES) $(test_config_node_id_SOURCES) $(test_spt_SOURCES)
+SOURCES = $(libproto_la_SOURCES) $(test_checksum_SOURCES) $(test_config_node_id_SOURCES) $(test_spt_SOURCES)
 
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .cc .lo .o .obj
+.SUFFIXES: .c .cc .lo .o .obj
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -227,6 +237,9 @@ clean-binPROGRAMS:
 
 clean-checkPROGRAMS:
 	-test -z "$(check_PROGRAMS)" || rm -f $(check_PROGRAMS)
+test_checksum$(EXEEXT): $(test_checksum_OBJECTS) $(test_checksum_DEPENDENCIES) 
+	@rm -f test_checksum$(EXEEXT)
+	$(CXXLINK) $(test_checksum_LDFLAGS) $(test_checksum_OBJECTS) $(test_checksum_LDADD) $(LIBS)
 test_config_node_id$(EXEEXT): $(test_config_node_id_OBJECTS) $(test_config_node_id_DEPENDENCIES) 
 	@rm -f test_config_node_id$(EXEEXT)
 	$(CXXLINK) $(test_config_node_id_LDFLAGS) $(test_config_node_id_OBJECTS) $(test_config_node_id_LDADD) $(LIBS)
@@ -240,16 +253,37 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/checksum.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_node_cli.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_register.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_state.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_unit.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spt.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_checksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_config_node_id.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_spt.Po@am__quote@
 
 distclean-depend:
 	-rm -rf $(DEPDIR)
+
+.c.o:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `test -f $< || echo '$(srcdir)/'`$<
+
+.c.obj:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Po' tmpdepfile='$(DEPDIR)/$*.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(COMPILE) -c `cygpath -w $<`
+
+.c.lo:
+@AMDEP_TRUE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@	$(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+	$(LTCOMPILE) -c -o $@ `test -f $< || echo '$(srcdir)/'`$<
+CCDEPMODE = @CCDEPMODE@
 
 .cc.o:
 @AMDEP_TRUE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
