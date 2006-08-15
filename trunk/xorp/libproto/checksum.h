@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP$
+ * $XORP: xorp/libproto/checksum.h,v 1.1 2006/08/15 01:10:51 pavlin Exp $
  */
 
 #ifndef __LIBPROTO_CHECKSUM_H__
@@ -35,12 +35,16 @@ extern "C" {
  *
  * @param addr the address with the data.
  * @param len the length of the data.
- * @return the calculated checksum.
+ * @return the calculated checksum (in network order).
  */
 extern uint16_t inet_checksum(const uint8_t *addr, size_t len);
 
 /**
  * Add two previously computed checksums for Internet Protocol family header.
+ *
+ * Note that if both checksums to add are in host order, the result is also in
+ * host order. Similarly, if both checksums to add are in network order, the
+ * result is also in network order.
  *
  * @param sum1 the first sum to add.
  * @param sum2 the second sum to add.
