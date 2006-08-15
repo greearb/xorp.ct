@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.1 2005/11/22 14:11:28 bms Exp $"
+#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.2 2006/03/16 00:04:10 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -143,8 +143,9 @@ lookup4(const char* addr)
         );
         exit(EXIT_FAILURE);
     }
-    const in_addr* ia = reinterpret_cast<const in_addr*>(he->h_addr_list[0]);
-    return IPv4(ia->s_addr);
+    struct in_addr ia;
+    memcpy(&ia, he->h_addr_list[0], sizeof(ia));
+    return IPv4(ia.s_addr);
 }
 
 static void
