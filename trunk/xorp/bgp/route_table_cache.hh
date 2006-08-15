@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.23 2006/08/11 05:59:05 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.24 2006/08/12 00:34:00 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -20,6 +20,7 @@
 #include <queue>
 #include "libxorp/timer.hh"
 #include "route_table_base.hh"
+#include "crash_dump.hh"
 #include "libxorp/ref_trie.hh"
 #include "peer_handler.hh"
 
@@ -76,7 +77,7 @@ class EventLoop;
  */
 
 template<class A>
-class CacheTable : public BGPRouteTable<A>  {
+class CacheTable : public BGPRouteTable<A>, CrashDumper {
 public:
     CacheTable(string tablename, Safi safi, BGPRouteTable<A> *parent,
 	       const PeerHandler *peer);
@@ -107,6 +108,9 @@ public:
     int route_count() const {
 	return _route_table->route_count();
     }
+
+    string dump_state() const;
+
     EventLoop& eventloop() const;
 
 private:

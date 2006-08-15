@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_deletion.hh,v 1.18 2006/03/16 00:03:33 pavlin Exp $
+// $XORP: xorp/bgp/route_table_deletion.hh,v 1.19 2006/08/11 00:57:38 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_DELETION_HH__
 #define __BGP_ROUTE_TABLE_DELETION_HH__
@@ -20,6 +20,8 @@
 #include "route_table_base.hh"
 #include "peer_handler.hh"
 #include "bgp_trie.hh"
+#include "crash_dump.hh"
+
 
 class EventLoop;
 /**
@@ -50,7 +52,7 @@ class EventLoop;
  * RibInTable.
  */
 template<class A>
-class DeletionTable : public BGPRouteTable<A>  {
+class DeletionTable : public BGPRouteTable<A>, CrashDumper  {
 public:
     DeletionTable(string tablename,
 		  Safi safi,
@@ -93,6 +95,9 @@ public:
      * @return the generation id.
      */
     uint32_t genid() const {return _genid;}
+
+    string dump_state() const;
+
 private:
     void unplumb_self();
     bool delete_next_chain();

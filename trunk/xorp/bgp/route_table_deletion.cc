@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.23 2006/08/11 05:59:05 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_deletion.cc,v 1.24 2006/08/12 00:34:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -283,6 +283,19 @@ DeletionTable<A>::unplumb_self()
     // ensure we can't continue to operate
     this->_next_table = (BGPRouteTable<A>*)0xd0d0;
     this->_parent = (BGPRouteTable<A>*)0xd0d0;
+}
+
+template<class A>
+string
+DeletionTable<A>::dump_state() const {
+    string s;
+    s  = "=================================================================\n";
+    s += "DeletionTable\n";
+    s += str() + "\n";
+    s += "=================================================================\n";
+    s += c_format("GenID: %d\n", _genid);
+    s += _route_table->str();
+    return s;
 }
 
 template class DeletionTable<IPv4>;

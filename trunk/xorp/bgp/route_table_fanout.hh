@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_fanout.hh,v 1.19 2006/02/17 23:34:54 zec Exp $
+// $XORP: xorp/bgp/route_table_fanout.hh,v 1.20 2006/03/16 00:03:34 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_FANOUT_HH__
 #define __BGP_ROUTE_TABLE_FANOUT_HH__
@@ -22,6 +22,7 @@
 #include "route_table_base.hh"
 #include "peer_route_pair.hh"
 #include "route_queue.hh"
+#include "crash_dump.hh"
 
 
 template<class A> class DumpTable;
@@ -75,7 +76,7 @@ private:
 };
 
 template<class A>
-class FanoutTable : public BGPRouteTable<A>  {
+class FanoutTable : public BGPRouteTable<A>, CrashDumper  {
 public:
     FanoutTable(string tablename,
 		Safi safi,
@@ -118,6 +119,11 @@ public:
 			       BGPRouteTable<A> *caller);
     void peering_came_up(const PeerHandler *peer, uint32_t genid,
 			 BGPRouteTable<A> *caller);
+
+    void crash_dump() const {
+	CrashDumper::crash_dump();
+    }
+    string dump_state() const;
 
     void print_queue();
 private:

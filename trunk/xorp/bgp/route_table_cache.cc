@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.31 2005/03/25 02:52:45 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.32 2006/03/16 00:03:32 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -76,7 +76,10 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     IPNet<A> net = rtmsg.net();
 
     //check we don't already have this cached
-    XLOG_ASSERT(_route_table->lookup_node(net) == _route_table->end());
+    if (_route_table->lookup_node(net) != _route_table->end()) {
+	    crash_dump();
+	    XLOG_UNREACHABLE();
+    }
 
     if (rtmsg.changed()==false) {
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -171,6 +174,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	iter = _route_table->lookup_node(net);
 	if (iter == _route_table->end()) {
 	    //We don't flush the cache, so this should not happen
+	    crash_dump();
 	    XLOG_UNREACHABLE();
 	} else {
 	    // Preserve the route.  Taking a reference will prevent
@@ -298,8 +302,11 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	}
     } else {
 
-	//we don't flush the cache, so this should simply never happen.
-	XLOG_ASSERT(!rtmsg.changed());
+	if (rtmsg.changed()) {
+	    //we don't flush the cache, so this should simply never happen.
+	    crash_dump();
+	    XLOG_UNREACHABLE();
+	};
 
 	//If we get here, route was not cached and was not modified.
 	result = this->_next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
@@ -390,6 +397,18 @@ CacheTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     XLOG_ASSERT(this->_next_table == next_table);
 
     return this->_parent->get_next_message(this);
+}
+
+template<class A>
+string
+CacheTable<A>::dump_state() const {
+    string s;
+    s  = "=================================================================\n";
+    s += "CacheTable\n";
+    s += str() + "\n";
+    s += "=================================================================\n";
+    s += _route_table->str();
+    return s;
 }
 
 template<class A>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.46 2006/08/11 05:59:05 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.47 2006/08/12 00:34:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -551,6 +551,22 @@ RibInTable<A>::stop_nexthop_push()
 //     _current_chain = _route_table->pathmap().end();
     _push_task.unschedule();
 }
+
+template<class A>
+string
+RibInTable<A>::dump_state() const {
+    string s;
+    s  = "=================================================================\n";
+    s += "RibInTable\n";
+    s += str() + "\n";
+    s += "=================================================================\n";
+    if (_peer_is_up)
+	s += "Peer is UP\n";
+    else
+	s += "Peer is DOWN\n";
+    s += _route_table->str();
+    return s;
+} 
 
 template<class A>
 EventLoop& 

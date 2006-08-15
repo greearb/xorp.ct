@@ -54,6 +54,9 @@
 /* Define to 1 if system getopt() is in unistd.h */
 #undef HAVE_DECL_GETOPT
 
+/* Define to 1 if you have the <dlfcn.h> header file. */
+#undef HAVE_DLFCN_H
+
 /* Define to 1 if you have the `ether_aton' function. */
 #undef HAVE_ETHER_ATON
 

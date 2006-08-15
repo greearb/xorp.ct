@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.42 2005/12/06 06:26:35 atanu Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.43 2006/02/02 02:44:30 pavlin Exp $
 ##
 
 # -- Subdirectories
@@ -95,6 +95,7 @@ libbgp_la_SOURCES += attribute_manager.hh
 libbgp_la_SOURCES += bgp_trie.hh
 libbgp_la_SOURCES += bgp_varrw.hh
 libbgp_la_SOURCES += bgp_varrw_export.hh
+libbgp_la_SOURCES += crash_dump.hh
 libbgp_la_SOURCES += damping.hh
 libbgp_la_SOURCES += dump_iterators.hh
 libbgp_la_SOURCES += exceptions.hh
@@ -142,6 +143,7 @@ libbgp_la_SOURCES += attribute_manager.cc
 libbgp_la_SOURCES += bgp_trie.cc
 libbgp_la_SOURCES += bgp_varrw.cc
 libbgp_la_SOURCES += bgp_varrw_export.cc
+libbgp_la_SOURCES += crash_dump.cc
 libbgp_la_SOURCES += damping.cc
 libbgp_la_SOURCES += dump_iterators.cc
 libbgp_la_SOURCES += internal_message.cc

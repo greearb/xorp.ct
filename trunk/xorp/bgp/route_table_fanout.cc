@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.53 2006/02/17 23:34:54 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.54 2006/03/16 00:03:33 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -926,6 +926,23 @@ FanoutTable<A>::print_queue()
     }
 #endif
 }
+
+template<class A>
+string
+FanoutTable<A>::dump_state() const {
+    string s;
+    s  = "=================================================================\n";
+    s += "FanoutTable\n";
+    s += "=================================================================\n";
+    s += "Rate control queue:\n";
+    typename list <const RouteQueueEntry<A>*>::const_iterator i;
+    int ctr = 0;
+    for (i = _output_queue.begin(); i != _output_queue.end(); i++) {
+	ctr++;
+	s += c_format("%-5d %s\n", ctr, (*i)->str().c_str());
+    }
+    return s;
+} 
 
 template class PeerTableInfo<IPv4>;
 template class PeerTableInfo<IPv6>;

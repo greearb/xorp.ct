@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_trie.hh,v 1.26 2006/06/29 22:21:05 pavlin Exp $
+// $XORP: xorp/libxorp/ref_trie.hh,v 1.27 2006/07/03 22:18:09 pavlin Exp $
 
 #ifndef __LIBXORP_REF_TRIE_HH__
 #define __LIBXORP_REF_TRIE_HH__
@@ -1029,6 +1029,7 @@ public:
     int route_count() const			{ return _payload_count; }
 
     void print() const;
+    string str() const;
 
 private:
     void validate()				{
@@ -1385,6 +1386,27 @@ RefTrie<A, Payload>::print() const
 	    printf("[]\n");
     }
     printf("---------------\n");
+}
+
+template <class A, class Payload>
+string
+RefTrie<A, Payload>::str() const
+{
+    string s = _root->str();
+    iterator ti;
+    for (ti = begin() ; ti != end() ; ti++) {
+	s += c_format("*** node: %-26s ",
+		      ti.cur()->k().str().c_str());
+	if (ti.cur()->has_active_payload())
+	    s += "PL\n";
+	else if (ti.cur()->has_payload())
+	    s += c_format("PL *DELETED* (%u refs)\n",
+			  XORP_UINT_CAST(ti.cur()->references()));
+	else
+	    s += "[]\n";
+    }
+    s += ("---------------\n");
+    return s;
 }
 
 #endif // __LIBXORP_REF_TRIE_HH__

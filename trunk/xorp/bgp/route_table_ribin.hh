@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_ribin.hh,v 1.23 2006/03/16 00:03:35 pavlin Exp $
+// $XORP: xorp/bgp/route_table_ribin.hh,v 1.24 2006/08/11 00:57:39 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_RIBIN_HH__
 #define __BGP_ROUTE_TABLE_RIBIN_HH__
@@ -21,6 +21,7 @@
 #include <map>
 #include "libxorp/eventloop.hh"
 #include "route_table_base.hh"
+#include "crash_dump.hh"
 #include "bgp_trie.hh"
 
 class EventLoop;
@@ -44,7 +45,7 @@ class EventLoop;
  */ 
 
 template<class A>
-class RibInTable : public BGPRouteTable<A>  {
+class RibInTable : public BGPRouteTable<A>, CrashDumper {
 public:
     RibInTable(string tablename, Safi safi, const PeerHandler *peer);
     ~RibInTable();
@@ -109,6 +110,11 @@ public:
     uint32_t genid() const {
 	return _genid;
     }
+
+    void crash_dump() const {
+	CrashDumper::crash_dump();
+    }
+    string dump_state() const;
 
 private:
     inline EventLoop& eventloop() const;
