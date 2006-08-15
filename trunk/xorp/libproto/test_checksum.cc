@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libproto/test_checksum.cc,v 1.1 2006/08/15 01:10:51 pavlin Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -155,10 +155,10 @@ test_inet_checksum(TestInfo& test_info)
 
     // Test values for IPv4 address: "12.34.56.78"
     const uint8_t packet_length_0[]	= { };
-    const uint8_t packet_length_1[]	= { 1 };
-    const uint8_t packet_length_2[]	= { 1, 2 };
-    const uint8_t packet_length_3[]	= { 1, 2, 3 };
-    const uint8_t packet_length_4[]	= { 1, 2, 3, 4 };
+    const uint8_t packet_length_1[]	= { 0x1 };
+    const uint8_t packet_length_2[]	= { 0x1, 0x2 };
+    const uint8_t packet_length_3[]	= { 0x1, 0x2, 0x3 };
+    const uint8_t packet_length_4[]	= { 0x1, 0x2, 0x3, 0x4 };
     const uint8_t packet_length_16[]	= { 0x1, 0x2, 0x3, 0x4,
 					    0x5, 0x6, 0x7, 0x8,
 					    0x9, 0xa, 0xb, 0xc,
@@ -192,83 +192,83 @@ test_inet_checksum(TestInfo& test_info)
     // Test the checksum of a packet with zero length.
     //
     checksum = inet_checksum(packet_length_0, sizeof(packet_length_0));
-    verbose_assert(checksum == 0xffff,
+    verbose_assert(checksum == htons(0xffff),
 		   "Internet checksum for a packet with length 0 bytes");
 
     //
     // Test the checksum for packets with length between 1 and 16
     //
     checksum = inet_checksum(packet_length_1, sizeof(packet_length_1));
-    verbose_assert(checksum == 0xfffe,
+    verbose_assert(checksum == htons(0xfeff),
 		   "Internet checksum for a packet with length 1 bytes");
 
     checksum = inet_checksum(packet_length_2, sizeof(packet_length_2));
-    verbose_assert(checksum == 0xfdfe,
+    verbose_assert(checksum == htons(0xfefd),
 		   "Internet checksum for a packet with length 2 bytes");
 
     checksum = inet_checksum(packet_length_3, sizeof(packet_length_3));
-    verbose_assert(checksum == 0xfdfb,
+    verbose_assert(checksum == htons(0xfbfd),
 		   "Internet checksum for a packet with length 3 bytes");
 
     checksum = inet_checksum(packet_length_4, sizeof(packet_length_4));
-    verbose_assert(checksum == 0xf9fb,
+    verbose_assert(checksum == htons(0xfbf9),
 		   "Internet checksum for a packet with length 4 bytes");
 
     checksum = inet_checksum(packet_length_16, sizeof(packet_length_16));
-    verbose_assert(checksum == 0xb7bf,
+    verbose_assert(checksum == htons(0xbfb7),
 		   "Internet checksum for a packet with length 16 bytes");
 
     //
     // Test the checksum for packets initialized with all zero and all one
     //
     checksum = inet_checksum(packet_all_zeros, sizeof(packet_all_zeros));
-    verbose_assert(checksum == 0xffff,
+    verbose_assert(checksum == htons(0xffff),
 		   "Internet checksum for a packet initialized with all zeros");
 
     checksum = inet_checksum(packet_all_ones, sizeof(packet_all_ones));
-    verbose_assert(checksum == 0x0,
+    verbose_assert(checksum == htons(0x0),
 		   "Internet checksum for a packet initialized with all ones");
 
     //
     // Test the checksum for long packets
     //
     checksum = inet_checksum(packet_length_long1, sizeof(packet_length_long1));
-    verbose_assert(checksum == 0x3fc0,
+    verbose_assert(checksum == htons(0xc03f),
 		   "Internet checksum for a long packet");
 
     checksum = inet_checksum(packet_length_long2, sizeof(packet_length_long2));
-    verbose_assert(checksum == 0xffff,
+    verbose_assert(checksum == htons(0xffff),
 		   "Internet checksum for a long packet");
 
     checksum = inet_checksum(packet_length_long3, sizeof(packet_length_long3));
-    verbose_assert(checksum == 0x0,
+    verbose_assert(checksum == htons(0x0),
 		   "Internet checksum for a long packet");
 
     //
     // Test the addition of two checksums
     //
-    checksum1 = 1;
-    checksum2 = 2;
+    checksum1 = htons(0x1);
+    checksum2 = htons(0x2);
     checksum = inet_checksum_add(checksum1, checksum2);
-    verbose_assert(checksum == 0x3,
+    verbose_assert(checksum == htons(0x3),
 		   "Addition of two checksums");
 
     //
     // Test the addition of two zero checksums
     //
-    checksum1 = 0;
-    checksum2 = 0;
+    checksum1 = htons(0x0);
+    checksum2 = htons(0x0);
     checksum = inet_checksum_add(checksum1, checksum2);
-    verbose_assert(checksum == 0x0,
+    verbose_assert(checksum == htons(0x0),
 		   "Addition of two zero checksums");
 
     //
     // Test the addition of two all-ones checksums
     //
-    checksum1 = 0xff;
-    checksum2 = 0xff;
+    checksum1 = htons(0xff);
+    checksum2 = htons(0xff);
     checksum = inet_checksum_add(checksum1, checksum2);
-    verbose_assert(checksum ==  0x1fe,
+    verbose_assert(checksum == htons(0x1fe),
 		   "Addition of two all-ones checksums");
 
     return (! failures());
