@@ -100,7 +100,7 @@ sbin_PROGRAMS = call_xrl
 noinst_LTLIBRARIES = libxipc.la libfinder.la
 
 # -- Test Programs and scripts (order of increasing complexity)
-test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
+test_programs = test_xrl_error test_xrl test_xrl_atom test_xrl_args test_header test_inproc test_sudp test_stcp test_stcppf test_lemming test_xrl_router test_finder_tcp test_finder_messenger test_finder_msgs test_finder test_finder_events
 
 test_extra_programs = test_xrl_parser test_finder_to test_xrl_receiver test_xrl_sender
 
@@ -127,6 +127,7 @@ test_header_SOURCES = test_header.cc
 test_inproc_SOURCES = test_inproc.cc
 test_lemming_SOURCES = test_lemming.cc
 test_stcp_SOURCES = test_stcp.cc
+test_stcppf_SOURCES = test_stcppf.cc
 test_sudp_SOURCES = test_sudp.cc
 test_xrl_SOURCES = test_xrl.cc
 test_xrl_atom_SOURCES = test_xrl_atom.cc
@@ -197,7 +198,7 @@ bin_PROGRAMS = xorp_finder$(EXEEXT)
 check_PROGRAMS = test_xrl_error$(EXEEXT) test_xrl$(EXEEXT) \
 	test_xrl_atom$(EXEEXT) test_xrl_args$(EXEEXT) \
 	test_header$(EXEEXT) test_inproc$(EXEEXT) test_sudp$(EXEEXT) \
-	test_stcp$(EXEEXT) test_lemming$(EXEEXT) \
+	test_stcp$(EXEEXT) test_stcppf$(EXEEXT) test_lemming$(EXEEXT) \
 	test_xrl_router$(EXEEXT) test_finder_tcp$(EXEEXT) \
 	test_finder_messenger$(EXEEXT) test_finder_msgs$(EXEEXT) \
 	test_finder$(EXEEXT) test_finder_events$(EXEEXT) \
@@ -282,6 +283,13 @@ test_stcp_DEPENDENCIES = ./libfinder.la ./libxipc.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/libcomm/libcomm.la
 test_stcp_LDFLAGS =
+am_test_stcppf_OBJECTS = test_stcppf.$(OBJEXT)
+test_stcppf_OBJECTS = $(am_test_stcppf_OBJECTS)
+test_stcppf_LDADD = $(LDADD)
+test_stcppf_DEPENDENCIES = ./libfinder.la ./libxipc.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libcomm/libcomm.la
+test_stcppf_LDFLAGS =
 am_test_sudp_OBJECTS = test_sudp.$(OBJEXT)
 test_sudp_OBJECTS = $(am_test_sudp_OBJECTS)
 test_sudp_LDADD = $(LDADD)
@@ -388,8 +396,8 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_finder_to.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_header.Po $(DEPDIR)/test_inproc.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_lemming.Po $(DEPDIR)/test_stcp.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_sudp.Po $(DEPDIR)/test_xrl.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_xrl_args.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_stcppf.Po $(DEPDIR)/test_sudp.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_xrl.Po $(DEPDIR)/test_xrl_args.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_atom.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_error.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_xrl_parser.Po \
@@ -435,13 +443,14 @@ DIST_SOURCES = $(libfinder_la_SOURCES) $(libxipc_la_SOURCES) \
 	$(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) \
 	$(test_finder_to_SOURCES) $(test_header_SOURCES) \
 	$(test_inproc_SOURCES) $(test_lemming_SOURCES) \
-	$(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) \
+	$(test_stcp_SOURCES) $(test_stcppf_SOURCES) \
+	$(test_sudp_SOURCES) $(test_xrl_SOURCES) \
 	$(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) \
 	$(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) \
 	$(test_xrl_receiver_SOURCES) $(test_xrl_router_SOURCES) \
 	$(test_xrl_sender_SOURCES) $(xorp_finder_SOURCES)
 DIST_COMMON = README Makefile.am Makefile.in TODO
-SOURCES = $(libfinder_la_SOURCES) $(libxipc_la_SOURCES) $(call_xrl_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_receiver_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_sender_SOURCES) $(xorp_finder_SOURCES)
+SOURCES = $(libfinder_la_SOURCES) $(libxipc_la_SOURCES) $(call_xrl_SOURCES) $(test_finder_SOURCES) $(test_finder_events_SOURCES) $(test_finder_messenger_SOURCES) $(test_finder_msgs_SOURCES) $(test_finder_tcp_SOURCES) $(test_finder_to_SOURCES) $(test_header_SOURCES) $(test_inproc_SOURCES) $(test_lemming_SOURCES) $(test_stcp_SOURCES) $(test_stcppf_SOURCES) $(test_sudp_SOURCES) $(test_xrl_SOURCES) $(test_xrl_args_SOURCES) $(test_xrl_atom_SOURCES) $(test_xrl_error_SOURCES) $(test_xrl_parser_SOURCES) $(test_xrl_receiver_SOURCES) $(test_xrl_router_SOURCES) $(test_xrl_sender_SOURCES) $(xorp_finder_SOURCES)
 
 all: all-am
 
@@ -565,6 +574,9 @@ test_lemming$(EXEEXT): $(test_lemming_OBJECTS) $(test_lemming_DEPENDENCIES)
 test_stcp$(EXEEXT): $(test_stcp_OBJECTS) $(test_stcp_DEPENDENCIES) 
 	@rm -f test_stcp$(EXEEXT)
 	$(CXXLINK) $(test_stcp_LDFLAGS) $(test_stcp_OBJECTS) $(test_stcp_LDADD) $(LIBS)
+test_stcppf$(EXEEXT): $(test_stcppf_OBJECTS) $(test_stcppf_DEPENDENCIES) 
+	@rm -f test_stcppf$(EXEEXT)
+	$(CXXLINK) $(test_stcppf_LDFLAGS) $(test_stcppf_OBJECTS) $(test_stcppf_LDADD) $(LIBS)
 test_sudp$(EXEEXT): $(test_sudp_OBJECTS) $(test_sudp_DEPENDENCIES) 
 	@rm -f test_sudp$(EXEEXT)
 	$(CXXLINK) $(test_sudp_LDFLAGS) $(test_sudp_OBJECTS) $(test_sudp_LDADD) $(LIBS)
@@ -640,6 +652,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_inproc.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_lemming.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_stcp.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_stcppf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_sudp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_xrl_args.Po@am__quote@

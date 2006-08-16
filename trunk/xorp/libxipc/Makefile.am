@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## # $XORP: xorp/libxipc/Makefile.am,v 1.42 2004/12/18 03:24:33 pavlin Exp $
+## # $XORP: xorp/libxipc/Makefile.am,v 1.44 2005/08/18 15:32:38 bms Exp $
 ##
 
 # Redefine the bin installation directory
@@ -22,7 +22,7 @@ noinst_LTLIBRARIES = libxipc.la libfinder.la
 test_programs	 = test_xrl_error test_xrl
 test_programs	+= test_xrl_atom test_xrl_args
 test_programs	+= test_header test_inproc
-test_programs	+= test_sudp test_stcp
+test_programs	+= test_sudp test_stcp test_stcppf
 test_programs	+= test_lemming test_xrl_router
 test_programs	+= test_finder_tcp test_finder_messenger
 test_programs	+= test_finder_msgs test_finder
@@ -60,6 +60,7 @@ test_header_SOURCES		 = test_header.cc
 test_inproc_SOURCES		 = test_inproc.cc
 test_lemming_SOURCES		 = test_lemming.cc
 test_stcp_SOURCES		 = test_stcp.cc
+test_stcppf_SOURCES		 = test_stcppf.cc
 test_sudp_SOURCES		 = test_sudp.cc
 test_xrl_SOURCES		 = test_xrl.cc
 test_xrl_atom_SOURCES		 = test_xrl_atom.cc
