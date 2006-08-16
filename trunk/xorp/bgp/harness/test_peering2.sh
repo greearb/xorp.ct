@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.53 2006/04/04 09:47:45 bms Exp $
+# $XORP: xorp/bgp/harness/test_peering2.sh,v 1.54 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -44,7 +44,7 @@ onexit()
 
 trap onexit 0 2
 
-HOST=localhost
+HOST=127.0.0.1
 LOCALHOST=$HOST
 ID=192.150.187.78
 AS=65008

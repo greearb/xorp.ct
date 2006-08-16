@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.22 2006/04/04 12:07:45 bms Exp $
+# $XORP: xorp/bgp/harness/test_routing1.sh,v 1.23 2006/04/13 17:45:40 atanu Exp $
 #
 
 #
@@ -45,7 +45,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/../xrl_shell_funcs.sh ""
 . ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
-HOST=localhost
+HOST=127.0.0.1
 PORT1=10001
 PORT2=10002
 PORT3=10003

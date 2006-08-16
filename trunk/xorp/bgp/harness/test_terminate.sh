@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.6 2004/11/24 02:40:12 atanu Exp $
+# $XORP: xorp/bgp/harness/test_terminate.sh,v 1.7 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -38,7 +38,7 @@ onexit()
 
 trap onexit 0 2
 
-HOST=localhost
+HOST=127.0.0.1
 AS=65008
 
 configure_bgp()
@@ -63,10 +63,10 @@ test2()
 {
     echo "TEST2 - Verify that BGP shuts down after enabling three peerings"
 
-    LOCALHOST=localhost
+    LOCALHOST=$HOST
     HOLDTIME=60
     NEXT_HOP="127.0.0.1"
-    PEER=localhost
+    PEER=$HOST
 
     PORT=10001;PEER_PORT=20001;PEER_AS=6401
     IPTUPLE="$LOCALHOST $PORT $PEER $PEER_PORT"

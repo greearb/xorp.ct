@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_route_flap_damping1.sh,v 1.1 2006/03/06 02:27:53 atanu Exp $
+# $XORP: xorp/bgp/harness/test_route_flap_damping1.sh,v 1.2 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -46,7 +46,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/../xrl_shell_funcs.sh ""
 . ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
-HOST=localhost
+HOST=127.0.0.1
 PORT1=10001
 PORT2=10002
 PORT3=10003

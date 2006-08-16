@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.15 2005/12/20 08:30:54 atanu Exp $
+# $XORP: xorp/bgp/harness/test_rib_fea1.sh,v 1.16 2006/04/04 12:07:45 bms Exp $
 #
 
 #
@@ -44,7 +44,7 @@ if [ "X${srcdir}" = "X" ] ; then srcdir=`dirname $0` ; fi
 . ${srcdir}/../xrl_shell_funcs.sh ""
 . ${srcdir}/../../rib/xrl_shell_funcs.sh ""
 
-HOST=localhost
+HOST=127.0.0.1
 AS=65008
 
 # EBGP - IPV4
