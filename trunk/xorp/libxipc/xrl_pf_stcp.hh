@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.23 2005/08/18 15:32:41 bms Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp.hh,v 1.24 2006/03/16 00:04:23 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_HH__
 #define __LIBXIPC_XRL_PF_STCP_HH__
@@ -28,7 +28,6 @@ class Xrl;
 
 class STCPRequestHandler;
 class XrlPFSTCPSender;
-class STCPPacketHeader;
 class RequestState;
 
 /**
@@ -127,7 +126,6 @@ private:
     // Reception related
     BufferedAsyncReader*	 _reader;
     vector<uint8_t>		 _reply;
-    const STCPPacketHeader*	 _sph;
 
     // Keepalive related
     XorpTimer			 _keepalive_timer;
