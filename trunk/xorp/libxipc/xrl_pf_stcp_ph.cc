@@ -12,16 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.10 2005/08/18 15:32:41 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.11 2006/03/16 00:04:23 pavlin Exp $"
 
 #include "xrl_module.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
-#include "libxorp/debug.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -35,8 +29,11 @@
 
 #include <strings.h>
 
+#include "libxorp/debug.h"
+
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
+
 
 static const uint32_t PROTO_FOURCC = (('S' << 24) | ('T' << 16) |
 				      ('C' <<  8) | ('P' <<  0));
@@ -49,48 +46,46 @@ static const uint8_t PROTO_MINOR = 1;
 // NB memcpy used as one means of not caring about alignment.
 //
 
-static inline void pack4(uint32_t data, uint8_t* dst)
+static inline void
+pack4(uint32_t data, uint8_t* dst)
 {
     data = htonl(data);
     memcpy(dst, &data, sizeof(data));
 }
 
-static inline void pack2(uint16_t data, uint8_t* dst)
+static inline void
+pack2(uint16_t data, uint8_t* dst)
 {
     data = htons(data);
     memcpy(dst, &data, sizeof(data));
 }
 
-static inline void pack1(uint8_t data, uint8_t* dst)
+static inline void
+pack1(uint8_t data, uint8_t* dst)
 {
     *dst = data;
 }
 
-static inline uint32_t unpack4(const uint8_t* src)
+static inline uint32_t
+unpack4(const uint8_t* src)
 {
     uint32_t t;
     memcpy(&t, src, sizeof(t));
     return ntohl(t);
 }
 
-static inline uint16_t unpack2(const uint8_t* src)
+static inline uint16_t
+unpack2(const uint8_t* src)
 {
     uint16_t t;
     memcpy(&t, src, sizeof(t));
     return ntohs(t);
 }
 
-static inline uint8_t unpack1(const uint8_t* src)
+static inline uint8_t
+unpack1(const uint8_t* src)
 {
     return *src;
-}
-
-STCPPacketHeader::STCPPacketHeader(uint32_t		seqno,
-				   STCPPacketType	type,
-				   const XrlError&	err,
-				   uint32_t		xrl_data_bytes)
-{
-    initialize(seqno, type, err, xrl_data_bytes);
 }
 
 void
