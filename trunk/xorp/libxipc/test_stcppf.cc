@@ -12,30 +12,35 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.9 2006/03/16 00:04:19 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.10 2006/08/16 22:10:50 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
+
+#include "libxorp/xlog.h"
 
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
 
 static void
-test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes)
+test_packet_header(uint32_t seqno, STCPPacketType type, const XrlError& e,
+		   uint32_t p_bytes)
 {
     uint8_t buffer[STCPPacketHeader::SIZE];
 
-    printf("Testing STCPPacketHeader(%s, \"%s\", %ul)... ",
-	   is_request ? "true" : "false", string(e).c_str(), p_bytes);
+    printf("Testing STCPPacketHeader(%u, %u, \"%s\", %u)... ",
+	   seqno, type, e.str().c_str(), p_bytes);
 
     STCPPacketHeader sph(buffer);
-    sph.initialize(is_request, e, p_bytes);
+    sph.initialize(seqno, type, e, p_bytes);
 
     if (sph.is_valid() == false) {
 	printf("invalid header\n");
-    } else if (sph.is_request() != is_request) {
-	printf("request bit corrupted.\n");
-    } else if (sph.status() != e) {
+    } else if (sph.seqno() != seqno) {
+	printf("sequence number is corrupted.\n");
+    } else if (sph.type() != type) {
+	printf("header type is corrupted.\n");
+    } else if (sph.error_code() != static_cast<uint32_t>(e.error_code())) {
 	printf("error identifier corrupted.\n");
     } else if (sph.payload_bytes() != p_bytes) {
 	printf("payload bytes corrupted.\n");
@@ -57,8 +62,13 @@ main(int /* argc */, char *argv[])
     xlog_add_default_output();
     xlog_start();
 
-    test_packet_header(true, XrlError::OKAY(), 0xaabbccdd);
-    test_packet_header(false, XrlError::SYSCALL_FAILED(), 0x10203040);
+    test_packet_header(1, STCP_PT_HELO, XrlError::OKAY(), 0xaabbccdd);
+    test_packet_header(2, STCP_PT_HELO_ACK, XrlError::COMMAND_FAILED(),
+		       0x10203040);
+    test_packet_header(3, STCP_PT_REQUEST, XrlError::COMMAND_FAILED(),
+		       0x10203040);
+    test_packet_header(4, STCP_PT_RESPONSE, XrlError::COMMAND_FAILED(),
+		       0x10203040);
 
     //
     // Gracefully stop and exit xlog
