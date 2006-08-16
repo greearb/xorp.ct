@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.13 2006/08/16 18:45:24 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.14 2006/08/16 22:10:50 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -31,6 +31,8 @@
 
 #include "libxorp/debug.h"
 
+#include "libproto/packet.hh"
+
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
 
@@ -40,53 +42,6 @@ static const uint32_t PROTO_FOURCC = (('S' << 24) | ('T' << 16) |
 static const uint8_t PROTO_MAJOR = 1;
 static const uint8_t PROTO_MINOR = 1;
 
-// ----------------------------------------------------------------------------
-// Utility byte packing and unpacking functions.
-//
-// NB memcpy used as one means of not caring about alignment.
-//
-
-static inline void
-pack4(uint32_t data, uint8_t* dst)
-{
-    data = htonl(data);
-    memcpy(dst, &data, sizeof(data));
-}
-
-static inline void
-pack2(uint16_t data, uint8_t* dst)
-{
-    data = htons(data);
-    memcpy(dst, &data, sizeof(data));
-}
-
-static inline void
-pack1(uint8_t data, uint8_t* dst)
-{
-    *dst = data;
-}
-
-static inline uint32_t
-unpack4(const uint8_t* src)
-{
-    uint32_t t;
-    memcpy(&t, src, sizeof(t));
-    return ntohl(t);
-}
-
-static inline uint16_t
-unpack2(const uint8_t* src)
-{
-    uint16_t t;
-    memcpy(&t, src, sizeof(t));
-    return ntohs(t);
-}
-
-static inline uint8_t
-unpack1(const uint8_t* src)
-{
-    return *src;
-}
 
 STCPPacketHeader::STCPPacketHeader(uint8_t* data)
     : _data(data),
@@ -113,14 +68,14 @@ STCPPacketHeader::initialize(uint32_t		seqno,
 			     const XrlError&	xrl_err,
 			     uint32_t		xrl_data_bytes)
 {
-    pack4(PROTO_FOURCC, _fourcc);
-    pack1(PROTO_MAJOR, _major);
-    pack1(PROTO_MINOR, _minor);
-    pack2(type, _type);
-    pack4(seqno, _seqno);
-    pack4(xrl_err.error_code(), _error_code);
-    pack4(xrl_err.note().size(), _error_note_bytes);
-    pack4(xrl_data_bytes, _xrl_data_bytes);
+    embed_32(_fourcc, PROTO_FOURCC);
+    embed_8(_major, PROTO_MAJOR);
+    embed_8(_minor, PROTO_MINOR);
+    embed_16(_type, type);
+    embed_32(_seqno, seqno);
+    embed_32(_error_code, xrl_err.error_code());
+    embed_32(_error_note_bytes, xrl_err.note().size());
+    embed_32(_xrl_data_bytes, xrl_data_bytes);
 }
 
 static bool
@@ -158,49 +113,49 @@ STCPPacketHeader::is_valid() const
 uint32_t
 STCPPacketHeader::fourcc() const
 {
-    return unpack4(_fourcc);
+    return extract_32(_fourcc);
 }
 
 uint8_t
 STCPPacketHeader::major() const
 {
-    return unpack1(_major);
+    return extract_8(_major);
 }
 
 uint8_t
 STCPPacketHeader::minor() const
 {
-    return unpack1(_minor);
+    return extract_8(_minor);
 }
 
 STCPPacketType
 STCPPacketHeader::type() const
 {
-    return STCPPacketType(unpack2(_type));
+    return STCPPacketType(extract_16(_type));
 }
 
 uint32_t
 STCPPacketHeader::seqno() const
 {
-    return unpack4(_seqno);
+    return extract_32(_seqno);
 }
 
 uint32_t
 STCPPacketHeader::error_code() const
 {
-    return unpack4(_error_code);
+    return extract_32(_error_code);
 }
 
 uint32_t
 STCPPacketHeader::error_note_bytes() const
 {
-    return unpack4(_error_note_bytes);
+    return extract_32(_error_note_bytes);
 }
 
 uint32_t
 STCPPacketHeader::xrl_data_bytes() const
 {
-    return unpack4(_xrl_data_bytes);
+    return extract_32(_xrl_data_bytes);
 }
 
 uint32_t
