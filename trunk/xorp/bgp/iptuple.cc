@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.16 2006/04/04 09:41:38 bms Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.17 2006/08/09 16:16:03 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -58,7 +58,9 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
     //  Test for an address family mismatch
     if (_local_sock.ss_family != _peer_sock.ss_family)
 	xorp_throw(AddressFamilyMismatch,
-		   c_format("mismatch %s %s",local_interface, peer_interface));
+		   c_format("mismatch %s (%u) %s (%u)",
+			    local_interface, _local_sock.ss_family, 
+			    peer_interface, _peer_sock.ss_family));
 }
 
 Iptuple::Iptuple(const Iptuple& rhs)

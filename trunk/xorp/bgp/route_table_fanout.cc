@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.54 2006/03/16 00:03:33 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.55 2006/08/15 23:03:53 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -716,6 +716,15 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	}
 	if ((*queue_ptr)->op() == RTQUEUE_OP_REPLACE_OLD)
 	    queue_ptr++;
+
+	// sanity check
+	if(queue_ptr == _output_queue.end()) {
+	    // this shouldn't ever happen, as a REPLACE_NEW should
+	    // follow a REPLACE_OLD
+	    crash_dump();
+	    XLOG_UNREACHABLE();
+	}
+
 	queue_ptr++;
     }
     if (queue_ptr == _output_queue.end()) {
