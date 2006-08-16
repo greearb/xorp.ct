@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/bgp/crash_dump.hh,v 1.1 2006/08/15 23:04:40 mjh Exp $
 
-#ifndef __CRASH_DUMP_HH__
-#define __CRASH_DUMP_HH__
+#ifndef __BGP_CRASH_DUMP_HH__
+#define __BGP_CRASH_DUMP_HH__
 
 #include <list>
 
@@ -28,6 +28,7 @@ public:
     void register_dumper(CrashDumper *dumper);
     void unregister_dumper(CrashDumper *dumper);
     void crash_dump();
+
 private:
     list <CrashDumper*> _dumpers;
 };
@@ -38,9 +39,10 @@ public:
     CrashDumper();
     virtual ~CrashDumper();
     virtual void crash_dump() const;
-    virtual string dump_state() const {return "";}
+    virtual string dump_state() const { return ""; }
+
 private:
     static CrashDumpManager _mgr;
 };
 
-#endif // __CRASH_DUMP_HH__
+#endif // __BGP_CRASH_DUMP_HH__
