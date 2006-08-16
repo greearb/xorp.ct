@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.11 2006/03/16 00:04:23 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.12 2006/08/16 18:09:28 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -193,5 +193,5 @@ STCPPacketHeader::payload_bytes() const
 uint32_t
 STCPPacketHeader::frame_bytes() const
 {
-    return sizeof(STCPPacketHeader) + error_note_bytes() + payload_bytes();
+    return header_size() + error_note_bytes() + payload_bytes();
 }

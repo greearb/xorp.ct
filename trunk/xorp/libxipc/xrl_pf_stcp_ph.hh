@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.9 2006/03/16 00:04:23 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.10 2006/08/16 18:09:28 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -37,10 +37,14 @@ enum STCPPacketType {
 
 // STCP Packet Header.
 struct STCPPacketHeader {
+    static const size_t SIZE = 24;	// STCP Packet Header size
+
     void initialize(uint32_t		seqno,
 		    STCPPacketType	type,
 		    const XrlError&	err,
 		    uint32_t		xrl_data_bytes);
+
+    static const size_t header_size() { return STCPPacketHeader::SIZE; }
 
     bool is_valid() const;
 
