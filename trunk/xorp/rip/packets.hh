@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.19 2005/08/31 16:53:59 zec Exp $
+// $XORP: xorp/rip/packets.hh,v 1.20 2006/03/16 00:05:49 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -414,8 +414,11 @@ PacketRouteEntry<IPv6>::is_table_request() const
     if (_metric != RIP_INFINITY) {
 	return false;
     }
-    const uint32_t* p = reinterpret_cast<const uint32_t*>(_prefix);
-    return (p[0] == 0) && (p[1] == 0) && (p[2] == 0) && (p[3] == 0);
+    if (_prefix_len != 0) {
+	return false;
+    }
+    IPv6 addr(_prefix);
+    return (addr.is_zero());
 }
 
 inline bool
