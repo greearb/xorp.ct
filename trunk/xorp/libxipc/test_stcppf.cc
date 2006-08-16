@@ -12,24 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.8 2005/08/18 15:32:39 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
+#ident "$XORP: xorp/libxipc/test_stcppf.cc,v 1.9 2006/03/16 00:04:19 pavlin Exp $"
 
 #include "xrl_module.h"
+#include "libxorp/xorp.h"
+
 #include "xrl_error.hh"
 #include "xrl_pf_stcp_ph.hh"
 
 static void
 test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes)
 {
+    uint8_t buffer[STCPPacketHeader::SIZE];
+
     printf("Testing STCPPacketHeader(%s, \"%s\", %ul)... ",
 	   is_request ? "true" : "false", string(e).c_str(), p_bytes);
-    STCPPacketHeader sph(is_request, e, p_bytes);
+
+    STCPPacketHeader sph(buffer);
+    sph.initialize(is_request, e, p_bytes);
 
     if (sph.is_valid() == false) {
 	printf("invalid header\n");
@@ -44,9 +44,9 @@ test_packet_header(bool is_request, const XrlError& e, uint32_t p_bytes)
     }
 }
 
-int main(int /* argc */, char *argv[])
+int
+main(int /* argc */, char *argv[])
 {
-
     //
     // Initialize and start xlog
     //

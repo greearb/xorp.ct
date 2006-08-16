@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.10 2006/08/16 18:09:28 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.11 2006/08/16 18:45:24 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -36,7 +36,10 @@ enum STCPPacketType {
 };
 
 // STCP Packet Header.
-struct STCPPacketHeader {
+class STCPPacketHeader {
+public:
+    STCPPacketHeader(uint8_t* data);
+
     static const size_t SIZE = 24;	// STCP Packet Header size
 
     void initialize(uint32_t		seqno,
@@ -70,14 +73,50 @@ struct STCPPacketHeader {
     uint32_t frame_bytes() const;
 
 private:
-    uint8_t _fourcc[4];		  // fourcc 'S' 'T' 'C' 'P'
-    uint8_t _major[1];		  // Version
-    uint8_t _minor[1];		  // Version
-    uint8_t _seqno[4];		  // Sequence number
-    uint8_t _type[2];		  // [15:7] Set to zero, [0:1] hello/req./resp.
-    uint8_t _error_code[4];	  // XrlError code
-    uint8_t _error_note_bytes[4]; // Length of note (if any) assoc. w/ code
-    uint8_t _xrl_data_bytes[4];	  // Xrl return args data bytes
+    //
+    // The STCP packet header has the following content:
+    //
+    // fourcc (4 bytes): fourcc 'S' 'T' 'C' 'P'
+    // major  (1 byte):  Major version
+    // minor  (1 byte):  Minor version
+    // seqno  (4 bytes): Sequence number
+    // type   (2 bytes): Type: bits [15:7] set to zero, [0:1] hello/req./resp.
+    // error_code (4 bytes): XrlError code
+    // error_note_bytes (4 bytes): Length of note (if any) assoc. w/ code
+    // xrl_data_bytes (4 bytes): Xrl return args data bytes
+    //
+
+    uint8_t* _data;		// The buffer data with the header
+
+    // Pointers to the header fields
+    uint8_t* _fourcc;		// fourcc 'S' 'T' 'C' 'P'
+    uint8_t* _major;		// Major version
+    uint8_t* _minor;		// Minor version
+    uint8_t* _seqno;		// Sequence number
+    uint8_t* _type;		// [15:7] Set to zero, [0:1] hello/req./resp.
+    uint8_t* _error_code;	// XrlError code
+    uint8_t* _error_note_bytes;	// Length of note (if any) assoc. w/ code
+    uint8_t* _xrl_data_bytes;	// Xrl return args data bytes
+
+    // Sizes of the header fields
+    static const size_t _fourcc_sizeof = 4;
+    static const size_t _major_sizeof = 1;
+    static const size_t _minor_sizeof = 1;
+    static const size_t _seqno_sizeof = 4;
+    static const size_t _type_sizeof = 2;
+    static const size_t _error_code_sizeof = 4;
+    static const size_t _error_note_bytes_sizeof = 4;
+    static const size_t _xrl_data_bytes_sizeof = 4;
+
+    // Offsets for the header fields
+    static const size_t _fourcc_offset = 0;
+    static const size_t _major_offset = _fourcc_offset + _fourcc_sizeof;
+    static const size_t _minor_offset = _major_offset + _major_sizeof;
+    static const size_t _seqno_offset = _minor_offset + _minor_sizeof;
+    static const size_t _type_offset = _seqno_offset + _seqno_sizeof;
+    static const size_t _error_code_offset = _type_offset + _type_sizeof;
+    static const size_t _error_note_bytes_offset = _error_code_offset + _error_code_sizeof;
+    static const size_t _xrl_data_bytes_offset = _error_note_bytes_offset + _error_note_bytes_sizeof;
 };
 
 #endif // __LIBXIPC_XRL_PF_STCP_PH_HH__

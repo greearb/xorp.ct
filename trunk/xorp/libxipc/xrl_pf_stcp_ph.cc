@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.12 2006/08/16 18:09:28 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp_ph.cc,v 1.13 2006/08/16 18:45:24 pavlin Exp $"
 
 #include "xrl_module.h"
 #include "libxorp/xorp.h"
@@ -86,6 +86,25 @@ static inline uint8_t
 unpack1(const uint8_t* src)
 {
     return *src;
+}
+
+STCPPacketHeader::STCPPacketHeader(uint8_t* data)
+    : _data(data),
+      _fourcc(_data + _fourcc_offset),
+      _major(_data + _major_offset),
+      _minor(_data + _minor_offset),
+      _seqno(_data + _seqno_offset),
+      _type(_data + _type_offset),
+      _error_code(_data + _error_code_offset),
+      _error_note_bytes(_data + _error_note_bytes_offset),
+      _xrl_data_bytes(_data + _xrl_data_bytes_offset)
+{
+    static_assert(STCPPacketHeader::SIZE == _fourcc_sizeof + _major_sizeof
+		  + _minor_sizeof + _seqno_sizeof + _type_sizeof
+		  + _error_code_sizeof + _error_note_bytes_sizeof
+		  + _xrl_data_bytes_sizeof);
+    static_assert(STCPPacketHeader::SIZE ==
+		  _xrl_data_bytes_offset + _xrl_data_bytes_sizeof);
 }
 
 void

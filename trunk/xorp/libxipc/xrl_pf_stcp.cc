@@ -14,7 +14,7 @@
 
 //#define DEBUG_LOGGING
 
-#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.50 2006/08/12 00:34:00 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_stcp.cc,v 1.51 2006/08/16 18:46:30 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -174,38 +174,37 @@ STCPRequestHandler::read_event(BufferedAsyncReader*		/* source */,
 	    return;
 	}
 
-	const STCPPacketHeader* sph =
-	    reinterpret_cast<const STCPPacketHeader*>(buffer);
+	const STCPPacketHeader sph(buffer);
 
-	if (!sph->is_valid()) {
+	if (!sph.is_valid()) {
 	    die("bad header");
 	    return;
 	}
 
-	if (sph->type() == STCP_PT_HELO) {
+	if (sph.type() == STCP_PT_HELO) {
 	    debug_msg("Got helo\n");
-	    ack_helo(sph->seqno());
-	    _reader.dispose(sph->frame_bytes());
+	    ack_helo(sph.seqno());
+	    _reader.dispose(sph.frame_bytes());
 	    _reader.set_trigger_bytes(STCPPacketHeader::header_size());
 	    return;
-	} else if (sph->type() != STCP_PT_REQUEST) {
+	} else if (sph.type() != STCP_PT_REQUEST) {
 	    die("Bad packet type");
 	    return;
 	}
 
-	if (buffer_bytes >= sph->frame_bytes()) {
+	if (buffer_bytes >= sph.frame_bytes()) {
 	    uint8_t* xrl_data = buffer;
-	    xrl_data += STCPPacketHeader::header_size() + sph->error_note_bytes();
-	    size_t   xrl_data_bytes = sph->payload_bytes();
-	    dispatch_request(sph->seqno(), xrl_data, xrl_data_bytes);
-	    _reader.dispose(sph->frame_bytes());
-	    buffer += sph->frame_bytes();
-	    buffer_bytes -= sph->frame_bytes();
+	    xrl_data += STCPPacketHeader::header_size() + sph.error_note_bytes();
+	    size_t   xrl_data_bytes = sph.payload_bytes();
+	    dispatch_request(sph.seqno(), xrl_data, xrl_data_bytes);
+	    _reader.dispose(sph.frame_bytes());
+	    buffer += sph.frame_bytes();
+	    buffer_bytes -= sph.frame_bytes();
 	} else {
-	    if (sph->frame_bytes() > _reader.reserve_bytes()) {
-		_reader.set_reserve_bytes(sph->frame_bytes());
+	    if (sph.frame_bytes() > _reader.reserve_bytes()) {
+		_reader.set_reserve_bytes(sph.frame_bytes());
 	    }
-	    _reader.set_trigger_bytes(sph->frame_bytes());
+	    _reader.set_trigger_bytes(sph.frame_bytes());
 	    return;
 	}
     }
@@ -245,8 +244,8 @@ STCPRequestHandler::dispatch_request(uint32_t 		seqno,
     _responses_size++;
     ReplyPacket& r = _responses.back();
 
-    STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&r[0]);
-    sph->initialize(seqno, STCP_PT_RESPONSE, e, xrl_response_bytes);
+    STCPPacketHeader sph(&r[0]);
+    sph.initialize(seqno, STCP_PT_RESPONSE, e, xrl_response_bytes);
 
     if (note_bytes != 0) {
 	memcpy(&r[0] + STCPPacketHeader::header_size(),
@@ -274,8 +273,8 @@ STCPRequestHandler::ack_helo(uint32_t seqno)
     _responses_size++;
     ReplyPacket& r = _responses.back();
 
-    STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&r[0]);
-    sph->initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
+    STCPPacketHeader sph(&r[0]);
+    sph.initialize(seqno, STCP_PT_HELO_ACK, XrlError::OKAY(), 0);
     _writer.add_buffer(&r[0], r.size(),
 		       callback(this, &STCPRequestHandler::update_writer));
 
@@ -459,8 +458,8 @@ public:
 	_b.resize(header_bytes + xrl_bytes);
 
 	// Prepare header
-	STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&_b[0]);
-	sph->initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
+	STCPPacketHeader sph(&_b[0]);
+	sph.initialize(_sn, STCP_PT_REQUEST, XrlError::OKAY(), xrl_bytes);
 
 	// Pack XRL data
 	x.pack(&_b[0] + header_bytes, xrl_bytes);
@@ -476,8 +475,8 @@ public:
 	_b.resize(header_bytes);
 
 	// Prepare header
-	STCPPacketHeader* sph = reinterpret_cast<STCPPacketHeader*>(&_b[0]);
-	sph->initialize(_sn, STCP_PT_HELO, XrlError::OKAY(), 0);
+	STCPPacketHeader sph(&_b[0]);
+	sph.initialize(_sn, STCP_PT_HELO, XrlError::OKAY(), 0);
     }
 
     inline bool		    has_seqno(uint32_t n) const { return _sn == n; }
@@ -490,8 +489,8 @@ public:
     {
 	if (_b.size() < STCPPacketHeader::header_size())
 	    return false;
-	const STCPPacketHeader* sph = reinterpret_cast<const STCPPacketHeader*>(&_b[0]);
-	STCPPacketType pt = sph->type();
+	const STCPPacketHeader sph(&_b[0]);
+	STCPPacketType pt = sph.type();
 	return pt == STCP_PT_HELO || pt == STCP_PT_HELO_ACK;
     }
 
@@ -799,52 +798,51 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
 	return;
     }
 
-    const STCPPacketHeader* sph =
-	reinterpret_cast<const STCPPacketHeader*>(buffer);
+    const STCPPacketHeader sph(buffer);
 
-    if (sph->is_valid() == false) {
+    if (sph.is_valid() == false) {
 	die("bad header");
 	return;
     }
 
-    if (sph->seqno() != _requests_sent.front()->seqno()) {
+    if (sph.seqno() != _requests_sent.front()->seqno()) {
 	die("Bad sequence number");
 	return;
     }
 
-    if (sph->type() == STCP_PT_HELO_ACK) {
+    if (sph.type() == STCP_PT_HELO_ACK) {
 	debug_msg("Got keep alive ack\n");
 	_keepalive_sent = false;
 	dispose_request();
-	_reader->dispose(sph->frame_bytes());
-	_reader->set_trigger_bytes(sph->header_size());
+	_reader->dispose(sph.frame_bytes());
+	_reader->set_trigger_bytes(sph.header_size());
 	return;
     }
 
-    if (sph->type() != STCP_PT_RESPONSE) {
+    if (sph.type() != STCP_PT_RESPONSE) {
 	die("unexpected packet type - not a response");
     }
 
     debug_msg("Frame Bytes %u Available %u\n",
-	      XORP_UINT_CAST(sph->frame_bytes()),
+	      XORP_UINT_CAST(sph.frame_bytes()),
 	      XORP_UINT_CAST(buffer_bytes));
-    if (sph->frame_bytes() > buffer_bytes) {
-	if (_reader->reserve_bytes() < sph->frame_bytes())
-	    _reader->set_reserve_bytes(sph->frame_bytes());
-	_reader->set_trigger_bytes(sph->frame_bytes() - buffer_bytes);
+    if (sph.frame_bytes() > buffer_bytes) {
+	if (_reader->reserve_bytes() < sph.frame_bytes())
+	    _reader->set_reserve_bytes(sph.frame_bytes());
+	_reader->set_trigger_bytes(sph.frame_bytes() - buffer_bytes);
 	return;
     }
 
     const uint8_t* xrl_data = buffer + STCPPacketHeader::header_size();
 
     XrlError xrl_error;
-    if (sph->error_note_bytes()) {
-	xrl_error = XrlError(XrlErrorCode(sph->error_code()),
+    if (sph.error_note_bytes()) {
+	xrl_error = XrlError(XrlErrorCode(sph.error_code()),
 			     string((const char*)xrl_data,
-				    sph->error_note_bytes()));
-	xrl_data += sph->error_note_bytes();
+				    sph.error_note_bytes()));
+	xrl_data += sph.error_note_bytes();
     } else {
-	xrl_error = XrlError(XrlErrorCode(sph->error_code()));
+	xrl_error = XrlError(XrlErrorCode(sph.error_code()));
     }
 
     // Get ref_ptr to callback from request state and discard the rest
@@ -857,8 +855,8 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
     XrlArgs  xa;
     XrlArgs* xap = NULL;
     try {
-	if (sph->payload_bytes() > 0) {
-	    xa.unpack(xrl_data, sph->payload_bytes());
+	if (sph.payload_bytes() > 0) {
+	    xa.unpack(xrl_data, sph.payload_bytes());
 	    xap = &xa;
 	}
     } catch (...) {
@@ -870,7 +868,7 @@ XrlPFSTCPSender::read_event(BufferedAsyncReader*	/* reader */,
 
     // Update reader to say we're done with this block of data and
     // specify minimum reserve for next call.
-    _reader->dispose(sph->frame_bytes());
+    _reader->dispose(sph.frame_bytes());
     _reader->set_trigger_bytes(STCPPacketHeader::header_size());
 
     // Dispatch Xrl and exit
