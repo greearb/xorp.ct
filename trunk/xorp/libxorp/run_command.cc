@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.25 2006/04/02 04:30:27 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.26 2006/04/02 04:31:14 pavlin Exp $
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,6 +35,7 @@
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/eventloop.hh"
+#include "libxorp/exceptions.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/xorpfd.hh"
 #include "libxorp/asyncio.hh"
@@ -432,9 +433,17 @@ RunCommandBase::wait_status_changed(int wait_status)
     // XXX: Schedule a timer to complete the command so we can return
     // control to the caller.
     //
-    _done_timer = _eventloop.new_oneoff_after(
-	TimeVal::ZERO(),
-	callback(this, &RunCommandBase::done));
+    // TODO: Temporary print any errors and catch any exceptions
+    // (for debugging purpose).
+    try {
+	errno = 0;
+	_done_timer = _eventloop.new_oneoff_after(
+	    TimeVal::ZERO(),
+	    callback(this, &RunCommandBase::done));
+    } catch(...) {
+	XLOG_ERROR("Error scheduling RunCommand::_done_timer: %d", errno);
+	xorp_catch_standard_exceptions();
+    }
 }
 
 void
