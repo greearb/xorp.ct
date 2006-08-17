@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.33 2006/08/15 23:03:53 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.34 2006/08/17 17:21:52 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -275,7 +275,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     IPNet<A> net = rtmsg.net();
-    log("replace_route: " + net.str());
+    log("delete_route: " + net.str());
 
     //do we already have this cached?
     typename RefTrie<A, const CacheRoute<A> >::iterator iter;
