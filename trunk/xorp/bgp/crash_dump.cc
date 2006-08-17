@@ -13,18 +13,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/crash_dump.cc,v 1.1 2006/08/15 23:04:40 mjh Exp $"
+#ident "$XORP: xorp/bgp/crash_dump.cc,v 1.2 2006/08/16 00:09:26 pavlin Exp $"
 
 #include "bgp_module.h"
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/c_format.hh"
+#include "libxorp/timer.hh"
 
 #include "crash_dump.hh"
 
 #ifndef HOST_OS_WINDOWS
 #include <pwd.h>
 #endif
+
+#define CRASHLOG_SIZE 100
 
 //make it real
 CrashDumpManager CrashDumper::_mgr;
@@ -89,6 +92,9 @@ CrashDumpManager::crash_dump()
 CrashDumper::CrashDumper()
 {
     _mgr.register_dumper(this);
+    _logfirst = 0;
+    _loglast = 0;
+
 }
 
 CrashDumper::~CrashDumper()
@@ -100,4 +106,46 @@ void
 CrashDumper::crash_dump() const
 {
     _mgr.crash_dump();
+}
+
+void
+CrashDumper::log(const string& msg)
+{
+    if (_logfirst == _loglast) {
+	// first time we're called, allocate the storage
+	_log.resize(CRASHLOG_SIZE);
+	_logtimes.resize(CRASHLOG_SIZE);
+    }
+
+    if ( ((_loglast + 1) % CRASHLOG_SIZE) == _logfirst) {
+	// need to overwrite an old entry
+	_loglast = _logfirst;
+	_logfirst = ((_logfirst + 1) % CRASHLOG_SIZE);
+    } else {
+	// there's still space
+	_loglast = ((_loglast + 1) % CRASHLOG_SIZE);
+    }
+
+    _log[_loglast] = msg;
+
+    TimeVal tv;
+    TimerList::system_gettimeofday(&tv);
+    _logtimes[_loglast] = tv;
+}
+
+string
+CrashDumper::dump_state() const
+{
+    string s;
+    if (_logfirst != _loglast) {
+	s = "Audit Log:\n";
+	int i = _logfirst;
+	while (1) {
+	    s += _logtimes[i].str() + " " + _log[i] + "\n";
+	    if (i == _loglast)
+		break;
+	    i = ((i + 1) % CRASHLOG_SIZE);
+	}
+    }
+    return s;
 }

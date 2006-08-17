@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.32 2006/03/16 00:03:32 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.33 2006/08/15 23:03:53 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -82,8 +82,10 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
 
     if (rtmsg.changed()==false) {
+	log("add_route (unchanged): " + net.str());
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
+	log("add_route (changed): " + net.str());
 	//The route was changed.  
 
 	//It's the responsibility of the recipient of a changed route
@@ -163,6 +165,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     IPNet<A> net = old_rtmsg.net();
     XLOG_ASSERT(net == new_rtmsg.net());
+    log("replace_route: " + net.str());
 
     SubnetRouteConstRef<A> *old_route_reference = NULL;
     const InternalMessage<A> *old_rtmsg_ptr = &old_rtmsg;
@@ -170,6 +173,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
+	log ("old route was changed\n");
 	typename RefTrie<A, const CacheRoute<A> >::iterator iter;
 	iter = _route_table->lookup_node(net);
 	if (iter == _route_table->end()) {
@@ -204,6 +208,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 					    new_rtmsg, 
 					    (BGPRouteTable<A>*)this);
     } else {
+	log ("new route was changed\n");
 	//Route was changed.
 
 	//It's the responsibility of the recipient of a changed route
@@ -270,6 +275,7 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     IPNet<A> net = rtmsg.net();
+    log("replace_route: " + net.str());
 
     //do we already have this cached?
     typename RefTrie<A, const CacheRoute<A> >::iterator iter;
@@ -408,6 +414,7 @@ CacheTable<A>::dump_state() const {
     s += str() + "\n";
     s += "=================================================================\n";
     s += _route_table->str();
+    s += CrashDumper::dump_state(); 
     return s;
 }
 

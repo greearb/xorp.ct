@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.55 2006/08/15 23:03:53 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.56 2006/08/16 21:41:38 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -223,6 +223,9 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
+    log("add_route rcvd, net: " + rtmsg.route()->net().str()
+	+ " peer: " + origin_peer->peername());
+
     typename NextTableMap<A>::iterator i = _next_tables.begin();
     list <PeerTableInfo<A>*> queued_peers;
     while (i != _next_tables.end()) {
@@ -289,6 +292,9 @@ FanoutTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     const PeerHandler *origin_peer = old_rtmsg.origin_peer();
     XLOG_ASSERT(origin_peer == new_rtmsg.origin_peer());
 
+    log("replace_route rcvd, net: " + old_rtmsg.route()->net().str()
+	+ " peer: " + origin_peer->peername());
+
     list <PeerTableInfo<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -332,6 +338,9 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
+    log("delete_route rcvd, net: " + rtmsg.route()->net().str()
+	+ " peer: " + origin_peer->peername());
+
     list <PeerTableInfo<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -367,6 +376,9 @@ FanoutTable<A>::route_dump(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(rtmsg.route()->nexthop_resolved());
 
+    log("route_dump, net: " + rtmsg.route()->net().str()
+	+ " dump peer: " + dump_peer->peername());
+
     BGPRouteTable<A> *dump_child = 0;
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
@@ -389,6 +401,7 @@ int
 FanoutTable<A>::push(BGPRouteTable<A> *caller) 
 {
     debug_msg("Push\n");
+    log("received push");
     XLOG_ASSERT(caller == this->_parent);
     list <PeerTableInfo<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
@@ -626,8 +639,12 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     if (peer_info->has_queued_data() == false) {
 	debug_msg("no data queued\n");
 	peer_info->set_is_ready();
+	log("get next message (non available): " 
+	    + peer_info->peer_handler()->peername());
 	return false;
     }
+
+    log("get next message: " + peer_info->peer_handler()->peername());
 
     typename list<const RouteQueueEntry<A>*>::iterator queue_ptr;
     queue_ptr = peer_info->queue_position();
@@ -642,6 +659,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) rtmsg.set_push();
+	log("sending add_route: " + (*queue_ptr)->route()->net().str());
 	next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
@@ -651,6 +669,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 				 (*queue_ptr)->origin_peer(),
 				 (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) rtmsg.set_push();
+	log("sending delete_route: " + (*queue_ptr)->route()->net().str());
 	next_table->delete_route(rtmsg, (BGPRouteTable<A>*)this);
 	break;
     }
@@ -667,6 +686,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 				     (*queue_ptr)->origin_peer(),
 				     (*queue_ptr)->genid());
 	if ((*queue_ptr)->push()) new_rtmsg.set_push();
+	log("sending replace_route: " + (*queue_ptr)->route()->net().str());
 	next_table->replace_route(old_rtmsg, new_rtmsg,
 				  (BGPRouteTable<A>*)this);
 	skipped = 2;
@@ -682,6 +702,7 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     }
     case RTQUEUE_OP_PUSH: {
 	debug_msg("OP_PUSH\n");
+	log("sending push");
 	next_table->push(this);
 	break;
     }
@@ -878,6 +899,7 @@ FanoutTable<A>::peering_went_down(const PeerHandler *peer, uint32_t genid,
 				  BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(this->_parent == caller);
+    log("Peering went down: " + peer->peername());
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	i.first()->peering_went_down(peer, genid, (BGPRouteTable<A>*)this);
@@ -891,6 +913,7 @@ FanoutTable<A>::peering_down_complete(const PeerHandler *peer,
 				      BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(this->_parent == caller);
+    log("Peering down complete: " + peer->peername());
 
     debug_msg("peer: %s genid: %u caller: %s\n",
 	      peer->peername().c_str(), XORP_UINT_CAST(genid),
@@ -915,6 +938,7 @@ FanoutTable<A>::peering_came_up(const PeerHandler *peer, uint32_t genid,
 				BGPRouteTable<A> *caller) 
 {
     XLOG_ASSERT(this->_parent == caller);
+    log("Peering came up: " + peer->peername());
     typename NextTableMap<A>::iterator i;
     for (i = _next_tables.begin();  i != _next_tables.end();  i++) {
 	i.first()->peering_came_up(peer, genid, (BGPRouteTable<A>*)this);
@@ -950,6 +974,7 @@ FanoutTable<A>::dump_state() const {
 	ctr++;
 	s += c_format("%-5d %s\n", ctr, (*i)->str().c_str());
     }
+    s += CrashDumper::dump_state();
     return s;
 } 
 
