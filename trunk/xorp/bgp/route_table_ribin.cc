@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.47 2006/08/12 00:34:00 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_ribin.cc,v 1.48 2006/08/15 23:03:53 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -59,6 +59,7 @@ template<class A>
 void
 RibInTable<A>::ribin_peering_went_down()
 {
+    log("Peering went down");
     _peer_is_up = false;
 
     // Stop pushing changed nexthops.
@@ -102,6 +103,7 @@ template<class A>
 void
 RibInTable<A>::ribin_peering_came_up()
 {
+    log("Peering came up");
     _peer_is_up = true;
     _genid++;
 
@@ -125,13 +127,13 @@ RibInTable<A>::add_route(const InternalMessage<A> &rtmsg,
 	      &rtmsg,
 	      rtmsg.route(),
 	      rtmsg.str().c_str());
-
     const ChainedSubnetRoute<A> *new_route;
     const SubnetRoute<A> *existing_route;
     XLOG_ASSERT(caller == NULL);
     XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);
     XLOG_ASSERT(this->_next_table != NULL);
+    log("add route: " + rtmsg.net().str());
 
     uint32_t dummy;
     existing_route = lookup_route(rtmsg.net(), dummy);
@@ -215,6 +217,7 @@ RibInTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == NULL);
     XLOG_ASSERT(rtmsg.origin_peer() == _peer);
     XLOG_ASSERT(_peer_is_up);
+    log("delete route: " + rtmsg.net().str());
 
     const SubnetRoute<A> *existing_route;
     uint32_t dummy;
@@ -349,6 +352,7 @@ RibInTable<A>::dump_next_route(DumpIterator<A>& dump_iter)
 	    InternalMessage<A> rt_msg(chained_rt, _peer, _genid);
 	    rt_msg.set_push();
 	   
+	    log("dump route: " + rt_msg.net().str());
 	    int res = this->_next_table->route_dump(rt_msg, (BGPRouteTable<A>*)this,
 				    dump_iter.peer_to_dump_to());
 
@@ -376,6 +380,7 @@ RibInTable<A>::igp_nexthop_changed(const A& bgp_nexthop)
     debug_msg("igp_nexthop_changed for bgp_nexthop %s on table %s\n",
 	   bgp_nexthop.str().c_str(), this->tablename().c_str());
 
+    log("igp nexthop changed: " + bgp_nexthop.str());
     typename set <A>::const_iterator i;
     i = _changed_nexthops.find(bgp_nexthop);
     if (i != _changed_nexthops.end()) {
@@ -454,6 +459,7 @@ RibInTable<A>::push_next_changed_nexthop()
 	//we used to send this as a replace route, but replacing a
 	//route with itself isn't safe in terms of preserving the
 	//flags.
+	log("push next changed nexthop: " + old_rt_msg.net().str());
 	this->_next_table->delete_route(old_rt_msg, (BGPRouteTable<A>*)this);
 	this->_next_table->add_route(new_rt_msg, (BGPRouteTable<A>*)this);
 
@@ -565,6 +571,7 @@ RibInTable<A>::dump_state() const {
     else
 	s += "Peer is DOWN\n";
     s += _route_table->str();
+    s += CrashDumper::dump_state();  
     return s;
 } 
 
