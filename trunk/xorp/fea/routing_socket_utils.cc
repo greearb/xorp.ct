@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.32 2006/04/03 06:21:28 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.33 2006/06/29 11:03:55 bms Exp $"
 
 #include "fea_module.h"
 
@@ -472,22 +472,34 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 #ifdef HOST_OS_WINDOWS
     // XXX: TODO: Windows ifindex-to-friendlyname lookup.
 #else
-    if (lookup_ifindex && (sa = rti_info[RTAX_IFP]) != NULL) {
-	if (sa->sa_family != AF_LINK) {
-	    // TODO: verify whether this is really an error.
-	    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
-		       sa->sa_family);
-	    return false;
-	}
-	const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
-	
-	if (sdl->sdl_nlen > 0) {
-	    if_name = string(sdl->sdl_data, sdl->sdl_nlen);
-	} else {
-	    if (if_index == 0) {
-		XLOG_FATAL("Interface with no name and index");
+    if (lookup_ifindex) {
+	const char* name = NULL;
+
+	do {
+	    sa = rti_info[RTAX_IFP];
+	    if (sa != NULL) {
+		// Use the RTAX_IFP info to get the interface name
+		if (sa->sa_family != AF_LINK) {
+		    // TODO: verify whether this is really an error.
+		    XLOG_ERROR("Ignoring RTM_GET for RTAX_IFP with sa_family = %d",
+			       sa->sa_family);
+		    return false;
+		}
+		const struct sockaddr_dl* sdl;
+		sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
+		if (sdl->sdl_nlen > 0) {
+		    if_name = string(sdl->sdl_data, sdl->sdl_nlen);
+		    break;
+		}
+		if (if_index == 0) {
+		    XLOG_FATAL("Interface with no name and index");
+		}
 	    }
-	    const char* name = NULL;
+
+	    // Use the interface index to get the interface name
+	    if (if_index == 0) {
+		break;		// XXX: no interface information is available
+	    }
 #ifdef HAVE_IF_INDEXTONAME
 	    char name_buf[IF_NAMESIZE];
 	    name = if_indextoname(if_index, name_buf);
@@ -497,9 +509,10 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 			   if_index);
 	    }
 	    if_name = string(name);
-	}
+	    break;
+	} while (false);
     }
-#endif
+#endif // ! HOST_OS_WINDOWS
 
     //
     // TODO: define default routing metric and admin distance instead of 0xffff
