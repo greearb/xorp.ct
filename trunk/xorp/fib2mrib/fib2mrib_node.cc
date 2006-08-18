@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.29 2006/03/02 23:58:48 pavlin Exp $"
+#ident "$XORP: xorp/fib2mrib/fib2mrib_node.cc,v 1.30 2006/03/16 00:04:09 pavlin Exp $"
 
 //
 // Fib2mrib node implementation.
@@ -687,10 +687,6 @@ Fib2mribNode::add_route(const Fib2mribRoute& fib2mrib_route,
 	Fib2mribRoute& orig_route = iter->second;
 	if (orig_route.network() != updated_route.network())
 	    break;
-	if ((orig_route.ifname() != updated_route.ifname())
-	    || (orig_route.vifname() != updated_route.vifname())) {
-	    continue;
-	}
 
 	//
 	// XXX: Route found. Ideally, if we receive add_route() from
@@ -1176,6 +1172,16 @@ Fib2mribNode::update_route(const IfMgrIfTree& iftree, Fib2mribRoute& route)
     //
     if (route.is_interface_route())
 	return (false);
+
+    //
+    // First find if the next-hop address is one of our interfaces.
+    //
+    string ifname, vifname;
+    if (iftree.is_my_addr(route.nexthop(), ifname, vifname)) {
+	route.set_ifname(ifname);
+	route.set_vifname(vifname);
+	return (true);
+    }
 
     //
     // Find if there is a directly-connected subnet that matches the route
