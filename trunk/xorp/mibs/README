@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/mibs/README,v 1.5 2003/11/07 00:00:11 pavlin Exp $
+# $XORP: xorp/mibs/README,v 1.6 2004/06/15 00:16:34 pavlin Exp $
 #
 
 MIB modules for Net-SNMP
@@ -82,3 +82,7 @@ memory aggregation by modifying _MAX_BYTES to be 0 (instead of 128) and
 _NFREELISTS to be 16 (instead of _MAX_BYTES/_ALIGN) in
 /usr/include/g++/stl_alloc.h
 
+The net-snmp code itself should be compiled with the -DNETSNMP_NO_INLINE
+compilation flag defined, otherwise there could be a run-time error when
+starting snmpd and loading one of the XORP MIBs:
+dlopen failed: /usr/local/xorp/mibs/bgp4_mib_1657.so: undefined symbol: CONTAINER_INSERT
