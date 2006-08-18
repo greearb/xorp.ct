@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.22 2005/11/01 04:31:01 pavlin Exp $
+// $XORP: xorp/libfeaclient/ifmgr_atoms.hh,v 1.23 2006/03/16 00:04:10 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_IFMGR_ATOMS_HH__
 #define __LIBFEACLIENT_IFMGR_ATOMS_HH__
@@ -146,6 +146,51 @@ public:
      * @return true if this instance and o are the same, false otherwise.
      */
     bool operator==(const IfMgrIfTree& o) const;
+
+    /**
+     * Test if an IPv4 address belongs to an interface.
+     * 
+     * If an interface with the address is down, then the address is not
+     * considered to belong to that interface.
+     * 
+     * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface
+     * the address belongs to, or an empty string.
+     * @param vifname the return-by-reference name of the vif
+     * the address belongs to, or an empty string.
+     * @return true if the address belongs to an interface, otherwise false.
+     */
+    bool is_my_addr(const IPv4& addr, string& ifname, string& vifname) const;
+
+    /**
+     * Test if an IPv6 address belongs to an interface.
+     * 
+     * If an interface with the address is down, then the address is not
+     * considered to belong to that interface.
+     * 
+     * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface
+     * the address belongs to, or an empty string.
+     * @param vifname the return-by-reference name of the vif
+     * the address belongs to, or an empty string.
+     * @return true if the address belongs to an interface, otherwise false.
+     */
+    bool is_my_addr(const IPv6& addr, string& ifname, string& vifname) const;
+
+    /**
+     * Test if an IPvX address belongs to an interface.
+     * 
+     * If an interface with the address is down, then the address is not
+     * considered to belong to that interface.
+     * 
+     * @param addr the address to test.
+     * @param ifname the return-by-reference name of the interface
+     * the address belongs to, or an empty string.
+     * @param vifname the return-by-reference name of the vif
+     * the address belongs to, or an empty string.
+     * @return true if the address belongs to an interface, otherwise false.
+     */
+    bool is_my_addr(const IPvX& addr, string& ifname, string& vifname) const;
 
     /**
      * Test if an IPv4 address is directly connected to an interface.

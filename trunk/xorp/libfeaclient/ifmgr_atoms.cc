@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.13 2005/11/02 02:27:22 pavlin Exp $"
+#ident "$XORP: xorp/libfeaclient/ifmgr_atoms.cc,v 1.14 2006/03/16 00:04:10 pavlin Exp $"
 
 #include "ifmgr_atoms.hh"
 
@@ -194,6 +194,121 @@ bool
 IfMgrIfTree::operator==(const IfMgrIfTree& o) const
 {
     return o.ifs() == ifs();
+}
+
+bool
+IfMgrIfTree::is_my_addr(const IPv4& addr, string& ifname,
+			string& vifname) const
+{
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	// Test if interface is enabled and the link state is up
+	if ((! iface.enabled()) || iface.no_carrier())
+	    continue;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    // Test if vif is enabled
+	    if (! vif.enabled())
+		continue;
+
+	    // Test if there is matching IPv4 address
+	    IfMgrVifAtom::V4Map::const_iterator a4_iter;
+
+	    for (a4_iter = vif.ipv4addrs().begin();
+		 a4_iter != vif.ipv4addrs().end();
+		 ++a4_iter) {
+		const IfMgrIPv4Atom& a4 = a4_iter->second;
+
+		if (! a4.enabled())
+		    continue;
+
+		// Test if my own address
+		if (a4.addr() == addr) {
+		    ifname = iface.name();
+		    vifname = vif.name();
+		    return (true);
+		}
+	    }
+	}
+    }
+
+    ifname = "";
+    vifname = "";
+    return (false);
+}
+
+bool
+IfMgrIfTree::is_my_addr(const IPv6& addr, string& ifname,
+			string& vifname) const
+{
+    IfMgrIfTree::IfMap::const_iterator if_iter;
+
+    for (if_iter = ifs().begin(); if_iter != ifs().end(); ++if_iter) {
+	const IfMgrIfAtom& iface = if_iter->second;
+
+	// Test if interface is enabled and the link state is up
+	if ((! iface.enabled()) || iface.no_carrier())
+	    continue;
+
+	IfMgrIfAtom::VifMap::const_iterator vif_iter;
+	for (vif_iter = iface.vifs().begin();
+	     vif_iter != iface.vifs().end();
+	     ++vif_iter) {
+	    const IfMgrVifAtom& vif = vif_iter->second;
+
+	    // Test if vif is enabled
+	    if (! vif.enabled())
+		continue;
+
+	    // Test if there is matching IPv6 address
+	    IfMgrVifAtom::V6Map::const_iterator a6_iter;
+
+	    for (a6_iter = vif.ipv6addrs().begin();
+		 a6_iter != vif.ipv6addrs().end();
+		 ++a6_iter) {
+		const IfMgrIPv6Atom& a6 = a6_iter->second;
+
+		if (! a6.enabled())
+		    continue;
+
+		// Test if my own address
+		if (a6.addr() == addr) {
+		    ifname = iface.name();
+		    vifname = vif.name();
+		    return (true);
+		}
+	    }
+	}
+    }
+
+    ifname = "";
+    vifname = "";
+    return (false);
+}
+
+bool
+IfMgrIfTree::is_my_addr(const IPvX& addr, string& ifname,
+			string& vifname) const
+{
+    if (addr.is_ipv4()) {
+	IPv4 addr4 = addr.get_ipv4();
+	return (is_my_addr(addr4, ifname, vifname));
+    }
+
+    if (addr.is_ipv6()) {
+	IPv6 addr6 = addr.get_ipv6();
+	return (is_my_addr(addr6, ifname, vifname));
+    }
+
+    return (false);
 }
 
 bool
