@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv6.m4,v 1.22 2005/10/28 17:35:46 pavlin Exp $
+dnl $XORP: xorp/config/acipv6.m4,v 1.23 2005/10/30 05:14:59 pavlin Exp $
 dnl
 
 dnl
@@ -265,6 +265,20 @@ test_sin6_len_headers=["
 AC_CHECK_MEMBER([struct sockaddr_in6.sin6_len],
  [AC_DEFINE(HAVE_SIN6_LEN, 1,
 	  [Define to 1 if your struct sockaddr_in6 has field sin6_len])], ,
+ [${test_sin6_len_headers}])
+
+dnl ----------------------------
+dnl Check for sin6_scope_id in sockaddr_in6 (Windows: ??)
+dnl ----------------------------
+
+test_sin6_len_headers=["
+	#include <sys/types.h>
+	#include <netinet/in.h>
+"]
+
+AC_CHECK_MEMBER([struct sockaddr_in6.sin6_scope_id],
+ [AC_DEFINE(HAVE_SIN6_SCOPE_ID, 1,
+	  [Define to 1 if your struct sockaddr_in6 has field sin6_scope_id])], ,
  [${test_sin6_len_headers}])
 
 dnl ----------------------------

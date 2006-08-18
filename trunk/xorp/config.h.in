@@ -377,6 +377,9 @@
 /* Define to 1 if your struct sockaddr_in6 has field sin6_len */
 #undef HAVE_SIN6_LEN
 
+/* Define to 1 if your struct sockaddr_in6 has field sin6_scope_id */
+#undef HAVE_SIN6_SCOPE_ID
+
 /* Define to 1 if your struct sockaddr_in has field sin_len */
 #undef HAVE_SIN_LEN
 
