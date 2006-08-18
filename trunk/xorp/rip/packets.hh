@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.21 2006/08/16 01:15:04 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.22 2006/08/18 01:50:30 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -360,16 +360,16 @@ public:
     static const size_t size() { return MD5PacketTrailer::SIZE; }
 
     inline void initialize();
-    inline uint8_t* data() 				{ return _data; }
-    inline const uint8_t* data() const			{ return _data; }
-    inline uint32_t data_bytes() const			{ return 16; }
-    inline uint32_t data_offset() const			{ return 4; }
+    inline uint8_t* auth_data()				{ return _auth_data; }
+    inline const uint8_t* auth_data() const		{ return _auth_data; }
+    inline uint32_t auth_data_bytes() const		{ return 16; }
+    inline uint32_t auth_data_offset() const		{ return 4; }
     inline bool valid() const;
 
 private:
     uint16_t _af;			// 0xffff - Authentication header
     uint16_t _one;			// 0x01	  - RFC2082 defined
-    uint8_t  _data[16];			// 16 bytes of data
+    uint8_t  _auth_data[16];		// 16 bytes of data
 };
 
 inline void

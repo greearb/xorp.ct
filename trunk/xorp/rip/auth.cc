@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.31 2006/05/15 21:10:24 pavlin Exp $"
+#ident "$XORP: xorp/rip/auth.cc,v 1.32 2006/08/18 01:50:30 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -584,11 +584,11 @@ MD5AuthHandler::authenticate_inbound(const uint8_t*		packet,
     uint8_t digest[16];
 
     MD5_Init(&ctx);
-    MD5_Update(&ctx, packet, mpr->auth_offset() + mpt->data_offset());
+    MD5_Update(&ctx, packet, mpr->auth_offset() + mpt->auth_data_offset());
     MD5_Update(&ctx, key->key_data(), key->key_data_bytes());
     MD5_Final(digest, &ctx);
 
-    if (memcmp(digest, mpt->data(), mpt->data_bytes()) != 0) {
+    if (memcmp(digest, mpt->auth_data(), mpt->auth_data_bytes()) != 0) {
 	set_error(c_format("authentication digest doesn't match local key "
 			   "(key ID = %d)", key->id()));
 // #define	DUMP_BAD_MD5
@@ -675,9 +675,9 @@ MD5AuthHandler::authenticate_outbound(RipPacket<IPv4>&	packet,
 	MD5_CTX ctx;
 	MD5_Init(&ctx);
 	MD5_Update(&ctx, copy_packet->data_ptr(), mpr->auth_offset());
-	MD5_Update(&ctx, &trailer[0], mpt->data_offset());
+	MD5_Update(&ctx, &trailer[0], mpt->auth_data_offset());
 	MD5_Update(&ctx, key.key_data(), key.key_data_bytes());
-	MD5_Final(mpt->data(), &ctx);
+	MD5_Final(mpt->auth_data(), &ctx);
 
 	//
 	// XXX: create a copy of the first packet without the trailer
