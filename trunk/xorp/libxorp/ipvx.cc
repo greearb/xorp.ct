@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.23 2006/08/04 22:50:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.24 2006/08/18 22:14:48 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -365,7 +365,27 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 	to_sockaddr_in6.sin6_len = sizeof(to_sockaddr_in6);
 #endif
 	to_sockaddr_in6.sin6_family = _af;
+
+#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef IPV6_STACK_KAME
+	//
+	// XXX: In case of KAME the local interface index (also the link-local
+	// scope_id) is encoded in the third and fourth octet of an IPv6
+	// address (for link-local unicast/multicast addresses or
+	// interface-local multicast addresses only).
+	//
+	if (is_linklocal_unicast()
+	    || is_linklocal_multicast()
+	    || is_interfacelocal_multicast()) {
+	    uint32_t addr0 = ntohs(_addr[0]);
+	    uint16_t zoneid = (addr0 & 0xffff);		// XXX: 16 bits only
+	    to_sockaddr_in6.sin6_scope_id = zoneid;
+	}
+#endif // IPV6_STACK_KAME
+#endif // HAVE_SIN6_SCOPE_ID
+
 	return (copy_out(to_sockaddr_in6.sin6_addr));
+
     default:
 	xorp_throw(InvalidFamily, _af);
     }
