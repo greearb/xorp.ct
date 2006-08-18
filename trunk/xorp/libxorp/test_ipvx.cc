@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.22 2006/08/04 17:32:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipvx.cc,v 1.23 2006/08/04 22:50:26 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -956,7 +956,7 @@ test_ipvx_address_type()
     IPvX ip6_multicast3("ffff:ffff:ffff:ffff:ffff:ffff:ffff:ffff");// Multicast
     //
     IPvX ip6_unicast_linklocal1("fe80::2");	// Link-local unicast
-    IPvX ip6_multicast_nodelocal1("ff01::1");	// Node-local multicast
+    IPvX ip6_multicast_interfacelocal1("ff01::1"); // Interface-local multicast
     IPvX ip6_multicast_linklocal1("ff02::2");	// Link-local multicast
     IPvX ip6_loopback1("::1");			// Loopback
 
@@ -1205,26 +1205,27 @@ test_ipvx_address_type()
 		   "is_linklocal_unicast()");
 
     //
-    // Test if an address is a valid node-local multicast address: IPv4
+    // Test if an address is a valid interface-local multicast address: IPv4
     //
-    verbose_assert(ip4_multicast1.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip4_multicast2.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip4_multicast3.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
+    verbose_assert(ip4_multicast1.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip4_multicast2.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip4_multicast3.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
 
     //
-    // Test if an address is a valid node-local multicast address: IPv6
+    // Test if an address is a valid interface-local multicast address: IPv6
     //
-    verbose_assert(ip6_multicast_nodelocal1.is_nodelocal_multicast() == true,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip6_multicast1.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip6_multicast2.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip6_multicast3.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
+    verbose_assert(ip6_multicast_interfacelocal1.is_interfacelocal_multicast()
+		   == true,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip6_multicast1.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip6_multicast2.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip6_multicast3.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
 
     //
     // Test if an address is a valid link-local multicast address: IPv4

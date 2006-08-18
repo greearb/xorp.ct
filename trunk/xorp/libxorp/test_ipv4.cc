@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.22 2006/08/04 07:04:32 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/test_ipv4.cc,v 1.23 2006/08/04 22:50:26 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -712,14 +712,14 @@ test_ipv4_address_type()
 		   "is_linklocal_unicast()");
 
     //
-    // Test if an address is a valid node-local multicast address.
+    // Test if an address is a valid interface-local multicast address.
     //
-    verbose_assert(ip4_multicast1.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip4_multicast2.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
-    verbose_assert(ip4_multicast3.is_nodelocal_multicast() == false,
-		   "is_nodelocal_multicast()");
+    verbose_assert(ip4_multicast1.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip4_multicast2.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
+    verbose_assert(ip4_multicast3.is_interfacelocal_multicast() == false,
+		   "is_interfacelocal_multicast()");
 
     //
     // Test if an address is a valid link-local multicast address.

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.30 2006/08/04 22:50:26 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.31 2006/08/04 23:21:16 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
@@ -431,14 +431,31 @@ public:
     bool is_linklocal_unicast() const;
 
     /**
+     * Test if this address is a valid interface-local multicast address.
+     *
+     * Note that "node-local" multicast addresses were renamed
+     * to "interface-local" by RFC-3513.
+     *
+     * @return true if the address is a valid multicast address,
+     * and the scope of the address is interface-local.
+     * XXX: in IPv4 there is no interface-local multicast scope, therefore
+     * the return value is always false.
+     */
+    bool is_interfacelocal_multicast() const;
+
+    /**
      * Test if this address is a valid node-local multicast address.
+     *
+     * Note that "node-local" multicast addresses were renamed
+     * to "interface-local" by RFC-3513.
+     * This method is kept for backward compatibility.
      *
      * @return true if the address is a valid multicast address,
      * and the scope of the address is node-local.
      * XXX: in IPv4 there is no node-local multicast scope, therefore
      * the return value is always false.
      */
-    bool is_nodelocal_multicast() const;
+    bool is_nodelocal_multicast() const { return is_interfacelocal_multicast(); }
 
     /**
      * Test if this address is a valid link-local multicast address.

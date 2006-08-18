@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.29 2006/07/28 06:07:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.30 2006/08/15 02:36:55 pavlin Exp $"
 
 
 //
@@ -204,10 +204,10 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	return (XORP_ERROR);
     }
     if (inner_dst.is_linklocal_multicast()
-	|| inner_dst.is_nodelocal_multicast()) {
+	|| inner_dst.is_interfacelocal_multicast()) {
 	XLOG_WARNING("RX %s%s from %s to %s: "
 		     "inner destination address = %s must not be "
-		     "link or node-local multicast group",
+		     "link or interface-local multicast group",
 		     PIMTYPE2ASCII(PIM_REGISTER),
 		     (is_null_register)? "(Null)" : "",
 		     cstring(src), cstring(dst),

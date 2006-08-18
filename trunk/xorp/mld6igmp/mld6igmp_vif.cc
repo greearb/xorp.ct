@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.78 2006/07/28 06:23:59 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_vif.cc,v 1.79 2006/08/15 02:36:54 pavlin Exp $"
 
 
 //
@@ -922,7 +922,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     bool check_src_linklocal_unicast = false;
     bool allow_src_zero_address = false;
     bool check_dst_multicast = false;
-    bool check_group_nodelocal_multicast = false;
+    bool check_group_interfacelocal_multicast = false;
     bool decode_extra_fields = false;
     
     //
@@ -999,7 +999,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //  - check_src_linklocal_unicast
     //  - allow_src_zero_address
     //  - check_dst_multicast
-    //  - check_group_nodelocal_multicast
+    //  - check_group_interfacelocal_multicast
     //  - decode_extra_fields
     //
     if (proto_is_igmp()) {
@@ -1022,7 +1022,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    check_dst_multicast = true;
 	    if (is_igmpv3_mode())
 		check_dst_multicast = false;		// XXX: disable
-	    check_group_nodelocal_multicast = false;	// Not needed for IPv4
+	    check_group_interfacelocal_multicast = false;// Not needed for IPv4
 	    decode_extra_fields = true;
 	    if (message_type == IGMP_V3_MEMBERSHIP_REPORT)
 		decode_extra_fields = false;
@@ -1048,7 +1048,7 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
 	    check_dst_multicast = true;
 	    if (is_mldv2_mode())
 		check_dst_multicast = false;		// XXX: disable
-	    check_group_nodelocal_multicast = true;
+	    check_group_interfacelocal_multicast = true;
 	    decode_extra_fields = true;
 	    if (message_type == MLDV2_LISTENER_REPORT)
 		decode_extra_fields = false;
@@ -1176,10 +1176,10 @@ Mld6igmpVif::mld6igmp_process(const IPvX& src,
     //
     // Inner multicast address scope check.
     //
-    if (check_group_nodelocal_multicast
-	&& group_address.is_nodelocal_multicast()) {
+    if (check_group_interfacelocal_multicast
+	&& group_address.is_interfacelocal_multicast()) {
 	error_msg = c_format("RX %s from %s to %s on vif %s: "
-			     "invalid node-local scope of inner "
+			     "invalid interface-local scope of inner "
 			     "multicast address: %s",
 			     proto_message_type2ascii(message_type),
 			     cstring(src), cstring(dst),

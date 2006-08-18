@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.14 2006/01/23 21:03:42 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register_stop.cc,v 1.15 2006/03/16 00:04:54 pavlin Exp $"
 
 
 //
@@ -91,10 +91,10 @@ PimVif::pim_register_stop_recv(PimNbr *pim_nbr,
     }
 
     if (group_addr.is_linklocal_multicast()
-	|| group_addr.is_nodelocal_multicast()) {
+	|| group_addr.is_interfacelocal_multicast()) {
 	XLOG_WARNING("RX %s from %s to %s: "
-		     "group address = %s must not be be link or node-local "
-		     "multicast",
+		     "group address = %s must not be be link or "
+		     "interface-local multicast",
 		     PIMTYPE2ASCII(PIM_REGISTER_STOP),
 		     cstring(src), cstring(dst),
 		     cstring(group_addr));

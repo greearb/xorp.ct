@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.22 2006/06/06 00:29:57 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.23 2006/06/06 01:40:24 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -399,7 +399,7 @@ IPv6::is_linklocal_unicast() const
 }
 
 bool
-IPv6::is_nodelocal_multicast() const
+IPv6::is_interfacelocal_multicast() const
 {
     // Icky casting because of alternate definitions
     // of IN6_IS_ADDR_MC_NODELOCAL

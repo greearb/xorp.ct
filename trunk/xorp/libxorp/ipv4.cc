@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.24 2006/08/04 22:50:26 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv4.cc,v 1.25 2006/08/09 06:43:37 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -305,10 +305,10 @@ IPv4::is_linklocal_unicast() const
     return (false);
 }
 
-// XXX: in IPv4 there is no node-local multicast scope, therefore
+// XXX: in IPv4 there is no interface-local multicast scope, therefore
 // the return value is always false.
 bool
-IPv4::is_nodelocal_multicast() const
+IPv4::is_interfacelocal_multicast() const
 {
     return (false);
 }

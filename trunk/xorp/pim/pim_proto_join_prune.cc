@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.13 2006/01/23 21:03:41 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_join_prune.cc,v 1.14 2006/03/16 00:04:54 pavlin Exp $"
 
 
 //
@@ -143,9 +143,9 @@ PimVif::pim_join_prune_recv(PimNbr *pim_nbr, const IPvX& src,
 		break;
 	    }
 	    if (group_addr.is_linklocal_multicast()
-		|| group_addr.is_nodelocal_multicast()) {
+		|| group_addr.is_interfacelocal_multicast()) {
 		XLOG_WARNING("RX %s from %s to %s: "
-			     "non-routable link or node-local "
+			     "non-routable link or interface-local "
 			     "group address: %s",
 			     PIMTYPE2ASCII(message_type),
 			     cstring(src), cstring(dst),

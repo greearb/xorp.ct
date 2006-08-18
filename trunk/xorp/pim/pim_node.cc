@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_node.cc,v 1.79 2006/07/03 23:33:39 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_node.cc,v 1.80 2006/07/10 08:15:29 pavlin Exp $"
 
 
 //
@@ -1305,8 +1305,11 @@ PimNode::add_membership(uint32_t vif_index, const IPvX& source,
     if (! group.is_multicast())
 	return (XORP_ERROR);
     
-    if (group.is_linklocal_multicast() || group.is_nodelocal_multicast())
-	return (XORP_OK);	// XXX: don't route link or node-local groups
+    if (group.is_linklocal_multicast()
+	|| group.is_interfacelocal_multicast()) {
+	// XXX: don't route link or interface-local groups
+	return (XORP_OK);
+    }
     
     XLOG_TRACE(is_log_trace(), "Add membership for (%s, %s) on vif %s",
 	       cstring(source), cstring(group), pim_vif->name().c_str());
@@ -1395,8 +1398,11 @@ PimNode::delete_membership(uint32_t vif_index, const IPvX& source,
     if (! group.is_multicast())
 	return (XORP_ERROR);
     
-    if (group.is_linklocal_multicast() || group.is_nodelocal_multicast())
-	return (XORP_OK);	// XXX: don't route link or node-local groups
+    if (group.is_linklocal_multicast()
+	|| group.is_interfacelocal_multicast()) {
+	// XXX: don't route link or interface-local groups
+	return (XORP_OK);
+    }
     
     XLOG_TRACE(is_log_trace(), "Delete membership for (%s, %s) on vif %s",
 	       cstring(source), cstring(group), pim_vif->name().c_str());
