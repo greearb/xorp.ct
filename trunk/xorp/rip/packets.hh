@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.20 2006/03/16 00:05:49 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.21 2006/08/16 01:15:04 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -27,40 +27,55 @@
 /**
  * @short Header appearing at the start of each RIP packet.
  */
-struct RipPacketHeader {
-    uint8_t command;		// 1 - request, 2 - response
-    uint8_t version;		// 1 - IPv4 RIPv1/IPv6 RIPng, 2 - IPv4 RIP v2
-    uint8_t unused[2];
-
-    inline void initialize(uint8_t cmd, uint8_t vers);
-    inline bool valid_command() const;
-    inline bool valid_version(uint8_t v) const { return version == v; }
-    inline bool valid_padding() const;
-
+class RipPacketHeader {
+public:
     static const uint8_t REQUEST  = 1;
     static const uint8_t RESPONSE = 2;
     static const uint8_t IPv4_VERSION = RIP_AF_CONSTANTS<IPv4>::PACKET_VERSION;
     static const uint8_t IPv6_VERSION = RIP_AF_CONSTANTS<IPv6>::PACKET_VERSION;
+    static const size_t SIZE = 4;	// The header size
+
+    /**
+     * Get the RIP packet header size.
+     *
+     * @return the RIP packet header size.
+     */
+    static const size_t size() { return RipPacketHeader::SIZE; }
+
+    uint8_t command() const { return _command; }
+    uint8_t version() const { return _version; }
+    uint8_t unused0() const { return _unused[0]; }
+    uint8_t unused1() const { return _unused[1]; }
+
+    inline void initialize(uint8_t cmd, uint8_t vers);
+    inline bool valid_command() const;
+    inline bool valid_version(uint8_t v) const { return _version == v; }
+    inline bool valid_padding() const;
+
+private:
+    uint8_t _command;		// 1 - request, 2 - response
+    uint8_t _version;		// 1 - IPv4 RIPv1/IPv6 RIPng, 2 - IPv4 RIP v2
+    uint8_t _unused[2];
 };
 
 inline void
 RipPacketHeader::initialize(uint8_t cmd, uint8_t vers)
 {
-    command = cmd;
-    version = vers;
-    unused[0] = unused[1] = 0;
+    _command = cmd;
+    _version = vers;
+    _unused[0] = _unused[1] = 0;
 }
 
 inline bool
 RipPacketHeader::valid_command() const
 {
-    return command == REQUEST || command == RESPONSE;
+    return _command == REQUEST || _command == RESPONSE;
 }
 
 inline bool
 RipPacketHeader::valid_padding() const
 {
-    return (unused[0] | unused[1]) == 0;
+    return (_unused[0] | _unused[1]) == 0;
 }
 
 /**
@@ -70,7 +85,7 @@ RipPacketHeader::valid_padding() const
  * @ref PacketRouteEntry<IPv4> and @ref PacketRouteEntry<IPv6>.
  */
 template <typename A>
-struct PacketRouteEntry {
+class PacketRouteEntry {
 };
 
 /**
@@ -104,16 +119,17 @@ static const size_t RIPv2_MAX_PACKET_BYTES = 4 + 20 * RIPv2_ROUTES_PER_PACKET;
  * take arguments in host order.
  */
 template <>
-struct PacketRouteEntry<IPv4> {
-protected:
-    uint16_t _af;
-    uint16_t _tag;
-    uint32_t _addr;
-    uint32_t _mask;
-    uint32_t _nh;
-    uint32_t _metric;
-
+class PacketRouteEntry<IPv4> {
 public:
+    static const size_t SIZE = 20;	// The entry size
+
+    /**
+     * Get the RIP IPv4 route entry size.
+     *
+     * @return the RIP IPv4 route entry size.
+     */
+    static const size_t size() { return PacketRouteEntry<IPv4>::SIZE; }
+
     /**
      * Initialize fields as a regular routing entry.
      */
@@ -148,6 +164,14 @@ public:
     static const uint16_t ADDR_FAMILY = 2;
     static const uint16_t ADDR_FAMILY_DUMP = 0;
     static const uint16_t ADDR_FAMILY_AUTH = 0xffff;
+
+private:
+    uint16_t _af;
+    uint16_t _tag;
+    uint32_t _addr;
+    uint32_t _mask;
+    uint32_t _nh;
+    uint32_t _metric;
 };
 
 inline void
@@ -213,13 +237,17 @@ PacketRouteEntry<IPv4>::initialize_table_request()
  * accessor methods provide values in host order, and the modifiers
  * take arguments in host order.
  */
-struct PlaintextPacketRouteEntry4 {
-protected:
-    uint16_t _af;
-    uint16_t _auth;
-    char     _pw[16];
-
+class PlaintextPacketRouteEntry4 {
 public:
+    static const size_t SIZE = 20;	// The entry size
+
+    /**
+     * Get the RIP IPv4 plaintext password route entry size.
+     *
+     * @return the RIP IPv4 plaintext password route entry size.
+     */
+    static const size_t size() { return PlaintextPacketRouteEntry4::SIZE; }
+
     inline uint16_t addr_family() const		{ return ntohs(_af); }
     inline uint16_t auth_type() const		{ return ntohs(_auth); }
     inline string   password() const		{ return string(_pw, 0, 16); }
@@ -234,6 +262,11 @@ public:
 
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 2;
+
+protected:
+    uint16_t _af;
+    uint16_t _auth;
+    char     _pw[16];
 };
 
 
@@ -256,17 +289,17 @@ public:
  * RFC 2082 as the "auth_offset".  This matches the textual description in
  * the RFC.
  */
-struct MD5PacketRouteEntry4 {
-protected:
-    uint16_t _af;			// 0xffff - Authentication header
-    uint16_t _auth;			// authentication type
-    uint16_t _auth_offset;		// Offset of authentication data
-    uint8_t  _key_id;			// Key number used
-    uint8_t  _auth_bytes;		// auth data length at end of packet
-    uint32_t _seqno;			// monotonically increasing seqno
-    uint32_t _mbz[2];			// must-be-zero
-
+class MD5PacketRouteEntry4 {
 public:
+    static const size_t SIZE = 20;	// The entry size
+
+    /**
+     * Get the RIP IPv4 MD5 authentication route entry size.
+     *
+     * @return the RIP IPv4 MD5 authentication route entry size.
+     */
+    static const size_t size() { return MD5PacketRouteEntry4::SIZE; }
+
     inline uint16_t addr_family() const		{ return ntohs(_af); }
     inline uint16_t auth_type() const		{ return ntohs(_auth); }
     inline uint16_t auth_offset() const		{ return ntohs(_auth_offset); }
@@ -285,6 +318,15 @@ public:
 
     static const uint16_t ADDR_FAMILY = 0xffff;
     static const uint16_t AUTH_TYPE = 3;
+
+private:
+    uint16_t _af;			// 0xffff - Authentication header
+    uint16_t _auth;			// authentication type
+    uint16_t _auth_offset;		// Offset of authentication data
+    uint8_t  _key_id;			// Key number used
+    uint8_t  _auth_bytes;		// auth data length at end of packet
+    uint32_t _seqno;			// monotonically increasing seqno
+    uint32_t _mbz[2];			// must-be-zero
 };
 
 inline void
@@ -308,13 +350,23 @@ MD5PacketRouteEntry4::initialize(uint16_t auth_offset,
  */
 class MD5PacketTrailer {
 public:
+    static const size_t SIZE = 20;	// The trailer size
+
+    /**
+     * Get the RIP IPv4 MD5 authentication trailer size.
+     *
+     * @return the RIP IPv4 MD5 authentication trailer size.
+     */
+    static const size_t size() { return MD5PacketTrailer::SIZE; }
+
     inline void initialize();
     inline uint8_t* data() 				{ return _data; }
     inline const uint8_t* data() const			{ return _data; }
     inline uint32_t data_bytes() const			{ return 16; }
     inline uint32_t data_offset() const			{ return 4; }
     inline bool valid() const;
-protected:
+
+private:
     uint16_t _af;			// 0xffff - Authentication header
     uint16_t _one;			// 0x01	  - RFC2082 defined
     uint8_t  _data[16];			// 16 bytes of data
@@ -343,14 +395,17 @@ MD5PacketTrailer::valid() const
  * All fields in this structure are stored in network order.
  */
 template <>
-struct PacketRouteEntry<IPv6> {
-protected:
-    uint8_t  _prefix[16];
-    uint16_t _tag;
-    uint8_t  _prefix_len;
-    uint8_t  _metric;
-
+class PacketRouteEntry<IPv6> {
 public:
+    static const size_t SIZE = 20;	// The entry size
+
+    /**
+     * Get the RIP IPv6 route entry size.
+     *
+     * @return the RIP IPv6 route entry size.
+     */
+    static const size_t size() { return PacketRouteEntry<IPv6>::SIZE; }
+
     /**
      * Initialize fields as a route entry.
      */
@@ -379,6 +434,12 @@ public:
     inline uint8_t  metric() const;
 
     static const uint8_t NEXTHOP_METRIC = 0xff;
+
+private:
+    uint8_t  _prefix[16];
+    uint16_t _tag;
+    uint8_t  _prefix_len;
+    uint8_t  _metric;
 };
 
 inline void
@@ -458,22 +519,10 @@ PacketRouteEntry<IPv6>::metric() const
  * A container for RIP packet, provides easy to use accessors and modifiers.
  */
 template <typename A>
-class RipPacket
-{
+class RipPacket {
 public:
     typedef A Addr;
 
-protected:
-    Addr	    _addr;	// Src addr on inbound, dst address on outbound
-    uint16_t	    _port;	// Src port on inbound, dst port on outbound
-    vector<uint8_t> _data;	// Data buffer
-    uint32_t _max_entries;	// Maximum number of route entries in packet
-
-protected:
-    const uint8_t* base_ptr() const	{ return &(_data[0]); }
-    uint8_t* base_ptr()			{ return &(_data[0]); }
-
-public:
     /**
      * @return destination address of packet.
      */
@@ -518,7 +567,7 @@ public:
     /**
      * Route entry accessor.
      *
-     * @param entry_no index of route entry to retrive
+     * @param entry_no index of route entry to retrive.
      * @return const pointer to route entry, or 0 if entry_no is greater than
      * the maximum route entries associated with packet.
      */
@@ -527,11 +576,10 @@ public:
     /**
      * Route entry accessor.
      *
-     * @param entry_no index of route entry to retrive
-     * @return const pointer to route entry, or 0 if entry_no is greater than
+     * @param entry_no index of route entry to retrive.
+     * @return pointer to route entry, or 0 if entry_no is greater than
      * the maximum route entries associated with packet.
      */
-
     inline PacketRouteEntry<A>* route_entry(uint32_t entry_no);
 
     void append_data(const uint8_t* data, uint32_t data_bytes);
@@ -542,6 +590,15 @@ public:
     inline uint32_t 		  data_bytes() const { return _data.size(); }
     inline const uint8_t*	  data_ptr() const  { return base_ptr(); }
     inline uint8_t*	  	  data_ptr()	    { return base_ptr(); }
+
+private:
+    Addr	    _addr;	// Src addr on inbound, dst address on outbound
+    uint16_t	    _port;	// Src port on inbound, dst port on outbound
+    vector<uint8_t> _data;	// Data buffer
+    uint32_t _max_entries;	// Maximum number of route entries in packet
+
+    const uint8_t* base_ptr() const	{ return &(_data[0]); }
+    uint8_t* base_ptr()			{ return &(_data[0]); }
 };
 
 template <typename A>
@@ -565,8 +622,8 @@ RipPacket<A>::route_entry(uint32_t entry_no) const
     if (entry_no >= _max_entries)
 	return 0;
 
-    const uint8_t* p = base_ptr() + sizeof(RipPacketHeader) +
-	entry_no * sizeof(PacketRouteEntry<A>);
+    const uint8_t* p = base_ptr() + RipPacketHeader::size() +
+	entry_no * PacketRouteEntry<A>::size();
     return reinterpret_cast<const PacketRouteEntry<A>*>(p);
 }
 
@@ -577,8 +634,8 @@ RipPacket<A>::route_entry(uint32_t entry_no)
     if (entry_no >= _max_entries)
 	return 0;
 
-    uint8_t* p = base_ptr() + sizeof(RipPacketHeader) +
-	entry_no * sizeof(PacketRouteEntry<A>);
+    uint8_t* p = base_ptr() + RipPacketHeader::size() +
+	entry_no * PacketRouteEntry<A>::size();
     return reinterpret_cast<PacketRouteEntry<A>*>(p);
 }
 
@@ -601,8 +658,8 @@ void
 RipPacket<A>::set_max_entries(uint32_t max_entries)
 {
     if (max_entries != _max_entries) {
-	_data.resize(sizeof(PacketRouteEntry<A>) * max_entries
-		     + sizeof(RipPacketHeader));
+	_data.resize(PacketRouteEntry<A>::size() * max_entries
+		     + RipPacketHeader::size());
 	_max_entries = max_entries;
     }
 }

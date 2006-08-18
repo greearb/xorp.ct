@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.11 2005/08/18 15:41:27 bms Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.12 2006/03/16 00:05:53 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -48,18 +48,17 @@ static int
 test_main()
 {
     // Static sizing tests
-    static_assert(sizeof(RipPacketHeader) == 4);
-    static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
-    static_assert(sizeof(RipPacketHeader) == RIPv2_MIN_PACKET_BYTES);
-    static_assert(sizeof(RipPacketHeader) + sizeof(PacketRouteEntry<IPv4>)
+    static_assert(RipPacketHeader::SIZE == 4);
+    static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
+    static_assert(RipPacketHeader::SIZE == RIPv2_MIN_PACKET_BYTES);
+    static_assert(RipPacketHeader::SIZE + PacketRouteEntry<IPv4>::SIZE
 		  == RIPv2_MIN_AUTH_PACKET_BYTES);
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(PlaintextPacketRouteEntry4));
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(MD5PacketRouteEntry4));
-    static_assert(sizeof(MD5PacketTrailer) == 20);
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(PacketRouteEntry<IPv6>));
+    static_assert(PacketRouteEntry<IPv4>::SIZE
+		  == PlaintextPacketRouteEntry4::SIZE);
+    static_assert(PacketRouteEntry<IPv4>::SIZE == MD5PacketRouteEntry4::SIZE);
+    static_assert(MD5PacketTrailer::SIZE == 20);
+    static_assert(PacketRouteEntry<IPv4>::SIZE
+		  == PacketRouteEntry<IPv6>::SIZE);
 
     //
     // Test packet header

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.63 2006/07/19 00:43:38 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.64 2006/07/19 22:55:43 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -770,8 +770,8 @@ Port<A>::port_io_receive(const A&	src_address,
 			 const uint8_t*	rip_packet,
 			 size_t		rip_packet_bytes)
 {
-    static_assert(sizeof(RipPacketHeader) == 4);
-    static_assert(sizeof(PacketRouteEntry<A>) == 20);
+    static_assert(RipPacketHeader::SIZE == 4);
+    static_assert(PacketRouteEntry<A>::SIZE == 20);
 
     if (enabled() == false) {
 	debug_msg("Discarding RIP packet: Port not enabled.");
@@ -808,12 +808,12 @@ Port<A>::port_io_receive(const A&	src_address,
 	record_bad_packet("Invalid command", src_address, src_port, p);
 	return;
     } else if (ph->valid_version(RIP_AF_CONSTANTS<A>::PACKET_VERSION) == false) {
-	record_bad_packet(c_format("Invalid version (%d).", ph->version),
+	record_bad_packet(c_format("Invalid version (%d).", ph->version()),
 			  src_address, src_port, p);
 	return;
     } else if (ph->valid_padding() == false) {
 	record_bad_packet(c_format("Invalid padding (%u,%u).",
-				   ph->unused[0], ph->unused[1]),
+				   ph->unused0(), ph->unused1()),
 			  src_address, src_port, p);
 	return;
     }
@@ -821,7 +821,7 @@ Port<A>::port_io_receive(const A&	src_address,
     //
     // Check this is not an attempt to inject routes from non-RIP port
     //
-    if (ph->command == RipPacketHeader::RESPONSE &&
+    if (ph->command() == RipPacketHeader::RESPONSE &&
 	src_port != RIP_AF_CONSTANTS<A>::IP_PORT) {
 	record_bad_packet(c_format("RIP response originating on wrong port"
 				   " (%d != %d)",
@@ -870,9 +870,10 @@ Port<A>::port_io_receive(const A&	src_address,
 #elif defined (INSTANTIATE_IPV6)
     const PacketRouteEntry<A>* entries =
 	reinterpret_cast<const PacketRouteEntry<IPv6>*>(ph + 1);
-    uint32_t n_entries = (rip_packet_bytes - sizeof(*ph)) /
-	sizeof(PacketRouteEntry<A>);
-    size_t calc_bytes = n_entries * sizeof(PacketRouteEntry<A>) + sizeof(*ph);
+    uint32_t n_entries = (rip_packet_bytes - RipPacketHeader::size()) /
+	PacketRouteEntry<A>::size();
+    size_t calc_bytes = n_entries * PacketRouteEntry<A>::size()
+	+ RipPacketHeader::size();
     if (calc_bytes != rip_packet_bytes) {
 	record_bad_packet("Packet did not contain an integral number "
 			  "of route entries", src_address, src_port, p);
@@ -880,11 +881,11 @@ Port<A>::port_io_receive(const A&	src_address,
 #endif
 
     if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT &&
-	ph->command == RipPacketHeader::RESPONSE) {
+	ph->command() == RipPacketHeader::RESPONSE) {
 	record_response_packet(p);
 	parse_response(src_address, src_port, entries, n_entries);
     } else {
-	XLOG_ASSERT(ph->command == RipPacketHeader::REQUEST);
+	XLOG_ASSERT(ph->command() == RipPacketHeader::REQUEST);
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    record_request_packet(p);
 	} else {

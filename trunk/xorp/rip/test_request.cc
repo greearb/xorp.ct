@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.21 2006/03/16 00:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.22 2006/06/27 21:50:48 pavlin Exp $"
 
 #include <set>
 
@@ -229,8 +229,8 @@ public:
     send_rip_route_queries()
     {
 	vector<uint8_t> buf;
-	buf.resize(sizeof(RipPacketHeader) +
-		   REQUESTED_ROUTES * sizeof(PacketRouteEntry<IPv4>));
+	buf.resize(RipPacketHeader::SIZE +
+		   REQUESTED_ROUTES * PacketRouteEntry<IPv4>::size());
 
 	RipPacketHeader* rph = new (&(buf[0])) RipPacketHeader();
 	rph->initialize(RipPacketHeader::REQUEST, 2);
@@ -238,8 +238,8 @@ public:
 	set<IPv4Net>::const_iterator n = _testnets.begin();
 	for (uint32_t i = 0; i < REQUESTED_ROUTES; i++) {
 	    XLOG_ASSERT(n != _testnets.end());
-	    uint32_t offset = sizeof(RipPacketHeader) +
-		i * sizeof(PacketRouteEntry<IPv4>);
+	    uint32_t offset = RipPacketHeader::SIZE +
+		i * PacketRouteEntry<IPv4>::size();
 
 	    PacketRouteEntry<IPv4>* pre =
 		new (&(buf[offset])) PacketRouteEntry<IPv4>;
@@ -290,7 +290,7 @@ public:
 	    return false;
 	}
 
-	if (rph->command != RipPacketHeader::RESPONSE) {
+	if (rph->command() != RipPacketHeader::RESPONSE) {
 	    verbose_log("Not a response packet\n");
 	    return false;
 	}
@@ -298,7 +298,7 @@ public:
 	// Validate entries
 	const PacketRouteEntry<IPv4>* pre =
 	    reinterpret_cast<const PacketRouteEntry<IPv4>*>(rph + 1);
-	uint32_t n_entries = buf.size() / sizeof (PacketRouteEntry<IPv4>) - 1;
+	uint32_t n_entries = buf.size() / PacketRouteEntry<IPv4>::size() - 1;
 
 	if (n_entries > _testnets.size()) {
 	    verbose_log("Got more routes than requested (%u > %u).\n",

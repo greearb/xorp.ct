@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.22 2006/03/16 00:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.23 2006/03/24 03:03:57 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -60,15 +60,15 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
 {
     vector<uint8_t> trailer;
 
-    pkt.resize(sizeof(RipPacketHeader) +
-	       (n + ah.head_entries()) * sizeof(PacketRouteEntry<IPv4>));
+    pkt.resize(RipPacketHeader::size() +
+	       (n + ah.head_entries()) * PacketRouteEntry<IPv4>::size());
 
     RipPacketHeader* rph = reinterpret_cast<RipPacketHeader*>(&pkt[0]);
     rph->initialize(RipPacketHeader::REQUEST, 2);
 
     for (uint32_t i = 0; i < n; i++) {
-	uint32_t offset = sizeof(RipPacketHeader) +
-	    (i + ah.head_entries()) * sizeof(PacketRouteEntry<IPv4>);
+	uint32_t offset = RipPacketHeader::size() +
+	    (i + ah.head_entries()) * PacketRouteEntry<IPv4>::size();
 	PacketRouteEntry<IPv4>* p =
 	    reinterpret_cast<PacketRouteEntry<IPv4>*>(&pkt[0] + offset);
 	p->initialize(0, IPv4Net("10.0.0.0/8"), IPv4("172.11.100.1"), 3);
@@ -142,7 +142,7 @@ check_auth_packet(const vector<uint8_t>& pkt,
 
     const PacketRouteEntry<IPv4>* exp0 =
 	reinterpret_cast<const PacketRouteEntry<IPv4>*>
-	    (&pkt[0] + sizeof(RipPacketHeader));
+	    (&pkt[0] + RipPacketHeader::size());
 
     exp0 += ah.head_entries();
     if (entries != exp0) {
@@ -258,18 +258,17 @@ test_main()
     string dummy_error_msg;
 
     // Static sizing tests
-    static_assert(sizeof(RipPacketHeader) == 4);
-    static_assert(sizeof(PacketRouteEntry<IPv4>) == 20);
-    static_assert(sizeof(RipPacketHeader) == RIPv2_MIN_PACKET_BYTES);
-    static_assert(sizeof(RipPacketHeader) + sizeof(PacketRouteEntry<IPv4>)
+    static_assert(RipPacketHeader::SIZE == 4);
+    static_assert(PacketRouteEntry<IPv4>::SIZE == 20);
+    static_assert(RipPacketHeader::SIZE == RIPv2_MIN_PACKET_BYTES);
+    static_assert(RipPacketHeader::SIZE + PacketRouteEntry<IPv4>::SIZE
 		  == RIPv2_MIN_AUTH_PACKET_BYTES);
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(PlaintextPacketRouteEntry4));
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(MD5PacketRouteEntry4));
-    static_assert(sizeof(MD5PacketTrailer) == 20);
-    static_assert(sizeof(PacketRouteEntry<IPv4>)
-		  == sizeof(PacketRouteEntry<IPv6>));
+    static_assert(PacketRouteEntry<IPv4>::SIZE
+		  == PlaintextPacketRouteEntry4::SIZE);
+    static_assert(PacketRouteEntry<IPv4>::SIZE == MD5PacketRouteEntry4::SIZE);
+    static_assert(MD5PacketTrailer::SIZE == 20);
+    static_assert(PacketRouteEntry<IPv4>::SIZE
+		  == PacketRouteEntry<IPv6>::SIZE);
 
     vector<uint8_t> pkt;
 
