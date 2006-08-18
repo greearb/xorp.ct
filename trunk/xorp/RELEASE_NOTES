@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.131 2006/08/03 19:08:38 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.132 2006/08/08 23:17:49 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -37,7 +37,9 @@ Release 1.4-WIP (2006/??/??)
     - 
 
   FEA/MFEA:
-    - 
+    - Fix the routing socket based mechanism (used by BSD-derived
+      systems) for obtaining the interface name (toward the destination)
+      for a routing entry.
 
   RIB:
     - 
@@ -62,7 +64,8 @@ Release 1.4-WIP (2006/??/??)
     - 
 
   FIB2MRIB:
-    - 
+    - Bug fix related to updating the interface and vif name of a
+      forwarding entry received from the FEA.
 
   CLI:
     - 
