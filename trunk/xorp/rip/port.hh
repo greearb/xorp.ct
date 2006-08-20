@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/port.hh,v 1.26 2006/02/09 08:56:08 pavlin Exp $
+// $XORP: xorp/rip/port.hh,v 1.27 2006/03/16 00:05:50 pavlin Exp $
 
 #ifndef __RIP_PORT_HH__
 #define __RIP_PORT_HH__
@@ -437,18 +437,18 @@ protected:
     /**
      * Parse request message.
      */
-    void parse_request(const Addr&		  src_addr,
-		       uint16_t			  src_port,
-		       const PacketRouteEntry<A>* entries,
-		       uint32_t			  n_entries);
+    void parse_request(const Addr&		src_addr,
+		       uint16_t			rc_port,
+		       const uint8_t*		entries_ptr,
+		       uint32_t			n_entries);
 
     /**
      * Parse response message.
      */
-    void parse_response(const Addr&		   src_addr,
-			uint16_t		   src_port,
-			const PacketRouteEntry<A>* entries,
-			uint32_t		   n_entries);
+    void parse_response(const Addr&		src_addr,
+			uint16_t		src_port,
+			const uint8_t*		entries_ptr,
+			uint32_t		n_entries);
 
     /**
      * Block route queries for amount of time determined by

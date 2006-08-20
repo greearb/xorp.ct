@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.22 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.23 2006/08/18 01:50:30 pavlin Exp $"
 
 #include <set>
 
@@ -232,8 +232,8 @@ public:
 	buf.resize(RipPacketHeader::SIZE +
 		   REQUESTED_ROUTES * PacketRouteEntry<IPv4>::size());
 
-	RipPacketHeader* rph = new (&(buf[0])) RipPacketHeader();
-	rph->initialize(RipPacketHeader::REQUEST, 2);
+	RipPacketHeaderWriter rph(&buf[0]);
+	rph.initialize(RipPacketHeader::REQUEST, 2);
 
 	set<IPv4Net>::const_iterator n = _testnets.begin();
 	for (uint32_t i = 0; i < REQUESTED_ROUTES; i++) {
@@ -241,10 +241,9 @@ public:
 	    uint32_t offset = RipPacketHeader::SIZE +
 		i * PacketRouteEntry<IPv4>::size();
 
-	    PacketRouteEntry<IPv4>* pre =
-		new (&(buf[offset])) PacketRouteEntry<IPv4>;
+	    PacketRouteEntryWriter<IPv4> pre(&(buf[offset]));
 
-	    pre->initialize(0, *n, IPv4::ZERO(), 0);
+	    pre.initialize(0, *n, IPv4::ZERO(), 0);
 	    n++;
 	}
 	XLOG_ASSERT(_pm.the_port() != 0);
@@ -272,32 +271,30 @@ public:
 	const vector<uint8_t> buf = _portio->last_rip_send_data();
 
 	// Validate RIP packet header
-	const RipPacketHeader* rph
-	    = reinterpret_cast<const RipPacketHeader*>(&buf[0]);
+	const RipPacketHeader rph(&buf[0]);
 
-	if (rph->valid_command() == false) {
+	if (rph.valid_command() == false) {
 	    verbose_log("Invalid command\n");
 	    return false;
 	}
 
-	if (rph->valid_version(RipPacketHeader::IPv4_VERSION) == false) {
+	if (rph.valid_version(RipPacketHeader::IPv4_VERSION) == false) {
 	    verbose_log("Invalid version\n");
 	    return false;
 	}
 
-	if (rph->valid_padding() == false) {
+	if (rph.valid_padding() == false) {
 	    verbose_log("Invalid padding\n");
 	    return false;
 	}
 
-	if (rph->command() != RipPacketHeader::RESPONSE) {
+	if (rph.command() != RipPacketHeader::RESPONSE) {
 	    verbose_log("Not a response packet\n");
 	    return false;
 	}
 
 	// Validate entries
-	const PacketRouteEntry<IPv4>* pre =
-	    reinterpret_cast<const PacketRouteEntry<IPv4>*>(rph + 1);
+	const uint8_t* pre_ptr = &buf[0] + RipPacketHeader::size();
 	uint32_t n_entries = buf.size() / PacketRouteEntry<IPv4>::size() - 1;
 
 	if (n_entries > _testnets.size()) {
@@ -309,29 +306,31 @@ public:
 
 	set<IPv4Net>::const_iterator ni = _testnets.begin();
 
-	for (uint32_t i = 0; i < n_entries; i++, pre++) {
+	for (uint32_t i = 0; i < n_entries;
+	     i++, pre_ptr += PacketRouteEntry<IPv4>::size()) {
+	    const PacketRouteEntry<IPv4> pre(pre_ptr);
 	    verbose_log("%s %s %u %u\n",
-			pre->net().str().c_str(),
-			pre->nexthop().str().c_str(),
-			XORP_UINT_CAST(pre->metric()),
-			pre->tag());
-	    if (pre->addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
+			pre.net().str().c_str(),
+			pre.nexthop().str().c_str(),
+			XORP_UINT_CAST(pre.metric()),
+			pre.tag());
+	    if (pre.addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
 		verbose_log("Invalid address family in route entry %u\n",
 			    XORP_UINT_CAST(i));
 		return false;
 	    }
-	    if (*ni != pre->net()) {
+	    if (*ni != pre.net()) {
 		verbose_log("Mismatched net in route entry %u\n",
 			    XORP_UINT_CAST(i));
 		return false;
 	    }
 	    if (i < INJECTED_ROUTES) {
-		if (pre->metric() != ROUTE_COST) {
+		if (pre.metric() != ROUTE_COST) {
 		    verbose_log("Metric changed.\n");
 		    return false;
 		}
 	    } else {
-		if (pre->metric() != RIP_INFINITY) {
+		if (pre.metric() != RIP_INFINITY) {
 		    verbose_log("Non-existant route with finite metric??\n");
 		}
 	    }

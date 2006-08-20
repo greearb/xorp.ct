@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_auth.cc,v 1.23 2006/03/24 03:03:57 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_auth.cc,v 1.24 2006/08/18 01:50:30 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -63,15 +63,14 @@ build_auth_packet(vector<uint8_t>& pkt, AuthHandlerBase& ah, uint32_t n)
     pkt.resize(RipPacketHeader::size() +
 	       (n + ah.head_entries()) * PacketRouteEntry<IPv4>::size());
 
-    RipPacketHeader* rph = reinterpret_cast<RipPacketHeader*>(&pkt[0]);
-    rph->initialize(RipPacketHeader::REQUEST, 2);
+    RipPacketHeaderWriter rph(&pkt[0]);
+    rph.initialize(RipPacketHeader::REQUEST, 2);
 
     for (uint32_t i = 0; i < n; i++) {
 	uint32_t offset = RipPacketHeader::size() +
 	    (i + ah.head_entries()) * PacketRouteEntry<IPv4>::size();
-	PacketRouteEntry<IPv4>* p =
-	    reinterpret_cast<PacketRouteEntry<IPv4>*>(&pkt[0] + offset);
-	p->initialize(0, IPv4Net("10.0.0.0/8"), IPv4("172.11.100.1"), 3);
+	PacketRouteEntryWriter<IPv4> p(&pkt[0] + offset);
+	p.initialize(0, IPv4Net("10.0.0.0/8"), IPv4("172.11.100.1"), 3);
     }
 
     RipPacket<IPv4> rip_packet(IPv4::ZERO(), RIP_PORT, n + ah.head_entries());
@@ -115,10 +114,10 @@ check_auth_packet(const vector<uint8_t>& pkt,
 		  uint32_t		 n,
 		  bool			 expect_fail = false)
 {
-    const PacketRouteEntry<IPv4>* entries = 0;
+    const uint8_t* entries_ptr = NULL;
     uint32_t n_entries = 0;
 
-    if (ah.authenticate_inbound(&pkt[0], pkt.size(), entries, n_entries,
+    if (ah.authenticate_inbound(&pkt[0], pkt.size(), entries_ptr, n_entries,
 				IPv4::ZERO(), false)
 	== false) {
 	if (expect_fail == false) {
@@ -132,7 +131,7 @@ check_auth_packet(const vector<uint8_t>& pkt,
     }
 
     if (n == 0) {
-	if (entries != 0) {
+	if (entries_ptr != NULL) {
 	    verbose_log("Got an address for start of entries when no entries "
 			"present in a packet.\n");
 	    return 1;
@@ -140,12 +139,10 @@ check_auth_packet(const vector<uint8_t>& pkt,
 	return 0;
     }
 
-    const PacketRouteEntry<IPv4>* exp0 =
-	reinterpret_cast<const PacketRouteEntry<IPv4>*>
-	    (&pkt[0] + RipPacketHeader::size());
+    const uint8_t* exp0 = (&pkt[0] + RipPacketHeader::size());
 
-    exp0 += ah.head_entries();
-    if (entries != exp0) {
+    exp0 += PacketRouteEntry<IPv4>::size() * ah.head_entries();
+    if (entries_ptr != exp0) {
 	verbose_log("First entry in packet does not correspond with expected "
 		    "position\n");
 	return 1;

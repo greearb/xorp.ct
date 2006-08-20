@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/auth.hh,v 1.19 2006/03/25 09:36:24 pavlin Exp $
+// $XORP: xorp/rip/auth.hh,v 1.20 2006/05/15 21:10:24 pavlin Exp $
 
 #ifndef __RIP_AUTH_HH__
 #define __RIP_AUTH_HH__
@@ -73,8 +73,8 @@ public:
      *
      * @param packet pointer to first byte of RIP packet.
      * @param packet_bytes number of bytes in RIP packet.
-     * @param entries_start output variable set to point to first
-     *        entry in packet.  Set to 0 if there are no entries, or
+     * @param entries_ptr output variable set to point to first
+     *        entry in packet.  Set to NULL if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
      * @param src_addr the source address of the packet.
@@ -84,7 +84,7 @@ public:
      */
     virtual bool authenticate_inbound(const uint8_t*	packet,
 				      size_t		packet_bytes,
-				      const PacketRouteEntry<IPv4>*& entries,
+				      const uint8_t*&	entries_ptr,
 				      uint32_t&		n_entries,
 				      const IPv4&	src_addr,
 				      bool		new_peer) = 0;
@@ -172,8 +172,8 @@ public:
      *
      * @param packet pointer to first byte of RIP packet.
      * @param packet_bytes number of bytes in RIP packet.
-     * @param entries_start output variable set to point to first
-     *        entry in packet.  Set to 0 if there are no entries, or
+     * @param entries_ptr output variable set to point to first
+     *        entry in packet.  Set to NULL if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
      * @param src_addr the source address of the packet.
@@ -183,7 +183,7 @@ public:
      */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
-			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      const uint8_t*&			entries_ptr,
 			      uint32_t&				n_entries,
 			      const IPv4&			src_addr,
 			      bool				new_peer);
@@ -250,8 +250,8 @@ public:
      *
      * @param packet pointer to first byte of RIP packet.
      * @param packet_bytes number of bytes in RIP packet.
-     * @param entries_start output variable set to point to first
-     *        entry in packet.  Set to 0 if there are no entries, or
+     * @param entries_ptr output variable set to point to first
+     *        entry in packet.  Set to NULL if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
      * @param src_addr the source address of the packet.
@@ -261,7 +261,7 @@ public:
      */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
-			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      const uint8_t*&			entries_ptr,
 			      uint32_t&				n_entries,
 			      const IPv4&			src_addr,
 			      bool				new_peer);
@@ -495,8 +495,8 @@ public:
      *
      * @param packet pointer to first byte of RIP packet.
      * @param packet_bytes number of bytes in RIP packet.
-     * @param entries_start output variable set to point to first
-     *        entry in packet.  Set to 0 if there are no entries, or
+     * @param entries_ptr output variable set to point to first
+     *        entry in packet.  Set to NULL if there are no entries, or
      *        on authentication failure.
      * @param n_entries number of entries in the packet.
      * @param src_addr the source address of the packet.
@@ -506,7 +506,7 @@ public:
      */
     bool authenticate_inbound(const uint8_t*			packet,
 			      size_t				packet_bytes,
-			      const PacketRouteEntry<IPv4>*&	entries_start,
+			      const uint8_t*&			entries_ptr,
 			      uint32_t&				n_entries,
 			      const IPv4&			src_addr,
 			      bool				new_peer);

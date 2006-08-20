@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_packets.cc,v 1.12 2006/03/16 00:05:53 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_packets.cc,v 1.13 2006/08/18 01:50:30 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -65,37 +65,36 @@ test_main()
     //
     {
 	uint8_t h4[4] = { 1, 2, 0, 0 };
-	const RipPacketHeader* rph =
-	    reinterpret_cast<const RipPacketHeader*>(&h4);
-	if (rph->valid_command() == false) {
+	const RipPacketHeader rph(h4);
+	if (rph.valid_command() == false) {
 	    verbose_log("Bad valid command check\n");
 	    return 1;
 	}
 	h4[0] = 3;
-	if (rph->valid_command() == true) {
+	if (rph.valid_command() == true) {
 	    verbose_log("Bad valid command check\n");
 	    return 1;
 	}
-	if (rph->valid_version(2) == false) {
+	if (rph.valid_version(2) == false) {
 	    verbose_log("Bad version check\n");
 	    return 1;
 	}
-	if (rph->valid_version(3) == true) {
+	if (rph.valid_version(3) == true) {
 	    verbose_log("Bad version check\n");
 	    return 1;
 	}
-	if (rph->valid_padding() == false) {
+	if (rph.valid_padding() == false) {
 	    verbose_log("Bad padding check\n");
 	    return 1;
 	}
 	h4[3] = 1;
-	if (rph->valid_padding() == true) {
+	if (rph.valid_padding() == true) {
 	    verbose_log("Bad padding check\n");
 	    return 1;
 	}
 	h4[2] = 1;
 	h4[3] = 0;
-	if (rph->valid_padding() == true) {
+	if (rph.valid_padding() == true) {
 	    verbose_log("Bad padding check\n");
 	    return 1;
 	}
@@ -111,10 +110,9 @@ test_main()
 	uint32_t metric(12);
 
 	uint8_t r[20];
-	PacketRouteEntry<IPv4>* pre =
-	    reinterpret_cast<PacketRouteEntry<IPv4>*>(r);
+	PacketRouteEntryWriter<IPv4> pre(r);
 
-	pre->initialize(tag, net, nh, metric);
+	pre.initialize(tag, net, nh, metric);
 
 	uint8_t e[20] = {
 	    0x00, 0x02, 0x04, 0x48,
@@ -131,19 +129,19 @@ test_main()
 	    }
 	}
 
-	if (pre->addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
+	if (pre.addr_family() != PacketRouteEntry<IPv4>::ADDR_FAMILY) {
 	    verbose_log("Bad address family accessor\n");
 	    return 1;
-	} else if (pre->tag() != tag) {
+	} else if (pre.tag() != tag) {
 	    verbose_log("Bad tag accessor\n");
 	    return 1;
-	} else if (pre->net() != net) {
+	} else if (pre.net() != net) {
 	    verbose_log("Bad net accessor\n");
 	    return 1;
-	} else if (pre->nexthop() != nh) {
+	} else if (pre.nexthop() != nh) {
 	    verbose_log("Bad nexthop accessor\n");
 	    return 1;
-	} else if (pre->metric() != metric) {
+	} else if (pre.metric() != metric) {
 	    verbose_log("Bad cost accessor\n");
 	    return 1;
 	}
@@ -154,9 +152,8 @@ test_main()
     //
     {
 	uint8_t r[20];
-	PlaintextPacketRouteEntry4* pre =
-	    reinterpret_cast<PlaintextPacketRouteEntry4*>(r);
-	pre->initialize("16 character password");
+	PlaintextPacketRouteEntry4Writer pre(r);
+	pre.initialize("16 character password");
 
 	uint8_t e[20] = {
 	    0xff, 0xff, 0x00, 0x02,
@@ -172,11 +169,11 @@ test_main()
 		return 1;
 	    }
 	}
-	if (pre->password() != "16 character pas") {
+	if (pre.password() != "16 character pas") {
 	    verbose_log("Password accessor wrong\n");
 	}
 
-	pre->initialize("8 character");
+	pre.initialize("8 character");
 	uint8_t f[20] = {
 	    0xff, 0xff, 0x00, 0x02,
 	    '8', ' ', 'c', 'h',
@@ -199,9 +196,8 @@ test_main()
     //
     {
 	uint8_t r[20];
-	MD5PacketRouteEntry4* pre =
-	    reinterpret_cast<MD5PacketRouteEntry4*>(r);
-	pre->initialize(0x7fee, 0xcc, 0x08, 0x12345678);
+	MD5PacketRouteEntry4Writer pre(r);
+	pre.initialize(0x7fee, 0xcc, 0x08, 0x12345678);
 
 	uint8_t e[20] = {
 	    0xff, 0xff, 0x00, 0x03,
@@ -218,23 +214,23 @@ test_main()
 	    }
 	}
 
-	if (pre->addr_family() != MD5PacketRouteEntry4::ADDR_FAMILY) {
+	if (pre.addr_family() != MD5PacketRouteEntry4::ADDR_FAMILY) {
 	    verbose_log("bad address family accessor\n");
 	    return 1;
-	} else if (pre->auth_type() != MD5PacketRouteEntry4::AUTH_TYPE) {
+	} else if (pre.auth_type() != MD5PacketRouteEntry4::AUTH_TYPE) {
 	    verbose_log("bad auth type accessor\n");
 	    return 1;
-	} else if (pre->auth_offset() != 0x7fee) {
+	} else if (pre.auth_off() != 0x7fee) {
 	    verbose_log("bad packet bytes accessor\n");
 	    return 1;
-	} else if (pre->key_id() != 0xcc) {
+	} else if (pre.key_id() != 0xcc) {
 	    verbose_log("bad key id accessor\n");
 	    return 1;
-	} else if (pre->auth_bytes() != 0x08) {
+	} else if (pre.auth_bytes() != 0x08) {
 
 	    verbose_log("bad auth bytes accessor\n");
 	    return 1;
-	} else if (pre->seqno() != 0x12345678) {
+	} else if (pre.seqno() != 0x12345678) {
 	    verbose_log("bad seqno accessor\n");
 	    return 1;
 	}

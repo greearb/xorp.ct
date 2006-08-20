@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packet_assembly.hh,v 1.9 2006/02/10 03:47:30 pavlin Exp $
+// $XORP: xorp/rip/packet_assembly.hh,v 1.10 2006/03/16 00:05:49 pavlin Exp $
 
 #ifndef __RIP_PACKET_ASSEMBLY_HH__
 #define __RIP_PACKET_ASSEMBLY_HH__
@@ -279,8 +279,9 @@ ResponsePacketAssembler<IPv4>::packet_start(RipPacket<IPv4>* pkt)
     const AuthHandlerBase& ah = _sp_state.ah();
     _pos = ah.head_entries();
     _pkt->set_max_entries(ah.head_entries() + ah.max_routing_entries());
-    _pkt->header()->initialize(RipPacketHeader::RESPONSE,
-			       RipPacketHeader::IPv4_VERSION);
+
+    RipPacketHeaderWriter rph(_pkt->header_ptr());
+    rph.initialize(RipPacketHeader::RESPONSE, RipPacketHeader::IPv4_VERSION);
 }
 
 template <>
@@ -301,7 +302,9 @@ ResponsePacketAssembler<IPv4>::packet_add_route(const Net&	net,
     if (packet_full()) {
 	return false;
     }
-    _pkt->route_entry(_pos)->initialize(tag, net, nexthop, cost);
+    uint8_t* pre_ptr = _pkt->route_entry_ptr(_pos);
+    PacketRouteEntryWriter<IPv4> pre(pre_ptr);
+    pre.initialize(tag, net, nexthop, cost);
     _pos++;
     return true;
 }
@@ -353,8 +356,8 @@ ResponsePacketAssembler<IPv6>::packet_start(RipPacket<IPv6>* pkt)
     _pkt = pkt;
     _pos = 0;
     _sp_state.reset_last_nexthop();
-    _pkt->header()->initialize(RipPacketHeader::RESPONSE,
-			       RipPacketHeader::IPv6_VERSION);
+    RipPacketHeaderWriter rph(_pkt->header_ptr());
+    rph.initialize(RipPacketHeader::RESPONSE, RipPacketHeader::IPv6_VERSION);
 }
 
 template <>
@@ -371,15 +374,21 @@ ResponsePacketAssembler<IPv6>::packet_add_route(const Net&	net,
 						uint16_t	cost,
 						uint16_t	tag)
 {
+    uint8_t* pre_ptr;
+
     if (packet_full()) {
 	return false;
     }
     if (nexthop != _sp_state.last_nexthop()) {
-	_pkt->route_entry(_pos)->initialize_nexthop(nexthop);
+	pre_ptr = _pkt->route_entry_ptr(_pos);
+	PacketRouteEntryWriter<IPv6> pre(pre_ptr);
+	pre.initialize_nexthop(nexthop);
 	_pos++;
 	_sp_state.set_last_nexthop(nexthop);
     }
-    _pkt->route_entry(_pos)->initialize_route(tag, net, cost);
+    pre_ptr = _pkt->route_entry_ptr(_pos);
+    PacketRouteEntryWriter<IPv6> pre(pre_ptr);
+    pre.initialize_route(tag, net, cost);
     _pos++;
     return true;
 }
@@ -406,12 +415,15 @@ inline bool
 RequestTablePacketAssembler<IPv4>::prepare(RipPacket<IPv4>*	    pkt,
 					   list<RipPacket<IPv4>* >& auth_packets)
 {
-    pkt->header()->initialize(RipPacketHeader::REQUEST,
-			      RipPacketHeader::IPv4_VERSION);
+    RipPacketHeaderWriter rph(pkt->header_ptr());
+    rph.initialize(RipPacketHeader::REQUEST, RipPacketHeader::IPv4_VERSION);
 
     AuthHandlerBase& ah = _sp_state.ah();
     pkt->set_max_entries(1 + ah.head_entries());
-    pkt->route_entry(ah.head_entries())->initialize_table_request();
+
+    uint8_t* pre_ptr = pkt->route_entry_ptr(ah.head_entries());
+    PacketRouteEntryWriter<IPv4> pre(pre_ptr);
+    pre.initialize_table_request();
 
     size_t n_routes = 0;
     if ((ah.authenticate_outbound(*pkt, auth_packets, n_routes) != true)
@@ -431,10 +443,13 @@ inline bool
 RequestTablePacketAssembler<IPv6>::prepare(RipPacket<IPv6>*	    pkt,
 					   list<RipPacket<IPv6>* >& auth_packets)
 {
-    pkt->header()->initialize(RipPacketHeader::REQUEST,
-			      RipPacketHeader::IPv6_VERSION);
+    RipPacketHeaderWriter rph(pkt->header_ptr());
+    rph.initialize(RipPacketHeader::REQUEST, RipPacketHeader::IPv6_VERSION);
     pkt->set_max_entries(1);
-    pkt->route_entry(0)->initialize_table_request();
+
+    uint8_t* pre_ptr = pkt->route_entry_ptr(0);
+    PacketRouteEntryWriter<IPv6> pre(pre_ptr);
+    pre.initialize_table_request();
 
     RipPacket<IPv6>* packet = new RipPacket<IPv6>(*pkt);
     auth_packets.push_back(packet);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_outputs.cc,v 1.26 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_outputs.cc,v 1.27 2006/08/18 01:50:30 pavlin Exp $"
 
 #include <set>
 
@@ -232,7 +232,8 @@ template <typename A>
 struct ResponseReader {
     ResponseReader(const RipPacket<A>* rp) : _rp(rp), _pe(0)
     {
-	if (_rp->header()->command() != RipPacketHeader::RESPONSE) {
+	RipPacketHeader rph(_rp->header_ptr());
+	if (rph.command() != RipPacketHeader::RESPONSE) {
 	    verbose_log("Bad packet!\n");
 	    _pe = ~0U;
 	}
@@ -254,13 +255,16 @@ ResponseReader<IPv4>::get(IPNet<IPv4>& 	n,
 			  uint32_t& 	cost,
 			  uint32_t& 	tag)
 {
-    const PacketRouteEntry<IPv4>* pre = _rp->route_entry(_pe);
-    if (pre == 0)
+    const uint8_t* pre_ptr = _rp->route_entry_ptr(_pe);
+
+    if (pre_ptr == NULL)
 	return false;
-    n 	 = pre->net();
-    nh 	 = pre->nexthop();
-    cost = pre->metric();
-    tag  = pre->tag();
+
+    const PacketRouteEntry<IPv4> pre(pre_ptr);
+    n 	 = pre.net();
+    nh 	 = pre.nexthop();
+    cost = pre.metric();
+    tag  = pre.tag();
     _pe++;
     return true;
 }
@@ -273,18 +277,19 @@ ResponseReader<IPv6>::get(IPNet<IPv6>& 	n,
 			  uint32_t& 	tag)
 {
     for (;;) {
-	const PacketRouteEntry<IPv6>* pre = _rp->route_entry(_pe);
-	if (pre == 0)
+	const uint8_t* pre_ptr = _rp->route_entry_ptr(_pe);
+	if (pre_ptr == NULL)
 	    return false;
-	if (pre->is_nexthop()) {
-	    _nh6 = pre->nexthop();
+	const PacketRouteEntry<IPv6> pre(pre_ptr);
+	if (pre.is_nexthop()) {
+	    _nh6 = pre.nexthop();
 	    _pe++;
 	    continue;
 	}
 	nh   = _nh6;
-	n    = pre->net();
-	cost = pre->metric();
-	tag  = pre->tag();
+	n    = pre.net();
+	cost = pre.metric();
+	tag  = pre.tag();
 	_pe++;
 	return true;
     }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/port.cc,v 1.64 2006/07/19 22:55:43 pavlin Exp $"
+#ident "$XORP: xorp/rip/port.cc,v 1.65 2006/08/18 01:50:30 pavlin Exp $"
 
 #include "rip_module.h"
 
@@ -666,7 +666,7 @@ template <typename A>
 void
 Port<A>::parse_request(const Addr&			src_addr,
 		       uint16_t				src_port,
-		       const PacketRouteEntry<A>*	entries,
+		       const uint8_t*			entries_ptr,
 		       uint32_t				n_entries)
 {
     if (this->port_io_enabled() == false) {
@@ -674,7 +674,9 @@ Port<A>::parse_request(const Addr&			src_addr,
 	return;
     }
 
-    if (n_entries == 1 && entries[0].is_table_request()) {
+    const PacketRouteEntry<A> pre(entries_ptr);
+
+    if (n_entries == 1 && pre.is_table_request()) {
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    Peer<A>* p = peer(src_addr);
 	    if (p == 0) {
@@ -724,7 +726,9 @@ Port<A>::parse_request(const Addr&			src_addr,
 	RipPacket<A>* pkt = new RipPacket<A>(src_addr, src_port);
 	rpa.packet_start(pkt);
 	while (rpa.packet_full() == false && i != n_entries) {
-	    if (entries[i].prefix_len() > A::ADDR_BITLEN) {
+	    const uint8_t* pre_ptr = entries_ptr + i * PacketRouteEntry<A>::size();
+	    const PacketRouteEntry<A> pre(pre_ptr);
+	    if (pre.prefix_len() > A::ADDR_BITLEN) {
 		// Route request has an address with a bad prefix length
 		// Unfortunately it's non-trivial for us to propagate this
 		// back to the offending enquirer so we just stop processing
@@ -733,12 +737,12 @@ Port<A>::parse_request(const Addr&			src_addr,
 		break;
 	    }
 
-	    const RouteEntry<A>* r = rdb.find_route(entries[i].net());
+	    const RouteEntry<A>* r = rdb.find_route(pre.net());
 	    if (r) {
 		rpa.packet_add_route(r->net(), r->nexthop(),
 				     r->cost(), r->tag());
 	    } else {
-		rpa.packet_add_route(entries[i].net(), A::ZERO(),
+		rpa.packet_add_route(pre.net(), A::ZERO(),
 				     RIP_INFINITY, 0);
 	    }
 	    i++;
@@ -798,22 +802,21 @@ Port<A>::port_io_receive(const A&	src_address,
 	return;
     }
 
-    const RipPacketHeader *ph =
-	reinterpret_cast<const RipPacketHeader*>(rip_packet);
+    const RipPacketHeader rph(rip_packet);
 
     //
     // Basic RIP packet header validity checks
     //
-    if (ph->valid_command() == false) {
+    if (rph.valid_command() == false) {
 	record_bad_packet("Invalid command", src_address, src_port, p);
 	return;
-    } else if (ph->valid_version(RIP_AF_CONSTANTS<A>::PACKET_VERSION) == false) {
-	record_bad_packet(c_format("Invalid version (%d).", ph->version()),
+    } else if (rph.valid_version(RIP_AF_CONSTANTS<A>::PACKET_VERSION) == false) {
+	record_bad_packet(c_format("Invalid version (%d).", rph.version()),
 			  src_address, src_port, p);
 	return;
-    } else if (ph->valid_padding() == false) {
+    } else if (rph.valid_padding() == false) {
 	record_bad_packet(c_format("Invalid padding (%u,%u).",
-				   ph->unused0(), ph->unused1()),
+				   rph.unused0(), rph.unused1()),
 			  src_address, src_port, p);
 	return;
     }
@@ -821,7 +824,7 @@ Port<A>::port_io_receive(const A&	src_address,
     //
     // Check this is not an attempt to inject routes from non-RIP port
     //
-    if (ph->command() == RipPacketHeader::RESPONSE &&
+    if (rph.command() == RipPacketHeader::RESPONSE &&
 	src_port != RIP_AF_CONSTANTS<A>::IP_PORT) {
 	record_bad_packet(c_format("RIP response originating on wrong port"
 				   " (%d != %d)",
@@ -831,7 +834,7 @@ Port<A>::port_io_receive(const A&	src_address,
     }
 
 #if defined (INSTANTIATE_IPV4)
-    const PacketRouteEntry<A>* entries = 0;
+    const uint8_t* entries_ptr = NULL;
     uint32_t n_entries = 0;
     bool new_peer = (p == NULL);
 
@@ -852,7 +855,7 @@ Port<A>::port_io_receive(const A&	src_address,
 
     if (af_state().auth_handler()->authenticate_inbound(rip_packet,
 							rip_packet_bytes,
-							entries,
+							entries_ptr,
 							n_entries,
 							src_address,
 							new_peer) == false) {
@@ -868,8 +871,7 @@ Port<A>::port_io_receive(const A&	src_address,
 	return;
     }
 #elif defined (INSTANTIATE_IPV6)
-    const PacketRouteEntry<A>* entries =
-	reinterpret_cast<const PacketRouteEntry<IPv6>*>(ph + 1);
+    const uint8_t* entries_ptr = rip_packet + RipPacketHeader::size();
     uint32_t n_entries = (rip_packet_bytes - RipPacketHeader::size()) /
 	PacketRouteEntry<A>::size();
     size_t calc_bytes = n_entries * PacketRouteEntry<A>::size()
@@ -881,17 +883,17 @@ Port<A>::port_io_receive(const A&	src_address,
 #endif
 
     if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT &&
-	ph->command() == RipPacketHeader::RESPONSE) {
+	rph.command() == RipPacketHeader::RESPONSE) {
 	record_response_packet(p);
-	parse_response(src_address, src_port, entries, n_entries);
+	parse_response(src_address, src_port, entries_ptr, n_entries);
     } else {
-	XLOG_ASSERT(ph->command() == RipPacketHeader::REQUEST);
+	XLOG_ASSERT(rph.command() == RipPacketHeader::REQUEST);
 	if (src_port == RIP_AF_CONSTANTS<A>::IP_PORT) {
 	    record_request_packet(p);
 	} else {
 	    counters().incr_non_rip_requests_recv();
 	}
-	parse_request(src_address, src_port, entries, n_entries);
+	parse_request(src_address, src_port, entries_ptr, n_entries);
     }
 }
 
@@ -906,7 +908,7 @@ template <>
 void
 Port<IPv4>::parse_response(const Addr&				src_addr,
 			   uint16_t				src_port,
-			   const PacketRouteEntry<Addr>*	entries,
+			   const uint8_t*			entries_ptr,
 			   uint32_t				n_entries)
 {
     static IPv4 net_filter("255.0.0.0");
@@ -923,25 +925,27 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
     }
 
     for (uint32_t i = 0; i < n_entries; i++) {
-	if (entries[i].addr_family() != AF_INET) {
+	const uint8_t* pre_ptr = entries_ptr + i * PacketRouteEntry<IPv4>::size();
+	const PacketRouteEntry<IPv4> pre(pre_ptr);
+	if (pre.addr_family() != AF_INET) {
 	    record_bad_route("bad address family", src_addr, src_port, p);
 	    continue;
 	}
 
-	uint16_t metric = entries[i].metric();
+	uint16_t metric = pre.metric();
 	if (metric > RIP_INFINITY) {
 	    record_bad_route("bad metric", src_addr, src_port, p);
 	    continue;
 	}
 
-	uint32_t prefix_len = entries[i].prefix_len();
+	uint32_t prefix_len = pre.prefix_len();
 	if (prefix_len > Addr::ADDR_BITLEN) {
 	    record_bad_packet("bad prefix length", src_addr, src_port, p);
 	    continue;
 	}
 
-	IPv4Net net = entries[i].net();
-	IPv4 addr = entries[i].addr();
+	IPv4Net net = pre.net();
+	IPv4 addr = pre.addr();
 	if (prefix_len == 0 && addr != IPv4::ZERO()) {
 	    // Subnet mask not specified, thus apply a clasfull mask
 	    if (addr < class_b_net) {
@@ -1051,7 +1055,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	    }
 	}
 
-	IPv4 nh = entries[i].nexthop();
+	IPv4 nh = pre.nexthop();
 	if (nh == IPv4::ZERO()) {
 	    nh = src_addr;
 	} else if (nh == _pio->address()) {
@@ -1078,7 +1082,7 @@ Port<IPv4>::parse_response(const Addr&				src_addr,
 	// XXX review
 	// Want to do anything with tag?
 	//
-	uint16_t tag = entries[i].tag();
+	uint16_t tag = pre.tag();
 
 	p->update_route(net, nh, metric, tag, PolicyTags());
     }
@@ -1097,7 +1101,7 @@ template <>
 void
 Port<IPv6>::parse_response(const Addr&				src_addr,
 			   uint16_t				src_port,
-			   const PacketRouteEntry<Addr>*	entries,
+			   const uint8_t*			entries_ptr,
 			   uint32_t				n_entries)
 {
     Peer<Addr>* p = peer(src_addr);
@@ -1110,8 +1114,10 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
     // ALL_ONES is used as a magic value to indicate no nexthop has been set.
     IPv6 nh = IPv6::ALL_ONES();
     for (uint32_t i = 0; i < n_entries; i++) {
-	if (entries[i].is_nexthop()) {
-	    nh = entries[i].nexthop();
+	const uint8_t* pre_ptr = entries_ptr + i * PacketRouteEntry<IPv6>::size();
+	const PacketRouteEntry<IPv6> pre(pre_ptr);
+	if (pre.is_nexthop()) {
+	    nh = pre.nexthop();
 	    if (! nh.is_linklocal_unicast())
 		nh = IPv6::ZERO();
 	    if (nh == IPv6::ZERO()) {
@@ -1124,18 +1130,18 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    continue;
 	}
 
-	uint16_t metric = entries[i].metric();
+	uint16_t metric = pre.metric();
 	if (metric > RIP_INFINITY) {
 	    record_bad_route("bad metric", src_addr, src_port, p);
 	    continue;
 	}
 
-	if (entries[i].prefix_len() > Addr::ADDR_BITLEN) {
+	if (pre.prefix_len() > Addr::ADDR_BITLEN) {
 	    record_bad_packet("bad prefix length", src_addr, src_port, p);
 	    continue;
 	}
 
-	IPv6Net net = entries[i].net();
+	IPv6Net net = pre.net();
 
 	IPv6 masked_net = net.masked_addr();
 	if (masked_net.is_multicast()) {
@@ -1161,7 +1167,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	    }
 	}
 
-	if (entries[i].prefix_len() == Addr::ADDR_BITLEN) {
+	if (pre.prefix_len() == Addr::ADDR_BITLEN) {
 	    //
 	    // Check if the route is for one of my own addresses.
 	    //
@@ -1226,7 +1232,7 @@ Port<IPv6>::parse_response(const Addr&				src_addr,
 	// XXX review
 	// Want to do anything with tag?
 	//
-	uint16_t tag = entries[i].tag();
+	uint16_t tag = pre.tag();
 
 	p->update_route(net, nh, metric, tag, PolicyTags());
     }
