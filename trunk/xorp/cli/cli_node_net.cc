@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.51 2006/07/21 00:56:22 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.52 2006/07/24 21:25:42 pavlin Exp $"
 
 
 //
@@ -514,9 +514,9 @@ CliClient::start_connection(string& error_msg)
 
 	; // do nothing
 #else
-	term_name = getenv("TERM");
-	if (term_name.empty())
-	    term_name = DEFAULT_TERM_TYPE;	// Set to default
+	char *term = getenv("TERM");
+	if ((term != NULL) && (! string(term).empty()))
+	    term_name = string(term);
 #endif
     }
 
