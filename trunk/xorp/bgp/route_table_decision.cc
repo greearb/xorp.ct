@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.41 2006/02/17 23:34:54 zec Exp $"
+#ident "$XORP: xorp/bgp/route_table_decision.cc,v 1.42 2006/03/16 00:03:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -324,7 +324,6 @@ DecisionTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     
     RouteData<A> *new_winner = NULL;
     if (!alternatives.empty()) {
-	//add the new route to the pool of possible winners.
 	new_winner = find_winner(alternatives);
     }
 
