@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/ERRATA,v 1.32 2006/07/06 20:23:16 pavlin Exp $
+# $XORP: xorp/ERRATA,v 1.33 2006/08/02 09:32:34 pavlin Exp $
 #
 
 		XORP ERRATA
@@ -95,6 +95,16 @@
       (or one of the interface specific variants) can be used to
       automatically promote one of the secondary addresses to become
       the new primary address.
+
+    - On Linux with kernel older than linux-2.6.18 there is a kernel
+      bug related to modifying MAC addresses using the RTM_SETLINK
+      netlink mechanism:
+        http://www.spinics.net/lists/kernel/msg498873.html
+
+      If it is not possible to update the kernel, the simplest
+      work-around would be to replace "#ifdef RTM_SETLINK"
+      with "#if 0" inside file fea/ifconfig_set_netlink.cc, method
+      IfConfigSetNetlink::set_interface_mac_address().
 
     - The mechanism for tracking the network interface link status
       may not work for the following OS-es because the kernel for those
