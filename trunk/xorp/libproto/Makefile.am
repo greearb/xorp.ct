@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/libproto/Makefile.am,v 1.15 2006/08/10 09:02:45 pavlin Exp $
+## $XORP: xorp/libproto/Makefile.am,v 1.16 2006/08/15 01:10:51 pavlin Exp $
 ##
 
 # -- Real Programs
@@ -9,11 +9,13 @@ bin_PROGRAMS	 =
 # -- No-install Programs
 check_PROGRAMS	 = test_checksum
 check_PROGRAMS	+= test_config_node_id
+check_PROGRAMS	+= test_packet
 check_PROGRAMS	+= test_spt
 
 # -- Test Programs
 TESTS		 = test_checksum$(EXEEXT)
 TESTS		+= test_config_node_id$(EXEEXT)
+TESTS		+= test_packet$(EXEEXT)
 TESTS		+= test_spt$(EXEEXT)
 
 # -- No-install Libraries
@@ -24,9 +26,10 @@ LDADD		 = $(noinst_LTLIBRARIES)
 LDADD		+= $(top_builddir)/libxorp/libxorp.la
 
 # -- Program Sources
-test_checksum_SOURCES	 = test_checksum.cc
+test_checksum_SOURCES	= test_checksum.cc
 test_config_node_id_SOURCES = test_config_node_id.cc
-test_spt_SOURCES	 = test_spt.cc
+test_packet_SOURCES	= test_packet.cc
+test_spt_SOURCES	= test_spt.cc
 
 # -- Library Sources
 libproto_la_SOURCES	 = libproto_module.h

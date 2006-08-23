@@ -91,10 +91,10 @@ install_sh = @install_sh@
 bin_PROGRAMS = 
 
 # -- No-install Programs
-check_PROGRAMS = test_checksum test_config_node_id test_spt
+check_PROGRAMS = test_checksum test_config_node_id test_packet test_spt
 
 # -- Test Programs
-TESTS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) test_spt$(EXEEXT)
+TESTS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) test_packet$(EXEEXT) test_spt$(EXEEXT)
 
 # -- No-install Libraries
 noinst_LTLIBRARIES = libproto.la
@@ -105,6 +105,7 @@ LDADD = $(noinst_LTLIBRARIES) $(top_builddir)/libxorp/libxorp.la
 # -- Program Sources
 test_checksum_SOURCES = test_checksum.cc
 test_config_node_id_SOURCES = test_config_node_id.cc
+test_packet_SOURCES = test_packet.cc
 test_spt_SOURCES = test_spt.cc
 
 # -- Library Sources
@@ -129,7 +130,7 @@ am_libproto_la_OBJECTS = checksum.lo proto_node_cli.lo proto_register.lo \
 libproto_la_OBJECTS = $(am_libproto_la_OBJECTS)
 bin_PROGRAMS =
 check_PROGRAMS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) \
-	test_spt$(EXEEXT)
+	test_packet$(EXEEXT) test_spt$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_test_checksum_OBJECTS = test_checksum.$(OBJEXT)
@@ -144,6 +145,12 @@ test_config_node_id_LDADD = $(LDADD)
 test_config_node_id_DEPENDENCIES = libproto.la \
 	$(top_builddir)/libxorp/libxorp.la
 test_config_node_id_LDFLAGS =
+am_test_packet_OBJECTS = test_packet.$(OBJEXT)
+test_packet_OBJECTS = $(am_test_packet_OBJECTS)
+test_packet_LDADD = $(LDADD)
+test_packet_DEPENDENCIES = libproto.la \
+	$(top_builddir)/libxorp/libxorp.la
+test_packet_LDFLAGS =
 am_test_spt_OBJECTS = test_spt.$(OBJEXT)
 test_spt_OBJECTS = $(am_test_spt_OBJECTS)
 test_spt_LDADD = $(LDADD)
@@ -162,7 +169,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/proto_state.Plo $(DEPDIR)/proto_unit.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/spt.Plo $(DEPDIR)/test_checksum.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_config_node_id.Po \
-@AMDEP_TRUE@	$(DEPDIR)/test_spt.Po
+@AMDEP_TRUE@	$(DEPDIR)/test_packet.Po $(DEPDIR)/test_spt.Po
 COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
 	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 LTCOMPILE = $(LIBTOOL) --mode=compile $(CC) $(DEFS) $(DEFAULT_INCLUDES) \
@@ -181,9 +188,10 @@ CXXLINK = $(LIBTOOL) --mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
 	$(AM_LDFLAGS) $(LDFLAGS) -o $@
 CXXFLAGS = @CXXFLAGS@
 DIST_SOURCES = $(libproto_la_SOURCES) $(test_checksum_SOURCES) \
-	$(test_config_node_id_SOURCES) $(test_spt_SOURCES)
+	$(test_config_node_id_SOURCES) $(test_packet_SOURCES) \
+	$(test_spt_SOURCES)
 DIST_COMMON = Makefile.am Makefile.in TODO
-SOURCES = $(libproto_la_SOURCES) $(test_checksum_SOURCES) $(test_config_node_id_SOURCES) $(test_spt_SOURCES)
+SOURCES = $(libproto_la_SOURCES) $(test_checksum_SOURCES) $(test_config_node_id_SOURCES) $(test_packet_SOURCES) $(test_spt_SOURCES)
 
 all: all-am
 
@@ -243,6 +251,9 @@ test_checksum$(EXEEXT): $(test_checksum_OBJECTS) $(test_checksum_DEPENDENCIES)
 test_config_node_id$(EXEEXT): $(test_config_node_id_OBJECTS) $(test_config_node_id_DEPENDENCIES) 
 	@rm -f test_config_node_id$(EXEEXT)
 	$(CXXLINK) $(test_config_node_id_LDFLAGS) $(test_config_node_id_OBJECTS) $(test_config_node_id_LDADD) $(LIBS)
+test_packet$(EXEEXT): $(test_packet_OBJECTS) $(test_packet_DEPENDENCIES) 
+	@rm -f test_packet$(EXEEXT)
+	$(CXXLINK) $(test_packet_LDFLAGS) $(test_packet_OBJECTS) $(test_packet_LDADD) $(LIBS)
 test_spt$(EXEEXT): $(test_spt_OBJECTS) $(test_spt_DEPENDENCIES) 
 	@rm -f test_spt$(EXEEXT)
 	$(CXXLINK) $(test_spt_LDFLAGS) $(test_spt_OBJECTS) $(test_spt_LDADD) $(LIBS)
@@ -261,6 +272,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/spt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_checksum.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_config_node_id.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_spt.Po@am__quote@
 
 distclean-depend:
