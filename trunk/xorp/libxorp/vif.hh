@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.13 2006/03/16 00:04:37 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.14 2006/07/03 23:33:37 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -22,11 +22,11 @@
 #include "xorp.h"
 #include "ipv4.hh"
 #include "ipv6.hh"
-#include "ipvxnet.hh"
 #include "ipvx.hh"
+#include "ipvxnet.hh"
 
 /**
- * @short Virtual interface address class
+ * @short Virtual interface address class.
  * 
  * VifAddr holds information about an address of a virtual interface.
  * A virtual interface may have more than one VifAddr.
@@ -171,7 +171,7 @@ private:
 };
 
 /**
- * @short Virtual Interface class
+ * @short Virtual Interface class.
  * 
  * Vif holds information about a virtual interface.  A Vif may
  * represent a physical interface, or may represent more abstract
@@ -223,7 +223,7 @@ public:
      * 
      * @return a string representation of the vif name.
      */
-    const string& name() const { return _name;}
+    const string& name() const { return _name; }
 
     /**
      * Get the name of the physical interface associated with vif.
