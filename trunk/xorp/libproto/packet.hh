@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.1 2006/08/10 09:02:45 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.2 2006/08/23 06:11:42 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -230,6 +230,13 @@ public:
     static const size_t size() { return IpHeader4::SIZE; }
 
     /**
+     * Get the buffer data.
+     *
+     * @return the buffer data.
+     */
+    const uint8_t* data() const { return (_data); }
+
+    /**
      * Methods to get various IP header fields.
      */
     uint8_t  ip_vhl() const	{ return extract_8(_ip_vhl); }
@@ -352,6 +359,13 @@ public:
     {}
 
     /**
+     * Get the buffer data.
+     *
+     * @return the buffer data.
+     */
+    uint8_t* data() { return (_data); }
+
+    /**
      * Methods to set various IP header fields.
      */
     void set_ip_vhl(uint8_t v)		{ embed_8(_ip_vhl, v); }
@@ -465,6 +479,13 @@ public:
     static const size_t size() { return IpHeader6::SIZE; }
 
     /**
+     * Get the buffer data.
+     *
+     * @return the buffer data.
+     */
+    const uint8_t* data() const { return (_data); }
+
+    /**
      * Methods to get various IP header fields.
      */
     uint32_t ip_vtc_flow() const { return extract_32(_ip_vtc_flow); }
@@ -564,6 +585,13 @@ public:
 	  _ip_src(_data + _ip_src_offset),
 	  _ip_dst(_data + _ip_dst_offset)
     {}
+
+    /**
+     * Get the buffer data.
+     *
+     * @return the buffer data.
+     */
+    uint8_t* data() { return (_data); }
 
     /**
      * Methods to set various IP header fields.
