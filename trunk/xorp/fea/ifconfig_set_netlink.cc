@@ -588,18 +588,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     ifinfomsg->ifi_change = 0xffffffff;
 
     // Add the MAC address as an attribute
-    struct sockaddr_storage ss_mac;
-    struct sockaddr* sa_mac_p = reinterpret_cast<struct sockaddr *>(&ss_mac);
-    size_t sa_mac_len = 0;
-    memset(&ss_mac, 0, sizeof(ss_mac));
-    sa_mac_p->sa_family = ARPHRD_ETHER;
-    sa_mac_len = sizeof(sa_mac_p->sa_family) + ETH_ALEN;
-#ifdef HAVE_SA_LEN
-    sa_mac_p->sa_len = ETH_ALEN;
-    sa_mac_len += sizeof(sa_mac_p->sa_len);
-#endif
-    memcpy(sa_mac_p->sa_data, &ether_addr, ETH_ALEN);
-    rta_len = RTA_LENGTH(sa_mac_len);
+    rta_len = RTA_LENGTH(ETH_ALEN);
     if (NLMSG_ALIGN(nlh->nlmsg_len) + rta_len > sizeof(buffer)) {
 	XLOG_FATAL("AF_NETLINK buffer size error: %u instead of %u",
 		   XORP_UINT_CAST(sizeof(buffer)),
@@ -607,28 +596,8 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     }
     rtattr = IFLA_RTA(ifinfomsg);
     rtattr->rta_type = IFLA_ADDRESS;
-    //
-    // XXX: The correct value for rtattr->rta_len should be "rta_len":
-    // rtattr->rta_len = rta_len;
-    //
-    // However, the Linux kernel (at least version 2.6.17) has an API bug:
-    // the attribute payload is suppose to be a MAC address contained inside
-    // "struct sockaddr", but rta_len only is suppose to be ETH_ALEN.
-    // The particular problematic code in the kernel is inside
-    // net/core/rtnetlink.c, do_setlink():
-    //  ...
-    //	if (ida[IFLA_ADDRESS - 1]) {
-    //      ...
-    //      if (ida[IFLA_ADDRESS - 1]->rta_len != RTA_LENGTH(dev->addr_len))
-    //          goto out;
-    //      err = dev->set_mac_address(dev, RTA_DATA(ida[IFLA_ADDRESS - 1]));
-    //      ...
-    //
-    //  [ Where dev->set_mac_address() expects to see a second argument of
-    //    type "struct sockaddr". ]
-    //
-    rtattr->rta_len = RTA_LENGTH(ETH_ALEN);
-    memcpy(RTA_DATA(rtattr), sa_mac_p, sa_mac_len);
+    rtattr->rta_len = rta_len;
+    memcpy(RTA_DATA(rtattr), &ether_addr, ETH_ALEN);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
     if (ns.sendto(buffer, nlh->nlmsg_len, 0,
