@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.18 2006/03/22 02:23:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.19 2006/06/15 06:04:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -22,6 +22,8 @@
 #include "libxorp/ipvx.hh"
 
 #include "libcomm/comm_api.h"
+
+#include "libproto/checksum.h"
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -78,59 +80,6 @@ do {                                                                          \
 } while(0)
 
 /* ------------------------------------------------------------------------- */
-/*
- * inet_cksum extracted from:
- *                      P I N G . C
- *
- * Author -
- *      Mike Muuss
- *      U. S. Army Ballistic Research Laboratory
- *      December, 1983
- * Modified at Uc Berkeley
- *
- * (ping.c) Status -
- *      Public Domain.  Distribution Unlimited.
- *
- *                      I N _ C K S U M
- *
- * Checksum routine for Internet Protocol family headers (C Version)
- *
- */
-static int
-inet_cksum(const u_short* addr, uint16_t len)
-{
-        register int nleft = (int)len;
-        register const u_short *w = addr;
-        u_short answer = 0;
-        register int sum = 0;
-
-        /*
-         *  Our algorithm is simple, using a 32 bit accumulator (sum),
-         *  we add sequential 16 bit words to it, and at the end, fold
-         *  back all the carry bits from the top 16 bits into the lower
-         *  16 bits.
-         */
-        while (nleft > 1)  {
-                sum += *w++;
-                nleft -= 2;
-        }
-
-        /* mop up an odd byte, if necessary */
-        if (nleft == 1) {
-                *(u_char *) (&answer) = *(const u_char *)w ;
-                sum += answer;
-        }
-
-        /*
-         * add back carry outs from top 16 bits to low 16 bits
-         */
-        sum = (sum >> 16) + (sum & 0xffff);     /* add hi 16 to low 16 */
-        sum += (sum >> 16);                     /* add carry */
-        answer = ~sum;                          /* truncate to 16 bits */
-        return (answer);
-}
-
-/* ------------------------------------------------------------------------- */
 /* IcmpEchoHeader */
 
 struct IcmpEchoHeader {
@@ -148,7 +97,7 @@ struct IcmpEchoHeader {
 	_id = htons(id);
 	_seq = htons(seq);
 	_cksum = 0;
-	_cksum = inet_cksum((const uint16_t*)&_type, 8);
+	_cksum = inet_checksum(&_type, 8);
     }
 
     IcmpEchoHeader(const uint8_t* buf, size_t bufbytes)

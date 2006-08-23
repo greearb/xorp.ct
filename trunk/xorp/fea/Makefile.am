@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/fea/Makefile.am,v 1.65 2006/06/29 11:03:53 bms Exp $
+## $XORP: xorp/fea/Makefile.am,v 1.66 2006/06/29 19:10:56 pavlin Exp $
 ##
 
 # Redefine the bin installation directory
@@ -136,8 +136,10 @@ test_ifmanager_transaction_LDADD	+= $(top_builddir)/libxorp/libxorp.la
 # -- Sources and Linkages for test_rawsock4
 test_rawsock4_SOURCES	 = test_rawsock4.cc
 test_rawsock4_LDADD	 = $(noinst_LTLIBRARIES)
-test_rawsock4_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+test_rawsock4_LDADD	+= $(top_builddir)/libproto/libproto.la
 test_rawsock4_LDADD	+= $(top_builddir)/libcomm/libcomm.la
+test_rawsock4_LDADD	+= $(top_builddir)/libxorp/libxorp.la
+
 
 # -- Sources and Linkage for test_xrl_sockets
 test_xrl_sockets4_udp_SOURCES	 = test_xrl_sockets4_udp.cc
