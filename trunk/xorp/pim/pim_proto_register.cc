@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.30 2006/08/15 02:36:55 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.31 2006/08/18 22:14:50 pavlin Exp $"
 
 
 //
@@ -28,6 +28,7 @@
 #include "libxorp/ipvx.hh"
 
 #include "libproto/checksum.h"
+#include "libproto/packet.hh"
 
 #include "pim_mfc.hh"
 #include "pim_node.hh"
@@ -460,16 +461,16 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 			  string& error_msg)
 {
 #ifndef HOST_OS_WINDOWS
-    const struct ip *ip4 = (const struct ip *)rcvbuf;
+    IpHeader4 ip4(rcvbuf);
     buffer_t *buffer;
     uint32_t flags = 0;
     size_t mtu = 0;
     string dummy_error_msg;
     
-    if (ip4->ip_v != source_addr.ip_version()) {
+    if (ip4.ip_version() != source_addr.ip_version()) {
 	error_msg = c_format("Cannot encapsulate IP packet: "
 			     "inner IP version (%u) != expected IP version (%u)",
-			     XORP_UINT_CAST(ip4->ip_v),
+			     XORP_UINT_CAST(ip4.ip_version()),
 			     XORP_UINT_CAST(source_addr.ip_version()));
 	XLOG_WARNING("%s", error_msg.c_str());
 	return (XORP_ERROR);
@@ -528,11 +529,11 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     //
     if (family() == AF_INET) {
 	uint8_t frag_buf[rcvlen];	// The buffer for the fragments
-	struct ip *frag_ip4 = (struct ip *)frag_buf;
+	IpHeader4Writer frag_ip4(frag_buf);
 	size_t frag_optlen = 0;		// The optlen to copy into fragments
 	size_t frag_ip_hl;
 	
-	if (ntohs(ip4->ip_off) & IP_DF) {
+	if (ip4.ip_off() & IP_DF) {
 	    // Fragmentation is forbidded
 	    error_msg = c_format("Cannot fragment encapsulated IP packet "
 				 "from %s to %s: "
@@ -544,7 +545,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    // back for datagrams destinated to an multicast address.
 	    return (XORP_ERROR);
 	}
-	if (((mtu - (ip4->ip_hl << 2)) & ~7) < 8) {
+	if (((mtu - (ip4.ip_header_len())) & ~7) < 8) {
 	    // Fragmentation is possible only if we can put at least
 	    // 8 octets per fragment (except the last one)
 	    error_msg = c_format("Cannot fragment encapsulated IP packet "
@@ -567,9 +568,9 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    register u_char *dp;
 	    int opt, optlen, cnt;
 	    
-	    cp = (const u_char *)(ip4 + 1);
-	    dp = (u_char *)(frag_ip4 + 1);
-	    cnt = (ip4->ip_hl << 2) - sizeof (struct ip);
+	    cp = (const u_char *)(ip4.data() + ip4.size());
+	    dp = (u_char *)(frag_ip4.data() + frag_ip4.size());
+	    cnt = ip4.ip_header_len() - sizeof (struct ip);
 	    for (; cnt > 0; cnt -= optlen, cp += optlen) {
                 opt = cp[0];
                 if (opt == IPOPT_EOL)
@@ -611,13 +612,15 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 		    dp += optlen;
                 }
 	    }
-	    for (optlen = dp - (u_char *)(frag_ip4+1); optlen & 0x3; optlen++)
+	    for (optlen = dp - (u_char *)(frag_ip4.data() + frag_ip4.size());
+		 optlen & 0x3; optlen++) {
                 *dp++ = IPOPT_EOL;
+	    }
 	    frag_optlen = optlen;	// return (optlen);
 	}
 	// The header length with the remaining IP options
 	frag_ip_hl = (sizeof(struct ip) + frag_optlen);
-	frag_ip4->ip_hl = frag_ip_hl >> 2;
+	frag_ip4.set_ip_header_len(frag_ip_hl);
 	
 	//
 	// Do the fragmentation
@@ -627,20 +630,18 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	// Send the first segment with all the options
 	{
 	    uint8_t first_frag[mtu];
-	    struct ip *first_ip = (struct ip *)first_frag;
-	    size_t first_ip_hl = ip4->ip_hl << 2;
+	    IpHeader4Writer first_ip(first_frag);
+	    size_t first_ip_hl = ip4.ip_header_len();
 	    size_t nfb = (mtu - first_ip_hl) / 8;
 	    size_t first_frag_len = first_ip_hl + nfb*8;
 	    
 	    memcpy(first_frag, rcvbuf, first_frag_len);
 	    
 	    // Correct the IP header
-	    first_ip->ip_off = htons(ntohs(first_ip->ip_off) | IP_MF);
-	    first_ip->ip_len = htons(first_frag_len);
-	    first_ip->ip_sum = 0;
-	    first_ip->ip_sum = inet_checksum(
-		reinterpret_cast<const uint8_t *>(first_ip),
-		first_ip_hl);
+	    first_ip.set_ip_off(first_ip.ip_off() | IP_MF);
+	    first_ip.set_ip_len(first_frag_len);
+	    first_ip.set_ip_sum(0);
+	    first_ip.set_ip_sum(inet_checksum(first_ip.data(), first_ip_hl));
 	    
 	    // Encapsulate and send the fragment
 	    buffer = buffer_send_prepare();
@@ -672,28 +673,26 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	    memcpy(frag_buf + frag_ip_hl, rcvbuf + data_start, frag_data_len);
 	    
 	    // The IP packet total length
-	    frag_ip4->ip_len = htons(frag_len);
+	    frag_ip4.set_ip_len(frag_len);
 	    
 	    // The IP fragment flags and offset
 	    {
 #ifndef IP_OFFMASK
 #define IP_OFFMASK 0x1fff	// Mask for fragmenting bits
 #endif
-		unsigned short ip_off_field = ntohs(ip4->ip_off);
+		unsigned short ip_off_field = ip4.ip_off();
 		unsigned short frag_ip_off_flags = ip_off_field & ~IP_OFFMASK;
 		unsigned short frag_ip_off = (ip_off_field & IP_OFFMASK);
 		
 		if (! is_last_fragment)
 		    frag_ip_off_flags |= IP_MF;
 		
-		frag_ip_off += (data_start - (ip4->ip_hl << 2)) / 8;	// XXX
-		frag_ip4->ip_off = htons(frag_ip_off_flags | frag_ip_off);
+		frag_ip_off += (data_start - ip4.ip_header_len()) / 8;	// XXX
+		frag_ip4.set_ip_off(frag_ip_off_flags | frag_ip_off);
 	    }
 	    
-	    frag_ip4->ip_sum = 0;
-	    frag_ip4->ip_sum = inet_checksum(
-		reinterpret_cast<const uint8_t *>(frag_ip4),
-		frag_ip_hl);
+	    frag_ip4.set_ip_sum(0);
+	    frag_ip4.set_ip_sum(inet_checksum(frag_ip4.data(), frag_ip_hl));
 	    
 	    // Encapsulate and send the fragment
 	    buffer = buffer_send_prepare();
