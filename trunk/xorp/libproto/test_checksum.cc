@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_checksum.cc,v 1.1 2006/08/15 01:10:51 pavlin Exp $"
+#ident "$XORP: xorp/libproto/test_checksum.cc,v 1.2 2006/08/15 23:15:30 pavlin Exp $"
 
 #include "libproto_module.h"
 #include "libxorp/xorp.h"
@@ -153,7 +153,7 @@ test_inet_checksum(TestInfo& test_info)
     uint16_t checksum;
     uint16_t checksum1, checksum2;
 
-    // Test values for IPv4 address: "12.34.56.78"
+    // Test values for packets of different length
     const uint8_t packet_length_0[]	= { };
     const uint8_t packet_length_1[]	= { 0x1 };
     const uint8_t packet_length_2[]	= { 0x1, 0x2 };
@@ -250,8 +250,7 @@ test_inet_checksum(TestInfo& test_info)
     checksum1 = htons(0x1);
     checksum2 = htons(0x2);
     checksum = inet_checksum_add(checksum1, checksum2);
-    verbose_assert(checksum == htons(0x3),
-		   "Addition of two checksums");
+    verbose_assert(checksum == htons(0x3), "Addition of two checksums");
 
     //
     // Test the addition of two zero checksums
@@ -259,8 +258,7 @@ test_inet_checksum(TestInfo& test_info)
     checksum1 = htons(0x0);
     checksum2 = htons(0x0);
     checksum = inet_checksum_add(checksum1, checksum2);
-    verbose_assert(checksum == htons(0x0),
-		   "Addition of two zero checksums");
+    verbose_assert(checksum == htons(0x0), "Addition of two zero checksums");
 
     //
     // Test the addition of two all-ones checksums
