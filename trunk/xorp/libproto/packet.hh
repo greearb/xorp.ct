@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.3 2006/08/23 07:05:40 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.4 2006/08/24 18:36:53 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -385,6 +385,14 @@ public:
     IPv4     ip_src() const	{ return IPv4(_ip_src); }
     IPv4     ip_dst() const	{ return IPv4(_ip_dst); }
 
+    /*
+     * A method to extract the ip_len value that is presumably stored
+     * in host order.
+     *
+     * @return the ip_len value that is presumably stored in host order.
+     */
+    uint16_t ip_len_host() const{ return extract_host_16(_ip_len); }
+
     /**
      * Get the IP protocol version of the header.
      *
@@ -514,10 +522,17 @@ public:
     void set_ip_src(const IPv4& v)	{ v.copy_out(_ip_src); }
     void set_ip_dst(const IPv4& v)	{ v.copy_out(_ip_dst); }
 
+    /*
+     * A method to embed the ip_len value by storing it in host order.
+     *
+     * @param v the ip_len value that will be stored in host order.
+     */
+    void set_ip_len_host(uint16_t v)	{ embed_host_16(_ip_len, v); }
+
     /**
      * Set the IP protocol version of the header.
      *
-     * @v the IP protocol version of the header.
+     * @param v the IP protocol version of the header.
      */
     void set_ip_version(uint8_t v) {
 	uint8_t vhl = ((v << 4) | (ip_header_len() >> 2));
@@ -527,7 +542,7 @@ public:
     /**
      * Set the IPv4 packet header size (including any header options).
      *
-     * @v the IPv4 packet header size (including any header options).
+     * @param v the IPv4 packet header size (including any header options).
      */
     void set_ip_header_len(uint8_t v) {
 	uint8_t vhl = ((ip_version() << 4) | (v >> 2));
@@ -537,7 +552,7 @@ public:
     /**
      * Set the IPv4 fragment offset (excluding the fragment flags).
      *
-     * @v the IPv4 fragment offset (excluding the fragment flags).
+     * @param v the IPv4 fragment offset (excluding the fragment flags).
      */
     void set_ip_fragment_offset(uint16_t v) {
 	uint16_t off = v & IpHeader4::FRAGMENT_OFFSET_MASK;
@@ -548,7 +563,7 @@ public:
     /**
      * Set the IPv4 fragment flags.
      *
-     * @v the IPv4 fragment flags.
+     * @param v the IPv4 fragment flags.
      */
     void set_ip_fragment_flags(uint16_t v) {
 	uint16_t off = v & IpHeader4::FRAGMENT_FLAGS_MASK;
@@ -741,7 +756,7 @@ public:
     /**
      * Set the IP protocol version of the header.
      *
-     * @v the IP protocol version of the header.
+     * @param v the IP protocol version of the header.
      */
     void set_ip_version(uint8_t v) {
 	uint32_t vtc_flow = ip_vtc_flow() & ~IpHeader6::VERSION_MASK;
@@ -754,7 +769,7 @@ public:
     /**
      * Set the IPv6 traffic class.
      *
-     * @v the IPv6 traffic class.
+     * @param v the IPv6 traffic class.
      */
     void set_ip_traffic_class(uint8_t v) {
 	uint32_t vtc_flow = ip_vtc_flow() & ~IpHeader6::TRAFFIC_CLASS_MASK;
@@ -767,7 +782,7 @@ public:
     /**
      * Set the IPv6 flow label.
      *
-     * @v the IPv6 flow label.
+     * @param v the IPv6 flow label.
      */
     void set_ip_flow_label(uint32_t v) {
 	uint32_t vtc_flow = ip_vtc_flow() & ~IpHeader6::FLOW_LABEL_MASK;
