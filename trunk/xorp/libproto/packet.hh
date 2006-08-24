@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.2 2006/08/23 06:11:42 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.3 2006/08/23 07:05:40 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -177,6 +177,141 @@ embed_32(uint8_t *ptr, uint32_t val)
     ptr[1] = (val >> 16) & 0xff;
     ptr[2] = (val >> 8) & 0xff;
     ptr[3] = val & 0xff;
+}
+
+/**
+ * Extract an 8-bit number from the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer with the data.
+ * @return an 8-bit number from the beginning of a buffer.
+ */
+inline
+uint8_t
+extract_host_8(const uint8_t *ptr)
+{
+    uint8_t val;
+
+    val = ptr[0];
+
+    return val;
+}
+
+/**
+ * Embed an 8-bit number into the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer to store the data.
+ * @param val the 8-bit value to embed into the beginning of the buffer.
+ */
+inline
+void
+embed_host_8(uint8_t *ptr, uint8_t val)
+{
+    ptr[0] = val;
+}
+
+/**
+ * Extract a 16-bit number from the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer with the data.
+ * @return a 16-bit number from the beginning of a buffer.
+ */
+inline
+uint16_t
+extract_host_16(const uint8_t *ptr)
+{
+    union {
+	uint16_t val;
+	uint8_t  c[sizeof(uint16_t)];
+    } u;
+
+    u.c[0] = ptr[0];
+    u.c[1] = ptr[1];
+
+    return u.val;
+}
+
+/**
+ * Embed a 16-bit number into the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer to store the data.
+ * @param val the 16-bit value to embed into the beginning of the buffer.
+ */
+inline
+void
+embed_host_16(uint8_t *ptr, uint16_t val)
+{
+    union {
+	uint16_t val;
+	uint8_t  c[sizeof(uint16_t)];
+    } u;
+
+    u.val = val;
+    ptr[0] = u.c[0];
+    ptr[1] = u.c[1];
+}
+
+/*
+ * XXX: Note that we don't define extract_host_24() and embed_host_24(),
+ * because 3 octets of data might occupy either 3 or 4 octets (depending
+ * on the byte ordering). Hence, extract_host_32() and embed_host_32()
+ * should be used instead.
+ */
+
+/**
+ * Extract a 32-bit number from the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer with the data.
+ * @return a 32-bit number from the beginning of a buffer.
+ */
+inline
+uint32_t
+extract_host_32(const uint8_t *ptr)
+{
+    union {
+	uint32_t val;
+	uint8_t  c[sizeof(uint32_t)];
+    } u;
+
+    u.c[0] = ptr[0];
+    u.c[1] = ptr[1];
+    u.c[2] = ptr[2];
+    u.c[3] = ptr[3];
+
+    return u.val;
+}
+
+/**
+ * Embed a 32-bit number into the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer to store the data.
+ * @param val the 32-bit value to embed into the beginning of the buffer.
+ */
+inline
+void
+embed_host_32(uint8_t *ptr, uint32_t val)
+{
+    union {
+	uint32_t val;
+	uint8_t  c[sizeof(uint32_t)];
+    } u;
+
+    u.val = val;
+    ptr[0] = u.c[0];
+    ptr[1] = u.c[1];
+    ptr[2] = u.c[2];
+    ptr[3] = u.c[3];
 }
 
 /**
