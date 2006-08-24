@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acipv4.m4,v 1.6 2006/03/31 22:53:46 pavlin Exp $
+dnl $XORP: xorp/config/acipv4.m4,v 1.7 2006/04/01 09:09:24 pavlin Exp $
 dnl
 
 dnl
@@ -186,15 +186,16 @@ dnl Different OS-es have a different view of what a raw IPv4 header passed
 dnl between the kernel and the user space looks like. In some OS-es
 dnl such as GNU/Linux nothing in the IP header is modified: e.g., the
 dnl 'ip_len' field is always in network-order and includes the IP header
-dnl length. In other OS-es such as various *BSD flavors the 'ip_len'
-dnl is already in host-order and, for the incoming packets, excludes
-dnl the IP header length (typically in 'ip_input()' in the kernel).
+dnl length. In other OS-es such as various *BSD flavors (e.g., FreeBSD,
+dnl NetBSD, and probably DragonFlyBSD), the 'ip_len' is already in host-order
+dnl and, for the incoming packets, excludes the IP header length (typically
+dnl in 'ip_input()' in the kernel).
 dnl
-dnl A notable exception is OpenBSD (at least version 2.7) which has
-dnl the 'ip_len' of incoming packets in host-order and excludes the IP header
-dnl length, but the 'ip_len' of the outgoing raw packets prepared by
-dnl the application must be in network order, and must include the IP header
-dnl length. Go figure...
+dnl A notable exception are some older versions of OpenBSD (e.g., version 2.7)
+dnl which has the 'ip_len' of incoming packets in host-order and excludes
+dnl the IP header length, but the 'ip_len' of the outgoing raw packets
+dnl prepared by the application must be in network order, and must include
+dnl the IP header length. Go figure...
 dnl
 
 case "${host_os}" in
