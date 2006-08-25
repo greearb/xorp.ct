@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.4 2006/08/24 18:36:53 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.5 2006/08/24 18:57:27 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -312,6 +312,53 @@ embed_host_32(uint8_t *ptr, uint32_t val)
     ptr[1] = u.c[1];
     ptr[2] = u.c[2];
     ptr[3] = u.c[3];
+}
+
+/**
+ * Extract an integer number from the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer with the data.
+ * @return an integer number from the beginning of a buffer.
+ */
+inline
+int
+extract_host_int(const uint8_t *ptr)
+{
+    union {
+	int val;
+	uint8_t  c[sizeof(int)];
+    } u;
+
+    for (size_t i = 0; i < sizeof(int); i++) {
+	u.c[i] = ptr[i];
+    }
+
+    return u.val;
+}
+
+/**
+ * Embed an integer number into the beginning of a buffer.
+ *
+ * Note that the integers in the buffer are stored in host order.
+ *
+ * @param ptr the buffer to store the data.
+ * @param val the integer value to embed into the beginning of the buffer.
+ */
+inline
+void
+embed_host_int(uint8_t *ptr, int val)
+{
+    union {
+	int val;
+	uint8_t  c[sizeof(int)];
+    } u;
+
+    u.val = val;
+    for (size_t i = 0; i < sizeof(int); i++) {
+	ptr[i] = u.c[i];
+    }
 }
 
 /**
