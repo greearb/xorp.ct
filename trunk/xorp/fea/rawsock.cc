@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.26 2006/07/28 00:29:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.27 2006/08/10 05:16:13 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -62,6 +62,8 @@
 #endif
 
 #include "libcomm/comm_api.h"
+
+#include "libproto/packet.hh"
 
 #include "mrt/include/ip_mroute.h"
 
@@ -1380,33 +1382,36 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     switch (family()) {
     case AF_INET:
     {
-	struct ip *ip;
+	IpHeader4 ip4(_rcvbuf0);
 	bool is_datalen_error = false;
 	
 	// Input check
-	ip = reinterpret_cast<struct ip *>(_rcvbuf0);
-	if (nbytes < (ssize_t)sizeof(*ip)) {
+	if (nbytes < (ssize_t)ip4.size()) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(*ip)));
+			 XORP_UINT_CAST(ip4.size()));
 	    return;		// Error
 	}
 #ifndef HOST_OS_WINDOWS
-	// TODO: get rid of this and always use ip->ip_src ??
+	// TODO: get rid of this and always use ip4.ip_src() ??
 	src_address.copy_in(_from4);
 #else
-	src_address.copy_in(ip->ip_src);
+	src_address = ip4.ip_src();
 #endif
-	dst_address.copy_in(ip->ip_dst);
-	ip_ttl = ip->ip_ttl;
-	ip_tos = ip->ip_tos;
+	dst_address = ip4.ip_dst();
+	ip_ttl = ip4.ip_ttl();
+	ip_tos = ip4.ip_tos();
 	
-	ip_hdr_len  = ip->ip_hl << 2;
+	ip_hdr_len  = ip4.ip_header_len();
 #ifdef IPV4_RAW_INPUT_IS_RAW
-	ip_data_len = ntohs(ip->ip_len) - ip_hdr_len;
+	ip_data_len = ip4.ip_len() - ip_hdr_len;
 #else
-	ip_data_len = ip->ip_len;
+	//
+	// XXX: The original value is in host order, and excludes the
+	// IPv4 header length.
+	//
+	ip_data_len = ip4.ip_len_host();
 #endif // ! IPV4_RAW_INPUT_IS_RAW
 	// Check length
 	is_datalen_error = false;
@@ -1419,13 +1424,13 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		is_datalen_error = true;
 		break;
 	    }
-	    if (ip->ip_p == IPPROTO_PIM) {
-		struct pim *pim;
+	    if (ip4.ip_p() == IPPROTO_PIM) {
+		const struct pim *pim;
 		if (nbytes < ip_hdr_len + PIM_REG_MINLEN) {
 		    is_datalen_error = true;
 		    break;
 		}
-		pim = reinterpret_cast<struct pim *>((uint8_t *)ip + ip_hdr_len);
+		pim = reinterpret_cast<const struct pim *>(ip4.data() + ip_hdr_len);
 		if (PIM_VT_T(pim->pim_vt) != PIM_REGISTER) {
 		    is_datalen_error = true;
 		    break;
@@ -1496,9 +1501,9 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// Check for Router Alert option
 	//
 	do {
-	    uint8_t *option_p = (uint8_t *)(ip + 1);
+	    const uint8_t *option_p = ip4.data() + ip4.size();
 	    uint8_t option_value, option_len;
-	    uint32_t test_ip_options_len = ip_hdr_len - sizeof(*ip);
+	    uint32_t test_ip_options_len = ip_hdr_len - ip4.size();
 	    while (test_ip_options_len) {
 		if (test_ip_options_len < 4)
 		    break;
@@ -1778,9 +1783,6 @@ RawSocket::proto_socket_write(const string& if_name,
 			      const vector<uint8_t>& payload,
 			      string& error_msg)
 {
-    struct ip	*ip;
-    uint32_t	ip_option;
-    uint32_t	*ip_option_p;
     int		ip_hdr_len = 0;
     int		int_val;
     int		setloop = false;
@@ -1889,6 +1891,7 @@ RawSocket::proto_socket_write(const string& if_name,
     //
     switch (family()) {
     case AF_INET:
+    {
 	if (! _is_ip_hdr_included) {
 	    //
 	    // Use socket options to set the IP header information
@@ -1899,7 +1902,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    //
 #ifdef IP_OPTIONS
 	    if (is_router_alert) {
-		ip_option = htonl((IPOPT_RA << 24) | (0x04 << 16));
+		uint32_t ip_option = htonl((IPOPT_RA << 24) | (0x04 << 16));
 		if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_OPTIONS,
 			       XORP_SOCKOPT_CAST(&ip_option),
 			       sizeof(ip_option))
@@ -1975,38 +1978,38 @@ RawSocket::proto_socket_write(const string& if_name,
 	    break;
 	}
 
-	ip = reinterpret_cast<struct ip *>(_sndbuf0);
+	//
+	// Set the IPv4 header
+	//
+	IpHeader4Writer ip4(_sndbuf0);
 	if (is_router_alert) {
 	    // Include the Router Alert option
-	    ip_option	= htonl((IPOPT_RA << 24) | (0x04 << 16));
-	    ip_option_p	= (uint32_t *)(ip + 1);
-	    *ip_option_p = ip_option;
-	    ip_hdr_len	= (sizeof(*ip) + sizeof(*ip_option_p));
+	    uint32_t ip_option = (IPOPT_RA << 24) | (0x04 << 16);
+	    uint8_t* ip_option_p = ip4.data() + ip4.size();
+	    embed_32(ip_option_p, ip_option);
+	    ip_hdr_len	= ip4.size() + sizeof(ip_option);
 	} else {
-	    ip_hdr_len	= sizeof(*ip);
+	    ip_hdr_len	= ip4.size();
 	}
-	ip->ip_hl	= ip_hdr_len >> 2;
-	ip->ip_v	= IPVERSION;
-	ip->ip_id	= 0;				// Let kernel fill in
-	ip->ip_off	= 0x0;
-	ip->ip_p	= _ip_protocol;
-	ip->ip_ttl	= ip_ttl;
-	ip->ip_tos	= ip_tos;
-
-	//
-	// XXX: we need to use a temporary in_addr storage as a work-around
-	// if "struct ip" is __packed
-	//
-	struct in_addr in_addr_tmp;
-	src_address.copy_out(in_addr_tmp);
-	ip->ip_src = in_addr_tmp;
-	dst_address.copy_out(in_addr_tmp);
-	ip->ip_dst = in_addr_tmp;
-	ip->ip_len = (ip->ip_hl << 2) + payload.size();
+	ip4.set_ip_version(IPVERSION);
+	ip4.set_ip_header_len(ip_hdr_len);
+	ip4.set_ip_tos(ip_tos);
+	ip4.set_ip_id(0);				// Let kernel fill in
+	ip4.set_ip_off(0);
+	ip4.set_ip_ttl(ip_ttl);
+	ip4.set_ip_p(_ip_protocol);
+	ip4.set_ip_sum(0);				// Let kernel fill in
+	ip4.set_ip_src(src_address.get_ipv4());
+	ip4.set_ip_dst(dst_address.get_ipv4());
 #ifdef IPV4_RAW_OUTPUT_IS_RAW
-	ip->ip_len = htons(ip->ip_len);
-#endif
-	ip->ip_sum = 0;					// Let kernel fill in
+	ip4.set_ip_len(ip_hdr_len + payload.size());
+#else
+	//
+	// XXX: The stored value should be in host order, and should
+	// include the IPv4 header length.
+	//
+	ip4.set_ip_len_host(ip_hdr_len + payload.size());
+#endif // ! IPV4_RAW_INPUT_IS_RAW
 
 	//
 	// Now hook the data
@@ -2022,7 +2025,8 @@ RawSocket::proto_socket_write(const string& if_name,
     	memcpy(_sndbuf1, &payload[0], payload.size()); // XXX: goes to _sndiov[1].iov_base
 	// _sndiov[1].iov_base	= (caddr_t)&payload[0];
 	_sndiov[1].iov_len	= payload.size();
-	break;
+    }
+    break;
 
 #ifdef HAVE_IPV6
     case AF_INET6:

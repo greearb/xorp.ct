@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.46 2006/03/20 21:33:24 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.47 2006/04/03 04:40:35 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -55,6 +55,8 @@
 #endif
 
 #include "libcomm/comm_api.h"
+
+#include "libproto/packet.hh"
 
 #include "mrt/include/ip_mroute.h"
 #include "mrt/max_vifs.h"
@@ -2234,13 +2236,13 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	    // If a WHOLEPKT message, then get the inner source and
 	    // destination addresses
 	    //
-	    const struct ip *ip4 = (const struct ip *)(igmpmsg + 1);
-	    if (datalen - sizeof(*igmpmsg) < sizeof(*ip4)) {
+	    IpHeader4 ip4(databuf + sizeof(*igmpmsg));
+	    if (datalen - sizeof(*igmpmsg) < ip4.size()) {
 		// The inner packet is too small
 		return (XORP_ERROR);
 	    }
-	    src.copy_in(ip4->ip_src);
-	    dst.copy_in(ip4->ip_dst);
+	    src = ip4.ip_src();
+	    dst = ip4.ip_dst();
 	} else {
 	    src.copy_in(igmpmsg->im_src);
 	    dst.copy_in(igmpmsg->im_dst);
@@ -2324,13 +2326,13 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 	    // If a WHOLEPKT message, then get the inner source and
 	    // destination addresses
 	    //
-	    const struct ip6_hdr *ip6 = (const struct ip6_hdr *)(mrt6msg + 1);
-	    if (datalen - sizeof(*mrt6msg) < sizeof(*ip6)) {
+	    IpHeader6 ip6(databuf + sizeof(*mrt6msg));
+	    if (datalen - sizeof(*mrt6msg) < ip6.size()) {
 		// The inner packet is too small
 		return (XORP_ERROR);
 	    }
-	    src.copy_in(ip6->ip6_src);
-	    dst.copy_in(ip6->ip6_dst);
+	    src = ip6.ip_src();
+	    dst = ip6.ip_dst();
 	} else {
 	    src.copy_in(mrt6msg->im6_src);
 	    dst.copy_in(mrt6msg->im6_dst);
