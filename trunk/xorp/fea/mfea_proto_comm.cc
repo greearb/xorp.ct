@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.58 2006/07/28 00:29:06 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.59 2006/08/25 01:04:21 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1606,7 +1606,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	    case IPV6_HOPLIMIT:
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
-		int_val = *((int *)CMSG_DATA(cmsgp));
+		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_ttl = int_val;
 		break;
 	    case IPV6_HOPOPTS:
@@ -1664,7 +1664,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	    case IPV6_TCLASS:
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
-		int_val = *((int *)CMSG_DATA(cmsgp));
+		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_tos = int_val;
 		break;
 #endif // IPV6_TCLASS
@@ -2179,7 +2179,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type = IPV6_HOPLIMIT;
 	int_val = ip_ttl;
-	*(int *)(CMSG_DATA(cmsgp)) = int_val;
+	embed_host_int(CMSG_DATA(cmsgp), int_val);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	
 	//
@@ -2190,7 +2190,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type = IPV6_TCLASS;
 	int_val = ip_tos;
-	*(int *)(CMSG_DATA(cmsgp)) = int_val;
+	embed_host_int(CMSG_DATA(cmsgp), int_val);
 	cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 #endif // IPV6_TCLASS
 	

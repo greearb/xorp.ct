@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.27 2006/03/16 00:03:59 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.28 2006/07/27 19:28:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -30,6 +30,8 @@
 #ifdef HAVE_LINUX_RTNETLINK_H
 #include <linux/rtnetlink.h>
 #endif
+
+#include "libproto/packet.hh"
 
 #include "kernel_utils.hh"
 #include "netlink_socket.hh"
@@ -282,7 +284,8 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
 
 	// Get the interface index
 	if (rta_array[RTA_OIF] != NULL) {
-	    if_index = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF]));
+	    if_index = extract_host_int(
+		RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_OIF])));
 	} else {
 	    XLOG_ERROR("nlm_get_to_fte_cfg() failed: no interface found");
 	    return false;
@@ -306,7 +309,8 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     uint32_t route_metric = 0xffff;
     if (rta_array[RTA_PRIORITY] != NULL) {
 	int int_priority;
-	int_priority = *(int *)RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_PRIORITY]));
+	int_priority = extract_host_int(
+	    RTA_DATA(const_cast<struct rtattr *>(rta_array[RTA_PRIORITY])));
 	route_metric = int_priority;
     }
 
