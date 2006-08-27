@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.28 2006/03/30 08:32:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_netlink.cc,v 1.29 2006/03/31 06:11:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -146,11 +146,15 @@ FtiConfigTableGetNetlink::get_table(int , list<FteX>& )
 bool
 FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
 {
-    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + 512;
-    char		buffer[buffer_size];
-    struct nlmsghdr	*nlh;
+    static const size_t	buffer_size = sizeof(struct nlmsghdr)
+	+ sizeof(struct rtmsg) + 512;
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct rtgenmsg	*rtgenmsg;
+    struct rtgenmsg*	rtgenmsg;
     NetlinkSocket&	ns = *this;
 
     // Check that the family is supported
@@ -181,8 +185,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     snl.nl_groups = 0;
     
     // Set the request
-    memset(buffer, 0, sizeof(buffer));
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtgenmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -191,7 +194,7 @@ FtiConfigTableGetNetlink::get_table(int family, list<FteX>& fte_list)
     rtgenmsg = reinterpret_cast<struct rtgenmsg*>(NLMSG_DATA(nlh));
     rtgenmsg->rtgen_family = family;
     
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl),
 		  sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {

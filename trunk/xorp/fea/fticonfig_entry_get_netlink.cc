@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.31 2006/03/30 08:32:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.32 2006/03/31 06:11:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -31,6 +31,7 @@
 
 #include "fticonfig.hh"
 #include "fticonfig_entry_get.hh"
+#include "netlink_socket_utils.hh"
 
 
 //
@@ -211,12 +212,16 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& , FteX& )
 bool
 FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 {
-    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;
-    char		buffer[buffer_size];
-    struct nlmsghdr	*nlh;
+    static const size_t	buffer_size = sizeof(struct nlmsghdr)
+	+ sizeof(struct rtmsg) + sizeof(struct rtattr) + 512;
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct rtmsg	*rtmsg;
-    struct rtattr	*rtattr;
+    struct rtmsg*	rtmsg;
+    struct rtattr*	rtattr;
     int			rta_len;
     NetlinkSocket&	ns = *this;
     int			family = dst.af();
@@ -255,8 +260,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     snl.nl_groups = 0;
     
     // Set the request
-    memset(buffer, 0, sizeof(buffer));
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_GETROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST;
@@ -284,7 +288,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     rtmsg->rtm_type  = RTN_UNSPEC;
     rtmsg->rtm_flags = 0;
     
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s",

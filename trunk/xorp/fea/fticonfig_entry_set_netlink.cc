@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.27 2006/03/30 08:32:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.28 2006/03/31 06:11:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -143,9 +143,12 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct rtmsg*	rtmsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -176,7 +179,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     if (fte.is_connected_route())
 	return true;	// XXX: don't add/remove directly-connected routes
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -187,7 +190,6 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_NEWROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -274,8 +276,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 		       XORP_UINT_CAST(sizeof(buffer)),
 		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
-	rtattr = (struct rtattr*)(((char*)(rtattr)) +
-	    RTA_ALIGN((rtattr)->rta_len));
+	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
 	rtattr->rta_type = RTA_OIF;
 	rtattr->rta_len = rta_len;
 	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
@@ -304,7 +305,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     //
     
     string error_msg;
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));
@@ -324,9 +325,12 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rtmsg)
 	+ 3*sizeof(struct rtattr) + sizeof(int) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct rtmsg*	rtmsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -356,7 +360,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     if (fte.is_connected_route())
 	return true;	// XXX: don't add/remove directly-connected routes
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -367,7 +371,6 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*rtmsg));
     nlh->nlmsg_type = RTM_DELROUTE;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -421,7 +424,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     } while (false);
 
     string error_msg;
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	XLOG_ERROR("Error writing to netlink socket: %s", strerror(errno));

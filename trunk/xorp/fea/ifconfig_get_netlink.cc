@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.18 2006/03/30 08:32:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_netlink.cc,v 1.19 2006/03/31 06:11:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -109,12 +109,16 @@ IfConfigGetNetlink::read_config(IfTree& )
 bool
 IfConfigGetNetlink::read_config(IfTree& it)
 {
-    static const size_t	buffer_size = sizeof(struct nlmsghdr) + sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;
-    char		buffer[buffer_size];
-    struct nlmsghdr	*nlh;
+    static const size_t	buffer_size = sizeof(struct nlmsghdr)
+	+ sizeof(struct ifinfomsg) + sizeof(struct ifaddrmsg) + 512;
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct ifinfomsg	*ifinfomsg;
-    struct ifaddrmsg	*ifaddrmsg;
+    struct ifinfomsg*	ifinfomsg;
+    struct ifaddrmsg*	ifaddrmsg;
     NetlinkSocket&	ns = *this;
     
     //
@@ -134,8 +138,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     //
     // Set the request for network interfaces
     //
-    memset(buffer, 0, sizeof(buffer));
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_GETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_ROOT;	// Get the whole table
@@ -148,7 +151,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
     ifinfomsg->ifi_flags = 0;
     ifinfomsg->ifi_change = 0xffffffff;
     
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl),
 		  sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
@@ -210,8 +213,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	// Set the request for IPv4 addresses
 	//
 	if (ifc().have_ipv4()) {
-	    memset(buffer, 0, sizeof(buffer));
-	    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+	    memset(&buffer, 0, sizeof(buffer));
 	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	    nlh->nlmsg_type = RTM_GETADDR;
 	    // Get the whole table
@@ -225,7 +227,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
 	
-	    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {
@@ -265,8 +267,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	// Set the request for IPv6 addresses
 	//
 	if (ifc().have_ipv6()) {
-	    memset(buffer, 0, sizeof(buffer));
-	    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
+	    memset(&buffer, 0, sizeof(buffer));
 	    nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
 	    nlh->nlmsg_type = RTM_GETADDR;
 	    // Get the whole table
@@ -280,7 +281,7 @@ IfConfigGetNetlink::read_config(IfTree& it)
 	    ifaddrmsg->ifa_scope = 0;
 	    ifaddrmsg->ifa_index = if_index;
 	
-	    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+	    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 			  reinterpret_cast<struct sockaddr*>(&snl),
 			  sizeof(snl))
 		!= (ssize_t)nlh->nlmsg_len) {

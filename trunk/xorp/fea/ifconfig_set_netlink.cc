@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.27 2006/03/31 06:11:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.29 2006/08/23 08:15:16 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -414,9 +414,12 @@ IfConfigSetNetlink::config_interface(const string& ifname,
 #ifndef HAVE_NETLINK_SOCKETS_SET_FLAGS_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct ifinfomsg*	ifinfomsg;
     NetlinkSocket&	ns = *this;
 
@@ -424,7 +427,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     UNUSED(is_up);
     UNUSED(is_deleted);
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -435,7 +438,6 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -455,7 +457,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     }
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len);
 
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
@@ -553,9 +555,12 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 #ifdef RTM_SETLINK
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct ifinfomsg*	ifinfomsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -563,7 +568,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 
     UNUSED(ifname);
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -574,7 +579,6 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_SETLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -600,7 +604,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     memcpy(RTA_DATA(rtattr), &ether_addr, ETH_ALEN);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
@@ -662,9 +666,12 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 #ifndef HAVE_NETLINK_SOCKETS_SET_MTU_IS_BROKEN
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct ifinfomsg*	ifinfomsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -672,7 +679,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 
     UNUSED(ifname);
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -683,7 +690,6 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifinfomsg));
     nlh->nlmsg_type = RTM_NEWLINK;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -710,7 +716,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     memcpy(RTA_DATA(rtattr), &uint_mtu, sizeof(uint_mtu));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
@@ -765,9 +771,12 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct ifaddrmsg*	ifaddrmsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -808,7 +817,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	break;
     }
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -819,7 +828,6 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
     nlh->nlmsg_type = RTM_NEWADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -867,7 +875,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	}
     }
 
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
@@ -891,9 +899,12 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 {
     static const size_t	buffer_size = sizeof(struct nlmsghdr)
 	+ sizeof(struct ifinfomsg) + 2*sizeof(struct rtattr) + 512;
-    uint8_t		buffer[buffer_size];
+    union {
+	uint8_t		data[buffer_size];
+	struct nlmsghdr	nlh;
+    } buffer;
+    struct nlmsghdr*	nlh = &buffer.nlh;
     struct sockaddr_nl	snl;
-    struct nlmsghdr*	nlh;
     struct ifaddrmsg*	ifaddrmsg;
     struct rtattr*	rtattr;
     int			rta_len;
@@ -932,7 +943,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 	break;
     }
 
-    memset(buffer, 0, sizeof(buffer));
+    memset(&buffer, 0, sizeof(buffer));
 
     // Set the socket
     memset(&snl, 0, sizeof(snl));
@@ -943,7 +954,6 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     //
     // Set the request
     //
-    nlh = reinterpret_cast<struct nlmsghdr*>(buffer);
     nlh->nlmsg_len = NLMSG_LENGTH(sizeof(*ifaddrmsg));
     nlh->nlmsg_type = RTM_DELADDR;
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
@@ -970,7 +980,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     addr.copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
-    if (ns.sendto(buffer, nlh->nlmsg_len, 0,
+    if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
 	error_msg = c_format("error writing to netlink socket: %s",
