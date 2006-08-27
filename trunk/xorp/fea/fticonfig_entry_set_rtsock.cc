@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.34 2006/03/22 00:41:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.35 2006/04/03 04:31:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -157,10 +157,14 @@ bool
 FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin_dst, *sin_netmask;
-    struct sockaddr_in	*sin_nexthop = NULL;
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_in*	sin_dst = NULL;
+    struct sockaddr_in*	sin_netmask = NULL;
+    struct sockaddr_in*	sin_nexthop = NULL;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
 #ifdef AF_LINK
@@ -239,10 +243,8 @@ FtiConfigEntrySetRtsock::add_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     rtm->rtm_msglen = sizeof(*rtm);
-    
     switch (family) {
     case AF_INET:
 	sin_dst = (struct sockaddr_in *)(rtm + 1);
@@ -381,9 +383,13 @@ bool
 FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
 {
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin_dst, *sin_netmask = NULL;
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_in*	sin_dst = NULL;
+    struct sockaddr_in*	sin_netmask = NULL;
     RoutingSocket&	rs = *this;
     int			family = fte.net().af();
     size_t		sin_dst_len = 0;
@@ -415,10 +421,8 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     rtm->rtm_msglen = sizeof(*rtm);
-    
     switch (family) {
     case AF_INET:
 	sin_dst = (struct sockaddr_in *)(rtm + 1);

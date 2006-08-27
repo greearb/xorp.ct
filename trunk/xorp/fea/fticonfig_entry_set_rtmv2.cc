@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.35 2006/04/03 04:31:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtmv2.cc,v 1.1 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -173,18 +173,22 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& )
 bool
 FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 {
-    static const size_t	buffer_size = sizeof(struct rt_msghdr) + (sizeof(struct sockaddr_storage) * 3);
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_storage *ss;
-    struct sockaddr_in	*sin_dst, *sin_netmask;
-    struct sockaddr_in	*sin_nexthop = NULL;
+    static const size_t	buffer_size = sizeof(struct rt_msghdr)
+	+ (sizeof(struct sockaddr_storage) * 3);
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_storage* ss;
+    struct sockaddr_in*	sin_dst = NULL;
+    struct sockaddr_in*	sin_netmask = NULL;
+    struct sockaddr_in*	sin_nexthop = NULL;
     int			family = fte.net().af();
     IPvX		fte_nexthop = fte.nexthop();
     int			result;
 
-    debug_msg("add_entry "
-	      "(network = %s nexthop = %s)",
+    debug_msg("add_entry (network = %s nexthop = %s)\n",
 	      fte.net().str().c_str(), fte_nexthop.str().c_str());
 
     // Check that the family is supported
@@ -237,8 +241,7 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     rtm->rtm_msglen = sizeof(*rtm);
     
     if (family != AF_INET && family != AF_INET6)
@@ -286,16 +289,20 @@ FtiConfigEntrySetRtmV2::add_entry(const FteX& fte)
 bool
 FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
 {
-    static const size_t	buffer_size = sizeof(struct rt_msghdr) + (sizeof(struct sockaddr_storage) * 2);
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_storage *ss;
-    struct sockaddr_in	*sin_dst, *sin_netmask = NULL;
+    static const size_t	buffer_size = sizeof(struct rt_msghdr)
+	+ (sizeof(struct sockaddr_storage) * 2);
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_storage* ss;
+    struct sockaddr_in*	sin_dst = NULL;
+    struct sockaddr_in*	sin_netmask = NULL;
     int			family = fte.net().af();
     int			result;
 
-    debug_msg("delete_entry "
-	      "(network = %s nexthop = %s)",
+    debug_msg("delete_entry (network = %s nexthop = %s)\n",
 	      fte.net().str().c_str(), fte.nexthop().str().c_str());
 
     // Check that the family is supported
@@ -319,8 +326,7 @@ FtiConfigEntrySetRtmV2::delete_entry(const FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr *>(buffer);
+    memset(&buffer, 0, sizeof(buffer));
     rtm->rtm_msglen = sizeof(*rtm);
 
     if (family != AF_INET && family != AF_INET6)

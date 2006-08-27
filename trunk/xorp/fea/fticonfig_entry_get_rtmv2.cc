@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtmv2.cc,v 1.1 2006/06/29 11:03:54 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtmv2.cc,v 1.2 2006/08/04 07:16:27 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -212,10 +212,13 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     UNUSED(fte);
 #else
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin;
-    WinRtmPipe&	rs = *this;
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_in*	sin;
+    WinRtmPipe&		rs = *this;
     
     // Zero the return information
     fte.zero();
@@ -243,9 +246,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr*>(buffer);
-    
+    memset(&buffer, 0, sizeof(buffer));
     switch (dst.af()) {
     case AF_INET:
 	rtm->rtm_msglen = sizeof(*rtm) + sizeof(struct sockaddr_in);
@@ -346,10 +347,13 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     UNUSED(fte);
 #else
     static const size_t	buffer_size = sizeof(struct rt_msghdr) + 512;
-    char		buffer[buffer_size];
-    struct rt_msghdr	*rtm;
-    struct sockaddr_in	*sin;
-    WinRtmPipe&	rs = *this;
+    union {
+	uint8_t		data[buffer_size];
+	struct rt_msghdr rtm;
+    } buffer;
+    struct rt_msghdr*	rtm = &buffer.rtm;
+    struct sockaddr_in*	sin;
+    WinRtmPipe&		rs = *this;
     
     // Zero the return information
     fte.zero();
@@ -377,9 +381,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
     //
     // Set the request
     //
-    memset(buffer, 0, sizeof(buffer));
-    rtm = reinterpret_cast<struct rt_msghdr*>(buffer);
-    
+    memset(&buffer, 0, sizeof(buffer));
     switch (dst.af()) {
     case AF_INET:
 	rtm->rtm_msglen = sizeof(*rtm) + 2 * sizeof(struct sockaddr_in);
