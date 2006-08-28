@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.59 2006/08/25 01:04:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.60 2006/08/25 01:29:43 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1239,6 +1239,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
     bool	is_router_alert = false; // Router Alert option received
     int		pif_index = 0;
     MfeaVif	*mfea_vif = NULL;
+    void	*cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(fd);
     UNUSED(type);
@@ -1509,7 +1510,8 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		struct sockaddr_dl *sdl = NULL;
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct sockaddr_dl)))
 		    continue;
-		sdl = reinterpret_cast<struct sockaddr_dl *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		sdl = reinterpret_cast<struct sockaddr_dl *>(cmsg_data);
 		pif_index = sdl->sdl_index;
 	    }
 	    break;
@@ -1521,7 +1523,8 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		struct in_pktinfo *inp = NULL;
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in_pktinfo)))
 		    continue;
-		inp = reinterpret_cast<struct in_pktinfo *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		inp = reinterpret_cast<struct in_pktinfo *>(cmsg_data);
 		pif_index = inp->ipi_ifindex;
 	    }
 	    break;
@@ -1595,79 +1598,87 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	     cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&_rcvmh, cmsgp))) {
 	    if (cmsgp->cmsg_level != IPPROTO_IPV6)
 		continue;
+
 	    switch (cmsgp->cmsg_type) {
 	    case IPV6_PKTINFO:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in6_pktinfo)))
 		    continue;
-		pi = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		pi = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
 		pif_index = pi->ipi6_ifindex;
 		dst.copy_in(pi->ipi6_addr);
-		break;
+	    }
+	    break;
+
 	    case IPV6_HOPLIMIT:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_ttl = int_val;
-		break;
+	    }
+	    break;
+
 	    case IPV6_HOPOPTS:
-		{
-		    //
-		    // Check for Router Alert option
-		    //
+	    {
+		//
+		// Check for Router Alert option
+		//
 #ifdef HAVE_RFC3542
-		    {
-			struct ip6_hbh *ext;
-			int currentlen;
-			uint8_t type;
-			size_t extlen;
-			socklen_t len;
-			void *databuf;
-			
-			ext = reinterpret_cast<struct ip6_hbh *>(CMSG_DATA(cmsgp));
-			extlen = (ext->ip6h_len + 1) * 8;
-			currentlen = 0;
-			while (true) {
-			    currentlen = inet6_opt_next(ext, extlen,
-							currentlen,
-							&type, &len, &databuf);
-			    if (currentlen == -1)
-				break;
-			    if (type == IP6OPT_ROUTER_ALERT) {
-				is_router_alert = true;
-				break;
-			    }
-			}
+		struct ip6_hbh *ext;
+		int currentlen;
+		uint8_t type;
+		size_t extlen;
+		socklen_t len;
+		void *databuf;
+
+		cmsg_data = CMSG_DATA(cmsgp);
+		ext = reinterpret_cast<struct ip6_hbh *>(cmsg_data);
+		extlen = (ext->ip6h_len + 1) * 8;
+		currentlen = 0;
+		while (true) {
+		    currentlen = inet6_opt_next(ext, extlen, currentlen,
+						&type, &len, &databuf);
+		    if (currentlen == -1)
+			break;
+		    if (type == IP6OPT_ROUTER_ALERT) {
+			is_router_alert = true;
+			break;
 		    }
-#else // ! HAVE_RFC3542 (i.e., the old advanced API)
-		    {
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-			//
-			// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
-			// to conditionally compile, because Linux doesn't
-			// have inet6_option_*
-			//
-			uint8_t  *tptr = NULL;
-			while (inet6_option_next(cmsgp, &tptr) == 0) {
-			    if (*tptr == IP6OPT_ROUTER_ALERT) {
-				is_router_alert = true;
-				break;
-			    }
-			}
-#endif // HAVE_IPV6_MULTICAST_ROUTING
-		    }
-#endif // ! HAVE_RFC3542
-		    
 		}
-		
-		break;
+
+#else // ! HAVE_RFC3542 (i.e., the old advanced API)
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+		//
+		// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
+		// to conditionally compile, because Linux doesn't
+		// have inet6_option_*
+		//
+		uint8_t *tptr = NULL;
+		while (inet6_option_next(cmsgp, &tptr) == 0) {
+		    if (*tptr == IP6OPT_ROUTER_ALERT) {
+			is_router_alert = true;
+			break;
+		    }
+		}
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif // ! HAVE_RFC3542
+	    }
+	    break;
+
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_tos = int_val;
-		break;
+	    }
+	    break;
 #endif // IPV6_TCLASS
+
 	    default:
 		break;
 	    }
@@ -1802,6 +1813,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     int		setloop = false;
     int		ret;
     MfeaVif	*mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
+    void	*cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
 
@@ -2096,7 +2108,8 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in6_pktinfo));
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type  = IPV6_PKTINFO;
-	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
+	cmsg_data = CMSG_DATA(cmsgp);
+	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
 	memset(sndpktinfo, 0, sizeof(*sndpktinfo));
 	if ((mfea_vif->pif_index() > 0)
 	    && !(dst.is_unicast() && !dst.is_linklocal_unicast())) {

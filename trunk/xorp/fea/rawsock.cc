@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.28 2006/08/25 01:04:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.29 2006/08/25 01:29:43 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1200,6 +1200,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     uint32_t	pif_index = 0;
     vector<uint8_t> ext_headers_type;
     vector<vector<uint8_t> > ext_headers_payload;
+    void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(fd);
     UNUSED(type);
@@ -1473,7 +1474,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		struct sockaddr_dl *sdl = NULL;
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct sockaddr_dl)))
 		    continue;
-		sdl = reinterpret_cast<struct sockaddr_dl *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		sdl = reinterpret_cast<struct sockaddr_dl *>(cmsg_data);
 		pif_index = sdl->sdl_index;
 	    }
 	    break;
@@ -1485,7 +1487,8 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		struct in_pktinfo *inp = NULL;
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in_pktinfo)))
 		    continue;
-		inp = reinterpret_cast<struct in_pktinfo *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		inp = reinterpret_cast<struct in_pktinfo *>(cmsg_data);
 		pif_index = inp->ipi_ifindex;
 	    }
 	    break;
@@ -1559,71 +1562,76 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	     cmsgp = reinterpret_cast<struct cmsghdr *>(CMSG_NXTHDR(&_rcvmh, cmsgp))) {
 	    if (cmsgp->cmsg_level != IPPROTO_IPV6)
 		continue;
+
 	    switch (cmsgp->cmsg_type) {
 	    case IPV6_PKTINFO:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct in6_pktinfo)))
 		    continue;
-		pi = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
+		cmsg_data = CMSG_DATA(cmsgp);
+		pi = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
 		pif_index = pi->ipi6_ifindex;
 		dst_address.copy_in(pi->ipi6_addr);
-		break;
+	    }
+	    break;
+
 	    case IPV6_HOPLIMIT:
+	    {
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
 		    continue;
 		int_val = extract_host_int(CMSG_DATA(cmsgp));
 		ip_ttl = int_val;
-		break;
+	    }
+	    break;
+
 	    case IPV6_HOPOPTS:
-		{
-		    //
-		    // Check for Router Alert option
-		    //
+	    {
+		//
+		// Check for Router Alert option
+		//
 #ifdef HAVE_RFC3542
-		    {
-			struct ip6_hbh *ext;
-			int currentlen;
-			uint8_t type;
-			size_t extlen;
-			socklen_t len;
-			void *databuf;
-			
-			ext = reinterpret_cast<struct ip6_hbh *>(CMSG_DATA(cmsgp));
-			extlen = (ext->ip6h_len + 1) * 8;
-			currentlen = 0;
-			while (true) {
-			    currentlen = inet6_opt_next(ext, extlen,
-							currentlen,
-							&type, &len, &databuf);
-			    if (currentlen == -1)
-				break;
-			    if (type == IP6OPT_ROUTER_ALERT) {
-				is_router_alert = true;
-				break;
-			    }
-			}
+		struct ip6_hbh *ext;
+		int currentlen;
+		uint8_t type;
+		size_t extlen;
+		socklen_t len;
+		void *databuf;
+
+		cmsg_data = CMSG_DATA(cmsgp);
+		ext = reinterpret_cast<struct ip6_hbh *>(cmsg_data);
+		extlen = (ext->ip6h_len + 1) * 8;
+		currentlen = 0;
+		while (true) {
+		    currentlen = inet6_opt_next(ext, extlen, currentlen,
+						&type, &len, &databuf);
+		    if (currentlen == -1)
+			break;
+		    if (type == IP6OPT_ROUTER_ALERT) {
+			is_router_alert = true;
+			break;
 		    }
-#else // ! HAVE_RFC3542 (i.e., the old advanced API)
-		    {
-#ifdef HAVE_IPV6_MULTICAST_ROUTING
-			//
-			// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
-			// to conditionally compile, because Linux doesn't
-			// have inet6_option_*
-			//
-			uint8_t  *tptr = NULL;
-			while (inet6_option_next(cmsgp, &tptr) == 0) {
-			    if (*tptr == IP6OPT_ROUTER_ALERT) {
-				is_router_alert = true;
-				break;
-			    }
-			}
-#endif // HAVE_IPV6_MULTICAST_ROUTING
-		    }
-#endif // ! HAVE_RFC3542
-		    
 		}
-		
-		break;
+
+#else // ! HAVE_RFC3542 (i.e., the old advanced API)
+
+#ifdef HAVE_IPV6_MULTICAST_ROUTING
+		//
+		// TODO: XXX: temporary use HAVE_IPV6_MULTICAST_ROUTING
+		// to conditionally compile, because Linux doesn't
+		// have inet6_option_*
+		//
+		uint8_t *tptr = NULL;
+		while (inet6_option_next(cmsgp, &tptr) == 0) {
+		    if (*tptr == IP6OPT_ROUTER_ALERT) {
+			is_router_alert = true;
+			break;
+		    }
+		}
+#endif // HAVE_IPV6_MULTICAST_ROUTING
+#endif // ! HAVE_RFC3542
+	    }		
+	    break;
+
 #ifdef IPV6_TCLASS
 	    case IPV6_TCLASS:
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(int)))
@@ -1632,36 +1640,37 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 		ip_tos = int_val;
 		break;
 #endif // IPV6_TCLASS
+
 #ifdef IPV6_RTHDR
 	    case IPV6_RTHDR:
 	    {
 		vector<uint8_t> opt_payload(cmsgp->cmsg_len);
-		uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
-
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_rthdr)))
 		    continue;
-		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
+		cmsg_data = CMSG_DATA(cmsgp);
+		memcpy(&opt_payload[0], cmsg_data, cmsgp->cmsg_len);
 		// XXX: Use the protocol number instead of message type
 		ext_headers_type.push_back(IPPROTO_ROUTING);
 		ext_headers_payload.push_back(opt_payload);
-		break;
 	    }
+	    break;
 #endif // IPV6_RTHDR
+
 #ifdef IPV6_DSTOPTS
 	    case IPV6_DSTOPTS:
 	    {
 		vector<uint8_t> opt_payload(cmsgp->cmsg_len);
-		uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
-
 		if (cmsgp->cmsg_len < CMSG_LEN(sizeof(struct ip6_dest)))
 		    continue;
-		memcpy(&opt_payload[0], data, cmsgp->cmsg_len);
+		cmsg_data = CMSG_DATA(cmsgp);
+		memcpy(&opt_payload[0], cmsg_data, cmsgp->cmsg_len);
 		// XXX: Use the protocol number instead of message type
 		ext_headers_type.push_back(IPPROTO_DSTOPTS);
 		ext_headers_payload.push_back(opt_payload);
-		break;
 	    }
+	    break;
 #endif // IPV6_DSTOPTS
+
 	    default:
 		break;
 	    }
@@ -1789,6 +1798,7 @@ RawSocket::proto_socket_write(const string& if_name,
     int		ret;
     const IfTreeInterface* iftree_if = NULL;
     const IfTreeVif* iftree_vif = NULL;
+    void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
 
@@ -2113,7 +2123,8 @@ RawSocket::proto_socket_write(const string& if_name,
 	cmsgp->cmsg_len   = CMSG_LEN(sizeof(struct in6_pktinfo));
 	cmsgp->cmsg_level = IPPROTO_IPV6;
 	cmsgp->cmsg_type  = IPV6_PKTINFO;
-	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(CMSG_DATA(cmsgp));
+	cmsg_data = CMSG_DATA(cmsgp);
+	sndpktinfo = reinterpret_cast<struct in6_pktinfo *>(cmsg_data);
 	memset(sndpktinfo, 0, sizeof(*sndpktinfo));
 	if ((iftree_if->pif_index() > 0)
 	    && !(dst_address.is_unicast()
@@ -2231,8 +2242,8 @@ RawSocket::proto_socket_write(const string& if_name,
 	    cmsgp->cmsg_len = CMSG_LEN(opt_payload.size());
 	    cmsgp->cmsg_level = IPPROTO_IPV6;
 	    cmsgp->cmsg_type = header_type;
-	    uint8_t *data = reinterpret_cast<uint8_t *>(CMSG_DATA(cmsgp));
-	    memcpy(data, &opt_payload[0], opt_payload.size());
+	    cmsg_data = CMSG_DATA(cmsgp);
+	    memcpy(cmsg_data, &opt_payload[0], opt_payload.size());
 	    cmsgp = CMSG_NXTHDR(&_sndmh, cmsgp);
 	}
 	
