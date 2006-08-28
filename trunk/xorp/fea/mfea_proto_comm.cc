@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.60 2006/08/25 01:29:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.61 2006/08/28 02:53:17 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1341,20 +1341,19 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		     "IGMP is unsupported on this platform");
 	return;		// Error
 #else
-	struct igmpmsg *igmpmsg;
-	
-	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf0);
-	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
+	if (nbytes < (ssize_t)sizeof(struct igmpmsg)) {
 	    XLOG_WARNING("proto_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(*igmpmsg)));
+			 XORP_UINT_CAST(sizeof(struct igmpmsg)));
 	    return;		// Error
 	}
-	if (igmpmsg->im_mbz == 0) {
+	struct igmpmsg igmpmsg;
+	memcpy(&igmpmsg, _rcvbuf0, sizeof(igmpmsg));
+	if (igmpmsg.im_mbz == 0) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
-	    //      igmpmsg->im_mbz = ip->ip_p = 0
+	    //      igmpmsg.im_mbz = ip->ip_p = 0
 	    //
 	    mfea_node().mfea_mrouter().kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
@@ -1464,13 +1463,13 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 		break;
 	    }
 	    if (ip4.ip_p() == IPPROTO_PIM) {
-		const struct pim *pim;
 		if (nbytes < ip_hdr_len + PIM_REG_MINLEN) {
 		    is_datalen_error = true;
 		    break;
 		}
-		pim = reinterpret_cast<const struct pim *>(ip4.data() + ip_hdr_len);
-		if (PIM_VT_T(pim->pim_vt) != PIM_REGISTER) {
+		struct pim pim;
+		memcpy(&pim, ip4.data() + ip_hdr_len, sizeof(pim));
+		if (PIM_VT_T(pim.pim_vt) != PIM_REGISTER) {
 		    is_datalen_error = true;
 		    break;
 		}

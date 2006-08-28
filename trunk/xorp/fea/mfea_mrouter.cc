@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.47 2006/04/03 04:40:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_mrouter.cc,v 1.48 2006/08/25 01:04:21 pavlin Exp $"
 
 //
 // Multicast routing kernel-access specific implementation.
@@ -2114,20 +2114,19 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 		   "IPv4 multicast routing not supported");
 	return;
 #else
-	struct igmpmsg *igmpmsg;
-	
-	igmpmsg = reinterpret_cast<struct igmpmsg *>(_rcvbuf0);
-	if (nbytes < (ssize_t)sizeof(*igmpmsg)) {
+	if (nbytes < (ssize_t)sizeof(struct igmpmsg)) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(sizeof(*igmpmsg)));
+			 XORP_UINT_CAST(sizeof(struct igmpmsg)));
 	    return;		// Error
 	}
-	if (igmpmsg->im_mbz == 0) {
+	struct igmpmsg igmpmsg;
+	memcpy(&igmpmsg, _rcvbuf0, sizeof(igmpmsg));
+	if (igmpmsg.im_mbz == 0) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
-	    //      igmpmsg->im_mbz = ip->ip_p = 0
+	    //      igmpmsg.im_mbz = ip->ip_p = 0
 	    //
 	    kernel_call_process(_rcvbuf0, nbytes);
 	    return;		// OK
@@ -2144,23 +2143,21 @@ MfeaMrouter::mrouter_socket_read(XorpFd fd, IoEventType type)
 		   "IPv6 multicast routing not supported");
 	return;
 #else
-	
-	struct mrt6msg *mrt6msg;
-	
-	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
-	if ((nbytes < (ssize_t)sizeof(*mrt6msg))
+	if ((nbytes < (ssize_t)sizeof(struct mrt6msg))
 	    && (nbytes < (ssize_t)MLD_MINLEN)) {
 	    XLOG_WARNING("mrouter_socket_read() failed: "
 			 "kernel signal packet size %d is smaller than minimum size %u",
 			 XORP_INT_CAST(nbytes),
-			 XORP_UINT_CAST(min(sizeof(*mrt6msg),
+			 XORP_UINT_CAST(min(sizeof(struct mrt6msg),
 					    (size_t)MLD_MINLEN)));
 	    return;		// Error
 	}
-	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
+	struct mrt6msg mrt6msg;
+	memcpy(&mrt6msg, _rcvbuf0, sizeof(mrt6msg));
+	if ((mrt6msg.im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
-	    //      mrt6msg->im6_mbz = icmp6_hdr->icmp6_type = 0
+	    //      mrt6msg.im6_mbz = icmp6_hdr->icmp6_type = 0
 	    // Because we set ICMP6 filters on the socket,
 	    // we should never see a real ICMPv6 packet
 	    // with icmp6_type = 0 .
@@ -2224,28 +2221,29 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 		   "IPv4 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	struct igmpmsg *igmpmsg = reinterpret_cast<struct igmpmsg *>(databuf);
+	struct igmpmsg igmpmsg;
+	memcpy(&igmpmsg, databuf, sizeof(igmpmsg));
 	
 	//
 	// Get the message type, the iif, and source and destination address
 	//
-	message_type = igmpmsg->im_msgtype;
-	iif_vif_index = igmpmsg->im_vif;
+	message_type = igmpmsg.im_msgtype;
+	iif_vif_index = igmpmsg.im_vif;
 	if (message_type == IGMPMSG_WHOLEPKT) {
 	    //
 	    // If a WHOLEPKT message, then get the inner source and
 	    // destination addresses
 	    //
-	    IpHeader4 ip4(databuf + sizeof(*igmpmsg));
-	    if (datalen - sizeof(*igmpmsg) < ip4.size()) {
+	    IpHeader4 ip4(databuf + sizeof(struct igmpmsg));
+	    if (datalen - sizeof(struct igmpmsg) < ip4.size()) {
 		// The inner packet is too small
 		return (XORP_ERROR);
 	    }
 	    src = ip4.ip_src();
 	    dst = ip4.ip_dst();
 	} else {
-	    src.copy_in(igmpmsg->im_src);
-	    dst.copy_in(igmpmsg->im_dst);
+	    src.copy_in(igmpmsg.im_src);
+	    dst.copy_in(igmpmsg.im_dst);
 	}
 
 	//
@@ -2299,8 +2297,8 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 					module_id(),
 					message_type,
 					iif_vif_index, src, dst,
-					databuf + sizeof(*igmpmsg),
-					datalen - sizeof(*igmpmsg));
+					databuf + sizeof(struct igmpmsg),
+					datalen - sizeof(struct igmpmsg));
 #endif // HAVE_IPV4_MULTICAST_ROUTING
     }
     break;
@@ -2313,29 +2311,28 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 		   "IPv6 multicast routing not supported");
 	return (XORP_ERROR);
 #else
-	
-	struct mrt6msg *mrt6msg = reinterpret_cast<struct mrt6msg *>(databuf);
-	
+	struct mrt6msg mrt6msg;
+	memcpy(&mrt6msg, databuf, sizeof(mrt6msg));
 	//
 	// Get the message type, the iif, and source and destination address
 	//
-	message_type = mrt6msg->im6_msgtype;
-	iif_vif_index = mrt6msg->im6_mif;
+	message_type = mrt6msg.im6_msgtype;
+	iif_vif_index = mrt6msg.im6_mif;
 	if (message_type == MRT6MSG_WHOLEPKT) {
 	    //
 	    // If a WHOLEPKT message, then get the inner source and
 	    // destination addresses
 	    //
-	    IpHeader6 ip6(databuf + sizeof(*mrt6msg));
-	    if (datalen - sizeof(*mrt6msg) < ip6.size()) {
+	    IpHeader6 ip6(databuf + sizeof(struct mrt6msg));
+	    if (datalen - sizeof(struct mrt6msg) < ip6.size()) {
 		// The inner packet is too small
 		return (XORP_ERROR);
 	    }
 	    src = ip6.ip_src();
 	    dst = ip6.ip_dst();
 	} else {
-	    src.copy_in(mrt6msg->im6_src);
-	    dst.copy_in(mrt6msg->im6_dst);
+	    src.copy_in(mrt6msg.im6_src);
+	    dst.copy_in(mrt6msg.im6_dst);
 	}
 	
 	//
@@ -2390,8 +2387,8 @@ MfeaMrouter::kernel_call_process(uint8_t *databuf, size_t datalen)
 					module_id(),
 					message_type,
 					iif_vif_index, src, dst,
-					databuf + sizeof(*mrt6msg),
-					datalen - sizeof(*mrt6msg));
+					databuf + sizeof(struct mrt6msg),
+					datalen - sizeof(struct mrt6msg));
 #endif // HAVE_IPV6_MULTICAST_ROUTING
     }
     break;
