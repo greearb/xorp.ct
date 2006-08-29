@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.28 2006/03/31 06:11:44 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.29 2006/08/27 07:11:25 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -156,6 +156,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     NetlinkSocket&	ns = *this;
     int			family = fte.net().af();
     uint32_t		if_index = 0;
+    void*		rta_align_data;
 
     debug_msg("add_entry "
 	      "(network = %s nexthop = %s)",
@@ -195,7 +196,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
+    rtmsg = static_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = fte.net().prefix_len(); // The destination mask length
     rtmsg->rtm_src_len = 0;
@@ -216,7 +217,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+    data = static_cast<uint8_t*>(RTA_DATA(rtattr));
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
@@ -228,10 +229,12 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 		       XORP_UINT_CAST(sizeof(buffer)),
 		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
-	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
+	rta_align_data = reinterpret_cast<char*>(rtattr)
+	    + RTA_ALIGN(rtattr->rta_len);
+	rtattr = static_cast<struct rtattr*>(rta_align_data);
 	rtattr->rta_type = RTA_GATEWAY;
 	rtattr->rta_len = rta_len;
-	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
 	fte.nexthop().copy_out(data);
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
@@ -276,10 +279,12 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 		       XORP_UINT_CAST(sizeof(buffer)),
 		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
-	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
+	rta_align_data = reinterpret_cast<char*>(rtattr)
+	    + RTA_ALIGN(rtattr->rta_len);
+	rtattr = static_cast<struct rtattr*>(rta_align_data);
 	rtattr->rta_type = RTA_OIF;
 	rtattr->rta_len = rta_len;
-	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
 	memcpy(data, &int_if_index, sizeof(int_if_index));
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
     }
@@ -292,10 +297,12 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
+    rta_align_data = reinterpret_cast<char*>(rtattr)
+	+ RTA_ALIGN(rtattr->rta_len);
+    rtattr = static_cast<struct rtattr*>(rta_align_data);
     rtattr->rta_type = RTA_PRIORITY;
     rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+    data = static_cast<uint8_t*>(RTA_DATA(rtattr));
     memcpy(data, &int_priority, sizeof(int_priority));
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
@@ -376,7 +383,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    rtmsg = reinterpret_cast<struct rtmsg*>(NLMSG_DATA(nlh));
+    rtmsg = static_cast<struct rtmsg*>(NLMSG_DATA(nlh));
     rtmsg->rtm_family = family;
     rtmsg->rtm_dst_len = fte.net().prefix_len(); // The destination mask length
     rtmsg->rtm_src_len = 0;
@@ -397,7 +404,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
     rtattr = RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+    data = static_cast<uint8_t*>(RTA_DATA(rtattr));
     fte.net().masked_addr().copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 

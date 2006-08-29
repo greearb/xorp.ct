@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.29 2006/08/23 08:15:16 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.30 2006/08/27 07:11:26 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -443,7 +443,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
+    ifinfomsg = static_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
     ifinfomsg->ifi_index = if_index;
@@ -584,7 +584,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
+    ifinfomsg = static_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;	// TODO: set to ARPHRD_ETHER ??
     ifinfomsg->ifi_index = if_index;
@@ -695,7 +695,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    ifinfomsg = reinterpret_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
+    ifinfomsg = static_cast<struct ifinfomsg*>(NLMSG_DATA(nlh));
     ifinfomsg->ifi_family = AF_UNSPEC;
     ifinfomsg->ifi_type = IFLA_UNSPEC;
     ifinfomsg->ifi_index = if_index;
@@ -782,6 +782,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     int			rta_len;
     uint8_t*		data;
     NetlinkSocket&	ns = *this;
+    void*		rta_align_data;
 
     debug_msg("add_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
@@ -833,7 +834,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
+    ifaddrmsg = static_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;
     ifaddrmsg->ifa_flags = 0;	// TODO: XXX: PAVPAVPAV: OK if 0?
@@ -850,7 +851,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     rtattr = IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;
     rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+    data = static_cast<uint8_t*>(RTA_DATA(rtattr));
     addr.copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
@@ -862,10 +863,12 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 		       XORP_UINT_CAST(sizeof(buffer)),
 		       XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
 	}
-	rtattr = (struct rtattr*)(((char*)(rtattr)) + RTA_ALIGN((rtattr)->rta_len));
+	rta_align_data = reinterpret_cast<char*>(rtattr)
+	    + RTA_ALIGN(rtattr->rta_len);
+	rtattr = static_cast<struct rtattr*>(rta_align_data);
 	rtattr->rta_type = IFA_UNSPEC;
 	rtattr->rta_len = rta_len;
-	data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+	data = static_cast<uint8_t*>(RTA_DATA(rtattr));
 	dst_or_bcast.copy_out(data);
 	nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 	if (is_p2p) {
@@ -959,7 +962,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     nlh->nlmsg_flags = NLM_F_REQUEST | NLM_F_CREATE | NLM_F_REPLACE | NLM_F_ACK;
     nlh->nlmsg_seq = ns.seqno();
     nlh->nlmsg_pid = ns.nl_pid();
-    ifaddrmsg = reinterpret_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
+    ifaddrmsg = static_cast<struct ifaddrmsg*>(NLMSG_DATA(nlh));
     ifaddrmsg->ifa_family = addr.af();
     ifaddrmsg->ifa_prefixlen = prefix_len;
     ifaddrmsg->ifa_flags = 0;	// TODO: XXX: PAVPAVPAV: OK if 0?
@@ -976,7 +979,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     rtattr = IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;
     rtattr->rta_len = rta_len;
-    data = reinterpret_cast<uint8_t*>(RTA_DATA(rtattr));
+    data = static_cast<uint8_t*>(RTA_DATA(rtattr));
     addr.copy_out(data);
     nlh->nlmsg_len = NLMSG_ALIGN(nlh->nlmsg_len) + rta_len;
 
