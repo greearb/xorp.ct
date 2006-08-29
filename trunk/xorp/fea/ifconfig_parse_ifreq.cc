@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.28 2006/04/26 01:42:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.29 2006/05/02 19:17:37 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -80,15 +80,16 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
     for (ptr = buf; ptr < buf + buf_bytes; ) {
 	bool is_newlink = false;	// True if really a new link
 	size_t len = 0;
-	const struct ifreq* ifreq = reinterpret_cast<const struct ifreq*>(ptr);
-	struct ifreq ifrcopy;
+	struct ifreq ifreq, ifrcopy;
+
+	memcpy(&ifreq, ptr, sizeof(ifreq));
 	
 	// Get the length of the ifreq entry
 #ifdef HAVE_SA_LEN
 	len = max(sizeof(struct sockaddr),
-		  static_cast<size_t>(ifreq->ifr_addr.sa_len));
+		  static_cast<size_t>(ifreq.ifr_addr.sa_len));
 #else
-	switch (ifreq->ifr_addr.sa_family) {
+	switch (ifreq.ifr_addr.sa_family) {
 #ifdef HAVE_IPV6
 	case AF_INET6:
 	    len = sizeof(struct sockaddr_in6);
@@ -100,7 +101,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    break;
 	}
 #endif // HAVE_SA_LEN
-	len += sizeof(ifreq->ifr_name);
+	len += sizeof(ifreq.ifr_name);
 	len = max(len, sizeof(struct ifreq));
 	ptr += len;				// Point to the next entry
 	
@@ -108,7 +109,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	// Get the interface name
 	//
 	char tmp_if_name[IFNAMSIZ+1];
-	strncpy(tmp_if_name, ifreq->ifr_name, sizeof(tmp_if_name) - 1);
+	strncpy(tmp_if_name, ifreq.ifr_name, sizeof(tmp_if_name) - 1);
 	tmp_if_name[sizeof(tmp_if_name) - 1] = '\0';
 	char* cptr;
 	if ( (cptr = strchr(tmp_if_name, ':')) != NULL) {
@@ -116,7 +117,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	    // the interface name changes for aliases.
 	    *cptr = '\0';
 	}
-	if_name = string(ifreq->ifr_name);
+	if_name = string(ifreq.ifr_name);
 	alias_if_name = string(tmp_if_name);
 	debug_msg("interface: %s\n", if_name.c_str());
 	debug_msg("alias interface: %s\n", alias_if_name.c_str());
@@ -185,7 +186,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	//
 	do {
 #ifdef AF_LINK
-	    const struct sockaddr* sa = &ifreq->ifr_addr;
+	    const struct sockaddr* sa = &ifreq.ifr_addr;
 	    if (sa->sa_family == AF_LINK) {
 		const struct sockaddr_dl* sdl = reinterpret_cast<const struct sockaddr_dl*>(sa);
 		if (sdl->sdl_type == IFT_ETHER) {
@@ -206,7 +207,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 #endif // AF_LINK
 	    
 #ifdef SIOCGIFHWADDR
-	    memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+	    memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
 	    if (ioctl(sock(family), SIOCGIFHWADDR, &ifrcopy) < 0) {
 		XLOG_ERROR("ioctl(SIOCGIFHWADDR) for interface %s failed: %s",
 			   if_name.c_str(), strerror(errno));
@@ -228,7 +229,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	// Get the MTU
 	//
 	unsigned int mtu = 0;
-	memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
 	if (ioctl(sock(family), SIOCGIFMTU, &ifrcopy) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFMTU) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
@@ -251,7 +252,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	// Get the flags
 	//
 	unsigned int flags = 0;
-	memcpy(&ifrcopy, ifreq, sizeof(ifrcopy));
+	memcpy(&ifrcopy, &ifreq, sizeof(ifrcopy));
 	if (ioctl(sock(family), SIOCGIFFLAGS, &ifrcopy) < 0) {
 	    XLOG_ERROR("ioctl(SIOCGIFFLAGS) for interface %s failed: %s",
 		       if_name.c_str(), strerror(errno));
@@ -316,8 +317,8 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	// Get the interface addresses for the same address family only.
 	// XXX: if the address family is zero, then we query the address.
 	//
-	if ((ifreq->ifr_addr.sa_family != family)
-	    && (ifreq->ifr_addr.sa_family != 0)) {
+	if ((ifreq.ifr_addr.sa_family != family)
+	    && (ifreq.ifr_addr.sa_family != 0)) {
 	    continue;
 	}
 	
@@ -333,24 +334,24 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 	bool has_peer_addr = false;
 	
 	struct ifreq ip_ifrcopy;
-	memcpy(&ip_ifrcopy, ifreq, sizeof(ip_ifrcopy));
+	memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
 	ip_ifrcopy.ifr_addr.sa_family = family;
 #ifdef SIOCGIFADDR_IN6
 	struct in6_ifreq ip_ifrcopy6;
-	memcpy(&ip_ifrcopy6, ifreq, sizeof(ip_ifrcopy6));
+	memcpy(&ip_ifrcopy6, &ifreq, sizeof(ip_ifrcopy6));
 	ip_ifrcopy6.ifr_ifru.ifru_addr.sin6_family = family;
 #endif // SIOCGIFADDR_IN6
 	
 	// Get the IP address
-	if (ifreq->ifr_addr.sa_family == family) {
-	    lcl_addr.copy_in(ifreq->ifr_addr);
-	    memcpy(&ip_ifrcopy, ifreq, sizeof(ip_ifrcopy));
+	if (ifreq.ifr_addr.sa_family == family) {
+	    lcl_addr.copy_in(ifreq.ifr_addr);
+	    memcpy(&ip_ifrcopy, &ifreq, sizeof(ip_ifrcopy));
 #ifdef SIOCGIFADDR_IN6
-	    memcpy(&ip_ifrcopy6, ifreq, sizeof(ip_ifrcopy6));
+	    memcpy(&ip_ifrcopy6, &ifreq, sizeof(ip_ifrcopy6));
 #endif
 	} else {
 	    // XXX: we need to query the local IP address
-	    XLOG_ASSERT(ifreq->ifr_addr.sa_family == 0);
+	    XLOG_ASSERT(ifreq.ifr_addr.sa_family == 0);
 	    
 	    switch (family) {
 	    case AF_INET:
