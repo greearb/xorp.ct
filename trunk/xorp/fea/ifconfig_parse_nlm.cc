@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.22 2006/08/28 23:38:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.23 2006/08/29 22:42:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -72,12 +72,13 @@ static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 bool
 IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 {
+    size_t buf_bytes = buffer.size();
     const struct nlmsghdr* nlh;
     bool recognized = false;
     
     for (nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[0]);
-	 NLMSG_OK(nlh, buffer.size());
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer.size())) {
+	 NLMSG_OK(nlh, buf_bytes);
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {

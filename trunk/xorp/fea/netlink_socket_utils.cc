@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.31 2006/08/28 23:38:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.32 2006/08/29 22:42:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -350,8 +350,9 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
     if (ns_reader.receive_data(ns, seqno, error_msg) != XORP_OK)
 	return (XORP_ERROR);
 
-    buf_bytes = ns_reader.buffer().size();
-    for (nlh = reinterpret_cast<const struct nlmsghdr*>(ns_reader.buffer());
+    const vector<uint8_t>& buffer = ns_reader.buffer();
+    buf_bytes = buffer.size();
+    for (nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[0]);
 	 NLMSG_OK(nlh, buf_bytes);
 	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
