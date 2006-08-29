@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_observer.hh,v 1.15 2006/03/16 00:03:55 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_observer.hh,v 1.16 2006/03/30 08:32:12 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_OBSERVER_HH__
 #define __FEA_IFCONFIG_OBSERVER_HH__
@@ -59,10 +59,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes) = 0;
+    virtual void receive_data(const vector<uint8_t>& buffer) = 0;
 
 protected:
     // Misc other state
@@ -97,10 +96,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -132,12 +130,11 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
-    void rtsock_data(const uint8_t* data, size_t nbytes);
+    void rtsock_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -169,12 +166,11 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
-    void nlsock_data(const uint8_t* data, size_t nbytes);
+    void nlsock_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -204,10 +200,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
 };
 
 #endif // __FEA_IFCONFIG_OBSERVER_HH__

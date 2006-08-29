@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.22 2006/03/30 08:32:11 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_get.hh,v 1.23 2006/06/29 11:03:54 bms Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_GET_HH__
 #define __FEA_FTICONFIG_TABLE_GET_HH__
@@ -92,14 +92,13 @@ public:
      * @param family the address family to consider only ((e.g., AF_INET
      * or AF_INET6 for IPv4 and IPv6 respectively).
      * @param fte_list the list with the Fte entries to store the result.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @param filter the set of messages that caller is interested in.
      * @return true on success, otherwise false.
      * @see FteX.
      */
-    bool parse_buffer_rtm(int family, list<FteX>& fte_list, const uint8_t *buf,
-			  size_t buf_bytes, FtiFibMsgSet filter);
+    bool parse_buffer_rtm(int family, list<FteX>& fte_list,
+			  const vector<uint8_t>& buffer, FtiFibMsgSet filter);
 
     /**
      * Parse information about routing table information received from
@@ -111,15 +110,14 @@ public:
      * @param family the address family to consider only ((e.g., AF_INET
      * or AF_INET6 for IPv4 and IPv6 respectively).
      * @param fte_list the list with the Fte entries to store the result.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @param is_nlm_get_only if true, consider only the entries obtained
      * by RTM_GETROUTE.
      * @return true on success, otherwise false.
      * @see FteX.
      */
-    bool parse_buffer_nlm(int family, list<FteX>& fte_list, const uint8_t* buf,
-			  size_t buf_bytes, bool is_nlm_get_only);
+    bool parse_buffer_nlm(int family, list<FteX>& fte_list,
+			  const vector<uint8_t>& buffer, bool is_nlm_get_only);
     
 protected:
     int sock(int family);

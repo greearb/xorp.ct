@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.15 2006/03/30 08:32:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_netlink.cc,v 1.16 2006/08/27 10:38:09 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -123,10 +123,9 @@ IfConfigObserverNetlink::stop(string& error_msg)
 }
 
 void
-IfConfigObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
+IfConfigObserverNetlink::receive_data(const vector<uint8_t>& buffer)
 {
-    if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(),
-						 data, nbytes)
+    if (ifc().ifc_get_primary().parse_buffer_nlm(ifc().live_config(), buffer)
 	!= true) {
 	return;
     }
@@ -143,7 +142,7 @@ IfConfigObserverNetlink::receive_data(const uint8_t* data, size_t nbytes)
 }
 
 void
-IfConfigObserverNetlink::nlsock_data(const uint8_t* data, size_t nbytes)
+IfConfigObserverNetlink::nlsock_data(const vector<uint8_t>& buffer)
 {
-    receive_data(data, nbytes);
+    receive_data(buffer);
 }

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_rtmv2.cc,v 1.2 2006/08/04 07:16:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_rtmv2.cc,v 1.3 2006/08/27 07:34:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -317,9 +317,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("Error reading from Rtmv2 pipe: %s", error_msg.c_str());
 	return (false);
     }
-    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
-			 FtiFibMsg::GETS)
-	!= true) {
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), FtiFibMsg::GETS) != true) {
 	return (false);
     }
 
@@ -472,8 +470,7 @@ FtiConfigEntryGetRtmV2::lookup_route_by_network(const IPvXNet& dst, FteX& fte)
 	return (false);
     }
 
-    if (parse_buffer_rtm(fte, _rs_reader.buffer(), _rs_reader.buffer_size(),
-			 FtiFibMsg::GETS) != true) {
+    if (parse_buffer_rtm(fte, _rs_reader.buffer(), FtiFibMsg::GETS) != true) {
 	return (false);
     }
 

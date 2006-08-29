@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.16 2006/03/16 00:03:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_parse_rtm.cc,v 1.17 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -44,8 +44,8 @@
 
 #if !defined(HOST_OS_WINDOWS) && !defined(HAVE_ROUTING_SOCKETS)
 bool
-FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
-				    size_t , FtiFibMsgSet)
+FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const vector<uint8_t>& ,
+				    FtiFibMsgSet)
 {
     return false;
 }
@@ -54,17 +54,17 @@ FtiConfigTableGet::parse_buffer_rtm(int, list<FteX>& , const uint8_t* ,
 
 bool
 FtiConfigTableGet::parse_buffer_rtm(int family, list<FteX>& fte_list,
-				    const uint8_t* buf, size_t buf_bytes,
+				    const vector<uint8_t>& buffer,
 				    FtiFibMsgSet filter)
 {
-    const struct rt_msghdr* rtm =
-	reinterpret_cast<const struct rt_msghdr *>(buf);
-    const uint8_t* last = buf + buf_bytes;
+    const struct rt_msghdr* rtm;
+    size_t offset;
 
-    for (const uint8_t* ptr = buf; ptr < last; ptr += rtm->rtm_msglen) {
+    rtm = reinterpret_cast<const struct rt_msghdr *>(&buffer[0]);
+    for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
 	bool filter_match = false;
 
-	rtm = reinterpret_cast<const struct rt_msghdr *>(ptr);
+	rtm = reinterpret_cast<const struct rt_msghdr *>(&buffer[offset]);
 	if (RTM_VERSION != rtm->rtm_version) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.26 2005/12/22 12:18:23 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.27 2006/03/16 00:04:01 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -244,7 +244,7 @@ RoutingSocket::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->rtsock_data(&message[0], message.size());
+	(*i)->rtsock_data(message);
     }
 
     return (XORP_OK);
@@ -354,15 +354,13 @@ RoutingSocketReader::receive_data(RoutingSocket& rs, uint32_t seqno,
  * has data to receive, therefore it should never be called directly by
  * anything else except the routing socket facility itself.
  *
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
+ * @param buffer the buffer with the received data.
  */
 void
-RoutingSocketReader::rtsock_data(const uint8_t* data, size_t nbytes)
+RoutingSocketReader::rtsock_data(const vector<uint8_t>& buffer)
 {
 #ifndef HAVE_ROUTING_SOCKETS
-    UNUSED(data);
-    UNUSED(nbytes);
+    UNUSED(buffer);
 
     XLOG_UNREACHABLE();
 
@@ -373,12 +371,13 @@ RoutingSocketReader::rtsock_data(const uint8_t* data, size_t nbytes)
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
-    _cache_data.resize(nbytes);
-    while (d < nbytes) {
-	const struct rt_msghdr* rh = reinterpret_cast<const struct rt_msghdr*>(data + d);
+    _cache_data.resize(buffer.size());
+    while (d < buffer.size()) {
+	const struct rt_msghdr* rh;
+	rh = reinterpret_cast<const struct rt_msghdr*>(&buffer[d]);
 	if ((rh->rtm_pid == my_pid)
 	    && (rh->rtm_seq == (signed)_cache_seqno)) {
-	    XLOG_ASSERT(nbytes - d >= rh->rtm_msglen);
+	    XLOG_ASSERT(buffer.size() - d >= rh->rtm_msglen);
 	    memcpy(&_cache_data[off], rh, rh->rtm_msglen);
 	    off += rh->rtm_msglen;
 	    _cache_valid = true;

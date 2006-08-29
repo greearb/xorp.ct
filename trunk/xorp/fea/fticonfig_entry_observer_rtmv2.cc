@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_observer_rtsock.cc,v 1.11 2006/03/16 00:03:50 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_observer_rtmv2.cc,v 1.1 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -96,16 +96,15 @@ FtiConfigEntryObserverRtmV2::stop(string& error_msg)
 
 #if 0
 void
-FtiConfigEntryObserverRtmV2::receive_data(const uint8_t* data, size_t nbytes)
+FtiConfigEntryObserverRtmV2::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: XXX: PAVPAVPAV: use it?
-    UNUSED(data);
-    UNUSED(nbytes);
+    UNUSED(buffer);
 }
 
 void
-FtiConfigEntryObserverRtmV2::rtsock_data(const uint8_t* data, size_t nbytes)
+FtiConfigEntryObserverRtmV2::rtsock_data(const vector<uint8_t>& buffer)
 {
-    receive_data(data, nbytes);
+    receive_data(buffer);
 }
-#endif
+#endif // 0

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.24 2006/03/16 00:03:54 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.25 2006/03/30 08:32:12 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -91,12 +91,11 @@ public:
      * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
      * 
      * @param it the IfTree storage to store the parsed information.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    bool parse_buffer_rtm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
+    bool parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer);
 
     /**
      * Parse information about network interface configuration change from
@@ -124,12 +123,11 @@ public:
      * (e.g., obtained by netlink(7) sockets mechanism).
      * 
      * @param it the IfTree storage to store the parsed information.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    bool parse_buffer_nlm(IfTree& it, const uint8_t *buf, size_t buf_bytes);
+    bool parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer);
     
 protected:
     static string iff_flags(uint32_t flags);

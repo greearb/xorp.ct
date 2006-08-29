@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP$
+// $XORP: xorp/fea/win_rtm_pipe.hh,v 1.1 2006/06/29 11:03:55 bms Exp $
 
 #ifndef __FEA_WIN_RTM_PIPE_HH__
 #define __FEA_WIN_RTM_PIPE_HH__
@@ -146,10 +146,9 @@ public:
      * has data to receive, therefore it should never be called directly by
      * anything else except the routing socket facility itself.
      *
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer.
+     * @param buffer the buffer with the received data.
      */
-    virtual void rtsock_data(const uint8_t* data, size_t nbytes) = 0;
+    virtual void rtsock_data(const vector<uint8_t>& buffer) = 0;
 
     /**
      * Get WinRtmPipe associated with Observer.

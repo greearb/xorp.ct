@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.19 2005/12/22 12:18:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_get_sysctl.cc,v 1.20 2006/03/16 00:03:52 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -176,13 +176,13 @@ FtiConfigTableGetSysctl::get_table(int family, list<FteX>& fte_list)
     // may increase between the two sysctl() calls.
     //
     for ( ; ; ) {
-	uint8_t table_data[sz];
+	vector<uint8_t> buffer(sz);
 	
 	// Get the data
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), table_data, &sz, NULL, 0)
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &buffer[0], &sz, NULL, 0)
 	    == 0) {
 	    // Parse the result
-	    return (parse_buffer_rtm(family, fte_list, table_data, sz,
+	    return (parse_buffer_rtm(family, fte_list, buffer,
 				     FtiFibMsg::GETS));
 	}
 	

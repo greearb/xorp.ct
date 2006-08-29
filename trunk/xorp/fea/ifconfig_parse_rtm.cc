@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.25 2005/10/16 07:10:35 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.26 2006/03/16 00:03:56 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -65,7 +65,7 @@
 
 #ifndef HAVE_ROUTING_SOCKETS
 bool
-IfConfigGet::parse_buffer_rtm(IfTree& , const uint8_t* , size_t )
+IfConfigGet::parse_buffer_rtm(IfTree& , const vector<uint8_t>& )
 {
     return false;
 }
@@ -119,16 +119,16 @@ ifm_get_link_status(const struct if_msghdr* ifm, const string& if_name,
 }
 
 bool
-IfConfigGet::parse_buffer_rtm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
+IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
 {
     bool recognized = false;
     u_short if_index_hint = 0;
-    
-    const struct if_msghdr* ifm = reinterpret_cast<const struct if_msghdr*>(buf);
-    const uint8_t* last = buf + buf_bytes;
-    
-    for (const uint8_t* ptr = buf; ptr < last; ptr += ifm->ifm_msglen) {
-    	ifm = reinterpret_cast<const struct if_msghdr*>(ptr);
+    const struct if_msghdr* ifm;
+    size_t offset;
+
+    ifm = reinterpret_cast<const struct if_msghdr*>(&buffer[0]);
+    for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
+    	ifm = reinterpret_cast<const struct if_msghdr*>(&buffer[offset]);
 	if (ifm->ifm_version != RTM_VERSION) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,

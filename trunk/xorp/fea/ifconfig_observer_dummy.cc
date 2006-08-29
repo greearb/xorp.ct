@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.13 2005/12/22 12:18:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_observer_dummy.cc,v 1.14 2006/03/16 00:03:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -84,10 +84,9 @@ IfConfigObserverDummy::stop(string& error_msg)
 }
 
 void
-IfConfigObserverDummy::receive_data(const uint8_t* data, size_t nbytes)
+IfConfigObserverDummy::receive_data(const vector<uint8_t>& buffer)
 {
     // TODO: use it?
-    UNUSED(data);
-    UNUSED(nbytes);
+    UNUSED(buffer);
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.33 2006/08/27 07:11:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.34 2006/08/27 10:38:09 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -303,9 +303,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 	XLOG_ERROR("Error reading from netlink socket: %s", error_msg.c_str());
 	return (false);
     }
-    if (parse_buffer_nlm(fte, _ns_reader.buffer(), _ns_reader.buffer_size(),
-			 true)
-	!= true) {
+    if (parse_buffer_nlm(fte, _ns_reader.buffer(), true) != true) {
 	return (false);
     }
 

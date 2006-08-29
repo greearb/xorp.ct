@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.14 2005/12/22 12:18:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_sysctl.cc,v 1.15 2006/03/16 00:03:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -126,13 +126,13 @@ IfConfigGetSysctl::read_config(IfTree& it)
     // may increase between the two sysctl() calls.
     //
     for ( ; ; ) {
-	uint8_t ifdata[sz];
+	vector<uint8_t> buffer(sz);
 	
 	// Get the data
-	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), ifdata, &sz, NULL, 0)
+	if (sysctl(mib, sizeof(mib) / sizeof(mib[0]), &buffer[0], &sz, NULL, 0)
 	    == 0) {
 	    // Parse the result
-	    return (parse_buffer_rtm(it, ifdata, sz));
+	    return (parse_buffer_rtm(it, buffer));
 	}
 	
 	// Error

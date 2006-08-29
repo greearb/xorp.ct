@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.25 2006/03/30 08:32:11 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_entry_get.hh,v 1.26 2006/06/29 11:03:54 bms Exp $
 
 #ifndef __FEA_FTICONFIG_ENTRY_GET_HH__
 #define __FEA_FTICONFIG_ENTRY_GET_HH__
@@ -111,13 +111,12 @@ public:
      * (e.g., obtained by routing sockets or by sysctl(3) mechanism).
      * 
      * @param fte the Fte storage to store the parsed information.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @param filter the set of messages that caller is interested in.
      * @return true on success, otherwise false.
      * @see FteX.
      */
-    bool parse_buffer_rtm(FteX& fte, const uint8_t *buf, size_t buf_bytes,
+    bool parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 			  FtiFibMsgSet filter);
 
     /**
@@ -128,14 +127,13 @@ public:
      * (e.g., obtained by netlink(7) sockets mechanism).
      * 
      * @param fte the Fte storage to store the parsed information.
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @param is_nlm_get_only if true, consider only the entries obtained
      * by RTM_GETROUTE.
      * @return true on success, otherwise false.
      * @see FteX.
      */
-    bool parse_buffer_nlm(FteX& fte, const uint8_t *buf, size_t buf_bytes,
+    bool parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
 			  bool is_nlm_get_only);
 
 protected:

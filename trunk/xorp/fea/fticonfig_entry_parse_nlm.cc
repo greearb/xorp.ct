@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.15 2006/08/27 10:38:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.16 2006/08/28 23:38:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -44,7 +44,7 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-FtiConfigEntryGet::parse_buffer_nlm(FteX& , const uint8_t* , size_t , bool )
+FtiConfigEntryGet::parse_buffer_nlm(FteX& , const vector<uint8_t>& , bool )
 {
     return false;
 }
@@ -53,14 +53,14 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& , const uint8_t* , size_t , bool )
 
 
 bool
-FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const uint8_t* buf,
-				    size_t buf_bytes, bool is_nlm_get_only)
+FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
+				    bool is_nlm_get_only)
 {
     const struct nlmsghdr* nlh;
     
-    for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
-	 NLMSG_OK(nlh, buf_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
+    for (nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[0]);
+	 NLMSG_OK(nlh, buffer.size());
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer.size())) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {

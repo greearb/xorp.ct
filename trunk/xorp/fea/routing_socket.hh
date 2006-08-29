@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/routing_socket.hh,v 1.13 2005/08/18 15:45:51 bms Exp $
+// $XORP: xorp/fea/routing_socket.hh,v 1.14 2006/03/16 00:04:01 pavlin Exp $
 
 #ifndef __FEA_ROUTING_SOCKET_HH__
 #define __FEA_ROUTING_SOCKET_HH__
@@ -153,10 +153,9 @@ public:
      * has data to receive, therefore it should never be called directly by
      * anything else except the routing socket facility itself.
      *
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer.
+     * @param buffer the buffer with the received data.
      */
-    virtual void rtsock_data(const uint8_t* data, size_t nbytes) = 0;
+    virtual void rtsock_data(const vector<uint8_t>& buffer) = 0;
 
     /**
      * Get RoutingSocket associated with Observer.
@@ -185,17 +184,9 @@ public:
     /**
      * Get the buffer with the data that was received.
      *
-     * @return a pointer to the beginning of the buffer with the data that
-     * was received.
+     * @return a reference to the buffer with the data that was received.
      */
-    const uint8_t* buffer() const { return (&_cache_data[0]); }
-
-    /**
-     * Get the size of the buffer with the data that was received.
-     * 
-     * @return the size of the buffer with the data that was received.
-     */
-    const size_t   buffer_size() const { return (_cache_data.size()); }
+    const vector<uint8_t>& buffer() const { return (_cache_data); }
 
     /**
      * Receive data from the routing socket.
@@ -204,10 +195,9 @@ public:
      * has data to receive, therefore it should never be called directly by
      * anything else except the routing socket facility itself.
      *
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer.
+     * @param buffer the buffer with the received data.
      */
-    virtual void rtsock_data(const uint8_t* data, size_t nbytes);
+    virtual void rtsock_data(const vector<uint8_t>& buffer);
 
 private:
     RoutingSocket&  _rs;

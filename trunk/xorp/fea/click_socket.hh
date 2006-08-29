@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/click_socket.hh,v 1.20 2005/10/10 04:50:48 pavlin Exp $
+// $XORP: xorp/fea/click_socket.hh,v 1.21 2006/03/16 00:03:48 pavlin Exp $
 
 #ifndef __FEA_CLICK_SOCKET_HH__
 #define __FEA_CLICK_SOCKET_HH__
@@ -610,13 +610,6 @@ public:
      * @return a C-style string with the data that was received.
      */
     const string& buffer_str() const { return (_cache_data); }
-
-    /**
-     * Get the size of the buffer with the data that was received.
-     * 
-     * @return the size of the buffer with the data that was received.
-     */
-    const size_t   buffer_size() const { return (_cache_data.size()); }
 
     /**
      * Receive data from the Click socket.

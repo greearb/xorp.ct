@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.21 2006/03/16 00:03:55 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_nlm.cc,v 1.22 2006/08/28 23:38:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -52,7 +52,7 @@
 
 #ifndef HAVE_NETLINK_SOCKETS
 bool
-IfConfigGet::parse_buffer_nlm(IfTree& , const uint8_t* , size_t )
+IfConfigGet::parse_buffer_nlm(IfTree& , const vector<uint8_t>&)
 {
     return false;
 }
@@ -70,14 +70,14 @@ static void nlm_newdeladdr_to_fea_cfg(IfConfig& ifc, IfTree& it,
 				      int rta_len, bool is_deleted);
 
 bool
-IfConfigGet::parse_buffer_nlm(IfTree& it, const uint8_t* buf, size_t buf_bytes)
+IfConfigGet::parse_buffer_nlm(IfTree& it, const vector<uint8_t>& buffer)
 {
     const struct nlmsghdr* nlh;
     bool recognized = false;
     
-    for (nlh = reinterpret_cast<const struct nlmsghdr*>(buf);
-	 NLMSG_OK(nlh, buf_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buf_bytes)) {
+    for (nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[0]);
+	 NLMSG_OK(nlh, buffer.size());
+	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer.size())) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {

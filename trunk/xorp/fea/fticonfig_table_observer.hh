@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.17 2006/03/30 08:32:11 pavlin Exp $
+// $XORP: xorp/fea/fticonfig_table_observer.hh,v 1.18 2006/06/29 11:03:54 bms Exp $
 
 #ifndef __FEA_FTICONFIG_TABLE_OBSERVER_HH__
 #define __FEA_FTICONFIG_TABLE_OBSERVER_HH__
@@ -60,10 +60,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes) = 0;
+    virtual void receive_data(const vector<uint8_t>& buffer) = 0;
 
     /**
      * Add a FIB table observer.
@@ -121,10 +120,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -156,12 +154,11 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
-    void rtsock_data(const uint8_t* data, size_t nbytes);
+    void rtsock_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -192,10 +189,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
 private:
     class RtmV2Observer : public WinRtmPipeObserver {
@@ -204,8 +200,8 @@ private:
 		      FtiConfigTableObserverRtmV2& rtmo)
 	    : WinRtmPipeObserver(rs), _af(af), _rtmo(rtmo) {}
     	virtual ~RtmV2Observer() {}
-	void rtsock_data(const uint8_t* data, size_t nbytes) {
-	    _rtmo.receive_data(data, nbytes);
+	void rtsock_data(const vector<uint8_t>& buffer) {
+	    _rtmo.receive_data(buffer);
 	}
     private:
 	int _af;
@@ -244,12 +240,11 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
     
-    void nlsock_data(const uint8_t* data, size_t nbytes);
+    void nlsock_data(const vector<uint8_t>& buffer);
     
 private:
     
@@ -279,10 +274,9 @@ public:
     /**
      * Receive data from the underlying system.
      * 
-     * @param data the buffer with the received data.
-     * @param nbytes the number of bytes in the data buffer @ref data.
+     * @param buffer the buffer with the received data.
      */
-    virtual void receive_data(const uint8_t* data, size_t nbytes);
+    virtual void receive_data(const vector<uint8_t>& buffer);
 };
 
 /**

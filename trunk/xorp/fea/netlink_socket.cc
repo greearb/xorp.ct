@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.37 2006/03/31 06:11:45 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.38 2006/04/21 06:17:15 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -337,7 +337,7 @@ NetlinkSocket::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(&message[0], message.size());
+	(*i)->nlsock_data(message);
     }
 
     return (XORP_OK);
@@ -414,7 +414,7 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(&message[0], message.size());
+	(*i)->nlsock_data(message);
     }
 
     return (XORP_OK);
@@ -527,7 +527,7 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->nlsock_data(&message[0], message.size());
+	(*i)->nlsock_data(message);
     }
 
     return (XORP_OK);
@@ -637,15 +637,13 @@ NetlinkSocketReader::receive_data(NetlinkSocket& ns, uint32_t seqno,
  * has data to receive, therefore it should never be called directly by
  * anything else except the netlink socket facility itself.
  *
- * @param data the buffer with the received data.
- * @param nbytes the number of bytes in the @param data buffer.
+ * @param buffer the buffer with the received data.
  */
 void
-NetlinkSocketReader::nlsock_data(const uint8_t* data, size_t nbytes)
+NetlinkSocketReader::nlsock_data(const vector<uint8_t>& buffer)
 {
 #ifndef HAVE_NETLINK_SOCKETS
-    UNUSED(data);
-    UNUSED(nbytes);
+    UNUSED(buffer);
 
     XLOG_UNREACHABLE();
 
@@ -656,13 +654,13 @@ NetlinkSocketReader::nlsock_data(const uint8_t* data, size_t nbytes)
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
-    _cache_data.resize(nbytes);
-    while (d < nbytes) {
+    _cache_data.resize(buffer.size());
+    while (d < buffer.size()) {
 	const struct nlmsghdr* nlh;
-	nlh = reinterpret_cast<const struct nlmsghdr*>(data + d);
+	nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[d]);
 	if ((nlh->nlmsg_seq == _cache_seqno)
 	    && (nlh->nlmsg_pid == _ns.nl_pid())) {
-	    XLOG_ASSERT(nbytes - d >= nlh->nlmsg_len);
+	    XLOG_ASSERT(buffer.size() - d >= nlh->nlmsg_len);
 	    memcpy(&_cache_data[off], nlh, nlh->nlmsg_len);
 	    off += nlh->nlmsg_len;
 	    _cache_valid = true;

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.1 2006/06/29 11:03:55 bms Exp $"
 
 #include "fea_module.h"
 
@@ -240,7 +240,7 @@ WinRtmPipe::force_read(string& error_msg)
     // Notify observers
     //
     for (ObserverList::iterator i = _ol.begin(); i != _ol.end(); i++) {
-	(*i)->rtsock_data(&message[0], message.size());
+	(*i)->rtsock_data(message);
     }
 
     return (XORP_OK);
