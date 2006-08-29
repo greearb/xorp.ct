@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.27 2006/03/16 00:04:01 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.28 2006/08/29 22:42:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -384,5 +384,8 @@ RoutingSocketReader::rtsock_data(const vector<uint8_t>& buffer)
 	}
 	d += rh->rtm_msglen;
     }
+
+    // XXX: shrink _cache_data to contain only the data copied to it
+    _cache_data.resize(off);
 #endif // HAVE_ROUTING_SOCKETS
 }

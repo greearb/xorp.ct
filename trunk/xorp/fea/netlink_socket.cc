@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.38 2006/04/21 06:17:15 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.39 2006/08/29 22:42:21 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -667,5 +667,8 @@ NetlinkSocketReader::nlsock_data(const vector<uint8_t>& buffer)
 	}
 	d += nlh->nlmsg_len;
     }
+
+    // XXX: shrink _cache_data to contain only the data copied to it
+    _cache_data.resize(off);
 #endif // HAVE_NETLINK_SOCKETS
 }
