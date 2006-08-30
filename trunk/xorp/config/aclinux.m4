@@ -1,5 +1,5 @@
 dnl
-dnl $XORP$
+dnl $XORP: xorp/config/aclinux.m4,v 1.1 2005/05/05 19:38:32 bms Exp $
 dnl
 
 dnl
@@ -65,6 +65,155 @@ AC_TRY_COMPILE([
 	[Define to 1 if you have Linux-style netlink sockets (AF_NETLINK), but they cannot be used to set the flags on an interface])
    AC_MSG_RESULT(yes)],
   [AC_MSG_RESULT(no)])
+
+dnl --------------------------------------------------------------------------
+dnl Check whether netlink related macros generate alignment compilation errors
+dnl --------------------------------------------------------------------------
+dnl
+dnl Some of the netlink related macros are not defined properly and might
+dnl generate alignment-related compilation warning on some architectures
+dnl (e.g, ARM/XScale) if we use "-Wcast-align" compilation flag:
+dnl
+dnl "warning: cast increases required alignment of target type"
+dnl
+dnl We test for that warning and define a flag for each of the macros that
+dnl might need to be redefined.
+dnl
+AC_CHECK_HEADER(stdlib.h,
+  [test_stdlib_h="#include <stdlib.h>"],
+  [test_stdlib_h=""])
+AC_CHECK_HEADER(sys/types.h,
+  [test_sys_types_h="#include <sys/types.h>"],
+  [test_sys_types_h=""])
+AC_CHECK_HEADER(sys/socket.h,
+  [test_sys_socket_h="#include <sys/socket.h>"],
+  [test_sys_socket_h=""])
+AC_CHECK_HEADER(linux/types.h,
+  [test_linux_types_h="#include <linux/types.h>"],
+  [test_linux_types_h=""])
+AC_CHECK_HEADER(linux/netlink.h,
+  [test_linux_netlink_h="#include <linux/netlink.h>"],
+  [test_linux_netlink_h=""])
+AC_CHECK_HEADER(linux/rtnetlink.h,
+  [test_linux_rtnetlink_h="#include <linux/rtnetlink.h>"],
+  [test_linux_rtnetlink_h=""])
+test_broken_netlink_macro_header_files=["
+	${test_stdlib_h}
+	${test_sys_types_h}
+	${test_sys_socket_h}
+	${test_linux_types_h}
+	${test_linux_netlink_h}
+	${test_linux_rtnetlink_h}
+"]
+
+dnl Save the original CFLAGS and add extra flags
+_save_flags="$CFLAGS"
+CFLAGS="$CFLAGS -Wcast-align -Werror"
+
+dnl ---------------------------------------
+dnl Test whether macro NLMSG_NEXT is broken
+dnl ---------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken NLMSG_NEXT macro)
+AC_TRY_COMPILE([
+${test_broken_netlink_macro_header_files}
+],
+[
+#ifdef NLMSG_NEXT
+    struct nlmsghdr buffer[100];
+    struct nlmsghdr *nlh = &buffer[0];
+    size_t buffer_bytes = sizeof(buffer);
+    nlh = NLMSG_NEXT(nlh, buffer_bytes);
+#endif
+    exit(0);
+],
+  [AC_MSG_RESULT(no)],
+  [AC_DEFINE(HAVE_BROKEN_MACRO_NLMSG_NEXT, 1,
+	[Define to 1 if you have broken Linux NLMSG_NEXT macro])
+   AC_MSG_RESULT(yes)])
+
+dnl -------------------------------------
+dnl Test whether macro RTA_NEXT is broken
+dnl -------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken RTA_NEXT macro)
+AC_TRY_COMPILE([
+${test_broken_netlink_macro_header_files}
+],
+[
+#ifdef RTA_NEXT
+    struct rtattr buffer[100];
+    struct rtattr* rtattr = &buffer[0];
+    size_t buffer_bytes = sizeof(buffer);
+    rtattr = RTA_NEXT(rtattr, buffer_bytes);
+#endif
+    exit(0);
+],
+  [AC_MSG_RESULT(no)],
+  [AC_DEFINE(HAVE_BROKEN_MACRO_RTA_NEXT, 1,
+	[Define to 1 if you have broken Linux RTA_NEXT macro])
+   AC_MSG_RESULT(yes)])
+
+dnl ------------------------------------
+dnl Test whether macro IFA_RTA is broken
+dnl ------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken IFA_RTA macro)
+AC_TRY_COMPILE([
+${test_broken_netlink_macro_header_files}
+],
+[
+#ifdef IFA_RTA
+    struct rtattr buffer[100];
+    struct rtattr *rtattr = &buffer[0];
+    rtattr = IFA_RTA(rtattr);
+#endif
+    exit(0);
+],
+  [AC_MSG_RESULT(no)],
+  [AC_DEFINE(HAVE_BROKEN_MACRO_IFA_RTA, 1,
+	[Define to 1 if you have broken Linux IFA_RTA macro])
+   AC_MSG_RESULT(yes)])
+
+dnl -------------------------------------
+dnl Test whether macro IFLA_RTA is broken
+dnl -------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken IFLA_RTA macro)
+AC_TRY_COMPILE([
+${test_broken_netlink_macro_header_files}
+],
+[
+#ifdef IFLA_RTA
+    struct rtattr buffer[100];
+    struct rtattr *rtattr = &buffer[0];
+    rtattr = IFLA_RTA(rtattr);
+#endif
+    exit(0);
+],
+  [AC_MSG_RESULT(no)],
+  [AC_DEFINE(HAVE_BROKEN_MACRO_IFLA_RTA, 1,
+	[Define to 1 if you have broken Linux IFLA_RTA macro])
+   AC_MSG_RESULT(yes)])
+
+dnl ------------------------------------
+dnl Test whether macro RTM_RTA is broken
+dnl ------------------------------------
+AC_MSG_CHECKING(whether the build environment has broken RTM_RTA macro)
+AC_TRY_COMPILE([
+${test_broken_netlink_macro_header_files}
+],
+[
+#ifdef RTM_RTA
+    struct rtattr buffer[100];
+    struct rtattr *rtattr = &buffer[0];
+    rtattr = RTM_RTA(rtattr);
+#endif
+    exit(0);
+],
+  [AC_MSG_RESULT(no)],
+  [AC_DEFINE(HAVE_BROKEN_MACRO_RTM_RTA, 1,
+	[Define to 1 if you have broken Linux RTM_RTA macro])
+   AC_MSG_RESULT(yes)])
+
+dnl Restore the original CFLAGS
+CFLAGS="$_save_flags"
 
 AC_LANG_POP(C)
 AC_CACHE_SAVE

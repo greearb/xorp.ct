@@ -51,6 +51,21 @@
 /* Define to 1 if netinet6/nd6.h is not C++ friendly */
 #undef HAVE_BROKEN_CXX_NETINET6_ND6_H
 
+/* Define to 1 if you have broken Linux IFA_RTA macro */
+#undef HAVE_BROKEN_MACRO_IFA_RTA
+
+/* Define to 1 if you have broken Linux IFLA_RTA macro */
+#undef HAVE_BROKEN_MACRO_IFLA_RTA
+
+/* Define to 1 if you have broken Linux NLMSG_NEXT macro */
+#undef HAVE_BROKEN_MACRO_NLMSG_NEXT
+
+/* Define to 1 if you have broken Linux RTA_NEXT macro */
+#undef HAVE_BROKEN_MACRO_RTA_NEXT
+
+/* Define to 1 if you have broken Linux RTM_RTA macro */
+#undef HAVE_BROKEN_MACRO_RTM_RTA
+
 /* Define to 1 if system getopt() is in unistd.h */
 #undef HAVE_DECL_GETOPT
 
