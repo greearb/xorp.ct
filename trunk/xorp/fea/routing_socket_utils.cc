@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.33 2006/06/29 11:03:55 bms Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.34 2006/08/18 23:24:10 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -179,8 +179,9 @@ next_sa(const struct sockaddr* sa)
     }
 #endif // ! HAVE_SA_LEN
 #endif // HOST_OS_WINDOWS
-    
-    const uint8_t* p = reinterpret_cast<const uint8_t*>(sa) + sa_size;
+
+    // XXX: the sa_size offset is aligned, hence we can use a void pointer
+    const void* p = reinterpret_cast<const uint8_t*>(sa) + sa_size;
     return reinterpret_cast<const struct sockaddr*>(p);
 }
 
