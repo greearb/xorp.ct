@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.13 2006/06/29 11:03:54 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.14 2006/08/29 22:42:19 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -56,10 +56,11 @@ bool
 FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
 				    FtiFibMsgSet filter)
 {
+    AlignData<struct rt_msghdr> align_data(buffer);
     const struct rt_msghdr* rtm;
     size_t offset;
 
-    rtm = reinterpret_cast<const struct rt_msghdr*>(&buffer[0]);
+    rtm = align_data.payload();
     for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
 	bool filter_match = false;
 
