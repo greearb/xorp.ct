@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.16 2006/04/05 06:07:06 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.17 2006/04/05 06:32:21 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -310,5 +310,52 @@ xorp_leading_zero_count_uint32(uint32_t x)
 
     return (32 - xorp_bit_count_uint32(x));
 }
+
+/**
+ * A template class for aligning buffer data with a particular data type.
+ *
+ * The technically correct solution is to allocate (using malloc())
+ * new buffer and copy the original data to it. By definition, the
+ * malloc()-ed data is aligned, and therefore it can be casted to the
+ * desired type.
+ *
+ * The more efficient solution (but probably technically incorrect),
+ * is to assume that the first byte of "vector<uint8_t>" buffer is aligned
+ * similar to malloc()-ed data, and therefore it can be casted to the
+ * desired type without creating a copy of it.
+ *
+ * The desired behavior can be chosen by setting the
+ * AlignData::_data_is_copied constant to true or false.
+ * Note that the constant is predefined for all AlignData instances.
+ * If necessary, the constant can become a variable that can have
+ * different value for each AlignData instance.
+ */
+template <typename A>
+class AlignData {
+public:
+    AlignData(const vector<uint8_t>& buffer) {
+	if (_data_is_copied) {
+	    _data = malloc(sizeof(uint8_t) * buffer.size());
+	    memcpy(_data, &buffer[0], sizeof(uint8_t) * buffer.size());
+	    _const_data = _data;
+	} else {
+	    _data = NULL;
+	    _const_data = &buffer[0];
+	}
+	_payload = reinterpret_cast<const A*>(_const_data);
+    }
+    ~AlignData() {
+	if (_data != NULL)
+	    free(_data);
+    }
+    const A* payload() const { return (_payload); }
+
+private:
+    static const bool _data_is_copied = false;
+
+    void*	_data;
+    const void*	_const_data;
+    const A*	_payload;
+};
 
 #endif // __LIBXORP_UTILS_HH__
