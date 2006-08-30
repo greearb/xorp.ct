@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.1 2006/06/29 11:03:55 bms Exp $"
+#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.2 2006/08/29 22:42:22 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -228,7 +228,11 @@ WinRtmPipe::force_read(string& error_msg)
 	    return (XORP_ERROR);
 	}
 
-	const struct if_msghdr* mh = reinterpret_cast<const struct if_msghdr*>(&message[0]);
+	//
+	// Received message (probably) OK
+	//
+	AlignData<struct if_msghdr> align_data(message);
+	const struct if_msghdr* mh = align_data.payload();
 	XLOG_ASSERT(mh->ifm_msglen == message.size());
 	XLOG_ASSERT(mh->ifm_msglen == nbytes);
 	last_mh_off = off;
