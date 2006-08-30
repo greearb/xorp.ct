@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.19 2006/08/30 00:39:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_nlm.cc,v 1.20 2006/08/30 06:43:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -61,7 +61,7 @@ FtiConfigEntryGet::parse_buffer_nlm(FteX& fte, const vector<uint8_t>& buffer,
 
     for (nlh = align_data.payload();
 	 NLMSG_OK(nlh, buffer_bytes);
-	 nlh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
+	 nlh = XORP_NLMSG_NEXT(const_cast<struct nlmsghdr*>(nlh), buffer_bytes)) {
 	void* nlmsg_data = NLMSG_DATA(const_cast<struct nlmsghdr*>(nlh));
 	
 	switch (nlh->nlmsg_type) {

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.29 2006/08/27 07:11:25 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.30 2006/08/29 00:28:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -214,7 +214,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = RTM_RTA(rtmsg);
+    rtattr = XORP_RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
     data = static_cast<uint8_t*>(RTA_DATA(rtattr));
@@ -401,7 +401,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = RTM_RTA(rtmsg);
+    rtattr = XORP_RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
     data = static_cast<uint8_t*>(RTA_DATA(rtattr));

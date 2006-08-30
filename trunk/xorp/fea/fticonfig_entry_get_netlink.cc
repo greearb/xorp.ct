@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.34 2006/08/27 10:38:09 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_get_netlink.cc,v 1.35 2006/08/29 22:42:18 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -275,7 +275,7 @@ FtiConfigEntryGetNetlink::lookup_route_by_dest(const IPvX& dst, FteX& fte)
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = RTM_RTA(rtmsg);
+    rtattr = XORP_RTM_RTA(rtmsg);
     rtattr->rta_type = RTA_DST;
     rtattr->rta_len = rta_len;
     dst.copy_out(reinterpret_cast<uint8_t*>(RTA_DATA(rtattr)));

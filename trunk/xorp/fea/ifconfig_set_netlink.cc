@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.30 2006/08/27 07:11:26 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.31 2006/08/29 00:28:48 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -598,7 +598,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = IFLA_RTA(ifinfomsg);
+    rtattr = XORP_IFLA_RTA(ifinfomsg);
     rtattr->rta_type = IFLA_ADDRESS;
     rtattr->rta_len = rta_len;
     memcpy(RTA_DATA(rtattr), &ether_addr, ETH_ALEN);
@@ -710,7 +710,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = IFLA_RTA(ifinfomsg);
+    rtattr = XORP_IFLA_RTA(ifinfomsg);
     rtattr->rta_type = IFLA_MTU;
     rtattr->rta_len = rta_len;
     memcpy(RTA_DATA(rtattr), &uint_mtu, sizeof(uint_mtu));
@@ -848,7 +848,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = IFA_RTA(ifaddrmsg);
+    rtattr = XORP_IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;
     rtattr->rta_len = rta_len;
     data = static_cast<uint8_t*>(RTA_DATA(rtattr));
@@ -976,7 +976,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 		   XORP_UINT_CAST(sizeof(buffer)),
 		   XORP_UINT_CAST(NLMSG_ALIGN(nlh->nlmsg_len) + rta_len));
     }
-    rtattr = IFA_RTA(ifaddrmsg);
+    rtattr = XORP_IFA_RTA(ifaddrmsg);
     rtattr->rta_type = IFA_LOCAL;
     rtattr->rta_len = rta_len;
     data = static_cast<uint8_t*>(RTA_DATA(rtattr));

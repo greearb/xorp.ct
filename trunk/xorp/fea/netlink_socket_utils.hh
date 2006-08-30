@@ -12,13 +12,62 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.13 2005/03/25 02:53:11 pavlin Exp $
+// $XORP: xorp/fea/netlink_socket_utils.hh,v 1.14 2006/03/16 00:03:59 pavlin Exp $
 
 #ifndef __FEA_NETLINK_SOCKET_UTILS_HH__
 #define __FEA_NETLINK_SOCKET_UTILS_HH__
 
+#include "libxorp/xorp.h"
+
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
+#endif
+#ifdef HAVE_LINUX_RTNETLINK_H
+#include <linux/rtnetlink.h>
+#endif
+
 #include "fte.hh"
 #include "iftree.hh"
+
+
+//
+// Conditionally define some of the netlink-related macros that are not
+// defined properly and might generate alignment-related compilation
+// warning on some architectures (e.g, ARM/XScale) if we use
+// "-Wcast-align" compilation flag.
+//
+#ifdef HAVE_BROKEN_MACRO_NLMSG_NEXT
+#define XORP_NLMSG_NEXT(nlh,len) ((len) -= NLMSG_ALIGN((nlh)->nlmsg_len), \
+				  (struct nlmsghdr*)(void*)(((char*)(nlh)) + NLMSG_ALIGN((nlh)->nlmsg_len)))
+#else
+#define XORP_NLMSG_NEXT(nlh,len) NLMSG_NEXT(nlh,len)
+#endif
+
+#ifdef HAVE_BROKEN_MACRO_RTA_NEXT
+#define XORP_RTA_NEXT(rta,attrlen) ((attrlen) -= RTA_ALIGN((rta)->rta_len), \
+				    (struct rtattr*)(void*)(((char*)(rta)) + RTA_ALIGN((rta)->rta_len)))
+#else
+#define XORP_RTA_NEXT(rta,attrlen) RTA_NEXT(rta,attrlen)
+#endif
+
+#ifdef HAVE_BROKEN_MACRO_IFA_RTA
+#define XORP_IFA_RTA(r)		((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifaddrmsg))))
+#else
+#define XORP_IFA_RTA(r)		IFA_RTA(r)
+#endif
+
+#ifdef HAVE_BROKEN_MACRO_IFLA_RTA
+#define XORP_IFLA_RTA(r)	((struct rtattr*)(void*)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct ifinfomsg))))
+#else
+#define XORP_IFLA_RTA(r)	IFLA_RTA(r)
+#endif
+
+#ifdef HAVE_BROKEN_MACRO_RTM_RTA
+#define XORP_RTM_RTA(r)		((struct rtattr*)(void *)(((char*)(r)) + NLMSG_ALIGN(sizeof(struct rtmsg))))
+#else
+#define XORP_RTM_RTA(r)		RTM_RTA(r)
+#endif
+
 
 //
 // TODO: XXX: a temporary definition of RTPROT_XORP (e.g., in case of Linux)
