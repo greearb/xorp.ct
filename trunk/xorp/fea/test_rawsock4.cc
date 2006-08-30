@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.19 2006/06/15 06:04:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_rawsock4.cc,v 1.20 2006/08/23 17:35:17 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -322,8 +322,9 @@ lookup4(const char* addr)
 	);
 	exit(EXIT_FAILURE);
     }
-    const in_addr* ia = reinterpret_cast<const in_addr*>(he->h_addr_list[0]);
-    return IPv4(ia->s_addr);
+    struct in_addr ia;
+    memcpy(&ia, he->h_addr_list[0], sizeof(ia));
+    return IPv4(ia.s_addr);
 }
 
 /* ------------------------------------------------------------------------- */
