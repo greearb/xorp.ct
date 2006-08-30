@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/utils.hh,v 1.17 2006/04/05 06:32:21 pavlin Exp $
+// $XORP: xorp/libxorp/utils.hh,v 1.18 2006/08/30 06:37:39 pavlin Exp $
 
 #ifndef __LIBXORP_UTILS_HH__
 #define __LIBXORP_UTILS_HH__
@@ -333,6 +333,11 @@ xorp_leading_zero_count_uint32(uint32_t x)
 template <typename A>
 class AlignData {
 public:
+    /**
+     * Constructor.
+     *
+     * @param buffer the buffer with the data.
+     */
     AlignData(const vector<uint8_t>& buffer) {
 	if (_data_is_copied) {
 	    _data = malloc(sizeof(uint8_t) * buffer.size());
@@ -344,11 +349,38 @@ public:
 	}
 	_payload = reinterpret_cast<const A*>(_const_data);
     }
+
+    /**
+     * Destructor.
+     */
     ~AlignData() {
 	if (_data != NULL)
 	    free(_data);
     }
+
+    /**
+     * Get the aligned payload from the beginning of the buffer.
+     *
+     * @return the aligned payload from the beginning of the buffer.
+     */
     const A* payload() const { return (_payload); }
+
+    /**
+     * Get the aligned payload by given offset from the beginning of the
+     * buffer.
+     *
+     * Note that the given offset itself is suppose to point to aligned
+     * location.
+     *
+     * @param offset the offset from the beginning of the buffer.
+     * @return the aligned payload by given offset from the beginning of
+     * the buffer.
+     */
+    const A* payload_by_offset(size_t offset) const {
+	const void* offset_data;
+	offset_data = reinterpret_cast<const uint8_t*>(_const_data) + offset;
+	return (reinterpret_cast<const A*>(offset_data));
+    }
 
 private:
     static const bool _data_is_copied = false;
