@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.39 2006/08/29 22:42:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket.cc,v 1.40 2006/08/29 23:56:12 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -50,6 +50,7 @@
 #include "libcomm/comm_api.h"
 
 #include "netlink_socket.hh"
+#include "netlink_socket_utils.hh"
 
 
 uint16_t NetlinkSocket::_instance_cnt = 0;
@@ -315,8 +316,9 @@ NetlinkSocket::force_read(string& error_msg)
 	//
 	bool is_end_of_message = true;
 	size_t new_size = off - last_mh_off;
+	AlignData<struct nlmsghdr> align_data(message);
 	const struct nlmsghdr* mh;
-	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
@@ -392,8 +394,9 @@ NetlinkSocket::force_recvfrom(int flags, struct sockaddr* from,
 	//
 	bool is_end_of_message = true;
 	size_t new_size = off - last_mh_off;
+	AlignData<struct nlmsghdr> align_data(message);
 	const struct nlmsghdr* mh;
-	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
@@ -505,8 +508,9 @@ NetlinkSocket::force_recvmsg(int flags, bool only_kernel_messages,
 	//
 	bool is_end_of_message = true;
 	size_t new_size = off - last_mh_off;
+	AlignData<struct nlmsghdr> align_data(message);
 	const struct nlmsghdr* mh;
-	for (mh = reinterpret_cast<const struct nlmsghdr*>(&message[last_mh_off]);
+	for (mh = align_data.payload_by_offset(last_mh_off);
 	     NLMSG_OK(mh, new_size);
 	     mh = NLMSG_NEXT(const_cast<struct nlmsghdr*>(mh), new_size)) {
 	    XLOG_ASSERT(mh->nlmsg_len <= buffer.size());
@@ -650,6 +654,7 @@ NetlinkSocketReader::nlsock_data(const vector<uint8_t>& buffer)
 #else // HAVE_NETLINK_SOCKETS
 
     size_t d = 0, off = 0;
+    AlignData<struct nlmsghdr> align_data(buffer);
 
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
@@ -657,7 +662,7 @@ NetlinkSocketReader::nlsock_data(const vector<uint8_t>& buffer)
     _cache_data.resize(buffer.size());
     while (d < buffer.size()) {
 	const struct nlmsghdr* nlh;
-	nlh = reinterpret_cast<const struct nlmsghdr*>(&buffer[d]);
+	nlh = align_data.payload_by_offset(d);
 	if ((nlh->nlmsg_seq == _cache_seqno)
 	    && (nlh->nlmsg_pid == _ns.nl_pid())) {
 	    XLOG_ASSERT(buffer.size() - d >= nlh->nlmsg_len);
