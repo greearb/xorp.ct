@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.14 2006/08/29 22:42:19 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_parse_rtm.cc,v 1.15 2006/08/30 06:43:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -64,7 +64,7 @@ FtiConfigEntryGet::parse_buffer_rtm(FteX& fte, const vector<uint8_t>& buffer,
     for (offset = 0; offset < buffer.size(); offset += rtm->rtm_msglen) {
 	bool filter_match = false;
 
-	rtm = reinterpret_cast<const struct rt_msghdr*>(&buffer[offset]);
+	rtm = align_data.payload_by_offset(offset);
 	if (RTM_VERSION != rtm->rtm_version) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,

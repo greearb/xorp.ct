@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.27 2006/08/29 22:42:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.28 2006/08/30 06:43:54 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -129,7 +129,7 @@ IfConfigGet::parse_buffer_rtm(IfTree& it, const vector<uint8_t>& buffer)
 
     ifm = align_data.payload();
     for (offset = 0; offset < buffer.size(); offset += ifm->ifm_msglen) {
-    	ifm = reinterpret_cast<const struct if_msghdr*>(&buffer[offset]);
+	ifm = align_data.payload_by_offset(offset);
 	if (ifm->ifm_version != RTM_VERSION) {
 	    XLOG_ERROR("RTM version mismatch: expected %d got %d",
 		       RTM_VERSION,

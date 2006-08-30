@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.29 2006/08/29 23:56:12 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.30 2006/08/30 07:14:28 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -369,22 +369,23 @@ RoutingSocketReader::rtsock_data(const vector<uint8_t>& buffer)
 #else // HAVE_ROUTING_SOCKETS
     size_t d = 0, off = 0;
     pid_t my_pid = _rs.pid();
+    AlignData<struct rt_msghdr> align_data(buffer);
 
     //
     // Copy data that has been requested to be cached by setting _cache_seqno
     //
     _cache_data.resize(buffer.size());
     while (d < buffer.size()) {
-	const struct rt_msghdr* rh;
-	rh = reinterpret_cast<const struct rt_msghdr*>(&buffer[d]);
-	if ((rh->rtm_pid == my_pid)
-	    && (rh->rtm_seq == (signed)_cache_seqno)) {
-	    XLOG_ASSERT(buffer.size() - d >= rh->rtm_msglen);
-	    memcpy(&_cache_data[off], rh, rh->rtm_msglen);
-	    off += rh->rtm_msglen;
+	const struct rt_msghdr* rtm;
+	rtm = align_data.payload_by_offset(d);
+	if ((rtm->rtm_pid == my_pid)
+	    && (rtm->rtm_seq == (signed)_cache_seqno)) {
+	    XLOG_ASSERT(buffer.size() - d >= rtm->rtm_msglen);
+	    memcpy(&_cache_data[off], rtm, rtm->rtm_msglen);
+	    off += rtm->rtm_msglen;
 	    _cache_valid = true;
 	}
-	d += rh->rtm_msglen;
+	d += rtm->rtm_msglen;
     }
 
     // XXX: shrink _cache_data to contain only the data copied to it
