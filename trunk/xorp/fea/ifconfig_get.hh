@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifconfig_get.hh,v 1.25 2006/03/30 08:32:12 pavlin Exp $
+// $XORP: xorp/fea/ifconfig_get.hh,v 1.26 2006/08/29 22:42:20 pavlin Exp $
 
 #ifndef __FEA_IFCONFIG_GET_HH__
 #define __FEA_IFCONFIG_GET_HH__
@@ -107,13 +107,12 @@ public:
      * @param it the IfTree storage to store the parsed information.
      * @param family the address family to consider only (e.g., AF_INET
      * or AF_INET6 for IPv4 and IPv6 respectively).
-     * @param buf the buffer with the data to parse.
-     * @param buf_bytes the size of the data in the buffer.
+     * @param buffer the buffer with the data to parse.
      * @return true on success, otherwise false.
      * @see IfTree.
      */
-    bool parse_buffer_ifreq(IfTree& it, int family, const uint8_t *buf,
-			    size_t buf_bytes);
+    bool parse_buffer_ifreq(IfTree& it, int family,
+			    const vector<uint8_t>& buffer);
 
     /**
      * Parse information about network interface configuration change from

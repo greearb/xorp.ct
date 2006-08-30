@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.24 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.25 2006/08/02 08:06:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -267,8 +267,6 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
     }
     
     while (fgets(buf, sizeof(buf), fh) != NULL) {
-	struct ifreq ifreq;
-	
 	//
 	// Get the interface name
 	//
@@ -283,12 +281,14 @@ if_fetch_linux_v4(IfConfig& ifc, IfTree& it,
 	    // Already have this interface. Ignore it.
 	    continue;
 	}
-	
+
+	struct ifreq ifreq;
 	memset(&ifreq, 0, sizeof(ifreq));
 	strncpy(ifreq.ifr_name, ifname, sizeof(ifreq.ifr_name) - 1);
-	ifc.ifc_get_ioctl().parse_buffer_ifreq(
-	    it, AF_INET,
-	    reinterpret_cast<const uint8_t *>(&ifreq), sizeof(ifreq));
+	vector<uint8_t> buffer(sizeof(struct ifreq));
+	memcpy(&buffer[0], &ifreq, sizeof(ifreq));
+
+	ifc.ifc_get_ioctl().parse_buffer_ifreq(it, AF_INET, buffer);
     }
     if (ferror(fh)) {
 	XLOG_ERROR("%s read failed: %s",

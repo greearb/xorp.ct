@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.15 2006/03/16 00:03:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_ioctl.cc,v 1.16 2006/05/02 19:11:39 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -159,9 +159,11 @@ IfConfigGetIoctl::read_config(IfTree& it)
     if (ifc().have_ipv4()) {
 	if (ioctl_read_ifconf(AF_INET, &ifconf) != true)
 	    return false;
-	parse_buffer_ifreq(it, AF_INET, (uint8_t *)ifconf.ifc_buf,
-			   ifconf.ifc_len);
+	vector<uint8_t> buffer(ifconf.ifc_len);
+	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
+
+	parse_buffer_ifreq(it, AF_INET, buffer);
     }
     
 #ifdef HAVE_IPV6
@@ -171,9 +173,11 @@ IfConfigGetIoctl::read_config(IfTree& it)
     if (ifc().have_ipv6()) {
 	if (ioctl_read_ifconf(AF_INET6, &ifconf) != true)
 	    return false;
-	parse_buffer_ifreq(it, AF_INET6, (uint8_t *)ifconf.ifc_buf,
-			   ifconf.ifc_len);
+	vector<uint8_t> buffer(ifconf.ifc_len);
+	memcpy(&buffer[0], ifconf.ifc_buf, ifconf.ifc_len);
 	delete[] ifconf.ifc_buf;
+
+	parse_buffer_ifreq(it, AF_INET6, buffer);
     }
 #endif // HAVE_IPV6
     

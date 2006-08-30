@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.29 2006/05/02 19:17:37 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.30 2006/08/29 03:03:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -60,8 +60,7 @@
 
 #ifndef HAVE_IOCTL_SIOCGIFCONF
 bool
-IfConfigGet::parse_buffer_ifreq(IfTree& , int ,
-				const uint8_t* , size_t )
+IfConfigGet::parse_buffer_ifreq(IfTree& , int , const vector<uint8_t>& )
 {
     return false;
 }
@@ -70,19 +69,19 @@ IfConfigGet::parse_buffer_ifreq(IfTree& , int ,
 
 bool
 IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
-				const uint8_t* buf, size_t buf_bytes)
+				const vector<uint8_t>& buffer)
 {
 #ifndef HOST_OS_WINDOWS
     u_short if_index = 0;
     string if_name, alias_if_name;
-    const uint8_t* ptr;
-    
-    for (ptr = buf; ptr < buf + buf_bytes; ) {
+    size_t offset;
+
+    for (offset = 0; offset < buffer.size(); ) {
 	bool is_newlink = false;	// True if really a new link
 	size_t len = 0;
 	struct ifreq ifreq, ifrcopy;
 
-	memcpy(&ifreq, ptr, sizeof(ifreq));
+	memcpy(&ifreq, &buffer[offset], sizeof(ifreq));
 	
 	// Get the length of the ifreq entry
 #ifdef HAVE_SA_LEN
@@ -103,7 +102,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 #endif // HAVE_SA_LEN
 	len += sizeof(ifreq.ifr_name);
 	len = max(len, sizeof(struct ifreq));
-	ptr += len;				// Point to the next entry
+	offset += len;				// Point to the next entry
 	
 	//
 	// Get the interface name
@@ -581,8 +580,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 
     UNUSED(it);
     UNUSED(family);
-    UNUSED(buf);
-    UNUSED(buf_bytes);
+    UNUSED(buffer);
     return false;
 #endif /* HOST_OS_WINDOWS */
 }
