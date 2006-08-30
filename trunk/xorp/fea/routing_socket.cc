@@ -12,13 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket.cc,v 1.28 2006/08/29 22:42:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket.cc,v 1.29 2006/08/29 23:56:12 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.hh"
 
 #include <algorithm>
 
@@ -232,7 +233,8 @@ RoutingSocket::force_read(string& error_msg)
 	//
 	// Received message (probably) OK
 	//
-	const struct if_msghdr* mh = reinterpret_cast<const struct if_msghdr*>(&message[0]);
+	AlignData<struct if_msghdr> align_data(message);
+	const struct if_msghdr* mh = align_data.payload();
 	XLOG_ASSERT(mh->ifm_msglen == message.size());
 	XLOG_ASSERT(mh->ifm_msglen == got);
 	last_mh_off = off;
