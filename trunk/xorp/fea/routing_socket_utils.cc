@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.34 2006/08/18 23:24:10 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.35 2006/08/30 08:06:20 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -287,8 +287,12 @@ RtmUtils::get_sock_mask_len(int family, const struct sockaddr* sock)
 	    return (0);
 	}
 	// XXX: sock->sa_family is undefined
-	const struct sockaddr_in6* sin6 = reinterpret_cast<const struct sockaddr_in6*>(sock);
-	IPv6 netmask(sin6->sin6_addr);
+	struct sockaddr_in6 sin6;
+	memset(&sin6, 0, sizeof(sin6));
+	memcpy(&sin6, sock, sock->sa_len);
+	sin6.sin6_len = sizeof(struct sockaddr_in6);
+	sin6.sin6_family = AF_INET6;
+	IPv6 netmask(sin6.sin6_addr);
 	return (netmask.mask_len());
     }
 #endif // HAVE_IPV6
