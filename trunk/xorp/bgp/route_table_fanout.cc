@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.57 2006/08/17 17:21:53 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.58 2006/09/07 08:10:10 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -649,7 +649,6 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
     typename list<const RouteQueueEntry<A>*>::iterator queue_ptr;
     queue_ptr = peer_info->queue_position();
     bool discard_possible = false;
-    int skipped = 1;
 
     switch ((*queue_ptr)->op()) {
     case RTQUEUE_OP_ADD: {
@@ -689,7 +688,6 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 	log("sending replace_route: " + (*queue_ptr)->route()->net().str());
 	next_table->replace_route(old_rtmsg, new_rtmsg,
 				  (BGPRouteTable<A>*)this);
-	skipped = 2;
 	break;
     }
     case RTQUEUE_OP_REPLACE_NEW: {
@@ -817,7 +815,6 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
     bool more_queued_data = true;
     while (more_queued_data) {
 	bool discard_possible = false;
-	int skipped = 1;
 
 	switch ((*queue_ptr)->op())
 	    {
@@ -829,7 +826,6 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 		if (queue_ptr == _output_queue.begin())
 		    discard_possible = true;
 		queue_ptr++;
-		skipped = 2;
 		break;
 	    case RTQUEUE_OP_REPLACE_NEW:
 		XLOG_FATAL("illegal route queue state");
@@ -873,18 +869,21 @@ FanoutTable<A>::skip_entire_queue(BGPRouteTable<A> *next_table)
 		    // discard.
 		    if (nti.second().queue_position() == _output_queue.begin())
 			discard = false;
-		    // if we're considering popping the first two entries,
-		    // we need to check no-one needs the second one either
-		    if (skipped == 2 &&
-			(nti.second().queue_position() 
-			 == (_output_queue.begin())++ ))
-			discard = false;
 		}
 	    }
 	    if (discard) {
+		// check if the item to delete is a replace, in which case
+		// we need to delete both replace items
+		bool delete_two = false;
+		if (_output_queue.front()->op() == RTQUEUE_OP_REPLACE_OLD)
+		    delete_two = true;
+
 		delete _output_queue.front();
 		_output_queue.pop_front();
-		if (skipped == 2) {
+		if (delete_two) {
+		    XLOG_ASSERT(_output_queue.front()->op() 
+				== RTQUEUE_OP_REPLACE_NEW);
+		    XLOG_ASSERT(!_output_queue.empty());
 		    delete _output_queue.front();
 		    _output_queue.pop_front();
 		}
