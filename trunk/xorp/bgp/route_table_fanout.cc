@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.56 2006/08/16 21:41:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.57 2006/08/17 17:21:53 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -770,17 +770,22 @@ FanoutTable<A>::get_next_message(BGPRouteTable<A> *next_table)
 		// discard.
 		if (nti.second().queue_position() == _output_queue.begin())
 		    discard = false;
-		// if we're considering popping the first two entries,
-		// we need to check no-one needs the second one either
-		if (skipped == 2 &&
-		    nti.second().queue_position() == (_output_queue.begin())++ )
-		    discard = false;
 	    }
 	}
 	if (discard) {
+	    // check if the item to delete is a replace, in which case
+	    // we need to delete both replace items
+	    bool delete_two = false;
+	    if (_output_queue.front()->op() == RTQUEUE_OP_REPLACE_OLD)
+		delete_two = true;
+
 	    delete _output_queue.front();
 	    _output_queue.pop_front();
-	    if (skipped == 2) {
+
+	    if (delete_two) {
+		XLOG_ASSERT(_output_queue.front()->op() 
+			    == RTQUEUE_OP_REPLACE_NEW);
+		XLOG_ASSERT(!_output_queue.empty());
 		delete _output_queue.front();
 		_output_queue.pop_front();
 	    }
