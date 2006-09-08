@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.13 2005/10/26 04:52:20 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.14 2006/03/16 00:03:57 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
@@ -126,7 +126,7 @@ public:
 	: InterfaceManagerOperation(it, ifname), _ifc(ifc) {}
 
     bool dispatch() {
-	const IfTree& dev_config = _ifc.pull_config();
+	const IfTree& dev_config = _ifc.pulled_config();
 	IfTree::IfMap::const_iterator iter = dev_config.get_if(ifname());
 	if (iter == dev_config.ifs().end())
 	    return false;

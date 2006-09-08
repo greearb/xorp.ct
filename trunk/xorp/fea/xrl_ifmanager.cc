@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.19 2005/10/18 05:04:08 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_ifmanager.cc,v 1.20 2006/03/16 00:04:03 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -186,6 +186,12 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
     bool is_error = false;
     string errmsg;
 
+    //
+    // XXX: Pull in advance the current config, in case it is needed
+    // by some of the transaction operations.
+    //
+    ifconfig().pull_config();
+
     if (_itm.commit(tid) != true)
 	return XrlCmdError::COMMAND_FAILED(BAD_ID);
 
@@ -226,7 +232,7 @@ XrlInterfaceManager::commit_transaction(uint32_t tid)
     //
     // Pull the new device configuration
     //
-    const IfTree& dev_config = ifconfig().pull_config();    
+    const IfTree& dev_config = ifconfig().pull_config();
     debug_msg("DEV CONFIG %s\n", dev_config.str().c_str());
     debug_msg("LOCAL CONFIG %s\n", local_config.str().c_str());
 
