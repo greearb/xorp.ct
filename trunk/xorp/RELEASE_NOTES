@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.132 2006/08/08 23:17:49 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.133 2006/08/18 23:29:47 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -40,6 +40,10 @@ Release 1.4-WIP (2006/??/??)
     - Fix the routing socket based mechanism (used by BSD-derived
       systems) for obtaining the interface name (toward the destination)
       for a routing entry.
+
+    - Apply a performance improvement when configuring a large number of
+      interfaces/VIFs, each of them with the "default-system-config"
+      configuration statement.
 
   RIB:
     - 
