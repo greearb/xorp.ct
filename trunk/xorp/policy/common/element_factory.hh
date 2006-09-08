@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element_factory.hh,v 1.3 2005/07/15 02:27:09 abittau Exp $
+// $XORP: xorp/policy/common/element_factory.hh,v 1.4 2006/03/16 00:05:18 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_FACTORY_HH__
 #define __POLICY_COMMON_ELEMENT_FACTORY_HH__
@@ -58,8 +58,10 @@ public:
      */
     class UnknownElement : public PolicyException {
     public:
-	UnknownElement(const string& elem) : 
-	    PolicyException("ElementFactory: unable to create unknown element: " + elem) {}
+	UnknownElement(const char* file, size_t line, 
+		       const string& init_why = "")   
+            : PolicyException("UnknownElement", file, line, 
+			      "ElementFactory: unable to create unknown element: " + init_why) {}  
     };
 
     /**

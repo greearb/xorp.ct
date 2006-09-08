@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.5 2005/11/05 13:47:26 abittau Exp $"
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.6 2006/03/16 00:04:59 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -41,8 +41,8 @@ PolicyMap::create(const string& name,SetMap& smap)
 
     if (!_deps.create(name,ps)) {
 	delete ps;
-	throw PolicyMapError("Can't create policy " + name + 
-			     " : already exists");
+	xorp_throw(PolicyMapError,
+		   "Can't create policy " + name + " : already exists");
     }
 }
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.5 2005/10/02 22:21:51 abittau Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.6 2006/03/16 00:05:03 pavlin Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
@@ -49,8 +49,8 @@ public:
      */
     class sem_error : public PolicyException {
     public:
-	sem_error(const string& err) : PolicyException(err) {}
-
+        sem_error(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("sem_error", file, line, init_why) {}
     };
 
     /**

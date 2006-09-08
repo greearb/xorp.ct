@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/set_map.hh,v 1.3 2005/07/15 02:27:06 abittau Exp $
+// $XORP: xorp/policy/set_map.hh,v 1.4 2006/03/16 00:05:00 pavlin Exp $
 
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
@@ -36,7 +36,8 @@ public:
      */
     class SetMapError : public PolicyException {
     public:
-	SetMapError(const string& err) : PolicyException(err) {}
+        SetMapError(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("SetMapError", file, line, init_why) {}  
 
     };
 

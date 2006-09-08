@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/semantic_varrw.hh,v 1.4 2006/03/16 00:05:00 pavlin Exp $
+// $XORP: xorp/policy/semantic_varrw.hh,v 1.6 2006/05/25 05:50:00 pavlin Exp $
 
 #ifndef __POLICY_SEMANTIC_VARRW_HH__
 #define __POLICY_SEMANTIC_VARRW_HH__
@@ -43,7 +43,8 @@ public:
      */
     class var_error : public PolicyException {
     public:
-	var_error(const string& err) : PolicyException(err) {}
+        var_error(const char* file, size_t line, const string& init_why = "")   
+            : PolicyException("var_error", file, line, init_why) {}  
     };
    
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.8 2005/10/02 22:21:54 abittau Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.9 2006/03/16 00:05:14 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -69,8 +69,9 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 	string arg1type = argv[1]->type();
 
 	if (arg1type != ElemStr::id)
-	    throw OpNotFound("First argument of ctr must be txt type, but is: " 
-			     + arg1type);
+	    xorp_throw(OpNotFound,
+		       "First argument of ctr must be txt type, but is: " 
+		       + arg1type);
 	
 	const ElemStr& es = dynamic_cast<const ElemStr&>(*argv[1]);
 
@@ -92,9 +93,9 @@ Dispatcher::run(const Oper& op, unsigned argc, const Element** argv) const
 
 	// the infrastructure is ready however.
 	default:
-	    throw OpNotFound("Operations of arity: " +
-			     policy_utils::to_str(argc) + 
-			     " not supported");
+	    xorp_throw(OpNotFound, "Operations of arity: " +
+		       policy_utils::to_str(argc) + 
+		       " not supported");
     }
     // unreach
 }
@@ -132,7 +133,8 @@ Dispatcher::assign_op_hash(const Oper& op)
 
     // XXX
     if (_ophash > 31) {
-	throw PolicyException("Too many operations for dispatcher---find a better hashing mechanism\n");
+	xorp_throw(PolicyException,
+		   "Too many operations for dispatcher---find a better hashing mechanism\n");
     }
 
     op.set_hash(_ophash);
@@ -150,7 +152,8 @@ Dispatcher::assign_elem_hash(Element& e)
 
     // XXX
     if (_elemhash > 31) {
-	throw PolicyException("Too many elems for dispatcher---find a better hashing mechanism\n");
+	xorp_throw(PolicyException, 
+		   "Too many elems for dispatcher---find a better hashing mechanism\n");
     }
 
     e.set_hash(_elemhash);

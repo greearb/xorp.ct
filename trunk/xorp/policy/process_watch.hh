@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/process_watch.hh,v 1.3 2005/10/23 20:41:38 abittau Exp $
+// $XORP: xorp/policy/process_watch.hh,v 1.4 2006/03/16 00:04:59 pavlin Exp $
 
 #ifndef __POLICY_PROCESS_WATCH_HH__
 #define __POLICY_PROCESS_WATCH_HH__
@@ -43,7 +43,8 @@ public:
      */
     class PWException : public PolicyException {
     public:
-	PWException(const string& err) : PolicyException(err) {}
+        PWException(const char* file, size_t line, const string& init_why = "")   
+            : PolicyException("PWException", file, line, init_why) {} 
     };
 
     /**

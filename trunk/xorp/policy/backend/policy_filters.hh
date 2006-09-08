@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policy_filters.hh,v 1.4 2005/07/20 01:29:23 abittau Exp $
+// $XORP: xorp/policy/backend/policy_filters.hh,v 1.5 2006/03/16 00:05:09 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICY_FILTERS_HH__
 #define __POLICY_BACKEND_POLICY_FILTERS_HH__
@@ -33,7 +33,9 @@ class PolicyFilters {
 public:
     class PolicyFiltersErr : public PolicyException {
     public:
-	PolicyFiltersErr(const string& err) : PolicyException(err) {}
+        PolicyFiltersErr(const char* file, size_t line, 
+			   const string& init_why = "")   
+	: PolicyException("PolicyFiltersErr", file, line, init_why) {}  
     };
 
     PolicyFilters();

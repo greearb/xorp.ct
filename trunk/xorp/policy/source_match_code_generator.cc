@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.9 2006/04/06 00:27:57 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.10 2006/08/09 16:00:08 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -138,8 +138,8 @@ SourceMatchCodeGenerator::visit_term(Term& term)
 
     // XXX: we can assume _protocol = PROTOCOL IN EXPORT STATEMENT
     if(_protocol == "") 
-        throw NoProtoSpec("No protocol specified in term " + term.name() + 
-			  " in export policy source match");
+        xorp_throw(NoProtoSpec, "No protocol specified in term " + term.name() + 
+		                " in export policy source match");
 
     // ignore any destination block [that is dealt with in the export code
     // generator]
@@ -173,7 +173,7 @@ SourceMatchCodeGenerator::visit_proto(NodeProto& node)
 	ostringstream err; 
         err << "PROTOCOL REDEFINED FROM " << _protocol << " TO " <<
 	    node.proto() << " AT LINE " << node.line();
-        throw ProtoRedefined(err.str());
+        xorp_throw(ProtoRedefined, err.str());
     }
 
     // define protocol

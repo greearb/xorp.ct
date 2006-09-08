@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.8 2006/03/16 00:04:57 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.9 2006/04/06 04:33:23 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -87,7 +87,7 @@ CodeGenerator::visit_term(Term& term)
 
     // Import policies should not have a dest block
     if(!dest.empty()) {
-	throw CodeGeneratorErr("Term " + term.name() + " has a dest part!");
+	xorp_throw(CodeGeneratorErr, "Term " + term.name() + " has a dest part!");
     }
 
     //
@@ -186,7 +186,7 @@ CodeGenerator::visit_proto(NodeProto& node)
 
     // import policies may not have protocol set.
     err << "INVALID protocol statement in line " << node.line() << endl;
-    throw CodeGeneratorErr(err.str());
+    xorp_throw(CodeGeneratorErr, err.str());
 }
 
 const Code&

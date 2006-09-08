@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/filter_manager.hh,v 1.3 2005/10/23 20:41:38 abittau Exp $
+// $XORP: xorp/policy/filter_manager.hh,v 1.4 2006/03/16 00:04:58 pavlin Exp $
 
 #ifndef __POLICY_FILTER_MANAGER_HH__
 #define __POLICY_FILTER_MANAGER_HH__
@@ -53,7 +53,8 @@ public:
      */
     class FMException : public PolicyException {
     public:
-	FMException(const string& err) : PolicyException(err) {}
+        FMException(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("FMException", file, line, init_why) {}  
     };
 
     /**

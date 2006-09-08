@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_map.hh,v 1.3 2005/07/01 22:54:33 abittau Exp $
+// $XORP: xorp/policy/policy_map.hh,v 1.4 2006/03/16 00:04:59 pavlin Exp $
 
 #ifndef __POLICY_POLICY_MAP_HH__
 #define __POLICY_POLICY_MAP_HH__
@@ -35,7 +35,9 @@ public:
      */
     class PolicyMapError : public PolicyException {
     public:
-	PolicyMapError(const string& err) : PolicyException(err) {}
+        PolicyMapError(const char* file, size_t line, 
+		       const string& init_why = "")   
+	: PolicyException("PolicyMapError", file, line, init_why) {}   
     };
 
     /**

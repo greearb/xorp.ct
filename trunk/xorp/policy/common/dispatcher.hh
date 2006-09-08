@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/dispatcher.hh,v 1.6 2005/10/02 22:21:54 abittau Exp $
+// $XORP: xorp/policy/common/dispatcher.hh,v 1.7 2006/03/16 00:05:14 pavlin Exp $
 
 #ifndef __POLICY_COMMON_DISPATCHER_HH__
 #define __POLICY_COMMON_DISPATCHER_HH__
@@ -53,7 +53,8 @@ public:
      */
     class OpNotFound : public PolicyException {
     public:
-	OpNotFound(const string& err) : PolicyException(err) {}
+	OpNotFound(const char* file, size_t line, const string& init_why = "")   
+	    : PolicyException("OpNotFound", file, line, init_why) {}
     };
 
     /**

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.8 2005/10/02 22:21:50 abittau Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.9 2006/03/16 00:04:57 pavlin Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -46,7 +46,8 @@ public:
      */
     class ConfError : public PolicyException {
     public:
-	ConfError(const string& e) : PolicyException(e) {}
+        ConfError(const char* file, size_t line, const string& init_why = "")   
+            : PolicyException("ConfError", file, line, init_why) {}  
 
     };
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.5 2005/08/04 15:26:56 bms Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.6 2006/03/16 00:05:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,7 +34,7 @@ SetMap::create(const string& name)
     // initially, set is empty [null object is fine].
     Element* e = NULL;
     if(!_deps.create(name,e))
-	throw SetMapError("Can't create set " + name + " : exists");
+	xorp_throw(SetMapError, "Can't create set " + name + " : exists");
 }
 
 void 

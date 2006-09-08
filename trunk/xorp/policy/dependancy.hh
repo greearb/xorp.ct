@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/dependancy.hh,v 1.4 2005/11/05 13:47:26 abittau Exp $
+// $XORP: xorp/policy/dependancy.hh,v 1.5 2006/03/16 00:04:57 pavlin Exp $
 
 #ifndef __POLICY_DEPENDANCY_HH__
 #define __POLICY_DEPENDANCY_HH__
@@ -65,7 +65,9 @@ public:
      */
     class DependancyError : public PolicyException {
     public:
-	DependancyError(const string& err) : PolicyException(err) {}
+        DependancyError(const char* file, size_t line, 
+			const string& init_why = "")
+	: PolicyException("DependancyError", file, line, init_why) {} 
     };
 
 
@@ -127,8 +129,8 @@ public:
 	typename Map::iterator i = _map.find(objectname);
 
 	if(i == _map.end())
-	    throw DependancyError("Dependancy remove: Cannot find object " + 
-				  objectname);
+	    xorp_throw(DependancyError,
+		       "Dependancy remove: Cannot find object " + objectname);
 	
 	Pair* p = (*i).second;
 
@@ -145,7 +147,7 @@ public:
 	    for (DependancyList::iterator j = s.begin(); j != s.end(); ++j)
 		oss << *j << " ";
 		
-	    throw DependancyError(oss.str());
+	    xorp_throw(DependancyError, oss.str());
 	}
 
 	// delete object
@@ -269,7 +271,7 @@ public:
      */
     ObjPair next(typename Map::const_iterator& i) const {
 	if(i == _map.end())
-	    throw DependancyError("No more objects");
+	    xorp_throw(DependancyError, "No more objects");
 	
 
 	Pair* p = (*i).second;
@@ -291,8 +293,8 @@ private:
 	typename Map::const_iterator i = _map.find(objectname);
 
 	if(i == _map.end())
-	    throw DependancyError("Dependancy: Cannot find object of name " + 
-			          objectname);
+	    xorp_throw(DependancyError,
+		       "Dependancy: Cannot find object of name " + objectname);
 
 	return (*i).second;    
     }

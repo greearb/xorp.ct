@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.6 2005/10/02 22:21:52 abittau Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.7 2006/03/16 00:05:08 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
@@ -57,7 +57,8 @@ public:
      */
     class RuntimeError : public PolicyException {
     public:
-	RuntimeError(const string& err) : PolicyException(err) {}
+	RuntimeError(const char* file, size_t line, const string& init_why = "")
+	    : PolicyException("RuntimeError", file, line, init_why) {}  
     };
 
     IvExec();

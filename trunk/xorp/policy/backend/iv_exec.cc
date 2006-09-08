@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.8 2006/03/16 00:05:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/iv_exec.cc,v 1.10 2006/05/25 05:50:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -179,7 +179,7 @@ void
 IvExec::visit(OnFalseExit& /* x */)
 {
     if (_stackptr < _stack)
-	throw RuntimeError("Got empty stack on ON_FALSE_EXIT");
+	xorp_throw(RuntimeError, "Got empty stack on ON_FALSE_EXIT");
 
     // we expect a bool at the top.
     const ElemBool* t = dynamic_cast<const ElemBool*>(*_stackptr);
@@ -195,7 +195,7 @@ IvExec::visit(OnFalseExit& /* x */)
 
 	// if it is anything else, its an error
         else {
-	   throw RuntimeError("Expected bool on top of stack instead: ");
+	   xorp_throw(RuntimeError, "Expected bool on top of stack instead: ");
 	}
 	    
     }
@@ -232,7 +232,7 @@ void
 IvExec::visit(Store& s)
 {
     if (_stackptr < _stack)
-	throw RuntimeError("Stack empty on assign of " + s.var());
+	xorp_throw(RuntimeError, "Stack empty on assign of " + s.var());
 
     const Element* arg = *_stackptr;
     _stackptr--;

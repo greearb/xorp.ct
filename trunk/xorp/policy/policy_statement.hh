@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_statement.hh,v 1.7 2006/03/16 00:04:59 pavlin Exp $
+// $XORP: xorp/policy/policy_statement.hh,v 1.8 2006/05/12 02:21:38 pavlin Exp $
 
 #ifndef __POLICY_POLICY_STATEMENT_HH__
 #define __POLICY_POLICY_STATEMENT_HH__
@@ -38,7 +38,9 @@ public:
      */
     class PolicyStatementErr : public PolicyException {
     public:
-	PolicyStatementErr(const string& err) : PolicyException(err) {}
+        PolicyStatementErr(const char* file, size_t line, 
+			   const string& init_why = "")   
+	: PolicyException("PolicyStatementErr", file, line, init_why) {}  
     };
 
     

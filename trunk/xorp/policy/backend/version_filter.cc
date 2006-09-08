@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/version_filter.cc,v 1.3 2005/10/02 22:21:53 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/version_filter.cc,v 1.4 2006/03/16 00:05:12 pavlin Exp $"
 
 #include "policy/policy_module.h"
 #include "config.h"
@@ -72,7 +72,7 @@ VersionFilter::acceptRoute(VarRW& varrw)
 
 	XLOG_FATAL("Reading %d but didn't get ElemFilter! Got %s: (%s)", 
 		   _fname, e.type(), e.str().c_str());
-	throw PolicyException("Reading filter but didn't get ElemFilter!");
+	xorp_throw(PolicyException, "Reading filter but didn't get ElemFilter!");
     }
 
     // filter exists... run it

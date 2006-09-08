@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.6 2006/03/16 00:05:24 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.8 2006/05/25 05:50:02 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -29,7 +29,7 @@ FileVarRW::FileVarRW(const string& fname) {
 	err += ": ";
 	err += strerror(errno);
 
-	throw Error(err);
+	xorp_throw(Error, err);
     }	
 
     char buff[1024];
@@ -44,7 +44,7 @@ FileVarRW::FileVarRW(const string& fname) {
 	ostringstream oss;
 
 	oss << "Parse error at line: " << lineno;
-	throw Error(oss.str());
+	xorp_throw(Error, oss.str());
     }
 
     fclose(f);
@@ -95,7 +95,7 @@ FileVarRW::doLine(const string& str) {
     char* err = 0;
     Id id = strtol(varname.c_str(), &err, 10);
     if (*err) {
-	throw Error(string("Varname must be ID [numeric]: ") + err);
+	xorp_throw(Error, string("Varname must be ID [numeric]: ") + err);
     }
 
     _map[id] = e;
@@ -108,7 +108,7 @@ FileVarRW::read(const Id& id) {
     Map::iterator i = _map.find(id);
 
     if(i == _map.end())
-	throw Error("Cannot read variable: " + id);
+	xorp_throw(Error, "Cannot read variable: " + id);
 
     const Element* e = (*i).second;
 

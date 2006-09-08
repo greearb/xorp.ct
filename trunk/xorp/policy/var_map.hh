@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/var_map.hh,v 1.6 2006/03/16 00:05:02 pavlin Exp $
+// $XORP: xorp/policy/var_map.hh,v 1.7 2006/04/07 20:52:58 pavlin Exp $
 
 #ifndef __POLICY_VAR_MAP_HH__
 #define __POLICY_VAR_MAP_HH__
@@ -40,7 +40,8 @@ public:
      */
     class VarMapErr : public PolicyException {
     public:
-	VarMapErr(const string& err) : PolicyException(err) {}
+        VarMapErr(const char* file, size_t line, const string& init_why = "")   
+            : PolicyException("VarMapErr", file, line, init_why) {} 
     };
 
     /**

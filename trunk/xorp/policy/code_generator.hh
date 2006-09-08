@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_generator.hh,v 1.4 2005/10/02 22:21:50 abittau Exp $
+// $XORP: xorp/policy/code_generator.hh,v 1.5 2006/03/16 00:04:57 pavlin Exp $
 
 #ifndef __POLICY_CODE_GENERATOR_HH__
 #define __POLICY_CODE_GENERATOR_HH__
@@ -43,7 +43,9 @@ public:
      */
     class CodeGeneratorErr : public PolicyException {
     public:
-	CodeGeneratorErr(const string& err) : PolicyException(err) {}
+        CodeGeneratorErr(const char* file, size_t line, 
+			 const string& init_why = "")
+            : PolicyException("CodeGeneratorErr", file, line, init_why) {}   
     };
 
     CodeGenerator(const VarMap& varmap); // used by source match code generator.

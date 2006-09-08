@@ -12,12 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/policy_exception.hh,v 1.2 2005/03/25 02:54:16 pavlin Exp $
+// $XORP: xorp/policy/common/policy_exception.hh,v 1.3 2006/03/16 00:05:19 pavlin Exp $
 
 #ifndef __POLICY_COMMON_POLICY_EXCEPTION_HH__
 #define __POLICY_COMMON_POLICY_EXCEPTION_HH__
 
 #include <string>
+#include "libxorp/exceptions.hh"
 
 
 /**
@@ -25,21 +26,24 @@
  *
  * All policy exceptions have a string representing the error.
  */
-class PolicyException {
+/**
+ * @short Base class for all policy exceptions.
+ *
+ * All policy exceptions have a string representing the error.
+ */
+class PolicyException : public XorpReasonedException {
 public:
     /**
      * @param reason the error message
      */
-    PolicyException(const std::string& reason) : _reason(reason) {}
+    PolicyException(const char* file, size_t line, 
+			const string& init_why = "")   
+      : XorpReasonedException("PolicyException", file, line, init_why) {} 
+
+    PolicyException(const char* type, const char* file, size_t line, 
+			const string& init_why = "")   
+      : XorpReasonedException(type, file, line, init_why) {} 
     virtual ~PolicyException() {}
-
-    /**
-     * @return a human readable and possibly understandable error message
-     */
-     const std::string& str() const { return _reason; }
-
-private:
-    std::string _reason;
 };
 
 

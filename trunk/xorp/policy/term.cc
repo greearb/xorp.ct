@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.18 2006/04/04 05:09:55 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.19 2006/05/12 02:21:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
 		const string& statement)
 {
     if (block >= LAST_BLOCK) {
-	throw term_syntax_error("Unknown block: " + to_str(block));
+	xorp_throw(term_syntax_error, "Unknown block: " + to_str(block));
     }
 
     // check if we want to delete
@@ -102,8 +102,8 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
 	// The alternative solution would be to avoid node/action duplication
 	// in the rtrmgr templates.
 	//
-	throw term_syntax_error("A statement is already present in position: " 
-				+ to_str(order));
+	xorp_throw(term_syntax_error,
+		   "A statement is already present in position: " + to_str(order));
 #endif // 0
     }
 
@@ -116,7 +116,7 @@ Term::set_block(const uint32_t& block, const ConfigNodeId& order,
     if (!nodes) {
 	string err = parser.last_error();
 	// XXX convert block from int to string... [human readable]
-	throw term_syntax_error("Syntax error in term " + _name + 
+	xorp_throw(term_syntax_error, "Syntax error in term " + _name + 
 				" block " + block2str(block) + " statement=("
 				+ statement + "): " + err);
     }
@@ -190,8 +190,8 @@ Term::del_block(const uint32_t& block, const ConfigNodeId& order)
     // The alternative solution would be to avoid node/action duplication
     // in the rtrmgr templates.
     //
-    throw term_syntax_error("Want to delete an empty position: " 
-			    + order.str());
+    xorp_throw(term_syntax_error,
+	       "Want to delete an empty position: " + order.str());
 #endif // 0
 }
 
@@ -199,7 +199,7 @@ void
 Term::set_block_end(uint32_t block)
 {
     if (block >= LAST_BLOCK) {
-	throw term_syntax_error("Unknown block: " + to_str(block));
+	xorp_throw(term_syntax_error, "Unknown block: " + to_str(block));
     }
 
     Nodes& conf_block = *_block_nodes[block];

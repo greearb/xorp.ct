@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/set_manager.hh,v 1.2 2005/03/25 02:54:13 pavlin Exp $
+// $XORP: xorp/policy/backend/set_manager.hh,v 1.3 2006/03/16 00:05:11 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_SET_MANAGER_HH__
 #define __POLICY_BACKEND_SET_MANAGER_HH__
@@ -39,7 +39,8 @@ public:
      */
     class SetNotFound : public PolicyException {
     public:
-	SetNotFound(const string& err) : PolicyException(err) {}
+        SetNotFound(const char* file, size_t line, const string& init_why = "")   
+	  : PolicyException("SetNotFound", file, line, init_why) {}  
     };
 
     SetManager();

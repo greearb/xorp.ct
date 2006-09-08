@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/policy_utils.hh,v 1.5 2005/09/27 18:50:43 pavlin Exp $
+// $XORP: xorp/policy/common/policy_utils.hh,v 1.6 2006/03/16 00:05:19 pavlin Exp $
 
 #ifndef __POLICY_COMMON_POLICY_UTILS_HH__
 #define __POLICY_COMMON_POLICY_UTILS_HH__
@@ -37,7 +37,8 @@ namespace policy_utils {
  */
 class PolicyUtilsErr : public PolicyException {
 public:
-    PolicyUtilsErr(const string& err) : PolicyException(err) {}
+    PolicyUtilsErr(const char* file, size_t line, const string& init_why = "")   
+        : PolicyException("PolicyUtilsErr", file, line, init_why) {}
 };
 
 

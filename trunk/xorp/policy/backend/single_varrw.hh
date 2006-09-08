@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/single_varrw.hh,v 1.7 2006/03/16 00:05:12 pavlin Exp $
+// $XORP: xorp/policy/backend/single_varrw.hh,v 1.9 2006/05/25 05:50:01 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_SINGLE_VARRW_HH__
 #define __POLICY_BACKEND_SINGLE_VARRW_HH__
@@ -39,7 +39,9 @@ public:
      */
     class SingleVarRWErr : public PolicyException {
     public:
-	SingleVarRWErr(const string& err) : PolicyException(err) {}
+	SingleVarRWErr(const char* file, size_t line, 
+		       const string& init_why = "")   
+            : PolicyException("SingleVarRWErr", file, line, init_why) {} 
     };
 
     SingleVarRW();

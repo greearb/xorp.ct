@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/test/file_varrw.hh,v 1.4 2006/03/16 00:05:24 pavlin Exp $
+// $XORP: xorp/policy/test/file_varrw.hh,v 1.6 2006/05/25 05:50:02 pavlin Exp $
 
 #ifndef __POLICY_TEST_FILE_VARRW_HH__
 #define __POLICY_TEST_FILE_VARRW_HH__
@@ -29,7 +29,8 @@ class FileVarRW : public VarRW {
 public:
     class Error : public PolicyException {
     public:
-	Error(const string& err) : PolicyException(err) {}
+        Error(const char* file, size_t line, const string& init_why = "")   
+            : PolicyException("Error", file, line, init_why) {}  
     };
 
     FileVarRW(const string& fname);

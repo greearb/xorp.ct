@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/term.hh,v 1.11 2006/03/16 00:05:01 pavlin Exp $
+// $XORP: xorp/policy/term.hh,v 1.12 2006/05/12 02:21:38 pavlin Exp $
 
 #ifndef __POLICY_TERM_HH__
 #define __POLICY_TERM_HH__
@@ -52,7 +52,9 @@ public:
      */
     class term_syntax_error :  public PolicyException {
     public:
-	term_syntax_error(const string& r) : PolicyException(r) {}
+        term_syntax_error(const char* file, size_t line, 
+			  const string& init_why = "")   
+            : PolicyException("term_syntax_error", file, line, init_why) {}  
     };
 
     /**

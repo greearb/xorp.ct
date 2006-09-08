@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.8 2005/11/05 18:01:45 bms Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.9 2006/03/16 00:05:19 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -96,7 +96,7 @@ read_file(const string& fname, string& out)
         err += "Unable to open file " + fname + ": ";
         err += strerror(errno);
 
-        throw PolicyUtilsErr(err);
+        xorp_throw(PolicyUtilsErr, err);
     }
 
     buff[0] = 0;
@@ -111,7 +111,7 @@ read_file(const string& fname, string& out)
             err += strerror(errno);
 
             fclose(f);
-            throw PolicyUtilsErr(err);
+            xorp_throw(PolicyUtilsErr, err);
         }
 
 	// append to content of file to out
@@ -154,7 +154,7 @@ regex(const string& str, const string& reg)
 	err += "): ";
 	err += tmp;
 
-	throw PolicyUtilsErr(err);
+	xorp_throw(PolicyUtilsErr, err);
     }
 
     // execute the regex [XXX: check for errors!!]

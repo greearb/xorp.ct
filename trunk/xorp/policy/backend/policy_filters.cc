@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.5 2005/08/04 15:26:58 bms Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filters.cc,v 1.6 2006/03/16 00:05:09 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -73,6 +73,6 @@ PolicyFilters::whichFilter(const uint32_t& ftype)
 	    return *_export_filter;
 	
     }
-    throw PolicyFiltersErr("Unknown filter: " +
-			   policy_utils::to_str(ftype));
+    xorp_throw(PolicyFiltersErr, 
+	       "Unknown filter: " + policy_utils::to_str(ftype));
 }

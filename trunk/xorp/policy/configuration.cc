@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.12 2006/05/12 02:21:38 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.13 2006/08/09 16:00:07 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -59,7 +59,7 @@ Configuration::delete_term(const string& policy, const string& term)
        return;
     }   
 
-    throw ConfError("TERM NOT FOUND " + policy + " " + term);
+    xorp_throw(ConfError, "TERM NOT FOUND " + policy + " " + term);
 }
    
 void 
@@ -74,8 +74,8 @@ Configuration::update_term_block(const string& policy,
 	t.set_block(block, order, statement);
         _modified_policies.insert(policy); // recompile on commit.
     } catch(const Term::term_syntax_error& e) {
-        string err = "In policy " + policy + ": " + e.str();
-        throw ConfError(err);
+        string err = "In policy " + policy + ": " + e.why();
+        xorp_throw(ConfError, err);
     }
 } 
 
@@ -86,8 +86,8 @@ Configuration::create_term(const string& policy, const ConfigNodeId& order,
     PolicyStatement& ps = _policies.find(policy);
 
     if(ps.term_exists(term)) {
-	throw ConfError("Term " + term +
-			" exists already in policy " + policy);
+	xorp_throw(ConfError,
+		   "Term " + term + " exists already in policy " + policy);
     }
 
     Term* t = new Term(term);
@@ -141,7 +141,7 @@ Configuration::update_imports(const string& protocol,
    
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
-	throw ConfError("imports: Protocol " + protocol + " unknown");
+	xorp_throw(ConfError, "imports: Protocol " + protocol + " unknown");
 
     update_ie(protocol,imports,_imports,PolicyList::IMPORT);
     _modified_targets.insert(Code::Target(protocol,filter::IMPORT));
@@ -153,7 +153,7 @@ Configuration::update_exports(const string& protocol,
 {
     // check if protocol exists
     if(!_varmap.protocol_known(protocol))
-	throw ConfError("exports: Protocol " + protocol + " unknown");
+	xorp_throw(ConfError, "exports: Protocol " + protocol + " unknown");
 
     // XXX: if conf fails we lost tagmap
     TagMap::iterator i = _tagmap.find(protocol);
@@ -455,8 +455,9 @@ Configuration::add_varmap(const string& protocol, const string& variable,
     else if (access == "w")
 	acc = VarMap::WRITE;
     else
-	throw PolicyException("Unknown access (" + access + ") for protocol: " 
-			      + protocol + " variable: " + variable);
+	xorp_throw(PolicyException,
+		   "Unknown access (" + access + ") for protocol: " 
+		   + protocol + " variable: " + variable);
 
     _varmap.add_protocol_variable(protocol, 
 		  new VarMap::Variable(variable, type, acc, id)); 
@@ -572,6 +573,6 @@ Configuration::dump_state(uint32_t id)
 	    break;
 
 	default:
-	    throw PolicyException("Unknown state id: " + to_str(id));
+	    xorp_throw(PolicyException, "Unknown state id: " + to_str(id));
     }
 }

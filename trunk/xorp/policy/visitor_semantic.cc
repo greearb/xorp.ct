@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.9 2005/10/02 22:21:51 abittau Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.10 2006/03/16 00:05:03 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -91,14 +91,14 @@ VisitorSemantic::visit(Term& term)
 
 	    err += " in term: " + term.name();
 
-	    throw sem_error(err);
+	    xorp_throw(sem_error, err);
 	}
     }
 
     // import policies should not have dest blocks
     if (_ptype == IMPORT && !(dest.empty())) {
-	throw sem_error("Invalid use of dest in import policy in term " + 
-		       term.name());
+	xorp_throw(sem_error, "Invalid use of dest in import policy in term " + 
+		   term.name());
     }
 
     // check dest block
@@ -133,7 +133,7 @@ VisitorSemantic::visit(NodeUn& node)
 	ostringstream error;
 
 	error << "Invalid unop " << e.str() << " at line " << node.line();
-	throw sem_error(error.str());
+	xorp_throw(sem_error, error.str());
     }
 }
 
@@ -157,7 +157,7 @@ VisitorSemantic::visit(NodeBin& node)
 
         error << "Invalid binop " << e.str() << " at line " << node.line();
     
-        throw sem_error(error.str());
+        xorp_throw(sem_error, error.str());
     }
 }
 
@@ -176,7 +176,7 @@ VisitorSemantic::visit(NodeAssign& node)
 
         error << e.str() << " at line " << node.line();
 
-        throw sem_error(error.str());
+        xorp_throw(sem_error, error.str());
     }
     return NULL;
 }
@@ -193,7 +193,7 @@ VisitorSemantic::visit(NodeVar& node)
 
         error << e.str() << " at line " << node.line();
     
-        throw sem_error(error.str());
+        xorp_throw(sem_error, error.str());
     }
 }
     
@@ -209,7 +209,7 @@ VisitorSemantic::visit(NodeSet& node)
         ostringstream error;
         error << "Set not found: " << node.setid() << " at line " << node.line();
     
-        throw sem_error(error.str());
+        xorp_throw(sem_error, error.str());
     }
 }
 
@@ -241,7 +241,7 @@ VisitorSemantic::visit(NodeProto& node)
 	err << "May not define protocol for import policy at line " <<
         node.line();
         
-        throw sem_error(err.str());
+        xorp_throw(sem_error, err.str());
     }
 
     string proto = node.proto();
@@ -252,7 +252,7 @@ VisitorSemantic::visit(NodeProto& node)
         err << "Redifinition of protocol from " << _current_protocol << 
 	    " to " << proto << " at line " << node.line();
     
-        throw sem_error(err.str());
+        xorp_throw(sem_error, err.str());
     }
 
     // do the switch

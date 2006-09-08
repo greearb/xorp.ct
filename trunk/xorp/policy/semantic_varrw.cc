@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.6 2006/03/16 00:05:00 pavlin Exp $"
+#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.8 2006/05/25 05:50:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -51,7 +51,7 @@ SemanticVarRW::write(const Id& id, const Element& elem) {
     if(!var.writable()) {
 	string error = "Trying to write on read-only variable ";
         error += id;
-        throw var_error(error);
+        xorp_throw(var_error, error);
     }    
 
     // type checking
@@ -61,7 +61,7 @@ SemanticVarRW::write(const Id& id, const Element& elem) {
         err << "Trying to assign value of type " << elem.type() << " to " <<
 	var.type << " variable " << id;
 
-        throw var_error(err.str());
+        xorp_throw(var_error, err.str());
     }
 }
 

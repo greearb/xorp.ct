@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.5 2005/08/04 15:26:59 bms Exp $"
+#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.6 2006/03/16 00:05:18 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -46,7 +46,7 @@ ElementFactory::create(const string& key, const char* arg)
 
     // No way of creating element
     if(i == _map.end())
-	throw UnknownElement(key);
+	xorp_throw(UnknownElement, key);
 
     // execute the callback
     return (i->second)(arg);

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/policytags.hh,v 1.2 2005/03/25 02:54:13 pavlin Exp $
+// $XORP: xorp/policy/backend/policytags.hh,v 1.3 2006/03/16 00:05:10 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_POLICYTAGS_HH__
 #define __POLICY_BACKEND_POLICYTAGS_HH__
@@ -39,7 +39,9 @@ public:
      */
     class PolicyTagsError : public PolicyException {
     public:
-	PolicyTagsError(const string& err) : PolicyException(err) {}
+        PolicyTagsError(const char* file, size_t line, 
+			const string& init_why = "")   
+	: PolicyException("PolicyTagsError", file, line, init_why) {} 
     };
     
     /**

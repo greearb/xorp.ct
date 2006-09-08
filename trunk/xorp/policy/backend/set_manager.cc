@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/set_manager.cc,v 1.4 2006/03/16 00:05:11 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/set_manager.cc,v 1.5 2006/08/09 16:00:09 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -29,11 +29,11 @@ SetManager::~SetManager() {
 const Element&
 SetManager::getSet(const string& setid) const {
     if(!_sets)
-	throw SetNotFound("No sets initialized");
+	xorp_throw(SetNotFound, "No sets initialized");
 
     SetMap::iterator i = _sets->find(setid);
     if(i == _sets->end())
-        throw SetNotFound("Set not found: " + setid);
+        xorp_throw(SetNotFound, "Set not found: " + setid);
 
     Element* e = (*i).second;
 

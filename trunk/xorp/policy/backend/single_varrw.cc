@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.11 2006/03/16 00:05:11 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.13 2006/05/25 05:50:00 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -68,7 +68,7 @@ SingleVarRW::read(const Id& id) {
 
 	// out of luck...
 	if(!e)
-	    throw SingleVarRWErr("Unable to read variable " + id);
+	    xorp_throw(SingleVarRWErr, "Unable to read variable " + id);
     }
 
     return *e;

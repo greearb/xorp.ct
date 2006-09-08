@@ -13,12 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element.cc,v 1.6 2005/10/02 22:21:54 abittau Exp $"
+#ident "$XORP: xorp/policy/common/element.cc,v 1.7 2006/03/16 00:05:17 pavlin Exp $"
 
 #include "element.hh"
 #include "elem_null.hh"
 #include "elem_filter.hh"
 #include "elem_bgp.hh"
+#include "policy_exception.hh"
 
 // Initialization of static members.
 // Remember to be unique in id's.
@@ -98,8 +99,8 @@ ElemCom32::ElemCom32(const char* c_str) {
 	msw = strtoul(c_str, NULL, 0);
 	lsw = strtoul(++colon, NULL, 0);
 	if (msw > 0xffff || lsw > 0xffff)
-	    throw PolicyException("uint16_t overflow for community " +
-				  string(c_str));
+	    xorp_throw(PolicyException, "uint16_t overflow for community " +
+		       string(c_str));
 	_val = (msw << 16) + lsw;
     } else {
 	string x = string(c_str);

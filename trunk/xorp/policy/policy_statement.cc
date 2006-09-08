@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_statement.cc,v 1.8 2006/03/16 00:04:59 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_statement.cc,v 1.9 2006/05/12 02:21:38 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,8 +47,8 @@ PolicyStatement::add_term(const ConfigNodeId& order, Term* term)
 {
     if((_terms.find(order) != _terms.end())
        || (find_out_of_order_term(order) != _out_of_order_terms.end())) {
-	throw PolicyException("Term already present in position: " +
-			      order.str());
+	xorp_throw(PolicyException,
+		   "Term already present in position: " + order.str());
     }
 
     pair<TermContainer::iterator, bool> res;
@@ -131,8 +131,8 @@ PolicyStatement::find_term(const string& name) const
 	    return *t;
 	}
 
-	throw PolicyStatementErr("Term " + name + " not found in policy " + 
-				 _name);
+	xorp_throw(PolicyStatementErr,
+		   "Term " + name + " not found in policy " + _name);
     }
 
     Term* t = i->second;

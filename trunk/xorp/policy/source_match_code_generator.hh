@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/source_match_code_generator.hh,v 1.5 2005/10/02 22:21:51 abittau Exp $
+// $XORP: xorp/policy/source_match_code_generator.hh,v 1.6 2006/03/16 00:05:01 pavlin Exp $
 
 #ifndef __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
 #define __POLICY_SOURCE_MATCH_CODE_GENERATOR_HH__
@@ -43,7 +43,8 @@ public:
      */
     class NoProtoSpec : public PolicyException {
     public:
-	NoProtoSpec(const string& x) : PolicyException(x) {}
+        NoProtoSpec(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("NoProtoSpec", file, line, init_why) {} 
     };
 
     /**
@@ -51,7 +52,8 @@ public:
      */
     class ProtoRedefined : public PolicyException {
     public:
-	ProtoRedefined(const string& x) : PolicyException(x) {}
+        ProtoRedefined(const char* file, size_t line, const string& init_why = "")
+            : PolicyException("ProtoRedefined", file, line, init_why) {} 
     };
 
 

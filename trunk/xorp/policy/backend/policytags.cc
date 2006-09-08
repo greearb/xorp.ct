@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.7 2006/03/16 00:05:10 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.8 2006/08/09 16:00:09 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -34,7 +34,7 @@ PolicyTags::PolicyTags(const XrlAtomList& alist)
 
 	// only support u32's
 	if(atom.type() != xrlatom_uint32)
-	    throw PolicyTagsError("XrlAtomList does not contain uint32's");
+	    xorp_throw(PolicyTagsError, "XrlAtomList does not contain uint32's");
 
 	// it's good, insert it
 	_tags.insert(atom.uint32());    
@@ -46,8 +46,8 @@ PolicyTags::PolicyTags(const Element& element)
     // we only support set elements
     const ElemSetU32* es = dynamic_cast<const ElemSetU32*>(&element);
     if(!es)
-	throw PolicyTagsError(string("Element is not a set: ") + 
-			      element.type());
+	xorp_throw(PolicyTagsError, 
+		   string("Element is not a set: ") + element.type());
 
     // go through all the set elements.
     for(ElemSetU32::const_iterator i = es->begin(); i != es->end(); ++i) {

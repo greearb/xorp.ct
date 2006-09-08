@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/var_map.cc,v 1.9 2006/04/07 20:52:58 pavlin Exp $"
+#ident "$XORP: xorp/policy/var_map.cc,v 1.10 2006/08/09 16:00:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,7 +33,7 @@ VarMap::variablemap(const string& protocol) const
 
     ProtoMap::const_iterator i = _protocols.find(protocol);
     if(i == _protocols.end()) 
-	throw VarMapErr("Unknown protocol: " + protocol);
+	xorp_throw(VarMapErr, "Unknown protocol: " + protocol);
 
     const VariableMap* vm = (*i).second;
 
@@ -51,7 +51,7 @@ VarMap::variable(const string& protocol, const VarRW::Id& varname) const
 	ostringstream oss;
 
 	oss << "Unknown variable: " << varname << " in protocol " << protocol;
-	throw VarMapErr(oss.str());
+	xorp_throw(VarMapErr, oss.str());
     }			
 
     const Variable* v = (*i).second;
@@ -99,7 +99,7 @@ VarMap::add_variable(VariableMap& vm, Variable* var)
 	ostringstream oss;
 	oss << "Variable " << var->id << " exists already";
 	delete var;
-	throw VarMapErr(oss.str());
+	xorp_throw(VarMapErr, oss.str());
     }	
     
     vm[var->id] = var;
@@ -119,7 +119,7 @@ VarMap::add_protocol_variable(const string& protocol, Variable* var)
 	oss << "Unable to create element of type: " << var->type
 	    << " in proto: " << protocol << " varname: " << var->name;
 	delete var;    
-	throw VarMapErr(oss.str());
+	xorp_throw(VarMapErr, oss.str());
     }
 
     ProtoMap::iterator iter = _protocols.find(protocol);
@@ -156,7 +156,7 @@ VarMap::add_metavariable(Variable* v)
 
 	oss << "Metavar: " << v->id << " exists already" << endl;
 	delete v;
-	throw VarMapErr(oss.str());
+	xorp_throw(VarMapErr, oss.str());
     }
 
     _metavars[v->id] = v;
@@ -195,7 +195,7 @@ VarMap::var2id(const string& protocol, const string& varname) const
     ProtoMap::const_iterator i = _protocols.find(protocol);
 
     if (i == _protocols.end())
-	throw VarMapErr("Unknown protocol: " + protocol);
+	xorp_throw(VarMapErr, "Unknown protocol: " + protocol);
 
     const VariableMap* vm = i->second;
 
@@ -207,5 +207,5 @@ VarMap::var2id(const string& protocol, const string& varname) const
 	    return v->id;
     }
 
-    throw VarMapErr("Unknown variable: " + varname);
+    xorp_throw(VarMapErr, "Unknown variable: " + varname);
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/element.hh,v 1.8 2005/11/23 03:13:41 pavlin Exp $
+// $XORP: xorp/policy/common/element.hh,v 1.9 2006/03/16 00:05:17 pavlin Exp $
 
 #ifndef __POLICY_COMMON_ELEMENT_HH__
 #define __POLICY_COMMON_ELEMENT_HH__
@@ -241,7 +241,8 @@ public:
      */
     class ElemInitError : public PolicyException {
     public:
-	ElemInitError(const string& err) : PolicyException(err) {}
+	ElemInitError(const char* file, size_t line, const string& init_why = "")   
+	    : PolicyException("ElemInitError", file, line, init_why) {}  
     };
 
 
@@ -271,7 +272,7 @@ public:
 		err += " with ";
 		err += c_str;
 
-		throw ElemInitError(err);
+		xorp_throw(ElemInitError, err);
 
 	    }
 	    
@@ -325,7 +326,8 @@ public:
      */
     class ElemInitError : public PolicyException {
     public:
-        ElemInitError(const string& err) : PolicyException(err) {}
+	ElemInitError(const char* file, size_t line, const string& init_why = "")   
+	    : PolicyException("ElemInitError", file, line, init_why) {}
     };
 
     
@@ -358,7 +360,7 @@ public:
                 err += " with ";
                 err += c_str;
 
-                throw ElemInitError(err);
+                xorp_throw(ElemInitError, err);
 
             }
 

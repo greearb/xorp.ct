@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/process_watch.cc,v 1.6 2006/03/17 23:53:01 pavlin Exp $"
+#ident "$XORP: xorp/policy/process_watch.cc,v 1.7 2006/08/09 16:00:08 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -40,7 +40,7 @@ ProcessWatch::register_cb(const XrlError& err)
 
     if (err != XrlError::OKAY()) {
 	error_msg = c_format("XRL register_cb() error: %s", err.str().c_str());
-	throw PWException(error_msg);
+	xorp_throw(PWException, error_msg);
     }
 }
 
@@ -88,7 +88,7 @@ bool
 ProcessWatch::alive(const string& proto) 
 {
     if (_watching.find(proto) == _watching.end())
-	throw PWException("Not watching protocol: " + proto);
+	xorp_throw(PWException, "Not watching protocol: " + proto);
 
     return _alive.find(proto) != _alive.end();
 }

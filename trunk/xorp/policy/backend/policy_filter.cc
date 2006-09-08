@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.7 2005/10/02 22:21:52 abittau Exp $"
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.8 2006/03/16 00:05:09 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -47,7 +47,7 @@ void PolicyFilter::configure(const string& str)
 	delete_vector(policies);
 	clear_map(*sets);
 	delete sets;
-	throw ConfError(err);
+	xorp_throw(ConfError, err);
     }
 
     // properly erase old conf

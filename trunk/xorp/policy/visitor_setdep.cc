@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.6 2006/03/16 00:05:03 pavlin Exp $"
+#ident "$XORP: xorp/policy/visitor_setdep.cc,v 1.7 2006/08/09 16:00:08 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -114,7 +114,7 @@ VisitorSetDep::visit(NodeSet& node)
         ostringstream error;
         error << "Set not found: " << node.setid() << " at line " << node.line();
     
-        throw sem_error(error.str());
+        xorp_throw(sem_error, error.str());
     }
     return NULL;
 }
