@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.18 2006/03/29 22:41:23 atanu Exp $"
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.19 2006/09/08 18:45:58 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -31,6 +31,7 @@ bool test_ribin_dump(TestInfo& info);
 bool test_deletion(TestInfo& info);
 bool test_filter(TestInfo& info);
 bool test_policy(TestInfo& info);
+bool test_policy_export(TestInfo& info);
 bool test_cache(TestInfo& info);
 bool test_nhlookup(TestInfo& info);
 bool test_decision(TestInfo& info);
@@ -144,6 +145,7 @@ main(int argc, char** argv)
 	    {"RibInDump", callback(test_ribin_dump)},
 	    {"Deletion", callback(test_deletion)},
 	    {"Filter", callback(test_filter)},
+	    {"PolicyExport", callback(test_policy_export)},
 	    {"Policy", callback(test_policy)},
 	    {"Cache", callback(test_cache)},
 	    {"NhLookup", callback(test_nhlookup)},

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.9 2005/07/23 00:32:05 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.10 2006/03/16 00:03:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,6 +55,29 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     // "old" filter...
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     bool was_filtered = (fmsg == NULL);
+    if (fmsg && (fmsg->route() == rtmsg.route())) {
+	// fmsg is the original route, so we need to clone it, or
+	// we'll get bad interactions when we set the policyfilter on
+	// the new route below because the policyfilter is propagated
+	// back to the parent.
+	SubnetRoute<A>* copy_old_rt = new SubnetRoute<A>(*rtmsg.route());
+	InternalMessage<A>* copy_fmsg
+	    = new InternalMessage<A>(copy_old_rt, rtmsg.origin_peer(),
+				     rtmsg.genid());
+
+	if (rtmsg.changed())
+	    copy_fmsg->set_changed();
+	
+	if (rtmsg.push())
+	    copy_fmsg->set_push();
+
+	if (rtmsg.from_previous_peering())
+	    copy_fmsg->set_from_previous_peering();
+
+	fmsg = copy_fmsg;
+	XLOG_ASSERT(fmsg->route() != rtmsg.route());
+    }
+    XLOG_ASSERT(fmsg->route() != rtmsg.route());
 
     // we want current filter
     rtmsg.route()->set_policyfilter(0, RefPf());
@@ -87,7 +110,8 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
 		      fmsg->str().c_str(), new_msg->str().c_str());
 
-
+	    XLOG_ASSERT(fmsg->route() != new_msg->route());
+#if 0
 	    // we will delete and add the same subnetroute!
 	    // make new internal message to preserve route.
 	    if (rtmsg.changed() && fmsg->route() == new_msg->route()) {
@@ -114,7 +138,7 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    
 		XLOG_ASSERT(fmsg != new_msg);
 	    }
-
+#endif
 
 	    // XXX don't check return of deleteroute!
 	    res = next->delete_route(*fmsg, this);
