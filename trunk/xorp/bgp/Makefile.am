@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/bgp/Makefile.am,v 1.43 2006/02/02 02:44:30 pavlin Exp $
+## $XORP: xorp/bgp/Makefile.am,v 1.44 2006/08/15 23:03:53 mjh Exp $
 ##
 
 # -- Subdirectories
@@ -70,6 +70,7 @@ isolation_tests_SOURCES		= test_main.cc
 isolation_tests_SOURCES		+= test_ribin.cc
 isolation_tests_SOURCES		+= test_deletion.cc
 isolation_tests_SOURCES		+= test_filter.cc
+isolation_tests_SOURCES		+= test_policy.cc
 isolation_tests_SOURCES		+= test_cache.cc
 isolation_tests_SOURCES		+= test_nhlookup.cc
 isolation_tests_SOURCES		+= test_decision.cc
