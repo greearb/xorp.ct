@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asyncio.hh,v 1.18 2006/08/11 05:59:06 pavlin Exp $
+// $XORP: xorp/libxorp/asyncio.hh,v 1.19 2006/08/12 00:38:35 pavlin Exp $
 
 #ifndef __LIBXORP_ASYNCIO_HH__
 #define __LIBXORP_ASYNCIO_HH__
@@ -219,7 +219,7 @@ protected:
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);
 
-    XorpTimer		_idle_timer;
+    XorpTask		_deferred_io_task;
     bool		_disconnect_added;
 #endif
 };
@@ -322,7 +322,7 @@ protected:
 #ifdef HOST_OS_WINDOWS
     void disconnect(XorpFd fd, IoEventType type);
 
-    XorpTimer		_idle_timer;
+    XorpTask		_deferred_io_task;
     bool		_disconnect_added;
 #endif
 };
