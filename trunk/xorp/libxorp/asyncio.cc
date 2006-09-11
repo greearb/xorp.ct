@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.26 2006/08/11 00:57:42 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.27 2006/09/11 17:50:50 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -221,7 +221,8 @@ AsyncFileReader::read(XorpFd fd, IoEventType type)
 	int result = ioctlsocket(_fd, FIONREAD, &remaining);
 	if (result != SOCKET_ERROR && remaining > 0) {
 	    _deferred_io_task = _eventloop.new_oneoff_task(
-		callback(this, &AsyncFileReader::read, _fd, IOT_READ));
+		callback(this, &AsyncFileReader::read, _fd, IOT_READ),
+		XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 	    XLOG_ASSERT(_deferred_io_task.scheduled());
 	}
    }
@@ -382,7 +383,8 @@ AsyncFileWriter::add_buffer(const uint8_t*	b,
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE),
+	    XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
@@ -399,7 +401,8 @@ AsyncFileWriter::add_buffer_with_offset(const uint8_t*	b,
 #ifdef EDGE_TRIGGERED_WRITES
     if (_running == true) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE),
+	    XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
@@ -526,7 +529,8 @@ AsyncFileWriter::write(XorpFd fd, IoEventType type)
 #ifdef EDGE_TRIGGERED_WRITES
     if (_buffers.empty() == false) {
 	_deferred_io_task = _eventloop.new_oneoff_task(
-	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	    callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE),
+	    XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 	XLOG_ASSERT(_deferred_io_task.scheduled());
     }
 #endif // EDGE_TRIGGERED_WRITES
@@ -659,7 +663,8 @@ AsyncFileWriter::start()
 
 #ifdef EDGE_TRIGGERED_WRITES
     _deferred_io_task = _eventloop.new_oneoff_task(
-	callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE));
+	callback(this, &AsyncFileWriter::write, _fd, IOT_WRITE),
+	XorpTask::PRIORITY_DEFAULT, XorpTask::WEIGHT_DEFAULT);
 #endif // EDGE_TRIGGERED_WRITES
 
     _running = true;
