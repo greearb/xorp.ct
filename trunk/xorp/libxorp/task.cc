@@ -13,7 +13,7 @@
 // legally binding.
 //
 
-#ident "$XORP: xorp/libxorp/task.cc,v 1.4 2006/08/11 22:12:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/task.cc,v 1.5 2006/08/12 00:49:12 pavlin Exp $"
 
 #include "libxorp_module.h"
 #include "xorp.h"
@@ -85,7 +85,6 @@ TaskNode::unschedule()
 // the TaskList XorpTask creation methods (e.g. TaskList::new_oneoff_at(), etc)
 // actually refer to.
 
-#if 0
 class OneoffTaskNode2 : public TaskNode {
 public:
     OneoffTaskNode2(TaskList* task_list, const OneoffTaskCallback& cb)
@@ -93,14 +92,18 @@ public:
 	  _cb(cb) {}
 
 private:
-    void run(XorpTask&) {
-	debug_msg("TaskNode::run() %p\n", this);
+    void run(XorpTask& xorp_task) {
+	debug_msg("OneoffTaskNode2::run() %p\n", this);
+	//
+	// XXX: we have to unschedule before the callback dispatch, in case
+	// the callback decides to schedules again the task.
+	//
+	xorp_task.unschedule();
 	_cb->dispatch();
     }
 
     OneoffTaskCallback _cb;
 };
-#endif // 0
 
 class RepeatedTaskNode2 : public TaskNode {
 public:
@@ -141,6 +144,17 @@ XorpTask::scheduled() const
 
 // ----------------------------------------------------------------------------
 // TaskList
+
+XorpTask
+TaskList::new_oneoff_task(const OneoffTaskCallback& cb,
+			  int priority, int weight)
+{
+    debug_msg("new oneoff task %p p = %d, w = %d\n", this, priority, weight);
+
+    TaskNode* task_node = new OneoffTaskNode2(this, cb);
+    task_node->schedule(priority, weight);
+    return XorpTask(task_node);
+}
 
 XorpTask
 TaskList::new_task(const RepeatedTaskCallback& cb,

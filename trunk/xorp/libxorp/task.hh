@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/task.hh,v 1.6 2006/08/11 22:12:43 pavlin Exp $
+// $XORP: xorp/libxorp/task.hh,v 1.7 2006/08/12 00:49:12 pavlin Exp $
 
 #ifndef __LIBXORP_TASK_HH__
 #define __LIBXORP_TASK_HH__
@@ -28,7 +28,7 @@ class TaskList;
 class TaskNode;
 class XorpTask;
 
-// typedef XorpCallback0<void>::RefPtr OneoffTaskCallback;
+typedef XorpCallback0<void>::RefPtr OneoffTaskCallback;
 typedef XorpCallback0<bool>::RefPtr RepeatedTaskCallback;
 typedef XorpCallback1<void, XorpTask&>::RefPtr BasicTaskCallback;
 
@@ -106,9 +106,22 @@ public:
     void run();
 
     /**
-     * Create a XorpTask that will be scheduled once.
+     * Create a XorpTask that will be scheduled only once.
      *
      * @param cb callback object that is invoked when task is run.
+     *
+     * @return the @ref XorpTask created.
+     */
+    XorpTask new_oneoff_task(const OneoffTaskCallback& cb,
+			     int priority = XorpTask::PRIORITY_DEFAULT,
+			     int weight = XorpTask::WEIGHT_DEFAULT);
+
+    /**
+     * Create a repeated XorpTask.
+     *
+     * @param cb callback object that is invoked when task is run.
+     * If the callback returns true, the task will continue to run,
+     * otherwise it will be unscheduled.
      *
      * @return the @ref XorpTask created.
      */

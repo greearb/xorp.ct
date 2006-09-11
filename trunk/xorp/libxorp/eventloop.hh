@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.23 2006/08/11 05:59:06 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.24 2006/08/12 00:38:36 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -240,15 +240,31 @@ public:
     XorpTimer new_timer(const BasicTimerCallback& cb);
 
     /** 
-     * Create a new task to be scheduled with the timers and filehandlers.
+     * Create a new one-time task to be scheduled with the timers and
+     * file handlers.
      *
-     * @param ocb callback object that is invoked when task is run.
+     * @param cb callback object that is invoked when task is run.
      * @param priority the scheduling priority for the task.  
      * @param scheduler_class the scheduling class within the priority level.
      * @return a @ref XorpTask object that must be assigned to remain
      * scheduled.
      */
-    XorpTask new_task(const RepeatedTaskCallback& ocb, int priority,
+    XorpTask new_oneoff_task(const OneoffTaskCallback& cb, int priority,
+			     int weight);
+
+    /** 
+     * Create a new repeated task to be scheduled with the timers and file
+     * handlers.
+     *
+     * @param cb callback object that is invoked when task is run.
+     * If the callback returns true, the task will continue to run,
+     * otherwise it will be unscheduled.
+     * @param priority the scheduling priority for the task.  
+     * @param scheduler_class the scheduling class within the priority level.
+     * @return a @ref XorpTask object that must be assigned to remain
+     * scheduled.
+     */
+    XorpTask new_task(const RepeatedTaskCallback& cb, int priority,
 		      int weight);
 
     /**

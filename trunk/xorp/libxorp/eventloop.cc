@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.17 2006/08/11 05:59:06 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.18 2006/08/12 00:38:35 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -174,7 +174,14 @@ EventLoop::descriptor_count() const
 }
 
 XorpTask
-EventLoop::new_task(const RepeatedTaskCallback& rcb, int priority, int weight)
+EventLoop::new_oneoff_task(const OneoffTaskCallback& cb, int priority,
+			   int weight)
 {
-    return _task_list.new_task(rcb, priority, weight);
+    return _task_list.new_oneoff_task(cb, priority, weight);
+}
+
+XorpTask
+EventLoop::new_task(const RepeatedTaskCallback& cb, int priority, int weight)
+{
+    return _task_list.new_task(cb, priority, weight);
 }
