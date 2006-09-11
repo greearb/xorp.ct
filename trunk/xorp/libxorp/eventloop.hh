@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/eventloop.hh,v 1.24 2006/08/12 00:38:36 pavlin Exp $
+// $XORP: xorp/libxorp/eventloop.hh,v 1.25 2006/09/11 17:42:05 pavlin Exp $
 
 #ifndef __LIBXORP_EVENTLOOP_HH__
 #define __LIBXORP_EVENTLOOP_HH__
@@ -249,8 +249,9 @@ public:
      * @return a @ref XorpTask object that must be assigned to remain
      * scheduled.
      */
-    XorpTask new_oneoff_task(const OneoffTaskCallback& cb, int priority,
-			     int weight);
+    XorpTask new_oneoff_task(const OneoffTaskCallback& cb,
+			     int priority = XorpTask::PRIORITY_DEFAULT,
+			     int weight = XorpTask::WEIGHT_DEFAULT);
 
     /** 
      * Create a new repeated task to be scheduled with the timers and file
@@ -264,8 +265,9 @@ public:
      * @return a @ref XorpTask object that must be assigned to remain
      * scheduled.
      */
-    XorpTask new_task(const RepeatedTaskCallback& cb, int priority,
-		      int weight);
+    XorpTask new_task(const RepeatedTaskCallback& cb,
+		      int priority = XorpTask::PRIORITY_DEFAULT,
+		      int weight = XorpTask::WEIGHT_DEFAULT);
 
     /**
      * Add a file descriptor and callback to be invoked when
