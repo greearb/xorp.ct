@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.13 2006/08/12 00:38:36 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.14 2006/08/12 08:25:58 pavlin Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
@@ -110,6 +110,29 @@ typedef map<SOCKET, MaskEventPair>	SocketEventMap;
  * method is called, and I/O is pending on a descriptor, or a Windows
  * object's state has been set to signalled.
  *
+ * The entire event loop is driven from the Win32 API call
+ * WaitForMultipleObjects(), which means there is a hard 64-object limit.
+ *
+ * This class is the glue which binds XORP to Windows. There are tricks
+ * in the AsyncFileOperator classes which are tightly coupled with what
+ * happens here. Most of these tricks exist because systems-level
+ * asynchronous I/O facilities cannot easily be integrated into XORP's
+ * current design.
+ *
+ * There is no way of telling specific I/O events apart on objects other
+ * than sockets without actually trying to service the I/O. The class
+ * uses WSAEventSelect() internally to map socket handles to event
+ * handles, and much of the complexity in this class is there to deal
+ * with this schism in Windows low-level I/O.
+ *
+ * The class emulates the ability of UNIX-like systems to interrupt a
+ * process waiting in select() for pending I/O on pipes, by using a
+ * time-slice quantum to periodically poll the pipes. This quantum is
+ * currently hard-coded to 250ms.
+ *
+ * Sockets are optimized to be the faster dispatch path, as this is where
+ * the bulk of XORP I/O processing happens.
+ *
  * WinDispatcher should only be exposed to @ref EventLoop.
  */
 class WinDispatcher {
@@ -127,24 +150,29 @@ public:
     /**
      * Add a hook for pending I/O operations on a callback.
      *
-     * Only one callback may be registered for each possible IoEventType.
+     * Only one callback may be registered for each possible IoEventType,
+     * with the following exceptions.
      *
-     * If the @ref XorpFd corresponds to a Windows socket handle, multiple
+     * If the @ref XorpFd maps to a Windows socket handle, multiple
      * callbacks may be registered for different IoEventTypes, but one
      * and only one callback may be registered for the handle if a
      * callback is registered for the IOT_ACCEPT event.
      *
+     * If the @ref XorpFd maps to a Windows pipe or console handle,
+     * callbacks may only be registered for the IOT_READ and IOT_DISCONNECT
+     * events.
+     *
      * If the @ref XorpFd corresponds to any other kind of Windows object
      * handle, only a single callback may be registered, and the IoEventType
-     * must be IOT_READ. This is because Windows object handles can have
-     * a signalled or non-signalled state, and there is no way of telling
-     * specific I/O events apart without actually trying to service the I/O,
-     * which is beyond the scope of this class's responsibilities.
-     *
+     * must be IOT_EXCEPTION. This mechanism is typically used to direct
+     * the class to wait on Windows event or process handles.
+     * 
      * @param fd a Windows object handle encapsulated in a @ref XorpFd .
      * @param type the @ref IoEventType which should trigger the callback.
      * @param cb callback object which shall be invoked when the event is
      * triggered.
+     * @param priority the XorpTask priority at which this callback should
+     *        be run.
      * @return true if function succeeds, false otherwise.
      */
     bool add_ioevent_cb(XorpFd		fd, 
@@ -205,7 +233,14 @@ public:
     size_t descriptor_count() const { return _descriptor_count; }
 
 protected:
+    /**
+     * @cond HIDDEN
+     * No user-servicable parts here at the moment.
+     */
     void dispatch_sockevent(HANDLE hevent, XorpFd fd);
+    /**
+     * @endcond
+     */
 
 private:
     bool add_socket_cb(XorpFd& fd, IoEventType type, const IoEventCb& cb,
