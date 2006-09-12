@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.30 2006/08/28 02:53:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.31 2006/08/28 23:20:27 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1205,6 +1205,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     UNUSED(fd);
     UNUSED(type);
     UNUSED(int_val);
+    UNUSED(cmsg_data);
 
 #ifndef HOST_OS_WINDOWS
     // Zero and reset various fields
@@ -1800,6 +1801,7 @@ RawSocket::proto_socket_write(const string& if_name,
     void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
+    UNUSED(cmsg_data);
 
     XLOG_ASSERT(ext_headers_type.size() == ext_headers_payload.size());
 

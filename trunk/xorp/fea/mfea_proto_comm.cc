@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.61 2006/08/28 02:53:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.62 2006/08/28 23:20:27 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1244,6 +1244,7 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
     UNUSED(fd);
     UNUSED(type);
     UNUSED(int_val);
+    UNUSED(cmsg_data);
 
 #ifndef HOST_OS_WINDOWS
     // Zero and reset various fields
@@ -1815,6 +1816,7 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     void	*cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
 
     UNUSED(int_val);
+    UNUSED(cmsg_data);
 
     if (mfea_vif == NULL) {
 	error_msg = c_format("Cannot find vif with vif_index = %u", vif_index);
