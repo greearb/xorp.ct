@@ -13,13 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.2 2006/08/29 22:42:22 pavlin Exp $"
+#ident "$XORP: xorp/fea/win_rtm_pipe.cc,v 1.3 2006/08/30 08:11:46 pavlin Exp $"
 
 #include "fea_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
+#include "libxorp/utils.h"
 
 #include <algorithm>
 
