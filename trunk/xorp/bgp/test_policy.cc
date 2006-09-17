@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_policy.cc,v 1.2 2006/09/08 22:55:24 mjh Exp $"
+#ident "$XORP: xorp/bgp/test_policy.cc,v 1.3 2006/09/08 23:55:51 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -33,6 +33,7 @@
 #include "route_table_debug.hh"
 #include "path_attribute.hh"
 #include "local_data.hh"
+#include "dummy_next_hop_resolver.hh" 
 
 #include "policy/backend/version_filters.hh" 
 
@@ -179,7 +180,7 @@ POLICY_END\n";
     delete msg;
 
     // ================================================================
-    // Test2: add and delete with configured policy
+    // Test3: add and delete with configured policy
     // ================================================================
     // add a route
     debug_table->write_comment("TEST 3");
@@ -507,6 +508,306 @@ POLICY_END\n";
 	ref_filename = ".";
     }
     ref_filename += "/test_policy.reference";
+    file = fopen(ref_filename.c_str(), "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
+	fprintf(stderr, "TEST POLICY FAILED\n");
+	fclose(file);
+	return false;
+    }
+    
+    char refout[BUFSIZE];
+    memset(refout, 0, BUFSIZE);
+    int bytes2 = fread(refout, 1, BUFSIZE, file);
+    if (bytes2 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST POLICY FAILED\n");
+	fclose(file);
+	return false;
+    }
+    fclose(file);
+
+    if ((bytes1 != bytes2) || (memcmp(testout, refout, bytes1) != 0)) {
+	fprintf(stderr, "Output in %s doesn't match reference output\n",
+		filename.c_str());
+	fprintf(stderr, "TEST POLICY FAILED\n");
+	return false;
+
+    }
+#ifndef HOST_OS_WINDOWS
+    unlink(filename.c_str());
+#else
+    DeleteFileA(filename.c_str());
+#endif
+    return true;
+}
+
+
+bool
+test_policy_dump(TestInfo& /*info*/)
+{
+#ifndef HOST_OS_WINDOWS
+    struct passwd *pwd = getpwuid(getuid());
+    string filename = "/tmp/test_policy_dump.";
+    filename += pwd->pw_name;
+#else
+    char *tmppath = (char *)malloc(256);
+    GetTempPathA(256, tmppath);
+    string filename = string(tmppath) + "test_policy_dump";
+    free(tmppath);
+#endif
+    BGPMain bgpmain;
+    LocalData localdata(bgpmain.eventloop());
+    Iptuple iptuple;
+    BGPPeerData *pd1 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeer peer1(&localdata, pd1, NULL, &bgpmain);
+    PeerHandler handler1("test1", &peer1, NULL, NULL);
+    BGPPeerData *pd2 = new BGPPeerData(localdata, iptuple, AsNum(0), IPv4(),0);
+    BGPPeer peer2(&localdata, pd2, NULL, &bgpmain);
+    PeerHandler handler2("test2", &peer2, NULL, NULL);
+
+    VersionFilters policy_filters;
+
+    RibInTable<IPv4> *ribin_table
+	= new RibInTable<IPv4>("RIB-in", SAFI_UNICAST, &handler1);
+    PolicyTableImport<IPv4> *policy_table_import
+	= new PolicyTableImport<IPv4>("POLICY", SAFI_UNICAST, ribin_table,
+				      policy_filters);
+    ribin_table->set_next_table(policy_table_import);
+
+    CacheTable<IPv4> *cache_table
+        = new CacheTable<IPv4>("CACHE", SAFI_UNICAST, policy_table_import, 
+			       &handler1);
+    policy_table_import->set_next_table(cache_table);
+
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
+    NhLookupTable<IPv4>* nhlookup_table
+	= new NhLookupTable<IPv4>("NHLOOKUP", SAFI_UNICAST, &next_hop_resolver,
+				  cache_table); 
+    cache_table->set_next_table(nhlookup_table);
+
+    DecisionTable<IPv4> *decision_table
+        = new DecisionTable<IPv4>("DECISION", SAFI_UNICAST, next_hop_resolver);
+
+    nhlookup_table->set_next_table(decision_table);
+    decision_table->add_parent(nhlookup_table, &handler1,
+                               ribin_table->genid());
+
+    PolicyTableSourceMatch<IPv4> *policy_table_sm
+	= new PolicyTableSourceMatch<IPv4>("POLICY_SM", SAFI_UNICAST, 
+					   decision_table,
+					   policy_filters,
+					   bgpmain.eventloop());
+
+    decision_table->set_next_table(policy_table_sm);
+
+
+
+    FanoutTable<IPv4> *fanout_table
+	= new FanoutTable<IPv4>("FANOUT", SAFI_UNICAST, policy_table_sm, 
+				NULL, NULL);
+    policy_table_sm->set_next_table(fanout_table);
+
+    PolicyTableExport<IPv4> *policy_table_export
+	= new PolicyTableExport<IPv4>("POLICY", SAFI_UNICAST, 
+				      fanout_table,
+				      policy_filters, "test_neighbour");
+
+    DebugTable<IPv4>* debug_table
+       = new DebugTable<IPv4>("D1", (BGPRouteTable<IPv4>*)policy_table_export);
+    policy_table_export->set_next_table(debug_table);
+    fanout_table->add_next_table(policy_table_export, &handler2, 1);
+
+    debug_table->set_output_file(filename);
+    debug_table->set_canned_response(ADD_USED);
+
+    // create a load of attributes
+    IPNet<IPv4> net1("1.0.1.0/24");
+    //    IPNet<IPv4> net2("1.0.2.0/24");
+
+    IPv4 nexthop1("2.0.0.1");
+    NextHopAttribute<IPv4> nhatt1(nexthop1);
+
+    IPv4 nexthop2("2.0.0.2");
+    NextHopAttribute<IPv4> nhatt2(nexthop2);
+
+    IPv4 nexthop3("2.0.0.3");
+    NextHopAttribute<IPv4> nhatt3(nexthop3);
+
+    next_hop_resolver.set_nexthop_metric(nexthop1, 27);
+    next_hop_resolver.set_nexthop_metric(nexthop2, 27);
+    next_hop_resolver.set_nexthop_metric(nexthop3, 27); 
+
+    OriginAttribute igp_origin_att(IGP);
+
+    AsPath aspath1;
+    aspath1.prepend_as(AsNum(1));
+    aspath1.prepend_as(AsNum(2));
+    aspath1.prepend_as(AsNum(3));
+    ASPathAttribute aspathatt1(aspath1);
+
+    AsPath aspath2;
+    aspath2.prepend_as(AsNum(4));
+    aspath2.prepend_as(AsNum(5));
+    aspath2.prepend_as(AsNum(6));
+    ASPathAttribute aspathatt2(aspath2);
+
+    AsPath aspath3;
+    aspath3.prepend_as(AsNum(7));
+    aspath3.prepend_as(AsNum(8));
+    aspath3.prepend_as(AsNum(9));
+    ASPathAttribute aspathatt3(aspath3);
+
+    PathAttributeList<IPv4>* palist1 =
+	new PathAttributeList<IPv4>(nhatt1, aspathatt1, igp_origin_att);
+
+    PathAttributeList<IPv4>* palist2 =
+	new PathAttributeList<IPv4>(nhatt2, aspathatt2, igp_origin_att);
+
+    PathAttributeList<IPv4>* palist3 =
+	new PathAttributeList<IPv4>(nhatt3, aspathatt3, igp_origin_att);
+
+    // create a subnet route
+    SubnetRoute<IPv4> *sr1, *sr2;
+    UNUSED(sr2);
+
+    InternalMessage<IPv4>* msg;
+
+    // ================================================================
+    // Test: trivial add then configure then dump
+    // ================================================================
+    // add a route
+    debug_table->write_comment("TEST 1");
+    debug_table->write_comment("ADD, CONFIG, DELETE");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
+    ribin_table->add_route(*msg, NULL);
+    sr1->unref();
+    delete msg;
+    fanout_table->get_next_message(policy_table_export);
+
+    debug_table->write_comment("CONFIGURE EXPORT FILTER");
+
+    string filter_export_conf = "";
+    string filter_import_conf = "";
+    string filter_sm_conf = "";
+#if 1
+    // Configure export filter
+    filter_export_conf = "POLICY_START foo\n\
+TERM_START foo2\n\
+PUSH u32 200\n\
+STORE 17\n\
+ACCEPT\n\
+TERM_END\n\
+POLICY_END\n";
+#endif
+
+    policy_filters.configure(filter::EXPORT, filter_export_conf);
+
+#if 0    
+    // Configure import filter
+    filter_import_conf = "POLICY_START foo\n\
+TERM_START foo2\n\
+PUSH u32 100\n\
+STORE 17\n\
+ACCEPT\n\
+TERM_END\n\
+POLICY_END\n";
+#endif
+
+    policy_filters.configure(filter::IMPORT, filter_import_conf);
+
+#if 0    
+    // Configure source match filter
+    filter_sm_conf = "POLICY_START foo\n\
+TERM_START foo2\n\
+PUSH u32 150\n\
+STORE 17\n\
+ACCEPT\n\
+TERM_END\n\
+POLICY_END\n";
+#endif
+
+    policy_filters.configure(filter::EXPORT_SOURCEMATCH, filter_sm_conf);
+    
+    debug_table->write_comment("PUSH_ROUTES");
+    list<const PeerTableInfo<IPv4>*> peer_list;
+    peer_list.push_back(new PeerTableInfo<IPv4>(NULL, &handler1, 
+						ribin_table->genid()));
+    policy_table_sm->push_routes(peer_list);
+
+    // dump the route
+    debug_table->write_comment("RUN EVENT LOOP TO COMPLETION");
+    debug_table->write_comment("EXPECT DELETE TO *NOT* HAVE LOCALPREF");
+    debug_table->write_comment("EXPECT ADD TO HAVE LOCALPREF OF 200");
+
+    while (bgpmain.eventloop().events_pending()) {
+	bgpmain.eventloop().run();
+    }
+
+    fanout_table->get_next_message(policy_table_export);
+    fanout_table->get_next_message(policy_table_export);
+    fanout_table->get_next_message(policy_table_export);
+
+    // delete the route
+    debug_table->write_comment("EXPECT DELETE TO HAVE LOCALPREF OF 200");
+    sr1 = new SubnetRoute<IPv4>(net1, palist1, NULL);
+    sr1->set_nexthop_resolved(true);
+    msg = new InternalMessage<IPv4>(sr1, &handler1, 1);
+    ribin_table->delete_route(*msg, NULL);
+    while (bgpmain.eventloop().events_pending()) {
+	bgpmain.eventloop().run();
+    }
+    fanout_table->get_next_message(policy_table_export);
+    fanout_table->get_next_message(policy_table_export);
+
+    debug_table->write_separator();
+    sr1->unref();
+    delete msg;
+
+    // ================================================================
+
+    debug_table->write_comment("SHUTDOWN AND CLEAN UP");
+    delete ribin_table;
+    delete policy_table_import;
+    delete cache_table;
+    delete nhlookup_table;
+    delete policy_table_sm;
+    delete policy_table_export;
+    delete debug_table;
+    delete palist1;
+    delete palist2;
+    delete palist3;
+
+    FILE *file = fopen(filename.c_str(), "r");
+    if (file == NULL) {
+	fprintf(stderr, "Failed to read %s\n",
+		filename.c_str());
+	fprintf(stderr, "TEST POLICY FAILED\n");
+	fclose(file);
+	return false;
+    }
+#define BUFSIZE 8192
+    char testout[BUFSIZE];
+    memset(testout, 0, BUFSIZE);
+    int bytes1 = fread(testout, 1, BUFSIZE, file);
+    if (bytes1 == BUFSIZE) {
+	fprintf(stderr, "Output too long for buffer\n");
+	fprintf(stderr, "TEST POLICY FAILED\n");
+	fclose(file);
+	return false;
+    }
+    fclose(file);
+
+    string ref_filename;
+    const char* srcdir = getenv("srcdir");
+    if (srcdir) {
+	ref_filename = string(srcdir); 
+    } else {
+	ref_filename = ".";
+    }
+    ref_filename += "/test_policy_dump.reference";
     file = fopen(ref_filename.c_str(), "r");
     if (file == NULL) {
 	fprintf(stderr, "Failed to read %s\n", ref_filename.c_str());
