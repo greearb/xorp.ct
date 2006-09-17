@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_cache.hh,v 1.24 2006/08/12 00:34:00 pavlin Exp $
+// $XORP: xorp/bgp/route_table_cache.hh,v 1.25 2006/08/15 23:03:53 mjh Exp $
 
 #ifndef __BGP_ROUTE_TABLE_CACHE_HH__
 #define __BGP_ROUTE_TABLE_CACHE_HH__
@@ -116,6 +116,9 @@ public:
 private:
     RefTrie<A, const CacheRoute<A> > *_route_table;
     const PeerHandler *_peer;
+
+    // stats to help debugging
+    int _unchanged_added, _unchanged_deleted, _changed_added, _changed_deleted;
 };
 
 /**

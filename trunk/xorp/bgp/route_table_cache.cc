@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.34 2006/08/17 17:21:52 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.35 2006/08/17 23:04:18 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -32,7 +32,9 @@ CacheTable<A>::CacheTable(string table_name,
 			  BGPRouteTable<A> *parent_table,
 			  const PeerHandler *peer)
     : BGPRouteTable<A>("CacheTable-" + table_name, safi),
-      _peer(peer)
+      _peer(peer),
+      _unchanged_added(0), _unchanged_deleted(0),
+      _changed_added(0), _changed_deleted(0)
 {
     this->_parent = parent_table;
     _route_table = new RefTrie<A, const CacheRoute<A> >;
@@ -83,9 +85,11 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
 
     if (rtmsg.changed()==false) {
 	log("add_route (unchanged): " + net.str());
+	_unchanged_added++;
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
 	log("add_route (changed): " + net.str());
+	_changed_added++;
 	//The route was changed.  
 
 	//It's the responsibility of the recipient of a changed route
@@ -174,6 +178,7 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
     //do we have the old route cached?
     if (old_rtmsg.changed()==true) {
 	log ("old route was changed\n");
+	_changed_deleted++;
 	typename RefTrie<A, const CacheRoute<A> >::iterator iter;
 	iter = _route_table->lookup_node(net);
 	if (iter == _route_table->end()) {
@@ -200,15 +205,19 @@ CacheTable<A>::replace_route(const InternalMessage<A> &old_rtmsg,
 	    //Free the route from the message.
 	    old_rtmsg.inactivate();
 	}
+    } else {
+	_unchanged_deleted++;
     }
 
     //do we need to cache the new route?
     if (new_rtmsg.changed()==false) {
+	_unchanged_added++;
 	result = this->_next_table->replace_route(*old_rtmsg_ptr, 
 					    new_rtmsg, 
 					    (BGPRouteTable<A>*)this);
     } else {
 	log ("new route was changed\n");
+	_changed_added++;
 	//Route was changed.
 
 	//It's the responsibility of the recipient of a changed route
@@ -276,6 +285,11 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(this->_next_table != NULL);
     IPNet<A> net = rtmsg.net();
     log("delete_route: " + net.str());
+    if (rtmsg.changed()) {
+	_changed_deleted++;
+    } else {
+	_unchanged_deleted++;
+    }
 
     //do we already have this cached?
     typename RefTrie<A, const CacheRoute<A> >::iterator iter;
@@ -413,6 +427,11 @@ CacheTable<A>::dump_state() const {
     s += "CacheTable\n";
     s += str() + "\n";
     s += "=================================================================\n";
+    s += "Unchanged added: " + c_format("%d\n", _unchanged_added);
+    s += "Unchanged deleted: " + c_format("%d\n", _unchanged_deleted);
+    s += "Changed added: " + c_format("%d\n", _changed_added); 
+    s += "Changed deleted: " + c_format("%d\n", _changed_deleted);
+    //    s += "In cache: " + c_format("%d\n", _route_table->size());
     s += _route_table->str();
     s += CrashDumper::dump_state(); 
     return s;
