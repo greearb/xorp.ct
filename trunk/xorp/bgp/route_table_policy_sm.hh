@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.7 2006/03/16 00:03:34 pavlin Exp $
+// $XORP: xorp/bgp/route_table_policy_sm.hh,v 1.8 2006/08/11 00:57:38 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_POLICY_SM_HH__
 #define __BGP_ROUTE_TABLE_POLICY_SM_HH__
@@ -57,6 +57,8 @@ public:
      * Need to keep track what is going on with dump iterators which peers go
      * down and up
      */
+    void peering_is_down(const PeerHandler *peer, uint32_t genid);
+
     void peering_went_down(const PeerHandler *peer, uint32_t genid,
                            BGPRouteTable<A> *caller);
 
