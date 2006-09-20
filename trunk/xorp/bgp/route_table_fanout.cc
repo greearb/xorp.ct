@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.58 2006/09/07 08:10:10 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.59 2006/09/07 08:45:27 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -224,7 +224,11 @@ FanoutTable<A>::add_route(const InternalMessage<A> &rtmsg,
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
     log("add_route rcvd, net: " + rtmsg.route()->net().str()
-	+ " peer: " + origin_peer->peername());
+	+ " peer: " + origin_peer->peername()
+	+ c_format(" filters: %p,%p,%p",
+		   rtmsg.route()->policyfilter(0).get(),
+		   rtmsg.route()->policyfilter(1).get(),
+		   rtmsg.route()->policyfilter(2).get()));
 
     typename NextTableMap<A>::iterator i = _next_tables.begin();
     list <PeerTableInfo<A>*> queued_peers;
@@ -339,7 +343,12 @@ FanoutTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     const PeerHandler *origin_peer = rtmsg.origin_peer();
 
     log("delete_route rcvd, net: " + rtmsg.route()->net().str()
-	+ " peer: " + origin_peer->peername());
+	+ " peer: " + origin_peer->peername()
+	+ c_format(" filters: %p,%p,%p",
+		   rtmsg.route()->policyfilter(0).get(),
+		   rtmsg.route()->policyfilter(1).get(),
+		   rtmsg.route()->policyfilter(2).get()));
+
 
     list <PeerTableInfo<A>*> queued_peers;
     typename NextTableMap<A>::iterator i;
@@ -977,6 +986,11 @@ FanoutTable<A>::dump_state() const {
     for (i = _output_queue.begin(); i != _output_queue.end(); i++) {
 	ctr++;
 	s += c_format("%-5d %s\n", ctr, (*i)->str().c_str());
+	s += c_format("Filters now: %p,%p,%p\n",
+		      (*i)->route()->policyfilter(0).get(),
+		      (*i)->route()->policyfilter(1).get(),
+		      (*i)->route()->policyfilter(2).get());
+		      
     }
     s += CrashDumper::dump_state();
     return s;

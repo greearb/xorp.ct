@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.35 2006/08/17 23:04:18 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.36 2006/09/17 16:17:25 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -84,11 +84,20 @@ CacheTable<A>::add_route(const InternalMessage<A> &rtmsg,
     }
 
     if (rtmsg.changed()==false) {
-	log("add_route (unchanged): " + net.str());
+	log(c_format("add_route (unchanged): %s filters: %p,%p,%p",
+		     net.str().c_str(),
+		     rtmsg.route()->policyfilter(0).get(),
+		     rtmsg.route()->policyfilter(1).get(),
+		     rtmsg.route()->policyfilter(2).get()));
 	_unchanged_added++;
 	return this->_next_table->add_route(rtmsg, (BGPRouteTable<A>*)this);
     } else {
-	log("add_route (changed): " + net.str());
+	log(c_format("add_route (changed): %s filters: %p,%p,%p",
+		     net.str().c_str(),
+		     rtmsg.route()->policyfilter(0).get(),
+		     rtmsg.route()->policyfilter(1).get(),
+		     rtmsg.route()->policyfilter(2).get()));
+
 	_changed_added++;
 	//The route was changed.  
 
@@ -284,10 +293,19 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
     XLOG_ASSERT(caller == this->_parent);
     XLOG_ASSERT(this->_next_table != NULL);
     IPNet<A> net = rtmsg.net();
-    log("delete_route: " + net.str());
     if (rtmsg.changed()) {
+	log(c_format("delete_route (changed): %s filters: %p,%p,%p",
+		     net.str().c_str(),
+		     rtmsg.route()->policyfilter(0).get(),
+		     rtmsg.route()->policyfilter(1).get(),
+		     rtmsg.route()->policyfilter(2).get()));
 	_changed_deleted++;
     } else {
+	log(c_format("delete_route (unchanged): %s filters: %p,%p,%p",
+		     net.str().c_str(),
+		     rtmsg.route()->policyfilter(0).get(),
+		     rtmsg.route()->policyfilter(1).get(),
+		     rtmsg.route()->policyfilter(2).get()));
 	_unchanged_deleted++;
     }
 
