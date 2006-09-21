@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.10 2006/03/16 00:03:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.11 2006/09/08 22:55:24 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -77,7 +77,6 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	fmsg = copy_fmsg;
 	XLOG_ASSERT(fmsg->route() != rtmsg.route());
     }
-    XLOG_ASSERT(fmsg->route() != rtmsg.route());
 
     // we want current filter
     rtmsg.route()->set_policyfilter(0, RefPf());
