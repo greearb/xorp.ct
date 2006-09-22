@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_policy.cc,v 1.3 2006/09/08 23:55:51 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_policy.cc,v 1.4 2006/09/17 15:58:28 mjh Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -474,6 +474,7 @@ POLICY_END\n";
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete ribin_table;
     delete policy_table_import;
+    delete fanout_table;
     delete policy_table_export;
     delete debug_table;
     delete palist1;
@@ -567,20 +568,28 @@ test_policy_dump(TestInfo& /*info*/)
     PeerHandler handler2("test2", &peer2, NULL, NULL);
 
     VersionFilters policy_filters;
+    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
 
     RibInTable<IPv4> *ribin_table
 	= new RibInTable<IPv4>("RIB-in", SAFI_UNICAST, &handler1);
+
+
+    FilterTable<IPv4> *filter_table
+        = new FilterTable<IPv4>("FILTER", SAFI_UNICAST, ribin_table, 
+			       next_hop_resolver);
+    filter_table->add_AS_prepend_filter(AsNum(1000), false);
+    ribin_table->set_next_table(filter_table);
+
     PolicyTableImport<IPv4> *policy_table_import
-	= new PolicyTableImport<IPv4>("POLICY", SAFI_UNICAST, ribin_table,
+	= new PolicyTableImport<IPv4>("POLICY", SAFI_UNICAST, filter_table,
 				      policy_filters);
-    ribin_table->set_next_table(policy_table_import);
+    filter_table->set_next_table(policy_table_import);
 
     CacheTable<IPv4> *cache_table
         = new CacheTable<IPv4>("CACHE", SAFI_UNICAST, policy_table_import, 
 			       &handler1);
     policy_table_import->set_next_table(cache_table);
 
-    DummyNextHopResolver<IPv4> next_hop_resolver(bgpmain.eventloop(), bgpmain);
     NhLookupTable<IPv4>* nhlookup_table
 	= new NhLookupTable<IPv4>("NHLOOKUP", SAFI_UNICAST, &next_hop_resolver,
 				  cache_table); 
@@ -746,6 +755,7 @@ POLICY_END\n";
 	bgpmain.eventloop().run();
     }
 
+    //fanout_table->crash_dump();
     fanout_table->get_next_message(policy_table_export);
     fanout_table->get_next_message(policy_table_export);
     fanout_table->get_next_message(policy_table_export);
@@ -770,10 +780,13 @@ POLICY_END\n";
 
     debug_table->write_comment("SHUTDOWN AND CLEAN UP");
     delete ribin_table;
+    delete filter_table;
     delete policy_table_import;
     delete cache_table;
     delete nhlookup_table;
+    delete decision_table;
     delete policy_table_sm;
+    delete fanout_table;
     delete policy_table_export;
     delete debug_table;
     delete palist1;
