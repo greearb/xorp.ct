@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.59 2006/09/07 08:45:27 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_fanout.cc,v 1.60 2006/09/20 22:10:50 mjh Exp $"
 
 //#define DEBUG_LOGGING
 //#define DEBUG_PRINT_FUNCTION_NAME
@@ -986,6 +986,7 @@ FanoutTable<A>::dump_state() const {
     for (i = _output_queue.begin(); i != _output_queue.end(); i++) {
 	ctr++;
 	s += c_format("%-5d %s\n", ctr, (*i)->str().c_str());
+	s += c_format("Parent now: %p\n", (*i)->route()->parent_route());
 	s += c_format("Filters now: %p,%p,%p\n",
 		      (*i)->route()->policyfilter(0).get(),
 		      (*i)->route()->policyfilter(1).get(),
