@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.36 2006/09/17 16:17:25 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_cache.cc,v 1.37 2006/09/20 22:10:50 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -319,10 +319,16 @@ CacheTable<A>::delete_route(const InternalMessage<A> &rtmsg,
 	XLOG_ASSERT(rtmsg.route()->nexthop() == existing_route->nexthop());
 	debug_msg("Found cached route: %s\n", existing_route->str().c_str());
 
-	//Delete it from our cache trie.  The actual deletion will
-	//only take place when iter goes out of scope, so
-	//existing_route remains valid til then.
+	// Delete it from our cache trie.  The actual deletion will
+	// only take place when iter goes out of scope, so
+	// existing_route remains valid til then.
 	_route_table->erase(iter);
+
+	// Fix the parent route in case it has changed.  This is also
+	// important if the parent route has been zeroed somewhere
+	// upstream to avoid unwanted side effects.
+	const_cast<SubnetRoute<A>*>(existing_route)
+	    ->set_parent_route(rtmsg.route()->parent_route());
 
 	InternalMessage<A> old_rt_msg(existing_route,
 				      rtmsg.origin_peer(),

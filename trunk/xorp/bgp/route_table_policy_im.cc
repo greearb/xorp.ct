@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.11 2006/09/08 22:55:24 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.12 2006/09/21 19:59:48 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -56,11 +56,16 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     bool was_filtered = (fmsg == NULL);
     if (fmsg && (fmsg->route() == rtmsg.route())) {
-	// fmsg is the original route, so we need to clone it, or
-	// we'll get bad interactions when we set the policyfilter on
-	// the new route below because the policyfilter is propagated
-	// back to the parent.
+	// fmsg contains the original route, so we need to clone it,
+	// or we'll get bad interactions when we set the policyfilter
+	// on the new route below because the policyfilter is
+	// propagated back to the parent.
 	SubnetRoute<A>* copy_old_rt = new SubnetRoute<A>(*rtmsg.route());
+
+	// clear the parent route, so noone downstream can mess up the
+	// metadata on the route still stored in RibIn.
+	copy_old_rt->set_parent_route(NULL);
+
 	InternalMessage<A>* copy_fmsg
 	    = new InternalMessage<A>(copy_old_rt, rtmsg.origin_peer(),
 				     rtmsg.genid());
@@ -76,6 +81,11 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 
 	fmsg = copy_fmsg;
 	XLOG_ASSERT(fmsg->route() != rtmsg.route());
+    } else {
+	// the route is already a copy, but we still need to clear the
+	// parent route to prevent anyone downstream modifying the
+	// metadata on the route still stored in RibIn
+	const_cast<SubnetRoute<A>*>(fmsg->route())->set_parent_route(NULL);
     }
 
     // we want current filter
