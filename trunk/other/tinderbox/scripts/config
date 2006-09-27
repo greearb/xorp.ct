@@ -33,22 +33,37 @@ home_fbsd410_gcc33="tinderbox/gcc33"
 env_fbsd410_gcc33="CC=gcc33 CXX=g++33 MALLOC_OPTIONS=AJ"
 buildflags_fbsd410_gcc33="-j 2"
 
+host_linux26g_gcc34="xorpv.icir.org"
+home_linux26g_gcc34="tinderbox"
+env_linux26g_gcc34="MALLOC_CHECK_=2"
+buildflags_linux26g_gcc34="-j 2"
+
+host_linux26g_gcc34_opt="xorpv.icir.org"
+home_linux26g_gcc34_opt="tinderbox"
+env_linux26g_gcc34_opt="CONFIGURE_ARGS='--disable-debug --enable-optimize'"
+buildflags_linux26g_gcc34_opt="-j 2"
+
 host_linux24_gcc296="koala.icir.org"
 home_linux24_gcc296="tinderbox"
 env_linux24_gcc296="MALLOC_CHECK_=2"
 buildflags_linux24_gcc296="-j 4"
 
-host_linux26_gcc33="uakari.cs.ucl.ac.uk"
-home_linux26_gcc33="tinderbox"
-env_linux26_gcc33="MALLOC_CHECK_=2"
-buildflags_linux26_gcc33="-j 2"
+#host_linux26_gcc33="uakari.cs.ucl.ac.uk"
+#home_linux26_gcc33="tinderbox"
+#env_linux26_gcc33="MALLOC_CHECK_=2"
+#buildflags_linux26_gcc33="-j 2"
 
 host_fbsd53_gcc34="ibex.cs.ucl.ac.uk"
 home_fbsd53_gcc34="tinderbox"
 env_fbsd53_gcc34="MALLOC_CHECK_=2"
 buildflags_fbsd53_gcc34="-j 2"
 
-TINDERBOX_CONFIGS="fbsd410_gcc34 fbsd410_gcc34_stldebug fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26_gcc33 fbsd53_gcc34"
+host_w2k3_gcc34="xorpv-w2k3.icir.org"
+home_w2k3_gcc34="tinderbox"
+env_w2k3_gcc34=""
+buildflags_w2k3_gcc34="-j 2"
+
+TINDERBOX_CONFIGS="w2k3_gcc34 fbsd410_gcc34 fbsd410_gcc34_stldebug fbsd410_gcc33 fbsd410_gcc295 linux24_gcc296 linux26g_gcc34 linux26g_gcc34_opt"
 
 #
 # Configuration variables for tinderbox
@@ -80,4 +95,4 @@ POST="/usr/local/libexec/nmh/post"
 
 # make and make check timeout and timeout check interval, both in seconds
 TIMEOUT=9000
-TIMEOUT_CHECK=10
+TIMEOUT_CHECK=24
