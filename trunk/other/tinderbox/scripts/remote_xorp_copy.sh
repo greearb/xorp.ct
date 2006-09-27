@@ -37,7 +37,7 @@ remote_run $HOST rm -rf "${DESTDIR}/data"
 remote_run $HOST mkdir -p ${DESTDIR}/tmp
 
 for i in xorp scripts data ; do
-    tar cfps - ${i} | ssh ${SSH_FLAGS} $1 cd ${DESTDIR} \&\& tar xfps -
+    tar cfp - ${i} | ssh ${SSH_FLAGS} $1 cd ${DESTDIR} \&\& tar xfp -
     if [ $? -ne 0 ] ; then
 	exit 1
     fi
