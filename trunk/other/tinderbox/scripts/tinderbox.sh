@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.9 2004/04/21 18:15:03 hodson Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.10 2004/10/19 08:16:54 bms Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -44,7 +44,7 @@ init_log_header()
     outfile="$1"
     cfg="$2"
     host="$3"
-    env="$4"
+    env="$4 XORP_FINDER_SERVER_PORT=19797"
     dir="$5"
     now=$(date "+%Y-%m-%d %H:%M:%S %Z")
     sinfo=$(ssh ${SSH_FLAGS} -n ${host} 'uname -s -r')
@@ -164,7 +164,7 @@ checkout() {
 
 roll_over_logs()
 {
-    log_history=10
+    log_history=15
     rm -rf ${LOGDIR}/${log_history}
     log=${log_history}
     while [ ${log} -ne 0 ] ; do
