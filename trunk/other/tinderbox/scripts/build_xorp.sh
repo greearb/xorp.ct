@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.8 2004/10/19 08:26:48 bms Exp $
+# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.9 2004/11/26 02:07:37 bms Exp $
 #
 
 CONFIG="$(dirname $0)/config"
@@ -93,4 +93,5 @@ fi
 #
 # Exit, returning failure; the job timed out.
 #
+echo "Subshell timed out; exiting with status 100."
 exit 100
