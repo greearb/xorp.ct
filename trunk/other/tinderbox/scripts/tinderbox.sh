@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.10 2004/10/19 08:16:54 bms Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.11 2006/09/27 18:01:58 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -46,12 +46,14 @@ init_log_header()
     host="$3"
     env="$4 XORP_FINDER_SERVER_PORT=19797"
     dir="$5"
+    ssh_flags="$6"
     now=$(date "+%Y-%m-%d %H:%M:%S %Z")
-    sinfo=$(ssh ${SSH_FLAGS} -n ${host} 'uname -s -r')
+    sinfo=$(ssh ${ssh_flags} -n ${host} 'uname -s -r')
     cat >${outfile} <<EOF
 -------------------------------------------------------------------------------
 Configuration:    ${cfg}
 Host:             ${host}
+SSH flags:        ${ssh_flags}
 Environment:      ${env}
 Build directory:  ${dir}
 Start time:       ${now}
@@ -92,11 +94,12 @@ run_tinderbox() {
 	eval cfg_home=\$home_$cfg
 	eval cfg_env=\$env_$cfg
 	eval cfg_buildflags=\$buildflags_$cfg
+	eval cfg_sshflags=\$sshflags_$cfg
 
 	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
 
-	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}"
+	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home} ${cfg_sshflags}"
 	cp ${header} ${errfile}
  
 	if [ -z "${cfg_host}" ] ; then
@@ -112,7 +115,7 @@ run_tinderbox() {
 	fi
 
 	echo "Remote copy ${cfg_host} ${cfg_home}" >> ${errfile}
-	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} >> ${errfile} 2>&1
+	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} ${cfg_sshflags} >> ${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote copy" "${errfile}"
 	    continue
@@ -121,7 +124,7 @@ run_tinderbox() {
 	# Log in to host and build xorp
 	build_errfile="${errfile}-build"
 	cp ${header} ${build_errfile}
-	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh ${cfg_buildflags}" >>${build_errfile} 2>&1
+	ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh ${cfg_buildflags}" >>${build_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote build" "${build_errfile}"
 	    continue
@@ -129,12 +132,12 @@ run_tinderbox() {
 
 	# Kill tinderbox user processes that may be lying around from
 	# earlier runs (boo, hiss)
-	ssh ${SSH_FLAGS} -n ${cfg_host}	"kill -- -1" 2>/dev/null
+	ssh ${cfg_sshflags} -n ${cfg_host}	"kill -- -1" 2>/dev/null
 
 	# Log into host and run regression tests
 	check_errfile="${errfile}-check"
 	cp ${header} ${check_errfile}
-	ssh ${SSH_FLAGS} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
+	ssh ${cfg_sshflags} -n ${cfg_host} "env ${cfg_env} ${cfg_home}/scripts/build_xorp.sh check" >>${check_errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote check" "${check_errfile}"
 	    continue
