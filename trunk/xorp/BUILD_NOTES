@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.66 2006/08/02 08:38:35 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.67 2006/08/02 22:19:31 bms Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -446,7 +446,38 @@ gmake check
     - The binary snapshots for Windows Server 2003 are known to run on
       this operating system, but are not officially supported.
 
-4. Known problems
+4. Performance optimization
+===========================
+
+[Note: this section is incomplete]
+
+By default, XORP is compiled with compiler debug information enabled
+and no optimization.
+
+Use the following command to disable the compiler debug information and
+to enable optimization:
+
+./configure --enable-optimize --disable-debug
+
+Remember that if XORP was compiled previously with different options,
+it must be recompiled from scratch:
+
+gmake clean
+gmake
+
+Additional compiler-related optimizations flags can be specified on
+the command line by setting CFLAGS (the C compiler flags) and CXXFLAGS
+(the C++ compiler flags). E.g., the following options can be used for
+Intel PentiumPro CPU optimizations:
+
+./configure --enable-optimize --disable-debug \
+    "CFLAGS=-march=pentiumpro -O3 -fomit-frame-pointer" \
+    "CXXFLAGS=-march=pentiumpro -O3 -fomit-frame-pointer"
+
+Other flags that can be set on the command line are CPPFLAGS (the C/C++
+pre-processor flags), and LDFLAGS (the linker flags).
+
+5. Known problems
 =================
 
 See file ${XORP}/ERRATA.
