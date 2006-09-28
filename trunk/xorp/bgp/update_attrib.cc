@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.13 2005/12/13 04:47:32 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.14 2006/03/16 00:03:38 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -35,7 +35,7 @@
 BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)
 {
     _prefix_len = d[0];
-    uint32_t a = d[1] << 24;
+    uint32_t a = _prefix_len == 0 ? 0 : d[1] << 24;
 
     if (_prefix_len > 8)
 	a |= (d[2] <<16);
