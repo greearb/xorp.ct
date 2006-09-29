@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.13 2006/09/29 06:08:02 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.14 2006/09/29 06:11:19 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -115,7 +115,7 @@ run_tinderbox() {
 	fi
 
 	echo "Remote copy ${cfg_host} ${cfg_home} ${cfg_sshflags}" >> ${errfile}
-	${SCRIPTSDIR}/remote_xorp_copy.sh ${cfg_host} ${cfg_home} ${cfg_sshflags} >> ${errfile} 2>&1
+	${SCRIPTSDIR}/remote_xorp_copy.sh "${cfg_host}" "${cfg_home}" "${cfg_sshflags}" >> ${errfile} 2>&1
 	if [ $? -ne 0 ] ; then
 	    harp "${cfg} remote copy" "${errfile}"
 	    continue

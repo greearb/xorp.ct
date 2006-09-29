@@ -7,11 +7,11 @@ cd ${ROOTDIR}
 
 remote_run()
 {
-    host=$1
+    host="$1"
     shift
-    ssh_flags=$1
+    ssh_flags="$1"
     shift
-    ssh ${ssh_flags} -n $host "$*"
+    ssh "${ssh_flags}" -n "$host" "$*"
 }
 
 if [ $# -ne 3 ] ; then
@@ -20,20 +20,20 @@ if [ $# -ne 3 ] ; then
     exit 1
 fi
 
-HOST=$1
-DESTDIR=$2
-SSH_FLAGS=$3
+HOST="$1"
+DESTDIR="$2"
+SSH_FLAGS="$3"
 
-remote_run $HOST $SSH_FLAGS rm -rf "${DESTDIR}/scripts"
-remote_run $HOST $SSH_FLAGS rm -rf "${DESTDIR}/tmp"
-remote_run $HOST $SSH_FLAGS rm -rf "${DESTDIR}/xorp"
-remote_run $HOST $SSH_FLAGS rm -rf "${DESTDIR}/data"
+remote_run "$HOST" "$SSH_FLAGS" rm -rf "${DESTDIR}/scripts"
+remote_run "$HOST" "$SSH_FLAGS" rm -rf "${DESTDIR}/tmp"
+remote_run "$HOST" "$SSH_FLAGS" rm -rf "${DESTDIR}/xorp"
+remote_run "$HOST" "$SSH_FLAGS" rm -rf "${DESTDIR}/data"
 
 # We make tmp as it forces DESTDIR to be created if it doesn't exist and
 # doesn't cause an error if it already does since previous command deletes
 # tmp.
 
-remote_run $HOST $SSH_FLAGS mkdir -p ${DESTDIR}/tmp
+remote_run "$HOST" "$SSH_FLAGS" mkdir -p "${DESTDIR}/tmp"
 
 for i in xorp scripts data ; do
     tar cfp - ${i} | ssh ${SSH_FLAGS} $HOST cd ${DESTDIR} \&\& tar xfp -
