@@ -11,7 +11,7 @@ remote_run()
     shift
     ssh_flags="$1"
     shift
-    ssh "${ssh_flags}" -n "$host" "$*"
+    ssh "$ssh_flags" -n "$host" "$*"
 }
 
 if [ $# -ne 3 ] ; then
