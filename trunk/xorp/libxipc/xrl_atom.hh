@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.8 2005/03/25 02:53:31 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.9 2006/03/16 00:04:20 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
@@ -103,9 +103,7 @@ public:
 
     // type but no data constructors
     XrlAtom(XrlAtomType t)
-	: _type(t), _have_data(false) {
-	set_name("");
-    }
+	: _type(t), _have_data(false) {}
 
     XrlAtom(const string& name, XrlAtomType t) throw (BadName)
 	: _type(t), _have_data(false) {
@@ -134,9 +132,7 @@ public:
 
     // int32 constructors
     explicit XrlAtom(const int32_t& value)
-	: _type(xrlatom_int32), _have_data(true), _i32val(value) {
-	set_name("");
-    }
+	: _type(xrlatom_int32), _have_data(true), _i32val(value) {}
 
     XrlAtom(const char* name, int32_t value) throw (BadName)
 	: _type(xrlatom_int32), _have_data(true), _i32val(value) {
@@ -145,9 +141,7 @@ public:
 
     // bool constructors
     explicit XrlAtom(const bool& value)
-	: _type(xrlatom_boolean), _have_data(true), _boolean(value) {
-	set_name("");
-    }
+	: _type(xrlatom_boolean), _have_data(true), _boolean(value) {}
 
     XrlAtom(const char* name, bool value) throw (BadName)
 	: _type(xrlatom_boolean), _have_data(true), _boolean(value) {
@@ -156,9 +150,7 @@ public:
 
     // uint32 constructors
     explicit XrlAtom(const uint32_t& value)
-	: _type(xrlatom_uint32), _have_data(true), _u32val(value) {
-	set_name("");
-    }
+	: _type(xrlatom_uint32), _have_data(true), _u32val(value) {}
 
     XrlAtom(const char* name, uint32_t value) throw (BadName)
 	: _type(xrlatom_uint32), _have_data(true), _u32val(value) {
@@ -168,9 +160,7 @@ public:
     // ipv4 constructors
     explicit XrlAtom(const IPv4& addr)
 	: _type(xrlatom_ipv4), _have_data(true),
-	_ipv4(new IPv4(addr)) {
-	set_name("");
-    }
+	_ipv4(new IPv4(addr)) {}
 
     XrlAtom(const char* name, const IPv4& addr) throw (BadName)
 	: _type(xrlatom_ipv4), _have_data(true), _ipv4(new IPv4(addr)) {
@@ -180,9 +170,7 @@ public:
     // ipv4net constructors
     explicit XrlAtom(const IPv4Net& subnet)
 	: _type(xrlatom_ipv4net), _have_data(true),
-	_ipv4net(new IPv4Net(subnet)) {
-	set_name("");
-    }
+	_ipv4net(new IPv4Net(subnet)) {}
 
     XrlAtom(const char* name, const IPv4Net& subnet) throw (BadName)
 	: _type(xrlatom_ipv4net), _have_data(true),
@@ -193,9 +181,7 @@ public:
     // ipv6 constructors
     explicit XrlAtom(const IPv6& addr)
 	: _type(xrlatom_ipv6), _have_data(true),
-	_ipv6(new IPv6(addr)) {
-	set_name("");
-    }
+	_ipv6(new IPv6(addr)) {}
 
     XrlAtom(const char* name, const IPv6& addr) throw (BadName)
 	: _type(xrlatom_ipv6), _have_data(true), _ipv6(new IPv6(addr)) {
@@ -205,9 +191,7 @@ public:
     // ipv6 net constructors
     explicit XrlAtom(const IPv6Net& subnet)
 	: _type(xrlatom_ipv6net), _have_data(true),
-	_ipv6net(new IPv6Net(subnet)) {
-	set_name("");
-    }
+	_ipv6net(new IPv6Net(subnet)) {}
 
     XrlAtom(const char* name, const IPv6Net& subnet) throw (BadName)
 	: _type(xrlatom_ipv6net), _have_data(true),
@@ -252,9 +236,7 @@ public:
     // mac constructors
     explicit XrlAtom(const Mac& mac)
 	: _type(xrlatom_mac), _have_data(true),
-	_mac(new Mac(mac)) {
-	set_name("");
-    }
+	_mac(new Mac(mac)) {}
 
     XrlAtom(const char* name, const Mac& mac) throw (BadName)
 	: _type(xrlatom_mac), _have_data(true),
@@ -265,9 +247,7 @@ public:
     // text constructors
     explicit XrlAtom(const string& txt)
 	: _type(xrlatom_text), _have_data(true),
-        _text(new string(txt)) {
-	set_name("");
-    }
+        _text(new string(txt)) {}
 
     XrlAtom(const char* name, const string& txt) throw (BadName)
 	: _type(xrlatom_text), _have_data(true),
@@ -278,9 +258,7 @@ public:
    // list constructors
     explicit XrlAtom(const XrlAtomList& l)
 	: _type(xrlatom_list), _have_data(true),
-	_list(new XrlAtomList(l)) {
-	set_name("");
-    }
+	_list(new XrlAtomList(l)) {}
 
     XrlAtom(const char* name, const XrlAtomList& l) throw (BadName)
 	: _type(xrlatom_list), _have_data(true), _list(new XrlAtomList(l)) {
@@ -302,15 +280,11 @@ public:
 
     XrlAtom(const vector<uint8_t>& data)
 	: _type(xrlatom_binary), _have_data(true),
-	  _binary(new vector<uint8_t>(data)) {
-	set_name("");
-    }
+	  _binary(new vector<uint8_t>(data)) {}
 
     XrlAtom(const uint8_t* data, size_t data_bytes)
 	: _type(xrlatom_binary), _have_data(true),
-	  _binary(new vector<uint8_t>(data, data + data_bytes)) {
-	set_name("");
-    }
+	  _binary(new vector<uint8_t>(data, data + data_bytes)) {}
 
     // ... Your type's constructors here ...
 

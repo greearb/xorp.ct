@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.21 2005/08/18 15:32:40 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.22 2006/03/16 00:04:20 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -298,7 +298,12 @@ void
 XrlAtom::copy(const XrlAtom& xa)
 {
 
-    set_name(xa.name().c_str());
+    /*
+     * We assume that xa._atom_name has been already checked for correctnes,
+     * otherwise we should use set_name(xa._atom_name) here.
+     */
+    _atom_name = xa._atom_name;
+
     _type = xa._type;
     _have_data = xa._have_data;
 
@@ -421,7 +426,6 @@ XrlAtom::XrlAtom(const char* serialized) throw (InvalidString, BadName)
 
     sep = strstr(start, XrlToken::ARG_NT_SEP);
     if (0 == sep) {
-	set_name("");
 	start = serialized;
     } else {
 	set_name(string(start, sep - start));
@@ -1136,21 +1140,22 @@ XrlAtom::unpack(const uint8_t* buffer, size_t buffer_bytes)
 void
 XrlAtom::set_name(const char *name) throw (BadName)
 {
-    if (name == 0) name = "";
-    _atom_name = name;
-    if (!valid_name(name))
-	xorp_throw(BadName, name);
+    if (name == 0)
+	_atom_name.clear();
+    else {
+	_atom_name = name;
+	if (!valid_name(_atom_name))
+	    xorp_throw(BadName, name);
+    }
 }
 
 bool
 XrlAtom::valid_name(const string& s)
 {
     string::const_iterator si;
-    si = s.begin();
-    while (si != s.end()) {
-	if (*si != '_' && *si != '-' && !xorp_isalnum(*si))
+    for (si = s.begin(); si != s.end(); ++si) {
+	if (!xorp_isalnum(*si) && *si != '_' && *si != '-')
 	    return false;
-	si++;
     }
     return true;
 }
