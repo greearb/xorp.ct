@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.11 2006/09/27 18:01:58 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.12 2006/09/27 19:17:25 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -99,7 +99,7 @@ run_tinderbox() {
 	errfile="${LOGDIR}/0/${cfg_host}-${cfg}"
 	header="${errfile}.header"
 
-	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home} ${cfg_sshflags}"
+	init_log_header "${header}" "${cfg}" "${cfg_host}" "${cfg_env}" "${cfg_home}" "${cfg_sshflags}"
 	cp ${header} ${errfile}
  
 	if [ -z "${cfg_host}" ] ; then
