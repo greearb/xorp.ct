@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.22 2006/03/16 00:04:20 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom.cc,v 1.23 2006/09/29 23:01:00 zec Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -1141,7 +1141,7 @@ void
 XrlAtom::set_name(const char *name) throw (BadName)
 {
     if (name == 0)
-	_atom_name.clear();
+	_atom_name = "";
     else {
 	_atom_name = name;
 	if (!valid_name(_atom_name))
