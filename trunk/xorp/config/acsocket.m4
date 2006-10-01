@@ -1,5 +1,5 @@
 dnl
-dnl $XORP: xorp/config/acsocket.m4,v 1.3 2006/04/03 04:19:39 pavlin Exp $
+dnl $XORP: xorp/config/acsocket.m4,v 1.4 2006/07/18 00:39:31 pavlin Exp $
 dnl
 
 dnl
@@ -183,4 +183,4 @@ AC_TRY_COMPILE([
 
 
 AC_LANG_POP(C)
-AC_LANG_SAVE
+AC_CACHE_SAVE
