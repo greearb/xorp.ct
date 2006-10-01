@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.174 2006/08/03 19:15:31 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.175 2006/09/12 18:18:33 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.4-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.174 2006/08/03 19:15:31 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.175 2006/09/12 18:18:33 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -549,7 +549,14 @@ dnl
 dnl Check for Ethernet-related types and functions.
 dnl
 AC_CHECK_HEADERS([sys/ethernet.h net/ethernet.h net/if.h net/if_ether.h netinet/in.h netinet/if_ether.h netinet/ether.h])
+dnl
 dnl Check for headers where 'struct ether_addr' is typically defined.
+dnl
+dnl XXX: It is preferable to use C instead of C++, because in DragonFlyBSD-1.6
+dnl file <machine/atomic.h> (indirectly included by <netinet/if_ether.h>)
+dnl is not C++ safe.
+dnl
+AC_LANG_PUSH(C)
 AC_CHECK_HEADER(sys/types.h,
   [test_sys_types_h="#include <sys/types.h>"],
   [test_sys_types_h=""])
@@ -590,10 +597,9 @@ ${test_netinet_in_h}
 ${test_netinet_if_ether_h}
 ${test_netinet_ether_h}
 "]
-
 AC_CHECK_TYPES([struct ether_addr], , , [${test_ethernet_header_files}])
 AC_CHECK_FUNCS([ether_ntoa ether_aton])
-
+AC_LANG_POP(C)
 
 dnl
 dnl Tests for presentation and name lookup related functions.
