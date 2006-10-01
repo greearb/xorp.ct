@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/ether_compat.h,v 1.12 2006/03/16 00:04:28 pavlin Exp $
+ * $XORP: xorp/libxorp/ether_compat.h,v 1.13 2006/04/02 02:44:03 pavlin Exp $
  */
 
 /* Ethernet manipulation compatibility functions */
@@ -46,9 +46,22 @@
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
+/*
+ * XXX: On DragonFlyBSD-1.6 header file <machine/atomic.h> (indirectly
+ * included by <netinet/if_ether.h>) is not C++ safe, hence conditionally
+ * don't include <netinet/if_ether.h> for that platform.
+ * We can exclude <netinet/if_ether.h>, because we don't really need it
+ * on DragonFlyBSD-1.6.
+ */
+#if defined(HOST_OS_DRAGONFLYBSD) && defined(__DragonFly_version) && \
+	(__DragonFly_version == 160000)
+#else
 #ifdef HAVE_NETINET_IF_ETHER_H
 #include <netinet/if_ether.h>
 #endif
+#endif
+
 #ifdef HAVE_NETINET_ETHER_H
 #include <netinet/ether.h>
 #endif
