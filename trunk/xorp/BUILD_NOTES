@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.67 2006/08/02 22:19:31 bms Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.68 2006/09/28 21:55:55 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -55,6 +55,18 @@ gmake check
 ============
 
   * DragonFlyBSD-1.4
+    - The code compiles with the default compiler, and the internal tests
+      appear to succeed:
+      gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
+
+  * DragonFlyBSD-1.6
+    - The following system header file has a bug (it uses the C++ keyword
+      "new" for the name of a variable):
+        /usr/include/machine/atomic.h
+
+      The following patch must be applied to that file before compiling XORP:
+      http://www.dragonflybsd.org/cvsweb/src/sys/i386/include/atomic.h.diff?r1=1.20.2.1&r2=1.20.2.2
+
     - The code compiles with the default compiler, and the internal tests
       appear to succeed:
       gcc (GCC) 3.4.5 20050809 (prerelease) [DragonFly] (propolice, visibility)
