@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.27 2006/03/16 00:06:05 pavlin Exp $
+// $XORP: xorp/rtrmgr/xrl_rtrmgr_interface.hh,v 1.28 2006/04/26 04:42:32 pavlin Exp $
 
 #ifndef __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
 #define __RTRMGR_XRL_RTRMGR_INTERFACE_HH__
@@ -205,7 +205,7 @@ private:
     uid_t get_user_id_from_token(const string& token) const;
     void lock_timeout();
     void initialize_client_state(uid_t user_id, UserInstance *user);
-    void send_client_state(uid_t user_id, UserInstance *user);
+    void send_client_state(uid_t user_id, string clientname);
     uint32_t allocate_clientid();
     void deallocate_clientid(uint32_t clientid);
 

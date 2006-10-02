@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.50 2006/03/16 00:06:05 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.51 2006/04/26 04:42:31 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -318,7 +318,7 @@ XrlRtrmgrInterface::initialize_client_state(uid_t user_id,
     }
     t = _eventloop.new_oneoff_after_ms(delay,
              callback(this, &XrlRtrmgrInterface::send_client_state, 
-		      user_id, user));
+		      user_id, user->clientname()));
     _background_tasks.push_front(t);
 }
 
@@ -332,9 +332,11 @@ XrlRtrmgrInterface::finder_register_done(const XrlError& e, string clientname)
 }
 
 void
-XrlRtrmgrInterface::send_client_state(uid_t user_id, UserInstance *user)
+XrlRtrmgrInterface::send_client_state(uid_t user_id, string client)
 {
-    string client = user->clientname();
+    UserInstance *user = find_user_instance(user_id, client);
+    if (user == NULL)
+	return;
 
     debug_msg("send_client_state %s\n", client.c_str());
     if (!_rtrmgr.ready()) {
