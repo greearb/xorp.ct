@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.68 2006/09/28 21:55:55 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.69 2006/10/02 17:56:10 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -135,7 +135,7 @@ gmake check
 3.3. NetBSD
 ===========
 
-  * NetBSD-2.0 and NetBSD-3.0:
+  * NetBSD-2.0, NetBSD-3.0 and NetBSD-3.0.1:
     - The SNMP support inside the "mibs" directory may fail to compile.
     - The rest of code compiles, and the internal tests appear to succeed:
       gcc (GCC) 3.3.3 (NetBSD nb3 20040520)
