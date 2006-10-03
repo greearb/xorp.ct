@@ -36,6 +36,14 @@ function dump_error() {
     next;
 }
 
+/^TINDERBOX:/ {
+    #
+    # A message from the tinderbox that should be printed.
+    #
+    print;
+    next;
+}
+
 /gmake\[[0-9]+\]/ {
     print
     if ($2 == "Entering") {
