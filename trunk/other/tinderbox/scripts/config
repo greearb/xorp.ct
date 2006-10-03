@@ -141,5 +141,5 @@ FROMADDR="Xorp TinderBox <xorp-tinderbox@xorp.org>"
 POST="/usr/local/libexec/nmh/post"
 
 # make and make check timeout and timeout check interval, both in seconds
-TIMEOUT=9000
+TIMEOUT=21600
 TIMEOUT_CHECK=24
