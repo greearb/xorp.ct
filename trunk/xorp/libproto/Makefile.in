@@ -109,7 +109,7 @@ test_packet_SOURCES = test_packet.cc
 test_spt_SOURCES = test_spt.cc
 
 # -- Library Sources
-libproto_la_SOURCES = libproto_module.h checksum.h config_node_id.hh packet.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh checksum.c proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
+libproto_la_SOURCES = libproto_module.h checksum.h config_node_id.hh packet.hh proto_node.hh proto_node_cli.hh proto_register.hh proto_state.hh proto_unit.hh spt.hh checksum.c packet.cc proto_node_cli.cc proto_register.cc proto_state.cc proto_unit.cc spt.cc
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = spt_graph1
@@ -125,8 +125,8 @@ LTLIBRARIES = $(noinst_LTLIBRARIES)
 
 libproto_la_LDFLAGS =
 libproto_la_LIBADD =
-am_libproto_la_OBJECTS = checksum.lo proto_node_cli.lo proto_register.lo \
-	proto_state.lo proto_unit.lo spt.lo
+am_libproto_la_OBJECTS = checksum.lo packet.lo proto_node_cli.lo \
+	proto_register.lo proto_state.lo proto_unit.lo spt.lo
 libproto_la_OBJECTS = $(am_libproto_la_OBJECTS)
 bin_PROGRAMS =
 check_PROGRAMS = test_checksum$(EXEEXT) test_config_node_id$(EXEEXT) \
@@ -163,7 +163,7 @@ CPPFLAGS = @CPPFLAGS@
 LDFLAGS = @LDFLAGS@
 LIBS = @LIBS@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
-@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/checksum.Plo \
+@AMDEP_TRUE@DEP_FILES = $(DEPDIR)/checksum.Plo $(DEPDIR)/packet.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_node_cli.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_register.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/proto_state.Plo $(DEPDIR)/proto_unit.Plo \
@@ -265,6 +265,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/checksum.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/packet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_node_cli.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_register.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/proto_state.Plo@am__quote@

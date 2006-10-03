@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.5 2006/08/24 18:57:27 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.6 2006/08/25 01:15:33 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -484,9 +484,31 @@ public:
 	return (ip_version() == IpHeader4::IP_VERSION);
     }
 
+    /**
+     * Fragment an IPv4 packet.
+     *
+     * Note: if the original packet not larger than the MTU, then the packet
+     * is not fragmented (i.e., @ref fragments is empty), and the return
+     * value is XORP_OK.
+     *
+     * @param mtu the MTU for fragmenting the packet.
+     * @param fragments the return-by-reference fragments of the IPv4 packet.
+     * @param error_msg the error message (if error).
+     * @raturn XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int fragment(size_t mtu, list<vector<uint8_t> >& fragments,
+		 string& error_msg) const;
+
 protected:
+    // IPv4 header related constants
     static const uint16_t FRAGMENT_OFFSET_MASK	= 0x1fff;
     static const uint16_t FRAGMENT_FLAGS_MASK	= 0xe000;
+    static const uint16_t FRAGMENT_FLAGS_IP_DF	= 0x4000; // Don't fragment
+    static const uint16_t FRAGMENT_FLAGS_IP_MF	= 0x2000; // More fragments
+    static const uint8_t  OPTIONS_IPOPT_EOL	= 0;	// End of option list
+    static const uint8_t  OPTIONS_IPOPT_NOP	= 1;	// No operation
+    static const size_t	  OPTIONS_IPOPT_OLEN	= 1;	// Option length offset
+    static const uint8_t  OPTIONS_COPIED_FLAG	= 0x80;	// Option copied flag
 
     // Sizes of the fields
     static const size_t _ip_vhl_sizeof	= 1;
