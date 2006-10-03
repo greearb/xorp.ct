@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.9 2004/11/26 02:07:37 bms Exp $
+# $XORP: other/tinderbox/scripts/build_xorp.sh,v 1.10 2006/09/27 17:54:02 pavlin Exp $
 #
 
 CONFIG="$(dirname $0)/config"
@@ -61,7 +61,7 @@ done
 # XXX: What if we've raced the child and we have no file? Erroneous error?
 #
 if [ "x${timed_out}" = "x1" ] ; then
-	err="Process appears wedged. Timed out after ${TIMEOUT} seconds."
+	err="FAIL: Process appears wedged. Timed out after ${TIMEOUT} seconds."
 	bar=$(echo $err | sed 's/./=/g')
 	printf "\n${bar}\n${err}\n${bar}\n"
 	killcmd="kill -KILL -- -${subshell_pid} 2>/dev/null"
@@ -85,7 +85,7 @@ fi
 #
 if [ -s ${wakefile} ] ; then
     err=$(cat ${wakefile})
-    echo "Subshell ran to completion with exit status ${err}."
+    echo "TINDERBOX: Subshell ran to completion with exit status ${err}."
     rm -f ${wakefile}
     exit ${err}
 fi
@@ -93,5 +93,5 @@ fi
 #
 # Exit, returning failure; the job timed out.
 #
-echo "Subshell timed out; exiting with status 100."
+echo "FAIL: Subshell timed out; exiting with status 100."
 exit 100

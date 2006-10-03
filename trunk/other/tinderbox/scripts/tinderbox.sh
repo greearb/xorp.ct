@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.14 2006/09/29 06:11:19 pavlin Exp $
+# $XORP: other/tinderbox/scripts/tinderbox.sh,v 1.15 2006/09/29 06:20:13 pavlin Exp $
 
 CONFIG="$(dirname $0)/config"
 . ${CONFIG}
@@ -103,13 +103,13 @@ run_tinderbox() {
 	cp ${header} ${errfile}
  
 	if [ -z "${cfg_host}" ] ; then
-	    echo "Configuration \"$cfg\" has no host." >> ${errfile}
+	    echo "FAIL: Configuration \"$cfg\" has no host." >> ${errfile}
 	    harp "${cfg} configuration" "${errfile}"
 	    continue
 	fi
 
 	if [ -z "${cfg_home}" ] ; then
-	    echo "Configuration \"$cfg\" has no directory." >> ${errfile}
+	    echo "FAIL: Configuration \"$cfg\" has no directory." >> ${errfile}
 	    harp "${cfg} configuration" "${err_file}"
 	    continue
 	fi
