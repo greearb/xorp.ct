@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.31 2006/08/18 22:14:50 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.32 2006/08/23 07:10:32 pavlin Exp $"
 
 
 //
@@ -460,13 +460,14 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 			  size_t rcvlen,
 			  string& error_msg)
 {
-#ifndef HOST_OS_WINDOWS
     IpHeader4 ip4(rcvbuf);
     buffer_t *buffer;
     uint32_t flags = 0;
     size_t mtu = 0;
     string dummy_error_msg;
     
+    UNUSED(group_addr);
+
     if (ip4.ip_version() != source_addr.ip_version()) {
 	error_msg = c_format("Cannot encapsulate IP packet: "
 			     "inner IP version (%u) != expected IP version (%u)",
@@ -528,180 +529,34 @@ PimVif::pim_register_send(const IPvX& rp_addr,
     // Fragment the inner packet, then encapsulate and send each fragment
     //
     if (family() == AF_INET) {
-	uint8_t frag_buf[rcvlen];	// The buffer for the fragments
-	IpHeader4Writer frag_ip4(frag_buf);
-	size_t frag_optlen = 0;		// The optlen to copy into fragments
-	size_t frag_ip_hl;
-	
-	if (ip4.ip_off() & IP_DF) {
-	    // Fragmentation is forbidded
-	    error_msg = c_format("Cannot fragment encapsulated IP packet "
-				 "from %s to %s: "
-				 "fragmentation not allowed",
-				 cstring(source_addr), cstring(group_addr));
-	    XLOG_WARNING("%s", error_msg.c_str());
-	    // XXX: we don't send ICMP "fragmentation needed" back to the
-	    // sender, because in IPv4 ICMP error messages are not sent
-	    // back for datagrams destinated to an multicast address.
+	list<vector<uint8_t> > fragments;
+	list<vector<uint8_t> >::iterator iter;
+
+	if (ip4.fragment(mtu, fragments, error_msg) != XORP_OK) {
+	    //
+	    // XXX: If fragmentation is forbidded, we don't send
+	    // ICMP "fragmentation needed" back to the sender, because in
+	    // IPv4 ICMP error messages are not sent back for datagrams
+	    // destinated to an multicast address.
+	    //
 	    return (XORP_ERROR);
 	}
-	if (((mtu - (ip4.ip_header_len())) & ~7) < 8) {
-	    // Fragmentation is possible only if we can put at least
-	    // 8 octets per fragment (except the last one)
-	    error_msg = c_format("Cannot fragment encapsulated IP packet "
-				 "from %s to %s: "
-				 "cannot send fragment with size less than 8 octets",
-				 cstring(source_addr), cstring(group_addr));
-	    XLOG_WARNING("%s", error_msg.c_str());
-	    return (XORP_ERROR);
-	}
-	
+
 	//
-	// Copy the IP header and the options that should be copied during
-	// fragmentation.
-	// XXX: the code below is taken from FreeBSD's ip_optcopy()
-	// in netinet/ip_output.c
+	// XXX: we already checked that the data packet is larger than
+	// the MTU, so the packet must have been fragmented.
 	//
-	memcpy(frag_buf, rcvbuf, sizeof(struct ip));
-	{
-	    register const u_char *cp;
-	    register u_char *dp;
-	    int opt, optlen, cnt;
-	    
-	    cp = (const u_char *)(ip4.data() + ip4.size());
-	    dp = (u_char *)(frag_ip4.data() + frag_ip4.size());
-	    cnt = ip4.ip_header_len() - sizeof (struct ip);
-	    for (; cnt > 0; cnt -= optlen, cp += optlen) {
-                opt = cp[0];
-                if (opt == IPOPT_EOL)
-		    break;
-                if (opt == IPOPT_NOP) {
-		    // Preserve for IP mcast tunnel's LSRR alignment.
-		    *dp++ = IPOPT_NOP;
-		    optlen = 1;
-		    continue;
-                }
-		
-		//
-		// Check for bogus lengths
-		//
-		if ((size_t)cnt < IPOPT_OLEN + sizeof(*cp)) {
-		    error_msg = c_format("Cannot fragment encapsulated IP "
-					 "packet from %s to %s: "
-					 "malformed IPv4 option",
-					 cstring(source_addr),
-					 cstring(group_addr));
-		    XLOG_WARNING("%s", error_msg.c_str());
-		    return (XORP_ERROR);
-		}
-                optlen = cp[IPOPT_OLEN];
-		if (optlen < (int)(IPOPT_OLEN + sizeof(*cp)) || optlen > cnt) {
-		    error_msg = c_format("Cannot fragment encapsulated IP "
-					 "packet from %s to %s: "
-					 "malformed IPv4 option",
-					 cstring(source_addr),
-					 cstring(group_addr));
-		    XLOG_WARNING("%s", error_msg.c_str());
-		    return (XORP_ERROR);
-		}
-		
-                if (optlen > cnt)
-		    optlen = cnt;
-                if (IPOPT_COPIED(opt)) {
-		    memcpy(dp, cp, optlen);
-		    dp += optlen;
-                }
-	    }
-	    for (optlen = dp - (u_char *)(frag_ip4.data() + frag_ip4.size());
-		 optlen & 0x3; optlen++) {
-                *dp++ = IPOPT_EOL;
-	    }
-	    frag_optlen = optlen;	// return (optlen);
-	}
-	// The header length with the remaining IP options
-	frag_ip_hl = (sizeof(struct ip) + frag_optlen);
-	frag_ip4.set_ip_header_len(frag_ip_hl);
-	
-	//
-	// Do the fragmentation
-	//
-	size_t data_start = 0;
-	size_t data_end = rcvlen;
-	// Send the first segment with all the options
-	{
-	    uint8_t first_frag[mtu];
-	    IpHeader4Writer first_ip(first_frag);
-	    size_t first_ip_hl = ip4.ip_header_len();
-	    size_t nfb = (mtu - first_ip_hl) / 8;
-	    size_t first_frag_len = first_ip_hl + nfb*8;
-	    
-	    memcpy(first_frag, rcvbuf, first_frag_len);
-	    
-	    // Correct the IP header
-	    first_ip.set_ip_off(first_ip.ip_off() | IP_MF);
-	    first_ip.set_ip_len(first_frag_len);
-	    first_ip.set_ip_sum(0);
-	    first_ip.set_ip_sum(inet_checksum(first_ip.data(), first_ip_hl));
-	    
-	    // Encapsulate and send the fragment
+	XLOG_ASSERT(! fragments.empty());
+
+	// Encapsulate and send the fragments
+	for (iter = fragments.begin(); iter != fragments.end(); ++iter) {
+	    vector<uint8_t>& ip_fragment = *iter;
+
 	    buffer = buffer_send_prepare();
 	    BUFFER_PUT_HOST_32(flags, buffer);
-	    BUFFER_PUT_DATA(first_frag, buffer, first_frag_len);
+	    BUFFER_PUT_DATA(&ip_fragment[0], buffer, ip_fragment.size());
 	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
 		     dummy_error_msg);
-	    
-	    data_start += first_frag_len;
-	}
-	
-	//
-	// Create the remaining of the fragments
-	//
-	while (data_start < data_end) {
-	    size_t nfb = (mtu - frag_ip_hl) / 8;
-	    size_t frag_len = frag_ip_hl + nfb*8;
-	    size_t frag_data_len = nfb*8;
-	    bool is_last_fragment = false;
-	    
-	    // Compute the fragment length
-	    if (data_end - data_start <= frag_data_len) {
-		frag_data_len = data_end - data_start;
-		frag_len = frag_ip_hl + frag_data_len;
-		is_last_fragment = true;
-	    }
-	    
-	    // Copy the data
-	    memcpy(frag_buf + frag_ip_hl, rcvbuf + data_start, frag_data_len);
-	    
-	    // The IP packet total length
-	    frag_ip4.set_ip_len(frag_len);
-	    
-	    // The IP fragment flags and offset
-	    {
-#ifndef IP_OFFMASK
-#define IP_OFFMASK 0x1fff	// Mask for fragmenting bits
-#endif
-		unsigned short ip_off_field = ip4.ip_off();
-		unsigned short frag_ip_off_flags = ip_off_field & ~IP_OFFMASK;
-		unsigned short frag_ip_off = (ip_off_field & IP_OFFMASK);
-		
-		if (! is_last_fragment)
-		    frag_ip_off_flags |= IP_MF;
-		
-		frag_ip_off += (data_start - ip4.ip_header_len()) / 8;	// XXX
-		frag_ip4.set_ip_off(frag_ip_off_flags | frag_ip_off);
-	    }
-	    
-	    frag_ip4.set_ip_sum(0);
-	    frag_ip4.set_ip_sum(inet_checksum(frag_ip4.data(), frag_ip_hl));
-	    
-	    // Encapsulate and send the fragment
-	    buffer = buffer_send_prepare();
-	    BUFFER_PUT_HOST_32(flags, buffer);
-	    BUFFER_PUT_DATA(frag_buf, buffer, frag_len);
-	    pim_send(domain_wide_addr(), rp_addr, PIM_REGISTER, buffer,
-		     dummy_error_msg);
-	    
-	    data_start += frag_data_len;
 	}
     }
     
@@ -724,19 +579,6 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 			 cstring(domain_wide_addr()), cstring(rp_addr));
     XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
-
-#else /* HOST_OS_WINDOWS */
-
-    error_msg = c_format("WinSock2 lacks struct ip definition");
-    XLOG_FATAL("%s", error_msg.c_str());
-    return (XORP_ERROR);
-
-    UNUSED(rp_addr);
-    UNUSED(source_addr);
-    UNUSED(group_addr);
-    UNUSED(rcvbuf);
-    UNUSED(rcvlen);
-#endif /* !HOST_OS_WINDOWS */
 }
 
 int
