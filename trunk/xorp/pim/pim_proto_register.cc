@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.32 2006/08/23 07:10:32 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.33 2006/10/04 00:15:29 pavlin Exp $"
 
 
 //
@@ -73,7 +73,6 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 			  const IPvX& dst,
 			  buffer_t *buffer)
 {
-#ifndef HOST_OS_WINDOWS
     uint32_t pim_register_flags;
     bool is_null_register, is_border_register;
     IPvX inner_src(family()), inner_dst(family());
@@ -106,21 +105,19 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     //
     switch (family()) {
     case AF_INET: {
-	struct ip ip4_header;
-	uint8_t *cp = (uint8_t *)&ip4_header;
+	uint8_t ip_header4_buffer[IpHeader4::SIZE];
+	IpHeader4 ip4(ip_header4_buffer);
 	
-	BUFFER_GET_DATA(cp, buffer, sizeof(ip4_header));
-	inner_src.copy_in(ip4_header.ip_src);
-	inner_dst.copy_in(ip4_header.ip_dst);
+	BUFFER_GET_DATA(ip_header4_buffer, buffer, IpHeader4::SIZE);
+	inner_src = IPvX(ip4.ip_src());
+	inner_dst = IPvX(ip4.ip_dst());
 	if (is_null_register) {
 	    //
 	    // If the inner header checksum is non-zero, then
 	    // check the checksum.
 	    //
-	    if (ip4_header.ip_sum != 0) {
-		uint16_t cksum = inet_checksum(
-		    reinterpret_cast<const uint8_t *>(&ip4_header),
-		    sizeof(ip4_header));
+	    if (ip4.ip_sum() != 0) {
+		uint16_t cksum = inet_checksum(ip4.data(), ip4.size());
 		if (cksum != 0) {
 		    XLOG_WARNING("RX %s%s from %s to %s: "
 				 "inner dummy IP header checksum error",
@@ -137,14 +134,14 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
     
 #ifdef HAVE_IPV6	
     case AF_INET6: {
-	struct ip6_hdr ip6_header;
-	uint8_t *cp = (uint8_t *)&ip6_header;
+	uint8_t ip_header6_buffer[IpHeader6::SIZE];
+	IpHeader6 ip6(ip_header6_buffer);
 	uint16_t inner_data_len;
 	
-	BUFFER_GET_DATA(cp, buffer, sizeof(ip6_header));
-	inner_src.copy_in(ip6_header.ip6_src);
-	inner_dst.copy_in(ip6_header.ip6_dst);
-	inner_data_len = ntohs(ip6_header.ip6_plen);
+	BUFFER_GET_DATA(ip_header6_buffer, buffer, IpHeader6::SIZE);
+	inner_src = IPvX(ip6.ip_src());
+	inner_dst = IPvX(ip6.ip_dst());
+	inner_data_len = ip6.ip_plen();
 	if (is_null_register) {
 	    //
 	    // If the dummy PIM header is present, then
@@ -152,7 +149,7 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 	    //
 	    if (inner_data_len == sizeof(struct pim)) {
 		struct pim pim_header;
-		cp = (uint8_t *)&pim_header;
+		uint8_t *cp = (uint8_t *)&pim_header;
 		BUFFER_GET_DATA(cp, buffer, sizeof(pim_header));
 		uint16_t cksum, cksum2;
 		cksum = inet_checksum(
@@ -439,17 +436,6 @@ PimVif::pim_register_recv(PimNbr *pim_nbr,
 		 cstring(src), cstring(dst));
     ++_pimstat_rx_malformed_packet;
     return (XORP_ERROR);
-
-#else /* HOST_OS_WINDOWS */
-
-    XLOG_FATAL("WinSock2 lacks struct ip definition");
-    return (XORP_ERROR);
-
-    UNUSED(pim_nbr);
-    UNUSED(src);
-    UNUSED(dst);
-    UNUSED(buffer);
-#endif /* !HOST_OS_WINDOWS */
 }
 
 int
@@ -587,7 +573,6 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 			       const IPvX& group_addr,
 			       string& error_msg)
 {
-#ifndef HOST_OS_WINDOWS
     buffer_t *buffer = buffer_send_prepare();
     uint32_t flags = 0;
 
@@ -598,44 +583,25 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
     // Create the dummy IP header and write it to the buffer
     switch (family()) {
     case AF_INET: {
-	struct ip ip4_header;
-	uint8_t *cp = (uint8_t *)&ip4_header;
-	
-	memset(&ip4_header, 0, sizeof(ip4_header));
-	ip4_header.ip_v		= IPVERSION;
-	ip4_header.ip_hl	= (sizeof(ip4_header) >> 2);
-	ip4_header.ip_tos	= 0;
-	ip4_header.ip_id	= 0;
-	ip4_header.ip_off	= 0;
-	ip4_header.ip_p		= IPPROTO_PIM;
-	ip4_header.ip_len	= htons(sizeof(ip4_header));
-	ip4_header.ip_ttl	= 0;
+	uint8_t ip_header4_buffer[IpHeader4::SIZE];
+	memset(ip_header4_buffer, 0, sizeof(ip_header4_buffer));
 
-	//
-	// XXX: we need to use a temporary in_addr storage as a work-around
-	// if "struct ip" is __packed
-	//
-	struct in_addr in_addr_tmp;
-	source_addr.copy_out(in_addr_tmp);
-	ip4_header.ip_src = in_addr_tmp;
-	group_addr.copy_out(in_addr_tmp);
-	ip4_header.ip_dst = in_addr_tmp;
-
-	//
-	// XXX: on older Linux 'ip->ip_sum' was named 'ip->ip_csum'.
-	// Later someone has realized that it is not a smart move,
-	// so now Linux is in sync with the rest of the UNIX-es.
-	// If you got one of those old Linux-es, you better upgrade to
-	// something more decent. If you are stubborn and you don't want
-	// to upgrade, then change 'ip_sum' to 'ip_csum' below, but
-	// you should know that in the future you will get what you deserve :)
-	//
-	ip4_header.ip_sum	= 0;
-	ip4_header.ip_sum	= inet_checksum(
-	    reinterpret_cast<const uint8_t *>(&ip4_header),
-	    sizeof(ip4_header));
+	IpHeader4Writer ip4(ip_header4_buffer);
 	
-	BUFFER_PUT_DATA(cp, buffer, sizeof(ip4_header));
+	ip4.set_ip_version(IpHeader4::IP_VERSION);
+	ip4.set_ip_header_len(IpHeader4::SIZE);
+	ip4.set_ip_tos(0);
+	ip4.set_ip_id(0);
+	ip4.set_ip_off(0);
+	ip4.set_ip_p(IPPROTO_PIM);
+	ip4.set_ip_len(IpHeader4::SIZE);
+	ip4.set_ip_ttl(0);
+	ip4.set_ip_src(source_addr.get_ipv4());
+	ip4.set_ip_dst(group_addr.get_ipv4());
+	ip4.set_ip_sum(0);
+	ip4.set_ip_sum(inet_checksum(ip4.data(), ip4.size()));
+	
+	BUFFER_PUT_DATA(ip_header4_buffer, buffer, IpHeader4::SIZE);
 	break;
     }
     
@@ -644,34 +610,26 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 	//
 	// First generate the dummy IPv6 header, and then the dummy PIM header
 	//
-	
+	uint8_t ip_header6_buffer[IpHeader6::SIZE];
+	memset(ip_header6_buffer, 0, sizeof(ip_header6_buffer));
+
 	// Generate the dummy IPv6 header
-	struct ip6_hdr ip6_header;
-	uint8_t *cp = (uint8_t *)&ip6_header;
+	IpHeader6Writer ip6(ip_header6_buffer);
+
+	ip6.set_ip_vtc_flow(0);
+	ip6.set_ip_version(IpHeader6::IP_VERSION);
+	ip6.set_ip_plen(sizeof(struct pim));
+	ip6.set_ip_hlim(0);
+	ip6.set_ip_nxt(IPPROTO_PIM);
+	ip6.set_ip_src(source_addr.get_ipv6());
+	ip6.set_ip_dst(group_addr.get_ipv6());
 	
-	// XXX: conditionally define IPv6 header related values
-#ifndef IPV6_VERSION
-#define IPV6_VERSION		0x60
-#endif
-#ifndef IPV6_VERSION_MASK
-#define IPV6_VERSION_MASK	0xf0
-#endif
-	memset(&ip6_header, 0, sizeof(ip6_header));
-	ip6_header.ip6_plen	= htons(sizeof(struct pim));
-	ip6_header.ip6_flow	= 0;
-	ip6_header.ip6_vfc	&= ~IPV6_VERSION_MASK;
-	ip6_header.ip6_vfc	|= IPV6_VERSION;
-	ip6_header.ip6_hlim	= 0;
-	ip6_header.ip6_nxt	= IPPROTO_PIM;
-	source_addr.copy_out((uint8_t*)&(ip6_header.ip6_src));
-	group_addr.copy_out((uint8_t*)&(ip6_header.ip6_dst));
-	
-	BUFFER_PUT_DATA(cp, buffer, sizeof(ip6_header));
+	BUFFER_PUT_DATA(ip_header6_buffer, buffer, IpHeader6::SIZE);
 	
 	// Generate the dummy PIM header
 	uint16_t cksum, cksum2;
 	struct pim pim_header;
-	cp = (uint8_t *)&pim_header;
+	uint8_t *cp = (uint8_t *)&pim_header;
 	
 	memset(&pim_header, 0, sizeof(pim_header));
 	cksum = inet_checksum(reinterpret_cast<const uint8_t *>(&pim_header),
@@ -706,15 +664,4 @@ PimVif::pim_register_null_send(const IPvX& rp_addr,
 			 cstring(domain_wide_addr()), cstring(rp_addr));
     XLOG_ERROR("%s", error_msg.c_str());
     return (XORP_ERROR);
-
-#else /* HOST_OS_WINDOWS */
-
-    error_msg = c_format("WinSock2 lacks struct ip definition");
-    XLOG_FATAL("%s", error_msg.c_str());
-    return (XORP_ERROR);
-
-    UNUSED(rp_addr);
-    UNUSED(source_addr);
-    UNUSED(group_addr);
-#endif /* !HOST_OS_WINDOWS */
 }
