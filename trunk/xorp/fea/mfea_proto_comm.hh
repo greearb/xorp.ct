@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.19 2006/03/20 02:06:47 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.20 2006/03/20 07:29:44 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -262,11 +262,24 @@ public:
      */
     xorp_module_id module_id() const { return (_module_id); }
     
-    
 private:
     // Private functions
     MfeaNode&	mfea_node() const	{ return (_mfea_node);	}
-    
+
+    /**
+     * Transmit a packet on a protocol socket.
+     *
+     * @param mfea_vif the vif to send the packet on.
+     * @param src the source address of the packet.
+     * @param dst the destination address of the packet.
+     * @param datalen the length of the data to be sent.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		proto_socket_transmit(MfeaVif *mfea_vif, const IPvX& src,
+				      const IPvX& dst, size_t datalen,
+				      string& error_msg);
+
     // Private state
     MfeaNode&	_mfea_node;	// The MFEA node I belong to
     int		_ip_protocol;	// The protocol number (IPPROTO_*)

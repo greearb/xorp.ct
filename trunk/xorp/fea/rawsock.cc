@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.31 2006/08/28 23:20:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.32 2006/09/12 07:30:00 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -1794,7 +1794,6 @@ RawSocket::proto_socket_write(const string& if_name,
 {
     int		ip_hdr_len = 0;
     int		int_val;
-    int		setloop = false;
     int		ret;
     const IfTreeInterface* iftree_if = NULL;
     const IfTreeVif* iftree_vif = NULL;
@@ -2268,8 +2267,24 @@ RawSocket::proto_socket_write(const string& if_name,
 	error_msg = c_format("Invalid address family %d", family());
 	return (XORP_ERROR);
     }
-    
-    setloop = false;
+
+    ret = proto_socket_transmit(if_name, vif_name, src_address, dst_address,
+				payload.size(), error_msg);
+
+    return (ret);
+}
+
+int
+RawSocket::proto_socket_transmit(const string&	if_name,
+				 const string&	vif_name,
+				 const IPvX&	src_address,
+				 const IPvX&	dst_address,
+				 size_t		datalen,
+				 string&	error_msg)
+{
+    bool setloop = false;
+    int ret = XORP_OK;
+
     if (dst_address.is_multicast()) {
 	if (set_default_multicast_interface(if_name, vif_name, error_msg)
 	    != XORP_OK) {
@@ -2286,17 +2301,15 @@ RawSocket::proto_socket_write(const string& if_name,
     }
 
 #ifndef HOST_OS_WINDOWS    
-    ret = XORP_OK;
     if (sendmsg(_proto_socket_out, &_sndmh, 0) < 0) {
 	ret = XORP_ERROR;
 	if (errno == ENETDOWN) {
 	    // TODO: check the interface status. E.g. vif_state_check(family);
 	} else {
 	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s on "
-				 "interface %s vif %s) "
-				 "failed: %s",
+				 "interface %s vif %s) failed: %s",
 				 _ip_protocol,
-				 XORP_UINT_CAST(payload.size()),
+				 XORP_UINT_CAST(datalen),
 				 cstring(src_address),
 				 cstring(dst_address),
 				 if_name.c_str(),
@@ -2306,44 +2319,27 @@ RawSocket::proto_socket_write(const string& if_name,
     }
 
 #else // HOST_OS_WINDOWS
-
     // XXX: We may use WSASendMsg() on Longhorn to support IPv6.
 
-    ret = XORP_OK;
+    DWORD sent, error;
+    struct sockaddr_storage to;
+    DWORD buffer_count = 0;
+    int to_len = 0;
+
+    memset(&to, 0, sizeof(to));
+    dst.copy_out(reinterpret_cast<struct sockaddr *>(&to));
+
+    // Set some family-specific arguments
     switch (family()) {
     case AF_INET:
-    {
-	struct sockaddr_in to;
-	DWORD sent, error;
-
-	dst_address.copy_out(to);
-	error = WSASendTo(_proto_socket_out,
-			  reinterpret_cast<WSABUF *>(_sndiov),
-			  2, &sent, 0,
-			  reinterpret_cast<struct sockaddr *>(&to),
-			  sizeof(to), NULL, NULL);
-	if (error != 0) {
-	    ret = XORP_ERROR;
-	}
-    }
-    break;
+	buffer_count = 2;
+	to_len = sizeof(struct sockaddr_in);
+	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-    {
-	struct sockaddr_in6 to;
-	DWORD sent, error;
-
-	dst_address.copy_out(to);
-	error = WSASendTo(_proto_socket_out,
-			  reinterpret_cast<WSABUF *>(_sndiov),
-			  1, &sent, 0,
-			  reinterpret_cast<struct sockaddr *>(&to),
-			  sizeof(to), NULL, NULL);
-	if (error != 0) {
-	    ret = XORP_ERROR;
-	}
-    }
-    break;
+	buffer_count = 1;
+	to_len = sizeof(struct sockaddr_in6);
+	break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
@@ -2351,13 +2347,28 @@ RawSocket::proto_socket_write(const string& if_name,
 	return (XORP_ERROR);
     }
 
+    error = WSASendTo(_proto_socket_out,
+		      reinterpret_cast<WSABUF *>(_sndiov),
+		      buffer_count, &sent, 0,
+		      reinterpret_cast<struct sockaddr *>(&to),
+		      to_len, NULL, NULL);
+    if (error != 0) {
+	ret = XORP_ERROR;
+	error_msg = c_format("WSASendTo(proto %d size %u from %s to %s "
+			     "on vif %s) failed: %s",
+			     _ip_protocol, XORP_UINT_CAST(datalen),
+			     cstring(src), cstring(dst),
+			     mfea_vif->name().c_str(),
+			     win_strerror(GetLastError()));
+	XLOG_ERROR("%s", error_msg.c_str());
+    }
 #endif // HOST_OS_WINDOWS
 
     if (setloop) {
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
     }
-    
+
     return (ret);
 }
 

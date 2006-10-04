@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.7 2006/03/20 07:29:44 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.8 2006/06/15 06:04:36 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -358,6 +358,24 @@ private:
      * @param type the event type.
      */
     void	proto_socket_read(XorpFd fd, IoEventType type);
+
+    /**
+     * Transmit a packet on a protocol socket.
+     *
+     * @param if_name the interface to send the packet on.
+     * @param vif_name the vif to send the packet on.
+     * @param src_address the IP source address.
+     * @param dst_address the IP destination address.
+     * @param datalen the length of the data to be sent.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int		proto_socket_transmit(const string&	if_name,
+				      const string&	vif_name,
+				      const IPvX&	src_address,
+				      const IPvX&	dst_address,
+				      size_t		datalen,
+				      string&		error_msg);
 
     // Private state
     EventLoop&	_eventloop;	// The event loop to use

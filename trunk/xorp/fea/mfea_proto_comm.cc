@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.62 2006/08/28 23:20:27 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.63 2006/09/12 07:30:00 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1810,7 +1810,6 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 {
     int		ip_hdr_len = 0;
     int		int_val;
-    int		setloop = false;
     int		ret;
     MfeaVif	*mfea_vif = mfea_node().vif_find_by_vif_index(vif_index);
     void	*cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
@@ -2228,16 +2227,27 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	error_msg = c_format("Invalid address family: %d", family());
 	return (XORP_ERROR);
     }
-    
-    setloop = false;
+
+    ret = proto_socket_transmit(mfea_vif, src, dst, datalen, error_msg);
+
+    return (ret);
+}
+
+int
+ProtoComm::proto_socket_transmit(MfeaVif *mfea_vif, const IPvX& src,
+				 const IPvX& dst, size_t datalen,
+				 string& error_msg)
+{
+    bool setloop = false;
+    int ret = XORP_OK;
+
     if (dst.is_multicast()) {
 	set_default_multicast_vif(mfea_vif->vif_index());
 	set_multicast_loop(true);
 	setloop = true;
     }
 
-#ifndef HOST_OS_WINDOWS    
-    ret = XORP_OK;
+#ifndef HOST_OS_WINDOWS
     if (sendmsg(_proto_socket_out, &_sndmh, 0) < 0) {
 	ret = XORP_ERROR;
 	if (errno == ENETDOWN) {
@@ -2253,42 +2263,27 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
     }
 
 #else // HOST_OS_WINDOWS
+    // XXX: We may use WSASendMsg() on Longhorn to support IPv6.
 
-    ret = XORP_OK;
+    DWORD sent, error;
+    struct sockaddr_storage to;
+    DWORD buffer_count = 0;
+    int to_len = 0;
+
+    memset(&to, 0, sizeof(to));
+    dst.copy_out(reinterpret_cast<struct sockaddr *>(&to));
+
+    // Set some family-specific arguments
     switch (family()) {
     case AF_INET:
-    {
-	struct sockaddr_in to;
-	DWORD sent, error;
-
-	dst.copy_out(to);
-	error = WSASendTo(_proto_socket_out,
-			  reinterpret_cast<WSABUF *>(_sndiov),
-			  2, &sent, 0,
-			  reinterpret_cast<struct sockaddr *>(&to),
-			  sizeof(to), NULL, NULL);
-	if (error != 0) {
-	    ret = XORP_ERROR;
-	}
-    }
-    break;
+	buffer_count = 2;
+	to_len = sizeof(struct sockaddr_in);
+	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-    {
-	struct sockaddr_in6 to;
-	DWORD sent, error;
-
-	dst.copy_out(to);
-	error = WSASendTo(_proto_socket_out,
-			  reinterpret_cast<WSABUF *>(_sndiov),
-			  1, &sent, 0,
-			  reinterpret_cast<struct sockaddr *>(&to),
-			  sizeof(to), NULL, NULL);
-	if (error != 0) {
-	    ret = XORP_ERROR;
-	}
-    }
-    break;
+	buffer_count = 1;
+	to_len = sizeof(struct sockaddr_in6);
+	break;
 #endif // HAVE_IPV6
     default:
 	XLOG_UNREACHABLE();
@@ -2296,11 +2291,26 @@ ProtoComm::proto_socket_write(uint32_t vif_index,
 	return (XORP_ERROR);
     }
 
+    error = WSASendTo(_proto_socket_out,
+		      reinterpret_cast<WSABUF *>(_sndiov),
+		      buffer_count, &sent, 0,
+		      reinterpret_cast<struct sockaddr *>(&to),
+		      to_len, NULL, NULL);
+    if (error != 0) {
+	ret = XORP_ERROR;
+	error_msg = c_format("WSASendTo(proto %d size %u from %s to %s "
+			     "on vif %s) failed: %s",
+			     _ip_protocol, XORP_UINT_CAST(datalen),
+			     cstring(src), cstring(dst),
+			     mfea_vif->name().c_str(),
+			     win_strerror(GetLastError()));
+	XLOG_ERROR("%s", error_msg.c_str());
+    }
 #endif // HOST_OS_WINDOWS
 
     if (setloop) {
 	set_multicast_loop(false);
     }
-    
+
     return (ret);
 }
