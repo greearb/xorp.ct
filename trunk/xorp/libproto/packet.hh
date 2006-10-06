@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.6 2006/08/25 01:15:33 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.7 2006/10/03 23:51:55 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -487,17 +487,19 @@ public:
     /**
      * Fragment an IPv4 packet.
      *
-     * Note: if the original packet not larger than the MTU, then the packet
+     * Note: If the original packet is not larger than the MTU, then the packet
      * is not fragmented (i.e., @ref fragments is empty), and the return
      * value is XORP_OK.
      *
      * @param mtu the MTU for fragmenting the packet.
      * @param fragments the return-by-reference fragments of the IPv4 packet.
+     * @param do_checksum if true, compute and set the checksum in the IPv4
+     * header, otherwise reset it to zero.
      * @param error_msg the error message (if error).
      * @raturn XORP_OK on success, otherwise XORP_ERROR.
      */
     int fragment(size_t mtu, list<vector<uint8_t> >& fragments,
-		 string& error_msg) const;
+		 bool do_checksum, string& error_msg) const;
 
 protected:
     // IPv4 header related constants

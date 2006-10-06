@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.33 2006/10/04 00:15:29 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_proto_register.cc,v 1.34 2006/10/04 00:59:38 pavlin Exp $"
 
 
 //
@@ -518,7 +518,7 @@ PimVif::pim_register_send(const IPvX& rp_addr,
 	list<vector<uint8_t> > fragments;
 	list<vector<uint8_t> >::iterator iter;
 
-	if (ip4.fragment(mtu, fragments, error_msg) != XORP_OK) {
+	if (ip4.fragment(mtu, fragments, true, error_msg) != XORP_OK) {
 	    //
 	    // XXX: If fragmentation is forbidded, we don't send
 	    // ICMP "fragmentation needed" back to the sender, because in

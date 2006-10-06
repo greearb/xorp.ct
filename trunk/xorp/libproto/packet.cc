@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP$"
+#ident "$XORP: xorp/libproto/packet.cc,v 1.1 2006/10/03 23:51:55 pavlin Exp $"
 
 
 //
@@ -29,7 +29,7 @@
 
 int
 IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
-		    string& error_msg) const
+		    bool do_checksum, string& error_msg) const
 {
     const IpHeader4& orig_ip4 = *this;
     size_t datalen = orig_ip4.ip_len();
@@ -160,7 +160,8 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	first_ip.set_ip_off(first_ip.ip_off() | IpHeader4::FRAGMENT_FLAGS_IP_MF);
 	first_ip.set_ip_len(first_frag_len);
 	first_ip.set_ip_sum(0);
-	first_ip.set_ip_sum(inet_checksum(first_ip.data(), first_ip_hl));
+	if (do_checksum)
+	    first_ip.set_ip_sum(inet_checksum(first_ip.data(), first_ip_hl));
 
 	// Add the first fragment
 	fragments.push_back(first_frag);
@@ -205,7 +206,8 @@ IpHeader4::fragment(size_t mtu, list<vector<uint8_t> >& fragments,
 	}
 
 	frag_ip4.set_ip_sum(0);
-	frag_ip4.set_ip_sum(inet_checksum(frag_ip4.data(), frag_ip_hl));
+	if (do_checksum)
+	    frag_ip4.set_ip_sum(inet_checksum(frag_ip4.data(), frag_ip_hl));
 
 	// Add the fragment
 	fragments.push_back(frag_buf);
