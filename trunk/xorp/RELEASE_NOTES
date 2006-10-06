@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.133 2006/08/18 23:29:47 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.134 2006/09/08 15:42:34 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -45,6 +45,8 @@ Release 1.4-WIP (2006/??/??)
       interfaces/VIFs, each of them with the "default-system-config"
       configuration statement.
 
+    - Bug fix related to atomically modifying the IP address of an interface.
+
   RIB:
     - 
 
@@ -62,10 +64,10 @@ Release 1.4-WIP (2006/??/??)
       conditions in the "from" block.
 
   MLD/IGMP:
-    - 
+    - Bug fix related to atomically modifying the IP address of an interface.
 
   PIM-SM:
-    - 
+    - Bug fix related to atomically modifying the IP address of an interface.
 
   FIB2MRIB:
     - Bug fix related to updating the interface and vif name of a
