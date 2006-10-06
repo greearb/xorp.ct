@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.8 2006/06/15 06:04:36 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.9 2006/10/04 18:33:52 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -366,7 +366,6 @@ private:
      * @param vif_name the vif to send the packet on.
      * @param src_address the IP source address.
      * @param dst_address the IP destination address.
-     * @param datalen the length of the data to be sent.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
@@ -374,7 +373,6 @@ private:
 				      const string&	vif_name,
 				      const IPvX&	src_address,
 				      const IPvX&	dst_address,
-				      size_t		datalen,
 				      string&		error_msg);
 
     // Private state
@@ -386,16 +384,15 @@ private:
     XorpFd	_proto_socket_in;    // The socket to receive protocol message
     XorpFd	_proto_socket_out;   // The socket to end protocol message
     bool	_is_ip_hdr_included; // True if IP header is included on send
+    uint16_t	_ip_id;		     // IPv4 Header ID
 
-    uint8_t*	_rcvbuf0;	// Data buffer0 for receiving
-    uint8_t*	_sndbuf0;	// Data buffer0 for sending
-    uint8_t*	_rcvbuf1;	// Data buffer1 for receiving
-    uint8_t*	_sndbuf1;	// Data buffer1 for sending
+    uint8_t*	_rcvbuf;	// Data buffer for receiving
+    uint8_t*	_sndbuf;	// Data buffer for sending
     uint8_t*	_rcvcmsgbuf;	// Control recv info (IPv6 only)
     uint8_t*	_sndcmsgbuf;	// Control send info (IPv6 only)
 
-    struct iovec	_rcviov[2]; // The scatter/gatter array for receiving
-    struct iovec	_sndiov[2]; // The scatter/gatter array for sending
+    struct iovec	_rcviov[1]; // The scatter/gatter array for receiving
+    struct iovec	_sndiov[]; // The scatter/gatter array for sending
 
 #ifndef HOST_OS_WINDOWS
     struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()

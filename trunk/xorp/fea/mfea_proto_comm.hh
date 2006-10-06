@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.20 2006/03/20 07:29:44 pavlin Exp $
+// $XORP: xorp/fea/mfea_proto_comm.hh,v 1.21 2006/10/04 18:33:52 pavlin Exp $
 
 
 #ifndef __FEA_MFEA_PROTO_COMM_HH__
@@ -272,13 +272,11 @@ private:
      * @param mfea_vif the vif to send the packet on.
      * @param src the source address of the packet.
      * @param dst the destination address of the packet.
-     * @param datalen the length of the data to be sent.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int		proto_socket_transmit(MfeaVif *mfea_vif, const IPvX& src,
-				      const IPvX& dst, size_t datalen,
-				      string& error_msg);
+				      const IPvX& dst, string& error_msg);
 
     // Private state
     MfeaNode&	_mfea_node;	// The MFEA node I belong to
@@ -288,16 +286,15 @@ private:
     XorpFd	_proto_socket_in;    // The socket to receive protocol message
     XorpFd	_proto_socket_out;   // The socket to send protocol message
     bool	_is_ip_hdr_included; // True if IP header is included on send
+    uint16_t	_ip_id;		     // IPv4 header ID
 
-    uint8_t*	_rcvbuf0;	// Data buffer0 for receiving
-    uint8_t*	_sndbuf0;	// Data buffer0 for sending
-    uint8_t*	_rcvbuf1;	// Data buffer1 for receiving
-    uint8_t*	_sndbuf1;	// Data buffer1 for sending
+    uint8_t*	_rcvbuf;	// Data buffer for receiving
+    uint8_t*	_sndbuf;	// Data buffer for sending
     uint8_t*	_rcvcmsgbuf;	// Control recv info (IPv6 only)
     uint8_t*	_sndcmsgbuf;	// Control send info (IPv6 only)
 
-    struct iovec	_rcviov[2]; // The rcvmh scatter/gatter array
-    struct iovec	_sndiov[2]; // The sndmh scatter/gatter array
+    struct iovec	_rcviov[1]; // The rcvmh scatter/gatter array
+    struct iovec	_sndiov[1]; // The sndmh scatter/gatter array
 
 #ifndef HOST_OS_WINDOWS
     struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()

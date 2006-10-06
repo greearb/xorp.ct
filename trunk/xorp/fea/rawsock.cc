@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.32 2006/09/12 07:30:00 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.33 2006/10/04 18:33:52 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -189,8 +189,9 @@ static LPFN_WSASENDMSG lpWSASendMsg = NULL; // Windows Longhorn and up
 #define IPTOS_PREC_INTERNETCONTROL	0xc0
 #endif
 #ifndef IPOPT_RA
-#define IPOPT_RA			148	/* 0x94 */
+#define IPOPT_RA			148	// 0x94
 #endif
+static uint32_t		ra_opt4;
 
 // IPv6 Router Alert stuff
 #ifdef HAVE_IPV6
@@ -209,9 +210,9 @@ static LPFN_WSASENDMSG lpWSASendMsg = NULL; // Windows Longhorn and up
 #endif // HAVE_IPV6
 //
 #ifdef HAVE_IPV6
-static uint16_t		rtalert_code;
+static uint16_t		rtalert_code6;
 #ifndef HAVE_RFC3542
-static uint8_t		raopt[IP6OPT_RTALERT_LEN];
+static uint8_t		ra_opt6[IP6OPT_RTALERT_LEN];
 #endif
 #endif // HAVE_IPV6
 
@@ -230,35 +231,31 @@ RawSocket::RawSocket(EventLoop& eventloop, int init_family,
       _family(init_family),
       _ip_protocol(ip_protocol),
       _iftree(iftree),
-      _is_ip_hdr_included(false)
+      _is_ip_hdr_included(false),
+      _ip_id(random())
 {
     // Init Router Alert related option stuff
+    ra_opt4 = htonl((IPOPT_RA << 24) | (0x04 << 16));
 #ifdef HAVE_IPV6
-    rtalert_code = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
+    rtalert_code6 = htons(IP6OPT_RTALERT_MLD); // XXX: used by MLD only (?)
 #ifndef HAVE_RFC3542
-    raopt[0] = IP6OPT_ROUTER_ALERT;
-    raopt[1] = IP6OPT_RTALERT_LEN - 2;
-    memcpy(&raopt[2], (caddr_t)&rtalert_code, sizeof(rtalert_code));
+    ra_opt6[0] = IP6OPT_ROUTER_ALERT;
+    ra_opt6[1] = IP6OPT_RTALERT_LEN - 2;
+    memcpy(&ra_opt6[2], (caddr_t)&rtalert_code6, sizeof(rtalert_code6));
 #endif // ! HAVE_RFC3542
 #endif // HAVE_IPV6
     
     // Allocate the buffers
-    _rcvbuf0 = new uint8_t[IO_BUF_SIZE];
-    _sndbuf0 = new uint8_t[IO_BUF_SIZE];
-    _rcvbuf1 = new uint8_t[IO_BUF_SIZE];
-    _sndbuf1 = new uint8_t[IO_BUF_SIZE];
+    _rcvbuf = new uint8_t[IO_BUF_SIZE];
+    _sndbuf = new uint8_t[IO_BUF_SIZE];
     _rcvcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
     _sndcmsgbuf = new uint8_t[CMSG_BUF_SIZE];
 
     // Scatter/gatter array initialization
-    _rcviov[0].iov_base		= (caddr_t)_rcvbuf0;
-    _rcviov[1].iov_base		= (caddr_t)_rcvbuf1;
+    _rcviov[0].iov_base		= (caddr_t)_rcvbuf;
     _rcviov[0].iov_len		= IO_BUF_SIZE;
-    _rcviov[1].iov_len		= IO_BUF_SIZE;
-    _sndiov[0].iov_base		= (caddr_t)_sndbuf0;
-    _sndiov[1].iov_base		= (caddr_t)_sndbuf1;
+    _sndiov[0].iov_base		= (caddr_t)_sndbuf;
     _sndiov[0].iov_len		= 0;
-    _sndiov[1].iov_len		= 0;
 
     // recvmsg() and sendmsg() related initialization
 #ifndef HOST_OS_WINDOWS    
@@ -299,10 +296,8 @@ RawSocket::~RawSocket()
     stop(dummy_error_msg);
     
     // Free the buffers
-    delete[] _rcvbuf0;
-    delete[] _sndbuf0;
-    delete[] _rcvbuf1;
-    delete[] _sndbuf1;
+    delete[] _rcvbuf;
+    delete[] _sndbuf;
     delete[] _rcvcmsgbuf;
     delete[] _sndcmsgbuf;
 }
@@ -1029,22 +1024,10 @@ RawSocket::open_proto_sockets(string& error_msg)
 	return (XORP_ERROR);
     }
     // Include IP header when sending (XXX: doesn't do anything for IPv6)
-#ifndef HOST_OS_LINUX
-    //
-    // XXX: In case of Linux don't include the IP header, but use socket
-    // options instead, because the IP_HDRINCL IP packets are not fragmented
-    // and are limited to the interface MTU. The raw(7) Linux manual is wrong
-    // by saying it is a limitation only in Linux 2.2. It is a limitation
-    // in 2.4 and 2.6, and there is no indication this is going to be fixed
-    // in the future.
-    // Fragmenting the packet in user space before transmition is very messy,
-    // especially because we cannot manage the ip_id field in the IP header.
-    //
     if (enable_ip_hdr_include(true, error_msg) != XORP_OK) {
 	close_proto_sockets(dummy_error_msg);
 	return (XORP_ERROR);
     }
-#endif // ! HOST_OS_LINUX
     // Show interest in receiving information from IP header (XXX: IPv6 only)
     if (enable_recv_pktinfo(true, error_msg) != XORP_OK) {
 	close_proto_sockets(dummy_error_msg);
@@ -1189,8 +1172,8 @@ void
 RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 {
     ssize_t	nbytes;
-    int		ip_hdr_len = 0;
-    int		ip_data_len = 0;
+    size_t	ip_hdr_len = 0;
+    size_t	ip_data_len = 0;
     IPvX	src_address(family());
     IPvX	dst_address(family());
     int		int_val;
@@ -1246,7 +1229,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	struct sockaddr_storage from;
 	socklen_t from_len = sizeof(from);
 
-	nbytes = recvfrom(_proto_socket_in, XORP_BUF_CAST(_rcvbuf0),
+	nbytes = recvfrom(_proto_socket_in, XORP_BUF_CAST(_rcvbuf),
 			  IO_BUF_SIZE, 0,
 			  reinterpret_cast<struct sockaddr *>(&from),
 			  &from_len);
@@ -1311,14 +1294,14 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    return;		// Error
 	}
 	struct igmpmsg igmpmsg;
-	memcpy(&igmpmsg, _rcvbuf0, sizeof(igmpmsg));
+	memcpy(&igmpmsg, _rcvbuf, sizeof(igmpmsg));
 	if (igmpmsg.im_mbz == 0) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
 	    //      igmpmsg.im_mbz = ip->ip_p = 0
 	    //
 	    // TODO: not implemented
-	    // kernel_call_process(_rcvbuf0, nbytes);
+	    // kernel_call_process(_rcvbuf, nbytes);
 	    return;		// OK
 	}
 #endif // HAVE_IPV4_MULTICAST_ROUTING
@@ -1343,7 +1326,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    break;
 	}
 
-	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf0);
+	mrt6msg = reinterpret_cast<struct mrt6msg *>(_rcvbuf);
 	if ((mrt6msg->im6_mbz == 0) || (_rcvmh.msg_controllen == 0)) {
 	    //
 	    // XXX: Packets sent up from kernel to daemon have
@@ -1359,7 +1342,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	    //     'icmp6_type = 0' mechanism.
 	    //
 	    // TODO: not implemented
-	    // kernel_call_process(_rcvbuf0, nbytes);
+	    // kernel_call_process(_rcvbuf, nbytes);
 	    return;		// OK
 	}
 #endif // HAVE_IPV6_MULTICAST_ROUTING
@@ -1383,7 +1366,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     switch (family()) {
     case AF_INET:
     {
-	IpHeader4 ip4(_rcvbuf0);
+	IpHeader4 ip4(_rcvbuf);
 	bool is_datalen_error = false;
 	
 	// Input check
@@ -1417,16 +1400,16 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
 	// Check length
 	is_datalen_error = false;
 	do {
-	    if (ip_hdr_len + ip_data_len == nbytes) {
+	    if (ip_hdr_len + ip_data_len == static_cast<size_t>(nbytes)) {
 		is_datalen_error = false;
 		break;		// OK
 	    }
-	    if (nbytes < ip_hdr_len) {
+	    if (nbytes < static_cast<ssize_t>(ip_hdr_len)) {
 		is_datalen_error = true;
 		break;
 	    }
 	    if (ip4.ip_p() == IPPROTO_PIM) {
-		if (nbytes < ip_hdr_len + PIM_REG_MINLEN) {
+		if (nbytes < static_cast<ssize_t>(ip_hdr_len + PIM_REG_MINLEN)) {
 		    is_datalen_error = true;
 		    break;
 		}
@@ -1767,7 +1750,7 @@ RawSocket::proto_socket_read(XorpFd fd, IoEventType type)
     
     // Process the result
     vector<uint8_t> payload(nbytes - ip_hdr_len);
-    memcpy(&payload[0], _rcvbuf0 + ip_hdr_len, nbytes - ip_hdr_len);
+    memcpy(&payload[0], _rcvbuf + ip_hdr_len, nbytes - ip_hdr_len);
     process_recv_data(iftree_if->ifname(),
 		      iftree_vif->vifname(),
 		      src_address, dst_address, ip_ttl, ip_tos,
@@ -1792,9 +1775,9 @@ RawSocket::proto_socket_write(const string& if_name,
 			      const vector<uint8_t>& payload,
 			      string& error_msg)
 {
-    int		ip_hdr_len = 0;
+    size_t	ip_hdr_len = 0;
     int		int_val;
-    int		ret;
+    int		ret_value = XORP_OK;
     const IfTreeInterface* iftree_if = NULL;
     const IfTreeVif* iftree_vif = NULL;
     void*	cmsg_data;	// XXX: CMSG_DATA() is aligned, hence void ptr
@@ -1893,7 +1876,7 @@ RawSocket::proto_socket_write(const string& if_name,
     //
     // Setup the IP header (including the Router Alert option, if specified)
     // In case of IPv4, if the IP_HDRINCL socket option is enabled, the IP
-    // header and the data are specified as two entries to the sndiov[]
+    // header and the data are specified as a single entry in the sndiov[]
     // scatter/gatter array, otherwise we use socket options to set the IP
     // header information and a single sndiov[] entry with the payload.
     // In case of IPv6, the IP header information is specified as
@@ -1902,6 +1885,69 @@ RawSocket::proto_socket_write(const string& if_name,
     switch (family()) {
     case AF_INET:
     {
+	//
+	// XXX: In case of Linux IP_HDRINCL IP packets are not fragmented and
+	// are limited to the interface MTU. The raw(7) Linux manual is wrong
+	// by saying it is a limitation only in Linux 2.2. It is a limitation
+	// in 2.4 and 2.6 and there is no indication this is going to be fixed
+	// in the future.
+	// Hence, in case of Linux we do the following:
+	//   - If the IP packet fits in the MTU, then send the packet using
+	//     IP_HDRINCL option.
+	//   - Otherwise, if the IP source address belongs to the outgoing
+	//     interface, then use various socket options to specify some of
+	//     the IP header options.
+	//   - Otherwise, use IP_HDRINCL and fragment the IP packet in user
+	//     space before transmitting it. Note that in this case we need
+	//     to manage the ip_id field in the IP header.
+	//
+	// The reasoning behind the above logic is: (1) If the IP source
+	// address doesn't belong to one of the router's IP addresses, then
+	// we must use IP_HDRINCL; (2) We want to avoid as much as possible
+	// user-level IP packet fragmentation, because managing the ip_id
+	// field in user space does not guarantee the same ip_id is reused
+	// by the kernel as well (for the same tuple of <src, dest, protocol>).
+	//
+	// Note that in case of all other OS-es we always use the IP_HDRINCL
+	// option to transmit the packets.
+	//
+	bool do_fragmentation = false;
+	bool do_ip_hdr_include = true;
+
+	//
+	// Decide whether we should use IP_HDRINCL and whether we should
+	// do IP packet fragmentation.
+	//
+	do {
+#ifndef HOST_OS_LINUX
+	    break;	// XXX: The extra processing below is for Linux only
+#endif
+	    // Calculate the final packet size and whether it fits in the MTU
+	    ip_hdr_len = IpHeader4::SIZE;
+	    if (is_router_alert)
+		ip_hdr_len += sizeof(ra_opt4);
+
+	    if (ip_hdr_len + payload.size() <= iftree_if->mtu())
+		break;
+
+	    if (iftree_vif->get_addr(src_address.get_ipv4())
+		!= iftree_vif->v4addrs().end()) {
+		do_ip_hdr_include = false;
+		break;
+	    }
+
+	    do_fragmentation = true;
+	    break;
+	} while (false);
+
+	if (do_ip_hdr_include != _is_ip_hdr_included) {
+	    if (enable_ip_hdr_include(do_ip_hdr_include, error_msg)
+		!= XORP_OK) {
+		XLOG_ERROR("%s", error_msg.c_str());
+		return (XORP_ERROR);
+	    }
+	}
+
 	if (! _is_ip_hdr_included) {
 	    //
 	    // Use socket options to set the IP header information
@@ -1912,10 +1958,9 @@ RawSocket::proto_socket_write(const string& if_name,
 	    //
 #ifdef IP_OPTIONS
 	    if (is_router_alert) {
-		uint32_t ip_option = htonl((IPOPT_RA << 24) | (0x04 << 16));
 		if (setsockopt(_proto_socket_out, IPPROTO_IP, IP_OPTIONS,
-			       XORP_SOCKOPT_CAST(&ip_option),
-			       sizeof(ip_option))
+			       XORP_SOCKOPT_CAST(&ra_opt4),
+			       sizeof(ra_opt4))
 		    < 0) {
 		    error_msg = c_format("setsockopt(IP_OPTIONS, IPOPT_RA) "
 					 "failed: %s",
@@ -1957,7 +2002,7 @@ RawSocket::proto_socket_write(const string& if_name,
 #endif // IP_TOS
 
 	    //
-	    // XXX: bind to the source address so the outgoing IP packet
+	    // XXX: Bind to the source address so the outgoing IP packet
 	    // will use that address.
 	    //
 	    struct sockaddr_in sin;
@@ -1975,29 +2020,24 @@ RawSocket::proto_socket_write(const string& if_name,
 	    //
 	    // Now hook the data
 	    //
-#ifndef HOST_OS_WINDOWS
-	    dst_address.copy_out(_to4);
-	    _sndmh.msg_namelen		= sizeof(_to4);
-	    _sndmh.msg_iovlen		= 1;
-	    _sndmh.msg_control		= NULL;
-	    _sndmh.msg_controllen	= 0;
-#endif // ! HOST_OS_WINDOWS
-	    memcpy(_sndbuf0, &payload[0], payload.size()); // XXX: goes to _sndiov[0].iov_base
-	    // _sndiov[0].iov_base	= (caddr_t)&payload[0];
-	    _sndiov[0].iov_len	= payload.size();
+	    memcpy(_sndbuf, &payload[0], payload.size()); // XXX: _sndiov[0].iov_base
+	    _sndiov[0].iov_len = payload.size();
+
+	    // Transmit the packet
+	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
+					      dst_address, error_msg);
 	    break;
 	}
 
 	//
 	// Set the IPv4 header
 	//
-	IpHeader4Writer ip4(_sndbuf0);
+	IpHeader4Writer ip4(_sndbuf);
 	if (is_router_alert) {
 	    // Include the Router Alert option
-	    uint32_t ip_option = (IPOPT_RA << 24) | (0x04 << 16);
 	    uint8_t* ip_option_p = ip4.data() + ip4.size();
-	    embed_32(ip_option_p, ip_option);
-	    ip_hdr_len	= ip4.size() + sizeof(ip_option);
+	    embed_32(ip_option_p, ra_opt4);
+	    ip_hdr_len	= ip4.size() + sizeof(ra_opt4);
 	} else {
 	    ip_hdr_len	= ip4.size();
 	}
@@ -2011,30 +2051,46 @@ RawSocket::proto_socket_write(const string& if_name,
 	ip4.set_ip_sum(0);				// Let kernel fill in
 	ip4.set_ip_src(src_address.get_ipv4());
 	ip4.set_ip_dst(dst_address.get_ipv4());
-#ifdef IPV4_RAW_OUTPUT_IS_RAW
 	ip4.set_ip_len(ip_hdr_len + payload.size());
-#else
-	//
-	// XXX: The stored value should be in host order, and should
-	// include the IPv4 header length.
-	//
-	ip4.set_ip_len_host(ip_hdr_len + payload.size());
-#endif // ! IPV4_RAW_INPUT_IS_RAW
 
 	//
 	// Now hook the data
 	//
-#ifndef HOST_OS_WINDOWS
-	dst_address.copy_out(_to4);
-	_sndmh.msg_namelen	= sizeof(_to4);
-	_sndmh.msg_iovlen	= 2;
-	_sndmh.msg_control	= NULL;
-	_sndmh.msg_controllen	= 0;
-#endif // ! HOST_OS_WINDOWS
-	_sndiov[0].iov_len	= ip_hdr_len;
-    	memcpy(_sndbuf1, &payload[0], payload.size()); // XXX: goes to _sndiov[1].iov_base
-	// _sndiov[1].iov_base	= (caddr_t)&payload[0];
-	_sndiov[1].iov_len	= payload.size();
+    	memcpy(_sndbuf + ip_hdr_len, &payload[0], payload.size()); // XXX: _sndiov[0].iov_base
+	_sndiov[0].iov_len	= ip_hdr_len + payload.size();
+
+	if (! do_fragmentation) {
+	    // Transmit the packet
+	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
+					      dst_address, error_msg);
+	    break;
+	}
+
+	//
+	// Perform fragmentation and transmit each fragment
+	//
+	list<vector<uint8_t> > fragments;
+	list<vector<uint8_t> >::iterator iter;
+
+	// Calculate and set the IPv4 packet ID
+	_ip_id++;
+	if (_ip_id == 0)
+	    _ip_id++;
+	ip4.set_ip_id(_ip_id);
+	if (ip4.fragment(iftree_if->mtu(), fragments, false, error_msg)
+	    != XORP_OK) {
+	    return (XORP_ERROR);
+	}
+	XLOG_ASSERT(! fragments.empty());
+	for (iter = fragments.begin(); iter != fragments.end(); ++iter) {
+	    vector<uint8_t>& ip_fragment = *iter;
+	    _sndiov[0].iov_len = ip_fragment.size();
+	    memcpy(_sndbuf, &ip_fragment[0], ip_fragment.size());
+	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
+					      dst_address, error_msg);
+	    if (ret_value != XORP_OK)
+		break;
+	}
     }
     break;
 
@@ -2082,7 +2138,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	    // to conditionally compile, because Linux doesn't
 	    // have inet6_option_*
 	    //
-	    hbhlen = inet6_option_space(sizeof(raopt));
+	    hbhlen = inet6_option_space(sizeof(ra_opt6));
 	    ctllen += hbhlen;
 #else
 	    UNUSED(hbhlen);
@@ -2166,7 +2222,7 @@ RawSocket::proto_socket_write(const string& if_name,
 				     currentlen);
 		return (XORP_ERROR);
 	    }
-	    inet6_opt_set_val(optp, 0, &rtalert_code, sizeof(rtalert_code));
+	    inet6_opt_set_val(optp, 0, &rtalert_code6, sizeof(rtalert_code6));
 	    if (inet6_opt_finish(hbhbuf, hbhlen, currentlen) == -1) {
 		error_msg = c_format("inet6_opt_finish(len = %d) failed",
 				     currentlen);
@@ -2185,7 +2241,7 @@ RawSocket::proto_socket_write(const string& if_name,
 		error_msg = c_format("inet6_option_init(IPV6_HOPOPTS) failed");
 		return (XORP_ERROR);
 	    }
-	    if (inet6_option_append(cmsgp, raopt, 4, 0)) {
+	    if (inet6_option_append(cmsgp, ra_opt6, 4, 0)) {
 		error_msg = c_format("inet6_option_append(Router Alert) failed");
 		return (XORP_ERROR);
 	    }
@@ -2250,14 +2306,12 @@ RawSocket::proto_socket_write(const string& if_name,
 	//
 	// Now hook the data
 	//
-#ifndef HOST_OS_WINDOWS
-	dst_address.copy_out(_to6);
-	_sndmh.msg_namelen  = sizeof(_to6);
-	_sndmh.msg_iovlen   = 1;
-#endif // ! HOST_OS_WINDOWS
-	memcpy(_sndbuf0, &payload[0], payload.size()); // XXX: goes to _sndiov[0].iov_base
-	// _sndiov[0].iov_base	= (caddr_t)&payload[0];
+	memcpy(_sndbuf, &payload[0], payload.size()); // XXX: _sndiov[0].iov_base
 	_sndiov[0].iov_len  = payload.size();
+
+	// Transmit the packet
+	ret_value = proto_socket_transmit(if_name, vif_name, src_address,
+					  dst_address, error_msg);
     }
     break;
 #endif // HAVE_IPV6
@@ -2268,10 +2322,7 @@ RawSocket::proto_socket_write(const string& if_name,
 	return (XORP_ERROR);
     }
 
-    ret = proto_socket_transmit(if_name, vif_name, src_address, dst_address,
-				payload.size(), error_msg);
-
-    return (ret);
+    return (ret_value);
 }
 
 int
@@ -2279,12 +2330,28 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 				 const string&	vif_name,
 				 const IPvX&	src_address,
 				 const IPvX&	dst_address,
-				 size_t		datalen,
 				 string&	error_msg)
 {
     bool setloop = false;
-    int ret = XORP_OK;
+    int ret_value = XORP_OK;
 
+    //
+    // Adjust some IPv4 header fields
+    //
+#ifndef IPV4_RAW_OUTPUT_IS_RAW
+    if (_is_ip_hdr_included && src_address.is_ipv4()) {
+	//
+	// XXX: The stored value should be in host order, and should
+	// include the IPv4 header length.
+	//
+	IpHeader4Writer ip4(_sndbuf);
+	ip4.set_ip_len_host(ip4.ip_len());
+    }
+#endif // ! IPV4_RAW_INPUT_IS_RAW
+
+    //
+    // Multicast-related setting
+    //
     if (dst_address.is_multicast()) {
 	if (set_default_multicast_interface(if_name, vif_name, error_msg)
 	    != XORP_OK) {
@@ -2300,16 +2367,41 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 	setloop = true;
     }
 
+    //
+    // Transmit the packet
+    //
+
 #ifndef HOST_OS_WINDOWS    
+
+    // Set some sendmsg()-related fields
+    switch (family()) {
+    case AF_INET:
+	dst_address.copy_out(_to4);
+	_sndmh.msg_namelen	= sizeof(_to4);
+	_sndmh.msg_control	= NULL;
+	_sndmh.msg_controllen	= 0;
+	break;
+#ifdef HAVE_IPV6
+    case AF_INET6:
+	dst_address.copy_out(_to6);
+	_sndmh.msg_namelen  = sizeof(_to6);
+	break;
+#endif // HAVE_IPV6
+    default:
+	XLOG_UNREACHABLE();
+	error_msg = c_format("Invalid address family %d", family());
+	return (XORP_ERROR);
+    }
+
     if (sendmsg(_proto_socket_out, &_sndmh, 0) < 0) {
-	ret = XORP_ERROR;
+	ret_value = XORP_ERROR;
 	if (errno == ENETDOWN) {
 	    // TODO: check the interface status. E.g. vif_state_check(family);
 	} else {
-	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s on "
-				 "interface %s vif %s) failed: %s",
+	    error_msg = c_format("sendmsg(proto %d size %u from %s to %s "
+				 "on interface %s vif %s) failed: %s",
 				 _ip_protocol,
-				 XORP_UINT_CAST(datalen),
+				 XORP_UINT_CAST(_sndiov[0].iov_len),
 				 cstring(src_address),
 				 cstring(dst_address),
 				 if_name.c_str(),
@@ -2323,7 +2415,7 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 
     DWORD sent, error;
     struct sockaddr_storage to;
-    DWORD buffer_count = 0;
+    DWORD buffer_count = 1;
     int to_len = 0;
 
     memset(&to, 0, sizeof(to));
@@ -2332,12 +2424,10 @@ RawSocket::proto_socket_transmit(const string&	if_name,
     // Set some family-specific arguments
     switch (family()) {
     case AF_INET:
-	buffer_count = 2;
 	to_len = sizeof(struct sockaddr_in);
 	break;
 #ifdef HAVE_IPV6
     case AF_INET6:
-	buffer_count = 1;
 	to_len = sizeof(struct sockaddr_in6);
 	break;
 #endif // HAVE_IPV6
@@ -2353,23 +2443,29 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 		      reinterpret_cast<struct sockaddr *>(&to),
 		      to_len, NULL, NULL);
     if (error != 0) {
-	ret = XORP_ERROR;
+	ret_value = XORP_ERROR;
 	error_msg = c_format("WSASendTo(proto %d size %u from %s to %s "
-			     "on vif %s) failed: %s",
-			     _ip_protocol, XORP_UINT_CAST(datalen),
-			     cstring(src), cstring(dst),
-			     mfea_vif->name().c_str(),
+			     "on interface %s vif %s) failed: %s",
+			     _ip_protocol,
+			     XORP_UINT_CAST(_sndiov[0].iov_len),
+			     cstring(src_address),
+			     cstring(dst_address),
+			     if_name.c_str(),
+			     vif_name.c_str(),
 			     win_strerror(GetLastError()));
 	XLOG_ERROR("%s", error_msg.c_str());
     }
 #endif // HOST_OS_WINDOWS
 
+    //
+    // Restore some multicast related settings
+    //
     if (setloop) {
 	string dummy_error_msg;
 	enable_multicast_loopback(false, dummy_error_msg);
     }
 
-    return (ret);
+    return (ret_value);
 }
 
 bool
