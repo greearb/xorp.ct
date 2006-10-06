@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.13 2006/06/23 00:18:23 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_config.cc,v 1.14 2006/07/03 23:33:38 pavlin Exp $"
 
 
 //
@@ -38,22 +38,7 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
     map<string, Vif>& configured_vifs = ProtoNode<Mld6igmpVif>::configured_vifs();
 
     //
-    // Remove vifs that don't exist anymore
-    //
-    for (uint32_t i = 0; i < maxvifs(); i++) {
-	Vif* node_vif = vif_find_by_vif_index(i);
-	if (node_vif == NULL)
-	    continue;
-	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
-	    // Delete the interface
-	    string vif_name = node_vif->name();
-	    delete_vif(vif_name, err);
-	    continue;
-	}
-    }
-
-    //
-    // Add new vifs, update existing ones and remove old addresses
+    // Add new vifs and update existing ones
     //
     for (vif_iter = configured_vifs.begin();
 	 vif_iter != configured_vifs.end();
@@ -80,13 +65,40 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
 		      vif->is_broadcast_capable(), vif->is_underlying_vif_up(),
 		      vif->mtu(),
 		      err);
+    }
+
+    //
+    // Add new vif addresses, update existing ones, and remove old addresses
+    //
+    for (vif_iter = configured_vifs.begin();
+	 vif_iter != configured_vifs.end();
+	 ++vif_iter) {
+	Vif* vif = &vif_iter->second;
+	Vif* node_vif = vif_find_by_name(vif->name());
+	list<VifAddr>::const_iterator vif_addr_iter;
+
+	if (vif->is_pim_register())
+	    continue;	// XXX: don't add the PIM Register vifs
+
+	if (node_vif == NULL)
+	    continue;
+	
+	for (vif_addr_iter = vif->addr_list().begin();
+	     vif_addr_iter != vif->addr_list().end();
+	     ++vif_addr_iter) {
+	    const VifAddr& vif_addr = *vif_addr_iter;
+	    add_vif_addr(vif->name(), vif_addr.addr(),
+			 vif_addr.subnet_addr(),
+			 vif_addr.broadcast_addr(),
+			 vif_addr.peer_addr(),
+			 err);
+	}
 
 	//
 	// Delete vif addresses that don't exist anymore
 	//
 	{
 	    list<IPvX> delete_addresses_list;
-	    list<VifAddr>::const_iterator vif_addr_iter;
 	    for (vif_addr_iter = node_vif->addr_list().begin();
 		 vif_addr_iter != node_vif->addr_list().end();
 		 ++vif_addr_iter) {
@@ -106,33 +118,20 @@ Mld6igmpNode::set_config_all_vifs_done(string& error_msg)
     }
 
     //
-    // Add new vif addresses, and update existing ones
+    // Remove vifs that don't exist anymore
     //
-    for (vif_iter = configured_vifs.begin();
-	 vif_iter != configured_vifs.end();
-	 ++vif_iter) {
-	Vif* vif = &vif_iter->second;
-	Vif* node_vif = vif_find_by_name(vif->name());
-
-	if (vif->is_pim_register())
-	    continue;	// XXX: don't add the PIM Register vifs
-
+    for (uint32_t i = 0; i < maxvifs(); i++) {
+	Vif* node_vif = vif_find_by_vif_index(i);
 	if (node_vif == NULL)
 	    continue;
-	
-	list<VifAddr>::const_iterator vif_addr_iter;
-	for (vif_addr_iter = vif->addr_list().begin();
-	     vif_addr_iter != vif->addr_list().end();
-	     ++vif_addr_iter) {
-	    const VifAddr& vif_addr = *vif_addr_iter;
-	    add_vif_addr(vif->name(), vif_addr.addr(),
-			 vif_addr.subnet_addr(),
-			 vif_addr.broadcast_addr(),
-			 vif_addr.peer_addr(),
-			 err);
+	if (configured_vifs.find(node_vif->name()) == configured_vifs.end()) {
+	    // Delete the interface
+	    string vif_name = node_vif->name();
+	    delete_vif(vif_name, err);
+	    continue;
 	}
     }
-    
+
     // TODO: XXX: PAVPAVPAV: remove it!!
     Mld6igmpNode::set_vif_setup_completed(true);
     

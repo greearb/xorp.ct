@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_node.cc,v 1.64 2006/07/03 23:33:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_node.cc,v 1.65 2006/07/03 23:57:29 pavlin Exp $"
 
 //
 // MFEA (Multicast Forwarding Engine Abstraction) implementation.
@@ -387,42 +387,13 @@ MfeaNode::updates_made()
     _iftree = ifmgr_iftree();
 
     //
-    // Remove vifs that don't exist anymore
-    //
-    list<string> delete_vifs_list;
-    for (mfea_vif_iter = configured_vifs().begin();
-	 mfea_vif_iter != configured_vifs().end();
-	 ++mfea_vif_iter) {
-	Vif* node_vif = &mfea_vif_iter->second;
-	if (node_vif->is_pim_register())
-	    continue;		// XXX: don't delete the PIM Register vif
-	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
-	    // Add the vif to the list of old interfaces
-	    delete_vifs_list.push_back(node_vif->name());
-	}
-    }
-    // Delete the old vifs
-    list<string>::iterator vif_name_iter;
-    for (vif_name_iter = delete_vifs_list.begin();
-	 vif_name_iter != delete_vifs_list.end();
-	 ++vif_name_iter) {
-	const string& vif_name = *vif_name_iter;
-	if (delete_config_vif(vif_name, error_msg) < 0) {
-	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
-		       "vifs: %s",
-		       vif_name.c_str(), error_msg.c_str());
-	}
-    }
-    
-    //
-    // Add new vifs, update existing ones and remove old addresses
+    // Add new vifs and update existing ones
     //
     IfMgrIfTree::IfMap::const_iterator ifmgr_iface_iter;
     for (ifmgr_iface_iter = _iftree.ifs().begin();
 	 ifmgr_iface_iter != _iftree.ifs().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
-	const string& ifmgr_iface_name = ifmgr_iface.name();
 
 	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
 	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
@@ -478,66 +449,29 @@ MfeaNode::updates_made()
 				 ifmgr_iface.mtu_bytes(),
 				 error_msg);
 	
-	    //
-	    // Delete vif addresses that don't exist anymore
-	    //
-	    {
-		list<IPvX> delete_addresses_list;
-		list<VifAddr>::const_iterator vif_addr_iter;
-		for (vif_addr_iter = node_vif->addr_list().begin();
-		     vif_addr_iter != node_vif->addr_list().end();
-		     ++vif_addr_iter) {
-		    const VifAddr& vif_addr = *vif_addr_iter;
-		    if (vif_addr.addr().is_ipv4()
-			&& (_iftree.find_addr(ifmgr_iface_name,
-					      ifmgr_vif_name,
-					      vif_addr.addr().get_ipv4()))
-			    == NULL) {
-			    delete_addresses_list.push_back(vif_addr.addr());
-		    }
-		    if (vif_addr.addr().is_ipv6()
-			&& (_iftree.find_addr(ifmgr_iface_name,
-					      ifmgr_vif_name,
-					      vif_addr.addr().get_ipv6()))
-			    == NULL) {
-			    delete_addresses_list.push_back(vif_addr.addr());
-		    }
-		}
-
-		// Delete the addresses
-		list<IPvX>::iterator ipvx_iter;
-		for (ipvx_iter = delete_addresses_list.begin();
-		     ipvx_iter != delete_addresses_list.end();
-		     ++ipvx_iter) {
-		    const IPvX& ipvx = *ipvx_iter;
-		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
-			< 0) {
-			XLOG_ERROR("Cannot delete address %s from vif %s from "
-				   "the set of configured vifs: %s",
-				   cstring(ipvx), ifmgr_vif_name.c_str(),
-				   error_msg.c_str());
-		    }
-		}
-	    }
 	}
     }
 
     //
-    // Add new vif addresses, and update existing ones
+    // Add new vif addresses, update existing ones, and remove old addresses
     //
     for (ifmgr_iface_iter = _iftree.ifs().begin();
 	 ifmgr_iface_iter != _iftree.ifs().end();
 	 ++ifmgr_iface_iter) {
 	const IfMgrIfAtom& ifmgr_iface = ifmgr_iface_iter->second;
-
+	const string& ifmgr_iface_name = ifmgr_iface.name();
 	IfMgrIfAtom::VifMap::const_iterator ifmgr_vif_iter;
+
 	for (ifmgr_vif_iter = ifmgr_iface.vifs().begin();
 	     ifmgr_vif_iter != ifmgr_iface.vifs().end();
 	     ++ifmgr_vif_iter) {
 	    const IfMgrVifAtom& ifmgr_vif = ifmgr_vif_iter->second;
 	    const string& ifmgr_vif_name = ifmgr_vif.name();
 	    Vif* node_vif = NULL;
-	
+
+	    //
+	    // Add new vif addresses and update existing ones
+	    //
 	    mfea_vif_iter = configured_vifs().find(ifmgr_vif_name);
 	    if (mfea_vif_iter != configured_vifs().end()) {
 		node_vif = &(mfea_vif_iter->second);
@@ -667,6 +601,76 @@ MfeaNode::updates_made()
 		    }
 		}
 	    }
+
+	    //
+	    // Delete vif addresses that don't exist anymore
+	    //
+	    {
+		list<IPvX> delete_addresses_list;
+		list<VifAddr>::const_iterator vif_addr_iter;
+		for (vif_addr_iter = node_vif->addr_list().begin();
+		     vif_addr_iter != node_vif->addr_list().end();
+		     ++vif_addr_iter) {
+		    const VifAddr& vif_addr = *vif_addr_iter;
+		    if (vif_addr.addr().is_ipv4()
+			&& (_iftree.find_addr(ifmgr_iface_name,
+					      ifmgr_vif_name,
+					      vif_addr.addr().get_ipv4()))
+			    == NULL) {
+			    delete_addresses_list.push_back(vif_addr.addr());
+		    }
+		    if (vif_addr.addr().is_ipv6()
+			&& (_iftree.find_addr(ifmgr_iface_name,
+					      ifmgr_vif_name,
+					      vif_addr.addr().get_ipv6()))
+			    == NULL) {
+			    delete_addresses_list.push_back(vif_addr.addr());
+		    }
+		}
+
+		// Delete the addresses
+		list<IPvX>::iterator ipvx_iter;
+		for (ipvx_iter = delete_addresses_list.begin();
+		     ipvx_iter != delete_addresses_list.end();
+		     ++ipvx_iter) {
+		    const IPvX& ipvx = *ipvx_iter;
+		    if (delete_config_vif_addr(ifmgr_vif_name, ipvx, error_msg)
+			< 0) {
+			XLOG_ERROR("Cannot delete address %s from vif %s from "
+				   "the set of configured vifs: %s",
+				   cstring(ipvx), ifmgr_vif_name.c_str(),
+				   error_msg.c_str());
+		    }
+		}
+	    }
+	}
+    }
+
+    //
+    // Remove vifs that don't exist anymore
+    //
+    list<string> delete_vifs_list;
+    for (mfea_vif_iter = configured_vifs().begin();
+	 mfea_vif_iter != configured_vifs().end();
+	 ++mfea_vif_iter) {
+	Vif* node_vif = &mfea_vif_iter->second;
+	if (node_vif->is_pim_register())
+	    continue;		// XXX: don't delete the PIM Register vif
+	if (_iftree.find_vif(node_vif->name(), node_vif->name()) == NULL) {
+	    // Add the vif to the list of old interfaces
+	    delete_vifs_list.push_back(node_vif->name());
+	}
+    }
+    // Delete the old vifs
+    list<string>::iterator vif_name_iter;
+    for (vif_name_iter = delete_vifs_list.begin();
+	 vif_name_iter != delete_vifs_list.end();
+	 ++vif_name_iter) {
+	const string& vif_name = *vif_name_iter;
+	if (delete_config_vif(vif_name, error_msg) < 0) {
+	    XLOG_ERROR("Cannot delete vif %s from the set of configured "
+		       "vifs: %s",
+		       vif_name.c_str(), error_msg.c_str());
 	}
     }
     
