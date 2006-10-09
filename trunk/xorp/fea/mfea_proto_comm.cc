@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.64 2006/10/04 18:33:51 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.65 2006/10/06 20:55:20 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -2357,7 +2357,7 @@ ProtoComm::proto_socket_transmit(MfeaVif *mfea_vif, const IPvX& src,
     int to_len = 0;
 
     memset(&to, 0, sizeof(to));
-    dst.copy_out(reinterpret_cast<struct sockaddr *>(&to));
+    dst.copy_out(reinterpret_cast<struct sockaddr&>(to));
 
     // Set some family-specific arguments
     switch (family()) {

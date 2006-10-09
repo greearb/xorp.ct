@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.33 2006/10/04 18:33:52 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.34 2006/10/06 20:55:20 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -2419,7 +2419,7 @@ RawSocket::proto_socket_transmit(const string&	if_name,
     int to_len = 0;
 
     memset(&to, 0, sizeof(to));
-    dst.copy_out(reinterpret_cast<struct sockaddr *>(&to));
+    dst.copy_out(reinterpret_cast<struct sockaddr&>(to));
 
     // Set some family-specific arguments
     switch (family()) {
