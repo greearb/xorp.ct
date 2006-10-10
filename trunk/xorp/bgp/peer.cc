@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer.cc,v 1.141 2006/08/11 00:57:38 pavlin Exp $"
+#ident "$XORP: xorp/bgp/peer.cc,v 1.142 2006/08/12 00:34:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1102,6 +1102,7 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	    set_state(STATESTOPPED);
 	    break;
 	}
+	restart_hold_timer();
 	if (!good_nexthop)
 	    return;
 	// ok the packet is correct.
@@ -1119,7 +1120,6 @@ BGPPeer::event_recvupdate(const UpdatePacket& p) // EVENTRECUPDATEMESS
 	    }
 	}
 
-	restart_hold_timer();
 	// process the packet...
 	debug_msg("Process the packet!!!\n");
 	XLOG_ASSERT(_handler);
