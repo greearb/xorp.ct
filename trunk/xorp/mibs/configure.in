@@ -1,5 +1,5 @@
 dnl -*- sh -*-
-dnl $XORP: xorp/mibs/configure.in,v 1.17 2006/08/02 07:34:01 pavlin Exp $
+dnl $XORP: xorp/mibs/configure.in,v 1.18 2006/08/03 19:15:36 pavlin Exp $
 dnl
 
 dnl ---------------------------------------------------------------------------
@@ -12,7 +12,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.17 2006/08/02 07:34:01 pavlin Exp $])
+AC_REVISION([$XORP: xorp/mibs/configure.in,v 1.18 2006/08/03 19:15:36 pavlin Exp $])
 AC_CONFIG_AUX_DIR(../config)
 AC_CANONICAL_TARGET
 
@@ -398,7 +398,20 @@ else
     # MIB support.  dummy MIB modules will only generate warnings
     echo 'dlmod dummy doubledummy' > conftestsnmp.conf
     test_ports='51510 51520 51530 51540 51550'
-    snmpd_base_args="-f -r -l conftestsnmp.log -c conftestsnmp.conf"
+
+    #
+    # If net-snmp version is >= 5.2 then the logfile argument is "-Lf <file>",
+    # otherwise it is "-l <file>".
+    #
+    snmpd_log_output_arg="-l"
+    if test "${net_snmp_maj}" -gt "5" ; then
+	snmpd_log_output_arg="-Lf"
+    fi
+    if test "${net_snmp_maj}" -eq "5" -a "${net_snmp_min}" -ge "2"; then
+	snmpd_log_output_arg="-Lf"
+    fi
+
+    snmpd_base_args="-f -r ${snmpd_log_output_arg} conftestsnmp.log -c conftestsnmp.conf"
     # On Linux snmpd seems to need the "-p" flag.
     for args in "" "-p"
     do
