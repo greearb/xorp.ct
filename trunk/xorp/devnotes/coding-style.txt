@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/devnotes/coding-style.txt,v 1.3 2003/04/22 23:23:37 hodson Exp $
+# $XORP: xorp/devnotes/coding-style.txt,v 1.4 2003/10/01 20:36:07 hodson Exp $
 #
 
 	Provisional XORP C++ coding style
@@ -191,21 +191,28 @@ from our default coding styles that all are equally peturbed.
 
 - USE OF AUTOCONF
 
-  We will use Gnu autoconf to improve portability. The "config.h"
+  We will use GNU autoconf to improve portability. The "config.h"
   header file will define symbols specifying system properties that
-  may differ between reasonable Unices. The first file included by any
-  Xorp source file should be `<config.h>' (or, perhaps,
-  `<xorp/config.h>').
+  may differ between reasonable Unices. This file is included by
+  "libxorp/xorp.h" which itself includes and defines a number of other
+  useful header files and features. The first file included by any XORP
+  source file should be "libxorp/xorp.h".
+  However, if one of the included header files is the module-specific
+  "foo_module.h" (required by "libxorp/xlog.h"), that file should
+  be included before "libxorp/xorp.h".
 
 - INCLUDE FILES
 
   Include files should be sorted into domain, each domain separated by
   a blank line:
 
+	"foo_module.h"
+	"libxorp/xorp.h"
 	kernel includes
 	sys includes
 	net includes
 	default include path includes
+	XORP libraries includes
 	local includes
 
   Don't sweat it too hard, however.
