@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipvxnet.hh,v 1.15 2006/08/04 18:13:27 pavlin Exp $
+// $XORP: xorp/libxorp/ipvxnet.hh,v 1.16 2006/08/04 23:19:51 pavlin Exp $
 
 #ifndef __LIBXORP_IPVXNET_HH__
 #define __LIBXORP_IPVXNET_HH__
@@ -76,12 +76,7 @@ public:
      * @param family the address family.
      */
     explicit IPvXNet(int family) throw (InvalidFamily)
-	// : _masked_addr(family), _prefix_len(0)
-	// XXX: G++ 2.95 croaks on this
-    {
-	_masked_addr = IPvX::ZERO(family);
-	_prefix_len = 0;
-    }
+	: BaseIPvXNet(IPvX::ZERO(family), 0) {}
 
     /**
      * Copy constructor for BaseIPvXNet subnet address
@@ -321,7 +316,7 @@ public:
      * @return true if this subnet is within the multicast address range.
      */
     bool is_multicast() const {
-	return (ip_multicast_base_prefix(_masked_addr.af()).contains(*this));
+	return (ip_multicast_base_prefix(masked_addr().af()).contains(*this));
     }
 
     /**
@@ -335,7 +330,7 @@ public:
      */
     bool is_class_a() const {
 	if (is_ipv4()) {
-	    return (ip_class_a_base_prefix(_masked_addr.af()).contains(*this));
+	    return (ip_class_a_base_prefix(masked_addr().af()).contains(*this));
 	}
 	return (false);
     }
@@ -351,7 +346,7 @@ public:
      */
     bool is_class_b() const {
 	if (is_ipv4()) {
-	    return (ip_class_b_base_prefix(_masked_addr.af()).contains(*this));
+	    return (ip_class_b_base_prefix(masked_addr().af()).contains(*this));
 	}
 	return (false);
     }
@@ -367,7 +362,7 @@ public:
      */
     bool is_class_c() const {
 	if (is_ipv4()) {
-	    return (ip_class_c_base_prefix(_masked_addr.af()).contains(*this));
+	    return (ip_class_c_base_prefix(masked_addr().af()).contains(*this));
 	}
 	return (false);
     }
@@ -383,7 +378,7 @@ public:
      */
     bool is_experimental() const {
 	if (is_ipv4()) {
-	    return (ip_experimental_base_prefix(_masked_addr.af()).contains(*this));
+	    return (ip_experimental_base_prefix(masked_addr().af()).contains(*this));
 	}
 	return (false);
     }

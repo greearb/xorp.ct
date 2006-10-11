@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.16 2006/10/02 21:34:57 atanu Exp $"
+#ident "$XORP: xorp/bgp/update_attrib.cc,v 1.17 2006/10/03 00:32:43 pavlin Exp $"
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -34,33 +34,49 @@
 
 BGPUpdateAttrib::BGPUpdateAttrib(const uint8_t *d)
 {
-    _prefix_len = d[0];
-    uint32_t a = _prefix_len == 0 ? 0 : d[1] << 24;
+    uint8_t plen = d[0];
+    union {
+	uint8_t		a8[4];
+	uint32_t	a32;
+    } a;
 
-    if (_prefix_len > 8)
-	a |= (d[2] <<16);
-    if (_prefix_len > 16)
-	a |= (d[3] <<8 );
-    if (_prefix_len > 24)
-	a |= d[4];
-    
-    // Clear the unwanted bits.
-    _masked_addr = IPv4Net(IPv4(htonl(a)), _prefix_len).masked_addr();
+    a.a32 = 0;		// Reset the original value;
+
+    // Calculate the number of bytes to copy
+    uint8_t bytes = plen / 8;
+    if (plen % 8)
+	bytes++;
+
+    // Copy the address
+    if (bytes > 0)
+	memcpy(a.a8, d + 1, bytes);
+
+    // Set the address
+    IPv4Net& net = *this;
+    net = IPv4Net(IPv4(a.a32), plen);
 }
 
 void
 BGPUpdateAttrib::copy_out(uint8_t *d) const
 {
-    uint32_t a = ntohl(masked_addr().addr());
-    d[0] = prefix_len();
-    if (d[0] > 0)
-	d[1] = (a >> 24) & 0xff;
-    if (d[0] > 8)
-	d[2] = (a >> 16) & 0xff;
-    if (d[0] > 16)
-	d[3] = (a >> 8) & 0xff;
-    if (d[0] > 24)
-	d[4] = a & 0xff;
+    uint8_t plen = prefix_len();
+    union {
+	uint8_t		a8[4];
+	uint32_t	a32;
+    } a;
+
+    // Get the address
+    a.a32 = masked_addr().addr();
+
+    // Calculate the number of bytes to copy
+    uint8_t bytes = plen / 8;
+    if (plen % 8)
+	bytes++;
+
+    // Copy the address
+    d[0] = plen;
+    if (bytes > 0)
+	memcpy(d + 1, a.a8, bytes);
 }
 
 size_t

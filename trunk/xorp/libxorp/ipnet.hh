@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.29 2006/08/04 18:13:27 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.30 2006/08/04 23:19:51 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -437,7 +437,7 @@ public:
 	return IPNet<A>(x.masked_addr(), x.overlap(y));
     }
 
-protected:
+private:
     inline void initialize_from_string(const char *s)
 	throw (InvalidString, InvalidNetmaskLength);
 
