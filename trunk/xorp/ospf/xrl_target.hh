@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.27 2006/06/15 06:07:27 pavlin Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.28 2006/10/12 00:41:53 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -613,9 +613,9 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 class XrlOspfV3Target : XrlOspfv3TargetBase {
  public:
     XrlOspfV3Target(XrlRouter *r,
-		    Ospf<IPv4>& ospf_ipv4,
+		    /* Ospf<IPv4>& ospf_ipv4, */
 		    Ospf<IPv6>& ospf_ipv6,
-		    XrlIO<IPv4>& io_ipv4,
+		    /* XrlIO<IPv4>& io_ipv4, */
 		    XrlIO<IPv6>& io_ipv6);
 
     /**
@@ -730,9 +730,9 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const IPv4&	id);
 
  private:
-    Ospf<IPv4>& _ospf_ipv4;
+//     Ospf<IPv4>& _ospf_ipv4;
     Ospf<IPv6>& _ospf_ipv6;
-    XrlIO<IPv4>& _xrl_io_ipv4;
+//     XrlIO<IPv4>& _xrl_io_ipv4;
     XrlIO<IPv6>& _xrl_io_ipv6;
 };
 #endif // __OSPF_XRL_TARGET_HH__

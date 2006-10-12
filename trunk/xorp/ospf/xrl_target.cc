@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.39 2006/10/12 00:41:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.40 2006/10/12 01:25:01 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -83,13 +83,13 @@ XrlOspfV2Target::XrlOspfV2Target(XrlRouter *r, Ospf<IPv4>& ospf,
 }
 
 XrlOspfV3Target::XrlOspfV3Target(XrlRouter *r,
-				 Ospf<IPv4>& ospf_ipv4, 
+				 /*Ospf<IPv4>& ospf_ipv4, */
 				 Ospf<IPv6>& ospf_ipv6, 
-				 XrlIO<IPv4>& io_ipv4,
+				 /*XrlIO<IPv4>& io_ipv4,*/
 				 XrlIO<IPv6>& io_ipv6)
     : XrlOspfv3TargetBase(r),
-      _ospf_ipv4(ospf_ipv4), _ospf_ipv6(ospf_ipv6),
-      _xrl_io_ipv4(io_ipv4), _xrl_io_ipv6(io_ipv6)
+      /*_ospf_ipv4(ospf_ipv4),*/ _ospf_ipv6(ospf_ipv6),
+      /*_xrl_io_ipv4(io_ipv4),*/ _xrl_io_ipv6(io_ipv6)
 {
 }
 
@@ -185,16 +185,17 @@ XrlOspfV2Target::raw_packet4_client_0_1_recv(
 XrlCmdError
 XrlOspfV3Target::raw_packet4_client_0_1_recv(
     // Input values,
-    const string&	if_name,
-    const string&	vif_name,
-    const IPv4&		src_address,
-    const IPv4&		dst_address,
-    const uint32_t&	ip_protocol,
-    const int32_t&	ip_ttl,
-    const int32_t&	ip_tos,
-    const bool&		ip_router_alert,
-    const vector<uint8_t>& payload)
+    const string&	/*if_name*/,
+    const string&	/*vif_name*/,
+    const IPv4&		/*src_address*/,
+    const IPv4&		/*dst_address*/,
+    const uint32_t&	/*ip_protocol*/,
+    const int32_t&	/*ip_ttl*/,
+    const int32_t&	/*ip_tos*/,
+    const bool&		/*ip_router_alert*/,
+    const vector<uint8_t>& /*payload*/)
 {
+#if	0
     _xrl_io_ipv4.recv(if_name,
 		      vif_name,
 		      src_address,
@@ -204,6 +205,9 @@ XrlOspfV3Target::raw_packet4_client_0_1_recv(
 		      ip_tos,
 		      ip_router_alert,
 		      payload);
+#else
+    XLOG_UNFINISHED();
+#endif
 
     return XrlCmdError::OKAY();
 }
