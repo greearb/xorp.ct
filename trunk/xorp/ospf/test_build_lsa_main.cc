@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.4 2006/03/29 22:41:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.5 2006/10/12 01:25:00 pavlin Exp $"
 
 #include "ospf_module.h"
 
@@ -30,9 +30,8 @@
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
-//#include "lsa.hh"
+#include "test_args.hh"
 #include "test_build_lsa.hh"
-
 
 int
 main(int argc, char **argv)

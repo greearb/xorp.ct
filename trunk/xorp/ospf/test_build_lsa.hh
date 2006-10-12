@@ -13,44 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/devnotes/template.hh,v 1.5 2005/03/25 02:52:59 pavlin Exp $
+// $XORP: xorp/ospf/test_build_lsa.hh,v 1.1 2006/03/28 01:50:07 atanu Exp $
 
 #ifndef __OSPF_TEST_BUILD_LSA_HH__
 #define __OSPF_TEST_BUILD_LSA_HH__
 
 #include "libxorp/tokenize.hh"
-
-/**
- * Break a string into a sequence of space separated words.
- */
-class Args {
- public:
-    Args(string& line) : _line(line), _pos(0) {
-	tokenize(line, _words);
-    }
-
-    /**
-     * @param word if a word is available it is placed here.
-     * @return true if a word has been returned.
-     */
-    bool get_next(string& word) {
-	if (_pos >= _words.size())
-	    return false;
-
-	word = _words[_pos++];
-
-	return true;
-    }
-
-    const string& original_line() const {
-	return _line;
-    }
-
- private:
-    const string _line;
-    vector<string> _words;
-    size_t _pos;
-};
 
 class BuildLsa {
  public:

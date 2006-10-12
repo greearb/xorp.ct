@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.3 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.4 2006/10/12 01:25:00 pavlin Exp $"
 
 #include "ospf_module.h"
 
@@ -31,49 +31,8 @@
 
 #include "ospf.hh"
 #include "packet.hh"
+#include "test_args.hh"
 #include "test_build_lsa.hh"
-
-
-/**
- * Get a number in base 8,10 or 16.
- */
-inline
-uint32_t
-get_number(const string& word) throw(InvalidString)
-{
-    char *endptr;
-    
-    uint32_t number = strtoul(word.c_str(), &endptr, 0);
-    if (0 != *endptr)
-	xorp_throw(InvalidString,
-		   c_format("<%s> is not a number", word.c_str()));
-
-    return number;
-}
-
-/**
- * Get the next word throw an exception if its not present.
- */
-inline
-string
-get_next_word(Args& args, const string& varname) throw(InvalidString)
-{
-    string var;
-    if (!args.get_next(var))
-	xorp_throw(InvalidString,
-		   c_format("No argument to %s. [%s]",
-			    varname.c_str(),
-			    args.original_line().c_str()));
-
-    return var;
-}
-
-inline
-uint32_t
-get_next_number(Args& args, const string& varname) throw(InvalidString)
-{
-    return get_number(get_next_word(args, varname));
-}
 
 Lsa *
 BuildLsa::generate(Args& args)
