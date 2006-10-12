@@ -96,7 +96,7 @@ SUBDIRS = . tools
 bin_PROGRAMS = xorp_ospfv2 xorp_ospfv3
 
 # -- Test Programs
-check_PROGRAMS = test_packet test_checksum test_peering test_routing test_routing_table test_build_lsa_main
+check_PROGRAMS = test_packet test_checksum test_peering test_routing test_routing_table test_build_lsa_main test_routing_interactive
 
 TESTS = test_packet$(EXEEXT) test_checksum$(EXEEXT) test_peering$(EXEEXT) test_routing$(EXEEXT) test_routing_table$(EXEEXT) test_routing1.py
 
@@ -121,7 +121,9 @@ test_routing_SOURCES = test_common.hh test_routing.cc
 
 test_routing_table_SOURCES = test_routing_table.cc
 
-test_build_lsa_main_SOURCES = test_build_lsa.hh test_build_lsa.cc test_build_lsa_main.cc
+test_build_lsa_main_SOURCES = test_args.hh test_build_lsa.hh test_build_lsa.cc test_build_lsa_main.cc
+
+test_routing_interactive_SOURCES = test_args.hh test_build_lsa.hh test_build_lsa.cc test_routing_interactive.cc
 
 # -- Library Sources
 libospf_la_SOURCES = auth.hh area_router.hh exceptions.hh debug_io.hh delay_queue.hh external.hh fletcher_checksum.hh lsa.hh ospf.hh packet.hh peer_manager.hh peer.hh policy_varrw.hh routing_table.hh xrl_io.hh xrl_target.hh vertex.hh vlink.hh auth.cc area_router.cc external.cc fletcher_checksum.cc lsa.cc ospf.cc packet.cc peer_manager.cc peer.cc policy_varrw.cc routing_table.cc xrl_io.cc xrl_target.cc vlink.cc
@@ -148,7 +150,8 @@ libospf_la_OBJECTS = $(am_libospf_la_OBJECTS)
 bin_PROGRAMS = xorp_ospfv2$(EXEEXT) xorp_ospfv3$(EXEEXT)
 check_PROGRAMS = test_packet$(EXEEXT) test_checksum$(EXEEXT) \
 	test_peering$(EXEEXT) test_routing$(EXEEXT) \
-	test_routing_table$(EXEEXT) test_build_lsa_main$(EXEEXT)
+	test_routing_table$(EXEEXT) test_build_lsa_main$(EXEEXT) \
+	test_routing_interactive$(EXEEXT)
 PROGRAMS = $(bin_PROGRAMS)
 
 am_test_build_lsa_main_OBJECTS = test_build_lsa.$(OBJEXT) \
@@ -257,6 +260,29 @@ test_routing_DEPENDENCIES = libospf.la \
 	$(top_builddir)/libxorp/libxorp.la \
 	$(top_builddir)/libproto/libproto.la
 test_routing_LDFLAGS =
+am_test_routing_interactive_OBJECTS = test_build_lsa.$(OBJEXT) \
+	test_routing_interactive.$(OBJEXT)
+test_routing_interactive_OBJECTS = \
+	$(am_test_routing_interactive_OBJECTS)
+test_routing_interactive_LDADD = $(LDADD)
+test_routing_interactive_DEPENDENCIES = libospf.la \
+	$(top_builddir)/xrl/targets/libospfv2base.la \
+	$(top_builddir)/xrl/targets/libospfv3base.la \
+	$(top_builddir)/policy/backend/libpolicybackend.la \
+	$(top_builddir)/libfeaclient/libfeaclient.la \
+	$(top_builddir)/xrl/interfaces/libribxif.la \
+	$(top_builddir)/xrl/interfaces/libfindereventnotifierxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrmirrorxif.la \
+	$(top_builddir)/xrl/interfaces/libfeaifmgrreplicatorxif.la \
+	$(top_builddir)/xrl/interfaces/libprofileclientxif.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt4.la \
+	$(top_builddir)/xrl/interfaces/libfearawpkt6.la \
+	$(top_builddir)/xrl/targets/libfeaifmgrmirrorbase.la \
+	$(top_builddir)/libxipc/libxipc.la \
+	$(top_builddir)/libcomm/libcomm.la \
+	$(top_builddir)/libxorp/libxorp.la \
+	$(top_builddir)/libproto/libproto.la
+test_routing_interactive_LDFLAGS =
 am_test_routing_table_OBJECTS = test_routing_table.$(OBJEXT)
 test_routing_table_OBJECTS = $(am_test_routing_table_OBJECTS)
 test_routing_table_LDADD = $(LDADD)
@@ -338,6 +364,7 @@ depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 @AMDEP_TRUE@	$(DEPDIR)/test_build_lsa_main.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_checksum.Po $(DEPDIR)/test_packet.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_peering.Po $(DEPDIR)/test_routing.Po \
+@AMDEP_TRUE@	$(DEPDIR)/test_routing_interactive.Po \
 @AMDEP_TRUE@	$(DEPDIR)/test_routing_table.Po $(DEPDIR)/vlink.Plo \
 @AMDEP_TRUE@	$(DEPDIR)/xorp_ospfv2.Po $(DEPDIR)/xorp_ospfv3.Po \
 @AMDEP_TRUE@	$(DEPDIR)/xrl_io.Plo $(DEPDIR)/xrl_target.Plo
@@ -361,6 +388,7 @@ LINK = $(LIBTOOL) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
 DIST_SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) \
 	$(test_checksum_SOURCES) $(test_packet_SOURCES) \
 	$(test_peering_SOURCES) $(test_routing_SOURCES) \
+	$(test_routing_interactive_SOURCES) \
 	$(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) \
 	$(xorp_ospfv3_SOURCES)
 
@@ -370,7 +398,7 @@ RECURSIVE_TARGETS = info-recursive dvi-recursive install-info-recursive \
 	uninstall-recursive check-recursive installcheck-recursive
 DIST_COMMON = README Makefile.am Makefile.in TODO
 DIST_SUBDIRS = $(SUBDIRS)
-SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(test_routing_SOURCES) $(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
+SOURCES = $(libospf_la_SOURCES) $(test_build_lsa_main_SOURCES) $(test_checksum_SOURCES) $(test_packet_SOURCES) $(test_peering_SOURCES) $(test_routing_SOURCES) $(test_routing_interactive_SOURCES) $(test_routing_table_SOURCES) $(xorp_ospfv2_SOURCES) $(xorp_ospfv3_SOURCES)
 
 all: all-recursive
 
@@ -439,6 +467,9 @@ test_peering$(EXEEXT): $(test_peering_OBJECTS) $(test_peering_DEPENDENCIES)
 test_routing$(EXEEXT): $(test_routing_OBJECTS) $(test_routing_DEPENDENCIES) 
 	@rm -f test_routing$(EXEEXT)
 	$(CXXLINK) $(test_routing_LDFLAGS) $(test_routing_OBJECTS) $(test_routing_LDADD) $(LIBS)
+test_routing_interactive$(EXEEXT): $(test_routing_interactive_OBJECTS) $(test_routing_interactive_DEPENDENCIES) 
+	@rm -f test_routing_interactive$(EXEEXT)
+	$(CXXLINK) $(test_routing_interactive_LDFLAGS) $(test_routing_interactive_OBJECTS) $(test_routing_interactive_LDADD) $(LIBS)
 test_routing_table$(EXEEXT): $(test_routing_table_OBJECTS) $(test_routing_table_DEPENDENCIES) 
 	@rm -f test_routing_table$(EXEEXT)
 	$(CXXLINK) $(test_routing_table_LDFLAGS) $(test_routing_table_OBJECTS) $(test_routing_table_LDADD) $(LIBS)
@@ -472,6 +503,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_packet.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_peering.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing_interactive.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/test_routing_table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/vlink.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@$(DEPDIR)/xorp_ospfv2.Po@am__quote@

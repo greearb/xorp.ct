@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/ospf/Makefile.am,v 1.23 2005/11/14 19:33:29 atanu Exp $
+## $XORP: xorp/ospf/Makefile.am,v 1.24 2006/03/28 01:50:07 atanu Exp $
 ##
 
 # -- Subdirectories
@@ -19,6 +19,7 @@ check_PROGRAMS	+= test_peering
 check_PROGRAMS	+= test_routing
 check_PROGRAMS	+= test_routing_table
 check_PROGRAMS	+= test_build_lsa_main
+check_PROGRAMS	+= test_routing_interactive
 
 TESTS		 = test_packet$(EXEEXT)
 TESTS		+= test_checksum$(EXEEXT)
@@ -66,9 +67,15 @@ test_routing_SOURCES		+= test_routing.cc
 
 test_routing_table_SOURCES	 = test_routing_table.cc
 
-test_build_lsa_main_SOURCES	 = test_build_lsa.hh
+test_build_lsa_main_SOURCES	 = test_args.hh
+test_build_lsa_main_SOURCES	+= test_build_lsa.hh
 test_build_lsa_main_SOURCES	+= test_build_lsa.cc
 test_build_lsa_main_SOURCES	+= test_build_lsa_main.cc
+
+test_routing_interactive_SOURCES	 = test_args.hh
+test_routing_interactive_SOURCES	+= test_build_lsa.hh
+test_routing_interactive_SOURCES	+= test_build_lsa.cc
+test_routing_interactive_SOURCES	+= test_routing_interactive.cc
 
 # -- Library Sources
 libospf_la_SOURCES  = auth.hh
