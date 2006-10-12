@@ -1,10 +1,19 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.2 2006/08/03 05:02:48 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.3 2006/10/12 00:41:54 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
  */
 
 interface ospfv3/0.1 {
-	  /** Set router id */
-	  set_router_id ? id:ipv4
+
+    /**
+     * Set router id 
+     */
+    set_router_id ? id:ipv4
+
+    /**
+     * Set the router alert in the IP options.
+     */
+    set_ip_router_alert ? ip_router_alert:bool
+
 }

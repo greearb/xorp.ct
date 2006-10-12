@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.28 2006/10/12 00:41:53 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.29 2006/10/12 19:41:29 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -728,6 +728,13 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
     XrlCmdError ospfv3_0_1_set_router_id(
 	// Input values,
 	const IPv4&	id);
+
+    /**
+     *  Set the router alert in the IP options.
+     */
+    XrlCmdError ospfv3_0_1_set_ip_router_alert(
+	// Input values,
+	const bool&	ip_router_alert);
 
  private:
 //     Ospf<IPv4>& _ospf_ipv4;

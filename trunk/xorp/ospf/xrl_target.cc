@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.40 2006/10/12 01:25:01 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.41 2006/10/12 19:41:29 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -334,6 +334,16 @@ XrlOspfV2Target::ospfv2_0_1_set_router_id(const IPv4& id)
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_router_id(const IPv4& id)
+{
+    OspfTypes::RouterID rid = ntohl(id.addr());
+
+    _ospf_ipv6.set_router_id(rid);
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_rfc1583_compatibility(const bool& compatibility)
 {
@@ -352,9 +362,10 @@ XrlOspfV2Target::ospfv2_0_1_set_ip_router_alert(const bool& ip_router_alert)
 }
 
 XrlCmdError
-XrlOspfV3Target::ospfv3_0_1_set_router_id(const IPv4& /*id*/)
+XrlOspfV3Target::ospfv3_0_1_set_ip_router_alert(const bool& ip_router_alert)
 {
-    XLOG_UNFINISHED();
+    if (!_ospf_ipv6.set_ip_router_alert(ip_router_alert))
+	return XrlCmdError::COMMAND_FAILED("Failed to set IP router alert");
 
     return XrlCmdError::OKAY();
 }
