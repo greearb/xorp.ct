@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.1 2006/10/12 00:04:24 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.2 2006/10/12 00:08:37 atanu Exp $ */
 
 protocols {
     ospf6 {
@@ -117,6 +117,7 @@ policy {
     }
 }
 
+/*
 protocols {
     ospf6 {
 	%help:	  short "Configure the OSPF protocol";
@@ -505,7 +506,7 @@ transmitted packets";
 	}
     }
 }
-
+*/
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf6&target:txt=ospfv3";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
