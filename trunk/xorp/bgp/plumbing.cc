@@ -13,28 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.94 2006/07/12 02:35:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.95 2006/09/19 22:09:37 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 #define CHECK_TIME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
-#include "route_table_reader.hh"
+#include "libxorp/timespent.hh"
 
+#include "route_table_reader.hh"
 #include "plumbing.hh"
 #include "bgp.hh"
 #include "profile_vars.hh"
 #include "dump_iterators.hh"
-#include "libxorp/timespent.hh"
+
 
 BGPPlumbing::BGPPlumbing(const Safi safi,
 			 RibIpcHandler* ribhandler,

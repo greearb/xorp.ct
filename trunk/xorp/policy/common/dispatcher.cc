@@ -13,15 +13,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.9 2006/03/16 00:05:14 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/dispatcher.cc,v 1.10 2006/09/08 18:44:38 mjh Exp $"
 
 #include "libxorp/xorp.h"
 
 #include <typeinfo>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "dispatcher.hh"
 #include "elem_null.hh"
@@ -29,6 +25,7 @@
 #include "operator.hh"
 #include "element.hh"
 #include "register_operations.hh"
+
 
 // init static members
 Dispatcher::Value Dispatcher::_map[32768];

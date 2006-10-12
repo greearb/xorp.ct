@@ -35,13 +35,12 @@
  * SUCH DAMAGE.
  */
 
-#include "config.h"
 #include "libxorp/xorp.h"
 
-#include <string.h>
 #include <openssl/md5.h>
 
 #include "hmac_md5.h"
+
 
 void hmac_md5(const unsigned char   *data,
 	      int              data_len,

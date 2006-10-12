@@ -12,16 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath.cc,v 1.35 2006/04/28 17:11:17 zec Exp $"
+#ident "$XORP: xorp/bgp/aspath.cc,v 1.36 2006/04/30 07:49:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp_module.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -31,12 +27,10 @@
 #include <sys/types.h>
 #endif
 
-#include <string.h>
-#include <stdio.h>
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
@@ -44,6 +38,7 @@
 #include "aspath.hh"
 #include "path_attribute.hh"
 #include "packet.hh"
+
 
 extern void dump_bytes(const uint8_t *d, uint8_t l);
 

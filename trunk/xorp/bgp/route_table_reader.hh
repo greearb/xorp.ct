@@ -12,21 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_reader.hh,v 1.9 2006/03/16 00:03:35 pavlin Exp $
+// $XORP: xorp/bgp/route_table_reader.hh,v 1.10 2006/07/12 02:35:19 atanu Exp $
 
 #ifndef __BGP_ROUTE_TABLE_READER_HH__
 #define __BGP_ROUTE_TABLE_READER_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
+#include "libxorp/ipnet.hh"
 
 #include <map>
 
-#include "libxorp/ipnet.hh"
 #include "bgp_trie.hh"
+
 
 template <class A>
 class RibInTable;

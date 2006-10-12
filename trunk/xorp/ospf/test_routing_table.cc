@@ -13,36 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.5 2006/03/16 00:04:49 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_routing_table.cc,v 1.6 2006/03/29 22:41:25 atanu Exp $"
 
-#include "config.h"
-#include <map>
-#include <list>
-#include <set>
-#include <deque>
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
-
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 #include "libxorp/tlv.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+
+#include <map>
+#include <list>
+#include <set>
+#include <deque>
 
 #include "libproto/spt.hh"
 
@@ -51,6 +45,7 @@
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
+
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.

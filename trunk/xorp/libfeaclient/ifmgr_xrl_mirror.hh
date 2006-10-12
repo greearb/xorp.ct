@@ -12,15 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.13 2005/08/18 15:34:24 bms Exp $
+// $XORP: xorp/libfeaclient/ifmgr_xrl_mirror.hh,v 1.14 2006/03/16 00:04:11 pavlin Exp $
 
 #ifndef __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 #define __LIBFEACLIENT_XRL_IFMGR_MIRROR_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/timer.hh"
 #include "libxorp/service.hh"
@@ -30,6 +27,7 @@
 
 #include "ifmgr_atoms.hh"
 #include "ifmgr_cmd_queue.hh"
+
 
 class XrlStdRouter;
 class EventLoop;

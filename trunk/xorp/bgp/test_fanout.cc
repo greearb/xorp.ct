@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.31 2006/02/17 23:34:55 zec Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/test_fanout.cc,v 1.32 2006/03/16 00:03:36 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -25,6 +21,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #include "bgp.hh"
 #include "route_table_base.hh"
@@ -35,9 +35,6 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
-#ifndef HOST_OS_WINDOWS
-#include <pwd.h>
-#endif
 
 bool
 test_fanout(TestInfo& /*info*/)

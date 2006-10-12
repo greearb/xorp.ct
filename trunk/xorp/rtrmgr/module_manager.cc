@@ -12,27 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.61 2006/03/16 00:06:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/module_manager.cc,v 1.62 2006/04/26 04:38:39 pavlin Exp $"
 
 #include "rtrmgr_module.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/utils.hh"
 
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-
 #ifdef HAVE_GLOB_H
 #include <glob.h>
 #elif defined(HOST_OS_WINDOWS)
 #include "glob_win32.h"
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
 #endif
 
 #include "module_manager.hh"
@@ -41,6 +37,7 @@
 #include "template_commands.hh"
 #include "main_rtrmgr.hh"
 #include "util.hh"
+
 
 #ifdef HOST_OS_WINDOWS
 #define stat _stat

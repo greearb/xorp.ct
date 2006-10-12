@@ -15,17 +15,15 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.11 2005/03/25 02:53:49 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.12 2006/03/16 00:04:38 pavlin Exp $
  */
 
 
 #ifndef __LIBXORP_XLOG_H__
 #define __LIBXORP_XLOG_H__
 
-#include <stdio.h>
-#include <stdarg.h>
+#include "libxorp/xorp.h"
 
-#include "config.h"
 
 /*
  * The following defines and notes we defined __printfike if it does not

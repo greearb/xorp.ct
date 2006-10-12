@@ -12,15 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.15 2005/08/18 15:32:40 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_sender.cc,v 1.16 2006/03/16 00:04:19 pavlin Exp $"
 
 //
 // Test XRLs sender.
 //
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "xrl_module.h"
 
@@ -33,14 +29,16 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/status_codes.h"
 
-#include "libxipc/xrl_std_router.hh"
-
-#include "xrl/interfaces/test_xrls_xif.hh"
-#include "xrl/targets/test_xrls_base.hh"
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/test_xrls_xif.hh"
+
+#include "xrl/targets/test_xrls_base.hh"
+
 
 //
 // This is a sender program for testing XRL performance. It is used

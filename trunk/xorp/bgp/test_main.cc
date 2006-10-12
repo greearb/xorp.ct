@@ -12,19 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_main.cc,v 1.20 2006/09/08 22:55:24 mjh Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
+#ident "$XORP: xorp/bgp/test_main.cc,v 1.21 2006/09/17 15:58:28 mjh Exp $"
 
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
 #include "test_next_hop_resolver.hh"
+
 
 bool test_ribin(TestInfo& info);
 bool test_ribin_dump(TestInfo& info);

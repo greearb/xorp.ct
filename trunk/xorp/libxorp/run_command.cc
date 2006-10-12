@@ -13,38 +13,36 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.26 2006/04/02 04:31:14 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.27 2006/08/17 22:46:17 pavlin Exp $
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "libxorp_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
+#include "libxorp/exceptions.hh"
+#include "libxorp/xorpfd.hh"
+#include "libxorp/asyncio.hh"
+#include "libxorp/popen.hh"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
+#endif
+
+#include <map>
+
+#ifdef HAVE_PATHS_H
+#include <paths.h>
 #endif
 
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>
 #endif
 
-#ifdef HAVE_PATHS_H
-#include <paths.h>
-#endif
-
-#include <map>
-
-#include "libxorp_module.h"
-
-#include "libxorp/xorp.h"
-#include "libxorp/xorp.h"
-#include "libxorp/debug.h"
-#include "libxorp/eventloop.hh"
-#include "libxorp/exceptions.hh"
-#include "libxorp/xlog.h"
-#include "libxorp/xorpfd.hh"
-#include "libxorp/asyncio.hh"
-#include "libxorp/popen.hh"
 #include "run_command.hh"
 
-#ifdef HOST_OS_WINDOWS
 
-#include "libxorp/win_io.h"
+#ifdef HOST_OS_WINDOWS
 
 #ifndef _PATH_BSHELL
 #define _PATH_BSHELL "C:\\MSYS\\bin\\sh.exe"

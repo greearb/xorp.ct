@@ -48,20 +48,19 @@ static int yygrowstack();
  * yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
 
+#include <vector>
+
 #include "policy/common/varrw.hh"
-#include "policy_backend_parser.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
+
+#include "policy_backend_parser.hh"
 #include "instruction.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
-#include <vector>
+
 
 extern int yylex(void);
 extern void yyerror(const char*);
@@ -70,11 +69,11 @@ using namespace policy_backend_parser;
 
 static ElementFactory _ef;
 
-#line 30 "backend.y"
+#line 29 "backend.y"
 typedef union {
 	char* c_str;
 } YYSTYPE;
-#line 78 "yacc.yy_policy_backend_parser.cc"
+#line 77 "yacc.yy_policy_backend_parser.cc"
 #define YYERRCODE 256
 #define YY_ARG 257
 #define YY_NEWLINE 258
@@ -444,7 +443,7 @@ yyreduce:
     switch (yyn)
     {
 case 4:
-#line 56 "backend.y"
+#line 55 "backend.y"
 {
 	  	/* XXX: doesn't delete old*/
 		(*_yy_sets)[yyvsp[-2].c_str] = _ef.create(yyvsp[-3].c_str, yyvsp[-1].c_str);
@@ -452,7 +451,7 @@ case 4:
 	  }
 break;
 case 5:
-#line 63 "backend.y"
+#line 62 "backend.y"
 {
 			PolicyInstr* pi = new PolicyInstr(yyvsp[-4].c_str,_yy_terms);
 			_yy_terms = new vector<TermInstr*>();
@@ -461,7 +460,7 @@ case 5:
 			}
 break;
 case 6:
-#line 72 "backend.y"
+#line 71 "backend.y"
 {
 	  
 			TermInstr* ti = new TermInstr(yyvsp[-4].c_str,_yy_instructions);
@@ -471,7 +470,7 @@ case 6:
 			}
 break;
 case 10:
-#line 89 "backend.y"
+#line 88 "backend.y"
 {
 	  			Instruction* i = new Push(_ef.create(yyvsp[-1].c_str,yyvsp[0].c_str));
 				_yy_instructions->push_back(i);
@@ -479,20 +478,20 @@ case 10:
 	  			}
 break;
 case 11:
-#line 94 "backend.y"
+#line 93 "backend.y"
 {
 				_yy_instructions->push_back(new PushSet(yyvsp[0].c_str));
 				free(yyvsp[0].c_str);
 				}
 break;
 case 12:
-#line 99 "backend.y"
+#line 98 "backend.y"
 {
 				_yy_instructions->push_back(new OnFalseExit());
 				}
 break;
 case 13:
-#line 103 "backend.y"
+#line 102 "backend.y"
 {
 				char* err = NULL;
 				bool is_error = false;
@@ -508,7 +507,7 @@ case 13:
 				}
 break;
 case 14:
-#line 117 "backend.y"
+#line 116 "backend.y"
 {
 				char* err = NULL;
 				bool is_error = false;
@@ -524,82 +523,82 @@ case 14:
 				}
 break;
 case 15:
-#line 131 "backend.y"
+#line 130 "backend.y"
 { _yy_instructions->push_back(new Accept()); }
 break;
 case 16:
-#line 132 "backend.y"
+#line 131 "backend.y"
 { _yy_instructions->push_back(new Reject()); }
 break;
 case 17:
-#line 134 "backend.y"
+#line 133 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpEq)); }
 break;
 case 18:
-#line 135 "backend.y"
+#line 134 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNe)); }
 break;
 case 19:
-#line 136 "backend.y"
+#line 135 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLt)); }
 break;
 case 20:
-#line 137 "backend.y"
+#line 136 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGt)); }
 break;
 case 21:
-#line 138 "backend.y"
+#line 137 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpLe)); }
 break;
 case 22:
-#line 139 "backend.y"
+#line 138 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpGe)); }
 break;
 case 23:
-#line 141 "backend.y"
+#line 140 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNot)); }
 break;
 case 24:
-#line 142 "backend.y"
+#line 141 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAnd)); }
 break;
 case 25:
-#line 143 "backend.y"
+#line 142 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpXor)); }
 break;
 case 26:
-#line 144 "backend.y"
+#line 143 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpOr)); }
 break;
 case 27:
-#line 146 "backend.y"
+#line 145 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpAdd)); }
 break;
 case 28:
-#line 147 "backend.y"
+#line 146 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpSub)); }
 break;
 case 29:
-#line 148 "backend.y"
+#line 147 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpMul)); }
 break;
 case 30:
-#line 149 "backend.y"
+#line 148 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpHead));}
 break;
 case 31:
-#line 150 "backend.y"
+#line 149 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpCtr));}
 break;
 case 32:
-#line 151 "backend.y"
+#line 150 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpNEInt));}
 break;
 case 33:
-#line 152 "backend.y"
+#line 151 "backend.y"
 { _yy_instructions->push_back(new NaryInstr(new OpRegex));}
 break;
-#line 603 "yacc.yy_policy_backend_parser.cc"
+#line 602 "yacc.yy_policy_backend_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

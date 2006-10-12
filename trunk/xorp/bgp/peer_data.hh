@@ -12,21 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_data.hh,v 1.20 2006/03/16 00:03:30 pavlin Exp $
+// $XORP: xorp/bgp/peer_data.hh,v 1.21 2006/04/15 07:10:35 atanu Exp $
 
 #ifndef __BGP_PEER_DATA_HH__
 #define __BGP_PEER_DATA_HH__
 
-#include <config.h>
-#include <sys/types.h>
-#include <list>
-
+#include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/asnum.hh"
+
+#include <list>
+
 #include "iptuple.hh"
 #include "parameter.hh"
 #include "local_data.hh"
+
 
 const size_t BGPVERSION = 4;
 

@@ -12,21 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_heap.cc,v 1.5 2005/08/18 15:28:40 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/test_heap.cc,v 1.6 2006/03/16 00:04:33 pavlin Exp $"
 
 #include "libxorp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/heap.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "heap.hh"
+
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM

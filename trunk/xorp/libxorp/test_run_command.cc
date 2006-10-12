@@ -12,21 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.14 2006/03/16 00:04:34 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/test_run_command.cc,v 1.15 2006/04/26 03:18:08 pavlin Exp $"
 
 #include "libxorp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/run_command.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "run_command.hh"
+
 
 #ifdef HOST_OS_WINDOWS
 #define MSYS_DEFAULT_ROOT	"C:\\MinGW"

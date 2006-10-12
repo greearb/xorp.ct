@@ -12,21 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_config_param.cc,v 1.6 2005/07/29 20:06:31 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/test_config_param.cc,v 1.7 2006/03/16 00:04:33 pavlin Exp $"
 
 #include "libxorp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/config_param.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "config_param.hh"
+
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM

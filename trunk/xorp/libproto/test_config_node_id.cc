@@ -12,21 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.5 2006/03/16 00:04:13 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libproto/test_config_node_id.cc,v 1.6 2006/05/12 19:00:02 pavlin Exp $"
 
 #include "libproto_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
-#include "libproto/config_node_id.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "libproto/config_node_id.hh"
+
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM

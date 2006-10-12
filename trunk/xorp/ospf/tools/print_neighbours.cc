@@ -13,46 +13,39 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.4 2005/12/28 18:57:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.5 2006/03/16 00:04:50 pavlin Exp $"
 
 // Print information about OSPF neighbours
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "ospf/ospf_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/service.hh"
+#include "libxorp/status_codes.h"
+#include "libxorp/eventloop.hh"
+#include "libxorp/tlv.hh"
 
 #include <set>
 #include <list>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
 
-#include "ospf/ospf_module.h"
-
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
-
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
-
-#include "libxorp/service.hh"
-#include "libxorp/status_codes.h"
-#include "libxorp/eventloop.hh"
 #include "libxipc/xrl_std_router.hh"
-#include "libxorp/tlv.hh"
+
+#include "xrl/interfaces/ospfv2_xif.hh"
 
 #include "ospf/ospf.hh"
 #include "ospf/test_common.hh"
 
-#include "xrl/interfaces/ospfv2_xif.hh"
 
 /**
  * Get the list of neighbours

@@ -12,13 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.2 2006/03/16 00:04:10 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/test_connect.cc,v 1.3 2006/08/15 04:31:14 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "libxorp/libxorp_module.h"
+#include "comm_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
@@ -26,7 +22,6 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
-#include "libcomm/comm_api.h"
 
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
@@ -34,6 +29,9 @@
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "libcomm/comm_api.h"
+
 
 static bool fd_connect_callback_called = false;
 static bool fd_success_connection = false;

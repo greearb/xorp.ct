@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.12 2006/03/16 00:04:02 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.13 2006/06/21 23:36:33 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -28,6 +24,10 @@
 
 #include <set>
 
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
 #include "libxipc/sockutil.hh"
 #include "libxipc/xrl_std_router.hh"
 
@@ -37,9 +37,6 @@
 #include "xrl_socket_server.hh"
 #include "addr_table.hh"
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 static const uint8_t FILLER_VALUE = 0xe7;
 

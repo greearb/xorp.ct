@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_map.cc,v 1.6 2006/03/16 00:04:59 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/policy_map.cc,v 1.7 2006/09/08 18:44:34 mjh Exp $"
 
 #include "policy_module.h"
+
+#include "libxorp/xorp.h"
+
 #include "visitor_printer.hh"
 #include "policy_map.hh"
+
 
 PolicyStatement& 
 PolicyMap::find(const string& name) const

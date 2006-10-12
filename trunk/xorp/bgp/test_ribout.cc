@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.29 2005/12/06 06:26:37 atanu Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/test_ribout.cc,v 1.30 2006/03/16 00:03:37 pavlin Exp $"
 
 #include "bgp_module.h"
 
@@ -27,6 +23,10 @@
 #include "libxorp/asnum.hh"
 #include "libxorp/test_main.hh"
 
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
+
 #include "bgp.hh"
 #include "route_table_base.hh"
 #include "route_table_ribout.hh"
@@ -36,9 +36,6 @@
 #include "local_data.hh"
 #include "dump_iterators.hh"
 
-#ifndef HOST_OS_WINDOWS
-#include <pwd.h>
-#endif
 
 bool
 test_ribout(TestInfo& /*info*/)

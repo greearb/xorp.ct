@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.8 2005/10/02 22:21:56 abittau Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.9 2006/03/16 00:05:23 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -29,26 +29,23 @@
  *
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "policy/policy_module.h"
+
 #include "libxorp/xorp.h"
-#include "policy/common/policy_utils.hh"
-#include "policy/configuration.hh"
-#include "process_watch_fake.hh"
-#include "filter_manager_fake.hh"
-#include <string>
+
 #include <iostream>
 #include <fstream>
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "policy/configuration.hh"
+#include "policy/common/policy_utils.hh"
+
+#include "process_watch_fake.hh"
+#include "filter_manager_fake.hh"
+
 
 using namespace policy_utils;
 

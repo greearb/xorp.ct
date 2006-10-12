@@ -12,31 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.65 2006/03/16 00:06:00 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/op_commands.cc,v 1.66 2006/05/01 21:41:55 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-#ifdef HAVE_GLOB_H
-#include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
-#ifdef HAVE_SYS_SIGNAL_H
-#include <sys/signal.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "rtrmgr_module.h"
 
@@ -46,12 +25,26 @@
 #include "libxorp/run_command.hh"
 #include "libxorp/utils.hh"
 
+#ifdef HAVE_GLOB_H
+#include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
+#ifdef HAVE_SYS_SIGNAL_H
+#include <sys/signal.h>
+#endif
+
 #include "cli.hh"
 #include "op_commands.hh"
 #include "slave_conf_tree.hh"
 #include "template_tree.hh"
 #include "slave_module_manager.hh"
 #include "y.opcmd_tab.h"
+
 
 #ifdef HOST_OS_WINDOWS
 #define	stat	_stat

@@ -12,17 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.8 2006/02/02 19:40:35 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_GLOB_H
-#include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
-#endif
+#ident "$XORP: xorp/rtrmgr/master_template_tree.cc,v 1.9 2006/03/16 00:05:59 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -30,8 +20,15 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
+#ifdef HAVE_GLOB_H
+#include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+
 #include "master_template_tree.hh"
 #include "master_template_tree_node.hh"
+
 
 MasterTemplateTree::MasterTemplateTree(const string& xorp_root_dir,
 				       XRLdb& xrldb,

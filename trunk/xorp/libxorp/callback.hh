@@ -12,16 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/callback.hh,v 1.17 2005/07/29 20:06:30 bms Exp $
+// $XORP: xorp/libxorp/callback.hh,v 1.18 2006/03/16 00:04:26 pavlin Exp $
 
 #ifndef __LIBXORP_CALLBACK_HH__
 #define __LIBXORP_CALLBACK_HH__
 
-#define INCLUDED_FROM_CALLBACK_HH
+#include "libxorp/xorp.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#define INCLUDED_FROM_CALLBACK_HH
 
 #ifdef DEBUG_CALLBACKS
 #include "callback_debug.hh"

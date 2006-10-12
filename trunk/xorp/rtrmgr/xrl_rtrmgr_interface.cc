@@ -12,15 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.51 2006/04/26 04:42:31 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_SYS_STAT_H
-#include <sys/stat.h>
-#endif
+#ident "$XORP: xorp/rtrmgr/xrl_rtrmgr_interface.cc,v 1.52 2006/10/02 21:26:54 atanu Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -28,6 +20,10 @@
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
+
+#ifdef HAVE_SYS_STAT_H
+#include <sys/stat.h>
+#endif
 
 #include "main_rtrmgr.hh"
 #include "master_conf_tree.hh"

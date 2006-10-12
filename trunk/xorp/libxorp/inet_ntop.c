@@ -14,7 +14,7 @@
  * SOFTWARE.
  */
 
-#include "config.h"
+#include "libxorp/xorp.h"
 
 #ifndef HAVE_INET_NTOP
 
@@ -28,7 +28,6 @@ __FBSDID("$FreeBSD: src/lib/libc/net/inet_ntop.c,v 1.12 2002/09/06 11:23:49 tjr 
 
 #ifdef HOST_OS_WINDOWS
 
-#include "xorp.h"
 #include <stdio.h>
 #include <string.h>
 

@@ -13,32 +13,31 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.8 2005/12/28 18:57:18 atanu Exp $"
+#ident "$XORP: xorp/ospf/policy_varrw.cc,v 1.9 2006/03/16 00:04:49 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
-#include <list>
-#include <set>
-
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+
+#include <list>
+#include <set>
 
 #include "libproto/spt.hh"
 
 #include "ospf.hh"
 #include "policy_varrw.hh"
+
 
 template <typename A>
 OspfVarRW<A>::OspfVarRW(IPNet<A>& network, A& nexthop, uint32_t& metric,

@@ -15,13 +15,14 @@
  */
 
 /*
- * $XORP: xorp/libxorp/debug.h,v 1.7 2005/03/25 02:53:39 pavlin Exp $
+ * $XORP: xorp/libxorp/debug.h,v 1.8 2006/03/16 00:04:28 pavlin Exp $
  */
 
 #ifndef __LIBXORP_DEBUG_H__
 #define __LIBXORP_DEBUG_H__
 
-#include "config.h"
+#include "libxorp/xorp.h"
+
 /*
  * This file defines the debug_msg(), the macro responsible for
  * generating debug messages.  It takes the same arguments as

@@ -12,19 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/c_format.cc,v 1.9 2005/08/18 17:45:57 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
-#include <vector>
+#ident "$XORP: xorp/libxorp/c_format.cc,v 1.10 2006/03/16 00:04:26 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "xorp.h"
-#include "xlog.h"
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+
+#include <vector>
+
 #include "c_format.hh"
+
 
 #ifndef HOST_OS_WINDOWS
 #define HAVE_C99_SNPRINTF	// [v]snprintf() conforms to ISO C99 spec

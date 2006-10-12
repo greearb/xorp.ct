@@ -13,30 +13,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.52 2006/03/16 00:04:49 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.53 2006/03/18 19:08:24 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
+#include "ospf_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
+#include "libxorp/status_codes.h"
+#include "libxorp/service.hh"
+#include "libxorp/eventloop.hh"
+
 #include <map>
 #include <list>
 #include <set>
 #include <deque>
-
-#include "ospf_module.h"
-
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
-#include "libxorp/callback.hh"
-
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
-#include "libxorp/ipnet.hh"
-
-#include "libxorp/status_codes.h"
-#include "libxorp/service.hh"
-#include "libxorp/eventloop.hh"
 
 #include "libproto/spt.hh"
 
@@ -44,6 +42,7 @@
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
+
 
 template <typename A>
 void

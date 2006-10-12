@@ -13,31 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.61 2006/07/05 22:46:56 atanu Exp $"
+#ident "$XORP: xorp/bgp/xrl_target.cc,v 1.62 2006/07/12 02:35:19 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 #define PROFILE_UTILS_REQUIRED
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
-
 #include "libxorp/eventloop.hh"
+
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_error.hh"
+
 #include "xrl/interfaces/profile_client_xif.hh"
 
 #include "bgp.hh"
 #include "iptuple.hh"
 #include "xrl_target.hh"
 #include "profile_vars.hh"
+
 
 XrlBgpTarget::XrlBgpTarget(XrlRouter *r, BGPMain& bgp)
 	: XrlBgpTargetBase(r),

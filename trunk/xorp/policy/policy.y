@@ -11,18 +11,18 @@
  * yyrcsid
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "policy_module.h"
+
 #include "libxorp/xorp.h"
+
+#include <vector>
+
 #include "policy/common/element.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
+
 #include "policy_parser.hh"
-#include <vector>
-#include <string>
+
 
 extern int yylex(void);
 

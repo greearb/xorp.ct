@@ -12,25 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.15 2006/03/16 00:03:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/test_peer_data.cc,v 1.16 2006/03/29 22:41:23 atanu Exp $"
 
 #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/asnum.hh"
+
 #include "iptuple.hh"
 #include "parameter.hh"
 #include "peer_data.hh"
+
 
 bool
 test1(TestInfo& info)

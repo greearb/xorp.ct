@@ -12,37 +12,31 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.76 2006/08/10 09:50:51 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/peer.cc,v 1.77 2006/08/10 23:14:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
-#include <string>
-#include <string.h>
-#include <stdlib.h>
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "bgp/bgp_module.h"
 
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/eventloop.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/utils.hh"
 
 #include "libproto/packet.hh"
 
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/test_peer_xif.hh"
+
 #include "bgp/local_data.hh"
 #include "bgp/packet.hh"
 
-#include "libxipc/xrl_std_router.hh"
-#include "xrl/interfaces/test_peer_xif.hh"
 #include "peer.hh"
 #include "bgppp.hh"
+
 
 Peer::~Peer()
 {

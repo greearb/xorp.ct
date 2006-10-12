@@ -12,20 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.8 2005/08/18 15:32:40 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
-#include <string>
+#ident "$XORP: xorp/libxipc/test_xrl_parser.cc,v 1.9 2006/03/16 00:04:19 pavlin Exp $"
 
 #include "xrl_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 
 #include "xrl_parser.hh"
+
 
 static const char QUOT='"';
 

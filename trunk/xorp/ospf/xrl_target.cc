@@ -13,31 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.38 2006/06/15 06:07:27 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.39 2006/10/12 00:41:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
-#include <string>
-#include <set>
-
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrl_std_router.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+
+#include <set>
+
+#include "libxipc/xrl_std_router.hh"
 
 #include "ospf.hh"
 #include "xrl_io.hh"
 #include "xrl_target.hh"
+
 
 static int
 decode_time_string(EventLoop& eventloop, const string& time_string,

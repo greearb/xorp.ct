@@ -12,22 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.7 2006/03/29 09:12:03 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/test_timeval.cc,v 1.8 2006/06/02 18:08:40 pavlin Exp $"
 
 #include "libxorp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 
-#include "libxorp/timeval.hh"
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "timeval.hh"
+
 
 //
 // XXX: MODIFY FOR YOUR TEST PROGRAM

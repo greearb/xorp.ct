@@ -13,11 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.8 2005/10/02 22:21:55 abittau Exp $"
+#ident "$XORP: xorp/policy/common/register_elements.cc,v 1.9 2006/03/16 00:05:20 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #include "register_elements.hh"
 #include "element_factory.hh"
@@ -25,6 +23,7 @@
 #include "elem_set.hh"
 #include "elem_null.hh"
 #include "elem_bgp.hh"
+
 
 RegisterElements::RegisterElements()
 {

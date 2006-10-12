@@ -16,7 +16,7 @@
  * SOFTWARE.
  */
 
-#include "config.h"
+#include "libxorp/xorp.h"
 
 #ifndef HAVE_INET_PTON
 
@@ -26,9 +26,6 @@ __FBSDID("$FreeBSD: src/lib/libc/net/inet_pton.c,v 1.11 2002/09/06 11:23:49 tjr 
 #endif
 
 #ifdef HOST_OS_WINDOWS
-
-#include "xorp.h"
-#include <string.h>
 
 #ifndef EAFNOSUPPORT
 #define EAFNOSUPPORT WSAEAFNOSUPPORT

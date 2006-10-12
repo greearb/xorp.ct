@@ -12,14 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_subnet_route.cc,v 1.6 2005/08/18 15:58:08 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/test_subnet_route.cc,v 1.7 2006/03/16 00:03:37 pavlin Exp $"
 
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv4.hh"
@@ -32,6 +29,7 @@
 
 #include "path_attribute.hh"
 #include "subnet_route.hh"
+
 
 template<>
 inline void

@@ -13,22 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.6 2005/08/18 15:41:28 bms Exp $
+// $XORP: xorp/rip/xrl_redist_manager.hh,v 1.7 2006/03/16 00:05:54 pavlin Exp $
 
 #ifndef __RIP_XRL_REDIST_MANAGER__
 #define __RIP_XRL_REDIST_MANAGER__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/ipnet.hh"
+#include "libxorp/service.hh"
 
 #include <list>
 #include <string>
 
-#include "libxorp/ipnet.hh"
-#include "libxorp/service.hh"
-
 #include "redist.hh"
+
 
 class EventLoop;
 class XrlRouter;

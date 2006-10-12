@@ -13,17 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.18 2006/08/12 00:38:35 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/eventloop.cc,v 1.19 2006/09/11 17:42:05 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "xorp.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
 #include "eventloop.hh"
-#include "xlog.h"
-#include "debug.h"
+
 
 //
 // Number of EventLoop instances.

@@ -13,20 +13,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.9 2006/03/16 00:05:19 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/policy_utils.cc,v 1.10 2006/09/08 18:44:39 mjh Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "policy_utils.hh"
-
-#include <errno.h>
-#include <stdio.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+#include "libxorp/xorp.h"
 
 #if defined(HAVE_REGEX_H)
 #include <regex.h>
@@ -36,6 +25,9 @@
 #else
 #error "No header defining regex_t is present."
 #endif
+
+#include "policy_utils.hh"
+
 
 namespace policy_utils {
 

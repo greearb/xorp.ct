@@ -15,12 +15,8 @@
  */
 
 /*
- * $XORP: xorp/libxorp/gai_strerror.c,v 1.3 2005/12/21 09:42:57 bms Exp $
+ * $XORP: xorp/libxorp/gai_strerror.c,v 1.4 2006/03/16 00:04:29 pavlin Exp $
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "xorp.h"
 

@@ -13,16 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.29 2006/06/27 21:50:48 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.30 2006/06/27 22:12:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <map>
 
 #include "rip_module.h"
 
@@ -33,11 +27,14 @@
 #include "libxorp/ipv6.hh"
 #include "libxorp/xlog.h"
 
+#include <map>
+
 #include "constants.hh"
 #include "route_db.hh"
 #include "update_queue.hh"
 #include "rip_varrw.hh"
 #include "peer.hh"
+
 
 // ----------------------------------------------------------------------------
 // NetCmp

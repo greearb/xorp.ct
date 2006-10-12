@@ -12,18 +12,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/c_format.hh,v 1.7 2005/07/29 20:06:30 bms Exp $
+// $XORP: xorp/libxorp/c_format.hh,v 1.8 2006/03/16 00:04:26 pavlin Exp $
 
 #ifndef __LIBXORP_C_FORMAT_HH__
 #define __LIBXORP_C_FORMAT_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
-#include <stdio.h>
-#include <stdarg.h>
-#include <string>
 
 //
 // c_format is a macro that creates a string from a c-style format

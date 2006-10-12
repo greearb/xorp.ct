@@ -12,51 +12,33 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_kill.cc,v 1.7 2005/08/18 15:32:41 bms Exp $"
+#ident "$XORP: xorp/libxipc/xrl_pf_kill.cc,v 1.8 2006/03/16 00:04:22 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "xrl_module.h"
-#include "libxorp/xorp.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 #include "libxorp/exceptions.hh"
 
-#include "header.hh"
-
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
 #endif
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
 
-#include <errno.h>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include <string>
-
+#include "header.hh"
 #include "xrl_error.hh"
 #include "xrl_pf_kill.hh"
 #include "xrl_dispatcher.hh"
 #include "xuid.hh"
 #include "sockutil.hh"
+
 
 // ----------------------------------------------------------------------------
 // SUDP is "simple udp" - a minimalist and simple udp transport

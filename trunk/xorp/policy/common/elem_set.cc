@@ -13,17 +13,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.9 2006/03/16 00:05:16 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.10 2006/04/02 23:24:55 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
+#include <algorithm>
+
 #include "elem_set.hh"
 #include "policy_utils.hh"
-#include <algorithm>
+
 
 template <class T>
 ElemSetAny<T>::ElemSetAny(const Set& val) : _val(val) 

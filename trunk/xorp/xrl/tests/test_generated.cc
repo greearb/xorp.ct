@@ -12,24 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.15 2005/08/04 11:54:08 bms Exp $"
+#ident "$XORP: xorp/xrl/tests/test_generated.cc,v 1.16 2006/03/16 00:06:37 pavlin Exp $"
 
-#include <iostream>
+#include "libxipc/ipc_module.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 
-#include "libxipc/ipc_module.h"
+#include <iostream>
+
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
 #include "libxipc/xrl_pf_sudp.hh"
 
 #include "test_xifs.hh"
 #include "test_tgt.hh"
+
 
 static const char* g_tgt_name = "test_tgt";
 static const char* g_clnt_name = "test_clnt";

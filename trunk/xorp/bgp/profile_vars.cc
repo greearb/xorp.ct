@@ -12,16 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.15 2005/12/16 17:38:00 atanu Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/profile_vars.cc,v 1.16 2006/03/16 00:03:31 pavlin Exp $"
 
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/profile.hh"
+
 #include "profile_vars.hh"
+
 
 struct profile_vars {
     string var;

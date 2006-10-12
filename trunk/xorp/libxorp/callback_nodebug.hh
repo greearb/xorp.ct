@@ -29,10 +29,9 @@
  *
 <pre>
 
-#include <iostream>
-
-#include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
+
 
 static void hello_world() {
     cout << "Hello World" << endl;
@@ -58,10 +57,9 @@ int main() {
  *
 <pre>
 
-#include <iostream>
-
-#include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
+
 
 class Foo {
 public:
@@ -91,10 +89,9 @@ int main() {
  *
 <pre>
 
-#include <iostream>
-
-#include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
+
 
 static int sum(int x, int y) {
     cout << "sum(x = " << x << ", y = " << y << ")" << endl;

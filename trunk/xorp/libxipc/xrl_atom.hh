@@ -12,15 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_atom.hh,v 1.9 2006/03/16 00:04:20 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_atom.hh,v 1.10 2006/09/29 23:01:00 zec Exp $
 
 #ifndef __LIBXIPC_XRL_ATOM_HH__
 #define __LIBXIPC_XRL_ATOM_HH__
 
-#include <string>
-#include <vector>
-
-//#include "config.h"
+#include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/ipv4.hh"
@@ -30,7 +27,12 @@
 #include "libxorp/ipvx.hh"
 #include "libxorp/ipvxnet.hh"
 #include "libxorp/mac.hh"
+
+#include <string>
+#include <vector>
+
 #include "xrl_atom_list.hh"
+
 
 enum XrlAtomType {
     xrlatom_no_type = 0,

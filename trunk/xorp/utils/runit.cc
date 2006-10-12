@@ -13,36 +13,30 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/utils/runit.cc,v 1.17 2006/04/03 21:13:49 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/utils/runit.cc,v 1.18 2006/05/29 04:18:57 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 #include "libxorp/utils.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#include <iostream>
+#include <vector>
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
 #endif
-#ifdef HAVE_SYS_WAIT_H
-#include <sys/wait.h>
+#ifdef HAVE_PROCESS_H
+#include <process.h>
 #endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #include <signal.h>
-#include <errno.h>
+
+#ifdef HAVE_SYS_WAIT_H
+#include <sys/wait.h>
+#endif
 
 #ifdef HOST_OS_WINDOWS
-#include <process.h>
 typedef HANDLE PID_T;
 #define INVALID_PID (INVALID_HANDLE_VALUE)
 #else
@@ -50,13 +44,6 @@ typedef pid_t PID_T;
 #define INVALID_PID (0)
 #endif
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
-
-#include <iostream>
-#include <string>
-#include <vector>
 
 #ifndef XORP_WIN32_SH_PATH
 #define XORP_WIN32_SH_PATH "C:\\MINGW\\BIN\\SH.EXE"

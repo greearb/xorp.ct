@@ -13,38 +13,37 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/profiler.cc,v 1.5 2005/08/18 15:54:28 bms Exp $"
+#ident "$XORP: xorp/rtrmgr/profiler.cc,v 1.6 2006/03/16 00:06:00 pavlin Exp $"
 
 // Access the profiling support in XORP processes.
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "rtrmgr_module.h"
 
 #include <stdio.h>
-
-#ifdef HAVE_SYSEXITS_H
-#include <sysexits.h>
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
 #include "libxorp/status_codes.h"
 #include "libxorp/callback.hh"
-#include "libxipc/xrl_std_router.hh"
-
-#include "xrl/interfaces/profile_xif.hh"
-#include "xrl/targets/profiler_base.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#ifdef HAVE_SYSEXITS_H
+#include <sysexits.h>
+#endif
+
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/profile_xif.hh"
+
+#include "xrl/targets/profiler_base.hh"
+
 
 class XrlProfilerTarget :  XrlProfilerTargetBase {
  public:

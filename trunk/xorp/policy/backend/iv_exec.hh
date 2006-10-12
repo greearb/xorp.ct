@@ -13,23 +13,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/backend/iv_exec.hh,v 1.7 2006/03/16 00:05:08 pavlin Exp $
+// $XORP: xorp/policy/backend/iv_exec.hh,v 1.8 2006/09/08 18:44:37 mjh Exp $
 
 #ifndef __POLICY_BACKEND_IV_EXEC_HH__
 #define __POLICY_BACKEND_IV_EXEC_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+
+#include <stack>
 
 #include "policy/common/dispatcher.hh"
 #include "policy/common/varrw.hh"
 #include "policy/common/policy_exception.hh"
+
 #include "instruction.hh"
 #include "set_manager.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
-#include <stack>
+
 
 /**
  * @short Visitor that executes instructions

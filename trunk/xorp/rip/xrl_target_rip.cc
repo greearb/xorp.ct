@@ -13,16 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "libxorp/xorp.h"
-
 // #define DEBUG_LOGGING
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
+
 #include "libxipc/xrl_router.hh"
 
 #include "auth.hh"
@@ -32,6 +28,7 @@
 #include "xrl_redist_manager.hh"
 #include "xrl_target_rip.hh"
 #include "xrl_target_common.hh"
+
 
 static int
 decode_time_string(EventLoop& eventloop, const string& time_string,

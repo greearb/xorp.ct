@@ -13,9 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.6 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_checksum.cc,v 1.7 2006/03/29 22:41:25 atanu Exp $"
 
-#include "config.h"
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
@@ -27,12 +28,6 @@
 
 #include "fletcher_checksum.hh"
 
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 uint8_t data[] = {
 #include "iso512.data"

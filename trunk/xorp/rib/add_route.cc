@@ -12,27 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/add_route.cc,v 1.6 2005/08/04 11:52:32 bms Exp $"
+#ident "$XORP: xorp/rib/add_route.cc,v 1.7 2006/03/16 00:05:26 pavlin Exp $"
 
 // Add routes to the RIB.
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <stdio.h>
-#include <string.h>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include <fstream>
-#include <cstdlib>
-#include <vector>
 
 #include "rib_module.h"
 
@@ -44,13 +29,18 @@
 #include "libxorp/timeval.hh"
 #include "libxorp/timer.hh"
 
-#include "libxipc/xrl_std_router.hh"
-
-#include "xrl/interfaces/rib_xif.hh"
+#include <fstream>
+#include <cstdlib>
+#include <vector>
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/rib_xif.hh"
+
 
 template <typename A>
 class Route {

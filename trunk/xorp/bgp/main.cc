@@ -12,24 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/main.cc,v 1.44 2005/12/16 18:04:49 atanu Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/main.cc,v 1.45 2006/03/16 00:03:29 pavlin Exp $"
 
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrl_std_router.hh"
 
 #include "libcomm/comm_api.h"
 
+#include "libxipc/xrl_std_router.hh"
+
 #include "bgp.hh"
 #include "xrl_target.hh"
+
 
 BGPMain *bgpmain;
 

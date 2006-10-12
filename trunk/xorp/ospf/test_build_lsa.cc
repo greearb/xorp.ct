@@ -13,28 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.2 2006/03/28 02:41:17 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa.cc,v 1.3 2006/03/28 03:06:55 atanu Exp $"
 
-#include "config.h"
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
 #include "packet.hh"
-
 #include "test_build_lsa.hh"
+
 
 /**
  * Get a number in base 8,10 or 16.

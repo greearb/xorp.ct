@@ -12,10 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.29 2006/03/16 00:04:22 pavlin Exp $"
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxipc/xrl_pf_inproc.cc,v 1.30 2006/04/02 06:50:57 pavlin Exp $"
 
 #include "xrl_module.h"
 
@@ -24,22 +21,11 @@
 #include "libxorp/xlog.h"
 #include "libxorp/c_format.hh"
 
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+#include <map>
+
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-
-#include <stdio.h>
-#include <string>
-#include <map>
 
 #include "xrl_error.hh"
 #include "xrl_pf_inproc.hh"

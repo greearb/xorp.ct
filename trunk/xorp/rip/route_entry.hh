@@ -13,19 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_entry.hh,v 1.13 2006/03/16 00:05:52 pavlin Exp $
+// $XORP: xorp/rip/route_entry.hh,v 1.14 2006/06/27 21:50:48 pavlin Exp $
 
 #ifndef __RIP_ROUTE_ENTRY_HH__
 #define __RIP_ROUTE_ENTRY_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/ipnet.hh"
 #include "libxorp/timer.hh"
 
 #include "policy/backend/policytags.hh"
+
 
 template<typename A> class RouteEntryOrigin;
 

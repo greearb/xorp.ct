@@ -13,15 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.11 2006/03/16 00:04:59 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.12 2006/07/28 06:34:31 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "policy_module.h"
-#include "policy_target.hh"
+
+#include "libxorp/xorp.h"
+
 #include "policy/common/policy_utils.hh"
 #include "policy/common/varrw.hh"
+
+#include "policy_target.hh"
+
 
 // static members
 string PolicyTarget::policy_target_name = "policy";

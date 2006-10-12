@@ -12,11 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/callback.cc,v 1.7 2005/09/28 17:31:43 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/callback.cc,v 1.8 2006/03/16 00:04:26 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp_module.h"
+
+#include "libxorp/xorp.h"
 
 /*
  * This code is only compiled if DEBUG_CALLBACKS is defined in
@@ -30,16 +30,14 @@
 
 #ifdef DEBUG_CALLBACKS
 
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+#include "libxorp/c_format.hh"
+#include "libxorp/timeval.hh"
+#include "libxorp/timer.hh"
+
 #include <stack>
 
-#include "libxorp_module.h"
-#include "xlog.h"
-#include "xorp.h"
-
-#include "callback.hh"
-#include "c_format.hh"
-#include "timeval.hh"
-#include "timer.hh"
 
 /**
  * Maximum callback dispatch duration.

@@ -12,19 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/tools/print_routes.hh,v 1.18 2006/06/28 15:50:44 atanu Exp $
+// $XORP: xorp/bgp/tools/print_routes.hh,v 1.19 2006/07/12 00:22:00 atanu Exp $
 
 #ifndef __BGP_TOOLS_PRINT_PEER_HH__
 #define __BGP_TOOLS_PRINT_PEER_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgptools_module.h"
-
-#include "bgp/aspath.hh"
-#include "bgp/path_attribute.hh"
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -34,6 +27,8 @@
 
 #include "xrl/interfaces/bgp_xif.hh"
 
+#include "bgp/aspath.hh"
+#include "bgp/path_attribute.hh"
 
 
 template <typename A>

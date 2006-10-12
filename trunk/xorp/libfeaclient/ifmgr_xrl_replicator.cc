@@ -12,20 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.12 2005/11/01 23:33:16 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <string>
+#ident "$XORP: xorp/libfeaclient/ifmgr_xrl_replicator.cc,v 1.13 2006/03/16 00:04:11 pavlin Exp $"
 
 #include "libfeaclient_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
 
 #include "libxipc/xrl_router.hh"
+
 #include "ifmgr_xrl_replicator.hh"
+
 
 IfMgrXrlReplicator::IfMgrXrlReplicator(XrlSender&	sender,
 				       const string&	xrl_target_name)

@@ -12,17 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.45 2005/08/22 06:57:31 atanu Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.46 2006/03/16 00:03:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/timer.hh"
@@ -35,6 +32,7 @@
 #include "route_table_nhlookup.hh"
 #include "route_table_decision.hh"
 #include "profile_vars.hh"
+
 
 template <class A>
 NextHopResolver<A>::NextHopResolver(XrlStdRouter *xrl_router,

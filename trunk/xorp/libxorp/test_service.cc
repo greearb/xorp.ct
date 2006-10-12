@@ -12,24 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_service.cc,v 1.9 2005/08/18 15:28:42 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <string>
-
-#include "eventloop.hh"
-#include "service.hh"
+#ident "$XORP: xorp/libxorp/test_service.cc,v 1.10 2006/03/16 00:04:34 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "xlog.h"
-#include "exceptions.hh"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/exceptions.hh"
+#include "libxorp/eventloop.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "service.hh"
+
 
 //
 // This test is fairly straightforward.  We implement two classes

@@ -12,27 +12,19 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/asnum.hh,v 1.12 2005/11/15 11:44:02 mjh Exp $
+// $XORP: xorp/libxorp/asnum.hh,v 1.13 2006/03/16 00:04:25 pavlin Exp $
 
 #ifndef __LIBXORP_ASNUM_HH__
 #define __LIBXORP_ASNUM_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
-#include "xorp.h"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
 
-#include <string>
-
 #include "c_format.hh"
+
 
 /**
  * @short A class for storing an AS number used by protocols such as BGP

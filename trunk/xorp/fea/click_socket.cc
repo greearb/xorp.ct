@@ -12,13 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/click_socket.cc,v 1.29 2006/03/16 00:03:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/click_socket.cc,v 1.30 2006/04/02 23:41:50 pavlin Exp $"
 
 #include "fea_module.h"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
@@ -26,22 +22,8 @@
 #include "libxorp/run_command.hh"
 #include "libxorp/utils.hh"
 
-#include "libcomm/comm_api.h"
-
 #include <algorithm>
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
 #ifdef HAVE_SYS_LINKER_H
 #include <sys/linker.h>
 #endif
@@ -49,7 +31,7 @@
 #include <sys/mount.h>
 #endif
 
-#include <errno.h>
+#include "libcomm/comm_api.h"
 
 #include "click_socket.hh"
 

@@ -12,23 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/term.cc,v 1.19 2006/05/12 02:21:38 pavlin Exp $"
+#ident "$XORP: xorp/policy/term.cc,v 1.20 2006/09/08 18:44:35 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "policy_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
 
-#include "term.hh"
 #include "policy/common/policy_utils.hh"
+
+#include "term.hh"
 #include "parser.hh"
+
 
 using namespace policy_utils;
 

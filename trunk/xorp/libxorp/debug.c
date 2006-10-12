@@ -13,29 +13,11 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/debug.c,v 1.7 2005/07/29 20:06:31 bms Exp $"
+#ident "$XORP: xorp/libxorp/debug.c,v 1.8 2006/03/16 00:04:28 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 
-#include "xorp.h"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <stdio.h>
-#include <stdarg.h>
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
-
-#include "debug.h"
-
-#ifdef UNUSED
-#undef UNUSED
-#endif /* UNUSED */
-#define UNUSED(x) (x) = (x)
 
 static uint32_t dbg_indent = 0;
 

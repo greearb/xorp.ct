@@ -12,13 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/util.cc,v 1.23 2005/12/21 09:43:00 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <list>
+#ident "$XORP: xorp/rtrmgr/util.cc,v 1.24 2006/03/16 00:06:04 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -27,6 +21,8 @@
 #include "libxorp/debug.h"
 #include "libxorp/utility.h"
 #include "libxorp/utils.hh"
+
+#include <list>
 
 #include "util.hh"
 

@@ -13,27 +13,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/external.cc,v 1.22 2006/03/16 00:04:49 pavlin Exp $"
+#ident "$XORP: xorp/ospf/external.cc,v 1.23 2006/06/12 18:19:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
-#include <list>
-#include <set>
-
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+
+#include <list>
+#include <set>
 
 #include "libproto/spt.hh"
 
@@ -43,6 +41,7 @@
 #include "area_router.hh"
 #include "external.hh"
 #include "policy_varrw.hh"
+
 
 template <typename A>
 External<A>::External(Ospf<A>& ospf,

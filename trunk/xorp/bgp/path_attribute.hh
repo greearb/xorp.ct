@@ -12,33 +12,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.43 2005/12/13 01:30:21 atanu Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.44 2006/03/16 00:03:30 pavlin Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
-
-#include <unistd.h>
-#include <openssl/md5.h>
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
 
 #include <list>
 #include <string>
 #include <set>
 
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
-#include "libxorp/ipnet.hh"
-#include "exceptions.hh"	// for CorruptMessage exception
+#include <openssl/md5.h>
 
+#include "exceptions.hh"	// for CorruptMessage exception
 #include "aspath.hh"
 #include "parameter.hh"
+
 
 /**
  * PathAttribute

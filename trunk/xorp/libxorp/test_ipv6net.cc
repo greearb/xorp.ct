@@ -12,24 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.13 2006/04/05 08:02:25 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/test_ipv6net.cc,v 1.14 2006/08/04 07:10:29 pavlin Exp $"
 
 #include "libxorp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/exceptions.hh"
-#include "libxorp/ipv6net.hh"
 #include "libxorp/timer.hh"
-
 #include "libxorp/test_main.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "ipv6net.hh"
+
 
 //
 // TODO: XXX: remove after the switch to the TestMain facility is completed

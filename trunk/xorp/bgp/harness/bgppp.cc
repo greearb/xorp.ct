@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.11 2006/03/16 00:03:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/bgppp.cc,v 1.12 2006/08/10 23:14:40 pavlin Exp $"
 
 /*
 ** BGP Pretty Print
@@ -20,10 +20,7 @@
 
 #include "bgp/bgp_module.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 

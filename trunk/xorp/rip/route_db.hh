@@ -13,21 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/route_db.hh,v 1.22 2006/03/16 00:05:51 pavlin Exp $
+// $XORP: xorp/rip/route_db.hh,v 1.23 2006/06/27 21:50:48 pavlin Exp $
 
 #ifndef __RIP_ROUTE_DB_HH__
 #define __RIP_ROUTE_DB_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/ref_ptr.hh"
 
 #include <map>
 
-#include "libxorp/ref_ptr.hh"
+#include "policy/backend/policy_filters.hh"
+
 #include "route_entry.hh"
 
-#include "policy/backend/policy_filters.hh"
 
 class EventLoop;
 

@@ -12,12 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP"
+#ident "$XORP$"
+
+#include "finder_module.h"
 
 #include "libxorp/xorp.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
 #endif
 
 #include "finder_client.hh"
@@ -25,9 +27,6 @@
 #include "finder_tcp_messenger.hh"
 #include "finder_constants.hh"
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 //
 // A client process to help test the finder keepalive and time out

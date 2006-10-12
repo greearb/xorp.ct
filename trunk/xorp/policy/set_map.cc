@@ -13,14 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.6 2006/03/16 00:05:00 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/set_map.cc,v 1.7 2006/09/08 18:44:35 mjh Exp $"
 
 #include "policy_module.h"
+
+#include "libxorp/xorp.h"
+
 #include "set_map.hh"    
+
 
 const Element&
 SetMap::getSet(const string& name) const

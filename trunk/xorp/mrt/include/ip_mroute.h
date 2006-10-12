@@ -15,13 +15,13 @@
  */
 
 /*
- * $XORP: xorp/mrt/include/ip_mroute.h,v 1.14 2006/03/16 00:04:48 pavlin Exp $
+ * $XORP: xorp/mrt/include/ip_mroute.h,v 1.15 2006/03/31 23:04:27 pavlin Exp $
  */
 
 #ifndef __MRT_INCLUDE_IP_MROUTE_H__
 #define __MRT_INCLUDE_IP_MROUTE_H__
 
-#include "config.h"
+#include "libxorp/xorp.h"
 
 #ifdef HAVE_NET_ROUTE_H
 #include <net/route.h>

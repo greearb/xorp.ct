@@ -31,15 +31,17 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.32 2006/03/30 00:32:02 pavlin Exp $"
+#ident "$XORP: xorp/libcomm/comm_sock.c,v 1.33 2006/03/30 09:57:36 pavlin Exp $"
 
 /*
  * COMM socket library lower `sock' level implementation.
  */
-#include "config.h"
 
 #include "comm_module.h"
-#include "comm_private.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
@@ -68,6 +70,8 @@
 #endif
 
 #include "comm_api.h"
+#include "comm_private.h"
+
 
 /* XXX: Single threaded socket errno, used to record last error code. */
 int _comm_serrno;

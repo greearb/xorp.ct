@@ -12,18 +12,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/packet_queue.cc,v 1.8 2005/08/18 15:41:27 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/rip/packet_queue.cc,v 1.9 2006/03/16 00:05:49 pavlin Exp $"
 
 #include "rip_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
+
 #include "packet_queue.hh"
+
 
 template <typename A>
 PacketQueue<A>::PacketQueue()

@@ -14,7 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/getopt.c,v 1.2 2005/08/18 15:28:40 bms Exp $"
+#ident "$XORP: xorp/libxorp/getopt.c,v 1.3 2006/03/16 00:04:29 pavlin Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
@@ -59,10 +59,6 @@
  *
  * __FBSDID("$FreeBSD: src/lib/libc/stdlib/getopt.c,v 1.7 2004/03/06 17:05:45 ache Exp $");
  */
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 

@@ -13,14 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.14 2006/08/12 08:25:58 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.hh,v 1.15 2006/09/12 08:24:20 bms Exp $
 
 #ifndef __LIBXORP_WIN_DISPATCHER_HH__
 #define __LIBXORP_WIN_DISPATCHER_HH__
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/xorpfd.hh"
@@ -30,6 +26,7 @@
 
 #include <vector>
 #include <map>
+
 
 #ifdef HOST_OS_WINDOWS
 

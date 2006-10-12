@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/test_filter.cc,v 1.37 2006/03/16 00:03:36 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/test_filter.cc,v 1.38 2006/04/14 05:57:59 atanu Exp $"
 
 #include "bgp_module.h"
 
@@ -25,6 +21,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/xlog.h"
 #include "libxorp/test_main.hh"
+
+#ifdef HAVE_PWD_H
+#include <pwd.h>
+#endif
 
 #include "bgp.hh"
 #include "route_table_base.hh"
@@ -36,9 +36,6 @@
 #include "dump_iterators.hh"
 #include "dummy_next_hop_resolver.hh"
 
-#ifndef HOST_OS_WINDOWS
-#include <pwd.h>
-#endif
 
 bool
 test_filter(TestInfo& /*info*/)

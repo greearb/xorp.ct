@@ -12,13 +12,9 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.11 2005/08/18 15:32:39 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_atom.cc,v 1.12 2006/03/16 00:04:19 pavlin Exp $"
 
 // test_xrl_atom: String Serialization Tests
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "xrl_module.h"
 
@@ -28,6 +24,7 @@
 
 #include "xrl_atom.hh"
 #include "xrl_atom_encoding.hh"
+
 
 static bool g_trace = false;
 #define tracef(args...) if (g_trace) printf(args)

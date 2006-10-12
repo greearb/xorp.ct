@@ -12,14 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.63 2006/03/28 00:15:26 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/xorpsh_main.cc,v 1.64 2006/04/26 04:22:50 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/utils.hh"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
 #endif
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
 #endif
 
 #ifdef HAVE_NETDB_H
@@ -32,13 +38,6 @@
 
 #include <signal.h>
 
-#include "rtrmgr_module.h"
-
-#include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/utils.hh"
-
 #include "libcomm/comm_api.h"
 
 #include "cli.hh"
@@ -50,12 +49,8 @@
 #include "util.hh"
 #include "xorpsh_main.hh"
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 #ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
 #define FILENO(x) ((HANDLE)_get_osfhandle(_fileno(x)))
 #else
 #define FILENO(x) fileno(x)

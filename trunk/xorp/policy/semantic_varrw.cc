@@ -13,15 +13,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.8 2006/05/25 05:50:00 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/semantic_varrw.cc,v 1.9 2006/09/08 18:44:35 mjh Exp $"
 
 #include "policy_module.h"
-#include "semantic_varrw.hh"
+
+#include "libxorp/xorp.h"
+
 #include "policy/common/policy_utils.hh"
+
+#include "semantic_varrw.hh"
+
 
 SemanticVarRW::SemanticVarRW(VarMap& vars) : 
 		    _vars(vars) 

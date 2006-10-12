@@ -12,17 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.16 2005/08/26 17:17:36 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_GLOB_H
-#include <glob.h>
-#elif defined(HOST_OS_WINDOWS)
-#include "glob_win32.h"
-#endif
+#ident "$XORP: xorp/rtrmgr/xrldb.cc,v 1.17 2006/03/16 00:06:05 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -32,9 +22,16 @@
 #include "libxorp/exceptions.hh"
 #include "libxorp/utils.hh"
 
+#ifdef HAVE_GLOB_H
+#include <glob.h>
+#elif defined(HOST_OS_WINDOWS)
+#include "glob_win32.h"
+#endif
+
 #include "libxipc/xrl_parser.hh"
 
 #include "xrldb.hh"
+
 
 #ifdef HOST_OS_WINDOWS
 #define	stat	_stat

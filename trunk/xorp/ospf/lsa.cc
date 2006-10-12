@@ -13,33 +13,32 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.69 2006/03/24 01:40:51 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.70 2006/03/28 03:06:53 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
-#include <map>
-#include <list>
-#include <set>
-
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
+#include <map>
+#include <list>
+#include <set>
+
 #include "ospf.hh"
 #include "lsa.hh"
 #include "fletcher_checksum.hh"
+
 
 /**
  * Verify the checksum of an LSA.

@@ -12,23 +12,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_tcp.hh,v 1.17 2006/02/12 20:56:41 bms Exp $
+// $XORP: xorp/libxipc/finder_tcp.hh,v 1.18 2006/03/16 00:04:16 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_TCP_HH__
 #define __LIBXIPC_FINDER_TCP_HH__
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_UIO_H
-#include <sys/uio.h>
-#endif
-
-#include <vector>
 
 #include "libxorp/xorp.h"
 #include "libxorp/asyncio.hh"
@@ -37,6 +24,13 @@
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv4net.hh"
 #include "libxorp/ref_ptr.hh"
+
+#include <vector>
+
+#ifdef HAVE_SYS_UIO_H
+#include <sys/uio.h>
+#endif
+
 
 #define MAX_XRL_INPUT_SIZE	65536	// maximum total XRL input buffer
 					// size on the network.

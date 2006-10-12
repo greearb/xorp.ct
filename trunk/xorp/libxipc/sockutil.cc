@@ -12,18 +12,32 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.22 2006/04/28 06:48:46 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxipc/sockutil.cc,v 1.23 2006/05/10 07:52:55 pavlin Exp $"
 
 #include "ipc_module.h"
-#include "libxorp/xorp.h"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/c_format.hh"
+#include "libxorp/eventloop.hh"
+#include "libxorp/ipv4.hh"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
 #endif
+
+#include <vector>
+
+#ifdef HAVE_IPHLPAPI_H
+#include <iphlpapi.h>
+#endif
+#ifdef HAVE_IPTYPES_H
+#include <iptypes.h>
+#endif
+#ifdef HAVE_NETDB_H
+#include <netdb.h>
+#endif
+
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
@@ -33,47 +47,21 @@
 #ifdef HAVE_SYS_SOCKIO_H
 #include <sys/sockio.h>
 #endif
-#ifdef HAVE_NET_IF_H
-#include <net/if.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#ifdef HAVE_NETDB_H
-#include <netdb.h>
-#endif
-
 #ifdef HAVE_SYS_SYSCTL_H
 #include <sys/sysctl.h>
 #endif
 
-#include <errno.h>
-#include <stdio.h>
-
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
+#ifdef HAVE_NET_IF_H
+#include <net/if.h>
 #endif
 
-#ifdef HAVE_IPHLPAPI_H
-#include <iphlpapi.h>
-#include <iptypes.h>		// XXX
-#endif
-
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/c_format.hh"
-#include "libxorp/eventloop.hh"
-#include "libxorp/ipv4.hh"
-
-#ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
+#ifdef HAVE_ARPA_INET_H
+#include <arpa/inet.h>
 #endif
 
 #include "libcomm/comm_api.h"
 
 #include "sockutil.hh"
-
-#include <vector>
 
 
 #ifndef HOST_OS_WINDOWS

@@ -13,14 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.8 2006/05/25 05:50:02 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/file_varrw.cc,v 1.9 2006/09/08 18:44:39 mjh Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #include "policy/common/policy_utils.hh"
+
 #include "file_varrw.hh"
+
 
 FileVarRW::FileVarRW(const string& fname) {
     FILE* f = fopen(fname.c_str(),"r");

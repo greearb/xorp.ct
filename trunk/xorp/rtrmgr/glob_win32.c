@@ -37,9 +37,7 @@
  *
  * ////////////////////////////////////////////////////////////////////////// */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #ifdef HOST_OS_WINDOWS
 

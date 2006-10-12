@@ -12,22 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.11 2005/08/18 15:32:39 bms Exp $"
+#ident "$XORP: xorp/libxipc/test_xrl_args.cc,v 1.12 2006/03/16 00:04:19 pavlin Exp $"
 
 // test_xrl_args: String Serialization Tests
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "xrl_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "xrl_args.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "xrl_args.hh"
+
 
 ///////////////////////////////////////////////////////////////////////////////
 //

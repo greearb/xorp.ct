@@ -13,37 +13,32 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.51 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.52 2006/03/29 22:41:25 atanu Exp $"
 
-#include "config.h"
-#include <map>
-#include <list>
-#include <set>
-#include <deque>
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
-#include "libxorp/xorp.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
+#include <map>
+#include <list>
+#include <set>
+#include <deque>
+
 #include "ospf.hh"
 #include "debug_io.hh"
 
-#ifndef	DEBUG_LOGGING
-#define DEBUG_LOGGING
-#endif /* DEBUG_LOGGING */
-#ifndef	DEBUG_PRINT_FUNCTION_NAME
-#define DEBUG_PRINT_FUNCTION_NAME
-#endif /* DEBUG_PRINT_FUNCTION_NAME */
 
 // Make sure that all tests free up any memory that they use. This will
 // allow us to use the leak checker program.

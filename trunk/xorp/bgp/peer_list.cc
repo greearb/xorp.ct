@@ -12,18 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/peer_list.cc,v 1.21 2005/11/01 01:36:01 atanu Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/peer_list.cc,v 1.22 2006/03/16 00:03:31 pavlin Exp $"
 
 #include "bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 
 #include "peer_list.hh"
+
 
 BGPPeerList::BGPPeerList()
     : _next_token(0)

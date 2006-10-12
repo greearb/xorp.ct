@@ -12,27 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.13 2006/08/01 22:21:40 mjh Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "xorp.h"
+#ident "$XORP: xorp/libxorp/test_ipnet.cc,v 1.14 2006/08/04 07:10:28 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "exceptions.hh"
-#include "ipv4net.hh"
-#include "xlog.h"
 
-#include <stdio.h>
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/exceptions.hh"
 
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "ipv4net.hh"
+
 
 // ----------------------------------------------------------------------------
 // Verbose output

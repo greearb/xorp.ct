@@ -3,20 +3,19 @@
  * yacc -d -p yy_policy_backend_parser -o yacc.yy_policy_backend_parser.cc backend.y
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
 
+#include <vector>
+
 #include "policy/common/varrw.hh"
-#include "policy_backend_parser.hh"
 #include "policy/common/element_factory.hh"
 #include "policy/common/operator.hh"
+
+#include "policy_backend_parser.hh"
 #include "instruction.hh"
 #include "term_instr.hh"
 #include "policy_instr.hh"
-#include <vector>
+
 
 extern int yylex(void);
 extern void yyerror(const char*);

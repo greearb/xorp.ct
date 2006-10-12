@@ -12,26 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.14 2005/08/18 15:58:04 bms Exp $"
+#ident "$XORP: xorp/bgp/aspath_test.cc,v 1.15 2006/03/16 00:03:27 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "bgp_module.h"
 
 #include "libxorp/xorp.h"
-
-#include <stdio.h>
 
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
 #endif
-
-#include "bgp_module.h"
-#include "aspath.hh"
-
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "aspath.hh"
+
 
 int
 main(int argc, char* argv[])

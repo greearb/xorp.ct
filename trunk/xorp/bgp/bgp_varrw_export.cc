@@ -13,11 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.3 2005/10/02 22:21:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/bgp_varrw_export.cc,v 1.4 2006/03/16 00:03:28 pavlin Exp $"
 
 #include "bgp_module.h"
-#include "config.h"
+
+#include "libxorp/xorp.h"
+
 #include "bgp_varrw_export.hh"
+
 
 template <class A>
 BGPVarRWExport<A>::BGPVarRWExport(const string& name,

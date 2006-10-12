@@ -32,7 +32,7 @@
  */
 
 /*
- *  $XORP: xorp/libcomm/comm_private.h,v 1.3 2005/05/05 19:49:08 bms Exp $
+ *  $XORP: xorp/libcomm/comm_private.h,v 1.4 2006/03/01 12:55:33 bms Exp $
  */
 
 #ifndef __LIBCOMM_COMM_PRIVATE_H__
@@ -42,13 +42,6 @@
 /*
  * COMM socket library private include header.
  */
-
-
-#include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "comm_api.h"
-
 
 /*
  * Constants definitions

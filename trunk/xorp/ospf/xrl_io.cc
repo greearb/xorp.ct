@@ -13,28 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.31 2006/03/28 03:06:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.32 2006/06/15 06:07:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
-#include <list>
-#include <set>
-
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+
+#include <list>
+#include <set>
 
 #include "xrl/interfaces/fea_rawpkt4_xif.hh"
 #include "xrl/interfaces/fea_rawpkt6_xif.hh"
@@ -42,6 +40,7 @@
 
 #include "ospf.hh"
 #include "xrl_io.hh"
+
 
 template <typename A>
 void

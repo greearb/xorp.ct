@@ -13,29 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/auth.cc,v 1.13 2006/05/15 20:22:18 pavlin Exp $"
+#ident "$XORP: xorp/ospf/auth.cc,v 1.14 2006/05/15 21:10:23 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
-
-#include "config.h"
 
 #include "ospf_module.h"
 
 #include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
 #include "auth.hh"
+
 
 /**
  * RFC 1141 Incremental Updating of the Internet Checksum

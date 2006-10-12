@@ -13,30 +13,28 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.120 2006/06/02 02:21:55 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.121 2006/06/12 18:19:49 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
+#include "ospf_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
+#include "libxorp/status_codes.h"
+#include "libxorp/service.hh"
+#include "libxorp/eventloop.hh"
+
 #include <map>
 #include <list>
 #include <set>
 #include <queue>
-
-#include "ospf_module.h"
-
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
-#include "libxorp/callback.hh"
-
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
-#include "libxorp/ipnet.hh"
-
-#include "libxorp/status_codes.h"
-#include "libxorp/service.hh"
-#include "libxorp/eventloop.hh"
 
 #include "libproto/spt.hh"
 
@@ -48,6 +46,7 @@
 #include "auth.hh"
 #include "peer.hh"
 #include "peer_manager.hh"
+
 
 template <typename A>
 PeerManager<A>::~PeerManager()

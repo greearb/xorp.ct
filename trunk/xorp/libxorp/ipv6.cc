@@ -12,27 +12,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.24 2006/08/18 22:14:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipv6.cc,v 1.25 2006/08/18 22:22:30 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
-#include "xorp.h"
-#include "ipv6.hh"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
+
+#include "ipv6.hh"
+
 
 IPv6::IPv6(const uint8_t* from_uint8)
 {

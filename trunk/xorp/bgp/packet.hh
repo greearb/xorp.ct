@@ -12,42 +12,25 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/packet.hh,v 1.39 2006/08/10 21:07:11 pavlin Exp $
+// $XORP: xorp/bgp/packet.hh,v 1.40 2006/08/10 23:14:40 pavlin Exp $
 
 #ifndef __BGP_PACKET_HH__
 #define __BGP_PACKET_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/ipv4net.hh"
+#include "libxorp/ipv4.hh"
 
-#include "libproto/packet.hh"
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#include <inttypes.h>
-
-#include <iostream>
-
-#include <string.h>
-#include <stdio.h>
-
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
+#include "libproto/packet.hh"
 
 #include "exceptions.hh"
 #include "parameter.hh"
@@ -56,9 +39,6 @@
 #include "path_attribute.hh"
 #include "update_attrib.hh"
 
-#include "libxorp/ipv4net.hh"
-#include "libxorp/ipv4.hh"
-#include "libxorp/debug.h"
 
 enum BgpPacketType {
     MESSAGETYPEOPEN =		1,

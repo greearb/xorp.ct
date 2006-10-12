@@ -13,25 +13,24 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/selector.cc,v 1.36 2006/08/11 05:59:06 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifndef HOST_OS_WINDOWS // Entire file is stubbed out on Windows.
+#ident "$XORP: xorp/libxorp/selector.cc,v 1.37 2006/08/12 00:38:36 pavlin Exp $"
 
 #include "libxorp_module.h"
 
-#include "xorp.h"
-#include "debug.h"
-#include "xorpfd.hh"
+#include "libxorp/xorp.h"
+
+#ifndef HOST_OS_WINDOWS // Entire file is stubbed out on Windows.
+
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/xorpfd.hh"
+#include "libxorp/timeval.hh"
+#include "libxorp/clock.hh"
+#include "libxorp/eventloop.hh"
+#include "libxorp/utility.h"
+
 #include "selector.hh"
-#include "timeval.hh"
-#include "clock.hh"
-#include "eventloop.hh"
-#include "utility.h"
-#include "xlog.h"
+
 
 // ----------------------------------------------------------------------------
 // Helper function to deal with translating between old and new

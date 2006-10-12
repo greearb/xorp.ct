@@ -12,19 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/internal_message.cc,v 1.10 2005/08/18 15:58:05 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/bgp/internal_message.cc,v 1.11 2006/03/16 00:03:28 pavlin Exp $"
 
 #include "bgp_module.h"
 
-#include <string>
-
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
+
 #include "internal_message.hh"
+
 
 template<class A>
 InternalMessage<A>::InternalMessage(const SubnetRoute<A> *rte,

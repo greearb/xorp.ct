@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.6 2006/03/16 00:05:18 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/common/element_factory.cc,v 1.7 2006/09/08 18:44:39 mjh Exp $"
 
 #include "policy/policy_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
+
 #include "element_factory.hh"
+
 
 // static members
 ElementFactory::Map ElementFactory::_map;

@@ -12,18 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.47 2005/10/17 11:14:22 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/test_mld6igmp.cc,v 1.48 2006/03/16 00:04:44 pavlin Exp $"
 
 
 //
 // MLD and IGMP test program.
 //
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "mld6igmp_module.h"
+
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/debug.h"
@@ -31,6 +28,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/profile.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -51,10 +52,6 @@
 #include "fea/xrl_target.hh"
 
 #include "xrl_mld6igmp_node.hh"
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 
 #ifndef FEA_DUMMY

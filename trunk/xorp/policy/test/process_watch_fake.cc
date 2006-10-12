@@ -12,14 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/process_watch_fake.cc,v 1.3 2005/08/04 15:27:00 bms Exp $"
+#ident "$XORP: xorp/policy/test/process_watch_fake.cc,v 1.4 2006/03/16 00:05:24 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+
+#include <iostream>
 
 #include "process_watch_fake.hh"
-#include <iostream>
+
 
 void
 ProcessWatchFake::add_interest(const string& id) {

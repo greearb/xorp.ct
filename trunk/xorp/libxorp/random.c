@@ -14,11 +14,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/random.c,v 1.5 2006/03/16 00:04:31 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/random.c,v 1.6 2006/03/25 00:49:45 bms Exp $"
 
 #include "libxorp/xorp.h"
 

@@ -13,12 +13,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP"
-#include "config.h"
+#ident "$XORP$"
 
 #include "ospf_module.h"
+
 #include "libxorp/xorp.h"
+
 #include "fletcher_checksum.hh"
+
 
 /*
 ** return number modulo 255 most importantly convert negative numbers

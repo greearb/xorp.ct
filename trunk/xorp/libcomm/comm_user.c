@@ -31,13 +31,19 @@
  * SUCH DAMAGE.
  */
 
-#ident "$XORP: xorp/libcomm/comm_user.c,v 1.21 2006/03/01 12:55:33 bms Exp $"
+#ident "$XORP: xorp/libcomm/comm_user.c,v 1.22 2006/03/30 00:32:02 pavlin Exp $"
 
 /*
  * COMM socket library higher `sock' level implementation.
  */
+
 #include "comm_module.h"
-#include "comm_private.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+
+#include <signal.h>
 
 #ifdef HAVE_WINDOWS_H
 #include <windows.h>
@@ -49,7 +55,9 @@
 #include <ws2tcpip.h>
 #endif
 
-#include <signal.h>
+#include "comm_api.h"
+#include "comm_private.h"
+
 
 /**
  * comm_init:

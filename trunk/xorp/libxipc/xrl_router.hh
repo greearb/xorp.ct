@@ -12,15 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_router.hh,v 1.34 2005/08/18 15:32:42 bms Exp $
+// $XORP: xorp/libxipc/xrl_router.hh,v 1.35 2006/03/16 00:04:23 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ROUTER_HH__
 #define __LIBXIPC_XRL_ROUTER_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/callback.hh"
 
 #include "xrl.hh"
@@ -29,6 +26,7 @@
 #include "xrl_pf.hh"
 #include "finder_constants.hh"
 #include "finder_client_observer.hh"
+
 
 class DispatchState;
 

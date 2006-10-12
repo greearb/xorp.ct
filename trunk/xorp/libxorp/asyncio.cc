@@ -13,37 +13,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.28 2006/09/11 20:51:56 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxorp/asyncio.cc,v 1.29 2006/09/11 21:39:21 pavlin Exp $"
 
 #include "libxorp_module.h"
-#include "xorp.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/eventloop.hh"
 
 #include <signal.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
+
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
-#include "libxorp/debug.h"
-#include "libxorp/eventloop.hh"
-#include "libxorp/xlog.h"
 #include "xorpfd.hh"
 #include "asyncio.hh"
 
 #ifdef HOST_OS_WINDOWS
- #define EDGE_TRIGGERED_READ_LATENCY	// IOT_READ may be delayed.
- #define EDGE_TRIGGERED_WRITES		// IOT_WRITE is edge triggered.
- #include "win_dispatcher.hh"
- #include "win_io.h"
+#   define EDGE_TRIGGERED_READ_LATENCY		// IOT_READ may be delayed.
+#   define EDGE_TRIGGERED_WRITES		// IOT_WRITE is edge triggered.
+#   include "win_dispatcher.hh"
+#   include "win_io.h"
 #endif
 
 

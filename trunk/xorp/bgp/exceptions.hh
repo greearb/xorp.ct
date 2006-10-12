@@ -12,38 +12,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/exceptions.hh,v 1.8 2005/08/18 15:58:05 bms Exp $
+// $XORP: xorp/bgp/exceptions.hh,v 1.9 2006/03/16 00:03:28 pavlin Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/exceptions.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#include <inttypes.h>
-
-#include <iostream>
-
-#include <string.h>
-#include <stdio.h>
-#ifdef HAVE_STDLIB_H
-#include <stdlib.h>
-#endif
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
+
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
 
-#include "libxorp/exceptions.hh"
 
 /**
  * This exception is thrown when a bad input message is received.

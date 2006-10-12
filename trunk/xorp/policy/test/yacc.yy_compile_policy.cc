@@ -48,19 +48,19 @@ static int yygrowstack();
  * yacc -d -p yy_compile_policy -o yacc.yy_compile_policy.cc compilepolicy.y
  */
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "policy/policy_module.h"
+
 #include "libxorp/xorp.h"
-#include "libproto/config_node_id.hh"
-#include <vector>
-#include <string>
+
 #include <list>
 #include <vector>
-#include "policy/test/compilepolicy.hh"
+
+#include "libproto/config_node_id.hh"
+
 #include "policy/configuration.hh"
 #include "policy/common/policy_utils.hh"
+#include "policy/test/compilepolicy.hh"
+
 
 extern int yylex(void);
 extern void yyerror(const char *);

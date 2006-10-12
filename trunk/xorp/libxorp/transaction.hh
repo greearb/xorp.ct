@@ -12,21 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/transaction.hh,v 1.7 2005/07/29 20:06:33 bms Exp $
+// $XORP: xorp/libxorp/transaction.hh,v 1.8 2006/03/16 00:04:36 pavlin Exp $
 
 #ifndef __LIBXORP_TRANSACTION_HH__
 #define __LIBXORP_TRANSACTION_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/eventloop.hh"
+#include "libxorp/ref_ptr.hh"
 
 #include <map>
 #include <list>
-#include <string>
 
-#include "libxorp/eventloop.hh"
-#include "libxorp/ref_ptr.hh"
 
 /**
  * @short Base class for operations within a Transaction.

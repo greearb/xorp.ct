@@ -12,22 +12,18 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.14 2006/03/16 00:03:57 pavlin Exp $
+// $XORP: xorp/fea/ifmanager_transaction.hh,v 1.15 2006/09/08 15:32:02 pavlin Exp $
 
 #ifndef __FEA_IFMANAGER_TRANSACTION_HH__
 #define __FEA_IFMANAGER_TRANSACTION_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <string>
-
+#include "libxorp/xorp.h"
 #include "libxorp/c_format.hh"
 #include "libxorp/transaction.hh"
 
 #include "ifconfig.hh"
 #include "iftree.hh"
+
 
 class InterfaceTransactionManager : public TransactionManager
 {

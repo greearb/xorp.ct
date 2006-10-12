@@ -12,31 +12,16 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipv4.hh,v 1.31 2006/08/04 23:21:16 pavlin Exp $
+// $XORP: xorp/libxorp/ipv4.hh,v 1.32 2006/08/18 22:14:48 pavlin Exp $
 
 #ifndef __LIBXORP_IPV4_HH__
 #define __LIBXORP_IPV4_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/exceptions.hh"
+#include "libxorp/range.hh"
+#include "libxorp/utils.hh"
 
-#include <string.h>
-
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-
-#include "xorp.h"
-#include "exceptions.hh"
-#include "range.hh"
-#include "utils.hh"
 
 struct in_addr;
 

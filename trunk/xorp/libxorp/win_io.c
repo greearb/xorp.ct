@@ -15,17 +15,14 @@
  *
  */
 
-#ident "$XORP: xorp/libxorp/win_io.c,v 1.6 2006/03/16 00:04:38 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/win_io.c,v 1.7 2006/06/29 11:03:56 bms Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "xorp.h"
+#include "libxorp/xorp.h"
 
 #ifdef HOST_OS_WINDOWS
 
 #include "win_io.h"
+
 
 /* Size of the statically allocated win_strerror() buffer. */
 #define WIN_STRERROR_BUF_SIZE 1024

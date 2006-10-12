@@ -15,7 +15,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.9 2006/03/16 00:04:28 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ether_compat.c,v 1.10 2006/03/16 01:32:40 pavlin Exp $"
 
 /*
  * Part of this software is derived from the following file(s):
@@ -91,11 +91,6 @@
 __FBSDID("$FreeBSD: /repoman/r/ncvs/src/lib/libc/net/ether_addr.c,v 1.15 2002/04/08 07:51:10 ru Exp $");
 #endif
 
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "libxorp/xorp.h"
 #include "libxorp/utility.h"
 #include "libxorp/ether_compat.h"
@@ -105,6 +100,7 @@ __FBSDID("$FreeBSD: /repoman/r/ncvs/src/lib/libc/net/ether_addr.c,v 1.15 2002/04
 #endif
 #include <inttypes.h>
 #include <ctype.h>
+
 
 #ifndef HAVE_ETHER_NTOA
 /* XXX: returns a pointer to static storage. */

@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.20 2006/04/02 07:21:10 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxipc/finder_main.cc,v 1.21 2006/06/21 23:36:33 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -24,18 +20,17 @@
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
 #endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
+
 #ifdef HAVE_ARPA_INET_H
 #include <arpa/inet.h>
 #endif
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
+
 #ifdef HAVE_NET_IF_H
 #include <net/if.h>
 #endif
@@ -46,9 +41,6 @@
 #include "finder_server.hh"
 #include "permits.hh"
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 static bool gbl_sig_exit = false;			// Exit signal() recv
 

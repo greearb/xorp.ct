@@ -13,16 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.13 2006/05/25 05:50:00 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/backend/single_varrw.cc,v 1.14 2006/09/08 18:44:38 mjh Exp $"
 
 #include "policy/policy_module.h"
+
+#include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
-#include "single_varrw.hh"
+
 #include "policy/common/elem_null.hh"
+
+#include "single_varrw.hh"
+
 
 SingleVarRW::SingleVarRW() : _trashc(0), _did_first_read(false) 
 {

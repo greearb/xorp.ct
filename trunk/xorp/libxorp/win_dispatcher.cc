@@ -13,21 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.16 2006/08/12 00:38:36 pavlin Exp $
+// $XORP: xorp/libxorp/win_dispatcher.cc,v 1.17 2006/08/12 08:32:27 pavlin Exp $
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#ifdef HOST_OS_WINDOWS	    // This entire file is for Windows only.
+#include "libxorp/libxorp_module.h"
 
 #include "libxorp/xorp.h"
 
-#include "libxorp/libxorp_module.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/win_io.h"
+#ifdef HOST_OS_WINDOWS	    // This entire file is for Windows only.
 
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/win_io.h"
 #include "libxorp/xorpfd.hh"
 #include "libxorp/timeval.hh"
 #include "libxorp/clock.hh"
@@ -35,6 +31,7 @@
 #include "libxorp/ioevents.hh"
 #include "libxorp/eventloop.hh"
 #include "libxorp/win_dispatcher.hh"
+
 
 static inline int
 _wsa2ioe(const long wsaevent)

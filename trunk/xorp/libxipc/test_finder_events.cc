@@ -12,23 +12,27 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.21 2005/12/21 09:42:56 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <list>
-#include <vector>
+#ident "$XORP: xorp/libxipc/test_finder_events.cc,v 1.22 2006/03/16 00:04:18 pavlin Exp $"
 
 #include "finder_module.h"
 
 #include "libxorp/xorp.h"
-#include "libxorp/xorpfd.hh"
-#include "libxorp/eventloop.hh"
-#include "libxorp/status_codes.h"
 #include "libxorp/xlog.h"
 #include "libxorp/random.h"
+#include "libxorp/status_codes.h"
+#include "libxorp/xorpfd.hh"
+#include "libxorp/eventloop.hh"
+
+#include <list>
+#include <vector>
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
+
+#include "xrl/interfaces/finder_event_notifier_xif.hh"
+
+#include "xrl/targets/test_finder_events_base.hh"
 
 #include "finder_server.hh"
 #include "finder_tcp_messenger.hh"
@@ -38,12 +42,6 @@
 
 #include "xrl_std_router.hh"
 
-#include "xrl/interfaces/finder_event_notifier_xif.hh"
-#include "xrl/targets/test_finder_events_base.hh"
-
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 ///////////////////////////////////////////////////////////////////////////////
 //

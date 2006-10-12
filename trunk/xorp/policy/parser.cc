@@ -13,15 +13,17 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/parser.cc,v 1.4 2005/08/04 15:26:55 bms Exp $"
+#ident "$XORP: xorp/policy/parser.cc,v 1.5 2006/03/16 00:04:58 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 #include "policy_module.h"
+
+#include "libxorp/xorp.h"
+
+#include "policy/common/policy_utils.hh"
+
 #include "parser.hh"
 #include "policy_parser.hh"
-#include "policy/common/policy_utils.hh"
+
 
 Parser::Nodes* 
 Parser::parse(const Term::BLOCKS& block, const string& text)

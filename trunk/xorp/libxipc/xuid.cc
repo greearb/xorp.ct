@@ -12,34 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xuid.cc,v 1.9 2005/08/18 15:32:42 bms Exp $"
+#ident "$XORP: xorp/libxipc/xuid.cc,v 1.10 2006/03/16 00:04:24 pavlin Exp $"
 
 #include "xrl_module.h"
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "libxorp/xorp.h"
 #include "libxorp/utility.h"
 #include "libxorp/timer.hh"
 #include "libxorp/timeval.hh"
 
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_PARAM_H
-#include <sys/param.h>
-#endif
-
-#include <assert.h>
-#include <stdio.h>
-
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -49,11 +30,9 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_UNISTD_H
-#include <unistd.h>
-#endif
 
 #include "xuid.hh"
+
 
 static const char* sfmt = "%08x-%08x-%08x-%08x";
 

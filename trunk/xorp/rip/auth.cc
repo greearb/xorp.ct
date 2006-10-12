@@ -12,23 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/auth.cc,v 1.33 2006/08/18 07:39:50 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/rip/auth.cc,v 1.34 2006/08/20 06:19:27 pavlin Exp $"
 
 #include "rip_module.h"
-
-#include <functional>
-#include <openssl/md5.h>
 
 #include "libxorp/xorp.h"
 #include "libxorp/xlog.h"
 #include "libxorp/eventloop.hh"
 
+#include <functional>
+#include <openssl/md5.h>
+
 #include "constants.hh"
 #include "auth.hh"
+
 
 // ----------------------------------------------------------------------------
 // AuthHandlerBase implementation

@@ -13,24 +13,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.14 2005/08/18 15:32:41 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <string>
-#include <map>
+#ident "$XORP: xorp/libxipc/xrl_pf_factory.cc,v 1.15 2006/03/16 00:04:22 pavlin Exp $"
 
 #include "xrl_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+
+#include <map>
+
 #include "xrl_pf_factory.hh"
 #include "xrl_pf_inproc.hh"
 #include "xrl_pf_sudp.hh"
 #include "xrl_pf_stcp.hh"
 #include "xrl_pf_kill.hh"
 
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
 
 // STCP senders are a special case.  Constructing an STCP sender has
 // real cost, unlike InProc and SUDP, so we maintain a cache of

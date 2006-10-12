@@ -12,24 +12,23 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/command.cc,v 1.22 2005/08/18 15:58:10 bms Exp $"
+#ident "$XORP: xorp/bgp/harness/command.cc,v 1.23 2006/03/16 00:03:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "bgp/bgp_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
-
 #include "libxorp/eventloop.hh"
 #include "libxorp/callback.hh"
+
 #include "libxipc/xrl_std_router.hh"
+
 #include "xrl/interfaces/test_peer_xif.hh"
+
 #include "coord.hh"
 #include "command.hh"
 

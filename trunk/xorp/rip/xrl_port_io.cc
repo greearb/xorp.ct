@@ -12,23 +12,21 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.19 2005/08/18 15:41:28 bms Exp $"
+#ident "$XORP: xorp/rip/xrl_port_io.cc,v 1.20 2006/03/16 00:05:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
 
 #include <map>
 
-#include "libxorp/debug.h"
+#include "libxipc/xrl_router.hh"
 
 #include "constants.hh"
 #include "xrl_config.hh"
 #include "xrl_port_io.hh"
 
-#include "libxipc/xrl_router.hh"
 
 // ----------------------------------------------------------------------------
 // Multicast socket code.  We instantiate one multicast socket per

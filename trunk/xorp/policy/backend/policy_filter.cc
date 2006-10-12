@@ -13,19 +13,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.8 2006/03/16 00:05:09 pavlin Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/policy/backend/policy_filter.cc,v 1.9 2006/09/08 18:44:37 mjh Exp $"
 
 #include "policy/policy_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+
+#include "policy/common/policy_utils.hh"
+
 #include "policy_filter.hh"
 #include "policy_backend_parser.hh"
 #include "set_manager.hh"
 #include "iv_exec.hh"
-#include "policy/common/policy_utils.hh"
-#include "libxorp/xlog.h"
+
 
 using namespace policy_utils;
 using policy_backend_parser::policy_backend_parse;

@@ -13,34 +13,29 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.238 2006/06/13 20:54:20 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.239 2006/06/21 23:36:36 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
-#include "config.h"
+#include "ospf_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/debug.h"
+#include "libxorp/xlog.h"
+#include "libxorp/callback.hh"
+#include "libxorp/ipv4.hh"
+#include "libxorp/ipv6.hh"
+#include "libxorp/ipnet.hh"
+#include "libxorp/status_codes.h"
+#include "libxorp/service.hh"
+#include "libxorp/eventloop.hh"
 
 #include <map>
 #include <list>
 #include <set>
 #include <queue>
 #include <typeinfo>
-
-#include "ospf_module.h"
-
-#include "libxorp/debug.h"
-#include "libxorp/xlog.h"
-#include "libxorp/callback.hh"
-
-#include "libxorp/ipv4.hh"
-#include "libxorp/ipv6.hh"
-#include "libxorp/ipnet.hh"
-
-#include "libxorp/status_codes.h"
-#include "libxorp/service.hh"
-#include "libxorp/eventloop.hh"
-
-#include "libproto/spt.hh"
 
 // XXX
 // The system header files are here to get the sizeof an ipv4 and ipv6
@@ -58,12 +53,15 @@
 #include "fea/ip.h"
 #endif
 
+#include "libproto/spt.hh"
+
 #include "ospf.hh"
 #include "delay_queue.hh"
 #include "vertex.hh"
 #include "area_router.hh"
 #include "auth.hh"
 #include "peer.hh"
+
 
 /**
  * Oh which linktype should multicast be enabled.

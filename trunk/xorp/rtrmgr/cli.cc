@@ -12,11 +12,20 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.132 2006/04/26 04:29:08 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.133 2006/06/23 06:51:31 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
+#include "rtrmgr_module.h"
+
+#include "libxorp/xorp.h"
+#include "libxorp/xlog.h"
+#include "libxorp/debug.h"
+#include "libxorp/token.hh"
+#include "libxorp/utils.hh"
+#ifdef HOST_OS_WINDOWS
+#include "libxorp/win_io.h"
 #endif
+
+#include <sstream>
 
 #ifdef HAVE_PWD_H
 #include <pwd.h>
@@ -26,16 +35,6 @@
 #include <netdb.h>
 #endif
 
-#include "rtrmgr_module.h"
-
-#include "libxorp/xorp.h"
-#include "libxorp/xlog.h"
-#include "libxorp/debug.h"
-#include "libxorp/token.hh"
-#include "libxorp/utils.hh"
-
-#include <sstream>
-
 #include "cli.hh"
 #include "command_tree.hh"
 #include "op_commands.hh"
@@ -44,8 +43,8 @@
 #include "template_tree.hh"
 #include "template_tree_node.hh"
 
+
 #ifdef HOST_OS_WINDOWS
-#include "libxorp/win_io.h"
 inline uid_t getuid() { return 0; }
 #endif
 

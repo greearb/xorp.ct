@@ -13,28 +13,26 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.3 2006/03/28 03:15:03 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_build_lsa_main.cc,v 1.4 2006/03/29 22:41:25 atanu Exp $"
 
-#include "config.h"
 #include "ospf_module.h"
 
+#include "libxorp/xorp.h"
 #include "libxorp/test_main.hh"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/callback.hh"
-
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipnet.hh"
-
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
 
 #include "ospf.hh"
-
 //#include "lsa.hh"
 #include "test_build_lsa.hh"
+
 
 int
 main(int argc, char **argv)

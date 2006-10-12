@@ -12,35 +12,35 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.40 2006/08/10 21:07:13 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.41 2006/08/10 23:14:41 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
 
 #include "bgp/bgp_module.h"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/xlog.h"
 #include "libxorp/status_codes.h"
 #include "libxorp/xorpfd.hh"
 #include "libxorp/eventloop.hh"
-#include "libxipc/xrl_std_router.hh"
-
-#include "libcomm/comm_api.h"
-
-#include "bgp/socket.hh"
-
-#include "xrl/interfaces/datain_xif.hh"
-#include "bgppp.hh"
-#include "test_peer.hh"
 
 #ifdef HAVE_GETOPT_H
 #include <getopt.h>
 #endif
+
+#include "libcomm/comm_api.h"
+
+#include "libxipc/xrl_std_router.hh"
+
+#include "xrl/interfaces/datain_xif.hh"
+
+#include "bgp/socket.hh"
+
+#include "bgppp.hh"
+#include "test_peer.hh"
+
 
 static const char SERVER[] = "test_peer";/* This servers name */
 static const char SERVER_VERSION[] = "0.1";

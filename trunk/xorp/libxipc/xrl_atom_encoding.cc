@@ -12,16 +12,14 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.12 2005/12/20 03:24:25 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/xrl_atom_encoding.cc,v 1.13 2006/03/16 00:04:20 pavlin Exp $"
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "xrl_module.h"
 
 #include "libxorp/xorp.h"
 
-#include "xrl_module.h"
 #include "xrl_atom_encoding.hh"
+
 
 // Encoding here is URL encoding like:
 // 	Alpha-numerics are not touched

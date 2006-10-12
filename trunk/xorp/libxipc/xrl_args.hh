@@ -12,17 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_args.hh,v 1.13 2005/08/18 15:32:40 bms Exp $
+// $XORP: xorp/libxipc/xrl_args.hh,v 1.14 2006/03/16 00:04:20 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_ARGS_HH__
 #define __LIBXIPC_XRL_ARGS_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include <list>
-
+#include "libxorp/xorp.h"
 #include "libxorp/ipv4.hh"
 #include "libxorp/ipv6.hh"
 #include "libxorp/ipv4net.hh"
@@ -30,7 +25,10 @@
 #include "libxorp/mac.hh"
 #include "libxorp/exceptions.hh"
 
+#include <list>
+
 #include "xrl_atom.hh"
+
 
 class XrlArgs {
 public:

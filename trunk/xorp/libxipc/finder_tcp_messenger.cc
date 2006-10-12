@@ -12,11 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.26 2005/08/18 15:32:38 bms Exp $"
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#ident "$XORP: xorp/libxipc/finder_tcp_messenger.cc,v 1.27 2006/03/16 00:04:17 pavlin Exp $"
 
 #include "finder_module.h"
 
@@ -27,6 +23,7 @@
 #include "libcomm/comm_api.h"
 
 #include "finder_tcp_messenger.hh"
+
 
 FinderTcpMessenger::FinderTcpMessenger(EventLoop&		e,
 				       FinderMessengerManager*	mm,

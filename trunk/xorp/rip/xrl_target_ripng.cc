@@ -13,16 +13,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
-
-#include "libxorp/xorp.h"
-
 // #define DEBUG_LOGGING
 
+#include "libxorp/xorp.h"
 #include "libxorp/debug.h"
 #include "libxorp/status_codes.h"
+
 #include "libxipc/xrl_router.hh"
 
 #include "constants.hh"
@@ -32,6 +28,7 @@
 #include "xrl_redist_manager.hh"
 #include "xrl_target_ripng.hh"
 #include "xrl_target_common.hh"
+
 
 XrlRipngTarget::XrlRipngTarget(EventLoop&		el,
 			       XrlRouter&		xr,

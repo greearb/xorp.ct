@@ -12,16 +12,12 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/test_pim.cc,v 1.57 2005/10/17 11:14:23 pavlin Exp $"
+#ident "$XORP: xorp/pim/test_pim.cc,v 1.58 2006/03/16 00:04:55 pavlin Exp $"
 
 
 //
 // PIM test program.
 //
-
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include "pim_module.h"
 
@@ -32,6 +28,10 @@
 #include "libxorp/eventloop.hh"
 #include "libxorp/exceptions.hh"
 #include "libxorp/profile.hh"
+
+#ifdef HAVE_GETOPT_H
+#include <getopt.h>
+#endif
 
 #include "libxipc/finder_server.hh"
 #include "libxipc/xrl_std_router.hh"
@@ -52,15 +52,13 @@
 #include "fea/xrl_target.hh"
 
 #include "rib/rib_manager.hh"
+
 #include "fib2mrib/xrl_fib2mrib_node.hh"
 
 #include "mld6igmp/xrl_mld6igmp_node.hh"
 
 #include "xrl_pim_node.hh"
 
-#ifdef HAVE_GETOPT_H
-#include <getopt.h>
-#endif
 
 #ifndef FEA_DUMMY
 static bool is_dummy = false;

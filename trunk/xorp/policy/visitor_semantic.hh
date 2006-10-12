@@ -13,22 +13,22 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.6 2006/03/16 00:05:03 pavlin Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.7 2006/09/08 18:44:36 mjh Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
 
-#ifdef HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "libxorp/xorp.h"
 
 #include "policy/common/varrw.hh"
 #include "policy/common/dispatcher.hh"
+
 #include "visitor.hh"
 #include "semantic_varrw.hh"
 #include "set_map.hh"
 #include "policy_statement.hh"
 #include "node.hh"
+
 
 /**
  * @short A policy semantic checker.
