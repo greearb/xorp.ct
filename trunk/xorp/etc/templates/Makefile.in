@@ -59,6 +59,7 @@ POST_UNINSTALL = :
 host_alias = @host_alias@
 host_triplet = @host@
 AMTAR = @AMTAR@
+AR = @AR@
 AS = @AS@
 AWK = @AWK@
 CC = @CC@
@@ -68,8 +69,13 @@ CXX = @CXX@
 CXXCPP = @CXXCPP@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
+ECHO = @ECHO@
+EGREP = @EGREP@
 EXEEXT = @EXEEXT@
+F77 = @F77@
 FLOWER_MALLOC = @FLOWER_MALLOC@
+GCJ = @GCJ@
+GCJFLAGS = @GCJFLAGS@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LIBTOOL = @LIBTOOL@
 LIBTOOL_DEPS = @LIBTOOL_DEPS@
@@ -82,6 +88,8 @@ PACKAGE = @PACKAGE@
 PYTHON = @PYTHON@
 PY_BUILD = @PY_BUILD@
 RANLIB = @RANLIB@
+RC = @RC@
+STRIP = @STRIP@
 VERSION = @VERSION@
 am__include = @am__include@
 am__quote = @am__quote@
@@ -90,7 +98,7 @@ install_sh = @install_sh@
 datadir = $(prefix)/$(subdir)
 
 # -- Data
-data_DATA = host.cmds bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp igmp.cmds igmp.tp interfaces.tp mfea.cmds mfea4.tp mfea6.cmds mfea6.tp mld.cmds mld.tp ospfv2.cmds ospfv2.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp plumbing.tp policy.tp protocols.tp rib.cmds rib.tp rip.cmds rip.tp ripng.tp rtrmgr.tp snmp.tp static_routes.tp xorpsh.cmds misc.cmds
+data_DATA = host.cmds bgp.cmds bgp.tp fea.cmds fea.tp fib2mrib.tp igmp.cmds igmp.tp interfaces.tp mfea.cmds mfea4.tp mfea6.cmds mfea6.tp mld.cmds mld.tp ospfv2.cmds ospfv2.tp ospfv3.tp pim.cmds pimsm4.tp pim6.cmds pimsm6.tp plumbing.tp policy.tp protocols.tp rib.cmds rib.tp rip.cmds rip.tp ripng.tp rtrmgr.tp snmp.tp static_routes.tp xorpsh.cmds misc.cmds
 
 # -- Extra files and directories to add to the distribution
 EXTRA_DIST = $(data_DATA)
