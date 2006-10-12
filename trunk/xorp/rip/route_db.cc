@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/route_db.cc,v 1.30 2006/06/27 22:12:38 pavlin Exp $"
+#ident "$XORP: xorp/rip/route_db.cc,v 1.31 2006/10/12 01:25:10 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -648,7 +648,9 @@ RouteDB<A>::delete_rib_route(const Net& net)
     debug_msg("[RIP] deleting RIB route %s\n",net.str().c_str());
 
     typename RouteContainerNoRef::iterator i = _rib_routes.find(net);
-    XLOG_ASSERT(i != _rib_routes.end());
+
+    if (i == _rib_routes.end())
+	return;			// XXX: nothing to do
 
     Route* r = (*i).second;
 
