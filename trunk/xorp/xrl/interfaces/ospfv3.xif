@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.1 2004/12/28 09:49:15 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.2 2006/08/03 05:02:48 pavlin Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
@@ -6,5 +6,5 @@
 
 interface ospfv3/0.1 {
 	  /** Set router id */
-	  set_router_id ? id:u32
+	  set_router_id ? id:ipv4
 }

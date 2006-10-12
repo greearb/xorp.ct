@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.37 2006/05/15 18:58:57 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.38 2006/06/15 06:07:27 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -349,7 +349,7 @@ XrlOspfV2Target::ospfv2_0_1_set_ip_router_alert(const bool& ip_router_alert)
 }
 
 XrlCmdError
-XrlOspfV3Target::ospfv3_0_1_set_router_id(const uint32_t& /*id*/)
+XrlOspfV3Target::ospfv3_0_1_set_router_id(const IPv4& /*id*/)
 {
     XLOG_UNFINISHED();
 

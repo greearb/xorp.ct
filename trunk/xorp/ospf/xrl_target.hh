@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.26 2006/03/28 03:06:56 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.27 2006/06/15 06:07:27 pavlin Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -727,7 +727,7 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      */
     XrlCmdError ospfv3_0_1_set_router_id(
 	// Input values,
-	const uint32_t&	id);
+	const IPv4&	id);
 
  private:
     Ospf<IPv4>& _ospf_ipv4;
