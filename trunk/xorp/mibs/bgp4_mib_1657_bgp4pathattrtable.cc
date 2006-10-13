@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.19 2006/10/09 07:51:16 pavlin Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.20 2006/10/13 00:21:08 pavlin Exp $"
 
 
 #include <stack>
@@ -498,12 +498,18 @@ bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx,
         */
 	ctx->bgp4PathAttrIpAddrPrefix = 
 	    *var_bgp4PathAttrIpAddrPrefix.val.integer;
+#ifdef HAVE_NETSNMP_ASN_IPADDRESS_HOST_ORDER
+	ctx->bgp4PathAttrIpAddrPrefix = htonl(ctx->bgp4PathAttrIpAddrPrefix);
+#endif
    
 	ctx->bgp4PathAttrIpAddrPrefixLen = 
 	    *var_bgp4PathAttrIpAddrPrefixLen.val.integer;
 
 	ctx->bgp4PathAttrPeer = 
 	    *var_bgp4PathAttrPeer.val.integer;
+#ifdef HAVE_NETSNMP_ASN_IPADDRESS_HOST_ORDER
+	ctx->bgp4PathAttrPeer = htonl(ctx->bgp4PathAttrPeer);
+#endif
     }
 
     // parsing may have allocated memory. free it.
