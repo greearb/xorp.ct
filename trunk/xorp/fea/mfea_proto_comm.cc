@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.65 2006/10/06 20:55:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/mfea_proto_comm.cc,v 1.66 2006/10/09 07:14:07 pavlin Exp $"
 
 //
 // Multicast-related raw protocol communications.
@@ -1470,10 +1470,12 @@ ProtoComm::proto_socket_read(XorpFd fd, IoEventType type)
 	if (is_datalen_error) {
 	    XLOG_ERROR("proto_socket_read() failed: "
 		       "RX packet size from %s to %s with %d bytes instead of "
-		       "hdr+datalen=%d+%d=%d",
+		       "hdr+datalen=%u+%u=%u",
 		       cstring(src), cstring(dst),
 		       XORP_INT_CAST(nbytes),
-		       ip_hdr_len, ip_data_len, ip_hdr_len + ip_data_len);
+		       XORP_UINT_CAST(ip_hdr_len),
+		       XORP_UINT_CAST(ip_data_len),
+		       XORP_UINT_CAST(ip_hdr_len + ip_data_len));
 	    return;		// Error
 	}
 
