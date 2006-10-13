@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.18 2006/07/05 22:46:57 atanu Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgp4pathattrtable.cc,v 1.19 2006/10/09 07:51:16 pavlin Exp $"
 
 
 #include <stack>
@@ -33,10 +33,10 @@
 // Local classes and typedefs
 
 typedef struct bgp4PathAttrTable_context_s {
-    netsnmp_index index; // THIS MUST BE FIRST!!! /
-    unsigned long bgp4PathAttrPeer;
+    netsnmp_index index;		// THIS MUST BE FIRST!!!
+    unsigned long bgp4PathAttrPeer;	// IPv4 address in network order
     unsigned long bgp4PathAttrIpAddrPrefixLen;
-    unsigned long bgp4PathAttrIpAddrPrefix;
+    unsigned long bgp4PathAttrIpAddrPrefix;  // IPv4 address in network order
     long bgp4PathAttrOrigin;
     u_char * bgp4PathAttrASPathSegment;
     unsigned long bgp4PathAttrASPathSegmentLen;
@@ -497,13 +497,13 @@ bgp4PathAttrTable_extract_index(bgp4PathAttrTable_context * ctx,
         * copy components into the context structure
         */
 	ctx->bgp4PathAttrIpAddrPrefix = 
-	    ntohl(*var_bgp4PathAttrIpAddrPrefix.val.integer);
+	    *var_bgp4PathAttrIpAddrPrefix.val.integer;
    
 	ctx->bgp4PathAttrIpAddrPrefixLen = 
 	    *var_bgp4PathAttrIpAddrPrefixLen.val.integer;
-   
+
 	ctx->bgp4PathAttrPeer = 
-	    ntohl(*var_bgp4PathAttrPeer.val.integer);
+	    *var_bgp4PathAttrPeer.val.integer;
     }
 
     // parsing may have allocated memory. free it.
@@ -619,9 +619,9 @@ get_v4_route_list_next_done(const XrlError& e,
     
     // Asserting that bgp4PathAttrTable_create_row has correctly initialized
     // the values for the index columns
-    XLOG_ASSERT(htonl(row->bgp4PathAttrPeer) == peer_id->addr());
+    XLOG_ASSERT(row->bgp4PathAttrPeer == peer_id->addr());
     XLOG_ASSERT(row->bgp4PathAttrIpAddrPrefixLen == net->prefix_len());
-    XLOG_ASSERT(htonl(row->bgp4PathAttrIpAddrPrefix) == net->masked_addr().addr());
+    XLOG_ASSERT(row->bgp4PathAttrIpAddrPrefix == net->masked_addr().addr());
 
 
     row->bgp4PathAttrOrigin = (*best_and_origin) & 0xFF;
