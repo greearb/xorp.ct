@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.121 2006/06/12 18:19:49 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.122 2006/10/12 01:25:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -413,16 +413,13 @@ template <typename A>
 PeerID
 PeerManager<A>::create_peer(const string& interface, const string& vif,
 			    const A source,
-			    uint16_t interface_prefix_length,
-			    uint16_t interface_mtu,
 			    OspfTypes::LinkType linktype, 
 			    OspfTypes::AreaID area)
     throw(BadPeer)
 {
-    debug_msg("Interface %s Vif %s source net %s mtu %d linktype %u area %s\n",
+    debug_msg("Interface %s Vif %s source net %s linktype %u area %s\n",
 	      interface.c_str(), vif.c_str(),
-	      cstring(source),  interface_mtu,
-	      linktype, pr_id(area).c_str());
+	      cstring(source),linktype, pr_id(area).c_str());
 
     AreaRouter<A> *area_router = get_area_router(area);
 
@@ -434,6 +431,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     PeerID peerid = create_peerid(interface, vif);
 
     // Get the prefix length.
+    uint16_t interface_prefix_length;
     if (!_ospf.get_prefix_length(interface, vif, source,
 				 interface_prefix_length)) {
 	destroy_peerid(interface, vif);
@@ -443,7 +441,7 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
     }
 
     // Get the MTU.
-    interface_mtu = _ospf.get_mtu(interface);
+    uint16_t interface_mtu = _ospf.get_mtu(interface);
     if (0 == interface_mtu) {
 	destroy_peerid(interface, vif);
 	xorp_throw(BadPeer, 
@@ -824,8 +822,6 @@ PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid)
 {
     string ifname;
     string vifname;
-    uint16_t prefix_length = 0;
-    uint16_t mtu = 0;
 
     if (!_vlink.get_interface_vif(rid, ifname, vifname)) {
 	XLOG_FATAL("Router ID not found %s", pr_id(rid).c_str());
@@ -834,7 +830,7 @@ PeerManager<A>::create_virtual_peer(OspfTypes::RouterID rid)
 
     PeerID peerid;
     try {
-	peerid = create_peer(ifname, vifname, A::ZERO(), prefix_length, mtu,
+	peerid = create_peer(ifname, vifname, A::ZERO(),
 			     OspfTypes::VirtualLink, OspfTypes::BACKBONE);
     } catch(XorpException& e) {
 	XLOG_ERROR("%s", cstring(e));

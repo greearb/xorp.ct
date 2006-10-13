@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.51 2006/04/04 04:51:58 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/ospfv2.tp,v 1.52 2006/04/19 19:59:26 pavlin Exp $ */
 
 protocols {
     ospf4 {
@@ -337,7 +337,7 @@ transmitted packets";
 
 		    address @ {
 		    	%help: short "Address on vif used for OSPF";
-			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=0&mtu:u32=0&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
+			%create: xrl "$(ospf4.targetname)/ospfv2/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
 			%delete: xrl "$(ospf4.targetname)/ospfv2/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
 
 			priority {

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.75 2006/06/02 02:21:55 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.76 2006/06/12 18:19:49 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -151,15 +151,13 @@ class PeerManager {
      * @param interface
      * @param vif
      * @param source address of transmitted packets.
-     * @param interface_mtu, MTU of this interface.
      * @param linktype broadcast or point-2-point, etc...
      * @param area ID of area
      *
      * @return PeerID on success otherwise throw an exception.
      */
     PeerID create_peer(const string& interface, const string& vif,
-		       const A source, uint16_t interface_prefix_length,
-		       uint16_t interface_mtu,
+		       const A source,
 		       OspfTypes::LinkType linktype, OspfTypes::AreaID area)
 	throw(BadPeer);
 	

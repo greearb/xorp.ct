@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.21 2006/03/24 20:02:49 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv2.xif,v 1.22 2006/08/03 05:03:30 pavlin Exp $ */
 
 /*
  * OSPF v2 protocol XRL interface.
@@ -52,15 +52,11 @@ interface ospfv2/0.1 {
      * @param ifname the interface that owns vif that has address.
      * @param vifname virtual interface owning address.
      * @param addr the address to be added.
-     * @param prefix_len the prefix length XXX temporary.
-     * @param mtu maximum transmission unit XXX temporary.
      * @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
      */
     create_peer ? ifname:txt \
 		& vifname:txt \
 		& addr:ipv4 \
-		& prefix_len:u32 \
-		& mtu:u32 \
 		& type:txt \
 		& area:ipv4  
 

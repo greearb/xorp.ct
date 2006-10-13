@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.30 2006/10/12 23:12:03 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.31 2006/10/13 19:43:24 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -221,8 +221,6 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
 	const string&	ifname,
 	const string&	vifname,
 	const IPv4&	addr,
-	const uint32_t&	prefix_len,
-	const uint32_t&	mtu,
 	const string&	type,
 	const IPv4&	area);
 
