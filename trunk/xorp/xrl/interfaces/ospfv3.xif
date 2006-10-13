@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.3 2006/10/12 00:41:54 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.4 2006/10/12 23:12:04 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
@@ -16,4 +16,12 @@ interface ospfv3/0.1 {
      */
     set_ip_router_alert ? ip_router_alert:bool
 
+    /**
+     * Create an area.
+     *
+     * @param area id of the area
+     * @param type of area "border", "stub", "nssa"
+     */
+    create_area_router ? area:ipv4 \
+		       & type:txt
 }
