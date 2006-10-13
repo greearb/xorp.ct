@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.81 2006/03/30 02:21:13 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.82 2006/06/15 06:04:36 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -1411,7 +1411,6 @@ XrlFeaTarget::ifmgr_0_1_set_interface_enabled(
     return _xifmgr.add(tid, new SetInterfaceEnabled(it, ifname, enabled));
 }
 
-
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_interface_discard(
 					      // Input values,
@@ -1422,7 +1421,6 @@ XrlFeaTarget::ifmgr_0_1_set_interface_discard(
     IfTree& it = _xifmgr.iftree();
     return _xifmgr.add(tid, new SetInterfaceDiscard(it, ifname, discard));
 }
-
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_mac(
@@ -1435,6 +1433,28 @@ XrlFeaTarget::ifmgr_0_1_set_mac(
     return _xifmgr.add(tid, new SetInterfaceMAC(it, ifname, mac));
 }
 
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_restore_original_mac(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname)
+{
+    IfTree& it = _xifmgr.iftree();
+
+    // Find the original MAC address
+    IfConfig& ifc = _xifmgr.ifconfig();
+    const IfTree& original_it = ifc.original_config();
+    IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
+    if (ii == original_it.ifs().end()) {
+	string error_msg = c_format("Interface %s does not exist.",
+				    ifname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    const IfTreeInterface& fi = ii->second;
+    const Mac& mac = fi.mac();
+
+    return _xifmgr.add(tid, new SetInterfaceMAC(it, ifname, mac));
+}
 
 XrlCmdError
 XrlFeaTarget::ifmgr_0_1_set_mtu(
@@ -1444,6 +1464,29 @@ XrlFeaTarget::ifmgr_0_1_set_mtu(
 				const uint32_t&	mtu)
 {
     IfTree& it = _xifmgr.iftree();
+    return _xifmgr.add(tid, new SetInterfaceMTU(it, ifname, mtu));
+}
+
+XrlCmdError
+XrlFeaTarget::ifmgr_0_1_restore_original_mtu(
+    // Input values,
+    const uint32_t&	tid,
+    const string&	ifname)
+{
+    IfTree& it = _xifmgr.iftree();
+
+    // Find the original MTU
+    IfConfig& ifc = _xifmgr.ifconfig();
+    const IfTree& original_it = ifc.original_config();
+    IfTree::IfMap::const_iterator ii = original_it.get_if(ifname);
+    if (ii == original_it.ifs().end()) {
+	string error_msg = c_format("Interface %s does not exist.",
+				    ifname.c_str());
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+    const IfTreeInterface& fi = ii->second;
+    uint32_t mtu = fi.mtu();
+
     return _xifmgr.add(tid, new SetInterfaceMTU(it, ifname, mtu));
 }
 

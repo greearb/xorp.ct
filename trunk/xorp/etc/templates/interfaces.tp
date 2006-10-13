@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/interfaces.tp,v 1.29 2006/02/22 02:31:29 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/interfaces.tp,v 1.30 2006/04/19 19:59:26 pavlin Exp $ */
 
 interfaces {
     targetname:		txt = "fea";
@@ -107,6 +107,7 @@ interfaces {
 	mac {
 	    %help:	short "Set the MAC address";
 	    %set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mac?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mac:mac=$(@)";
+	    %delete:	xrl  "$(interfaces.targetname)/ifmgr/0.1/restore_original_mac?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)";
 	    %get:	xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mac?ifname:txt=$(interface.@)->mac:mac=$(@)";
 	}
 
@@ -115,6 +116,7 @@ interfaces {
 	    /* Minimum and maximum MTU as defined in RFC 791 and RFC 1191 */
 	    %allow-range: $(@) "68" "65535" %help: "The MTU (in octets)";
 	    %set:	xrl  "$(interfaces.targetname)/ifmgr/0.1/set_mtu?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)&mtu:u32=$(@)";
+	    %delete:	xrl  "$(interfaces.targetname)/ifmgr/0.1/restore_original_mtu?tid:u32=$(interfaces.TID)&ifname:txt=$(interface.@)";
 	    %get:	xrl  "$(interfaces.targetname)/ifmgr/0.1/get_configured_mtu?ifname:txt=$(interface.@)->mtu:u32=$(@)";
 	}
 

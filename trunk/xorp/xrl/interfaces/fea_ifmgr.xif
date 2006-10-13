@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.15 2005/10/12 09:21:37 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fea_ifmgr.xif,v 1.16 2005/10/16 07:10:38 pavlin Exp $ */
 
 /*
  * Forwarding Engine Abstraction Interface Management XRL interface.
@@ -97,7 +97,11 @@ interface ifmgr/0.1 {
 
 	set_mac ? tid:u32 & ifname:txt & mac:mac
 
+	restore_original_mac ? tid:u32 & ifname:txt
+
 	set_mtu ? tid:u32 & ifname:txt & mtu:u32
+
+	restore_original_mtu ? tid:u32 & ifname:txt
 
 	/**
 	 * Create a vif

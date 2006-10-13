@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.58 2006/03/30 02:21:13 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.59 2006/06/15 06:04:36 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -402,6 +402,11 @@ public:
 	const string&	ifname,
 	const Mac&	mac);
 
+    XrlCmdError ifmgr_0_1_restore_original_mac(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname);
+
     XrlCmdError ifmgr_0_1_get_system_mac(
 	// Input values,
 	const string&	ifname,
@@ -419,6 +424,11 @@ public:
 	const uint32_t& tid,
 	const string&	ifname,
 	const uint32_t&	mtu);
+
+    XrlCmdError ifmgr_0_1_restore_original_mtu(
+	// Input values,
+	const uint32_t&	tid,
+	const string&	ifname);
 
     XrlCmdError ifmgr_0_1_get_system_mtu(
 	// Input values,
