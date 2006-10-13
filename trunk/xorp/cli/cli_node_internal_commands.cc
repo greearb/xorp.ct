@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.14 2005/12/14 00:52:40 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_internal_commands.cc,v 1.15 2006/03/16 00:03:45 pavlin Exp $"
 
 
 //
@@ -55,7 +55,7 @@
 
 /**
  * CliNode::add_internal_cli_commands:
- * @: 
+ * @error_msg: The error message (if error).
  * 
  * Add the internal default CLI commands from the top.
  * XXX: used by the CLI itself for internal processing of a command.
@@ -64,49 +64,90 @@
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliNode::add_internal_cli_commands()
+CliNode::add_internal_cli_commands(string& error_msg)
 {
-    CliCommand *c0, *c1;
+    CliCommand *c0;
     
     c0 = cli_command_root();
     
-    if (c0 == NULL)
+    if (c0 == NULL) {
+	error_msg = c_format("Cannot find root CLI command");
 	return (XORP_ERROR);
+    }
     
-    // TODO: check that each command succeeded
-    c1 = c0->add_command("show", "Display information", true);
-    c1 = c0->add_command("show log",
-			 "Display information about log files and users",
-			 true,
-			 callback(this, &CliNode::cli_show_log));
-    c1 = c0->add_command("show log user",
-			 "Display information about users",
-			 true,
-			 callback(this, &CliNode::cli_show_log_user));
-    c1 = c0->add_command("set", "Set variable", true);
-    c1 = c0->add_command("set log", "Set log-related state", true);
-    c1 = c0->add_command("set log output",
-			 "Set output destination for log messages",
-			 true);
-    c1 = c0->add_command("set log output cli",
-			 "Set output CLI terminal for log messages",
-			 true,
-			 callback(this, &CliNode::cli_set_log_output_cli));
-    c1 = c0->add_command("set log output file",
-			 "Set output file for log messages",
-			 true,
-			 callback(this, &CliNode::cli_set_log_output_file));
-    c1 = c0->add_command("set log output remove",
-			 "Remove output destination for log messages",
-			 true);
-    c1 = c0->add_command("set log output remove cli",
-			 "Remove output CLI terminal for log messages",
-			 true,
-			 callback(this, &CliNode::cli_set_log_output_remove_cli));
-    c1 = c0->add_command("set log output remove file",
-			 "Remove output file for log messages",
-			 true,
-			 callback(this, &CliNode::cli_set_log_output_remove_file));
+    if (c0->add_command("show", "Display information", true, error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("show log",
+			"Display information about log files and users",
+			true,
+			callback(this, &CliNode::cli_show_log),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("show log user",
+			"Display information about users",
+			true,
+			callback(this, &CliNode::cli_show_log_user),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set", "Set variable", true, error_msg) == NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log", "Set log-related state", true, error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output",
+			"Set output destination for log messages",
+			true,
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output cli",
+			"Set output CLI terminal for log messages",
+			true,
+			callback(this, &CliNode::cli_set_log_output_cli),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output file",
+			"Set output file for log messages",
+			true,
+			callback(this, &CliNode::cli_set_log_output_file),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output remove",
+			"Remove output destination for log messages",
+			true,
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output remove cli",
+			"Remove output CLI terminal for log messages",
+			true,
+			callback(this, &CliNode::cli_set_log_output_remove_cli),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
+    if (c0->add_command("set log output remove file",
+			"Remove output file for log messages",
+			true,
+			callback(this, &CliNode::cli_set_log_output_remove_file),
+			error_msg)
+	== NULL) {
+	return (XORP_ERROR);
+    }
     
     return (XORP_OK);
 }

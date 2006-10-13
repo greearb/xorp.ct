@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_node.hh,v 1.25 2006/01/23 21:03:37 pavlin Exp $
+// $XORP: xorp/cli/cli_node.hh,v 1.26 2006/03/16 00:03:45 pavlin Exp $
 
 
 #ifndef __CLI_CLI_NODE_HH__
@@ -399,7 +399,7 @@ private:
     //
     // Internal CLI commands
     //
-    int		add_internal_cli_commands();
+    int		add_internal_cli_commands(string& error_msg);
     int		cli_show_log(const string& server_name,
 			     const string& cli_term_name,
 			     uint32_t cli_session_id,

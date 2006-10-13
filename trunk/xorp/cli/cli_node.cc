@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node.cc,v 1.33 2006/03/01 04:43:19 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node.cc,v 1.34 2006/03/16 00:03:44 pavlin Exp $"
 
 
 //
@@ -76,6 +76,8 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
       _cli_command_root(NULL, "", ""),
       _is_log_trace(false)
 {
+    string error_msg;
+
     XLOG_ASSERT(module_id == XORP_MODULE_CLI);
     if (module_id != XORP_MODULE_CLI) {
 	XLOG_FATAL("Invalid module ID = %d (must be 'XORP_MODULE_CLI' = %d)",
@@ -84,7 +86,9 @@ CliNode::CliNode(int init_family, xorp_module_id module_id,
     
     cli_command_root()->set_allow_cd(true, _startup_cli_prompt);
     cli_command_root()->create_default_cli_commands();
-    cli_command_root()->add_pipes();
+    if (cli_command_root()->add_pipes(error_msg) != XORP_OK) {
+	XLOG_FATAL("Cannot add command pipes: %s", error_msg.c_str());
+    }
 }
 
 /**
@@ -103,6 +107,8 @@ CliNode::~CliNode()
 int
 CliNode::start()
 {
+    string error_msg;
+
     if (! is_enabled())
 	return (XORP_OK);
 
@@ -124,7 +130,10 @@ CliNode::start()
 	}
     }
     
-    add_internal_cli_commands();
+    if (add_internal_cli_commands(error_msg) != XORP_OK) {
+	XLOG_ERROR("Cannot add internal CLI commands: %s", error_msg.c_str());
+	return (XORP_ERROR);
+    }
 
     XLOG_TRACE(is_log_trace(), "CLI started");
 
@@ -461,14 +470,15 @@ CliNode::add_cli_command(
     if (! is_command_processor) {
 	if (is_command_cd) {
 	    c1 = c0->add_command(command_name, command_help,
-				 command_cd_prompt, true);
+				 command_cd_prompt, true, error_msg);
 	} else {
-	    c1 = c0->add_command(command_name, command_help, true);
+	    c1 = c0->add_command(command_name, command_help, true, error_msg);
 	}
     } else {
 	// Command processor
 	c1 = c0->add_command(command_name, command_help, true,
-			     callback(this, &CliNode::send_process_command));
+			     callback(this, &CliNode::send_process_command),
+			     error_msg);
 	if (c1 != NULL)
 	    c1->set_can_pipe(true);
     }
@@ -478,8 +488,9 @@ CliNode::add_cli_command(
     //
     
     if (c1 == NULL) {
-	error_msg = c_format("Cannot install command '%s'",
-			     command_name.c_str());
+	error_msg = c_format("Cannot install command '%s': %s",
+			     command_name.c_str(),
+			     error_msg.c_str());
 	return (XORP_ERROR);
     }
     

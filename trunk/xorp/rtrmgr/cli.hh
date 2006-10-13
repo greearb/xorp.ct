@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/cli.hh,v 1.48 2006/04/20 07:49:04 pavlin Exp $
+// $XORP: xorp/rtrmgr/cli.hh,v 1.49 2006/06/23 06:51:31 pavlin Exp $
 
 #ifndef __RTRMGR_CLI_HH__
 #define __RTRMGR_CLI_HH__
@@ -202,7 +202,7 @@ private:
     void reset_path();
     void set_path(string path);
     void apply_path_change();
-    void add_static_configure_mode_commands();
+    int add_static_configure_mode_commands(string& error_msg);
     void set_prompt(const string& line1, 
 		    const string& line2);
     void config_mode_prompt();
@@ -213,7 +213,7 @@ private:
     string pathstr() const;
     string pathstr2() const;
     void operational_mode();
-    void add_op_mode_commands(CliCommand *root);
+    int add_op_mode_commands(CliCommand *root, string& error_msg);
     void configure_mode();
     void text_entry_mode();
     void add_command_subtree(CliCommand& current_cli_node,

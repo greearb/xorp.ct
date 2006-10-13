@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/cli/cli_command.hh,v 1.24 2006/03/16 00:03:44 pavlin Exp $
+// $XORP: xorp/cli/cli_command.hh,v 1.25 2006/04/20 00:44:47 pavlin Exp $
 
 
 #ifndef __CLI_CLI_COMMAND_HH__
@@ -136,9 +136,10 @@ public:
     /**
      * Create and add the default CLI pipe commands.
      * 
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_pipes();
+    int add_pipes(string& error_msg);
     
     /**
      * Add a CLI command.
@@ -153,11 +154,13 @@ public:
      * @param init_command_help the command help.
      * @param is_multilevel_command if true, then @ref init_command_name
      * may include more than one command levels in the middle.
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
-			    bool is_multilevel_command);
+			    bool is_multilevel_command,
+			    string& error_msg);
     
     /**
      * Add a CLI command we can "cd" to it.
@@ -173,12 +176,14 @@ public:
      * when "cd" to this command.
      * @param is_multilevel_command if true, then @ref init_command_name
      * may include more than one command levels in the middle.
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    const string& init_cd_prompt,
-			    bool is_multilevel_command);
+			    bool is_multilevel_command,
+			    string& error_msg);
     
     /**
      * Add a CLI command with a processing callback.
@@ -193,12 +198,14 @@ public:
      * may include more than one command levels in the middle.
      * @param init_cli_process_callback the callback to call when the
      * command is entered for execution from the command-line.
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    bool is_multilevel_command,
-			    const CLI_PROCESS_CALLBACK& init_cli_process_callback);
+			    const CLI_PROCESS_CALLBACK& init_cli_process_callback,
+			    string& error_msg);
 
     /**
      * Add a CLI command with a processing and an interrupt callbacks.
@@ -215,13 +222,15 @@ public:
      * command is entered for execution from the command-line.
      * @param init_cli_interrupt_callback the callback to call when the
      * user has interrupted the command (e.g., by typing Ctrl-C).
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    bool is_multilevel_command,
 			    const CLI_PROCESS_CALLBACK& init_cli_process_callback,
-			    const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback);
+			    const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback,
+			    string& error_msg);
     
     /**
      * Add a CLI command with a processing function.
@@ -236,15 +245,17 @@ public:
      * may include more than one command levels in the middle.
      * @param init_cli_process_func the processing function to call when the
      * command is entered for execution from the command-line.
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    bool is_multilevel_command,
-			    CLI_PROCESS_FUNC init_cli_process_func) {
+			    CLI_PROCESS_FUNC init_cli_process_func,
+			    string& error_msg) {
 	CLI_PROCESS_CALLBACK cb = callback(init_cli_process_func);
 	return (add_command(init_command_name, init_command_help,
-			    is_multilevel_command, cb));
+			    is_multilevel_command, cb, error_msg));
     }
 
     /**
@@ -263,26 +274,29 @@ public:
      * command is entered for execution from the command-line.
      * @param init_cli_interrupt_func the function to call when the
      * user has interrupted the command (e.g., by typing Ctrl-C).
+     * @param error_msg the error message (if error).
      * @return the new child command on success, otherwise NULL.
      */
     CliCommand *add_command(const string& init_command_name,
 			    const string& init_command_help,
 			    bool is_multilevel_command,
 			    CLI_PROCESS_FUNC init_cli_process_func,
-			    CLI_INTERRUPT_FUNC init_cli_interrupt_func) {
+			    CLI_INTERRUPT_FUNC init_cli_interrupt_func,
+			    string& error_msg) {
 	CLI_PROCESS_CALLBACK cb1 = callback(init_cli_process_func);
 	CLI_INTERRUPT_CALLBACK cb2 = callback(init_cli_interrupt_func);
 	return (add_command(init_command_name, init_command_help,
-			    is_multilevel_command, cb1, cb2));
+			    is_multilevel_command, cb1, cb2, error_msg));
     }
     
     /**
      * Add a child CLI command.
      * 
      * @param child_command the child command to add.
+     * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int add_command(CliCommand *child_command);
+    int add_command(CliCommand *child_command, string& error_msg);
     
     /**
      * Delete a child command and all sub-commands below it.

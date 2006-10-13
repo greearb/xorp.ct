@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_command.cc,v 1.27 2006/04/12 02:31:28 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_command.cc,v 1.28 2006/04/20 00:44:47 pavlin Exp $"
 
 
 //
@@ -107,7 +107,7 @@ CliCommand::set_allow_cd(bool v, const string& init_cd_prompt)
 // Return %XORP_OK, on success, otherwise %XORP_ERROR
 //
 int
-CliCommand::add_command(CliCommand *child_command)
+CliCommand::add_command(CliCommand *child_command, string& error_msg)
 {
     list<CliCommand *>::iterator iter, insert_pos;
     
@@ -121,7 +121,9 @@ CliCommand::add_command(CliCommand *child_command)
 	CliCommand *cli_command = *iter;
 	if (cli_command->is_same_command(child_command->name())) {
 	    // Command already installed
-	    XLOG_ERROR("Command already installed");
+	    error_msg = c_format("Command '%s' already installed",
+				 child_command->name().c_str());
+	    XLOG_ERROR("%s", error_msg.c_str());
 	    return (XORP_ERROR);
 	}
 	if (cli_command->name() < child_command->name()) {
@@ -151,7 +153,8 @@ CliCommand::add_command(CliCommand *child_command)
 CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
-			bool is_multilevel_command)
+			bool is_multilevel_command,
+			string& error_msg)
 {
     CliCommand *parent_cli_command = NULL;
     CliCommand *cli_command = NULL;
@@ -168,13 +171,19 @@ CliCommand::add_command(const string& init_command_name,
 	    command_tokens.push_back(token);
 	}
     } else {
-	if (token_line.empty())
+	if (token_line.empty()) {
+	    error_msg = c_format("Empty token line for command %s",
+				 init_command_name.c_str());
 	    return (NULL);
+	}
 	command_tokens.push_back(token_line);
     }
 
-    if (command_tokens.empty())
+    if (command_tokens.empty()) {
+	error_msg = c_format("Empty command tokens for command %s",
+			     init_command_name.c_str());
 	return (NULL);
+    }
     command_name_string = command_tokens[command_tokens.size() - 1];
     
     // Traverse all tokens and find the parent command where to install
@@ -185,14 +194,16 @@ CliCommand::add_command(const string& init_command_name,
 	if (parent_cli_command == NULL)
 	    break;
     }
-    if (parent_cli_command == NULL)
+    if (parent_cli_command == NULL) {
+	error_msg = c_format("Cannot find parent command");
 	goto error_label_missing;
+    }
     
     cli_command = new CliCommand(parent_cli_command,
 				 command_name_string,
 				 init_command_help);
     
-    if (parent_cli_command->add_command(cli_command) < 0) {
+    if (parent_cli_command->add_command(cli_command, error_msg) < 0) {
 	delete cli_command;
 	goto error_label_failed;
     }
@@ -202,13 +213,18 @@ CliCommand::add_command(const string& init_command_name,
     return (cli_command);
     
  error_label_missing:
-    XLOG_ERROR("Error installing '%s' on non-existent node '%s'", 
-	       init_command_name.c_str(),
-	       (this->name().size() > 0) ? this->name().c_str() : "<ROOT>");
+    error_msg = c_format("Error installing '%s' on non-existent node '%s': %s",
+			 init_command_name.c_str(),
+			 (this->name().size() > 0) ? this->name().c_str() : "<ROOT>",
+			 error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (NULL);		// Invalid path to the command
  error_label_failed:
-    XLOG_ERROR("Error installing '%s' on '%s'", init_command_name.c_str(),
-	       (this->name().size() > 0) ? this->name().c_str() : "<ROOT>");
+    error_msg = c_format("Error installing '%s' on '%s': %s",
+			 init_command_name.c_str(),
+			 (this->name().size() > 0) ? this->name().c_str() : "<ROOT>",
+			 error_msg.c_str());
+    XLOG_ERROR("%s", error_msg.c_str());
     return (NULL);		// Invalid path to the command
 }
 
@@ -220,11 +236,13 @@ CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
 			bool is_multilevel_command,
-			const CLI_PROCESS_CALLBACK& init_cli_process_callback)
+			const CLI_PROCESS_CALLBACK& init_cli_process_callback,
+			string& error_msg)
 {
     CliCommand *cli_command = add_command(init_command_name,
 					  init_command_help,
-					  is_multilevel_command);
+					  is_multilevel_command,
+					  error_msg);
     
     if (cli_command == NULL)
 	return (NULL);
@@ -247,12 +265,14 @@ CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
 			bool is_multilevel_command,
 			const CLI_PROCESS_CALLBACK& init_cli_process_callback,
-			const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback)
+			const CLI_INTERRUPT_CALLBACK& init_cli_interrupt_callback,
+			string& error_msg)
 {
     CliCommand *cli_command = add_command(init_command_name,
 					  init_command_help,
 					  is_multilevel_command,
-					  init_cli_process_callback);
+					  init_cli_process_callback,
+					  error_msg);
     
     if (cli_command == NULL)
 	return (NULL);
@@ -271,11 +291,13 @@ CliCommand *
 CliCommand::add_command(const string& init_command_name,
 			const string& init_command_help,
 			const string& init_cd_prompt,
-			bool is_multilevel_command)
+			bool is_multilevel_command,
+			string& error_msg)
 {
     CliCommand *cli_command = add_command(init_command_name,
 					  init_command_help,
-					  is_multilevel_command);
+					  is_multilevel_command,
+					  error_msg);
     
     if (cli_command == NULL)
 	return (NULL);
@@ -391,60 +413,60 @@ CliCommand::create_default_cli_commands()
  * Return value: %XORP_OK on success, otherwise %XORP_ERROR.
  **/
 int
-CliCommand::add_pipes()
+CliCommand::add_pipes(string& error_msg)
 {
     CliPipe *cli_pipe;
     CliCommand *com0;
     
     com0 = new CliCommand(this, "|", "Pipe through a command");
-    // com0 = add_command("|", "Pipe through a command", false);
+    // com0 = add_command("|", "Pipe through a command", false, error_msg);
     if (com0 == NULL) {
 	return (XORP_ERROR);
     }
     set_cli_command_pipe(com0);
     
     cli_pipe = new CliPipe("count");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("except");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("find");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("hold");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("match");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("no-more");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("resolve");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("save");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
     cli_pipe = new CliPipe("trim");
-    if (com0->add_command(cli_pipe) != XORP_OK) {
+    if (com0->add_command(cli_pipe, error_msg) != XORP_OK) {
 	delete_pipes();
 	return (XORP_ERROR);
     }
@@ -827,6 +849,8 @@ CliCommand::has_type_match_cb() const
 list<CliCommand *>&
 CliCommand::child_command_list()
 {
+    string error_msg;
+
     if (_has_dynamic_children)
 	XLOG_ASSERT(_child_command_list.empty());
 
@@ -852,7 +876,12 @@ CliCommand::child_command_list()
 	    bool default_nomore_mode = ccm.default_nomore_mode();
 	    bool is_command_argument = ccm.is_command_argument();
 	    bool is_argument_expected = ccm.is_argument_expected();
-	    new_cmd = add_command(command_name, help_string, false);
+	    new_cmd = add_command(command_name, help_string, false, error_msg);
+	    if (new_cmd == NULL) {
+		XLOG_FATAL("Cannot add command '%s' to parent '%s': %s",
+			   command_name.c_str(), name().c_str(),
+			   error_msg.c_str());
+	    }
 	    vector<string> child_global_name = global_name();
 	    child_global_name.push_back(command_name);
 	    new_cmd->set_global_name(child_global_name);
