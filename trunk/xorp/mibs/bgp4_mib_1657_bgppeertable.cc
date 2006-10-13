@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.17 2005/05/26 02:05:21 atanu Exp $"
+#ident "$XORP: xorp/mibs/bgp4_mib_1657_bgppeertable.cc,v 1.18 2006/03/16 00:04:41 pavlin Exp $"
 
 
 #include <net-snmp/net-snmp-config.h>
@@ -243,8 +243,16 @@ bgpPeerTable_get_next_data_point(void **my_loop_context, void **my_data_context,
 
     IPvX ip(data_context->peer_remote_ip);
     uint32_t raw_ip = ip.is_ipv4() ? ip.get_ipv4().addr() : 0;
-
-    //    uint32_t raw_ip = ntohl(data_context->peer_remote_ip.addr());
+    //
+    // XXX: ntohl() below is needed probably because of a Net-SNMP bug.
+    // E.g., it appears that all ASN_IPADDRESS that are used as indexes
+    // in a table need to be in host order (even though ASN_IPADDRESS
+    // values in general are suppose to be stored in network order).
+    //
+    // See the following URL for a related discussion (within UDP context);
+    // http://groups.google.com/group/mailing.unix.net-snmp-coders/browse_thread/thread/24bc2c2aed8663bc/e8837358d13f0de6
+    //
+    raw_ip = ntohl(raw_ip);
 
     snmp_set_var_typed_value(put_index_data, ASN_IPADDRESS, 
 	reinterpret_cast<const u_char *> (&raw_ip), sizeof(uint32_t));
