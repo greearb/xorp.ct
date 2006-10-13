@@ -134,7 +134,7 @@ int glob(   char const  *pattern
     else
 #endif /* 0 */
     {
-        WIN32_FIND_DATAA    find_data;
+        WIN32_FIND_DATA     find_data;
         HANDLE              hFind = FindFirstFileA(pattern, &find_data);
 
         pglob->gl_pathc = 0;
