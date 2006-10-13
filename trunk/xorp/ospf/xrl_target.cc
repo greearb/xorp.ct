@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.43 2006/10/13 19:43:24 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.44 2006/10/13 20:26:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -421,11 +421,39 @@ XrlOspfV2Target::ospfv2_0_1_change_area_router_type(const IPv4& a,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_change_area_router_type(const IPv4& a,
+						    const string& type)
+{
+    bool status;
+    OspfTypes::AreaType t = from_string_to_area_type(type, status);
+    if (!status)
+	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+	
+    OspfTypes::AreaID area = ntohl(a.addr());
+    if (!_ospf_ipv6.get_peer_manager().change_area_router_type(area, t))
+	return XrlCmdError::COMMAND_FAILED("Failed to create area " +
+					   pr_id(area));
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_destroy_area_router(const IPv4& a)
 {
     OspfTypes::AreaID area = ntohl(a.addr());
     if (!_ospf.get_peer_manager().destroy_area_router(area))
+	return XrlCmdError::COMMAND_FAILED("Failed to destroy area " +
+					   pr_id(area));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_destroy_area_router(const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    if (!_ospf_ipv6.get_peer_manager().destroy_area_router(area))
 	return XrlCmdError::COMMAND_FAILED("Failed to destroy area " +
 					   pr_id(area));
 

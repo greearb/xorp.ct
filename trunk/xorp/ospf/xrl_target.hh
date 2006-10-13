@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.31 2006/10/13 19:43:24 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.32 2006/10/13 20:26:52 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -189,7 +189,7 @@ class XrlOspfV2Target : XrlOspfv2TargetBase {
      *
      *  @param type of area "border", "stub", "nssa"
      */
-    virtual XrlCmdError ospfv2_0_1_change_area_router_type(
+    XrlCmdError ospfv2_0_1_change_area_router_type(
 	// Input values,
 	const IPv4&	area,
 	const string&	type);
@@ -741,6 +741,25 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	// Input values,
 	const IPv4&	area,
 	const string&	type);
+
+    /**
+     *  Change area type.
+     *
+     *  @param area id of the area
+     *
+     *  @param type of area "border", "stub", "nssa"
+     */
+    XrlCmdError ospfv3_0_1_change_area_router_type(
+	// Input values,
+	const IPv4&	area,
+	const string&	type);
+
+    /**
+     *  Destroy area.
+     */
+    XrlCmdError ospfv3_0_1_destroy_area_router(
+	// Input values,
+	const IPv4&	area);
 
  private:
 //     Ospf<IPv4>& _ospf_ipv4;
