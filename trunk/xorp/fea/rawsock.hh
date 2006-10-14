@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.9 2006/10/04 18:33:52 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.10 2006/10/06 20:55:21 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -392,7 +392,7 @@ private:
     uint8_t*	_sndcmsgbuf;	// Control send info (IPv6 only)
 
     struct iovec	_rcviov[1]; // The scatter/gatter array for receiving
-    struct iovec	_sndiov[]; // The scatter/gatter array for sending
+    struct iovec	_sndiov[1]; // The scatter/gatter array for sending
 
 #ifndef HOST_OS_WINDOWS
     struct msghdr	_rcvmh;	// The msghdr structure used by recvmsg()
