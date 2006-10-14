@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_peering.cc,v 1.52 2006/03/29 22:41:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_peering.cc,v 1.53 2006/10/12 01:25:00 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -197,8 +197,6 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     ospf.set_router_id(set_id("0.0.0.1"));
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
-    const uint16_t interface_prefix_length = 16;
-    const uint16_t interface_mtu = 1500;
     const uint16_t interface_cost = 10;
     const uint16_t inftransdelay = 2;
 
@@ -228,10 +226,7 @@ single_peer(TestInfo& info, OspfTypes::Version version)
     }
 
     PeerID peerid = pm.
-	create_peer(interface, vif, src, interface_prefix_length,
-		    interface_mtu,
-		    OspfTypes::BROADCAST,
-		    area);
+	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     if (!ospf.set_hello_interval(interface, vif, area, hello_interval)) {
 	DOUT(info) << "Failed to set hello interval\n";
@@ -345,8 +340,6 @@ two_peers(TestInfo& info, OspfTypes::Version version,
     ospf_1.set_router_id(set_id("192.150.187.1"));
     ospf_2.set_router_id(set_id("192.150.187.2"));
 
-    const uint16_t interface_prefix_length = 16;
-    const uint16_t interface_mtu = 1500;
     const uint16_t interface_cost = 10;
     const uint16_t inftransdelay = 20;
 
@@ -379,11 +372,9 @@ two_peers(TestInfo& info, OspfTypes::Version version,
     }
 
     PeerID peerid_1 = pm_1.
-	create_peer(interface_1, vif_1, src_1, interface_prefix_length,
-		    interface_mtu, linktype, area);
+	create_peer(interface_1, vif_1, src_1, linktype, area);
     PeerID peerid_2 = pm_2.
-	create_peer(interface_2, vif_2, src_2, interface_prefix_length,
-		    interface_mtu, linktype, area);
+	create_peer(interface_2, vif_2, src_2, linktype, area);
 
     switch(linktype) {
     case OspfTypes::PointToPoint:

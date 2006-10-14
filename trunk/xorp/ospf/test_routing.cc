@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_routing.cc,v 1.20 2006/03/29 22:41:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_routing.cc,v 1.21 2006/10/12 01:25:00 pavlin Exp $"
 
 #define DEBUG_LOGGING
 #define DEBUG_PRINT_FUNCTION_NAME
@@ -333,8 +333,6 @@ routing1(TestInfo& info, OspfTypes::Version version)
     ospf.set_router_id(set_id("0.0.0.6"));
 
     OspfTypes::AreaID area = set_id("128.16.64.16");
-    const uint16_t interface_prefix_length = 16;
-    const uint16_t interface_mtu = 1500;
 
     PeerManager<A>& pm = ospf.get_peer_manager();
 
@@ -359,10 +357,7 @@ routing1(TestInfo& info, OspfTypes::Version version)
     }
 
     PeerID peerid = pm.
-	create_peer(interface, vif, src, interface_prefix_length,
-		    interface_mtu,
-		    OspfTypes::BROADCAST,
-		    area);
+	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     // Bring the peering up
     if (!pm.set_state_peer(peerid, true)) {
@@ -454,8 +449,6 @@ routing2(TestInfo& info)
     ospf.set_router_id(rid);
     
     OspfTypes::AreaID area = set_id("0.0.0.0");
-    const uint16_t interface_prefix_length = 30;
-    const uint16_t interface_mtu = 1500;
 
     PeerManager<IPv4>& pm = ospf.get_peer_manager();
 
@@ -468,10 +461,7 @@ routing2(TestInfo& info)
     const string vif = "vif0";
 
     PeerID peerid = pm.
-	create_peer(interface, vif, src, interface_prefix_length,
-		    interface_mtu,
-		    OspfTypes::BROADCAST,
-		    area);
+	create_peer(interface, vif, src, OspfTypes::BROADCAST, area);
 
     // Bring the peering up
     if (!pm.set_state_peer(peerid, true)) {
