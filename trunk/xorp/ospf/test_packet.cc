@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.40 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.41 2006/10/16 06:50:04 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -885,6 +885,10 @@ uint8_t bad_packet1[] = {
 #include "packet1.data"
 };
 
+uint8_t bad_packet2[] = {
+#include "packet2.data"
+};
+
 bool
 packet_decode_bad_packet(TestInfo& info, OspfTypes::Version version,
 			 uint8_t *ptr, size_t len)
@@ -1426,6 +1430,9 @@ main(int argc, char **argv)
 	{"packet_decode_bad1V2", callback(packet_decode_bad_packet,
 					  OspfTypes::V2,
 					  bad_packet1, sizeof(bad_packet1))},
+	{"packet_decode_bad2V2", callback(packet_decode_bad_packet,
+					  OspfTypes::V2,
+					  bad_packet2, sizeof(bad_packet2))},
 
 	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
