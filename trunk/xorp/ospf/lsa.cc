@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.70 2006/03/28 03:06:53 atanu Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.71 2006/10/12 01:24:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -122,13 +122,15 @@ put_ipv6_net(IPNet<IPv6>& v6net, uint8_t *ptr)
 }
 
 /**
- * Get the length of this LSA and make sure that its less than the
- * provided buffer. Otherwise throw an exception. Don't modify the
- * value if its greater than the buffer.
+ * Get the length of this LSA and verify that the length is smaller
+ * than the buffer and large enough to be a valid LSA. Otherwise throw
+ * an exception. Don't modify the value if its greater than the
+ * buffer.
  */
 inline
 size_t
-get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len)
+get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len,
+			size_t min_len)
     throw(BadPacket)
 {
     size_t tlen = Lsa_header::get_lsa_len_from_buffer(buf);
@@ -138,6 +140,13 @@ get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len)
 			    caller,
 			    XORP_UINT_CAST(tlen),
 			    XORP_UINT_CAST(len)));
+    } else if(tlen < min_len) {
+	xorp_throw(BadPacket,
+		   c_format("%s header len %u smaller than minimum LSA "
+			    "of this type %u",
+			    caller,
+			    XORP_UINT_CAST(tlen),
+			    XORP_UINT_CAST(min_len)));
     } else {
 	len = tlen;
     }
@@ -680,7 +689,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("Router-LSA", buf, len);
+    len = get_lsa_len_from_header("Router-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
@@ -876,7 +885,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("Network-LSA", buf, len);
+    len = get_lsa_len_from_header("Network-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
@@ -1033,7 +1042,7 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("Summary-LSA", buf, len);
+    len = get_lsa_len_from_header("Summary-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
@@ -1174,7 +1183,7 @@ SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("Summary-LSA", buf, len);
+    len = get_lsa_len_from_header("Summary-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
@@ -1309,7 +1318,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 			    XORP_UINT_CAST(required)));
 
     // This guy throws an exception of there is a problem.
-    len = get_lsa_len_from_header("AS-External-LSA", buf, len);
+    len = get_lsa_len_from_header("AS-External-LSA", buf, len, required);
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.39 2006/03/29 22:41:25 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.40 2006/10/12 01:25:00 pavlin Exp $"
 
 #include "ospf_module.h"
 
@@ -881,6 +881,35 @@ packet_decoder2(TestInfo& info, OspfTypes::Version version)
     return true;
 }
 
+uint8_t bad_packet1[] = {
+#include "packet1.data"
+};
+
+bool
+packet_decode_bad_packet(TestInfo& info, OspfTypes::Version version,
+			 uint8_t *ptr, size_t len)
+{
+    PacketDecoder packet_decoder;
+    LsaDecoder lsa_decoder(version);
+
+    initialise_lsa_decoder(version, lsa_decoder);
+    initialise_packet_decoder(version, packet_decoder, lsa_decoder);
+
+    Packet *packet;
+    try {
+	packet = packet_decoder.decode(ptr, len);
+	DOUT(info) << "Accepted bad packet (bad)\n";
+	return false;
+    } catch(BadPacket& e) {
+	DOUT(info) << "Rejected bad packet (good): " << e.str() << endl;
+	return true;
+    }
+    
+    XLOG_UNREACHABLE();
+
+    return false;
+}
+
 /* Packet stuff above - LSA stuff below */
 
 inline
@@ -1393,6 +1422,10 @@ main(int argc, char **argv)
 	{"packet_decoder1V3", callback(packet_decoder1, OspfTypes::V3)},
 	{"packet_decoder2V2", callback(packet_decoder2, OspfTypes::V2)},
 	{"packet_decoder2V3", callback(packet_decoder2, OspfTypes::V3)},
+
+	{"packet_decode_bad1V2", callback(packet_decode_bad_packet,
+					  OspfTypes::V2,
+					  bad_packet1, sizeof(bad_packet1))},
 
 	{"router_lsa_compareV2", callback(router_lsa_compare, OspfTypes::V2)},
 	{"router_lsa_compareV3", callback(router_lsa_compare, OspfTypes::V3)},
