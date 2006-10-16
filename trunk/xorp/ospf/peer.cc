@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.239 2006/06/21 23:36:36 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.240 2006/10/12 01:24:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1180,7 +1180,7 @@ Peer<A>::process_hello_packet(A dst, A src, HelloPacket *hello)
 	if (_hello_packet.get_network_mask() !=
 	    hello->get_network_mask()) {
 	    XLOG_TRACE(_ospf.trace()._input_errors,
-		       "Network masks don't match %d %s",
+		       "Network masks don't match %#x %s",
 		       _hello_packet.get_network_mask(),
 		       hello->str().c_str());
 	    return false;
