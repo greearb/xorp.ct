@@ -1,0 +1,82 @@
+=============================================================================
+XORP_SA_06:01.ospf				            Security Advisory
+						             The XORP Project
+
+
+Topic:		An LSA length of 0 or 1 will crash OSPFv2
+
+Module:		OSPF
+Announced:	2006-10-16
+Credits:	http://www.musecurity.com
+Affects:	XORP 1.2 and XORP 1.3 Releases
+Corrected:	2006-10-16 06:50:04 UTC (Release 1.4-WIP)
+
+I.	Background
+
+OSPFv2 is a link-state routing protocol defined in RFC 2328,
+implemented by the XORP project.
+
+II.	Problem Description
+
+The OSPF protocol carries link state information in Link State
+Advertisements (LSAs). One or more LSAs can be carried in a Link State
+Update Packet. Each LSA has its own length field and checksum amongst
+other fields.
+
+One of the first checks made when processing an LSA is to verify the
+checksum, the checksum verification routine is provided with the
+length field after having two subtracted from it. A length of zero or
+one gives a negative value which when dealt with as an unsigned
+quantity gives a large positve value (0xffffffff). The checksum
+routine scans memory until it accesses an invalid address at which
+point OSPF fails.
+
+III.  Impact
+An attacker sending specially crafted packets with an LSA length of
+zero or one will be able to terminate XORP OSPF processes.
+
+It should be noted that the attacker must be on the same network
+segment as the OSPF process. OSPF packets are sent as IP protocol
+number 89, not as UDP packets, so it it not possible to mount an
+attack from a remote location.
+
+IV.    Workaround
+
+One possible workaround is to enable authentication, so an attacker on
+the same network segment will not be able to introduce packets.
+
+Do nothing, if an attacker is able to inject packets into your routing
+infrastructure this is the least of your problems.
+
+V.     Solution
+
+Apply the patch to your XORP 1.3 system.
+
+1) To patch your present system:
+
+This patch has been verified with XORP 1.3.
+
+# wget http://www.xorp.org/patches/SA-06:01/ospf.patch
+
+2) Execute the following command:
+
+# cd xorp
+# patch < /path/to/patch
+# gmake install
+
+3) Restart OSPFv2
+
+a) Save the current configuration to a file.
+
+Xorp> configure
+XORP# save /tmp/xorp.boot
+
+b) Delete ospf4 from the configuration and commit. OSPFv2 should no
+longer be running.
+
+XORP# delete protocols ospf4
+XORP# commit
+
+c) Reload the saved configuration, which will restart OSPFv2
+XORP# load /tmp/xorp.boot
+=============================================================================
