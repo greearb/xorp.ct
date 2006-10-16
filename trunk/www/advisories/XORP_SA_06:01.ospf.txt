@@ -32,6 +32,7 @@ routine scans memory until it accesses an invalid address at which
 point OSPF fails.
 
 III.  Impact
+
 An attacker sending specially crafted packets with an LSA length of
 zero or one will be able to terminate XORP OSPF processes.
 
@@ -44,9 +45,6 @@ IV.    Workaround
 
 One possible workaround is to enable authentication, so an attacker on
 the same network segment will not be able to introduce packets.
-
-Do nothing, if an attacker is able to inject packets into your routing
-infrastructure this is the least of your problems.
 
 V.     Solution
 
