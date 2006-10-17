@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.33 2006/10/13 21:17:28 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.34 2006/10/17 00:06:08 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -779,6 +779,302 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
 	const IPv6&	addr,
 	const string&	type,
 	const IPv4&	area);
+
+    /**
+     *  Delete peer.
+     */
+    XrlCmdError ospfv3_0_1_delete_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname);
+
+    /**
+     *  Set the peer state up or down.
+     */
+    XrlCmdError ospfv3_0_1_set_peer_state(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const bool&	enable);
+
+    /**
+     *  Add a neighbour to the peer.
+     */
+    XrlCmdError ospfv3_0_1_add_neighbour(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv6&	neighbour_address,
+	const IPv4&	neighbour_id);
+
+    /**
+     *  Remove a neighbour from the peer.
+     */
+    XrlCmdError ospfv3_0_1_remove_neighbour(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const IPv6&	neighbour_address,
+	const IPv4&	neighbour_id);
+
+    /**
+     *  Create a virtual link.
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     *
+     *  @param area in which an attempt has been made to configure a virtual
+     *  link it has to be the backbone. Its just being passed in so it can be
+     *  checked by the protocol.
+     */
+    XrlCmdError ospfv3_0_1_create_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id,
+	const IPv4&	area);
+
+    /**
+     *  Delete virtual link
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     */
+    XrlCmdError ospfv3_0_1_delete_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id);
+
+    /**
+     *  The area through which the virtual link transits.
+     *
+     *  @param neighbour_id the router ID of the other end of the link.
+     *
+     *  @param transit_area that the virtual link transits.
+     */
+    XrlCmdError ospfv3_0_1_transit_area_virtual_link(
+	// Input values,
+	const IPv4&	neighbour_id,
+	const IPv4&	transit_area);
+
+    /**
+     *  The edge cost of this interface.
+     */
+    XrlCmdError ospfv3_0_1_set_interface_cost(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	cost);
+
+    /**
+     *  The RxmtInterval.
+     */
+    XrlCmdError ospfv3_0_1_set_retransmit_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  Update packet will have their age incremented by this amount before
+     *  transmission. This value should take into account transmission and
+     *  propagation delays; it must be greater than zero.
+     */
+    XrlCmdError ospfv3_0_1_set_inftransdelay(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	delay);
+
+    /**
+     *  Used in the designated router election.
+     */
+    XrlCmdError ospfv3_0_1_set_router_priority(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  The interval between hello messages.
+     */
+    XrlCmdError ospfv3_0_1_set_hello_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  The period to wait before considering a router dead.
+     */
+    XrlCmdError ospfv3_0_1_set_router_dead_interval(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const uint32_t&	interval);
+
+    /**
+     *  Toggle the passive status of an interface.
+     */
+    XrlCmdError ospfv3_0_1_set_passive(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv4&	area,
+	const bool&	passive);
+
+    /**
+     *  If this is a "stub" or "nssa" area toggle the sending of a default
+     *  route.
+     */
+    XrlCmdError ospfv3_0_1_originate_default_route(
+	// Input values,
+	const IPv4&	area,
+	const bool&	enable);
+
+    /**
+     *  Set the StubDefaultCost, the default cost sent in a default route in a
+     *  "stub" or "nssa" area.
+     */
+    XrlCmdError ospfv3_0_1_stub_default_cost(
+	// Input values,
+	const IPv4&	area,
+	const uint32_t&	cost);
+
+    /**
+     *  Toggle the sending of summaries into "stub" or "nssa" areas.
+     */
+    XrlCmdError ospfv3_0_1_summaries(
+	// Input values,
+	const IPv4&	area,
+	const bool&	enable);
+
+    /**
+     *  Add area range.
+     */
+    XrlCmdError ospfv3_0_1_area_range_add(
+	// Input values,
+	const IPv4&	area,
+	const IPv6Net&	net,
+	const bool&	advertise);
+
+    /**
+     *  Delete area range.
+     */
+    XrlCmdError ospfv3_0_1_area_range_delete(
+	// Input values,
+	const IPv4&	area,
+	const IPv6Net&	net);
+
+    /**
+     *  Change the advertised state of this area.
+     */
+    XrlCmdError ospfv3_0_1_area_range_change_state(
+	// Input values,
+	const IPv4&	area,
+	const IPv6Net&	net,
+	const bool&	advertise);
+
+    /**
+     *  Enable/Disable tracing.
+     *
+     *  @param tvar trace variable.
+     *
+     *  @param enable set to true to enable false to disable.
+     */
+    XrlCmdError ospfv3_0_1_trace(
+	// Input values,
+	const string&	tvar,
+	const bool&	enable);
+
+    /**
+     *  Get a single lsa from an area. A stateless mechanism to get LSAs. The
+     *  client of this interface should start from zero and continue to request
+     *  LSAs (incrementing index) until toohigh becomes true.
+     *
+     *  @param area database that is being searched.
+     *
+     *  @param index into database starting from 0.
+     *
+     *  @param valid true if a LSA has been returned. Some index values do not
+     *  contain LSAs. This should not be considered an error.
+     *
+     *  @param toohigh true if no more LSA exist after this index.
+     *
+     *  @param self if true this LSA was originated by this router.
+     *
+     *  @param lsa if valid is true the LSA at index.
+     */
+    XrlCmdError ospfv3_0_1_get_lsa(
+	// Input values,
+	const IPv4&	area,
+	const uint32_t&	index,
+	// Output values,
+	bool&	valid,
+	bool&	toohigh,
+	bool&	self,
+	vector<uint8_t>&	lsa);
+
+    /**
+     * Get a list of all the configured areas.
+     */
+    XrlCmdError ospfv3_0_1_get_area_list(XrlAtomList& areas);
+
+    /**
+     *  Get the list of neighbours.
+     */
+    XrlCmdError ospfv3_0_1_get_neighbour_list(
+	// Output values,
+	XrlAtomList&	areas);
+
+    /**
+     *  Get information on a neighbour.
+     *
+     *  @param nid neighbour ID returned by the get_neighbour_list.
+     *
+     *  @param valid true if valid information has been returned.
+     *
+     *  @param address of neighbour in txt to allow IPv4 and IPv6.
+     *
+     *  @param interface with which the neighbour forms the adjacency.
+     *
+     *  @param state of the adjacency.
+     *
+     *  @param rid router ID of the neighbour.
+     *
+     *  @param priority of the neighbour (used for DR election).
+     *
+     *  @param area the neighbour is in.
+     *
+     *  @param opt value in the neighbours hello packet.
+     *
+     *  @param dr designated router.
+     *
+     *  @param bdr backup designated router.
+     *
+     *  @param up time in seconds that the neigbour has been up.
+     *
+     *  @param adjacent time in seconds that there has been an adjacency.
+     */
+    XrlCmdError ospfv3_0_1_get_neighbour_info(
+	// Input values,
+	const uint32_t&	nid,
+	// Output values,
+	string&	address,
+	string&	interface,
+	string&	state,
+	IPv4&	rid,
+	uint32_t& priority,
+	uint32_t& deadtime,
+	IPv4&	area,
+	uint32_t&	opt,
+	IPv4&	dr,
+	IPv4&	bdr,
+	uint32_t&	up,
+	uint32_t&	adjacent);
 
  private:
 //     Ospf<IPv4>& _ospf_ipv4;

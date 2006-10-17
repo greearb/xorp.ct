@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.45 2006/10/13 21:17:27 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.46 2006/10/17 00:06:08 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -524,6 +524,24 @@ XrlOspfV2Target::ospfv2_0_1_delete_peer(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_delete_peer(const string& ifname,
+					const string& vifname)
+{
+    debug_msg("interface %s vif %s\n", ifname.c_str(), vifname.c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().delete_peer(peerid))
+	return XrlCmdError::COMMAND_FAILED("Failed to delete peer");
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
 					   const string& vifname,
@@ -539,6 +557,26 @@ XrlOspfV2Target::ospfv2_0_1_set_peer_state(const string& ifname,
 	return XrlCmdError::COMMAND_FAILED(e.str());
     }
     if (!_ospf.get_peer_manager().set_state_peer(peerid, enable))
+	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_peer_state(const string& ifname,
+					   const string& vifname,
+					   const bool& enable)
+{
+    debug_msg("interface %s vif %s enable %s\n", ifname.c_str(),
+	      vifname.c_str(), pb(enable));
+
+    PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().set_state_peer(peerid, enable))
 	return XrlCmdError::COMMAND_FAILED("Failed to set peer state");
 
     return XrlCmdError::OKAY();
@@ -566,6 +604,34 @@ XrlOspfV2Target::ospfv2_0_1_add_neighbour(const string&	ifname,
     if (!_ospf.get_peer_manager().add_neighbour(peerid, area,
 						neighbour_address,
 						rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to add neighbour " +
+					   neighbour_address.str());
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_add_neighbour(const string&	ifname,
+					  const string&	vifname,
+					  const IPv4& addr,
+					  const IPv6& neighbour_address,
+					  const IPv4& neighbour_id)
+{
+    OspfTypes::AreaID area = ntohl(addr.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), 
+	      cstring(neighbour_address),pr_id(rid).c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().add_neighbour(peerid, area,
+						     neighbour_address,
+						     rid))
 	return XrlCmdError::COMMAND_FAILED("Failed to add neighbour " +
 					   neighbour_address.str());
 
@@ -600,6 +666,34 @@ XrlOspfV2Target::ospfv2_0_1_remove_neighbour(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_remove_neighbour(const string& ifname,
+					     const string& vifname,
+					     const IPv4& addr,
+					     const IPv6& neighbour_address,
+					     const IPv4& neighbour_id)
+{
+    OspfTypes::AreaID area = ntohl(addr.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("interface %s vif %s area %s address %s id %s\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), 
+	      cstring(neighbour_address),pr_id(rid).c_str());
+
+    PeerID peerid;
+    try {
+	peerid = _ospf_ipv6.get_peer_manager().get_peerid(ifname, vifname);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+    if (!_ospf_ipv6.get_peer_manager().remove_neighbour(peerid, area,
+							neighbour_address,
+							rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to remove neighbour" +
+					   neighbour_address.str());
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_create_virtual_link(const IPv4& neighbour_id,
 						const IPv4& a)
@@ -622,11 +716,43 @@ XrlOspfV2Target::ospfv2_0_1_create_virtual_link(const IPv4& neighbour_id,
 }
 
 XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_create_virtual_link(const IPv4& neighbour_id,
+						const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    debug_msg("Neighbour's router ID %s configuration area %s\n",
+	      pr_id(rid).c_str(), pr_id(area).c_str());
+
+    if (OspfTypes::BACKBONE != area) {
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Virtual link must be in area %s",
+				    pr_id(OspfTypes::BACKBONE).c_str()));
+    }
+
+    if (!_ospf_ipv6.create_virtual_link(rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to create virtual link");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_delete_virtual_link(const IPv4& neighbour_id)
 {
     OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
 
     if (!_ospf.delete_virtual_link(rid))
+	return XrlCmdError::COMMAND_FAILED("Failed to delete virtual link");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_delete_virtual_link(const IPv4& neighbour_id)
+{
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+
+    if (!_ospf_ipv6.delete_virtual_link(rid))
 	return XrlCmdError::COMMAND_FAILED("Failed to delete virtual link");
 
     return XrlCmdError::OKAY();
@@ -640,6 +766,19 @@ XrlOspfV2Target::ospfv2_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
     OspfTypes::AreaID area = ntohl(transit_area.addr());
 
     if (!_ospf.transit_area_virtual_link(rid, area))
+	return XrlCmdError::COMMAND_FAILED("Failed to configure transit area");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_transit_area_virtual_link(const IPv4& neighbour_id,
+						      const IPv4& transit_area)
+{
+    OspfTypes::RouterID rid = ntohl(neighbour_id.addr());
+    OspfTypes::AreaID area = ntohl(transit_area.addr());
+
+    if (!_ospf_ipv6.transit_area_virtual_link(rid, area))
 	return XrlCmdError::COMMAND_FAILED("Failed to configure transit area");
 
     return XrlCmdError::OKAY();
@@ -662,6 +801,22 @@ XrlOspfV2Target::ospfv2_0_1_set_interface_cost(const string& ifname,
 }
 
 XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_set_interface_cost(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const uint32_t& cost)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s cost %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), cost);
+
+    if (!_ospf_ipv6.set_interface_cost(ifname, vifname, area, cost))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "interface cost");
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_retransmit_interval(const string& ifname,
 						    const string& vifname,
 						    const IPv4& a,
@@ -672,6 +827,23 @@ XrlOspfV2Target::ospfv2_0_1_set_retransmit_interval(const string& ifname,
 	      vifname.c_str(), pr_id(area).c_str(), interval);
 
     if (!_ospf.set_retransmit_interval(ifname, vifname, area, interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "RxmtInterval interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_set_retransmit_interval(const string& ifname,
+						    const string& vifname,
+						    const IPv4& a,
+						    const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    if (!_ospf_ipv6.set_retransmit_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "RxmtInterval interval");
 
@@ -696,6 +868,23 @@ XrlOspfV2Target::ospfv2_0_1_set_inftransdelay(const string& ifname,
 }
 
 XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_set_inftransdelay(const string& ifname,
+					      const string& vifname,
+					      const IPv4& a,
+					      const uint32_t& delay)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s delay %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), delay);
+
+    if (!_ospf_ipv6.set_inftransdelay(ifname, vifname, area, delay))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "inftransdelay delay");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
 						const string& vifname,
 						const IPv4& a,
@@ -706,6 +895,22 @@ XrlOspfV2Target::ospfv2_0_1_set_router_priority(const string& ifname,
 	      vifname.c_str(), pr_id(area).c_str(), priority);
 
     if (!_ospf.set_router_priority(ifname, vifname, area, priority))
+	return XrlCmdError::COMMAND_FAILED("Failed to set priority");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_set_router_priority(const string& ifname,
+						const string& vifname,
+						const IPv4& a,
+						const uint32_t& priority)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s priority %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), priority);
+
+    if (!_ospf_ipv6.set_router_priority(ifname, vifname, area, priority))
 	return XrlCmdError::COMMAND_FAILED("Failed to set priority");
 
     return XrlCmdError::OKAY();
@@ -728,6 +933,22 @@ XrlOspfV2Target::ospfv2_0_1_set_hello_interval(const string& ifname,
 }
 
 XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_hello_interval(const string& ifname,
+					       const string& vifname,
+					       const IPv4& a,
+					       const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    if (!_ospf_ipv6.set_hello_interval(ifname, vifname, area, interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set hello interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
 						     const string& vifname,
 						     const IPv4& a,
@@ -738,6 +959,23 @@ XrlOspfV2Target::ospfv2_0_1_set_router_dead_interval(const string& ifname,
 	      vifname.c_str(), pr_id(area).c_str(), interval);
 
     if (!_ospf.set_router_dead_interval(ifname, vifname, area, interval))
+	return XrlCmdError::COMMAND_FAILED("Failed to set "
+					   "router dead interval");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_router_dead_interval(const string& ifname,
+						     const string& vifname,
+						     const IPv4& a,
+						     const uint32_t& interval)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s interval %d\n", ifname.c_str(),
+	      vifname.c_str(), pr_id(area).c_str(), interval);
+
+    if (!_ospf_ipv6.set_router_dead_interval(ifname, vifname, area, interval))
 	return XrlCmdError::COMMAND_FAILED("Failed to set "
 					   "router dead interval");
 
@@ -919,6 +1157,23 @@ XrlOspfV2Target::ospfv2_0_1_set_passive(const string& ifname,
     return XrlCmdError::OKAY();
 }
 
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_set_passive(const string& ifname,
+					const string& vifname,
+					const IPv4& a,
+					const bool& passive)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("interface %s vif %s area %s passive %s\n",
+	      ifname.c_str(), vifname.c_str(), pr_id(area).c_str(),
+	      pb(passive));
+
+    if (!_ospf_ipv6.set_passive(ifname, vifname, area, passive))
+	return XrlCmdError::COMMAND_FAILED("Failed to configure make passive");
+
+    return XrlCmdError::OKAY();
+}
+
 XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
 						    const bool&	enable)
@@ -927,6 +1182,20 @@ XrlOspfV2Target::ospfv2_0_1_originate_default_route(const IPv4&	a,
     debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
 
     if (!_ospf.originate_default_route(area, enable))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed to configure default route");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_originate_default_route(const IPv4&	a,
+						    const bool&	enable)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    if (!_ospf_ipv6.originate_default_route(area, enable))
 	return XrlCmdError::
 	    COMMAND_FAILED("Failed to configure default route");
 
@@ -948,6 +1217,20 @@ XrlOspfV2Target::ospfv2_0_1_stub_default_cost(const IPv4& a,
 }
 
 XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_stub_default_cost(const IPv4& a,
+					      const uint32_t& cost)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s cost %u\n", pr_id(area).c_str(), cost);
+
+    if (!_ospf_ipv6.stub_default_cost(area, cost))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed set StubDefaultCost");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
 XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
 				      const bool& enable)
 {
@@ -955,6 +1238,20 @@ XrlOspfV2Target::ospfv2_0_1_summaries(const IPv4& a,
     debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
 
     if (!_ospf.summaries(area, enable))
+	return XrlCmdError::
+	    COMMAND_FAILED("Failed to configure summaries");
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError 
+XrlOspfV3Target::ospfv3_0_1_summaries(const IPv4& a,
+				      const bool& enable)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s enable %s\n", pr_id(area).c_str(), pb(enable));
+
+    if (!_ospf_ipv6.summaries(area, enable))
 	return XrlCmdError::
 	    COMMAND_FAILED("Failed to configure summaries");
 
@@ -981,6 +1278,25 @@ XrlOspfV2Target::ospfv2_0_1_area_range_add(const IPv4& a,
 }
 
 XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_area_range_add(const IPv4& a,
+					   const IPv6Net& net,
+					   const bool& advertise)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    if (!_ospf_ipv6.area_range_add(area, net, advertise))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to add area range "
+				    "area %s net %s advertise %s\n",
+				    pr_id(area).c_str(), cstring(net),
+				    pb(advertise)));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_area_range_delete(const IPv4& a,
 					      const IPv4Net& net)
 {
@@ -988,6 +1304,23 @@ XrlOspfV2Target::ospfv2_0_1_area_range_delete(const IPv4& a,
     debug_msg("area %s net %s\n", pr_id(area).c_str(), cstring(net));
 
     if (!_ospf.area_range_delete(area, net))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to delete area range "
+				    "area %s net %s\n",
+				    pr_id(area).c_str(), cstring(net)));
+
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_area_range_delete(const IPv4& a,
+					      const IPv6Net& net)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s\n", pr_id(area).c_str(), cstring(net));
+
+    if (!_ospf_ipv6.area_range_delete(area, net))
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Failed to delete area range "
 				    "area %s net %s\n",
@@ -1017,12 +1350,46 @@ XrlOspfV2Target::ospfv2_0_1_area_range_change_state(const IPv4& a,
 }
 
 XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_area_range_change_state(const IPv4& a,
+						    const IPv6Net& net,
+						    const bool&	advertise)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s net %s advertise %s\n", pr_id(area).c_str(),
+	      cstring(net), pb(advertise));
+
+    if (!_ospf_ipv6.area_range_change_state(area, net, advertise))
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Failed to change area range "
+				    "area %s net %s advertise %s\n",
+				    pr_id(area).c_str(), cstring(net),
+				    pb(advertise)));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_trace(const string&	tvar, const bool& enable)
 {
     debug_msg("trace variable %s enable %s\n", tvar.c_str(), pb(enable));
 
     if (tvar == "all") {
 	_ospf.trace().all(enable);
+    } else {
+	return XrlCmdError::
+	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
+    } 
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_trace(const string&	tvar, const bool& enable)
+{
+    debug_msg("trace variable %s enable %s\n", tvar.c_str(), pb(enable));
+
+    if (tvar == "all") {
+	_ospf_ipv6.trace().all(enable);
     } else {
 	return XrlCmdError::
 	    COMMAND_FAILED(c_format("Unknown variable %s", tvar.c_str()));
@@ -1052,6 +1419,26 @@ XrlOspfV2Target::XrlOspfV2Target::ospfv2_0_1_get_lsa(const IPv4& a,
 }
 
 XrlCmdError
+XrlOspfV3Target::XrlOspfV3Target::ospfv3_0_1_get_lsa(const IPv4& a,
+						     const uint32_t& index,
+						     bool& valid,
+						     bool& toohigh,
+						     bool& self,
+						     vector<uint8_t>& lsa)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    debug_msg("area %s index %u\n", pr_id(area).c_str(), index);
+
+    if (!_ospf_ipv6.get_lsa(area, index, valid, toohigh, self, lsa))
+	return XrlCmdError::COMMAND_FAILED("Unable to get LSA");
+
+    debug_msg("area %s index %u valid %s toohigh %s self %s\n",
+	      pr_id(area).c_str(), index, pb(valid), pb(toohigh), pb(self));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
 {
     list<OspfTypes::AreaID> arealist;
@@ -1067,11 +1454,41 @@ XrlOspfV2Target::ospfv2_0_1_get_area_list(XrlAtomList& areas)
 }
 
 XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_get_area_list(XrlAtomList& areas)
+{
+    list<OspfTypes::AreaID> arealist;
+
+    if (!_ospf_ipv6.get_area_list(arealist))
+	return XrlCmdError::COMMAND_FAILED("Unable to get area list");
+
+    list<OspfTypes::AreaID>::const_iterator i;
+    for (i = arealist.begin(); i != arealist.end(); i++)
+	areas.append(XrlAtom(*i));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
 XrlOspfV2Target::ospfv2_0_1_get_neighbour_list(XrlAtomList& neighbours)
 {
     list<OspfTypes::NeighbourID> neighbourlist;
 
     if (!_ospf.get_neighbour_list(neighbourlist))
+	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour list");
+
+    list<OspfTypes::NeighbourID>::const_iterator i;
+    for (i = neighbourlist.begin(); i != neighbourlist.end(); i++)
+	neighbours.append(XrlAtom(*i));
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_get_neighbour_list(XrlAtomList& neighbours)
+{
+    list<OspfTypes::NeighbourID> neighbourlist;
+
+    if (!_ospf_ipv6.get_neighbour_list(neighbourlist))
 	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour list");
 
     list<OspfTypes::NeighbourID>::const_iterator i;
@@ -1099,6 +1516,44 @@ XrlOspfV2Target::ospfv2_0_1_get_neighbour_info(const uint32_t& nid,
     NeighbourInfo ninfo;
 
     if (!_ospf.get_neighbour_info(nid, ninfo))
+	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour info");
+
+#define copy_ninfo(var) 	var = ninfo._ ## var
+    copy_ninfo(address);
+    copy_ninfo(interface);
+    copy_ninfo(state);
+    copy_ninfo(rid);
+    copy_ninfo(priority);
+    copy_ninfo(deadtime);
+    copy_ninfo(area);
+    copy_ninfo(opt);
+    copy_ninfo(dr);
+    copy_ninfo(bdr);
+    copy_ninfo(up);
+    copy_ninfo(adjacent);
+#undef copy_ninfo
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_get_neighbour_info(const uint32_t& nid,
+					       string& address,
+					       string& interface,
+					       string& state,
+					       IPv4& rid,
+					       uint32_t& priority,
+					       uint32_t& deadtime,
+					       IPv4& area,
+					       uint32_t& opt,
+					       IPv4& dr,
+					       IPv4& bdr,
+					       uint32_t& up,
+					       uint32_t& adjacent)
+{
+    NeighbourInfo ninfo;
+
+    if (!_ospf_ipv6.get_neighbour_info(nid, ninfo))
 	return XrlCmdError::COMMAND_FAILED("Unable to get neighbour info");
 
 #define copy_ninfo(var) 	var = ninfo._ ## var
