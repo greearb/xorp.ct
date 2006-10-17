@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.5 2006/10/13 19:43:25 atanu Exp $ */
+/* $XORP: xorp/xrl/interfaces/ospfv3.xif,v 1.6 2006/10/13 21:17:28 atanu Exp $ */
 
 /*
  * OSPF v3 protocol XRL interface.
@@ -40,4 +40,18 @@ interface ospfv3/0.1 {
      * @param area id of the area
      */
     destroy_area_router ? area:ipv4
+
+    /**
+     * Create a binding to an interface.
+     *
+     * @param ifname the interface that owns vif that has address.
+     * @param vifname virtual interface owning address.
+     * @param addr the address to be added.
+     * @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
+     */
+    create_peer ? ifname:txt \
+		& vifname:txt \
+		& addr:ipv6 \
+		& type:txt \
+		& area:ipv4  
 }

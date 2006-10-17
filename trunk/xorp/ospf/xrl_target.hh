@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_target.hh,v 1.32 2006/10/13 20:26:52 atanu Exp $
+// $XORP: xorp/ospf/xrl_target.hh,v 1.33 2006/10/13 21:17:28 atanu Exp $
 
 #ifndef __OSPF_XRL_TARGET_HH__
 #define __OSPF_XRL_TARGET_HH__
@@ -759,6 +759,25 @@ class XrlOspfV3Target : XrlOspfv3TargetBase {
      */
     XrlCmdError ospfv3_0_1_destroy_area_router(
 	// Input values,
+	const IPv4&	area);
+
+    /**
+     *  Create a binding to an interface.
+     *
+     *  @param ifname the interface that owns vif that has address.
+     *
+     *  @param vifname virtual interface owning address.
+     *
+     *  @param addr the address to be added.
+     *
+     *  @param type of link "p2p", "broadcast", "nbma", "p2m", "vlink"
+     */
+    XrlCmdError ospfv3_0_1_create_peer(
+	// Input values,
+	const string&	ifname,
+	const string&	vifname,
+	const IPv6&	addr,
+	const string&	type,
 	const IPv4&	area);
 
  private:

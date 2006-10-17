@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.44 2006/10/13 20:26:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/xrl_target.cc,v 1.45 2006/10/13 21:17:27 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -475,6 +475,29 @@ XrlOspfV2Target::ospfv2_0_1_create_peer(const string& ifname,
 
     try {
 	_ospf.get_peer_manager().create_peer(ifname, vifname, addr,
+					     linktype, area);
+    } catch(XorpException& e) {
+	return XrlCmdError::COMMAND_FAILED(e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlOspfV3Target::ospfv3_0_1_create_peer(const string& ifname,
+					const string& vifname,
+					const IPv6& addr,
+					const string& type,
+					const IPv4& a)
+{
+    OspfTypes::AreaID area = ntohl(a.addr());
+    bool status;
+    OspfTypes::LinkType linktype = from_string_to_link_type(type, status);
+    if (!status)
+	return XrlCmdError::COMMAND_FAILED("Unrecognised type " + type);
+
+    try {
+	_ospf_ipv6.get_peer_manager().create_peer(ifname, vifname, addr,
 					     linktype, area);
     } catch(XorpException& e) {
 	return XrlCmdError::COMMAND_FAILED(e.str());
