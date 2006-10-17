@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.6 2006/03/16 00:03:53 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_table_set_iphelper.cc,v 1.7 2006/06/29 11:03:54 bms Exp $"
 
 #include "fea_module.h"
 
@@ -72,8 +72,10 @@ FtiConfigTableSetIPHelper::start(string& error_msg)
 	return (XORP_OK);
 
     // Cleanup any leftover entries from previously run XORP instance
-    delete_all_entries4();
-    delete_all_entries6();
+    if (! ftic().unicast_forwarding_entries_retain_on_startup4())
+	delete_all_entries4();
+    if (! ftic().unicast_forwarding_entries_retain_on_startup6())
+	delete_all_entries6();
 
     //
     // XXX: This mechanism relies on the FtiConfigEntrySet mechanism
@@ -93,8 +95,11 @@ FtiConfigTableSetIPHelper::stop(string& error_msg)
     if (! _is_running)
 	return (XORP_OK);
 
-    delete_all_entries4();
-    delete_all_entries6();
+    // Delete the XORP entries
+    if (! ftic().unicast_forwarding_entries_retain_on_shutdown4())
+	delete_all_entries4();
+    if (! ftic().unicast_forwarding_entries_retain_on_shutdown6())
+	delete_all_entries6();
 
     //
     // XXX: This mechanism relies on the FtiConfigEntrySet mechanism

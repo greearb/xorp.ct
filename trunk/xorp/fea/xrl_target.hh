@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/xrl_target.hh,v 1.59 2006/06/15 06:04:36 pavlin Exp $
+// $XORP: xorp/fea/xrl_target.hh,v 1.60 2006/10/13 06:24:09 pavlin Exp $
 
 #ifndef __FEA_XRL_TARGET_HH__
 #define __FEA_XRL_TARGET_HH__
@@ -857,6 +857,50 @@ public:
     XrlCmdError fti_0_2_set_unicast_forwarding_enabled6(
 	// Input values,
 	const bool&	enabled);
+
+    /**
+     *  Set the IPv4 unicast forwarding engine whether to retain existing XORP
+     *  forwarding entries on startup.
+     *
+     *  @param retain if true, then retain the XORP forwarding entries,
+     *  otherwise delete them.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_entries_retain_on_startup4(
+	// Input values,
+	const bool&	retain);
+
+    /**
+     *  Set the IPv4 unicast forwarding engine whether to retain existing XORP
+     *  forwarding entries on shutdown.
+     *
+     *  @param retain if true, then retain the XORP forwarding entries,
+     *  otherwise delete them.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown4(
+	// Input values,
+	const bool&	retain);
+
+    /**
+     *  Set the IPv6 unicast forwarding engine whether to retain existing XORP
+     *  forwarding entries on startup.
+     *
+     *  @param retain if true, then retain the XORP forwarding entries,
+     *  otherwise delete them.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_entries_retain_on_startup6(
+	// Input values,
+	const bool&	retain);
+
+    /**
+     *  Set the IPv6 unicast forwarding engine whether to retain existing XORP
+     *  forwarding entries on shutdown.
+     *
+     *  @param retain if true, then retain the XORP forwarding entries,
+     *  otherwise delete them.
+     */
+    XrlCmdError fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
+	// Input values,
+	const bool&	retain);
 
     //
     // RIB routes redistribution transaction-based XRL interface

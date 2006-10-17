@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.10 2006/03/09 12:13:52 pavlin Exp $
+% $XORP: xorp/docs/user_manual/forwarding.tex,v 1.11 2006/08/02 05:31:48 pavlin Exp $
 %
 
 \chapter{Forwarding Engine}
@@ -47,9 +47,17 @@ fea \{\\
 \>targetname: {\it txt}\\
 \>unicast-forwarding4 \{\\
 \>\>disable: {\it bool}\\
+\>\>forwarding-entries \{\\
+\>\>\>retain-on-startup: {\it bool}\\
+\>\>\>retain-on-shutdown: {\it bool}\\
+\>\>\}\\
 \>\}\\
 \>unicast-forwarding6 \{\\
 \>\>disable: {\it bool}\\
+\>\>forwarding-entries \{\\
+\>\>\>retain-on-startup: {\it bool}\\
+\>\>\>retain-on-shutdown: {\it bool}\\
+\>\>\}\\
 \>\}\\
 \>click \{\\
 \>\>disable: {\it bool}\\
@@ -76,6 +84,18 @@ fea \{\\
 \>\}\\
 \}
 \\
+{\rm continued overleaf....}
+\end{tabbing}
+\end{alltt}
+\end{minipage}
+}
+\newpage
+\vspace{0.1in}
+\noindent\framebox[\textwidth][l]{\scriptsize
+\begin{minipage}{6in}
+\begin{alltt}
+\begin{tabbing}
+xx\=xx\=xx\=xx\=xx\=\kill
 plumbing \{\\
 \>mfea4 \{\\
 \>\>disable: {\it bool}\\
@@ -96,18 +116,6 @@ plumbing \{\\
 \>\>\}\\
 \>\}\\
 \\
-{\rm continued overleaf....}
-\end{tabbing}
-\end{alltt}
-\end{minipage}
-}
-\newpage
-\vspace{0.1in}
-\noindent\framebox[\textwidth][l]{\scriptsize
-\begin{minipage}{6in}
-\begin{alltt}
-\begin{tabbing}
-xx\=xx\=xx\=xx\=xx\=\kill
 \>mfea6 \{\\
 \>\>disable: {\it bool}\\
 \>\>interface {\it text} \{\\
@@ -145,21 +153,57 @@ xx\=xx\=xx\=xx\=xx\=\kill
   it is strongly recommended that this default is {\it not} overridden
   under normal usage scenarios.
 \end{description}
+
 \item{\tt unicast-forwarding4}: this directive is used to configure the IPv4
   forwarding~\footnote{Note that prior to XORP Release-1.1, the
   {\tt enable-unicast-forwarding4} flag was used instead to enable or disable
-  the IPv4 forwarding.}. Possible parameters are:
+  the IPv4 forwarding.}.
 \begin{description}
 \item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and disables or enables all IPv4 unicast forwarding on the router.
+  The default is {\stt false}.
+\item{\tt forwarding-entries}: this directive is used to configure the
+  properties of the IPv4 forwarding entries.
+\begin{description}
+\item{\tt retain-on-startup}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv4 unicast
+  forwarding entries (if there are any left from a previous execution)
+  are removed on startup by the FEA itself. The default is {\stt false}.
+\item{\tt retain-on-shutdown}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv4 unicast
+  forwarding entries are removed on shutdown by the FEA itself.
+  The default is {\stt false}.
 \end{description}
+   Note that the {\tt retain-on-startup} and {\tt retain-on-shutdown}
+   statements prevent the FEA itself from deleting the forwarding
+   entries and does not prevent the RIB or any of the unicast routing
+   protocols from deleting the entries on shutdown.
+\end{description}
+
 \item{\tt unicast-forwarding6}: this directive is used to configure the IPv6
   forwarding~\footnote{Note that prior to XORP Release-1.1, the
   {\tt enable-unicast-forwarding6} flag was used instead to enable or disable
-  the IPv6 forwarding.}. Possible parameters are:
+  the IPv6 forwarding.}.
 \begin{description}
 \item{\tt disable}: this takes the value {\stt true} or {\stt false},
   and disables or enables all IPv6 unicast forwarding on the router.
+  The default is {\stt false}.
+\item{\tt forwarding-entries}: this directive is used to configure the
+  properties of the IPv6 forwarding entries.
+\begin{description}
+\item{\tt retain-on-startup}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv6 unicast
+  forwarding entries (if there are any left from a previous execution)
+  are removed on startup by the FEA itself. The default is {\stt false}.
+\item{\tt retain-on-shutdown}: this takes the value {\stt true} or
+  {\stt false}, and is used to control whether the XORP IPv6 unicast
+  forwarding entries are removed on shutdown by the FEA itself.
+  The default is {\stt false}.
+\end{description}
+   Note that the {\tt retain-on-startup} and {\tt retain-on-shutdown}
+   statements prevent the FEA itself from deleting the forwarding
+   entries and does not prevent the RIB or any of the unicast routing
+   protocols from deleting the entries on shutdown.
 \end{description}
 
 \item{\tt click}: this directive is used to configure the Click

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig.cc,v 1.51 2006/06/29 11:03:53 bms Exp $"
+#ident "$XORP: xorp/fea/fticonfig.cc,v 1.52 2006/06/29 20:05:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -119,6 +119,10 @@ FtiConfig::FtiConfig(EventLoop& eventloop, Profile& profile,
       _unicast_forwarding_enabled4(false),
       _unicast_forwarding_enabled6(false),
       _accept_rtadv_enabled6(false),
+      _unicast_forwarding_entries_retain_on_startup4(false),
+      _unicast_forwarding_entries_retain_on_shutdown4(false),
+      _unicast_forwarding_entries_retain_on_startup6(false),
+      _unicast_forwarding_entries_retain_on_shutdown6(false),
       _have_ipv4(false),
       _have_ipv6(false),
       _is_dummy(false),
@@ -610,22 +614,30 @@ FtiConfig::stop(string& error_msg)
     }
 
     //
-    // Restore the old state in the underlying system
+    // Restore the old forwarding state in the underlying system.
+    //
+    // XXX: Note that if the XORP forwarding entries are retained on shutdown,
+    // then we don't restore the state.
     //
     if (_have_ipv4) {
-	if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
-					    error_msg) < 0) {
-	    ret_value = XORP_ERROR;
+	if (! unicast_forwarding_entries_retain_on_shutdown4()) {
+	    if (set_unicast_forwarding_enabled4(_unicast_forwarding_enabled4,
+						error_msg) < 0) {
+		ret_value = XORP_ERROR;
+	    }
 	}
     }
 #ifdef HAVE_IPV6
     if (_have_ipv6) {
-	if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
-					    error_msg) < 0) {
-	    ret_value = XORP_ERROR;
-	}
-	if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg) < 0) {
-	    ret_value = XORP_ERROR;
+	if (! unicast_forwarding_entries_retain_on_shutdown6()) {
+	    if (set_unicast_forwarding_enabled6(_unicast_forwarding_enabled6,
+						error_msg) < 0) {
+		ret_value = XORP_ERROR;
+	    }
+	    if (set_accept_rtadv_enabled6(_accept_rtadv_enabled6, error_msg)
+		< 0) {
+		ret_value = XORP_ERROR;
+	    }
 	}
     }
 #endif // HAVE_IPV6
@@ -2344,4 +2356,80 @@ FtiConfig::set_accept_rtadv_enabled6(bool v, string& error_msg)
     
     return (XORP_OK);
 #endif // HAVE_IPV6
+}
+
+/**
+ * Set the IPv4 unicast forwarding engine whether to retain existing
+ * XORP forwarding entries on startup.
+ *
+ * @param retain if true, then retain the XORP forwarding entries,
+ * otherwise delete them.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_entries_retain_on_startup4(bool retain,
+							     string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_startup4 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv4 unicast forwarding engine whether to retain existing
+ * XORP forwarding entries on shutdown.
+ *
+ * @param retain if true, then retain the XORP forwarding entries,
+ * otherwise delete them.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
+							      string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_shutdown4 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv6 unicast forwarding engine whether to retain existing
+ * XORP forwarding entries on startup.
+ *
+ * @param retain if true, then retain the XORP forwarding entries,
+ * otherwise delete them.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_entries_retain_on_startup6(bool retain,
+							     string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_startup6 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
+}
+
+/**
+ * Set the IPv6 unicast forwarding engine whether to retain existing
+ * XORP forwarding entries on shutdown.
+ *
+ * @param retain if true, then retain the XORP forwarding entries,
+ * otherwise delete them.
+ * @param error_msg the error message (if error).
+ * @return XORP_OK on success, otherwise XORP_ERROR.
+ */
+int
+FtiConfig::set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
+							      string& error_msg)
+{
+    _unicast_forwarding_entries_retain_on_shutdown6 = retain;
+
+    error_msg = "";		// XXX: reset
+    return (XORP_OK);
 }

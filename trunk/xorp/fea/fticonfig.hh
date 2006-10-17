@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/fticonfig.hh,v 1.39 2006/06/29 11:03:53 bms Exp $
+// $XORP: xorp/fea/fticonfig.hh,v 1.40 2006/06/29 20:07:12 pavlin Exp $
 
 #ifndef	__FEA_FTICONFIG_HH__
 #define __FEA_FTICONFIG_HH__
@@ -539,6 +539,98 @@ public:
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
     int set_accept_rtadv_enabled6(bool v, string& error_msg);
+
+    /**
+     * Test whether the IPv4 unicast forwarding engine retains existing
+     * XORP forwarding entries on startup.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_startup4() const {
+	return (_unicast_forwarding_entries_retain_on_startup4);
+    }
+
+    /**
+     * Test whether the IPv4 unicast forwarding engine retains existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_shutdown4() const {
+	return (_unicast_forwarding_entries_retain_on_shutdown4);
+    }
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine retains existing
+     * XORP forwarding entries on startup.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_startup6() const {
+	return (_unicast_forwarding_entries_retain_on_startup6);
+    }
+
+    /**
+     * Test whether the IPv6 unicast forwarding engine retains existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @return true if the XORP unicast forwarding entries are retained,
+     * otherwise false.
+     */
+    bool unicast_forwarding_entries_retain_on_shutdown6() const {
+	return (_unicast_forwarding_entries_retain_on_shutdown6);
+    }
+
+    /**
+     * Set the IPv4 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on startup.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_startup4(bool retain,
+							  string& error_msg);
+
+    /**
+     * Set the IPv4 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_shutdown4(bool retain,
+							   string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on startup.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_startup6(bool retain,
+							  string& error_msg);
+
+    /**
+     * Set the IPv6 unicast forwarding engine whether to retain existing
+     * XORP forwarding entries on shutdown.
+     *
+     * @param retain if true, then retain the XORP forwarding entries,
+     * otherwise delete them.
+     * @param error_msg the error message (if error).
+     * @return XORP_OK on success, otherwise XORP_ERROR.
+     */
+    int set_unicast_forwarding_entries_retain_on_shutdown6(bool retain,
+							   string& error_msg);
     
     /**
      * Get the IPv4 Trie (used for testing purpose).
@@ -699,6 +791,14 @@ private:
     bool	_unicast_forwarding_enabled4;
     bool	_unicast_forwarding_enabled6;
     bool	_accept_rtadv_enabled6;
+
+    //
+    // Unicast forwarding entries properties
+    //
+    bool	_unicast_forwarding_entries_retain_on_startup4;
+    bool	_unicast_forwarding_entries_retain_on_shutdown4;
+    bool	_unicast_forwarding_entries_retain_on_startup6;
+    bool	_unicast_forwarding_entries_retain_on_shutdown6;
 
     //
     // Misc other state

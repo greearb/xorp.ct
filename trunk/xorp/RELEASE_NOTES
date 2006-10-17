@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.135 2006/10/06 23:01:30 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.136 2006/10/10 23:23:23 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -14,6 +14,30 @@ Release 1.4-WIP (2006/??/??)
   CONFIGURATION:
     - Allow static routes to have "nexthop4" and "nexthop6" policy
       matching conditions in the "from" block.
+
+    - Addition of new FEA configuration statements to retain XORP
+      unicast forwarding entries on startup or shutdown:
+
+      fea {
+          unicast-forwarding4 {
+              forwarding-entries {
+                  retain-on-startup: false
+                  retain-on-shutdown: false
+              }
+          }
+          unicast-forwarding6 {
+              forwarding-entries {
+                  retain-on-startup: false
+                  retain-on-shutdown: false
+              }
+          }
+      }
+
+      The default value for each statement is false.
+      Note that those statements prevent the FEA itself from deleting
+      the forwarding entries and does not prevent the RIB or any of the
+      unicast routing protocols from deleting the entries on shutdown.
+
 
   LIBXORP:
     - 

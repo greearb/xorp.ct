@@ -1,4 +1,4 @@
-/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.40 2006/03/27 07:56:43 pavlin Exp $ */
+/* $XORP: xorp/rtrmgr/config.boot.sample,v 1.41 2006/06/30 00:43:05 pavlin Exp $ */
 
 
 interfaces {
@@ -53,10 +53,18 @@ interfaces {
 fea {
     unicast-forwarding4 {
 	disable: false
+	forwarding-entries {
+	    retain-on-startup: false
+	    retain-on-shutdown:	false
+	}
     }
 /*
     unicast-forwarding6 {
 	disable: false
+	forwarding-entries {
+	    retain-on-startup: false
+	    retain-on-shutdown:	false
+	}
     }
 */
 

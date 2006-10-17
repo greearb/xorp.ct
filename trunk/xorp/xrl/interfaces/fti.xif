@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.6 2004/08/03 05:02:57 pavlin Exp $ */
+/* $XORP: xorp/xrl/interfaces/fti.xif,v 1.7 2004/08/03 05:21:27 pavlin Exp $ */
 
 /*
  * Forwarding Table XRL interface.
@@ -147,4 +147,40 @@ interface fti/0.2 {
 	 * otherwise disable it.
 	 */
 	set_unicast_forwarding_enabled6 ? enabled:bool
+
+	/**
+	 * Set the IPv4 unicast forwarding engine whether to retain existing
+	 * XORP forwarding entries on startup.
+	 *
+	 * @param retain if true, then retain the XORP forwarding entries,
+	 * otherwise delete them.
+	 */
+	set_unicast_forwarding_entries_retain_on_startup4 ? retain:bool
+
+	/**
+	 * Set the IPv4 unicast forwarding engine whether to retain existing
+	 * XORP forwarding entries on shutdown.
+	 *
+	 * @param retain if true, then retain the XORP forwarding entries,
+	 * otherwise delete them.
+	 */
+	set_unicast_forwarding_entries_retain_on_shutdown4 ? retain:bool
+
+	/**
+	 * Set the IPv6 unicast forwarding engine whether to retain existing
+	 * XORP forwarding entries on startup.
+	 *
+	 * @param retain if true, then retain the XORP forwarding entries,
+	 * otherwise delete them.
+	 */
+	set_unicast_forwarding_entries_retain_on_startup6 ? retain:bool
+
+	/**
+	 * Set the IPv6 unicast forwarding engine whether to retain existing
+	 * XORP forwarding entries on shutdown.
+	 *
+	 * @param retain if true, then retain the XORP forwarding entries,
+	 * otherwise delete them.
+	 */
+	set_unicast_forwarding_entries_retain_on_shutdown6 ? retain:bool
 }

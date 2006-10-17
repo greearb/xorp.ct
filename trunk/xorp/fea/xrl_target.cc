@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_target.cc,v 1.82 2006/06/15 06:04:36 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_target.cc,v 1.83 2006/10/13 06:24:09 pavlin Exp $"
 
 #define PROFILE_UTILS_REQUIRED
 
@@ -2047,6 +2047,74 @@ XrlFeaTarget::fti_0_2_set_unicast_forwarding_enabled6(
 
     if (_xftm.ftic().set_unicast_forwarding_enabled6(enabled, error_msg) < 0)
 	return XrlCmdError::COMMAND_FAILED(error_msg);
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup4(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_startup4(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown4(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_shutdown4(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_startup6(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_startup6(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlFeaTarget::fti_0_2_set_unicast_forwarding_entries_retain_on_shutdown6(
+    // Input values,
+    const bool&	retain)
+{
+    string error_msg;
+
+    if (_xftm.ftic().set_unicast_forwarding_entries_retain_on_shutdown6(
+	    retain,
+	    error_msg)
+	!= XORP_OK) {
+	return XrlCmdError::COMMAND_FAILED(error_msg);
+    }
 
     return XrlCmdError::OKAY();
 }

@@ -1,15 +1,23 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.35 2006/02/22 02:26:10 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.36 2006/04/19 19:59:26 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
 
     unicast-forwarding4 {
 	disable:		toggle = false;
+	forwarding-entries {
+	    retain-on-startup:	bool = false;
+	    retain-on-shutdown:	bool = false;
+	}
     }
     enable-unicast-forwarding4:	bool;		/* %deprecated */
 
     unicast-forwarding6 {
 	disable:		toggle = false;
+	forwarding-entries {
+	    retain-on-startup:	bool = false;
+	    retain-on-shutdown:	bool = false;
+	}
     }
     enable-unicast-forwarding6:	bool;		/* %deprecated */
 
@@ -70,6 +78,20 @@ fea {
 	%help:		short "Enable IPv4 unicast forwarding";
 	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
 	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
+
+	forwarding-entries {
+	    %help:	short "Configure IPv4 forwarding entries properties";
+	    retain-on-startup {
+		%help:	short "Retain IPv4 unicast forwarding entries on startup";
+		%set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_startup4?retain:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_startup4?retain:bool=$(DEFAULT)";
+	    }
+	    retain-on-shutdown {
+		%help:	short "Retain IPv4 unicast forwarding entries on shutdown";
+		%set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_shutdown4?retain:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_shutdown4?retain:bool=$(DEFAULT)";
+	    }
+	}
     }
 
     unicast-forwarding6 {
@@ -78,6 +100,20 @@ fea {
 	    %help:	short "Disable IPv6 unicast forwarding";
 	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(@)`";
 	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled6?enabled:bool=`~$(DEFAULT)`";
+	}
+
+	forwarding-entries {
+	    %help:	short "Configure IPv6 forwarding entries properties";
+	    retain-on-startup {
+		%help:	short "Retain IPv6 unicast forwarding entries on startup";
+		%set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_startup6?retain:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_startup6?retain:bool=$(DEFAULT)";
+	    }
+	    retain-on-shutdown {
+		%help:	short "Retain IPv6 unicast forwarding entries on shutdown";
+		%set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_shutdown6?retain:bool=$(@)";
+		%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_shutdown6?retain:bool=$(DEFAULT)";
+	    }
 	}
     }
 
