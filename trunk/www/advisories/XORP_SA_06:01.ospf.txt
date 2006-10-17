@@ -48,10 +48,10 @@ Apply the relevant patch to your XORP system and restart OSPF.
 1) To patch your present system:
 
 [XORP 1.2]
-# wget http://www.xorp.org/patches/SA-06:01/xorp_ospf_1.2.patch
+# wget http://www.xorp.org/patches/SA-06:01/xorp_sa_06:01.ospf_1.2.patch
 
 [XORP 1.3]
-# wget http://www.xorp.org/patches/SA-06:01/xorp_ospf_1.3.patch
+# wget http://www.xorp.org/patches/SA-06:01/xorp_sa_06:01.ospf_1.3.patch
 
 2) Execute the following commands (only the last one has to be as root):
 
