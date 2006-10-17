@@ -58,6 +58,7 @@ Apply the relevant patch to your XORP system and restart OSPF.
 # cd xorp
 # patch -p0 < /path/to/patch
 # gmake
+# cd ospf
 # gmake install
 
 3) Restart OSPFv2
