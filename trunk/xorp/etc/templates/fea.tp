@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/fea.tp,v 1.36 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/fea.tp,v 1.37 2006/10/17 22:26:08 pavlin Exp $ */
 
 fea {
     targetname:			txt = "fea";
@@ -71,13 +71,6 @@ fea {
 	    %set:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(@)`";
 	    %delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
 	}
-    }
-
-    enable-unicast-forwarding4 {
-	%deprecated: "Statement 'enable-unicast-forwarding4: true/false' is replaced with 'unicast-forwarding4 { disable: false/true }'";
-	%help:		short "Enable IPv4 unicast forwarding";
-	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
-	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
 
 	forwarding-entries {
 	    %help:	short "Configure IPv4 forwarding entries properties";
@@ -92,6 +85,13 @@ fea {
 		%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_entries_retain_on_shutdown4?retain:bool=$(DEFAULT)";
 	    }
 	}
+    }
+
+    enable-unicast-forwarding4 {
+	%deprecated: "Statement 'enable-unicast-forwarding4: true/false' is replaced with 'unicast-forwarding4 { disable: false/true }'";
+	%help:		short "Enable IPv4 unicast forwarding";
+	%set:		xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=$(@)";
+	%delete:	xrl "$(fea.targetname)/fti/0.2/set_unicast_forwarding_enabled4?enabled:bool=`~$(DEFAULT)`";
     }
 
     unicast-forwarding6 {
