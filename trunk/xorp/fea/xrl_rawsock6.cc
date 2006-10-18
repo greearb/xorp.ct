@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.9 2006/03/16 00:04:04 pavlin Exp $"
+#ident "$XORP: xorp/fea/xrl_rawsock6.cc,v 1.10 2006/06/15 06:04:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -118,7 +118,7 @@ public:
 	XrlAtomList ext_headers_type_list, ext_headers_payload_list;
 	size_t i;
 	for (i = 0; i < header.ext_headers_type.size(); i++) {
-	    ext_headers_type_list.append(XrlAtom(header.ext_headers_type[i]));
+	    ext_headers_type_list.append(XrlAtom(static_cast<uint32_t>(header.ext_headers_type[i])));
 	    ext_headers_payload_list.append(XrlAtom(header.ext_headers_payload[i]));
 	}
 
