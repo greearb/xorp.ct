@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.70 2006/10/02 19:29:57 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.71 2006/10/19 00:16:00 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -461,6 +461,12 @@ gmake check
 3.8. Cross-compilation
 ======================
 
+  * All:
+    - Running the "gmake check" internal tests within the
+      cross-compilation environment will not work, unless the build
+      machine is capable of running the cross-compiled binaries for the
+      target architecture.
+ 
   * XScale
     - The code is known to cross-compile on Linux, but it is unknown
       whether the internal tests succeed.
@@ -557,6 +563,55 @@ setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
          cd /path/to/xorp/source/code
          ./configure --host=$CROSS_ARCH --with-openssl=$CROSS_LINUX_ROOT/usr/local/ssl
          gmake
+
+  * IA-64
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on IA-64 machine, so it is unknown
+      whether it will run properly.
+
+    - Use the XScale instructions to install cross-compilation tools
+      and use those tools to compile XORP, with the following
+      differences in some of the steps:
+
+      b) Apply the following patch to demo-ia64.sh
+
+         patch < demo-ia64.sh.patch
+
+----------------------------------------------------------------------
+--- demo-ia64.sh.org	2005-03-09 13:49:19.000000000 -0800
++++ demo-ia64.sh	2006-10-18 17:37:25.000000000 -0700
+@@ -18,6 +18,7 @@
+ #eval `cat ia64.dat gcc-3.4.0-glibc-2.3.2.dat`        sh all.sh --notest
+ #eval `cat ia64.dat gcc-3.4.1-glibc-2.3.2.dat`        sh all.sh --notest
+ #eval `cat ia64.dat gcc-3.4.1-glibc-2.3.3.dat`        sh all.sh --notest
+- eval `cat ia64.dat gcc-3.4.2-glibc-2.3.3.dat`        sh all.sh --notest
++# eval `cat ia64.dat gcc-3.4.2-glibc-2.3.3.dat`        sh all.sh --notest
++ eval `cat ia64.dat gcc-3.4.5-glibc-2.3.6.dat`        sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
+      c) The command to perform the compilation is:
+
+         # Perform the compilation (it tay take a while)
+         sh demo-ia64.sh
+
+      d) The environmental varibles to set before compiling openssl are:
+
+setenv CROSS_ARCH ia64-unknown-linux-gnu
+setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+      f) The line to add to file "Configure" should be like the
+         following:
+
+"ia64-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu/bin/ia64-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK:${ia64_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+      h) The first command to prepare the XORP cross-compilation
+         environment should be:
+
+setenv CROSS_ARCH ia64-unknown-linux-gnu
 
 4. Performance optimization
 ===========================
