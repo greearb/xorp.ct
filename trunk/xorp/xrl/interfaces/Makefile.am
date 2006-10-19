@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in.
 ##
-## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.31 2006/03/17 11:46:01 pavlin Exp $
+## $XORP: xorp/xrl/interfaces/Makefile.am,v 1.32 2006/03/26 22:35:11 pavlin Exp $
 ##
 
 ###############################################################################
@@ -269,5 +269,5 @@ INCLUDES =	-I$(top_srcdir)
 SCRIPT_DIR=$(top_srcdir)/xrl/scripts
 CLNTGEN_PY=$(SCRIPT_DIR)/clnt-gen
 
-@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
-@PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
+@PYTHON_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
+@PYTHON_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<

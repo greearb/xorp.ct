@@ -85,7 +85,7 @@ OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PYTHON = @PYTHON@
-PY_BUILD = @PY_BUILD@
+PYTHON_BUILD = @PYTHON_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -1002,8 +1002,8 @@ uninstall-am: uninstall-info-am
 	uninstall-info-am
 
 
-@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
-@PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
+@PYTHON_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: $(srcdir)/%.xif $(CLNTGEN_PY)
+@PYTHON_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

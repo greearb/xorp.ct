@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.19 2006/08/02 04:57:02 pavlin Exp $
+% $XORP: xorp/docs/xorpdev_101/xorpdev_101.tex,v 1.20 2006/08/02 05:43:36 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -288,9 +288,9 @@ libstaticroutesxif_la_SOURCES = static_routes_xif.hh static_routes_xif.cc
 SCRIPT_DIR=$(top_srcdir)/xrl/scripts
 CLNTGEN_PY=$(SCRIPT_DIR)/clnt-gen
 
-@PY_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: \
+@PYTHON_BUILD@%_xif.cc %_xif.hh $(srcdir)/%_xif.hh $(srcdir)/%_xif.cc: \
          $(srcdir)/%.xif $(CLNTGEN_PY)
-@PY_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
+@PYTHON_BUILD@	$(PYTHON) $(CLNTGEN_PY) $<
 
 \end{lstlisting}%$
 
@@ -572,9 +572,9 @@ TGTGEN_PY=$(SCRIPT_DIR)/tgt-gen
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc   \
-@PY_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
-@PY_BUILD@      $(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
+@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc   \
+@PYTHON_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
+@PYTHON_BUILD@      $(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 \end{lstlisting}
 
 \newpage

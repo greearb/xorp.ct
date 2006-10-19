@@ -78,7 +78,7 @@ OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PYTHON = @PYTHON@
-PY_BUILD = @PY_BUILD@
+PYTHON_BUILD = @PYTHON_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -954,9 +954,9 @@ $(srcdir)/test_base.hh $(srcdir)/test_base.cc:				\
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc	\
-@PY_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
-@PY_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
+@PYTHON_BUILD@$(srcdir)/%_base.hh $(srcdir)/%_base.cc %_base.hh %_base.cc    \
+@PYTHON_BUILD@$(srcdir)/%.xrls: $(srcdir)/%.tgt $(TGTGEN_PY)
+@PYTHON_BUILD@	$(PYTHON) $(TGTGEN_PY) -I$(INTERFACES_DIR) $<
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

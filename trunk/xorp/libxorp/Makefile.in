@@ -81,7 +81,7 @@ OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
 PACKAGE = @PACKAGE@
 PYTHON = @PYTHON@
-PY_BUILD = @PY_BUILD@
+PYTHON_BUILD = @PYTHON_BUILD@
 RANLIB = @RANLIB@
 VERSION = @VERSION@
 am__include = @am__include@
@@ -839,11 +839,11 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am
 
 # If this code is commented out, please upgrade to python2.0 or above.
 
-@PY_BUILD@callback_nodebug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 15 > $(srcdir)/callback_nodebug.hh
+@PYTHON_BUILD@callback_nodebug.hh: callback-gen.py
+@PYTHON_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -b 6 -l 15 > $(srcdir)/callback_nodebug.hh
 
-@PY_BUILD@callback_debug.hh: callback-gen.py
-@PY_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 15 > $(srcdir)/callback_debug.hh
+@PYTHON_BUILD@callback_debug.hh: callback-gen.py
+@PYTHON_BUILD@	$(PYTHON) $(srcdir)/callback-gen.py -d -b 6 -l 15 > $(srcdir)/callback_debug.hh
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

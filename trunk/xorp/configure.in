@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.175 2006/09/12 18:18:33 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.176 2006/10/01 06:39:27 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.4-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.175 2006/09/12 18:18:33 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.176 2006/10/01 06:39:27 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -390,9 +390,9 @@ if test "${PYTHON}" != "NO_PYTHON" ; then
   AC_CACHE_CHECK(
     [python version 2.0 or above], xorp_python_good,
     changequote(<<,>>)dnl
-    PY_VERSION=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
+    python_version=`$PYTHON -c 'import sys; print sys.version[[:3]]' | tr -cd '[[:digit:]]'`
     changequote([,])dnl
-    if test 0${PY_VERSION} -ge 20 ; then
+    if test 0${python_version} -ge 20 ; then
       xorp_python_good="yes"
     else
       xorp_python_good="no"
@@ -400,11 +400,11 @@ if test "${PYTHON}" != "NO_PYTHON" ; then
   )
 fi
 
-PY_BUILD="#"
+PYTHON_BUILD="#"
 if test "${xorp_python_good}" = "yes" ; then
-   PY_BUILD=''
+   PYTHON_BUILD=''
 fi
-AC_SUBST(PY_BUILD)
+AC_SUBST(PYTHON_BUILD)
 AC_SUBST(PYTHON)
 
 dnl ----------------------------
