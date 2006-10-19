@@ -1,10 +1,9 @@
-/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.2 2006/10/12 00:08:37 atanu Exp $ */
+/* $XORP: xorp/etc/templates/ospfv3.tp,v 1.3 2006/10/12 00:39:41 atanu Exp $ */
 
 protocols {
     ospf6 {
 	targetname: txt = "ospfv3";
 	router-id: ipv4;
-	rfc1583-compatibility: bool = false;
 	ip-router-alert: bool = false;
 
 	traceoptions {
@@ -27,7 +26,7 @@ protocols {
 		disable:	toggle = false;
 	    }
 
-	    area-range @: ipv4net {
+	    area-range @: ipv6net {
 		advertise:	bool = true;
 	    }
 
@@ -37,18 +36,6 @@ protocols {
 		router-dead-interval:   u32 = 40;
 		retransmit-interval:	u32 = 5;
 		transit-delay:		u32 = 1;
-		authentication {
-		    type:		txt;	/* %deprecated */
-		    password:		txt;	/* %deprecated */
-		    simple-password:	txt	= "";
-
-		    md5 @: u32 {
-			password:		txt	= "";
-			start-time:		txt	= "";
-			end-time:		txt	= "";
-			max-time-drift:		u32	= 3600;
-		    }
-		}
 	    }
 
 	    interface @: txt {
@@ -63,18 +50,6 @@ protocols {
 			interface-cost:		u32 = 1;
 			retransmit-interval:	u32 = 5;
 			transit-delay:		u32 = 1;
-			authentication {
-			    type:		txt;	/* %deprecated */
-			    password:		txt;	/* %deprecated */
-			    simple-password:	txt	= "";
-
-			    md5 @: u32 {
-				password:	txt	= "";
-				start-time:	txt	= "";
-				end-time:	txt	= "";
-				max-time-drift:	u32	= 3600;
-			    }
-			}
 			passive:		bool = false;
 
 			neighbor @: ipv4 {
@@ -117,7 +92,6 @@ policy {
     }
 }
 
-/*
 protocols {
     ospf6 {
 	%help:	  short "Configure the OSPF protocol";
@@ -146,13 +120,6 @@ the OSPF protocol. This number uniquely identifies
 the router within an Autonomous System";
 
 	    %set: xrl "$(ospf6.targetname)/ospfv3/0.1/set_router_id?id:ipv4=$(@)";
-	}
-
-	rfc1583-compatibility {
-	    %help: short "Criteria for handling AS external routes";
-
-	    %set: xrl "$(ospf6.targetname)/ospfv3/0.1/set_rfc1583_compatibility?compatibility:bool=$(@)";
-	    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/set_rfc1583_compatibility?compatibility:bool=$(DEFAULT)";
 	}
 
 	ip-router-alert {
@@ -210,17 +177,17 @@ transmitted packets";
 		}
 	    }
 
-	    area-range @: ipv4net {
+	    area-range @: ipv6net {
 		%help: short "Area range for generating summaries";
 
-		%create: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_add?area:ipv4=$(area.@)&net:ipv4net=$(@)&advertise:bool=$(@.advertise)";
-		%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_delete?area:ipv4=$(area.@)&net:ipv4net=$(@)";
+		%create: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_add?area:ipv4=$(area.@)&net:ipv6net=$(@)&advertise:bool=$(@.advertise)";
+		%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_delete?area:ipv4=$(area.@)&net:ipv6net=$(@)";
 
 		advertise {
 		    %help: short "Advertise or DoNotAdvertise";
 
-		    %set: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.@)&advertise:bool=$(@)";
-		    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv4net=$(area-range.@)&advertise:bool=$(DEFAULT)";
+		    %set: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv6net=$(area-range.@)&advertise:bool=$(@)";
+		    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/area_range_change_state?area:ipv4=$(area.@)&net:ipv6net=$(area-range.@)&advertise:bool=$(DEFAULT)";
 		}
 	    }
 
@@ -273,52 +240,6 @@ transmitted packets";
 		    %set: xrl "$(ospf6.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&delay:u32=$(@)";
 		    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
 		}
-
-		authentication {
-		    %help: short "Set the authentication";
-
-		    type {
-			%deprecated: "Statement 'type' is obsoleted by 'simple-password' and 'md5'";
-			%help: short "Set the authentication type";
-			%allow: $(@) "none" %help: "No authentication";
-			%allow: $(@) "simple" %help: "Simple password authentication";
-			%allow: $(@) "md5" %help: "MD5 authentication";
-		    }
-
-		    password {
-			%deprecated: "Statement 'password' is replaced with 'simple-password'";
-			%help: short "Set the authentication password";
-		    }
-
-		    simple-password {
-			%help: short "Set simple password authentication key";
-			%create: xrl "$(ospf6.targetname)/ospfv3/0.1/set_simple_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&password:txt=$(@)";
-			%set: xrl "$(ospf6.targetname)/ospfv3/0.1/set_simple_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&password:txt=$(@)";
-			%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/delete_simple_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)";
-		    }
-
-		    md5 @ {
-			%help: short "Set MD5 authentication key";
-			%allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
-			%activate: xrl "$(ospf6.targetname)/ospfv3/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
-			%update: xrl "$(ospf6.targetname)/ospfv3/0.1/set_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
-			%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/delete_md5_authentication_key?ifname:txt=vlink&vifname:txt=$(virtual-link.@)&area:ipv4=$(area.@)&key_id:u32=$(@)";
-			password {
-			    %help: short "Set the authentication password";
-			}
-			start-time {
-			    %help: short "Set the authentication start time (YYYY-MM-DD.HH:MM)";
-			}
-			end-time {
-			    %help: short "Set the authentication end time (YYYY-MM-DD.HH:MM)";
-			}
-			max-time-drift {
-			    %help: short "Set the maximum time drift (in seconds) among all routers";
-			    %allow-range: $(@) "0" "65534" %help: "The maximum time drift (in seconds)";
-			    %allow-range: $(@) "65535" "65535" %help: "Unlimited time drift";
-			}
-		    }
-		}
 	    }
 
 	    interface @: txt {
@@ -338,7 +259,7 @@ transmitted packets";
 
 		    address @ {
 		    	%help: short "Address on vif used for OSPF";
-			%create: xrl "$(ospf6.targetname)/ospfv3/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv4=$(@)&prefix_len:u32=0&mtu:u32=0&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
+			%create: xrl "$(ospf6.targetname)/ospfv3/0.1/create_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&addr:ipv6=$(@)&type:txt=$(interface.@.link-type)&area:ipv4=$(area.@)";
 			%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/delete_peer?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)";
 
 			priority {
@@ -398,52 +319,6 @@ transmitted packets";
 			    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/set_inftransdelay?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&delay:u32=$(DEFAULT)";
 			}
 
-			authentication {
-			    %help: short "Set the authentication";
-
-			    type {
-				%deprecated: "Statement 'type' is obsoleted by 'simple-password' and 'md5'";
-				%help: short "Set the authentication type";
-				%allow: $(@) "none" %help: "No authentication";
-				%allow: $(@) "simple" %help: "Simple password authentication";
-				%allow: $(@) "md5" %help: "MD5 authentication";
-			    }
-
-			    password {
-				%deprecated: "Statement 'password' is replaced with 'simple-password'";
-				%help: short "Set the authentication password";
-			    }
-
-			    simple-password {
-				%help: short "Set simple password authentication key";
-				%create: xrl "$(ospf6.targetname)/ospfv3/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&password:txt=$(@)";
-				%set: xrl "$(ospf6.targetname)/ospfv3/0.1/set_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&password:txt=$(@)";
-				%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/delete_simple_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)";
-			    }
-
-			    md5 @ {
-				%help: short "Set MD5 authentication key";
-				%allow-range: $(@) "0" "255" %help: "The MD5 authentication key ID";
-				%activate: xrl "$(ospf6.targetname)/ospfv3/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
-				%update: xrl "$(ospf6.targetname)/ospfv3/0.1/set_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)&password:txt=$(@.password)&start_time:txt=$(@.start-time)&end_time:txt=$(@.end-time)&max_time_drift:u32=$(@.max-time-drift)";
-				%delete: xrl "$(ospf6.targetname)/ospfv3/0.1/delete_md5_authentication_key?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&key_id:u32=$(@)";
-				password {
-				    %help: short "Set the authentication password";
-				}
-				start-time {
-				    %help: short "Set the authentication start time (YYYY-MM-DD.HH:MM)";
-				}
-				end-time {
-				    %help: short "Set the authentication end time (YYYY-MM-DD.HH:MM)";
-				}
-				max-time-drift {
-				    %help: short "Set the maximum time drift (in seconds) among all routers";
-				    %allow-range: $(@) "0" "65534" %help: "The maximum time drift (in seconds)";
-				    %allow-range: $(@) "65535" "65535" %help: "Unlimited time drift";
-				}
-			    }
-			}
-
 			passive {
 			    %help: short "Do not run OSPF, but advertise it";
 
@@ -469,8 +344,8 @@ transmitted packets";
 				%set:;
 			    }
 
-			    %create: xrl "$(ospf6.targetname)/ospfv3/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv4=$(@)&neighbour_id:ipv4=$(@.router-id)";
-			    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv4=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			    %create: xrl "$(ospf6.targetname)/ospfv3/0.1/add_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
+			    %delete: xrl "$(ospf6.targetname)/ospfv3/0.1/remove_neighbour?ifname:txt=$(interface.@)&vifname:txt=$(vif.@)&area:ipv4=$(area.@)&neighbour_address:ipv6=$(@)&neighbour_id:ipv4=$(@.router-id)";
 			}
 		    }
 		}
@@ -506,7 +381,7 @@ transmitted packets";
 	}
     }
 }
-*/
+
 policy {
     %create: xrl "$(policy.targetname)/policy/0.1/set_proto_target?protocol:txt=ospf6&target:txt=ospfv3";
     %create: xrl "$(policy.targetname)/policy/0.1/add_varmap?protocol:txt=ospf6&variable:txt=network4&type:txt=ipv4net&access:txt=r&id:u32=10";
