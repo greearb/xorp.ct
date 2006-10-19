@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.69 2006/10/02 17:56:10 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.70 2006/10/02 19:29:57 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -457,6 +457,106 @@ gmake check
   * Windows Vista Ultimate Beta (Build 5384) (32-bit, x86):
     - The binary snapshots for Windows Server 2003 are known to run on
       this operating system, but are not officially supported.
+
+3.8. Cross-compilation
+======================
+
+  * XScale
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP appears to run on Linux MontaVista-3.1, but it hasn't been
+      tested thoughtfully.
+
+    - Use the following instructions to install cross-compilation tools
+      and use those tools to compile XORP:
+
+      a) Download crosstool from http://kegel.com/crosstool/ and untar
+         it:
+
+         wget http://kegel.com/crosstool/crosstool-0.42.tar.gz
+         tar zxvf crosstool-0.42.tar.gz
+         cd crosstool-0.42
+
+      b) Apply the following patch to demo-armv5b-softfloat.sh
+
+         patch < demo-armv5b-softfloat.sh.patch
+
+----------------------------------------------------------------------
+--- demo-armv5b-softfloat.sh.org	2005-03-07 16:34:34.000000000 -0800
++++ demo-armv5b-softfloat.sh	2006-10-18 15:24:05.000000000 -0700
+@@ -13,7 +13,8 @@
+ # Build the toolchain.  Takes a couple hours and a couple gigabytes.
+ 
+ #eval `cat armv5b-softfloat.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --notest
+- eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
++# eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-2.3.3.dat` sh all.sh --notest
+ #eval `cat armv5b-softfloat.dat gcc-3.4.1-glibc-20040827.dat` sh all.sh --notest
++ eval `cat armv5b-softfloat.dat gcc-3.4.5-glibc-2.3.6.dat` sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
+      c) Compile the toolchain and install it:
+
+         sudo mkdir /opt/crosstool
+         sudo chown $USER /opt/crosstool
+
+         # Unset the LD_LIBRARY_PATH environmetal variable
+         setenv _SAVE_LD_LIBRARY_PATH $LD_LIBRARY_PATH
+         unsetenv LD_LIBRARY_PATH
+
+         # Perform the compilation (it tay take a while)
+         sh demo-armv5b-softfloat.sh
+         cd ..
+
+         # Restore the original LD_LIBRARY_PATH environmetal variable
+         setenv LD_LIBRARY_PATH $_SAVE_LD_LIBRARY_PATH
+         unsetenv _SAVE_LD_LIBRARY_PATH
+
+      d) Set some environmetal variables that will be used later.
+         The values need to be modified appropriately if the tools
+         are installed in different directory.
+
+setenv CROSS_ARCH armv5b-softfloat-linux
+setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+      e) Download openssl from http://www.openssl.org/ and untar it:
+
+         wget http://www.openssl.org/source/openssl-0.9.8d.tar.gz
+         tar zxvf openssl-0.9.8d.tar.gz
+         cd openssl-0.9.8d
+
+      f) Add a line like the following to file "Configure" in the section
+         with other Linux targets. Note that the second field might need
+         to be modified to match the exact path name of the installed
+         cross-compiler.
+
+"armv5b-softfloat-linux",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux/bin/armv5b-softfloat-linux-gcc:-DB_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+      g) Cross-compile openssl and install it:
+
+         ./Configure $CROSS_ARCH
+         make INSTALL_PREFIX=$CROSS_LINUX_ROOT install
+
+      h) Prepare the XORP cross-compilation environment.
+         The first three commands can be skipped if they were done in
+         step (d):
+
+setenv CROSS_ARCH armv5b-softfloat-linux
+setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+setenv CC ${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc
+setenv CXX ${CROSS_ROOT}/bin/${CROSS_ARCH}-g++
+setenv LD ${CROSS_ROOT}/bin/${CROSS_ARCH}-ld
+setenv RANLIB ${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib
+setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
+
+      i) Cross-compile XORP:
+
+         cd /path/to/xorp/source/code
+         ./configure --host=$CROSS_ARCH --with-openssl=$CROSS_LINUX_ROOT/usr/local/ssl
+         gmake
 
 4. Performance optimization
 ===========================
