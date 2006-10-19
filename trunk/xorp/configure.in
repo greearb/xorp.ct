@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.176 2006/10/01 06:39:27 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.177 2006/10/19 02:14:12 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.4-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.176 2006/10/01 06:39:27 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.177 2006/10/19 02:14:12 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -46,17 +46,18 @@ dnl XXX: We can't use AC_CONFIG_HEADERS yet because automake is old.
 dnl builtin(include, config/ahxorp.m4)
 dnl AC_CONFIG_HEADERS(config.h)
 
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 dnl automake options
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
+
 AM_INIT_AUTOMAKE(xorp, 1.4-WIP)
 AM_CONFIG_HEADER(config.h)
 AM_MAINTAINER_MODE
 AC_CACHE_SAVE
 
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 dnl Set host, host_alias, host_cpu, host_vendor, host_os
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 
 case "${host_os}" in
     bsdi* )
@@ -154,15 +155,16 @@ dnl Include the macros for testing compiler-supported command-line options
 dnl
 builtin(include, config/compiler_flags.m4)
 
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 dnl  Get project-specific macros
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 
 builtin(include, config/acxorp.m4)
 
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 dnl libtool options
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
+
 AC_DISABLE_SHARED
 AC_DISABLE_FAST_INSTALL
 AC_LIBTOOL_WIN32_DLL
@@ -183,78 +185,78 @@ AC_ARG_ENABLE([debug],
 	      [],
 	      [enable_debug=yes;])
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-debug-msgs
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([debug-msgs],
 	      AC_HELP_STRING([--enable-debug-msgs],
 			     [enable debug messages]))
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-debug-linker-maps
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([debug-linker-maps],
 	      AC_HELP_STRING([--enable-debug-linker-maps],
 			     [enable linker map file output to stderr]))
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-debug-fnames (GCC)
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([debug-fnames],
 	      AC_HELP_STRING([--enable-debug-fnames],
 			     [enable function names in debug messages (requires GCC)]))
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-stl-debug (GCC)
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([stl-debug],
 	      AC_HELP_STRING([--enable-stl-debug],
 			     [enable STL debugging (requires GCC)]))
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-optimize
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([optimize],
 	      AC_HELP_STRING([--enable-optimize],
 			     [enable compiler optimizations]))
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-profile
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([profile],
 	      AC_HELP_STRING([--enable-profile],
 			     [enable profiling]))
 
-dnl ----------------------------------------
+dnl -----------------------------------------
 dnl --disable-compiler-pipe (XXX: enabled by default)
-dnl ----------------------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([compiler-pipe],
 	      AC_HELP_STRING([--disable-compiler-pipe],
 			     [disable compiler's -pipe compilation option]),
 	      [],
 	      [enable_compiler_pipe=yes;])
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-callback-debug
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([callback-debug],
 	      AC_HELP_STRING([--enable-callback-debug],
 			     [enable callback debugging]),
 	      AC_DEFINE(DEBUG_CALLBACKS, 1,
 			[Define to enable callback debugging]))
 
-dnl ----------------------------------------
+dnl -----------------------------------------
 dnl --disable-ipv6 (XXX: enabled by default)
-dnl ----------------------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([ipv6],
 	      AC_HELP_STRING([--disable-ipv6],
 			     [disable IPv6 support]),
 	      [],
 	      [enable_ipv6=yes;])
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --enable-sim
-dnl ----------------------------
+dnl -----------------------------------------
 TRY_USE_SIM=false
 AC_ARG_ENABLE([sim],
 	      AC_HELP_STRING([--enable-sim],
@@ -267,9 +269,9 @@ fi
 )
 AM_CONDITIONAL(TRY_USE_SIM, test "${enable_sim}" = "yes")
 
-dnl ----------------------------------------------------------
+dnl -----------------------------------------
 dnl --disable-advanced-multicast-api (XXX: enabled by default)
-dnl ----------------------------------------------------------
+dnl -----------------------------------------
 AC_ARG_ENABLE([advanced-multicast-api],
 	      AC_HELP_STRING([--disable-advanced-multicast-api],
 			     [disable use of the advanced multicast API]),
@@ -281,24 +283,24 @@ if test "${enable_advanced_multicast_api}" = "yes" ; then
 		  [Define to 1 to enable advanced multicast API (if supported)])
 fi
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --with-dmalloc
-dnl ----------------------------
+dnl -----------------------------------------
 dnl XXX: XR_WITH_DMALLOC_DIR (a local modified version of AM_WITH_DMALLOC)
 dnl is specified later, so it will overwrite -ld
 builtin(include, config/dmalloc.m4)
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --with-openssl
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_WITH([openssl],
 	    AC_HELP_STRING([--with-openssl],
 			   [specify path to OpenSSL installation root]),
 	    [ xr_openssl_prefix="$withval" ])
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --with-snmp
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_WITH([snmp],
 	    AC_HELP_STRING([--with-snmp],
 			   [build XORP MIBs for Net-SNMP]),
@@ -312,9 +314,9 @@ AC_ARG_WITH([snmp],
 )
 AC_SUBST(MIBS)
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --with-path-to-snmpd
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_WITH([path-to-snmpd],
 	    AC_HELP_STRING([--with-path-to-snmpd=DIR],
 			   [specify path to the snmpd executable]),
@@ -322,9 +324,9 @@ AC_ARG_WITH([path-to-snmpd],
 	    [snmpd="not_found";]
 )
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl --with-path-to-net-snmp-config
-dnl ----------------------------
+dnl -----------------------------------------
 AC_ARG_WITH([path-to-net-snmp-config],
 	    AC_HELP_STRING([--with-path-to-net-snmp-config=DIR],
 			   [specify path to the net-snmp-config executable]),
@@ -338,9 +340,9 @@ dnl ---------------------------------------------------------------------------
 dnl Additional tool probes
 dnl ---------------------------------------------------------------------------
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl CPP GNU variable arguments
-dnl ----------------------------
+dnl -----------------------------------------
 
 AC_CACHE_CHECK(
 	[whether preprocessor supports GNU variadic macros],
@@ -385,6 +387,24 @@ AC_CACHE_CHECK([if GNU make is installed], xorp_cv_gmake_name,
 		done
 		xorp_cv_gmake_name=${GMAKE_NAME})
 
+dnl -----------------------------------------
+dnl Python related checks
+dnl -----------------------------------------
+
+dnl
+dnl XXX: A better mechanism for Python-related checks.
+dnl This mechanism doesn't work for older automake version (e.g., 1.5),
+dnl and should be enabled after we move to newer automake (e.g., 1.9).
+dnl
+dnl AM_PATH_PYTHON(2.0,			dnl Min. required Python version
+dnl   [PYTHON_BUILD=''],
+dnl   [PYTHON_BUILD="#"])
+dnl AC_SUBST(PYTHON_BUILD)
+
+dnl
+dnl The older mechanism for Python-related checks. Should be removed
+dnl after the newer AM_PATH_PYTHON() mechanism is enabled (see above).
+dnl
 AC_CHECK_PROGS(PYTHON, python2.2 python2 python, "NO_PYTHON")
 if test "${PYTHON}" != "NO_PYTHON" ; then
   AC_CACHE_CHECK(
@@ -399,17 +419,19 @@ if test "${PYTHON}" != "NO_PYTHON" ; then
     fi
   )
 fi
-
 PYTHON_BUILD="#"
 if test "${xorp_python_good}" = "yes" ; then
    PYTHON_BUILD=''
 fi
 AC_SUBST(PYTHON_BUILD)
 AC_SUBST(PYTHON)
+dnl
+dnl End of older Python-related mechanism
+dnl
 
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 dnl OpenSSL (Strictly OpenSSL MD5 implementation)
-dnl ----------------------------
+dnl ---------------------------------------------------------------------------
 
 fail_openssl()
 {
@@ -608,9 +630,9 @@ builtin(include, config/acinet.m4)
 
 
 dnl ---------------------------------------------------------------------------
-dnl Check for standard integer size types. The defaults are only valid on some
-dnl systems so we hope that <inttypes.h> or <stdint.h> exists when they're
-dnl wrong.
+dnl Check for standard integer size types.
+dnl The defaults are only valid on some systems so we hope that
+dnl <inttypes.h> or <stdint.h> exists when they're wrong.
 dnl ---------------------------------------------------------------------------
 AC_CHECK_HEADERS([inttypes.h stdint.h])
 AC_CHECK_HEADER(inttypes.h,
@@ -627,10 +649,9 @@ AC_CHECK_TYPES([int8_t, int16_t, int32_t, int64_t,
 		uint8_t, uint16_t, uint32_t, uint64_t], , ,
   [${test_standard_size_types_header_files}])
 
-dnl ----------------------------
+dnl 
 dnl TODO: the following two macros cause autoconf to complain.
-dnl ----------------------------
-
+dnl 
 AC_C_BIGENDIAN
 AC_C_CHAR_UNSIGNED
 
@@ -829,9 +850,9 @@ dnl ---------------------------------------------------------------------------
 dnl Check for compiler characteristics
 dnl ---------------------------------------------------------------------------
 
-dnl ----------------------------
+dnl -----------------------------------------
 dnl GCC-specific warning flags
-dnl ----------------------------
+dnl -----------------------------------------
 
 if test "${GCC}" = "yes" ; then
 	dnl
@@ -1001,9 +1022,9 @@ AC_OUTPUT(
 )
 
 
-dnl ------------------------
+dnl -----------------------------------------
 dnl Print the compiler flags
-dnl ------------------------
+dnl -----------------------------------------
 echo "Compiler C flags = $CFLAGS"
 echo "Compiler C++ flags = $CXXFLAGS"
 echo "C preprocessor flags = $CPPFLAGS"
