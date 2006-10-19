@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.5 2006/03/16 00:04:50 pavlin Exp $"
+#ident "$XORP: xorp/ospf/tools/print_neighbours.cc,v 1.6 2006/10/12 01:25:03 pavlin Exp $"
 
 // Print information about OSPF neighbours
 
@@ -42,6 +42,7 @@
 #include "libxipc/xrl_std_router.hh"
 
 #include "xrl/interfaces/ospfv2_xif.hh"
+#include "xrl/interfaces/ospfv3_xif.hh"
 
 #include "ospf/ospf.hh"
 #include "ospf/test_common.hh"
@@ -59,10 +60,24 @@ public:
     }
 
     void start() {
-	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_neighbour_list(xrl_target(_version),
-				       callback(this,
-						&GetNeighbourList::response));
+	switch(_version) {
+	case OspfTypes::V2: {
+	    XrlOspfv2V0p1Client ospfv2(&_xrl_router);
+	    ospfv2.
+		send_get_neighbour_list(xrl_target(_version),
+					callback(this,
+						 &GetNeighbourList::response));
+	}
+	    break;
+	case OspfTypes::V3: {
+	    XrlOspfv3V0p1Client ospfv3(&_xrl_router);
+	    ospfv3.
+		send_get_neighbour_list(xrl_target(_version),
+					callback(this,
+						 &GetNeighbourList::response));
+	}
+	    break;
+	}
     }
 
     bool busy() {
@@ -115,10 +130,22 @@ public:
 	    return;
 	}
 
-	XrlOspfv2V0p1Client ospfv2(&_xrl_router);
-	ospfv2.send_get_neighbour_info(xrl_target(_version), *_index,
-				       callback(this,
-						&GetNeighbours::response));
+	switch(_version) {
+	case OspfTypes::V2: {
+	    XrlOspfv2V0p1Client ospfv2(&_xrl_router);
+	    ospfv2.send_get_neighbour_info(xrl_target(_version), *_index,
+					   callback(this,
+						    &GetNeighbours::response));
+	}
+	    break;
+	case OspfTypes::V3: {
+	    XrlOspfv3V0p1Client ospfv3(&_xrl_router);
+	    ospfv3.send_get_neighbour_info(xrl_target(_version), *_index,
+					   callback(this,
+						    &GetNeighbours::response));
+	}
+	    break;
+	}
     }
 
     bool busy() {
