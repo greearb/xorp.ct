@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.137 2006/10/17 22:26:07 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.138 2006/10/19 00:18:43 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,7 @@ This file contains XORP release notes (most recent releases first).
 Release 1.4-WIP (2006/??/??)
 =========================
   ALL:
-    - XORP now can be cross-compiled for XScale.
+    - XORP now can be cross-compiled for XScale processor.
 
   CONFIGURATION:
     - Allow static routes to have "nexthop4" and "nexthop6" policy
