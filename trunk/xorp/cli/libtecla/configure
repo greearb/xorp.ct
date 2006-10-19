@@ -3486,7 +3486,7 @@ if test "$GCC"_ = "yes"_ && test "$LINK_SHARED"_ != "_" ; then
   case $target_os in
   sparc*solaris*) SHARED_CFLAGS="$SHARED_CFLAGS -mno-app-regs"
   esac
-  LINK_SHARED="$LINK_SHARED `gcc -print-libgcc-file-name`"
+  LINK_SHARED="$LINK_SHARED `$CC -print-libgcc-file-name`"
 fi
 
 
