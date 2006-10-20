@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.36 2006/10/13 03:44:11 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.37 2006/10/13 04:32:40 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -2038,7 +2038,11 @@ RawSocket::proto_socket_write(const string& if_name,
 	if (is_router_alert) {
 	    // Include the Router Alert option
 	    uint8_t* ip_option_p = ip4.data() + ip4.size();
-	    embed_32(ip_option_p, ra_opt4);
+	    //
+	    // XXX: ra_opt4 is in network order, hence we write it as-is
+	    // by using embed_host_32().
+	    //
+	    embed_host_32(ip_option_p, ra_opt4);
 	    ip_hdr_len	= ip4.size() + sizeof(ra_opt4);
 	} else {
 	    ip_hdr_len	= ip4.size();
