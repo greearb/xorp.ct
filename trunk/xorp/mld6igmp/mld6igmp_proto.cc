@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.43 2006/07/04 01:04:56 pavlin Exp $"
+#ident "$XORP: xorp/mld6igmp/mld6igmp_proto.cc,v 1.44 2006/07/06 08:18:07 pavlin Exp $"
 
 
 //
@@ -816,6 +816,9 @@ Mld6igmpVif::mld6igmp_query_version_consistency_check(const IPvX& src,
 {
     string proto_name, mode_config, mode_received;
 
+    if (message_version == proto_version())
+	return (XORP_OK);
+
     if (proto_is_igmp())
 	proto_name = "IGMP";
     if (proto_is_mld6())
@@ -823,22 +826,19 @@ Mld6igmpVif::mld6igmp_query_version_consistency_check(const IPvX& src,
     mode_config = c_format("%sv%u", proto_name.c_str(), proto_version());
     mode_received = c_format("%sv%u", proto_name.c_str(), message_version);
 
-    if (message_version != proto_version()) {
-	// TODO: rate-limit the warning
-	XLOG_WARNING("RX %s from %s to %s on vif %s: "
-		     "this interface is in %s mode, but received %s message",
-		     proto_message_type2ascii(message_type),
-		     cstring(src), cstring(dst),
-		     name().c_str(),
-		     mode_config.c_str(),
-		     mode_received.c_str());
-	XLOG_WARNING("Please configure properly all routers on "
-		     "that subnet to use same %s version",
-		     proto_name.c_str());
-	return (XORP_ERROR);
-    }
+    // TODO: rate-limit the warning
+    XLOG_WARNING("RX %s from %s to %s on vif %s: "
+		 "this interface is in %s mode, but received %s message",
+		 proto_message_type2ascii(message_type),
+		 cstring(src), cstring(dst),
+		 name().c_str(),
+		 mode_config.c_str(),
+		 mode_received.c_str());
+    XLOG_WARNING("Please configure properly all routers on "
+		 "that subnet to use same %s version",
+		 proto_name.c_str());
 
-    return (XORP_OK);
+    return (XORP_ERROR);
 }
 
 void
