@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rib.cc,v 1.60 2006/03/16 00:05:31 pavlin Exp $"
+#ident "$XORP: xorp/rib/rib.cc,v 1.61 2006/07/03 23:33:40 pavlin Exp $"
 
 #include "rib_module.h"
 
@@ -437,7 +437,7 @@ RIB<A>::add_connected_route(const Vif& vif,
     //
     add_route("connected", net, nexthop_addr, "", "", 0, PolicyTags());
 
-    if (vif.is_p2p() && (peer_addr != A::ZERO())) {
+    if (vif.is_p2p() && (peer_addr != A::ZERO()) && (! net.contains(peer_addr))) {
 	add_route("connected", IPNet<A>(peer_addr, A::addr_bitlen()),
 		  peer_addr, "", "", 0, PolicyTags());
     }
@@ -452,7 +452,7 @@ RIB<A>::delete_connected_route(const Vif& vif, const IPNet<A>& net,
 {
     delete_route("connected", net);
 
-    if (vif.is_p2p() && (peer_addr != A::ZERO())) {
+    if (vif.is_p2p() && (peer_addr != A::ZERO()) && (! net.contains(peer_addr))) {
 	delete_route("connected", IPNet<A>(peer_addr, A::addr_bitlen()));
     }
 
