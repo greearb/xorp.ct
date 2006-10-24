@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.35 2006/04/03 04:31:21 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_rtsock.cc,v 1.36 2006/08/27 07:34:47 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -476,6 +476,43 @@ FtiConfigEntrySetRtsock::delete_entry(const FteX& fte)
     }
     
     if (rs.write(rtm, rtm->rtm_msglen) != rtm->rtm_msglen) {
+	//
+	// XXX: If the outgoing interface was taken down earlier, then
+	// most likely the kernel has removed the matching forwarding
+	// entries on its own. Hence, check whether all of the following
+	// is true:
+	//   - the error code matches
+	//   - the outgoing interface is down
+	//
+	// If all conditions are true, then ignore the error and consider
+	// the deletion was success.
+	// Note that we could add to the following list the check whether
+	// the forwarding entry is not in the kernel, but this is probably
+	// an overkill. If such check should be performed, we should
+	// use the corresponding FtiConfigTableGetNetlink provider.
+	//
+	do {
+	    // Check whether the error code matches
+	    if (errno != ESRCH) {
+		//
+		// XXX: The "No such process" error code is used by the
+		// kernel to indicate there is no such forwarding entry
+		// to delete.
+		//
+		break;
+	    }
+
+	    // Check whether the interface is down
+	    if (fte.ifname().empty())
+		break;		// No interface to check
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	    if ((ii == iftree.ifs().end()) || ii->second.enabled())
+		break;		// The interface is UP
+
+	    return (true);
+	} while (false);
+
 	XLOG_ERROR("Error writing to routing socket: %s", strerror(errno));
 	return false;
     }
