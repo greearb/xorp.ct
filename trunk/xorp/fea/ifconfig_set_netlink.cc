@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.31 2006/08/29 00:28:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_set_netlink.cc,v 1.32 2006/08/30 16:46:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -422,6 +422,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
     struct sockaddr_nl	snl;
     struct ifinfomsg*	ifinfomsg;
     NetlinkSocket&	ns = *this;
+    int			last_errno = 0;
 
     UNUSED(ifname);
     UNUSED(is_up);
@@ -465,7 +466,7 @@ IfConfigSetNetlink::config_interface(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -565,6 +566,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
     struct rtattr*	rtattr;
     int			rta_len;
     NetlinkSocket&	ns = *this;
+    int			last_errno = 0;
 
     UNUSED(ifname);
 
@@ -612,7 +614,7 @@ IfConfigSetNetlink::set_interface_mac_address(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -676,6 +678,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
     struct rtattr*	rtattr;
     int			rta_len;
     NetlinkSocket&	ns = *this;
+    int			last_errno = 0;
 
     UNUSED(ifname);
 
@@ -724,7 +727,7 @@ IfConfigSetNetlink::set_interface_mtu(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -783,6 +786,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
     uint8_t*		data;
     NetlinkSocket&	ns = *this;
     void*		rta_align_data;
+    int			last_errno = 0;
 
     debug_msg("add_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u is_broadcast = %s "
@@ -886,7 +890,7 @@ IfConfigSetNetlink::add_vif_address(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);
@@ -913,6 +917,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
     int			rta_len;
     uint8_t*		data;
     NetlinkSocket&	ns = *this;
+    int			last_errno = 0;
 
     debug_msg("delete_vif_address "
 	      "(ifname = %s vifname = %s if_index = %u addr = %s "
@@ -991,7 +996,7 @@ IfConfigSetNetlink::delete_vif_address(const string& ifname,
 	return (XORP_ERROR);
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	return (XORP_ERROR);
     }
     return (XORP_OK);

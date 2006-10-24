@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.35 2006/08/30 06:43:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/netlink_socket_utils.cc,v 1.36 2006/08/30 16:46:09 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -332,6 +332,7 @@ NlmUtils::nlm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
  * @param ns_reader the NetlinkSocketReader to use for reading data.
  * @param ns the NetlinkSocket to use for reading data.
  * @param seqno the sequence nomer of the netlink request to check for.
+ * @param last_errno the last error number (if error).
  * @param error_msg the error message (if error).
  * @return XORP_OK on success, otherwise XORP_ERROR.
  */
@@ -339,10 +340,13 @@ int
 NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 				NetlinkSocket& ns,
 				uint32_t seqno,
+				int& last_errno,
 				string& error_msg)
 {
     size_t buffer_bytes;
     const struct nlmsghdr* nlh;
+
+    last_errno = 0;		// XXX: reset the value
 
     //
     // Force to receive data from the kernel, and then parse it
@@ -371,6 +375,7 @@ NlmUtils::check_netlink_request(NetlinkSocketReader& ns_reader,
 	    if (err->error == 0)
 		return (XORP_OK);	// No error
 	    errno = -err->error;
+	    last_errno = errno;
 	    error_msg = c_format("AF_NETLINK NLMSG_ERROR message: %s",
 				 strerror(errno));
 	    return (XORP_ERROR);

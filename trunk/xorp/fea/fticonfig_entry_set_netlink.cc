@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.30 2006/08/29 00:28:48 pavlin Exp $"
+#ident "$XORP: xorp/fea/fticonfig_entry_set_netlink.cc,v 1.31 2006/08/30 16:46:08 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -312,6 +312,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
     //
     
     string error_msg;
+    int last_errno = 0;
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
 	!= (ssize_t)nlh->nlmsg_len) {
@@ -319,7 +320,7 @@ FtiConfigEntrySetNetlink::add_entry(const FteX& fte)
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
 	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
 	return false;
     }
@@ -430,6 +431,7 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	break;
     } while (false);
 
+    int last_errno = 0;
     string error_msg;
     if (ns.sendto(&buffer, nlh->nlmsg_len, 0,
 		  reinterpret_cast<struct sockaddr*>(&snl), sizeof(snl))
@@ -438,7 +440,44 @@ FtiConfigEntrySetNetlink::delete_entry(const FteX& fte)
 	return false;
     }
     if (NlmUtils::check_netlink_request(_ns_reader, ns, nlh->nlmsg_seq,
-					error_msg) < 0) {
+					last_errno, error_msg) < 0) {
+	//
+	// XXX: If the outgoing interface was taken down earlier, then
+	// most likely the kernel has removed the matching forwarding
+	// entries on its own. Hence, check whether all of the following
+	// is true:
+	//   - the error code matches
+	//   - the outgoing interface is down
+	//
+	// If all conditions are true, then ignore the error and consider
+	// the deletion was success.
+	// Note that we could add to the following list the check whether
+	// the forwarding entry is not in the kernel, but this is probably
+	// an overkill. If such check should be performed, we should
+	// use the corresponding FtiConfigTableGetNetlink provider.
+	//
+	do {
+	    // Check whether the error code matches
+	    if (last_errno != ESRCH) {
+		//
+		// XXX: The "No such process" error code is used by the
+		// kernel to indicate there is no such forwarding entry
+		// to delete.
+		//
+		break;
+	    }
+
+	    // Check whether the interface is down
+	    if (fte.ifname().empty())
+		break;		// No interface to check
+	    const IfTree& iftree = ftic().iftree();
+	    IfTree::IfMap::const_iterator ii = iftree.get_if(fte.ifname());
+	    if ((ii == iftree.ifs().end()) || ii->second.enabled())
+		break;		// The interface is UP
+
+	    return (true);
+	} while (false);
+
 	XLOG_ERROR("Error checking netlink request: %s", error_msg.c_str());
 	return false;
     }
