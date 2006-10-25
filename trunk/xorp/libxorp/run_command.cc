@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.27 2006/08/17 22:46:17 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.28 2006/10/12 01:24:54 pavlin Exp $
 
 #include "libxorp_module.h"
 
@@ -185,6 +185,8 @@ RunCommandBase::RunCommandBase(EventLoop&		eventloop,
 {
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
+
+    _run_command_base_done_cb = callback(this, &RunCommandBase::done);
 }
 
 RunCommandBase::~RunCommandBase()
@@ -437,7 +439,7 @@ RunCommandBase::wait_status_changed(int wait_status)
 	errno = 0;
 	_done_timer = _eventloop.new_oneoff_after(
 	    TimeVal::ZERO(),
-	    callback(this, &RunCommandBase::done));
+	    _run_command_base_done_cb);
     } catch(...) {
 	XLOG_ERROR("Error scheduling RunCommand::_done_timer: %d", errno);
 	xorp_catch_standard_exceptions();

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.12 2006/02/17 07:52:08 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.13 2006/03/16 00:04:32 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -431,6 +431,8 @@ private:
 
     bool		_stdout_eof_received;
     bool		_stderr_eof_received;
+
+    XorpCallback0<void>::RefPtr	_run_command_base_done_cb; // XXX: pre-computed
 };
 
 /**
