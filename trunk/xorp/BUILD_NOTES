@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.71 2006/10/19 00:16:00 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.72 2006/10/19 06:42:50 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -612,6 +612,57 @@ setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
          environment should be:
 
 setenv CROSS_ARCH ia64-unknown-linux-gnu
+
+  * MIPS (Broadcom for Linksys WRT54G)
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on Linksys WRT54, so it is unknown
+      whether it will run properly.
+
+    - Use the XScale instructions to install cross-compilation tools
+      and use those tools to compile XORP, with the following
+      differences in some of the steps:
+
+      b) Apply the following patch to demo-mipsel.sh
+
+         patch < demo-mipsel.sh.patch
+
+----------------------------------------------------------------------
+--- demo-mipsel.sh.org	2005-03-07 16:34:34.000000000 -0800
++++ demo-mipsel.sh	2006-10-25 16:25:59.000000000 -0700
+@@ -33,8 +33,9 @@
+ #eval `cat mipsel.dat gcc-3.4.0-glibc-2.3.2.dat`        sh all.sh --notest
+ #eval `cat mipsel.dat gcc-3.4.1-glibc-2.2.5.dat`        sh all.sh --notest
+ #eval `cat mipsel.dat gcc-3.4.1-glibc-2.3.2.dat`        sh all.sh --notest
+- eval `cat mipsel.dat gcc-3.4.2-glibc-2.2.5.dat`        sh all.sh --notest
++# eval `cat mipsel.dat gcc-3.4.2-glibc-2.2.5.dat`        sh all.sh --notest
+ #eval `cat mipsel.dat gcc-3.4.2-glibc-2.3.3.dat`        sh all.sh --notest
+ #eval `cat mipsel.dat gcc-3.4.2-glibc-20040827.dat`        sh all.sh --notest
++eval `cat mipsel.dat gcc-3.4.5-glibc-2.3.6.dat`        sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
+      c) The command to perform the compilation is:
+
+         # Perform the compilation (it tay take a while)
+         sh demo-mipsel.sh
+
+      d) The environmental varibles to set before compiling openssl are:
+
+setenv CROSS_ARCH mipsel-unknown-linux-gnu
+setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+      f) The line to add to file "Configure" should be like the
+         following:
+
+"mipsel-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+      h) The first command to prepare the XORP cross-compilation
+         environment should be:
+
+setenv CROSS_ARCH mipsel-unknown-linux-gnu
 
 4. Performance optimization
 ===========================
