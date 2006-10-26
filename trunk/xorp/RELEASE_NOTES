@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.140 2006/10/19 02:14:11 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.141 2006/10/19 06:46:54 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,8 @@ This file contains XORP release notes (most recent releases first).
 Release 1.4-WIP (2006/??/??)
 =========================
   ALL:
-    - XORP now can be cross-compiled for IA-64 and XScale processors.
+    - XORP now can be cross-compiled for IA-64, XScale and MIPS
+      (Broadcom for Linksys WRT54G) processors.
 
     - The internal Makefile variable PY_BUILD has been renamed to
       PYTHON_BUILD
