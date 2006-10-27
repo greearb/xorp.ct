@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.2 2005/10/02 22:21:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_ex.cc,v 1.3 2006/03/16 00:03:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,7 +31,15 @@ PolicyTableExport<A>::PolicyTableExport(const string& tablename,
     : PolicyTable<A>(tablename, safi, parent, pfs, filter::EXPORT),
       _neighbor(neighbor)
 {
-    this->_parent = parent;		
+    this->_parent = parent;
+
+    //
+    // XXX: Explicitly call PolicyTableExport::init_varrw(),
+    // because the virtual PolicyTable::init_varrw() won't be overwritten
+    // by PolicyTableExport::init_varrw() when called inside the
+    // PolicyTable constructor.
+    //
+    init_varrw();
 }
 
 template <class A>

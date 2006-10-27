@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.20 2006/03/16 00:03:34 pavlin Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.21 2006/10/27 23:05:33 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -39,7 +39,8 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
       _policy_filters(pfs)
 {
     this->_parent = parent;
-    init_varrw();
+    // XXX: For clarity, explicitly call the local virtual init_varrw()
+    PolicyTable<A>::init_varrw();
     XLOG_ASSERT(_varrw != NULL);
 	
     // Performance optimization - suppress generation of trace strings
