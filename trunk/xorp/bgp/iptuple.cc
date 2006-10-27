@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/iptuple.cc,v 1.18 2006/08/16 21:41:38 mjh Exp $"
+#ident "$XORP: xorp/bgp/iptuple.cc,v 1.19 2006/10/12 01:24:36 pavlin Exp $"
 
 // #define DEBUG_LOGGING 
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -58,6 +58,9 @@ Iptuple::Iptuple(const char *local_interface, uint16_t local_port,
 		   c_format("mismatch %s (%u) %s (%u)",
 			    local_interface, _local_sock.ss_family, 
 			    peer_interface, _peer_sock.ss_family));
+
+    _local_address_ipvx = IPvX(_local_address.c_str());
+    _peer_address_ipvx = IPvX(_peer_address.c_str());
 }
 
 Iptuple::Iptuple(const Iptuple& rhs)
@@ -186,6 +189,28 @@ Iptuple::get_local_addr() const
     return _local_address;
 }
 
+bool
+Iptuple::get_local_addr(IPv4& addr) const
+{
+    if (!_local_address_ipvx.is_ipv4())
+	return false;
+
+    addr = _local_address_ipvx.get_ipv4();
+
+    return true;
+}
+
+bool
+Iptuple::get_local_addr(IPv6& addr) const
+{
+    if (!_local_address_ipvx.is_ipv6())
+	return false;
+
+    addr = _local_address_ipvx.get_ipv6();
+
+    return true;
+}
+
 uint16_t
 Iptuple::get_local_port() const
 {
@@ -210,6 +235,28 @@ string
 Iptuple::get_peer_addr() const
 {
     return _peer_address;
+}
+
+bool
+Iptuple::get_peer_addr(IPv4& addr) const
+{
+    if (!_peer_address_ipvx.is_ipv4())
+	return false;
+
+    addr = _peer_address_ipvx.get_ipv4();
+
+    return true;
+}
+
+bool
+Iptuple::get_peer_addr(IPv6& addr) const
+{
+    if (!_peer_address_ipvx.is_ipv6())
+	return false;
+
+    addr = _peer_address_ipvx.get_ipv6();
+
+    return true;
 }
 
 uint16_t
