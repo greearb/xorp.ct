@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/bgp_varrw.hh,v 1.17 2006/03/16 00:03:27 pavlin Exp $
+// $XORP: xorp/bgp/bgp_varrw.hh,v 1.18 2006/05/01 16:49:05 zec Exp $
 
 #ifndef __BGP_BGP_VARRW_HH__
 #define __BGP_BGP_VARRW_HH__
@@ -109,6 +109,13 @@ public:
      * @return the neighbor variable.
      */
     virtual Element* read_neighbor();
+
+    /**
+     * Callback wrapper used to call the virtual @ref read_neighbor() method.
+     *
+     * @return the neighbor variable.
+     */
+    Element* read_neighbor_base_cb()	{ return read_neighbor(); }
 
     Element* read_policytags();
     Element* read_filter_im();
