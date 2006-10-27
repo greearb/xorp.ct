@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.22 2006/04/14 05:57:59 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.23 2006/04/15 07:10:35 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -170,6 +170,22 @@ public:
      */
     string get_peer_addr() const {
 	return _peer->peerdata()->iptuple().get_peer_addr();
+    }
+
+    /**
+     * @param addr fill in the address if this is IPv4.
+     * @return true if the peer address is IPv4.
+     */
+    bool get_peer_addr(IPv4& addr) const {
+	return _peer->peerdata()->iptuple().get_peer_addr(addr);
+    }
+
+    /**
+     * @param addr fill in the address if this is IPv6.
+     * @return true if the peer address is IPv6.
+     */
+    bool get_peer_addr(IPv6& addr) const {
+	return _peer->peerdata()->iptuple().get_peer_addr(addr);
     }
 
     /**
