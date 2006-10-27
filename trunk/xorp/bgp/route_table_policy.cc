@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.19 2005/10/02 22:21:48 abittau Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy.cc,v 1.20 2006/03/16 00:03:34 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -33,12 +33,14 @@ PolicyTable<A>::PolicyTable(const string& tablename, const Safi& safi,
 			    BGPRouteTable<A>* parent,
 			    PolicyFilters& pfs, 
 			    const filter::Filter& type)
-    : BGPRouteTable<A>(tablename, safi), _filter_type(type),
+    : BGPRouteTable<A>(tablename, safi),
+      _filter_type(type),
+      _varrw(NULL),
       _policy_filters(pfs)
 {
     this->_parent = parent;
     init_varrw();
-    XLOG_ASSERT(_varrw);
+    XLOG_ASSERT(_varrw != NULL);
 	
     // Performance optimization - suppress generation of trace strings
     _varrw->suppress_trace();
@@ -471,6 +473,9 @@ template <class A>
 void
 PolicyTable<A>::init_varrw()
 {
+    if (_varrw != NULL)
+	delete _varrw;
+
     _varrw = new BGPVarRW<A>(filter::filter2str(_filter_type));
 }
 
