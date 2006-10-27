@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/plumbing.cc,v 1.95 2006/09/19 22:09:37 mjh Exp $"
+#ident "$XORP: xorp/bgp/plumbing.cc,v 1.96 2006/10/12 01:24:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -731,7 +731,7 @@ BGPPlumbingAF<A>::add_peering(PeerHandler* peer_handler)
 			         _master.safi(),
 				 filter_out,
 				 _master.policy_filters(),
-				 peer_handler->id().str());
+				 peer_handler->get_peer_addr());
     filter_out->set_next_table(policy_filter_out);
    
     CacheTable<A>* cache_out = 
