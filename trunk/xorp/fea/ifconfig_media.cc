@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_media.cc,v 1.9 2005/12/29 16:35:17 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_media.cc,v 1.10 2006/03/16 00:03:55 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -32,6 +32,9 @@
 #endif
 #ifdef HAVE_NET_IF_MEDIA_H
 #include <net/if_media.h>
+#endif
+#ifdef HAVE_LINUX_TYPES_H
+#include <linux/types.h>
 #endif
 #ifdef HAVE_LINUX_SOCKIOS_H
 #include <linux/sockios.h>
