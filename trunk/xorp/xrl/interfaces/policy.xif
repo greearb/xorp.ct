@@ -1,4 +1,4 @@
-/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.7 2005/10/02 22:21:57 abittau Exp $ */
+/* $XORP: xorp/xrl/interfaces/policy.xif,v 1.8 2005/10/23 20:41:39 abittau Exp $ */
 
 /**
  * Policy manager XRL interface.
@@ -74,6 +74,24 @@ interface policy/0.1 {
 	 * @param set name of the set.
 	 */
 	delete_set ? set:txt
+
+	/**
+	 * Add an element to a set.
+	 *
+	 * @param type the type of the set.
+	 * @param set name of the set.
+	 * @param element the element to add.
+	 */
+	add_to_set ? type:txt & set:txt & element:txt
+
+	/**
+	 * Delete an element from a set.
+	 *
+	 * @param type the type of the set.
+	 * @param set name of the set.
+	 * @param element the element to delete.
+	 */
+	delete_from_set ? type:txt & set:txt & element:txt
 
 	/**
 	 * Commit the configuration.

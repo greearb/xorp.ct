@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/dependancy.hh,v 1.5 2006/03/16 00:04:57 pavlin Exp $
+// $XORP: xorp/policy/dependancy.hh,v 1.6 2006/09/08 18:44:34 mjh Exp $
 
 #ifndef __POLICY_DEPENDANCY_HH__
 #define __POLICY_DEPENDANCY_HH__
@@ -192,10 +192,10 @@ public:
     }
 
     /**
-     * Returns the object being searched for
+     * Returns the object being searched for.
      *
-     * @return object requested.
      * @param objectname name of object to return.
+     * @return object requested.
      */
     T& find(const string& objectname) const {
 	Pair* p = findDepend(objectname);
@@ -203,6 +203,24 @@ public:
 	T* x = (*p).first;
 
 	return *x;
+    }
+
+    /**
+     * Returns a pointer the object being searched for.
+     *
+     * @param objectname name of object to return.
+     * @return a pointer to the object requested if found, otherwise NULL.
+     */
+    T* find_ptr(const string& objectname) const {
+	typename Map::const_iterator i = _map.find(objectname);
+
+	if (i == _map.end())
+	    return (NULL);
+
+	Pair* p = i->second;
+	T* x = (*p).first;
+
+	return x;
     }
 
     /**

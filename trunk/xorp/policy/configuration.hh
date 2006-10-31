@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/configuration.hh,v 1.9 2006/03/16 00:04:57 pavlin Exp $
+// $XORP: xorp/policy/configuration.hh,v 1.10 2006/09/08 18:44:34 mjh Exp $
 
 #ifndef __POLICY_CONFIGURATION_HH__
 #define __POLICY_CONFIGURATION_HH__
@@ -141,6 +141,32 @@ public:
      * @param set name of set to delete.
      */
     void delete_set(const string& set);
+
+    /**
+     * Add an element to a set.
+     *
+     * Throws an exception on failure.
+     * Checks if set exists.
+     *
+     * @param type the type of the set.
+     * @param name name of the set.
+     * @param element the element to add.
+     */
+    void add_to_set(const string& type, const string& name, 
+		    const string& element);
+
+    /**
+     * Delete an element from a set.
+     *
+     * Throws an exception on failure.
+     * Checks if set exists.
+     *
+     * @param type the type of the set.
+     * @param name name of the set.
+     * @param element the element to delete.
+     */
+    void delete_from_set(const string& type, const string& name, 
+			 const string& element);
   
     /**
      * Throws an exception on failure.

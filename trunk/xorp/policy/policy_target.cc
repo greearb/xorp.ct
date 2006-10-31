@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_target.cc,v 1.12 2006/07/28 06:34:31 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_target.cc,v 1.13 2006/10/12 01:25:05 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -111,6 +111,20 @@ void
 PolicyTarget::delete_set(const string& name)
 {
     _conf.delete_set(name);
+}
+
+void
+PolicyTarget::add_to_set(const string& type, const string& name, 
+			 const string& element)
+{
+    _conf.add_to_set(type, name, element);
+}
+
+void
+PolicyTarget::delete_from_set(const string& type, const string& name, 
+			      const string& element)
+{
+    _conf.delete_from_set(type, name, element);
 }
 
 void

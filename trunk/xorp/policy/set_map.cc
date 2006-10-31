@@ -13,13 +13,13 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/set_map.cc,v 1.7 2006/09/08 18:44:35 mjh Exp $"
+#ident "$XORP: xorp/policy/set_map.cc,v 1.8 2006/10/12 01:25:05 pavlin Exp $"
 
 #include "policy_module.h"
 
 #include "libxorp/xorp.h"
 
-#include "set_map.hh"    
+#include "set_map.hh"
 
 
 const Element&
@@ -42,7 +42,7 @@ SetMap::update_set(const string& type, const string& name,
 		   const string& elements, set<string>& modified)
 {
     // create the object, _deps will own it...
-    Element* e = _ef.create(type ,elements.c_str());
+    Element* e = _ef.create(type, elements.c_str());
 
     // see affected policies
     _deps.get_deps(name, modified);
@@ -55,6 +55,79 @@ void
 SetMap::delete_set(const string& name)
 {
     _deps.remove(name);
+}
+
+void
+SetMap::add_to_set(const string& type, const string& name,
+		   const string& element, set<string>& modified)
+{
+    Element* e = _deps.find_ptr(name);
+
+    // Find the element
+    if (e == NULL) {
+	// First element to the set
+	update_set(type, name, element, modified);
+	return;
+    }
+
+    // Check the element type
+    if (type != string(e->type())) {
+	string error_msg = c_format("Can't add to set %s: type mismatch "
+				    "(received %s expected %s)",
+				    name.c_str(),
+				    type.c_str(),
+				    e->type());
+	xorp_throw(SetMapError, error_msg);
+    }
+
+    // Get a string with the existing elements and add the new element
+    string elements = e->str();
+    if (! elements.empty())
+	elements += ",";
+    elements += element;
+
+    update_set(type, name, elements, modified);
+}
+
+void
+SetMap::delete_from_set(const string& type, const string& name,
+			const string& element, set<string>& modified)
+{
+    Element* e = _deps.find_ptr(name);
+
+    // Find the element
+    if (e == NULL) {
+	string error_msg = c_format("Can't delete from set %s: not found",
+				    name.c_str());
+	xorp_throw(SetMapError, error_msg);
+    }
+
+    // Check the element type
+    if (type != string(e->type())) {
+	string error_msg = c_format("Can't delete from set %s: type mismatch "
+				    "(received %s expected %s)",
+				    name.c_str(),
+				    type.c_str(),
+				    e->type());
+	xorp_throw(SetMapError, error_msg);
+    }
+
+    // Get a string with the existing elements and delete the element
+    string elements = e->str();
+    set<string> s;
+    policy_utils::str_to_set(elements.c_str(), s);
+    s.erase(element);
+
+    // Recreate a string with the remaining elements
+    elements = "";
+    set<string>::iterator i;
+    for (i = s.begin(); i != s.end(); ++i) {
+	if (! elements.empty())
+	    elements += ",";
+	elements += *i;
+    }
+
+    update_set(type, name, elements, modified);
 }
 
 void 

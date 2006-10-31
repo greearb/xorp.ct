@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/xrl_target.hh,v 1.8 2005/10/23 20:41:39 abittau Exp $
+// $XORP: xorp/policy/xrl_target.hh,v 1.9 2006/03/16 00:05:04 pavlin Exp $
 
 #ifndef __POLICY_XRL_TARGET_HH__
 #define __POLICY_XRL_TARGET_HH__
@@ -90,6 +90,18 @@ public:
     XrlCmdError policy_0_1_delete_set(
         // Input values,
         const string&   set);
+
+    XrlCmdError policy_0_1_add_to_set(
+	// Input values,
+	const string&	type,
+	const string&	set,
+	const string&	element);
+
+    XrlCmdError policy_0_1_delete_from_set(
+	// Input values,
+	const string&	type,
+	const string&	set,
+	const string&	element);
     
     XrlCmdError policy_0_1_done_global_policy_conf();
 

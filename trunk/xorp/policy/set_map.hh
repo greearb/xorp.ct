@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/set_map.hh,v 1.4 2006/03/16 00:05:00 pavlin Exp $
+// $XORP: xorp/policy/set_map.hh,v 1.5 2006/09/08 18:44:35 mjh Exp $
 
 #ifndef __POLICY_SET_MAP_HH__
 #define __POLICY_SET_MAP_HH__
@@ -81,6 +81,36 @@ public:
      * @param name name of the set.
      */
     void delete_set(const string& name);
+
+    /**
+     * Add an element to a set.
+     *
+     * Throws an expcetion if set does not exist.
+     *
+     * @param type type of the set.
+     * @param name name of the set.
+     * @param element the element to add.
+     * @param modified set filled with policies which are now modified.
+     */
+    void add_to_set(const string& type,
+		    const string& name,
+		    const string& element,
+		    set<string>& modified);
+
+    /**
+     * Delete an element from a set.
+     *
+     * Throws an expcetion if set does not exist.
+     *
+     * @param type type of the set.
+     * @param name name of the set.
+     * @param element the element to delete.
+     * @param modified set filled with policies which are now modified.
+     */
+    void delete_from_set(const string& type,
+			 const string& name,
+			 const string& element,
+			 set<string>& modified);
 
     /**
      * Add a dependancy of a policy using a set.

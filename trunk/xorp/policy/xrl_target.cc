@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/xrl_target.cc,v 1.11 2006/03/16 00:05:03 pavlin Exp $"
+#ident "$XORP: xorp/policy/xrl_target.cc,v 1.12 2006/10/12 01:25:05 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -212,6 +212,38 @@ XrlPolicyTarget::policy_0_1_delete_set(const string&   set)
 
     return XrlCmdError::OKAY();
 }	
+
+XrlCmdError
+XrlPolicyTarget::policy_0_1_add_to_set(
+    // Input values,
+    const string&	type,
+    const string&	set,
+    const string&	element)
+{
+    try {
+	_policy_target.add_to_set(type, set, element);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("add_to_set: " + e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
+
+XrlCmdError
+XrlPolicyTarget::policy_0_1_delete_from_set(
+    // Input values,
+    const string&	type,
+    const string&	set,
+    const string&	element)
+{
+    try {
+	_policy_target.delete_from_set(type, set, element);
+    } catch(const PolicyException& e) {
+	return XrlCmdError::COMMAND_FAILED("delete_from_set: " + e.str());
+    }
+
+    return XrlCmdError::OKAY();
+}
 
 XrlCmdError 
 XrlPolicyTarget::policy_0_1_done_global_policy_conf()

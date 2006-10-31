@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/policy_target.hh,v 1.9 2005/10/23 20:41:38 abittau Exp $
+// $XORP: xorp/policy/policy_target.hh,v 1.10 2006/03/16 00:04:59 pavlin Exp $
 
 #ifndef __POLICY_POLICY_TARGET_HH__
 #define __POLICY_POLICY_TARGET_HH__
@@ -140,7 +140,30 @@ public:
      */
     void delete_set(const string& name);
 
-    
+    /**
+     * Add an element to a set.
+     *
+     * Exception is thrown on error.
+     *
+     * @param type the type of the set.
+     * @param name name of the set.
+     * @param element the element to add.
+     */
+    void add_to_set(const string& type, const string& name, 
+		    const string& element);
+
+    /**
+     * Delete an element from a set.
+     *
+     * Exception is thrown on error.
+     *
+     * @param type the type of the set.
+     * @param name name of the set.
+     * @param element the element to delete.
+     */
+    void delete_from_set(const string& type, const string& name, 
+			 const string& element);
+
     /**
      * Updates the import policy list for a protocol and triggers a delayed
      * commit.
