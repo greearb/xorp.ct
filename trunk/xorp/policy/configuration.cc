@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.14 2006/09/08 18:44:34 mjh Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.15 2006/10/31 05:26:26 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -139,7 +139,7 @@ Configuration::add_to_set(const string& type, const string& set,
 			  const string& element)
 {
     // policies affected will be marked as modified.
-    _sets.update_set(type, set, element, _modified_policies);
+    _sets.add_to_set(type, set, element, _modified_policies);
 }
 
 void
@@ -147,7 +147,7 @@ Configuration::delete_from_set(const string& type, const string& set,
 			       const string& element)
 {
     // policies affected will be marked as modified.
-    _sets.update_set(type, set, element, _modified_policies);
+    _sets.delete_from_set(type, set, element, _modified_policies);
 }
 
 void 
