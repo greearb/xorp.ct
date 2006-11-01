@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/dependancy.hh,v 1.6 2006/09/08 18:44:34 mjh Exp $
+// $XORP: xorp/policy/dependancy.hh,v 1.7 2006/10/31 05:26:26 pavlin Exp $
 
 #ifndef __POLICY_DEPENDANCY_HH__
 #define __POLICY_DEPENDANCY_HH__
@@ -75,14 +75,18 @@ public:
     Dependancy(){}
 
     ~Dependancy() {
-	for(typename Map::iterator i = _map.begin();
-	    i != _map.end(); ++i)  {
-	    
+	clear();
+    }
+
+    void clear() {
+	for (typename Map::iterator i = _map.begin(); i != _map.end(); ++i) {
 	    Pair* p = (*i).second;
-	    if(p->first)
+	    if (p->first != NULL) {
 		delete p->first;
+	    }
 	    delete p;
-	}    
+	}
+	_map.clear();
     }
 
     /**

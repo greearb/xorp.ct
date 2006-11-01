@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.15 2006/10/31 05:26:26 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.16 2006/11/01 00:27:08 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -39,6 +39,13 @@ Configuration::~Configuration()
     clear_map(_export_filters);
 
     clear_map(_tagmap);
+
+    //
+    // XXX: Clear the _policies before the _sets goes out of scope.
+    // Otherwise, the _policies destructor might try to use a reference
+    // to _sets after _sets has been destroyed.
+    //
+    _policies.clear();
 }
   
 Term& 
