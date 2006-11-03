@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/spt.hh,v 1.11 2006/03/16 00:04:12 pavlin Exp $
+// $XORP: xorp/libproto/spt.hh,v 1.12 2006/03/27 19:06:57 pavlin Exp $
 
 #ifndef __LIBPROTO_SPT_HH__
 #define __LIBPROTO_SPT_HH__
@@ -716,7 +716,7 @@ Spt<A>::dijkstra()
 	return false;
     }
 
-    for_each(_nodes.begin(), _nodes.end(), ptr_fun(init_dijkstra<A>));
+    for_each(_nodes.begin(), _nodes.end(), init_dijkstra<A>);
 
     typename Node<A>::NodeRef current = _origin;
     _origin->set_tentative(false);
@@ -1075,7 +1075,7 @@ Spt<A>::garbage_collect()
     }
 
     // Garbage collect all the edges that point at deleted nodes.
-    for_each(_nodes.begin(), _nodes.end(), ptr_fun(gc<A>));
+    for_each(_nodes.begin(), _nodes.end(), gc<A>);
 }
 
 template <typename A> 
