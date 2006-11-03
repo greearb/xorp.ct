@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.142 2006/10/26 09:00:27 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.143 2006/10/27 04:56:18 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -9,7 +9,7 @@ This file contains XORP release notes (most recent releases first).
 Release 1.4-WIP (2006/??/??)
 =========================
   ALL:
-    - XORP now builds on Linux Fedora Core6.
+    - XORP now builds on Linux Fedora Core6 and OpenBSD-4.0.
 
     - XORP now can be cross-compiled for IA-64, XScale and MIPS
       (Broadcom for Linksys WRT54G) processors.
@@ -301,7 +301,7 @@ Release 1.2 (2006/03/08)
       the system is completed.
 
     - XORP now builds on Windows Server 2003 (Service Pack 1),
-      amd64+FreeBSD-6.0, FreeBSD-6.1 (BETA3), NetBSD-3.0, OpenBSD-2.8,
+      amd64+FreeBSD-6.0, FreeBSD-6.1 (BETA3), NetBSD-3.0, OpenBSD-3.8,
       MacOS X 10.4.5, Linux Fedora Core4 (among others).
 
   CONFIGURATION:
