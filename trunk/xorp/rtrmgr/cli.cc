@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.134 2006/10/12 01:25:12 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/cli.cc,v 1.135 2006/10/13 20:48:17 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -1573,37 +1573,38 @@ RouterCLI::add_text_entry_commands(CliCommand* com0)
 
     list<TemplateTreeNode*>::const_iterator tti;
     for (tti = ttn->children().begin(); tti != ttn->children().end(); ++tti) {
-	TemplateTreeNode* ttn = *tti;
+	TemplateTreeNode* ttn_child = *tti;
 	CliCommand* com = NULL;
 	vector<string> vector_subpath;
 
 	// XXX: ignore deprecated subtrees
-	if (ttn->is_deprecated())
+	if (ttn_child->is_deprecated())
 	    continue;
 
 	// XXX: ignore user-hidden subtrees
-	if (ttn->is_user_hidden())
+	if (ttn_child->is_user_hidden())
 	    continue;
 
 	append_list_to_vector(vector_subpath, _path);
-	vector_subpath.push_back(ttn->segname());
+	vector_subpath.push_back(ttn_child->segname());
 
-	string help = ttn->help();
+	string help = ttn_child->help();
 	if (help == "") {
 	    help = "-- No help available --";
 	}
 
-	if (ttn->is_tag()) {
-	    com = com0->add_command(ttn->segname(), help, false, error_msg);
+	if (ttn_child->is_tag()) {
+	    com = com0->add_command(ttn_child->segname(), help, false,
+				    error_msg);
 	} else {
-	    com = com0->add_command(ttn->segname(),
+	    com = com0->add_command(ttn_child->segname(),
 				    help, false,
 				    callback(this, &RouterCLI::text_entry_func),
 				    error_msg);
 	}
 	if (com == NULL) {
 	    XLOG_FATAL("AI: add_command %s for template failed: %s",
-		       ttn->segname().c_str(), error_msg.c_str());
+		       ttn_child->segname().c_str(), error_msg.c_str());
 	} else {
 	    com->set_global_name(vector_subpath);
 	}
