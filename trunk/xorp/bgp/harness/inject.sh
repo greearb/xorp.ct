@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# $XORP: xorp/bgp/harness/inject.sh,v 1.1 2003/01/31 03:02:14 atanu Exp $
+# $XORP: xorp/bgp/harness/inject.sh,v 1.2 2003/07/17 00:28:32 pavlin Exp $
 #
 
 # Inject a saved conversation in mrtd format to our BGP process using
@@ -23,6 +23,7 @@ set -e
 # interface
 VIF0="dc0"
 ADDR0="10.1.0.1"
+ADDR_PREFIX0="25"
 NEXT_HOP_REWRITE1="10.1.0.2"
 NEXT_HOP_REWRITE2="10.1.0.3"
 
@@ -82,7 +83,7 @@ fea()
     $FEA_FUNCS create_address4 $tid $VIF0 $VIF0 $ADDR0
     $FEA_FUNCS enable_address4 $tid $VIF0 $VIF0 $ADDR0
 
-    $FEA_FUNCS set_prefix4 $tid $VIF0 $VIF0 $ADDR0 25
+    $FEA_FUNCS set_prefix4 $tid $VIF0 $VIF0 $ADDR0 $ADDR_PREFIX0
 
     $FEA_FUNCS commit_fea_transaction $tid
 
