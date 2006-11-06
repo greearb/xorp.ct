@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.21 2006/03/29 22:41:24 atanu Exp $"
+#ident "$XORP: xorp/bgp/harness/test_trie.cc,v 1.22 2006/10/12 01:24:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -80,7 +80,7 @@ tree_walker(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
 template <class A>
 void
 tree_walker_empty(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
-		  TestInfo info)
+		  TestInfo info, A dummy_addr)
 {
     DOUT(info) << info.test_name() << endl <<
 	p->str() <<
@@ -88,12 +88,18 @@ tree_walker_empty(const UpdatePacket *p, const IPNet<A>& net, const TimeVal&,
 
     XLOG_FATAL("There should be no entries in this trie\n %s:%s",
 	       p->str().c_str(), net.str().c_str());
+
+    //
+    // XXX: Dummy address needed to fix template-related deduction problem
+    // exposed by the Intel C++ compiler.
+    //
+    UNUSED(dummy_addr);
 }
 
 template <class A>
 void
 replay_walker(const UpdatePacket *p, const TimeVal&, TestInfo info,
-	      size_t *pos, Ulist ulist)
+	      size_t *pos, Ulist ulist, A dummy_addr)
 {
     DOUT(info) << info.test_name() << " " << (*pos) << endl << p->str();
 
@@ -107,6 +113,12 @@ replay_walker(const UpdatePacket *p, const TimeVal&, TestInfo info,
 		   ulist[*pos]->str().c_str());
 
     (*pos)++;
+
+    //
+    // XXX: Dummy address needed to fix template-related deduction problem
+    // exposed by the Intel C++ compiler.
+    //
+    UNUSED(dummy_addr);
 }
 
 template <class A> void add_nlri(UpdatePacket *p, IPNet<A> net);
@@ -254,7 +266,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Verify that the trie is empty.
     */
-    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info, A::ZERO()));
 
     /*
     ** The trie should be empty make sure that a lookup fails.
@@ -340,7 +352,7 @@ test_single_update(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Verify that the trie is empty.
     */
-    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info, A::ZERO()));
 
     return true;
 }
@@ -356,7 +368,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     /*
     ** Verify that the trie is empty.
     */
-    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info, A::ZERO()));
 
     /*
     ** The trie should be empty make sure that a lookup fails.
@@ -463,7 +475,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     ulist.push_back(packet_w1);
     DOUT(info) << "0\t" << ulist[0]->str() << endl;
     DOUT(info) << "1\t" << ulist[1]->str() << endl;
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
 
     /*
     ** Build another withdraw to remove the net2. This should empty
@@ -479,7 +491,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     */
     pos = 0;
     ulist.clear();
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
 
     /*
     ** Push the update packet with the two nlris back in.
@@ -494,7 +506,7 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     ulist.clear();
     ulist.push_back(packet_nlri);
     DOUT(info) << "0\t" << ulist[0]->str() << endl;
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
 
     /*
     ** Empty out the trie.
@@ -507,12 +519,12 @@ test_replay(TestInfo& info, A nexthop, IPNet<A> net)
     */
     pos = 0;
     ulist.clear();
-    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist));
+    trie.replay_walk(callback(replay_walker<A>, info, &pos, ulist, A::ZERO()));
 
     /*
     ** Verify that the trie is empty.
     */
-    trie.tree_walk_table(callback(tree_walker_empty<A>, info));
+    trie.tree_walk_table(callback(tree_walker_empty<A>, info, A::ZERO()));
 
     delete [] data_nlri;
     delete packet_nlri;
