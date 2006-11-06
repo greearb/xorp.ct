@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.15 2006/08/08 22:25:21 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.16 2006/08/08 23:11:10 pavlin Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -211,7 +211,9 @@ Many times it is useful to match against a set of values.  For example it is
 more practical to reference a set of prefixes to match against, which may also
 be used in different policies rather than enumerating the prefixes one by one in
 each policy.  This is achieved via sets which contain un-ordered items and no
-duplicates.  Sets are declared as follows:
+duplicates.  Sets are declared as follows~\footnote{Note that prior to XORP
+Release-1.4, the {\tt elements} statement with a complete comma-separated
+list of all networks was used instead of {\tt network}.}:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -219,11 +221,13 @@ duplicates.  Sets are declared as follows:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 policy \{\\
-\>network4-list {\em name} \{ \\
-\>\>elements: "10.0.0.0/8,192.168.0.0/16,\ldots"\\
+\>network4-list {\em name} \{\\
+\>\>network 10.0.0.0/8\\
+\>\>network 192.168.0.0/16\\
 \>\}\\
-\>network6-list {\em name} \{ \\
-\>\>elements: "2001:0910::/32,2001:dead::/32,\ldots"\\
+\>network6-list {\em name} \{\\
+\>\>network 2001:0910::/32\\
+\>\>network 2001:dead::/32\\
 \>\}\\
 \} \\
 \end{tabbing} 
@@ -231,11 +235,12 @@ policy \{\\
 \end{minipage}
 }
 
-Two sets cannot have the same name---else there is no way to reference them
-within policies.  Sets of different types are created in different ways.  For
-example, a set of IPv4 prefixes is created via the {\tt network4-list} directive
-whereas IPv6 prefixes would be created using {\tt network6-list}.  To reference
-a set in a policy, simply use its name as a text string.  For example:
+Two sets cannot have the same name---else there is no way to reference
+them within policies.  Sets of different types are created in different
+ways.  For example, a set of IPv4 prefixes is created via the {\tt
+network4-list} directive whereas IPv6 prefixes would be created using
+{\tt network6-list}.  To reference a set in a policy, simply use its
+name as a text string.  For example:
 
 \noindent\framebox[\textwidth][l]{\scriptsize
 \begin{minipage}{6in}
@@ -243,10 +248,11 @@ a set in a policy, simply use its name as a text string.  For example:
 \begin{tabbing}
 xx\=xx\=xx\=xx\=xx\=\kill
 policy \{\\
-\>network4-list private \{ \\
-\>\>elements: "10.0.0.0/8,192.168.0.0/16"\\
+\>network4-list private \{\\
+\>\>network 10.0.0.0/8\\
+\>\>network 192.168.0.0/16\\
 \>\}\\
-\>policy-statement drop-private \{ \\
+\>policy-statement drop-private \{\\
 \>\>term a \{\\
 \>\>\>from \{\\
 \>\>\>\>network4-list: "private"\\
@@ -437,10 +443,10 @@ learnt.  Only valid for export policies.  Used in route redistribution. \\
 {\tt network4} & {\tt :} & ipv4net & Matches the prefix of an IPv4 route. \\
 {\tt network6} & {\tt :} & ipv6net & Matches the prefix of an IPv6 route. \\
 \hline
-{\tt network4-list} & {\tt :} & network4-list & Matches if the IPv4 set contains
-the route.\\
-{\tt network6-list} & {\tt :} & network6-list & Matches if the IPv6 set contains
-the route.\\
+{\tt network4-list} & {\tt :} & txt & Matches if the named IPv4 set
+contains the route.\\
+{\tt network6-list} & {\tt :} & txt & Matches if the named IPv6 set
+contains the route.\\
 \hline
 {\tt prefix-length4} & {\tt :} & u32range & Matches if the IPv4 route has a
 prefix length within the specified range. \\
