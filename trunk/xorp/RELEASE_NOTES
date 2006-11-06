@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.143 2006/10/27 04:56:18 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.144 2006/11/03 01:16:01 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -44,6 +44,31 @@ Release 1.4-WIP (2006/??/??)
       the forwarding entries and does not prevent the RIB or any of the
       unicast routing protocols from deleting the entries on shutdown.
 
+    - The "elements" policy statements for configuring sets of network
+      routes have been deprecated:
+
+      policy {
+          network4-list foo {
+              elements: "1.2.0.0/16,3.4.0.0/16"
+          }
+          network6-list bar {
+              elements: "2222::/64,3333::/64"
+          }
+      }
+
+      The new replacement statement is "network" and can be used to
+      specify one element per line:
+
+      policy {
+          network4-list foo {
+              network 1.2.0.0/16
+              network 3.4.0.0/16
+          }
+          network6-list bar {
+              network 2222::/64
+              network 3333::/64
+          }
+      }
 
   LIBXORP:
     - 
