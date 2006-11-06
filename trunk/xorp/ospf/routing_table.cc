@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/routing_table.cc,v 1.53 2006/03/18 19:08:24 pavlin Exp $"
+#ident "$XORP: xorp/ospf/routing_table.cc,v 1.54 2006/10/12 01:25:00 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -705,5 +705,11 @@ Adv<A>::lookup_entry(OspfTypes::AreaID area, uint32_t adv,
     return true;
 }
 
+template class RouteEntry<IPv4>;
+template class RouteEntry<IPv6>;
+template class InternalRouteEntry<IPv4>;
+template class InternalRouteEntry<IPv6>;
+template class Adv<IPv4>;
+template class Adv<IPv6>;
 template class RoutingTable<IPv4>;
 template class RoutingTable<IPv6>;
