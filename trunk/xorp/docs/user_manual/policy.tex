@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/user_manual/policy.tex,v 1.16 2006/08/08 23:11:10 pavlin Exp $
+% $XORP: xorp/docs/user_manual/policy.tex,v 1.17 2006/11/06 23:04:07 pavlin Exp $
 %
 
 \chapter{\label{policy}Policy}
@@ -457,6 +457,16 @@ prefix length within the specified range. \\
 \caption{\label{policy_common_match_from}Common match conditions in the {\tt from}
 block for all protocols}
 \end{table}
+
+Note that the {\tt network4} and {\tt prefix-length4} statements
+are independent and cannot be used together to match, say, all routes
+within a specific prefix. For example, using both statements
+{\tt network4 = 10.0.0.0/8} and {\tt prefix-length4 >= 8} is incorrect
+if the intend is to match all routes within prefix 10.0.0.0/8.
+Instead, the {\tt network4 <= 10.0.0.0/4} statement alone should be used
+for that purpose.
+The same applies for the {\tt network6} and {\tt prefix-length6}
+statements as well.
 
 The match conditions for the {\tt to} block are identical in syntax and
 semantics as the {\tt from} block except for one case.  It is illegal to specify
