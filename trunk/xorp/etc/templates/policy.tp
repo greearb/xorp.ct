@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.20 2006/04/03 23:35:14 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.21 2006/04/19 19:59:26 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -33,10 +33,14 @@ policy {
     }
 
     network4-list @: txt {
-	elements: txt;
+	elements: txt;				/* %deprecated */
+	network @: ipv4net {
+	}
     }
     network6-list @: txt {
-	elements: txt;
+	elements: txt;				/* %deprecated */
+	network @: ipv6net {
+	}
     }
 }
 
@@ -188,8 +192,15 @@ policy {
 	%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
 
 	elements {
+	    %deprecated: "Statement 'elements' is replaced with 'network'";
 	    %help: short "Elements in the named set of IPv4 networks";
 	    %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&elements:txt=$(@)";
+	}
+
+	network @: ipv4net {
+	    %help: short "Element in the named set of IPv4 networks";
+	    %create: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv4net&set:txt=$(network4-list.@)&element:txt=$(@)";
 	}
     }
     network6-list @: txt {
@@ -198,8 +209,15 @@ policy {
 	%create: xrl "$(policy.targetname)/policy/0.1/create_set?set:txt=$(@)";
 
 	elements {
+	    %deprecated: "Statement 'elements' is replaced with 'network'";
 	    %help: short "Elements in the named set of IPv6 networks";
 	    %set: xrl "$(policy.targetname)/policy/0.1/update_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&elements:txt=$(@)";
+	}
+
+	network @: ipv6net {
+	    %help: short "Element in the named set of IPv6 networks";
+	    %create: xrl "$(policy.targetname)/policy/0.1/add_to_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(@)";
+	    %delete: xrl "$(policy.targetname)/policy/0.1/delete_from_set?type:txt=set_ipv6net&set:txt=$(network6-list.@)&element:txt=$(@)";
 	}
     }
 }
