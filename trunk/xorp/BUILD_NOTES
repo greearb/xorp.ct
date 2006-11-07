@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.75 2006/11/03 01:14:14 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.76 2006/11/07 03:04:21 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -489,6 +489,12 @@ gmake check
       XORP itself hasn't been tested on Linksys WRT54, so it is unknown
       whether it will run properly.
 
+  * sparc64
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on sparc64 machine, so it is unknown
+      whether it will run properly.
+
   * Instructions for installing crosstool-based cross-compilation tools.
 
     Use the following instructions to install cross-compilation tools
@@ -556,6 +562,24 @@ gmake check
  echo Done.
 ----------------------------------------------------------------------
 
+       - sparc64
+         patch < demo-sparc64.sh.patch
+
+----------------------------------------------------------------------
+--- demo-sparc64.sh.org	2005-03-07 16:34:34.000000000 -0800
++++ demo-sparc64.sh	2006-11-06 19:31:57.000000000 -0800
+@@ -15,7 +15,8 @@
+ #eval `cat sparc64.dat gcc-3.3.2-glibc-2.3.2.dat` sh all.sh --notest
+ #eval `cat sparc64.dat gcc-3.3.3-glibc-2.3.2.dat` sh all.sh --notest
+ #eval `cat sparc64.dat gcc-3.4.0-glibc-2.3.2.dat` sh all.sh --notest
+- eval `cat sparc64.dat gcc-3.4.2-glibc-2.3.3.dat` sh all.sh --notest --testlinux
++# eval `cat sparc64.dat gcc-3.4.2-glibc-2.3.3.dat` sh all.sh --notest --testlinux
+ #eval `cat sparc64.dat gcc-3.4.2-glibc-20040827.dat` sh all.sh --notest
++eval `cat sparc64.dat gcc-3.4.5-glibc-2.3.6.dat` sh all.sh --notest
+ 
+ echo Done.
+----------------------------------------------------------------------
+
     c) Compile the toolchain and install it:
 
        sudo mkdir /opt/crosstool
@@ -575,6 +599,9 @@ gmake check
 
        - MIPS (Broadcom for Linksys WRT54G)
          sh demo-mipsel.sh
+
+       - sparc64
+         sh demo-sparc64.sh
 
        # Restore the original LD_LIBRARY_PATH environmetal variable
        cd ..
@@ -600,6 +627,11 @@ gmake check
          setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
          setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
+       - sparc64
+         setenv CROSS_ARCH sparc64-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
     e) Download openssl from http://www.openssl.org/ and untar it:
 
        wget http://www.openssl.org/source/openssl-0.9.8d.tar.gz
@@ -620,6 +652,9 @@ gmake check
        - MIPS (Broadcom for Linksys WRT54G)
 "mipsel-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
+       - sparc64
+"sparc64-unknown-linux-gnu",    "/opt/crosstool/gcc-3.4.5-glibc-2.3.6/sparc64-unknown-linux-gnu/bin/sparc64-unknown-linux-gnu-gcc:-DB_ENDIAN -DTERMIOS -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
     g) Cross-compile openssl and install it:
 
        ./Configure $CROSS_ARCH
@@ -637,6 +672,9 @@ gmake check
 
        - MIPS (Broadcom for Linksys WRT54G)
          setenv CROSS_ARCH mipsel-unknown-linux-gnu
+
+       - sparc64
+         setenv CROSS_ARCH sparc64-unknown-linux-gnu
 
        setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
        setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
