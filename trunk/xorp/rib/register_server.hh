@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/register_server.hh,v 1.11 2005/03/25 02:54:20 pavlin Exp $
+// $XORP: xorp/rib/register_server.hh,v 1.12 2006/03/16 00:05:31 pavlin Exp $
 
 #ifndef __RIB_REGISTER_SERVER_HH__
 #define __RIB_REGISTER_SERVER_HH__
@@ -103,7 +103,7 @@ public:
      * invalidated and the client needs to register again to find out
      * what happened.
      */
-    typedef enum EntryType { CHANGED, INVALIDATE };
+    typedef enum { CHANGED, INVALIDATE } EntryType;
 
     /**
      * NotifyQueueEntry constructor
