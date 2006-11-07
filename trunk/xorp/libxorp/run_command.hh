@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.hh,v 1.13 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.hh,v 1.14 2006/10/25 01:55:18 pavlin Exp $
 
 #ifndef __LIBXORP_RUN_COMMAND_HH__
 #define __LIBXORP_RUN_COMMAND_HH__
@@ -385,8 +385,10 @@ private:
 
     /**
      * The command has completed.
+     *
+     * @param done_timer the timer associated with the event.
      */
-    void done();
+    void done(XorpTimer& done_timer);
 
 #ifdef HOST_OS_WINDOWS
     static const int WIN32_PROC_TIMEOUT_MS = 500;
@@ -431,8 +433,6 @@ private:
 
     bool		_stdout_eof_received;
     bool		_stderr_eof_received;
-
-    XorpCallback0<void>::RefPtr	_run_command_base_done_cb; // XXX: pre-computed
 };
 
 /**

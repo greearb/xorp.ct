@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/run_command.cc,v 1.28 2006/10/12 01:24:54 pavlin Exp $
+// $XORP: xorp/libxorp/run_command.cc,v 1.29 2006/10/25 01:55:18 pavlin Exp $
 
 #include "libxorp_module.h"
 
@@ -186,7 +186,7 @@ RunCommandBase::RunCommandBase(EventLoop&		eventloop,
     memset(_stdout_buffer, 0, BUF_SIZE);
     memset(_stderr_buffer, 0, BUF_SIZE);
 
-    _run_command_base_done_cb = callback(this, &RunCommandBase::done);
+    _done_timer = _eventloop.new_timer(callback(this, &RunCommandBase::done));
 }
 
 RunCommandBase::~RunCommandBase()
@@ -204,7 +204,7 @@ RunCommandBase::cleanup()
 	pid2command.erase(_pid);
 	_pid = 0;
     }
-    _done_timer.clear();
+    _done_timer.unschedule();
     _is_running = false;
     unblock_child_signals();
 }
@@ -437,9 +437,7 @@ RunCommandBase::wait_status_changed(int wait_status)
     // (for debugging purpose).
     try {
 	errno = 0;
-	_done_timer = _eventloop.new_oneoff_after(
-	    TimeVal::ZERO(),
-	    _run_command_base_done_cb);
+	_done_timer.schedule_now();
     } catch(...) {
 	XLOG_ERROR("Error scheduling RunCommand::_done_timer: %d", errno);
 	xorp_catch_standard_exceptions();
@@ -655,13 +653,15 @@ RunCommandBase::io_done(AsyncFileOperator::Event event, int error_code)
 
     close_output();
 
-    done();
+    done(_done_timer);
 }
 
 void
-RunCommandBase::done()
+RunCommandBase::done(XorpTimer& done_timer)
 {
     string prefix, suffix, reason;
+
+    done_timer.unschedule();
 
     if (_stdout_stream != NULL)
 	return;		// XXX: I/O is not done yet
@@ -672,7 +672,7 @@ RunCommandBase::done()
     // Remove the entry from the pid map
     pid2command.erase(_pid);
     _pid = 0;
-    _done_timer.clear();
+    _done_timer.unschedule();
     _is_running = false;
 
     if (_error_msg.size()) {
