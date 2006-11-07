@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.145 2006/11/06 23:05:28 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.146 2006/11/07 05:11:38 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -13,8 +13,8 @@ Release 1.4-WIP (2006/??/??)
 
     - XORP now can be compiled with the Intel C/C++ compiler (9.1.042).
 
-    - XORP now can be cross-compiled for IA-64, XScale and MIPS
-      (Broadcom for Linksys WRT54G) processors.
+    - XORP now can be cross-compiled for XScale, IA-64,
+      MIPS (Broadcom for Linksys WRT54G), and sparc64 processors.
 
     - The internal Makefile variable PY_BUILD has been renamed to
       PYTHON_BUILD
