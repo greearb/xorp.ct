@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libproto/packet.hh,v 1.7 2006/10/03 23:51:55 pavlin Exp $
+// $XORP: xorp/libproto/packet.hh,v 1.8 2006/10/06 20:33:25 pavlin Exp $
 
 
 #ifndef __LIBPROTO_PACKET_HH__
@@ -409,7 +409,7 @@ public:
      *
      * @return the IPv4 packet header size.
      */
-    static const size_t size() { return IpHeader4::SIZE; }
+    static size_t size() { return IpHeader4::SIZE; }
 
     /**
      * Get the buffer data.
@@ -697,7 +697,7 @@ public:
      *
      * @return the IPv6 packet header size.
      */
-    static const size_t size() { return IpHeader6::SIZE; }
+    static size_t size() { return IpHeader6::SIZE; }
 
     /**
      * Get the buffer data.
