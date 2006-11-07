@@ -13,7 +13,7 @@
  * legally binding.
  */
 
-#ident "$XORP: xorp/libxorp/xlog.c,v 1.18 2006/03/16 00:04:38 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/xlog.c,v 1.19 2006/10/12 01:24:56 pavlin Exp $"
 
 /*
  * Message logging utility.
@@ -122,7 +122,7 @@ int
 xlog_init(const char *argv0, const char *preamble_message)
 {
     const char* process_name;
-    size_t i;
+    xlog_level_t level;
 
     if (init_flag)
 	return (-1);
@@ -153,9 +153,9 @@ xlog_init(const char *argv0, const char *preamble_message)
     xlog_set_preamble(preamble_message);
 
     /* Enable all log messages by default, and set default verbose level */
-    for (i = 0; i < XLOG_LEVEL_MAX; i++) {
-	xlog_enable(i);
-	xlog_verbose_level[i] = XLOG_VERBOSE_LOW;		/* Default */
+    for (level = 0; level < XLOG_LEVEL_MAX; level++) {
+	xlog_enable(level);
+	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
     xlog_verbose_level[XLOG_LEVEL_FATAL] = XLOG_VERBOSE_HIGH;	/* XXX */
 
@@ -179,6 +179,7 @@ int
 xlog_exit(void)
 {
     int i;
+    xlog_level_t level;
 
     if (! init_flag)
 	return (-1);
@@ -212,9 +213,9 @@ xlog_exit(void)
     xlog_output_func_count = 0;
     fp_default = 0;
 
-    for (i = 0; i < XLOG_LEVEL_MAX; i++) {
-	xlog_disable(i);
-	xlog_verbose_level[i] = XLOG_VERBOSE_LOW;		/* Default */
+    for (level = 0; level < XLOG_LEVEL_MAX; level++) {
+	xlog_disable(level);
+	xlog_verbose_level[level] = XLOG_VERBOSE_LOW;		/* Default */
     }
     xlog_verbose_level[XLOG_LEVEL_FATAL] = XLOG_VERBOSE_HIGH;	/* XXX */
 
