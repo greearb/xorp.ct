@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/pim/pim_proto.h,v 1.18 2006/03/16 00:04:54 pavlin Exp $
+ * $XORP: xorp/pim/pim_proto.h,v 1.19 2006/04/26 04:16:44 pavlin Exp $
  */
 
 
@@ -106,7 +106,7 @@
 #define PIM_HELLO_HOLDTIME_FOREVER		0xffff
 #define PIM_HELLO_LAN_PRUNE_DELAY_OPTION	2
 #define PIM_HELLO_LAN_PRUNE_DELAY_LENGTH	4
-#define PIM_HELLO_LAN_PRUNE_DELAY_TBIT		(1 << 15)
+#define PIM_HELLO_LAN_PRUNE_DELAY_TBIT		((uint16_t)(1 << 15))
 #define PIM_HELLO_DR_PRIORITY_OPTION		19
 #define PIM_HELLO_DR_PRIORITY_LENGTH		4
 #define PIM_HELLO_DR_PRIORITY_DEFAULT		1
@@ -139,7 +139,7 @@
 #define PIM_ASSERT_MAX_METRIC_PREFERENCE	0x7fffffffU
 #define PIM_ASSERT_MAX_METRIC			0xffffffffU
 #define PIM_ASSERT_OIF_RATE_LIMIT		1	/* 1 pkt/second */
-#define PIM_ASSERT_RPT_BIT			(1 << 31)
+#define PIM_ASSERT_RPT_BIT			((uint32_t)(1 << 31))
 
 /* PIM_REGISTER-related definitions */
 #define PIM_REGISTER_SUPPRESSION_TIME_DEFAULT	60
