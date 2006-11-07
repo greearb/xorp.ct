@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.11 2006/03/16 00:03:49 pavlin Exp $"
+#ident "$XORP: xorp/fea/demo_fea_ifmgr_client.cc,v 1.12 2006/06/21 23:36:33 pavlin Exp $"
 
 //
 // This program is a simple example of what is required to be an interface
@@ -42,7 +42,7 @@ enum IfEvent {
     CHANGED = 3
 };
 
-const char * const
+const char *
 if_event(const uint32_t& i)
 {
     switch (IfEvent(i)) {

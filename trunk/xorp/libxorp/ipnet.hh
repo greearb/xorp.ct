@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ipnet.hh,v 1.30 2006/08/04 23:19:51 pavlin Exp $
+// $XORP: xorp/libxorp/ipnet.hh,v 1.31 2006/10/11 06:53:57 pavlin Exp $
 
 #ifndef __LIBXORP_IPNET_HH__
 #define __LIBXORP_IPNET_HH__
@@ -259,7 +259,7 @@ public:
      *
      * @return the address family of this address.
      */
-    static const int af() { return A::af(); }
+    static int af() { return A::af(); }
 
     /**
      * Get the base address.

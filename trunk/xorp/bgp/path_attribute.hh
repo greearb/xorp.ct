@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/path_attribute.hh,v 1.44 2006/03/16 00:03:30 pavlin Exp $
+// $XORP: xorp/bgp/path_attribute.hh,v 1.45 2006/10/12 01:24:38 pavlin Exp $
 
 #ifndef __BGP_PATH_ATTRIBUTE_HH__
 #define __BGP_PATH_ATTRIBUTE_HH__
@@ -177,7 +177,7 @@ protected:
      * information for a nexthop changes.
      * So we give priority to NEXT_HOP and keep other values unchanged.
      */
-    const int sorttype() const			{
+    int sorttype() const			{
 	return type() == NEXT_HOP ? -1 : type();
     }
 
@@ -576,7 +576,7 @@ public:
     void add_path_attribute(PathAttribute *att);
     const A& nexthop() const		{ return _nexthop_att->nexthop(); }
     const AsPath& aspath() const	{ return _aspath_att->as_path(); }
-    const uint8_t origin() const	{ return _origin_att->origin(); }
+    uint8_t origin() const		{ return _origin_att->origin(); }
 
     const MEDAttribute* med_att() const;
     const LocalPrefAttribute* local_pref_att() const;

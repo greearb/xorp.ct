@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/exceptions.hh,v 1.9 2006/03/16 00:03:28 pavlin Exp $
+// $XORP: xorp/bgp/exceptions.hh,v 1.10 2006/10/12 01:24:36 pavlin Exp $
 
 #ifndef __BGP_EXCEPTIONS_HH__
 #define __BGP_EXCEPTIONS_HH__
@@ -54,10 +54,10 @@ public:
 	  _error(error), _subcode(subcode), _data(data), _len(len)
     {}
 
-    const int error() const			{ return _error; }
-    const int subcode() const			{ return _subcode; }
+    int error() const				{ return _error; }
+    int subcode() const				{ return _subcode; }
     const uint8_t *data() const			{ return _data; }
-    const size_t len() const			{ return _len; }
+    size_t len() const				{ return _len; }
 
 private:
     const int		_error;

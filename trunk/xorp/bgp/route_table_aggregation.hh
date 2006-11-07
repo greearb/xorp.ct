@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.10 2006/02/17 23:34:53 zec Exp $
+// $XORP: xorp/bgp/route_table_aggregation.hh,v 1.11 2006/03/16 00:03:32 pavlin Exp $
 
 #ifndef __BGP_ROUTE_TABLE_AGGREGATION_HH__
 #define __BGP_ROUTE_TABLE_AGGREGATION_HH__
@@ -127,13 +127,13 @@ public:
 	delete _aggregator_attribute;
     }
     inline const PathAttributeList<A> *pa_list() const { return _pa_list; }
-    inline const IPNet<A> net() const { return _net; }
-    inline const bool was_announced() const { return _was_announced; }
-    inline const bool is_suppressed() const { return _is_suppressed; }
-    inline const bool brief_mode() const { return _brief_mode; }
+    inline const IPNet<A> net() const	{ return _net; }
+    inline bool was_announced() const	{ return _was_announced; }
+    inline bool is_suppressed() const	{ return _is_suppressed; }
+    inline bool brief_mode() const	{ return _brief_mode; }
     inline void was_announced(bool value) { _was_announced = value; }
     inline void is_suppressed(bool value) { _is_suppressed = value; }
-    inline void brief_mode(bool value) { _brief_mode = value; }
+    inline void brief_mode(bool value)	{ _brief_mode = value; }
     void reevaluate(AggregationTable<A> *parent);
     RefTrie<A, const ComponentRoute<A> > *components_table() {
 	return &_components_table;
@@ -207,9 +207,9 @@ public:
 
     virtual PeerType get_peer_type() const {
 	return PEER_TYPE_INTERNAL;
-    }                                                                           
+    }
 
-    const uint32_t get_unique_id() const { return _fake_unique_id; }
+    uint32_t get_unique_id() const	{ return _fake_unique_id; }
     virtual bool originate_route_handler() const { return true; }
     const uint32_t _fake_unique_id;
 };

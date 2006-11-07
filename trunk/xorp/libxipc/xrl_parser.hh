@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_parser.hh,v 1.6 2005/03/25 02:53:33 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_parser.hh,v 1.7 2006/03/16 00:04:21 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PARSER_HH__
 #define __LIBXIPC_XRL_PARSER_HH__
@@ -36,9 +36,9 @@ public:
 
     virtual ~XrlParseError() {}
 
-    const string& input() const { return _input; }
-    const ssize_t offset() const { return _offset; }
-    const string& reason() const { return _reason; }
+    const string& input() const		{ return _input; }
+    ssize_t offset() const		{ return _offset; }
+    const string& reason() const	{ return _reason; }
 
     string pretty_print(size_t termwidth = 80u) const;
 

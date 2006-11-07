@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/vif.hh,v 1.14 2006/07/03 23:33:37 pavlin Exp $
+// $XORP: xorp/libxorp/vif.hh,v 1.15 2006/08/23 17:30:04 pavlin Exp $
 
 #ifndef __LIBXORP_VIF_HH__
 #define __LIBXORP_VIF_HH__
@@ -266,7 +266,7 @@ public:
      * 
      * @return the virtual interface index.
      */
-    const uint32_t vif_index() const { return (_vif_index); }
+    uint32_t vif_index() const { return (_vif_index); }
     
     /**
      * Set the virtual interface index.

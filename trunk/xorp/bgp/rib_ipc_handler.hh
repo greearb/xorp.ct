@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.42 2006/03/27 01:56:00 pavlin Exp $
+// $XORP: xorp/bgp/rib_ipc_handler.hh,v 1.43 2006/03/27 12:46:05 zec Exp $
 
 #ifndef __BGP_RIB_IPC_HANDLER_HH__
 #define __BGP_RIB_IPC_HANDLER_HH__
@@ -210,7 +210,7 @@ public:
 			const bool& multicast);
 
     
-    virtual const uint32_t get_unique_id() const { return _fake_unique_id; }
+    virtual uint32_t get_unique_id() const	{ return _fake_unique_id; }
 
     //fake a zero IP address so the RIB IPC handler gets listed first
     //in the Fanout Table.

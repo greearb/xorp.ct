@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.11 2006/08/16 18:45:24 pavlin Exp $
+// $XORP: xorp/libxipc/xrl_pf_stcp_ph.hh,v 1.12 2006/08/16 22:10:50 pavlin Exp $
 
 #ifndef __LIBXIPC_XRL_PF_STCP_PH_HH__
 #define __LIBXIPC_XRL_PF_STCP_PH_HH__
@@ -47,7 +47,7 @@ public:
 		    const XrlError&	err,
 		    uint32_t		xrl_data_bytes);
 
-    static const size_t header_size() { return STCPPacketHeader::SIZE; }
+    static size_t header_size()		{ return STCPPacketHeader::SIZE; }
 
     bool is_valid() const;
 

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/subnet_route.hh,v 1.19 2005/11/11 15:23:28 zec Exp $
+// $XORP: xorp/bgp/subnet_route.hh,v 1.20 2006/03/16 00:03:35 pavlin Exp $
 
 #ifndef __BGP_SUBNET_ROUTE_HH__
 #define __BGP_SUBNET_ROUTE_HH__
@@ -326,7 +326,7 @@ public:
     /**
      * Read the "brief" aggregation mode flag.
      */
-    const bool aggr_brief_mode() const {
+    bool aggr_brief_mode() const {
 	return (_flags & SRF_AGGR_BRIEF_MODE);
     }
 
@@ -345,7 +345,7 @@ public:
      * Read the aggregation prefix length marker.
      * The field is also used for storing aggregation markers.
      */
-    const uint32_t aggr_prefix_len() const {
+    uint32_t aggr_prefix_len() const {
 	return (_flags & SRF_AGGR_PREFLEN_MASK) >> 8;
     }
 

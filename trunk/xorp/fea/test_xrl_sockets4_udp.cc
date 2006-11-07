@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.13 2006/06/21 23:36:33 pavlin Exp $"
+#ident "$XORP: xorp/fea/test_xrl_sockets4_udp.cc,v 1.14 2006/10/12 01:24:44 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -153,12 +153,12 @@ public:
 	_r = 0;
     }
 
-    inline const uint32_t bytes_received() const	{ return _b_rcv; }
-    inline const uint32_t bytes_sent() const		{ return _b_snd; }
-    inline const uint32_t packets_received() const	{ return _p_rcv; }
-    inline const uint32_t packets_sent() const		{ return _p_snd; }
-    inline const uint32_t xrl_errors() const		{ return _x_err; }
-    inline const bool	  closed() const		{ return _closed; }
+    inline uint32_t bytes_received() const	{ return _b_rcv; }
+    inline uint32_t bytes_sent() const		{ return _b_snd; }
+    inline uint32_t packets_received() const	{ return _p_rcv; }
+    inline uint32_t packets_sent() const	{ return _p_snd; }
+    inline uint32_t xrl_errors() const		{ return _x_err; }
+    inline bool	    closed() const		{ return _closed; }
 
     /**
      * Bind to interface and port.

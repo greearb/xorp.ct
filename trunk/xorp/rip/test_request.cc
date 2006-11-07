@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/test_request.cc,v 1.23 2006/08/18 01:50:30 pavlin Exp $"
+#ident "$XORP: xorp/rip/test_request.cc,v 1.24 2006/08/20 06:19:27 pavlin Exp $"
 
 #include <set>
 
@@ -159,8 +159,8 @@ public:
 	return _lo_port != 0;
     }
 
-    const Addr&	   last_rip_send_addr() const		{ return _lo_addr; }
-    const uint16_t last_rip_send_port() const		{ return _lo_port; }
+    const Addr&	last_rip_send_addr() const		{ return _lo_addr; }
+    uint16_t	last_rip_send_port() const		{ return _lo_port; }
     const vector<uint8_t>& last_rip_send_data() const	{ return _lo_data; }
 
     void last_rip_send_flush()

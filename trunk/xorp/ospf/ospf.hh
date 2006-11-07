@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.91 2006/03/24 08:20:08 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.92 2006/03/28 03:06:54 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -800,7 +800,7 @@ class Ospf {
     /**
      * Get the current OSPF version.
      */
-    const OspfTypes::Version get_version() const { return _version; }
+    OspfTypes::Version get_version() const { return _version; }
 
     /**
      * @return a reference to the eventloop, required for timers etc...

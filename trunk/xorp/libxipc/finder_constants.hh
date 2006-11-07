@@ -12,15 +12,15 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxipc/finder_constants.hh,v 1.7 2005/07/06 08:19:46 mjh Exp $
+// $XORP: xorp/libxipc/finder_constants.hh,v 1.8 2006/03/16 00:04:14 pavlin Exp $
 
 #ifndef __LIBXIPC_FINDER_CONSTANTS_HH__
 #define __LIBXIPC_FINDER_CONSTANTS_HH__
 
 class FinderConstants {
 public:
-    static const uint16_t FINDER_DEFAULT_PORT() { return (19999); }
-    static const IPv4 FINDER_DEFAULT_HOST() { return IPv4::LOOPBACK(); }
+    static uint16_t FINDER_DEFAULT_PORT()	{ return (19999); }
+    static const IPv4 FINDER_DEFAULT_HOST()	{ return IPv4::LOOPBACK(); }
 };
 
 #endif // __LIBXIPC_FINDER_CONSTANTS_HH__

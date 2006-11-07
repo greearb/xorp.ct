@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.30 2005/03/25 02:53:25 pavlin Exp $"
+#ident "$XORP: xorp/libxipc/finder_client.cc,v 1.31 2006/03/16 00:04:14 pavlin Exp $"
 
 #include <functional>
 #include <algorithm>
@@ -562,7 +562,7 @@ public:
     inline const string& instance_name() const		{ return _ins_name; }
     inline const string& class_name() const		{ return _cls_name; }
     inline const XrlDispatcher* dispatcher() const	{ return _dispatcher; }
-    inline const uint32_t id() const			{ return _id; }
+    inline uint32_t id() const				{ return _id; }
 
 private:
     string		 _ins_name;

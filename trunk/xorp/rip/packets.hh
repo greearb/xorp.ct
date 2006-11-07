@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rip/packets.hh,v 1.23 2006/08/18 07:39:50 pavlin Exp $
+// $XORP: xorp/rip/packets.hh,v 1.24 2006/08/20 06:19:27 pavlin Exp $
 
 #ifndef __RIP_PACKET_ENTRIES_HH__
 #define __RIP_PACKET_ENTRIES_HH__
@@ -63,12 +63,12 @@ public:
      *
      * @return the RIP packet header size.
      */
-    static const size_t size() { return RipPacketHeader::SIZE; }
+    static size_t size()	{ return RipPacketHeader::SIZE; }
 
-    uint8_t command() const { return extract_8(_command); }
-    uint8_t version() const { return extract_8(_version); }
-    uint8_t unused0() const { return extract_8(_unused0); }
-    uint8_t unused1() const { return extract_8(_unused1); }
+    uint8_t command() const	{ return extract_8(_command); }
+    uint8_t version() const	{ return extract_8(_version); }
+    uint8_t unused0() const	{ return extract_8(_unused0); }
+    uint8_t unused1() const	{ return extract_8(_unused1); }
 
     inline bool valid_command() const;
     inline bool valid_version(uint8_t v) const { return version() == v; }
@@ -229,7 +229,7 @@ public:
      *
      * @return the RIP IPv4 route entry size.
      */
-    static const size_t size() { return PacketRouteEntry<IPv4>::SIZE; }
+    static size_t size()	{ return PacketRouteEntry<IPv4>::SIZE; }
 
     inline uint16_t addr_family() const 	{ return extract_16(_af); }
     inline uint16_t tag() const			{ return extract_16(_tag); }
@@ -414,7 +414,7 @@ public:
      *
      * @return the RIP IPv4 plaintext password route entry size.
      */
-    static const size_t size() { return PlaintextPacketRouteEntry4::SIZE; }
+    static size_t size()	{ return PlaintextPacketRouteEntry4::SIZE; }
 
     inline uint16_t addr_family() const		{ return extract_16(_af); }
     inline uint16_t auth_type() const		{ return extract_16(_auth); }
@@ -540,7 +540,7 @@ public:
      *
      * @return the RIP IPv4 MD5 authentication route entry size.
      */
-    static const size_t size() { return MD5PacketRouteEntry4::SIZE; }
+    static size_t size()	{ return MD5PacketRouteEntry4::SIZE; }
 
     inline uint16_t addr_family() const		{ return extract_16(_af); }
     inline uint16_t auth_type() const		{ return extract_16(_auth); }
@@ -673,7 +673,7 @@ public:
      *
      * @return the RIP IPv4 MD5 authentication trailer size.
      */
-    static const size_t size() { return MD5PacketTrailer::SIZE; }
+    static size_t size()	{ return MD5PacketTrailer::SIZE; }
 
     inline uint16_t addr_family() const		{ return extract_16(_af); }
     inline const uint8_t* auth_data() const	{ return _auth_data; }
@@ -782,7 +782,7 @@ public:
      *
      * @return the RIP IPv6 route entry size.
      */
-    static const size_t size() { return PacketRouteEntry<IPv6>::SIZE; }
+    static size_t size()	{ return PacketRouteEntry<IPv6>::SIZE; }
 
     inline bool	    is_nexthop() const;
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer.hh,v 1.40 2006/03/16 00:03:30 pavlin Exp $
+// $XORP: xorp/bgp/peer.hh,v 1.41 2006/05/01 09:17:10 pavlin Exp $
 
 #ifndef __BGP_PEER_HH__
 #define __BGP_PEER_HH__
@@ -123,9 +123,7 @@ public:
     /**
      * Get this peers unique ID.
      */
-    const uint32_t get_unique_id() const {
-	return _unique_id;
-    }
+    uint32_t get_unique_id() const	{ return _unique_id; }
 
     /**
      * Zero all the stats counters.

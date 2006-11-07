@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/peer_handler.hh,v 1.23 2006/04/15 07:10:35 atanu Exp $
+// $XORP: xorp/bgp/peer_handler.hh,v 1.24 2006/10/27 07:17:19 atanu Exp $
 
 #ifndef __BGP_PEER_HANDLER_HH__
 #define __BGP_PEER_HANDLER_HH__
@@ -132,9 +132,7 @@ public:
     /**
      * @return an ID that is unique per peer for use in decision.
      */
-    virtual const uint32_t get_unique_id() const {
-	return _peer->get_unique_id();
-    }
+    virtual uint32_t get_unique_id() const { return _peer->get_unique_id(); }
 
     /**
      * @return the neighbours BGP ID as an integer for use by decision.

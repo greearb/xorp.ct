@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/common/varrw.hh,v 1.8 2006/03/16 00:05:21 pavlin Exp $
+// $XORP: xorp/policy/common/varrw.hh,v 1.10 2006/05/25 05:50:01 pavlin Exp $
 
 #ifndef __POLICY_BACKEND_VARRW_HH__
 #define __POLICY_BACKEND_VARRW_HH__
@@ -102,7 +102,7 @@ public:
      * Return true if trace strings should be generated.
      *
      */
-    inline const bool trace_allowed() { return _allow_trace; }
+    inline bool trace_allowed() const { return _allow_trace; }
 
     /**
      * Support for tracing reads.  Executor will call this.
