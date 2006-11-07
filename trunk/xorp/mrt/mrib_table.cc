@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.15 2005/08/30 06:35:04 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.16 2006/03/16 00:04:47 pavlin Exp $"
 
 
 //
@@ -166,7 +166,7 @@ MribTable::insert(const Mrib& mrib)
 	for (size_t j = 0; j < sizeof(lookup_word)*NBBY; j++) {
 	    MribLookup *parent_mrib_lookup = mrib_lookup;
 	    
-#define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
+#define MRIB_LOOKUP_BITTEST   ((uint32_t)(1 << (sizeof(lookup_word)*NBBY - 1)))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
 		mrib_lookup = mrib_lookup->right_child();
 	    else
