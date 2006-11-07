@@ -15,7 +15,7 @@
 // Portions of this code originally derived from:
 // 	FreeBSD dummynet code, (C) 2001 Luigi Rizzo.
 
-// $XORP: xorp/libxorp/heap.hh,v 1.11 2006/03/16 00:04:29 pavlin Exp $
+// $XORP: xorp/libxorp/heap.hh,v 1.12 2006/08/11 00:57:42 pavlin Exp $
 
 #ifndef __LIBXORP_HEAP_HH__
 #define __LIBXORP_HEAP_HH__
@@ -59,7 +59,7 @@ class HeapBase {
 
 class Heap {
     friend class TimerList;
-private:
+protected:
 typedef TimeVal Heap_Key ;
     struct heap_entry {
 	Heap_Key key;	/* sorting key. Topmost element is smallest one */
