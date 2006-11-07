@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.74 2006/10/27 04:56:18 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.75 2006/11/03 01:14:14 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -477,18 +477,32 @@ gmake check
       XORP appears to run on Linux MontaVista-3.1, but it hasn't been
       tested thoughtfully.
 
-    - Use the following instructions to install cross-compilation tools
-      and use those tools to compile XORP:
+  * IA-64
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on IA-64 machine, so it is unknown
+      whether it will run properly.
 
-      a) Download crosstool from http://kegel.com/crosstool/ and untar
-         it:
+  * MIPS (Broadcom for Linksys WRT54G)
+    - The code is known to cross-compile on Linux, but it is unknown
+      whether the internal tests succeed.
+      XORP itself hasn't been tested on Linksys WRT54, so it is unknown
+      whether it will run properly.
 
-         wget http://kegel.com/crosstool/crosstool-0.42.tar.gz
-         tar zxvf crosstool-0.42.tar.gz
-         cd crosstool-0.42
+  * Instructions for installing crosstool-based cross-compilation tools.
 
-      b) Apply the following patch to demo-armv5b-softfloat.sh
+    Use the following instructions to install cross-compilation tools
+    and use those tools to compile XORP:
 
+    a) Download crosstool from http://kegel.com/crosstool/ and untar it:
+
+       wget http://kegel.com/crosstool/crosstool-0.42.tar.gz
+       tar zxvf crosstool-0.42.tar.gz
+       cd crosstool-0.42
+
+    b) Apply one of the following patches:
+
+       - XScale
          patch < demo-armv5b-softfloat.sh.patch
 
 ----------------------------------------------------------------------
@@ -506,80 +520,7 @@ gmake check
  echo Done.
 ----------------------------------------------------------------------
 
-      c) Compile the toolchain and install it:
-
-         sudo mkdir /opt/crosstool
-         sudo chown $USER /opt/crosstool
-
-         # Unset the LD_LIBRARY_PATH environmetal variable
-         setenv _SAVE_LD_LIBRARY_PATH $LD_LIBRARY_PATH
-         unsetenv LD_LIBRARY_PATH
-
-         # Perform the compilation (it tay take a while)
-         sh demo-armv5b-softfloat.sh
-         cd ..
-
-         # Restore the original LD_LIBRARY_PATH environmetal variable
-         setenv LD_LIBRARY_PATH $_SAVE_LD_LIBRARY_PATH
-         unsetenv _SAVE_LD_LIBRARY_PATH
-
-      d) Set some environmetal variables that will be used later.
-         The values need to be modified appropriately if the tools
-         are installed in different directory.
-
-setenv CROSS_ARCH armv5b-softfloat-linux
-setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
-
-      e) Download openssl from http://www.openssl.org/ and untar it:
-
-         wget http://www.openssl.org/source/openssl-0.9.8d.tar.gz
-         tar zxvf openssl-0.9.8d.tar.gz
-         cd openssl-0.9.8d
-
-      f) Add a line like the following to file "Configure" in the section
-         with other Linux targets. Note that the second field might need
-         to be modified to match the exact path name of the installed
-         cross-compiler.
-
-"armv5b-softfloat-linux",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux/bin/armv5b-softfloat-linux-gcc:-DB_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
-
-      g) Cross-compile openssl and install it:
-
-         ./Configure $CROSS_ARCH
-         make INSTALL_PREFIX=$CROSS_LINUX_ROOT install
-
-      h) Prepare the XORP cross-compilation environment.
-         The first three commands can be skipped if they were done in
-         step (d):
-
-setenv CROSS_ARCH armv5b-softfloat-linux
-setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
-setenv CC ${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc
-setenv CXX ${CROSS_ROOT}/bin/${CROSS_ARCH}-g++
-setenv LD ${CROSS_ROOT}/bin/${CROSS_ARCH}-ld
-setenv RANLIB ${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib
-setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
-
-      i) Cross-compile XORP:
-
-         cd /path/to/xorp/source/code
-         ./configure --host=$CROSS_ARCH --with-openssl=$CROSS_LINUX_ROOT/usr/local/ssl
-         gmake
-
-  * IA-64
-    - The code is known to cross-compile on Linux, but it is unknown
-      whether the internal tests succeed.
-      XORP itself hasn't been tested on IA-64 machine, so it is unknown
-      whether it will run properly.
-
-    - Use the XScale instructions to install cross-compilation tools
-      and use those tools to compile XORP, with the following
-      differences in some of the steps:
-
-      b) Apply the following patch to demo-ia64.sh
-
+       - IA-64
          patch < demo-ia64.sh.patch
 
 ----------------------------------------------------------------------
@@ -596,39 +537,7 @@ setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
  echo Done.
 ----------------------------------------------------------------------
 
-      c) The command to perform the compilation is:
-
-         # Perform the compilation (it tay take a while)
-         sh demo-ia64.sh
-
-      d) The environmental varibles to set before compiling openssl are:
-
-setenv CROSS_ARCH ia64-unknown-linux-gnu
-setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
-
-      f) The line to add to file "Configure" should be like the
-         following:
-
-"ia64-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu/bin/ia64-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK:${ia64_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
-
-      h) The first command to prepare the XORP cross-compilation
-         environment should be:
-
-setenv CROSS_ARCH ia64-unknown-linux-gnu
-
-  * MIPS (Broadcom for Linksys WRT54G)
-    - The code is known to cross-compile on Linux, but it is unknown
-      whether the internal tests succeed.
-      XORP itself hasn't been tested on Linksys WRT54, so it is unknown
-      whether it will run properly.
-
-    - Use the XScale instructions to install cross-compilation tools
-      and use those tools to compile XORP, with the following
-      differences in some of the steps:
-
-      b) Apply the following patch to demo-mipsel.sh
-
+       - MIPS (Broadcom for Linksys WRT54G)
          patch < demo-mipsel.sh.patch
 
 ----------------------------------------------------------------------
@@ -647,26 +556,102 @@ setenv CROSS_ARCH ia64-unknown-linux-gnu
  echo Done.
 ----------------------------------------------------------------------
 
-      c) The command to perform the compilation is:
+    c) Compile the toolchain and install it:
 
-         # Perform the compilation (it tay take a while)
+       sudo mkdir /opt/crosstool
+       sudo chown $USER /opt/crosstool
+
+       # Unset the LD_LIBRARY_PATH environmetal variable
+       setenv _SAVE_LD_LIBRARY_PATH $LD_LIBRARY_PATH
+       unsetenv LD_LIBRARY_PATH
+
+       # Perform the compilation (it tay take a while)
+
+       - XScale
+         sh demo-armv5b-softfloat.sh
+
+       - IA-64
+         sh demo-ia64.sh
+
+       - MIPS (Broadcom for Linksys WRT54G)
          sh demo-mipsel.sh
 
-      d) The environmental varibles to set before compiling openssl are:
+       # Restore the original LD_LIBRARY_PATH environmetal variable
+       cd ..
+       setenv LD_LIBRARY_PATH $_SAVE_LD_LIBRARY_PATH
+       unsetenv _SAVE_LD_LIBRARY_PATH
 
-setenv CROSS_ARCH mipsel-unknown-linux-gnu
-setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
-setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+    d) Set some environmetal variables that will be used later.
+       The values need to be modified appropriately if the tools
+       are installed in different directory.
 
-      f) The line to add to file "Configure" should be like the
-         following:
+       - XScale
+         setenv CROSS_ARCH armv5b-softfloat-linux
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
 
+       - IA-64
+         setenv CROSS_ARCH ia64-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+       - MIPS (Broadcom for Linksys WRT54G)
+         setenv CROSS_ARCH mipsel-unknown-linux-gnu
+         setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+         setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+
+    e) Download openssl from http://www.openssl.org/ and untar it:
+
+       wget http://www.openssl.org/source/openssl-0.9.8d.tar.gz
+       tar zxvf openssl-0.9.8d.tar.gz
+       cd openssl-0.9.8d
+
+    f) Add a line like the following to file "Configure" in the section
+       with other Linux targets. Note that the second field might need
+       to be modified to match the exact path name of the installed
+       cross-compiler.
+
+       - XScale
+"armv5b-softfloat-linux",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/armv5b-softfloat-linux/bin/armv5b-softfloat-linux-gcc:-DB_ENDIAN -DTERMIO -O3 -fomit-frame-pointer -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+       - IA-64
+"ia64-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/ia64-unknown-linux-gnu/bin/ia64-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:SIXTY_FOUR_BIT_LONG RC4_CHUNK:${ia64_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
+
+       - MIPS (Broadcom for Linksys WRT54G)
 "mipsel-unknown-linux-gnu",	"/opt/crosstool/gcc-3.4.5-glibc-2.3.6/mipsel-unknown-linux-gnu/bin/mipsel-unknown-linux-gnu-gcc:-DL_ENDIAN -DTERMIO -O3 -Wall::-D_REENTRANT::-ldl:BN_LLONG BF_PTR:${no_asm}:dlfcn:linux-shared:-fPIC::.so.\$(SHLIB_MAJOR).\$(SHLIB_MINOR)",
 
-      h) The first command to prepare the XORP cross-compilation
-         environment should be:
+    g) Cross-compile openssl and install it:
 
-setenv CROSS_ARCH mipsel-unknown-linux-gnu
+       ./Configure $CROSS_ARCH
+       make INSTALL_PREFIX=$CROSS_LINUX_ROOT install
+
+    h) Prepare the XORP cross-compilation environment.
+       The first three commands can be skipped if they were done in
+       step (d):
+
+       - XScale
+         setenv CROSS_ARCH armv5b-softfloat-linux
+
+       - IA-64
+         setenv CROSS_ARCH ia64-unknown-linux-gnu
+
+       - MIPS (Broadcom for Linksys WRT54G)
+         setenv CROSS_ARCH mipsel-unknown-linux-gnu
+
+       setenv CROSS_ROOT /opt/crosstool/gcc-3.4.5-glibc-2.3.6/${CROSS_ARCH}
+       setenv CROSS_LINUX_ROOT ${CROSS_ROOT}/${CROSS_ARCH}
+       setenv CC ${CROSS_ROOT}/bin/${CROSS_ARCH}-gcc
+       setenv CXX ${CROSS_ROOT}/bin/${CROSS_ARCH}-g++
+       setenv LD ${CROSS_ROOT}/bin/${CROSS_ARCH}-ld
+       setenv RANLIB ${CROSS_ROOT}/bin/${CROSS_ARCH}-ranlib
+       setenv NM ${CROSS_ROOT}/bin/${CROSS_ARCH}-nm
+
+    i) Cross-compile XORP:
+
+       cd /path/to/xorp/source/code
+       ./configure --host=$CROSS_ARCH --with-openssl=$CROSS_LINUX_ROOT/usr/local/ssl
+       gmake
+
 
 4. Performance optimization
 ===========================
