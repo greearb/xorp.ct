@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.11 2006/01/04 05:55:28 pavlin Exp $"
+#ident "$XORP: xorp/rip/xrl_redist_manager.cc,v 1.12 2006/03/16 00:05:54 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 
@@ -93,7 +93,7 @@ public:
 
 protected:
     XrlRedistManager<A>& _xrm;
-    bool		 _attempts;
+    uint32_t		 _attempts;
 };
 
 
