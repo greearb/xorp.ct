@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/libxorp/ref_ptr.hh,v 1.19 2006/03/16 00:04:32 pavlin Exp $
+// $XORP: xorp/libxorp/ref_ptr.hh,v 1.20 2006/10/12 01:24:53 pavlin Exp $
 
 #ifndef __LIBXORP_REF_PTR_HH__
 #define __LIBXORP_REF_PTR_HH__
@@ -120,8 +120,6 @@ public:
  */
 template <class _Tp>
 class ref_ptr {
-public:
-    typedef ref_ptr<const _Tp> const_ref_ptr;
 public:
     /**
      * Construct a reference pointer for object.
@@ -234,12 +232,6 @@ public:
      */
     inline void release() const {
 	unref();
-    }
-
-    inline operator const_ref_ptr()
-    {
-	const_ref_ptr crp(get(), _M_index);
-	return crp;
     }
 
     ref_ptr(_Tp* data, int32_t index) : _M_ptr(data), _M_index(index)
