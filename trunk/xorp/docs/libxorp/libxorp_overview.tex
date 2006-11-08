@@ -1,5 +1,5 @@
 %
-% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.24 2006/08/02 01:21:04 pavlin Exp $
+% $XORP: xorp/docs/libxorp/libxorp_overview.tex,v 1.25 2006/08/02 05:43:33 pavlin Exp $
 %
 
 \documentclass[11pt]{article}
@@ -710,11 +710,12 @@ void xlog_level_set_verbose(xlog_level_t log_level,
 	xlog_verbose_t verbose_level);
 \end{verbatim}
 
-  where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MAX=
-  excluded):
+  where ``log\_level'' is one of the following (\verb=XLOG_LEVEL_MIN=
+  and \verb=XLOG_LEVEL_MAX= excluded):
 
 \begin{verbatim}
 typedef enum {
+    XLOG_LEVEL_MIN = 0,         /* 0 */
     XLOG_LEVEL_FATAL = 0,       /* 0 */
     XLOG_LEVEL_ERROR,           /* 1 */
     XLOG_LEVEL_WARNING,         /* 2 */
