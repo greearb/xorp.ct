@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.10 2006/04/02 23:24:55 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.11 2006/10/12 01:25:08 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -276,22 +276,22 @@ ElemSetAny<T>::type() const
 }
 
 // define the various sets
-template class ElemSetAny<ElemU32>;
 template <> const char* ElemSetU32::id = "set_u32";
 template <> Element::Hash ElemSetU32::_hash = 0;
+template class ElemSetAny<ElemU32>;
 
-template class ElemSetAny<ElemCom32>;
 template <> const char* ElemSetCom32::id = "set_com32";
 template <> Element::Hash ElemSetCom32::_hash = 0;
+template class ElemSetAny<ElemCom32>;
 
-template class ElemSetAny<ElemIPv4Net>;
 template <> const char* ElemSetIPv4Net::id = "set_ipv4net";
 template <> Element::Hash ElemSetIPv4Net::_hash = 0;
+template class ElemSetAny<ElemIPv4Net>;
 
-template class ElemSetAny<ElemIPv6Net>;
 template <> const char* ElemSetIPv6Net::id = "set_ipv6net";
 template <> Element::Hash ElemSetIPv6Net::_hash = 0;
+template class ElemSetAny<ElemIPv6Net>;
 
-template class ElemSetAny<ElemStr>;
 template <> const char* ElemSetStr::id = "set_str";
 template <> Element::Hash ElemSetStr::_hash = 0;
+template class ElemSetAny<ElemStr>;
