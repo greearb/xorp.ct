@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/bgp.cc,v 1.77 2006/07/12 02:35:19 atanu Exp $"
+#ident "$XORP: xorp/bgp/bgp.cc,v 1.78 2006/10/12 01:24:36 pavlin Exp $"
 
 // #define DEBUG_MAXIMUM_DELAY
 // #define DEBUG_LOGGING
@@ -1949,7 +1949,7 @@ BGPMain::set_parameter(const Iptuple& iptuple , const string& parameter,
     
     debug_msg("Peer %s. %s\n", iptuple.str().c_str(),toggle ? "true" :"false");
 
-    BGPPeerData *peerdata = const_cast<BGPPeerData *const>(peer->peerdata());
+    BGPPeerData *peerdata = const_cast<BGPPeerData *>(peer->peerdata());
     if (toggle) {
 	peerdata->add_sent_parameter(node);
     } else {
