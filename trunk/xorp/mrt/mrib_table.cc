@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.16 2006/03/16 00:04:47 pavlin Exp $"
+#ident "$XORP: xorp/mrt/mrib_table.cc,v 1.17 2006/11/07 21:53:17 pavlin Exp $"
 
 
 //
@@ -334,7 +334,7 @@ MribTable::find(const IPvX& lookup_addr) const
 	    if (parent_mrib_lookup->mrib() != NULL)
 		longest_match_mrib = parent_mrib_lookup->mrib();
 	    
-#define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
+#define MRIB_LOOKUP_BITTEST   ((uint32_t)(1 << (sizeof(lookup_word)*NBBY - 1)))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
 		mrib_lookup = mrib_lookup->right_child();
 	    else
@@ -413,7 +413,7 @@ MribTable::find_prefix_mrib_lookup(const IPvXNet& addr_prefix) const
 	uint32_t lookup_word = ntohl(mem_lookup_addr[i]);
 	for (size_t j = 0; j < sizeof(lookup_word)*NBBY; j++) {
 	    
-#define MRIB_LOOKUP_BITTEST	(1 << (sizeof(lookup_word)*NBBY - 1))
+#define MRIB_LOOKUP_BITTEST   ((uint32_t)(1 << (sizeof(lookup_word)*NBBY - 1)))
 	    if (lookup_word & MRIB_LOOKUP_BITTEST)
 		mrib_lookup = mrib_lookup->right_child();
 	    else
