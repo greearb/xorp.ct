@@ -15,7 +15,7 @@
  */
 
 /*
- * $XORP: xorp/libxorp/xlog.h,v 1.12 2006/03/16 00:04:38 pavlin Exp $
+ * $XORP: xorp/libxorp/xlog.h,v 1.13 2006/10/12 01:24:56 pavlin Exp $
  */
 
 
@@ -56,6 +56,7 @@ extern "C" {
  * and @ref xlog_disable()
  */
 typedef enum {
+    XLOG_LEVEL_MIN = 0,		/* 0 */
     XLOG_LEVEL_FATAL = 0,	/* 0 */
     XLOG_LEVEL_ERROR,		/* 1 */
     XLOG_LEVEL_WARNING,		/* 2 */
