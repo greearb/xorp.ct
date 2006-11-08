@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.52 2006/07/24 21:25:42 pavlin Exp $"
+#ident "$XORP: xorp/cli/cli_node_net.cc,v 1.53 2006/08/21 19:38:17 pavlin Exp $"
 
 
 //
@@ -385,12 +385,12 @@ CliClient::start_connection(string& error_msg)
     // Setup the telnet options
     //
     if (is_telnet()) {
-	char will_echo_cmd[] = { IAC, WILL, TELOPT_ECHO, '\0' };
-	char will_sga_cmd[]  = { IAC, WILL, TELOPT_SGA, '\0'  };
-	char dont_linemode_cmd[] = { IAC, DONT, TELOPT_LINEMODE, '\0' };
-	char do_window_size_cmd[] = { IAC, DO, TELOPT_NAWS, '\0' };
-	char do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
-	char will_transmit_binary_cmd[] = { IAC, WILL, TELOPT_BINARY, '\0' };
+	uint8_t will_echo_cmd[] = { IAC, WILL, TELOPT_ECHO, '\0' };
+	uint8_t will_sga_cmd[]  = { IAC, WILL, TELOPT_SGA, '\0'  };
+	uint8_t dont_linemode_cmd[] = { IAC, DONT, TELOPT_LINEMODE, '\0' };
+	uint8_t do_window_size_cmd[] = { IAC, DO, TELOPT_NAWS, '\0' };
+	uint8_t do_transmit_binary_cmd[] = { IAC, DO, TELOPT_BINARY, '\0' };
+	uint8_t will_transmit_binary_cmd[] = { IAC, WILL, TELOPT_BINARY, '\0' };
 
 	send(input_fd(), will_echo_cmd, sizeof(will_echo_cmd), 0);
 	send(input_fd(), will_sga_cmd, sizeof(will_sga_cmd), 0);
