@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.10 2005/04/28 02:35:47 pavlin Exp $"
+#ident "$XORP: xorp/bgp/attribute_manager.cc,v 1.11 2006/03/16 00:03:27 pavlin Exp $"
 
 //#define DEBUG_LOGGING
 #include "bgp_module.h"
@@ -41,20 +41,22 @@ AttributeManager<A>::add_attribute_list(
 	new StoredAttributeList<A>(attribute_list);
     typedef typename set<StoredAttributeList<A>*, Att_Ptr_Cmp<A> >::iterator Iter;
     Iter i = _attribute_lists.find(new_att);
+
     if (i == _attribute_lists.end()) {
 	new_att->clone_data();
 	_attribute_lists.insert(new_att);
 	debug_msg("ATMgr: Inserting new attribute %p\n",
 		  new_att->attribute());
 	return new_att->attribute();
-    } else {
-	(*i)->increase();
-	delete new_att;
-	debug_msg("** (+) ref count for %p now %d\n",
-		  (*i)->attribute(), (*i)->references());
-	return (*i)->attribute();
     }
+
+    (*i)->increase();
+    delete new_att;
+    debug_msg("** (+) ref count for %p now %d\n",
+	      (*i)->attribute(), (*i)->references());
     debug_msg("done\n");
+
+    return (*i)->attribute();
 }
 
 template <class A>
