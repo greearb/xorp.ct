@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.41 2006/08/10 23:14:41 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.42 2006/10/12 01:24:42 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -809,14 +809,16 @@ TestPeer::sendit()
 
     _flying++;
 
+    if (q.st == ERROR) {
+	datain.send_error(_coordinator.c_str(), _server, _genid, q.error,
+			  callback(this, &TestPeer::xrl_callback));
+	return;
+    }
+
     switch(q.len) {
     case 0:
 	datain.send_closed(_coordinator.c_str(), _server, _genid,
 			   callback(this, &TestPeer::xrl_callback));
-	break;
-    case -1:
-	datain.send_error(_coordinator.c_str(), _server, _genid, q.error,
-			  callback(this, &TestPeer::xrl_callback));
 	break;
     default:
 	datain.send_receive(_coordinator.c_str(), _server, _genid,
