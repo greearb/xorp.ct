@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.42 2006/10/12 01:24:42 pavlin Exp $"
+#ident "$XORP: xorp/bgp/harness/test_peer.cc,v 1.43 2006/11/09 07:33:51 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -809,25 +809,30 @@ TestPeer::sendit()
 
     _flying++;
 
+    if (q.len == 0) {
+	//
+	// XXX: Note that we don't consider it an error even if
+	// "q.st == ERROR".
+	// This is needed to preserve the original logic that considers
+	// the case of a peer resetting immediately the TCP
+	// connection not an error.
+	//
+	datain.send_closed(_coordinator.c_str(), _server, _genid,
+			   callback(this, &TestPeer::xrl_callback));
+	return;
+    }
+
     if (q.st == ERROR) {
 	datain.send_error(_coordinator.c_str(), _server, _genid, q.error,
 			  callback(this, &TestPeer::xrl_callback));
 	return;
     }
 
-    switch(q.len) {
-    case 0:
-	datain.send_closed(_coordinator.c_str(), _server, _genid,
-			   callback(this, &TestPeer::xrl_callback));
-	break;
-    default:
-	datain.send_receive(_coordinator.c_str(), _server, _genid,
-			    GOOD == q.st ? true : false,
-			    q.secs, q.micro,
-			    q.v,
-			    callback(this, &TestPeer::xrl_callback));
-	break;
-    }
+    datain.send_receive(_coordinator.c_str(), _server, _genid,
+			GOOD == q.st ? true : false,
+			q.secs, q.micro,
+			q.v,
+			callback(this, &TestPeer::xrl_callback));
 }
 
 void
