@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.13 2006/09/22 07:12:54 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.14 2006/11/10 01:38:29 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -96,16 +96,6 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     // filter new message
     const InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
     
-    //
-    // Check if route was modified by our filters.  If it was, and it was
-    // modified by the static filters, then we need to free the new subnet
-    // route allocated by static filters.
-    //
-    // TODO: do we need to check whether fmsg and new_msg are non-NULL?
-    if (rtmsg.changed() && fmsg != &rtmsg && new_msg != &rtmsg) {
-	rtmsg.route()->unref();
-    }
-
     bool accepted = (new_msg != NULL);
 
     debug_msg("[BGP] Policy route dump accepted: %d\n", accepted);
@@ -179,9 +169,25 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	if (was_filtered) {
 	} else {
 	    XLOG_ASSERT(fmsg != NULL);
+	    //
+	    // XXX: A hack propagating the "not-winner route" flag back to
+	    // the original route.
+	    // The reason we need this hack here is because of an earlier
+	    // hack where the fmsg parent was modified to be NULL.
+	    //
+	    rtmsg.route()->set_is_not_winner();
 	    next->delete_route(*fmsg, this);
 	}
 	res = ADD_FILTERED;
+    }
+
+    //
+    // Check if route was modified by our filters.  If it was, and it was
+    // modified by the static filters, then we need to free the new subnet
+    // route allocated by static filters.
+    //
+    if (rtmsg.changed() && fmsg != &rtmsg && new_msg != &rtmsg) {
+	rtmsg.route()->unref();
     }
 
     if (fmsg != &rtmsg) {
