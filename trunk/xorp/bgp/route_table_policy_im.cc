@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.12 2006/09/21 19:59:48 mjh Exp $"
+#ident "$XORP: xorp/bgp/route_table_policy_im.cc,v 1.13 2006/09/22 07:12:54 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -55,37 +55,39 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     // "old" filter...
     const InternalMessage<A>* fmsg = do_filtering(rtmsg, false);
     bool was_filtered = (fmsg == NULL);
-    if (fmsg && (fmsg->route() == rtmsg.route())) {
-	// fmsg contains the original route, so we need to clone it,
-	// or we'll get bad interactions when we set the policyfilter
-	// on the new route below because the policyfilter is
-	// propagated back to the parent.
-	SubnetRoute<A>* copy_old_rt = new SubnetRoute<A>(*rtmsg.route());
+    if (fmsg != NULL) {
+	if (fmsg->route() == rtmsg.route()) {
+	    // fmsg contains the original route, so we need to clone it,
+	    // or we'll get bad interactions when we set the policyfilter
+	    // on the new route below because the policyfilter is
+	    // propagated back to the parent.
+	    SubnetRoute<A>* copy_old_rt = new SubnetRoute<A>(*rtmsg.route());
 
-	// clear the parent route, so noone downstream can mess up the
-	// metadata on the route still stored in RibIn.
-	copy_old_rt->set_parent_route(NULL);
+	    // clear the parent route, so noone downstream can mess up the
+	    // metadata on the route still stored in RibIn.
+	    copy_old_rt->set_parent_route(NULL);
 
-	InternalMessage<A>* copy_fmsg
-	    = new InternalMessage<A>(copy_old_rt, rtmsg.origin_peer(),
-				     rtmsg.genid());
+	    InternalMessage<A>* copy_fmsg
+		= new InternalMessage<A>(copy_old_rt, rtmsg.origin_peer(),
+					 rtmsg.genid());
 
-	if (rtmsg.changed())
-	    copy_fmsg->set_changed();
-	
-	if (rtmsg.push())
-	    copy_fmsg->set_push();
+	    if (rtmsg.changed())
+		copy_fmsg->set_changed();
 
-	if (rtmsg.from_previous_peering())
-	    copy_fmsg->set_from_previous_peering();
+	    if (rtmsg.push())
+		copy_fmsg->set_push();
 
-	fmsg = copy_fmsg;
-	XLOG_ASSERT(fmsg->route() != rtmsg.route());
-    } else {
-	// the route is already a copy, but we still need to clear the
-	// parent route to prevent anyone downstream modifying the
-	// metadata on the route still stored in RibIn
-	const_cast<SubnetRoute<A>*>(fmsg->route())->set_parent_route(NULL);
+	    if (rtmsg.from_previous_peering())
+		copy_fmsg->set_from_previous_peering();
+
+	    fmsg = copy_fmsg;
+	    XLOG_ASSERT(fmsg->route() != rtmsg.route());
+	} else {
+	    // the route is already a copy, but we still need to clear the
+	    // parent route to prevent anyone downstream modifying the
+	    // metadata on the route still stored in RibIn
+	    const_cast<SubnetRoute<A>*>(fmsg->route())->set_parent_route(NULL);
+	}
     }
 
     // we want current filter
@@ -94,9 +96,12 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
     // filter new message
     const InternalMessage<A>* new_msg = do_filtering(rtmsg, false);
     
-    // check if route was modified by our filters.  If it was, and it was
-    // modified by the static filters, then we need to free the new subnet route
-    // allocated by static filters...
+    //
+    // Check if route was modified by our filters.  If it was, and it was
+    // modified by the static filters, then we need to free the new subnet
+    // route allocated by static filters.
+    //
+    // TODO: do we need to check whether fmsg and new_msg are non-NULL?
     if (rtmsg.changed() && fmsg != &rtmsg && new_msg != &rtmsg) {
 	rtmsg.route()->unref();
     }
@@ -116,6 +121,7 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	    debug_msg("[BGP] Policy add_route [accepted, was filtered]");
 	    res = next->add_route(*new_msg, this);
 	} else {
+	    XLOG_ASSERT(fmsg != NULL);
 	    debug_msg("[BGP] Policy replace_route old=(%s) new=(%s)\n",
 		      fmsg->str().c_str(), new_msg->str().c_str());
 
@@ -172,16 +178,21 @@ PolicyTableImport<A>::route_dump(const InternalMessage<A>& rtmsg,
 	// not accepted
 	if (was_filtered) {
 	} else {
+	    XLOG_ASSERT(fmsg != NULL);
 	    next->delete_route(*fmsg, this);
 	}
 	res = ADD_FILTERED;
     }
 
-    if (fmsg != &rtmsg)
-	delete fmsg;
+    if (fmsg != &rtmsg) {
+	if (fmsg != NULL)
+	    delete fmsg;
+    }
 
-    if (new_msg != &rtmsg)
-	delete new_msg;
+    if (new_msg != &rtmsg) {
+	if (new_msg != NULL)
+	    delete new_msg;
+    }
 
     return res;
 }
