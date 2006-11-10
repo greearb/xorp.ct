@@ -28,7 +28,7 @@
 // notice is a summary of the Click LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/timer.cc,v 1.35 2006/08/12 00:38:36 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/timer.cc,v 1.36 2006/08/14 22:37:11 pavlin Exp $"
 
 
 #include "libxorp_module.h"
@@ -88,9 +88,11 @@ TimerNode::release_ref()
 }
 
 void
-TimerNode::expire(XorpTimer&, void*)
+TimerNode::expire(XorpTimer& xorp_timer, void*)
 {
-    // Implemented by children
+    // XXX: Implemented by children. Might be called only for custom timers.
+    if (! _cb.is_empty())
+	_cb->dispatch(xorp_timer);
 }
 
 bool
