@@ -1,6 +1,6 @@
 dnl -*- sh -*-
 dnl
-dnl $XORP: xorp/configure.in,v 1.181 2006/11/09 01:12:30 pavlin Exp $
+dnl $XORP: xorp/configure.in,v 1.182 2006/11/09 01:22:08 pavlin Exp $
 dnl
 dnl ---------------------------------------------------------------------------
 dnl Process this file with autoconf to produce a configure script.
@@ -37,7 +37,7 @@ dnl ---------------------------------------------------------------------------
 
 AC_INIT(xorp, [1.4-WIP], [feedback@xorp.org])
 AC_PREREQ(2.53)
-AC_REVISION([$XORP: xorp/configure.in,v 1.181 2006/11/09 01:12:30 pavlin Exp $])
+AC_REVISION([$XORP: xorp/configure.in,v 1.182 2006/11/09 01:22:08 pavlin Exp $])
 AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_TARGET
 AC_CONFIG_SUBDIRS(cli/libtecla)
@@ -909,15 +909,14 @@ if test "${GCC}" = "yes" ; then
 	dnl
 	dnl XXX: Intel compiler, although tries to mimic GCC, has different
 	dnl	 warnings handling:
-	dnl	 - It doesn't support most of GCC -W<feature> options,
-	dnl	   XR_TRY_ADD_* macros should handle this, but don't.
+	dnl	 - It doesn't support most of the GCC -W<feature> options.
+	dnl	   The XR_TRY_ADD_* macros should handle this, but they don't.
 	dnl	 - Option -Wall has different meaning than in GCC, it really
-	dnl	   means ALL warnings and remarks compiler knows about.
-	dnl	 - Code doesn't compile yet with -Werror option.
+	dnl	   means ALL warnings and remarks the compiler knows about.
 	dnl
 	if test "${ICC}" = "yes" ; then
-	    CPARANOIDFLAGS=""
-	    CXXPARANOIDFLAGS=""
+	    CPARANOIDFLAGS="-Werror"
+	    CXXPARANOIDFLAGS="-Werror"
 	else
 	    CPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wbad-function-cast -Wmissing-prototypes -Wcast-qual -Wmissing-declarations -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Wnested-externs"
 	    CXXPARANOIDFLAGS="-W -Wall -Wwrite-strings -Wcast-qual -Werror -Wpointer-arith -Wcast-align -Wstrict-prototypes -Woverloaded-virtual -Wtraditional"
