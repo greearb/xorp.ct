@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.76 2006/11/07 03:04:21 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.77 2006/11/07 06:20:19 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -263,6 +263,20 @@ gmake check
   * Linux Fedora Core6 (2.6.18-1.2798.fc6PAE):
     - The code compiles, and the internal tests appear to succeed.
     - gcc (GCC) 4.1.1 20061011 (Red Hat 4.1.1-30)
+
+  * Linux Debian-3.1 (sarge) (2.4.27-3-386)
+    - You must install the following packages:
+      - libssl (e.g., libssl0.9.7)
+      - libssl-dev
+      - gcc (e.g., gcc-3.3)
+      - g++ (e.g., g++-3.3)
+    - The binaries for the GCC C and C++ compilers might not be called
+      gcc/g++, but gcc-3.3 and g++-3.3.
+      Either create a link from gcc to gcc-3.3 and from g++ to g++-3.3,
+      or set the CC and CXX environments to point to the binary names.
+      E.g., in csh/tcsh: setenv CC gcc-3.3; setenv CXX g++-3.3
+    - The code compiles, and the internal tests appear to succeed.
+    - gcc-3.3 (GCC) 3.3.5 (Debian 1:3.3.5-13)
 
   * There is a known problem with building XORP on Linux with gcc-4.0.x
     and optimization enabled. It is a bug in gcc, see XORP Bugzilla #435
