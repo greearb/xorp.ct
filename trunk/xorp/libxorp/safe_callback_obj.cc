@@ -12,7 +12,11 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/safe_callback_obj.cc,v 1.5 2005/03/25 02:53:44 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/safe_callback_obj.cc,v 1.6 2006/03/16 00:04:32 pavlin Exp $"
+
+#include "libxorp_module.h"
+
+#include "libxorp/xorp.h"
 
 #include "safe_callback_obj.hh"
 
