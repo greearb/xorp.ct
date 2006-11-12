@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.13 2006/11/12 00:35:54 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.14 2006/11/12 00:38:51 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -110,8 +110,8 @@ ElemSetAny<T>::operator<(const ElemSetAny<T>& rhs) const
     // for all elements on left to match, the intersection must be equal to
     // the left set.
     Set tmp;
-    set_intersection(_val.begin(),_val.end(),rset.begin(),rset.end(),
-        insert_iterator<Set>(tmp,tmp.begin()));
+    set_intersection(_val.begin(), _val.end(), rset.begin(), rset.end(),
+        insert_iterator<Set>(tmp, tmp.begin()));
 
     return tmp == _val;
 }
