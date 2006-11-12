@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.72 2006/09/22 19:14:51 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/master_conf_tree.cc,v 1.73 2006/10/12 01:25:12 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -414,29 +414,30 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
     // Figure out the dependencies for all the additional modules
     set<string> additional_done;
     while (!additional_modules.empty()) {
-	iter = additional_modules.begin();
-	ModuleCommand* mc = _template_tree->find_module(*iter);
+	set<string>::iterator mod_iter;
+	mod_iter = additional_modules.begin();
+	ModuleCommand* mc = _template_tree->find_module(*mod_iter);
 	if (mc == NULL) {
-	    debug_msg("%s has no info\n", (*iter).c_str());
-	    additional_done.insert(*iter);
-	    additional_modules.erase(iter);
-	    ordered_modules.push_back(*iter);
-	    satisfied.insert(*iter);
+	    debug_msg("%s has no info\n", (*mod_iter).c_str());
+	    additional_done.insert(*mod_iter);
+	    additional_modules.erase(mod_iter);
+	    ordered_modules.push_back(*mod_iter);
+	    satisfied.insert(*mod_iter);
 	    continue;
 	}
 	if (mc->depends().empty()) {
-	    debug_msg("%s has no dependencies\n", (*iter).c_str());
-	    additional_done.insert(*iter);
-	    ordered_modules.push_back(*iter);
-	    satisfied.insert(*iter);
-	    additional_modules.erase(iter);
+	    debug_msg("%s has no dependencies\n", (*mod_iter).c_str());
+	    additional_done.insert(*mod_iter);
+	    ordered_modules.push_back(*mod_iter);
+	    satisfied.insert(*mod_iter);
+	    additional_modules.erase(mod_iter);
 	    continue;
 	}
 
 	list<string>::const_iterator di;
 	for (di = mc->depends().begin(); di != mc->depends().end(); ++di) {
-	    depends.insert(pair<string,string>(*iter, *di));
-	    debug_msg("%s depends on %s\n", iter->c_str(), di->c_str());
+	    depends.insert(pair<string,string>(*mod_iter, *di));
+	    debug_msg("%s depends on %s\n", mod_iter->c_str(), di->c_str());
 	    // Check that the dependency is already in our list of modules.
 	    if (module_set.find(*di) == module_set.end()
 		&& additional_modules.find(*di) == additional_modules.end()
@@ -445,8 +446,8 @@ MasterConfigTree::order_module_list(const set<string>& module_set,
 		additional_modules.insert(*di);
 	    }
 	}
-	additional_done.insert(*iter);
-	additional_modules.erase(iter);
+	additional_done.insert(*mod_iter);
+	additional_modules.erase(mod_iter);
     }
     debug_msg("done additional modules\n");
 
