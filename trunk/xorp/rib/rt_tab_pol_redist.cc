@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_pol_redist.cc,v 1.5 2005/03/25 02:54:23 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_pol_redist.cc,v 1.6 2006/03/16 00:05:38 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -156,7 +156,7 @@ PolicyRedistTable<A>::add_redist(const IPRouteEntry<A>& route,
 				 const Set& protos)
 {
     // send a redistribution request for all protocols in the set.
-    for (Set::iterator i = protos.begin(); i != protos.end(); ++i)
+    for (Set::const_iterator i = protos.begin(); i != protos.end(); ++i)
 	add_redist(route, *i);
 }
 
@@ -167,7 +167,7 @@ PolicyRedistTable<A>::del_redist(const IPRouteEntry<A>& route,
 				 const Set& protos)
 {
     // stop redistribution for all protocols in set.
-    for (Set::iterator i = protos.begin(); i != protos.end(); ++i)
+    for (Set::const_iterator i = protos.begin(); i != protos.end(); ++i)
 	del_redist(route, *i);
 }
 
