@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/BUILD_NOTES,v 1.78 2006/11/11 03:34:34 pavlin Exp $
+# $XORP: xorp/BUILD_NOTES,v 1.79 2006/11/11 16:06:49 pavlin Exp $
 #
 
 	Build Notes for XORP (eXtensible Open Router Platform)
@@ -293,7 +293,7 @@ gmake check
     be used instead.
 
   * Intel C/C++ compiler 9.x can be used to compile XORP on Linux
-    platform. Only linking against GCC runtime has been tested.
+    platform.
 
 3.6. Mac OS X
 =============

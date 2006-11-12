@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.148 2006/11/11 03:34:55 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.149 2006/11/11 16:08:35 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -13,7 +13,7 @@ Release 1.4-WIP (2006/??/??)
       and OpenBSD-4.0.
 
     - XORP now can be compiled with the Intel C/C++ compiler 9.* on
-      Linux. Only linking against GCC runtime has been tested.
+      Linux.
 
     - XORP now can be cross-compiled for XScale, IA-64,
       MIPS (Broadcom for Linksys WRT54G), and sparc64 processors.
