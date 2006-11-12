@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.11 2006/10/12 01:25:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.12 2006/11/08 15:43:18 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -58,7 +58,7 @@ ElemSetAny<T>::str() const
     if(!_val.size())
 	return s;
 
-    for(typename Set::iterator i = _val.begin(); i != _val.end(); ++i) {
+    for(typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
 	s += (*i).str();
         s += ",";
     }
@@ -148,7 +148,7 @@ template <class T>
 bool 
 ElemSetAny<T>::operator>(const T& rhs) const 
 {
-    typename Set::iterator i = _val.find(rhs);
+    typename Set::const_iterator i = _val.find(rhs);
 
     if(i == _val.end())
 	return false;
