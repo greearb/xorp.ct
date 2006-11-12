@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.12 2006/11/08 15:43:18 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/elem_set.cc,v 1.13 2006/11/12 00:35:54 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -31,7 +31,7 @@ ElemSetAny<T>::ElemSetAny(const Set& val) : _val(val)
 template <class T>
 ElemSetAny<T>::ElemSetAny(const char* c_str)
 {
-    if(!c_str)
+    if (!c_str)
 	return;
 
     // create each element in the list
@@ -55,10 +55,10 @@ ElemSetAny<T>::str() const
 {
     string s = "";
 
-    if(!_val.size())
+    if (!_val.size())
 	return s;
 
-    for(typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
+    for (typename Set::const_iterator i = _val.begin(); i != _val.end(); ++i) {
 	s += (*i).str();
         s += ",";
     }
@@ -104,7 +104,7 @@ ElemSetAny<T>::operator<(const ElemSetAny<T>& rhs) const
     const Set& rset = rhs._val;
 
     // left has to be smaller
-    if(_val.size() >= rset.size())
+    if (_val.size() >= rset.size())
 	return false;
 
     // for all elements on left to match, the intersection must be equal to
@@ -150,12 +150,12 @@ ElemSetAny<T>::operator>(const T& rhs) const
 {
     typename Set::const_iterator i = _val.find(rhs);
 
-    if(i == _val.end())
+    if (i == _val.end())
 	return false;
 
     // left has to have at least 2 elements 
     // [so it has more than 1 elements -- size of rhs].
-    if(_val.size() < 2)
+    if (_val.size() < 2)
 	return false;
 
     return true;
