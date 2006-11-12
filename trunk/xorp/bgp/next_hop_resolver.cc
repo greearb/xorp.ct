@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.46 2006/03/16 00:03:29 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.47 2006/10/12 01:24:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -633,7 +633,7 @@ NextHopCache<A>::rpe_to_pe_delete(RealPrefixEntry& rpe, A addr,
     debug_msg("addr %s real prefix_len %d\n", addr.str().c_str(), 
 	      real_prefix_len);
 
-    typename RealPrefixEntry::const_iterator si;
+    typename RealPrefixEntry::iterator si;
 
 #ifdef	DEBUG_LOGGING
     for (si = rpe.begin(); si != rpe.end(); si++)
