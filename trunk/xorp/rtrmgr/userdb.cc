@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.18 2006/04/26 04:42:31 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/userdb.cc,v 1.19 2006/10/12 01:25:13 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 
@@ -40,7 +40,7 @@ User::User(uid_t user_id, const string& username)
 bool 
 User::has_acl_capability(const string& capname) const
 {
-    set<string>::iterator iter;
+    set<string>::const_iterator iter;
 
     iter = _capabilities.find(capname);
     if (iter == _capabilities.end()) {

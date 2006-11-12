@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code.cc,v 1.4 2006/03/16 00:04:57 pavlin Exp $"
+#ident "$XORP: xorp/policy/code.cc,v 1.5 2006/08/09 16:00:07 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -94,19 +94,19 @@ Code::operator+=(const Code& rhs) {
     _code += rhs._code;
 
     // add any new sets.
-    for(set<string>::iterator i = rhs._sets.begin();
+    for(set<string>::const_iterator i = rhs._sets.begin();
         i != rhs._sets.end(); ++i)
 	
 	_sets.insert(*i);
 
     // add tags
-    for(TagSet::iterator i = rhs._tags.begin();
+    for(TagSet::const_iterator i = rhs._tags.begin();
 	i != rhs._tags.end(); ++i)
 
 	_tags.insert(*i);
 
     // add protos
-    for(set<string>::iterator i = rhs._source_protos.begin();
+    for(set<string>::const_iterator i = rhs._source_protos.begin();
 	i != rhs._source_protos.end(); ++i)
 
 	_source_protos.insert(*i);

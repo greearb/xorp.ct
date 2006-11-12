@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.8 2006/08/09 16:00:09 pavlin Exp $"
+#ident "$XORP: xorp/policy/backend/policytags.cc,v 1.9 2006/09/08 18:44:37 mjh Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -64,7 +64,7 @@ PolicyTags::str() const
 {
     ostringstream oss;
 
-    for(Set::iterator i = _tags.begin(); i != _tags.end(); ++i)
+    for(Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i)
 	oss << *i << ", ";
 
     string res = oss.str();
@@ -90,7 +90,7 @@ PolicyTags::xrl_atomlist() const
 {
     XrlAtomList alist;
 
-    for(Set::iterator i = _tags.begin(); i != _tags.end(); ++i) {
+    for(Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
 	uint32_t tag = *i;
 
 	alist.append(XrlAtom(tag));
@@ -103,7 +103,7 @@ Element*
 PolicyTags::element() const
 {
     ElemSetU32* s = new ElemSetU32;
-    for (Set::iterator i = _tags.begin(); i != _tags.end(); ++i) {
+    for (Set::const_iterator i = _tags.begin(); i != _tags.end(); ++i) {
 	ElemU32* e = new ElemU32(*i);
 	s->insert(*e);
     }
@@ -114,7 +114,7 @@ void
 PolicyTags::insert(const PolicyTags& ptags)
 {
     // go through all the elements in ptags and insert them.
-    for(Set::iterator i = ptags._tags.begin();
+    for(Set::const_iterator i = ptags._tags.begin();
 	i != ptags._tags.end(); ++i)
 
 	_tags.insert(*i);

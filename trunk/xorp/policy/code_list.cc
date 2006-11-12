@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_list.cc,v 1.4 2006/03/16 00:04:57 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_list.cc,v 1.5 2006/08/09 16:00:07 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -87,7 +87,7 @@ CodeList::get_tags(const string& protocol, Code::TagSet& tagset) const {
 	const Code::TagSet& ts = c->_tags;
 
 	// insert the tags for this protocol.
-	for(Code::TagSet::iterator j = ts.begin(); j != ts.end(); ++j) 
+	for(Code::TagSet::const_iterator j = ts.begin(); j != ts.end(); ++j) 
 	    tagset.insert(*j);
     }
 }

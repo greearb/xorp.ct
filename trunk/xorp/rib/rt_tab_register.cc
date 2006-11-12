@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.28 2006/03/07 04:10:02 pavlin Exp $"
+#ident "$XORP: xorp/rib/rt_tab_register.cc,v 1.29 2006/03/16 00:05:40 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -58,7 +58,7 @@ RouteRegister<A>::str() const
     else
 	s += "RR Route: NONE \n";
 
-    set<const ModuleData*, ModuleCmp>::iterator mod_iter;
+    set<const ModuleData*, ModuleCmp>::const_iterator mod_iter;
     mod_iter = _modules.begin();
     while (mod_iter != _modules.end()) {
 	s += "RR Module: " + (*mod_iter)->str() + "\n";

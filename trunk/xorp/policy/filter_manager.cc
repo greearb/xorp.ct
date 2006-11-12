@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.11 2006/08/09 16:00:07 pavlin Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.12 2006/09/08 18:44:34 mjh Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -95,7 +95,7 @@ FilterManager::update_tagmap(const string& protocol)
     // convert tags to xrlatomlist
     XrlAtomList al;
 
-    for(TagSet::iterator iter = ts->begin();
+    for(TagSet::const_iterator iter = ts->begin();
 	iter != ts->end(); ++iter) {
    
         al.append(XrlAtom(*iter));	    
@@ -256,7 +256,7 @@ FilterManager::birth(const string& protocol)
 
 	const Code* export_code = (*cmi).second;
 
-	for(set<string>::iterator i = export_code->_source_protos.begin();
+	for(set<string>::const_iterator i = export_code->_source_protos.begin();
 	    i != export_code->_source_protos.end(); ++i) {
 
 	    const string& push_proto = *i;

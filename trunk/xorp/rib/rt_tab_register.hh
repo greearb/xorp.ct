@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rib/rt_tab_register.hh,v 1.14 2005/03/25 02:54:23 pavlin Exp $
+// $XORP: xorp/rib/rt_tab_register.hh,v 1.15 2006/03/16 00:05:40 pavlin Exp $
 
 #ifndef __RIB_RT_TAB_REGISTER_HH__
 #define __RIB_RT_TAB_REGISTER_HH__
@@ -204,7 +204,7 @@ public:
      * the ModuleData as needing nitification.  
      */
     void mark_modules() const {
-	    set<const ModuleData*, ModuleCmp>::iterator i;
+	    set<const ModuleData*, ModuleCmp>::const_iterator i;
 	    for (i = _modules.begin(); i != _modules.end(); ++i)
 		(*i)->set();
     }
