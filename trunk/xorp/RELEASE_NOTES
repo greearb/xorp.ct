@@ -1,5 +1,5 @@
 #
-# $XORP: xorp/RELEASE_NOTES,v 1.149 2006/11/11 16:08:35 pavlin Exp $
+# $XORP: xorp/RELEASE_NOTES,v 1.150 2006/11/12 23:52:05 pavlin Exp $
 #
 
 		XORP RELEASE NOTES
@@ -123,10 +123,17 @@ Release 1.4-WIP (2006/??/??)
       conditions in the "from" block.
 
   MLD/IGMP:
-    - Bug fix related to atomically modifying the IP address of an interface.
+    - Bug fix related to atomically modifying the IP address of an
+      interface.
 
   PIM-SM:
-    - Bug fix related to atomically modifying the IP address of an interface.
+    - Bug fix related to atomically modifying the IP address of an
+      interface.
+
+    - The PIM-SM control messages do not include the IP Router Alert
+      option anymore, because it has been included from the newer
+      revisions of the PIM-SM protocol specification (RFC 4601 and
+      draft-ietf-pim-sm-bsr-09.txt,.ps).
 
   FIB2MRIB:
     - Bug fix related to updating the interface and vif name of a
