@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/pim/pim_vif.cc,v 1.61 2006/07/28 06:07:58 pavlin Exp $"
+#ident "$XORP: xorp/pim/pim_vif.cc,v 1.62 2006/08/15 02:36:55 pavlin Exp $"
 
 
 //
@@ -544,7 +544,11 @@ PimVif::pim_send(const IPvX& src, const IPvX& dst,
     int ret_value;
     size_t datalen;
     int ttl = MINTTL;
-    bool is_router_alert = true;
+    //
+    // XXX: According to newer revisions of the PIM-SM spec, the PIM-SM control
+    // messages don't include the IP Router Alert option.
+    //
+    bool is_router_alert = false;
 
     if (! (is_up() || is_pending_down()))
 	return (XORP_ERROR);
