@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.17 2006/04/07 18:24:51 pavlin Exp $"
+#ident "$XORP: xorp/policy/common/register_operations.cc,v 1.18 2006/10/12 01:25:08 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -118,6 +118,49 @@ DEFINE_BINOP_SWITCHPARAMS(op_gt_sw,<)
 
 DEFINE_BINOP_SWITCHPARAMS(op_le_sw,>=)
 DEFINE_BINOP_SWITCHPARAMS(op_ge_sw,<=)
+
+//
+// Network related operators
+//
+template<class Result, class Left, class Right>
+Element*
+op_lt_net(const Left& x, const Right& y)
+{
+    bool result;
+
+    result = (y.val().contains(x.val()) && (y.val() != x.val()));
+    return new Result(result);
+}
+
+template<class Result, class Left, class Right>
+Element*
+op_gt_net(const Left& x, const Right& y)
+{
+    bool result;
+
+    result = (x.val().contains(y.val()) && (x.val() != y.val()));
+    return new Result(result);
+}
+
+template<class Result, class Left, class Right>
+Element*
+op_le_net(const Left& x, const Right& y)
+{
+    bool result;
+
+    result = y.val().contains(x.val());
+    return new Result(result);
+}
+
+template<class Result, class Left, class Right>
+Element*
+op_ge_net(const Left& x, const Right& y)
+{
+    bool result;
+
+    result = x.val().contains(y.val());
+    return new Result(result);
+}
 
 // 2 template parameters because U can be T or ElemSetAny<T>
 template <class T, class U>
@@ -306,7 +349,15 @@ do {									\
     ADD_BINOP(ElemBool,arg,arg,op_le,Le);				\
     ADD_BINOP(ElemBool,arg,arg,op_ge,Ge);				\
 } while (0)
-   
+
+#define ADD_RELOP_SPECIALIZED(arg, suffix)				\
+do {									\
+    ADD_BINOP(ElemBool,arg,arg,op_lt_##suffix,Lt);			\
+    ADD_BINOP(ElemBool,arg,arg,op_gt_##suffix,Gt);			\
+    ADD_BINOP(ElemBool,arg,arg,op_le_##suffix,Le);			\
+    ADD_BINOP(ElemBool,arg,arg,op_ge_##suffix,Ge);			\
+} while (0)
+
 #define ADD_RELOP2(argl,argr)						\
 do {									\
     ADD_BINOP(ElemBool,argl,argr,op_lt,Lt);				\
@@ -314,7 +365,7 @@ do {									\
     ADD_BINOP(ElemBool,argl,argr,op_le,Le);				\
     ADD_BINOP(ElemBool,argl,argr,op_ge,Ge);				\
 } while (0)
-   
+
 // MATH OPERATORS
 #define ADD_MATHOP(arg)							\
 do {									\
@@ -435,7 +486,7 @@ do {                                                                    \
     // IPV4NET
     ADD_EQOP(ElemIPv4Net);
     ADD_EQOP2(ElemIPv4Net,ElemU32Range);
-    ADD_RELOP(ElemIPv4Net);
+    ADD_RELOP_SPECIALIZED(ElemIPv4Net, net);
     ADD_RELOP2(ElemIPv4Net,ElemU32Range);
     ADD_SETBINOP(ElemSetIPv4Net, ElemIPv4Net);
    
@@ -449,7 +500,7 @@ do {                                                                    \
     // IPV6NET
     ADD_EQOP(ElemIPv6Net);
     ADD_EQOP2(ElemIPv6Net,ElemU32Range);
-    ADD_RELOP(ElemIPv6Net);
+    ADD_RELOP_SPECIALIZED(ElemIPv6Net, net);
     ADD_RELOP2(ElemIPv6Net,ElemU32Range);
     ADD_SETBINOP(ElemSetIPv6Net, ElemIPv6Net);
 }
