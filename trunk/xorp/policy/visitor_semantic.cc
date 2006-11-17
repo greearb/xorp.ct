@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.11 2006/09/08 18:44:36 mjh Exp $"
+#ident "$XORP: xorp/policy/visitor_semantic.cc,v 1.12 2006/10/12 01:25:05 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -171,7 +171,7 @@ VisitorSemantic::visit(NodeAssign& node)
 
     // try assignment
     try {
-	VarRW::Id id = _varmap.var2id(current_protocol(), node.varid());
+	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.varid());
 	_varrw.write(id, *rvalue);
     } catch(SemanticVarRW::var_error e) {
         ostringstream error;
@@ -188,7 +188,7 @@ VisitorSemantic::visit(NodeVar& node)
 {
     // try reading a variable
     try {
-	VarRW::Id id = _varmap.var2id(current_protocol(), node.val());
+	VarRW::Id id = _varmap.var2id(semantic_protocol(), node.val());
 	return &_varrw.read(id);
     } catch(SemanticVarRW::var_error e) {
         ostringstream error;
@@ -267,12 +267,12 @@ VisitorSemantic::visit(NodeProto& node)
 void
 VisitorSemantic::change_protocol(const string& proto)
 {
-    _semantic_proto = proto;
-    _varrw.set_protocol(_semantic_proto);
+    _semantic_protocol = proto;
+    _varrw.set_protocol(_semantic_protocol);
 }
 
 const string&
-VisitorSemantic::current_protocol()
+VisitorSemantic::semantic_protocol()
 {
-    return _semantic_proto;
+    return _semantic_protocol;
 }

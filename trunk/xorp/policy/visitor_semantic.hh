@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/visitor_semantic.hh,v 1.7 2006/09/08 18:44:36 mjh Exp $
+// $XORP: xorp/policy/visitor_semantic.hh,v 1.8 2006/10/12 01:25:05 pavlin Exp $
 
 #ifndef __POLICY_VISITOR_SEMANTIC_HH__
 #define __POLICY_VISITOR_SEMANTIC_HH__
@@ -85,7 +85,7 @@ public:
 
 private:
     void change_protocol(const string& proto);
-    const string& current_protocol();
+    const string& semantic_protocol();
 
     SemanticVarRW& _varrw;
     VarMap& _varmap;
@@ -96,7 +96,7 @@ private:
 
     string _protocol;
     string _current_protocol;
-    string _semantic_proto;
+    string _semantic_protocol;
 
     PolicyType _ptype;
 
