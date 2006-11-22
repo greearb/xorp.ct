@@ -1,4 +1,4 @@
-/* $XORP: xorp/etc/templates/policy.tp,v 1.21 2006/04/19 19:59:26 pavlin Exp $ */
+/* $XORP: xorp/etc/templates/policy.tp,v 1.22 2006/11/06 21:50:55 pavlin Exp $ */
 
 policy {
     targetname: txt = "policy";
@@ -87,7 +87,7 @@ policy {
 
 		network4 {
 		    %help: short "IPv4 network";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=" "exact" "not" "shorter" "longer" "orshorter" "orlonger";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=0&order:txt=$(#)&statement:txt=";
 		}
@@ -128,7 +128,7 @@ policy {
 		%help: short "Conditions to match the destination of a route";
 		network4 {
 		    %help: short "IPv4 network";
-		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=";
+		    %allow-operator: ":" "==" "!=" "<" ">" "<=" ">=" "exact" "not" "shorter" "longer" "orshorter" "orlonger";
 		    %set: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=network4 $(<>) $(@);";
 		    %delete: xrl "$(policy.targetname)/policy/0.1/update_term_block?policy:txt=$(policy-statement.@)&term:txt=$(term.@)&block:u32=1&order:txt=$(#)&statement:txt=";
 		}

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/rtrmgr/config_operators.hh,v 1.4 2005/11/27 05:22:59 pavlin Exp $
+// $XORP: xorp/rtrmgr/config_operators.hh,v 1.5 2006/03/16 00:05:58 pavlin Exp $
 
 #ifndef __RTRMGR_CONFIG_OPERATORS_HH__
 #define __RTRMGR_CONFIG_OPERATORS_HH__
@@ -33,7 +33,13 @@ enum ConfigOperator {
     OP_LTE		= 4,
     OP_GT		= 5,
     OP_GTE		= 6,
-    MAX_COMPARATOR	= OP_GTE,
+    OP_IPNET_EQ		= 7,
+    OP_IPNET_NE		= 8,
+    OP_IPNET_LT		= 9,
+    OP_IPNET_GT		= 10,
+    OP_IPNET_LE		= 11,
+    OP_IPNET_GE		= 12,
+    MAX_COMPARATOR	= OP_IPNET_GE,
     OP_ASSIGN		= 101,
     OP_ADD		= 102,
     OP_SUB		= 103,

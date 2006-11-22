@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/rtrmgr/config_operators.cc,v 1.3 2005/11/27 05:22:59 pavlin Exp $"
+#ident "$XORP: xorp/rtrmgr/config_operators.cc,v 1.4 2006/03/16 00:05:58 pavlin Exp $"
 
 #include "rtrmgr_module.h"
 #include "libxorp/xorp.h"
@@ -41,6 +41,18 @@ operator_to_str(ConfigOperator op)
 	return string(">");
     case OP_GTE:
 	return string(">=");
+    case OP_IPNET_EQ:
+	return string("exact");
+    case OP_IPNET_NE:
+	return string("not");
+    case OP_IPNET_LT:
+	return string("longer");
+    case OP_IPNET_GT:
+	return string("shorter");
+    case OP_IPNET_LE:
+	return string("orlonger");
+    case OP_IPNET_GE:
+	return string("orshorter");
     case OP_ASSIGN:
 	return string(":");
     case OP_ADD:
@@ -68,6 +80,18 @@ lookup_operator(const string& s) throw (ParseError)
 	return OP_GT;
     } else if (s == ">=") {
 	return OP_GTE;
+    } else if (s == "exact") {
+	return OP_IPNET_EQ;
+    } else if (s == "not") {
+	return OP_IPNET_NE;
+    } else if (s == "longer") {
+	return OP_IPNET_LT;
+    } else if (s == "shorter") {
+	return OP_IPNET_GT;
+    } else if (s == "orlonger") {
+	return OP_IPNET_LE;
+    } else if (s == "orshorter") {
+	return OP_IPNET_GE;
     } else if (s == ":") {
 	return OP_ASSIGN;
     } else if (s == "=") {

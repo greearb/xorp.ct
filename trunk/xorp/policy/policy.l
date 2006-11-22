@@ -143,6 +143,12 @@ RE_IPV6NET      {RE_IPV6}\/{RE_IPV6_PREFIXLEN}
 "<"		return YY_LT;
 ">"		return YY_GT;
 
+"exact"		return YY_IPNET_EQ;
+"longer"	return YY_IPNET_LT;
+"shorter"	return YY_IPNET_GT;
+"orlonger"	return YY_IPNET_LE;
+"orshorter"	return YY_IPNET_GE;
+
 "and"		return YY_AND;
 "or"		return YY_OR;
 "xor"		return YY_XOR;

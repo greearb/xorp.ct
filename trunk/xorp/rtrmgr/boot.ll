@@ -218,9 +218,10 @@ RE_URL_SUBDELIMS "!"|"$"|"&"|"'"|"("|")"|"*"|"+"|","|";"|"="
  * operators for arithmetic expressions
  */
 RE_COMPARATOR		"<"|">"|("<"+"=")|(">"+"=")|("="+"=")|("!"+"=")
+RE_IPNET_COMPARATOR	"exact"|"not"|"shorter"|"orshorter"|"longer"|"orlonger"
 RE_BIN_OPERATOR		"+"|"-"|"*"|"/"
 RE_MODIFIER		":"|"add"|"sub"|"set"|"del"|"="
-RE_INFIX_OPERATOR	{RE_COMPARATOR}|{RE_BIN_OPERATOR}|{RE_MODIFIER}
+RE_INFIX_OPERATOR	{RE_COMPARATOR}|{RE_IPNET_COMPARATOR}|{RE_BIN_OPERATOR}|{RE_MODIFIER}
 RE_ARITH_OPERATOR	[" "]*({RE_BIN_OPERATOR})[" "]*
 
 %%

@@ -44,6 +44,7 @@ static ElementFactory _ef;
 
 %left YY_NOT YY_AND YY_XOR YY_OR YY_HEAD YY_CTR YY_NE_INT
 %left YY_EQ YY_NE YY_LE YY_GT YY_LT YY_LE YY_GE
+%left YY_IPNET_EQ YY_IPNET_LE YY_IPNET_GT YY_IPNET_LT YY_IPNET_LE YY_IPNET_GE
 %left YY_ADD YY_SUB
 %left YY_MUL
 
@@ -91,6 +92,14 @@ boolexpr:
 	| expr YY_GT expr { $$ = new NodeBin(new OpGt,$1,$3,_parser_lineno); }
 	| expr YY_LE expr { $$ = new NodeBin(new OpLe,$1,$3,_parser_lineno); }
 	| expr YY_GE expr { $$ = new NodeBin(new OpGe,$1,$3,_parser_lineno); }
+
+	| expr YY_IPNET_EQ expr { $$ = new NodeBin(new OpEq,$1,$3,_parser_lineno); }
+	| expr YY_NOT expr { $$ = new NodeBin(new OpNe,$1,$3,_parser_lineno); }
+	| expr YY_IPNET_LT expr { $$ = new NodeBin(new OpLt,$1,$3,_parser_lineno); }
+	| expr YY_IPNET_GT expr { $$ = new NodeBin(new OpGt,$1,$3,_parser_lineno); }
+	| expr YY_IPNET_LE expr { $$ = new NodeBin(new OpLe,$1,$3,_parser_lineno); }
+	| expr YY_IPNET_GE expr { $$ = new NodeBin(new OpGe,$1,$3,_parser_lineno); }
+
 	| expr YY_NE_INT expr { $$ = new NodeBin(new OpNEInt, $1, $3, _parser_lineno); }
 
 	| YY_LPAR boolexpr YY_RPAR { $$ = $2; }
