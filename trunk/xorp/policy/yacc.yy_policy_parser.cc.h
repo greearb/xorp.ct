@@ -27,18 +27,23 @@
 #define YY_GT 279
 #define YY_LT 280
 #define YY_GE 281
-#define YY_ADD 282
-#define YY_SUB 283
-#define YY_MUL 284
-#define YY_SEMICOLON 285
-#define YY_LPAR 286
-#define YY_RPAR 287
-#define YY_ASSIGN 288
-#define YY_SET 289
-#define YY_REGEX 290
-#define YY_ACCEPT 291
-#define YY_REJECT 292
-#define YY_PROTOCOL 293
+#define YY_IPNET_EQ 282
+#define YY_IPNET_LE 283
+#define YY_IPNET_GT 284
+#define YY_IPNET_LT 285
+#define YY_IPNET_GE 286
+#define YY_ADD 287
+#define YY_SUB 288
+#define YY_MUL 289
+#define YY_SEMICOLON 290
+#define YY_LPAR 291
+#define YY_RPAR 292
+#define YY_ASSIGN 293
+#define YY_SET 294
+#define YY_REGEX 295
+#define YY_ACCEPT 296
+#define YY_REJECT 297
+#define YY_PROTOCOL 298
 typedef union {
 	char *c_str;
 	Node *node;
