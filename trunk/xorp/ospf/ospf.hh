@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.92 2006/03/28 03:06:54 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.93 2006/11/07 18:55:41 pavlin Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -828,6 +828,22 @@ class Ospf {
     PolicyFilters& get_policy_filters() { return _policy_filters; }
 
     /**
+     * Get the Instance ID.
+     */
+    uint8_t get_instance_id() const { 
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _instance_id;
+    }
+
+    /**
+     * Set the Instance ID.
+     */
+    void set_instance_id(uint8_t instance_id) { 
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_instance_id = instance_id;
+    }
+
+    /**
      * Get the Router ID.
      */
     OspfTypes::RouterID get_router_id() const { return _router_id; }
@@ -869,6 +885,8 @@ class Ospf {
     PeerManager<A> _peer_manager;
     RoutingTable<A> _routing_table;
     PolicyFilters _policy_filters;	// The policy filters.
+
+    uint8_t _instance_id;		// OSPFv3 Only
 
     OspfTypes::RouterID _router_id;	// Router ID.
     bool _rfc1583_compatibility;	// Preference rules for route
