@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.30 2006/03/28 03:06:54 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.31 2006/08/10 09:10:25 pavlin Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -147,12 +147,18 @@ class Packet {
     /**
      * Get the Instance ID.
      */
-    uint8_t get_instance_id() const { return _instance_id; }
+    uint8_t get_instance_id() const { 
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	return _instance_id;
+    }
 
     /**
      * Set the Instance ID.
      */
-    void set_instance_id(uint8_t instance_id) { _instance_id = instance_id; }
+    void set_instance_id(uint8_t instance_id) { 
+	XLOG_ASSERT(OspfTypes::V3 == get_version());
+	_instance_id = instance_id;
+    }
 
     /**
      * @return the standard header length for this version of OSPF.
