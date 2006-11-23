@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.240 2006/10/12 01:24:59 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.241 2006/10/16 20:03:47 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -475,14 +475,14 @@ PeerOut<A>::router_id_changing()
 
 template <typename A> 
 bool
-PeerOut<A>::set_interface_id(OspfTypes::AreaID area, uint32_t interface_id)
+PeerOut<A>::set_interface_id(uint32_t interface_id)
 {
-    if (0 == _areas.count(area)) {
-	XLOG_ERROR("Unknown Area %s", pr_id(area).c_str());
-	return false;
+    typename map<OspfTypes::AreaID, Peer<A> *>::const_iterator i;
+    for(i = _areas.begin(); i != _areas.end(); i++) {
+	(*i).second->set_interface_id(interface_id);
     }
 
-    return _areas[area]->set_interface_id(interface_id);
+    return true;
 }
 
 template <typename A>

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.123 2006/10/13 20:26:52 atanu Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.124 2006/11/23 00:29:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -455,6 +455,22 @@ PeerManager<A>::create_peer(const string& interface, const string& vif,
 				    source, interface_prefix_length,
 				    interface_mtu, linktype,
 				    area, area_router->get_area_type());
+
+    switch (_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3: {
+	uint32_t interface_id;
+	if (!_ospf.get_interface_id(interface, interface_id)) {
+	    delete_peer(peerid);
+	    xorp_throw(BadPeer, 
+		       c_format("Unable to get interface ID for %s",
+				interface.c_str()));
+	}
+	_peers[peerid]->set_interface_id(interface_id);
+    }
+	break;
+    }
 
     // Pass in the option to be sent by the hello packet.
     _peers[peerid]->set_options(area,

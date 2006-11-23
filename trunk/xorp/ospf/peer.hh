@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer.hh,v 1.125 2006/03/28 03:06:55 atanu Exp $
+// $XORP: xorp/ospf/peer.hh,v 1.126 2006/06/13 20:54:20 atanu Exp $
 
 #ifndef __OSPF_PEER_HH__
 #define __OSPF_PEER_HH__
@@ -287,7 +287,7 @@ class PeerOut {
     /**
      * Set the interface ID OSPFv3 only.
      */
-    bool set_interface_id(OspfTypes::AreaID area, uint32_t interface_id);
+    bool set_interface_id(uint32_t interface_id);
 
     /**
      * Set the hello interval in seconds.
