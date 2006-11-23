@@ -13,10 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.32 2006/06/15 06:07:27 pavlin Exp $"
+#ident "$XORP: xorp/ospf/xrl_io.cc,v 1.33 2006/10/12 01:25:01 pavlin Exp $"
 
-// #define DEBUG_LOGGING
-// #define DEBUG_PRINT_FUNCTION_NAME
+#define DEBUG_LOGGING
+#define DEBUG_PRINT_FUNCTION_NAME
 
 #include "ospf_module.h"
 
@@ -409,6 +409,21 @@ XrlIO<IPv6>::is_address_enabled(const string& interface, const string& vif,
 	return false;
 
     return (fa->enabled());
+}
+
+template <typename A>
+bool
+XrlIO<A>::get_interface_id(const string& interface, uint32_t& interface_id)
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    const IfMgrIfAtom* fi = ifmgr_iftree().find_if(interface);
+    if (fi == NULL)
+	return false;
+
+    interface_id = fi->pif_index();
+
+    return true;
 }
 
 template <>

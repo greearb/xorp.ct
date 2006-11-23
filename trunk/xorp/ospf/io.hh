@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/io.hh,v 1.19 2005/12/28 18:57:17 atanu Exp $
+// $XORP: xorp/ospf/io.hh,v 1.20 2006/03/28 03:06:53 atanu Exp $
 
 #ifndef __OSPF_IO_HH__
 #define __OSPF_IO_HH__
@@ -147,6 +147,11 @@ class IO : public ServiceBase {
 	_address_status_cb = cb;
     }
 
+    /**
+     * @return prefix length for this address.
+     */
+    virtual bool get_interface_id(const string& interface,
+				  uint32_t& interface_id) = 0;
     /**
      * @return prefix length for this address.
      */

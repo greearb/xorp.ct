@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.94 2006/11/23 00:11:23 atanu Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.95 2006/11/23 00:29:09 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -460,6 +460,11 @@ class Ospf {
     void register_address_status(typename IO<A>::AddressStatusCb cb) {
 	_io->register_address_status(cb);
     }
+
+    /**
+     * Get the interface ID required for OSPFv3.
+     */
+    bool get_interface_id(const string& interface, uint32_t& interface_id);
 
     /**
      * @return prefix length for this address.

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/xrl_io.hh,v 1.20 2006/02/02 01:24:56 pavlin Exp $
+// $XORP: xorp/ospf/xrl_io.hh,v 1.21 2006/03/28 03:06:55 atanu Exp $
 
 #ifndef __OSPF_XRL_IO_HH__
 #define __OSPF_XRL_IO_HH__
@@ -256,6 +256,15 @@ class XrlIO : public IO<A>,
      */
     bool is_address_enabled(const string& interface, const string& vif,
 			    const A& address) const;
+
+    /**
+     * Get the interface ID.
+     *
+     * @param interface the name of the interface.
+     * @param interface_id the value if found..
+     * @return true if the interface ID has been found..
+     */
+    bool get_interface_id(const string& interface, uint32_t& interface_id);
 
     /**
      * Obtain the subnet prefix length for an interface/vif/address.

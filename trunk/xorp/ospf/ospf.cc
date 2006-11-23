@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.75 2006/11/23 00:11:23 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.76 2006/11/23 00:29:09 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -129,6 +129,15 @@ Ospf<A>::enabled(const string& interface, const string& vif, A address)
 	      vif.c_str(), cstring(address));
 
     return _io->is_address_enabled(interface, vif, address);
+}
+
+template <typename A>
+bool
+Ospf<A>::get_interface_id(const string& interface, uint32_t& interface_id)
+{
+    debug_msg("Interface %s\n", interface.c_str());
+
+    return _io->get_interface_id(interface, interface_id);
 }
 
 template <typename A>

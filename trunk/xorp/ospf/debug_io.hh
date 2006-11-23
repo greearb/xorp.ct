@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.15 2005/12/28 18:57:17 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.16 2006/03/28 03:06:53 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -26,7 +26,7 @@ class DebugIO : public IO<A> {
  public:
     DebugIO(TestInfo& info, OspfTypes::Version version, EventLoop& eventloop)
 	: _info(info), _eventloop(eventloop), _packets(0),
-	  _lsa_decoder(version)
+	  _lsa_decoder(version), _next_interface_id(1)
     {
 	initialise_lsa_decoder(version, _lsa_decoder);
 	initialise_packet_decoder(version, _dec, _lsa_decoder);
@@ -165,6 +165,20 @@ class DebugIO : public IO<A> {
     {
 	DOUT(_info) << "enabled(" << interface << "," << vif << ","
 		    << cstring(address) << ")\n";
+
+	return true;
+    }
+
+    bool get_interface_id(const string& interface, uint32_t& interface_id)
+    {
+	DOUT(_info) << "get_interface_id(" << interface << ")\n";
+
+	if (0 == _interface_ids.count(interface)) {
+	    interface_id = _next_interface_id++;
+	    _interface_ids[interface] = interface_id;
+	} else {
+	    interface_id = _interface_ids[interface];
+	}
 
 	return true;
     }
@@ -335,6 +349,9 @@ class DebugIO : public IO<A> {
     LsaDecoder _lsa_decoder;
 
     typename IO<A>::ReceiveCallback _forward_cb;
+
+    uint32_t _next_interface_id;
+    map<string, uint32_t> _interface_ids;
 
     struct DebugRouteEntry {
 	A _nexthop;
