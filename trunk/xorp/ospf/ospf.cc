@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.74 2006/11/23 00:05:41 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.75 2006/11/23 00:11:23 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -202,22 +202,6 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 #endif
 
     return _io->send(interface, vif, dst, src, data, len);
-}
-
-template <typename A>
-bool
-Ospf<A>::set_interface_id(const string& interface, const string& vif,
-			  OspfTypes::AreaID area,
-			  uint32_t interface_id)
-{
-    try {
-	_peer_manager.set_interface_id(_peer_manager.get_peerid(interface,vif),
-				       area, interface_id);
-    } catch(BadPeer& e) {
-	XLOG_ERROR("%s", cstring(e));
-	return false;
-    }
-    return true;
 }
 
 template <typename A>

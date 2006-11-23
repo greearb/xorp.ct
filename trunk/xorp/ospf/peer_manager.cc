@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.122 2006/10/12 01:25:00 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer_manager.cc,v 1.123 2006/10/13 20:26:52 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1154,19 +1154,6 @@ PeerManager<A>::set_interface_address(const PeerID peerid, A address)
     return _peers[peerid]->set_interface_address(address);
 }
 
-template <typename A> 
-bool
-PeerManager<A>::set_interface_id(const PeerID peerid, OspfTypes::AreaID area,
-		 uint32_t interface_id)
-{
-    if (0 == _peers.count(peerid)) {
-	XLOG_ERROR("Unknown PeerID %u", peerid);
-	return false;
-    }
-
-    return _peers[peerid]->set_interface_id(area, interface_id);
-}
-
 template <typename A>
 bool
 PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
@@ -1179,7 +1166,6 @@ PeerManager<A>::set_hello_interval(const PeerID peerid, OspfTypes::AreaID area,
 
     return _peers[peerid]->set_hello_interval(area, hello_interval);
 }
-
 
 template <typename A> 
 bool

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/ospf.hh,v 1.93 2006/11/07 18:55:41 pavlin Exp $
+// $XORP: xorp/ospf/ospf.hh,v 1.94 2006/11/23 00:11:23 atanu Exp $
 
 #ifndef __OSPF_OSPF_HH__
 #define __OSPF_OSPF_HH__
@@ -484,14 +484,7 @@ class Ospf {
     bool leave_multicast_group(const string& interface, const string& vif,
 			       A mcast);
 
-    /**
-     * Set the interface ID OSPFv3 only.
-     */
-    bool set_interface_id(const string& interface, const string& vif,
-			  OspfTypes::AreaID area,
-			  uint32_t interface_id);
-
-    /**
+   /**
      * Set the hello interval in seconds.
      */
     bool set_hello_interval(const string& interface, const string& vif,

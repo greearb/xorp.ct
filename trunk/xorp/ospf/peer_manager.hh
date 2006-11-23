@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/peer_manager.hh,v 1.76 2006/06/12 18:19:49 atanu Exp $
+// $XORP: xorp/ospf/peer_manager.hh,v 1.77 2006/10/13 20:26:52 atanu Exp $
 
 #ifndef __OSPF_PEER_MANAGER_HH__
 #define __OSPF_PEER_MANAGER_HH__
@@ -450,12 +450,6 @@ class PeerManager {
      * Set the interface address of this peer.
      */
     bool set_interface_address(const PeerID, A address);
-
-    /**
-     * Set the interface ID OSPFv3 only.
-     */
-    bool set_interface_id(const PeerID, OspfTypes::AreaID area,
-			  uint32_t interface_id);
 
     /**
      * Set the hello interval in seconds.
