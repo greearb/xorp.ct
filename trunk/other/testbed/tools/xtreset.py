@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 
-# $XORP: other/testbed/tools/xtreset.py,v 1.4 2003/07/23 02:18:02 atanu Exp $
+# $XORP: other/testbed/tools/xtreset.py,v 1.5 2003/07/27 10:34:17 pavlin Exp $
 
 import os
 import getopt
@@ -21,7 +21,7 @@ dict = { "xorp0" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.2"],
          "xorp2" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.3"],
-         "xorp3" : \
+         "bcm0" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.4"],
          "xorp4" : \
            [APCMIBLOC, "xorppwr1", "public", "private", "sPDUOutletCtl.5"],
