@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.24 2006/08/18 22:14:48 pavlin Exp $"
+#ident "$XORP: xorp/libxorp/ipvx.cc,v 1.25 2006/08/18 22:22:30 pavlin Exp $"
 
 #include "xorp.h"
 #include "ipvx.hh"
@@ -377,7 +377,7 @@ IPvX::copy_out(struct sockaddr_in6& to_sockaddr_in6) const
 	if (is_linklocal_unicast()
 	    || is_linklocal_multicast()
 	    || is_interfacelocal_multicast()) {
-	    uint32_t addr0 = ntohs(_addr[0]);
+	    uint32_t addr0 = ntohl(_addr[0]);
 	    uint16_t zoneid = (addr0 & 0xffff);		// XXX: 16 bits only
 	    to_sockaddr_in6.sin6_scope_id = zoneid;
 	}
