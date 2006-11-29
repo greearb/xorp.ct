@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.35 2006/08/30 08:06:20 pavlin Exp $"
+#ident "$XORP: xorp/fea/routing_socket_utils.cc,v 1.36 2006/08/30 21:23:36 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -365,7 +365,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     if ( (sa = rti_info[RTAX_DST]) != NULL) {
 	if (sa->sa_family == family) {
 	    dst_addr.copy_in(*rti_info[RTAX_DST]);
-	    dst_addr = kernel_ipvx_adjust(dst_addr);
+	    dst_addr = kernel_adjust_ipvx_recv(dst_addr);
 	    is_family_match = true;
 	}
     }
@@ -396,7 +396,7 @@ RtmUtils::rtm_get_to_fte_cfg(FteX& fte, const IfTree& iftree,
     if ( (sa = rti_info[RTAX_GATEWAY]) != NULL) {
 	if (sa->sa_family == family) {
 	    nexthop_addr.copy_in(*rti_info[RTAX_GATEWAY]);
-	    nexthop_addr = kernel_ipvx_adjust(nexthop_addr);
+	    nexthop_addr = kernel_adjust_ipvx_recv(nexthop_addr);
 	    is_family_match = true;
 	}
     }

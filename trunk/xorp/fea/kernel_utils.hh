@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/kernel_utils.hh,v 1.4 2006/03/16 00:03:57 pavlin Exp $
+// $XORP: xorp/fea/kernel_utils.hh,v 1.5 2006/08/18 22:26:23 pavlin Exp $
 
 #ifndef __FEA_KERNEL_UTILS_HH__
 #define __FEA_KERNEL_UTILS_HH__
@@ -32,7 +32,7 @@
 //
 #ifdef HAVE_IPV6
 inline IPv6
-kernel_ipv6_adjust(const IPv6& ipv6)
+kernel_adjust_ipv6_recv(const IPv6& ipv6)
 {
 #ifdef IPV6_STACK_KAME
     in6_addr in6_addr;
@@ -45,20 +45,45 @@ kernel_ipv6_adjust(const IPv6& ipv6)
 	return IPv6(in6_addr);
     }
 #endif // IPV6_STACK_KAME
+
     return ipv6;
 }
 #endif // HAVE_IPV6
 
 inline IPvX
-kernel_ipvx_adjust(const IPvX& ipvx)
+kernel_adjust_ipvx_recv(const IPvX& ipvx)
 {
 #ifndef HAVE_IPV6
     return ipvx;
 #else
     if (! ipvx.is_ipv6())
 	return ipvx;
-    return (kernel_ipv6_adjust(ipvx.get_ipv6()));
+    return (kernel_adjust_ipv6_recv(ipvx.get_ipv6()));
 #endif // HAVE_IPV6
 }
+
+//
+// XXX: In case of KAME the local interface index should be set as
+// the link-local scope_id ((for link-local unicast/multicast addresses or
+// interface-local multicast addresses only).
+//
+#ifdef HAVE_IPV6
+inline void
+kernel_adjust_sockaddr_in6_send(struct sockaddr_in6& sin6, uint16_t zoneid)
+{
+#ifdef HAVE_SIN6_SCOPE_ID
+#ifdef IPV6_STACK_KAME
+    if (IN6_IS_ADDR_LINKLOCAL(&sin6.sin6_addr)
+	|| IN6_IS_ADDR_MC_LINKLOCAL(&sin6.sin6_addr)
+	|| IN6_IS_ADDR_MC_NODELOCAL(&sin6.sin6_addr)) {
+	sin6.sin6_scope_id = zoneid;
+    }
+#endif // IPV6_STACK_KAME
+#endif // HAVE_SIN6_SCOPE_ID
+
+    UNUSED(sin6);
+    UNUSED(zoneid);
+}
+#endif // HAVE_IPV6
 
 #endif // __FEA_KERNEL_UTILS_HH__

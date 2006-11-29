@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/rawsock.cc,v 1.37 2006/10/13 04:32:40 pavlin Exp $"
+#ident "$XORP: xorp/fea/rawsock.cc,v 1.38 2006/10/20 00:08:35 pavlin Exp $"
 
 //
 // Raw socket support.
@@ -76,6 +76,7 @@
 #endif
 
 #include "iftree.hh"
+#include "kernel_utils.hh"
 #include "rawsock.hh"
 
 
@@ -2026,8 +2027,9 @@ RawSocket::proto_socket_write(const string& if_name,
 	    _sndiov[0].iov_len = payload.size();
 
 	    // Transmit the packet
-	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
-					      dst_address, error_msg);
+	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+					      src_address, dst_address,
+					      error_msg);
 	    break;
 	}
 
@@ -2067,8 +2069,9 @@ RawSocket::proto_socket_write(const string& if_name,
 
 	if (! do_fragmentation) {
 	    // Transmit the packet
-	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
-					      dst_address, error_msg);
+	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+					      src_address, dst_address,
+					      error_msg);
 	    break;
 	}
 
@@ -2092,8 +2095,9 @@ RawSocket::proto_socket_write(const string& if_name,
 	    vector<uint8_t>& ip_fragment = *iter;
 	    _sndiov[0].iov_len = ip_fragment.size();
 	    memcpy(_sndbuf, &ip_fragment[0], ip_fragment.size());
-	    ret_value = proto_socket_transmit(if_name, vif_name, src_address,
-					      dst_address, error_msg);
+	    ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+					      src_address, dst_address,
+					      error_msg);
 	    if (ret_value != XORP_OK)
 		break;
 	}
@@ -2316,8 +2320,9 @@ RawSocket::proto_socket_write(const string& if_name,
 	_sndiov[0].iov_len  = payload.size();
 
 	// Transmit the packet
-	ret_value = proto_socket_transmit(if_name, vif_name, src_address,
-					  dst_address, error_msg);
+	ret_value = proto_socket_transmit(iftree_if, iftree_vif,
+					  src_address, dst_address,
+					  error_msg);
     }
     break;
 #endif // HAVE_IPV6
@@ -2332,11 +2337,11 @@ RawSocket::proto_socket_write(const string& if_name,
 }
 
 int
-RawSocket::proto_socket_transmit(const string&	if_name,
-				 const string&	vif_name,
-				 const IPvX&	src_address,
-				 const IPvX&	dst_address,
-				 string&	error_msg)
+RawSocket::proto_socket_transmit(const IfTreeInterface* iftree_if,
+				 const IfTreeVif*	iftree_vif,
+				 const IPvX&		src_address,
+				 const IPvX&		dst_address,
+				 string&		error_msg)
 {
     bool setloop = false;
     int ret_value = XORP_OK;
@@ -2359,7 +2364,9 @@ RawSocket::proto_socket_transmit(const string&	if_name,
     // Multicast-related setting
     //
     if (dst_address.is_multicast()) {
-	if (set_default_multicast_interface(if_name, vif_name, error_msg)
+	if (set_default_multicast_interface(iftree_if->ifname(),
+					    iftree_vif->vifname(),
+					    error_msg)
 	    != XORP_OK) {
 	    return (XORP_ERROR);
 	}
@@ -2390,6 +2397,7 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 #ifdef HAVE_IPV6
     case AF_INET6:
 	dst_address.copy_out(_to6);
+	kernel_adjust_sockaddr_in6_send(_to6, iftree_if->pif_index());
 	_sndmh.msg_namelen  = sizeof(_to6);
 	break;
 #endif // HAVE_IPV6
@@ -2410,8 +2418,8 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 				 XORP_UINT_CAST(_sndiov[0].iov_len),
 				 cstring(src_address),
 				 cstring(dst_address),
-				 if_name.c_str(),
-				 vif_name.c_str(),
+				 iftree_if->ifname().c_str(),
+				 iftree_vif->vifname().c_str(),
 				 strerror(errno));
 	}
     }
@@ -2456,8 +2464,8 @@ RawSocket::proto_socket_transmit(const string&	if_name,
 			     XORP_UINT_CAST(_sndiov[0].iov_len),
 			     cstring(src_address),
 			     cstring(dst_address),
-			     if_name.c_str(),
-			     vif_name.c_str(),
+			     iftree_if->ifname().c_str(),
+			     iftree_vif->vifname().c_str(),
 			     win_strerror(GetLastError()));
 	XLOG_ERROR("%s", error_msg.c_str());
     }

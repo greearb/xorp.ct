@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.25 2006/08/02 08:06:43 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_get_proc_linux.cc,v 1.26 2006/08/30 00:39:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -494,7 +494,7 @@ if_fetch_linux_v6(IfConfig& ifc, IfTree& it,
 		addr6p[0], addr6p[1], addr6p[2], addr6p[3],
 		addr6p[4], addr6p[5], addr6p[6], addr6p[7]);
 	lcl_addr = IPv6(addr6);
-	lcl_addr = kernel_ipv6_adjust(lcl_addr);
+	lcl_addr = kernel_adjust_ipv6_recv(lcl_addr);
 	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	
 	// Get the netmask

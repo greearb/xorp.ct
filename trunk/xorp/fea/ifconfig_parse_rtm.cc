@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.28 2006/08/30 06:43:54 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_rtm.cc,v 1.29 2006/08/30 08:10:46 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -609,7 +609,7 @@ rtm_addr_to_fea_cfg(IfConfig& ifc, const struct if_msghdr* ifm, IfTree& it,
 #ifdef HAVE_IPV6
     if (rti_info[RTAX_IFA]->sa_family == AF_INET6) {
 	IPv6 lcl_addr(*rti_info[RTAX_IFA]);
-	lcl_addr = kernel_ipv6_adjust(lcl_addr);
+	lcl_addr = kernel_adjust_ipv6_recv(lcl_addr);
 	fv->add_addr(lcl_addr);
 	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	

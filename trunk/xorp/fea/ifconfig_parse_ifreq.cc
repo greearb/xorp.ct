@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.30 2006/08/29 03:03:46 pavlin Exp $"
+#ident "$XORP: xorp/fea/ifconfig_parse_ifreq.cc,v 1.31 2006/08/30 00:39:43 pavlin Exp $"
 
 #include "fea_module.h"
 
@@ -396,7 +396,7 @@ IfConfigGet::parse_buffer_ifreq(IfTree& it, int family,
 		break;
 	    }
 	}
-	lcl_addr = kernel_ipvx_adjust(lcl_addr);
+	lcl_addr = kernel_adjust_ipvx_recv(lcl_addr);
 	debug_msg("IP address: %s\n", lcl_addr.str().c_str());
 	
 	// Get the netmask

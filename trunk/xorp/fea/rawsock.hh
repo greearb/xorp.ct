@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/fea/rawsock.hh,v 1.10 2006/10/06 20:55:21 pavlin Exp $
+// $XORP: xorp/fea/rawsock.hh,v 1.11 2006/10/14 01:07:14 pavlin Exp $
 
 
 #ifndef __FEA_RAWSOCK_HH__
@@ -362,15 +362,15 @@ private:
     /**
      * Transmit a packet on a protocol socket.
      *
-     * @param if_name the interface to send the packet on.
-     * @param vif_name the vif to send the packet on.
+     * @param iftree_if the interface to send the packet on.
+     * @param iftree_vif the vif to send the packet on.
      * @param src_address the IP source address.
      * @param dst_address the IP destination address.
      * @param error_msg the error message (if error).
      * @return XORP_OK on success, otherwise XORP_ERROR.
      */
-    int		proto_socket_transmit(const string&	if_name,
-				      const string&	vif_name,
+    int		proto_socket_transmit(const IfTreeInterface* iftree_if,
+				      const IfTreeVif*	iftree_vif,
 				      const IPvX&	src_address,
 				      const IPvX&	dst_address,
 				      string&		error_msg);
