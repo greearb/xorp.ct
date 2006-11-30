@@ -64,12 +64,6 @@ namespace {
 "<="		{ return YY_LE; }
 ">="		{ return YY_GE; }
 
-"exact"		{ return YY_IPNET_EQ; }
-"longer"	{ return YY_IPNET_LT; }
-"shorter"	{ return YY_IPNET_GT; }
-"orlonger"	{ return YY_IPNET_LE; }
-"orshorter"	{ return YY_IPNET_GE; }
-
 "NOT"		{ return YY_NOT; }
 "AND"		{ return YY_AND; }
 "XOR"		{ return YY_XOR; }

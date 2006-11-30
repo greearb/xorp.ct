@@ -1,11 +1,8 @@
-#include <stdlib.h>
 #ifndef lint
-#ifdef __unused
-__unused
-#endif
 static char const 
-yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.37 2003/02/12 18:03:55 davidc Exp $";
+yyrcsid[] = "$FreeBSD: src/usr.bin/yacc/skeleton.c,v 1.28.2.1 2001/07/19 05:46:39 peter Exp $";
 #endif
+#include <stdlib.h>
 #define YYBYACC 1
 #define YYMAJOR 1
 #define YYMINOR 9
@@ -85,7 +82,7 @@ typedef union {
 	char *c_str;
 	Node *node;
 } YYSTYPE;
-#line 89 "yacc.yy_policy_parser.cc"
+#line 86 "yacc.yy_policy_parser.cc"
 #define YYERRCODE 256
 #define YY_BOOL 257
 #define YY_INT 258
@@ -444,9 +441,9 @@ int
 yyparse (YYPARSE_PARAM_ARG)
     YYPARSE_PARAM_DECL
 {
-    int yym, yyn, yystate;
+    register int yym, yyn, yystate;
 #if YYDEBUG
-    const char *yys;
+    register const char *yys;
 
     if ((yys = getenv("YYDEBUG")))
     {
@@ -757,7 +754,7 @@ case 46:
 #line 132 "policy.y"
 { yyval.node = new NodeElem(_ef.create(ElemIPv6Net::id,yyvsp[0].c_str),_parser_lineno); free(yyvsp[0].c_str); }
 break;
-#line 761 "yacc.yy_policy_parser.cc"
+#line 758 "yacc.yy_policy_parser.cc"
     }
     yyssp -= yym;
     yystate = *yyssp;

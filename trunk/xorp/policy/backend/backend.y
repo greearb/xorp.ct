@@ -35,7 +35,6 @@ static ElementFactory _ef;
 %token YY_POLICY_START YY_POLICY_END YY_TERM_START YY_TERM_END
 %token YY_PUSH YY_PUSH_SET
 %token YY_EQ YY_NE YY_LT YY_GT YY_LE YY_GE
-%token YY_IPNET_EQ YY_IPNET_LT YY_IPNET_GT YY_IPNET_LE YY_IPNET_GE
 %token YY_NOT YY_AND YY_OR YY_XOR YY_HEAD YY_CTR YY_NE_INT
 %token YY_ADD YY_SUB YY_MUL
 %token YY_ONFALSE_EXIT
@@ -137,12 +136,6 @@ statement:
 	| YY_GT		{ _yy_instructions->push_back(new NaryInstr(new OpGt)); }
 	| YY_LE		{ _yy_instructions->push_back(new NaryInstr(new OpLe)); }
 	| YY_GE		{ _yy_instructions->push_back(new NaryInstr(new OpGe)); }
-
-	| YY_IPNET_EQ	{ _yy_instructions->push_back(new NaryInstr(new OpEq)); }
-	| YY_IPNET_LT	{ _yy_instructions->push_back(new NaryInstr(new OpLt)); }
-	| YY_IPNET_GT	{ _yy_instructions->push_back(new NaryInstr(new OpGt)); }
-	| YY_IPNET_LE	{ _yy_instructions->push_back(new NaryInstr(new OpLe)); }
-	| YY_IPNET_GE	{ _yy_instructions->push_back(new NaryInstr(new OpGe)); }
 
 	| YY_NOT	{ _yy_instructions->push_back(new NaryInstr(new OpNot)); }
 	| YY_AND	{ _yy_instructions->push_back(new NaryInstr(new OpAnd)); }
