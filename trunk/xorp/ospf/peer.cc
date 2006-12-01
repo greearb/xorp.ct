@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/peer.cc,v 1.241 2006/10/16 20:03:47 pavlin Exp $"
+#ident "$XORP: xorp/ospf/peer.cc,v 1.242 2006/11/23 01:55:21 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -1740,6 +1740,14 @@ template <typename A>
 void
 Peer<A>::populate_common_header(Packet& packet)
 {
+    switch(_ospf.get_version()) {
+    case OspfTypes::V2:
+	break;
+    case OspfTypes::V3:
+	packet.set_instance_id(_ospf.get_instance_id());
+	break;
+    }
+
     // Fetch the router ID.
     packet.set_router_id(_ospf.get_router_id());
 
