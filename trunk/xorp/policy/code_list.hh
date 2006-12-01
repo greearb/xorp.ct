@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/policy/code_list.hh,v 1.2 2005/03/25 02:54:06 pavlin Exp $
+// $XORP: xorp/policy/code_list.hh,v 1.3 2006/03/16 00:04:57 pavlin Exp $
 
 #ifndef __POLICY_CODE_LIST_HH__
 #define __POLICY_CODE_LIST_HH__
@@ -30,15 +30,15 @@
 class CodeList {
 public:
     /**
-     * Initialize codelist for a specific protocol.
+     * Initialize codelist.
      *
-     * @param p protocol.
+     * @param policy the policy name.
      */
-    CodeList(const string& p);
+    CodeList(const string& policy);
     ~CodeList();
 
     /**
-     * Append code to the list
+     * Append code to the list.
      * Code is now owned by the code list.
      *
      * @param c code to append. Caller must not delete code.
@@ -46,6 +46,8 @@ public:
     void push_back(Code* c);
 
     /**
+     * Obtain string representation of the code list.
+     *
      * @return string representation of the code list.
      */
     string str() const;
@@ -59,6 +61,8 @@ public:
     void link_code(Code& c) const;
 
     /**
+     * Obtain the set of targets the code list has.
+     *
      * @param targets argument is filled with targets the code list has.
      */
     void get_targets(Code::TargetSet& targets) const;
@@ -72,7 +76,7 @@ public:
     void get_tags(const string& protocol, Code::TagSet& tagset) const;
 
 private:
-    string _policy;
+    string _policy;		// The policy name
 
     typedef list<Code*> ListCode;
 
