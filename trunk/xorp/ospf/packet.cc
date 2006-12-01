@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.33 2006/10/12 01:24:59 pavlin Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.34 2006/12/01 23:02:22 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -41,45 +41,14 @@
 #include "ospf.hh"
 #include "packet.hh"
 
-
 /**
- * XXX - Might make sense to move this into libxorp.
- *     - Rewrite this routine to not perform the intermediate copy and
- *       keep it portable to architectures that don't allow
- *       non-aligned accesses.
- *
- * Compute the IP checksum.
+ * Return the IP checksum in network order.
  */
 inline
 uint16_t
 checksum(uint8_t *ptr, size_t len)
 {
-#if	0
-    // Copy the buffer to be checksumed into a temporary buffer to
-    // deal with alignment and odd number of bytes issues.
-    size_t templen = (len + 1) / 2;
-    uint16_t temp[templen];
-    temp[templen - 1] = 0;// Put a zero at the end if the buffer to
-			  // deal with an odd number of bytes.
-
-    memcpy(&temp[0], ptr, len);
-
-    uint32_t sum = 0;
-    for(size_t i = 0; i < templen; i++) {
-// 	printf("%u %#x\n", i * 2, temp[i]);
-	sum += temp[i];
-    }
-
-    // Fold the carry back in.
-    sum += (sum >> 16) & 0xffff;
-
-    uint16_t result = sum;
-    result ^= 0xffff;
-
-    return htons(result);	// XXX - Fix the callers.
-#else
     return htons(inet_checksum(ptr, len));
-#endif
 }
 
 #ifdef	DEBUG_RAW_PACKETS
