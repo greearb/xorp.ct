@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.30 2006/03/16 00:03:29 pavlin Exp $
+// $XORP: xorp/bgp/next_hop_resolver.hh,v 1.31 2006/11/07 18:55:38 pavlin Exp $
 
 #ifndef __BGP_NEXT_HOP_RESOLVER_HH__
 #define __BGP_NEXT_HOP_RESOLVER_HH__
@@ -150,7 +150,7 @@ public:
      * Call from the RIB to notify us that a metric has changed.
      */
     bool rib_client_route_info_changed(const A& addr,
-				       const uint32_t& real_prefix_len,
+				       const uint32_t& prefix_len,
 				       const A& nexthop,
 				       const uint32_t& metric);
 
@@ -269,7 +269,7 @@ public:
      * Change an entry in the next hop table.
      *
      * @param addr The base address.
-     * @param real_prefix_len The actual prefix_len that this next hop
+     * @param prefix_len The prefix_len that this next hop
      * resolves too. This is only used to match with upcalls from the
      * RIB.
      * @param metric If this route is resolvable its metric.
@@ -277,7 +277,7 @@ public:
      * covered by this entry.
      *
      */
-    map <A, int> change_entry(A addr, int real_prefix_len, uint32_t metric);
+    map <A, int> change_entry(A addr, int prefix_len, uint32_t metric);
 
     /**
      * Delete an entry from the nexthop table.

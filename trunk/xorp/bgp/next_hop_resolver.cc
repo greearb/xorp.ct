@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.47 2006/10/12 01:24:37 pavlin Exp $"
+#ident "$XORP: xorp/bgp/next_hop_resolver.cc,v 1.48 2006/11/12 00:48:26 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -178,16 +178,16 @@ NextHopResolver<A>::lookup(const A nexthop, bool& resolvable,
 template <class A>
 bool
 NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
-						  const uint32_t& real_prefix_len,
+						  const uint32_t& prefix_len,
 						  const A& nexthop,
 						  const uint32_t& metric)
 {
     debug_msg("addr %s prefix_len %u nexthop %s metric %u\n",
-	      addr.str().c_str(), XORP_UINT_CAST(real_prefix_len),
+	      addr.str().c_str(), XORP_UINT_CAST(prefix_len),
 	      nexthop.str().c_str(), XORP_UINT_CAST(metric));
     XLOG_TRACE(_bgp.profile().enabled(trace_nexthop_resolution),
 	       "addr %s prefix_len %u nexthop %s metric %u\n",
-	       addr.str().c_str(), XORP_UINT_CAST(real_prefix_len),
+	       addr.str().c_str(), XORP_UINT_CAST(prefix_len),
 	       nexthop.str().c_str(), XORP_UINT_CAST(metric));
 
     UNUSED(nexthop);
@@ -196,7 +196,7 @@ NextHopResolver<A>::rib_client_route_info_changed(const A& addr,
     ** Change the entries in the cache and make an upcall notifying
     ** the decision code that the metrics have changed.
     */
-    map<A, int> m = _next_hop_cache.change_entry(addr, real_prefix_len, metric);
+    map<A, int> m = _next_hop_cache.change_entry(addr, prefix_len, metric);
     typename map<A, int>::iterator i;
     for (i = m.begin(); i != m.end(); i++)
 	next_hop_changed(i->first);
@@ -401,6 +401,7 @@ NextHopCache<A>::validate_entry(A addr, A nexthop, int prefix_len, int real_pref
     return true;
 }
 
+#if	0
 template<class A>
 map<A, int>
 NextHopCache<A>::change_entry(A addr, int real_prefix_len, uint32_t metric)
@@ -415,6 +416,33 @@ NextHopCache<A>::change_entry(A addr, int real_prefix_len, uint32_t metric)
     XLOG_ASSERT(en);
     XLOG_ASSERT(en->_address == addr);
     XLOG_ASSERT(en->_real_prefix_len == real_prefix_len);
+
+    // Save all the next hops and reference counts that were covered
+    // by this entry.
+    map<A, int> ret = en->_nexthop_references;
+
+    // Update the metric
+    en->_metric = metric;
+
+    return ret;
+}
+#endif
+
+template<class A>
+map<A, int>
+NextHopCache<A>::change_entry(A addr, int prefix_len, uint32_t metric)
+{
+    debug_msg("addr %s prefix_len %d\n", addr.str().c_str(), prefix_len);
+
+    PrefixIterator pi =
+	_next_hop_by_prefix.lookup_node(IPNet<A>(addr, prefix_len));
+    XLOG_ASSERT(pi != _next_hop_by_prefix.end());
+
+    PrefixEntry *en = pi.payload();
+
+    XLOG_ASSERT(en);
+    XLOG_ASSERT(en->_address == addr);
+    XLOG_ASSERT(en->_prefix_len == prefix_len);
 
     // Save all the next hops and reference counts that were covered
     // by this entry.
