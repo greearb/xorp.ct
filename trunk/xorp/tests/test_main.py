@@ -12,7 +12,7 @@
 # notice is a summary of the XORP LICENSE file; the license in that file is
 # legally binding.
 
-# $XORP: xorp/devnotes/template.py,v 1.2 2006/03/24 18:10:47 atanu Exp $
+# $XORP: xorp/tests/test_main.py,v 1.1 2006/06/17 03:07:41 atanu Exp $
 
 # A common main to be used by all test programs plus the entry point into
 # running the tests.
@@ -115,7 +115,7 @@ def run_test(test, single, configure, TESTS, config_module, test_module):
                 conf_funcs.append("UNKNOWN")
                 test_func +=  '(bdir,conf)'
             if i[4] != '':
-                print "debug", i[4][0]
+                print "debug", i[4]
                 for f in i[4]:
                     conf_funcs.append(f + '(bdir)')
                 test_func +=  '()'
