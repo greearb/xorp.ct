@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.32 2006/03/28 03:06:54 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.33 2006/10/12 01:24:59 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -31,6 +31,7 @@
 #include "libxorp/status_codes.h"
 #include "libxorp/service.hh"
 #include "libxorp/eventloop.hh"
+#include "libproto/checksum.h"
 
 #include <map>
 #include <list>
@@ -53,6 +54,7 @@ inline
 uint16_t
 checksum(uint8_t *ptr, size_t len)
 {
+#if	0
     // Copy the buffer to be checksumed into a temporary buffer to
     // deal with alignment and odd number of bytes issues.
     size_t templen = (len + 1) / 2;
@@ -75,6 +77,9 @@ checksum(uint8_t *ptr, size_t len)
     result ^= 0xffff;
 
     return htons(result);	// XXX - Fix the callers.
+#else
+    return htons(inet_checksum(ptr, len));
+#endif
 }
 
 #ifdef	DEBUG_RAW_PACKETS
@@ -211,8 +216,8 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
     if (checksum_inpacket != checksum_actual)
 	xorp_throw(BadPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
-			    checksum_inpacket,
-			    checksum_actual));
+			    checksum_actual,
+			    checksum_inpacket));
 
     // Return the offset at which continued processing can take place.
     return get_standard_header_length();
