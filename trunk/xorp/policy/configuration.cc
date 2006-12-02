@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/configuration.cc,v 1.17 2006/11/01 02:34:57 pavlin Exp $"
+#ident "$XORP: xorp/policy/configuration.cc,v 1.18 2006/11/12 23:37:37 pavlin Exp $"
 
 #include "libxorp/xorp.h"
 
@@ -357,7 +357,7 @@ Configuration::link_sourcematch_code(const Code::Target& target)
     // This will allow the += operator of Code to behave properly. [i.e. link
     // only stuff we really are interested in].
     Code* code = new Code();
-    code->_target = target;
+    code->set_target(target);
 
     // only export statements have source match code.
     // go through all of them and link.
@@ -368,7 +368,7 @@ Configuration::link_sourcematch_code(const Code::Target& target)
     }
 
     // kill previous
-    CodeMap::iterator i = _sourcematch_filters.find(target.protocol);
+    CodeMap::iterator i = _sourcematch_filters.find(target.protocol());
     if(i != _sourcematch_filters.end()) {
 	delete (*i).second;
 	_sourcematch_filters.erase(i);
@@ -376,10 +376,10 @@ Configuration::link_sourcematch_code(const Code::Target& target)
 
 
     // if there is nothing, keep it deleted and empty.
-    if(code->_code == "") 
+    if(code->code() == "") 
         delete code;
     else {
-        _sourcematch_filters[target.protocol] = code;
+        _sourcematch_filters[target.protocol()] = code;
     }	
 }
    
@@ -423,7 +423,7 @@ Configuration::link_code()
 
         const Code::Target& t = *i;
 
-        switch(t.filter) {
+        switch(t.filter()) {
 	    case filter::IMPORT:
 		link_code(t,_imports,_import_filters);
 		break;
@@ -435,7 +435,7 @@ Configuration::link_code()
 	    case filter::EXPORT:
 		link_code(t,_exports,_export_filters);
 		// export policies produce tags, update them.
-		update_tagmap(t.protocol);
+		update_tagmap(t.protocol());
 		break;
 	}
 
@@ -532,7 +532,7 @@ Configuration::link_code(const Code::Target& target,
 			 CodeMap& codemap)
 {
     // find the policy list for the target
-    IEMap::iterator i = iemap.find(target.protocol);
+    IEMap::iterator i = iemap.find(target.protocol());
 
     XLOG_ASSERT(i != iemap.end());
 
@@ -540,24 +540,24 @@ Configuration::link_code(const Code::Target& target,
 
     // create new code and set target, so code may be linked properly
     Code* code = new Code();
-    code->_target = target;
+    code->set_target(target);
 
     // link the code
     pl->link_code(*code);
 
 
     // erase previous code
-    CodeMap::iterator iter = codemap.find(target.protocol);
+    CodeMap::iterator iter = codemap.find(target.protocol());
     if(iter != codemap.end()) {
 	delete (*iter).second;
 	codemap.erase(iter);
     }	   
 
     // if code is empty [no-op filter] just erase it, and keep no entry.
-    if(code->_code == "") 
+    if(code->code() == "") 
         delete code;
     else 
-	codemap[target.protocol] = code;
+	codemap[target.protocol()] = code;
 }
     
 string 

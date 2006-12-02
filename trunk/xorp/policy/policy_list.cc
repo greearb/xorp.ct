@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/policy_list.cc,v 1.6 2006/03/16 00:04:58 pavlin Exp $"
+#ident "$XORP: xorp/policy/policy_list.cc,v 1.7 2006/08/09 16:00:07 pavlin Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -225,7 +225,7 @@ PolicyList::compile_import(PolicyCodeList::iterator& iter,
     (*iter).second = cl;
 
     // target was modified
-    modified_targets.insert(code->_target);
+    modified_targets.insert(code->target());
 }
 
 void 
@@ -260,7 +260,7 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
     (*iter).second = cl;
 
     // export target modified
-    modified_targets.insert(code->_target);
+    modified_targets.insert(code->target());
 
     // we may get a lot of code fragments here:
     // consider a policy where each term has a different source protocol...
@@ -273,9 +273,9 @@ PolicyList::compile_export(PolicyCodeList::iterator& iter, PolicyStatement& ps,
         Code* c = *i;
         cl->push_back(c);
 
-        modified_targets.insert(c->_target);
+        modified_targets.insert(c->target());
 
         // keep track of source protocols in export policy code.
-        code->_source_protos.insert(c->_target.protocol);
+        code->add_source_protocol(c->target().protocol());
     }
 }

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.10 2006/08/09 16:00:08 pavlin Exp $"
+#ident "$XORP: xorp/policy/source_match_code_generator.cc,v 1.11 2006/09/08 18:44:35 mjh Exp $"
 
 #include "policy_module.h"
 #include "libxorp/xorp.h"
@@ -38,7 +38,7 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
     for (i = terms.begin(); i != terms.end(); ++i) {
 	// reset code and sets
 	_os.str("");
-	_code._sets.clear();
+	_code.clear_referenced_set_names();
 
 	Term* term = i->second;
 	// make sure the source of the term has something [non empty source]
@@ -58,7 +58,7 @@ SourceMatchCodeGenerator::visit_policy(PolicyStatement& policy)
  	 i != _codes.end(); ++i) {
 
         Code* c = (*i).second;
-        c->_code += "POLICY_END\n";
+        c->add_code("POLICY_END\n");
 
         _codes_vect.push_back(c);
     }
@@ -72,9 +72,9 @@ SourceMatchCodeGenerator::addTerm(const string& pname)
     // copy the code for the term
     Code* term = new Code();
 
-    term->_target.protocol = _protocol;
-    term->_target.filter = filter::EXPORT_SOURCEMATCH;
-    term->_sets = _code._sets;
+    term->set_target_protocol(_protocol);
+    term->set_target_filter(filter::EXPORT_SOURCEMATCH);
+    term->set_referenced_set_names(_code.referenced_set_names());
 
     // see if we have code for this target already
     CodeMap::iterator i = _codes.find(_protocol);
@@ -84,7 +84,7 @@ SourceMatchCodeGenerator::addTerm(const string& pname)
 	Code* existing = (*i).second;
 
 	// link "raw" code
-	term->_code = _os.str();
+	term->set_code(_os.str());
 	*existing += *term;
 
 	delete term;
@@ -92,7 +92,7 @@ SourceMatchCodeGenerator::addTerm(const string& pname)
     }
 
     // code for a new target, need to create policy start header.
-    term->_code = "POLICY_START " + pname + "\n" + _os.str();
+    term->set_code("POLICY_START " + pname + "\n" + _os.str());
     _codes[_protocol] = term;
 }
 

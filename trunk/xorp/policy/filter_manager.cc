@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/filter_manager.cc,v 1.12 2006/09/08 18:44:34 mjh Exp $"
+#ident "$XORP: xorp/policy/filter_manager.cc,v 1.13 2006/11/12 23:37:37 pavlin Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -48,17 +48,17 @@ FilterManager::FilterManager(const CodeMap& imp,
 void 
 FilterManager::update_filter(const Code::Target& t)
 {
-    switch (t.filter) {
+    switch (t.filter()) {
 	case filter::IMPORT:
-	    update_import_filter(t.protocol);
+	    update_import_filter(t.protocol());
 	    break;
 
 	case filter::EXPORT_SOURCEMATCH:
-	    update_sourcematch_filter(t.protocol);
+	    update_sourcematch_filter(t.protocol());
 	    break;
 
 	case filter::EXPORT:
-	    update_export_filter(t.protocol);
+	    update_export_filter(t.protocol());
 	    break;
     }
 }
@@ -256,8 +256,8 @@ FilterManager::birth(const string& protocol)
 
 	const Code* export_code = (*cmi).second;
 
-	for(set<string>::const_iterator i = export_code->_source_protos.begin();
-	    i != export_code->_source_protos.end(); ++i) {
+	for(set<string>::const_iterator i = export_code->source_protocols().begin();
+	    i != export_code->source_protocols().end(); ++i) {
 
 	    const string& push_proto = *i;
 	
@@ -349,13 +349,13 @@ FilterManager::update_queue(const string& protocol,
     // get the code
     Code* code = (*i).second;
 
-    string conf = code->_code;
+    string conf = code->code();
 
-    set<string>& sets = code->_sets;
+    const set<string>& set_names = code->referenced_set_names();
 
-    // expand the sets
-    for(set<string>::iterator iter = sets.begin();
-        iter != sets.end(); ++iter) {
+    // expand the set names
+    for(set<string>::const_iterator iter = set_names.begin();
+        iter != set_names.end(); ++iter) {
 
 	const string& name = *iter;
         const Element& e = _sets.getSet(*iter);

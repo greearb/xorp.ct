@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.8 2006/04/06 04:33:23 pavlin Exp $"
+#ident "$XORP: xorp/policy/export_code_generator.cc,v 1.9 2006/10/12 01:25:04 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -55,7 +55,7 @@ ExportCodeGenerator::visit_term(Term& term)
         _os << "ONFALSE_EXIT" << endl;
     
 	// update tags used by the code
-	_code._tags.insert(ti.second);
+	_code.add_tag(ti.second);
     }
 
     // do dest block

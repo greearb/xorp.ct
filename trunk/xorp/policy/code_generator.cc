@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_generator.cc,v 1.10 2006/09/08 18:44:34 mjh Exp $"
+#ident "$XORP: xorp/policy/code_generator.cc,v 1.11 2006/10/12 01:25:04 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -31,8 +31,8 @@ CodeGenerator::CodeGenerator(const string& proto,
 			     const VarMap& varmap) : _varmap(varmap)
 {
     _protocol = proto;
-    _code._target.protocol = proto;
-    _code._target.filter = filter;
+    _code.set_target_protocol(proto);
+    _code.set_target_filter(filter);
 }
 
 // constructor for import policies
@@ -40,8 +40,8 @@ CodeGenerator::CodeGenerator(const string& proto, const VarMap& varmap) :
 				_varmap(varmap)
 {
     _protocol = proto;
-    _code._target.protocol = proto;
-    _code._target.filter = filter::IMPORT;
+    _code.set_target_protocol(proto);
+    _code.set_target_filter(filter::IMPORT);
 }
 
 CodeGenerator::~CodeGenerator()
@@ -64,7 +64,7 @@ CodeGenerator::visit_policy(PolicyStatement& policy)
 
     _os << "POLICY_END\n";
 
-    _code._code = _os.str();
+    _code.set_code(_os.str());
     return NULL;
 }
 
@@ -161,7 +161,7 @@ const Element*
 CodeGenerator::visit(NodeSet& node)
 {
     _os << "PUSH_SET " << node.setid() << endl;
-    _code._sets.insert(node.setid());
+    _code.add_referenced_set_name(node.setid());
     return NULL;
 }
 

@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code_list.cc,v 1.6 2006/11/12 23:37:37 pavlin Exp $"
+#ident "$XORP: xorp/policy/code_list.cc,v 1.7 2006/12/01 02:21:53 pavlin Exp $"
 
 #include "policy_module.h"
 
@@ -68,7 +68,7 @@ CodeList::get_targets(Code::TargetSet& targets) const
     // go through all our code and see what targets the code is for
     for (ListCode::const_iterator i = _codes.begin(); i != _codes.end(); ++i) {
 	const Code* c = *i;
-	targets.insert(c->_target);
+	targets.insert(c->target());
     }
 }
 
@@ -80,10 +80,10 @@ CodeList::get_tags(const string& protocol, Code::TagSet& tagset) const
 	const Code* c = *i;
 
 	// we only want tags for specific protocols.
-	if (c->_target.protocol != protocol)
+	if (c->target().protocol() != protocol)
 	    continue;
 
-	const Code::TagSet& ts = c->_tags;
+	const Code::TagSet& ts = c->tags();
 
 	// insert the tags for this protocol.
 	for (Code::TagSet::const_iterator j = ts.begin(); j != ts.end(); ++j) {

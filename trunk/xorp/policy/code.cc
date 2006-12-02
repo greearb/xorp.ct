@@ -12,105 +12,121 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/code.cc,v 1.5 2006/08/09 16:00:07 pavlin Exp $"
+#ident "$XORP: xorp/policy/code.cc,v 1.6 2006/11/12 23:37:37 pavlin Exp $"
+
+#include "policy_module.h"
 
 #include "libxorp/xorp.h"
 
-#include "policy_module.h"
-#include "code.hh"
 #include "policy/common/policy_utils.hh"
 
-bool 
-Code::Target::operator<(const Target& rhs) const {
-    //XXX: i think XOR will do the trick [filter number / protocol]
+#include "code.hh"
 
-    string left,right;
+bool
+Code::Target::operator<(const Target& rhs) const
+{
+    // XXX: I think XOR will do the trick [filter number / protocol]
 
-    left = protocol + policy_utils::to_str(filter);
-    right = rhs.protocol + policy_utils::to_str(rhs.filter);
+    string left, right;
+
+    left = _protocol + policy_utils::to_str(_filter);
+    right = rhs._protocol + policy_utils::to_str(rhs._filter);
 
     return left < right;
 }
 
 bool
-Code::Target::operator==(const Target& rhs) const {
-    if(protocol != rhs.protocol)
+Code::Target::operator==(const Target& rhs) const
+{
+    if (_protocol != rhs._protocol)
 	return false;
 
-    if(filter != rhs.filter)
+    if (_filter != rhs._filter)
 	return false;
 
     return true;
 }
 
 bool
-Code::Target::operator!=(const Target& rhs) const {
+Code::Target::operator!=(const Target& rhs) const
+{
     return !(*this == rhs);
 }
 
 string
-Code::Target::str() const {
+Code::Target::str() const
+{
     string ret = "Protocol: ";
 
-    ret += protocol;
-    ret += ", Filter: " + filter2str(filter);
+    ret += _protocol;
+    ret += ", Filter: " + filter2str(_filter);
 
     return ret;
-    
 }
 
-string 
-Code::str() {
-    string ret = "TARGET proto: " + _target.protocol;
+void
+Code::set_target_protocol(const string& protocol)
+{
+    _target.set_protocol(protocol);
+}
+
+void
+Code::set_target_filter(const filter::Filter& filter)
+{
+    _target.set_filter(filter);
+}
+
+string
+Code::str()
+{
+    string ret = "TARGET proto: " + _target.protocol();
 
     ret += " FILTER: ";
-    ret += filter2str(_target.filter);
+    ret += filter2str(_target.filter());
     ret += "\nCODE:\n";
     ret += _code;
 
     ret += "SETS:";
 
-    for(set<string>::iterator i = _sets.begin();
-	i != _sets.end(); ++i) {
-
+    for (set<string>::iterator i = _referenced_set_names.begin();
+	 i != _referenced_set_names.end();
+	 ++i) {
 	ret += " " + *i;
-    }    
+    }
 
     ret += "\n";
 
     return ret;
-	
 }
 
-
-
-Code& 
-Code::operator+=(const Code& rhs) {
+Code&
+Code::operator+=(const Code& rhs)
+{
     // may only add for same target
-    if(_target != rhs._target)
+    if (_target != rhs._target)
 	return *this;	// do nothing
 
     // add the code [link it]
     _code += rhs._code;
 
     // add any new sets.
-    for(set<string>::const_iterator i = rhs._sets.begin();
-        i != rhs._sets.end(); ++i)
-	
-	_sets.insert(*i);
+    for (set<string>::const_iterator i = rhs._referenced_set_names.begin();
+	 i != rhs._referenced_set_names.end();
+	 ++i) {
+	_referenced_set_names.insert(*i);
+    }
 
     // add tags
-    for(TagSet::const_iterator i = rhs._tags.begin();
-	i != rhs._tags.end(); ++i)
-
+    for (TagSet::const_iterator i = rhs._tags.begin();
+	 i != rhs._tags.end(); ++i) {
 	_tags.insert(*i);
+    }
 
     // add protos
-    for(set<string>::const_iterator i = rhs._source_protos.begin();
-	i != rhs._source_protos.end(); ++i)
-
-	_source_protos.insert(*i);
-
+    for (set<string>::const_iterator i = rhs._source_protocols.begin();
+	 i != rhs._source_protocols.end(); ++i) {
+	_source_protocols.insert(*i);
+    }
 
     return *this;	
 }

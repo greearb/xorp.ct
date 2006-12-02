@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.9 2006/03/16 00:05:23 pavlin Exp $"
+#ident "$XORP: xorp/policy/test/compilepolicy.cc,v 1.10 2006/10/12 01:25:09 pavlin Exp $"
 
 /*
  * EXIT CODES:
@@ -74,12 +74,12 @@ void print_code(Code& c) {
 	os = code_out;
 
     
-    *os << c._code;
+    *os << c.code();
 
-    set<string>& sets = c._sets;
+    const set<string>& set_names = c.referenced_set_names();
 
-    for(set<string>::iterator i = sets.begin();
-	i != sets.end(); ++i) {
+    for(set<string>::const_iterator i = set_names.begin();
+	i != set_names.end(); ++i) {
     
 	*os << "SET " << *i << " \"";
 
