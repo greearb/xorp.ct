@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.32 2006/11/23 00:03:13 atanu Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.33 2006/12/02 00:00:30 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -29,11 +29,12 @@ class Packet {
     static const size_t STANDARD_HEADER_V2 = 24;
     static const size_t STANDARD_HEADER_V3 = 16;
 
+    static const size_t CHECKSUM_OFFSET = 12;
+
     // OSPFv2 only.
     static const size_t AUTH_TYPE_OFFSET = 14;
     static const size_t AUTH_PAYLOAD_OFFSET = 16;
     static const size_t AUTH_PAYLOAD_SIZE = 8;
-    static const size_t CHECKSUM_OFFSET = 12;
 
     Packet(OspfTypes::Version version)
 	: _version(version), _auth_type(0), _instance_id(0)
