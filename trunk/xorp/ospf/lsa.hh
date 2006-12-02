@@ -12,7 +12,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/lsa.hh,v 1.79 2006/02/03 21:26:19 atanu Exp $
+// $XORP: xorp/ospf/lsa.hh,v 1.80 2006/03/28 03:06:54 atanu Exp $
 
 #ifndef __OSPF_LSA_HH__
 #define __OSPF_LSA_HH__
@@ -69,12 +69,12 @@ class Lsa_header {
     /**
      * Decode a LSA header and return a LSA header inline not a pointer.
      */
-    Lsa_header decode(uint8_t *ptr) const throw(BadPacket);
+    Lsa_header decode(uint8_t *ptr) const throw(InvalidPacket);
 
     /**
      * Decode this lsa header in this context.
      */
-    void decode_inline(uint8_t *ptr) throw(BadPacket);
+    void decode_inline(uint8_t *ptr) throw(InvalidPacket);
 
     /**
      * Copy a wire format representation to the pointer provided.
@@ -176,7 +176,7 @@ class Lsa_header {
     string str() const;
 
  private:
-    void decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket);
+    void decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket);
 
     OspfTypes::Version _version;
     uint16_t 	_LS_age;
@@ -325,7 +325,7 @@ class Lsa {
      * @return A reference to an LSA that manages its own memory.
      */
     virtual LsaRef decode(uint8_t *buf, size_t& len) const 
-	throw(BadPacket) = 0;
+	throw(InvalidPacket) = 0;
 
     /**
      * Encode an LSA for transmission.
@@ -589,7 +589,7 @@ class LsaDecoder {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) const throw(BadPacket);
+    Lsa::LsaRef decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket);
 
     /**
      * @return The length of the smallest LSA that can be decoded.
@@ -724,7 +724,7 @@ class RouterLink {
      * @return A RouterLink.
      */
     RouterLink
-    decode(uint8_t *ptr, size_t& len) const throw(BadPacket);
+    decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket);
     
     /**
      * Copy a wire format representation to the pointer provided.
@@ -883,7 +883,7 @@ class RouterLsa : public Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
 
     bool encode();
 
@@ -1023,7 +1023,7 @@ class NetworkLsa : public Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
 
     bool encode();
 
@@ -1125,7 +1125,7 @@ class SummaryNetworkLsa : public Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
 
     bool encode();
 
@@ -1241,7 +1241,7 @@ class SummaryRouterLsa : public Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
 
     bool encode();
 
@@ -1365,7 +1365,7 @@ class ASExternalLsa : public Lsa {
      *
      * @return A reference to an LSA that manages its own memory.
      */
-    LsaRef decode(uint8_t *buf, size_t& len) const throw(BadPacket);
+    LsaRef decode(uint8_t *buf, size_t& len) const throw(InvalidPacket);
 
     bool encode();
 
@@ -1679,7 +1679,7 @@ class Ls_request {
      * Decode a Link State Request and return value inline not a pointer.
      */
     Ls_request
-    decode(uint8_t *ptr) throw(BadPacket);
+    decode(uint8_t *ptr) throw(InvalidPacket);
 
     /**
      * Copy a wire format representation to the pointer provided.

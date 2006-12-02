@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/packet.cc,v 1.34 2006/12/01 23:02:22 atanu Exp $"
+#ident "$XORP: xorp/ospf/packet.cc,v 1.35 2006/12/01 23:10:13 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -71,7 +71,7 @@ dump_packet(uint8_t *ptr, size_t len)
 /* Packet */
 
 size_t
-Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
+Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket)
 {
     debug_msg("ptr %p len %u\n", ptr, XORP_UINT_CAST(len));
 #ifdef	DEBUG_RAW_PACKETS
@@ -85,7 +85,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
     // Make sure that at least two bytes have been extracted:
     // Version and Type fields.
     if (len < 2)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(2)));
@@ -99,7 +99,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 	version = OspfTypes::V3;
 	break;
     default:
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Version mismatch expected %u received %u",
 			    get_version(),
 			    ptr[0] & 0xff));
@@ -107,7 +107,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
     }
 
     if (ptr[1] != get_type())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Type mismatch expected %u received %u",
 			    get_type(),
 			    ptr[1]));
@@ -116,13 +116,13 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
     switch(version) {
     case OspfTypes::V2:
 	if (len < STANDARD_HEADER_V2)
-	    xorp_throw(BadPacket,
+	    xorp_throw(InvalidPacket,
 		       c_format("Packet too short %u, must be at least %u",
 				XORP_UINT_CAST(len),
 				XORP_UINT_CAST(STANDARD_HEADER_V2)));
     case OspfTypes::V3:
 	if (len < STANDARD_HEADER_V3)
-	    xorp_throw(BadPacket,
+	    xorp_throw(InvalidPacket,
 		       c_format("Packet too short %u, must be at least %u",
 				XORP_UINT_CAST(len),
 				XORP_UINT_CAST(STANDARD_HEADER_V3)));
@@ -134,7 +134,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
     if (packet_length != len) {
 	// If the frame is too small complain.
 	if (len < packet_length)
-	    xorp_throw(BadPacket,
+	    xorp_throw(InvalidPacket,
 		       c_format("Packet length expected %u received %u",
 			    packet_length,
 			    XORP_UINT_CAST(len)));
@@ -183,7 +183,7 @@ Packet::decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket)
 	return get_standard_header_length();
     
     if (checksum_inpacket != checksum_actual)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Checksum mismatch expected %#x received %#x",
 			    checksum_actual,
 			    checksum_inpacket));
@@ -312,12 +312,12 @@ PacketDecoder::register_decoder(Packet *packet)
 }
 
 Packet *
-PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
+PacketDecoder::decode(uint8_t *ptr, size_t len) throw(InvalidPacket)
 {
     // Make sure that at least two bytes have been extracted:
     // Version and Type fields.
     if (len < 2)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(2)));
@@ -331,7 +331,7 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
 	version = OspfTypes::V3;
 	break;
     default:
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Unknown OSPF Version %u", ptr[0] & 0xff));
 	break;
     }
@@ -353,7 +353,7 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
     }
     
     if (bad)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("OSPF Version %u Unknown Type %u", version, type));
     
     Packet *packet = i->second;
@@ -364,7 +364,7 @@ PacketDecoder::decode(uint8_t *ptr, size_t len) throw(BadPacket)
 /* HelloPacket */
 
 Packet *
-HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
+HelloPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -375,7 +375,7 @@ HelloPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     // Verify that this packet is large enough, up to but not including
     // any neighbours.
     if ((len - offset) < MINIMUM_LENGTH)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(offset + MINIMUM_LENGTH)));
@@ -512,7 +512,7 @@ HelloPacket::str() const
 /* Database Description packet */
 
 Packet *
-DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
+DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -523,7 +523,7 @@ DataDescriptionPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     // Verify that this packet is large enough, up to but not including
     // any neighbours.
     if ((len - offset) < minimum_length())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(offset + minimum_length())));
@@ -669,7 +669,7 @@ DataDescriptionPacket::str() const
 /* Link State Request Packet */
 
 Packet *
-LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
+LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -682,7 +682,7 @@ LinkStateRequestPacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     // Verify that this packet is large enough, a standard header plus
     // at least one request
     if ((len - offset) < ls.length())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(offset + ls.length())));
@@ -757,7 +757,7 @@ LinkStateRequestPacket::str() const
 /* Link State Update Packet */
 
 Packet *
-LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
+LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -771,7 +771,7 @@ LinkStateUpdatePacket::decode(uint8_t *ptr, size_t len) const throw(BadPacket)
     size_t min_length = _lsa_decoder.min_length();
 
     if ((len - offset) < min_length)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(offset + min_length)));
@@ -880,7 +880,7 @@ LinkStateUpdatePacket::str() const
 
 Packet *
 LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
-    throw(BadPacket)
+    throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -892,7 +892,7 @@ LinkStateAcknowledgementPacket::decode(uint8_t *ptr, size_t len) const
     // Verify that this packet is large enough to hold the at least
     // one LSA header.
     if ((len - offset) < Lsa_header::length())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Packet too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(offset + Lsa_header::length())));

@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/lsa.cc,v 1.71 2006/10/12 01:24:59 pavlin Exp $"
+#ident "$XORP: xorp/ospf/lsa.cc,v 1.72 2006/10/16 06:50:04 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -89,12 +89,12 @@ bytes_per_prefix(uint8_t prefix)
  */
 inline
 IPNet<IPv6>
-get_ipv6_net(const char *caller, uint8_t *ptr, uint8_t prefix) throw(BadPacket)
+get_ipv6_net(const char *caller, uint8_t *ptr, uint8_t prefix) throw(InvalidPacket)
 {
     uint8_t addr[IPv6::ADDR_BITLEN / 8];
     uint32_t bytes = bytes_per_prefix(prefix);
     if (bytes > sizeof(addr)) 
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("%s prefix length %u larger than 16",
 			    caller,
 			    bytes));
@@ -131,17 +131,17 @@ inline
 size_t
 get_lsa_len_from_header(const char *caller, uint8_t *buf, size_t len,
 			size_t min_len)
-    throw(BadPacket)
+    throw(InvalidPacket)
 {
     size_t tlen = Lsa_header::get_lsa_len_from_buffer(buf);
     if (tlen > len) {
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("%s header len %u larger than buffer %u",
 			    caller,
 			    XORP_UINT_CAST(tlen),
 			    XORP_UINT_CAST(len)));
     } else if(tlen < min_len) {
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("%s header len %u smaller than minimum LSA "
 			    "of this type %u",
 			    caller,
@@ -161,7 +161,7 @@ Lsa_header::get_lsa_len_from_buffer(uint8_t *ptr)
 }
 
 void
-Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
+Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -193,7 +193,7 @@ Lsa_header::decode(Lsa_header& header, uint8_t *ptr) const throw(BadPacket)
  * enough space by calling the length() method.
  */
 Lsa_header
-Lsa_header::decode(uint8_t *ptr) const throw(BadPacket)
+Lsa_header::decode(uint8_t *ptr) const throw(InvalidPacket)
 {
      Lsa_header header(get_version());
      decode(header, ptr);
@@ -202,7 +202,7 @@ Lsa_header::decode(uint8_t *ptr) const throw(BadPacket)
 }
 
 void
-Lsa_header::decode_inline(uint8_t *ptr) throw(BadPacket)
+Lsa_header::decode_inline(uint8_t *ptr) throw(InvalidPacket)
 {
     decode(*this, ptr);
 }
@@ -381,7 +381,7 @@ Lsa::set_ls_age(uint16_t age)
  * enough space by calling the length() method.
  */
 Ls_request
-Ls_request::decode(uint8_t *ptr) throw(BadPacket)
+Ls_request::decode(uint8_t *ptr) throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -465,13 +465,13 @@ LsaDecoder::register_decoder(Lsa *lsa)
 }
 
 Lsa::LsaRef
-LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
+LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
     Lsa_header header(version);
 
     if (len < header.length())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(header.length())));
@@ -485,7 +485,7 @@ LsaDecoder::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
     uint16_t type = header.get_ls_type();
     i = _lsa_decoders.find(type);
     if (i == _lsa_decoders.end())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("OSPF Version %u Unknown LSA Type %#x",
 			    version, type));
     
@@ -512,10 +512,10 @@ RouterLink::length() const
 }
 
 RouterLink
-RouterLink::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
+RouterLink::decode(uint8_t *ptr, size_t& len) const throw(InvalidPacket)
 {
     if (len < length())
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("RouterLink too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(length())));
@@ -547,7 +547,7 @@ RouterLink::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
 	    link.set_type(vlink);
 	    break;
 	default:
-	    xorp_throw(BadPacket,
+	    xorp_throw(InvalidPacket,
 		   c_format("RouterLink illegal type should be 0..4 not %u",
 			    XORP_UINT_CAST(type)));
 		break;
@@ -572,7 +572,7 @@ RouterLink::decode(uint8_t *ptr, size_t& len) const throw(BadPacket)
 	    link.set_type(vlink);
 	    break;
 	default:
-	    xorp_throw(BadPacket,
+	    xorp_throw(InvalidPacket,
 	    c_format("RouterLink illegal type should be 1,2 or 4 not %u",
 			    XORP_UINT_CAST(type)));
 		break;
@@ -675,7 +675,7 @@ RouterLink::str() const
 }
 
 Lsa::LsaRef
-RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+RouterLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -683,7 +683,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     size_t required = header_length + min_length();
 
     if (len < required)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Router-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
@@ -693,7 +693,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
-	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
     RouterLsa *lsa = 0;
     try {
@@ -736,7 +736,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	switch(version) {
 	case OspfTypes::V2:
 	    if (nlinks != lsa->get_router_links().size())
-		xorp_throw(BadPacket,
+		xorp_throw(InvalidPacket,
 			   c_format(
 				    "Router-LSA mismatch in router links"
 				    " expected %u received %u",
@@ -748,7 +748,7 @@ RouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	delete lsa;
 	throw e;
     }
@@ -871,7 +871,7 @@ RouterLsa::str() const
 }
 
 Lsa::LsaRef
-NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -879,7 +879,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     size_t required = header_length + min_length();
 
     if (len < required)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Network-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
@@ -889,7 +889,7 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
-	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
     NetworkLsa *lsa = 0;
     try {
@@ -912,12 +912,12 @@ NetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	uint8_t *end = &buf[len];
 	while(start < end) {
 	    if (!(start < end))
-		xorp_throw(BadPacket, c_format("Network-LSA too short"));
+		xorp_throw(InvalidPacket, c_format("Network-LSA too short"));
 	    lsa->get_attached_routers().push_back(extract_32(start));
 	    start += 4;
 	}
 
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	delete lsa;
 	throw e;
     }
@@ -1028,7 +1028,7 @@ NetworkLsa::str() const
 }
 
 Lsa::LsaRef
-SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -1036,7 +1036,7 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     size_t required = header_length + min_length();
 
     if (len < required)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Summary-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
@@ -1046,7 +1046,7 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
-	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
     SummaryNetworkLsa *lsa = 0;
     try {
@@ -1070,7 +1070,7 @@ SummaryNetworkLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	delete lsa;
 	throw e;
     }
@@ -1169,7 +1169,7 @@ SummaryNetworkLsa::str() const
 }
 
 Lsa::LsaRef
-SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -1177,7 +1177,7 @@ SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     size_t required = header_length + min_length();
 
     if (len < required)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("Summary-LSA too short %u, must be at least %u",
 			    XORP_UINT_CAST(len),
 			    XORP_UINT_CAST(required)));
@@ -1187,7 +1187,7 @@ SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
-	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
     SummaryRouterLsa *lsa = 0;
     try {
@@ -1207,7 +1207,7 @@ SummaryRouterLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	delete lsa;
 	throw e;
     }
@@ -1303,7 +1303,7 @@ SummaryRouterLsa::str() const
 }
 
 Lsa::LsaRef
-ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
+ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(InvalidPacket)
 {
     OspfTypes::Version version = get_version();
 
@@ -1311,7 +1311,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
     size_t required = header_length + min_length();
 
     if (len < required)
-	xorp_throw(BadPacket,
+	xorp_throw(InvalidPacket,
 		   c_format("AS-External-LSA too short %u, "
 			    "must be at least %u",
 			    XORP_UINT_CAST(len),
@@ -1322,7 +1322,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 
     // Verify the checksum.
     if (!verify_checksum(buf + 2, len - 2, 16 - 2))
-	xorp_throw(BadPacket, c_format("LSA Checksum failed"));
+	xorp_throw(InvalidPacket, c_format("LSA Checksum failed"));
 
     ASExternalLsa *lsa = 0;
     try {
@@ -1375,7 +1375,7 @@ ASExternalLsa::decode(uint8_t *buf, size_t& len) const throw(BadPacket)
 	    break;
 	}
 
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	delete lsa;
 	throw e;
     }

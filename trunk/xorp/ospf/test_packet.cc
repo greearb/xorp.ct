@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/test_packet.cc,v 1.42 2006/10/16 08:41:29 atanu Exp $"
+#ident "$XORP: xorp/ospf/test_packet.cc,v 1.43 2006/10/16 09:15:34 atanu Exp $"
 
 #include "ospf_module.h"
 
@@ -92,7 +92,7 @@ packet_bad_length(TestInfo& info, OspfTypes::Version version,
 	packet = packet_decoder.decode(ptr, pkt.size() - 1);
 	DOUT(info) << "Accepted short frame (bad)\n";
 	return false;
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	DOUT(info) << "Rejected short frame (good): " << e.str() << endl;
     }
 
@@ -101,7 +101,7 @@ packet_bad_length(TestInfo& info, OspfTypes::Version version,
 	try {
 	    packet = packet_decoder.decode(ptr, pkt.size() + i);
 	    DOUT(info) << "Accepted large frame (good)\n";
-	} catch(BadPacket& e) {
+	} catch(InvalidPacket& e) {
 	    DOUT(info) << "Didn't accept large frame (bad): " << e.str() << 
 		endl;
 	    return false;
@@ -849,7 +849,7 @@ packet_decoder1(TestInfo& info, OspfTypes::Version version)
     // fail.
     try {
 	dec.decode(&pkt[0], pkt.size());
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	DOUT(info) << "Caught exception: " << e.str() << endl;
 	return true;
     }
@@ -908,7 +908,7 @@ packet_decode_bad_packet(TestInfo& info, OspfTypes::Version version,
 	packet = packet_decoder.decode(ptr, len);
 	DOUT(info) << "Accepted bad packet (bad)\n";
 	return false;
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	DOUT(info) << "Rejected bad packet (good): " << e.str() << endl;
 	return true;
     }
@@ -1322,7 +1322,7 @@ lsa_decoder1(TestInfo& info, OspfTypes::Version version)
     // fail.
     try {
 	dec.decode(ptr, len);
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	DOUT(info) << "Caught exception: " << e.str() << endl;
 	return true;
     }

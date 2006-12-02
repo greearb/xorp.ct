@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-#ident "$XORP: xorp/ospf/ospf.cc,v 1.76 2006/11/23 00:29:09 atanu Exp $"
+#ident "$XORP: xorp/ospf/ospf.cc,v 1.77 2006/11/23 01:25:31 atanu Exp $"
 
 // #define DEBUG_LOGGING
 // #define DEBUG_PRINT_FUNCTION_NAME
@@ -77,7 +77,7 @@ Ospf<A>::receive(const string& interface, const string& vif,
     Packet *packet;
     try {
 	packet = _packet_decoder.decode(data, len);
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	XLOG_ERROR("%s", cstring(e));
 	return;
     }
@@ -205,7 +205,7 @@ Ospf<A>::transmit(const string& interface, const string& vif,
 	Packet *packet = _packet_decoder.decode(data, len);
 	debug_msg("Transmit: %s\n", cstring(*packet));
 	delete packet;
-    } catch(BadPacket& e) {
+    } catch(InvalidPacket& e) {
 	debug_msg("Unable to decode packet\n");
     }
 #endif

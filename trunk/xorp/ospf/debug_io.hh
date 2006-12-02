@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/debug_io.hh,v 1.16 2006/03/28 03:06:53 atanu Exp $
+// $XORP: xorp/ospf/debug_io.hh,v 1.17 2006/11/23 01:25:31 atanu Exp $
 
 #ifndef __OSPF_DEBUG_IO_HH__
 #define __OSPF_DEBUG_IO_HH__
@@ -51,7 +51,7 @@ class DebugIO : public IO<A> {
 	    Packet *packet = _dec.decode(data, len);
 	    DOUT_LEVEL(_info, level) << packet->str() << endl;
 	    delete packet;
-	} catch(BadPacket& e) {
+	} catch(InvalidPacket& e) {
 	    DOUT_LEVEL(_info, level) << "Probably no decoder provided: " <<
 		e.str() <<
 		endl;

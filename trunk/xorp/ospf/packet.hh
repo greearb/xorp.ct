@@ -13,7 +13,7 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/packet.hh,v 1.31 2006/08/10 09:10:25 pavlin Exp $
+// $XORP: xorp/ospf/packet.hh,v 1.32 2006/11/23 00:03:13 atanu Exp $
 
 #ifndef __OSPF_PACKET_HH__
 #define __OSPF_PACKET_HH__
@@ -55,14 +55,14 @@ class Packet {
      *
      * @return the offset where the specific header starts.
      */
-    size_t decode_standard_header(uint8_t *ptr, size_t& len) throw(BadPacket);
+    size_t decode_standard_header(uint8_t *ptr, size_t& len) throw(InvalidPacket);
 
     /**
      * Decode the packet.
      * The returned packet must be free'd.
      */
     virtual Packet *decode(uint8_t *ptr, size_t len)
-	const throw(BadPacket) = 0;
+	const throw(InvalidPacket) = 0;
 
     /**
      * Encode standard header.
@@ -254,7 +254,7 @@ class PacketDecoder {
      *
      * @return a packet structure, which must be free'd
      */
-    Packet *decode(uint8_t *ptr, size_t len) throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) throw(InvalidPacket);
  private:
     map<OspfTypes::Type , Packet *> _ospfv2;	// OSPFv2 Packet decoders
     map<OspfTypes::Type , Packet *> _ospfv3;	// OSPFv3 Packet decoders
@@ -279,7 +279,7 @@ class HelloPacket : public Packet {
 
     OspfTypes::Type get_type() const { return 1; }
 
-    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
 
     /**
      * Encode the packet.
@@ -435,7 +435,7 @@ class DataDescriptionPacket : public Packet {
 	return 0;
     }
 
-    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
 
     /**
      * Encode the packet.
@@ -543,7 +543,7 @@ class LinkStateRequestPacket : public Packet {
 
     OspfTypes::Type get_type() const { return 3; }
 
-    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
 
     /**
      * Encode the packet.
@@ -576,7 +576,7 @@ class LinkStateUpdatePacket : public Packet {
 
     OspfTypes::Type get_type() const { return 4; }
 
-    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
 
     /**
      * Encode the packet.
@@ -624,7 +624,7 @@ class LinkStateAcknowledgementPacket : public Packet {
 
     OspfTypes::Type get_type() const { return 5; }
 
-    Packet *decode(uint8_t *ptr, size_t len) const throw(BadPacket);
+    Packet *decode(uint8_t *ptr, size_t len) const throw(InvalidPacket);
 
     /**
      * Encode the packet.

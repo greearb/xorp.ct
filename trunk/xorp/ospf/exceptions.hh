@@ -13,21 +13,10 @@
 // notice is a summary of the XORP LICENSE file; the license in that file is
 // legally binding.
 
-// $XORP: xorp/ospf/exceptions.hh,v 1.2 2005/04/04 21:25:27 atanu Exp $
+// $XORP: xorp/ospf/exceptions.hh,v 1.3 2006/03/28 03:06:53 atanu Exp $
 
 #ifndef __OSPF_EXCEPTIONS_HH__
 #define __OSPF_EXCEPTIONS_HH__
-
-/**
- * Bad Packet exception.
- */
-class BadPacket : public XorpReasonedException
-{
-public:
-    BadPacket(const char* file, size_t line, const string init_why = "")
- 	: XorpReasonedException("BadPacket", file, line, init_why)
-    {}
-};
 
 /**
  * Bad Peer exception.
